@@ -373,7 +373,7 @@ public class PlatformManagerTest
 
     @Test(expected = PlatformNotFoundException.class)
     public void testGetPlatformByInvalidId() throws ApplicationException, NotFoundException {
-        platformManager.getPlatformById(authzSubjectManager.getOverlordPojo(), 12345);
+        platformManager.getPlatformById(authzSubjectManager.getOverlordPojo(), -2);
     }
 
     @Test
@@ -384,7 +384,7 @@ public class PlatformManagerTest
 
     @Test(expected = PlatformNotFoundException.class)
     public void testFindPlatformByInvalidId() throws ApplicationException {
-        platformManager.findPlatformById(12345);
+        platformManager.findPlatformById(-2);
     }
 
     @Test

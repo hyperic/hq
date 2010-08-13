@@ -159,7 +159,7 @@ __ll__
   </target>
 
   <target name="init"
-          depends="load-basics,load-user-setup-properties,show-eula,load-default-setup-properties">
+          depends="load-basics,check-eula,load-user-setup-properties,show-eula,load-default-setup-properties">
 
     <!-- Parameterized names of things to deploy -->
     <echo>^^^INFO: Preparing to install...</echo>

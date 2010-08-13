@@ -1,8 +1,10 @@
 <%@ page language="java" %>
 <%@ page errorPage="/common/Error.jsp" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -33,7 +35,33 @@
 <tiles:importAttribute name="resource"/>
 <tiles:importAttribute name="deleteMessage"/>
 
-<html:link page="javascript:hyperic.utils.deleteResource('${resource.entityId.type}:${resource.id}');">
+<hq:constant
+    classname="org.hyperic.hq.authz.shared.AuthzConstants" 
+    symbol="platformPrototypeVmwareVsphereVm" var="platformPrototypeVmwareVsphereVm" />
+
+<hq:constant
+    classname="org.hyperic.hq.authz.shared.AuthzConstants" 
+    symbol="platformPrototypeVmwareVsphereHost" var="platformPrototypeVmwareVsphereHost" />
+
+<hq:constant
+    classname="org.hyperic.hq.authz.shared.AuthzConstants" 
+    symbol="serverPrototypeVmwareVcenter" var="serverPrototypeVmwareVcenter" />
+
+<c:choose>
+	<c:when test="${(resource.entityId.platform && (resource.platformType.name == platformPrototypeVmwareVsphereVm || 
+	                                                resource.platformType.name == platformPrototypeVmwareVsphereHost)) ||
+	                (resource.entityId.server && resource.serverType.name == serverPrototypeVmwareVcenter)}">
+		<c:set var="userMsg">
+			<fmt:message key="delete.vsphere.resource" />
+		</c:set>
+	</c:when>
+	<c:otherwise>
+		<c:set var="userMsg">
+			<fmt:message key="delete.resource" />
+		</c:set>
+	</c:otherwise>
+</c:choose>
+<html:link page="javascript:hyperic.utils.deleteResource('${resource.entityId.type}:${resource.id}', '${userMsg}');">
 	<c:out value="${deleteMessage}"/>
 </html:link>
 <html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/>

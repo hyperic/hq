@@ -36,6 +36,10 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
+    		<groupId>org.aspectj</groupId>
+    		<artifactId>aspectjtools</artifactId>
+ 		</dependency>
+		<dependency>
 			<groupId>org.jasypt</groupId>
 			<artifactId>jasypt</artifactId>
   			<scope>runtime</scope>
@@ -125,11 +129,6 @@
   		 	<scope>runtime</scope>
 		</dependency>
 		<dependency>
-	  		<groupId>org.springframework.security</groupId>
-	  		<artifactId>spring-security-taglibs</artifactId>
-	  		<scope>runtime</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.apache</groupId>
 			<artifactId>tomcat-jdbc</artifactId>
 			<scope>runtime</scope>
@@ -176,6 +175,7 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
 		</dependency>
+		
 		<!--  We use a version of dbunit that we patched -->
 		<dependency>
 			<groupId>org.hyperic</groupId>
@@ -209,6 +209,9 @@
 				<configuration>
 					<skip>false</skip>
 				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-source-plugin</artifactId>
 			</plugin>
 		</plugins>	
     	<resources>

@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import net.sf.ehcache.CacheManager;
+
 import org.hibernate.SessionFactory;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
@@ -61,6 +63,7 @@ import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceTypeInfo;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -80,7 +83,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @DirtiesContext
 
-public class EscalationManagerTest {
+public class EscalationManagerTest  {
 
 	@Autowired
 	private EscalationManager eManager;
@@ -152,6 +155,13 @@ public class EscalationManagerTest {
         // Hibernate session in
         // order to avoid false positive in test
         sessionFactory.getCurrentSession().flush();
+    }
+    
+    @After
+    public void tearDown() {
+        sessionFactory.evictQueries();
+        //Clear the 2nd level cache including regions with queries
+        CacheManager.getInstance().clearAll();
     }
 
 	@Test

@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.support.GenericXmlContextLoader;
 
@@ -15,7 +14,6 @@ public class IntegrationTestContextLoader extends GenericXmlContextLoader {
     @Override
     protected void customizeContext(GenericApplicationContext context) {
         Bootstrap.appContext = context;
-        ConcurrentStatsCollector.setEnabled(false);
         try {
         	//Find the sigar libs on the test classpath
 			File sigarBin = new File(context.getResource("/libsigar-sparc64-solaris.so").getFile().getParent());
@@ -24,7 +22,5 @@ public class IntegrationTestContextLoader extends GenericXmlContextLoader {
 		} catch (IOException e) {
 			log.error("Unable to initiailize sigar path",e);
 		}
-        
     }
-
 }

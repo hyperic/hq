@@ -106,6 +106,7 @@
   <tr>
     <td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
   </tr>
+<c:if test="${ipCount > 0}">
 <c:forEach var="i" varStatus="status" begin="0" end="${ipCount-1}">
   <tr>
     <td width="20%" class="BlockLabel"><html:img page="/images/icon_required.gif" width="9" height="9" border="0"/><fmt:message key="resource.platform.inventory.type.IPAddressLabel"/></td>
@@ -141,6 +142,7 @@
   </tr>
   </c:if>
 </c:forEach>
+</c:if>
   <tr>
     <td width="20%" class="BlockLabel">&nbsp;</td>
     <td width="30%" class="BlockContent" colspan="3"><html:link href="javascript:document.${formName}.submit()" onclick="clickAdd('${formName}')"><fmt:message key="resource.platform.inventory.type.AddAnotherSet"/></html:link></td>

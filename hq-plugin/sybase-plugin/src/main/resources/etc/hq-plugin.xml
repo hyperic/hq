@@ -146,8 +146,9 @@
             collectionType="dynamic"/>
   </metrics>
 
-  <filter name="template"
-          value="${domain}:Type=Server:${alias}"/>
+  <filter name="template">
+        sbSysmon:interval=%interval%,jdbcUrl=%jdbcUrl%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%:${alias}
+  </filter>
 
   <metrics name="SybaseAvailability">
     <metric name="Availability"
@@ -157,9 +158,6 @@
             collectionType="dynamic"/>
   </metrics>
 
-  <filter name="template">
-        sbSysmon:interval=%interval%,jdbcUrl=%jdbcUrl%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%:${alias}
-  </filter>
   <metrics name="sp_sysmon">
     <metric name="Deadlocks"
             category="THROUGHPUT"
@@ -205,7 +203,9 @@
   <server name="Sybase"
           version="12.5.x">
     <plugin type="measurement"
-            class="SybaseMeasurementPlugin"/>
+            class="org.hyperic.hq.product.MeasurementPlugin"/>
+    <plugin type="collector"
+            class="SybaseSysmonCollector"/>
     <plugin type="autoinventory"
             class="SybaseServerDetector"/>
     <metrics include="SybaseAvailability"/>
@@ -299,7 +299,9 @@
       <plugin type="autoinventory"
               class="SybaseServerDetector"/>
       <plugin type="measurement"
-              class="SybaseMeasurementPlugin"/>
+              class="org.hyperic.hq.product.MeasurementPlugin"/>
+      <plugin type="collector"
+              class="SybaseSysmonCollector"/>
       <config>
         <option name="cachename"
                 description="Name of Cache"/>

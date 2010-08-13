@@ -35,6 +35,8 @@ import java.util.Map;
 
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.type.IntegerType;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -45,16 +47,13 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class ResourceEdgeDAO
-    extends HibernateDAO<ResourceEdge>
-{
+    extends HibernateDAO<ResourceEdge> {
     @Autowired
     ResourceEdgeDAO(SessionFactory f) {
         super(ResourceEdge.class, f);
     }
 
-    ResourceEdge create(Resource from, Resource to, int distance,
-                        ResourceRelation relation)
-    {
+    ResourceEdge create(Resource from, Resource to, int distance, ResourceRelation relation) {
         ResourceEdge res = new ResourceEdge(from, to, distance, relation);
 
         save(res);
@@ -62,25 +61,22 @@ public class ResourceEdgeDAO
     }
 
     Map findDescendantMap(Resource r) {
-        String sql = "select e.to, e.distance from ResourceEdge e " +
-                     "where e.from = :from " +
-                     "and distance > :distance";
+        String sql = "select e.to, e.distance from ResourceEdge e " + "where e.from = :from "
+                     + "and distance > :distance";
 
-        List vals = getSession().createQuery(sql)
-                                .setParameter("from", r)
-                                .setInteger("distance", 0)
-                                .list();
+        List vals = getSession().createQuery(sql).setParameter("from", r).setInteger("distance", 0)
+            .list();
         return convertDistanceListToMap(vals);
     }
 
     Map convertDistanceListToMap(List vals) {
         Map res = new HashMap();
 
-        for (Iterator i=vals.iterator(); i.hasNext(); ) {
-            Object[] ent = (Object[])i.next();
-            Resource r = (Resource)ent[0];
-            Integer distance = (Integer)ent[1];
-            Collection c = (Collection)res.get(distance);
+        for (Iterator i = vals.iterator(); i.hasNext();) {
+            Object[] ent = (Object[]) i.next();
+            Resource r = (Resource) ent[0];
+            Integer distance = (Integer) ent[1];
+            Collection c = (Collection) res.get(distance);
 
             if (c == null) {
                 c = new ArrayList();
@@ -92,26 +88,23 @@ public class ResourceEdgeDAO
     }
 
     /**
-           * @return {@link Collection} of {@link ResourceEdge}s
+     * @return {@link Collection} of {@link ResourceEdge}s
      */
     @SuppressWarnings("unchecked")
     Collection<ResourceEdge> findDescendantEdges(List<Resource> resources, ResourceRelation rel) {
-        String sql = "from ResourceEdge e " +
-                          "where e.from in (:resources) " +
-                       "and distance > :distance " +
-                       "and rel_id = :rel_id ";
+        String sql = "from ResourceEdge e " + "where e.from in (:resources) "
+                     + "and distance > :distance " + "and rel_id = :rel_id ";
         List<ResourceEdge> rtn = new ArrayList<ResourceEdge>();
         Query query = getSession().createQuery(sql);
         int size = resources.size();
-        for (int i=0; i<size; i+=BATCH_SIZE) {
-            int end = Math.min(i+BATCH_SIZE, size);
-            rtn.addAll(query.setParameterList("resources", resources.subList(i, end))
-                .setInteger("distance", 0)
-                .setInteger("rel_id", rel.getId().intValue())
-                .list());
+        for (int i = 0; i < size; i += BATCH_SIZE) {
+            int end = Math.min(i + BATCH_SIZE, size);
+            rtn.addAll(query.setParameterList("resources", resources.subList(i, end)).setInteger(
+                "distance", 0).setInteger("rel_id", rel.getId().intValue()).list());
         }
         return rtn;
     }
+
     /**
      * @return {@link Collection} of {@link ResourceEdge}s
      */
@@ -120,14 +113,13 @@ public class ResourceEdgeDAO
     }
 
     List<ResourceEdge> findDescendantEdgesByNetworkRelation(Integer resourceId,
-                                              List<Integer> platformTypeIds,
-                                              String platformName) {
+                                                            List<Integer> platformTypeIds,
+                                                            String platformName) {
         String nameEx = null;
         String sql = "select {e.*} from EAM_RESOURCE_EDGE e " +
                      " join EAM_RESOURCE r on e.to_id = r.id " +
-                     " join EAM_PLATFORM p on p.resource_id = r.id " +
-                     " where e.rel_id = " + AuthzConstants.RELATION_NETWORK_ID +
-                     " and e.distance != 0 ";
+                     " join EAM_PLATFORM p on p.resource_id = r.id " + " where e.rel_id = " +
+                     AuthzConstants.RELATION_NETWORK_ID + " and e.distance != 0 ";
 
         if (resourceId != null) {
             sql += " and r.id = :rid ";
@@ -144,9 +136,7 @@ public class ResourceEdgeDAO
         }
         sql += " order by r.sort_name ";
 
-        Query query = getSession()
-                        .createSQLQuery(sql)
-                        .addEntity("e", ResourceEdge.class);
+        Query query = getSession().createSQLQuery(sql).addEntity("e", ResourceEdge.class);
 
         if (resourceId != null) {
             query.setInteger("rid", resourceId.intValue());
@@ -164,67 +154,114 @@ public class ResourceEdgeDAO
 
     @SuppressWarnings("unchecked")
     Collection<ResourceEdge> findAncestorEdges(Resource r, ResourceRelation rel) {
-        String sql = "from ResourceEdge e where e.from = :from " +
-                     "and distance < :distance " +
-                     "and rel_id = :rel_id ";
+        String sql = "from ResourceEdge e where e.from = :from " + "and distance < :distance "
+                     + "and rel_id = :rel_id ";
 
-        return getSession().createQuery(sql)
-                .setParameter("from", r)
-                .setInteger("distance", 0)
-                .setInteger("rel_id", rel.getId().intValue())
-                .list();
+        return getSession().createQuery(sql).setParameter("from", r).setInteger("distance", 0)
+            .setInteger("rel_id", rel.getId().intValue()).list();
     }
 
     void deleteEdges(Resource r) {
         String sql = "delete ResourceEdge where to_id = :to or from_id = :from)";
-        getSession().createQuery(sql)
-                    .setParameter("to", r)
-                    .setParameter("from", r)
-                    .executeUpdate();
+        getSession().createQuery(sql).setParameter("to", r).setParameter("from", r).executeUpdate();
     }
 
     void deleteEdges(Resource r, ResourceRelation rel) {
-        String sql = "delete ResourceEdge where (to_id = :to or from_id = :from) " +
-                     "and rel_id = :rel_id ";
-        getSession().createQuery(sql)
-                    .setParameter("to", r)
-                    .setParameter("from", r)
-                    .setInteger("rel_id", rel.getId().intValue())
-                    .executeUpdate();
+        String sql = "delete ResourceEdge where (to_id = :to or from_id = :from) "
+                     + "and rel_id = :rel_id ";
+        getSession().createQuery(sql).setParameter("to", r).setParameter("from", r).setInteger(
+            "rel_id", rel.getId().intValue()).executeUpdate();
     }
 
-    void deleteEdge(Resource parent, Resource child,
-                    ResourceRelation rel) {
-        String sql = "delete ResourceEdge where from_id = :from " +
-                     "and to_id = :to " +
-                     "and rel_id = :rel_id ";
-        getSession().createQuery(sql)
-                    .setParameter("from", parent)
-                    .setParameter("to", child)
-                    .setInteger("rel_id", rel.getId().intValue())
-                    .executeUpdate();
+    void deleteEdge(Resource parent, Resource child, ResourceRelation rel) {
+        String sql = "delete ResourceEdge where from_id = :from " + "and to_id = :to "
+                     + "and rel_id = :rel_id ";
+        getSession().createQuery(sql).setParameter("from", parent).setParameter("to", child)
+            .setInteger("rel_id", rel.getId().intValue()).executeUpdate();
     }
-    
+
+    // Retrieve the parent of a given resource, if one exists, otherwise return
+    // null
+    ResourceEdge getParentEdge(Resource resource, ResourceRelation relation) {
+        String hql = "from ResourceEdge re "
+                     + "where re.from=:from and distance=-1 and relation=:relation";
+        Iterator iterator = getSession().createQuery(hql).setParameter("from", resource)
+            .setParameter("relation", relation).iterate();
+
+        if (iterator.hasNext()) {
+            return (ResourceEdge) iterator.next();
+        }
+
+        return null;
+    }
+
+    // Retrieve the children of a given resource, base on the relation
+    List<ResourceEdge> findChildEdges(Resource resource, ResourceRelation relation) {
+        String hql = "from ResourceEdge re "
+                     + "where re.from=:from and distance=1 and relation=:relation";
+
+        return getSession().createQuery(hql).setParameter("from", resource).setParameter(
+            "relation", relation).list();
+    }
+
+    List<ResourceEdge> findByName(String name, ResourceRelation relation) {
+        return getSession().createCriteria(ResourceEdge.class).createAlias("from", "f").add(
+            Restrictions.ilike("f.name", name, MatchMode.ANYWHERE)).add(
+            Restrictions.eq("relation", relation)).add(Restrictions.eq("distance", new Integer(0)))
+            .list();
+    }
+
+    // Returns the number of descendants of a given resource
+    int getDescendantCount(Resource resource, ResourceRelation relation) {
+        String hql = "select count(re) from ResourceEdge re "
+                     + "where re.from=:from and distance > 0 and relation=:relation";
+
+        return ((Number) getSession().createQuery(hql).setParameter("from", resource)
+            .setParameter("relation", relation).iterate().next()).intValue();
+    }
+
+    // Checks whether or not a given resource has a relation in the edge table
+    boolean hasResourceRelation(Resource resource, ResourceRelation relation) {
+        return checkEdgeExistence(resource, relation, 0);
+    }
+
+    // Checks whether or not a given resource has any direct children
+    boolean hasChildren(Resource parent, ResourceRelation relation) {
+        return checkEdgeExistence(parent, relation, 1);
+    }
+
+    // Checks whether or not resource(s) in the edge table exist based on
+    // relation and distance from the given resource
+    private boolean checkEdgeExistence(Resource resource, ResourceRelation relation, int distance) {
+        String hql = "select count(re) from ResourceEdge re "
+                     + "where re.from=:from and distance=:distance and relation=:relation";
+
+        int result = ((Number) getSession().createQuery(hql).setParameter("from", resource)
+            .setParameter("relation", relation).setInteger("distance", distance).iterate().next())
+            .intValue();
+
+        return result > 0;
+    }
+
     boolean isResourceChildOf(Resource parent, Resource child) {
-        String sql = "from ResourceEdge re " +
-                     "where re.from=:from and re.to=:to and distance=:distance and rel_id=:rel_id";
-        // ...in most cases we want to check for a direct parent child relationship
+        String sql = "from ResourceEdge re "
+                     + "where re.from=:from and re.to=:to and distance=:distance and rel_id=:rel_id";
+        // ...in most cases we want to check for a direct parent child
+        // relationship
         int distance = 1;
-        
+
         if (parent.getResourceType().getAppdefType() == AppdefEntityConstants.APPDEF_TYPE_PLATFORM &&
             child.getResourceType().getAppdefType() == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
-            // ...in the case where the parent is a platform and the child is a service, we need to adjust the distance
+            // ...in the case where the parent is a platform and the child is a
+            // service, we need to adjust the distance
             // to get the appropriate answer...
             distance = 2;
         }
-        
-        List results = getSession().createQuery(sql)
-                                   .setParameter("from", parent)
-                                   .setParameter("to", child)
-                                   .setInteger("distance", distance)
-                                   .setInteger("rel_id", AuthzConstants.RELATION_CONTAINMENT_ID.intValue())
-                                   .list();
-        
+
+        List results = getSession().createQuery(sql).setParameter("from", parent).setParameter(
+            "to", child).setInteger("distance", distance).setInteger("rel_id",
+            AuthzConstants.RELATION_CONTAINMENT_ID.intValue()).list();
+
         return results.size() == 1;
     }
 }

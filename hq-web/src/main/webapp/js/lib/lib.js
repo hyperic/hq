@@ -216,9 +216,9 @@ hyperic.utils.addUrlXtraCallback = function(plugin_id, fn) {
     urlXtraVar[plugin_id].push(fn);
 };
 
-hyperic.utils.deleteResource = function(appdefentityId) {
+hyperic.utils.deleteResource = function(appdefentityId, msg) {
 	var url = "/resource/hub/RemoveResource.do";
-	var msg = "Are you sure you want to delete this resource?\n\nThis action cannot be undone.";
+	
 	if (confirm(msg)) {
 		url += "?resources=" + escape(appdefentityId);
 		url += "&delete.x=1&preventCache=" + new Date().getTime();
@@ -293,14 +293,13 @@ hyperic.widget.search = function(/*Object*/ urls, /*number*/ minStrLenth, /*Obje
         var string = e.target.value;
         if(this.searchBox.value.length >= this.minStrLen){
             this.searchStarted();
-            dojo.io.bind( {
+            dojo11.xhrGet({
                 url: this.searchURL+'?q='+string, 
-                method: "post",
                 handleAs: "json",
+                headers: { "Content-Type": "application/json"},
                 timeout: 5000, 
-                handle: loadSearchData,
-                error: this.error,
-                mimetype:'text/json'
+                load: loadSearchData,
+                error: this.error
             });
             
            
@@ -343,49 +342,56 @@ hyperic.widget.search = function(/*Object*/ urls, /*number*/ minStrLenth, /*Obje
     return this;
 };
 
-function loadSearchData(type, response, evt) {
-    if(type == 'load'){
-        var resURL = resourceURL+"?eid=";
-        var usrURL = userURL +"?mode=view&u=";
-        var template = "<li class='type'><a href='link' title='fullname'>text<\/a><\/li>";
-        var count = 0;
-        var res = "";
-        var relink = new RegExp("link", "g");
-        var retext = new RegExp("text", "g");
-        var refulltext = new RegExp("fullname", "g");
-        var retype = new RegExp("type", "g");
-        var resources = response.resources;
-        for(var i = 0; i < resources.length; i++) {
-            var length = resources[i].name.length;
-            var fullname = resources[i].name;
-            if(length >= 37){
-                resources[i].name = resources[i].name.substring(0,4) + "..." + resources[i].name.substring(length-28, length);
-            }
-            res += template.replace(relink, resURL+resources[i].eId)
-                           .replace(retext, resources[i].name)
-                           .replace(retype, resources[i].resType)
-                           .replace(refulltext, fullname);
-            count++;
+function loadSearchData(response, evt) {
+	var resURL = resourceURL+"?eid=";
+    var usrURL = userURL +"?mode=view&u=";
+    var template = "<li class='type'><a href='link' title='fullname'>text<\/a><\/li>";
+    var count = 0;
+    var res = "";
+    var relink = new RegExp("link", "g");
+    var retext = new RegExp("text", "g");
+    var refulltext = new RegExp("fullname", "g");
+    var retype = new RegExp("type", "g");
+    var resources = response.resources;
+    
+    for(var i = 0; i < resources.length; i++) {
+    	var length = resources[i].name.length;
+        var fullname = resources[i].name;
+        
+        if(length >= 37){
+        	resources[i].name = resources[i].name.substring(0,4) + "..." + resources[i].name.substring(length-28, length);
         }
-        dojo.byId("resourceResults").innerHTML = res;
-        dojo.byId("resourceResultsCount").innerHTML = count;
-
-        count = 0;
-        res = "";
-        var users = response.users;
-        for(var i = 0; i < users.length; i++) {
-            var fullname = users[i].name;
-            res += template.replace(relink, usrURL+users[i].id)
-                           .replace(retype, "user")
-                           .replace(retext, users[i].name);
-            count++;
-        }
-        dojo.byId("usersResults").innerHTML = res;
-        dojo.byId("usersResultsCount").innerHTML = count;
-
-        dojo.byId('headerSearchResults').style.display = '';
-        dojo.byId('searchBox').className = "";
+        
+        res += template.replace(relink, resURL+resources[i].id)
+        	.replace(retext, resources[i].name)
+            .replace(retype, resources[i].resType)
+            .replace(refulltext, fullname);
+            
+        count++;
     }
+    
+    dojo.byId("resourceResults").innerHTML = res;
+    dojo.byId("resourceResultsCount").innerHTML = count;
+
+    count = 0;
+    res = "";
+     
+    var users = response.users;
+     
+    for(var i = 0; i < users.length; i++) {
+        var fullname = users[i].name;
+     
+        res += template.replace(relink, usrURL+users[i].id)
+            .replace(retype, "user")
+            .replace(retext, users[i].name);
+    
+        count++;
+    }
+     
+    dojo.byId("usersResults").innerHTML = res;
+    dojo.byId("usersResultsCount").innerHTML = count;
+    dojo.byId('headerSearchResults').style.display = '';
+    dojo.byId('searchBox').className = "";
 }
 
 /**
@@ -1547,8 +1553,12 @@ hyperic.dashboard.arcWidget.prototype = hyperic.dashboard.widget;
  * @base hyperic.dashboard.widget
  * @constructor
  */
-hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
+hyperic.dashboard.chartWidget = function(args) {
     var that = this;
+    var node = dojo11.byId(args.tabName);
+    var portletName = args.portletName;
+    var portletLabel = args.title;
+    var baseUrl = args.url;
 
     that.sheets = {};
     that.sheets.loading = dojo11.query('.loading',node)[0];
@@ -1648,10 +1658,16 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
         that.config.range = dojo11.byId('chart_range').value;
         that.config.rotation = dojo11.byId('chart_rotation').checked ? 'true' : 'false';
 
-        dojo11.xhrGet( {
-            url: "/api.shtml?v=1.0&s_id=chart&config=true&tr=" + that.config.range + "&ivl=" + that.config.interval + "&rot=" + that.config.rotation,
-            handleAs: 'json',
-            preventCache: true,
+        dojo11.xhrPost({
+            url: baseUrl,
+            content: { 
+        		"tr" : that.config.range, 
+        		"ivl" : that.config.interval, 
+        		"rot" : that.config.rotation,
+        		"_method" : "PUT" // need to work around issue using PUT directly
+        	},
+        	handle: "json",
+        	//headers: { "Content-Type": "application/json"},
             load: function(data){
                 that.config.interval = parseInt(data.ivl,10) || that.config.interval;
                 that.config.range = data.tr || that.config.range;
@@ -1775,9 +1791,10 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
         var chartId = that.currentChartId;
         var chartIndex = that.chartselect.select.selectedIndex;
         if(confirm('Remove ' + that.charts[chartId].name + ' from saved charts?')) {
-            dojo11.xhrGet( {
-                url: "/api.shtml?v=1.0&remove=true&s_id=chart&rid=" + that.charts[chartId].rid + "&mtid=[" + that.charts[chartId].mtid + "]",
+            dojo11.xhrDelete( {
+                url: baseUrl + "/chart/" + that.charts[chartId].rid + "/" + that.charts[chartId].mtid + "/",
                 handleAs: 'json',
+                //headers: { "Content-Type": "application/json"},
                 preventCache: true,
                 load: function(data){
                     if(data.error)
@@ -2018,19 +2035,29 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
      */
     that.fetchAndPlayCharts = function()
     {
+        // preset defaults
+        that.config.interval = 60;
+        that.config.range = '1h';
+        that.config.rotation = 'true';
+ 
         if(that.fetchChartsCycleId !== null) {
             clearInterval(that.fetchChartsCycleId);
             that.fetchChartsCycleId = null;
             that.swapSheets('loading');
         }
         dojo11.xhrGet( {
-            url: "/api.shtml?v=1.0&s_id=chart",
+            url: baseUrl,
             handleAs: 'json',
+            headers: { "Content-Type": "application/json"},
             preventCache: true,
             load: function(data){
-                if(typeof data.length != 'undefined' && data.length > 0)
+	            that.config.interval = parseInt(data.ivl,10) || that.config.interval;
+	            that.config.range = data.tr || that.config.range;
+	            that.config.rotation = data.rot || that.config.rotation;
+
+	            if(typeof data.payload.length != 'undefined' && data.payload.length > 0)
                 {
-                    that.charts = data.sort(
+                    that.charts = data.payload.sort(
                         function(a,b) { 
                             a = a.name.toLowerCase(); 
                             b = b.name.toLowerCase();
@@ -2079,30 +2106,33 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
     {
     	// console.log('fetching from url ' + "/api.shtml?v=1.0&s_id=chart&rid=" + that.charts[chart].rid + "&mtid=[" + that.charts[chart].mtid + "]");
         return dojo11.xhrGet( {
-            url: "/api.shtml",
-            content: {v: "1.0", s_id: "chart", rid: that.charts[chart].rid, mtid: "[" + that.charts[chart].mtid + "]", ctype: that.charts[chart].ctype},
+            url: baseUrl + "/chart/" + that.charts[chart].rid + "/" + that.charts[chart].mtid + "/",
             handleAs: 'json',
+            headers: { "Content-Type": "application/json"},
             preventCache: true,
             load: function(data){
                 // that.charts[chart].data = data;
-                if(!data.error && data.length > 0)
+                if(!data.error && data.payload.length > 0)
                 {
                     that.charts[chart].data = {};
+                    
+                    var payload = data.payload[0];
+                    
                     // loop through the 'data' object and round all values to 3 decimal places
-                    for(var i in data[0].data) {
-                        if(typeof data[0].data[i] != 'function')
+                    for(var i in payload.data) {
+                        if(typeof payload.data[i] != 'function')
                         {
                             that.charts[chart].data[i] = [];
-                            for(var j in data[0].data[i]) {
-                                if(typeof data[0].data[i][j] != 'function')
+                            for(var j in payload.data[i]) {
+                                if(typeof payload.data[i][j] != 'function')
                                 {
-                                    that.charts[chart].data[i][j] = data[0].data[i][j].toFixed(3);
+                                    that.charts[chart].data[i][j] = payload.data[i][j].toFixed(3);
                                 }
                             }
                         }
                     }
-                    that.charts[chart].measurementName = data[0].measurementName;
-                    that.charts[chart].measurementUnits = data[0].measurementUnits;
+                    that.charts[chart].measurementName = payload.measurementName;
+                    that.charts[chart].measurementUnits = payload.measurementUnits;
                     that.charts[chart].last_updated = new Date();
                     that.charts[chart].maxTitleLength = (that.sheets.content.offsetWidth - 150) * 1.5;
                 }
@@ -2111,32 +2141,6 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                 console.info("An error occurred fetching charts config ", data);
             },
             timeout: 30000
-        });
-    };
-
-    /**
-     * fetch the stored config for the chart dashboard widget
-     */
-    that.fetchConfig = function()
-    {
-        // preset defaults
-        that.config.interval = 60;
-        that.config.range = '1h';
-        that.config.rotation = 'true';
-
-        dojo11.xhrGet( {
-            url: "/api.shtml?v=1.0&s_id=chart&config=true",
-            handleAs: 'json',
-            preventCache: true,
-            load: function(data){
-                that.config.interval = parseInt(data.ivl,10) || that.config.interval;
-                that.config.range = data.tr || that.config.range;
-                that.config.rotation = data.rot || that.config.rotation;
-            },
-            error: function(data){
-                console.info("An error occurred fetching charts config ", data);
-            },
-            timeout: 20000
         });
     };
 
@@ -2202,7 +2206,6 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
         // handle resizing of the window
         dojo11.connect(window,'onresize',dojo11.hitch(that, that.chartResize));
 
-        that.fetchConfig();
         that.fetchAndPlayCharts();
 
         if(that.config.rotation == 'false')
@@ -2222,9 +2225,13 @@ hyperic.dashboard.chartWidget.prototype = hyperic.dashboard.widget;
  * @base hyperic.dashboard.widget
  * @constructor
  */
-hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
+hyperic.dashboard.summaryWidget = function(args) {
     var that = this;
-
+    var node = dojo11.byId(args.tabName);
+    var portletName = args.portletName;
+    var portletLabel = args.title;
+    var baseUrl = args.url;
+    
 	that.cycleId = null;
 
     that.sheets = {};
@@ -2445,14 +2452,19 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     {
         that.selected_alert_groups = that.enabled_alert_groups.getAllValues();
 
-        dojo11.xhrGet( {
-            url: "/api.shtml?v=1.0&s_id=alert_summary&config=true&rid=[" + that.selected_alert_groups + "]",
+        dojo11.xhrPost( {
+            url: baseUrl,
+            content: {
+        		"rid" : that.selected_alert_groups,
+        		"_method" : "PUT" // need to work around issue using PUT directly
+        	},
             handleAs: 'json',
+            //headers: { "Content-Type": "application/json"},
             preventCache: true,
             load: function(data){
-                that.selected_alert_groups = data.rid || that.selected_alert_groups;
-                that.alert_groups.data = data.avail || that.alert_groups.data;
-                that.alert_groups.count = data.count || that.alert_groups.count;
+        		that.selected_alert_groups = data.rid
+        		that.alert_groups.data = data.data;
+                that.alert_group_status = data.payload;
 
                 that.fetchAlertGroupStatus().addCallback(function(){
 
@@ -2539,15 +2551,8 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
      */
     that.paintAlertGroups = function()
     {
-        var groups = that.selected_alert_groups.sort(
-            function(a,b) {
-                a = that.alert_groups.data[a].toLowerCase();
-                b = that.alert_groups.data[b].toLowerCase();
-                return a > b ? 1 : (a < b ? -1 : 0);
-            });
-        
+        var groups = that.selected_alert_groups;
         var half = Math.ceil(groups.length/2);
-
         var status = {
             'red'    : 'Failure',
             'green'  : 'OK',
@@ -2586,56 +2591,6 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     };
 
     /**
-     * fetch all available alert groups from server
-     * the server should return a json object of the following form:
-     * { 
-     *     data: { 
-     *         "id" : "name",
-     *         ...
-     *     },
-     *     count: 10
-     * }
-     * the count element shall be the total number of alert groups available
-     * (may be greater than number returned)
-     *
-     * @param {Number} page number
-     * @param {String} string to search alerts for
-     */
-    // that.fetchAlertGroups = function(page, searchString)
-    // {
-    //     dojo11.xhrGet( {
-    //         url: "/api.shtml?v=1.0&s_id=alert_summary&config=true",
-    //         handleAs: 'json',
-    //         load: function(data){
-    //             that.alert_groups.data = data.avail || that.alert_groups.data;
-    //             that.alert_groups.count = data.count || that.alert_groups.count;
-    //             that.fetchAlertGroupStatus();
-    //         },
-    //         error: function(data){
-    //             console.info("An error occurred fetching alert groups... ", data);
-    //         },
-    //         timeout: 2000
-    //     });
-    // 
-    //     // // offset = offset || 0;
-    //     // that.alert_groups = { 
-    //     //         data: { 
-    //     //             1 : "Apache VHosts",
-    //     //             2 : "HTTP Serivces",
-    //     //             3 : "Linux Boxes",
-    //     //             4 : "REST API",
-    //     //             5 : "SF Data Center",
-    //     //             6 : "Storage 1",
-    //     //             7 : "WS API",
-    //     //             8 : "Applications",
-    //     //             9 : "CentOS Boxes",
-    //     //             10 : "SuSE Boxes"
-    //     //         },
-    //     //         count: 10
-    //     //     };
-    // };
-
-    /**
      * fetch the alert group status from server for currently selected alert groups
      * the server should return a json object of the following form:
      * { 
@@ -2647,11 +2602,14 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     that.fetchAlertGroupStatus = function()
     {
         return dojo11.xhrGet( {
-            url: "/api.shtml?v=1.0&s_id=alert_summary",
+            url: baseUrl,
             handleAs: 'json',
+            headers: { "Content-Type": "application/json"},
             preventCache: true,
             load: function(data){
-                that.alert_group_status = data;
+        		that.selected_alert_groups = data.rid
+        		that.alert_groups.data = data.data;
+                that.alert_group_status = data.payload;
                 // that.alert_group_status = {
                 //                 '1': ['red','green'],
                 //                 '2': ['green','yellow'],
@@ -2692,49 +2650,6 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
 	        }
     	}
     }
-    
-    /**
-     * fetch the stored selected alert groups for the dashboard widget
-     * the server should return a json array of the alert group id's
-     * [ 
-     *    "id",
-     *    ...
-     * ]
-     */
-    that.fetchConfig = function()
-    {
-        return dojo11.xhrGet( {
-            url: "/api.shtml?v=1.0&s_id=alert_summary&config=true",
-            handleAs: 'json',
-            preventCache: true,
-            load: function(data){
-                that.selected_alert_groups = data.rid || [];
-                that.alert_groups.data = data.data || that.alert_groups.data;
-                // that.selected_alert_groups = ['1','2','3','4','5','6','7'];
-                // that.alert_groups = { 
-                //         data: { 
-                //             '1': "Apache VHosts",
-                //             '2': "HTTP Serivces",
-                //             '3': "Linux Boxes",
-                //             '4': "REST API",
-                //             '5': "SF Data Center",
-                //             '6': "Storage 1",
-                //             '7': "WS API",
-                //             '8': "Applications",
-                //             '9': "CentOS Boxes",
-                //             '10' : "SuSE Boxes"
-                //         },
-                //         count: 10
-                //     };
-                // // that.alert_groups.count = data.count || that.alert_groups.count;
-            },
-            error: function(data){
-            	that.swapSheets('error_loading');
-                console.info("An error occurred fetching alert group config... ", data);
-            },
-            timeout: 45000
-        });
-    };
 
     that.startRefreshCycle = function()
     {
@@ -2774,25 +2689,22 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
         var disabled_deselect = new Image();
         disabled_deselect.src = '/images/4.0/buttons/arrow_deselect_disabled.gif';
         
-        that.fetchConfig().addCallback(
-            function() {
-                if (that.currentSheet != 'error_loading') {
-	            	that.fetchAlertGroupStatus().addCallback(
-	                    function() {
-		                    that.fetchAlertGroupStatusCallback();
-	                        // periodically refresh the status
-	                        that.startRefreshCycle();
-	                    });
-                }
-            });
+        that.fetchAlertGroupStatus().addCallback(
+        	function() {
+        		that.fetchAlertGroupStatusCallback();
+	            // periodically refresh the status
+	            that.startRefreshCycle();
+	        });
     }
 };
 
 // set the hyperic.dashboard.widget as the ancestor of the summaryWidget class.
 hyperic.dashboard.summaryWidget.prototype = hyperic.dashboard.widget;
 
-hyperic.group_manager = function() {
+hyperic.group_manager = function(args) {
 	var that = this;
+	var baseUrl = args.url;
+	
 	that.dialogs = {};
 	that.message_area = {};
 	that.button_area = {};
@@ -2988,12 +2900,11 @@ hyperic.group_manager = function() {
 								'Please wait. Processing your request...');
 
 		dojo11.xhrPost( {
-            url: "/api.shtml",
-            content: {v: "1.0", 
-					  s_id: "group_manager", 
-					  mode: "addGroups",
-					  eid: "['" + formArray.eid.split(",").join("','") + "']",
-					  groupId: "['" + formArray.group.toString().split(",").join("','") + "']"},
+            url: baseUrl + "association",
+            content: {
+				eid: formArray.eid.split(","),
+				groupId: formArray.group.toString().split(",")
+			},
             handleAs: 'json',
             load: function(data) {
 				if (data && data.error) {
@@ -3014,9 +2925,12 @@ hyperic.group_manager = function() {
 	}
 	
 	that.getGroupsNotContaining = function(eids) {    
-		dojo11.xhrPost( {
-            url: "/api.shtml",
-            content: {v: "1.0", s_id: "group_manager", eid: "['" + eids.join("','") + "']"},
+		dojo11.xhrGet( {
+            url: baseUrl + "associations",
+            content: {
+				eid: eids
+			},
+			headers: { "Content-Type": "application/json"},
             handleAs: 'json',
             preventCache: true,
             load: function(data) {            	
@@ -3555,12 +3469,14 @@ hyperic.alert_center = function(title_name) {
 	that.initDialog();
 }
 
-hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
+hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) {
     var that = this;
+    var baseUrl = args.url;
+    
     that.existing_schedule = {};
-    that.group_id = group_id;
-    that.group_name = unescape(group_name);
-    that.title_name = title_name + " - " + that.group_name;
+    that.group_id = args.resourceId;
+    that.group_name = unescape(args.resourceName);
+    that.title_name = args.title + " - " + that.group_name;
     that.dialog = null;
 	that.buttons = {};
 	that.inputs = {};
@@ -3667,12 +3583,14 @@ hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
 
     	    // create unix epoch datetime in GMT timezone
             from_datetime = (args.from_date.getTime() + args.from_time.getTime() - args.from_time.getTimezoneOffset() * 60000);
-
             to_datetime = (args.to_date.getTime() + args.to_time.getTime() - args.to_time.getTimezoneOffset() * 60000);
 
             return dojo11.xhrPost( {
-                url: "/api.shtml",
-                content: {v: "1.0", s_id: "maint_win", groupId: that.group_id, sched: "true", startTime: from_datetime, endTime: to_datetime},
+                url: baseUrl + "/schedule",
+                content: {
+            		startTime: from_datetime, 
+            		endTime: to_datetime
+            	},
                 handleAs: 'json',
                 load: function(data){
                     if(data && !data.error) 
@@ -3683,12 +3601,9 @@ hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
                     	{
 	                        that.existing_schedule.from_time = parseInt(data.startTime,10);
 	                        that.existing_schedule.to_time = parseInt(data.endTime,10);
-	
 	                        that.selected_from_time = new Date(that.existing_schedule.from_time);
 	                        that.selected_to_time = new Date(that.existing_schedule.to_time);
-	
-	                        that.redraw(
-	                        		false, 
+	                        that.redraw(false, 
 	                        		hyperic.data.maintenance_schedule.message.currentSchedule, 
 	                        		hyperic.data.maintenance_schedule.message.success);
                     	}
@@ -3709,17 +3624,15 @@ hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
     };
     
     that.clear_schedule_action = function() {
-        return dojo11.xhrPost( {
-            url: "/api.shtml",
-            content: {v: "1.0", s_id: "maint_win", groupId: that.group_id, sched: "false"},
+        return dojo11.xhrDelete( {
+            url: baseUrl + "/schedule/" + that.group_id,
             handleAs: 'json',
             load: function(data){
                 if(data && !data.error)
                 {
             		that.server_time = new Date(data.serverTime);
                 	that.resetSchedule();
-					that.redraw(
-							false,
+					that.redraw(false,
 							hyperic.data.maintenance_schedule.message.noSchedule,
 							hyperic.data.maintenance_schedule.message.success);
 				}
@@ -3738,8 +3651,8 @@ hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
     
     that.getSchedule = function() {
         return dojo11.xhrGet( {
-            url: "/api.shtml",
-            content: {v: "1.0", s_id: "maint_win", groupId: that.group_id},
+            url: baseUrl + "/schedule/" + that.group_id,
+            headers: { "Content-Type": "application/json"},
             handleAs: 'json',
             preventCache: true,
             load: function(data){
@@ -3960,13 +3873,15 @@ hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
 	}
 };
 
-hyperic.clone_resource_dialog = function(title_name, platform_id) {
+hyperic.clone_resource_dialog = function(args) {
     var that = this;
+    var baseUrl = args.url;
+    
     that.dialog = null;
-    that.title_name = title_name;
+    that.title_name = args.titleName;
     that.data = {};
 	that.buttons = {};
-	that.platform_id = platform_id || null;
+	that.platform_id = args.platformId || null;
     that.sheets = {};
     that.sheets.clone_instructions = dojo11.byId('clone_instructions');
     that.sheets.clone_queue_status = dojo11.byId('clone_queue_status');
@@ -4059,9 +3974,9 @@ hyperic.clone_resource_dialog = function(title_name, platform_id) {
 
     that.fetchData = function() {
         dojo11.xhrGet( {
-            url: "/api.shtml",
-            content: {v: "1.0", s_id: "clone_platform", pid: that.platform_id},
+            url: baseUrl + "/targets",
             preventCache: true,
+            headers: { "Content-Type": "application/json"},
             handleAs: 'json',
             load: function(data){
                 if(data && !data.error)
@@ -4124,12 +4039,14 @@ hyperic.clone_resource_dialog = function(title_name, platform_id) {
         if(clone_target_ids.length > 0)
         {
         	dojo11.xhrPost( {
-                url: "/api.shtml",
-                content: {v: "1.0", s_id: "clone_platform", pid: that.platform_id, clone: "true", ctid: "[" + clone_target_ids.toString() + "]"},
-                handleAs: 'json',
-                load: function(data){
+                url: baseUrl,
+                content: {
+        			ctid: clone_target_ids
+        		},
+        		handleAs: 'json',
+                load: function(data) {
                 },
-                error: function(data){
+                error: function(data) {
                     console.info("An error occurred queueing platforms for cloning " + that.platform_id, data);
                 }
             });

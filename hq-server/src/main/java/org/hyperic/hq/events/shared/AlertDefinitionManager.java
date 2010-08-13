@@ -249,6 +249,14 @@ public interface AlertDefinitionManager {
                                                              org.hyperic.hq.authz.server.session.Resource res);
 
     /**
+     * Get a list of all alert definitions with an availability metric condition
+     * @param subj the caller
+     * @return a list of alert definitions
+     */
+    public List<AlertDefinition> findAvailAlertDefinitions(AuthzSubject subj) 
+		throws PermissionException;
+    
+    /**
      * Get list of children alert definition for a parent alert definition
      */
     public PageList<AlertDefinitionValue> findAlertDefinitionChildren(Integer id);

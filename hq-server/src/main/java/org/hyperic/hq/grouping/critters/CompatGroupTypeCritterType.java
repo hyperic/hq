@@ -35,7 +35,6 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterDump;
 import org.hyperic.hq.grouping.CritterTranslationContext;
-import org.hyperic.hq.grouping.CritterTranslator;
 import org.hyperic.hq.grouping.CritterType;
 import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.prop.CritterPropType;
@@ -171,6 +170,13 @@ public class CompatGroupTypeCritterType extends BaseCritterType {
             }
             return _proto.hashCode();
         }
+
+        public boolean meets(Resource resource) {
+            //TODO implement
+            throw new UnsupportedOperationException();
+        }
+        
+        
     }
 
 }

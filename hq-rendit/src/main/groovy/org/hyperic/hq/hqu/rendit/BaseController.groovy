@@ -98,7 +98,7 @@ abstract class BaseController {
 
     /**
      * Controllers can use this method to force rendering to not occur.  This
-     * is useful for controller methods that don't necessiarly want to send
+     * is useful for controller methods that don't necessarily want to send
      * data to the client.
      */
     protected void setRendered(boolean isRendered) {

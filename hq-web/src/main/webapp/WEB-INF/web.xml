@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<web-app xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
-      						 http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
-	version="2.4">
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+  		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  		 xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
+      						 http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" 
+      	 version="2.4">
 	<display-name>HQ</display-name>
 
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
-		<param-value>/WEB-INF/spring/*-context.xml,classpath*:/META-INF/spring/*-context.xml</param-value>
+		<param-value>
+			/WEB-INF/spring/security-web-context.xml,
+			classpath*:/META-INF/spring/*-context.xml
+		</param-value>
 	</context-param>
 
 	<listener>
@@ -31,43 +35,21 @@
 		<param-name>RtEnabled</param-name>
 		<param-value>false</param-value>
 	</context-param>
-	<!-- Tapestry servelet and mappings -->
+	
 	<servlet>
-		<servlet-name>hq</servlet-name>
-		<servlet-class>org.apache.tapestry.ApplicationServlet</servlet-class>
-		<load-on-startup>0</load-on-startup>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>hq</servlet-name>
-		<url-pattern>*.html</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>hq</servlet-name>
-		<url-pattern>*.shtml</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>hq</servlet-name>
-		<url-pattern>*.sshq</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>hq</servlet-name>
-		<url-pattern>*.shq</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>hq</servlet-name>
-		<url-pattern>/assets/*</url-pattern>
-	</servlet-mapping>
+        <servlet-name>webapp</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>/WEB-INF/spring/webapp-servlet.xml</param-value>
+		</init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
 
-	<servlet>
-		<servlet-name>webapp</servlet-name>
-		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>webapp</servlet-name>
-		<url-pattern>/app/*</url-pattern>
-	</servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>webapp</servlet-name>
+        <url-pattern>/app/*</url-pattern>
+    </servlet-mapping>
 
 	<!-- URLRewite Filter -->
 	<filter>
@@ -86,9 +68,9 @@
 	</filter>
 
 	<filter>
-		<filter-name>filterChainProxy</filter-name>
-		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
-	</filter>
+        <filter-name>filterChainProxy</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
 
 	<filter>
 		<filter-name>Resource-Filter</filter-name>
@@ -98,6 +80,11 @@
 	<filter>
 		<filter-name>HQU-Filter</filter-name>
 		<filter-class>org.hyperic.hq.ui.RenditFilter</filter-class>
+	</filter>
+
+	<filter>
+    	<filter-name>httpMethodFilter</filter-name>
+	    <filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
 	</filter>
 
 	<filter-mapping>
@@ -110,9 +97,14 @@
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 
+	 <filter-mapping>
+      <filter-name>filterChainProxy</filter-name>
+      <url-pattern>/*</url-pattern>
+    </filter-mapping> 
+
 	<filter-mapping>
-		<filter-name>filterChainProxy</filter-name>
-		<url-pattern>/*</url-pattern>
+    	<filter-name>httpMethodFilter</filter-name>
+	    <servlet-name>webapp</servlet-name>
 	</filter-mapping>
 
 	<filter-mapping>

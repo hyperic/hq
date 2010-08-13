@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import net.sf.ehcache.CacheManager;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
@@ -114,7 +116,7 @@ abstract public class BaseInfrastructureTest {
     protected AgentManager agentManager;
 
     @Autowired
-    private SessionFactory sessionFactory;
+    protected SessionFactory sessionFactory;
 
     @Autowired
     protected ResourceManager resourceManager;
@@ -142,6 +144,10 @@ abstract public class BaseInfrastructureTest {
 
     @After
     public void after() {
+        //Clear the query cache
+        sessionFactory.evictQueries();
+        //Clear the 2nd level cache including regions with queries
+        CacheManager.getInstance().clearAll();
         endTime = System.nanoTime();
         logger.debug(buildMessage());
     }

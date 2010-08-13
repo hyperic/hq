@@ -98,8 +98,6 @@ public class ProductPluginManager
     private int pluginStubLength = 0;
     private Comparator<File> pluginSorter;
 
-    public static final int DEPLOYMENT_ORDER_LAST = TypeInfo.TYPE_SERVICE + 1;
-
     private static final File HQ_DIR = new File(System.getProperty("user.home"), ".hq");
 
     public static final File PLUGIN_PROPERTIES_FILE = new File(HQ_DIR, "plugin.properties");
@@ -227,11 +225,9 @@ public class ProductPluginManager
      * @see #getTypeInfo
      * @see #registerPluginJar(String jarName)
      */
-    private int registerTypeInfo(TypeInfo[] types) {
-        int order = DEPLOYMENT_ORDER_LAST;
-
+    private void registerTypeInfo(TypeInfo[] types) {
         if (types == null) {
-            return order;
+            return;
         }
 
         for (int i = 0; i < types.length; i++) {
@@ -241,11 +237,7 @@ public class ProductPluginManager
             for (int j = 0; j < platforms.length; j++) {
                 setTypeInfo(platforms[j], type.getName(), type);
             }
-
-            order = Math.min(order, type.getType());
         }
-
-        return order;
     }
 
     private String[] getPluginNames(String plugins) {
@@ -997,7 +989,7 @@ public class ProductPluginManager
     public void addPluginTypes(TypeInfo[] types, ProductPlugin plugin) throws PluginExistsException {
         PluginInfo info = getPluginInfo(plugin.getName());
         if (this.registerTypes) {
-            info.deploymentOrder = registerTypeInfo(types);
+             registerTypeInfo(types);
         }
         for (int i = 0; i < ProductPlugin.TYPES.length; i++) {
             String type = ProductPlugin.TYPES[i];

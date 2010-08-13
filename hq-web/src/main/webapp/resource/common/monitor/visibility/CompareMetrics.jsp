@@ -189,6 +189,9 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
             <c:when test="${rmds.metrics[last].value == -0.01}">
             <html:img page="/images/icon_available_orange.gif" width="12" height="12" alt="" border="0" align="middle"/>
             </c:when>
+            <c:when test="${rmds.metrics[last].value == -0.02}">
+            <html:img page="/images/icon_available_black.gif" width="12" height="12" alt="" border="0" align="middle"/>
+            </c:when>
             <c:otherwise>
             <html:img page="/images/icon_available_yellow.gif" width="12" height="12" alt="" border="0" align="middle"/>
             </c:otherwise>

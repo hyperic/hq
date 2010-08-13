@@ -28,6 +28,7 @@ package org.hyperic.hq.product.pluginxml;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.util.config.BooleanConfigOption;
 import org.hyperic.util.config.ConfigOption;
+import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.HiddenConfigOption;
 import org.hyperic.util.config.IpAddressConfigOption;
 import org.hyperic.util.config.MacAddressConfigOption;
@@ -125,7 +126,7 @@ class ConfigOptionTag extends ContainerTag {
             option = this.schema.add(name, desc, doubleValueOf(dval));
         }
         else if (type.equals("secret")) {
-            Metric.addSecret(name);
+            ConfigSchema.addSecret(name);
             option = this.schema.addSecret(name, desc);
         }
         else if (type.equals("hidden")) {

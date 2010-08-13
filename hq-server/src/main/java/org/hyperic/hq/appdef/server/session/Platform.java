@@ -81,7 +81,7 @@ public class Platform extends PlatformBase
         return _platformType;
     }
 
-    void setPlatformType(PlatformType platformType) {
+    public void setPlatformType(PlatformType platformType) {
         _platformType = platformType;
     }
 

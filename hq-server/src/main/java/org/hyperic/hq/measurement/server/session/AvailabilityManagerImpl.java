@@ -1456,16 +1456,20 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                 continue;
             }
             if (last.getAvailVal() == avail.getAvailVal()) {
-                _log.error("consecutive availpoints have the same value");
+                _log.error("consecutive availpoints have the same value, " +
+                    "first={" + last + "}, last={" + avail + "}");
                 return false;
             } else if (last.getEndtime() != avail.getStartime()) {
-                _log.error("there are gaps in the availability table");
+                _log.error("there are gaps in the availability table" +
+                   "first={" + last + "}, last={" + avail + "}");
                 return false;
             } else if (last.getStartime() > avail.getStartime()) {
-                _log.error("startime availability is out of order");
+                _log.error("startime availability is out of order" +
+                   "first={" + last + "}, last={" + avail + "}");
                 return false;
             } else if (last.getEndtime() > avail.getEndtime()) {
-                _log.error("endtime availability is out of order");
+                _log.error("endtime availability is out of order" +
+                   "first={" + last + "}, last={" + avail + "}");
                 return false;
             }
             last = avail;

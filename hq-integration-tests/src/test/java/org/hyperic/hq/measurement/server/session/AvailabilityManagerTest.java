@@ -34,6 +34,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.sf.ehcache.CacheManager;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.context.IntegrationTestContextLoader;
@@ -43,6 +45,7 @@ import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.MetricValue;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -93,6 +96,12 @@ public class AvailabilityManagerTest {
         //TODO may not need to load all this data for every test - move this
         //into only test methods that need it?
         dbPopulator.restoreDatabase();
+    }
+    
+    @After
+    public void after() {
+        //Clear the 2nd level cache including regions with queries
+        CacheManager.getInstance().clearAll();
     }
 
     @Test
@@ -214,7 +223,7 @@ public class AvailabilityManagerTest {
             dumpAvailsToLogger(avails);
         }
         
-        Assert.assertTrue(avails.size() == 2);
+        Assert.assertEquals(2,avails.size());
         // all points should be green in db after this
         for (int i = 0; i < 10; i++) {
             pt = new DataPoint(measId, new MetricValue(1.0, baseTime + (interval * i)));
@@ -314,7 +323,7 @@ public class AvailabilityManagerTest {
         if (avails.size() != 4) {
             dumpAvailsToLogger(avails);
         }
-        Assert.assertTrue(avails.size() == 4);
+        Assert.assertEquals(4,avails.size());
         list.clear();
         // After the network is up we start getting the availability data for
         // the period when the network was down
@@ -385,7 +394,7 @@ public class AvailabilityManagerTest {
         if (avails.size() != 2) {
             dumpAvailsToLogger(avails);
         }
-        Assert.assertTrue(avails.size() == 2);
+        Assert.assertEquals(2,avails.size());
         list.clear();
     }
 
