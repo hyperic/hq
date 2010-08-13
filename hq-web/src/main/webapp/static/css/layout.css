@@ -144,3 +144,20 @@ a img { border: none; }
 	text-align: right; 
 	margin-right: 10px;
 }
+
+/* below are added by Annie */
+#content {
+	margin: 65px 0px 0px 140px;
+	
+}
+
+/* dont let it cover my content */
+#headerTabs {
+	width: 140px;
+}
+
+.errorMessage{
+	color: red;
+
+}
+

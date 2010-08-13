@@ -64,6 +64,10 @@
 		<td class="BlockLabel"></td>
 		<td class="BlockContent"><html:link page="/admin/config/Config.do?mode=escalate"><fmt:message key="admin.home.EscalationSchemes"/></html:link> <span class="italicInfo"><fmt:message key="inform.config.admin.EscalationScheme"/></span></td>
 	</tr>
+    <tr>
+		<td class="BlockLabel"></td>
+		<td class="BlockContent"><html:link page="/app/admin/escalations">New Esc</html:link> <span class="italicInfo"><fmt:message key="inform.config.admin.EscalationScheme"/></span></td>
+	</tr>
 </table>
 <!--  /  -->
 

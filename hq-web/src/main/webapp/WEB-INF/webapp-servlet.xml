@@ -7,6 +7,7 @@
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
+
 	<!--
 		========================== WEB DEFINITIONS =======================
 	-->
@@ -32,19 +33,35 @@
 	</bean>
 
 	<!-- Resolves view names to Tiles 2 definitions -->
-	<bean id="tilesViewResolver"
-		class="org.springframework.web.servlet.view.UrlBasedViewResolver">
-		<property name="viewClass"
-			value="org.springframework.web.servlet.view.tiles2.TilesView" />
-	</bean>
+
 
 	<!-- Configures Tiles 2 -->
+	<!-- Resolves view names to Tiles 2 definitions -->
+	<bean id="tilesViewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+		<property name="viewClass" value="org.springframework.web.servlet.view.tiles2.TilesView"/>
+		<property name="order" value="0"/>
+	</bean>
+
 	<bean id="tilesConfigurer"
 		class="org.springframework.web.servlet.view.tiles2.TilesConfigurer">
 		<property name="definitions">
 			<list>
 				<value>/WEB-INF/jsp/tiles.xml</value>
+				<value>/WEB-INF/jsp/admin/tiles.xml</value>
+				<value>/WEB-INF/jsp/admin/escalation/tiles.xml</value>
 			</list>
 		</property>
 	</bean>
+
+
+	<!-- Let Spring handle ResourceBoundle: Message Source (enable Spring tag "message") -->
+	<bean id="messageSource"
+	class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basename">
+			<value>ApplicationResources</value>
+		</property>
+	</bean>
+	
+
+
 </beans>
