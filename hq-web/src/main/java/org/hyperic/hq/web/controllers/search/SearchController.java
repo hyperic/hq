@@ -8,6 +8,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -35,6 +37,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 public class SearchController extends BaseController {
+	private final static Log log = LogFactory.getLog(SearchController.class.getName());
+	
 	@Autowired
 	public SearchController(AppdefBoss appdefBoss, AuthzBoss authzBoss) {
 		super(appdefBoss, authzBoss);
@@ -98,15 +102,14 @@ public class SearchController extends BaseController {
 					webUser.getSessionId(), searchString, page);
 
 			result.put("resources", constructResourceMaps(resources));
-		} catch (SessionTimeoutException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SessionNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (PermissionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.debug("User doesn't have the permission to perform this operation", e);
+		} catch (SessionNotFoundException e) {
+			log.debug("User's session can't be found", e);
+		} catch (SessionTimeoutException e) {
+			log.debug("User's session has timed out", e);
+		} catch (Exception e) {
+			log.debug(e);
 		}
 
 		// ...search for users matching the searchString...
@@ -115,15 +118,14 @@ public class SearchController extends BaseController {
 					webUser.getSessionId(), searchString, page);
 
 			result.put("users", constructUserMaps(users));
-		} catch (SessionTimeoutException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SessionNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (PermissionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.debug("User doesn't have the permission to perform this operation", e);
+		} catch (SessionNotFoundException e) {
+			log.debug("User's session can't be found", e);
+		} catch (SessionTimeoutException e) {
+			log.debug("User's session has timed out", e);
+		} catch (Exception e) {
+			log.debug(e);
 		}
 
 		return result;

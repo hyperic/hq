@@ -8,6 +8,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.auth.shared.SessionException;
@@ -26,8 +28,17 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+/**
+ * This controller handles the different actions that can be performed when
+ * associating one or more resources to a group.
+ * 
+ * @author David Crutchfield
+ * 
+ */
 @Controller
 public class GroupAssociationController extends BaseController {
+	private final static Log log = LogFactory.getLog(GroupAssociationController.class.getName());
+			
 	@Autowired
 	public GroupAssociationController(AppdefBoss appdefBoss, AuthzBoss authzBoss) {
 		super(appdefBoss, authzBoss);
@@ -38,39 +49,44 @@ public class GroupAssociationController extends BaseController {
 	Map<String, List<Map<String, Object>>> getAvailableAssociations(
 			@RequestParam(RequestParameterKeys.RESOURCE_IDS) String[] resourceAppdefEntityIds,
 			HttpSession session) {
+		// First create an array of AppdefEntityIDs from the passed in String array...
 		AppdefEntityID[] appdefEntityIds = new AppdefEntityID[resourceAppdefEntityIds.length];
 
 		for (int x = 0; x < resourceAppdefEntityIds.length; x++) {
 			appdefEntityIds[x] = new AppdefEntityID(resourceAppdefEntityIds[x]);
 		}
 
+		// ...then get the web user...
 		WebUser webUser = getWebUser(session);
 		PageList<AppdefGroupValue> availableGroups;
 		Map<String, List<Map<String, Object>>> result = new LinkedHashMap<String, List<Map<String, Object>>>();
 
 		try {
+			// ...followed by a list of available groups...
 			availableGroups = getAppdefBoss().findAllGroupsMemberExclusive(
 					webUser.getSessionId(), PageControl.PAGE_ALL,
 					appdefEntityIds);
-			
-			List<Map<String, Object>> groups = new ArrayList<Map<String,Object>>();
-			
+
+			List<Map<String, Object>> groups = new ArrayList<Map<String, Object>>();
+
+			// ...iterate through the list of groups and populate the result list...
 			for (AppdefGroupValue group : availableGroups) {
 				Map<String, Object> groupInfo = new HashMap<String, Object>();
-			
+
 				groupInfo.put("id", group.getId());
 				groupInfo.put("name", group.getName());
 				groupInfo.put("description", group.getDescription());
 				groups.add(groupInfo);
 			}
-			
+
+			// ...update the result with a list of groups...
 			result.put("groups", groups);
 		} catch (PermissionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.debug("User doesn't have the permission to perform this operation", e);
 		} catch (SessionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.debug("There's a problem with the user's session", e);
+		} catch (Exception e) {
+			log.debug(e);
 		}
 
 		return result;
@@ -83,30 +99,30 @@ public class GroupAssociationController extends BaseController {
 			HttpSession session) {
 		String redirectString = "redirect:/app/resource/";
 
-		// ...now check for the resources to be added to the group(s),
-		// otherwise it's a no-op...
 		try {
+			// First, get the web user...
 			WebUser webUser = getWebUser(session);
 
+			// ...then iterate through the AppdefEntitIds, adding them to the specified group(s)...
 			for (String resourceAppdefEntityId : resourceAppdefEntityIds) {
 				getAppdefBoss().batchGroupAdd(webUser.getSessionId(),
 						new AppdefEntityID(resourceAppdefEntityId), groupIds);
 			}
-			
+
+			// TODO come up with a better strategy...for now this works 
 			if (groupIds.length == 1) {
 				redirectString += "association/" + groupIds[0];
 			} else {
 				redirectString += "associations";
 			}
-		} catch (SessionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (PermissionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.debug("User doesn't have the permission to perform this operation", e);
+		} catch (SessionException e) {
+			log.debug("There's a problem with the user's session", e);
 		} catch (VetoException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.debug(e);
+		} catch (Exception e) {
+			log.debug(e);
 		}
 
 		return redirectString;
@@ -115,6 +131,9 @@ public class GroupAssociationController extends BaseController {
 	@RequestMapping(method = RequestMethod.GET, value = "/resource/association/{groupId}")
 	public @ResponseBody
 	Map<String, String> getAssociation() {
+		// TODO this doesn't currently do anything, but ideally when we create
+		// an association the request would be redirected to GET the newly
+		// created association (or parent resource)...
 		return new HashMap<String, String>();
 	}
 }

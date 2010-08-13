@@ -1658,12 +1658,13 @@ hyperic.dashboard.chartWidget = function(args) {
         that.config.range = dojo11.byId('chart_range').value;
         that.config.rotation = dojo11.byId('chart_rotation').checked ? 'true' : 'false';
 
-        dojo11.xhrPut({
+        dojo11.xhrPost({
             url: baseUrl,
             content: { 
         		"tr" : that.config.range, 
         		"ivl" : that.config.interval, 
-        		"rot" : that.config.rotation 
+        		"rot" : that.config.rotation,
+        		"_method" : "PUT" // need to work around issue using PUT directly
         	},
         	handle: "json",
         	//headers: { "Content-Type": "application/json"},
@@ -2451,10 +2452,11 @@ hyperic.dashboard.summaryWidget = function(args) {
     {
         that.selected_alert_groups = that.enabled_alert_groups.getAllValues();
 
-        dojo11.xhrPut( {
+        dojo11.xhrPost( {
             url: baseUrl,
             content: {
-        		"rid" : that.selected_alert_groups
+        		"rid" : that.selected_alert_groups,
+        		"_method" : "PUT" // need to work around issue using PUT directly
         	},
             handleAs: 'json',
             //headers: { "Content-Type": "application/json"},
