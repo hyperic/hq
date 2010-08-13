@@ -25,8 +25,6 @@
 
 package org.hyperic.hq.ui.util;
 
-import java.rmi.RemoteException;
-
 import javax.servlet.http.HttpSession;
 
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -57,8 +55,7 @@ public class ConfigurationProxyImpl implements ConfigurationProxy {
         this.authzBoss = boss;
     }
 
-    public void setPreference(HttpSession session, WebUser user, String key, String value) throws ApplicationException,
-        RemoteException {
+    public void setPreference(HttpSession session, WebUser user, String key, String value) throws ApplicationException {
         if (key.substring(0, 5).equalsIgnoreCase(".dash")) {
             // Dashboard preference
 
@@ -76,7 +73,7 @@ public class ConfigurationProxyImpl implements ConfigurationProxy {
     }
 
     public void setDashboardPreferences(HttpSession session, WebUser user, ConfigResponse dashConfigResp)
-        throws SessionNotFoundException, SessionTimeoutException, PermissionException, RemoteException {
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException {
 
         AuthzSubject me = authzBoss.findSubjectById(user.getSessionId(), user.getSubject().getId());
         DashboardConfig dashConfig = dashboardManager.findDashboard((Integer) session
@@ -85,20 +82,19 @@ public class ConfigurationProxyImpl implements ConfigurationProxy {
     }
 
     public void setUserPreferences(HttpSession session, WebUser user, ConfigResponse userPrefs)
-        throws ApplicationException, RemoteException {
+        throws ApplicationException {
         user.getPreferences().merge(userPrefs, false);
         authzBoss.setUserPrefs(user.getSessionId(), user.getId(), user.getPreferences());
     }
 
-    public void setUserDashboardPreferences(ConfigResponse userPrefs, WebUser user) throws ApplicationException,
-        RemoteException {
+    public void setUserDashboardPreferences(ConfigResponse userPrefs, WebUser user) throws ApplicationException {
 
         AuthzSubject me = authzBoss.findSubjectById(user.getSessionId(), user.getSubject().getId());
         dashboardManager.configureDashboard(me, dashboardManager.getUserDashboard(me, me), userPrefs);
     }
 
     public void setRoleDashboardPreferences(ConfigResponse preferences, WebUser user, Role role)
-        throws ApplicationException, RemoteException {
+        throws ApplicationException {
 
         AuthzSubject me = authzBoss.findSubjectById(user.getSessionId(), user.getSubject().getId());
         dashboardManager.configureDashboard(me, dashboardManager.getRoleDashboard(me, role), preferences);
