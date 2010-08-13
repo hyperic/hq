@@ -33,11 +33,15 @@ import org.hyperic.tools.db.priv.PrivilegeCheck;
 import org.hyperic.tools.db.priv.PrivilegeCheckException;
 import org.hyperic.tools.db.priv.PrivilegeCheckFactory;
 
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
+import org.jasypt.properties.PropertyValueEncryptionUtils;
+
 public class DBPrivCheckTask extends Task {
 
     private String jdbcUrl;
     private String jdbcUser;
     private String jdbcPassword;
+    private String encryptionKey;
     private String property = null;
     private String errMsgProperty = null;
     private boolean quiet = true;
@@ -63,6 +67,10 @@ public class DBPrivCheckTask extends Task {
         this.jdbcPassword = jdbcPassword;
     }
 
+    public void setEncryptionKey(String encryptionKey) {
+        this.encryptionKey = encryptionKey;
+    }
+    
     public void setQuiet(boolean quiet) {
         this.quiet = quiet;
     }
@@ -79,7 +87,17 @@ public class DBPrivCheckTask extends Task {
         PrivilegeCheck checker = null;
         
         try {
-            checker = PrivilegeCheckFactory.getChecker(jdbcUrl,jdbcUser,jdbcPassword);
+            String password = jdbcPassword;
+            
+            if (PropertyValueEncryptionUtils.isEncryptedValue(password)) {
+                log("Encryption key is " + encryptionKey);
+                password = decryptPassword(
+                                "PBEWithMD5AndDES",
+                                encryptionKey,
+                                password);
+            }
+            
+            checker = PrivilegeCheckFactory.getChecker(jdbcUrl,jdbcUser,password);
             String privError = checker.isPrivileged();
             if (privError == null) {
                 if (property != null) {
@@ -126,4 +144,16 @@ public class DBPrivCheckTask extends Task {
             throw new BuildException("No jdbcUrl was set, can't continue");        
     }
 
+    private String decryptPassword(String algorithm, 
+    		                       String encryptionKey,
+    		                       String clearTextPassword) {
+
+    	// TODO: This needs to be refactored into a security utility class
+
+    	StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
+    	encryptor.setPassword(encryptionKey);
+    	encryptor.setAlgorithm(algorithm);
+
+    	return PropertyValueEncryptionUtils.decrypt(clearTextPassword, encryptor);
+    }
 }

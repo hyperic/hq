@@ -375,6 +375,7 @@ __ll__
     <dbprivcheck jdbcUrl="${server.database-url}"
                  jdbcUser="${server.database-user}"
                  jdbcPassword="${server.database-password}"
+                 encryptionKey="${server.encryption-key}"
                  property="server.db.user.permission"
                  errMsgProperty="errMsg"/>
     <antcall target="fail-if-no-permission">
