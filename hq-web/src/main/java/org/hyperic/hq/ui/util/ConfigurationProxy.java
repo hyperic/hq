@@ -1,7 +1,5 @@
 package org.hyperic.hq.ui.util;
 
-import java.rmi.RemoteException;
-
 import javax.servlet.http.HttpSession;
 
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -14,16 +12,13 @@ import org.hyperic.util.config.ConfigResponse;
 
 public interface ConfigurationProxy {
 
-    void setPreference(HttpSession session, WebUser user, String key, String value) throws ApplicationException,
-        RemoteException;
+    void setPreference(HttpSession session, WebUser user, String key, String value) throws ApplicationException;
 
-    void setUserDashboardPreferences(ConfigResponse userPrefs, WebUser user) throws ApplicationException,
-        RemoteException;
+    void setUserDashboardPreferences(ConfigResponse userPrefs, WebUser user) throws ApplicationException;
 
     void setDashboardPreferences(HttpSession session, WebUser user, ConfigResponse dashConfigResp)
-        throws SessionNotFoundException, SessionTimeoutException, PermissionException, RemoteException;
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException;
 
-    void setRoleDashboardPreferences(ConfigResponse preferences, WebUser user, Role role) throws ApplicationException,
-        RemoteException;
+    void setRoleDashboardPreferences(ConfigResponse preferences, WebUser user, Role role) throws ApplicationException;
 
 }

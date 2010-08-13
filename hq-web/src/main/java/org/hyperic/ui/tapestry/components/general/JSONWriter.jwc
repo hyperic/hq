@@ -1,7 +1,0 @@
-<!DOCTYPE component-specification PUBLIC 
-  "-//Apache Software Foundation//Tapestry Specification 4.0//EN" 
-  "http://tapestry.apache.org/dtd/Tapestry_4_0.dtd">
-
-<component-specification class="org.hyperic.ui.tapestry.components.general.JSONWriter" allow-informal-parameters="no">
-
-</component-specification>

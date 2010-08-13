@@ -35,6 +35,7 @@
 		<hqapi.version>4.0.0.BUILD-SNAPSHOT</hqapi.version>
 		<httpclient.version>3.1</httpclient.version>
 		<j2ee-management.version>1.1</j2ee-management.version>
+        <jackson-mapper-asl.version>1.5.5</jackson-mapper-asl.version>
 		<jasypt.version>1.6</jasypt.version>
 		<jdom.version>1.1</jdom.version>
 		<jmock.version>1.2.0</jmock.version>
@@ -163,6 +164,11 @@
 				<artifactId>velocity</artifactId>
 				<version>${velocity.version}</version>
 			</dependency>
+            <dependency>
+                <groupId>org.codehaus.jackson</groupId>
+                <artifactId>jackson-mapper-asl</artifactId>
+                <version>${jackson-mapper-asl.version}</version>
+            </dependency>
 			<!--  We use a version of dbunit that we patched -->
 			<dependency>
 				<groupId>org.hyperic</groupId>
@@ -526,6 +532,17 @@
 	<build>
 		<pluginManagement>
 			<plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>test-jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
@@ -676,7 +693,7 @@
 	    			<module>dist</module>
 			</modules>
 		</profile>
-			<profile>
+        <profile>
 			<id>no-dist</id>
 			<modules>
 					<module>hq-util</module>
@@ -690,6 +707,17 @@
 					<module>hq-uiplugin</module>
 					<module>hq-installer</module>
 					<module>hq-bootstrap</module>
+					<module>hq-web</module>
+			</modules>
+		</profile>
+        <profile>
+			<id>web-app</id>
+			<modules>
+					<module>hq-util</module>
+					<module>hq-common</module>
+					<module>hq-pdk</module>
+					<module>hq-rendit</module>
+					<module>hq-server</module>
 					<module>hq-web</module>
 			</modules>
 		</profile>
