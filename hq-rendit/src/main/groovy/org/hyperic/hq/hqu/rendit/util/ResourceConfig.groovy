@@ -3,12 +3,12 @@ package org.hyperic.hq.hqu.rendit.util
 import org.hyperic.hq.appdef.Agent
 
 import org.hyperic.hq.appdef.shared.AgentManager;
+import org.hyperic.hq.appdef.shared.AppdefEntityID 
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
-import org.hyperic.hq.appdef.shared.PlatformNotFoundException
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.auth.shared.SessionManager
@@ -18,8 +18,9 @@ import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses
 import org.hyperic.hq.product.ProductPlugin
-import org.hyperic.hq.product.PluginNotFoundException
 import org.hyperic.util.config.ConfigResponse
+import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+import org.hyperic.hq.product.PluginNotFoundException;
 
 /**
  * This class provides a layer of abstraction needed to get properties
@@ -143,15 +144,18 @@ class ResourceConfig {
     
     void populate() {
         clear()
-        def entityID = resource.entityId
-
-        // Fill out config responses
+        populateConfig();
+        populateCPropsAndPojoFields()
+    }
+    
+    void populateConfig() {
+         // Fill out config responses
         ProductPlugin.CONFIGURABLE_TYPES.each { type ->
             def cfgSchema
             def cfgResponse
             try {
                 def schemaAndResponse = 
-                    prodBoss.getConfigSchemaAndBaseResponse(null, entityID,
+                    prodBoss.getConfigSchemaAndBaseResponse(null, resource.entityId,
                                                             type, true)
                 cfgSchema   = schemaAndResponse.schema
                 cfgResponse = schemaAndResponse.response
@@ -164,16 +168,17 @@ class ResourceConfig {
                                      bytes: cfgResponse.encode(),
                                      schema: cfgSchema]
         }
-        
+    }
+    
+    void populateCPropsAndPojoFields() {
         def proto  = resource.prototype
-        def typeId = proto.appdefType
-        
-        // Fill out cprops
+        def typeId = proto.appdefType 
+         // Fill out cprops
         for (cpropKey in cpropMan.getKeys(typeId, proto.instanceId)) {
             cprops.put(cpropKey.key, [key: cpropKey])
         }
         
-        cpropMan.getEntries(entityID).each { key, val ->
+        cpropMan.getEntries(resource.entityId).each { key, val ->
             cprops[key].value = val
         }
 
@@ -222,6 +227,56 @@ class ResourceConfig {
     }
     
     /**
+     * Sets config ONLY of the resource, whereas setProperties uses the props passed in to possibly
+     * set config, custom properties, and certain attributes of the resource such as name and location
+     * @param config The resource config
+     * @param subject The user token
+     */
+    void setConfig(Map config, AuthzSubject subject) {
+        clear()
+        populateConfig()
+        def entityID   = resource.entityId
+        // Config Response changes
+        def allConfigs      = new AllConfigResponses()
+        allConfigs.resource = entityID
+        def allConfigsRoll  = new AllConfigResponses()
+        allConfigsRoll.resource = entityID
+        
+        for (i in 0..<ProductPlugin.CONFIGURABLE_TYPES.length) {
+            def type        = ProductPlugin.CONFIGURABLE_TYPES[i]
+            def responseMap = configResponses[type]
+            if (responseMap == null) {
+                allConfigsRoll.setSupports(i, false)
+            } else {
+                def curResponse = responseMap.response
+                allConfigsRoll.setSupports(i, true)
+                allConfigsRoll.setConfig(i, curResponse)
+                allConfigs.setSupports(i, true)
+                
+                def newResponse = new ConfigResponse()
+                responseMap.schema.options.each { opt ->
+                    def key = opt.name
+                    def val = curResponse.getValue(key)
+                    if (config.containsKey(key) && config[key] != val) {
+                        newResponse.setValue(key, config[key])
+                    } else {
+                        newResponse.setValue(key, (String)val) 
+                    }
+                }
+                allConfigs.setConfig(i, newResponse)
+            }
+        }
+        
+        def appdefHandler = getAppdefHandler(resource)
+        def targetForGet  = appdefHandler.targetForGet(resource)
+        appdefHandler.populateAllCfg(allConfigs, targetForGet)
+        // XXX:  Undo this rollback crap when Appdef gets itself figured out.
+        def mgr = SessionManager.instance
+        def sessionId = mgr.put(subject)
+        appBoss.setAllConfigResponses(sessionId, allConfigs, allConfigsRoll)
+    }
+    
+    /**
      * Set properties of the resource backing this configuration.  Only  
      * existing properties can be set -- new properties will be discarded.
      */
@@ -263,43 +318,7 @@ class ResourceConfig {
             appdefHandler.saveSetTarget(subject, targetForSet)
         }
         
-        // Config Response changes
-        def allConfigs      = new AllConfigResponses()
-        allConfigs.resource = entityID
-        def allConfigsRoll  = new AllConfigResponses()
-        allConfigsRoll.resource = entityID
-        
-        for (i in 0..<ProductPlugin.CONFIGURABLE_TYPES.length) {
-            def type        = ProductPlugin.CONFIGURABLE_TYPES[i]
-            def responseMap = configResponses[type]
-            if (responseMap == null) {
-                allConfigsRoll.setSupports(i, false)
-            } else {
-                def curResponse = responseMap.response
-                allConfigsRoll.setSupports(i, true)
-                allConfigsRoll.setConfig(i, curResponse)
-                allConfigs.setSupports(i, true)
-                
-                def newResponse = new ConfigResponse()
-                responseMap.schema.options.each { opt ->
-                    def key = opt.name
-                    def val = curResponse.getValue(key)
-                    if (props.containsKey(key) && props[key] != val) {
-                        newResponse.setValue(key, props[key])
-                    } else {
-                        newResponse.setValue(key, (String)val) 
-                    }
-                }
-                allConfigs.setConfig(i, newResponse)
-            }
-        }
-        
-        appdefHandler.populateAllCfg(allConfigs, targetForGet)
-        // XXX:  Undo this rollback crap when Appdef gets itself figured out.
-        def mgr = SessionManager.instance
-        def sessionId = mgr.put(subject)
-        appBoss.setAllConfigResponses(sessionId, allConfigs, allConfigsRoll)
-
+        setConfig(props,subject)
     }
     
     private getAppdefHandler(Resource r) {
