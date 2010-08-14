@@ -12,7 +12,7 @@
 	<bean id="passwordEncoder" class="org.springframework.security.authentication.encoding.Md5PasswordEncoder">
 		<property name="encodeHashAsBase64" value="true" />
 	</bean>
-		
+	
 	<bean id="internalAuthenticationProvider" class="org.hyperic.hq.security.InternalAuthenticationProvider">
 		<constructor-arg ref="authzSubjectManager"/>
 		<constructor-arg>

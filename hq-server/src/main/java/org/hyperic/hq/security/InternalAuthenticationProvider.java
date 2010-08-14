@@ -72,7 +72,7 @@ public class InternalAuthenticationProvider implements AuthenticationProvider {
                 throw lastException;
             }
         }
-       //Return a token for guest user
+        //Return a token for guest user
         List<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
         // ...TODO right now, every user is given the "ROLE USER" grant authority, once we fully integrate with
         // spring security this should be updated with a better approach...

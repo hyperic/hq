@@ -107,5 +107,4 @@ public class JdbcHQAuthenticationProvider implements HQAuthenticationProvider {
     public int getOrder() {
         return Ordered.LOWEST_PRECEDENCE;
     }
-
 }

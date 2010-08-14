@@ -290,26 +290,6 @@ public class DashboardUtils {
 		}
 	}
     
-    public static void addEntityToPreferences(String key, WebUser user,
-                                              AppdefEntityID newId, int max)
-        throws Exception {
-        List existing = preferencesAsEntityIds(key, user);
-        for (Iterator it = existing.iterator(); it.hasNext();) {
-            AppdefEntityID entityID = (AppdefEntityID) it.next();
-            if (entityID.equals(newId))
-                it.remove();
-        }
-        
-        // Now add the new one
-        existing.add(newId);
-        if (max < Integer.MAX_VALUE && existing.size() > max)
-            existing.remove(0);
-        
-        user.setPreference(key,
-                        StringUtil.listToString(existing,
-                                                Constants.DASHBOARD_DELIMITER));
-    }
-    
     public static boolean addEntityToPreferences(String key,
                                                  ConfigResponse userConfig,
                                                  AppdefEntityID newId,
