@@ -217,7 +217,7 @@ class MxObjectNameQuery extends MxServiceQuery {
         StringBuffer name = new StringBuffer();
 
         for (Iterator it=this.names.iterator(); it.hasNext();) {
-            name.append(stripQuotes(oName.getKeyProperty((String)it.next())));
+            name.append(oName.getKeyProperty((String)it.next()));
             if (it.hasNext()) {
                 name.append(' ');
             }
@@ -226,14 +226,6 @@ class MxObjectNameQuery extends MxServiceQuery {
         return name.toString();
     }
     
-    private String stripQuotes(String value) {
-        String stripped = value.trim();
-        if ( stripped.startsWith( "\"" ) && stripped.endsWith( "\"" ) ) {
-          return stripped.substring( 1, value.length( ) - 1 );
-        }
-        return value;
-    }
-
     public boolean hasControl() {
         //XXX this functionality should be elsewhere
         ProductPluginManager ppm =
