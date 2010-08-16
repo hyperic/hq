@@ -343,8 +343,16 @@ class ResourceCategory {
 	 * here, as we'd like to abstract the thing doing the persisting
 	 */
 	static Map getConfig(Resource r) {
+		getConfig(r,true)
+	}
+	
+	static Map getConfig(Resource r, boolean includePropsAndPojoFields) {
 		def cfg = new ResourceConfig(r)
-		cfg.populate()
+		if(includePropsAndPojoFields) {
+			cfg.populate()
+		}else {
+			cfg.populateConfig()
+		}
 		cfg.entries
 	}
 	
@@ -362,6 +370,14 @@ class ResourceCategory {
             (new ResourceConfig(r)).setConfig(m, subject)
         }
     }
+
+   static void setFields(Resource r, Map m, AuthzSubject subject) {
+       (new ResourceConfig(r)).setFields(m, subject)
+   }
+
+   static void setProperties(Resource r, Map m, AuthzSubject subject) {
+       (new ResourceConfig(r)).setProperties(m, subject, false)
+   }
 	
 	/**
 	 * Get all the children of a resource, viewable by the passed user.
@@ -499,7 +515,7 @@ class ResourceCategory {
 	}
 	
 	static createInstance(Resource proto, Resource parent, String name,
-	    AuthzSubject subject, Map cfg, Agent agent, List ips, boolean setProps) {
+	    AuthzSubject subject, Map cfg, Agent agent, List ips, Map cprops, Map fields) {
 	    if (!proto.isPlatformPrototype()) {
             throw new RuntimeException("createInstance called for non-platform " +
             "prototype, when platproto was " + 
@@ -533,13 +549,15 @@ class ResourceCategory {
         }
         
         def res = plat.resource
-        setConfig(res, cfg, subject, setProps)
-        
+        setConfig(res, cfg, subject, false)
+		setProperties(res,cfg)
+        setFields(res,cfg)
+
         return res
     }
     
     static createInstance(Resource proto, Resource parent, 
-        String name, AuthzSubject subject, Map cfg, boolean setProps) {
+        String name, AuthzSubject subject, Map cfg, Map cprops, Map fields) {
         cfg = cfg + [:]  // Clone to avoid modifying someone else's cfg
         
         if (proto.isServicePrototype()) {
@@ -581,7 +599,9 @@ class ResourceCategory {
             
             def res = svcMan.createService(subject, server,  serviceType, name,
                     "", "", null).resource
-            setConfig(res, cfg, subject, setProps)
+            setConfig(res, cfg, subject, false)
+			setProperties(res, cfg, subject)
+			setFields(res, cfg, subject)
             return res
         } else if (proto.isServerPrototype() && parent.isPlatform()) {
             Platform platform = toPlatform(parent)
@@ -614,7 +634,9 @@ class ResourceCategory {
             
             def res = svrMan.createServer(subject, platform.id,
                     proto.instanceId, sv).resource
-            setConfig(res, cfg, subject, setProps)
+            setConfig(res, cfg, subject, false)
+			setProperties(res, cfg, subject)
+			setFields(res, cfg, subject)
             return res
         } else {
             throw new IllegalArgumentException("Cannot create resources of type " +
