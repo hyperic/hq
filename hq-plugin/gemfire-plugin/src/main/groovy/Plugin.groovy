@@ -7,20 +7,23 @@ import org.hyperic.hq.hqu.rendit.HQUPlugin
 import GemfireController
 
 class Plugin extends HQUPlugin {
+
+    private boolean attachmentIsShown(Attachment a, Resource r, AuthzSubject u){
+        !r.isGroup()
+    }
+
     void initialize(File pluginDir) {
         super.initialize(pluginDir)
-
-        addView(description:  'Gemfire',
+        log.info("[initialize] pluginDir="+pluginDir)
+        addView(description:  'GemFire',
             attachType:   'resource',
+            toRoot:       false,
+            platforms:    'all',
+            byPlugin:     'gemfire',
             controller:   GemfireController,
             action:       'index',
-            resourceType: ['GemFire Distributed System'])
-        
-        addView(description:  'Gemfire',
-            attachType:   'resource',
-            controller:   GemfireController,
-            action:       'index',
-            resourceType: ['Cache Server'])
+            showAttachmentIf: {a, r, u -> attachmentIsShown(a, r, u)})
     }
+
 }
 

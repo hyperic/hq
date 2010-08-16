@@ -16,6 +16,7 @@
      getLog().debug("[getPlatformResource] config=" + config);
      config.setValue("jmx.url", "service:jmx:rmi://localhost/jndi/rmi://:1099/jmxconnector");
      PlatformResource res = super.getPlatformResource(config);
+     res.setMeasurementConfig(new ConfigResponse());
      return res;
    }
  }

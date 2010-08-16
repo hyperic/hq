@@ -18,10 +18,11 @@
     </tr>
   </thead>
   <tbody>
+<% if (members!=null) { %>
 <%for (member in members.values()){%>
     <tr>
       <td>${member.get("_id")}</td>
-      <td>${member.get("name")}</td>
+      <td><a id="${member.get("id2")}" class="member" href="#${member.get("id2")}">${member.get("name")}</a></td>
       <td>${member.get("host")}</td>
       <td>${member.get("port")}</td>
       <td>${member.get("heap")}%</td>
@@ -31,5 +32,6 @@
       <td>${member.get("type")}</td>
     </tr>
   <% } %>
+<% } %>
   </tbody>
 </table>

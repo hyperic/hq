@@ -45,27 +45,63 @@
             <metric name="Applications Peer" alias="n_apps"     indicator="true" />
             <metric name="Gateway Hubs"      alias="n_gateways" indicator="true" />
         </metrics>
-        <!--server name="JMX Agent" version="6.5">
+        <server name="JMX Agent" version="6.5">
             <plugin type="autoinventory" class="JMXAgentDetector" />
-            <plugin type="measurement" class="MemberMeasurement" />
-            <filter name="template" value="GemFire::${alias}"/>
+            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+            <plugin type="collector" class="JMXAgentCollector" />
+
+            <config type="measurement">
+                <option name="jmx.url"
+			        description="JMX URL to GemFire Agent"
+				    default="service:jmx:rmi://localhost/jndi/rmi://:1099/jmxconnector" />
+                <option name="jmx.username"
+			        description="JMX username"
+				    optional="true" default="" />
+                <option name="jmx.password"
+			        description="JMX password"
+				    optional="true" default="" />
+            </config>
+            <filter name="template" value="collector:jmx.url=%jmx.url%,memberID=%memberID%:${alias}"/>
             <metrics>
                 <metric name="Availability"  indicator="true" />
             </metrics>
-        </server-->
+        </server>
         <server name="Cache Server">
             <plugin type="autoinventory" class="CacheServerDetector" />
-            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+            <plugin type="measurement" class="MemberMeasurement" />
             <plugin type="collector" class="MemberCollector" />
-         <plugin type="livedata" class="GemFireLiveData" />
-           <config type="measurement">
+            <plugin type="livedata" class="GemFireLiveData" />
+            <config type="measurement">
                 <option name="memberID" description="Cache Server Id"/>
+                <option name="jmx.url"
+			        description="JMX URL to GemFire Agent"
+				    default="service:jmx:rmi://localhost/jndi/rmi://:1099/jmxconnector" />
+                <option name="jmx.username"
+			        description="JMX username"
+				    optional="true" default="" />
+                <option name="jmx.password"
+			        description="JMX password"
+				    optional="true" default="" />
             </config>
-            <filter name="template" value="GemFire:jmx.url=%jmx.url%,memberID=%memberID%:${alias}"/>
+            <properties>
+                <property name="id" description="ID"/>
+                <property name="type" description="Type"/>
+                <property name="host" description="Peer Host"/>
+                <property name="port" description="Peer Port"/>
+            </properties>
+            <filter name="template" value="collector:jmx.url=%jmx.url%,memberID=%memberID%:${alias}"/>
+            <property name="OBJECT_NAME" value="GemFire.Statistic:source=%memberID%,uid=3,name=vmStats"/>
             <metrics>
                 <metric name="Availability"  indicator="true" />
-                <metric name="Used Memory" alias="memory" indicator="true" />
+                <metric name="Used Heap" alias="memory" indicator="true" />
                 <metric name="Used CPU" alias="cpu" indicator="true" />
+                <metric name="Uptime" alias="uptime" indicator="true" />
+                <metric name="Number of Clients" alias="clients" indicator="true" />
+                <!--metric name="Gets" template="${OBJECT_NAME}:threads" ndicator="true"/>
+                <metric name="Puts" template="${OBJECT_NAME}:threads" ndicator="true"/>
+                <metric name="Cache Misses" template="${OBJECT_NAME}:threads" ndicator="true"/>
+                <metric name="Threads" template="${OBJECT_NAME}:threads" ndicator="true"/>
+                <metric name="Queue Size" template="${OBJECT_NAME}:threads" ndicator="true"/-->
             </metrics>
             <service name="Region">
                 <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
@@ -74,7 +110,16 @@
                     <option name="memberID" description="Cache Server Id"/>
                     <option name="regionID" description="Region Name"/>
                 </config>
-                <filter name="template" value="GemFire:hi=hola,jmx.url=%jmx.url%,memberID=%memberID%,regionID=%regionID%:${alias}"/>
+                <properties>
+                    <property description="gemfire.member.id" name="ID"/>
+                    <property description="Name" name="name"/>
+                    <property description="Path" name="path"/>
+                    <property description="Scope" name="scope"/>
+                    <property description="Data Policy" name="datapolicy"/>
+                    <property description="Inerrest Policy" name="interestpolicy"/>
+                    <property description="dik Attributes" name="diskattrs"/>
+                </properties>
+                <filter name="template" value="GemFire:jmx.url=%jmx.url%,memberID=%memberID%,regionID=%regionID%:${alias}"/>
                 <metrics>
                     <metric name="Availability"  indicator="true" />
                     <metric name="Entry Count" alias="entry_count" indicator="true" />
@@ -82,19 +127,24 @@
             </service>
         </server>
         <server name="Application Peer" include="Cache Server">
-                 <plugin type="autoinventory" class="ApplicationServerDetector" />
+            <plugin type="autoinventory" class="ApplicationServerDetector" />
         </server>
-        <!--server name="Gateway Hub">
+        <server name="Gateway Hub" include="Cache Server">
             <plugin type="autoinventory" class="GatewayServerDetector" />
-            <plugin type="measurement" class="MemberMeasurement" />
-            <filter name="template" value="GemFire::${alias}"/>
-            <config type="measurement">
-                <option name="Id" description="Cache Server Id"/>
-            </config>
-            <metrics>
-                <metric name="Availability"  indicator="true" />
-            </metrics>
-        </server-->
+            <service name="Gateway">
+                <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+                <plugin type="collector" class="GatewayCollector" />
+                <config type="measurement">
+                    <option name="memberID" description="Cache Server Id"/>
+                    <option name="gatewayID" description="Gateway Id"/>
+                </config>
+                <filter name="template" value="GemFire:jmx.url=%jmx.url%,memberID=%memberID%,gatewayID=%gatewayID%:${alias}"/>
+                <metrics>
+                    <metric name="Availability"  indicator="true" />
+                    <metric name="Queue size" alias="queuesize" indicator="true" />
+                </metrics>
+            </service>
+        </server>
     </platform>
 </plugin>
 

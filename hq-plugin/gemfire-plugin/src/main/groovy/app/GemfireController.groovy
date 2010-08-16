@@ -7,30 +7,13 @@ import org.json.JSONObject
 class GemfireController extends BaseController {
     def s=0,g=0,a=0;
 
-    def inventory(params){
-        def result = new JSONObject()
-        def nodes = new JSONArray()
-
-        def members = viewedResource.getLiveData(user, "getDetails", new ConfigResponse()).objectResult
-        translate(members)
-
-        members.each{k,i ->
-            JSONObject node = new JSONObject();
-            def id = (i.get("id") =~ /(\w*).(\d*)..(\w*)..(\d*).(\d*)/).replaceAll("\$1-\$2--\$3--\$4-\$5")
-            node.put("id",id)
-            node.put("text",i.get("name"))
-            node.put("classes","icon icon-hq")
-            //node.put("children",new JSONArray())
-            nodes.put(node)
-        }
-
-        result.put("payload", nodes)
-        render(inline:"${result}", contentType:'text/json-comment-filtered')
+    def tree(params){
+        def members = getmembersList(params)
+        render(locals:[members:members])
     }
 
     def member(params){
-        def members = viewedResource.getLiveData(user, "getDetails", new ConfigResponse()).objectResult
-        translate(members)
+        def members = getmembersList(params)
         def mid=params.getOne("mid")
         mid = (mid =~ /(\w*).(\d*)..(\w*)..(\d*).(\d*)/).replaceAll("\$1(\$2)<\$3>:\$4/\$5")
         log.info("mid="+mid)
@@ -41,10 +24,11 @@ class GemfireController extends BaseController {
 
     def translate(members){
         s=0; g=0; a=0;
-        members.each{k,it -> it.get("isserver") ? it.put("name","cache server "+ ++s) : void }
-        members.each{k,it -> it.get("isgateway") ? it.put("name","gateway hub "+ ++g) : void }
+        members.each{k,it ->  it.get("isserver") && !it.get("isgateway")  ? it.put("name","cache server "+ ++s) : void }
+        members.each{k,it ->  it.get("isserver") &&  it.get("isgateway") ? it.put("name","gateway hub "+ ++g) : void }
         members.each{k,it -> !it.get("isserver") && !it.get("isgateway") ? it.put("name","application "+ ++a) : void }
         members.each{k,it -> it.put("_id",HtmlUtil.escapeHtml(it.get("id"))) }
+        members.each{k,it -> it.put("id2",(it.get("id") =~ /(\w*).(\d*)..(\w*)..(\d*).(\d*)/).replaceAll("\$1-\$2--\$3--\$4-\$5") ) }
 
 
         // CPU Usage
@@ -63,9 +47,21 @@ class GemfireController extends BaseController {
     }
 
     def membersList(params) {
-        def members = viewedResource.getLiveData(user, "getDetails", new ConfigResponse()).objectResult
-        translate(members)
+        def members = getmembersList(params)
         render(locals:[members:members, a:a, g:g, s:s])
+    }
+
+    def getmembersList(params) {
+        def liveData=viewedResource.getLiveData(user, "getDetails", new ConfigResponse())
+        def members = [:]
+        if(!liveData.hasError()){
+            members = liveData.objectResult
+        }else{
+            log.error(liveData.errorMessage);
+        }
+
+        translate(members)
+        members
     }
 
     def index(params) {
@@ -73,3 +69,10 @@ class GemfireController extends BaseController {
         render(locals:[eid:eid])
     }
 }
+
+
+//import org.hyperic.hq.context.Bootstrap;
+//import org.hyperic.hq.hqu.shared.UIPluginManager;
+//def pMan = Bootstrap.getBean(UIPluginManager.class)
+//def plugin = pMan.findPluginByName("gemfire")
+//pMan.deletePlugin(plugin)

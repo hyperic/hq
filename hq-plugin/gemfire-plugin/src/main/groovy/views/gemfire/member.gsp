@@ -17,6 +17,36 @@
     </tr>
   </tbody>
 </table>
+<%if(member.get("gatewayhub.gateways")!=null){%>
+<h3>gateways:</h3>
+<dl>
+  <%for(gateway in member.get("gatewayhub.gateways")){%>
+  <dt>
+    ${gateway.get("gemfire.member.gateway.id.string")} Queue Size=${gateway.get("gemfire.member.gateway.queuesize.int")}
+  </dt>
+  <dd>
+    <table class="tablesorter">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Host</th>
+          <th>Port</th>
+        </tr>
+      </thead>
+      <tbody>
+    <%for(endpoint in gateway.get("gemfire.member.gateway.endpoints.collection")){%>
+        <tr>
+          <td>${endpoint.get("gemfire.member.gateway.endpoint.id.string")}</td>
+          <td>${endpoint.get("gemfire.member.gateway.endpoint.host.string")}</td>
+          <td>${endpoint.get("gemfire.member.gateway.endpoint.port.int")}</td>
+        </tr>
+      <% } %>
+      </tbody>
+    </table>
+  </dd>
+    <% } %>
+</dl>
+  <% } %>
 <h3>Regions:</h3>
 <table class="tablesorter">
   <thead>
@@ -32,7 +62,7 @@
   </thead>
   <tbody>
 <%for (region in member.get("regions").values()){ %>
-  <tr>
+    <tr>
       <td>${region.get("gemfire.region.name.string")}</td>
       <td>${region.get("gemfire.region.path.string")}</td>
       <td>${region.get("gemfire.region.scope.string")}</td>

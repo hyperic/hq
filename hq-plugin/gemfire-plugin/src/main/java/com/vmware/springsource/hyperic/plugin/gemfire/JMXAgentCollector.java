@@ -9,14 +9,12 @@ import javax.management.remote.JMXConnector;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.Collector;
-import org.hyperic.hq.product.Metric;
-import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.jmx.MxUtil;
 
-public class MemberCollector extends Collector {
+public class JMXAgentCollector extends Collector {
 
-    static Log log = LogFactory.getLog(MemberCollector.class);
+    static Log log = LogFactory.getLog(JMXAgentCollector.class);
 
     @Override
     protected void init() throws PluginException {
@@ -27,30 +25,14 @@ public class MemberCollector extends Collector {
 
     @Override
     public void collect() {
-        int a = 0, c = 0, g = 0;
         Properties props = getProperties();
         JMXConnector connector = null;
         try {
             connector = MxUtil.getMBeanConnector(props);
             MBeanServerConnection mServer = connector.getMBeanServerConnection();
-            String memberID = props.getProperty("memberID");
-            Object[] args2 = {memberID};
-            String[] def2 = {String.class.getName()};
-            Map memberDetails = (Map) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMemberDetails", args2, def2);
-            if (!memberDetails.isEmpty()) {
-                long max = ((Long) memberDetails.get("gemfire.member.stat.maxmemory.long"));
-                long used = ((Long) memberDetails.get("gemfire.member.stat.usedmemory.long"));
-                if (max > 0) {
-                    setValue("memory", (used * 100 / max));
-                }
-                setValue("cpu", (Integer) memberDetails.get("gemfire.member.stat.cpus.int"));
-
-                setAvailability(true);
-                setAvailability(true);
-            } else {
-                log.debug("Member '" + memberID + "' not found!!!");
-                setAvailability(Metric.AVAIL_PAUSED);
-            }
+            ObjectName obj = new ObjectName("GemFire:type=Agent");
+            mServer.getAttribute(obj, "version");
+            setAvailability(true);
         } catch (Exception ex) {
             setAvailability(false);
             log.debug(ex, ex);

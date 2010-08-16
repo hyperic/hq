@@ -29,7 +29,9 @@ public class GemFireLiveData extends LiveDataPlugin {
         try {
             connector = MxUtil.getMBeanConnector(config.toProperties());
             MBeanServerConnection mServer = connector.getMBeanServerConnection();
-            if ("getDetails".equals(command));
+            if ("getDetails".equals(command)){
+                res=getDetails(mServer);
+            }
             try {
                 if (connector != null) {
                     connector.close();

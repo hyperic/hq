@@ -3,10 +3,8 @@ package com.vmware.springsource.hyperic.plugin.gemfire;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
@@ -16,12 +14,10 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
-import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.hq.product.jmx.MxUtil;
 import org.hyperic.util.config.ConfigResponse;
 
-public abstract class MemberDetector extends ServerDetector
-        implements AutoServerDetector {
+public abstract class MemberDetector extends ServerDetector implements AutoServerDetector {
 
     Log log = getLog();
 
@@ -36,13 +32,15 @@ public abstract class MemberDetector extends ServerDetector
 
             Object[] args = {};
             String[] def = {};
-            String[] members = (String[]) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMembers", args, def);
+            ObjectName statsMBean = new ObjectName("GemFire:type=MemberInfoWithStatsMBean");
+            String[] members = (String[]) mServer.invoke(statsMBean, "getMembers", args, def);
             log.debug("[getServerResources] members=" + Arrays.asList(members));
             for (String menber : members) {
                 Object[] args2 = {menber};
                 String[] def2 = {String.class.getName()};
-                Map memberDetails = (Map) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMemberDetails", args2, def2);
+                Map<String, Object> memberDetails = (Map) mServer.invoke(statsMBean, "getMemberDetails", args2, def2);
                 log.debug("[getServerResources] memberDetails.size()=" + memberDetails.size());
+
                 if (isValidMember(memberDetails)) {
                     ServerResource server = createServerResource("");
                     server.setName(getTypeInfo().getName() + " " + menber);
@@ -50,6 +48,8 @@ public abstract class MemberDetector extends ServerDetector
                     ConfigResponse c = new ConfigResponse();
                     c.setValue("memberID", menber);
                     setMeasurementConfig(server, c);
+                    setProductConfig(server, new ConfigResponse());
+                    setCustomProperties(server, getAtributtes(memberDetails));
                     servers.add(server);
                 }
             }
@@ -82,27 +82,51 @@ public abstract class MemberDetector extends ServerDetector
             String memberId = config.getValue("memberID");
             Object[] args2 = {memberId};
             String[] def2 = {String.class.getName()};
-            Map<String, Object> memberDetails = (Map) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMemberDetails", args2, def2);
-            Map<String, Map> regions = (Map) memberDetails.get("gemfire.member.regions.map");
+            ObjectName statsMBean = new ObjectName("GemFire:type=MemberInfoWithStatsMBean");
 
+            Map<String, Object> memberDetails = (Map) mServer.invoke(statsMBean, "getMemberDetails", args2, def2);
+            Map<String, Map> regions = (Map) memberDetails.get("gemfire.member.regions.map");
 
             if (regions != null) {
                 for (Map region : regions.values()) {
                     String name = (String) region.get("gemfire.region.name.string");
-
                     ServiceResource service = createServiceResource("Region");
-                    service.setName("Region " + name);
+                    service.setName(memberId + " Region " + name);
                     ConfigResponse c = new ConfigResponse();
                     c.setValue("regionID", (String) region.get("gemfire.region.path.string"));
                     c.setValue("name", name);
                     c.setValue("memberID", memberId);
-                    log.debug("[discoverServices] c=" + c);
+                    log.debug("[discoverServices] region -> c=" + c);
+
+                    ConfigResponse attr = new ConfigResponse();
+                    attr.setValue("name", (String) region.get("gemfire.region.name.string"));
+                    attr.setValue("path", (String) region.get("gemfire.region.path.string"));
+                    attr.setValue("scope", (String) region.get("gemfire.region.scope.string"));
+                    attr.setValue("datapolicy", (String) region.get("gemfire.region.datapolicy.string"));
+                    attr.setValue("interestpolicy", (String) region.get("gemfire.region.interestpolicy.string"));
+                    attr.setValue("diskattrs", (String) region.get("gemfire.region.diskattrs.string"));
+
                     setMeasurementConfig(service, c);
+                    service.setCustomProperties(attr);
                     services.add(service);
                 }
-            } else {
-                for (String key : memberDetails.keySet()) {
-                    log.debug(key + "=" + memberDetails.get(key));
+            }
+
+            List<Map> gateways = (List) memberDetails.get("gemfire.member.gatewayhub.gateways.collection");
+            if (gateways != null) {
+                for (Map gateway : gateways) {
+                    String id = (String) gateway.get("gemfire.member.gateway.id.string");
+                    ServiceResource service = createServiceResource("Gateway");
+                    service.setName(memberId + " Gateway " + id);
+
+                    ConfigResponse c = new ConfigResponse();
+                    c.setValue("memberID", memberId);
+                    c.setValue("gatewayID", id);
+                    log.debug("[discoverServices] gateway -> c=" + c);
+
+                    setProductConfig(service, new ConfigResponse());
+                    setMeasurementConfig(service, c);
+                    services.add(service);
                 }
             }
 
@@ -121,4 +145,6 @@ public abstract class MemberDetector extends ServerDetector
     }
 
     abstract boolean isValidMember(Map memberDetails);
+
+    abstract ConfigResponse getAtributtes(Map memberDetails);
 }

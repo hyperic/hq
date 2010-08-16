@@ -3,7 +3,9 @@ package com.vmware.springsource.hyperic.plugin.gemfire;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import javax.management.MBeanServerConnection;
+import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import org.apache.commons.logging.Log;
@@ -35,13 +37,22 @@ public class JMXAgentDetector extends ServerDetector
             ObjectName mbean = new ObjectName("GemFire:type=MemberInfoWithStatsMBean");
             String version = (String) mServer.getAttribute(mbean, "Version");
             String id = (String) mServer.getAttribute(mbean, "Id");
-            this.log.debug("Agent version='" + version + " (" + getTypeInfo().getVersion() + ")");
+            boolean versionOK = version.startsWith(getTypeInfo().getVersion());
+            this.log.debug("Agent version='" + version + " " + (versionOK?"OK":"") + " (" + getTypeInfo().getVersion() + ")");
             ServerResource server;
-            if (version.startsWith(getTypeInfo().getVersion())) {
+            if (versionOK) {
                 server = createServerResource("");
                 server.setName(getTypeInfo().getName() + " " + id);
                 server.setIdentifier(id);
+                setProductConfig(server, new ConfigResponse());
+                setMeasurementConfig(server, pc);
+                servers.add(server);
             }
+
+//            Set<ObjectInstance> mbs = mServer.queryMBeans(new ObjectName("*:*"), null);
+//            for(ObjectInstance mb:mbs){
+//                System.out.println("---> "+mb.getObjectName());
+//            }
 
             try {
                 if (connector != null) {
