@@ -301,26 +301,9 @@ class ResourceConfig {
         def sessionId = mgr.put(subject)
         appBoss.setAllConfigResponses(sessionId, allConfigs, allConfigsRoll)
     }
-    
-    /**
-     * Set properties of the resource backing this configuration.  Only  
-     * existing properties can be set -- new properties will be discarded.
-     */
-    void setProperties(Map props, AuthzSubject subject) {
-        populate()
 
-        def entityID   = resource.entityId
-
-        // CProp changes
-        def proto    = resource.prototype
-        def typeId   = proto.appdefType
-        cprops.each { key, val ->
-            if (props.containsKey(key) && val != props[key]) {
-                cpropMan.setValue(entityID, proto.instanceId, key, props[key])
-            }
-        }
-        
-        // POJO (field) level changes
+    void setFields(Map props, AuthzSubject subject) {
+		 // POJO (field) level changes
         def appdefHandler = getAppdefHandler(resource)
         def targetForGet  = appdefHandler.targetForGet(resource)
         def changedFields = [:]
@@ -343,8 +326,33 @@ class ResourceConfig {
             println "Saving target ${targetForSet.name}: ${targetForSet}"
             appdefHandler.saveSetTarget(subject, targetForSet)
         }
-        
-        setConfig(props,subject)
+    }
+
+    void setProperties(Map props, AuthzSubject subject) {
+		setProperties(props,subject,true)
+    }
+    
+    /**
+     * Set properties of the resource backing this configuration.  Only  
+     * existing properties can be set -- new properties will be discarded.
+     */
+    void setProperties(Map props, AuthzSubject subject, boolean setFieldsAndConfig) {
+        populate()
+
+        def entityID   = resource.entityId
+
+        // CProp changes
+        def proto    = resource.prototype
+        def typeId   = proto.appdefType
+        cprops.each { key, val ->
+            if (props.containsKey(key) && val != props[key]) {
+                cpropMan.setValue(entityID, proto.instanceId, key, props[key])
+            }
+        }
+		if(setFieldsAndConfig) {
+        	setFields(props,subject)
+        	setConfig(props,subject)
+		}
     }
     
     private getAppdefHandler(Resource r) {
