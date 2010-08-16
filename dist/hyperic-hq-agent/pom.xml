@@ -21,42 +21,7 @@
 			<version>${project.version}</version>
 			<type>tar.gz</type>
 		</dependency>
-		<dependency>
-			<groupId>org.hyperic.jre</groupId>
-			<artifactId>amd64-linux</artifactId>
-			<version>1.5</version>
-			<type>tar.gz</type>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.jre</groupId>
-			<artifactId>x86-linux</artifactId>
-			<version>1.5</version>
-			<type>tar.gz</type>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.jre</groupId>
-			<artifactId>sparc-sun-solaris</artifactId>
-			<version>1.5</version>
-			<type>tar.gz</type>
-		</dependency> 
-		<dependency>
-			<groupId>org.hyperic.jre</groupId>
-			<artifactId>hpux-11</artifactId>
-			<version>1.5</version>
-			<type>tar.gz</type>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.jre</groupId>
-			<artifactId>x86-win32</artifactId>
-			<version>1.5</version>
-			<type>tar.gz</type>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.jre</groupId>
-			<artifactId>ppc-aix</artifactId>
-			<version>1.5</version>
-			<type>tar.gz</type>
-		</dependency> 
+	
 	</dependencies>
 	
 	<profiles>
@@ -84,6 +49,44 @@
 						</plugin>
 					</plugins>
 				</build>
+				<dependencies>
+						<dependency>
+							<groupId>org.hyperic.jre</groupId>
+							<artifactId>amd64-linux</artifactId>
+							<version>1.5</version>
+							<type>tar.gz</type>
+						</dependency>
+						<dependency>
+							<groupId>org.hyperic.jre</groupId>
+							<artifactId>x86-linux</artifactId>
+							<version>1.5</version>
+							<type>tar.gz</type>
+						</dependency>
+						<dependency>
+							<groupId>org.hyperic.jre</groupId>
+							<artifactId>sparc-sun-solaris</artifactId>
+							<version>1.5</version>
+							<type>tar.gz</type>
+						</dependency> 
+						<dependency>
+							<groupId>org.hyperic.jre</groupId>
+							<artifactId>hpux-11</artifactId>
+							<version>1.5</version>
+							<type>tar.gz</type>
+						</dependency>
+						<dependency>
+							<groupId>org.hyperic.jre</groupId>
+							<artifactId>x86-win32</artifactId>
+							<version>1.5</version>
+							<type>tar.gz</type>
+						</dependency>
+						<dependency>
+							<groupId>org.hyperic.jre</groupId>
+							<artifactId>ppc-aix</artifactId>
+							<version>1.5</version>
+							<type>tar.gz</type>
+						</dependency>
+					</dependencies>
   		</profile>
 		<profile>
     			<id>noJRE</id>
@@ -129,6 +132,14 @@
 						</plugin>
 					</plugins>
 				</build>
+				<dependencies>
+						<dependency>
+							<groupId>org.hyperic.jre</groupId>
+							<artifactId>hpux-11</artifactId>
+							<version>1.5</version>
+							<type>tar.gz</type>
+						</dependency>
+				</dependencies>
   		</profile>
 		<profile>
     			<id>ppc-aix</id>
@@ -144,6 +155,14 @@
 						</plugin>
 					</plugins>
 				</build>
+				<dependencies>
+					<dependency>
+						<groupId>org.hyperic.jre</groupId>
+						<artifactId>ppc-aix</artifactId>
+						<version>1.5</version>
+						<type>tar.gz</type>
+					</dependency>
+				</dependencies>
   		</profile>
 		<profile>
     			<id>sparc-solaris</id>
@@ -159,6 +178,14 @@
 						</plugin>
 					</plugins>
 				</build>
+				<dependencies>
+					<dependency>
+						<groupId>org.hyperic.jre</groupId>
+						<artifactId>sparc-sun-solaris</artifactId>
+						<version>1.5</version>
+						<type>tar.gz</type>
+					</dependency>
+				</dependencies>
   		</profile>
 		<profile>
     			<id>win32</id>
@@ -174,6 +201,14 @@
 						</plugin>
 					</plugins>
 				</build>
+				<dependencies>
+						<dependency>
+							<groupId>org.hyperic.jre</groupId>
+							<artifactId>x86-win32</artifactId>
+							<version>1.5</version>
+							<type>tar.gz</type>
+						</dependency>
+				</dependencies>
   		</profile>
 		<profile>
     			<id>x86-linux</id>
@@ -189,6 +224,14 @@
 						</plugin>
 					</plugins>
 				</build>
+				<dependencies>
+						<dependency>
+							<groupId>org.hyperic.jre</groupId>
+							<artifactId>x86-linux</artifactId>
+							<version>1.5</version>
+							<type>tar.gz</type>
+						</dependency>
+				</dependencies>
   		</profile>
 		<profile>
     			<id>x86-64-linux</id>
@@ -204,6 +247,14 @@
 						</plugin>
 					</plugins>
 				</build>
+				<dependencies>
+						<dependency>
+							<groupId>org.hyperic.jre</groupId>
+							<artifactId>amd64-linux</artifactId>
+							<version>1.5</version>
+							<type>tar.gz</type>
+						</dependency>
+				</dependencies>
   		</profile>
 	</profiles>
 
