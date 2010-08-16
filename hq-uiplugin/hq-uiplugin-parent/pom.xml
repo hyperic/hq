@@ -25,44 +25,6 @@
 						</descriptors>
 					</configuration>
 				</plugin>
-				<plugin>
-					<groupId>org.codehaus.gmaven</groupId>
-					<artifactId>gmaven-plugin</artifactId>
-					<version>${gmaven.version}</version>
-					<dependencies>
-						<dependency>
-							<groupId>org.codehaus.gmaven.runtime</groupId>
-							<artifactId>gmaven-runtime-1.7</artifactId>
-							<version>${gmaven.version}</version>
-						</dependency>
-						<dependency>
-							<groupId>org.codehaus.groovy</groupId>
-							<artifactId>groovy-all</artifactId>
-							<version>${groovy.version}</version>
-						</dependency>
-					</dependencies>
-					<executions>
-        				<execution>
-            				<goals>
-                				<goal>compile</goal>
-            				</goals>
-            				<configuration>
-                				<sources>
-                    				<fileset>
-                        				<directory>${pom.basedir}/src/main/groovy</directory>
-                        				<includes>
-                            				<include>**/*.groovy</include>
-                        				</includes>
-										<!-- Some Plugin.groovy files import controller classes which causes groovy compilation errors -->
-										<excludes>
-                            				<exclude>Plugin.groovy</exclude>
-                        				</excludes>
-                    				</fileset>
-                				</sources>
-            				</configuration>
-        				</execution>
-    				</executions>
-				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
