@@ -1,4 +1,4 @@
-package org.hyperic.hq.ui.login;
+package org.hyperic.hq.web.controllers.login;
 
 import java.io.IOException;
 
@@ -23,6 +23,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
+/**
+ * This controller provides the data needs of the login view. It doesn't actually perform any 
+ * authentication as that's handled by Spring Security.
+ * 
+ * @author David Crutchfield
+ *
+ */
 @Controller
 public class LoginController {
     private static final Log log = LogFactory.getLog(LoginController.class.getName());
@@ -35,36 +42,35 @@ public class LoginController {
     }
     
     @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public ModelAndView login(HttpServletRequest request, HttpServletResponse response) {
+    public ModelAndView login(HttpServletRequest request, HttpServletResponse response, HttpSession session) {
         final boolean debug = log.isDebugEnabled();
         
-        // ...first check for an authentication object, if one exists we are already logged in
-        // This may be too simplistic if we start using the anonymous user mechanism,  
-        // but right now we don't use it, so this is fine...
+        ModelAndView result = new ModelAndView();
+        
+        // ...first check for an authentication object, if one exists we are already logged in...
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         
         if (authentication != null && 
             !(authentication instanceof AnonymousAuthenticationToken) && 
             authentication.isAuthenticated()) {
             try {
-                if (debug) log.debug("User has already been authenticated.  Redirect to dashboard.");
+                if (debug) log.debug("User has already been authenticated.  Redirecting to dashboard.");
                 
                 response.sendRedirect("/Dashboard.do");
+                
+                return result;
             } catch(IOException e) {
                 log.warn("Could not perform the redirect for an authenticated user, displaying login page instead");
             }
         }
         
         // ...we're dealing with an unauthenticated user, we're going to show the login form...
-        ModelAndView result = new ModelAndView();
         AuthzSubject guestUser = authzSubjectManager.getSubjectById(AuthzConstants.guestId);
         
         // ...before we return, check for an error message...
         boolean loginError = request.getParameter("authfailed") != null;
         
         if (loginError) {
-            HttpSession session = request.getSession(false);
-
             if (session != null) {
                 AuthenticationException ex = (AuthenticationException) session.getAttribute(AbstractAuthenticationProcessingFilter.SPRING_SECURITY_LAST_EXCEPTION_KEY);
                 
