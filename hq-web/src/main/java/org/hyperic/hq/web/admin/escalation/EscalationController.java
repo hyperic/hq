@@ -39,8 +39,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.ValidationUtils;
-import org.springframework.validation.Validator;
+
 
 
 
@@ -56,16 +55,6 @@ public class EscalationController {
     private SessionManager sessionManager;
     private EventsBoss eventsBoss;//should be deleted at last
     
-    private Validator validator;
-    
-    public void setValidator(Validator validator){
-        this.validator = validator;
-    }
-    
-    @InitBinder
-    protected void initBinder(WebDataBinder binder){
-        binder.setValidator(new EscalationFormValidator());
-    }
     
     private final Log log = LogFactory.getLog(EscalationController.class.getName());
 
@@ -184,7 +173,7 @@ public class EscalationController {
         log.debug("in createEscalation method.");
         ModelAndView mav = new ModelAndView();
         try {
-            validator.validate(escalationForm, result);
+  
             //TODO: shouldn't save MaxPauseTime if "isPauseAllowed" is false
             Escalation esc = escalationManager.createEscalation(escalationForm.getEscalationName(), 
                 escalationForm.getDescription(), escalationForm.isPauseAllowed(), 

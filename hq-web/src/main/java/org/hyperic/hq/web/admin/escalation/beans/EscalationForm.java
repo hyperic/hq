@@ -1,7 +1,6 @@
 package org.hyperic.hq.web.admin.escalation.beans;
 
 import org.hibernate.validator.NotNull;
-import org.hyperic.hq.web.admin.escalation.EscalationFormValidator;
 
 /**
  * The form object of new escalation page. 
