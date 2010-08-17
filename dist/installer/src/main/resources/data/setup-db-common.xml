@@ -92,15 +92,23 @@
 
   <target name="set-multicast-props" if="server.multicast.addr">
     <!-- Set multicast address and port explicitly -->
-    <sql driver="${server.database-driver}"
-         url="${server.database-url}"
-         userid="${server.database-user}"
-         password="${server.database-password}">
-      UPDATE EAM_CONFIG_PROPS SET PROPVALUE='${server.multicast.addr}'
-      WHERE PROPKEY='CAM_MULTICAST_ADDRESS';
-      UPDATE EAM_CONFIG_PROPS SET PROPVALUE='${server.multicast.port}'
-      WHERE PROPKEY='CAM_MULTICAST_PORT';
-    </sql>
+  	
+    <serverConfigPropsUpgrade 
+    	jdbcUrl="${server.database-url}"
+    	jdbcUser="${server.database-user}"
+    	jdbcPassword="${server.database-password}"
+    	encryptionKey="${server.encryption-key}"
+    	propKey="CAM_MULTICAST_ADDRESS"
+    	propValue="${server.multicast.addr}"/>
+
+    <serverConfigPropsUpgrade 
+    	jdbcUrl="${server.database-url}"
+    	jdbcUser="${server.database-user}"
+    	jdbcPassword="${server.database-password}"
+    	encryptionKey="${server.encryption-key}"
+    	propKey="CAM_MULTICAST_PORT"
+    	propValue="${server.multicast.port}"/>
+  	
   </target>
 
   <target name="upgrade-db" depends="init-taskdefs,hibernate-prep">
@@ -115,13 +123,15 @@
       <property name="schema.target" value="LATEST"/>
       <property name="server.upgradedir" value="${server.upgradedir}"/>
     </ant>
-    <sql driver="${server.database-driver}"
-         url="${server.database-url}"
-         userid="${server.database-user}"
-         password="${server.database-password}" classpathref="alljars">
-      update EAM_CONFIG_PROPS SET PROPVALUE='${version}'
-      where PROPKEY='CAM_SERVER_VERSION';
-    </sql>
+
+  	<serverConfigPropsUpgrade 
+    	jdbcUrl="${server.database-url}"
+    	jdbcUser="${server.database-user}"
+    	jdbcPassword="${server.database-password}"
+    	encryptionKey="${server.encryption-key}"
+    	propKey="CAM_SERVER_VERSION"
+    	propValue="${version}"/>
+
   	<antcall target="set-multicast-props"/>
   </target>
 
