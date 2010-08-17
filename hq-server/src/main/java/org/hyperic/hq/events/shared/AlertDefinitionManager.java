@@ -32,7 +32,8 @@ public interface AlertDefinitionManager {
     /**
      * Create a new alert definition
      */
-    public AlertDefinitionValue createAlertDefinition(AlertDefinitionValue a);
+    public AlertDefinitionValue createAlertDefinition(AlertDefinitionValue a)
+    	throws AlertDefinitionCreateException;
 
     /**
      * Update just the basics

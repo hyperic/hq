@@ -230,7 +230,8 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
     /**
      * Create a new alert definition
      */
-    public AlertDefinitionValue createAlertDefinition(AlertDefinitionValue a) {
+    public AlertDefinitionValue createAlertDefinition(AlertDefinitionValue a) 
+    	throws AlertDefinitionCreateException {
 
         // HHQ-1054: since the alert definition mtime is managed explicitly,
         // let's initialize it
@@ -253,18 +254,27 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
 
             AlertCondition cond = res.createCondition(condition, trigger);
 
-            if (res.getName() == null || res.getName().length() == 0) {
-                Measurement dm = null;
-                if (cond.getType() == EventConstants.TYPE_THRESHOLD || cond.getType() == EventConstants.TYPE_BASELINE) {
+            if (res.getName() == null || res.getName().trim().length() == 0) {
+                Measurement dm = measurementDAO.findById(new Integer(cond.getMeasurementId()));
 
-                    dm = measurementDAO.findById(new Integer(cond.getMeasurementId()));
-                }
                 if (dm == null) {
-                    log.warn("AlertCondition (id=" + cond.getId() + ") has an " + "associated Measurement (id=" +
-                             cond.getMeasurementId() + ") that does not exist, ignoring");
-                    continue;
+                	throw new AlertDefinitionCreateException(
+                				"Could not automatically name the alert definition "
+                				+ "because the AlertCondition (id=" + cond.getId() 
+                				+ ") has an associated Measurement (id="
+                				+ cond.getMeasurementId() + ") that does not exist.");
                 }
-                res.setName(cond.describe(dm));
+                
+                String predefinedAlertDefName = cond.describe(dm);
+                
+                if (predefinedAlertDefName == null 
+                		|| predefinedAlertDefName.trim().length() == 0) {
+                	throw new AlertDefinitionCreateException(
+                				"Could not automatically name the alert definition "
+                				+ "based on the alert condition.");
+                }
+                
+                res.setName(predefinedAlertDefName);
             }
 
             if (cond.getType() == EventConstants.TYPE_ALERT) {
