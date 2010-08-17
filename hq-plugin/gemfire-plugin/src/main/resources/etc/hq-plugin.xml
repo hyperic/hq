@@ -20,6 +20,12 @@
         <metric name="distributionStats,deserializations" collectionType="trendsup" category="UTILIZATION" indicator="true" interval="60000" />
     </metrics-->
 
+    <config name="jmx">
+        <option name="jmx.url" description="JMX URL to GemFire Agent" default="service:jmx:rmi://localhost/jndi/rmi://:1099/jmxconnector" />
+        <option name="jmx.username" description="JMX username" optional="true" default="" />
+        <option name="jmx.password" description="JMX password" optional="true" default="" />
+    </config>
+    <property name="JXMCFG" value="jmx.url=%jmx.url%,jmx.username=%jmx.username%,jmx.password=%jmx.password%"/>
 
 
     <platform name="GemFire Distributed System">
@@ -27,17 +33,9 @@
         <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
         <plugin type="collector" class="GemfireCollector" />
         <plugin type="livedata" class="GemFireLiveData" />
-        <config type="measurement">
-            <option name="jmx.url"
-			        description="JMX URL to GemFire Agent"
-				    default="service:jmx:rmi://localhost/jndi/rmi://:1099/jmxconnector" />
-            <option name="jmx.username"
-			        description="JMX username"
-				    optional="true" default="" />
-            <option name="jmx.password"
-			        description="JMX password"
-				    optional="true" default="" />
-        </config>
+        <plugin type="log_track" class="org.hyperic.hq.product.jmx.MxNotificationPlugin" />
+
+        <config include="jmx"/>
         <filter name="template" value="GemFire:jmx.url=%jmx.url%:${alias}"/>
         <metrics>
             <metric name="Availability" indicator="true" />
@@ -46,42 +44,23 @@
             <metric name="Gateway Hubs"      alias="n_gateways" indicator="true" />
         </metrics>
         <server name="JMX Agent" version="6.5">
+            <plugin type="log_track" class="AlertsPlugin" />
             <plugin type="autoinventory" class="JMXAgentDetector" />
             <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
             <plugin type="collector" class="JMXAgentCollector" />
-
-            <config type="measurement">
-                <option name="jmx.url"
-			        description="JMX URL to GemFire Agent"
-				    default="service:jmx:rmi://localhost/jndi/rmi://:1099/jmxconnector" />
-                <option name="jmx.username"
-			        description="JMX username"
-				    optional="true" default="" />
-                <option name="jmx.password"
-			        description="JMX password"
-				    optional="true" default="" />
-            </config>
-            <filter name="template" value="collector:jmx.url=%jmx.url%,memberID=%memberID%:${alias}"/>
+            <config type="measurement" include="jmx"/>
+            <filter name="template" value="collector:${JXMCFG}:${alias}"/>
             <metrics>
                 <metric name="Availability"  indicator="true" />
             </metrics>
         </server>
-        <server name="Cache Server">
+        <server name="Cache Server" version="6.5">
             <plugin type="autoinventory" class="CacheServerDetector" />
             <plugin type="measurement" class="MemberMeasurement" />
             <plugin type="collector" class="MemberCollector" />
             <plugin type="livedata" class="GemFireLiveData" />
-            <config type="measurement">
+            <config type="measurement" include="jmx">
                 <option name="memberID" description="Cache Server Id"/>
-                <option name="jmx.url"
-			        description="JMX URL to GemFire Agent"
-				    default="service:jmx:rmi://localhost/jndi/rmi://:1099/jmxconnector" />
-                <option name="jmx.username"
-			        description="JMX username"
-				    optional="true" default="" />
-                <option name="jmx.password"
-			        description="JMX password"
-				    optional="true" default="" />
             </config>
             <properties>
                 <property name="id" description="ID"/>
@@ -89,13 +68,13 @@
                 <property name="host" description="Peer Host"/>
                 <property name="port" description="Peer Port"/>
             </properties>
-            <filter name="template" value="collector:jmx.url=%jmx.url%,memberID=%memberID%:${alias}"/>
+            <filter name="template" value="collector:${JXMCFG},memberID=%memberID%:${alias}"/>
             <property name="OBJECT_NAME" value="GemFire.Statistic:source=%memberID%,uid=3,name=vmStats"/>
             <metrics>
                 <metric name="Availability"  indicator="true" />
                 <metric name="Used Heap" alias="memory" indicator="true" />
                 <metric name="Used CPU" alias="cpu" indicator="true" />
-                <metric name="Uptime" alias="uptime" indicator="true" />
+                <metric name="Uptime" alias="uptime" indicator="true" collectionType="static" units="sec"/>
                 <metric name="Number of Clients" alias="clients" indicator="true" />
                 <!--metric name="Gets" template="${OBJECT_NAME}:threads" ndicator="true"/>
                 <metric name="Puts" template="${OBJECT_NAME}:threads" ndicator="true"/>
@@ -119,17 +98,17 @@
                     <property description="Inerrest Policy" name="interestpolicy"/>
                     <property description="dik Attributes" name="diskattrs"/>
                 </properties>
-                <filter name="template" value="GemFire:jmx.url=%jmx.url%,memberID=%memberID%,regionID=%regionID%:${alias}"/>
+                <filter name="template" value="GemFire:${JXMCFG},memberID=%memberID%:%regionID%.${alias}"/>
                 <metrics>
                     <metric name="Availability"  indicator="true" />
                     <metric name="Entry Count" alias="entry_count" indicator="true" />
                 </metrics>
             </service>
         </server>
-        <server name="Application Peer" include="Cache Server">
+        <server name="Application Peer" version="6.5" include="Cache Server 6.5">
             <plugin type="autoinventory" class="ApplicationServerDetector" />
         </server>
-        <server name="Gateway Hub" include="Cache Server">
+        <server name="Gateway Hub" version="6.5" include="Cache Server 6.5">
             <plugin type="autoinventory" class="GatewayServerDetector" />
             <service name="Gateway">
                 <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
@@ -138,7 +117,7 @@
                     <option name="memberID" description="Cache Server Id"/>
                     <option name="gatewayID" description="Gateway Id"/>
                 </config>
-                <filter name="template" value="GemFire:jmx.url=%jmx.url%,memberID=%memberID%,gatewayID=%gatewayID%:${alias}"/>
+                <filter name="template" value="GemFire:${JXMCFG},memberID=%memberID%,gatewayID=%gatewayID%:${alias}"/>
                 <metrics>
                     <metric name="Availability"  indicator="true" />
                     <metric name="Queue size" alias="queuesize" indicator="true" />

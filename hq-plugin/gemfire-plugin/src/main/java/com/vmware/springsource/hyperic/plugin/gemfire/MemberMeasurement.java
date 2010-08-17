@@ -17,21 +17,18 @@ public class MemberMeasurement extends MxMeasurementPlugin {
 
     @Override
     public MetricValue getValue(Metric metric) throws PluginException, MetricNotFoundException, MetricUnreachableException {
-        log.debug("[getValue] metric=" + metric);
         if (metric.getDomainName().equals("collector")) {
             return Collector.getValue(this, metric);
         }
-
+        log.debug("[getValue] metric=" + metric);
         return super.getValue(metric);
     }
 
     @Override
     public String translate(String template, ConfigResponse config) {
         template = super.translate(template, config);
-        log.debug("-------> " + template);
         if (template.contains("GemFire.Statistic")) {
             template = template.replaceAll("(\\w*)\\((\\d*)\\)<(\\w*)>%3A(\\d*)/(\\d*)", "$1($2)<$3>-$4/$5"); // %3A == :
-            log.debug("-------> " + template);
         }
         return template;
     }

@@ -24,9 +24,9 @@ class GemfireController extends BaseController {
 
     def translate(members){
         s=0; g=0; a=0;
-        members.each{k,it ->  it.get("isserver") && !it.get("isgateway")  ? it.put("name","cache server "+ ++s) : void }
-        members.each{k,it ->  it.get("isserver") &&  it.get("isgateway") ? it.put("name","gateway hub "+ ++g) : void }
-        members.each{k,it -> !it.get("isserver") && !it.get("isgateway") ? it.put("name","application "+ ++a) : void }
+        members.each{k,it ->  it.get("isserver") && !it.get("isgateway")  ? it.put("_name","cache server "+ ++s) : void }
+        members.each{k,it ->  it.get("isserver") &&  it.get("isgateway") ? it.put("_name","gateway hub "+ ++g) : void }
+        members.each{k,it -> !it.get("isserver") && !it.get("isgateway") ? it.put("_name","application "+ ++a) : void }
         members.each{k,it -> it.put("_id",HtmlUtil.escapeHtml(it.get("id"))) }
         members.each{k,it -> it.put("id2",(it.get("id") =~ /(\w*).(\d*)..(\w*)..(\d*).(\d*)/).replaceAll("\$1-\$2--\$3--\$4-\$5") ) }
 

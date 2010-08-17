@@ -9,6 +9,7 @@ import javax.management.remote.JMXConnector;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.Collector;
+import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.jmx.MxUtil;
 
@@ -34,19 +35,19 @@ public class RegionCollector extends Collector {
             String[] def2 = {String.class.getName()};
             Map memberDetails = (Map) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMemberDetails", args2, def2);
             if (!memberDetails.isEmpty()) {
-                Map regions = (Map) memberDetails.get("gemfire.member.regions.map");
-                Map region = (Map) regions.get(props.get("regionID"));
-                if (log.isDebugEnabled()) {
-                    log.debug("[collect] region=" + region);
+                Map<Object, Map> regions = (Map) memberDetails.get("gemfire.member.regions.map");
+                for (Map region : regions.values()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("[collect] region=" + region);
+                    }
+                    String name = (String) region.get("gemfire.region.name.string");
+                    setValue(name + "." + Metric.ATTR_AVAIL, Metric.AVAIL_UP);
+                    setValue(name + ".entry_count", ((Integer) region.get("gemfire.region.entrycount.int")).intValue());
                 }
-                setValue("entry_count", ((Integer) region.get("gemfire.region.entrycount.int")).intValue());
-                setAvailability(true);
             } else {
                 log.debug("Member '" + memberID + "' nof found!!!");
-                setAvailability(false);
             }
         } catch (Exception ex) {
-            setAvailability(false);
             log.debug(ex, ex);
         } finally {
             try {

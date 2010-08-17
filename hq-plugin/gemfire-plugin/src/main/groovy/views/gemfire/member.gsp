@@ -22,9 +22,12 @@
 <dl>
   <%for(gateway in member.get("gatewayhub.gateways")){%>
   <dt>
-    ${gateway.get("gemfire.member.gateway.id.string")} Queue Size=${gateway.get("gemfire.member.gateway.queuesize.int")}
+    <b>${gateway.get("gemfire.member.gateway.id.string")}</b><br/>
+    Queue Size=${gateway.get("gemfire.member.gateway.queuesize.int")}<br/>
+    Connected=${gateway.get("gemfire.member.gateway.isconnected.boolean")}
   </dt>
   <dd>
+    <h4>End Points:</h4>
     <table class="tablesorter">
       <thead>
         <tr>
@@ -74,6 +77,7 @@
   <% } %>
   </tbody>
 </table>
+<%if(clients.size()>0) { %>
 <h3>Clients:</h3>
 <table class="tablesorter">
   <thead>
@@ -91,7 +95,7 @@
     </tr>
   </thead>
   <tbody>
-<%for (client in clients){ def member=members.get(client.get("gemfire.client.id.string")) %>
+  <%for (client in clients){ def member=members.get(client.get("gemfire.client.id.string")) %>
     <tr>
       <td>${client.get("gemfire.client.id.string")}</td>
       <td>${member.get("name")}</td>
@@ -104,6 +108,7 @@
       <td>${client.get("gemfire.client.stats.cpus.int")}%</td>
       <td>${client.get("gemfire.client.stats.threads.int")}</td>
     </tr>
-  <% } %>
+    <% } %>
   </tbody>
 </table>
+  <% } %>

@@ -93,7 +93,7 @@ public abstract class MemberDetector extends ServerDetector implements AutoServe
                     ServiceResource service = createServiceResource("Region");
                     service.setName(memberId + " Region " + name);
                     ConfigResponse c = new ConfigResponse();
-                    c.setValue("regionID", (String) region.get("gemfire.region.path.string"));
+                    c.setValue("regionID", (String) region.get("gemfire.region.name.string"));
                     c.setValue("name", name);
                     c.setValue("memberID", memberId);
                     log.debug("[discoverServices] region -> c=" + c);

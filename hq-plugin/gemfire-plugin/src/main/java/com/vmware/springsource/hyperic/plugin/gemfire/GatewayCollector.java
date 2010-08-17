@@ -40,7 +40,7 @@ public class GatewayCollector extends Collector {
                 String id = (String) props.get("gatewayID");
                 for (Map gateway : gateways) {
                     if (((String) gateway.get("gemfire.member.gateway.id.string")).equals(id)) {
-                        setAvailability(true);
+                        setAvailability(((Boolean)gateway.get("gemfire.member.gateway.isconnected.boolean")));
                         setValue("queuesize", (Integer)gateway.get("gemfire.member.gateway.queuesize.int"));
                     }
                 }
