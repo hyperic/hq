@@ -1,4 +1,4 @@
-/*
+/**
 * NOTE: This copyright does *not* cover user programs that use HQ
 * program services by normal system calls through the application
 * program interfaces provided as part of the Hyperic Plug-in Development
@@ -6,7 +6,7 @@
 * normal use of the program, and does *not* fall under the heading of
 * "derived work".
 *
-* Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+* Copyright (C) [2004, 2005, 2006], VMware, Inc.
 * This file is part of HQ.
 *
 * HQ is free software; you can redistribute it and/or modify
