@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.ActionConfigInterface;
 import org.hyperic.hq.events.shared.ActionManager;
 import org.hyperic.hq.events.shared.ActionValue;

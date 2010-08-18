@@ -16,7 +16,7 @@
 
 	<tag> 
 		<name>staticContentBaseUrl</name> 
-		<tag-class>org.hyperic.hq.web.tag.StaticContentBaseUrlTag</tag-class>
+		<tag-class>org.hyperic.hq.web.tags.StaticContentBaseUrlTag</tag-class>
 		<body-content>empty</body-content>
 	</tag> 
 

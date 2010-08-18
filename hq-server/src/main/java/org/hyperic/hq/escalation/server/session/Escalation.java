@@ -67,9 +67,9 @@ public class Escalation
     private long _mtime;
     private List _actions = new ArrayList();
 
-    protected Escalation() {}
+    public Escalation() {}
 
-    Escalation(String name, String description, boolean pauseAllowed,
+    public Escalation(String name, String description, boolean pauseAllowed,
                 long maxPauseTime, boolean notifyAll, boolean repeat)
     {
         _name         = name;
@@ -102,7 +102,7 @@ public class Escalation
         return _name;
     }
 
-    protected void setName(String name) {
+    public void setName(String name) {
         _name = name;
     }
 
@@ -110,7 +110,7 @@ public class Escalation
         return _description;
     }
 
-    protected void setDescription(String description) {
+    public void setDescription(String description) {
         _description = description;
     }
 
@@ -118,7 +118,7 @@ public class Escalation
         return _pauseAllowed;
     }
 
-    protected void setPauseAllowed(boolean allowed) {
+    public void setPauseAllowed(boolean allowed) {
         _pauseAllowed = allowed;
     }
 
@@ -126,7 +126,7 @@ public class Escalation
         return _maxPauseTime;
     }
 
-    protected void setMaxPauseTime(long pauseTime) {
+    public void setMaxPauseTime(long pauseTime) {
         _maxPauseTime = pauseTime;
     }
 
@@ -134,7 +134,7 @@ public class Escalation
         return _notifyAll;
     }
 
-    protected void setNotifyAll(boolean notifyAll) {
+    public void setNotifyAll(boolean notifyAll) {
         _notifyAll = notifyAll;
     }
 
@@ -142,7 +142,7 @@ public class Escalation
         return _ctime;
     }
 
-    protected void setCreationTime(long ctime) {
+    public void setCreationTime(long ctime) {
         _ctime = ctime;
     }
 

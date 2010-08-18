@@ -34,7 +34,7 @@
     	</c:if>
     	
     	
-    	<c:forEach items="${escalationListUIBeanList}" var="row" >
+    	<c:forEach items="${escalations}" var="row" >
     	<tr>
     		<td><a href="/app/admin/escalation/${row.escId}" ><c:out value="${row.escName}"></c:out></a></td>
     		<td><c:out value="${row.actionNum}"></c:out></td>
@@ -52,7 +52,7 @@
     </table>
     </div>
     
-    <form:form method="get" action="/app/admin/escalation/new">
+    <form:form method="get" action="/app/admin/escalation">
     	<input type="submit" value="<fmt:message key='admin.escalation.newEscalation'/>" />
     </form:form>
 

@@ -30,6 +30,20 @@
 		<property name="order" value="1" />
 	</bean>
 
+	<bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+  		<property name="viewResolvers">
+    		<list>
+      			<ref bean="tilesViewResolver" />
+    		</list>
+  		</property>
+  		<property name="defaultViews">
+    		<list>
+      			<bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView" />
+    		</list>
+  		</property>
+	</bean>
+
+
 	<!-- Resolves view names to Tiles 2 definitions -->
 	<bean id="tilesViewResolver"
 		class="org.springframework.web.servlet.view.UrlBasedViewResolver">
@@ -43,6 +57,8 @@
 		<property name="definitions">
 			<list>
 				<value>/WEB-INF/jsp/tiles.xml</value>
+				<value>/WEB-INF/jsp/admin/tiles.xml</value>
+				<value>/WEB-INF/jsp/admin/escalation/tiles.xml</value>
 			</list>
 		</property>
 	</bean>

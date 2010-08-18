@@ -1,231 +1,247 @@
 package org.hyperic.hq.web.admin.escalation;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.shared.EscalationManager;
-import org.hyperic.hq.ui.Constants;
-import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.web.admin.escalation.beans.EscalationForm;
-import org.hyperic.hq.web.admin.escalation.beans.EscalationListUIBean;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.hyperic.hq.web.BaseController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
-import org.springframework.validation.BindingResult;
-
-
-
 
 /**
- * This class is the controller for Escalation Scheme
- * @author yechen
- *
+ * This class is the controller for Escalation Scheme management.
+ * 
+ * @author Yen-Ju "Annie" Chen
+ * @author David Crutchfield
+ * 
  */
 @Controller
-public class EscalationController {
-    
-    private EscalationManager escalationManager;
-    private SessionManager sessionManager;
-    private EventsBoss eventsBoss;//should be deleted at last
-    
-    
-    private final Log log = LogFactory.getLog(EscalationController.class.getName());
+@RequestMapping("/admin")
+public class EscalationController extends BaseController {
+	private final static Log log = LogFactory.getLog(EscalationController.class
+			.getName());
+	private final static String BASE_ESCALATION_URL = "/app/admin/escalation";
 
-    
-    @Autowired
-    public EscalationController(EscalationManager escalationManager, SessionManager sessionManager,EventsBoss eventsBoss){
-        this.escalationManager = escalationManager;
-        this.sessionManager = sessionManager;
-        this.eventsBoss = eventsBoss;
-    }
-    
+	private EscalationManager escalationManager;
 
+	@Autowired
+	public EscalationController(AuthzBoss authzBoss,
+			EscalationManager escalationManager) {
+		super(null, authzBoss);
 
-    /**
-     * List all the escalation, if there's no escalation: will have empty "escalations" in model
-     *                          if exception happens when trying to get escalations, the escalations won't be in model
-     * Maps to admin/escalations.jsp
-     * @throws ServletException from getSessionId
-     */
-    @RequestMapping(value="/admin/escalations", method=RequestMethod.GET)
-    protected ModelAndView listAllEscalation(HttpServletRequest request, HttpServletResponse response) 
-                                            throws ServletException{
-    
-        ModelAndView result = new ModelAndView();
+		this.escalationManager = escalationManager;
+	}
 
-        List<EscalationListUIBean> escalations = new ArrayList();
-        try {
-            escalations = getAllEscalations();
-            result.addObject(escalations);
-        } catch (Exception e) {
-            log.debug("not able to get all escalations, so the escalations won't be in the model");
-            e.printStackTrace();
-        }
-        return result;
-    }
-    
-    /**
-     * The subject param that escalationManager.findAll(null) take is for security concern.
-     * However, there is no authorization check for "findAll." In addition, we want to get 
-     * rid of this authorization, use Spring Security instead.
-     */
-    private List<EscalationListUIBean> getAllEscalations () {
-        
-        List<Escalation> allEscalations;
-        try {
-            allEscalations = (List<Escalation>) escalationManager.findAll(null);
-        } catch (PermissionException e) {
-            // won't have this exception!
-            e.printStackTrace();
-            log.debug("failed to get all the escalations from escaaltionManager");
-            allEscalations = null;
-        }
-        List<EscalationListUIBean> escalations = new ArrayList<EscalationListUIBean>();
-        
-        for(int i=0 ; i < allEscalations.size();i++){    
-            
-            Escalation esc =  allEscalations.get(i);
-            
-           //TODO: set action number
-            int actionNum = 0;
-            //TODO: set alert number
-            int alertNum = 0;
-            
-            EscalationListUIBean row = new EscalationListUIBean();
-            row.setEscId(esc.getId());
-            row.setEscName(esc.getName());
-            row.setActionNum(actionNum);
-            row.setAlertNum(alertNum);
-            
-            escalations.add(row);
-        }
-        return escalations;
-    }
+	/**
+	 * List all the escalation, if there's no escalation: will have empty
+	 * "escalations" in model if exception happens when trying to get
+	 * escalations, the escalations won't be in model Maps to
+	 * admin/escalations.jsp
+	 */
+	@RequestMapping(value = "/escalations", method = RequestMethod.GET)
+	public ModelAndView listEscalations() {
+		ModelAndView result = new ModelAndView();
+		List<EscalationListUIBean> escalations;
 
-    /**
-     * Delete the escalation
-     * @throws ServletException from getSessionId
-     * Security: authorization checked in escalationManager, using "alertPermissionManager.canRemoveEscalation(subject.getId());"
-     */
-    @RequestMapping(value="/admin/escalation/{escId}", method=RequestMethod.DELETE)
-    protected String deleteEscalation(@PathVariable int escId, HttpServletRequest request,
-                                             HttpSession session) throws ServletException {
-        
-        log.debug("entering EscalationConroller: deleteEscalation");
-    
-        try{
-            WebUser webUser = (WebUser) session.getAttribute(Constants.WEBUSER_SES_ATTR);
+		try {
+			// TODO The subject param that escalationManager.findAll(null) take
+			// is for security concern.
+			// However, there is no authorization check for "findAll." In
+			// addition, we want to get
+			// rid of this authorization, use Spring Security instead.
+			List<Escalation> allEscalations = (List<Escalation>) escalationManager
+					.findAll(null);
 
-            Integer sessionId = webUser.getSessionId();
-             
-            AuthzSubject subject = sessionManager.getSubject(sessionId);
-            
-            Escalation e = escalationManager.findById(escId);
-            escalationManager.deleteEscalation(subject, e);
+			escalations = new ArrayList<EscalationListUIBean>(allEscalations
+					.size());
 
-        } catch(ApplicationException e){
-            RequestUtils.setError(request, "admin.config.error.escalation.CannotDelete");
-        }
-        
-        return "redirect:/app/admin/escalations";
-    }
-    
-    @RequestMapping(value="/admin/escalation/new", method=RequestMethod.GET)
-    protected void showNewForm(Model model){
-        model.addAttribute(new EscalationForm());
-    }
-    
-    /**
-     * Security: should have authorization checking
-     * @param escalationForm
-     * @return 
-     */
-    @RequestMapping(value="/admin/escalation", method=RequestMethod.POST)
-    protected ModelAndView createEscalation(EscalationForm escalationForm,
-                                            BindingResult result){
-        log.debug("in createEscalation method.");
-        ModelAndView mav = new ModelAndView();
-        try {
-  
-            //TODO: shouldn't save MaxPauseTime if "isPauseAllowed" is false
-            Escalation esc = escalationManager.createEscalation(escalationForm.getEscalationName(), 
-                escalationForm.getDescription(), escalationForm.isPauseAllowed(), 
-                escalationForm.getMaxPauseTime(), escalationForm.isNotifyAll(), 
-                escalationForm.isRepeat());
-            
-            RedirectView redirect = new RedirectView("/app/admin/escalation/"+String.valueOf(esc.getId()));
-            mav.setView(redirect);
-            return mav;
-            
-        } catch (DuplicateObjectException e) {
-            e.printStackTrace();
-            mav.addObject("errorMsg", "Already has an escalation has the same name. Please change the escalation name.");//TODO: use spring messageResource to do it. Should have other form validation.
-            mav.setViewName("admin/escalation/new");
-            return mav;
-        }
+			for (Escalation escalation : allEscalations) {
+				escalations.add(new EscalationListUIBean(escalation));
+			}
+		} catch (PermissionException e) {
+			escalations = new ArrayList<EscalationListUIBean>();
+		}
 
-    }
-    
-    @RequestMapping(value="/admin/escalation/{escId}", method=RequestMethod.GET)
-    protected String showEscalation(@PathVariable int escId, Model model) throws ServletException {
-        Escalation escalation;
-      
-        try {
-            escalation = (Escalation) escalationManager.findById(null, escId);
+		result.addObject("escalations", escalations);
+		result.setViewName("admin/escalations");
 
-            EscalationForm escalationForm = new EscalationForm();
-            escalationForm.setEscalationName(escalation.getName());
-            escalationForm.setDescription(escalation.getDescription());//TODO is it possible in html?
-            escalationForm.setMaxPauseTime(escalation.getMaxPauseTime());
-            escalationForm.setNotifyAll(escalation.isNotifyAll());
-            escalationForm.setPauseAllowed(escalation.isPauseAllowed());
-            escalationForm.setRepeat(escalation.isRepeat());
-            escalationForm.setId(escalation.getId());
-            
-            model.addAttribute(escalationForm);
-        } catch (PermissionException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        //model.addAttribute("mode", "new");  
-        return "admin/escalation";
+		return result;
+	}
 
-    }
-    
-    @RequestMapping(value="/admin/escalation/{escId}", method=RequestMethod.PUT)
-    protected String updateEscalation(@PathVariable int escId, Model model, HttpServletRequest request,
-                                      HttpServletResponse response) throws ServletException {
-        
-        return null;
-    }
-    
-    
-   
+	/**
+	 * Populates any default values for creating a new escalation.
+	 * 
+	 * @param model
+	 */
+	@RequestMapping(value = "/escalation", method = RequestMethod.GET)
+	public ModelAndView getNewEscalationForm() {
+		ModelAndView result = new ModelAndView();
+
+		result.addObject("escalationForm", new EscalationForm());
+		result.setViewName("admin/escalation/new");
+
+		return result;
+	}
+
+	/**
+	 * Security: should have authorization checking
+	 * 
+	 * @param escalationForm
+	 * @return
+	 */
+	@RequestMapping(value = "/escalation", method = RequestMethod.POST)
+	public ModelAndView createEscalation(EscalationForm escalationForm) {
+		ModelAndView result = new ModelAndView();
+
+		try {
+			// TODO: shouldn't save MaxPauseTime if "isPauseAllowed" is false
+			Escalation esc = escalationManager.createEscalation(escalationForm
+					.getEscalationName(), escalationForm.getDescription(),
+					escalationForm.isPauseAllowed(), escalationForm
+							.getMaxPauseTime(), escalationForm.isNotifyAll(),
+					escalationForm.isRepeat());
+			RedirectView redirectView = new RedirectView(BASE_ESCALATION_URL
+					+ "/" + esc.getId());
+
+			result.setView(redirectView);
+
+			return result;
+		} catch (DuplicateObjectException e) {
+			log.debug("An escalation of the name, '"
+					+ escalationForm.getEscalationName() + "', already exists",
+					e);
+		}
+
+		result = getNewEscalationForm();
+
+		result
+				.addObject(
+						"errorMsg",
+						"Already has an escalation has the same name. Please change the escalation name.");
+
+		return result;
+	}
+
+	@RequestMapping(value = "/escalation/{escalationId}", method = RequestMethod.GET)
+	public ModelAndView getEscalation(@PathVariable int escalationId) {
+		ModelAndView result = new ModelAndView();
+
+		Escalation escalation = escalationManager.findById(escalationId);
+
+		if (escalation != null) {
+			EscalationForm escalationForm = new EscalationForm(escalation);
+
+			result.addObject("escalationForm", escalationForm);
+			result.setViewName("admin/escalation");
+
+			return result;
+		}
+
+		return listEscalations();
+	}
+
+	@RequestMapping(value = "/escalation/{escalationId}", method = RequestMethod.PUT)
+	public ModelAndView updateEscalation(@PathVariable int escalationId,
+			EscalationForm escalationForm, HttpSession session) {
+		ModelAndView result = new ModelAndView();
+
+		try {
+			AuthzSubject subject = getAuthzSubject(session);
+			Escalation escalation = escalationManager.findById(escalationId);
+
+			if (escalation != null) {
+				escalationManager.updateEscalation(subject, escalation,
+						escalationForm.getEscalationName(), escalationForm
+								.getDescription(), escalationForm
+								.isPauseAllowed(), escalationForm
+								.getMaxPauseTime(), escalationForm
+								.isNotifyAll(), escalationForm.isRepeat());
+			}
+
+			RedirectView redirectView = new RedirectView(BASE_ESCALATION_URL
+					+ "/" + escalationId);
+
+			result.setView(redirectView);
+
+			return result;
+		} catch (SessionNotFoundException e) {
+			log.debug("User's session not found", e);
+		} catch (SessionTimeoutException e) {
+			log.debug("Users's session has timed out", e);
+		} catch (PermissionException e) {
+			log.debug(
+					"User does not have permission to perform this operation.",
+					e);
+		} catch (DuplicateObjectException e) {
+			log.debug("An escalation of the name, '"
+					+ escalationForm.getEscalationName() + "', already exists",
+					e);
+		}
+
+		result = getEscalation(escalationId);
+
+		result.addObject("errorMsg", "Cannot update escalation");
+
+		return result;
+	}
+
+	/**
+	 * Delete the escalation
+	 * 
+	 * @throws ServletException
+	 *             from getSessionId
+	 * 
+	 *             Security: authorization checked in escalationManager, using
+	 *             "alertPermissionManager.canRemoveEscalation(subject.getId());"
+	 */
+	@RequestMapping(value = "/escalation/{escalationId}", method = RequestMethod.DELETE)
+	public ModelAndView deleteEscalation(@PathVariable int escalationId,
+			HttpSession session) {
+		ModelAndView result = new ModelAndView();
+
+		try {
+			AuthzSubject subject = getAuthzSubject(session);
+			Escalation escalation = escalationManager.findById(escalationId);
+
+			escalationManager.deleteEscalation(subject, escalation);
+
+			RedirectView redirectView = new RedirectView(BASE_ESCALATION_URL
+					+ "s");
+
+			result.setView(redirectView);
+
+			return result;
+		} catch (ApplicationException e) {
+			log.debug("An application error occurred", e);
+		}
+
+		result = getEscalation(escalationId);
+
+		result.addObject("errorMsg",
+				"admin.config.error.escalation.CannotDelete");
+
+		return result;
+	}
+
+	protected EscalationManager getEscalationManager() {
+		return escalationManager;
+	}
 }
