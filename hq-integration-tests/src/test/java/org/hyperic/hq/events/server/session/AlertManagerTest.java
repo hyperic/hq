@@ -62,6 +62,7 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalatable;
+import org.hyperic.hq.events.AlertDefinitionCreateException;
 import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerFiredEvent;
@@ -124,7 +125,7 @@ public class AlertManagerTest
     private List<Role> testRoles = new ArrayList<Role>();
 
     private AlertDefinition createAlertDefinition(Integer appdefId, Integer appdefType,
-                                                  String alertDefName) {
+                                                  String alertDefName) throws AlertDefinitionCreateException {
         AlertDefinitionValue alertDefValue = new AlertDefinitionValue();
         alertDefValue.setName(alertDefName);
         alertDefValue.setAppdefId(appdefId);
@@ -261,7 +262,7 @@ public class AlertManagerTest
         return resGrp;
     }
 
-    private void createResourceAlertDefs(Platform testPlatform) {
+    private void createResourceAlertDefs(Platform testPlatform) throws AlertDefinitionCreateException {
         // Create Platform Alert Definition
         this.testPlatformAlertDef = createAlertDefinition(testPlatform.getId(),
             AppdefEntityConstants.APPDEF_TYPE_PLATFORM, "Platform Down");

@@ -76,6 +76,7 @@ import org.hyperic.hq.escalation.server.session.EscalationManagerImpl;
 import org.hyperic.hq.escalation.server.session.EscalationRuntime;
 import org.hyperic.hq.escalation.server.session.EscalationState;
 import org.hyperic.hq.escalation.server.session.EscalationStateDAO;
+import org.hyperic.hq.events.AlertDefinitionCreateException;
 import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.MockEvent;
 import org.hyperic.hq.events.TriggerFiredEvent;
@@ -412,7 +413,7 @@ public class EscalationManagerTest  {
 	}
 
 	private AlertDefinition createAlertDefinition(Integer appdefId, Integer appdefType,
-			String alertDefName) {
+			String alertDefName) throws AlertDefinitionCreateException {
 		AlertDefinitionValue alertDefValue = new AlertDefinitionValue();
 		alertDefValue.setName(alertDefName);
 		alertDefValue.setAppdefId(appdefId);
@@ -494,7 +495,7 @@ public class EscalationManagerTest  {
         return resGrp;
     }
 
-    private void createResourceAlertDefs(Platform testPlatform) {
+    private void createResourceAlertDefs(Platform testPlatform) throws AlertDefinitionCreateException {
         // Create Platform Alert Definition
         this.testPlatformAlertDef = createAlertDefinition(testPlatform.getId(),
             AppdefEntityConstants.APPDEF_TYPE_PLATFORM, "Platform Down");
