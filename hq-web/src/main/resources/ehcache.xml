@@ -708,7 +708,7 @@
 
   <!-- Availability Down Alert Definition cache, used outside of hibernate -->
   <cache name="AvailabilityDownAlertDefinitionCache"
-         maxElementsInMemory="10000"
+         maxElementsInMemory="250000"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
