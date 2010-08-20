@@ -60,10 +60,10 @@ public final class ConcurrentStatsCollector {
     private final MBeanServer mBeanServer;
 	private final ConcurrentLinkedQueue<StatsObject> queue = new ConcurrentLinkedQueue<StatsObject>();
     private final Sigar sigar = new Sigar();
-    private AtomicBoolean hasStarted = new AtomicBoolean(false);
+    private final AtomicBoolean hasStarted = new AtomicBoolean(false);
     private Long pid;
 
-    public static final int WRITE_PERIOD = 15;
+    public static final int WRITE_PERIOD = ConcurrentStatsWriter.WRITE_PERIOD;
     public static final String JVM_TOTAL_MEMORY = "JVM_TOTAL_MEMORY", 
     						   JVM_FREE_MEMORY = "JVM_FREE_MEMORY",
     						   JVM_MAX_MEMORY = "JVM_MAX_MEMORY", 
@@ -96,7 +96,9 @@ public final class ConcurrentStatsCollector {
     						   UNSCHEDULE_QUEUE_SIZE = "UNSCHEDULE_QUEUE_SIZE",
     						   ESCALATION_EXECUTE_STATE_TIME = "ESCALATION_EXECUTE_STATE_TIME",
     						   JDBC_HQ_DS_MAX_ACTIVE = "JDBC_HQ_DS_MAX_ACTIVE", 
-    						   JDBC_HQ_DS_IN_USE = "JDBC_HQ_DS_IN_USE";
+    						   JDBC_HQ_DS_IN_USE = "JDBC_HQ_DS_IN_USE",
+                               AVAIL_BACKFILLER_TIME = "AVAIL_BACKFILLER_TIME",
+                               AVAIL_BACKFILLER_NUMPLATFORMS = "AVAIL_BACKFILLER_NUMPLATFORMS";
 
     @Autowired
     public ConcurrentStatsCollector(MBeanServer mBeanServer) {
@@ -108,13 +110,17 @@ public final class ConcurrentStatsCollector {
     public Map<String, StatCollector> getStatKeys() {
 		return statKeys;
 	}
+    
+    void setStarted(boolean started) {
+        hasStarted.set(started);
+    }
 
-	public final void register(final String statId) {
+	public void register(final String statId) {
         // can't register any stats after the collector has been initially
         // started due to consistent ordering in the csv output file
         if (hasStarted.get()) {
-        	log.info("Cannot register " + statId + " because the collector has already been started.");
-        	
+        	log.warn("Cannot register " + statId +
+        	         " because the collector has already been started.");
             return;
         }
 
@@ -125,7 +131,7 @@ public final class ConcurrentStatsCollector {
         statKeys.put(statId, null);
     }
 
-    public final void register(final StatCollector stat) {
+    public void register(final StatCollector stat) {
         // can't register any stats after the collector has been initially
         // started due to the need for consistent ordering in the csv output
         // file
@@ -144,7 +150,7 @@ public final class ConcurrentStatsCollector {
         statKeys.put(stat.getId(), stat);
     }
 
-    public final void addStat(final long value, final String id) {
+    public void addStat(final long value, final String id) {
         if (!statKeys.containsKey(id)) {
             return;
         }
@@ -316,52 +322,45 @@ public final class ConcurrentStatsCollector {
             }
         });
 
-        register(new MBeanCollector("HIBERNATE_2ND_LEVEL_CACHE_HITS", "Hibernate:type=statistics,application=hq",
+        register(new MBeanCollector(
+            "HIBERNATE_2ND_LEVEL_CACHE_HITS", "Hibernate:type=statistics,application=hq",
             "SecondLevelCacheHitCount", true));
-
-        register(new MBeanCollector("HIBERNATE_2ND_LEVEL_CACHE_MISSES", "Hibernate:type=statistics,application=hq",
+        register(new MBeanCollector(
+            "HIBERNATE_2ND_LEVEL_CACHE_MISSES", "Hibernate:type=statistics,application=hq",
             "SecondLevelCacheMissCount", true));
-
-        register(new MBeanCollector("HIBERNATE_QUERY_CACHE_MISSES", "Hibernate:type=statistics,application=hq",
+        register(new MBeanCollector(
+            "HIBERNATE_QUERY_CACHE_MISSES", "Hibernate:type=statistics,application=hq",
             "QueryCacheMissCount", true));
-
-        register(new MBeanCollector("HIBERNATE_QUERY_CACHE_HITS", "Hibernate:type=statistics,application=hq",
+        register(new MBeanCollector(
+            "HIBERNATE_QUERY_CACHE_HITS", "Hibernate:type=statistics,application=hq",
             "QueryCacheHitCount", true));
-
-        register(new MBeanCollector("ZEVENTS_PROCESSED", "hyperic.jmx:name=HQInternal", "ZeventsProcessed", true));
-
-        register(new MBeanCollector("ZEVENT_QUEUE_SIZE", "hyperic.jmx:name=HQInternal", "ZeventQueueSize", false));
-
-        register(new MBeanCollector("PLATFORM_COUNT", "hyperic.jmx:name=HQInternal", "PlatformCount", false));
-
-        register(new MBeanCollector("JMS_EVENT_TOPIC",
-            "org.apache.activemq:BrokerName=localhost,Type=Topic,Destination=topic/eventsTopic", "QueueSize", false));
-
+        register(new MBeanCollector(
+            "ZEVENTS_PROCESSED", "hyperic.jmx:name=HQInternal", "ZeventsProcessed", true));
+        register(new MBeanCollector(
+            "ZEVENT_QUEUE_SIZE", "hyperic.jmx:name=HQInternal", "ZeventQueueSize", false));
+        register(new MBeanCollector(
+            "PLATFORM_COUNT", "hyperic.jmx:name=HQInternal", "PlatformCount", false));
+        register(new MBeanCollector(
+            "JMS_EVENT_TOPIC",
+            "org.apache.activemq:BrokerName=localhost,Type=Topic,Destination=topic/eventsTopic",
+            "QueueSize", true));
         register(new MBeanCollector("EDEN_MEMORY_USED", "java.lang:type=MemoryPool,name=",
             new String[] { "Par Eden Space", "PS Eden Space", "Eden Space" }, "Usage", "used"));
-
         register(new MBeanCollector("SURVIVOR_MEMORY_USED", "java.lang:type=MemoryPool,name=",
-            new String[] { "Par Survivor Space", "PS Survivor Space", "Survivor Space" }, "Usage", "used"));
-
+            new String[] {"Par Survivor Space", "PS Survivor Space", "Survivor Space" }, "Usage",
+                          "used"));
         register(new MBeanCollector("TENURED_MEMORY_USED", "java.lang:type=MemoryPool,name=",
             new String[] { "CMS Old Gen", "PS Old Gen", "Tenured Gen" }, "Usage", "used"));
-
-        register(new MBeanCollector("HEAP_MEMORY_USED", "java.lang:type=Memory", new String[] { "" },
+        register(new MBeanCollector("HEAP_MEMORY_USED", "java.lang:type=Memory", new String[] {""},
             "HeapMemoryUsage", "used"));
-
         register(new MBeanCollector("JVM_MARKSWEEP_GC", "java.lang:type=GarbageCollector,name=",
             new String[] { "ConcurrentMarkSweep", "PS MarkSweep" }, "CollectionTime", true));
-
         register(new MBeanCollector("JVM_COPY_GC", "java.lang:type=GarbageCollector,name=",
             new String[] { "Copy", "ParNew", "PS Scavenge" }, "CollectionTime", true));
-
-        
-        register(new MBeanCollector(JDBC_HQ_DS_MAX_ACTIVE, "hyperic.jmx:type=DataSource,name=tomcat.jdbc",
-            "MaxActive", false));
-
-        register(new MBeanCollector(JDBC_HQ_DS_IN_USE, "hyperic.jmx:type=DataSource,name=tomcat.jdbc",
-            "Active", false));
-
+        register(new MBeanCollector(JDBC_HQ_DS_MAX_ACTIVE,
+            "hyperic.jmx:type=DataSource,name=tomcat.jdbc", "MaxActive", false));
+        register(new MBeanCollector(JDBC_HQ_DS_IN_USE,
+            "hyperic.jmx:type=DataSource,name=tomcat.jdbc", "Active", false));
         register(CONCURRENT_STATS_COLLECTOR);
     }
 
@@ -411,11 +410,11 @@ public final class ConcurrentStatsCollector {
             _isTrend = false;
         }
 
-        public final String getId() {
+        public String getId() {
             return _id;
         }
 
-        public final long getVal() throws StatUnreachableException {
+        public long getVal() throws StatUnreachableException {
             // no need to keep generating a new exception. If it fails
             // 10 times, assume that the mbean server is not on.
             if (_ex != null && failures >= 10) {

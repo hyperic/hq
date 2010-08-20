@@ -1,29 +1,3 @@
-/**
- * NOTE: This copyright does *not* cover user programs that use HQ
- * program services by normal system calls through the application
- * program interfaces provided as part of the Hyperic Plug-in Development
- * Kit or the Hyperic Client Development Kit - this is merely considered
- * normal use of the program, and does *not* fall under the heading of
- *  "derived work".
- *
- *  Copyright (C) [2010], VMware, Inc.
- *  This file is part of HQ.
- *
- *  HQ is free software; you can redistribute it and/or modify
- *  it under the terms version 2 of the GNU General Public License as
- *  published by the Free Software Foundation. This program is distributed
- *  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- *  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- *  PARTICULAR PURPOSE. See the GNU General Public License for more
- *  details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- *  USA.
- *
- */
-
 package org.hyperic.hq.stats;
 
 import java.io.BufferedReader;
@@ -40,6 +14,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
@@ -61,7 +36,9 @@ public class ConcurrentStatsWriter implements ApplicationListener<ContextRefresh
 	private static final Log log = LogFactory.getLog(ConcurrentStatsWriter.class.getName());
 	private static final String BASE_FILENAME = "hqstats";
 	
-	private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
+	private static final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
+	private static final Object LOCK = new Object();
+    private static ScheduledFuture<?> scheduleFuture;
 	private ConcurrentStatsCollector concurrentStatsCollector;
 	private String currFilename;
     private FileWriter file;
@@ -75,65 +52,65 @@ public class ConcurrentStatsWriter implements ApplicationListener<ContextRefresh
     }
     
     public void onApplicationEvent(ContextRefreshedEvent event) {
-    	final char fs = File.separatorChar;
-    	
-    	try {
-            // Start 2 levels up from where the webapp is deployed (engine
-            // home)
-            String restartStorageDir = new File(new File(Bootstrap.getResource("/").getFile().getParent())
-                .getParent()).getAbsolutePath();
+        synchronized(LOCK) {
+            if (scheduleFuture != null) {
+                return;
+            }
+    	}
+        setupBasedir();
+        setFileInfo();
+        printHeader();
+        synchronized(LOCK) {
+            scheduleFuture = executor.scheduleWithFixedDelay(
+                new StatsWriter(), WRITE_PERIOD, WRITE_PERIOD, TimeUnit.SECONDS);
+        }
+        concurrentStatsCollector.setStarted(true);
+        log.info("ConcurrentStatsCollector has started");
+    }
+	
+    private void setFileInfo() {
+        currFilename = getFilename(false);
+        cleanupFilename(currFilename);
+        File aFile = new File(currFilename);
+        try {
+            if (aFile.exists()) {
+                String mvFilename = getFilename(true);
+                aFile.renameTo(new File(mvFilename));
+                gzipFile(mvFilename);
+            }
+            if (file != null) {
+                file.close();
+            }
+            file = new FileWriter(currFilename, true);
+        } catch (IOException e) {
+            log.error(e, e);
+        }
+    }
 
+    private void setupBasedir() {
+    	final char fs = File.separatorChar;
+    	try {
+            // Start 2 levels up from where the webapp is deployed (engine home)
+            String restartStorageDir =
+                Bootstrap.getResource("/").getFile().getParentFile().getParentFile().getAbsolutePath();
             String logDir = "logs";
             File logDirectory = new File(restartStorageDir + fs + logDir);
-            
             if (!(logDirectory.exists())) {
                 logDirectory.mkdir();
             }
-            
             String logSuffix = logDir + fs + "hqstats" + fs;
-            
             baseDir = restartStorageDir + fs + logSuffix;
             log.info("using hqstats baseDir " + baseDir);
-            
             final File dir = new File(baseDir);
-            
             if (!dir.exists()) {
                 dir.mkdir();
             }
         } catch (IOException e) {
-            log.warn("Error setting up stats directory for logging.  Stats will not be logged.  Cause: " +
-                      e.getMessage());
+            log.error("Error setting up stats directory for logging.  Stats will not be logged.  Cause: " +
+                      e.getMessage(), e);
         }
-        
-        currFilename = getFilename(false);
-        cleanupFilename(currFilename);
-        
-        File aFile = new File(currFilename);
-        
-        try {
-            if (aFile.exists()) {
-                String mvFilename = getFilename(true);
-                
-                aFile.renameTo(new File(mvFilename));
-                gzipFile(mvFilename);
-            }
-            
-            if (file != null) {
-                file.close();
-            }
-            
-            file = new FileWriter(currFilename, true);
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
-        
-        printHeader();
-        
-        executor.scheduleWithFixedDelay(new StatsWriter(), WRITE_PERIOD, WRITE_PERIOD, TimeUnit.SECONDS);
-        
-        log.info("ConcurrentStatsCollector has started");
     }
-	
+
     private final void cleanupFilename(String filename) {
         final File file = new File(filename);
         final File path = file.getParentFile();
