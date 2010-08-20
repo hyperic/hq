@@ -74,6 +74,7 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -673,6 +674,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      * @mval The MetricValue to store.
      * 
      */
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
     public void addData(Integer mid, MetricValue mval) {
         List<DataPoint> l = new ArrayList<DataPoint>(1);
         l.add(new DataPoint(mid, mval));
@@ -687,6 +689,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      * 
      * 
      */
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
     public void addData(List<DataPoint> availPoints) {
         addData(availPoints, true);
     }
@@ -701,6 +704,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      * 
      * 
      */
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
     public void addData(List<DataPoint> availPoints, boolean sendData) {
         if (availPoints == null || availPoints.size() == 0) {
             return;

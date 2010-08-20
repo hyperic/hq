@@ -31,6 +31,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -41,6 +43,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.TimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,8 +51,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * This job is responsible for filling in missing availabilty metric values.
- * 
- * 
  */
 @Service("availabilityCheckService")
 public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
@@ -57,6 +58,10 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
     private static final double AVAIL_DOWN   = MeasurementConstants.AVAIL_DOWN;
     private static final double AVAIL_PAUSED = MeasurementConstants.AVAIL_PAUSED;
     private static final double AVAIL_NULL   = MeasurementConstants.AVAIL_NULL;
+    private static final String AVAIL_BACKFILLER_TIME =
+        ConcurrentStatsCollector.AVAIL_BACKFILLER_TIME;
+    private static final String AVAIL_BACKFILLER_NUMPLATFORMS =
+        ConcurrentStatsCollector.AVAIL_BACKFILLER_NUMPLATFORMS;
 
     private long startTime = 0;
     private long wait = 5 * MeasurementConstants.MINUTE;
@@ -65,15 +70,24 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
     private AvailabilityManager availabilityManager;
     private PermissionManager permissionManager;
     private AvailabilityCache availabilityCache;
+    private ConcurrentStatsCollector concurrentStatsCollector;
   
 
     @Autowired
     public AvailabilityCheckServiceImpl(AvailabilityManager availabilityManager,
                                         PermissionManager permissionManager,
+                                        ConcurrentStatsCollector concurrentStatsCollector,
                                         AvailabilityCache availabilityCache) {
         this.availabilityManager = availabilityManager;
         this.permissionManager = permissionManager;
         this.availabilityCache = availabilityCache;
+        this.concurrentStatsCollector = concurrentStatsCollector;
+    }
+    
+    @PostConstruct
+    public void initStats() {
+        concurrentStatsCollector.register(AVAIL_BACKFILLER_TIME);
+        concurrentStatsCollector.register(AVAIL_BACKFILLER_NUMPLATFORMS);
     }
 
     // End is at least more than 1 interval away
@@ -102,22 +116,20 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
      */
     private Map<Integer, ResourceDataPoint> getDownPlatforms(long timeInMillis) {
         final boolean debug = log.isDebugEnabled();
-       
-
-        List<Measurement> platformResources = availabilityManager.getPlatformResources();
+        final List<Measurement> platformResources = availabilityManager.getPlatformResources();
         final long now = TimingVoodoo.roundDownTime(timeInMillis, MeasurementConstants.MINUTE);
         final String nowTimestamp = TimeUtil.toString(now);
-        Map<Integer, ResourceDataPoint> rtn = new HashMap<Integer, ResourceDataPoint>(platformResources.size());
+        final Map<Integer, ResourceDataPoint> rtn =
+            new HashMap<Integer, ResourceDataPoint>(platformResources.size());
         Resource resource = null;
         synchronized (availabilityCache) {
-            for (Measurement meas : platformResources) {
-
-                long interval = meas.getInterval();
-                long end = getEndWindow(now, meas);
-                long begin = getBeginWindow(end, meas);
-                DataPoint defaultPt = new DataPoint(meas.getId().intValue(), AVAIL_NULL, end);
-                DataPoint last = availabilityCache.get(meas.getId(), defaultPt);
-                long lastTimestamp = last.getTimestamp();
+            for (final Measurement meas : platformResources) {
+                final long interval = meas.getInterval();
+                final long end = getEndWindow(now, meas);
+                final long begin = getBeginWindow(end, meas);
+                final DataPoint defaultPt = new DataPoint(meas.getId().intValue(), AVAIL_NULL, end);
+                final DataPoint last = availabilityCache.get(meas.getId(), defaultPt);
+                final long lastTimestamp = last.getTimestamp();
                 if (debug) {
                     String msg = "Checking availability for " + last + ", CacheValue=(" +
                                  TimeUtil.toString(lastTimestamp) + ") vs. Now=(" + nowTimestamp + ")";
@@ -130,8 +142,9 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                     continue;
                 }
                 if (!meas.isEnabled()) {
-                    long t = TimingVoodoo.roundDownTime(now - interval, interval);
-                    DataPoint point = new DataPoint(meas.getId(), new MetricValue(AVAIL_PAUSED, t));
+                    final long t = TimingVoodoo.roundDownTime(now - interval, interval);
+                    final DataPoint point =
+                        new DataPoint(meas.getId(), new MetricValue(AVAIL_PAUSED, t));
                     resource = meas.getResource();
                     rtn.put(resource.getId(), new ResourceDataPoint(resource, point));
                 } else if (last.getValue() == AVAIL_DOWN || (now - lastTimestamp) > interval * 2) {
@@ -142,36 +155,36 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                     if (last.getValue() == AVAIL_PAUSED && (now - lastTimestamp) <= 5 * 60 * 1000) {
                         continue;
                     }
-                    long t = (last.getValue() != AVAIL_DOWN) ? lastTimestamp + interval : TimingVoodoo.roundDownTime(
-                        now - interval, interval);
-                    t = (last.getValue() == AVAIL_PAUSED) ? TimingVoodoo.roundDownTime(now, interval) : t;
+                    long t = (last.getValue() != AVAIL_DOWN) ?
+                        lastTimestamp+interval : TimingVoodoo.roundDownTime(now-interval, interval);
+                    t = (last.getValue() == AVAIL_PAUSED) ?
+                        TimingVoodoo.roundDownTime(now, interval) : t;
                     DataPoint point = new DataPoint(meas.getId(), new MetricValue(AVAIL_DOWN, t));
                     resource = meas.getResource();
                     rtn.put(resource.getId(), new ResourceDataPoint(resource, point));
                 }
             }
         }
-
         if (!rtn.isEmpty()) {
             permissionManager.getHierarchicalAlertingManager().performSecondaryAvailabilityCheck(rtn);
         }
-
         return rtn;
     }
 
-    @Transactional
+    @Transactional(readOnly=true)
     public void backfill() {
         backfill(System.currentTimeMillis(), false);
     }
 
-    @Transactional
-    
+    @Transactional(readOnly=true)
     public void backfill(long timeInMillis) {
         // since method is used for unittests no need to check if alert triggers have initialized
         backfill(timeInMillis, true);
     }
 
     private void backfill(long current, boolean forceStart) {
+        long start = now();
+        long backfilledPts = -1;
         try {
             final boolean debug = log.isDebugEnabled();
             if (debug) {
@@ -186,7 +199,7 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
            
             synchronized (IS_RUNNING_LOCK) {
                 if (isRunning) {
-                    log.warn("Availability Check Service is already running, " + "bailing out");
+                    log.warn("Availability Check Service is already running, bailing out");
                     return;
                 } else {
                     isRunning = true;
@@ -203,6 +216,7 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                 Map<Integer, DataPoint> backfillPoints = null;
                 synchronized (availabilityCache) {
                     Map<Integer, ResourceDataPoint> downPlatforms = getDownPlatforms(current);
+                    backfilledPts = downPlatforms.size();
                     backfillPoints = getBackfillPts(downPlatforms, current);
                     backfillAvails(new ArrayList<DataPoint>(backfillPoints.values()));
                 }
@@ -215,7 +229,16 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
             }
         } catch (Exception e) {
             throw new SystemException(e);
+        } finally {
+            concurrentStatsCollector.addStat(now()-start, AVAIL_BACKFILLER_TIME);
+            if (backfilledPts != -1) {
+                concurrentStatsCollector.addStat(backfilledPts, AVAIL_BACKFILLER_NUMPLATFORMS);
+            }
         }
+    }
+
+    private long now() {
+        return System.currentTimeMillis();
     }
 
     /**
@@ -224,35 +247,37 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
      */
     private void backfillAvails(List<DataPoint> backfillList) {
         final boolean debug = log.isDebugEnabled();
-
         final int batchSize = 500;
-        for (int i = 0; i < backfillList.size(); i += batchSize) {
+        for (int i=0; i<backfillList.size(); i+=batchSize) {
             if (debug) {
-                log.debug("backfilling " + batchSize + " datapoints, " + (backfillList.size() - i) + " remaining");
+                log.debug("backfilling " + batchSize +
+                          " datapoints, " + (backfillList.size() - i) + " remaining");
             }
             int end = Math.min(i + batchSize, backfillList.size());
-            // use this method signature to not send data to event handlers from
-            // here.
-            // send it outside the synchronized cache block from the calling
-            // method
+            // use this method signature to not send data to event handlers from here.
+            // send it outside the synchronized cache block from the calling method
             availabilityManager.addData(backfillList.subList(i, end), false);
         }
     }
 
-    private Map<Integer, DataPoint> getBackfillPts(Map<Integer, ResourceDataPoint> downPlatforms, long current) {
+    private Map<Integer, DataPoint> getBackfillPts(Map<Integer, ResourceDataPoint> downPlatforms,
+                                                   long current) {
         final boolean debug = log.isDebugEnabled();
-
-       
         final Map<Integer, DataPoint> rtn = new HashMap<Integer, DataPoint>();
         final List<Integer> resourceIds = new ArrayList<Integer>(downPlatforms.keySet());
-        final Map<Integer, List<Measurement>> rHierarchy = availabilityManager.getAvailMeasurementChildren(resourceIds,
-            AuthzConstants.ResourceEdgeContainmentRelation);
+        final Map<Integer, List<Measurement>> rHierarchy =
+            availabilityManager.getAvailMeasurementChildren(
+                resourceIds, AuthzConstants.ResourceEdgeContainmentRelation);
         for (ResourceDataPoint rdp : downPlatforms.values()) {
-
             final Resource platform = rdp.getResource();
             if (debug) {
-                log.debug("platform measurement id " + rdp.getMetricId() + " is being marked " + rdp.getValue() +
-                          " with timestamp = " + TimeUtil.toString(rdp.getTimestamp()));
+                log.debug(new StringBuilder(256)
+                    .append("platform name=").append(platform.getName())
+                    .append(", resourceid=").append(platform.getId())
+                    .append(", measurementid=").append(rdp.getMetricId())
+                    .append(" is being marked ").append(rdp.getValue())
+                    .append(" with timestamp = ").append(TimeUtil.toString(rdp.getTimestamp()))
+                    .toString());
             }
             rtn.put(platform.getId(), rdp);
             if (rdp.getValue() != AVAIL_DOWN) {
@@ -264,11 +289,10 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                 continue;
             }
             if (debug) {
-                log.debug("platform [resource id " + platform.getId() + "] has " + associatedResources.size() +
-                          " associated resources");
+                log.debug("platform [resource id " + platform.getId() +
+                          "] has " + associatedResources.size() + " associated resources");
             }
             for (Measurement meas : associatedResources) {
-
                 if (!meas.isEnabled()) {
                     continue;
                 }
@@ -280,10 +304,12 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                     continue;
                 }
                 if (debug) {
-                    log.debug("measurement id " + meas.getId() + " is " + "being marked down, time=" + backfillTime);
+                    log.debug("measurement id " + meas.getId() +
+                              " is being marked down, time=" + backfillTime);
                 }
                 final MetricValue val = new MetricValue(AVAIL_DOWN, backfillTime);
-                final MeasDataPoint point = new MeasDataPoint(meas.getId(), val, meas.getTemplate().isAvailability());
+                final MeasDataPoint point =
+                    new MeasDataPoint(meas.getId(), val, meas.getTemplate().isAvailability());
                 rtn.put(meas.getResource().getId(), point);
             }
         }
