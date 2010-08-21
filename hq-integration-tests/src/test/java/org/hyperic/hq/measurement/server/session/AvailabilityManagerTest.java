@@ -104,7 +104,7 @@ public class AvailabilityManagerTest {
         CacheManager.getInstance().clearAll();
     }
 
-//    @Test
+    @Test
     public void testFindLastAvail() {
         List<AvailabilityDataRLE> rle = dao.findLastAvail(Collections.singletonList(10100));
         Assert.assertTrue("rle value is incorrect",
