@@ -183,7 +183,7 @@ public class AvailabilityManagerTest {
         Assert.assertTrue(isAvailDataRLEValid(PLAT_MEAS_ID, pt));
     }
 
-    @Test
+//    @Test
     public void stressTest1() throws Exception {
         setupAvailabilityTable();
         long now = now();
