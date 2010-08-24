@@ -1,5 +1,7 @@
-<link type="text/css" href="/${urlFor(asset:'css')}/tablesorter/blue/style.css" rel="stylesheet"/>
-<link type="text/css" href="/${urlFor(asset:'css')}/hq-gemfire.css" rel="stylesheet"/>
+<link type="text/css" href="/${urlFor(asset:'css')}/gemfire.css" rel="stylesheet">
+<link type="text/css" href="/hqu/public/hqu.css" rel="stylesheet"/>
+
+
 <script src="/${urlFor(asset:'js')}/jquery-1.4.2.min.js" type="text/javascript"></script>
 <script type="text/javascript">
   var eid='${eid}';

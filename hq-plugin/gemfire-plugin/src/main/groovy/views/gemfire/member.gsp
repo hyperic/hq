@@ -1,5 +1,5 @@
-<h2>Deatils of ${member.get("name")} with ID: ${member.get("_id")}</h2>
-<table class="tablesorter">
+<h2>Deatils of ${member.get("name")} with ID: ${member.get("id")}<span class="loading"></span></h2>
+<table>
   <thead>
     <tr>
       <th>heap</th>
@@ -28,7 +28,7 @@
   </dt>
   <dd>
     <h4>End Points:</h4>
-    <table class="tablesorter">
+    <table>
       <thead>
         <tr>
           <th>Name</th>
@@ -51,7 +51,7 @@
 </dl>
   <% } %>
 <h3>Regions:</h3>
-<table class="tablesorter">
+<table>
   <thead>
     <tr>
       <th>Name</th>
@@ -79,7 +79,7 @@
 </table>
 <%if(clients.size()>0) { %>
 <h3>Clients:</h3>
-<table class="tablesorter">
+<table>
   <thead>
     <tr>
       <th>id</th>
@@ -95,7 +95,10 @@
     </tr>
   </thead>
   <tbody>
-  <%for (client in clients){ def member=members.get(client.get("gemfire.client.id.string")) %>
+  <%for (client in clients){
+    def cid=client.get("gemfire.client.id.string");
+    def member=members.get(cid)
+    if(member==null) member=[:] %>
     <tr>
       <td>${client.get("gemfire.client.id.string")}</td>
       <td>${member.get("name")}</td>
@@ -108,7 +111,7 @@
       <td>${client.get("gemfire.client.stats.cpus.int")}%</td>
       <td>${client.get("gemfire.client.stats.threads.int")}</td>
     </tr>
-    <% } %>
+      <% } %>
   </tbody>
 </table>
-  <% } %>
+    <% } %>

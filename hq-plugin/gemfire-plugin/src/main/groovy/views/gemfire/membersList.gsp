@@ -1,9 +1,10 @@
+<h2>Distributed System: ${systemName}<span class="loading"></span></h2>
 <ul>
   <li>Servers: ${s}</li>
   <li>Gateways: ${g}</li>
   <li>Clients: ${a}</li>
 </ul>
-<table class="tablesorter">
+<table cellspacing="1">
   <thead>
     <tr>
       <th class="labelColumn">id</th>
@@ -21,8 +22,8 @@
 <% if (members!=null) { %>
 <%for (member in members.values()){%>
     <tr>
-      <td>${member.get("_id")}</td>
-      <td><a id="${member.get("id2")}" class="member" href="#${member.get("id2")}">${member.get("name")}</a></td>
+      <td>${member.get("id")}</td>
+      <td><a id="${member.get("id")}" class="member" href="#${member.get("id")}">${member.get("name")}</a></td>
       <td>${member.get("host")}</td>
       <td>${member.get("port")}</td>
       <td>${member.get("heap")}%</td>

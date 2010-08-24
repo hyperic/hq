@@ -24,27 +24,70 @@
  */
 package com.vmware.springsource.hyperic.plugin.gemfire;
 
-import java.util.StringTokenizer;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.management.MBeanServerConnection;
+import javax.management.Notification;
+import javax.management.NotificationFilter;
+import javax.management.NotificationListener;
+import javax.management.ObjectName;
+import org.apache.commons.logging.Log;
+import org.hyperic.hq.product.LogTrackPlugin;
 
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.hq.product.jmx.*;
 
-public class AlertsPlugin
-        extends MxNotificationPlugin {
+public class AlertsPlugin extends LogTrackPlugin implements NotificationListener {
 
-    private MxNotificationListener listener = null;
+    Log log = getLog();
+    Pattern msgPatt = Pattern.compile("\\[(\\w*) *(\\d{4}/\\d{2}/\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3} \\w*) *(\\w*) *([^\\]]*)] *(.*)");
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS z");
 
     @Override
     public void configure(ConfigResponse config) throws PluginException {
-        getLog().debug("[configure] config=" + config);
+        log.debug("[configure] config=" + config);
         super.configure(config);
+        MBeanServerConnection mServer;
+
+        try {
+            mServer = MxUtil.getMBeanServer(config.toProperties());
+            ObjectName obj = new ObjectName("GemFire:type=MemberInfoWithStatsMBean");
+            mServer.addNotificationListener(obj, this, null, null);
+            log.debug("[configure] listener OK");
+        } catch (Exception e) {
+            throw new PluginException(e.getMessage(), e);
+        }
     }
 
-    @Override
-    public String[] getMBeans() {
-        String res[]={"GemFire:type=MemberInfoWithStatsMBean"};
-        getLog().debug("[getMBeans] res=" + res);
-        return res;
+    public void handleNotification(Notification notification, Object handback) {
+        if (log.isDebugEnabled()) {
+            log.debug("[handleNotification] notification.getType() => " + notification.getType());
+        }
+        if ("gemfire.distributedsystem.alert".equals(notification.getType())) {
+            if (log.isDebugEnabled()) {
+                log.debug("[handleNotification] notification.getMessage() => " + notification.getMessage().trim());
+            }
+            Matcher m = msgPatt.matcher(notification.getMessage().trim());
+            if (m.find()) {
+                try {
+                    String level = m.group(1);
+                    Date date = dateFormat.parse(m.group(2));
+                    String menberID = m.group(4);
+                    String msg = m.group(5);
+                    reportEvent(date.getTime(), LOGLEVEL_ERROR, menberID, msg);
+                } catch (Exception ex) {
+                    log.debug("BAD FORMAT!!!! " + ex.getMessage(), ex);
+                }
+            } else {
+                log.debug("BAD FORMAT!!!!");
+            }
+        }
     }
 }

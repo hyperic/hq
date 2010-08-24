@@ -16,7 +16,7 @@ public class GemfirePlatformDetector extends PlatformDetector {
         PlatformResource res = super.getPlatformResource(config);
 
         ConfigResponse c = new ConfigResponse();
-        c.setValue("jmx.url", "service:jmx:rmi://localhost/jndi/rmi://:1099/jmxconnector");
+        c.setValue("jmx.url", DEF_URL);
         c.setValue("jmx.username", "");
         c.setValue("jmx.password", "");
 
@@ -25,6 +25,7 @@ public class GemfirePlatformDetector extends PlatformDetector {
         res.setMeasurementConfig(new ConfigResponse());
 
         getLog().debug("[getPlatformResource] res=" + res);
+        
         return res;
     }
 }

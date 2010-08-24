@@ -8,18 +8,30 @@ class GemfireController extends BaseController {
     def s=0,g=0,a=0;
 
     def tree(params){
-        def members = getmembersList(params)
+        def liveData=viewedResource.getLiveData(user, "getMembers", new ConfigResponse())
+        def members = []
+        if(!liveData.hasError()){
+            def _members = liveData.objectResult
+            _members.each{i -> members.add(HtmlUtil.escapeHtml(i))}
+            log.info("[tree] members="+members)
+        }else{
+            log.error(liveData.errorMessage);
+        }
         render(locals:[members:members])
     }
 
     def member(params){
-        def members = getmembersList(params)
         def mid=params.getOne("mid")
-        mid = (mid =~ /(\w*).(\d*)..(\w*)..(\d*).(\d*)/).replaceAll("\$1(\$2)<\$3>:\$4/\$5")
+        //mid = (mid =~ /([^(]*).(\d*)..(\w*)..(\d*).(\d*)/).replaceAll("\$1(\$2)<\$3>:\$4/\$5")
         log.info("mid="+mid)
+        def members = getMembersList(params)
         def member=((Map)members).get(mid)
-        def clients=member.get("clients").values()
-        render(locals:[members:members, member:member, clients:clients])
+        if(member!=null){
+            def clients=member.get("clients").values()
+            render(locals:[members:members, member:member, clients:clients])
+        }else{
+            log.error("member==null mid="+mid)
+        }
     }
 
     def translate(members){
@@ -27,9 +39,8 @@ class GemfireController extends BaseController {
         members.each{k,it ->  it.get("isserver") && !it.get("isgateway")  ? it.put("_name","cache server "+ ++s) : void }
         members.each{k,it ->  it.get("isserver") &&  it.get("isgateway") ? it.put("_name","gateway hub "+ ++g) : void }
         members.each{k,it -> !it.get("isserver") && !it.get("isgateway") ? it.put("_name","application "+ ++a) : void }
-        members.each{k,it -> it.put("_id",HtmlUtil.escapeHtml(it.get("id"))) }
-        members.each{k,it -> it.put("id2",(it.get("id") =~ /(\w*).(\d*)..(\w*)..(\d*).(\d*)/).replaceAll("\$1-\$2--\$3--\$4-\$5") ) }
-
+        members.each{k,it -> it.put("id",HtmlUtil.escapeHtml(it.get("id"))) }
+        members.each{k,it -> it.put("name",HtmlUtil.escapeHtml(it.get("name"))) }
 
         // CPU Usage
         members.each{k,it ->
@@ -47,11 +58,24 @@ class GemfireController extends BaseController {
     }
 
     def membersList(params) {
-        def members = getmembersList(params)
-        render(locals:[members:members, a:a, g:g, s:s])
+        def members = getMembersList(params)
+        def name = getGMFSName()
+        render(locals:[members:members,systemName:name, a:a, g:g, s:s])
     }
 
-    def getmembersList(params) {
+    def getGMFSName(){
+        def liveData=viewedResource.getLiveData(user, "connectToSystem", new ConfigResponse())
+        def name = ":"
+        if(!liveData.hasError()){
+            name = liveData.objectResult
+            log.info("name="+name)
+        }else{
+            log.error(liveData.errorMessage);
+        }
+        name
+    }
+
+    def getMembersList(params) {
         def liveData=viewedResource.getLiveData(user, "getDetails", new ConfigResponse())
         def members = [:]
         if(!liveData.hasError()){

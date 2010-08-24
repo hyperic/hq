@@ -1,6 +1,8 @@
 package com.vmware.springsource.hyperic.plugin.gemfire;
 
+import antlr.collections.List;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -18,7 +20,7 @@ import org.hyperic.util.config.ConfigResponse;
 public class GemFireLiveData extends LiveDataPlugin {
 
     private static final Log log = LogFactory.getLog(GemFireLiveData.class);
-    private static final String[] cmds = {"getDetails"};
+    private static final String[] cmds = {"getMembers", "getDetails", "connectToSystem"};
     private static final int prefixLength = "gemfire.member.".length();
 
     public Object getData(String command, ConfigResponse config) throws PluginException {
@@ -29,8 +31,14 @@ public class GemFireLiveData extends LiveDataPlugin {
         try {
             connector = MxUtil.getMBeanConnector(config.toProperties());
             MBeanServerConnection mServer = connector.getMBeanServerConnection();
-            if ("getDetails".equals(command)){
-                res=getDetails(mServer);
+            if ("getDetails".equals(command)) {
+                res = getDetails(mServer);
+            } else if ("getMembers".equals(command)) {
+                res = getMembers(mServer);
+            } else if ("connectToSystem".equals(command)) {
+                res = connectToSystem(mServer);
+            } else {
+                throw new PluginException("command '" + command + "' not found");
             }
             try {
                 if (connector != null) {
@@ -39,7 +47,9 @@ public class GemFireLiveData extends LiveDataPlugin {
             } catch (IOException e) {
                 throw new PluginException(e.getMessage(), e);
             }
-        } catch (Exception ex) {
+        } catch (Exception e) {
+            throw new PluginException(e.getMessage(), e);
+
         } finally {
             try {
                 if (connector != null) {
@@ -56,27 +66,37 @@ public class GemFireLiveData extends LiveDataPlugin {
         return cmds;
     }
 
+    private static String connectToSystem(MBeanServerConnection mServer) throws Exception {
+        Object[] args = new Object[0];
+        String[] def = new String[0];
+        ObjectName sys = (ObjectName) mServer.invoke(new ObjectName("GemFire:type=Agent"), "connectToSystem", args, def);
+        log.debug("[connectToSystem] sys=" + sys);
+        return sys.getKeyProperty("id");
+    }
+
+    private static String[] getMembers(MBeanServerConnection mServer) throws Exception {
+        Object[] args = new Object[0];
+        String[] def = new String[0];
+        String[] members = (String[]) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMembers", args, def);
+        return members;
+    }
+
     private static Map getDetails(MBeanServerConnection mServer) throws Exception {
         Object[] args = new Object[0];
         String[] def = new String[0];
-        String[] members = (String[]) (String[]) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMembers", args, def);
+        String[] members = (String[]) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMembers", args, def);
         Map data = new HashMap();
         Map details;
-        Map memberDetails;
-        Iterator i$;
+        Map<String, Object> memberDetails;
         for (String menber : members) {
             details = new HashMap();
             data.put(menber, details);
             Object[] args2 = {menber};
             String[] def2 = {String.class.getName()};
             memberDetails = (Map) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMemberDetails", args2, def2);
-            Set keys = memberDetails.keySet();
-            for (i$ = keys.iterator(); i$.hasNext();) {
-                Object key = i$.next();
-                String k = (String) key;
-                details.put(k.substring(prefixLength, k.lastIndexOf('.')), memberDetails.get(key));
+            for (String k : memberDetails.keySet()) {
+                details.put(k.substring(prefixLength, k.lastIndexOf('.')), memberDetails.get(k));
             }
-
         }
         return data;
     }

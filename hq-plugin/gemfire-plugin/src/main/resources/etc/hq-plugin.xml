@@ -33,7 +33,7 @@
         <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
         <plugin type="collector" class="GemfireCollector" />
         <plugin type="livedata" class="GemFireLiveData" />
-        <plugin type="log_track" class="org.hyperic.hq.product.jmx.MxNotificationPlugin" />
+        <plugin type="log_track" class="AlertsPlugin" />
 
         <config include="jmx"/>
         <filter name="template" value="GemFire:jmx.url=%jmx.url%:${alias}"/>
@@ -44,7 +44,6 @@
             <metric name="Gateway Hubs"      alias="n_gateways" indicator="true" />
         </metrics>
         <server name="JMX Agent" version="6.5">
-            <plugin type="log_track" class="AlertsPlugin" />
             <plugin type="autoinventory" class="JMXAgentDetector" />
             <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
             <plugin type="collector" class="JMXAgentCollector" />
