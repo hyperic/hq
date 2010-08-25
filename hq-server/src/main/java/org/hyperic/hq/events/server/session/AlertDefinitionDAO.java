@@ -51,6 +51,7 @@ import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -196,7 +197,9 @@ public class AlertDefinitionDAO
             .append("join fetch ad.conditionsBag c ")
             .append("where ad.active = true ")
             .append("and ad.deleted = false ")
-            .append("and c.name = 'Availability' ")
+            .append("and upper(c.name) = '")
+            .append(MeasurementConstants.CAT_AVAILABILITY.toUpperCase())
+            .append("' ")
             .append("and (ad.parent is null or ad.parent.id != 0) ")
             .toString();
         
@@ -245,7 +248,7 @@ public class AlertDefinitionDAO
     public List<AlertDefinition> findByRootResource(AuthzSubject subject, Resource r) {
         EdgePermCheck wherePermCheck = permissionManager.makePermCheckHql("rez", true);
         String hql = "select ad from AlertDefinition ad join ad.resource rez " + wherePermCheck +
-                     " and ad.deleted = false and ad.resource is not null ";
+                     " and ad.deleted = false and rez.resourceType is not null ";
 
         Query q = createQuery(hql);
 

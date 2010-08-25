@@ -76,6 +76,11 @@ public interface GalertManager {
     public void enable(GalertDef def, boolean enable);
 
     /**
+     * Enable/disable an alert def by id
+     */
+    public void enable(Integer id, boolean enable);
+
+    /**
      * Find all alert definitions for the specified group
      */
     public PageList<GalertDef> findAlertDefs(ResourceGroup g, PageControl pc);

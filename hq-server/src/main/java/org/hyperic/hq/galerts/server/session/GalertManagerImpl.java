@@ -177,6 +177,15 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
     }
 
     /**
+     * Enable/disable an alert def by id
+     */
+    public void enable(Integer id, boolean enable) {
+    	// TODO: Add permission check
+    	GalertDef def = findById(id);
+    	enable(def, enable);
+    }
+
+    /**
      * Find all alert definitions for the specified group
      * 
      */
