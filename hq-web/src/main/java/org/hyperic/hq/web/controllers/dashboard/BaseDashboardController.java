@@ -71,30 +71,37 @@ public abstract class BaseDashboardController extends BaseController {
 	// empty string, we clear the value...
 	protected boolean compareAndUpdate(ConfigResponse configResponse,
 			String key, Object value) {
-		boolean result = false;
-
+		boolean updated = false;
+		String valueString = "";
+		
+		// ...if value is null, we automatically treat it as an empty 
+		// string otherwise we convert it to a string...
 		if (value != null) {
-			// ...get current preference value...
-			String currentValue = configResponse.getValue(key);
-
-			// ...compare values...
-			if (currentValue != null) {
-				// ...convert value to string...
-				String valueString = value.toString();
-
-				if (valueString.isEmpty()) {
-					// ...if value string is empty, clear the setting...
-					configResponse.unsetValue(key);
-				} else if (!currentValue.equals(valueString)) {
-					// ...otherwise, update it...
-					configResponse.setValue(key, valueString);
-				}
-
-				result = true;
-			}
+			valueString = value.toString();
 		}
 
-		return result;
+		// ...if value is empty, we need to unset the perference...
+		if (valueString.isEmpty()) {
+			// ...if value string is empty, clear the setting...
+			configResponse.unsetValue(key);
+			
+			updated = true;
+		}
+		
+		if (!updated) {
+			// ...get current preference value...
+			String currentValue = configResponse.getValue(key);
+			
+			// ...otherwise compare values and update accordingly...
+			if (currentValue == null || !currentValue.equals(valueString)) {
+				// ...update it...
+				configResponse.setValue(key, valueString);
+				
+				updated = true;
+			}
+		}
+		
+		return updated;
 	}
 
 	protected ConfigResponse getDashboardSettings(Integer dashboardId,
