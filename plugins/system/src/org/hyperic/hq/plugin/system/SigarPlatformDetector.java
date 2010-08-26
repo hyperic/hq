@@ -203,12 +203,15 @@ public class SigarPlatformDetector extends PlatformDetector {
                     continue; //skip "0.0.0.0"
                 }
 
+                String mac = ifconfig.getHwaddr();
                 if ((flags & NetFlags.IFF_LOOPBACK) > 0) {
                     //XXX 127.0.0.1 is not useful, but keeping for now
                     //to prevent "ip set changed" in the auto-inventory portlet
                     if (!address.equals(NetFlags.LOOPBACK_ADDRESS)) {
                         continue;
                     }
+                    // Hard code loopback hardware address.  See SIGAR-223
+                    mac = "00:00:00:00:00:00";
                 } else if (ip == null) {
                     ip = address;
                 }
@@ -241,7 +244,7 @@ public class SigarPlatformDetector extends PlatformDetector {
 
                 platform.addInterface(address,
                                       ifconfig.getNetmask(),
-                                      ifconfig.getHwaddr());
+                                      mac);
             }
 
             //allow these to fail can carry on since this is
