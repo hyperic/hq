@@ -1,4 +1,4 @@
-package com.vmware.springsource.hyperic.plugin.gemfire;
+package com.vmware.springsource.hyperic.plugin.gemfire.detectors;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,7 +38,7 @@ public class JMXAgentDetector extends ServerDetector
             String version = (String) mServer.getAttribute(mbean, "Version");
             String id = (String) mServer.getAttribute(mbean, "Id");
             boolean versionOK = version.startsWith(getTypeInfo().getVersion());
-            this.log.debug("Agent version='" + version + " " + (versionOK?"OK":"") + " (" + getTypeInfo().getVersion() + ")");
+            this.log.debug("Agent version='" + version + " " + (versionOK ? "OK" : "") + " (" + getTypeInfo().getVersion() + ")");
             ServerResource server;
             if (versionOK) {
                 server = createServerResource("");
@@ -54,14 +54,8 @@ public class JMXAgentDetector extends ServerDetector
 //                System.out.println("---> "+mb.getObjectName());
 //            }
 
-            try {
-                if (connector != null) {
-                    connector.close();
-                }
-            } catch (IOException e) {
-                throw new PluginException(e.getMessage(), e);
-            }
-        } catch (Exception ex) {
+        } catch (Exception e) {
+            throw new PluginException(e.getMessage(), e);
         } finally {
             try {
                 if (connector != null) {

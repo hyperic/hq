@@ -1,4 +1,4 @@
-package com.vmware.springsource.hyperic.plugin.gemfire;
+package com.vmware.springsource.hyperic.plugin.gemfire.detectors;
 
 import java.io.IOException;
 import java.util.ArrayList;

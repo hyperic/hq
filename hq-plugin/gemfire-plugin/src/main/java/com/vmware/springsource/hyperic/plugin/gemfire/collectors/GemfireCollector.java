@@ -1,4 +1,4 @@
-package com.vmware.springsource.hyperic.plugin.gemfire;
+package com.vmware.springsource.hyperic.plugin.gemfire.collectors;
 
 import java.io.IOException;
 import java.util.Map;

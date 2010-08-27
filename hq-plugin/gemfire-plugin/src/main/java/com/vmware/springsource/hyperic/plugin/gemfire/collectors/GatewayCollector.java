@@ -1,6 +1,7 @@
-package com.vmware.springsource.hyperic.plugin.gemfire;
+package com.vmware.springsource.hyperic.plugin.gemfire.collectors;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import javax.management.MBeanServerConnection;
@@ -9,13 +10,12 @@ import javax.management.remote.JMXConnector;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.Collector;
-import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.jmx.MxUtil;
 
-public class MemberCollector extends Collector {
+public class GatewayCollector extends Collector {
 
-    static Log log = LogFactory.getLog(MemberCollector.class);
+    static Log log = LogFactory.getLog(GatewayCollector.class);
 
     @Override
     protected void init() throws PluginException {
@@ -24,10 +24,9 @@ public class MemberCollector extends Collector {
         super.init();
     }
 
-    @Override
     public void collect() {
-        int a = 0, c = 0, g = 0;
         Properties props = getProperties();
+        log.debug("[collect] props=" + props);
         JMXConnector connector = null;
         try {
             connector = MxUtil.getMBeanConnector(props);
@@ -37,23 +36,17 @@ public class MemberCollector extends Collector {
             String[] def2 = {String.class.getName()};
             Map memberDetails = (Map) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMemberDetails", args2, def2);
             if (!memberDetails.isEmpty()) {
-                if(log.isDebugEnabled()){
-                    log.debug("[collect] memberDetails="+memberDetails);
+                List<Map> gateways = (List) memberDetails.get("gemfire.member.gatewayhub.gateways.collection");
+                String id = (String) props.get("gatewayID");
+                for (Map gateway : gateways) {
+                    if (((String) gateway.get("gemfire.member.gateway.id.string")).equals(id)) {
+                        setAvailability(((Boolean)gateway.get("gemfire.member.gateway.isconnected.boolean")));
+                        setValue("queuesize", (Integer)gateway.get("gemfire.member.gateway.queuesize.int"));
+                    }
                 }
-                long max = ((Long) memberDetails.get("gemfire.member.stat.maxmemory.long"));
-                long used = ((Long) memberDetails.get("gemfire.member.stat.usedmemory.long"));
-                if (max > 0) {
-                    setValue("memory", (used * 100 / max));
-                }
-                setValue("cpu", (Integer) memberDetails.get("gemfire.member.stat.cpus.int"));
-                setValue("uptime", (Long) memberDetails.get("gemfire.member.uptime.long"));
-                setValue("clients", ((Map) memberDetails.get("gemfire.member.clients.map")).size());
-
-                setAvailability(true);
-                setAvailability(true);
             } else {
-                log.debug("[collect] Member '" + memberID + "' not found!!!");
-                setAvailability(Metric.AVAIL_PAUSED);
+                log.debug("Member '" + memberID + "' nof found!!!");
+                setAvailability(false);
             }
         } catch (Exception ex) {
             setAvailability(false);

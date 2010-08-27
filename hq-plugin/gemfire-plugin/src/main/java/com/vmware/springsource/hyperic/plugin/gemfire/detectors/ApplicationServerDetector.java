@@ -1,5 +1,6 @@
-package com.vmware.springsource.hyperic.plugin.gemfire;
+package com.vmware.springsource.hyperic.plugin.gemfire.detectors;
 
+import com.vmware.springsource.hyperic.plugin.gemfire.detectors.CacheServerDetector;
 import java.util.Map;
 
 public class ApplicationServerDetector extends CacheServerDetector {

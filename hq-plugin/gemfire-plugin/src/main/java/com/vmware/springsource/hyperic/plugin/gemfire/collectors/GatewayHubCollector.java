@@ -1,23 +1,21 @@
-package com.vmware.springsource.hyperic.plugin.gemfire;
+package com.vmware.springsource.hyperic.plugin.gemfire.collectors;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import javax.management.MBeanServerConnection;
-import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.Collector;
-import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.jmx.MxUtil;
 
-public class RegionCollector extends Collector {
+public class GatewayHubCollector extends Collector {
 
-    static Log log = LogFactory.getLog(RegionCollector.class);
+    static Log log = LogFactory.getLog(GatewayHubCollector.class);
 
     protected void init() throws PluginException {
         Properties props = getProperties();
@@ -37,19 +35,20 @@ public class RegionCollector extends Collector {
             String[] def2 = {String.class.getName()};
             Map memberDetails = (Map) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMemberDetails", args2, def2);
             if (!memberDetails.isEmpty()) {
-                Map<Object, Map> regions = (Map) memberDetails.get("gemfire.member.regions.map");
-                for (Map region : regions.values()) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("[collect] region=" + region);
+                List<Map> gateways = (List) memberDetails.get("gemfire.member.gatewayhub.gateways.collection");
+                String id = (String) props.get("ID");
+                for (Map gateway : gateways) {
+                    if (((String) gateway.get("gemfire.member.gateway.id.string")).equals(id)) {
+                        setAvailability(true);
+                        setValue("queuesize", (Integer)gateway.get("gemfire.member.gateway.queuesize.int"));
                     }
-                    String name = (String) region.get("gemfire.region.name.string");
-                    setValue(name + "." + Metric.ATTR_AVAIL, Metric.AVAIL_UP);
-                    setValue(name + ".entry_count", ((Integer) region.get("gemfire.region.entrycount.int")).intValue());
                 }
             } else {
                 log.debug("Member '" + memberID + "' nof found!!!");
+                setAvailability(false);
             }
         } catch (Exception ex) {
+            setAvailability(false);
             log.debug(ex, ex);
         } finally {
             try {
