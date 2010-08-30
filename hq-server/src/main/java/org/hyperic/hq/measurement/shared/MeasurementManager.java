@@ -41,6 +41,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
@@ -48,6 +49,7 @@ import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.server.session.CollectionSummary;
+import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementEnabler;
 import org.hyperic.util.config.ConfigResponse;
@@ -317,6 +319,14 @@ public interface MeasurementManager {
      */
     public void disableMeasurements(AuthzSubject subject, AppdefEntityID id, Integer[] tids)
         throws PermissionException;
+
+    /**
+     * Disable or enable measurements for a collection of resources
+     * during a maintenance window
+     */
+    public List<DataPoint> enableMeasurements(AuthzSubject admin,
+                                              MaintenanceEvent event,
+                                              Collection<Resource> resources);
 
     public void syncPluginMetrics(String plugin);
 
