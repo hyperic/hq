@@ -327,6 +327,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>netapp-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>netservices-plugin</artifactId>
 			<version>${project.version}</version>
 		</dependency>
