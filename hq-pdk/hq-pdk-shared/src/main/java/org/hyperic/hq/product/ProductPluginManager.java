@@ -1,26 +1,27 @@
-/*
- * NOTE: This copyright does *not* cover user programs that use HQ
+/**
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
- * "derived work".
- * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
- * This file is part of HQ.
- * 
- * HQ is free software; you can redistribute it and/or modify
- * it under the terms version 2 of the GNU General Public License as
- * published by the Free Software Foundation. This program is distributed
- * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- * USA.
+ *  "derived work".
+ *
+ *  Copyright (C) [2010], VMware, Inc.
+ *  This file is part of Hyperic.
+ *
+ *  Hyperic is free software; you can redistribute it and/or modify
+ *  it under the terms version 2 of the GNU General Public License as
+ *  published by the Free Software Foundation. This program is distributed
+ *  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ *  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ *  PARTICULAR PURPOSE. See the GNU General Public License for more
+ *  details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ *  USA.
+ *
  */
 
 package org.hyperic.hq.product;
@@ -33,7 +34,6 @@ import java.lang.reflect.Method;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -88,7 +88,6 @@ public class ProductPluginManager
 
     private boolean registerTypes = false;
     private boolean client;
-    private HashMap<String, Integer> basePlugins = new HashMap<String, Integer>();
     private HashMap<String, PluginManager> managers = new HashMap<String, PluginManager>();
     private HashMap<String, HashMap<String, TypeInfo>> types = new HashMap<String, HashMap<String, TypeInfo>>();
     private HashMap includePlugins = null;
@@ -96,7 +95,7 @@ public class ProductPluginManager
     private Log log = LogFactory.getLog(this.getClass().getName());
     private byte[] pluginStub = null;
     private int pluginStubLength = 0;
-    private Comparator<File> pluginSorter;
+   
 
     private static final File HQ_DIR = new File(System.getProperty("user.home"), ".hq");
 
@@ -249,34 +248,10 @@ public class ProductPluginManager
         return names.toArray(new String[0]);
     }
 
-    // NOTE: use of TypeInfo for sorting plugin deployment order
-    // on the agent side is intended to load in the following order:
-    // 1st: system plugin
-    // 2nd: base plugins
-    // 3rd: other plugins
-    // the order doesn't actually matter for the agent, but it may
-    // for command-line testing. the server ProductPluginDeployer
-    // does its own sorting based on the actual TypeInfo.getType()
-    private class PluginSorter implements Comparator<File> {
-        private Map<String, Integer> basePlugins;
-
-        private PluginSorter(Map<String, Integer> basePlugins) {
-            this.basePlugins = basePlugins;
-        }
-
-        private int getPluginValue(File file) {
-            String name = getNameFromFile(file.getName());
-            Integer value = (Integer) this.basePlugins.get(name);
-            return value == null ? TypeInfo.TYPE_SERVICE : value.intValue();
-        }
-
-        public int compare(File o1, File o2) {
-            return getPluginValue(o1) - getPluginValue(o2);
-        }
-    }
-
+ 
     private void initPluginFilters() {
-        this.basePlugins.put(SYSTEM_PLUGIN, // must-have
+        HashMap<String, Integer> basePlugins = new HashMap<String, Integer>();
+        basePlugins.put(SYSTEM_PLUGIN, // must-have
             new Integer(TypeInfo.TYPE_PLATFORM));
         String[] defaultPlugins;
         String base = getProperty("plugins.base");
@@ -287,10 +262,10 @@ public class ProductPluginManager
         }
 
         for (int i = 0; i < defaultPlugins.length; i++) {
-            this.basePlugins.put(defaultPlugins[i], new Integer(TypeInfo.TYPE_SERVER));
+            basePlugins.put(defaultPlugins[i], new Integer(TypeInfo.TYPE_SERVER));
         }
 
-        this.pluginSorter = new PluginSorter(this.basePlugins);
+       
 
         String include = getProperty("plugins.include");
         String exclude = getProperty("plugins.exclude");
@@ -305,7 +280,7 @@ public class ProductPluginManager
                 this.includePlugins.put(plugins[i], Boolean.TRUE);
             }
             // must-haves
-            this.includePlugins.putAll(this.basePlugins);
+            this.includePlugins.putAll(basePlugins);
         }
 
         if (exclude != null) {
@@ -313,7 +288,7 @@ public class ProductPluginManager
             String[] plugins = getPluginNames(exclude);
             for (int i = 0; i < plugins.length; i++) {
                 String name = plugins[i];
-                if (this.basePlugins.get(name) == null) {
+                if (basePlugins.get(name) == null) {
                     this.excludePlugins.put(name, Boolean.TRUE);
                 } else {
                     this.log.warn("Cannot exclude " + name + " plugin, ignoring.");
@@ -729,7 +704,6 @@ public class ProductPluginManager
 
     private File[] listPlugins(File dir) {
         File[] plugins = dir.listFiles();
-        Arrays.sort(plugins, this.pluginSorter);
         return plugins;
     }
 
@@ -804,11 +778,12 @@ public class ProductPluginManager
         }
 
         String pdkDir = getPdkDir();
-
+        String pdkPluginsDir = getPdkPluginsDir();
         for (int i = 0; i < classpath.length; i++) {
             String path = classpath[i];
-            // for commandline usage outside of agent directory
-            if (path.startsWith("pdk/") && (pdkDir != null)) {
+            if(path.startsWith("pdk/plugins/") && pdkPluginsDir !=null) {
+                path = pdkPluginsDir + "/" + path.substring(12);
+            }else if (path.startsWith("pdk/") && (pdkDir != null)) {
                 path = pdkDir + "/" + path.substring(3);
             }
             addClassPath(loader, path);
