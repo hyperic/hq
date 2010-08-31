@@ -87,7 +87,7 @@ public class ProductPluginManager
     private static final String[] PLUGIN_SUPPORT_DIRS = { "scripting" };
 
     private boolean registerTypes = false;
-    private boolean isClient;
+    private boolean client;
     private HashMap<String, Integer> basePlugins = new HashMap<String, Integer>();
     private HashMap<String, PluginManager> managers = new HashMap<String, PluginManager>();
     private HashMap<String, HashMap<String, TypeInfo>> types = new HashMap<String, HashMap<String, TypeInfo>>();
@@ -388,9 +388,9 @@ public class ProductPluginManager
 
         String pdk = getPdkDir();
         if (pdk != null) {
-            this.isClient = new File(pdk, "lib").exists();
+            this.client = new File(pdk, "lib").exists();
         }
-        if (this.isClient) {
+        if (this.client) {
             log.debug("Initializing in client mode " + "(pdk=" + pdk + ")");
         } else {
             log.debug("Initializing in server mode");
@@ -416,7 +416,7 @@ public class ProductPluginManager
             PluginManager mgr = mgrs[i];
             mgr.init(this);
             this.managers.put(mgr.getName(), mgr);
-            if (!this.isClient || DEBUG_LIFECYCLE) {
+            if (!this.client || DEBUG_LIFECYCLE) {
                 log.debug(mgr.getName() + " plugins enabled=" + isPluginTypeEnabled(mgr.getName()));
             }
         }
@@ -942,7 +942,7 @@ public class ProductPluginManager
                 plugin.setName(pluginName);
             }
 
-            if (this.isClient && (implName != null)) {
+            if (this.client && (implName != null)) {
                 // already added the classpath, but the impl may override/adjust
                 String[] pluginClasspath = plugin.getClassPath(this);
                 addClassPath(loader, plugin.getName(), pluginClasspath);
@@ -1133,5 +1133,9 @@ public class ProductPluginManager
             PluginManager manager = entry.getValue();
             manager.getProperties().setProperty(key, value);
         }
+    }
+    
+    public boolean isClient() {
+        return this.client;
     }
 }

@@ -74,6 +74,7 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
@@ -1287,6 +1288,78 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         List<AppdefEntityID> eids = Collections.singletonList(id);
         AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
         ZeventManager.getInstance().enqueueEventAfterCommit(event);
+    }
+
+    /**
+     * Disable or enable measurements for a collection of resources
+     * during a maintenance window
+     */
+    public List<DataPoint> enableMeasurements(AuthzSubject admin,
+                                              MaintenanceEvent event,
+                                              Collection<Resource> resources) {
+        final List<DataPoint> rtn = new ArrayList<DataPoint>(resources.size());
+
+        AvailabilityManager am = getAvailabilityManager();
+        for (Resource resource : resources) {
+            // HQ-1653: Only disable/enable availability measurements
+            // TODO: G (when AvailabilityManager is convered)
+            List<Measurement> measurements = am.getAvailMeasurementChildren(resource,
+                                                                            AuthzConstants.ResourceEdgeContainmentRelation);
+            measurements.add(am.getAvailMeasurement(resource));
+            rtn.addAll(manageAvailabilityMeasurements(event, measurements));
+        }
+        return rtn;
+    }
+
+    /**
+     * @return {@link List} of {@link DataPoint}s to insert into db
+     *         Disable or enable availability measurements
+     */
+    private List<DataPoint> manageAvailabilityMeasurements(MaintenanceEvent event,
+                                                           Collection<Measurement> measurements) {
+        if (measurements == null || measurements.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Integer key = null;
+        final List<DataPoint> availDataPoints = new ArrayList<DataPoint>(measurements.size());
+        final boolean debug = log.isDebugEnabled();
+        final long eventStart = event.getStartTime();
+        for (Measurement m : measurements) {
+            if (m == null) {
+                continue;
+            }
+            key = m.getId();
+            if (!event.getMeasurements().contains(key)) {
+                if (event.activate() && !m.isEnabled()) {
+                    m.setEnabled(true);
+                    if (debug) {
+                        log.debug("enabling mid=" + m.getId() +
+                                   " for maintenance window end");
+                    }
+                } else if (!event.activate() && m.isEnabled()) {
+                    m.setEnabled(false);
+                    if (debug) {
+                        log.debug("disabling mid=" + m.getId() +
+                                   " for maintenance window begin");
+                    }
+                    // [HQ-1837] only create "pause" datapoint to mark the
+                    // beginning
+                    // of the downtime window
+                    availDataPoints.add(getPausedDataPoint(m, eventStart));
+                }
+                event.getMeasurements().add(key);
+            } else {
+                if (debug) {
+                    log.debug("Availability measurement already processed. " +
+                               "Skipping measurement [id=" + key + "] for " + event);
+                }
+            }
+        }
+        return availDataPoints;
+    }
+
+    private final DataPoint getPausedDataPoint(Measurement m, long time) {
+        return new DataPoint(m.getId().intValue(), MeasurementConstants.AVAIL_PAUSED, time);
     }
 
     /**

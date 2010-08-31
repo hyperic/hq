@@ -1,3 +1,28 @@
+/**
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ *  "derived work".
+ *
+ *  Copyright (C) [2010], VMware, Inc.
+ *  This file is part of Hyperic.
+ *
+ *  Hyperic is free software; you can redistribute it and/or modify
+ *  it under the terms version 2 of the GNU General Public License as
+ *  published by the Free Software Foundation. This program is distributed
+ *  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ *  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ *  PARTICULAR PURPOSE. See the GNU General Public License for more
+ *  details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ *  USA.
+ *
+ */
 package org.hyperic.hq.stats;
 
 import java.io.BufferedReader;
@@ -14,7 +39,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
@@ -26,19 +50,21 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.util.stats.StatCollector;
 import org.hyperic.util.stats.StatUnreachableException;
 import org.hyperic.util.stats.StatsObject;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ConcurrentStatsWriter implements ApplicationListener<ContextRefreshedEvent>{
+public class ConcurrentStatsWriter implements ApplicationListener<ContextRefreshedEvent>, ApplicationContextAware {
 	private static final Log log = LogFactory.getLog(ConcurrentStatsWriter.class.getName());
 	private static final String BASE_FILENAME = "hqstats";
 	
-	private static final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
-	private static final Object LOCK = new Object();
-    private static ScheduledFuture<?> scheduleFuture;
+	private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
+	private ApplicationContext applicationContext;
 	private ConcurrentStatsCollector concurrentStatsCollector;
 	private String currFilename;
     private FileWriter file;
@@ -52,18 +78,14 @@ public class ConcurrentStatsWriter implements ApplicationListener<ContextRefresh
     }
     
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        synchronized(LOCK) {
-            if (scheduleFuture != null) {
-                return;
-            }
-    	}
+        if(!(event.getApplicationContext() == this.applicationContext)) {
+            return;
+        }
         setupBasedir();
         setFileInfo();
         printHeader();
-        synchronized(LOCK) {
-            scheduleFuture = executor.scheduleWithFixedDelay(
+        executor.scheduleWithFixedDelay(
                 new StatsWriter(), WRITE_PERIOD, WRITE_PERIOD, TimeUnit.SECONDS);
-        }
         concurrentStatsCollector.setStarted(true);
         log.info("ConcurrentStatsCollector has started");
     }
@@ -329,4 +351,10 @@ public class ConcurrentStatsWriter implements ApplicationListener<ContextRefresh
             return rtn;
         }
     }
+
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+       this.applicationContext = applicationContext;
+    }
+    
+    
 }
