@@ -49,7 +49,7 @@
 				<exclude>mysql:mysql-connector-java</exclude>
 				<exclude>postgresql:postgresql</exclude>
 				<exclude>mx4j:*</exclude>
-				<exclude>org.hyperic.hq:hq-pdk-shared</exclude>
+				<exclude>org.hyperic.hq:hq-pdk:*:javadoc</exclude>
 				<exclude>org.hyperic:sigar</exclude>
 				<exclude>org.hyperic.hq.agent:hq-product</exclude>
 			</excludes>
@@ -62,7 +62,7 @@
 			<useTransitiveDependencies>false</useTransitiveDependencies>
 			<outputDirectory>/pdk/javadoc</outputDirectory>
 			<includes>
-				<include>org.hyperic.hq:hq-pdk-shared:*:javadoc</include>
+				<include>org.hyperic.hq:hq-pdk:*:javadoc</include>
 			</includes>
 			<unpack>true</unpack>
 			<fileMode>0644</fileMode>

@@ -46,7 +46,7 @@
 	<classpathentry kind="var" path="M2_REPO/org/hibernate/hibernate/3.2.6.ga/hibernate-3.2.6.ga.jar" sourcepath="M2_REPO/org/hibernate/hibernate/3.2.6.ga/hibernate-3.2.6.ga-sources.jar"/>
 	<classpathentry kind="src" path="/hq-common"/>
 	<classpathentry kind="src" path="/hq-lather"/>
-	<classpathentry kind="src" path="/hq-pdk-shared"/>
+	<classpathentry kind="src" path="/hq-pdk"/>
 	<classpathentry kind="src" path="/hq-server"/>
 	<classpathentry kind="src" path="/hq-util"/>
 	<classpathentry kind="var" path="M2_REPO/org/jasypt/jasypt/1.6/jasypt-1.6.jar" sourcepath="M2_REPO/org/jasypt/jasypt/1.6/jasypt-1.6-sources.jar"/>

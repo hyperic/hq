@@ -157,7 +157,7 @@ public class OracleServerDetector
         }
     }
 
-    //for use w/ -jar hq-pdk-shared.jar or agent.properties
+    //for use w/ -jar hq-pdk.jar or agent.properties
     private boolean configureProperties(ConfigResponse config) {
         boolean hasCreds = false;
         String[] keys =

@@ -20,7 +20,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
-			<artifactId>hq-pdk-shared</artifactId>
+			<artifactId>hq-pdk</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
