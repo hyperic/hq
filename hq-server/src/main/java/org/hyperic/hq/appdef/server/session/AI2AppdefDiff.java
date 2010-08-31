@@ -516,7 +516,7 @@ public class AI2AppdefDiff {
         return o1.equals(o2);
     }
 
-    //XXX this seems odd to update something in a method
+    //TODO this seems odd to update something in a method
     //that is checking for differences.  however, at this point
     //we have the ai object, the existing appdef object and the cpropMgr.
     //this is simply the easiest place until server AI code is refactored.

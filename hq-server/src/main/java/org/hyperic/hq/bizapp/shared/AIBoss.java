@@ -199,12 +199,6 @@ public interface AIBoss {
         SessionTimeoutException;
 
     /**
-     * Get details on a single platform from the AI queue, by FQDN
-     */
-    public AIPlatformValue findAIPlatformByFqdn(int sessionID, String fqdn) throws SessionNotFoundException,
-        SessionTimeoutException;
-
-    /**
      * Get details on a single server from the AI queue, by serverID
      */
     public AIServerValue findAIServerById(int sessionID, int serverID) throws SessionNotFoundException,
