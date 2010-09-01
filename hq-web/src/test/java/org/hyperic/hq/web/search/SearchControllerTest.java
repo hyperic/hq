@@ -1,4 +1,4 @@
-package org.hyperic.hq.web.controllers.search;
+package org.hyperic.hq.web.search;
 
 import java.util.List;
 import java.util.Map;
@@ -15,7 +15,8 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.SearchResult;
-import org.hyperic.hq.web.controllers.BaseControllerTest;
+import org.hyperic.hq.web.BaseControllerTest;
+import org.hyperic.hq.web.search.SearchController;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.junit.Before;

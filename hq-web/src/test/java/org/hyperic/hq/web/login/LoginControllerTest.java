@@ -1,4 +1,4 @@
-package org.hyperic.hq.web.controllers.login;
+package org.hyperic.hq.web.login;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
@@ -11,7 +11,8 @@ import javax.servlet.http.HttpSession;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
-import org.hyperic.hq.web.controllers.BaseControllerTest;
+import org.hyperic.hq.web.BaseControllerTest;
+import org.hyperic.hq.web.login.LoginController;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;

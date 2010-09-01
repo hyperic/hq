@@ -24,7 +24,7 @@
  *
  */
 
-package org.hyperic.hq.web.controllers.search;
+package org.hyperic.hq.web.search;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,7 +44,7 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.SearchResult;
 import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.web.controllers.BaseController;
+import org.hyperic.hq.web.BaseController;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;

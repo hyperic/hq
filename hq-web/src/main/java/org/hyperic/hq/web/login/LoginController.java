@@ -24,7 +24,7 @@
  *
  */
 
-package org.hyperic.hq.web.controllers.login;
+package org.hyperic.hq.web.login;
 
 import java.io.IOException;
 

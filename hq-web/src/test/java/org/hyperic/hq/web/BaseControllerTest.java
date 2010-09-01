@@ -1,4 +1,4 @@
-package org.hyperic.hq.web.controllers;
+package org.hyperic.hq.web;
 
 import static org.easymock.EasyMock.*;
 
@@ -10,6 +10,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.web.SessionParameterKeys;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 public abstract class BaseControllerTest {

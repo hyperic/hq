@@ -24,7 +24,7 @@
  *
  */
 
-package org.hyperic.hq.web.controllers.dashboard;
+package org.hyperic.hq.web.dashboard;
 
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
@@ -34,7 +34,7 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
-import org.hyperic.hq.web.controllers.BaseController;
+import org.hyperic.hq.web.BaseController;
 import org.hyperic.util.config.ConfigResponse;
 
 /**

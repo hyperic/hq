@@ -1,4 +1,4 @@
-package org.hyperic.hq.web.controllers.dashboard;
+package org.hyperic.hq.web.dashboard;
 
 import org.easymock.EasyMock;
 import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
@@ -8,7 +8,7 @@ import org.hyperic.hq.bizapp.shared.DashboardPortletBoss;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
-import org.hyperic.hq.web.controllers.BaseControllerTest;
+import org.hyperic.hq.web.BaseControllerTest;
 import org.hyperic.util.config.ConfigResponse;
 
 public abstract class BaseDashboardControllerTest extends BaseControllerTest {

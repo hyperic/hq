@@ -24,7 +24,7 @@
  *
  */
 
-package org.hyperic.hq.web.controllers.search;
+package org.hyperic.hq.web.search;
 
 /**
  * This interface provides public string constants that map to request

@@ -1,4 +1,4 @@
-package org.hyperic.hq.web.controllers.resource.association;
+package org.hyperic.hq.web.resource.association;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +16,8 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.web.controllers.BaseControllerTest;
+import org.hyperic.hq.web.BaseControllerTest;
+import org.hyperic.hq.web.resource.association.GroupAssociationController;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.junit.Before;

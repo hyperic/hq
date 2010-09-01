@@ -24,7 +24,7 @@
  *
  */
 
-package org.hyperic.hq.web.controllers;
+package org.hyperic.hq.web;
 
 import java.util.HashMap;
 import java.util.Map;
