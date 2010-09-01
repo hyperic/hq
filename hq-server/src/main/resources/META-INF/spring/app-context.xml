@@ -209,6 +209,15 @@
 		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger" />
 	</util:list>
 
+	<!--
+		This bean refers to various classes that should be loaded at startup.
+		Its only interest is loading the classes listed to have the
+		no-argument constructor called to do some initialization.
+	-->
+	<util:list id="actions">
+		<bean class="org.hyperic.hq.bizapp.server.action.integrate.OpenNMSAction" />
+	</util:list>
+	
 	<task:scheduler id="scheduler" />
 
 	<bean class="org.hyperic.hq.application.Scheduler">
