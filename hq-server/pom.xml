@@ -34,6 +34,12 @@
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-pdk</artifactId>
 			<version>${project.version}</version>
+			<exclusions>
+                <exclusion>
+                	<groupId>org.hyperic.hq.hqapi</groupId>
+                   	<artifactId>hqapi1</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
     		<groupId>org.aspectj</groupId>
