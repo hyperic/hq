@@ -99,7 +99,6 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
             
             // look up the subject record
             AuthzSubject subj = authzBoss.getCurrentSubject(sessionId);
-            userAuditFactory.loginAudit(subj);
             boolean needsRegistration = false;
             
             if (subj == null) {
@@ -120,6 +119,7 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
                                     subj.getEmailAddress().length() == 0;
             }
 
+            userAuditFactory.loginAudit(subj);
             AuthzSubjectValue subject = subj.getAuthzSubjectValue();
             
             // figure out if the user has a principal

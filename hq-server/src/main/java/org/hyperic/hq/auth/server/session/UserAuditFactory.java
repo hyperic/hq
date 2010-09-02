@@ -61,7 +61,7 @@ public class UserAuditFactory {
     }
 
     public UserAudit loginAudit(AuthzSubject user) {
-        String msg = MSGS.format("auditMsg.user.login", user.getFullName());
+        String msg = MSGS.format("auditMsg.user.login", getAuditUserName(user));
         UserAudit res = new UserAudit(user.getResource(), user, USER_LOGIN, AuditImportance.LOW, AuditNature.START, msg);
 
         auditManager.saveAudit(res);
@@ -69,7 +69,7 @@ public class UserAuditFactory {
     }
 
     public UserAudit logoutAudit(AuthzSubject user) {
-        String msg = MSGS.format("auditMsg.user.logout", user.getFullName());
+        String msg = MSGS.format("auditMsg.user.logout", getAuditUserName(user));
         UserAudit res = new UserAudit(user.getResource(), user, USER_LOGOUT, AuditImportance.LOW, AuditNature.STOP, msg);
 
         auditManager.saveAudit(res);
@@ -96,5 +96,15 @@ public class UserAuditFactory {
         res.setNewFieldValue(newVal);
         auditManager.saveAudit(res);
         return res;
+    }
+    
+    private String getAuditUserName(AuthzSubject user) {
+        String userName = user.getFullName();
+        
+        if (userName == null || userName.trim().length() == 0) {
+            userName = user.getName();
+        }
+        
+        return userName;
     }
 }
