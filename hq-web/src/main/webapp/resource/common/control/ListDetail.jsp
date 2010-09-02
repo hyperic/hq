@@ -70,10 +70,10 @@
  	<c:when test="${section eq 'group'}">
  		<!--  PAGE TITLE -->
   		<tiles:insert definition=".page.title.resource.group.full">
-   			<tiles:put name="titleName" beanName="Resource" beanProperty="name"/>
    			<tiles:put name="resource" beanName="Resource"/>
    			<tiles:put name="resourceOwner" beanName="ResourceOwner"/>
    			<tiles:put name="resourceModifier" beanName="ResourceModifier"/>
+   			<tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
   		</tiles:insert>
  		<!-- CONTROL BAR -->
  		<tiles:insert definition=".tabs.resource.group.control.current">
