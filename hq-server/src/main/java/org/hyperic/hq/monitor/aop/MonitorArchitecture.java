@@ -30,29 +30,27 @@ import org.springframework.stereotype.Component;
 
 /**
  * SystemMonitorArchitecture
- *
+ * 
  * @author Helena Edelson
  */
 @Aspect
 @Component
 public class MonitorArchitecture {
+	@Pointcut("inServiceLayer() && execution(* *.hyperic.hq..*.*(..))")
+	public void serviceLayerOperationDuration() {
+	}
 
-    @Pointcut("inServiceLayer() && execution(* *.hyperic.hq..*.*(..))")
-    public void serviceLayerOperationDuration(){}
+	/* Layer Definitions */
+	@Pointcut("serviceOperation() && transactionalOperation()")
+	public void inServiceLayer() {
+	}
 
+	/* Concern Definitions */
+	@Pointcut("execution(* (@org.springframework.transaction.annotation.Transactional *).*(..))")
+	public void transactionalOperation() {
+	}
 
-    /* Layer Definitions */
-    @Pointcut("serviceOperation() && transactionalOperation())")
-    public void inServiceLayer(){}
-
-
-
-    /* Concern Definitions */
-    @Pointcut("execution(* (@org.springframework.transaction.annotation.Transactional *).*(..))")
-    public void transactionalOperation() {}
-
-    @Pointcut("execution(* (@org.springframework.stereotype.Service *).*(..))") 
-    public void serviceOperation() {}
-
- 
+	@Pointcut("execution(* (@org.springframework.stereotype.Service *).*(..))")
+	public void serviceOperation() {
+	}
 }
