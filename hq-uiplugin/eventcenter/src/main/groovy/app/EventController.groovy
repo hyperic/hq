@@ -37,6 +37,8 @@ import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.events.EventLogStatus
 import java.text.DateFormat
 
+import org.apache.commons.lang.StringEscapeUtils
+
 class EventController 
 	extends BaseController
 {
@@ -61,14 +63,14 @@ class EventController
             [field:EventLogSortField.DATE, width:'12%',
              label:{df.format(it.eventLog.timestamp)}],
             [field:EventLogSortField.STATUS, width:'8%',
-             label:{getSexyStatus(it.eventLog)}],
+             label:{StringEscapeUtils.escapeHtml(getSexyStatus(it.eventLog))}],
             [field:EventLogSortField.RESOURCE, width:'31%',
-             label:{linkTo(it.resource.name, [resource:it.resource]) }],
+             label:{linkTo(StringEscapeUtils.escapeHtml(it.resource.name), [resource:it.resource]) }],
             [field:EventLogSortField.SUBJECT, width:'20%',
-             label:{it.eventLog.subject}],
+             label:{StringEscapeUtils.escapeHtml(it.eventLog.subject)}],
             [field:EventLogSortField.DETAIL, width:'29%',
              label:{
-                getSexyDetail(it.eventLog)
+            	StringEscapeUtils.escapeHtml(getSexyDetail(it.eventLog))
              }],
         ],
     ]   
