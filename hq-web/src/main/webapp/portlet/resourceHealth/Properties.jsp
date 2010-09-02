@@ -90,7 +90,9 @@ var help = '<hq:help/>';
         <c:out value="${resource.name}"/>
         <c:if test="${not empty resource.description}">
           <fmt:message key="parenthesis">
-            <fmt:param value="${resource.description}"/>
+            <fmt:param>
+            	<c:out value="${resource.description}"/>
+            </fmt:param>
           </fmt:message>
         </c:if></span>
         </li>
