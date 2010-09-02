@@ -1810,13 +1810,6 @@
               type="org.springframework.web.struts.DelegatingActionProxy">
               <forward name="success" path="/Dashboard.do" redirect="true"/>
       </action>
-      <action path="/dashboard/AddPortlet"
-              type="org.springframework.web.struts.DelegatingActionProxy"
-              name="AddPortletForm"
-              scope="request"
-              input="/Dashboard.do">
-              <forward name="success" path="/Dashboard.do" redirect="true"/>
-      </action>                 
       
       <action path="/dashboard/SearchHubPrepare"
               type="org.springframework.web.struts.DelegatingActionProxy"
