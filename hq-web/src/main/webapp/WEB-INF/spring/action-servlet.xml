@@ -382,8 +382,6 @@
 		class="org.hyperic.hq.ui.action.portlet.addcontent.ViewAction" />
 	<bean name="/dashboard/RemovePortlet"
 		class="org.hyperic.hq.ui.action.portlet.admin.RemovePortletAction" />
-	<bean name="/dashboard/AddPortlet"
-		class="org.hyperic.hq.ui.action.portlet.addcontent.AddPortletAction" />
 	<bean name="/dashboard/SearchHubPrepare" class="org.hyperic.hq.ui.action.portlet.search.ViewAction" />
 	<bean name="/dashboard/ModifySavedQueries"
 		class="org.hyperic.hq.ui.action.portlet.savedqueries.ModifyAction" />

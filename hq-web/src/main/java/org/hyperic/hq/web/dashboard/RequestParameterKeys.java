@@ -24,11 +24,11 @@
  *
  */
 
-package org.hyperic.hq.web.controllers.search;
+package org.hyperic.hq.web.dashboard;
 
 /**
  * This interface provides public string constants that map to request
- * parameters used by the header search functionality.
+ * parameters used with the dashboard.
  * 
  * String should be ordered alphabetical for ease of maintenance.
  * 
@@ -36,5 +36,6 @@ package org.hyperic.hq.web.controllers.search;
  * 
  */
 public interface RequestParameterKeys {
-	public final static String SEARCH_STRING = "q";
+	public final static String PORTLET_NAME = "portlet";
+	public final static String IS_PORTLET_WIDE = "wide";
 }

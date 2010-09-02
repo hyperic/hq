@@ -60,9 +60,10 @@
   <div id="addContentsPortlet<c:out value="${wide}"/>" class="effectsPortlet" style="visibility: hidden">
 </c:otherwise>
 </c:choose>
-<html:form action="/dashboard/AddPortlet">
-<html:hidden property="wide" value="${wide}"/>
-  <table cellpadding="0" cellspacing="0" border="0" width="100%">
+<c:set var="selectedDashboardId" value="${sessionScope['.user.dashboard.selected.id']}"/>
+<form method="POST" action="/app/dashboard/<c:out value="${selectedDashboardId}" />/portlets">
+	<html:hidden property="wide" value="${wide}"/>
+  	<table cellpadding="0" cellspacing="0" border="0" width="100%">
     <tr valign="top">
       <td colspan="3" class="ToolbarLine"><html:img page="/images/spacer.gif" width="20" height="1" border="0"/></td>
     </tr>
@@ -85,5 +86,5 @@
       <td width="100%"><html:image page="/images/4.0/icons/add.png" border="0" titleKey="FormButtons.ClickToOk" property="ok"/></td>
     </tr>
   </table>
-</html:form>
+</form>
 </div>
