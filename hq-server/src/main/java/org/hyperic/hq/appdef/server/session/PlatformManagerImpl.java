@@ -429,25 +429,16 @@ public class PlatformManagerImpl implements PlatformManager {
             return;
         }
         final Collection<Platform> platforms = agent.getPlatforms();
-        Platform phys = null;
+        
         for (final Iterator<Platform> it = platforms.iterator(); it.hasNext();) {
             final Platform p = it.next();
             if (p == null) {
                 continue;
             }
-            final String platType = platform.getPlatformType().getName();
-            if (PlatformDetector.isSupportedPlatform(platType)) {
-                phys = p;
-            }
+         
             if (p.getId().equals(platform.getId())) {
                 it.remove();
             }
-        }
-        if (phys == null) {
-            return;
-        }
-        if (phys.getId().equals(platform.getId())) {
-            agentManager.removeAgentStatus(agent);
         }
     }
 

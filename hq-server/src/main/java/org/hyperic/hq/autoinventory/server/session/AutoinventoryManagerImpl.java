@@ -40,7 +40,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.server.session.AgentCreatedEvent;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
@@ -54,7 +53,6 @@ import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
@@ -104,7 +102,6 @@ import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -112,14 +109,13 @@ import org.springframework.transaction.annotation.Transactional;
  * and their relationships
  */
 @org.springframework.stereotype.Service
-public class AutoinventoryManagerImpl implements AutoinventoryManager,
-    ApplicationListener<AgentCreatedEvent> {
+public class AutoinventoryManagerImpl implements AutoinventoryManager {
     private Log log = LogFactory.getLog(AutoinventoryManagerImpl.class.getName());
 
     private AutoinventoryPluginManager aiPluginManager;
     private AIScheduleManager aiScheduleManager;
 
-    private AgentReportStatusDAO agentReportStatusDao;
+    
     private AIHistoryDAO aiHistoryDao;
     private AIPlatformDAO aiPlatformDao;
 
@@ -139,8 +135,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager,
     private AgentManager agentManager;
 
     @Autowired
-    public AutoinventoryManagerImpl(AgentReportStatusDAO agentReportStatusDao,
-                                    AIHistoryDAO aiHistoryDao, AIPlatformDAO aiPlatformDao,
+    public AutoinventoryManagerImpl(AIHistoryDAO aiHistoryDao, AIPlatformDAO aiPlatformDao,
                                     ProductManager productManager, ServerManager serverManager,
                                     AIScheduleManager aiScheduleManager,
                                     ResourceManager resourceManager, ConfigManager configManager,
@@ -151,7 +146,6 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager,
                                     ServiceMerger serviceMerger,
                                     RuntimePlatformAndServerMerger runtimePlatformAndServerMerger, PlatformManager platformManager, 
                                     MeasurementProcessor measurementProcessor, AgentManager agentManager) {
-        this.agentReportStatusDao = agentReportStatusDao;
         this.aiHistoryDao = aiHistoryDao;
         this.aiPlatformDao = aiPlatformDao;
         this.productManager = productManager;
@@ -760,60 +754,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager,
         runtimePlatformAndServerMerger.schedulePlatformAndServerMerges(agentToken, crrr);
     }
 
-    /**
-     * Returns a list of {@link Agent}s which still need to send in a runtime
-     * scan (their last runtime scan was unsuccessfully processed)
-     */
-    @Transactional(readOnly = true)
-    public List<Agent> findAgentsRequiringRuntimeScan() {
-        Collection<AgentReportStatus> dirties = agentReportStatusDao.findDirtyStatus();
-        List<Agent> res = new ArrayList<Agent>(dirties.size());
-
-        log.info("Found " + dirties.size() + " agents with " + "serviceDirty = true");
-
-        for (AgentReportStatus s : dirties) {
-            if (!serviceMerger.currentlyWorkingOn(s.getAgent())) {
-                log.debug("Agent [" + s.getAgent().getAgentToken() + "] is serviceDirty");
-                res.add(s.getAgent());
-            } else {
-                log.debug("Agent [" + s.getAgent().getAgentToken() +
-                          "] is serviceDirty, but in process");
-            }
-        }
-        return res;
-    }
-
-    /**
-     */
-    @Transactional
-    public void notifyAgentsNeedingRuntimeScan() {
-        List<Agent> agents = findAgentsRequiringRuntimeScan();
-
-        for (Agent a : agents) {
-            AICommandsClient client;
-
-            try {
-                client = aiCommandsClientFactory.getClient(a.getAgentToken());
-            } catch (AgentNotFoundException e) {
-                log.warn("Unable to find agent [" + a.getAgentToken() + "]");
-                continue;
-            }
-
-            int type = AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
-            ConfigResponse cfg = new ConfigResponse();
-
-            try {
-                client.pushRuntimeDiscoveryConfig(type, 0, null, null, cfg);
-            } catch (AgentRemoteException e) {
-                log.warn("Unable to notify agent needing runtime scan [" + a.getAgentToken() + "]");
-                continue;
-            }
-        }
-    }
-
-    public void onApplicationEvent(AgentCreatedEvent event) {
-        serviceMerger.markServiceClean(event.getAgent(), false);
-    }
+   
 
     /**
      * Handle ResourceZEvents for enabling runtime autodiscovery.
