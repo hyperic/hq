@@ -204,14 +204,6 @@ public interface AutoinventoryManager {
         ApplicationException;
 
     /**
-     * Returns a list of {@link Agent}s which still need to send in a runtime
-     * scan (their last runtime scan was unsuccessfully processed)
-     */
-    public List<Agent> findAgentsRequiringRuntimeScan();
-
-    public void notifyAgentsNeedingRuntimeScan();
-
-    /**
      * Handle ResourceZEvents for enabling runtime autodiscovery.
      * @param events A list of ResourceZevents
      */
