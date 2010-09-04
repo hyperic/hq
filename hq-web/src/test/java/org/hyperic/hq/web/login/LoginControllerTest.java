@@ -74,7 +74,10 @@ public class LoginControllerTest extends BaseControllerTest {
 		
 		// ...replay those expectations...
 		replay(mockAuthzSubjectManager);
-		
+						
+		// ...make sure our security context holder is empty...
+		SecurityContextHolder.getContext().setAuthentication(null);
+
 		// ...test it...
 		ModelAndView result = loginController.login(mockRequest, mockResponse, mockSession);
 		
@@ -105,7 +108,10 @@ public class LoginControllerTest extends BaseControllerTest {
 		
 		// ...replay those expectations...
 		replay(mockAuthzSubjectManager);
-		
+				
+		// ...make sure our security context holder is empty...
+		SecurityContextHolder.getContext().setAuthentication(null);
+
 		// ...test it...
 		ModelAndView result = loginController.login(mockRequest, mockResponse, mockSession);
 		
@@ -136,6 +142,9 @@ public class LoginControllerTest extends BaseControllerTest {
 		
 		// ...replay those expectations...
 		replay(mockAuthzSubjectManager);
+		
+		// ...make sure our security context holder is empty...
+		SecurityContextHolder.getContext().setAuthentication(null);
 		
 		// ...test it...
 		ModelAndView result = loginController.login(mockRequest, mockResponse, mockSession);
