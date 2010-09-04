@@ -48,8 +48,6 @@ import org.hyperic.util.ConfigPropertyException;
  */
 public interface AgentManager {
 
-    public void removeAgentStatus(Agent agent);
-
     public void removeAgent(Agent agent);
 
     /**

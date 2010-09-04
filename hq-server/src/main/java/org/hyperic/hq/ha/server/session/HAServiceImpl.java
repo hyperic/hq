@@ -30,7 +30,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.autoinventory.server.session.AgentAIScanService;
 import org.hyperic.hq.events.shared.RegisteredTriggerManager;
 import org.hyperic.hq.ha.HAService;
 import org.hyperic.hq.measurement.server.session.AvailabilityCheckService;
@@ -51,9 +50,9 @@ public class HAServiceImpl implements HAService {
     private final Log log = LogFactory.getLog(HAServiceImpl.class);
     private TaskScheduler scheduler;
     private AvailabilityCheckService availabilityCheckService;
-    private AgentAIScanService agentAIScanService;
+   
     private ScheduledFuture<?> backfillTask;
-    private ScheduledFuture<?> notifyAgentsTask;
+   
     private RegisteredTriggerManager registeredTriggerManager;
     private final AtomicBoolean triggersHaveInitialized = new AtomicBoolean(false);
     private final Thread triggerInitThread = new Thread() {
@@ -82,11 +81,9 @@ public class HAServiceImpl implements HAService {
     @Autowired
     public HAServiceImpl(TaskScheduler scheduler,
                          AvailabilityCheckService availabilityCheckService,
-                         AgentAIScanService agentAIScanService,
                          RegisteredTriggerManager registeredTriggerManager) {
         this.scheduler = scheduler;
         this.availabilityCheckService = availabilityCheckService;
-        this.agentAIScanService = agentAIScanService;
         this.registeredTriggerManager = registeredTriggerManager;
     }
 
@@ -97,20 +94,6 @@ public class HAServiceImpl implements HAService {
     
     public void start() {
         triggerInitThread.start();
-        // If this node was designated as a slave b/c of connectivity loss (not
-        // server crash), then we don't want to schedule another round of tasks
-        // once it becomes master again
-        if (this.notifyAgentsTask == null) {
-            MethodInvokingRunnable notifyAgents = new MethodInvokingRunnable();
-            notifyAgents.setTargetObject(agentAIScanService);
-            notifyAgents.setTargetMethod("notifyAgents");
-            try {
-                notifyAgents.prepare();
-                this.notifyAgentsTask = scheduler.scheduleAtFixedRate(notifyAgents, 1800000);
-            } catch (Exception e) {
-                log.error("Unable to schedule agent AI scan.", e);
-            }
-        }
     }
     
     
@@ -129,10 +112,6 @@ public class HAServiceImpl implements HAService {
         if (backfillTask != null) {
             backfillTask.cancel(false);
             this.backfillTask = null;
-        }
-        if (notifyAgentsTask != null) {
-            notifyAgentsTask.cancel(false);
-            this.notifyAgentsTask = null;
         }
     }
 

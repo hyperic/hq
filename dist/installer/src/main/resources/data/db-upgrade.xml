@@ -11478,6 +11478,14 @@ has already been defined.
  	<removeOldHQServers upgradeDir="${server.upgradedir}"/>
  </schemaSpec>
 	
+ <schemaSpec version="3.198">
+ 	<schema-directSQL>
+		<statement desc="Drop unused eam_ai_agent_report table">
+	          DROP TABLE EAM_AI_AGENT_REPORT
+	    </statement>
+	</schema-directSQL>
+ </schemaSpec>
+	
 </dbupgrade>
 </target>
 </project>

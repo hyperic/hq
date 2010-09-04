@@ -1071,8 +1071,8 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
             String vmPrototype = AuthzConstants.platformPrototypeVmwareVsphereVm;
 
             if (!vmPrototype.equals(vmResource.getPrototype().getName())) {
-                throw new ResourceEdgeCreateException("Resource[id=" + vmResource.getId() +
-                                                      "] is not a " + vmPrototype);
+                //Possible (but not likely) for 2 physical platforms to have same MAC address (particularly in test scenarios)
+                return false;
             } else if (vmPrototype.equals(hqResource.getPrototype().getName())) {
                 throw new ResourceEdgeCreateException("Resource[id=" + hqResource.getId() +
                                                       "] cannot be a " + vmPrototype);
