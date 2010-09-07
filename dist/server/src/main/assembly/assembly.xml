@@ -79,7 +79,7 @@
 				<exclude>**/*.pl</exclude>
 				<exclude>**/.gitignore</exclude>
 				<exclude>conf/logging.properties</exclude>
-				<exclude>webapps/ROOT/**</exclude>
+				<exclude>webapps/**</exclude>
 			</excludes>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
