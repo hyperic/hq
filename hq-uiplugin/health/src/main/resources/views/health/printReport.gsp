@@ -45,7 +45,7 @@ System Swap:
     
 
 -- HQ Process --
-- Version: ${hqVersion} # ${buildNumber}
+- Version: ${hqVersion}
 - Schema: ${schemaVersion}
 - ID: ${guid}
 - Command Line: ${cmdLine}
