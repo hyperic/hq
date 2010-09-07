@@ -434,7 +434,6 @@ class HealthController
             metricsPerMinute: metricsPerMinute,
             diagnostics:      diagnostics,
             hqVersion:        Bootstrap.getBean(ProductBoss.class).version,
-            buildNumber:      Bootstrap.getBean(ProductBoss.class).buildNumber,
             jvmProps:         System.properties,
             schemaVersion:    Bootstrap.getBean(ServerConfigManager.class).config.getProperty('CAM_SCHEMA_VERSION'),
             cmdLine:          cmdLine,
@@ -448,7 +447,7 @@ class HealthController
         ] + getSystemStats([:])
         
         if (HQUtil.isEnterpriseEdition()) {
-            locals.licenseInfo = com.hyperic.hq.license.LicenseManager.licenseInfo
+            locals.licenseInfo = Bootstrap.getBean(com.hyperic.hq.license.LicenseManager.class).licenseInfo
         }
         
         render(locals: locals)
