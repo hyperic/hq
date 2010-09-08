@@ -175,13 +175,14 @@ public class ServerConfiguratorImpl implements ServerConfigurator {
     }
 
     private void copyLoggingConf() throws IOException {
-        File confFile = new File(serverHome + File.separator + "conf" + File.separator +
-                                 "log4j.xml");
+        // ../conf/server-log4j.xml should only be used by the HQ server
+        File serverConfFile = new File(serverHome + File.separator + "conf" + File.separator +
+                                       "server-log4j.xml");
         FileInputStream fi = null;
         FileOutputStream webAppLoggingConfig = null;
         
         try {
-            fi = new FileInputStream(confFile);
+            fi = new FileInputStream(serverConfFile);
             webAppLoggingConfig = new FileOutputStream(engineHome + File.separator + "hq-server" + File.separator +
                                       "webapps" + File.separator + "ROOT" + File.separator +
                                       "WEB-INF" + File.separator + "classes" + File.separator +
@@ -195,11 +196,14 @@ public class ServerConfiguratorImpl implements ServerConfigurator {
                 webAppLoggingConfig.close();
             }
         }
-        
+
+       // ../conf/log4j.xml should only be used by Tomcat and the HQ bootstrap process
+       File bootstrapConfFile = new File(serverHome + File.separator + "conf" + File.separator +
+                                         "log4j.xml");
        FileInputStream conf = null;
        FileOutputStream engineLoggingConfig = null;
        try {
-           conf= new FileInputStream(confFile);
+           conf= new FileInputStream(bootstrapConfFile);
            engineLoggingConfig = new FileOutputStream(engineHome +  File.separator + "hq-server" + File.separator + "lib" + File.separator +
                                      "log4j.xml");
            copyStream(conf, engineLoggingConfig);
