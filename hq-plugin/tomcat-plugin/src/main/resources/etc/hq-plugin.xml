@@ -170,7 +170,7 @@
               value="catalina.base-DISABLED"/>
 
     <property name="PROC_QUERY"
-              value="State.Name.re=java|jsvc,State.Name.Pne=$1,Args.*.sw=-Dcatalina.home="/>
+              value="State.Name.re=java|jsvc,State.Name.Pne=jsvc,Args.*.sw=-Dcatalina.base="/>
 
     <property name="DEFAULT_CONF"
               value="conf/server.xml"/>
