@@ -127,6 +127,9 @@ public interface ResourceGroupManager
      */
     public void removeResourceGroup(AuthzSubject whoami, ResourceGroup group)
         throws PermissionException, VetoException;
+    
+    public void removeResourceGroup(AuthzSubject whoami, Integer groupId)
+    throws PermissionException, VetoException;
 
     public void addResources(AuthzSubject subj, ResourceGroup group, List<Resource> resources)
         throws PermissionException, VetoException;

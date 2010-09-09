@@ -30,16 +30,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+
+
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
-import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.ApplicationType;
 import org.hyperic.hq.appdef.server.session.CpropKey;
 import org.hyperic.hq.appdef.server.session.DownResource;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
-import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
@@ -67,6 +67,7 @@ import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
+import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
@@ -362,23 +363,7 @@ public interface AppdefBoss {
     public AppdefEntityID[] removeAppdefEntity(int sessionId, AppdefEntityID aeid) throws SessionNotFoundException,
         SessionTimeoutException, ApplicationException, VetoException;
     
-    void removeDeletedResources(Map<Integer,List<AppdefEntityID>> agentCache) throws ApplicationException, VetoException;
-
-    public void _removePlatformInNewTran(AuthzSubject subject, Platform platform) throws ApplicationException,
-        VetoException;
-
-    public void removePlatform(AuthzSubject subject, Platform platform) throws ApplicationException, VetoException;
-
-    public void _removeServerInNewTran(AuthzSubject subject, Server server) throws VetoException, PermissionException;
-
-    public void _removeServiceInNewTran(AuthzSubject subject, Service service) throws VetoException,
-        PermissionException;
-
-    public void _removeGroupInNewTran(AuthzSubject subject, ResourceGroup group) throws SessionException,
-        PermissionException, VetoException;
-
-    public void _removeApplicationInNewTran(AuthzSubject subject, Application app) throws ApplicationException,
-        PermissionException, SessionException, VetoException;
+    public void removePlatform(AuthzSubject subject, Integer platformId) throws ApplicationException, VetoException;
 
     public ServerValue updateServer(int sessionId, ServerValue aServer) throws PermissionException,
         ValidationException, SessionTimeoutException, SessionNotFoundException, UpdateException,
@@ -441,6 +426,9 @@ public interface AppdefBoss {
 
     public void removeServer(AuthzSubject subj, Integer serverId) throws ServerNotFoundException,
         SessionNotFoundException, SessionTimeoutException, PermissionException, SessionException, VetoException;
+    
+    void removeService(AuthzSubject subject, Integer serviceId)
+    throws VetoException, PermissionException, ServiceNotFoundException;
 
     /**
      * Remove an application service.
