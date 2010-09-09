@@ -55,10 +55,6 @@
 			<artifactId>sigar</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.hyperic.hq.hqapi</groupId>
-			<artifactId>hqapi1</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.snmp4j</groupId>
 			<artifactId>snmp4j</artifactId>
 		</dependency>
@@ -123,24 +119,5 @@
 			</plugin>
 		</plugins>
 	</build>
-	
-	<repositories>
-		<repository>
-			<id>hqapi-snapshot</id>
-			<name>HQApi Snapshot Repository</name>
-			<url>http://maven.hyperic.org/hqapi/snapshot/</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>hqapi-milestone</id>
-			<name>HQApi Milestone Repository</name>
-			<url>http://maven.hyperic.org/hqapi/milestone/</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
 
 </project>

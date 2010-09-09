@@ -29,6 +29,12 @@
 
 	<dependencies>
 		<dependency>
+			<!-- Making hqapi jar available to plugins on agent side only for now, due to issues with Spring app context being loaded when hqapi jar is in server lib.  
+			     May make this a dependency of hq-pdk once that is fixed-->
+			<groupId>org.hyperic.hq.hqapi</groupId>
+			<artifactId>hqapi1</artifactId>
+		</dependency>
+		<dependency>
   			<groupId>mysql</groupId>
   			<artifactId>mysql-connector-java</artifactId>
 		</dependency>
@@ -460,4 +466,22 @@
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
+	<repositories>
+		<repository>
+			<id>hqapi-snapshot</id>
+			<name>HQApi Snapshot Repository</name>
+			<url>http://maven.hyperic.org/hqapi/snapshot/</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>hqapi-milestone</id>
+			<name>HQApi Milestone Repository</name>
+			<url>http://maven.hyperic.org/hqapi/milestone/</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 </project>
