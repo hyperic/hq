@@ -1,28 +1,28 @@
-/*
- * NOTE: This copyright does *not* cover user programs that use HQ
+/**
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
- * "derived work".
- * 
- * Copyright (C) [2004-2009], Hyperic, Inc.
- * This file is part of HQ.
- * 
- * HQ is free software; you can redistribute it and/or modify
- * it under the terms version 2 of the GNU General Public License as
- * published by the Free Software Foundation. This program is distributed
- * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- * USA.
+ *  "derived work".
+ *
+ *  Copyright (C) [2004-2010], VMware, Inc.
+ *  This file is part of Hyperic.
+ *
+ *  Hyperic is free software; you can redistribute it and/or modify
+ *  it under the terms version 2 of the GNU General Public License as
+ *  published by the Free Software Foundation. This program is distributed
+ *  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ *  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ *  PARTICULAR PURPOSE. See the GNU General Public License for more
+ *  details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ *  USA.
+ *
  */
-
 package org.hyperic.hq.bizapp.server.session;
 
 import java.text.MessageFormat;
@@ -105,6 +105,7 @@ import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.ServiceManager;
+import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
@@ -1330,12 +1331,12 @@ public class AppdefBossImpl implements AppdefBoss {
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                 Server server = serverManager.findServerById(id);
                 agentCache = buildAsyncDeleteAgentCache(server);
-                removeServer(subject, server);
+                removeServer(subject, server.getId());
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                 Platform platform = platformManager.findPlatformById(id);
                 agentCache = buildAsyncDeleteAgentCache(platform);
-                removePlatform(subject, platform);
+                removePlatform(subject, platform.getId());
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
 
@@ -1359,156 +1360,6 @@ public class AppdefBossImpl implements AppdefBoss {
         zEventManager.enqueueEventAfterCommit(new ResourcesCleanupZevent(agentCache));
 
         return removed;
-    }
-
-    // TODO modify javadoc comment below regarding NotSupported
-    /**
-     * Remove all delete resources Method was "NotSupported" since all the
-     * resource deletes may take longer than the transaction timeout. No need
-     * for a transaction in this context.
-     * 
-     */
-    public void removeDeletedResources(Map<Integer, List<AppdefEntityID>> agentCache)
-        throws ApplicationException, VetoException {
-        final StopWatch watch = new StopWatch();
-        final AuthzSubject subject = authzSubjectManager.findSubjectById(AuthzConstants.overlordId);
-        watch.markTimeBegin("unscheduleMeasurementsForAsyncDelete");
-        unscheduleMeasurementsForAsyncDelete(agentCache);
-        watch.markTimeEnd("unscheduleMeasurementsForAsyncDelete");
-
-        // Look through services, servers, platforms, applications, and groups
-        watch.markTimeBegin("removeApplications");
-        Collection<Application> applications = applicationManager.findDeletedApplications();
-        removeApplications(subject, applications);
-        watch.markTimeEnd("removeApplications");
-
-        watch.markTimeBegin("removeResourceGroups");
-        Collection<ResourceGroup> groups = resourceGroupManager.findDeletedGroups();
-        removeResourceGroups(subject, groups);
-
-        watch.markTimeEnd("removeResourceGroups");
-
-        Collection<Service> services = serviceManager.findDeletedServices();
-        removeServices(subject, services);
-
-        Collection<Server> servers = serverManager.findDeletedServers();
-        removeServers(subject, servers);
-
-        watch.markTimeBegin("removePlatforms");
-        Collection<Platform> platforms = platformManager.findDeletedPlatforms();
-        for (Platform platform : platforms) {
-            try {
-                removeServers(subject, platform.getServers());
-                _removePlatformInNewTran(subject, platform);
-            } catch (Exception e) {
-                log.error("Unable to remove platform: " + e, e);
-            }
-        }
-        watch.markTimeEnd("removePlatforms");
-        if (log.isDebugEnabled()) {
-            log.debug("removeDeletedResources: " + watch);
-        }
-    }
-
-    /**
-     * Disable measurements and unschedule from the agent in bulk with the agent
-     * cache info because the resources have been de-referenced from the agent
-     * 
-     * @param agentCache {@link Map} of {@link Integer} of agentIds to
-     *        {@link List} of {@link AppdefEntityID}s
-     */
-    private void unscheduleMeasurementsForAsyncDelete(Map<Integer, List<AppdefEntityID>> agentCache) {
-        if (agentCache == null) {
-            return;
-        }
-
-        try {
-            AuthzSubject subject = authzSubjectManager.findSubjectById(AuthzConstants.overlordId);
-
-            for (Integer agentId : agentCache.keySet()) {
-
-                Agent agent = agentManager.getAgent(agentId);
-                List<AppdefEntityID> resources = agentCache.get(agentId);
-
-                measurementManager.disableMeasurements(subject, agent, (AppdefEntityID[]) resources
-                    .toArray(new AppdefEntityID[0]), true);
-            }
-        } catch (Exception e) {
-            log.error("Error unscheduling measurements during async delete", e);
-        }
-    }
-
-    private final void removeApplications(AuthzSubject subject, Collection<Application> applications) {
-        for (Application application : applications) {
-            try {
-                _removeApplicationInNewTran(subject, application);
-            } catch (Exception e) {
-                log.error("Unable to remove application: " + e, e);
-            }
-        }
-        if (log.isDebugEnabled()) {
-            log.debug("Removed " + applications.size() + " applications");
-        }
-    }
-
-    private final void removeResourceGroups(AuthzSubject subject, Collection<ResourceGroup> groups) {
-        for (ResourceGroup group : groups) {
-            try {
-                _removeGroupInNewTran(subject, group);
-            } catch (Exception e) {
-                log.error("Unable to remove group: " + e, e);
-            }
-        }
-        if (log.isDebugEnabled()) {
-            log.debug("Removed " + groups.size() + " resource groups");
-        }
-    }
-
-    private final void removeServers(AuthzSubject subject, Collection<Server> servers) {
-        final StopWatch watch = new StopWatch();
-        watch.markTimeBegin("removeServers");
-        final List<Server> svrs = new ArrayList<Server>(servers);
-        // can't use iterator for loop here. Since we are modifying the
-        // internal hibernate collection, which this collection is based on,
-        // it will throw a ConcurrentModificationException
-        // This occurs even if you disassociate the Collection by trying
-        // something like new ArrayList(servers). Not sure why.
-        for (int i = 0; i < svrs.size(); i++) {
-            try {
-                final Server server = svrs.get(i);
-                removeServices(subject, server.getServices());
-                _removeServerInNewTran(subject, server);
-            } catch (Exception e) {
-                log.error("Unable to remove server: " + e, e);
-            }
-        }
-        watch.markTimeEnd("removeServers");
-        if (log.isDebugEnabled()) {
-            log.debug("Removed " + servers.size() + " services");
-        }
-    }
-
-    private final void removeServices(AuthzSubject subject, Collection<Service> services) {
-        final StopWatch watch = new StopWatch();
-        watch.markTimeBegin("removeServices");
-        final List<Service> svcs = new ArrayList<Service>(services);
-        // can't use iterator for loop here. Since we are modifying the
-        // internal hibernate collection, which this collection is based on,
-        // it will throw a ConcurrentModificationException
-        // This occurs even if you disassociate the Collection by trying
-        // something like new ArrayList(services). Not sure why.
-        for (int i = 0; i < svcs.size(); i++) {
-            try {
-                final Service service = svcs.get(i);
-                _removeServiceInNewTran(subject, service);
-            } catch (Exception e) {
-                log.error("Unable to remove service: " + e, e);
-            }
-        }
-        watch.markTimeEnd("removeServices");
-        if (log.isDebugEnabled()) {
-            log.debug("Removed " + services.size() + " services");
-        }
     }
 
     /**
@@ -1546,21 +1397,14 @@ public class AppdefBossImpl implements AppdefBoss {
         }
     }
 
-    /**
-     * 
-     * 
-     */
-    public void _removePlatformInNewTran(AuthzSubject subject, Platform platform)
-        throws ApplicationException, VetoException {
-        removePlatform(subject, platform);
-    }
-
+   
     /**
      * 
      */
-    public void removePlatform(AuthzSubject subject, Platform platform)
+    public void removePlatform(AuthzSubject subject, Integer platformId)
         throws ApplicationException, VetoException {
         try {
+            Platform platform = platformManager.findPlatformById(platformId);
             // Disable all measurements for this platform. We don't actually
             // remove the measurements here to avoid delays in deleting
             // resources.
@@ -1586,35 +1430,8 @@ public class AppdefBossImpl implements AppdefBoss {
             // now, remove the platform.
             platformManager.removePlatform(subject, platform);
         } catch (PermissionException e) {
-            log.error("Caught PermissionException while removing platform: " + platform.getId(), e);
+            log.error("Caught PermissionException while removing platform: " + platformId, e);
             throw e;
-        }
-    }
-
-    private void removeServer(AuthzSubject subject, Server server) throws PermissionException,
-        VetoException {
-        try {
-            // now remove the measurements
-            disableMeasurements(subject, server.getResource());
-            try {
-                autoinventoryManager.toggleRuntimeScan(authzSubjectManager.getOverlordPojo(),
-                    server.getEntityId(), false);
-            } catch (ResourceDeletedException e) {
-                log.debug(e);
-            } catch (AutoinventoryException e) {
-                log.warn("Exception while turning off RuntimeScan for: " + server +
-                         " (handled gracefully).  " + e);
-            } catch (Exception e) {
-                log.error("Unexpected error turning off RuntimeScan for: " + server +
-                          " (handled gracefully).", e);
-            }
-            // finally, remove the server
-            serverManager.removeServer(subject, server);
-
-        } catch (PermissionException e) {
-
-            log.error("Caught permission exception: [server:" + server.getId() + "]");
-            throw (PermissionException) e;
         }
     }
 
@@ -1672,22 +1489,11 @@ public class AppdefBossImpl implements AppdefBoss {
         return cache;
     }
 
-    /**
-     * 
-     * 
-     */
-    public void _removeServerInNewTran(AuthzSubject subject, Server server) throws VetoException,
-        PermissionException {
-        removeServer(subject, server);
-    }
-
-    /**
-     * 
-     * 
-     */
-    public void _removeServiceInNewTran(AuthzSubject subject, Service service)
-        throws VetoException, PermissionException {
+  
+    public void removeService(AuthzSubject subject, Integer serviceId)
+        throws VetoException, PermissionException, ServiceNotFoundException {
         try {
+            Service service = serviceManager.findServiceById(serviceId);
             // now remove any measurements associated with the service
             disableMeasurements(subject, service.getResource());
             removeTrackers(subject, service.getEntityId());
@@ -1696,24 +1502,6 @@ public class AppdefBossImpl implements AppdefBoss {
 
             throw (PermissionException) e;
         }
-    }
-
-    /**
-     * 
-     * 
-     */
-    public void _removeGroupInNewTran(AuthzSubject subject, ResourceGroup group)
-        throws SessionException, PermissionException, VetoException {
-        resourceGroupManager.removeResourceGroup(subject, group);
-    }
-
-    /**
-     * 
-     * 
-     */
-    public void _removeApplicationInNewTran(AuthzSubject subject, Application app)
-        throws ApplicationException, PermissionException, SessionException, VetoException {
-        applicationManager.removeApplication(subject, app.getId());
     }
 
     /**
@@ -1932,14 +1720,34 @@ public class AppdefBossImpl implements AppdefBoss {
         }
     }
 
-    /**
-     * 
-     */
+   
     public void removeServer(AuthzSubject subj, Integer serverId) throws ServerNotFoundException,
         SessionNotFoundException, SessionTimeoutException, PermissionException, SessionException,
         VetoException {
         Server server = serverManager.findServerById(serverId);
-        removeServer(subj, server);
+        try {
+            // now remove the measurements
+            disableMeasurements(subj, server.getResource());
+            try {
+                autoinventoryManager.toggleRuntimeScan(authzSubjectManager.getOverlordPojo(),
+                    server.getEntityId(), false);
+            } catch (ResourceDeletedException e) {
+                log.debug(e);
+            } catch (AutoinventoryException e) {
+                log.warn("Exception while turning off RuntimeScan for: " + server +
+                         " (handled gracefully).  " + e);
+            } catch (Exception e) {
+                log.error("Unexpected error turning off RuntimeScan for: " + server +
+                          " (handled gracefully).", e);
+            }
+            // finally, remove the server
+            serverManager.removeServer(subj, server);
+
+        } catch (PermissionException e) {
+
+            log.error("Caught permission exception: [server:" + server.getId() + "]");
+            throw (PermissionException) e;
+        }
     }
 
     /**

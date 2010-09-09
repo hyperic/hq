@@ -39,7 +39,7 @@ import org.hyperic.hq.authz.server.session.ResourceEdge;
 import org.hyperic.hq.authz.server.session.ResourceRelation;
 import org.hyperic.hq.authz.server.session.ResourceSortField;
 import org.hyperic.hq.authz.server.session.ResourceType;
-import org.hyperic.hq.bizapp.server.session.AppdefBossImpl;
+import org.hyperic.hq.bizapp.server.session.ResourceCleanupEventListener;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.util.pager.PageControl;
@@ -137,9 +137,9 @@ public interface ResourceManager {
      * Removes the specified resource by nulling out its resourceType. Will not
      * null the resourceType of the resource which is passed in. These resources
      * need to be cleaned up eventually by
-     * {@link AppdefBossImpl.removeDeletedResources}. This may be done in the
+     * {@link ResourceCleanupEventListener.removeDeletedResources}. This may be done in the
      * background via zevent by issuing a {@link ResourcesCleanupZevent}.
-     * @see {@link AppdefBossImpl.removeDeletedResources}
+     * @see {@link ResourceCleanupEventListener.removeDeletedResources}
      * @see {@link ResourcesCleanupZevent}
      * @param r {@link Resource} resource to be removed.
      * @param nullResourceType tells the method to null out the resourceType
