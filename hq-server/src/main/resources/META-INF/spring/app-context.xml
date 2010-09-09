@@ -87,19 +87,24 @@
 			</props>
 		</property>
 	</bean>
+	
+    <bean id="lazyDataSource" class="org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy">
+        <property name="targetDataSource"><ref local="tomcatDataSource"/></property>
+    </bean>
 
 	<bean id="dataSource"
 		class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
-		<constructor-arg ref="tomcatDataSource"/>
+		<constructor-arg ref="lazyDataSource"/>
 	</bean>
-	
+
 	<bean id="tomcatDataSource" class="org.apache.tomcat.jdbc.pool.DataSource"
 				p:driverClassName="${server.database-driver}" p:url="${server.database-url}"
 				p:username="${server.database-user}" p:password="${server.database-password}"
 				p:defaultAutoCommit="false" p:minIdle="${server.database-minpoolsize}"
 				p:maxActive="${server.database-maxpoolsize}" p:maxIdle="${server.database-maxpoolsize}" 
 				p:initialSize="${server.database-minpoolsize}"
-				p:maxWait="${server.database-blockingtimeout}" p:jdbcInterceptors="ConnectionState;StatementFinalizer"
+				p:maxWait="${server.database-blockingtimeout}"
+                p:jdbcInterceptors="ConnectionState;StatementFinalizer"
 				p:validationQuery="${server.connection-validation-sql}"
 				p:validationInterval="30000" p:logAbandoned="true" p:testOnBorrow="true" />
 				
@@ -118,7 +123,6 @@
 	</bean>
 
 	<context:component-scan base-package="org.hyperic,com.hyperic" />
-
 
 	<bean id="sessionFactory"
 		class="org.hyperic.hibernate.JmxExposingLocalSessionFactoryBean">
@@ -184,10 +188,8 @@
 		class="org.springframework.beans.factory.config.PropertiesFactoryBean"
 		p:location="classpath:/tweak.properties" />
 
-
 	<context:mbean-export />
 	<context:mbean-server />
-
 
 	<bean class="org.hyperic.hq.transport.util.AsynchronousInvoker">
 		<constructor-arg value="4" />
@@ -227,7 +229,5 @@
     <bean class="org.hyperic.hq.common.Log4jWatcher">
         <constructor-arg value="/log4j.xml"/>
     </bean>
-
-
 
 </beans>

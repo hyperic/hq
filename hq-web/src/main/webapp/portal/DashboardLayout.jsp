@@ -30,6 +30,8 @@
   USA.
  --%>
 
+<c:set var="selectedDashboardId" value="${sessionScope['.user.dashboard.selected.id']}"/>
+
 <script src="<html:rewrite page='/js/dash.js' />" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/scriptaculous.js' />" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/requests.js' />" type="text/javascript" id="requests"></script>
@@ -44,8 +46,8 @@
 	autoLogout = false;
 	
 	function removePortlet(name, label) {
-	    dojo11.xhrGet({
-	        url: '<html:rewrite page="/dashboard/RemovePortlet.do"/>' + '?portletName=' + name,
+	    dojo11.xhrDelete({
+	        url: '/app/dashboard/<c:out value="${selectedDashboardId}" />/portlets/' + name,
 	        load: function(){postRemovet(name,label)}
 	    });
 	}

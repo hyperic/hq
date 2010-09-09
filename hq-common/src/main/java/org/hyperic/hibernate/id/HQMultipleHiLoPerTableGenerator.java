@@ -227,19 +227,11 @@ public class HQMultipleHiLoPerTableGenerator
     private int executeInNewTransaction(TransactionTemplate transactionTemplate,
                                    final SessionImplementor session) {
         if (transactionTemplate != null) {
-            //We are in a Spring managed environment
-            final Connection connection;
-            try {
-                connection = Bootstrap.getBean(DBUtil.class).getConnection();
-            } catch (SQLException e) {
-                throw JDBCExceptionHelper.convert(session.getFactory()
-                    .getSQLExceptionConverter(), e,
-                    "could not obtain database connection", null);
-            }
             return transactionTemplate.execute(new TransactionCallback<Integer>() {
+                //We are in a Spring managed environment
                 public Integer doInTransaction(TransactionStatus status) {
                     try {
-                        return updateSequence(connection);
+                        return updateSequence(Bootstrap.getBean(DBUtil.class).getConnection());
                     } catch (SQLException sqle) {
                         throw JDBCExceptionHelper.convert(session.getFactory()
                             .getSQLExceptionConverter(), sqle,
@@ -248,7 +240,7 @@ public class HQMultipleHiLoPerTableGenerator
                 }
             });
         } else {
-            //Use Hibernate's JDBC delegation
+             //Use Hibernate's JDBC delegation
              return (Integer) doWorkInNewTransaction(session);
         }
     }
