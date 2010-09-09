@@ -104,7 +104,7 @@
 				p:maxActive="${server.database-maxpoolsize}" p:maxIdle="${server.database-maxpoolsize}" 
 				p:initialSize="${server.database-minpoolsize}"
 				p:maxWait="${server.database-blockingtimeout}"
-                p:jdbcInterceptors="ConnectionState;StatementFinalizer;org.hyperic.hq.ConnectionIdenifier"
+                p:jdbcInterceptors="ConnectionState;StatementFinalizer"
 				p:validationQuery="${server.connection-validation-sql}"
 				p:validationInterval="30000" p:logAbandoned="true" p:testOnBorrow="true" />
 				
