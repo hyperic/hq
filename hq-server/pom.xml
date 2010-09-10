@@ -35,9 +35,9 @@
 			<artifactId>hq-pdk</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
+		 <dependency>
     		<groupId>org.aspectj</groupId>
-    		<artifactId>aspectjtools</artifactId>
+    		<artifactId>aspectjrt</artifactId>
  		</dependency>
 		<dependency>
 			<groupId>org.jasypt</groupId>
