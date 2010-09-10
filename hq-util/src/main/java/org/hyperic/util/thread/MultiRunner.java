@@ -34,6 +34,7 @@ import java.util.Properties;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import org.apache.log4j.MDC;
 import org.hyperic.util.ArrayUtil;
 
 /**
@@ -106,6 +107,8 @@ public class MultiRunner {
             MultiRunnable r = (MultiRunnable)c.newInstance();
             Properties subProps = new Properties();
             subProps.putAll(_props);
+            MDC.put("cloneId", "clone-" + threadNo);
+            Logger.getLogger(MultiRunner.class).info("Initializing log for clone-" + threadNo);
             TargetRunnable tr = new TargetRunnable(cl, r, threadNo, subProps);
             Thread t = new Thread(tr);
             t.start();
@@ -141,7 +144,7 @@ public class MultiRunner {
         BasicConfigurator.configure();
         PropertyConfigurator.configure(args[0]);
         
-        Logger.getLogger(MultiRunner.class).info("Fubar");
+        Logger.getLogger(MultiRunner.class).info("MultiRunner.class");
         MultiRunner m = new MultiRunner(p);
         m.runThreads();
     }
