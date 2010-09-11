@@ -729,28 +729,28 @@ function activateHeaderTab(){
     if (document.navTabCat) {
         //This is a plugin
         if (document.navTabCat == "Resource") {
-             dojo.byId("resTab").className = "activeTab";
+            dojo11.addClass("resTab", "activeTab");
         } else if(document.navTabCat == "Admin") {
-            dojo.byId("adminTab").className = "activeTab";
+            dojo11.addClass("adminTab", "activeTab");
         }
         return;
     }
     l = l+""; // force string cast
     if ( l.indexOf("Dash")!=-1 || 
          l.indexOf("dash")!=-1 ) {
-        dojo.byId("dashTab").className = "activeTab";
+    	dojo11.addClass("dashTab", "activeTab");
     } else if( l.indexOf("Resou")!=-1 ||
                l.indexOf("resource")!=-1 || 
                l.indexOf("alerts/")!=-1 || 
                l.indexOf("TabBodyAttach.do")!=-1 ) {
-        dojo.byId("resTab").className = "activeTab";
+    	dojo11.addClass("resTab", "activeTab");
     } else if( l.indexOf("rep")!=-1 || 
                l.indexOf("Rep")!=-1 || 
                l.indexOf("masth")!=-1 ) {
-        dojo.byId("analyzeTab").className = "activeTab";
+    	dojo11.addClass("analyzeTab", "activeTab");
     } else if( l.indexOf("admin.do")!=-1 || 
                l.indexOf("Admin.do")!=-1 ) {
-        dojo.byId("adminTab").className = "activeTab";
+    	dojo11.addClass("adminTab", "activeTab");
     }
 }
 

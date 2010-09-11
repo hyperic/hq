@@ -1,53 +1,52 @@
 body {
-    font: 76% Arial,Helvetica,sans-serif;
-    background: #ECECEC;
-    border: 0;
-    margin: 0;
-    min-width: 990px
+	font: 76% Arial, Helvetica, sans-serif;
+	background: #ECECEC;
+	border: 0;
+	margin: 0;
+	min-width: 990px
 }
 
 .white {
-    background: #FFF;
+	background: #FFF;
 }
 
 #wrapper {
-    width: 100%;
+	width: 100%;
 }
 
 a:visited,a:hover,a {
-    color: #88C7FC;
-    text-decoration: none
+	color: #88C7FC;
+	text-decoration: none
 }
 
 /* HEADER */
-
 #headerLogo {
-    background: url('/images/4.0/logos/hqlogo.jpg') no-repeat 10px 0;
-    width: 352px;
-    padding: 50px 0 0 10px;
-    cursor: pointer;
-    float: left;
+	background: url('/images/4.0/logos/hqlogo.jpg') no-repeat 10px 0;
+	width: 352px;
+	padding: 50px 0 0 10px;
+	cursor: pointer;
+	float: left;
 }
 
 #headerAlerts {
-    position: absolute;
-    top: 0;
-    left: 310px;
-    width: 360px;
-    height: 38px;
-    font-size: 10px;
-    color: #FFF;
+	position: absolute;
+	top: 0;
+	left: 310px;
+	width: 360px;
+	height: 38px;
+	font-size: 10px;
+	color: #FFF;
 }
 
 #headerLinks {
-    position: absolute;
-    top: 0;
-    right: 0px;
-    height: 20px;
-    text-align: right;
-    padding: 8px 10px 0 0;
-    color: #FFF;
-    font-size: 11px
+	position: absolute;
+	top: 0;
+	right: 0px;
+	height: 20px;
+	text-align: right;
+	padding: 8px 10px 0 0;
+	color: #FFF;
+	font-size: 11px
 }
 
 #headerLinks ul {
@@ -57,449 +56,400 @@ a:visited,a:hover,a {
 #headerLinks li {
 	margin: 0 5px;
 	list-style: none;
-    float: left;
+	float: left;
 }
 
 #headerLinks ul li a {
-    color: #88C7FC;
-    text-decoration: none;
+	color: #88C7FC;
+	text-decoration: none;
 }
 
 #headerLinks span {
-    margin-left: 8px;
-    font-weight: 500;
-    color: #fff
+	margin-left: 8px;
+	font-weight: 500;
+	color: #fff
 }
 
 /* HEADER SEARCH */
-
 #headerSearch {
-    position: absolute;
-    top: 46px;
-    right: 0;
-    width: 65px;
-    height: 13px;
-    background: #666 url(/images/4.0/icons/search.gif) no-repeat scroll 1% 50%;
-    color: #FFF;
-    padding: 2px 8px 3px 0px;
-    text-align: right;
-    cursor: pointer;
-    font-weight: bold
+	position: absolute;
+	top: 46px;
+	right: 0;
+	width: 65px;
+	height: 13px;
+	background: #666 url(/images/4.0/icons/search.gif) no-repeat scroll 1%
+		50%;
+	color: #FFF;
+	padding: 2px 8px 3px 0px;
+	text-align: right;
+	cursor: pointer;
+	font-weight: bold
 }
 
 #headerSearch a:hover {
-    color: #88C7FC
+	color: #88C7FC
 }
 
-#headerSearch a, #headerSearch a:visited {
-    color: #FFF
+#headerSearch a,
+#headerSearch a:visited {
+	color: #FFF
 }
 
 #headerSearchBox {
-    position: absolute;
-    top: 64px;
-    right: 0px;
-    height: 24px;
-    width: 260px;
-    background-color: #F96115;
-    color: #FFF;
-    padding: 0 1px 0 -1px;
-    text-align: right;
-    cursor: pointer
+	position: absolute;
+	top: 64px;
+	right: 0px;
+	height: 24px;
+	width: 260px;
+	background-color: #F96115;
+	color: #FFF;
+	padding: 0 1px 0 -1px;
+	text-align: right;
+	cursor: pointer
 }
 
 #headerSearchBox #searchBox {
-    color: gray;
-    padding: 1px 30px 1px 0px;
-    width: 248px
+	color: gray;
+	padding: 1px 30px 1px 0px;
+	width: 248px
 }
 
 #headerSearchResults {
-    position: absolute;
-    top: 86px;
-    right: 0px;
-    height: auto;
-    border: solid 1px #3179D4;
-    background-color: #FFF;
-    width: 250px;
-    padding: 4px;
-    z-index: 9;
+	position: absolute;
+	top: 86px;
+	right: 0px;
+	height: auto;
+	border: solid 1px #3179D4;
+	background-color: #FFF;
+	width: 250px;
+	padding: 4px;
+	z-index: 9;
 }
 
 #headerSearchResults .category {
-    margin-bottom: 3px;
-    background: #92C1FD;
-    color: #FFF;
-    height: 12px;
-    padding: 2px
+	margin-bottom: 3px;
+	background: #92C1FD;
+	color: #FFF;
+	height: 12px;
+	padding: 2px
 }
 
-#headerSearchResults a, #headerSearchResults a:visited, #headerSearchResults a:hover {
-    color: #88C7FC
+#headerSearchResults a,
+#headerSearchResults a:visited,
+#headerSearchResults a:hover {
+	color: #88C7FC
 }
 
 #headerSearchResults .all {
-    margin-top: 3px;
-    margin-bottom: 4px
+	margin-top: 3px;
+	margin-bottom: 4px
 }
 
 #headerSearchResults li {
-    margin: 2px 0px;
-    padding: 1px 0px 1px 22px; /* 22px to leave room for icons */
-    border: 1px solid #FFF;
+	margin: 2px 0px;
+	padding: 1px 0px 1px 22px; /* 22px to leave room for icons */
+	border: 1px solid #FFF;
 }
 
 #headerSearchResults li:hover {
-    border: 1px dotted gray;
+	border: 1px dotted gray;
 }
 
 #headerSearchResults ul {
-    margin: 0px;
-    padding: 4px;
-    list-style: none
+	margin: 0px;
+	padding: 4px;
+	list-style: none
 }
 
 #headerSearchResults li a {
-    color: #666;
-    text-decoration: none
+	color: #666;
+	text-decoration: none
 }
 
 #headerSearchResults li a:hover {
-    color: #666
+	color: #666
 }
 
 .searchActive {
-    background: #FFF url('/images/4.0/icons/progress2.gif') no-repeat 99% 50%
+	background: #FFF url('/images/4.0/icons/progress2.gif') no-repeat 99%
+		50%
 }
 
 .searchComplete {
-    background: #FFF
+	background: #FFF
 }
 
 #headerSearchResults li.platform {
-    background: transparent url('/images/4.0/icons/platform.png') no-repeat 0% 50%;
+	background: transparent url('/images/4.0/icons/platform.png') no-repeat
+		0% 50%;
 }
 
 #headerSearchResults li.server {
-    background: transparent url('/images/4.0/icons/server.png') no-repeat 0% 50%;
+	background: transparent url('/images/4.0/icons/server.png') no-repeat 0%
+		50%;
 }
 
 #headerSearchResults li.service {
-    background: transparent url('/images/4.0/icons/service.png') no-repeat 0% 50%;
+	background: transparent url('/images/4.0/icons/service.png') no-repeat
+		0% 50%;
 }
 
 #headerSearchResults li.application {
-    background: transparent url('/images/4.0/icons/application.png') no-repeat 0% 50%;
+	background: transparent url('/images/4.0/icons/application.png')
+		no-repeat 0% 50%;
 }
 
 #headerSearchResults li.group {
-    background: transparent url('/images/4.0/icons/group.png') no-repeat 0% 50%;
+	background: transparent url('/images/4.0/icons/group.png') no-repeat 0%
+		50%;
 }
 
 #headerSearchResults li.user {
-    background: transparent url('/images/group_key.gif') no-repeat 0% 50%;
+	background: transparent url('/images/group_key.gif') no-repeat 0% 50%;
 }
 
 /* Navigation Tabs */
-
 #navTabContainer {
-    float: left;
-    margin: 36px 0 0 20px;
-    _margin: 33px 0 0 20px;
-    position: relative;
-    width: 400px;
-    z-index: 20;
+	padding-top:35px;
+	padding-top:"0";
+	margin:"36px 0 0 16px";
+}
+    	
+#navTabContainer div.tab {
+	float:left;
+	padding:7px 5px;
+	padding:"0 5px";
+	position:relative;
+    margin-right: 6px;
+    background: url("/images/4.0/tabs/tab_main.gif") no-repeat left top;
 }
 
-/* navigation menus */
-/* - - - ADxMenu: BASIC styles [ MANDATORY ] - - - */
-/* remove all list stylings */
-.mainMenu, .mainMenu ul {
+#navTabContainer div.tab a {
+	background: url("/images/4.0/tabs/tab_cap.gif") no-repeat scroll right top transparent;
+	margin-left:5px;
+	margin-right:-10px;
+	padding:7px 8px 7px 0;
+	color:#333;
+			
+    /* 
+     * the next three styles are necessary to fix IE negative margin bug to
+     * make the "a" element show up outside the parent element's box
+     * see: http://haslayout.net/css/negmargin  
+     */
+    zoom: "1";
+    position: "relative";
+    float: "left";
+}
+		
+#navTabContainer div.tab a:hover,
+#navTabContainer div.tab ul.root a:hover {
+	color:#c94304;
+}
+		
+#navTabContainer div.activeTab {
+	background: url('/images/4.0/tabs/tab_main_active.gif') no-repeat left top;		
+}
+		
+#navTabContainer div.activeTab a {
+	background: url("/images/4.0/tabs/tab_cap_active.gif") no-repeat scroll right top transparent;
+}		
+		
+#navTabContainer div.activeTab a,
+#navTabContainer div.activeTab a:hover {
+	color:#fff;		
+}
+
+#navTabContainer div.tab ul.root {
+	display:none;
+}
+		
+#navTabContainer div.tab:hover ul.root,
+#navTabContainer div.tab.over ul.root {
+	display:block;
+}
+		
+#navTabContainer div.tab ul.root a {
+	color:#3179D4;
+	padding:5px;
+	margin:0;
+	background-image:none;
+}
+		
+#navTabContainer ul.root {
+	top:100%;
+	left:0;
+	position:absolute;
+}
+		
+#navTabContainer ul {
 	margin: 0;
 	padding: 0;
-	border: 0;
-	list-style-type: none;
-	display: block;
+	list-style: none;
+	width: 150px;
+	background-color:#FFFFFF;
+	border:1px solid #2D6EBE;
 }
-.mainMenu li {
-	margin: 0;
-	padding: 0;
-	border: 0;
-	display: block;
-	float: left;	/* move all main list items into one row, by floating them */
-	position: relative;	/* position each LI, thus creating potential IE.win overlap problem */
-	z-index: 5;		/* thus we need to apply explicit z-index here... */
-}
-.mainMenu li:hover {
-	z-index: 10000;	/* ...and here. this makes sure active item is always above anything else in the menu */
-	white-space: normal;/* required to resolve IE7 :hover bug (z-index above is ignored if this is not present)
-							see http://www.tanfa.co.uk/css/articles/pure-css-popups-bug.asp for other stuff that work */
-}
-.mainMenu li li {
-	float: none;/* items of the nested menus are kept on separate lines */
-}
-.mainMenu div {
-	visibility: hidden;	/* initially hide all submenus. */
-	position: absolute;
-	z-index: 10;
-	left: 0;	/* while hidden, always keep them at the top left corner, */
-	top: 0;		/* 		to avoid scrollbars as much as possible */
-}
-.mainMenu li:hover>div {
-	visibility: visible;	/* display submenu them on hover */
-	top: 100%;	/* 1st level go below their parent item */
-}
-.mainMenu li li:hover>div {	/* 2nd+ levels go on the right side of the parent item */
-	top: 0;
-	left: 100%;
-}
-/* -- float.clear --
-	force containment of floated LIs inside of UL */
-.mainMenu:after, .mainMenu div:after {
-	content: ".";
-	height: 0;
-	display: block;
-	visibility: hidden;
-	overflow: hidden;
-	clear: both;
-}
-.mainMenu, .mainMenu ul {	/* IE7 float clear: */
-	min-height: 0;
-}
-/* -- float.clear.END --  */
-/* -- sticky.submenu --
-	it should not disappear when your mouse moves a bit outside the submenu
-	YOU SHOULD NOT STYLE the background of the ".mainMenu UL" or this feature may not work properly!
-	if you do it, make sure you 110% know what you do */
-.mainMenu div {
-	background-image: url('/images/empty.gif');	/* required for sticky to work in IE6 and IE7 - due to their (different) hover bugs */
-	padding: 8px 30px 30px 30px;
-	margin: -10px 0 0 -30px;
-	/*background: #f00;*/	/* uncomment this if you want to see the "safe" area.
-								you can also use to adjust the safe area to your requirement */
-}
-.mainMenu div div {
-	padding: 30px 30px 30px 10px;
-	margin: -30px 0 0 -10px;
-/*  background: #f00;*/
-}
-/* -- sticky.submenu.END -- */
-/* - - - ADxMenu: DESIGN styles [ OPTIONAL, design your heart out :) ] - - - */
-.mainMenu, .mainMenu ul li {
-    color: #88C7FC;
-}
-.mainMenu > li {
-    margin-right: 6px;
-    background: url('/images/4.0/tabs/tab_main.gif') no-repeat left top;
-}
-.mainMenu > li > a {
-    margin-right: -5px;
-    background: url('/images/4.0/tabs/tab_cap.gif') no-repeat right top;
-}
-.mainMenu > li.activeTab {
-    background: url('/images/4.0/tabs/tab_main_active.gif') no-repeat left top;
-}
-.mainMenu > li.activeTab > a {
-    background: url('/images/4.0/tabs/tab_cap_active.gif') no-repeat right top;
-    color: #FFF;
-}
-.mainMenu div {
-	/*width: 11em;*/
-}
-.mainMenu a, .mainMenu a:visited {
-    font-family: Helvetica, sans-serif;
-    font-size: 12px;
-	text-decoration: none;
-	color: #333;
-	padding: .6em 1em;
-	display: block;
+		
+#navTabContainer ul li {
 	position: relative;
 }
-
-.mainMenu ul a,.mainMenu ul a:visited,.mainMenu ul a:hover {
-    font-size: 0.9em;
+		
+#navTabContainer li.hasSubMenu {
+	background: url("/images/4.0/icons/resultset_next.gif") no-repeat scroll right #fff;
 }
-
-.mainMenu ul a, .mainMenu ul a:visited {
-    color: #3179D4;
+		
+#navTabContainer li ul {
+	position: absolute;
+	left:149px;
+	left:"44px";
+	top:0;
+	display: none;
 }
-
-.mainMenu a:hover, .mainMenu li:hover>a {
-	color: #C94304;
+	
+#navTabContainer ul li a {
+	display: block;
+	text-decoration: none;
+	padding: 5px;
+	padding:"0";
+	border-bottom: 0;
 }
-.mainMenu .activeTab > a:hover {
-	color: #000;
+		
+#navTabContainer li:hover ul, 
+#navTabContainer li.over ul { 
+	display: block; 
 }
-
-.mainMenu li ul {	/* create borders around each submenu */
-    border: 1px solid #2D6EBE;
-    min-width: 150px;
-    padding: 0px;
-    _width:175px;
-    background-color: #FFF;
+		
+#navTabContainer ul.root a {
+	clear:"both";
 }
-.mainMenu li li {	/* create borders around each item */
-/*      border: 1px solid #2D6EBE;*/
-    font: 12px Verdana;
-    color: #88C7FC;
-}
-
-.mainMenu li li a:hover {
-    /*background-color: #E2F5FF;*/
-	color: #C94304;
-}
-.mainMenu ul>li + li {	/* and remove the top border on all but first item in the list */
-/*      border-top: 0;*/
-}
-.mainMenu li li:hover>div {	/* inset 2nd+ submenus, to show off overlapping */
-	top: 5px;
-	left: 90%;
-}
-
-/* the links to submenus should have an arrow */
-.mainMenu .hasSubmenu>a {
-    background: #FFF url('/images/4.0/icons/resultset_next.gif') no-repeat scroll 98% 1px;
-}
-
-/* special colouring for "Main menu:", and for "xx submenu" items in ADxMenu
-	placed here to clarify the terminology I use when referencing submenus in posts */
-.mainMenu>li:first-child>a, .mainMenu li + li + li li:first-child>a {
-/*  color: #567;*/
-}
-/* Fix for IE5/Mac \*//*/
-.mainMenu a {
-	float: left;
-}
-/* End Fix */
 
 #container {
-    background: #FFF;
-    border-left: 1px solid gray;
-    border-right: 1px solid gray;
-    margin: 0 10px;
-    padding: 10px
+	background: #FFF;
+	border-left: 1px solid gray;
+	border-right: 1px solid gray;
+	margin: 0 10px;
+	padding: 10px
 }
 
 .fieldRow {
-    margin-bottom: 2px;
-    clear: right;
-    height: 22px;
-    padding: 6px 0 5px 6px
+	margin-bottom: 2px;
+	clear: right;
+	height: 22px;
+	padding: 6px 0 5px 6px
 }
 
 .active {
-    background: #D9E4F1 none repeat scroll 0
+	background: #D9E4F1 none repeat scroll 0
 }
 
 .error {
-    background: #FFDFDF none repeat scroll 0;
-    color: red
+	background: #FFDFDF none repeat scroll 0;
+	color: red
 }
 
 .hint {
-    height: 32px
+	height: 32px
 }
 
 .req {
-    color: red!important;
-    font-weight: 700
+	color: red !important;
+	font-weight: 700
 }
 
 .msgPanel {
-    margin-bottom: 9px;
-    background-color: #FFF;
-    background: url('/images/4.0/icons/exclamation.png') no-repeat 6px 40%;
-    padding: 5px 2px 5px 28px
+	margin-bottom: 9px;
+	background-color: #FFF;
+	background: url('/images/4.0/icons/exclamation.png') no-repeat 6px 40%;
+	padding: 5px 2px 5px 28px
 }
 
 .msgError {
-    color: red;
-    border: 1px solid red
+	color: red;
+	border: 1px solid red
 }
 
 .fieldRow label {
-    float: left;
-    width: 75px;
-    text-align: right;
-    font-weight: 700;
-    padding: 2px 5px 0 0
+	float: left;
+	width: 75px;
+	text-align: right;
+	font-weight: 700;
+	padding: 2px 5px 0 0
 }
 
 .fieldRow span.help {
-    float: left;
-    cursor: pointer;
-    margin: 2px 0px 0px 4px;
-    padding: 5px 10px 0 3px;
-    background: url(/images/4.0/icons/help.png) no-repeat
+	float: left;
+	cursor: pointer;
+	margin: 2px 0px 0px 4px;
+	padding: 5px 10px 0 3px;
+	background: url(/images/4.0/icons/help.png) no-repeat
 }
 
 .fieldRow input {
-    float: left;
+	float: left;
 }
 
 .fieldRow input[readonly='readonly'] {
-    background: #EFEFEF
+	background: #EFEFEF
 }
 
 .fieldHint {
-    margin-left: 85px;
-    color: gray;
-    font-size: 10px;
-    float: left;
-    padding-top: 2px
-    clear:both
+	margin-left: 85px;
+	color: gray;
+	font-size: 10px;
+	float: left;
+	padding-top: 2px clear : both
 }
 
 input[type=password],input[type=text] {
-    border: 1px solid gray;
-    width: 150px;
-    padding: 3px
+	border: 1px solid gray;
+	width: 150px;
+	padding: 3px
 }
 
 fieldset {
-    border: 0;
-    margin: 6px 0 0
+	border: 0;
+	margin: 6px 0 0
 }
 
 #content .loginPanel {
-	margin:10% auto 0;
+	margin: 10% auto 0;
 }
 
 .loginPanel {
-    width: 350px;
-    border: 3px solid #B0F6FF;
-    background: #fff;
+	width: 350px;
+	border: 3px solid #B0F6FF;
+	background: #fff;
 	padding: 16px 16px 10px;
 	text-align: left;
-    -moz-border-radius: 8px;
-    -webkit-border-radius: 8px;
-    -moz-box-shadow: 0 3px 3px #999;
+	-moz-border-radius: 8px;
+	-webkit-border-radius: 8px;
+	-moz-box-shadow: 0 3px 3px #999;
 	-webkit-box-shadow: 0 3px 3px #999;
 }
 
 .loginPanel .fieldRow {
-    height:33px;
-    max-height:21px;
-    position:relative;
-    clear:none;
+	height: 33px;
+	max-height: 21px;
+	position: relative;
+	clear: none;
 }
 
 .loginPanel .fieldRow input {
-    position:absolute;
-    right:5px;
-    top:5px;
-    float:none;
+	position: absolute;
+	right: 5px;
+	top: 5px;
+	float: none;
 }
 
 .loginPanel .fieldRow label {
-    top: 5px;
-    position: absolute;
-    text-align:left;
-    float:none;
+	top: 5px;
+	position: absolute;
+	text-align: left;
+	float: none;
 }
 
-.loginPanel input[type="password"], .loginPanel input[type="text"] {
-    margin-right:5px;
+.loginPanel input[type="password"],.loginPanel input[type="text"] {
+	margin-right: 5px;
 }
 
 .loginPanel input[type="submit"] {
@@ -507,22 +457,22 @@ fieldset {
 }
 
 .loginPanel .submitButtonContainer {
-	text-align: right; 
+	text-align: right;
 	margin-right: 10px;
 }
 
 .loginPanel .guestUserLinkContainer {
-	margin-top: 5px; 
+	margin-top: 5px;
 	text-align: right;
 }
 
 .loginPanel .guestUser {
-	color:#45A8DF;
-	margin-right:0;
+	color: #45A8DF;
+	margin-right: 0;
 }
 
 .loginButtons {
-	text-align: right;	
+	text-align: right;
 }
 
 .loginPanel form fieldset {
@@ -539,1154 +489,1166 @@ fieldset {
 }
 
 .fieldsetTitle {
-    height: 17px;
-    font-weight: 700;
-    font-size: 15px;
-    padding: 2px
+	height: 17px;
+	font-weight: 700;
+	font-size: 15px;
+	padding: 2px
 }
 
 .fieldsetNote {
-    height: 15px;
-    font-size: 13px;
-    color: #444;
-    border-bottom: 1px dotted gray;
-    margin-bottom: 10px;
-    padding: 3px 2px 8px
+	height: 15px;
+	font-size: 13px;
+	color: #444;
+	border-bottom: 1px dotted gray;
+	margin-bottom: 10px;
+	padding: 3px 2px 8px
 }
 
 .button {
-    float: right;
-    margin: 10px 0px 0px 10px;
+	float: right;
+	margin: 10px 0px 0px 10px;
 }
 
 a.buttonGreen {
-    background: transparent url('/images/4.0/buttons/button_green_right.gif') no-repeat scroll top right;
-    color: #FFF;
-    display: block;
-    float: left;
-    font: 400 12px arial, sans-serif;
-    height: 24px;
-    margin-right: 6px;
-    padding-right: 18px;
-    text-decoration: none;
-    font-weight: 700
+	background: transparent
+		url('/images/4.0/buttons/button_green_right.gif') no-repeat scroll top
+		right;
+	color: #FFF;
+	display: block;
+	float: left;
+	font: 400 12px arial, sans-serif;
+	height: 24px;
+	margin-right: 6px;
+	padding-right: 18px;
+	text-decoration: none;
+	font-weight: 700
 }
 
 a.buttonGreen span {
-    background: transparent url('/images/4.0/buttons/button_green_left.gif') no-repeat;
-    display: block;
-    line-height: 14px;
-    color: #FFF;
-    padding: 5px 0 5px 18px
+	background: transparent url('/images/4.0/buttons/button_green_left.gif')
+		no-repeat;
+	display: block;
+	line-height: 14px;
+	color: #FFF;
+	padding: 5px 0 5px 18px
 }
 
 a.buttonGreen:active {
-    background: transparent url('/images/4.0/buttons/button_green_right.gif') no-repeat scroll top right;
-    background-position: bottom right;
-    color: #FFF;
-    outline: none
+	background: transparent
+		url('/images/4.0/buttons/button_green_right.gif') no-repeat scroll top
+		right;
+	background-position: bottom right;
+	color: #FFF;
+	outline: none
 }
 
 a.buttonGreen:active span {
-    background: transparent url('/images/4.0/buttons/button_green_left.gif') no-repeat;
-    background-position: bottom left;
-    padding: 6px 0 4px 18px
+	background: transparent url('/images/4.0/buttons/button_green_left.gif')
+		no-repeat;
+	background-position: bottom left;
+	padding: 6px 0 4px 18px
 }
 
 a.buttonGray {
-    background: transparent url('/images/4.0/buttons/button_gray_right.gif') no-repeat scroll top right;
-    color: #FFF;
-    display: block;
-    float: left;
-    font: 400 12px arial, sans-serif;
-    height: 24px;
-    margin-right: 6px;
-    padding-right: 18px;
-    text-decoration: none;
-    font-weight: 700
+	background: transparent url('/images/4.0/buttons/button_gray_right.gif')
+		no-repeat scroll top right;
+	color: #FFF;
+	display: block;
+	float: left;
+	font: 400 12px arial, sans-serif;
+	height: 24px;
+	margin-right: 6px;
+	padding-right: 18px;
+	text-decoration: none;
+	font-weight: 700
 }
 
 a.buttonGray span {
-    background: transparent url('/images/4.0/buttons/button_gray_left.gif') no-repeat;
-    display: block;
-    line-height: 14px;
-    color: #FFF;
-    padding: 5px 0 5px 18px
+	background: transparent url('/images/4.0/buttons/button_gray_left.gif')
+		no-repeat;
+	display: block;
+	line-height: 14px;
+	color: #FFF;
+	padding: 5px 0 5px 18px
 }
 
 a.buttonGray:active {
-    background: transparent url('/images/4.0/buttons/button_gray_right.gif') no-repeat scroll top right;
-    background-position: bottom right;
-    color: #FFF;
-    outline: none
+	background: transparent url('/images/4.0/buttons/button_gray_right.gif')
+		no-repeat scroll top right;
+	background-position: bottom right;
+	color: #FFF;
+	outline: none
 }
 
 a.buttonGray:active span {
-    background: transparent url('/images/4.0/buttons/button_gray_left.gif') no-repeat;
-    background-position: bottom left;
-    padding: 6px 0 4px 18px
+	background: transparent url('/images/4.0/buttons/button_gray_left.gif')
+		no-repeat;
+	background-position: bottom left;
+	padding: 6px 0 4px 18px
 }
 
 a.buttonBlue {
-    background: transparent url('/images/4.0/buttons/button_blue_right.gif') no-repeat scroll top right;
-    color: #FFF;
-    display: block;
-    float: left;
-    font: 400 12px arial, sans-serif;
-    height: 24px;
-    margin-right: 6px;
-    padding-right: 18px;
-    text-decoration: none;
-    font-weight: 700
+	background: transparent url('/images/4.0/buttons/button_blue_right.gif')
+		no-repeat scroll top right;
+	color: #FFF;
+	display: block;
+	float: left;
+	font: 400 12px arial, sans-serif;
+	height: 24px;
+	margin-right: 6px;
+	padding-right: 18px;
+	text-decoration: none;
+	font-weight: 700
 }
 
 a.buttonBlue span {
-    background: transparent url('/images/4.0/buttons/button_blue_left.gif') no-repeat;
-    display: block;
-    line-height: 14px;
-    color: #FFF;
-    padding: 5px 0 5px 18px
+	background: transparent url('/images/4.0/buttons/button_blue_left.gif')
+		no-repeat;
+	display: block;
+	line-height: 14px;
+	color: #FFF;
+	padding: 5px 0 5px 18px
 }
 
 a.buttonBlue:active {
-    background: transparent url('/images/4.0/buttons/button_blue_right.gif') no-repeat scroll top right;
-    background-position: bottom right;
-    color: #FFF;
-    outline: none
+	background: transparent url('/images/4.0/buttons/button_blue_right.gif')
+		no-repeat scroll top right;
+	background-position: bottom right;
+	color: #FFF;
+	outline: none
 }
 
 a.buttonBlue:active span {
-    background: transparent url('/images/4.0/buttons/button_blue_left.gif') no-repeat;
-    background-position: bottom left;
-    padding: 6px 0 4px 18px
+	background: transparent url('/images/4.0/buttons/button_blue_left.gif')
+		no-repeat;
+	background-position: bottom left;
+	padding: 6px 0 4px 18px
 }
 
 a.buttonInactive {
-    background: transparent url('/images/4.0/buttons/button_inactive_right.gif') no-repeat scroll top right;
-    color: #FFF;
-    display: block;
-    float: left;
-    font: 400 12px arial, sans-serif;
-    height: 24px;
-    margin-right: 6px;
-    padding-right: 18px;
-    text-decoration: none;
-    font-weight: 700
+	background: transparent
+		url('/images/4.0/buttons/button_inactive_right.gif') no-repeat scroll
+		top right;
+	color: #FFF;
+	display: block;
+	float: left;
+	font: 400 12px arial, sans-serif;
+	height: 24px;
+	margin-right: 6px;
+	padding-right: 18px;
+	text-decoration: none;
+	font-weight: 700
 }
 
 a.buttonInactive span {
-    background: transparent url('/images/4.0/buttons/button_inactive_left.gif') no-repeat;
-    display: block;
-    line-height: 14px;
-    color: #AAA;
-    padding: 5px 0 5px 18px
+	background: transparent
+		url('/images/4.0/buttons/button_inactive_left.gif') no-repeat;
+	display: block;
+	line-height: 14px;
+	color: #AAA;
+	padding: 5px 0 5px 18px
 }
 
 a.buttonInactive:active {
-    background: transparent url('/images/4.0/buttons/button_inactive_right.gif') no-repeat scroll top right;
-    background-position: bottom right;
-    color: #FFF;
-    outline: none
+	background: transparent
+		url('/images/4.0/buttons/button_inactive_right.gif') no-repeat scroll
+		top right;
+	background-position: bottom right;
+	color: #FFF;
+	outline: none
 }
 
 a.buttonInactive:active span {
-    background: transparent url('/images/4.0/buttons/button_inactive_left.gif') no-repeat;
-    background-position: bottom left;
-    padding: 5px 0 5px 18px
+	background: transparent
+		url('/images/4.0/buttons/button_inactive_left.gif') no-repeat;
+	background-position: bottom left;
+	padding: 5px 0 5px 18px
 }
 
 .goButton {
-    background: transparent url('/images/4.0/icons/accept.png') no-repeat;
-    height: 16px;
-    width: 16px;
-    margin: 3px 2px 0px 5px
+	background: transparent url('/images/4.0/icons/accept.png') no-repeat;
+	height: 16px;
+	width: 16px;
+	margin: 3px 2px 0px 5px
 }
 
 .cancelButton {
-    background: transparent url('/images/4.0/icons/close.png') no-repeat;
-    height: 16px;
-    width: 16px;
-    cursor: pointer
+	background: transparent url('/images/4.0/icons/close.png') no-repeat;
+	height: 16px;
+	width: 16px;
+	cursor: pointer
 }
 
 #header {
-    border-bottom: 3px solid #2D6EBE;
+	border-bottom: 3px solid #2D6EBE;
 }
 
-#header, #footer {
-    position: relative;
-    /* setting z-index here to make sure that header stacks higher than the main body content
+#header,#footer {
+	position: relative;
+	/* setting z-index here to make sure that header stacks higher than the main body content
     so that header menus drop down on TOP of the main content */
-    z-index: 2;  
-    height: 64px;
-    background: transparent url(/images/4.0/backgrounds/header_background.jpg) repeat-x scroll
+	z-index: 2;
+	height: 64px;
+	background: transparent
+		url(/images/4.0/backgrounds/header_background.jpg) repeat-x scroll
 }
 
 .right {
-    float: right
+	float: right
 }
 
 .left {
-    float: left
+	float: left
 }
 
 .clear {
-    clear: both
+	clear: both
 }
 
 .none {
-    display: none
+	display: none
 }
 
 #menu {
-    
+	
 }
 
 #menu div {
-    display: block;
-    position: absolute;
-    background-color: #FFF;
-    padding: 2px 3px;
-    border: 1px solid #777;
-    width: 145px
+	display: block;
+	position: absolute;
+	background-color: #FFF;
+	padding: 2px 3px;
+	border: 1px solid #777;
+	width: 145px
 }
 
 #menu ul {
-    margin: 0px;
-    padding: 0px
+	margin: 0px;
+	padding: 0px
 }
 
 #menu li {
-    list-style: none;
-    padding: 2px 4px;
-    margin: 2px 0px;
-    font-weight: bold;
-    cursor: pointer
+	list-style: none;
+	padding: 2px 4px;
+	margin: 2px 0px;
+	font-weight: bold;
+	cursor: pointer
 }
 
 #menu li:hover {
-    border: 1px solid #4CD3F6;
-    padding: 1px 3px;
-    color: #FF8400;
+	border: 1px solid #4CD3F6;
+	padding: 1px 3px;
+	color: #FF8400;
 }
 
 #menu li a,a:active {
-    color: #4CD3F6
+	color: #4CD3F6
 }
 
 #subMenu {
-    
+	
 }
 
 .arrow {
-    background: url('/images/4.0/icons/play.png') no-repeat 100% 50%
+	background: url('/images/4.0/icons/play.png') no-repeat 100% 50%
 }
 
 .position1 {
-    top: 65px;
-    left: 499px
+	top: 65px;
+	left: 499px
 }
 
 .position2 {
-    top: 95px;
-    left: 644px
+	top: 95px;
+	left: 644px
 }
 
 body .dijitMenu {
-    border: 1px solid #006DBD;
-    margin: 0px;
-    padding: 0px;
-    background-color: white
+	border: 1px solid #006DBD;
+	margin: 0px;
+	padding: 0px;
+	background-color: white
 }
 
 body .dijitMenuTable {
-    margin: 0px 0px;
-    border-collapse: collapse;
-    border-width: 1px;
-    background-color: white;
-    padding: 2px
+	margin: 0px 0px;
+	border-collapse: collapse;
+	border-width: 1px;
+	background-color: white;
+	padding: 2px
 }
 
 body .dijitMenuTable TR {
-    margin: 2px
+	margin: 2px
 }
 
 body .dijitMenuItem {
-    white-space: nowrap;
-    padding: 2px 4px;
-    font: menu;
-    margin: 0;
-    color: #555
+	white-space: nowrap;
+	padding: 2px 4px;
+	font: menu;
+	margin: 0;
+	color: #555
 }
 
 body .dijitMenuItem TD {
-    padding: 3px;
-    outline: 0
+	padding: 3px;
+	outline: 0
 }
 
 body .dijitMenuItemHover {
-    cursor: pointer;
-    cursor: hand;
-    background-color: #34C9F3;
-    color: #000
+	cursor: pointer;
+	cursor: hand;
+	background-color: #34C9F3;
+	color: #000
 }
 
 body .dijitMenuItemIcon {
-    position: relative;
-    background-position: center center;
-    background-repeat: no-repeat
+	position: relative;
+	background-position: center center;
+	background-repeat: no-repeat
 }
 
 body .dijitMenuItemDisabled * {
-    /* for a disabled menu item, just set it to mostly transparent */
-    /* opacity:0.3;*/
-    cursor: default
+	/* for a disabled menu item, just set it to mostly transparent */
+	/* opacity:0.3;*/
+	cursor: default
 }
 
-body .dj_ie .dijit_a11y .dijitMenuItemDisabled td,
-body .dj_ie .dijitMenuItemDisabled *,
-body .dj_ie .dijitMenuItemDisabled td {
-    color: gray !important;
-    filter: alpha(opacity=35)
+body .dj_ie .dijit_a11y .dijitMenuItemDisabled td,body .dj_ie .dijitMenuItemDisabled *,body .dj_ie .dijitMenuItemDisabled td
+	{
+	color: gray !important;
+	filter: alpha(opacity = 35)
 }
 
 body .dijitMenuItemLabel {
-    position: relative;
-    vertical-align: middle
+	position: relative;
+	vertical-align: middle
 }
 
 body .dijit_a11y .dijitMenuItemHover .dijitMenuItemLabel {
-    border-width: 1px;
-    border-style: solid
+	border-width: 1px;
+	border-style: solid
 }
 
 body .dijit_a11y .dijitMenuItemHover {
-    border: 1px #fff dotted !important
+	border: 1px #fff dotted !important
 }
 
 body .dijit_a11y .dijitMenuExpandInner {
-    display: block !important
+	display: block !important
 }
 
 /* separator can be two pixels -- set border of either one to 0px to have only one */
-
 body .dijitMenuSeparatorTop {
-    height: 50%;
-    margin: 0px;
-    margin-top: 3px;
-    font-size: 1px
+	height: 50%;
+	margin: 0px;
+	margin-top: 3px;
+	font-size: 1px
 }
 
 body .dijitMenuSeparatorBottom {
-    height: 50%;
-    margin: 0px;
-    margin-bottom: 3px;
-    font-size: 1px
+	height: 50%;
+	margin: 0px;
+	margin-bottom: 3px;
+	font-size: 1px
 }
 
 body .dijitMenuSeparator {
-    background-color: #FFF;
-    font-family: menu;
-    margin: 0pt
+	background-color: #FFF;
+	font-family: menu;
+	margin: 0pt
 }
 
 body .dijitMenuExpandEnabled {
-    background: transparent url('/images/4.0/icons/play.png') scroll 0%;
-    width: 16px;
-    height: 16px;
-    overflow: hidden;
-    margin: 0;
-    padding: 0;
-    background-repeat: none
+	background: transparent url('/images/4.0/icons/play.png') scroll 0%;
+	width: 16px;
+	height: 16px;
+	overflow: hidden;
+	margin: 0;
+	padding: 0;
+	background-repeat: none
 }
 
 body .dijitArrowNode {
-    display: none
+	display: none
 }
 
 body .dijitReset {
-    line-height: normal
+	line-height: normal
 }
 
 body .dijitPopup {
-    position: absolute
+	position: absolute
 }
 
 .myIcon {
-    background: transparent url('/images/4.0/icons/play.png') scroll 0%;
-    width: 16px;
-    height: 16px;
-    overflow: hidden;
-    margin: 0;
-    padding: 0
+	background: transparent url('/images/4.0/icons/play.png') scroll 0%;
+	width: 16px;
+	height: 16px;
+	overflow: hidden;
+	margin: 0;
+	padding: 0
 }
 
-.resourceIcon,.nagiosIcon,.recentIcon,.favoriteIcon,.alertIcon,.reportIcon {
-    width: 16px;
-    height: 16px;
-    overflow: hidden;
-    margin: 0;
-    padding: 0
+.resourceIcon,.nagiosIcon,.recentIcon,.favoriteIcon,.alertIcon,.reportIcon
+	{
+	width: 16px;
+	height: 16px;
+	overflow: hidden;
+	margin: 0;
+	padding: 0
 }
 
 .resourceIcon {
-    background: transparent url('/images/4.0/icons/resource.png') no-repeat scroll 0%
+	background: transparent url('/images/4.0/icons/resource.png') no-repeat
+		scroll 0%
 }
 
 .nagiosIcon {
-    background: transparent url('/images/4.0/icons/nagios.gif') no-repeat scroll 0%
+	background: transparent url('/images/4.0/icons/nagios.gif') no-repeat
+		scroll 0%
 }
 
 .recentIcon {
-    background: transparent url('/images/4.0/icons/recent1.png') no-repeat scroll 0%
+	background: transparent url('/images/4.0/icons/recent1.png') no-repeat
+		scroll 0%
 }
 
 .favoriteIcon {
-    background: transparent url('/images/4.0/icons/favorite.png') no-repeat scroll 0%
+	background: transparent url('/images/4.0/icons/favorite.png') no-repeat
+		scroll 0%
 }
 
 .alertIcon {
-    background: transparent url('/images/4.0/icons/alert.png') no-repeat scroll 0%
+	background: transparent url('/images/4.0/icons/alert.png') no-repeat
+		scroll 0%
 }
 
 .reportIcon {
-    background: transparent url('/images/4.0/icons/report.png') no-repeat scroll 0%
+	background: transparent url('/images/4.0/icons/report.png') no-repeat
+		scroll 0%
 }
 
 /* table */
-
 .dojogrid {
-    width: 100%;
-    height: 25em;
-    padding: 1px
+	width: 100%;
+	height: 25em;
+	padding: 1px
 }
 
 /* MIG */
-
 #migContainer {
-    background-color: #EEE;
-    padding-top: 7px;
+	background-color: #EEE;
+	padding-top: 7px;
 }
 
-#migContainer a:visited, #migContainer a:hover, #migContainer a {
-    color: #3179D4
+#migContainer a:visited,#migContainer a:hover,#migContainer a {
+	color: #3179D4
 }
 
 .FooterTitle {
-    color: #fff;
-    font-family: arial, sans-serif;
-    font-size: 12px;
-    font-weight: 700
+	color: #fff;
+	font-family: arial, sans-serif;
+	font-size: 12px;
+	font-weight: 700
 }
 
 .resourceTitle {
-    color: #222
+	color: #222
 }
 
 .resourceSubTitle {
-    color: #222
+	color: #222
 }
 
 /*Resource Hub Fitler Box*/
-
 .filterBox {
-    clear: both;
-    margin-left: 7px
+	clear: both;
+	margin-left: 7px
 }
 
 .filterBoxTitle {
-    float: left;
-    font-weight: bold;
-    padding: 4px 9px 0 0
+	float: left;
+	font-weight: bold;
+	padding: 4px 9px 0 0
 }
 
 .filterBoxFields {
-    float: left
+	float: left
 }
 
-.filterBox span, .filterBox label {
-    font-weight: bold
+.filterBox span,.filterBox label {
+	font-weight: bold
 }
 
-.filterBox input[type="password"], .filterBox input[type="text"] {
-    border: 1px solid gray;
-    padding: 3px;
-    width: 180px
+.filterBox input[type="password"],.filterBox input[type="text"] {
+	border: 1px solid gray;
+	padding: 3px;
+	width: 180px
 }
 
 .filterBox select {
-    border: 1px solid gray;
-    padding: 2px;
-    width: 145px;
+	border: 1px solid gray;
+	padding: 2px;
+	width: 145px;
 }
 
-.filterBox input[type="radio"], .filterBox input[type="checkbox"] {
-    margin-left: 10px
+.filterBox input[type="radio"],.filterBox input[type="checkbox"] {
+	margin-left: 10px
 }
 
 .filterBox span {
-    margin-left: 10px;
+	margin-left: 10px;
 }
 
 /* container for the tools menu dropdown */
 .toolsMenu {
-    clear: both;
-    height: 20px;
-    cursor: pointer;
+	clear: both;
+	height: 20px;
+	cursor: pointer;
 }
- 
+
 #toolMenu table {
-    width: 200px;
+	width: 200px;
 }
 
 .toolsMenuStacked {
-    height: 14px;
-    float: left;
-    margin: 2px 10px 0px 0px;
-    padding: 2px 2px 2px 4px;
-    cursor: pointer;
+	height: 14px;
+	float: left;
+	margin: 2px 10px 0px 0px;
+	padding: 2px 2px 2px 4px;
+	cursor: pointer;
 }
 
 .navMap {
-    float: left;
-    height: 14px;
-    margin: 2px 10px 6px 0;
-    background-color: #EDF0F8;
-    border: 1px solid;
-    border-color: #BDCEF0 #477DDF #477DDF #BDCEF0;
-    padding: 2px 2px 2px 4px;
-    color: #039;
-    font-weight: bold;
-    cursor: pointer
+	float: left;
+	height: 14px;
+	margin: 2px 10px 6px 0;
+	background-color: #EDF0F8;
+	border: 1px solid;
+	border-color: #BDCEF0 #477DDF #477DDF #BDCEF0;
+	padding: 2px 2px 2px 4px;
+	color: #039;
+	font-weight: bold;
+	cursor: pointer
 }
 
 /* chart css */
-
 .chart {
-    cursor: default;
-    height: 250px;
-    width: 300px;
+	cursor: default;
+	height: 250px;
+	width: 300px;
 }
 
 .chartW {
-    cursor: default;
-    height: 250px;
-    width: 700px;
+	cursor: default;
+	height: 250px;
+	width: 700px;
 }
 
 .xlegend {
-    text-align: right;
+	text-align: right;
 }
 
 .ylegend {
-    float: left;
-    width: 2px;
+	float: left;
+	width: 2px;
 }
 
 div.timeplot-container {
-    border: 0pt none;
+	border: 0pt none;
 }
 
 canvas {
-    
+	
 }
 
-div.timeplot-valueflag, div.timeplot-timeflag {
-    background-color: #73D2F7;
-    border: 1px solid #2813F1;
+div.timeplot-valueflag,div.timeplot-timeflag {
+	background-color: #73D2F7;
+	border: 1px solid #2813F1;
 }
 
 div.timeplot-valueflag-pole {
-    border-left: 1px solid #2813F1;
+	border-left: 1px solid #2813F1;
 }
 
-.none, img.timeplot-copyright {
-    display: none;
+.none,img.timeplot-copyright {
+	display: none;
 }
 
 .timeline-ether-marker-bottom {
-    border-left: 1px solid #AAAAAA;
-    color: #AAAAAA;
-    height: 1.5em;
-    padding-left: 2px;
-    width: 5em;
+	border-left: 1px solid #AAAAAA;
+	color: #AAAAAA;
+	height: 1.5em;
+	padding-left: 2px;
+	width: 5em;
 }
 
 .timeline-ether-marker-bottom-emphasized {
-    border-left: 1px solid #AAAAAA;
-    color: black;
-    height: 2em;
-    padding-left: 2px;
-    width: 5em;
+	border-left: 1px solid #AAAAAA;
+	color: black;
+	height: 2em;
+	padding-left: 2px;
+	width: 5em;
 }
 
 .timeline-ether-marker-top {
-    border-left: 1px solid #AAAAAA;
-    color: #AAAAAA;
-    height: 1.5em;
-    padding-left: 2px;
-    width: 5em;
+	border-left: 1px solid #AAAAAA;
+	color: #AAAAAA;
+	height: 1.5em;
+	padding-left: 2px;
+	width: 5em;
 }
 
 .timeline-ether-marker-top-emphasized {
-    border-left: 1px solid #AAAAAA;
-    color: black;
-    height: 2em;
-    padding-left: 2px;
-    width: 5em;
+	border-left: 1px solid #AAAAAA;
+	color: black;
+	height: 2em;
+	padding-left: 2px;
+	width: 5em;
 }
 
 .timeline-ether-marker-right {
-    border-top: 1px solid #AAAAAA;
-    color: #AAAAAA;
-    height: 1.5em;
-    padding-top: 2px;
-    width: 5em;
+	border-top: 1px solid #AAAAAA;
+	color: #AAAAAA;
+	height: 1.5em;
+	padding-top: 2px;
+	width: 5em;
 }
 
 .timeline-ether-marker-right-emphasized {
-    border-top: 1px solid #AAAAAA;
-    color: black;
-    height: 1.5em;
-    padding-top: 2px;
-    width: 7em;
+	border-top: 1px solid #AAAAAA;
+	color: black;
+	height: 1.5em;
+	padding-top: 2px;
+	width: 7em;
 }
 
 .timeline-ether-marker-left {
-    border-top: 1px solid #AAAAAA;
-    color: #AAAAAA;
-    height: 1.5em;
-    padding-top: 2px;
-    width: 5em;
+	border-top: 1px solid #AAAAAA;
+	color: #AAAAAA;
+	height: 1.5em;
+	padding-top: 2px;
+	width: 5em;
 }
 
 .timeline-ether-marker-left-emphasized {
-    border-top: 1px solid #AAAAAA;
-    color: black;
-    height: 1.5em;
-    padding-top: 2px;
-    width: 7em;
+	border-top: 1px solid #AAAAAA;
+	color: black;
+	height: 1.5em;
+	padding-top: 2px;
+	width: 7em;
 }
 
 .timeline-duration-event {
-    border: 1px solid blue;
-    overflow: hidden;
-    position: absolute;
+	border: 1px solid blue;
+	overflow: hidden;
+	position: absolute;
 }
 
 .timeline-instant-event2 {
-    border-left: 1px solid blue;
-    overflow: hidden;
-    padding-left: 2px;
-    position: absolute;
+	border-left: 1px solid blue;
+	overflow: hidden;
+	padding-left: 2px;
+	position: absolute;
 }
 
 .timeline-instant-event {
-    overflow: hidden;
-    position: absolute;
+	overflow: hidden;
+	position: absolute;
 }
 
 .timeline-event-bubble-title {
-    border-bottom: 1px solid #888888;
-    font-weight: bold;
-    margin-bottom: 0.5em;
+	border-bottom: 1px solid #888888;
+	font-weight: bold;
+	margin-bottom: 0.5em;
 }
 
 .timeline-event-bubble-wiki {
-    color: #A0A040;
-    margin: 0.5em;
-    text-align: right;
+	color: #A0A040;
+	margin: 0.5em;
+	text-align: right;
 }
 
 .timeline-event-bubble-wiki a {
-    color: #A0A040;
+	color: #A0A040;
 }
 
 .timeline-event-bubble-time {
-    color: #AAAAAA;
+	color: #AAAAAA;
 }
 
 .timeline-event-bubble-image {
-    float: right;
-    padding-bottom: 5px;
-    padding-left: 5px;
+	float: right;
+	padding-bottom: 5px;
+	padding-left: 5px;
 }
 
 .timeline-container {
-    overflow: hidden;
-    position: relative;
+	overflow: hidden;
+	position: relative;
 }
 
 .timeline-message-container {
-    display: none;
-    left: 35%;
-    position: absolute;
-    right: 35%;
-    top: 30%;
-    z-index: 1000;
+	display: none;
+	left: 35%;
+	position: absolute;
+	right: 35%;
+	top: 30%;
+	z-index: 1000;
 }
 
 .timeline-message {
-    font-size: 120%;
-    font-weight: bold;
-    text-align: center;
+	font-size: 120%;
+	font-weight: bold;
+	text-align: center;
 }
 
 .timeline-message img {
-    vertical-align: middle;
+	vertical-align: middle;
 }
 
 .timeline-band {
-    background: #EEEEEE none repeat scroll 0% 0%;
-    position: absolute;
-    z-index: 10;
+	background: #EEEEEE none repeat scroll 0% 0%;
+	position: absolute;
+	z-index: 10;
 }
 
 .timeline-band-inner {
-    height: 100%;
-    position: relative;
-    width: 100%;
+	height: 100%;
+	position: relative;
+	width: 100%;
 }
 
 .timeline-band-input {
-    height: 1em;
-    overflow: hidden;
-    position: absolute;
-    width: 1em;
-    z-index: 0;
+	height: 1em;
+	overflow: hidden;
+	position: absolute;
+	width: 1em;
+	z-index: 0;
 }
 
 .timeline-band-input input {
-    width: 0pt;
+	width: 0pt;
 }
 
 .timeline-band-layer {
-    height: 100%;
-    position: absolute;
-    width: 100%;
+	height: 100%;
+	position: absolute;
+	width: 100%;
 }
 
 .timeline-band-layer-inner {
-    height: 100%;
-    position: relative;
-    width: 100%;
+	height: 100%;
+	position: relative;
+	width: 100%;
 }
 
 .timeplot-container {
-    border: 1px solid #CCCCCC;
-    height: 200px;
-    overflow: hidden;
-    /*padding:12px 14px;*/
-    position: relative;
+	border: 1px solid #CCCCCC;
+	height: 200px;
+	overflow: hidden;
+	/*padding:12px 14px;*/
+	position: relative;
 }
 
 .timeplot-copyright {
-    cursor: pointer;
-    left: 0pt;
-    position: absolute;
-    top: 0pt;
-    z-index: 1000;
+	cursor: pointer;
+	left: 0pt;
+	position: absolute;
+	top: 0pt;
+	z-index: 1000;
 }
 
 .timeplot-message-container {
-    display: none;
-    left: 35%;
-    max-width: 400px;
-    position: absolute;
-    right: 35%;
-    top: 30%;
-    z-index: 1000;
+	display: none;
+	left: 35%;
+	max-width: 400px;
+	position: absolute;
+	right: 35%;
+	top: 30%;
+	z-index: 1000;
 }
 
 .timeplot-message {
-    font-size: 120%;
-    font-weight: bold;
-    text-align: center;
+	font-size: 120%;
+	font-weight: bold;
+	text-align: center;
 }
 
 .timeplot-message img {
-    vertical-align: middle;
+	vertical-align: middle;
 }
 
 .timeplot-div {
-    position: absolute;
+	position: absolute;
 }
 
 .timeplot-grid-label {
-    font-size: 9px;
-    color: #FFF !important;
+	font-size: 9px;
+	color: #FFF !important;
 }
 
 .timeplot-event-box {
-    cursor: pointer;
+	cursor: pointer;
 }
 
 .timeplot-event-box-highlight {
-    border: 1px solid #FFB03B;
+	border: 1px solid #FFB03B;
 }
 
 .timeplot-valueflag {
-    background-color: #FFE57F;
-    border: 1px solid #FFB02D;
-    display: none;
-    font-weight: bold;
-    padding: 2px 4px;
-    text-align: center;
-    z-index: 1000;
+	background-color: #FFE57F;
+	border: 1px solid #FFB02D;
+	display: none;
+	font-weight: bold;
+	padding: 2px 4px;
+	text-align: center;
+	z-index: 1000;
 }
 
 .timeplot-valueflag-line {
-    display: none;
-    height: 14px;
-    width: 14px;
-    z-index: 1000;
+	display: none;
+	height: 14px;
+	width: 14px;
+	z-index: 1000;
 }
 
 .timeplot-timeflag {
-    background-color: #FFE57F;
-    border: 1px solid #FFB02D;
-    display: none;
-    font-weight: bold;
-    padding: 2px 4px;
-    text-align: center;
-    z-index: 1000;
+	background-color: #FFE57F;
+	border: 1px solid #FFB02D;
+	display: none;
+	font-weight: bold;
+	padding: 2px 4px;
+	text-align: center;
+	z-index: 1000;
 }
 
 .timeplot-timeflag-triangle {
-    display: none;
-    height: 6px;
-    width: 11px;
-    z-index: 1001;
+	display: none;
+	height: 6px;
+	width: 11px;
+	z-index: 1001;
 }
 
 .timeplot-valueflag-pole {
-    border-left: 1px solid #FFB02D;
-    display: none;
-    z-index: 999;
+	border-left: 1px solid #FFB02D;
+	display: none;
+	z-index: 999;
 }
 
 .timeplot-lens {
-    border: 1px solid #FFB02D;
-    display: none;
-    z-index: 998;
+	border: 1px solid #FFB02D;
+	display: none;
+	z-index: 998;
 }
 
 /* projection chart specific chart css styles  */
-
 .projectionChart .timeplot-grid-label {
-    color: #000 !important;
+	color: #000 !important;
 }
 
 /*Resource Hub*/
-
 .hubContainer table {
-    
+	
 }
 
-.hubContainer a:visited,.hubContainer a:hover, .hubContainer a {
-    color: #3179D4
+.hubContainer a:visited,.hubContainer a:hover,.hubContainer a {
+	color: #3179D4
 }
 
 .hubContainer {
-    border: 1px solid gray;
-    background-color: #FFF
+	border: 1px solid gray;
+	background-color: #FFF
 }
 
 #dijit_MenuItem_2 {
-    background-color: #FFF
+	background-color: #FFF
 }
 
 #propertiesAccordion {
-    background-color: #FFF
+	background-color: #FFF
 }
 
 .ajaxLoading {
-    position: absolute;
-    top: 22px;
-    right: 5px;
+	position: absolute;
+	top: 22px;
+	right: 5px;
 }
 
 textarea {
-    border: 1px solid gray;
-    padding: 2px
+	border: 1px solid gray;
+	padding: 2px
 }
 
-.dialogbody input[type="password"], .dialogbody input[type="text"] {
-    width: auto;
+.dialogbody input[type="password"],.dialogbody input[type="text"] {
+	width: auto;
 }
 
 .dialog select {
-    padding: 2px;
-    border: 1px solid gray;
+	padding: 2px;
+	border: 1px solid gray;
 }
 
 select {
-    padding: 2px;
+	padding: 2px;
 }
 
 .ToolbarContent td {
-    background-color: #fff;
-    padding: 1px;
-/*    border-left:1px solid #D5D8DE;*/
-/*    border-right:1px solid #D5D8DE;*/
+	background-color: #fff;
+	padding: 1px;
+	/*    border-left:1px solid #D5D8DE;*/
+	/*    border-right:1px solid #D5D8DE;*/
 }
 
 .dojoTabPaneWrapper {
-    background-color: #fff
+	background-color: #fff
 }
 
 /* dashboard widget css */
-.widget {
-/*    width: 450px;*/
-    background: #000 url('/images/widget_bg.jpg') repeat-x;
-    position: relative;
-    color: #FFF;
-    font-family: Helvetica, sans-serif;
-    
-    /* IE magic to make stuff not disappear on drag-n-drop sorting */
-    zoom: 1;
+.widget { /*    width: 450px;*/
+	background: #000 url('/images/widget_bg.jpg') repeat-x;
+	position: relative;
+	color: #FFF;
+	font-family: Helvetica, sans-serif;
+	/* IE magic to make stuff not disappear on drag-n-drop sorting */
+	zoom: 1;
 }
 
-.widget h2, .widget h3 {
-    margin: 0px;
-    font-size: 12px;
-    font-weight: 700;
+.widget h2,.widget h3 {
+	margin: 0px;
+	font-size: 12px;
+	font-weight: 700;
 }
 
 .widgetTitle {
-    background: transparent url('/images/4.0/backgrounds/panel_gray.jpg') repeat-x scroll top left;
-    padding: 6px 10px;
+	background: transparent url('/images/4.0/backgrounds/panel_gray.jpg')
+		repeat-x scroll top left;
+	padding: 6px 10px;
 }
 
 .widget .config_btn {
-    position: absolute;
-    right: 30px;
-    top: 4px;
-    cursor: pointer;
+	position: absolute;
+	right: 30px;
+	top: 4px;
+	cursor: pointer;
 }
 
 .widget .remove_btn {
-    position: absolute;
-    right: 10px;
-    top: 4px;
-    cursor: pointer;
+	position: absolute;
+	right: 10px;
+	top: 4px;
+	cursor: pointer;
 }
 
 .widget .expand_btn {
-    position: absolute;
-    right: 10px;
-    bottom: 10px;
-    cursor: pointer;
+	position: absolute;
+	right: 10px;
+	bottom: 10px;
+	cursor: pointer;
 }
 
 .widget .pause_btn {
-    position: absolute;
-    left: 10px;
-    bottom: 10px;
-    cursor: pointer;
+	position: absolute;
+	left: 10px;
+	bottom: 10px;
+	cursor: pointer;
 }
 
 .widget .play_btn {
-    position: absolute;
-    left: 10px;
-    bottom: 10px;
+	position: absolute;
+	left: 10px;
+	bottom: 10px;
 }
 
 .widget .refresh_btn {
-    cursor: pointer;
+	cursor: pointer;
 }
 
 .widget .last_updated {
-    position: absolute;
-    right: 10px;
-    bottom: 10px;
+	position: absolute;
+	right: 10px;
+	bottom: 10px;
 }
 
 .widget .hidelegend_btn {
-   display:none
+	display: none
 }
 
 .widget .legend {
-   display:none
+	display: none
 }
 
-.widget .content select, .widget input {
-    width: 120px;
-    margin: 10px 0px;
+.widget .content select,.widget input {
+	width: 120px;
+	margin: 10px 0px;
 }
 
 .widget .loading {
-    padding: 0px 10px 10px 10px;
-    margin: 0px;
-    display: block;
-
-    /* magic for IE to ensure the .content block hasLayout property gets triggered so
-     that the widget doesn't become wider than the page but is scaled properly (fixes bug #HQ-1402) */ 
-    zoom: 1; 
+	padding: 0px 10px 10px 10px;
+	margin: 0px;
+	display: block;
+	/* magic for IE to ensure the .content block hasLayout property gets triggered so
+     that the widget doesn't become wider than the page but is scaled properly (fixes bug #HQ-1402) */
+	zoom: 1;
 }
 
 .widget .error_loading {
-    padding: 0px 10px 10px 10px;
-    margin: 0px;
-    display: none;
-    opacity: 0;
-    
-    /* magic for IE to ensure the .content block hasLayout property gets triggered so
-     that the widget doesn't become wider than the page but is scaled properly (fixes bug #HQ-1402) */ 
-    zoom: 1; 
+	padding: 0px 10px 10px 10px;
+	margin: 0px;
+	display: none;
+	opacity: 0;
+	/* magic for IE to ensure the .content block hasLayout property gets triggered so
+     that the widget doesn't become wider than the page but is scaled properly (fixes bug #HQ-1402) */
+	zoom: 1;
 }
+
 .widget .notfound {
-   display:none;
-   zoom: 1; 
+	display: none;
+	zoom: 1;
 }
 
 .widget .instructions {
-    padding: 0px 10px 10px 10px;
-    margin: 0px;
-    display: none;
-    opacity: 0;
-
-    /* magic for IE to ensure the .content block hasLayout property gets triggered so
-     that the widget doesn't become wider than the page but is scaled properly (fixes bug #HQ-1402) */ 
-    zoom: 1; 
+	padding: 0px 10px 10px 10px;
+	margin: 0px;
+	display: none;
+	opacity: 0;
+	/* magic for IE to ensure the .content block hasLayout property gets triggered so
+     that the widget doesn't become wider than the page but is scaled properly (fixes bug #HQ-1402) */
+	zoom: 1;
 }
 
 .widget .content {
-    padding: 0px 10px 10px 10px;
-    margin: 0px;
-    display: none;
-    opacity: 0;
-
-    /* magic for IE to ensure the .content block hasLayout property gets triggered so
-     that the widget doesn't become wider than the page but is scaled properly (fixes bug #HQ-1402) */ 
-    zoom: 1; 
+	padding: 0px 10px 10px 10px;
+	margin: 0px;
+	display: none;
+	opacity: 0;
+	/* magic for IE to ensure the .content block hasLayout property gets triggered so
+     that the widget doesn't become wider than the page but is scaled properly (fixes bug #HQ-1402) */
+	zoom: 1;
 }
 
 .widget .contents {
-   display: none;
-   padding: 0px 10px 10px 10px;
-
+	display: none;
+	padding: 0px 10px 10px 10px;
 }
 
 .widget .config {
-    padding: 0px 10px 10px 10px;
-    margin: 0px;
-    display: none;
-    opacity: 0;
-/*    
+	padding: 0px 10px 10px 10px;
+	margin: 0px;
+	display: none;
+	opacity: 0;
+	/*    
 
 visibility: hidden;*/
 }
 
 .widget .config form fieldset {
-    margin-bottom: 10px;
+	margin-bottom: 10px;
 }
 
 .widget .config form legend {
-    padding: 0 2px;
-    font-weight: bold;
-    color: #FFF;
+	padding: 0 2px;
+	font-weight: bold;
+	color: #FFF;
 }
 
 .widget .config form label {
-    display: inline-block;
-    /* Width of labels */
-    width: 120px;
-
-    /* firefox 2 fix */
-    display: -moz-inline-box;
-    -moz-box-orient: vertical
+	display: inline-block;
+	/* Width of labels */
+	width: 120px;
+	/* firefox 2 fix */
+	display: -moz-inline-box;
+	-moz-box-orient: vertical
 }
 
 /* fix for IE inline-block problem */
-
-<!--[if IE]><!-->
-.widget .config form label {
-    zoom: 1;
-    display: inline;
+<!--
+[if IE]><!-- > .widget .config form label {
+	zoom: 1;
+	display: inline;
 }
 
-<!--<![endif]-->
+<!--
+<!
+[endif]-->
 
 .widget .config form ol {
-    margin: 0;
-    padding: 0;
+	margin: 0;
+	padding: 0;
 }
 
 .widget .config form li {
-    list-style: none;
-    padding: 5px;
-    margin: 0;
+	list-style: none;
+	padding: 5px;
+	margin: 0;
 }
 
 /* chart widget stuff */
-
 #chartWidget .content {
-    height: 322px;
+	height: 322px;
 }
 
 #chartWidget #chart_container {
-    position: absolute;
-    top: 35px;
-    right: 10px;
-/*  width: 300px;*/
-    height: 250px;
+	position: absolute;
+	top: 35px;
+	right: 10px;
+	/*  width: 300px;*/
+	height: 250px;
 }
 
-#chartWidget #widget_chart {
-/*    width: 300px;*/
-    height: 250px;
-    border: 1px solid #DDD;
+#chartWidget #widget_chart { /*    width: 300px;*/
+	height: 250px;
+	border: 1px solid #DDD;
 }
 
 #chartWidget #chart_container .cTitle a {
-    color: #FFFFFF;
+	color: #FFFFFF;
 }
 
 /* summary widget stuff */
-
 #summaryWidget .content {
-    padding-bottom: 30px; /* leave room for the "last-updated" div */
+	padding-bottom: 30px; /* leave room for the "last-updated" div */
 }
 
 #summaryWidget fieldset {
-    padding: 1em;
+	padding: 1em;
 }
 
 #summaryWidget .content table {
-    margin-top: 10px;
-    color: #FFF;
-    border: 0px;
-    border-spacing: 0px;
-    font-size: 90%;
-    width: 100%;
+	margin-top: 10px;
+	color: #FFF;
+	border: 0px;
+	border-spacing: 0px;
+	font-size: 90%;
+	width: 100%;
 }
 
 #summaryWidget .content th {
-    width: 40%;
-    font-weight: normal;
-    margin: 0px;
-    text-align: right;
-    color: #FFFFFF;
+	width: 40%;
+	font-weight: normal;
+	margin: 0px;
+	text-align: right;
+	color: #FFFFFF;
 }
 
-#summaryWidget .content th a,#summaryWidget .content th a:visited,#summaryWidget .content th a:hover {
-    color: #FFFFFF;
-    font-weight: normal;
+#summaryWidget .content th a,#summaryWidget .content th a:visited,#summaryWidget .content th a:hover
+	{
+	color: #FFFFFF;
+	font-weight: normal;
 }
 
 #summaryWidget .content thead th {
-    width: 30%;
-    text-align: center;
+	width: 30%;
+	text-align: center;
 }
 
 #summaryWidget .content td {
-    text-align: center;
-    padding: 4px;
+	text-align: center;
+	padding: 4px;
 }
 
-/* HQ-1491 fix */
-/* 
+/* HQ-1491 fix */ /* 
 #summaryWidget .content tr.even {
     background-color: #4F4F4F;
 }
@@ -1695,87 +1657,84 @@ visibility: hidden;*/
     background-color: transparent;
 }
 */
-
 #summaryWidget .content .lcol {
-    border-right: 1px solid #FFF;
-    padding: 0px;
-    vertical-align: top;
+	border-right: 1px solid #FFF;
+	padding: 0px;
+	vertical-align: top;
 }
 
 #summaryWidget .content .rcol {
-    padding: 0px;
-    vertical-align: top;
+	padding: 0px;
+	vertical-align: top;
 }
 
 #summaryWidget .config table {
-    margin-top: 10px;
-    color: #FFF;
-    border: 0px;
-    border-spacing: 0px;
-    font-size: 100%;
-    width: 100%;
+	margin-top: 10px;
+	color: #FFF;
+	border: 0px;
+	border-spacing: 0px;
+	font-size: 100%;
+	width: 100%;
 }
 
-#summaryWidget .config label {
-/*    display: inline;*/
-    color: #FFF;
-    font-size: inherit;
+#summaryWidget .config label { /*    display: inline;*/
+	color: #FFF;
+	font-size: inherit;
 }
 
 #summaryWidget .config select {
-    width: 130px;
+	width: 130px;
 }
 
 #summaryWidget .config button {
-    background-color: transparent; 
-    border: 0px;
+	background-color: transparent;
+	border: 0px;
 }
 
 /* schedule maintenance downtime dialog styling */
-
 .dijitDialog button {
-    color: #000;
+	color: #000;
 }
 
 .dijitDialog fieldset {
-    border: 1px solid gray;
-    padding: 4pt;
-    margin: 5pt 0pt;
+	border: 1px solid gray;
+	padding: 4pt;
+	margin: 5pt 0pt;
 }
 
 .dijitDialog legend {
-    font-weight: bold;
+	font-weight: bold;
 }
 
 .dijitDialog label {
-    display: inline-block;
-    width: 40px;
-    /* Width of labels */
-    margin-left: 4pt;
-    margin-bottom: 2px;
-    /* firefox 2 fix */
-    display: -moz-inline-box;
-    -moz-box-orient: vertical
+	display: inline-block;
+	width: 40px;
+	/* Width of labels */
+	margin-left: 4pt;
+	margin-bottom: 2px;
+	/* firefox 2 fix */
+	display: -moz-inline-box;
+	-moz-box-orient: vertical
 }
 
-.dijitDialog .errorPanel{
+.dijitDialog .errorPanel {
 	color: red;
-	text-align: left;	
-    padding: 3px 5px 3px 27px;
+	text-align: left;
+	padding: 3px 5px 3px 27px;
 	margin: 5px auto;
-    border: 1px solid red;
+	border: 1px solid red;
 	background-color: #FFF;
 	background-image: url('/images/4.0/icons/exclamation.png');
 	background-repeat: no-repeat;
 	background-position: 5px 45%;
 }
 
-.dijitDialog .warningPanel{
+.dijitDialog .warningPanel {
 	color: red;
-	text-align: left;	
-    padding: 3px 5px 3px 27px;
+	text-align: left;
+	padding: 3px 5px 3px 27px;
 	margin: 5px auto;
-    border: 1px solid #F96115;
+	border: 1px solid #F96115;
 	background-color: #FFF;
 	background-image: url('/images/tt_error.gif');
 	background-repeat: no-repeat;
@@ -1783,11 +1742,11 @@ visibility: hidden;*/
 }
 
 .dijitDialog .confirmationPanel {
-    color: #000;
-    text-align:left;
-    padding: 3px 5px 3px 22px;
+	color: #000;
+	text-align: left;
+	padding: 3px 5px 3px 22px;
 	margin: 5px auto;
-    border: 1px solid #00AC3D;
+	border: 1px solid #00AC3D;
 	background-color: #BFF1B5;
 	background-image: url('/images/tt_check.gif');
 	background-repeat: no-repeat;
@@ -1795,620 +1754,647 @@ visibility: hidden;*/
 }
 
 /*Reporting contianer*/
-
 #reportingContainer {
-    margin: 0 20px
+	margin: 0 20px
 }
 
 #reportingContainer label {
-    text-align:left;
-    width:auto
+	text-align: left;
+	width: auto
 }
 
 #reportingContainer .selectDetailsTitle {
-    font-weight:bold
+	font-weight: bold
 }
 
 #reportingContainer label input[type=radio] {
-    margin:0px 4px;
+	margin: 0px 4px;
 }
 
 .reportingTableContainer {
-    background: #EEEEEE;
-    font-size: 1.2em
+	background: #EEEEEE;
+	font-size: 1.2em
 }
 
 #reportingContainer fieldset {
-    font-family: Arial,sans-serif;
-    color: #000;
-    background-color: #fff;
-    padding: 10px 0px 10px 10px;
-    border: none;
-    border-bottom: solid 1px #dddddd;
-    margin-bottom: 10px
+	font-family: Arial, sans-serif;
+	color: #000;
+	background-color: #fff;
+	padding: 10px 0px 10px 10px;
+	border: none;
+	border-bottom: solid 1px #dddddd;
+	margin-bottom: 10px
 }
 
 #reportingContainer .fieldsetTitle {
-    margin: -10px 0px 20px -10px;
-    font-size: 9pt;
-    padding: 3px;
-    color: white;
-    background: transparent url(/images/4.0/backgrounds/panel_gray.jpg) repeat-x scroll left top;
-    font-weight: bold
+	margin: -10px 0px 20px -10px;
+	font-size: 9pt;
+	padding: 3px;
+	color: white;
+	background: transparent url(/images/4.0/backgrounds/panel_gray.jpg)
+		repeat-x scroll left top;
+	font-weight: bold
 }
 
 #reportingContainer .fieldRow {
-    margin-bottom: 10px;
-    vertical-align: center;
-    clear: both
+	margin-bottom: 10px;
+	vertical-align: center;
+	clear: both
 }
 
 #reportingContainer .fieldValue {
-    float: left;
-    margin-bottom: 3px;
-    margin-right: 15px
+	float: left;
+	margin-bottom: 3px;
+	margin-right: 15px
 }
 
 #reportingContainer .fieldLabel {
-    float: left;
-    width: 185px;
-    height: 24px;
-    clear: both;
-    text-align: right;
-    padding-right: 10px;
-    font-weight: bold
+	float: left;
+	width: 185px;
+	height: 24px;
+	clear: both;
+	text-align: right;
+	padding-right: 10px;
+	font-weight: bold
 }
 
 #reportingContainer .fieldRow {
-    margin-bottom: 2px;
-    clear: right;
-    height: 22px;
-    padding: 6px 0 5px 6px
+	margin-bottom: 2px;
+	clear: right;
+	height: 22px;
+	padding: 6px 0 5px 6px
 }
 
 .datePickerContainer table {
-    font-size: 1.2em
+	font-size: 1.2em
 }
 
 #reportingContainer .buttonGroup {
-    margin-left: 215px
+	margin-left: 215px
 }
 
-.reportingTableContainer .pageTitle{
-    font-size: 1.8em;
-    font-weight: bold;
-    padding-top:10px;
-    color: #444
+.reportingTableContainer .pageTitle {
+	font-size: 1.8em;
+	font-weight: bold;
+	padding-top: 10px;
+	color: #444
 }
 
 .reportTitle {
-    padding-top: 3px;
+	padding-top: 3px;
 }
 
 .report img {
-    padding-top: 3px;
-    padding-bottom: 3px;
+	padding-top: 3px;
+	padding-bottom: 3px;
 }
 
 /*GroupManager*/
-
 .panelContainer {
-    margin: 15px 0 0 15px
+	margin: 15px 0 0 15px
 }
 
 .panel {
-    height: 800px;
-    float: left;
-    border: 1px solid #8E8E8E;
-    background-color: #fff
+	height: 800px;
+	float: left;
+	border: 1px solid #8E8E8E;
+	background-color: #fff
 }
 
 .rhLeftPanel {
-    width: 270px;
+	width: 270px;
 }
 
 .rhRightPanel {
-    width: 700px;
-    margin-left: -1px
+	width: 700px;
+	margin-left: -1px
 }
 
 .clearBoth {
-    clear: both;
+	clear: both;
 }
 
 .panelTitleGray {
-    background: url('/images/4.0/backgrounds/titlebar_bg.png') repeat-x;
-    padding: 4px 0 4px 4px;
-    border-bottom: 1px solid #8E8E8E
+	background: url('/images/4.0/backgrounds/titlebar_bg.png') repeat-x;
+	padding: 4px 0 4px 4px;
+	border-bottom: 1px solid #8E8E8E
 }
 
 .panelTitleText {
-    font-size: 1.2em;
-    font-weight: bold;
+	font-size: 1.2em;
+	font-weight: bold;
 }
 
 .panel .listFilter input {
-	border:1px solid #D5D5D5;
-	color:#B0B0B0;
-	margin-left:13px;
-	padding:2px;
-	width:185px;
+	border: 1px solid #D5D5D5;
+	color: #B0B0B0;
+	margin-left: 13px;
+	padding: 2px;
+	width: 185px;
 }
 
 .gray {
-	color:gray
+	color: gray
 }
 
 .panel .listFilter {
-    padding: 5px 0 2px 4px;
-    border-bottom: 1px solid #8E8E8E
+	padding: 5px 0 2px 4px;
+	border-bottom: 1px solid #8E8E8E
 }
 
 .panel .actionBox {
-    padding: 3px 0 0px 6px;
-    background: url(/images/4.0/filterboxbg.png) repeat-x;
-    border-bottom: 1px solid #8E8E8E;
-    height: 28px
+	padding: 3px 0 0px 6px;
+	background: url(/images/4.0/filterboxbg.png) repeat-x;
+	border-bottom: 1px solid #8E8E8E;
+	height: 28px
 }
 
 .panel .listContainer {
-    overflow: auto;
-    width: 270px;
-    height: 709px;
+	overflow: auto;
+	width: 270px;
+	height: 709px;
 }
 
 .panel ol {
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    padding: 0 3px;
-    margin: 2px 0 0 0;
-    list-style: none;
-    cursor: pointer;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	padding: 0 3px;
+	margin: 2px 0 0 0;
+	list-style: none;
+	cursor: pointer;
 }
 
 .panel li {
-    padding: 2px 2px 2px 26px;
-    white-space: nowrap;
-    cursor: pointer;
-    margin:2px 0;
+	padding: 2px 2px 2px 26px;
+	white-space: nowrap;
+	cursor: pointer;
+	margin: 2px 0;
 }
 
 .panel li:hover {
-    border: 1px dotted gray;
-    padding: 1px 2px 1px 25px;
+	border: 1px dotted gray;
+	padding: 1px 2px 1px 25px;
 }
 
 .panel .active {
-    padding: 1px 2px 1px 25px;
-    border: 1px dotted gray;
-    background-color: #E2F5FF;
-    font-weight: bold;
+	padding: 1px 2px 1px 25px;
+	border: 1px dotted gray;
+	background-color: #E2F5FF;
+	font-weight: bold;
 }
 
 ol .groupIcon {
-    background: transparent url(/images/4.0/icons/group.png) no-repeat scroll 5px 2px;
+	background: transparent url(/images/4.0/icons/group.png) no-repeat
+		scroll 5px 2px;
 }
 
 ol .groupIcon:hover {
-    background: transparent url(/images/4.0/icons/group.png) no-repeat scroll 4px 1px;
+	background: transparent url(/images/4.0/icons/group.png) no-repeat
+		scroll 4px 1px;
 }
 
 ol .active.groupIcon {
-    background: #E2F5FF url(/images/4.0/icons/group.png) no-repeat scroll 4px 1px;
+	background: #E2F5FF url(/images/4.0/icons/group.png) no-repeat scroll
+		4px 1px;
 }
 
 .viewContainer {
-    border: 1px solid #E78B28;
-    margin: 3px;
-    -moz-border-radius-topleft: 6px;
-    -moz-border-radius-topright: 6px;
-    -webkit-border-radius: 6px;
-    height: 792px;
+	border: 1px solid #E78B28;
+	margin: 3px;
+	-moz-border-radius-topleft: 6px;
+	-moz-border-radius-topright: 6px;
+	-webkit-border-radius: 6px;
+	height: 792px;
 }
 
 .viewTitle {
-    font-weight: bold;
-    font-size: 1.4em;
-    padding: 6px 6px 24px;
+	font-weight: bold;
+	font-size: 1.4em;
+	padding: 6px 6px 24px;
 }
 
 .viewActions {
-    background: url(/images/4.0/actionbarbg.png);
-    border-top: 1px solid #E78B28;
-    border-bottom: 1px solid #E78B28;
-    height: 35px;
-    clear: both;
+	background: url(/images/4.0/actionbarbg.png);
+	border-top: 1px solid #E78B28;
+	border-bottom: 1px solid #E78B28;
+	height: 35px;
+	clear: both;
 }
 
 .viewMainContent {
-    height: 687px;
-    overflow-x:hidden;
-    overflow-y:scroll;
+	height: 687px;
+	overflow-x: hidden;
+	overflow-y: scroll;
 }
 
 .viewBottomContent {
-	background:#FFFFFF none repeat scroll 0 0;
-	border-top:1px solid #E78B28;
-	clear:both;
-	height:27px;
-	padding:10px 0 0 40%;
+	background: #FFFFFF none repeat scroll 0 0;
+	border-top: 1px solid #E78B28;
+	clear: both;
+	height: 27px;
+	padding: 10px 0 0 40%;
 }
 
 .viewBottomContent div {
-    float: left;
-    height: 16px;
+	float: left;
+	height: 16px;
 }
 
 .action {
-    float: left;
-    cursor: pointer;
+	float: left;
+	cursor: pointer;
 }
 
 .btnAdd {
-    background: url(/images/4.0/buttons.png) no-repeat;
-    width: 32px;
-    height: 26px;
+	background: url(/images/4.0/buttons.png) no-repeat;
+	width: 32px;
+	height: 26px;
 }
 
 .btnModify {
-    background: transparent url(/images/4.0/buttons.png) no-repeat scroll -32px 0px;
-    width: 32px;
-    height: 26px;
+	background: transparent url(/images/4.0/buttons.png) no-repeat scroll
+		-32px 0px;
+	width: 32px;
+	height: 26px;
 }
 
 .btnDelete {
-    background: transparent url(/images/4.0/buttons.png) no-repeat scroll -65px 0px;
-    width: 37px;
-    height: 26px;
-    margin-left: 6px;
+	background: transparent url(/images/4.0/buttons.png) no-repeat scroll
+		-65px 0px;
+	width: 37px;
+	height: 26px;
+	margin-left: 6px;
 }
 
 .iconAction {
-    height: 16px;
-    width: 16px;
-    cursor: pointer;
-    margin-left: 10px;
+	height: 16px;
+	width: 16px;
+	cursor: pointer;
+	margin-left: 10px;
 }
 
 .btnNextAll {
-    background: url(/images/4.0/icons/resultset_last.png)
+	background: url(/images/4.0/icons/resultset_last.png)
 }
 
 .btnNext {
-    background: url(/images/4.0/icons/resultset_next.png)
+	background: url(/images/4.0/icons/resultset_next.png)
 }
 
 .btnBackAll {
-    background: url(/images/4.0/icons/resultset_first.png)
+	background: url(/images/4.0/icons/resultset_first.png)
 }
 
 .btnBack {
-    background: url(/images/4.0/icons/resultset_previous.png)
+	background: url(/images/4.0/icons/resultset_previous.png)
 }
 
 #wrapper .pageTitle {
-    color: #444444;
-    font-size: 1.8em;
-    font-weight: bold;
-    margin: 16px 0 0 16px;
+	color: #444444;
+	font-size: 1.8em;
+	font-weight: bold;
+	margin: 16px 0 0 16px;
 }
 
 #wrapper table {
-    border: 1px solid #ccc;
+	border: 1px solid #ccc;
 }
 
 #wrapper table tbody {
-	color:#4F4F4F;
-	cursor:default;
+	color: #4F4F4F;
+	cursor: default;
 }
 
 #wrapper table th {
-    border-color: #DCDCDC;
-    border-style: solid;
-    border-width: 1px 1px 0 0;
-    font-weight: bold;
-    padding: 2px 3px 2px 5px;
-    background: url(/images/4.0/backgrounds/table_header.png);
-    -moz-user-select: none;
-    -webkit-user-select: none;
+	border-color: #DCDCDC;
+	border-style: solid;
+	border-width: 1px 1px 0 0;
+	font-weight: bold;
+	padding: 2px 3px 2px 5px;
+	background: url(/images/4.0/backgrounds/table_header.png);
+	-moz-user-select: none;
+	-webkit-user-select: none;
 }
 
 #wrapper table tr {
-    border: 1px solid #ccc;
+	border: 1px solid #ccc;
 }
 
 #wrapper table td {
-    border-color: #DCDCDC;
-    border-style: solid;
-    border-width: 1px 1px 0 0;
-    padding: 1px 3px;
-    vertical-align: middle;
-    height: 23px;
-    -moz-user-select: none;
-    -webkit-user-select: none;
+	border-color: #DCDCDC;
+	border-style: solid;
+	border-width: 1px 1px 0 0;
+	padding: 1px 3px;
+	vertical-align: middle;
+	height: 23px;
+	-moz-user-select: none;
+	-webkit-user-select: none;
 }
 
 #wrapper table tr:hover {
-    background: #E2F5FF
+	background: #E2F5FF
 }
 
 #wrapper table .alternate {
 	background: #F3FFF3
 }
 
-.textCenter{
-	text-align:center;
+.textCenter {
+	text-align: center;
 }
 
 .ajaxBlue {
-    background: transparent url(/images/4.0/icons/ajax-loader-gray.gif) no-repeat scroll 0 0;
-    padding: 0px 14px 0 0;
+	background: transparent url(/images/4.0/icons/ajax-loader-gray.gif)
+		no-repeat scroll 0 0;
+	padding: 0px 14px 0 0;
 }
 
-.labelIcon{
+.labelIcon {
 	padding-left: 21px;
 }
 
-.availGreen{
-    background: transparent url(/images/4.0/icons/green.png) no-repeat scroll 0 0;
+.availGreen {
+	background: transparent url(/images/4.0/icons/green.png) no-repeat
+		scroll 0 0;
 }
 
-.availYellow{
-    background: transparent url(/images/4.0/icons/yellow.png) no-repeat scroll 0 0;
+.availYellow {
+	background: transparent url(/images/4.0/icons/yellow.png) no-repeat
+		scroll 0 0;
 }
 
-.availGray{
-    background: transparent url(/images/4.0/icons/gray.png) no-repeat scroll 0 0;
+.availGray {
+	background: transparent url(/images/4.0/icons/gray.png) no-repeat scroll
+		0 0;
 }
 
-.availRed{
-    background: transparent url(/images/4.0/icons/red.png) no-repeat scroll 0 0;
+.availRed {
+	background: transparent url(/images/4.0/icons/red.png) no-repeat scroll
+		0 0;
 }
 
-.dijitDialogPaneContent label{
-	width:90px;
-}
-.dijitDialogPaneContent input[type=text]{
-	border:1px solid gray;
-	padding:3px;
-	width:150px;
+.dijitDialogPaneContent label {
+	width: 90px;
 }
 
-.dialogButtonBox{
-	height:30px;
-    padding:10px;
+.dijitDialogPaneContent input[type=text] {
+	border: 1px solid gray;
+	padding: 3px;
+	width: 150px;
 }
 
-.tapestry-palette select{
-	min-width:280px;
-	width:280px;
+.dialogButtonBox {
+	height: 30px;
+	padding: 10px;
 }
 
-.available-header{
-	background: transparent url(/images/4.0/filterboxbg.png) repeat-x scroll 0px -2px;
-	height:23px;
+.tapestry-palette select {
+	min-width: 280px;
+	width: 280px;
 }
 
-.selected-header{
-	background: transparent url(/images/4.0/filterboxbg.png) repeat-x scroll 0px -2px;
-    height:23px;
-}
-.tapestry-palette option{
-	background:#F3FFF3 none repeat scroll 0 0;
-}
-.tapestry-palette option:active{
-    background:#E2F5FF none repeat scroll 0 0
-}
-.tapestry-palette option:hover{
-    background:#E2F5FF none repeat scroll 0 0
-}
-.modifyDialogInstructions{
-	width:635px
+.available-header {
+	background: transparent url(/images/4.0/filterboxbg.png) repeat-x scroll
+		0px -2px;
+	height: 23px;
 }
 
-.smallBox{
-    width:27px;
+.selected-header {
+	background: transparent url(/images/4.0/filterboxbg.png) repeat-x scroll
+		0px -2px;
+	height: 23px;
+}
+
+.tapestry-palette option {
+	background: #F3FFF3 none repeat scroll 0 0;
+}
+
+.tapestry-palette option:active {
+	background: #E2F5FF none repeat scroll 0 0
+}
+
+.tapestry-palette option:hover {
+	background: #E2F5FF none repeat scroll 0 0
+}
+
+.modifyDialogInstructions {
+	width: 635px
+}
+
+.smallBox {
+	width: 27px;
 }
 
 /* NEW BUTTONS */
-button{
-    border: 0px none;
-    color:white;
-    /*4p 4p for ie 7*/
-    padding:3px 4px;
-    cursor:pointer;
-    width:auto;
-    overflow:visible;
-    /* ie only */
-    margin: 0 3px;
-    white-space: nowrap;
+button {
+	border: 0px none;
+	color: white;
+	/*4p 4p for ie 7*/
+	padding: 3px 4px;
+	cursor: pointer;
+	width: auto;
+	overflow: visible;
+	/* ie only */
+	margin: 0 3px;
+	white-space: nowrap;
 }
 
-button.btnBlue{
-    /* 0 2px*/
-    background: transparent url(/images/4.0/buttons/button_blue_left.gif) no-repeat;
+button.btnBlue { /* 0 2px*/
+	background: transparent url(/images/4.0/buttons/button_blue_left.gif)
+		no-repeat;
 }
 
-button.btnGray{
-    background: transparent url(/images/4.0/buttons/button_gray_left.gif) no-repeat;
+button.btnGray {
+	background: transparent url(/images/4.0/buttons/button_gray_left.gif)
+		no-repeat;
 }
 
-button.btnGreen{
-    background: transparent url(/images/4.0/buttons/button_green_left.gif) no-repeat;
+button.btnGreen {
+	background: transparent url(/images/4.0/buttons/button_green_left.gif)
+		no-repeat;
 }
 
-button.btnGreenBlack{
-    background: transparent url(/images/4.0/buttons/button_green_b_left.gif) no-repeat;
+button.btnGreenBlack {
+	background: transparent url(/images/4.0/buttons/button_green_b_left.gif)
+		no-repeat;
 }
 
-button.btnInactive{
-    background: transparent url(/images/4.0/buttons/button_inactive_left.gif) no-repeat;
-    cursor:default
+button.btnInactive {
+	background: transparent
+		url(/images/4.0/buttons/button_inactive_left.gif) no-repeat;
+	cursor: default
 }
 
-button.btnBlue span{
-    background: transparent url(/images/4.0/buttons/button_blue_right.gif) no-repeat scroll 100% 0;
+button.btnBlue span {
+	background: transparent url(/images/4.0/buttons/button_blue_right.gif)
+		no-repeat scroll 100% 0;
 }
 
-button.btnGray span{
-    background: transparent url(/images/4.0/buttons/button_gray_right.gif) no-repeat scroll 100% 0;
+button.btnGray span {
+	background: transparent url(/images/4.0/buttons/button_gray_right.gif)
+		no-repeat scroll 100% 0;
 }
 
-button.btnGreen span{
-    background: transparent url(/images/4.0/buttons/button_green_right.gif) no-repeat scroll 100% 0;
+button.btnGreen span {
+	background: transparent url(/images/4.0/buttons/button_green_right.gif)
+		no-repeat scroll 100% 0;
 }
 
-button.btnGreenBlack span{
-    background: transparent url(/images/4.0/buttons/button_green_b_right.gif) no-repeat scroll 100% 0;
+button.btnGreenBlack span {
+	background: transparent
+		url(/images/4.0/buttons/button_green_b_right.gif) no-repeat scroll
+		100% 0;
 }
 
-button.btnInactive span{
-    background: transparent url(/images/4.0/buttons/button_inactive_right.gif) no-repeat scroll 100% 0;
-    color:#AAA
+button.btnInactive span {
+	background: transparent
+		url(/images/4.0/buttons/button_inactive_right.gif) no-repeat scroll
+		100% 0;
+	color: #AAA
 }
 
-button.inactive:active{
-    margin: 0 3px;
+button.inactive:active {
+	margin: 0 3px;
 }
 
-
-button:active{
-    margin:1px 3px;
+button:active {
+	margin: 1px 3px;
 }
 
-button span{
-    margin:-3px;
-    padding:4px 10px 4px 5px;
-    font-weight:bold;
+button span {
+	margin: -3px;
+	padding: 4px 10px 4px 5px;
+	font-weight: bold;
 }
 
 .widgetHandle {
-    cursor: move;
-    width: 100%;
+	cursor: move;
+	width: 100%;
 }
 
 #attachPointContainer {
-    background-color: #fff;
-    border-left: 1px solid gray;
-    border-right: 1px solid gray;
-    border-bottom: 1px solid gray;
+	background-color: #fff;
+	border-left: 1px solid gray;
+	border-right: 1px solid gray;
+	border-bottom: 1px solid gray;
 }
 
 .viewSelectionNote {
-    padding: 5px 0px 45px 59px;
-    color: gray;
-    font-size: 14px;
-    border-top: 1px solid gray;
+	padding: 5px 0px 45px 59px;
+	color: gray;
+	font-size: 14px;
+	border-top: 1px solid gray;
 }
 
 /*GConsole*/
-
-.gConsoleContainer pre{
-    border:0px none;
-    background-color:#fff;
+.gConsoleContainer pre {
+	border: 0px none;
+	background-color: #fff;
 }
 
 .gConsoleContainer fieldset {
-    border:1px solid gray;
-    background-color:#fff;
-    padding:2px 4px;
-    margin:0
+	border: 1px solid gray;
+	background-color: #fff;
+	padding: 2px 4px;
+	margin: 0
 }
 
 .gConsoleContainer legend {
-    font-weight:bold;
-    font-size:1.2em;
-    color:#000
+	font-weight: bold;
+	font-size: 1.2em;
+	color: #000
 }
 
-.gConsoleContainer label{
-    display:block;
-    font-size:1.2em;
-    font-weight:bold;
+.gConsoleContainer label {
+	display: block;
+	font-size: 1.2em;
+	font-weight: bold;
 }
 
 .gConsoleContainer textarea {
-    width:100%
+	width: 100%
 }
 
 #button {
-    border: 1px solid #84B96D;
-    background-color: #2DBF3D;
-    -moz-border-radius: 3px;
-    -webkit-border-radius: 3px;
-    border-radius: 3px;
-    padding: 3px 5px;
-    margin: 3px;
+	border: 1px solid #84B96D;
+	background-color: #2DBF3D;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	border-radius: 3px;
+	padding: 3px 5px;
+	margin: 3px;
 }
 
-#button a,#button a:visited, #button a:hover, #button a:active {
-    color: #FFF;
-    font-weight: 700;
-    outline: none;
+#button a,#button a:visited,#button a:hover,#button a:active {
+	color: #FFF;
+	font-weight: 700;
+	outline: none;
 }
 
 .SubTabCellWhite {
-    background-color:#fff
+	background-color: #fff
 }
 
 .SubTabCellWhite img {
-    padding-left: 2px;
+	padding-left: 2px;
 }
 
 .SubTabCellWhiteLeft {
-    background-color:#fff;
-    border-left: 1px solid gray
+	background-color: #fff;
+	border-left: 1px solid gray
 }
 
 #panelHeader {
-    border-left: 1px solid gray;
-    border-right: 1px solid gray;
+	border-left: 1px solid gray;
+	border-right: 1px solid gray;
 }
 
 #panelContent {
-    border-left: 1px solid gray;
-    border-right: 1px solid gray;
+	border-left: 1px solid gray;
+	border-right: 1px solid gray;
 }
 
 .ToolbarContent td a img {
-    margin-left:5px;
+	margin-left: 5px;
 }
-
-
 
 /* 4.2.x styles */
 .button42 {
-	color:#fff;
-	font-weight:700;
+	color: #fff;
+	font-weight: 700;
 	font-size: 11px !important;
-	width:auto;
-	overflow:visible;
-    border: 1px solid #84B96D;
-    background: #2DBF3D url(../images/4.0/backgrounds/button-green-background.jpg) repeat-x bottom;
-    -moz-border-radius: 4px;
-    -webkit-border-radius: 4px;
-    border-radius: 3px;
-    padding: 3px 15px;
-    cursor:pointer;
+	width: auto;
+	overflow: visible;
+	border: 1px solid #84B96D;
+	background: #2DBF3D
+		url(../images/4.0/backgrounds/button-green-background.jpg) repeat-x
+		bottom;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 3px;
+	padding: 3px 15px;
+	cursor: pointer;
 }
 
 .button42disabled {
 	color: #888;
-	background: #bbb url(../images/4.0/backgrounds/button-grey-background.jpg) repeat-x bottom;
-	border-color: #aaa;	
+	background: #bbb
+		url(../images/4.0/backgrounds/button-grey-background.jpg) repeat-x
+		bottom;
+	border-color: #aaa;
 	cursor: default
 }
 
 .successDialogMsg {
-	color:cornflowerblue; 
-	font-size:10pt; 
-	font-weight:bold;
+	color: cornflowerblue;
+	font-size: 10pt;
+	font-weight: bold;
 }
 
 .failureDialogMsg {
-	color:red; 
-	font-size:10pt; 
-	font-weight:bold;
+	color: red;
+	font-size: 10pt;
+	font-weight: bold;
 }
 
 .secondaryLabel {
@@ -2442,15 +2428,15 @@ button span{
 }
 
 span#browseFilters {
-	font-size:14px;
+	font-size: 14px;
 }
 
 div#breadcrumbContainer {
-	font-size:1.25em;
-	font-weight:bold;
-	padding:0 25px 10px;
+	font-size: 1.25em;
+	font-weight: bold;
+	padding: 0 25px 10px;
 }
-	
+
 ul.breadcrumbs {
 	padding: 0;
 	margin: 0;
@@ -2556,73 +2542,75 @@ span.returnToLink {
 }
 
 .availabilityRed {
-	display:inline-block;
+	display: inline-block;
 	background: url(../images/icon_available_red.gif) no-repeat;
 	height: 12px;
 	width: 12px;
 }
 
 .availabilityOrange {
-	display:inline-block;
+	display: inline-block;
 	background: url(../images/icon_available_orange.gif) no-repeat;
 	height: 12px;
 	width: 12px;
 }
 
 .availabilityYellow {
-	display:inline-block;
+	display: inline-block;
 	background: url(../images/icon_available_yellow.gif) no-repeat;
 	height: 12px;
 	width: 12px;
 }
 
 .availabilityGreen {
-	display:inline-block;
+	display: inline-block;
 	background: url(../images/icon_available_green.gif) no-repeat;
 	height: 12px;
 	width: 12px;
 }
 
 .availabilityError {
-	display:inline-block;
+	display: inline-block;
 	background: url(../images/icon_available_error.gif) no-repeat;
 	height: 12px;
 	width: 12px;
 }
 
 .availabilityBlack {
-	display:inline-block;
+	display: inline-block;
 	background: url(../images/icon_available_black.gif) no-repeat;
 	height: 12px;
 	width: 12px;
 }
+
 .formButtonContainer {
-	background-color:#fff;
-	margin-bottom:10px;
-	padding:10px 0; 
-	text-align:center; 
-	width:100%;
+	background-color: #fff;
+	margin-bottom: 10px;
+	padding: 10px 0;
+	text-align: center;
+	width: 100%;
 }
 
 .formButtonContainer input[type=button] {
-	margin-right:8px;
+	margin-right: 8px;
 }
 
-.formButtonContainer .reset,
-.formButtonContainer .cancel {
-	background: #bbb url(../images/4.0/backgrounds/button-grey-background.jpg) repeat-x bottom;
-	border-color:#ddd;
+.formButtonContainer .reset,.formButtonContainer .cancel {
+	background: #bbb
+		url(../images/4.0/backgrounds/button-grey-background.jpg) repeat-x
+		bottom;
+	border-color: #ddd;
 }
 
 .footerMessageContainer {
-	margin-top:15px; 
-	text-align:center; 
-	width:100%;
+	margin-top: 15px;
+	text-align: center;
+	width: 100%;
 }
 
 .resourceTypeColumn {
 	padding: 8px 3px 8px 15px;
-	width: 20%;	
+	width: 20%;
 }
 
 .permissionColumn {
@@ -2630,17 +2618,18 @@ span.returnToLink {
 }
 
 .capabilitiesColumn {
-	padding-left: 5px; 
+	padding-left: 5px;
 	width: 60%;
 }
 
 .alertCapability {
-	width: 15%;	
+	width: 15%;
 }
-	
+
 .controlCapability {
-	width: 45%;	
+	width: 45%;
 }
+
 .bottomBorder {
 	border-bottom: 1px solid #eee;
 }

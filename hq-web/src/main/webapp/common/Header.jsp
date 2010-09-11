@@ -117,37 +117,55 @@
     <div id="headerLogo" title="Home" onclick="location.href='<html:rewrite action="/Dashboard" />'">&nbsp;</div>
     <div id="navTabContainer">
         <c:set var="pageURL" value="${requestURL}"/>
-        <ul class="adxm mainMenu" style="position: absolute; z-index: 10">
-            <li id="dashTab"><a href="/Dashboard.do"><fmt:message key="header.dashboard"/></a></li>
-            <li id="resTab"><a href="<html:rewrite page="/ResourceHub.do"/>" onclick="useBreadcrumbHrefIfAvailable(this);"><fmt:message key="header.resources"/></a>
-              <div>
-              <ul>
-                <li><a href="<html:rewrite page="/ResourceHub.do"/>" onclick="useBreadcrumbHrefIfAvailable(this);"><fmt:message key="header.Browse"/></a></li>
+        <div id="dashTab" class="tab">
+        	<a href="/Dashboard.do"><fmt:message key="header.dashboard"/></a>
+        </div>
+        <div id="resTab" class="tab">
+        	<a href="<html:rewrite page="/ResourceHub.do"/>" onclick="useBreadcrumbHrefIfAvailable(this);"><fmt:message key="header.resources"/></a>
+        	<ul class="root">
+        		<li>
+        			<a href="<html:rewrite page="/ResourceHub.do"/>" onclick="useBreadcrumbHrefIfAvailable(this);"><fmt:message key="header.Browse"/></a>
+        		</li>
                 <tiles:insert definition=".header.optional.tabs">
-                  <tiles:put name="location" value="resources"/>
+                	<tiles:put name="location" value="resources"/>
                 </tiles:insert>
-                <li class="hasSubmenu"><a href=""><fmt:message key=".dashContent.recentResources"/></a>
-                  <div>
-                  <ul>
-                    <tiles:insert definition=".toolbar.recentResources"/>
-                  </ul>
-                  </div>
+                <li class="hasSubmenu">
+                	<a href=""><fmt:message key=".dashContent.recentResources"/></a>
+                  	<ul>
+                    	<tiles:insert definition=".toolbar.recentResources"/>
+                  	</ul>
                 </li>
-              </ul>
-              </div>
-            </li>
-            <li id="analyzeTab"><a href="#"><fmt:message key="header.analyze"/></a>
-              <div>
-              <ul>
-              <tiles:insert definition=".header.optional.tabs">
-                  <tiles:put name="location" value="tracking"/>
-              </tiles:insert>
-              </ul>
-              </div>
-            </li>
-            <li id="adminTab"><a href="/Admin.do"><fmt:message key="header.admin"/></a></li>
-        </ul>
+        	</ul>
+        </div>
+        <div id="analyzeTab" class="tab">
+        	<a href="#"><fmt:message key="header.analyze"/></a>
+        	<ul class="root">
+              	<tiles:insert definition=".header.optional.tabs">
+                  	<tiles:put name="location" value="tracking"/>
+              	</tiles:insert>
+          	</ul>
+        </div>
+        <div id="adminTab" class="tab">
+        	<a href="/Admin.do"><fmt:message key="header.admin"/></a>
+        </div>
     </div>
+    <script type="text/javascript">
+	    dojo11.addOnLoad(function() {
+	    	var menu = dojo.byId("navTabContainer");
+	    	
+	    	dojo11.query(".tab", menu).onmouseenter(function(e) {
+	    		dojo11.addClass(e.currentTarget, "over");
+	    	}).onmouseleave(function(e) {
+	    		dojo11.removeClass(e.currentTarget, "over")
+	    	});
+	    	
+	    	dojo11.query("li", menu).onmouseover(function(e) {
+	    		dojo11.addClass(e.currentTarget, "over");
+	    	}).onmouseout(function(e) {
+	    		dojo11.removeClass(e.currentTarget, "over")
+	    	});
+	    });
+    </script>
     <div class="ajaxLoading" style="display:none;" id="loading">
         <html:img page="/images/4.0/icons/ajax-loader.gif" border="0" width="16" height="16"/>
     </div>
@@ -244,4 +262,3 @@
         -->
     </div>     
 </div>
-
