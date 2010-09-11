@@ -34,18 +34,6 @@
 <link rel="shortcut icon" href="<html:rewrite page="/images/4.0/icons/favicon.ico"/>"/>
 <link rel="stylesheet" href="<html:rewrite page="/css/win.css"/>" type="text/css"/>
 <link rel="stylesheet" href="<html:rewrite page="/css/HQ_40.css"/>" type="text/css"/>
-<!--[if IE 7]>
-<link rel="stylesheet" href="<html:rewrite page="/css/ie7.css"/>" type="text/css"/>
-<![endif]-->
-<!--[if lte IE 6]>
-<link rel="stylesheet" href="<html:rewrite page="/css/ie6.css"/>" type="text/css"/>
-<![endif]-->
-
-<!-- TODO: ADxMenu.js script invocation must be moved to the "lte IE 6" section above once we start using the HTML5 doctype which will kick IE7 into strict mode. -->
-<!--[if IE]>
-<link rel="stylesheet" href="<html:rewrite page="/css/ie.css"/>" type="text/css"/>
-<script type="text/javascript" src="/js/ADxMenu.js"></script>
-<![endif]-->
 
 <script type="text/javascript">
 djConfig = { isDebug: false, locale: 'en-us' }
