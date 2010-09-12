@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hyperic HQ 4.x Documentation : ui-tcserver.ServerJDBCRef</title>
+        <title>Evolution : ui-tcserver.ServerJDBCRef</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,22 +12,22 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic HQ 4.x Documentation : ui-tcserver.ServerJDBCRef
+                            Evolution : ui-tcserver.ServerJDBCRef
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Feb 09, 2010 by <font color="#0050B2">jshackell</font>.
+					    This page last changed on Jun 18, 2010 by <font color="#0050B2">jshackell</font>.
 				    </div>
 
 				    <p>The features described on this page are available in tc Server and tc Server Standard Edition.</p>
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1265759580444 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1265759580444 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1265759580444 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1281566527615 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1281566527615 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1281566527615 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1265759580444'>
+/*]]>*/</style><div class='rbtoc1281566527615'>
 <ul>
-    <li><a href='#ui-tcserver.ServerJDBCRef-tcServerJDBCReference'>tc Server JDBC Reference</a></li>
+    <li><a href='#ui-tcserver.ServerJDBCRef-tcRuntimeJDBCReference'>tc Runtime JDBC Reference</a></li>
 <ul>
     <li><a href='#ui-tcserver.ServerJDBCRef-GeneralProperties'>General Properties</a></li>
     <li><a href='#ui-tcserver.ServerJDBCRef-ConnectionProperties'>Connection Properties</a></li>
@@ -36,11 +36,11 @@ div.rbtoc1265759580444 li {margin-left: 0px;padding-left: 0px;}
 </ul></div>
 <p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
 
-<h1><a name="ui-tcserver.ServerJDBCRef-tcServerJDBCReference"></a>tc Server JDBC Reference</h1>
+<h1><a name="ui-tcserver.ServerJDBCRef-tcRuntimeJDBCReference"></a>tc Runtime JDBC Reference</h1>
 
 <p>This page provides reference information about the fields on the <b>Views &gt; Server Configuration &gt; Resources</b> tab used to configure and create JDBC data sources.</p>
 
-<p>SpringSource tc Server provides two types of JDBC datasources: the standard DBCP one and a Tomcat datasource for highly-concurrent environments. For additional information about the two types of datasources, see <a href="ui-tcserver.ServerConfiguration.html#ui-tcserver.ServerConfiguration-jdbc">Configuring and Creating JDBC Data Sources</a>.</p>
+<p>SpringSource tc Runtime provides two types of JDBC datasources: the standard DBCP one and a Tomcat datasource for highly-concurrent environments. For additional information about the two types of datasources, see <a href="ui-tcserver.ServerConfiguration.html#ui-tcserver.ServerConfiguration-jdbc">Configuring and Creating JDBC Data Sources</a>.</p>
 
 <h2><a name="ui-tcserver.ServerJDBCRef-GeneralProperties"></a>General Properties</h2>
 
@@ -86,9 +86,9 @@ div.rbtoc1265759580444 li {margin-left: 0px;padding-left: 0px;}
 </tr>
 <tr>
 <td class='confluenceTd'> Connection Properties <a name="ui-tcserver.ServerJDBCRef-resourcesjdbcdataSourceconnectionconnectionPro..."></a> <br class="atl-forced-newline" /> </td>
-<td class='confluenceTd'> The connection properties that tc Server sends to the JDBC driver when establishing new connections. Format of the string must be <tt>[propertyName=property;]</tt><br class="atl-forced-newline" />
+<td class='confluenceTd'> The connection properties that tc Runtime sends to the JDBC driver when establishing new connections. Format of the string must be <tt>[propertyName=property;]</tt><br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
-NOTE - tc Server passes the "user" and "password" properties explicitly, so do not include them in this field. </td>
+NOTE - tc Runtime passes the "user" and "password" properties explicitly, so do not include them in this field. </td>
 </tr>
 </tbody></table>
 </div>
@@ -129,11 +129,11 @@ NOTE - tc Server passes the "user" and "password" properties explicitly, so do n
 </tr>
 <tr>
 <td class='confluenceTd'> Initial Number of Connections <a name="ui-tcserver.ServerJDBCRef-resourcesjdbcdataSourceconnectionPoolinitialSize"></a> </td>
-<td class='confluenceTd'> Specifies the initial number of connections that are created when tc Server starts this connection pool. Default value is 0 (DBCP datasource) or 10 (Tomcat datasource). </td>
+<td class='confluenceTd'> Specifies the initial number of connections that are created when tc Runtime starts this connection pool. Default value is 0 (DBCP datasource) or 10 (Tomcat datasource). </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Max Active Connections <a name="ui-tcserver.ServerJDBCRef-resourcesjdbcdataSourceconnectionPoolmaxActive"></a> <br class="atl-forced-newline" /> </td>
-<td class='confluenceTd'> Specifies the maximum number of active connections that tc Server can allocate from this pool at the same time. Specify a negative number for no limit. Default value is 8 (DBCP datasource) or 100 (Tomcat datasource). <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies the maximum number of active connections that tc Runtime can allocate from this pool at the same time. Specify a negative number for no limit. Default value is 8 (DBCP datasource) or 100 (Tomcat datasource). <br class="atl-forced-newline" /> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Max Idle Connections <a name="ui-tcserver.ServerJDBCRef-resourcesjdbcdataSourceconnectionPoolmaxIdle"></a> </td>
@@ -153,23 +153,23 @@ NOTE - tc Server passes the "user" and "password" properties explicitly, so do n
 </tr>
 <tr>
 <td class='confluenceTd'> Test on Borrow <a name="ui-tcserver.ServerJDBCRef-resourcesjdbcdataSourceconnectionPooltestOnBorrow"></a> </td>
-<td class='confluenceTd'> Specifies whether tc Server validates objects before being borrowed from the pool. If the object fails to validate, tc Server drops it from the pool and attempts to borrow another. <br class="atl-forced-newline" />
+<td class='confluenceTd'> Specifies whether tc Runtime validates objects before being borrowed from the pool. If the object fails to validate, tc Runtime drops it from the pool and attempts to borrow another. <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
 NOTE - for a value in this field to have any effect, you must set the Validation Query field to a non-null string. <br class="atl-forced-newline" /> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Test on Return <a name="ui-tcserver.ServerJDBCRef-resourcesjdbcdataSourceconnectionPooltestOnReturn"></a> </td>
-<td class='confluenceTd'> Specifies whether tc Server validates objects before returning them to the connection pool.&nbsp; <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies whether tc Runtime validates objects before returning them to the connection pool.&nbsp; <br class="atl-forced-newline" /> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Test While Idle <a name="ui-tcserver.ServerJDBCRef-resourcesjdbcdataSourceconnectionPooltestWhileIdle"></a> </td>
-<td class='confluenceTd'> Specifies whether the idle object evictor validates objects. If an object fails to validate, tc Server drops it from the connection pool. <br class="atl-forced-newline" />
+<td class='confluenceTd'> Specifies whether the idle object evictor validates objects. If an object fails to validate, tc Runtime drops it from the connection pool. <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
 NOTE - for a value in this field to have any effect, you must set the Validation Query field to a non-null string. <br class="atl-forced-newline" /> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Time Between Eviction Runs <a name="ui-tcserver.ServerJDBCRef-resourcesjdbcdataSourceconnectionPooltimeBetwe..."></a> <br class="atl-forced-newline" /> </td>
-<td class='confluenceTd'> The number of milliseconds to sleep between runs of the idle object evictor thread. When non-positive, tc Server does not run an idle object evictor thread. Default value is &#45;1 (DBCP datasource) or 5000 (Tomcat datasource). </td>
+<td class='confluenceTd'> The number of milliseconds to sleep between runs of the idle object evictor thread. When non-positive, tc Runtime does not run an idle object evictor thread. Default value is &#45;1 (DBCP datasource) or 5000 (Tomcat datasource). </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Test Per Eviction Runs <a name="ui-tcserver.ServerJDBCRef-resourcesjdbcdataSourceconnectionPoolnumTestsP..."></a> <br class="atl-forced-newline" /> </td>
@@ -193,21 +193,21 @@ NOTE - for a value in this field to have any effect, you must set the Validation
 </tr>
 <tr>
 <td class='confluenceTd'> Remove Abandoned Connections <a name="ui-tcserver.ServerJDBCRef-resourcesjdbcdataSourceconnectionPoolrmAbConn"></a> <br class="atl-forced-newline" /> </td>
-<td class='confluenceTd'> Specifies whether tc Server should remove abandoned connections if they exceed the value of the Remove Abandoned Timeouts field. If checked, a connection is considered abandoned and eligible for removal if it has been idle longer than the value of Remove Abandoned Timeouts. Checking this field can recover database connections from poorly written applications which fail to close a connection. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Specifies whether tc Runtime should remove abandoned connections if they exceed the value of the Remove Abandoned Timeouts field. If checked, a connection is considered abandoned and eligible for removal if it has been idle longer than the value of Remove Abandoned Timeouts. Checking this field can recover database connections from poorly written applications which fail to close a connection. <br class="atl-forced-newline" /> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Remove Abandoned Timeouts <a name="ui-tcserver.ServerJDBCRef-resourcesjdbcdataSourceconnectionPoolrmAbTime"></a> <br class="atl-forced-newline" /> </td>
-<td class='confluenceTd'> Specifies the amount of time, in seconds, before tc Server can remove an abandoned connection. Default value is 300 seconds. </td>
+<td class='confluenceTd'> Specifies the amount of time, in seconds, before tc Runtime can remove an abandoned connection. Default value is 300 seconds. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Log Abandoned Statements and Connections <a name="ui-tcserver.ServerJDBCRef-resourcesjdbcdataSourceconnectionPoollogAbandoned"></a> </td>
-<td class='confluenceTd'> Specifies whether tc Server should log stack traces for application code that abandoned a Statement or Connection. <br class="atl-forced-newline" />
+<td class='confluenceTd'> Specifies whether tc Runtime should log stack traces for application code that abandoned a Statement or Connection. <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
 NOTE: Logging of abandoned Statements and Connections adds overhead for every Connection open or new Statement because a stack trace has to be generated. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Validation Interval (ms) <a name="ui-tcserver.ServerJDBCRef-resourcesjdbcdataSourceconnectionPoolvalidInterval"></a> </td>
-<td class='confluenceTd'> <b>Tomcat datasource only.</b> Specifies the time, in milliseconds, that tc Server waits before running a validation check to ensure that the JDBC connection is still valid. Too frequent validation checks can slow performance. Default value for this field is 30000 (30 seconds). </td>
+<td class='confluenceTd'> <b>Tomcat datasource only.</b> Specifies the time, in milliseconds, that tc Runtime waits before running a validation check to ensure that the JDBC connection is still valid. Too frequent validation checks can slow performance. Default value for this field is 30000 (30 seconds). </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Fair Queue <a name="ui-tcserver.ServerJDBCRef-resourcesjdbcdataSourceconnectionPoolfairQueue"></a> <br class="atl-forced-newline" /> </td>
@@ -227,10 +227,10 @@ NOTE: Logging of abandoned Statements and Connections adds overhead for every Co
 </tr>
 <tr>
 <td class='confluenceTd'> JDBC Interceptors <a name="ui-tcserver.ServerJDBCRef-resourcesjdbcdataSourceconnectionPooljdbcInter..."></a> </td>
-<td class='confluenceTd'> <b>Tomcat datasource only.</b> Semi-colon separated list of classnames that tc Server inserts as interceptors in the chain of operations on the java.sql.Connection object. The interceptor classes must extend the abstract class: <br class="atl-forced-newline" />
+<td class='confluenceTd'> <b>Tomcat datasource only.</b> Semi-colon separated list of classnames that tc Runtime inserts as interceptors in the chain of operations on the java.sql.Connection object. The interceptor classes must extend the abstract class: <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />  <tt>org.apache.tomcat.jdbc.pool.JdbcInterceptor</tt> <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
-SpringSource tc Server provides a JDBC Interceptor called <tt>SlowQueryReportJmx</tt> that keeps a report of slow JDBC queries, or JDBC queries that did not complete below a configured time threshold. If you want AMS to display this report in its Console, then you must add the <tt>SlowQueryReportJmx</tt> interceptor to this text field. For example, to add it to the default interceptors, enter this value: <br class="atl-forced-newline" />
+SpringSource tc Runtime provides a JDBC Interceptor called <tt>SlowQueryReportJmx</tt> that keeps a report of slow JDBC queries, or JDBC queries that did not complete below a configured time threshold. If you want AMS to display this report in its Console, then you must add the <tt>SlowQueryReportJmx</tt> interceptor to this text field. For example, to add it to the default interceptors, enter this value: <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />  <tt>ConnectionState;StatementFinalizer;SlowQueryReportJmx</tt><br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
 The default threshold for the SlowQueryReportJmx interceptor is 5000 milliseconds. If you want to change the default value, include it as a parameter to the interceptor, as shown: <br class="atl-forced-newline" />
@@ -250,7 +250,7 @@ After you have configured the <tt>SlowQueryReportJmx</tt> interceptor, AMS creat
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Apr 20, 2010 15:01</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Sep 10, 2010 15:54</font></td>
 		    </tr>
 	    </table>
     </body>

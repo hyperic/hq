@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hyperic HQ 4.x Documentation : ui-vSphere</title>
+        <title>Evolution : ui-vSphere</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,20 +12,23 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic HQ 4.x Documentation : ui-vSphere
+                            Evolution : ui-vSphere
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 12, 2010 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jul 27, 2010 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><b>Available only in <font color="red">HQ Enterprise</font></b></p>
-<style type='text/css'>/*<![CDATA[*/
-div.rbtoc1278974000295 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1278974000295 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1278974000295 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1278974000295'>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Pre-Release Documentation</b><br />This space is a staging area for Hyperic 4.5 documentation. See <a href="http://support.hyperic.com/confluence/display/DOC/HQ+Documentation" title="HQ Documentation">HQ Documentation</a> for Hyperic 4.2, 4.3, and 4.4 documentation.</td></tr></table></div> 
+<p><b>This page describes a feature in<font color="blue"> HQ 4.4 </font>.</b></p>
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1281565051013 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1281565051013 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1281565051013 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1281565051013'>
 <ul>
     <li><a href='#ui-vSphere-AbouttheHQvSpherePage'>About the HQ vSphere Page</a></li>
 <ul>
@@ -58,7 +61,7 @@ div.rbtoc1278974000295 li {margin-left: 0px;padding-left: 0px;}
 
 <p>This page describes the <b>HQ vSphere</b> page, an interface for monitoring and managing vSphere Hosts and VMs available in HQ Enterprise 4.4 and later.</p>
 
-<p>See <a href="http://support.hyperic.com/confluence/display/DOC/Monitoring+vSphere+Components" title="Monitoring vSphere Components">Monitoring vSphere Components</a> for information about the management functions supported for each resource type and configuration instructions.
+<p>See <a href="http://support.hyperic.com/confluence/display/EVO/Monitoring+vSphere+Components" title="Monitoring vSphere Components">Monitoring vSphere Components</a> for information about the management functions supported for each resource type and configuration instructions.
 <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
 <a name="ui-vSphere-installagent"></a></p>
@@ -102,19 +105,19 @@ div.rbtoc1278974000295 li {margin-left: 0px;padding-left: 0px;}
 <td class='confluenceTd'> <b>Inventory Type</b> </td>
 </tr>
 <tr>
-<td class='confluenceTd'> VMware vCenter<br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> VMware vCenter <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> server </td>
 </tr>
 <tr>
-<td class='confluenceTd'> &nbsp; &nbsp; VMware vSphere Host<br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> &nbsp; &nbsp; VMware vSphere Host <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> platform </td>
 </tr>
 <tr>
-<td class='confluenceTd'> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;VMware vSphere VM<br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;VMware vSphere VM <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> platform </td>
 </tr>
 <tr>
-<td class='confluenceTd'> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; HQ Agent-managed resource in VM &nbsp; &nbsp; &nbsp;&nbsp;<br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; HQ Agent-managed resource in VM &nbsp; &nbsp; &nbsp;&nbsp; <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> server </td>
 </tr>
 </tbody></table>
@@ -129,7 +132,7 @@ div.rbtoc1278974000295 li {margin-left: 0px;padding-left: 0px;}
 <p>Click the thumbnail to see an expanded hierarchy in the <b>Inventory</b> tab.<br/>
 <span class="image-wrap" style=""><a class="confluence-thumbnail-link 1083x442" href='http://support.hyperic.com/confluence/download/attachments/66915257/VirtualHierarchy.png'><img src="attachments/thumbnails/66915257/71598147" style="border: 0px solid black"/></a></span></p>
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Icons in the vSphere Inventory Tab</b><br />The icon to the left of an item in the resource tree indicates the type of the resource, and for a VM, its availability status.
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Icons in the vSphere Inventory Tab</b><br />The icon to the left of an item in the resource tree indicates the type of the resource, and for a VM, its availability status. For information about how VM availability is determined, see <a href="#ui-vSphere-VMwarevSphereVMMetrics">VMware vSphere VM Metrics</a> below.
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
 <tr>
@@ -142,19 +145,23 @@ div.rbtoc1278974000295 li {margin-left: 0px;padding-left: 0px;}
 </tr>
 <tr>
 <td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/66926072/71925832.png" width="20" style="border: 0px solid black"/></span> </td>
-<td class='confluenceTd'> VM whose availability status is "up". </td>
+<td class='confluenceTd'> VM whose availability is <tt>Up</tt> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/66926072/71925823.png" width="20" style="border: 0px solid black"/></span> </td>
-<td class='confluenceTd'> VM whose availability status is "paused". </td>
+<td class='confluenceTd'> VM whose availability is <tt>Paused</tt> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/66926072/71925838.png" width="20" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> VM whose availability is <tt>Powered Off</tt> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/66926072/71925829.png" width="20" style="border: 0px solid black"/></span> </td>
-<td class='confluenceTd'> VM whose availability status is "down". </td>
+<td class='confluenceTd'> VM whose availability status is <tt>Down</tt> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/66926072/71925824.png" width="20" style="border: 0px solid black"/></span> </td>
-<td class='confluenceTd'> VM whose availability status is unknown. </td>
+<td class='confluenceTd'> VM whose availability status is <tt>Unknown</tt> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/66926072/71925839.png" width="20" style="border: 0px solid black"/></span> </td>
@@ -239,7 +246,7 @@ div.rbtoc1278974000295 li {margin-left: 0px;padding-left: 0px;}
 
 <p><b>Note:</b> This information applies to a VM with a running HQ Agent that is managing resources in the VM. Otherwise, resources running in the VM do not appear in the <b>HQ vSphere</b> page.</p>
 
-<p>When you select a managed resource running in a VM, the <b>Summary</b> tab displays the vSphere Host and VM properties described in <a href="#ui-vSphere-SummaryTabforvSphereVM">Summary Tab for vSphere VM</a>. </p>
+<p>When you select a managed resource running in a VM, the <b>Summary</b> tab displays the vSphere Host and VM properties described in <a href="#ui-vSphere-SummaryTabforvSphereVM">Summary Tab for vSphere VM</a>.</p>
 
 <p>The contents of the <b>Summary</b> tab are updated once per minute.</p>
 
@@ -261,12 +268,12 @@ div.rbtoc1278974000295 li {margin-left: 0px;padding-left: 0px;}
 <p>The <b>Performance</b> tab displays an <b>Availability</b> bar, and a chart for each metric currently enabled for the selected resource type.</p>
 
 <p>Click the thumbnail for the <b>Performance</b> tab for a vSphere Host.<br/>
-<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1085x1673" href='http://support.hyperic.com/confluence/download/attachments/66915257/VsphereHostPerfTab.png'><img src="attachments/thumbnails/66915257/71925842" style="border: 0px solid black"/></a></span></p>
+<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1085x1673" href='http://support.hyperic.com/confluence/download/attachments/66915257/VsphereHostPerfTab.png'><img src="attachments/thumbnails/66915257/71925842" title="HQ vSphere Perf Tab for vSphere Host" style="border: 0px solid black"/></a></span></p>
 
 <p>Click the thumbnail for the <b>Performance</b> tab for a vSphere VM.<br/>
 <span class="image-wrap" style=""><a class="confluence-thumbnail-link 1007x1339" href='http://support.hyperic.com/confluence/download/attachments/66915257/VmPerformanceTab.png'><img src="attachments/thumbnails/66915257/71598139" style="border: 0px solid black"/></a></span></p>
 
-<p>The tables in <a href="http://support.hyperic.com/confluence/display/DOC/VMware+vSphere+Host+Metrics" title="VMware vSphere Host Metrics">VMware vSphere Host Metrics</a> and <a href="http://support.hyperic.com/confluence/display/DOC/VMware+vSphere+Host+Metrics" title="VMware vSphere Host Metrics">VMware vSphere Host Metrics</a> list supported vSphere metrics and default settings.</p>
+<p>The tables in <a href="http://support.hyperic.com/confluence/display/EVO/VMware+vSphere+Host+Metrics" title="VMware vSphere Host Metrics">VMware vSphere Host Metrics</a> and <a href="http://support.hyperic.com/confluence/display/EVO/VMware+vSphere+Host+Metrics" title="VMware vSphere Host Metrics">VMware vSphere Host Metrics</a> list supported vSphere metrics and default settings.</p>
 
 <p>Twelve hours history is displayed by default. You can use the <b>Data Range</b> pull-down to set the display range to the most recent:</p>
 
@@ -296,13 +303,13 @@ div.rbtoc1278974000295 li {margin-left: 0px;padding-left: 0px;}
 
 <ul>
 	<li><b>Compare metrics for a managed resource in the VM with performance of the VM or the vSphere host</b> &#8212; Use the <b>Compare</b> pull-down to select a VM or Host metric - the charts for the managed resource metrics will be overlayed with the line for the selected VM or host metric. Click the thumbnail for an example in which the vSphere Hosts's "CPU Usage (Average)" counter is overlayed on each HQ Agent metric chart.<br/>
-<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1130x1333" href='http://support.hyperic.com/confluence/download/attachments/66915257/ApptoHostCompare.png'><img src="attachments/thumbnails/66915257/71925822" style="border: 0px solid black"/></a></span></li>
+<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1130x1333" href='http://support.hyperic.com/confluence/download/attachments/66915257/ApptoHostCompare.png'><img src="attachments/thumbnails/66915257/71925822" title="HQ vSphere Perf Tab for App with vSphere Host Metric Correlated" style="border: 0px solid black"/></a></span></li>
 </ul>
 
 
 <h1><a name="ui-vSphere-HQvSphereControlTab"></a>HQ vSphere Control Tab</h1>
 
-<p>The The <b>Control</b> tab appears when a VM is selected (if there is an HQ Agent running in the VM) and allows you to issue a control command to the VM. See <a href="http://support.hyperic.com/confluence/display/DOC/Monitoring+vSphere+Components#MonitoringvSphereComponents-control">Management Functions for VMware VSphere VM</a> for information about the supported control actions.</p>
+<p>The The <b>Control</b> tab appears when a VM is selected (if there is an HQ Agent running in the VM) and allows you to issue a control command to the VM. See <a href="http://support.hyperic.com/confluence/display/EVO/Monitoring+vSphere+Components#MonitoringvSphereComponents-control">Management Functions for VMware VSphere VM</a> for information about the supported control actions.</p>
 
 <p>Click the thumbnail to see the an example screenshot.</p>
 
@@ -329,13 +336,13 @@ div.rbtoc1278974000295 li {margin-left: 0px;padding-left: 0px;}
 <tr>
 <td class='confluenceTd'> <font color="navy">Availability</font> </td>
 <td class='confluenceTd'> <font color="navy">Availability</font> </td>
-<td class='confluenceTd'>&nbsp;</td>
-<td class='confluenceTd'> The plugin collects the power state of the host once per minute, by default.  If the power state is: <br class="atl-forced-newline" />
+<td class='confluenceTd'>n/a, Availability is determined by HQ; it is not a vCenter statistic. </td>
+<td class='confluenceTd'> The plugin determines a vSphere Host's availability by querying vCenter for the host's power state, once per minute, by default. Availability takes these values:If the power state is: <br class="atl-forced-newline" /> 
 <ul>
-	<li><tt>poweredOn</tt> &#45; Availability state is "up"</li>
-	<li><tt>poweredOff</tt> &#45; Availability state is "down"</li>
-	<li><tt>standby</tt> &#45; Availability state is "paused"</li>
-	<li>none of the above - Availability state is "unknown"</li>
+	<li><tt>Up</tt> &#8212; if vSphere Host power state is <tt>poweredOn</tt>. <br class="atl-forced-newline" /> <br class="atl-forced-newline" /></li>
+	<li><tt>Paused</tt> &#8212; if vSphere Host power state is <tt>standby</tt>. <br class="atl-forced-newline" /> <br class="atl-forced-newline" /></li>
+	<li><tt>Powered Off</tt> &#8212; if vSphere Host power state is <tt>poweredOff</tt>. <br class="atl-forced-newline" /> <br class="atl-forced-newline" /></li>
+	<li><tt>Down</tt> &#8212; if the vSphere Host power state is none of the above. <br class="atl-forced-newline" /> <br class="atl-forced-newline" /></li>
 </ul>
 </td>
 <td class='confluenceTd'> <font color="navy">percentage</font> </td>
@@ -706,13 +713,14 @@ Memory Shared - Memory Shared Common = Host memory saved by sharing <br class="a
 <tr>
 <td class='confluenceTd'> <font color="navy">Availability</font> </td>
 <td class='confluenceTd'> <font color="navy">Availability</font> </td>
-<td class='confluenceTd'>&nbsp;</td>
-<td class='confluenceTd'> The plugin collects the power state of the VM once per minute, by default. If the power state is: <br class="atl-forced-newline" />
+<td class='confluenceTd'>n/a, Availability is determined by HQ; it is not a vCenter statistic.</td>
+<td class='confluenceTd'> The plugin determines a VM's availability by querying vCenter for a VM power state, once per minute, by default. Availability takes these values:If the power state is: <br class="atl-forced-newline" />
 <ul>
-	<li><tt>poweredOn</tt> &#45; Availability state is "poweredOn"</li>
-	<li><tt>poweredOff</tt> &#45; Availability state is "poweredOff"</li>
-	<li><tt>standby</tt> &#45; Availability state is "paused"</li>
-	<li>none of the above - Availability state is "unknown"</li>
+	<li><tt>Up</tt> &#8212; if VM power state is <tt>poweredOn</tt>. <br class="atl-forced-newline" /> <br class="atl-forced-newline" /></li>
+	<li><tt>Paused</tt> &#8212; if VM power state is <tt>standby</tt>. <br class="atl-forced-newline" /> <br class="atl-forced-newline" /></li>
+	<li><tt>Powered Off</tt> &#8212; if VM power state is <tt>poweredOff</tt>. <br class="atl-forced-newline" /> <br class="atl-forced-newline" /></li>
+	<li><tt>Unknown</tt> &#8212; if the VM power state is none of the above. <br class="atl-forced-newline" /> <br class="atl-forced-newline" /></li>
+	<li><tt>Down</tt> &#8212; if VM availability was not reported for a duration equal to, or greater than, twice the configured collection interval, which is 1 minute, by default.</li>
 </ul>
 </td>
 <td class='confluenceTd'> <font color="navy">percentage</font> </td>
@@ -977,7 +985,7 @@ While a VM may&nbsp;have been configured to use 4 GB of RAM, as an example, it m
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 12, 2010 15:34</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Sep 10, 2010 15:54</font></td>
 		    </tr>
 	    </table>
     </body>

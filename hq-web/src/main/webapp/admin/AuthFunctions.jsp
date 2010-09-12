@@ -47,7 +47,7 @@
       <span class="italicInfo">
       <fmt:message key="feature.available.in.EE">
         <fmt:param><fmt:message key="header.roles"/></fmt:param>
-        <fmt:param value="http://support.hyperic.com/confluence/display/DOC/ui-Admin.Role.List"/>
+        <fmt:param value="http://support.hyperic.com/confluence/display/EVO/ui-Admin.Role.List"/>
       </fmt:message>
       </span>
     </td>
