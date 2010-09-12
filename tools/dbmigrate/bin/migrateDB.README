@@ -21,7 +21,7 @@ TO INSTALL:
 2) shutdown your HQ installation running on PG.
 
 3) Install MySQL on a box and set it up according to our installation instructions.
-   http://support.hyperic.com/display/DOC/Set+Up+MySQL
+   http://support.hyperic.com/display/EVO/Set+Up+MySQL
 
 4) upgrade your HQ PostgreSQL with the newly downloaded version of HQ on PG.
    Ignore this step if you are already running the latest HQ on PG.
