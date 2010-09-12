@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hyperic HQ 4.x Documentation : ui-Alert.New</title>
+        <title>Evolution : ui-Alert.New</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,7 +12,7 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic HQ 4.x Documentation : ui-Alert.New
+                            Evolution : ui-Alert.New
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
@@ -20,13 +20,15 @@
 				    </div>
 
 				    <p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Pre-Release Documentation</b><br />This space is a staging area for Hyperic 4.5 documentation. See <a href="http://support.hyperic.com/confluence/display/DOC/HQ+Documentation" title="HQ Documentation">HQ Documentation</a> for Hyperic 4.2, 4.3, and 4.4 documentation.</td></tr></table></div> 
 <p>The <b>New Alert Definition</b> page allows you to define the properties and condition set for an alert definition. After you define the alert properties and condition set, and save your changes, you can define actions for HQ to perform when an alert is fired.</p>
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1247611034717 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1247611034717 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1247611034717 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1281566110510 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1281566110510 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1281566110510 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1247611034717'>
+/*]]>*/</style><div class='rbtoc1281566110510'>
 <ul>
     <li><a href='#ui-Alert.New-NavigatetotheNewAlertDefinitionPage'>Navigate to the New Alert Definition Page</a></li>
     <li><a href='#ui-Alert.New-DefineAlertProperties'>Define Alert Properties</a></li>
@@ -84,9 +86,9 @@ div.rbtoc1247611034717 li {margin-left: 0px;padding-left: 0px;}
 		<li><b>Metric</b> &#45; Select a metric from the selector list.&nbsp; Only currently enabled metrics are listed.&nbsp; (If the metric you're looking for is not listed, see the note below.)</li>
 		<li>Define the rule for evaluating the metric value.&nbsp; You can:
 		<ul>
-			<li><ins>Compare metric value to a specified value</ins>. Select a comparison operator:&nbsp; <b>&gt;(greater than)</b>, <b>&lt;(less than)</b>, <b>=(equal to)</b>, or <b>&#33;= (not equal to)</b>, and enter the absolute value, or</li>
+			<li><ins>Compare metric value to an absolute value</ins>. Select an operator: <b>&gt;(greater than)</b>, <b>&lt;(less than)</b>, <b>=(equal to)</b>, or <b>&#33;= (not equal to)</b>, and enter a metric value. If the metric value is a percentage, specify it as a float value. For example, enter <tt>.99</tt> for <tt>99%</tt>, <tt>1.0</tt> for 100%. Use a period (.) as a decimal separator, rather than a comma (,).</li>
+			<li><ins>Compare metric value to its minimum, baseline, or maximum value</ins> <font color="red">&#42;</font>, in HQ Enterprise only. Select an operator: <b>&gt;(greater than)</b>, <b>&lt;(less than)</b>, <b>=(equal to)</b>, or <b>&#33;= (not equal to)</b>, and choose "Min Value", "Baseline Value" or "Max Value". Baselining must be enabled. For more information, see <a href="http://support.hyperic.com/confluence/display/DOC/Baselines" title="Baselines">Baselines</a>.</li>
 			<li><ins>Fire upon change in metric value</ins>.&nbsp; Click <b>value changes</b>.</li>
-			<li><ins>Compare to metric value to baseline</ins>, in HQ Enterprise only. Select an operator:&nbsp; <b>&gt;(greater than)</b>, <b>&lt;(less than)</b>, <b>=(equal to)</b>, or <b>&#33;= (not equal to)</b>, and choose "Baseline Value" from the pulldown. Baselining must be enabled. For more information, see <a href="http://support.hyperic.com/confluence/display/DOC/Baselines" title="Baselines">Baselines</a>.<font color="red">&#42;</font></li>
 		</ul>
 		</li>
 	</ol>
@@ -137,7 +139,7 @@ div.rbtoc1247611034717 li {margin-left: 0px;padding-left: 0px;}
 
 
 <ul>
-	<li><b>Once every &#95;<em>&#95; times conditions are met within a time period of &#95;</em>&#95;</b> <b>minutes</b>. This option configures an alert to fire when the condition(s) occur multiple times over a period of time.&nbsp; Enter the number of&nbsp; occurrences and period of time.</li>
+	<li><b>Once every</b> <b>_ times conditions are met within a time period of _</b> <b>minutes</b>. This option configures an alert to fire when the condition(s) occur multiple times over a period of time.&nbsp; Enter the number of&nbsp; occurrences and period of time.</li>
 </ul>
 
 
@@ -172,7 +174,7 @@ div.rbtoc1247611034717 li {margin-left: 0px;padding-left: 0px;}
 <p>Under these circumstances, this configuration option ensures that if multiple alerts are fired within a short period for resources that are members of the same application, only one control action will be executed. For example, this would prevent a server from being restarted several times in a short period of time for the same alert conditions. For instance, you might have an alert with an action to restart a Tomcat server if the JVM Free Memory got too low and another alert with an action to restart the same server if the JVM Active Thread count got too high. If both alerts fired at the same time and they were filtering control actions, only 1 restart control action would be executed and not two.</p>
 
 <div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Option removed in 4.2</b></div><div class="panelContent">
-<p>Versions of HQ previous to 4.2 also had a <b>Filter notification actions that are defined for related alerts</b> option to prevent multiple notification when alerts fire for resources on the same platform. In HQ 4.2, the option was removed. HQ 4.2 provides enhanced functionality for global control of notification volume.&nbsp; For more information, see <a href="http://support.hyperic.com/confluence/display/DOC/Controlling+Alert+and+Notification+Volume#ControllingAlertandNotificationVolume-SetaNotificationThrottle">Set a Notification Throttle</a>.</p>
+<p>Versions of HQ previous to 4.2 also had a <b>Filter notification actions that are defined for related alerts</b> option to prevent multiple notification when alerts fire for resources on the same platform. In HQ 4.2, the option was removed. HQ 4.2 provides enhanced functionality for global control of notification volume.&nbsp; For more information, see <a href="http://support.hyperic.com/confluence/display/EVO/Controlling+Alert+and+Notification+Volume#ControllingAlertandNotificationVolume-SetaNotificationThrottle">Set a Notification Throttle</a>.</p>
 </div></div>
 
 <h2><a name="ui-Alert.New-SavetheAlertDefinition"></a>Save the Alert Definition</h2>
@@ -185,7 +187,7 @@ div.rbtoc1247611034717 li {margin-left: 0px;padding-left: 0px;}
 
 <p>Note: Defining actions for an alert definition is optional.</p>
 <div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Related Information</b></div><div class="panelContent">
-<p><a href="http://support.hyperic.com/confluence/display/DOC/Key+Facts+about+HQ+Alerting" title="Key Facts about HQ Alerting">Key Facts about HQ Alerting</a></p>
+<p><a href="http://support.hyperic.com/confluence/display/EVO/Key+Facts+about+HQ+Alerting" title="Key Facts about HQ Alerting">Key Facts about HQ Alerting</a></p>
 </div></div>
 
 				    					    <br/>
@@ -195,7 +197,7 @@ div.rbtoc1247611034717 li {margin-left: 0px;padding-left: 0px;}
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/59375861/59539535.gif">fb_ok.gif</a> (image/gif)
+                                <a href="attachments/71828489/71926189.gif">fb_ok.gif</a> (image/gif)
                                 <br/>
                                                     </div>
 				    
@@ -207,7 +209,7 @@ div.rbtoc1247611034717 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Apr 20, 2010 15:01</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Sep 10, 2010 15:54</font></td>
 		    </tr>
 	    </table>
     </body>

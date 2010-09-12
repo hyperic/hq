@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hyperic HQ 4.x Documentation : ui-Admin.Monitor.MetricTemplate</title>
+        <title>Evolution : ui-Admin.Monitor.MetricTemplate</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,105 +12,78 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic HQ 4.x Documentation : ui-Admin.Monitor.MetricTemplate
+                            Evolution : ui-Admin.Monitor.MetricTemplate
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Apr 18, 2010 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 09, 2010 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <h1><a name="ui-Admin.Monitor.MetricTemplate-EditingDefaultValuesforaResourceType%27sMonitoringMetrics"></a><a name="ui-Admin.Monitor.MetricTemplate-top"></a>Editing Default Values for a Resource Type's Monitoring Metrics</h1>
+				    <p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
 
-<p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
-<p>This screen allows users to specify which metrics Hyperic HQ should gather and at what time intervals for a selected resource type (<a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-platform">platform</a>, <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-server">server</a>, or <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-platformservice">platform service</a>).</p>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Pre-Release Documentation</b><br />This space is a staging area for Hyperic 4.5 documentation. See <a href="http://support.hyperic.com/confluence/display/DOC/HQ+Documentation" title="HQ Documentation">HQ Documentation</a> for Hyperic 4.2, 4.3, and 4.4 documentation.</td></tr></table></div> 
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1281566689954 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1281566689954 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1281566689954 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1281566689954'>
 <ul>
-	<li><a href="#ui-Admin.Monitor.MetricTemplate-Tasks">Tasks</a> available on this screen</li>
-	<li><a href="#ui-Admin.Monitor.MetricTemplate-Navigating">Navigating</a> via the masthead menu</li>
+    <li><a href='#ui-Admin.Monitor.MetricTemplate-ConfigureMetricCollectionforaResourceType%26nbsp%3B'>Configure Metric Collection for a Resource Type&nbsp;</a></li>
+<ul>
+    <li><a href='#ui-Admin.Monitor.MetricTemplate-EnableCollectionofaMetric'>Enable Collection of a Metric</a></li>
+    <li><a href='#ui-Admin.Monitor.MetricTemplate-DisableCollectionofaMetric'>Disable Collection of a Metric</a></li>
+    <li><a href='#ui-Admin.Monitor.MetricTemplate-ChangeaMetricCollectionInterval'>Change a Metric Collection Interval</a></li>
+    <li><a href='#ui-Admin.Monitor.MetricTemplate-SetIndicatorMetrics'>Set Indicator Metrics</a></li>
+    <li><a href='#ui-Admin.Monitor.MetricTemplate-APIsforMetricCollectionSettings'>APIs for Metric Collection Settings</a></li>
 </ul>
-
-
+</ul></div>
 <p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
 
-<h3><a name="ui-Admin.Monitor.MetricTemplate-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h3>
+<h1><a name="ui-Admin.Monitor.MetricTemplate-ConfigureMetricCollectionforaResourceType%26nbsp%3B"></a>Configure Metric Collection for a Resource Type&nbsp;</h1>
 
-<p>On this screen, users can do the following tasks:</p>
-
-<p><b>To enable the collection of a metric:</b></p>
-<ul>
-	<li>Follow the directions <a href="#ui-Admin.Monitor.MetricTemplate-below">below</a> for changing a metric's collection interval.<br/>
-Collection of the metric is now enabled by default with the specified collection interval on every resource of this type.</li>
-</ul>
+<p>The <b>Monitoring Defaults</b> page page allows users to specify which metrics Hyperic HQ should gather and at what time intervals for a selected resource type.</p>
 
 
-<p><b>To disable the collection of a metric:</b></p>
-<ul>
-	<li>Check the metric name at the left and click <span class="image-wrap" style=""><img src="attachments/59375885/59539561.png" style="border: 0px solid black"/></span> at screen bottom.</li>
-</ul>
+<h2><a name="ui-Admin.Monitor.MetricTemplate-EnableCollectionofaMetric"></a>Enable Collection of a Metric</h2>
 
+<p><font color="#333333">To enable the collection of a metric, follow the directions in</font> <font color="#333333"><a href="#ui-Admin.Monitor.MetricTemplate-ChangeaMetricCollectionInterval">Change a Metric Collection Interval</a></font><font color="#333333">. Collection of the metric is now enabled by default with the specified collection interval on every resource of this type.</font></p>
 
-<p><a name="ui-Admin.Monitor.MetricTemplate-below"></a><b>To change a metric's collection interval:</b></p>
+<h2><a name="ui-Admin.Monitor.MetricTemplate-DisableCollectionofaMetric"></a>Disable Collection of a Metric</h2>
+
+<p><font color="#333333">To disable the collection of a metric, check the metric name at the left and click</font> <span class="image-wrap" style=""><img src="attachments/71828506/71926243.png" style="border: 0px solid black"/></span> <font color="#333333">at the bottom of the page.</font></p>
+
+<h2><a name="ui-Admin.Monitor.MetricTemplate-ChangeaMetricCollectionInterval"></a>Change a Metric Collection Interval</h2>
+
 <ol>
 	<li>Check the metric name at the left.</li>
-	<li>In <ins>Collection Interval for Selected</ins> at screen bottom, type a time value and select a unit of time measure for the collection interval.</li>
-	<li>Click <span class="image-wrap" style=""><img src="attachments/59375885/59539517.png" style="border: 0px solid black"/></span>.</li>
+	<li>In <b>Collection Interval for Selected</b> at the bottom of the page, enter  a time value and select a unit of time measure for the collection interval.</li>
+	<li>Click <span class="image-wrap" style=""><img src="attachments/71828506/71926244.png" style="border: 0px solid black"/></span>.</li>
 </ol>
 
 
-<p><a name="ui-Admin.Monitor.MetricTemplate-indicator"></a><b>To make a metric an</b> <b><a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-indicatormetric"><b>indicator metric</b></a></b><b>:</b></p>
+<h2><a name="ui-Admin.Monitor.MetricTemplate-SetIndicatorMetrics"></a>Set Indicator Metrics</h2>
+
+<p><font color="#333333">To select the metrics that appear as indicators on the</font> <font color="#333333"><b>Monitoring</b></font> <font color="#333333">tab for resources instances, check the metric name at the left for each metric you wish to be an indicator, and click</font> <span class="image-wrap" style=""><img src="attachments/71828506/71926244.png" style="border: 0px solid black"/></span> <font color="#333333">to the right of</font> <font color="#333333"><b>Set Selected Metrics as Indicators</b></font> <font color="#333333">at the bottom of the page.</font></p>
+
+<p>The metrics you configure will be the default indicators for the resource type.</p>
+
+<p>Changes to indicator metrics apply to existing resources but only for users that have not explicitly changed the default indicator page on the resources (of the specified type). If a user has changed the default indicator page for a resource, that will not be overwritten with changes made here.</p>
+
+<h2><a name="ui-Admin.Monitor.MetricTemplate-APIsforMetricCollectionSettings"></a>APIs for Metric Collection Settings</h2>
+
+
+<p>As an alternative to the updating updating metric collection settings from the HQ user interface, you can use HQ APIs to perform updates from the command line or from scripts to perform bulk updates:</p>
+
 <ul>
-	<li>Check the metric name at the left and click <span class="image-wrap" style=""><img src="attachments/59375885/59539517.png" style="border: 0px solid black"/></span> to the right of <b>Set Selected Metrics as Indicators</b> at screen bottom.
-<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Changing Monitoring Values Overwrites Current Values</b><br />When users select indicator metrics, they are redefining the set of such metrics, they are not adding on to the existing set of indicator metrics. Therefore any metric left unchecked when <span class="image-wrap" style=""><img src="attachments/59375885/59539517.png" style="border: 0px solid black"/></span> (next to <b>Set Selected Metrics as Indicators</b>) is clicked will be disabled as indicators. Changing the indicator set affects the default view of the resource.
-
-<p>Also, note that changes to indicator metrics apply to existing resources but only for users that have not explicitly changed the default indicator page on the resources (of the specified type). If a user has changed the default indicator page for a resource, that will not be overwritten with changes made here.</p>
-
-<p><b>Collection Interval.</b> Changing the collection interval will overwrite the current collection intervals of existing metrics.</p></td></tr></table></div>
-<p><em><a href="#ui-Admin.Monitor.MetricTemplate-top"><em>back to top</em></a></em></p></li>
+	<li><a href="http://support.hyperic.com/confluence/display/EVO/HQApi+metric+command" title="HQApi metric command">HQApi metric command</a> &#45; for listing and updating metric collection settings for an individual resource.</li>
+	<li><a href="http://support.hyperic.com/confluence/display/EVO/HQApi+metrictemplate+command" title="HQApi metrictemplate command">HQApi metrictemplate command</a> &#45; for listing and updating metric collection settings for an all instances of a resource type.</li>
 </ul>
 
 
-<p><a name="ui-Admin.Monitor.MetricTemplate-Navigating"></a></p>
-<h3><a name="ui-Admin.Monitor.MetricTemplate-NavigatingviatheMastheadMenu"></a>Navigating via the Masthead Menu</h3>
+<p>For general information, see <a href="http://support.hyperic.com/confluence/display/EVO/Web+Services+API" title="Web Services API">Web Services API</a>.</p>
 
-<p>Main screens in Hyperic contain a masthead menu. Users can navigate to the following parts of HQ using this menu:</p>
-<div class='table-wrap'>
-<table class='confluenceTable'><tbody>
-<tr>
-<td class='confluenceTd'> <b>Dashboard</b> </td>
-<td class='confluenceTd'> Displays the <a href="ui-Dashboard.html" title="ui-Dashboard">Dashboard</a>, the starting screen in HQ, which displays information about resource health, recent alerts, recently performed auto-discovery scan, and control actions </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Resources</b> </td>
-<td class='confluenceTd'> Click the menu name to access either <b>Browse</b> (takes users to the <a href="ui-Resources.html" title="ui-Resources">Browse Resources</a> screen, where they can locate and navigate through information about all <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-managedresource">managed resources</a>), <b>Currently Down</b> (takes users to the <a href="ui-CurrentlyDown.html" title="ui-CurrentlyDown">Currently Down</a> screen, where they can look at all managed resources that are unavailable), <b>Nagios Availability</b> (available only when Nagios is installed), or <b>Recently Viewed</b> (provides a drop-down list of <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-resource">resources</a> that the user has recently viewed. Selecting one of those resources takes the user to the <a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Current Health</a> screen for the resource). </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Analyze</b> </td>
-<td class='confluenceTd'> Click the menu name to access <b>Reporting</b> <font color="red">&#42;</font> (presents the <a href="ui-ReportCenter.html" title="ui-ReportCenter">Reporting</a> screen, from which reports can be generated), <b>Alert Center</b> (presents the <a href="ui-Alert.Center.html" title="ui-Alert.Center">Alert Center</a>, which displays a deployment wide alert summary), or <b>Event Center</b> (presents the <a href="ui-Event.Center.html" title="ui-Event.Center">Event Center</a>, which displays a deployment-wide event summary). <br class="atl-forced-newline" /> </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Administration</b> </td>
-<td class='confluenceTd'> Takes users (with "Administer Hyperic HQ Server Configuration" permissions) to the <a href="ui-Admin.html" title="ui-Admin">Administration</a> screen, where they can manage the system-wide settings </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Search</b> <br class="atl-forced-newline" /> </td>
-<td class='confluenceTd'> The Search box in the upper right of the Masthead allows you to search for HQ resources of any type and HQ users. <br class="atl-forced-newline" />
-<br class="atl-forced-newline" />
-Search results appear after four characters are entered in the text box. Results will include the first 10 platforms, servers, services, and groups whose name includes the search string. <br class="atl-forced-newline" />  <br class="atl-forced-newline" />
-Double-click a resource in the list to navigate to its Resource page. </td>
-</tr>
-</tbody></table>
-</div>
-
-<p>The masthead also displays the two most recently triggered alerts. Users can click the alert's time to be taken to the <a href="ui-Alert.Detail.html" title="ui-Alert.Detail">alert detail</a>.</p>
-<p><em><a href="#ui-Admin.Monitor.MetricTemplate-top"><em>back to top</em></a></em></p>
-
-<p><br class="atl-forced-newline" /></p>
-<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Related Information</b></div><div class="panelContent">
-<p><a href="http://support.hyperic.com/confluence/display/DOC/HQ+Metric+Categories" title="HQ Metric Categories">HQ Metric Categories</a><br/>
-<a href="http://support.hyperic.com/confluence/display/DOC/Monitoring+Defaults+Configuration" title="Monitoring Defaults Configuration">Monitoring Defaults Configuration</a></p>
-</div></div></tr></tbody></table>
-
-<h5><a name="ui-Admin.Monitor.MetricTemplate-ReturntoMonitoringDefaultsConfigurationuiAdmin.Monitor."></a>Return to <a href="ui-Admin.Monitor.html" title="ui-Admin.Monitor">Monitoring Defaults Configuration</a>.</h5>
+<p>Return to <a href="ui-Admin.Monitor.html" title="ui-Admin.Monitor">Monitoring Defaults Configuration</a>.</p>
 
 				    					    <br/>
                         <div class="tabletitle">
@@ -119,10 +92,10 @@ Double-click a resource in the list to navigate to its Resource page. </td>
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/59375885/59539517.png">dash-button_go-arrow.png</a> (image/png)
+                                <a href="attachments/71828506/71926244.png">dash-button_go-arrow.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/59375885/59539561.png">tbb_disablecollection.png</a> (image/png)
+                                <a href="attachments/71828506/71926243.png">tbb_disablecollection.png</a> (image/png)
                                 <br/>
                                                     </div>
 				    
@@ -134,7 +107,7 @@ Double-click a resource in the list to navigate to its Resource page. </td>
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Apr 20, 2010 15:01</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Sep 10, 2010 15:54</font></td>
 		    </tr>
 	    </table>
     </body>
