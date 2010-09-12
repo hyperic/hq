@@ -1,0 +1,346 @@
+<?xml version="1.0"?>
+<!DOCTYPE plugin [
+        <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+        <!ENTITY multi-process-metrics SYSTEM "/pdk/plugins/multi-process-metrics.xml">
+        ]>
+<!--
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ *  "derived work".
+ *
+ *  Copyright (C) [2010], VMware, Inc.
+ *  This file is part of HQ.
+ *
+ *  HQ is free software; you can redistribute it and/or modify
+ *  it under the terms version 2 of the GNU General Public License as
+ *  published by the Free Software Foundation. This program is distributed
+ *  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ *  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ *  PARTICULAR PURPOSE. See the GNU General Public License for more
+ *  details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ *  USA.
+ -->
+
+<plugin class="org.hyperic.hq.plugin.rabbitmq.core.RabbitProductPlugin">
+
+   <!-- <help name="RabbitMQ">
+      <![CDATA[
+          <p>
+          <h3>Configure RabbitMQ ${product.version} for Monitoring</h3>
+          Help docs coming soon.
+          </p>
+        ]]>
+    </help>-->
+    
+    <server name="RabbitMQ" version="1.8.0" description="RabbitMQ Server">
+
+        <plugin type="autoinventory"
+                class="org.hyperic.hq.plugin.rabbitmq.detect.RabbitServerDetector"/>
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+        <plugin type="collector"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+        <plugin type="log_track"
+                class="org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerLog"/>
+        <!--  <plugin type="control"
+        class="org.hyperic.hq.plugin.rabbitmq.manage.RabbitBrokerManagerPlugin"/>-->
+
+        <config type="product">
+            <option name="server.name" description="RabbitMQ server name"/>
+
+            <option name="server.path" description="Process Path"/>
+            <!--hidden-->
+
+            <option name="rabbitmq.home" description="RABBITMQ_HOME" optional="true"/>
+
+            <option name="host" description="RabbitMQ Host"/>
+
+            <option name="username" description="RabbitMQ Username"/>
+
+            <option name="password" type="secret" description="RabbitMQ Password"/>
+
+            <option name="port" type="int" default="5672" description="RabbitMQ Port" optional="true"/>
+
+        </config>
+
+         
+
+        <!-- Have not had time to test these.
+
+        <actions>
+            <include name="startNode"/>
+            <include name="stopNode"/>
+            <include name="startBrokerApplication"/>
+            <include name="stopBrokerApplication"/>
+            <include name="createQueue"/>
+            <include name="deleteQueue"/>
+            hanging: <include name="purgeQueue"/>
+            <include name="createExchange"/>
+            <include name="deleteExchangeIfUnused"/>
+            <include name="createUser"/>
+            <include name="updateUserPassword"/>
+            <include name="deleteUser"/>
+        </actions>
+        -->
+
+        <config type="measurement">
+            <option name="process.query" default="State.Name.sw=beam,Args.*.eq=-sname,Args.*.ct=%server.path%"
+                    description="XXXXXXX"/>
+        </config>
+
+        <metric name="Availability"
+                template="sigar:Type=ProcState,Arg=%process.query%:State"
+                indicator="true"/>
+
+        &process-metrics;
+
+
+        <service name="Proccess">
+            <plugin type="log_track" class="org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerLog"/>
+            <config type="product">
+                <option name="process.name" description="XXXXXXX"/>
+            </config>
+            <config type="measurement">
+                <option name="process.query" default="State.Name.sw=beam,Args.*.eq=-sname,Args.*.eq=%proccess.name%"
+                        description="XXXXXXX"/>
+            </config>
+            <metric name="Availability"
+                    template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>
+            &process-metrics;
+        </service>
+
+        <service name="Queue">
+            <property name="template" value="rabbitmq:queue=%name%,vhost=%vhost%,server=%server.name%:${alias}"/>
+
+            <metric name="Messages"
+                    alias="messages"
+                    category="THROUGHPUT"
+                    units="none"
+                    indicator="true"
+                    collectionType="dynamic"/>
+            <metric name="Consumers"
+                    alias="consumers"
+                    category="UTILIZATION"
+                    units="none"
+                    indicator="true"
+                    collectionType="dynamic"/>
+            <metric name="Transactions"
+                    alias="transactions"
+                    category="THROUGHPUT"
+                    units="none"
+                    indicator="true"
+                    collectionType="dynamic"/>
+            <metric name="Availability"
+                    category="AVAILABILITY"
+                    units="percentage"
+                    indicator="true"
+                    collectionType="dynamic"/>
+            <metric name="Memory"
+                    alias="memory"
+                    category="UTILIZATION"
+                    units="b"
+                    indicator="true"
+                    collectionType="dynamic"/>
+
+            <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitQueueCollector"/>
+            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="autoinventory"/>
+            <config type="product">
+                <option name="vhost" description="queue vHost"/>
+                <option name="name" description="queue Name"/>
+            </config>
+            <properties>
+                <property description="Name" name="name"/>
+                <property description="Process ID" name="pid"/>
+                <property description="Acks Uncommitted" name="acksUncommitted"/>
+                <property description="Messages Ready" name="messagesReady"/>
+                <property description="Messages Unacknowledged" name="messagesUnacknowledged"/>
+                <property description="Messages Uncommitted" name="messagesUncommitted"/>
+                <property description="Durable" name="durable"/>
+            </properties>
+        </service>
+
+       <service name="Channel">
+            <property name="template" value="rabbitmq:channel=%name%,vhost=%vhost%,server=%server.name%:${alias}"/>
+
+            <metric name="Consumers"
+                    alias="consumerCount"
+                    category="UTILIZATION"
+                    units="none"
+                    indicator="true"
+                    collectionType="dynamic"/>
+            <metric name="Availability"
+                    category="AVAILABILITY"
+                    units="percentage"
+                    indicator="true"
+                    collectionType="dynamic"/>
+            <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitChannelCollector"/>
+            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="autoinventory"/>
+            <config type="product">
+                <option name="vhost" description="queue vHost"/>
+                <option name="name" description="queue Name"/>
+            </config>
+            <properties>
+                <property description="Process ID" name="pid"/>
+                <property description="Connection" name="connection"/>
+                <property description="Number" name="number"/>
+                <property description="User" name="user"/>
+                <property description="Transactional" name="transactional"/>
+                <property description="Prefetch Count" name="prefetchCount"/>
+                <property description="Acks Uncommitted" name="acksUncommitted"/>
+                <property description="Messages Unacknowledged" name="messagesUnacknowledged"/>
+           </properties>
+        </service>
+
+        <service name="Connection">
+            <property name="template" value="rabbitmq:connection=%name%,vhost=%vhost%,server=%server.name%:${alias}"/>
+
+            <metric name="Octets Received"
+                    alias="octetsReceived"
+                    category="THROUGHPUT"
+                    units="B"
+                    indicator="true"
+                    collectionType="dynamic"/>
+            <metric name="Octets Sent"
+                    alias="octetsSent"
+                    category="THROUGHPUT"
+                    units="B"
+                    indicator="true"
+                    collectionType="dynamic"/>
+            <metric name="Network Packets Received"
+                    alias="packetsReceived"
+                    category="THROUGHPUT"
+                    units="B"
+                    indicator="true"
+                    collectionType="dynamic"/>
+            <metric name="Network Packets Sent"
+                    alias="packetsSent"
+                    category="THROUGHPUT"
+                    units="B"
+                    indicator="true"
+                    collectionType="dynamic"/>
+            <metric name="Channels"
+                    alias="channelCount"
+                    category="UTILIZATION"
+                    units="none"
+                    indicator="true"
+                    collectionType="dynamic"/>
+            <metric name="Pending Sends"
+                    alias="pendingSends"
+                    category="UTILIZATION"
+                    units="none"
+                    indicator="true"
+                    collectionType="dynamic"/>
+            <metric name="Availability"
+                    category="AVAILABILITY"
+                    units="percentage"
+                    indicator="true"
+                    collectionType="dynamic"/>
+
+            <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitConnectionCollector"/>
+            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="autoinventory"/>
+            <config type="product">
+                <option name="vhost" description="connection vHost"/>
+                <option name="name" description="connection Name"/>
+            </config>
+            <properties>
+                <property description="PID" name="pid"/>
+                <property description="Self Node" name="selfNode"/>
+                <property description="Peer Node" name="peerNode"/>
+                <property description="Frame Max" name="frameMax"/>
+                <property description="State" name="state"/>
+                <property description="VHost" name="vHost"/>
+                <property description="Username" name="username"/>
+            </properties>
+        </service>
+
+        <service name="Exchange">
+            <property name="template" value="rabbitmq:exchange=%name%,vhost=%vhost%,server=%server.name%:${alias}"/>
+
+            <metric name="Availability"
+                    category="AVAILABILITY"
+                    units="percentage"
+                    indicator="true"
+                    collectionType="dynamic"/>
+
+            <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitExchangeCollector"/>
+            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="autoinventory"/>
+            <config type="product">
+                <option name="vhost" description="exchange vHost"/>
+                <option name="name" description="exchange Name"/>
+            </config>
+            <properties>
+                <property description="Durable" name="durable"/>
+                <property description="Exchange Type" name="exchangeType"/>
+                <property description="Auto-delete" name="autoDelete"/>
+            </properties>
+        </service>
+
+        <service name="BrokerApplication">
+            <property name="template"
+                      value="rabbitmq:brokerapplication=%name%,vhost=%vhost%,server=%server.name%:${alias}"/>
+            <metric name="Availability"
+                    category="AVAILABILITY"
+                    units="percentage"
+                    indicator="true"
+                    collectionType="dynamic"/>
+
+            <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.BrokerAppCollector"/>
+            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="autoinventory"/>
+            <config type="product">
+                <option name="vhost" description="application vHost"/>
+                <option name="name" description="application Name"/>
+            </config>
+            <properties>
+                <property description="Name" name="name"/>
+                <property description="Description" name="description"/>
+                <property description="Version" name="version"/>
+            </properties>
+        </service>
+
+        <service name="User">
+            <property name="template"
+                      value="rabbitmq:brokerapplication=%name%,vhost=%vhost%,server=%server.name%:${alias}"/>
+            <metric name="Availability"
+                    category="AVAILABILITY"
+                    units="percentage"
+                    indicator="true"
+                    collectionType="dynamic"/>
+
+            <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitUserCollector"/>
+            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="autoinventory"/>
+            <config type="product">
+                <option name="vhost" description="application vHost"/>
+                <option name="name" description="application Name"/>
+            </config>
+            <properties>
+                <property description="Name" name="name"/>
+            </properties>
+        </service>
+
+        &multi-process-metrics;
+
+    </server>
+
+    <server name="RabbitMQ" version="1.8.1" include="RabbitMQ 1.8.0"/>
+    <server name="RabbitMQ" version="2.0.0" include="RabbitMQ 1.8.1"/>
+
+
+    <!--  <server name="Erlang">
+        <plugin type="autoinventory" class="org.hyperic.hq.product.DaemonDetector"/>
+    </server>-->
+
+
+</plugin>
