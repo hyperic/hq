@@ -70,14 +70,14 @@ public class  RabbitServerDetector extends ServerDetector implements AutoServerD
             
             for (String path : paths) {
                 for (long pid : pids) {
-                    String rabbitHome = inferPath(path);
-                    String args[] = getProcArgs(pid);
+
+                    final String rabbitHome = inferPath(path);
+                    final String args[] = getProcArgs(pid);
                     final String node = getServerName(args);
                     final String serverVersion = RabbitVersionDetector.detectVersion(path, node); 
 
                     if (serverVersion != null && serverVersion.startsWith(getTypeInfo().getVersion())) {
                         ServerResource server = doCreateServerResource(node, serverVersion, path, rabbitHome);
- 
                         if (server != null) {
                             resources.add(server);
                         }
@@ -143,7 +143,7 @@ public class  RabbitServerDetector extends ServerDetector implements AutoServerD
             processResource.setProductConfig(productConfig);
 
             for (int n = 0; n < args.length; n++) {
-                //logger.debug("\n" + pid + ".arg=" + args[n]);
+                 /** rabbit -sname rabbit@localhost */
                 /** -kernel error_logger {file,"/path/to/rabbit@localhost.log"} */
                 if (args[n].equalsIgnoreCase("-kernel") && args[n + 1].equalsIgnoreCase("error_logger") && args[n + 2].startsWith("{file,")) {
 
@@ -305,7 +305,6 @@ public class  RabbitServerDetector extends ServerDetector implements AutoServerD
      */
     private List<ServiceResource> createAppServiceResources(RabbitGateway rabbitGateway, String vHost) throws PluginException {
         List<ServiceResource> serviceResources = null;
-
         List<Application> runningApps = rabbitGateway.getRunningApplications();
 
         if (runningApps != null) {
@@ -324,10 +323,10 @@ public class  RabbitServerDetector extends ServerDetector implements AutoServerD
      */
     private List<ServiceResource> createChannelServiceResources(RabbitGateway rabbitGateway, String vHost) throws PluginException {
         List<ServiceResource> serviceResources = null;
-
         List<AmqpChannel> channels = rabbitGateway.getChannels();
 
         if (channels != null) {
+            logger.debug("\n\n************************createChannelServiceResources.channels=" + channels.size());
             serviceResources = doCreateServiceResources(channels, DetectorConstants.CHANNEL, vHost);
         }
 
@@ -351,30 +350,44 @@ public class  RabbitServerDetector extends ServerDetector implements AutoServerD
             serviceResources = new ArrayList<ServiceResource>();
 
             for (Object obj : rabbitObjects) {
-                String name = getIdentifier(obj);
 
                 ServiceResource resource = createServiceResource(rabbitType);
-                resource.setName(new StringBuilder().append("RabbitMQ ").append(rabbitType).append(" ").append(name).toString());
+                String name = null;
+
+                if (obj instanceof QueueInfo) {
+                    name = ((QueueInfo) obj).getName();
+                    resource.setCustomProperties(RabbitQueueCollector.getAttributes((QueueInfo) obj));
+                }
+                else if (obj instanceof AmqpConnection) {
+                    name = ((AmqpConnection) obj).getPid();
+                    resource.setCustomProperties(RabbitConnectionCollector.getAttributes((AmqpConnection) obj));
+                }
+                else if (obj instanceof Exchange) {
+                    name = ((Exchange) obj).getName();
+                    resource.setCustomProperties(RabbitExchangeCollector.getAttributes((Exchange) obj));
+                }
+                else if (obj instanceof Application) {
+                    name = ((Application) obj).getDescription();
+                    resource.setCustomProperties(BrokerAppCollector.getAttributes((Application) obj));
+                }
+                else if (obj instanceof AmqpChannel) {
+                    logger.debug("\n\n************************createChannelServiceResources.channels=" + (AmqpChannel)obj);
+                    name = ((AmqpChannel)obj).getPid();
+                    resource.setCustomProperties(RabbitChannelCollector.getAttributes((AmqpChannel)obj));
+                }
+                else if (obj instanceof String) {
+                    name = (String)obj;
+                }
+                
 
                 ConfigResponse configResponse = new ConfigResponse();
                 configResponse.setValue(DetectorConstants.VHOST.toLowerCase(), vHost);
                 configResponse.setValue(DetectorConstants.NAME, name);
-
+                
+                resource.setName(new StringBuilder().append("RabbitMQ ").append(rabbitType).append(" ").append(name).toString());
                 resource.setProductConfig(configResponse);
                 resource.setDescription(new StringBuilder(rabbitType).append(" ").append(name).toString());
                 setMeasurementConfig(resource, configResponse);
-
-                if (obj instanceof QueueInfo) {
-                    resource.setCustomProperties(RabbitQueueCollector.getAttributes((QueueInfo) obj));
-                } else if (obj instanceof AmqpConnection) {
-                    resource.setCustomProperties(RabbitConnectionCollector.getAttributes((AmqpConnection) obj));
-                } else if (obj instanceof Exchange) {
-                    resource.setCustomProperties(RabbitExchangeCollector.getAttributes((Exchange) obj));
-                } else if (obj instanceof Application) {
-                    resource.setCustomProperties(BrokerAppCollector.getAttributes((Application) obj));
-                } else if (obj instanceof AmqpChannel) {
-                    resource.setCustomProperties(RabbitChannelCollector.getAttributes((AmqpChannel)obj));
-                }
 
                 if (resource != null) serviceResources.add(resource);
             }
@@ -384,29 +397,6 @@ public class  RabbitServerDetector extends ServerDetector implements AutoServerD
             logger.debug(new StringBuilder("Created ").append(serviceResources.size()).append(" ").append(rabbitType).append(" serviceResources"));
 
         return serviceResources;
-    }
-
-    /**
-     * For each AMQP type, derive the 'name' of the resource.
-     * @param obj
-     * @return
-     */
-    private String getIdentifier(Object obj) {
-        if (obj instanceof QueueInfo) {
-            return ((QueueInfo) obj).getName();
-        } else if (obj instanceof AmqpConnection) {
-            return ((AmqpConnection) obj).getPid();
-        } else if (obj instanceof Exchange) {
-            return ((Exchange) obj).getName();
-        } else if (obj instanceof Application) {
-            return ((Application) obj).getDescription();
-        } else if (obj instanceof AmqpChannel) {
-            return ((AmqpChannel)obj).getPid();
-        } else if (obj instanceof String) {
-            return (String)obj;
-        } else {
-            return obj.getClass().getSimpleName();
-        }
     }
 
     /**
@@ -426,8 +416,7 @@ public class  RabbitServerDetector extends ServerDetector implements AutoServerD
         ConfigResponse conf = new ConfigResponse();
         conf.setValue(DetectorConstants.SERVER_NAME, node);
         conf.setValue(DetectorConstants.SERVER_PATH, path);
-        if (rabbitHome != null && (!rabbitHome.equalsIgnoreCase(path))) {
-            logger.debug("\nRABBITMQ_HOME is " + rabbitHome);
+        if (rabbitHome != null && (!rabbitHome.equalsIgnoreCase(path))) { 
             conf.setValue(DetectorConstants.RABBITMQ_HOME, rabbitHome);
         }
 
@@ -465,10 +454,6 @@ public class  RabbitServerDetector extends ServerDetector implements AutoServerD
         for (int n = 0; n < args.length; n++) {
             if (args[n].equalsIgnoreCase(DetectorConstants.MNESIA) && args[n + 1].equalsIgnoreCase(DetectorConstants.DIR)) {
                 mpath = args[n + 2];
-                /*if (mpath.startsWith("\\")) {
-                    mpath = mpath.substring(1, mpath.length() - 1);
-                }*/
-
                 if (mpath.startsWith("\"")) {
                     mpath = mpath.substring(1);
                 }
@@ -478,6 +463,7 @@ public class  RabbitServerDetector extends ServerDetector implements AutoServerD
 
             }
         }
+        
         return mpath;
     }
 
