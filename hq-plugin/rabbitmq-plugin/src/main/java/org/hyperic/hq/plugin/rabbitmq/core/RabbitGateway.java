@@ -84,7 +84,7 @@ public interface RabbitGateway {
     
     AMQPStatus stopRabbitNode();
 
-    AMQPStatus startRabbitNode();
+    AMQPStatus startRabbitNode(String rabbitHome);
 
     AMQPStatus startBrokerApplication();
 

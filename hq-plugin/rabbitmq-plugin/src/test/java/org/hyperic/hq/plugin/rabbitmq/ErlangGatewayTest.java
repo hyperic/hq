@@ -108,6 +108,9 @@ public class ErlangGatewayTest {
     @Test
     public void getChannels() {
         List<AmqpChannel> channels = erlangGatway.getChannels();
+        for (AmqpChannel c : channels) {
+            System.out.println(c);
+        }
         // if we're just starting up the node, it won't have channels.
         // will add assertions after a set up is added.
     }

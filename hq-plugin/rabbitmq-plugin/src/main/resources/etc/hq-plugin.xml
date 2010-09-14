@@ -30,17 +30,25 @@
 
 <plugin class="org.hyperic.hq.plugin.rabbitmq.core.RabbitProductPlugin">
 
-   <!-- <help name="RabbitMQ">
+
+
+    <server name="RabbitMQ" version="1.8.0" description="RabbitMQ Server">
+
+        <help>
       <![CDATA[
           <p>
           <h3>Configure RabbitMQ ${product.version} for Monitoring</h3>
-          Help docs coming soon.
+          Once the RabbitMQ nodes are auto-detected and you can select the Server resource by node, go to Configure Server.
+          Here enter the node's host, username, and password then select OK. This will allow Hyperic to connect to the node
+          and provide information on Queues, Connections, Processes, Users, and Exchanges.
+          </p>
+          <p>
+          <h3>Help Docs</h3>
+          Coming soon: <a href="http://support.hyperic.com/display/EVO/Monitoring+RabbitMQ">Monitoring and Managing RabbitMQ</a>
           </p>
         ]]>
-    </help>-->
-    
-    <server name="RabbitMQ" version="1.8.0" description="RabbitMQ Server">
-
+    </help>
+        
         <plugin type="autoinventory"
                 class="org.hyperic.hq.plugin.rabbitmq.detect.RabbitServerDetector"/>
         <plugin type="measurement"
@@ -70,7 +78,6 @@
 
         </config>
 
-         
 
         <!-- Have not had time to test these.
 
@@ -167,7 +174,7 @@
             </properties>
         </service>
 
-       <service name="Channel">
+        <service name="Channel">
             <property name="template" value="rabbitmq:channel=%name%,vhost=%vhost%,server=%server.name%:${alias}"/>
 
             <metric name="Consumers"
@@ -181,6 +188,7 @@
                     units="percentage"
                     indicator="true"
                     collectionType="dynamic"/>
+
             <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitChannelCollector"/>
             <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
             <plugin type="autoinventory"/>
@@ -188,6 +196,7 @@
                 <option name="vhost" description="queue vHost"/>
                 <option name="name" description="queue Name"/>
             </config>
+
             <properties>
                 <property description="Process ID" name="pid"/>
                 <property description="Connection" name="connection"/>
@@ -197,7 +206,7 @@
                 <property description="Prefetch Count" name="prefetchCount"/>
                 <property description="Acks Uncommitted" name="acksUncommitted"/>
                 <property description="Messages Unacknowledged" name="messagesUnacknowledged"/>
-           </properties>
+            </properties>
         </service>
 
         <service name="Connection">

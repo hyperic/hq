@@ -66,7 +66,7 @@ public class AMQPErlangConverter extends SimpleErlangConverter implements AMQPCo
                 list = convertVirtualHosts(response);
             } else if (type.isAssignableFrom(Connection.class)) {
                 list = convertConnections(response);
-            } else if (type.isAssignableFrom(Channel.class) && virtualHost == null) {
+            } else if (type.isAssignableFrom(Channel.class) && virtualHost == null) { 
                 list = convertChannels(response);
             }
         }
@@ -286,7 +286,6 @@ public class AMQPErlangConverter extends SimpleErlangConverter implements AMQPCo
                         if (peerHost != null && peerPort > 0) connection.setPeerAddress(peerHost, peerPort);
 
                         if (connection != null) {
-                            logger.debug(connection);
                             connections.add(connection);
                         }
                     }
@@ -294,9 +293,6 @@ public class AMQPErlangConverter extends SimpleErlangConverter implements AMQPCo
             }
         }
 
-        if (connections != null) {
-            logger.debug("Found " + connections.size() + " connections");
-        }
         return connections;
     }
 
