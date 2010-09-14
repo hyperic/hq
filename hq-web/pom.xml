@@ -495,12 +495,6 @@
 			<scope>provided</scope>
 		    <type>zip</type>
 		</dependency>
-        <dependency>
-			<groupId>org.hyperic.hq.plugin</groupId>
-			<artifactId>rabbitmq-plugin</artifactId>
-			<version>${project.version}</version>
-            <scope>provided</scope> 
-		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>resin-plugin</artifactId>
