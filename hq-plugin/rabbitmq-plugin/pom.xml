@@ -122,11 +122,16 @@
     </build>
    
 
-    <repositories>
+    <!--<repositories>
        <repository>
             <id>repository.springframework.maven.milestone</id>
             <name>Spring Framework Maven Milestone Repository</name>
             <url>http://maven.springframework.org/milestone</url>
         </repository>
-    </repositories>
+        <repository>
+            <id>repository.springframework.maven.snapshot</id>
+            <name>Spring Framework Maven Snapshot Repository</name>
+            <url>http://maven.springframework.org/snapshot</url>
+        </repository>
+    </repositories>-->
 </project>
