@@ -26,12 +26,15 @@
 package org.hyperic.hq.plugin.rabbitmq.configure;
 
 
-import org.hyperic.hq.plugin.rabbitmq.core.*; 
+import org.hyperic.hq.plugin.rabbitmq.core.*;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
 import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.erlang.core.ErlangTemplate;
 
 /**
  * RabbitConfig configures Spring AMQP RabbitMQ objects
@@ -40,9 +43,48 @@ import org.springframework.context.annotation.Bean;
  */
 public class RabbitConfiguration {
 
-  
+    @Value("${hyperic.rabbit.routingkey}")
+    private String hypericRoutingKeyName;
+
+    @Value("${hyperic.rabbit.exchange}")
+    private String exchangeName;
+
+    @Value("${hyperic.rabbit.request.queue}")
+    private String requestQueueName;
+
+    @Value("${hyperic.rabbit.response.queue}")
+    private String responseQueueName;
+
+    @Value("${consumer.concurrentConsumers}")
+    private String concurrentConsumers;
+
     @Autowired
     private SingleConnectionFactory singleConnectionFactory;
+
+    @Bean
+    public TopicExchange topicExchange() {
+        return new TopicExchange(exchangeName + ExchangeType.topic);
+    }
+
+    @Bean
+    public FanoutExchange fanoutExchange() {
+        return new FanoutExchange(exchangeName + ExchangeType.fanout);
+    }
+
+    @Bean
+    public DirectExchange directExchange() {
+        return new DirectExchange(exchangeName + ExchangeType.direct);
+    }
+
+    @Bean
+    public Queue requestQueue() {
+        return new Queue(requestQueueName);
+    }
+
+    @Bean
+    public Queue responseQueue() {
+        return new Queue(responseQueueName);
+    }
 
     @Bean
     public RabbitBrokerAdmin rabbitBrokerAdmin() {
@@ -50,13 +92,19 @@ public class RabbitConfiguration {
     }
 
     @Bean
-    public RabbitTemplate rabbitTemplate() { 
-        return new RabbitTemplate(singleConnectionFactory);
+    public RabbitTemplate rabbitTemplate() {
+        RabbitTemplate rabbitTemplate = new RabbitTemplate(singleConnectionFactory);
+        rabbitTemplate.setExchange(directExchange().getName());
+        rabbitTemplate.setQueue(requestQueue().getName());
+        return rabbitTemplate;
     }
 
     @Bean
     public RabbitGateway rabbitGateway() {
-        return new RabbitBrokerGateway(rabbitBrokerAdmin());
+        RabbitGateway rabbitGateway = new RabbitBrokerGateway(rabbitBrokerAdmin());
+        rabbitGateway.createQueue(requestQueue().getName());
+        rabbitGateway.createQueue(responseQueue().getName());
+        return rabbitGateway;
     }
 
     @Bean

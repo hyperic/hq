@@ -30,25 +30,17 @@
 
 <plugin class="org.hyperic.hq.plugin.rabbitmq.core.RabbitProductPlugin">
 
-
-
-    <server name="RabbitMQ" version="1.8.0" description="RabbitMQ Server">
-
-        <help>
+    <!-- <help name="RabbitMQ">
       <![CDATA[
           <p>
           <h3>Configure RabbitMQ ${product.version} for Monitoring</h3>
-          Once the RabbitMQ nodes are auto-detected and you can select the Server resource by node, go to Configure Server.
-          Here enter the node's host, username, and password then select OK. This will allow Hyperic to connect to the node
-          and provide information on Queues, Connections, Processes, Users, and Exchanges.
-          </p>
-          <p>
-          <h3>Help Docs</h3>
-          Coming soon: <a href="http://support.hyperic.com/display/EVO/Monitoring+RabbitMQ">Monitoring and Managing RabbitMQ</a>
+          Help docs coming soon.
           </p>
         ]]>
-    </help>
-        
+    </help>-->
+
+    <server name="RabbitMQ" version="1.8.0" description="RabbitMQ Server">
+
         <plugin type="autoinventory"
                 class="org.hyperic.hq.plugin.rabbitmq.detect.RabbitServerDetector"/>
         <plugin type="measurement"
