@@ -365,14 +365,7 @@ public class AgentCommandsService implements AgentCommandsClient {
             }
 
             // assume that the bundle name is the same as the top level directory
-            final String bundleHome = getBundleHome(bundleFile);
-
-            // check if the bundle home directory exists
-            final File bundleDir = new File(destination, bundleHome);
-            if (bundleDir.exists()) {
-                throw new AgentRemoteException("Bundle directory "
-                        + bundleDir.toString() + " already exists");
-            }
+            String bundleHome = getBundleHome(bundleFile);
 
             // delete work directory in case it wasn't cleaned up
             FileUtil.deleteDir(workDir);
@@ -386,6 +379,9 @@ public class AgentCommandsService implements AgentCommandsClient {
                         "Failed to decompress " + bundle + " at destination " + workDir);
             }
 
+            // check if the bundle home directory exists
+            File bundleDir = new File(destination, bundleHome);
+
             final File extractedBundleDir = new File(workDir,  bundleHome);
             // verify that top level dir exists
             if (!extractedBundleDir.isDirectory()) {
@@ -393,6 +389,15 @@ public class AgentCommandsService implements AgentCommandsClient {
                         "Invalid agent bundle file detected; missing top-level "
                                 + bundleDir + " directory");
             }
+            
+            if (bundleDir.exists()) {
+            	 // TODO HQ-2428 Since we use maven and no longer have build numbers, there needs to be a way to differentiate between snapshot builds.  After some discussion,
+                //      we decided to ensure bundle folder name uniqueness by timestamp.  This means that users could "upgrade" to the same version, HQ will no longer prevent
+                //      this scenario...
+            	bundleHome += "-" + System.currentTimeMillis();
+            	bundleDir = new File(destination, bundleHome);
+            }
+
             // if everything went well, move extracted files to destination
             if (!extractedBundleDir.renameTo(bundleDir)) {
                 throw new AgentRemoteException(
