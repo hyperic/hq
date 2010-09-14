@@ -1,6 +1,7 @@
 package com.vmware.springsource.hyperic.plugin.gemfire;
 
 import antlr.collections.List;
+import com.vmware.springsource.hyperic.plugin.gemfire.collectors.MemberCollector;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -39,13 +40,6 @@ public class GemFireLiveData extends LiveDataPlugin {
                 res = connectToSystem(mServer);
             } else {
                 throw new PluginException("command '" + command + "' not found");
-            }
-            try {
-                if (connector != null) {
-                    connector.close();
-                }
-            } catch (IOException e) {
-                throw new PluginException(e.getMessage(), e);
             }
         } catch (Exception e) {
             throw new PluginException(e.getMessage(), e);
@@ -86,18 +80,21 @@ public class GemFireLiveData extends LiveDataPlugin {
         String[] def = new String[0];
         String[] members = (String[]) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMembers", args, def);
         Map data = new HashMap();
-        Map details;
-        Map<String, Object> memberDetails;
-        for (String menber : members) {
-            details = new HashMap();
-            data.put(menber, details);
-            Object[] args2 = {menber};
-            String[] def2 = {String.class.getName()};
-            memberDetails = (Map) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMemberDetails", args2, def2);
-            for (String k : memberDetails.keySet()) {
-                details.put(k.substring(prefixLength, k.lastIndexOf('.')), memberDetails.get(k));
-            }
+        for (String member : members) {
+            data.put(member, getMemberDetails(mServer, member));
         }
         return data;
+    }
+
+    private static Map getMemberDetails(MBeanServerConnection mServer, String member) throws Exception {
+        Map details = new HashMap();
+        Object[] args2 = {member};
+        String[] def2 = {String.class.getName()};
+        Map<String, Object> memberDetails = (Map) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMemberDetails", args2, def2);
+        for (String k : memberDetails.keySet()) {
+            details.put(k.substring(prefixLength, k.lastIndexOf('.')), memberDetails.get(k));
+        }
+        details.putAll(MemberCollector.getMetrics(member, mServer, true));
+        return details;
     }
 }

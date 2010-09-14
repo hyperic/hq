@@ -2,9 +2,6 @@ jQuery.noConflict();
 
 jQuery(document).ready(function() {
     setSelectedResource(sid);
-    jQuery('#data').everyTime(5000, function() {
-        setSelectedResource(sid);
-    });
 });
 
 function init(){
@@ -33,4 +30,7 @@ function setSelectedResource(id) {
 function reloadTree(){
     init();
     jQuery('#tree').load('/hqu/gemfire/gemfire/tree.hqu?eid='+eid,init);
+    jQuery('#data').oneTime(5000, function() {
+        setSelectedResource(sid);
+    });
 }

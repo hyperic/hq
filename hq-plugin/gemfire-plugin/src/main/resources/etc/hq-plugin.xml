@@ -67,18 +67,20 @@
                 <property name="port" description="Peer Port"/>
             </properties>
             <filter name="template" value="collector:${JXMCFG},memberID=%memberID%:${alias}"/>
-            <property name="OBJECT_NAME" value="GemFire.Statistic:source=%memberID%,uid=3,name=vmStats"/>
             <metrics>
                 <metric name="Availability"  indicator="true" />
-                <metric name="Used Heap" alias="memory" indicator="true" />
-                <metric name="Used CPU" alias="cpu" indicator="true" />
+                <metric name="Used Heap" alias="used_memory" indicator="true" units="percentage"/>
+                <metric name="Used CPU" alias="used_cpu" indicator="true" units="percentage"/>
                 <metric name="Uptime" alias="uptime" indicator="true" collectionType="static" units="sec"/>
-                <metric name="Number of Clients" alias="clients" indicator="true" />
-                <metric name="Gets" template="${OBJECT_NAME}:threads" ndicator="true"/>
-                <metric name="Puts" template="${OBJECT_NAME}:threads" ndicator="true"/>
-                <metric name="Cache Misses" template="${OBJECT_NAME}:threads" ndicator="true"/>
-                <metric name="Threads" template="${OBJECT_NAME}:threads" ndicator="true"/>
-                <metric name="Queue Size" template="${OBJECT_NAME}:threads" ndicator="true"/>
+                <metric name="Number of Clients" alias="clients"/>
+                <metric name="Gets" alias="cachePerfStats.gets" collectionType="trendsup"/>
+                <metric name="GetTime" alias="cachePerfStats.getTime" units="sec"/>
+                <metric name="Puts" alias="cachePerfStats.puts" collectionType="trendsup"/>
+                <metric name="PutTime" alias="cachePerfStats.putTime" units="sec"/>
+                <metric name="Threads" alias="vmStats.threads"/>
+                <metric name="Receivers" alias="distributionStats.receivers"/>
+                <metric name="Sent Bytes" alias="distributionStats.sentBytes" units="B" collectionType="trendsup"/>
+                <metric name="Received Bytes" alias="distributionStats.receivedBytes" units="B" collectionType="trendsup"/>
             </metrics>
             <service name="Region">
                 <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />

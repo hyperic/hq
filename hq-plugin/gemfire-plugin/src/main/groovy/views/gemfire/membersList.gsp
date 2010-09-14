@@ -2,7 +2,7 @@
 <ul>
   <li>Servers: ${s}</li>
   <li>Gateways: ${g}</li>
-  <li>Clients: ${a}</li>
+  <li>Clients: ${c}</li>
 </ul>
 <table cellspacing="1">
   <thead>
@@ -20,7 +20,7 @@
   </thead>
   <tbody>
 <% if (members!=null) { %>
-<%for (member in members.values()){%>
+  <%for (member in members.values()){%>
     <tr>
       <td>${member.get("id")}</td>
       <td><a id="${member.get("id")}" class="member" href="#${member.get("id")}">${member.get("name")}</a></td>
@@ -32,7 +32,7 @@
       <td>${member.get("clients").size()}</td>
       <td>${member.get("type")}</td>
     </tr>
+    <% } %>
   <% } %>
-<% } %>
   </tbody>
 </table>
