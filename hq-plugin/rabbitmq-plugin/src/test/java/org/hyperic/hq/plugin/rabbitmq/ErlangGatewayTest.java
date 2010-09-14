@@ -50,7 +50,7 @@ import static org.junit.Assert.*;
  */
 @ContextConfiguration("classpath:/etc/rabbit-test-context.xml")
 @RunWith(SpringJUnit4ClassRunner.class)
-@Ignore("Need to set up a rabbit server for QA")
+//@Ignore("Need to set up a rabbit server for QA")
 public class ErlangGatewayTest {
 
     @Autowired

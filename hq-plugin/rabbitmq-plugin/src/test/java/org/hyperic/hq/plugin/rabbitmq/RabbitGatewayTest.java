@@ -141,10 +141,10 @@ public class RabbitGatewayTest {
     }
 
     @Test
-    @Ignore("this is hanging..have to fix")
+    //@Ignore("this is hanging..have to fix")
     public void purgeQueue() {
         List<QueueInfo> queues = rabbitGateway.getQueues();
-        assertNotNull(queues);
+       
         /*AMQPStatus status = rabbitGateway.purgeQueue(queues.get(0).getName());
         assertTrue(status.compareTo(AMQPStatus.NO_CONTENT) == 0);
         assertTrue(status.name().equalsIgnoreCase(AMQPStatus.NO_CONTENT.name()));*/
