@@ -50,7 +50,7 @@ import static org.junit.Assert.*;
  */
 @ContextConfiguration("classpath:/etc/rabbit-test-context.xml")
 @RunWith(SpringJUnit4ClassRunner.class)
-//@Ignore("Need to set up a rabbit server for QA")
+@Ignore("Need to set up a rabbit server for QA")
 public class ErlangGatewayTest {
 
     @Autowired
@@ -108,9 +108,6 @@ public class ErlangGatewayTest {
     @Test
     public void getChannels() {
         List<AmqpChannel> channels = erlangGatway.getChannels();
-        for (AmqpChannel c : channels) {
-            System.out.println(c);
-        }
         // if we're just starting up the node, it won't have channels.
         // will add assertions after a set up is added.
     }

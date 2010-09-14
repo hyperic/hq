@@ -45,6 +45,7 @@ public class RabbitChannelCollector extends Collector {
 
     private static final Log logger = LogFactory.getLog(RabbitConnectionCollector.class);
 
+
     @Override
     public void collect() {
 
@@ -55,14 +56,14 @@ public class RabbitChannelCollector extends Collector {
                 List<AmqpChannel> channels = rabbitGateway.getChannels();
 
                 if (channels != null) {
-                    logger.debug("Found " + channels.size() + " channels");
+                    
                     for (AmqpChannel channel : channels) {
                         Map<String, Object> props = new HashMap<String, Object>();
-                        props.put("consumerCount", channel.getConsumerCount());
+                        props.put("consumerCount", channel.getConsumerCount()); 
                         setValue("consumerCount", channel.getConsumerCount());
 
                         addValues(props);
-                        setAvailability(true);
+                        setAvailability(true); 
                     }
                 }
             }
@@ -92,5 +93,4 @@ public class RabbitChannelCollector extends Collector {
 
         return res;
     }
-
 }

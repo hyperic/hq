@@ -25,7 +25,7 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
 
-
+  
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.PluginException;
@@ -36,19 +36,17 @@ import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
 import org.springframework.amqp.rabbit.admin.RabbitStatus;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.erlang.ErlangBadRpcException;
 import org.springframework.erlang.core.*;
 import org.springframework.erlang.core.Application;
 import org.springframework.util.Assert;
-import org.springframework.util.exec.Execute;
-import org.springframework.util.exec.Os;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
 
 /**
  * RabbitPluginGateway
+ *
  * @author Helena Edelson
  */
 public class RabbitBrokerGateway implements RabbitGateway {
@@ -66,7 +64,7 @@ public class RabbitBrokerGateway implements RabbitGateway {
     public RabbitBrokerGateway(RabbitBrokerAdmin rabbitBrokerAdmin) {
         this.rabbitBrokerAdmin = rabbitBrokerAdmin;
     }
-
+    
     @PostConstruct
     public void initialize() {
         Assert.notNull(rabbitBrokerAdmin, "rabbitBrokerAdmin must not be null.");
@@ -76,6 +74,7 @@ public class RabbitBrokerGateway implements RabbitGateway {
 
     /**
      * Get a list of QueueInfo objects.
+     *
      * @return
      */
     @SuppressWarnings("unchecked")
@@ -89,7 +88,7 @@ public class RabbitBrokerGateway implements RabbitGateway {
      * @throws ErlangBadRpcException
      */
     public List<AmqpChannel> getChannels() throws ErlangBadRpcException {
-        return erlangGateway.getChannels();
+        return erlangGateway.getChannels(); 
     }
 
     /**
@@ -104,6 +103,7 @@ public class RabbitBrokerGateway implements RabbitGateway {
     /**
      * Create a Queue. Defines a queue on the broker whose name is automatically created.
      * The additional properties of this auto-generated queue are exclusive=true, autoDelete=true, and durable=false.
+     *
      * @param queueName
      */
     public AMQPStatus createQueue(String queueName) {
@@ -116,6 +116,7 @@ public class RabbitBrokerGateway implements RabbitGateway {
 
     /**
      * Delete a Queue by name.
+     *
      * @param queueName
      * @return AMQPStatus
      * @throws PluginException
@@ -132,6 +133,7 @@ public class RabbitBrokerGateway implements RabbitGateway {
     /**
      * Purge a Queue by name.
      * Still finishing...
+     *
      * @param queueName
      * @return AMQPStatus
      */
@@ -146,6 +148,7 @@ public class RabbitBrokerGateway implements RabbitGateway {
 
     /**
      * Get a list of Exchanges
+     *
      * @return
      * @throws Exception
      */
@@ -163,14 +166,11 @@ public class RabbitBrokerGateway implements RabbitGateway {
 
         if (exchangeType.equals(ExchangeType.fanout)) {
             exchange = new FanoutExchange(exchangeName);
-        }
-        else if (exchangeType.equals(ExchangeType.topic)) {
+        } else if (exchangeType.equals(ExchangeType.topic)) {
             exchange = new TopicExchange(exchangeName);
-        }
-        else if (exchangeType.equals(ExchangeType.direct)) {
+        } else if (exchangeType.equals(ExchangeType.direct)) {
             exchange = new DirectExchange(exchangeName);
         }
-        
         try {
             rabbitBrokerAdmin.declareExchange(exchange);
             return AMQPStatus.RESOURCE_CREATED;
@@ -183,6 +183,7 @@ public class RabbitBrokerGateway implements RabbitGateway {
     /**
      * final String exchangeName, final String ExchangeType.fanout.name(),
      * final boolean durable, final boolean autoDelete
+     *
      * @param exchangeName
      * @param exchangeType
      * @param durable
@@ -201,6 +202,7 @@ public class RabbitBrokerGateway implements RabbitGateway {
 
     /**
      * Delete an Exchange by name.
+     *
      * @param exchangeName
      * @return AMQPStatus
      */
@@ -216,6 +218,7 @@ public class RabbitBrokerGateway implements RabbitGateway {
 
     /**
      * Delete an Exchange by name, if unused.
+     *
      * @param exchangeName
      * @param ifUnused
      * @return DeleteOk
@@ -231,6 +234,7 @@ public class RabbitBrokerGateway implements RabbitGateway {
 
     /**
      * 3 types of Exchanges. You can test by Exchange  or ExchangeType.
+     *
      * @param queue
      * @param exchange
      * @param routingKey
@@ -250,6 +254,7 @@ public class RabbitBrokerGateway implements RabbitGateway {
 
     /**
      * Get a list of users.
+     *
      * @return
      */
     public List<String> getUsers() {
@@ -258,6 +263,7 @@ public class RabbitBrokerGateway implements RabbitGateway {
 
     /**
      * Create a user
+     *
      * @param userName
      * @param password
      * @return AMQPStatus
@@ -272,6 +278,7 @@ public class RabbitBrokerGateway implements RabbitGateway {
 
     /**
      * Update a User's password
+     *
      * @param userName
      * @param password
      * @return AMQPStatus
@@ -286,6 +293,7 @@ public class RabbitBrokerGateway implements RabbitGateway {
 
     /**
      * Delete a User by username.
+     *
      * @param userName
      * @return AMQPStatus
      */
@@ -299,6 +307,7 @@ public class RabbitBrokerGateway implements RabbitGateway {
 
     /**
      * Get the host name;
+     *
      * @return host name.
      */
     public String getHost() {
@@ -308,6 +317,7 @@ public class RabbitBrokerGateway implements RabbitGateway {
     /**
      * Get the virtual host name.
      * Default is "/"
+     *
      * @return
      */
     public String getVirtualHost() {
@@ -336,10 +346,10 @@ public class RabbitBrokerGateway implements RabbitGateway {
     public AMQPStatus startBrokerApplication() {
         List<Node> nodes = getRabbitStatus().getRunningNodes();
         if (nodes.size() == 0) {
-            rabbitBrokerAdmin.startBrokerApplication();
-            if (nodes.size() == 1 && nodes.get(0).getName().contains("rabbit")) {
-                return AMQPStatus.SUCCESS;
-            }
+           rabbitBrokerAdmin.startBrokerApplication();
+           if (nodes.size() == 1 && nodes.get(0).getName().contains("rabbit")) {
+               return AMQPStatus.SUCCESS;
+           }
         }
         return AMQPStatus.FAIL;
     }
@@ -351,16 +361,17 @@ public class RabbitBrokerGateway implements RabbitGateway {
     public AMQPStatus stopBrokerApplication() {
         List<Node> nodes = getRabbitStatus().getRunningNodes();
         if (nodes.size() == 1) {
-            rabbitBrokerAdmin.stopBrokerApplication();
-            if (nodes.size() == 0 && nodes.get(0).getName().contains("rabbit")) {
-                return AMQPStatus.SUCCESS;
-            }
+           rabbitBrokerAdmin.stopBrokerApplication();
+           if (nodes.size() == 0 && nodes.get(0).getName().contains("rabbit")) {
+               return AMQPStatus.SUCCESS;
+           }
         }
-        return AMQPStatus.FAIL;
+        return AMQPStatus.FAIL; 
     }
 
     /**
      * Get the RabbitMQ server version.
+     *
      * @return
      */
     public String getServerVersion() {
@@ -369,6 +380,7 @@ public class RabbitBrokerGateway implements RabbitGateway {
 
     /**
      * Get RabbitStatus object.
+     *
      * @return
      */
     public RabbitStatus getRabbitStatus() {
@@ -377,6 +389,7 @@ public class RabbitBrokerGateway implements RabbitGateway {
 
     /**
      * Get a list of running broker apps.
+     *
      * @return
      */
     public List<Application> getRunningApplications() {
@@ -384,7 +397,17 @@ public class RabbitBrokerGateway implements RabbitGateway {
     }
 
     /**
+     * Get a list of all nodes.
+     *
+     * @return
+     */
+    public List<Node> getNodes() {
+        return getRabbitStatus().getNodes();
+    }
+
+    /**
      * Get a list of running nodes.
+     *
      * @return
      */
     public List<Node> getRunningNodes() {
@@ -394,9 +417,10 @@ public class RabbitBrokerGateway implements RabbitGateway {
     /**
      */
     public AMQPStatus stopRabbitNode() {
-        if (isBrokerAppRunning()) {
-            rabbitBrokerAdmin.stopNode();
-        }
+        String rabbitHome = System.getenv(DetectorConstants.RABBITMQ_HOME);
+        Assert.notNull(rabbitHome, DetectorConstants.RABBITMQ_HOME + " environment variable not set.");
+        isBrokerAppRunning();
+        rabbitBrokerAdmin.stopNode();
 
         return isBrokerAppRunning() ? AMQPStatus.FAIL : AMQPStatus.SUCCESS;
     }
@@ -406,59 +430,13 @@ public class RabbitBrokerGateway implements RabbitGateway {
      * so while we should assert it is running after completion,
      * assuming completion was successful, we don't want to wait.
      */
-    public AMQPStatus startRabbitNode(String rabbitHome) {
-        if (!isBrokerAppRunning()) {
-            Assert.hasText(rabbitHome);
-
-            final String RABBITMQ_HOME = System.getenv("RABBITMQ_HOME");
-
-            final Execute execute = new Execute();
-
-            String rabbitStartScript = null;
-
-            if (Os.isFamily("windows") || Os.isFamily("dos")) {
-                rabbitStartScript = "rabbitmq-server.bat";
-            } else if (Os.isFamily("unix") || Os.isFamily("mac")) {
-                rabbitStartScript = "rabbitmq-server";
-            }
-            Assert.notNull(rabbitStartScript, "unsupported OS family");
-
-            if (rabbitStartScript != null) {
-                StringBuilder rabbitStartCommand = null;
-
-                if (RABBITMQ_HOME != null) {
-                    rabbitStartCommand = new StringBuilder(RABBITMQ_HOME);
-                } else if (rabbitHome != null) {
-                    rabbitStartCommand = new StringBuilder(rabbitHome);
-                }
-
-                if (rabbitStartCommand != null) {
-                    rabbitStartCommand.append(System.getProperty("file.separator"))
-                            .append("sbin").append(System.getProperty("file.separator")).append(rabbitStartScript);
-
-                    execute.setCommandline(new String[]{rabbitStartCommand.toString()});
-
-                    SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor();
-                    executor.execute(new Runnable() {
-                        public void run() {
-                            try {
-                                execute.execute();
-                            }
-                            catch (Exception e) {
-                                logger.error("failed to start node", e);
-                            }
-                        }
-                    });
-
-                    return AMQPStatus.PROCESSING;
-                }
-            }
-
-        }
-
-        return AMQPStatus.DEPENDENCY_NOT_FOUND;
+    public AMQPStatus startRabbitNode() {
+        String rabbitHome = System.getenv(DetectorConstants.RABBITMQ_HOME);
+        Assert.notNull(rabbitHome, DetectorConstants.RABBITMQ_HOME + " environment variable not set.");
+        rabbitBrokerAdmin.startNode();
+        return AMQPStatus.PROCESSING;
     }
-
+  
     private boolean isBrokerAppRunning() {
         return !getRunningNodes().isEmpty() && getRunningNodes().get(0).getName().contains("rabbit");
     }
