@@ -27,14 +27,13 @@ package org.hyperic.hq.agent.server;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.JarURLConnection;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +41,6 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.util.PropertiesHelper;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentUpgradeManager;
@@ -51,7 +49,6 @@ import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.commands.AgentReceiveFileData_args;
 import org.hyperic.hq.agent.commands.AgentUpgrade_result;
-import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.transport.util.RemoteInputStream;
 import org.hyperic.util.JDK;
 import org.hyperic.util.StringUtil;
@@ -394,7 +391,9 @@ public class AgentCommandsService implements AgentCommandsClient {
             	 // TODO HQ-2428 Since we use maven and no longer have build numbers, there needs to be a way to differentiate between snapshot builds.  After some discussion,
                 //      we decided to ensure bundle folder name uniqueness by timestamp.  This means that users could "upgrade" to the same version, HQ will no longer prevent
                 //      this scenario...
-            	bundleHome += "-" + System.currentTimeMillis();
+            	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+            	
+            	bundleHome += "-" + dateFormat.format(new Date(System.currentTimeMillis()));
             	bundleDir = new File(destination, bundleHome);
             }
 
