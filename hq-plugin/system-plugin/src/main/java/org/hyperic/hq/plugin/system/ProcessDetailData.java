@@ -28,7 +28,6 @@ package org.hyperic.hq.plugin.system;
 import java.util.List;
 import java.util.Map;
 
-import org.hyperic.hq.system.ProcessData;
 import org.hyperic.sigar.ProcCred;
 import org.hyperic.sigar.ProcExe;
 import org.hyperic.sigar.ProcFd;
