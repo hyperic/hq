@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -23,39 +23,39 @@
  * USA.
  */
 
-package org.hyperic.hq.system;
+package org.hyperic.hq.plugin.system;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hyperic.sigar.FileSystem;
+
 import org.hyperic.sigar.SigarProxy;
 import org.hyperic.sigar.SigarException;
 
-public class DfData {
-    private List _fs;
+public class IfconfigData {
+    private List _interfaces;
 
-    public DfData() {}
+    public IfconfigData() {}
 
     public void populate(SigarProxy sigar)
         throws SigarException {
 
-        _fs = new ArrayList();
-        FileSystem[] fslist = sigar.getFileSystemList();
-        for (int i=0; i<fslist.length; i++) {
-            _fs.add(FileSystemData.gather(sigar, fslist[i]));
+        _interfaces = new ArrayList();
+        String[] names = sigar.getNetInterfaceList();
+        for (int i=0; i<names.length; i++) {
+            _interfaces.add(NetInterfaceData.gather(sigar, names[i]));
         }
     }
 
-    public static DfData gather(SigarProxy sigar)
+    public static IfconfigData gather(SigarProxy sigar)
         throws SigarException {
     
-        DfData data = new DfData();
+        IfconfigData data = new IfconfigData();
         data.populate(sigar);
         return data;
     }
 
-    public List getFileSystems() {
-        return _fs;
+    public List getInterfaces() {
+        return _interfaces;
     }
 }

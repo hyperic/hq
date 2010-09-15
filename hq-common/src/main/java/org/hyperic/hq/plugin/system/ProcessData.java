@@ -23,7 +23,7 @@
  * USA.
  */
 //XXX move this class to sigar
-package org.hyperic.hq.system;
+package org.hyperic.hq.plugin.system;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

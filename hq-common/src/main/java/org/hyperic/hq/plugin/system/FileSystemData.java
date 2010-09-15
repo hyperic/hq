@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -23,40 +23,45 @@
  * USA.
  */
 
-package org.hyperic.hq.system;
+package org.hyperic.hq.plugin.system;
 
-import org.hyperic.sigar.NetInterfaceConfig;
-import org.hyperic.sigar.NetInterfaceStat;
+import org.hyperic.sigar.FileSystem;
+import org.hyperic.sigar.FileSystemUsage;
 import org.hyperic.sigar.SigarProxy;
 import org.hyperic.sigar.SigarException;
 
-public class NetInterfaceData {
+public class FileSystemData {
 
-    private NetInterfaceConfig _config;
-    private NetInterfaceStat _stat;
+    private FileSystem _config;
+    private FileSystemUsage _stat;
 
-    private NetInterfaceData() {}
+    public FileSystemData() {}
 
-    public static NetInterfaceData gather(SigarProxy sigar, String name)
+    public void populate(SigarProxy sigar, FileSystem fs)
+        throws SigarException {
+
+        _config = fs;
+
+        try {
+            _stat = sigar.getFileSystemUsage(fs.getDirName());
+        } catch (SigarException e) {
+            
+        }
+    }
+
+    public static FileSystemData gather(SigarProxy sigar, FileSystem fs)
         throws SigarException {
     
-        NetInterfaceData data = new NetInterfaceData();
-        data._config = sigar.getNetInterfaceConfig(name);
-        
-        try {
-            data._stat = sigar.getNetInterfaceStat(name);
-        } catch (SigarException e) {
-            // _stat is null
-        }
-        
+        FileSystemData data = new FileSystemData();
+        data.populate(sigar, fs);
         return data;
     }
 
-    public NetInterfaceConfig getConfig() {
+    public FileSystem getConfig() {
         return _config;
     }
 
-    public NetInterfaceStat getStat() {
+    public FileSystemUsage getStat() {
         return _stat;
     }
 }

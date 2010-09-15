@@ -23,45 +23,39 @@
  * USA.
  */
 
-package org.hyperic.hq.system;
+package org.hyperic.hq.plugin.system;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.hyperic.sigar.FileSystem;
-import org.hyperic.sigar.FileSystemUsage;
 import org.hyperic.sigar.SigarProxy;
 import org.hyperic.sigar.SigarException;
 
-public class FileSystemData {
+public class DfData {
+    private List _fs;
 
-    private FileSystem _config;
-    private FileSystemUsage _stat;
+    public DfData() {}
 
-    public FileSystemData() {}
-
-    public void populate(SigarProxy sigar, FileSystem fs)
+    public void populate(SigarProxy sigar)
         throws SigarException {
 
-        _config = fs;
-
-        try {
-            _stat = sigar.getFileSystemUsage(fs.getDirName());
-        } catch (SigarException e) {
-            
+        _fs = new ArrayList();
+        FileSystem[] fslist = sigar.getFileSystemList();
+        for (int i=0; i<fslist.length; i++) {
+            _fs.add(FileSystemData.gather(sigar, fslist[i]));
         }
     }
 
-    public static FileSystemData gather(SigarProxy sigar, FileSystem fs)
+    public static DfData gather(SigarProxy sigar)
         throws SigarException {
     
-        FileSystemData data = new FileSystemData();
-        data.populate(sigar, fs);
+        DfData data = new DfData();
+        data.populate(sigar);
         return data;
     }
 
-    public FileSystem getConfig() {
-        return _config;
-    }
-
-    public FileSystemUsage getStat() {
-        return _stat;
+    public List getFileSystems() {
+        return _fs;
     }
 }
