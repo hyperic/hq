@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -23,39 +23,40 @@
  * USA.
  */
 
-package org.hyperic.hq.system;
+package org.hyperic.hq.plugin.system;
 
-import java.util.ArrayList;
-import java.util.List;
-
-
+import org.hyperic.sigar.NetInterfaceConfig;
+import org.hyperic.sigar.NetInterfaceStat;
 import org.hyperic.sigar.SigarProxy;
 import org.hyperic.sigar.SigarException;
 
-public class IfconfigData {
-    private List _interfaces;
+public class NetInterfaceData {
 
-    public IfconfigData() {}
+    private NetInterfaceConfig _config;
+    private NetInterfaceStat _stat;
 
-    public void populate(SigarProxy sigar)
-        throws SigarException {
+    private NetInterfaceData() {}
 
-        _interfaces = new ArrayList();
-        String[] names = sigar.getNetInterfaceList();
-        for (int i=0; i<names.length; i++) {
-            _interfaces.add(NetInterfaceData.gather(sigar, names[i]));
-        }
-    }
-
-    public static IfconfigData gather(SigarProxy sigar)
+    public static NetInterfaceData gather(SigarProxy sigar, String name)
         throws SigarException {
     
-        IfconfigData data = new IfconfigData();
-        data.populate(sigar);
+        NetInterfaceData data = new NetInterfaceData();
+        data._config = sigar.getNetInterfaceConfig(name);
+        
+        try {
+            data._stat = sigar.getNetInterfaceStat(name);
+        } catch (SigarException e) {
+            // _stat is null
+        }
+        
         return data;
     }
 
-    public List getInterfaces() {
-        return _interfaces;
+    public NetInterfaceConfig getConfig() {
+        return _config;
+    }
+
+    public NetInterfaceStat getStat() {
+        return _stat;
     }
 }
