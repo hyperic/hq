@@ -144,7 +144,7 @@ SIGAR_PROC_NET=$AGENT_BUNDLE_HOME/tmp
 
 if [ "x${HQ_JAVA_HOME}" != "x" ] ; then
     HQ_JAVA_HOME=${HQ_JAVA_HOME}
-elif [ -d "${AGENT_INSTALL_HOME}/jre" ]; then
+elif [ -d "${AGENT_INSTALL_HOME}"/jre ]; then
     HQ_JAVA_HOME="${AGENT_INSTALL_HOME}"/jre
     # Just in case
     chmod -R +x "${AGENT_INSTALL_HOME}"/jre/bin/* > /dev/null 2>&1
