@@ -27,7 +27,7 @@ cd %_REALPATH%
 
 if not "%HQ_JAVA_HOME%"=="" goto gothqjava
 
-if EXIST "%AGENT_INSTALL_HOME%\jre" (
+if EXIST "%AGENT_INSTALL_HOME%"\jre (
     set HQ_JAVA_HOME=%AGENT_INSTALL_HOME%\jre
     goto gotjava
 )
