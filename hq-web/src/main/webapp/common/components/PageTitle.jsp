@@ -331,10 +331,4 @@
     	</td>
   	</tr>
   	<tr>
-    	<td class="PageTitle">
-    		<html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/>
-    	</td>
-    	<td>
-    		<html:img page="/images/spacer.gif" width="20" height="1" alt="" border="0"/>
-    	</td>
-    	<td width="100%">
+    	<td style="padding-left:25px; width:100%">

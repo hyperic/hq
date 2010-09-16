@@ -91,68 +91,65 @@
 </c:if>
 
 <c:choose>
-  <c:when test="${not empty summaries}">
-    <c:forEach var="summary" items="${summaries}" varStatus="status">
-      <div id="<c:out value="${summary.resourceName}"/>_menu" class="menu">
-        <ul>
-          <li><div class="BoldText"><fmt:message key="${childResourcesTypeKey}"/></div>
-              <c:out value="${summary.resourceTypeName}"/>
-          </li>
-          <li><div class="BoldText"><fmt:message key="resource.common.monitor.visibility.USAGETH"/></div>
-            <hq:metric metric="${summary.throughput}" unit="${summary.throughputUnits}"  defaultKey="common.value.notavail" />
-          </li>
-          <hr>
-          <li>
-            <html:link page="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do?mode=${mode}&type=${summary.resourceTypeId}" paramId="rid" paramName="summary" paramProperty="resourceId">
-              <fmt:message key="resource.common.monitor.visibility.GoToResource"/>
-            </html:link>
-          </li>
-        </ul>
-      </div>
+	<c:when test="${not empty summaries}">
+    	<c:forEach var="summary" items="${summaries}" varStatus="status">
+      		<div id="<c:out value="${summary.resourceName}"/>_menu" class="menu">
+        		<ul>
+          			<li>
+          				<div class="BoldText"><fmt:message key="${childResourcesTypeKey}"/></div>
+              			<c:out value="${summary.resourceTypeName}"/>
+          			</li>
+          			<li>
+          				<div class="BoldText"><fmt:message key="resource.common.monitor.visibility.USAGETH"/></div>
+            			<hq:metric metric="${summary.throughput}" unit="${summary.throughputUnits}"  defaultKey="common.value.notavail" />
+          			</li>
+          			<hr/>
+          			<li>
+            			<html:link page="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do?mode=${mode}&type=${summary.resourceTypeId}" paramId="rid" paramName="summary" paramProperty="resourceId">
+              				<fmt:message key="resource.common.monitor.visibility.GoToResource"/>
+            			</html:link>
+          			</li>
+        		</ul>
+      		</div>
 
-      <c:set var="count" value="${status.count}"/>
-    </c:forEach>
+      		<c:set var="count" value="${status.count}"/>
+    	</c:forEach>
 
-    <c:if test="${count > 5}">
-      <div class="scrollable">
-    </c:if>
+    	<c:if test="${count > 5}">
+      		<div class="scrollable">
+    	</c:if>
 
-    <c:if test="${not empty summaries}">
-    <table width="100%" border="0" cellpadding="1" cellspacing="0" id="ResourceTable">
-    <tr>
-      <c:if test="${checkboxes}">
-      <td class="ListHeaderCheckbox" width="3%"><input type="checkbox" onclick="ToggleAllGroup(this, widgetProperties, '<c:out value="${listMembersName}"/>')" name="<c:out value="${listMembersName}"/>All"></td>
-      </c:if>
-      <td class="ListHeaderInactive" width="1%"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-      <td class="ListHeader" width="100%" align="left"><fmt:message key="${childResourcesHealthKey}"/></td>
-      <td class="ListHeaderInactive" width="20%" align="center" nowrap><fmt:message key="resource.common.monitor.visibility.AVAILTH"/></td>
-      <td class="ListHeaderInactive" width="6%"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-    </tr>
-    <c:forEach var="summary" items="${summaries}">
-    <tr>
-      <c:if test="${checkboxes}">
-      <td class="ListCellCheckbox"><html:multibox property="eids" value="${summary.entityId}" styleClass="${listMembersName}" onchange="ToggleGroup(this, widgetProperties)"/></td>
-      </c:if>
-      <td width="1%" class="ListCellCheckbox">
-        <html:img page="/images/spacer.gif" height="10" width="11" border="0" alt=""/>
-      </td>
-      <td class="ListCell">
-        <html:link page="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do?mode=${mode}&eid=${summary.resourceTypeId}:${summary.resourceId}"><c:out value="${summary.resourceName}"/></html:link>
-      </td>
-      <td class="ListCellCheckbox">
-    <tiles:insert page="/resource/common/monitor/visibility/AvailIcon.jsp">
-        <tiles:put name="availability" beanName="summary" beanProperty="availability" />
-    </tiles:insert>
-      </td>
-      <td class="ListCellCheckbox">
-        <!--<html:link page="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do?mode=${mode}&eid=${summary.resourceTypeId}:${summary.resourceId}">-->
-        <html:img page="/images/comment.gif" onmouseover="menuLayers.show('${summary.resourceName}_menu', event)" onmouseout="menuLayers.hide()" border="0"/>
-        <!--</html:link>-->
-      </td>
-    </tr>
-    </c:forEach>
-    </table>
-    </c:if>
+		<c:if test="${not empty summaries}">
+			<table width="100%" border="0" cellpadding="1" cellspacing="0" id="ResourceTable">
+    			<tr>
+      				<c:if test="${checkboxes}">
+	      				<td class="ListHeaderCheckbox"><input type="checkbox" onclick="ToggleAllGroup(this, widgetProperties, '<c:out value="${listMembersName}"/>')" name="<c:out value="${listMembersName}"/>All"></td>
+      				</c:if>
+      				<td class="ListHeader" width="90%" align="left"><fmt:message key="${childResourcesHealthKey}"/></td>
+      				<td class="ListHeaderInactive" align="center" nowrap><fmt:message key="resource.common.monitor.visibility.AVAILTH"/></td>
+      				<td class="ListHeaderInactive" width="10%">&nbsp;</td>
+    			</tr>
+    			<c:forEach var="summary" items="${summaries}">
+    				<tr>
+      					<c:if test="${checkboxes}">
+      						<td class="ListCellCheckbox"><html:multibox property="eids" value="${summary.entityId}" styleClass="${listMembersName}" onchange="ToggleGroup(this, widgetProperties)"/></td>
+      					</c:if>
+      					<td class="ListCell" style="padding-top:10px;">
+        					<html:link page="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do?mode=${mode}&eid=${summary.resourceTypeId}:${summary.resourceId}"><c:out value="${summary.resourceName}"/></html:link>
+      					</td>
+      					<td class="ListCellCheckbox">
+    						<tiles:insert page="/resource/common/monitor/visibility/AvailIcon.jsp">
+        						<tiles:put name="availability" beanName="summary" beanProperty="availability" />
+    						</tiles:insert>
+      					</td>
+        				<td class="ListCellCheckbox resourceCommentIcon"
+    	    				onmouseover="menuLayers.show('<c:out value="${summary.resourceName}" />_menu', event)" 
+    	    				onmouseout="menuLayers.hide()">&nbsp;
+						</td>
+    				</tr>
+    			</c:forEach>
+    		</table>
+    	</c:if>
 
     <c:if test="${count > 5}">
       </div>

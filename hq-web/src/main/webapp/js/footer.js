@@ -41,8 +41,8 @@ function setFoot() {
 
   var myHeight = winH - conH - footerH + browserH;
   if (myHeight > 60) {
-    var footerSpacer = document.getElementById("footerSpacer");
-    footerSpacer.setAttribute('height', myHeight);
+    var footerSpacer = document.getElementById("footerContent");
+    footerSpacer.setAttribute('style', "margin-top:" + myHeight + "px;");
   }
 }
 
