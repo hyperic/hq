@@ -70,17 +70,12 @@
     </tr>
   </c:forEach>
 <!--  /  -->
-
 	<tr>
-	  <td><html:img page="/images/spacer.gif" width="1" height="15" border="0"/></td>
-	  <td></td>
-	  <td></td>
+	  <td style="padding-top:5px;" colspan="100%">&nbsp;</td>
 	</tr>
-
 <!-- Platform Services -->
 	<tr class="ListHeaderDark">
-      <td width="85%" class="ListHeaderInactiveSorted"><fmt:message key="resource.hub.PlatformServiceTypeTH"/>s</td>
-      <td width="15%" class="ListHeaderInactive" align="center" nowrap>&nbsp;</td>
+      <td width="85%" class="ListHeaderInactiveSorted" colspan="100%"><fmt:message key="resource.hub.PlatformServiceTypeTH"/>s</td>
   	</tr>
 	<c:forEach var="platSvc" varStatus="psStatus" items="${platformServiceTypes}">
     <c:choose>
@@ -120,13 +115,11 @@
     </c:forEach>
 
 	<tr>
-	  <td><html:img page="/images/spacer.gif" width="1" height="15" border="0"/></td>
-	  <td></td>
+	  <td style="padding-top:5px;" colspan="100%">&nbsp;</td>
 	</tr>
 <!-- SERVER CONTENTS -->
 	<tr>
-      <td class="ListCellHeaderSorted"><fmt:message key="resource.hub.ServerTypeTH"/>s</td>
-      <td class="ListCellHeader" colspan="2"><html:link page="."><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></html:link></td>
+      <td class="ListCellHeaderSorted" colspan="100%"><fmt:message key="resource.hub.ServerTypeTH"/>s</td>
 	</tr>
     <c:forEach var="entry" varStatus="status" items="${serverTypes}">
     <c:set var="server" value="${entry.key}"/>
