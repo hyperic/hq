@@ -5,9 +5,12 @@ import com.vmware.springsource.hyperic.plugin.gemfire.collectors.MemberCollector
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
@@ -22,16 +25,14 @@ public class GemFireLiveData extends LiveDataPlugin {
 
     private static final Log log = LogFactory.getLog(GemFireLiveData.class);
     private static final String[] cmds = {"getMembers", "getDetails", "connectToSystem"};
-    private static final int prefixLength = "gemfire.member.".length();
 
     public Object getData(String command, ConfigResponse config) throws PluginException {
         Object res = null;
-        JMXConnector connector = null;
 
         log.info("command='" + command + "' config='" + config + "'");
         try {
-            connector = MxUtil.getMBeanConnector(config.toProperties());
-            MBeanServerConnection mServer = connector.getMBeanServerConnection();
+            MBeanServerConnection mServer = MxUtil.getMBeanServer(config.toProperties());
+            log.info("mServer="+mServer);
             if ("getDetails".equals(command)) {
                 res = getDetails(mServer);
             } else if ("getMembers".equals(command)) {
@@ -43,15 +44,6 @@ public class GemFireLiveData extends LiveDataPlugin {
             }
         } catch (Exception e) {
             throw new PluginException(e.getMessage(), e);
-
-        } finally {
-            try {
-                if (connector != null) {
-                    connector.close();
-                }
-            } catch (IOException e) {
-                throw new PluginException(e.getMessage(), e);
-            }
         }
         return res;
     }
@@ -88,12 +80,6 @@ public class GemFireLiveData extends LiveDataPlugin {
 
     private static Map getMemberDetails(MBeanServerConnection mServer, String member) throws Exception {
         Map details = new HashMap();
-        Object[] args2 = {member};
-        String[] def2 = {String.class.getName()};
-        Map<String, Object> memberDetails = (Map) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMemberDetails", args2, def2);
-        for (String k : memberDetails.keySet()) {
-            details.put(k.substring(prefixLength, k.lastIndexOf('.')), memberDetails.get(k));
-        }
         details.putAll(MemberCollector.getMetrics(member, mServer, true));
         return details;
     }

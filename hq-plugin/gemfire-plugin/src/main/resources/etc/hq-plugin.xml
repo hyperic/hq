@@ -72,7 +72,7 @@
                 <metric name="Used Heap" alias="used_memory" indicator="true" units="percentage"/>
                 <metric name="Used CPU" alias="used_cpu" indicator="true" units="percentage"/>
                 <metric name="Uptime" alias="uptime" indicator="true" collectionType="static" units="sec"/>
-                <metric name="Number of Clients" alias="clients"/>
+                <metric name="Number of Clients" alias="nclients"/>
                 <metric name="Gets" alias="cachePerfStats.gets" collectionType="trendsup"/>
                 <metric name="GetTime" alias="cachePerfStats.getTime" units="sec"/>
                 <metric name="Puts" alias="cachePerfStats.puts" collectionType="trendsup"/>
@@ -95,8 +95,8 @@
                     <property description="Path" name="path"/>
                     <property description="Scope" name="scope"/>
                     <property description="Data Policy" name="datapolicy"/>
-                    <property description="Inerrest Policy" name="interestpolicy"/>
-                    <property description="dik Attributes" name="diskattrs"/>
+                    <property description="Interest Policy" name="interestpolicy"/>
+                    <property description="Disk Attributes" name="diskattrs"/>
                 </properties>
                 <filter name="template" value="GemFire:${JXMCFG},memberID=%memberID%:%regionID%.${alias}"/>
                 <metrics>

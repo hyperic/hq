@@ -1,4 +1,4 @@
-<h2>Deatils of ${member.get("name")} with ID: ${member.get("id")}<span class="loading"></span></h2>
+<h2>Details of ${member.get("name")} with ID: ${member.get("id")}<span class="loading"></span></h2>
 <table>
   <thead>
     <tr>

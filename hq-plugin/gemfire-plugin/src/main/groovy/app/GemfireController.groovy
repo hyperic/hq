@@ -100,7 +100,6 @@ class GemfireController extends BaseController {
         //Uptime
         members.each{k,it ->
             long uptime=it.get("uptime")
-            uptime /= 1000
             long minutes = (int)uptime / 60
             long hours = minutes / 60
             minutes = minutes - (hours*60)
