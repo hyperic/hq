@@ -24,25 +24,20 @@
  */
 package com.vmware.springsource.hyperic.plugin.gemfire;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.management.MBeanServerConnection;
 import javax.management.Notification;
-import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.hyperic.hq.product.LogTrackPlugin;
 
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.jmx.MxUtil;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.hq.product.jmx.*;
 
 public class AlertsPlugin extends LogTrackPlugin implements NotificationListener {
 

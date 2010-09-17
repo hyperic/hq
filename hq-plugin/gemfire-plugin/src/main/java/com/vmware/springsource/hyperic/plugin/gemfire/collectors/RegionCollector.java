@@ -1,13 +1,9 @@
 package com.vmware.springsource.hyperic.plugin.gemfire.collectors;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import javax.management.MBeanServerConnection;
-import javax.management.ObjectInstance;
 import javax.management.ObjectName;
-import javax.management.remote.JMXConnector;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.Collector;
@@ -19,6 +15,7 @@ public class RegionCollector extends Collector {
 
     static Log log = LogFactory.getLog(RegionCollector.class);
 
+    @Override
     protected void init() throws PluginException {
         Properties props = getProperties();
         log.debug("[init] props=" + props);
@@ -28,10 +25,9 @@ public class RegionCollector extends Collector {
     public void collect() {
         Properties props = getProperties();
         log.debug("[collect] props=" + props);
-        JMXConnector connector = null;
         try {
-            connector = MxUtil.getMBeanConnector(props);
-            MBeanServerConnection mServer = connector.getMBeanServerConnection();
+            MBeanServerConnection mServer = MxUtil.getMBeanServer(props);
+            log.info("mServer=" + mServer);
             String memberID = props.getProperty("memberID");
             Object[] args2 = {memberID};
             String[] def2 = {String.class.getName()};
@@ -51,14 +47,6 @@ public class RegionCollector extends Collector {
             }
         } catch (Exception ex) {
             log.debug(ex, ex);
-        } finally {
-            try {
-                if (connector != null) {
-                    connector.close();
-                }
-            } catch (IOException e) {
-                log.debug(e, e);
-            }
         }
     }
 }

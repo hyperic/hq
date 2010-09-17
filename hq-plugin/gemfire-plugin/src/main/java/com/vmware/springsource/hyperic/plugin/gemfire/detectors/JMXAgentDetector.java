@@ -1,19 +1,14 @@
 package com.vmware.springsource.hyperic.plugin.gemfire.detectors;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import javax.management.MBeanServerConnection;
-import javax.management.ObjectInstance;
 import javax.management.ObjectName;
-import javax.management.remote.JMXConnector;
 import org.apache.commons.logging.Log;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
-import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.hq.product.jmx.MxUtil;
 import org.hyperic.util.config.ConfigResponse;
 
@@ -29,10 +24,9 @@ public class JMXAgentDetector extends ServerDetector
     public List getServerResources(ConfigResponse pc) throws PluginException {
         this.log.debug("[getServerResources] pc=" + pc);
         List servers = new ArrayList();
-        JMXConnector connector = null;
         try {
-            connector = MxUtil.getMBeanConnector(pc.toProperties());
-            MBeanServerConnection mServer = connector.getMBeanServerConnection();
+            MBeanServerConnection mServer = MxUtil.getMBeanServer(pc.toProperties());
+            log.info("mServer=" + mServer);
 
             ObjectName mbean = new ObjectName("GemFire:type=MemberInfoWithStatsMBean");
             String version = (String) mServer.getAttribute(mbean, "Version");
@@ -56,14 +50,6 @@ public class JMXAgentDetector extends ServerDetector
 
         } catch (Exception e) {
             throw new PluginException(e.getMessage(), e);
-        } finally {
-            try {
-                if (connector != null) {
-                    connector.close();
-                }
-            } catch (IOException e) {
-                throw new PluginException(e.getMessage(), e);
-            }
         }
         return servers;
     }

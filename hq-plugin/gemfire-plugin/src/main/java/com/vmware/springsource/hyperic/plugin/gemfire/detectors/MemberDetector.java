@@ -1,13 +1,11 @@
 package com.vmware.springsource.hyperic.plugin.gemfire.detectors;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-import javax.management.remote.JMXConnector;
 import org.apache.commons.logging.Log;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.PluginException;
@@ -24,11 +22,9 @@ public abstract class MemberDetector extends ServerDetector implements AutoServe
     public List getServerResources(ConfigResponse pc) throws PluginException {
         log.debug("[getServerResources] pc=" + pc);
         List servers = new ArrayList();
-        JMXConnector connector = null;
-
         try {
-            connector = MxUtil.getMBeanConnector(pc.toProperties());
-            MBeanServerConnection mServer = connector.getMBeanServerConnection();
+            MBeanServerConnection mServer = MxUtil.getMBeanServer(pc.toProperties());
+            log.info("mServer=" + mServer);
 
             Object[] args = {};
             String[] def = {};
@@ -56,14 +52,6 @@ public abstract class MemberDetector extends ServerDetector implements AutoServe
 
         } catch (Exception ex) {
             throw new PluginException(ex.getMessage(), ex);
-        } finally {
-            try {
-                if (connector != null) {
-                    connector.close();
-                }
-            } catch (IOException e) {
-                throw new PluginException(e.getMessage(), e);
-            }
         }
         return servers;
     }
@@ -72,12 +60,9 @@ public abstract class MemberDetector extends ServerDetector implements AutoServe
     protected List discoverServices(ConfigResponse config) throws PluginException {
         log.debug("[discoverServices] config=" + config);
         List services = new ArrayList();
-        JMXConnector connector = null;
-
-
         try {
-            connector = MxUtil.getMBeanConnector(config.toProperties());
-            MBeanServerConnection mServer = connector.getMBeanServerConnection();
+            MBeanServerConnection mServer = MxUtil.getMBeanServer(config.toProperties());
+            log.info("mServer=" + mServer);
 
             String memberId = config.getValue("memberID");
             Object[] args2 = {memberId};
@@ -132,14 +117,6 @@ public abstract class MemberDetector extends ServerDetector implements AutoServe
 
         } catch (Exception ex) {
             throw new PluginException(ex.getMessage(), ex);
-        } finally {
-            try {
-                if (connector != null) {
-                    connector.close();
-                }
-            } catch (IOException e) {
-                throw new PluginException(e.getMessage(), e);
-            }
         }
         return services;
     }

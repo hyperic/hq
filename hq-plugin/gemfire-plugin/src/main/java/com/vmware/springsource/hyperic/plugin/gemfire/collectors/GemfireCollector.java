@@ -1,11 +1,9 @@
 package com.vmware.springsource.hyperic.plugin.gemfire.collectors;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-import javax.management.remote.JMXConnector;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.Collector;
@@ -29,10 +27,9 @@ public class GemfireCollector extends Collector {
         int c = 0;
         int g = 0;
         Properties props = getProperties();
-        JMXConnector connector = null;
         try {
-            connector = MxUtil.getMBeanConnector(props);
-            MBeanServerConnection mServer = connector.getMBeanServerConnection();
+            MBeanServerConnection mServer = MxUtil.getMBeanServer(props);
+            log.info("mServer=" + mServer);
             Object[] args = {};
             String[] def = {};
             String[] members = (String[]) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMembers", args, def);
@@ -56,14 +53,6 @@ public class GemfireCollector extends Collector {
         } catch (Exception ex) {
             setAvailability(false);
             log.debug(ex, ex);
-        } finally {
-            try {
-                if (connector != null) {
-                    connector.close();
-                }
-            } catch (IOException e) {
-                log.debug(e, e);
-            }
         }
     }
 }

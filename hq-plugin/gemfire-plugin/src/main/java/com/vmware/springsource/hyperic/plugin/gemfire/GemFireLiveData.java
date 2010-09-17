@@ -1,19 +1,10 @@
 package com.vmware.springsource.hyperic.plugin.gemfire;
 
-import antlr.collections.List;
 import com.vmware.springsource.hyperic.plugin.gemfire.collectors.MemberCollector;
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-import javax.management.remote.JMXConnector;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.LiveDataPlugin;

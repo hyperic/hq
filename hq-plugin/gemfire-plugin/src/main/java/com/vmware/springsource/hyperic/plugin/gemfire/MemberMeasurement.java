@@ -1,21 +1,13 @@
 package com.vmware.springsource.hyperic.plugin.gemfire;
 
-import java.io.IOException;
-import java.util.Set;
-import javax.management.MBeanServerConnection;
-import javax.management.ObjectName;
-import javax.management.remote.JMXConnector;
 import org.apache.commons.logging.Log;
 import org.hyperic.hq.product.Collector;
-import org.hyperic.hq.product.MeasurementPlugin;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricNotFoundException;
 import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.jmx.MxMeasurementPlugin;
-import org.hyperic.hq.product.jmx.MxUtil;
-import org.hyperic.util.config.ConfigResponse;
 
 public class MemberMeasurement extends MxMeasurementPlugin {
 
