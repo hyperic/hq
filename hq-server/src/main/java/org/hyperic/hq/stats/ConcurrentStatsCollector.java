@@ -28,7 +28,13 @@ package org.hyperic.hq.stats;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
@@ -322,6 +328,13 @@ public final class ConcurrentStatsCollector {
             }
         });
 
+        register(new StatSampler(new MBeanCollector(
+            "TOMCAT_THREAD_POOL_QUEUE_SIZE", "Catalina:type=Executor,name=tomcatThreadPool",
+            "queueSize", false)));
+        register(new StatSampler(new MBeanCollector(
+            "TOMCAT_THREAD_POOL_ACTIVE_COUNT", "Catalina:type=Executor,name=tomcatThreadPool",
+            "activeCount", false)));
+
         register(new MBeanCollector(
             "HIBERNATE_2ND_LEVEL_CACHE_HITS", "Hibernate:type=statistics,application=hq",
             "SecondLevelCacheHitCount", true));
@@ -359,8 +372,8 @@ public final class ConcurrentStatsCollector {
             new String[] { "Copy", "ParNew", "PS Scavenge" }, "CollectionTime", true));
         register(new MBeanCollector(JDBC_HQ_DS_MAX_ACTIVE,
             "hyperic.jmx:type=DataSource,name=tomcat.jdbc", "MaxActive", false));
-        register(new MBeanCollector(JDBC_HQ_DS_IN_USE,
-            "hyperic.jmx:type=DataSource,name=tomcat.jdbc", "Active", false));
+        register(new StatSampler(new MBeanCollector(JDBC_HQ_DS_IN_USE,
+            "hyperic.jmx:type=DataSource,name=tomcat.jdbc", "Active", false)));
         register(CONCURRENT_STATS_COLLECTOR);
     }
 
@@ -370,6 +383,82 @@ public final class ConcurrentStatsCollector {
         }
         pid = new Long(sigar.getPid());
         return pid.longValue();
+    }
+    
+    public StatsObject generateMarker() {
+    	final StatsObject marker = new StatsObject(-1, null);
+    	queue.add(marker);
+    	return marker;
+    }
+
+    public StatsObject pollQueue() {
+    	return queue.poll();
+    }
+    
+    private final ScheduledThreadPoolExecutor samplerExecutor =
+        new ScheduledThreadPoolExecutor(8, new ThreadFactory() {
+            private final String namePrefix = "hqstats-sampler-";
+            private final AtomicInteger threadNumber = new AtomicInteger(0);
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread t = new Thread(r, namePrefix + threadNumber.getAndIncrement());
+                if (t.isDaemon()) {
+                    t.setDaemon(false);
+                }
+                if (t.getPriority() != Thread.NORM_PRIORITY) {
+                    t.setPriority(Thread.NORM_PRIORITY);
+                }
+                return t;
+            }
+        });
+
+    private class StatSampler implements StatCollector {
+        private final StatCollector stat;
+        private final String id;
+        private final AtomicLong value = new AtomicLong();
+        private final AtomicReference<StatUnreachableException> exceptionRef =
+            new AtomicReference<StatUnreachableException>();
+        private StatSampler(StatCollector s) {
+            this.id = s.getId() + "_MAX";
+            this.stat = s;
+            final Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    if (!hasStarted.get()) {
+                        return;
+                    }
+                    try {
+                        final long newVal = stat.getVal();
+                        synchronized (value) {
+                            final long val = value.get();
+                            if (Math.abs(newVal) > Math.abs(val)) {
+                                value.set(newVal);
+                            }
+                            exceptionRef.set(null);
+                        }
+                    } catch (StatUnreachableException e) {
+                        exceptionRef.set(e);
+                    } catch (Throwable t) {
+                        log.error(t,t);
+                    }
+                }
+            };
+            samplerExecutor.scheduleAtFixedRate(runnable, 0, 1, TimeUnit.SECONDS);
+        }
+        @Override
+        public String getId() {
+            return id;
+        }
+        @Override
+        public long getVal() throws StatUnreachableException {
+            StatUnreachableException ex;
+            if ((ex = exceptionRef.get()) != null) {
+                throw ex;
+            }
+            synchronized (value) {
+                return value.getAndSet(0);
+            }
+        }
     }
 
     private class MBeanCollector implements StatCollector {
@@ -410,10 +499,12 @@ public final class ConcurrentStatsCollector {
             _isTrend = false;
         }
 
+        @Override
         public String getId() {
             return _id;
         }
 
+        @Override
         public long getVal() throws StatUnreachableException {
             // no need to keep generating a new exception. If it fails
             // 10 times, assume that the mbean server is not on.
@@ -462,16 +553,5 @@ public final class ConcurrentStatsCollector {
             return rtn;
         }
     }
-    
-    public StatsObject generateMarker() {
-    	final StatsObject marker = new StatsObject(-1, null);
-    	
-    	queue.add(marker);
-    	
-    	return marker;
-    }
-    
-    public StatsObject pollQueue() {
-    	return queue.poll();
-    }
+
 }
