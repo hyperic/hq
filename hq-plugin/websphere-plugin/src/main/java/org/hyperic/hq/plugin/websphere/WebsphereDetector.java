@@ -336,7 +336,6 @@ public class WebsphereDetector
             if (log.isDebugEnabled()) {
                 log.error("Error getting the WAS version: " + e.getMessage(), e);
             }
-            res = null;
         } finally {
             if (reader != null) {
                 try {

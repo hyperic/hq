@@ -78,7 +78,7 @@ public class ConcurrentStatsWriter implements ApplicationListener<ContextRefresh
     }
     
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        if(!(event.getApplicationContext() == this.applicationContext)) {
+        if(event.getApplicationContext() != this.applicationContext) {
             return;
         }
         setupBasedir();
@@ -296,18 +296,14 @@ public class ConcurrentStatsWriter implements ApplicationListener<ContextRefresh
                 StatCollector stat = (StatCollector) entry.getValue();
             
                 if (stat != null) {
-                    long value;
-                    
                     try {
-                        value = stat.getVal();
+                        long value = stat.getVal();
                         rtn.append(value).append(',');
                     } catch (StatUnreachableException e) {
                         if (log.isDebugEnabled()) {
                             log.debug(e.getMessage(), e);
                         }
-                    
                         rtn.append(',');
-                        
                         continue;
                     }
                 } else {
