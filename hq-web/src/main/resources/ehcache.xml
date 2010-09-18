@@ -331,7 +331,7 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  <cache name="org.hyperic.hq.appdef.server.session.Platform.servers"
+  <cache name="org.hyperic.hq.appdef.server.session.Platform.serversBag"
          maxElementsInMemory="500"
          eternal="true"
          timeToIdleSeconds="0"
