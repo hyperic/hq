@@ -39,6 +39,7 @@ import org.hyperic.hq.events.AlertConditionCreateException;
 import org.hyperic.hq.events.AlertDefinitionCreateException;
 import org.hyperic.hq.events.server.session.AlertDefSortField;
 import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.util.pager.PageList;
 
 /**
@@ -128,11 +129,6 @@ public interface AlertDefinitionManager {
      * Remove alert definitions
      */
     public void deleteAlertDefinitions(AuthzSubject subj, java.lang.Integer[] ids) throws PermissionException;
-
-    /**
-     * Set Resource to null on entity's alert definitions
-     */
-    public void disassociateResource(Resource r);
 
     /**
      * Clean up alert definitions and alerts for removed resources
@@ -296,6 +292,33 @@ public interface AlertDefinitionManager {
      */
     public SortedMap<String, Integer> findAlertDefinitionNames(AppdefEntityID id, java.lang.Integer parentId);
 
+    /**
+     * Clone the parent actions into the alert definition.
+     */
+    public void cloneParentActions(AppdefEntityID parentId, AlertDefinitionValue child,
+                                   ActionValue[] actions);
+    
+    /**
+     * Clone the parent conditions into the alert definition.
+     * 
+     * @param subject The subject.
+     * @param id The entity to which the alert definition is assigned.
+     * @param adval The alert definition where the cloned conditions are set.
+     * @param conds The parent conditions to clone.
+     * @param failSilently <code>true</code> fail silently if cloning fails
+     *        because no measurement is found corresponding to the measurement
+     *        template specified in a parent condition; <code>false</code> to
+     *        throw a {@link MeasurementNotFoundException} when this occurs.
+     * @param allowStale True if we don't need to perform a flush to query for measurements
+     * (this will be the case if we are not in the same transaction that measurements are created in)    
+     * @return <code>true</code> if cloning succeeded; <code>false</code> if
+     *         cloning failed.
+     */
+    public boolean cloneParentConditions(AuthzSubject subject, AppdefEntityID id,
+                                         AlertDefinitionValue adval, AlertConditionValue[] conds,
+                                         boolean failSilently, boolean allowStale) 
+        throws MeasurementNotFoundException;
+    
     /**
      * Return array of two values: enabled and act on trigger ID
      */
