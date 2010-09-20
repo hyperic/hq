@@ -95,10 +95,6 @@ public interface EventsBoss {
         InvalidOptionException, InvalidOptionValueException, SessionNotFoundException,
         SessionTimeoutException;
 
-    public void inheritResourceTypeAlertDefinition(AuthzSubject subject, AppdefEntityID id)
-        throws org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException, PermissionException,
-        InvalidOptionException, InvalidOptionValueException, AlertDefinitionCreateException;
-
     public Action createAction(int sessionID, Integer adid, String className, ConfigResponse config)
         throws SessionNotFoundException, SessionTimeoutException, ActionCreateException,
         PermissionException;

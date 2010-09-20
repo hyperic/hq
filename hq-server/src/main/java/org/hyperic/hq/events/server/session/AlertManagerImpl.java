@@ -1,15 +1,15 @@
 /*
- * NOTE: This copyright does *not* cover user programs that use HQ
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2008], Hyperic, Inc.
- * This file is part of HQ.
+ * Copyright (C) [2004-2010], VMware, Inc.
+ * This file is part of Hyperic.
  *
- * HQ is free software; you can redistribute it and/or modify
+ * Hyperic is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
  * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -21,7 +21,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
- * 
  */
 
 package org.hyperic.hq.events.server.session;
@@ -46,6 +45,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.SubjectDeleteRequestedEvent;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -71,6 +71,8 @@ import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -79,7 +81,8 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class AlertManagerImpl implements AlertManager {
+public class AlertManagerImpl implements AlertManager,
+    ApplicationListener<ApplicationEvent> {
 
     private AlertPermissionManager alertPermissionManager;
 
@@ -140,6 +143,17 @@ public class AlertManagerImpl implements AlertManager {
         concurrentStatsCollector.register(ConcurrentStatsCollector.FIRE_ALERT_TIME);
     }
 
+    public void onApplicationEvent(ApplicationEvent event) {
+        if (event instanceof SubjectDeleteRequestedEvent) {
+            subjectRemoved(((SubjectDeleteRequestedEvent) event).getSubject());
+        }
+    }
+    
+    private void subjectRemoved(AuthzSubject toDelete) {
+        escalationManager.handleSubjectRemoval(toDelete);
+        handleSubjectRemoval(toDelete);        
+    }
+    
     /**
      * Create a new alert.
      * 
