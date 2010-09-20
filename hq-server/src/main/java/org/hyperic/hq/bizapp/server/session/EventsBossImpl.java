@@ -1,15 +1,15 @@
 /*
- * NOTE: This copyright does *not* cover user programs that use HQ
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2009], Hyperic, Inc.
- * This file is part of HQ.
+ * Copyright (C) [2004-2010], VMware, Inc.
+ * This file is part of Hyperic.
  *
- * HQ is free software; you can redistribute it and/or modify
+ * Hyperic is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
  * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -61,9 +61,7 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceDeleteRequestedEvent;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.SubjectDeleteRequestedEvent;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -116,10 +114,8 @@ import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
 import org.hyperic.hq.galerts.server.session.GalertLogSortField;
 import org.hyperic.hq.galerts.shared.GalertManager;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
-import org.hyperic.hq.measurement.action.MetricAlertAction;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MetricsEnabledEvent;
-import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
@@ -135,8 +131,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -145,7 +139,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class EventsBossImpl implements EventsBoss, ApplicationListener<ApplicationEvent> {
+public class EventsBossImpl implements EventsBoss {
     private Log log = LogFactory.getLog(EventsBossImpl.class);
 
     private static final String BUNDLE = "org.hyperic.hq.bizapp.Resources";
@@ -163,8 +157,6 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
     private AuthBoss authBoss;
 
     private EscalationManager escalationManager;
-
-    private MeasurementManager measurementManager;
 
     private PlatformManager platformManager;
 
@@ -190,8 +182,7 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
     public EventsBossImpl(SessionManager sessionManager, ActionManager actionManager,
                           AlertDefinitionManager alertDefinitionManager, AlertManager alertManager,
                           AppdefBoss appdefBoss, AuthBoss authBoss,
-                          EscalationManager escalationManager,
-                          MeasurementManager measurementManager, PlatformManager platformManager,
+                          EscalationManager escalationManager, PlatformManager platformManager,
                           RegisteredTriggerManager registeredTriggerManager,
                           ResourceManager resourceManager, ServerManager serverManager,
                           ServiceManager serviceManager, PermissionManager permissionManager,
@@ -204,7 +195,6 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
         this.appdefBoss = appdefBoss;
         this.authBoss = authBoss;
         this.escalationManager = escalationManager;
-        this.measurementManager = measurementManager;
         this.platformManager = platformManager;
         this.registeredTriggerManager = registeredTriggerManager;
         this.resourceManager = resourceManager;
@@ -227,123 +217,6 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
      */
     private MaintenanceEventManager getMaintenanceEventManager() {
         return permissionManager.getMaintenanceEventManager();
-    }
-
-    /*
-     * How the Boss figures out which triggers to create based on conditions
-     */
-    private void createTriggers(AuthzSubject subject, AlertDefinitionValue alertdef)
-        throws TriggerCreateException, InvalidOptionException, InvalidOptionValueException {
-        registeredTriggerManager.createTriggers(subject, alertdef);
-    }
-
-    /**
-     * Clone the parent conditions into the alert definition.
-     * 
-     * @param subject The subject.
-     * @param id The entity to which the alert definition is assigned.
-     * @param adval The alert definition where the cloned conditions are set.
-     * @param conds The parent conditions to clone.
-     * @param failSilently <code>true</code> fail silently if cloning fails
-     *        because no measurement is found corresponding to the measurement
-     *        template specified in a parent condition; <code>false</code> to
-     *        throw a {@link MeasurementNotFoundException} when this occurs.
-     * @param allowStale True if we don't need to perform a flush to query for measurements
-     * (this will be the case if we are not in the same transaction that measurements are created in)    
-     * @return <code>true</code> if cloning succeeded; <code>false</code> if
-     *         cloning failed.
-     */
-    private boolean cloneParentConditions(AuthzSubject subject, AppdefEntityID id,
-                                          AlertDefinitionValue adval, AlertConditionValue[] conds,
-                                          boolean failSilently, boolean allowStale) throws MeasurementNotFoundException {
-        // scrub and copy the parent's conditions
-        adval.removeAllConditions();
-
-        for (int i = 0; i < conds.length; i++) {
-            AlertConditionValue clone = new AlertConditionValue(conds[i]);
-
-            switch (clone.getType()) {
-                case EventConstants.TYPE_THRESHOLD:
-                case EventConstants.TYPE_BASELINE:
-                case EventConstants.TYPE_CHANGE:
-                    Integer tid = new Integer(clone.getMeasurementId());
-
-                    // If allowStale is true, don't need to synch the Measurement with the db
-                    // since changes to the Measurement aren't cascaded
-                    // on saving the AlertCondition.
-                    try {
-                        Measurement dmv = measurementManager.findMeasurement(subject, tid, id
-                            .getId(), allowStale);
-                        clone.setMeasurementId(dmv.getId().intValue());
-                    } catch (MeasurementNotFoundException e) {
-                        log.error("No measurement found for entity " + id +
-                                  " associated with template id=" + tid +
-                                  ". Alert definition name [" + adval.getName() + "]");
-                        log.debug("Root cause", e);
-
-                        if (failSilently) {
-                            log.info("Alert condition creation failed. " +
-                                     "The alert definition for entity " + id + " with name [" +
-                                     adval.getName() + "] should not be created.");
-                            // Just set to 0, it'll never fire
-                            clone.setMeasurementId(0);
-                            return false;
-                        } else {
-                            throw e;
-                        }
-                    }
-
-                    break;
-                case EventConstants.TYPE_ALERT:
-
-                    // Don't need to synch the child alert definition Id lookup.
-                    Integer recoverId = alertDefinitionManager.findChildAlertDefinitionId(id,
-                        new Integer(clone.getMeasurementId()), true);
-
-                    if (recoverId == null) {
-                        // recoverId should never be null, but if it is and
-                        // assertions
-                        // are disabled, just move on.
-                        assert false : "recover Id should not be null.";
-
-                        log
-                            .error("A recovery alert has no associated recover "
-                                   + "from alert. Setting alert condition "
-                                   + "measurement Id to 0.");
-                        clone.setMeasurementId(0);
-                    } else {
-                        clone.setMeasurementId(recoverId.intValue());
-                    }
-
-                    break;
-            }
-
-            // Now add it to the alert definition
-            adval.addCondition(clone);
-        }
-
-        return true;
-    }
-
-    private void cloneParentActions(AppdefEntityID id, AlertDefinitionValue child,
-                                    ActionValue[] actions) {
-        child.removeAllActions();
-        for (int i = 0; i < actions.length; i++) {
-            ActionValue childAct;
-            try {
-                ActionInterface actInst = (ActionInterface) Class
-                    .forName(actions[i].getClassname()).newInstance();
-                ConfigResponse config = ConfigResponse.decode(actions[i].getConfig());
-                actInst.setParentActionConfig(id, config);
-                childAct = new ActionValue(null, actInst.getImplementor(), actInst
-                    .getConfigResponse().encode(), actions[i].getId());
-            } catch (Exception e) {
-                // Not a valid action, skip it then
-                log.debug(actions[i].getClassname(), e);
-                continue;
-            }
-            child.addAction(childAct);
-        }
     }
 
     /**
@@ -411,19 +284,17 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
                 if (parent != null) {
                     adval.setParentId(parent.getId());
                     try {
-                        cloneParentConditions(subject, id, adval, parent.getConditions(), false, true);
+                        alertDefinitionManager.cloneParentConditions(subject, id, adval, parent
+                            .getConditions(), false, true);
                     } catch (MeasurementNotFoundException e) {
                         throw new AlertConditionCreateException(e);
                     }
                 }
 
                 // Create the triggers
-                createTriggers(subject, adval);
+                registeredTriggerManager.createTriggers(subject, adval);
                 triggers.addAll(Arrays.asList(adval.getTriggers()));
             }
-
-            // Create a measurement AlertLogAction if necessary
-            setMetricAlertAction(adval);
 
             // Now create the alert definition
             AlertDefinitionValue created = alertDefinitionManager.createAlertDefinition(subject,
@@ -464,9 +335,6 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
         adval.setAppdefId(aetid.getId());
         adval.setParentId(EventConstants.TYPE_ALERT_DEF_ID);
         
-        // Create a measurement AlertLogAction if necessary
-        setMetricAlertAction(adval);
-
         // Now create the alert definition
         if (debug) watch.markTimeBegin("createParentAlertDefinition");
         parent = alertDefinitionManager.createAlertDefinition(subject, adval);
@@ -511,8 +379,8 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
             adval.removeAllTriggers();
 
             try {
-                boolean succeeded = cloneParentConditions(subject, id, adval, parent
-                    .getConditions(), true, true);
+                boolean succeeded = alertDefinitionManager.cloneParentConditions(subject, id,
+                    adval, parent.getConditions(), true, true);
 
                 if (!succeeded) {
                     continue;
@@ -530,7 +398,7 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
             if (debug) childWatch.markTimeEnd("createTriggers");
 
             // Make sure the actions have the proper parentId
-            cloneParentActions(id, adval, parent.getActions());
+            alertDefinitionManager.cloneParentActions(id, adval, parent.getActions());
 
             // Now create the alert definition
             if (debug) childWatch.markTimeBegin("createAlertDefinition");
@@ -554,111 +422,6 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
         }
 
         return parent;
-    }
-    
-   /**
-    * Get the MetricAlertAction ActionValue from an
-    * AlertDefinitionValue.  If none exists, return null.
-    */
-    private ActionValue getMetricAlertAction(AlertDefinitionValue adv) {
-        ActionValue[] actions = adv.getActions();
-        for (int i = 0; i < actions.length; ++i) {
-            String actionClass = actions[i].getClassname();
-            if (MetricAlertAction.class.getName().equals(actionClass)) {
-                return actions[i];
-            }
-        }
-        return null;
-    }
-
-    private void setMetricAlertAction(AlertDefinitionValue adval) {
-        AlertConditionValue[] conds = adval.getConditions();
-        for (int i = 0; i < conds.length; i++) {
-            if (conds[i].getType() == EventConstants.TYPE_THRESHOLD ||
-                conds[i].getType() == EventConstants.TYPE_BASELINE ||
-                conds[i].getType() == EventConstants.TYPE_CHANGE) {
-                ActionValue action = getMetricAlertAction(adval);
-                 
-                // if MetricAlertAction doesn't exist, add one
-                 if (action == null) {
-                     action = new ActionValue();
-                     action.setClassname(MetricAlertAction.class.getName());
-
-                    ConfigResponse config = new ConfigResponse();
-                    try {
-                        action.setConfig(config.encode());
-                    } catch (EncodingException e) {
-                        // This should never happen
-                        log.error("Empty ConfigResponse threw an encoding error", e);
-                    }
-
-                    adval.addAction(action);
-                 }
-                break;
-   
-            }
-        }
-    }
-
-    /**
-     * 
-     */
-    public void inheritResourceTypeAlertDefinition(AuthzSubject subject, AppdefEntityID id)
-        throws AppdefEntityNotFoundException, PermissionException, InvalidOptionException,
-        InvalidOptionValueException, AlertDefinitionCreateException {
-        AppdefEntityValue rv = new AppdefEntityValue(id, subject);
-        AppdefResourceType type = rv.getAppdefResourceType();
-
-        // Find the alert definitions for the type
-        AppdefEntityTypeID aetid = new AppdefEntityTypeID(type.getAppdefType(), type.getId());
-
-        // The alert definitions should be returned sorted by creation time.
-        // This should minimize the possibility of creating a recovery alert
-        // before the recover from alert.
-        PageControl pc = new PageControl(0, PageControl.SIZE_UNLIMITED, PageControl.SORT_ASC,
-            SortAttribute.CTIME);
-
-        List<AlertDefinitionValue> defs = alertDefinitionManager.findAlertDefinitions(subject,
-            aetid, pc);
-
-        ArrayList<RegisteredTriggerValue> triggers = new ArrayList<RegisteredTriggerValue>();
-        for (AlertDefinitionValue adval : defs) {
-            // Only create if definition does not already exist
-            if (alertDefinitionManager.isAlertDefined(id, adval.getId())) {
-                continue;
-            }
-
-            // Set the parent ID
-            adval.setParentId(adval.getId());
-
-            // Reset the value object with this entity ID
-            adval.setAppdefId(id.getId());
-
-            try {
-                boolean succeeded = cloneParentConditions(subject, id, adval,
-                    adval.getConditions(), true, false);
-
-                if (!succeeded) {
-                    continue;
-                }
-            } catch (MeasurementNotFoundException e) {
-                throw new AlertDefinitionCreateException(
-                    "Expected parent condition cloning to fail silently", e);
-            }
-
-            // Create the triggers
-            createTriggers(subject, adval);
-            triggers.addAll(Arrays.asList(adval.getTriggers()));
-
-            // Recreate the actions
-            cloneParentActions(id, adval, adval.getActions());
-
-            // Create a measurement AlertLogAction if necessary
-            setMetricAlertAction(adval);
-
-            // Now create the alert definition
-            alertDefinitionManager.createAlertDefinition(subject, adval);
-        }
     }
 
     /**
@@ -798,8 +561,6 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
         if (EventConstants.TYPE_ALERT_DEF_ID.equals(adval.getParentId()) ||
             adval.getAppdefType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
             // A little more work to do for group and type alert definition
-            // Create a measurement AlertLogAction if necessary
-            setMetricAlertAction(adval);
             if (debug) watch.markTimeBegin("updateParentAlertDefinition");
             adval = alertDefinitionManager.updateAlertDefinition(adval);
             if (debug) {
@@ -823,12 +584,13 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
 
                 // Now add parent's conditions, actions, and new triggers
                 try {
-                    cloneParentConditions(subject, id, child, adval.getConditions(), false, true);
+                    alertDefinitionManager.cloneParentConditions(subject, id, child, adval
+                        .getConditions(), false, true);
                 } catch (MeasurementNotFoundException e) {
                     throw new AlertConditionCreateException(e);
                 }
 
-                cloneParentActions(id, child, adval.getActions());
+                alertDefinitionManager.cloneParentActions(id, child, adval.getActions());
 
                 // Set the alert definition frequency type
                 child.setFrequencyType(adval.getFrequencyType());
@@ -873,12 +635,8 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
             adval.removeAllTriggers();
 
             // Now create the new triggers
-            createTriggers(subject, adval);
-           
+            registeredTriggerManager.createTriggers(subject, adval);           
             
-            // Create a measurement AlertLogAction if necessary
-            setMetricAlertAction(adval);
-
             // Now update the alert definition
             alertDefinitionManager.updateAlertDefinition(adval);
         }
@@ -1607,31 +1365,4 @@ public class EventsBossImpl implements EventsBoss, ApplicationListener<Applicati
 
         getMaintenanceEventManager().unschedule(subject, event);
     }
-
-    public void onApplicationEvent(ApplicationEvent event) {
-        if (event instanceof ResourceDeleteRequestedEvent) {
-            alertDefinitionManager.disassociateResource(((ResourceDeleteRequestedEvent) event)
-                .getResource());
-        } else if (event instanceof MetricsEnabledEvent) {
-            metricsEnabled(((MetricsEnabledEvent) event).getEntityId());
-        } else if (event instanceof SubjectDeleteRequestedEvent) {
-            subjectRemoved(((SubjectDeleteRequestedEvent) event).getSubject());
-        }
-    }
-
-    private void metricsEnabled(AppdefEntityID ent) {
-        try {
-            log.info("Inheriting type-based alert defs for " + ent);
-            AuthzSubject hqadmin = authzSubjectManager.getSubjectById(AuthzConstants.rootSubjectId);
-            inheritResourceTypeAlertDefinition(hqadmin, ent);
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
-    }
-
-    private void subjectRemoved(AuthzSubject toDelete) {
-        escalationManager.handleSubjectRemoval(toDelete);
-        alertManager.handleSubjectRemoval(toDelete);
-    }
-
 }
