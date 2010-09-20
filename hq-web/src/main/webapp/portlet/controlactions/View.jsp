@@ -79,7 +79,12 @@
               </tr>  
               <c:forEach items="${lastCompleted}" var="resource">
                 <tr class="ListRow">                                                   
-                  <td class="ListCell"><html:link page="/ResourceControlHistory.do?eid=${resource.entityType}:${resource.entityId}"><c:out value="${resource.entityName}"/></html:link></td>
+                  <td class="ListCell">
+                  	<html:link action="/ResourceControlHistory">
+                  		<html:param name="eid" value="${resource.entityType}:${resource.entityId}" />
+                  		<c:out value="${resource.entityName}"/>
+                  	</html:link>
+                  </td>
                   <td class="ListCell"><c:out value="${resource.action}"/></td>
                   <td class="ListCell"><hq:dateFormatter value="${resource.startTime}"/></td>
                   <td class="ListCell">
@@ -127,7 +132,12 @@
                     </tr>
                     <c:forEach items="${mostFrequent}" var="resource">
                       <tr class="ListRow">
-                        <td class="ListCell"><html:link page="/ResourceControlHistory.do?eid=${resource.type}:${resource.id}"><c:out value="${resource.name}"/></html:link></td>
+                        <td class="ListCell">
+                        	<html:link action="/ResourceControlHistory">
+                        		<html:param name="eid" value="${resource.type}:${resource.id}" />
+                        		<c:out value="${resource.name}"/>
+                        	</html:link>
+                        </td>
                         <td class="ListCell" align="center"><c:out value="${resource.num}"/></td>
                         <td class="ListCell"><c:out value="${resource.action}"/></td>
                       </tr>

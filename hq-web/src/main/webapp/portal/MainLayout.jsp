@@ -29,9 +29,9 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html"%>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-
 <html>
 	<head>
+		<meta http-equiv="content-type" content="text/html;charset=utf-8" />
 	    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
 		<tiles:insert attribute="head" />
 		<title>
@@ -88,7 +88,7 @@
 	        window.onload = initOnloads;
 	    </script>
 	</head>
-	<body style="background-color: #FFFFFF;" class="tundra" debug="true">
+	<body style="background-color: #FFFFFF;" class="tundra">
 		<tiles:insert attribute="header" />
 
 		<div id="migContainer">

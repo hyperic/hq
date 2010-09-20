@@ -35,18 +35,18 @@
       <fmt:message key="resource.common.monitor.visibility.options.categories"/></td>
   </tr>
   <tr> 
-    <td class="ListCell" width="50%" nowrap="true"> 
+    <td class="ListCell" width="50%" nowrap> 
       <html:multibox property="filter" value="0"/>
       <fmt:message key="resource.common.monitor.visibility.AvailabilityTH"/></td>
-    <td class="ListCell" width="50%" nowrap="true"> 
+    <td class="ListCell" width="50%" nowrap> 
       <html:multibox property="filter" value="1"/>
       <fmt:message key="resource.common.monitor.visibility.UtilizationTH"/></td>
   </tr>
   <tr>
-    <td class="ListCell" nowrap="true"> 
+    <td class="ListCell" nowrap> 
       <html:multibox property="filter" value="2"/>
       <fmt:message key="resource.common.monitor.visibility.UsageTH"/></td>
-    <td class="ListCell" nowrap="true"> 
+    <td class="ListCell" nowrap> 
       <html:multibox property="filter" value="3"/>
       <fmt:message key="resource.common.monitor.visibility.PerformanceTH"/></td>
   </tr>
@@ -55,18 +55,18 @@
       <fmt:message key="resource.common.monitor.visibility.options.valueTypes"/></td>
   </tr>
   <tr> 
-    <td class="ListCell" nowrap="true"> 
+    <td class="ListCell" nowrap> 
       <html:multibox property="filter" value="4"/>
       <fmt:message key="resource.common.monitor.visibility.metricmetadata.collection.type.dynamic"/></td>
-    <td class="ListCell" nowrap="true"> 
+    <td class="ListCell" nowrap> 
       <html:multibox property="filter" value="5"/>
       <fmt:message key="resource.common.monitor.visibility.metricmetadata.collection.type.trendsup"/></td>
   </tr>
   <tr>
-    <td class="ListCell" nowrap="true"> 
+    <td class="ListCell" nowrap> 
       <html:multibox property="filter" value="6"/>
       <fmt:message key="resource.common.monitor.visibility.metricmetadata.collection.type.trendsdown"/></td>
-    <td class="ListCell" nowrap="true"> 
+    <td class="ListCell" nowrap> 
       <html:multibox property="filter" value="7"/>
       <fmt:message key="resource.common.monitor.visibility.metricmetadata.collection.type.static"/></td>
   </tr>
