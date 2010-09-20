@@ -2536,7 +2536,7 @@ span.returnToLink {
 }
 
 .addMetricIcon {
-	background: url(../images/icon_menu.gif) no-repeat;
+	background: url(../images/icon_menu.gif) no-repeat right 50%;
 	height:11px;
 	width:14px;
 	cursor:pointer;

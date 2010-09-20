@@ -82,7 +82,7 @@
     
     <table width="100%" border="0" cellspacing="0" cellpadding="2">
       <tr> 
-        <td nowrap="true"><div style="width: 60px; position: relative;"/><html:img page="/images/schedule_return.gif" width="17" height="21" border="0" align="right"/></td>
+        <td nowrap><div style="width: 60px; position: relative;"/><html:img page="/images/schedule_return.gif" width="17" height="21" border="0" align="right"/></td>
         <logic:messagesPresent property="condition[0].absoluteValue"><td width="100%" class="ErrorField"></logic:messagesPresent>
         <logic:messagesNotPresent property="condition[0].absoluteValue"><td width="100%"></logic:messagesNotPresent>
           <html:radio property="condition[0].thresholdType" value="absolute"/>

@@ -51,7 +51,7 @@
       <c:otherwise>
         <c:forEach var="chart" items="${charts}">        
           <tr class="ListRow">
-            <td class="ListCell" valign="middle" nowrap="true">&nbsp;<html:img page="/images/icon_chart.gif"/></td>
+            <td class="ListCell" valign="middle" nowrap>&nbsp;<html:img page="/images/icon_chart.gif"/></td>
             <td class="ListCell"><html:link page="${chart.value}"><c:out value="${chart.key}"/></html:link></td>        
           </tr>
         </c:forEach>

@@ -75,8 +75,10 @@
   <c:otherwise>
     <td width="20%" class="BlockLabel"><fmt:message key="common.label.Password"/></td>
     <td width="30%" class="BlockContent">
-     <html:link page="/admin/user/UserAdmin.do?mode=editPass&u=${User.id}">
-      <fmt:message key="admin.user.generalProperties.Change"/>
+     <html:link action="/admin/user/UserAdmin">
+     	<html:param name="mode" value="editPass" />
+     	<html:param name="u" value="${User.id}" />
+      	<fmt:message key="admin.user.generalProperties.Change"/>
      </html:link>
     </td>
   </c:otherwise>

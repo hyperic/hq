@@ -70,19 +70,19 @@
     <!--  GROUP AVAILABILITY CONTENTS -->
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
      <tr>
-      <td width="20%" class="BlockLabel" nowrap="true"><fmt:message key="resource.group.monitor.visibility.config.ShowGroupAvailLabel"/></td>
+      <td width="20%" class="BlockLabel" nowrap><fmt:message key="resource.group.monitor.visibility.config.ShowGroupAvailLabel"/></td>
       <logic:messagesPresent property="availabilityThreshold">
-       <td width="30%" class="BlockContent" nowrap="true"><fmt:message key="resource.group.monitor.visibility.config.When"/> <html:text size="2" property="availabilityThreshold"/>% <fmt:message key="resource.group.monitor.visibility.config.OfGroup"/></td>
+       <td width="30%" class="BlockContent" nowrap><fmt:message key="resource.group.monitor.visibility.config.When"/> <html:text size="2" property="availabilityThreshold"/>% <fmt:message key="resource.group.monitor.visibility.config.OfGroup"/></td>
       </logic:messagesPresent>
       <logic:messagesNotPresent property="availabilityThreshold">
-       <td width="30%" class="BlockContent" nowrap="true"><fmt:message key="resource.group.monitor.visibility.config.When"/> <html:text size="2" property="availabilityThreshold"/>% <fmt:message key="resource.group.monitor.visibility.config.OfGroup"/></td>
+       <td width="30%" class="BlockContent" nowrap><fmt:message key="resource.group.monitor.visibility.config.When"/> <html:text size="2" property="availabilityThreshold"/>% <fmt:message key="resource.group.monitor.visibility.config.OfGroup"/></td>
       </logic:messagesNotPresent>
-      <td width="20%" class="BlockLabel" nowrap="true"><fmt:message key="resource.group.monitor.visibility.config.ShowGroupUnavailLabel"/></td>
+      <td width="20%" class="BlockLabel" nowrap><fmt:message key="resource.group.monitor.visibility.config.ShowGroupUnavailLabel"/></td>
       <logic:messagesPresent property="unavailabilityThreshold">
-       <td width="30%" class="BlockContent" nowrap="true"><fmt:message key="resource.group.monitor.visibility.config.When"/> <html:text size="2" property="unavailabilityThreshold"/>% <fmt:message key="resource.group.monitor.visibility.config.OfGroup"/></td>
+       <td width="30%" class="BlockContent" nowrap><fmt:message key="resource.group.monitor.visibility.config.When"/> <html:text size="2" property="unavailabilityThreshold"/>% <fmt:message key="resource.group.monitor.visibility.config.OfGroup"/></td>
       </logic:messagesPresent>
       <logic:messagesNotPresent property="unavailabilityThreshold">
-       <td width="30%" class="BlockContent" nowrap="true"><fmt:message key="resource.group.monitor.visibility.config.When"/> <html:text size="2" property="unavailabilityThreshold"/>% <fmt:message key="resource.group.monitor.visibility.config.OfGroup"/></td>
+       <td width="30%" class="BlockContent" nowrap><fmt:message key="resource.group.monitor.visibility.config.When"/> <html:text size="2" property="unavailabilityThreshold"/>% <fmt:message key="resource.group.monitor.visibility.config.OfGroup"/></td>
       </logic:messagesNotPresent>
      </tr>
      <tr>

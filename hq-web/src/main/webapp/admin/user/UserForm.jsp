@@ -167,7 +167,9 @@
       			<td class="BlockContent">
       				<span class="CaptionText">
 						<fmt:message key="admin.user.generalProperties.ReturnTo"/>
-						<html:link page="/admin/user/UserAdmin.do?mode=${MODE_VIEW}&u=${param.u}">
+						<html:link action="/admin/user/UserAdmin">
+							<html:param name="mode" value="${MODE_VIEW}" />
+							<html:param name="u" value="${param.u}" />
 	 						<fmt:message key="admin.user.generalProperties.ViewUser"/>
 						</html:link>
 						<fmt:message key="admin.user.generalProperties.ToAccess"/>

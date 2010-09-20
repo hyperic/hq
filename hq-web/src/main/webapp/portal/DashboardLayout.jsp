@@ -135,8 +135,9 @@
 	
 	onloads.push(refreshPortlets);
 </script>
-<html:link page="/Resource.do?eid=" linkName="viewResUrl" styleId="viewResUrl" style="display:none;"></html:link>
-
+<html:link action="/Resource" linkName="viewResUrl" styleId="viewResUrl" style="display:none;">
+	<html:param name="eid" value="" />
+</html:link>
 <%
   String divStart;
   String divEnd;

@@ -45,8 +45,10 @@
 		<td width="30%" class="BlockContent">
 			<c:choose>
 				<c:when test="${not empty Resource and not alertDef.deleted}">
-					<html:link page="/alerts/Config.do?mode=viewDefinition&eid=${Resource.entityId.appdefKey}&ad=${alertDef.id}"
-					           titleKey="alert.config.props.PB.ViewDef">
+					<html:link action="/alerts/Config" titleKey="alert.config.props.PB.ViewDef">
+						<html:param name="mode" value="viewDefinition"/>
+						<html:param name="eid" value="${Resource.entityId.appdefKey}"/>
+						<html:param name="ad" value="${alertDef.id}" />
 						<c:out value="${alertDef.name}" />
 					</html:link>
 				</c:when>
@@ -70,10 +72,8 @@
 		</td>
 		<td class="BlockContent">
 			<c:if test="${not empty Resource}">
-				<html:link action="/Resource" 
-				           paramId="eid" 
-				           paramName="Resource"
-						   paramProperty="entityId">
+				<html:link action="/Resource" >
+					<html:param name="eid" value="${Resource.entityId}"/>
 					<c:out value="${Resource.name}" />
 				</html:link>
 			</c:if>
