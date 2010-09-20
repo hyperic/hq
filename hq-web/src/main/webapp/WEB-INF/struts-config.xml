@@ -939,7 +939,49 @@
               <forward name="success" path="/resource/platform/monitor/Config.do?mode=configure"/> 
       </action>
            
-     <!-- Platform Control Actions -->
+      <!-- Platform Control Actions -->
+      <action path="/resource/platform/control/NewFormPrepare"
+              name="ServerControlForm"
+              scope="request"
+              type="org.springframework.web.struts.DelegatingActionProxy">
+        <set-property property="title" value="Control.New"/>
+      </action>
+
+      <action path="/resource/platform/control/New"   
+              type="org.springframework.web.struts.DelegatingActionProxy"
+              name="ServerControlForm"
+              scope="request"
+              input="/resource/platform/Control.do?mode=new">
+        <forward name="add" path="/resource/platform/Control.do?mode=new"/>
+        <forward name="remove" path="/resource/platform/Control.do?mode=new"/>
+        <forward name="cancel" path="/resource/platform/Control.do?mode=view"
+                 redirect="true"/>
+        <forward name="reset" path="/resource/platform/Control.do?mode=new"
+                 redirect="true"/>
+        <forward name="failure" path="/resource/platform/Control.do?mode=new" />
+        <forward name="success" path="/resource/platform/Control.do?mode=view" redirect="true" />
+      </action>
+
+      <action path="/resource/platform/control/EditFormPrepare"
+              name="ServerControlForm"
+              scope="request"
+              type="org.springframework.web.struts.DelegatingActionProxy">
+        <set-property property="title" value="Control"/>
+      </action>
+
+      <action path="/resource/platform/control/Edit"
+              type="org.springframework.web.struts.DelegatingActionProxy"
+              name="ServerControlForm"
+              scope="request"
+              input="/resource/platform/Control.do?mode=edit">
+        <forward name="add" path="/resource/platform/Control.do?mode=edit"/>
+        <forward name="remove" path="/resource/platform/Control.do?mode=edit"/>              
+        <forward name="cancel" path="/resource/platform/Control.do?mode=view" redirect="true"/>
+        <forward name="reset" path="/resource/platform/Control.do?mode=edit"/>
+        <forward name="failure" path="/resource/platform/Control.do?mode=edit"/>
+        <forward name="success" path="/resource/platform/Control.do?mode=view" redirect="true"/>
+      </action>
+     
      <action path="/resource/platform/control/RemoveHistory"
              type="org.springframework.web.struts.DelegatingActionProxy"
              name="RemoveControlForm"
