@@ -62,7 +62,6 @@
 	<bean name="/admin/user/Register" class="org.hyperic.hq.ui.action.admin.user.RegisterAction" />
 	<bean name="/admin/user/RegisterFormPrepare"
 		class="org.hyperic.hq.ui.action.admin.user.RegisterFormPrepareAction" />
-	
 	<bean name="/admin/user/Plugins" class="org.hyperic.hq.ui.action.admin.plugins.PluginsAction" />
 	<bean name="/admin/config/EditConfigPrep"
 		class="org.hyperic.hq.ui.action.admin.config.EditConfigPrepAction" />
@@ -111,6 +110,8 @@
 		class="org.hyperic.hq.ui.action.resource.common.control.CurrentStatusAction" />
 	<bean name="/resource/common/control/UpdateStatus"
 		class="org.hyperic.hq.ui.action.resource.common.control.UpdateStatusAction" />
+	<bean name="/resource/common/control/RemoveControlJobs"
+		class="org.hyperic.hq.ui.action.resource.common.control.RemoveControlJobsAction" />
 	<bean name="/resource/platform/InventoryPortal"
 		class="org.hyperic.hq.ui.action.resource.platform.inventory.PlatformInventoryPortalAction" />
 	<bean name="/resource/platform/inventory/NewPlatformFormPrepare"
@@ -204,12 +205,22 @@
 		class="org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsFormPrepareAction" />
 	<bean name="/resource/platform/monitor/config/ConfigMetrics"
 		class="org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsAction" />
+	<bean name="/resource/platform/PlatformController"
+		class="org.hyperic.hq.ui.action.resource.platform.control.PlatformControllerAction" />
 	<bean name="/resource/platform/control/RemoveHistory"
 		class="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction" />
 	<bean name="/resource/platform/control/RemoveCurrentStatus"
 		class="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction" />
-	<bean name="/resource/platform/PlatformController"
-		class="org.hyperic.hq.ui.action.resource.platform.control.PlatformControllerAction" />
+	<bean name="/resource/platform/control/RemoveControlJobs"
+		class="org.hyperic.hq.ui.action.resource.common.control.RemoveControlJobsAction" />
+	<bean name="/resource/platform/control/NewFormPrepare"
+		class="org.hyperic.hq.ui.action.resource.common.control.NewFormPrepareAction" />
+	<bean name="/resource/platform/control/New"
+		class="org.hyperic.hq.ui.action.resource.common.control.NewAction" />
+	<bean name="/resource/platform/control/EditFormPrepare"
+		class="org.hyperic.hq.ui.action.resource.common.control.EditFormPrepareAction" />
+	<bean name="/resource/platform/control/Edit"
+		class="org.hyperic.hq.ui.action.resource.common.control.EditAction" />
 	<bean name="/resource/server/monitor/visibility/ServerCurrentHealth"
 		class="org.hyperic.hq.ui.action.resource.common.monitor.visibility.CurrentHealthAction" />
 	<bean name="/resource/server/monitor/visibility/ListChildrenResources"
@@ -248,7 +259,7 @@
 	<bean name="/resource/server/inventory/EditConfigProperties"
 		class="org.hyperic.hq.ui.action.resource.common.inventory.EditConfigPropertiesAction" />
 	<bean name="/resource/server/inventory/RemoveService"
-		class="org.hyperic.hq.ui.action.resource.server.inventory.RemoveServiceAction" />
+		class="org.hyperic.hq.ui.action.resource.server.inventory.RemoveServiceAction" />	
 	<bean name="/resource/server/ServerController"
 		class="org.hyperic.hq.ui.action.resource.server.control.ServerControllerAction" />
 	<bean name="/resource/server/control/NewFormPrepare"
@@ -263,9 +274,9 @@
 		class="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction" />
 	<bean name="/resource/server/control/RemoveCurrentStatus"
 		class="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction" />
-	<bean name="/resource/common/control/RemoveControlJobs"
-		class="org.hyperic.hq.ui.action.resource.common.control.RemoveControlJobsAction" />
 	<bean name="/resource/server/control/RemoveControlJobs"
+		class="org.hyperic.hq.ui.action.resource.common.control.RemoveControlJobsAction" />	
+	<bean name="/resource/service/control/RemoveControlJobs"
 		class="org.hyperic.hq.ui.action.resource.common.control.RemoveControlJobsAction" />
 	<bean name="/resource/service/InventoryPortal"
 		class="org.hyperic.hq.ui.action.resource.service.inventory.ServiceInventoryPortalAction" />
