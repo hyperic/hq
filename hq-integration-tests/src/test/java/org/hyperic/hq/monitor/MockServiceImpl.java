@@ -42,18 +42,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class MockServiceImpl implements MockService {
 
-private final Log logger = LogFactory.getLog(this.getClass().getName());
+    private final Log logger = LogFactory.getLog(this.getClass().getName());
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public void foo(long duration) {
-        logger.debug("Starting to run " + this.getClass().getName() + ".foo() for an unacceptable duration..");
-
+    public void foo(long duration, Pojo obj) {
         try {
 
             Thread.sleep(duration);
 
-        }
-        /* handling? */
+        } 
         catch (InterruptedException e) {
             logger.warn("Thread interrupted, shutting down.");
 
@@ -63,7 +60,6 @@ private final Log logger = LogFactory.getLog(this.getClass().getName());
         }
 
         logger.debug("completed " + this.getClass().getName() + ".foo()");
-
     }
 
     
