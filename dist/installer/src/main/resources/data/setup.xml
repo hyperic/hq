@@ -526,7 +526,7 @@ ${errMsg}
             failonerror="false"/>
   	
     <echo>^^^INFO: Copying existing HQ server cache information</echo>
-  	<!-- Copy from 4.3 or earlier -->
+  	<!-- Copy from 4.4 or earlier -->
     <ehcacheUpgrade existing="${server.upgradedir}/hq-engine/server/default/deploy/hq.ear/ehcache.xml"
                     new="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/ehcache.xml"/>
 
@@ -535,7 +535,7 @@ ${errMsg}
   	                    new="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/ehcache.xml"/>
   	
     <echo>^^^INFO: Copying existing HQU plugins</echo>
-  	<!-- Copy from 4.3 or earlier-->
+  	<!-- Copy from 4.4 or earlier-->
     <copy todir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/hqu" failonerror="false">
       <fileset dir="${server.upgradedir}/hq-engine/server/default/deploy/hq.ear/hq.war/hqu"/>
     </copy>
@@ -546,16 +546,26 @@ ${errMsg}
   	</copy>
 
   	<echo>^^^INFO: Copying existing state files</echo>
-  	<!-- Copy from 4.3 or earlier-->
+  	<!-- Copy from 4.4 or earlier-->
   	<copy todir="${server.product.dir}/hq-engine/hq-server" failonerror="false">
-      <fileset dir="${server.upgradedir}/hq-engine/" includes="*.dat"/>
+      <fileset dir="${server.upgradedir}/hq-engine" includes="*.dat"/>
     </copy>
   	
   	<!--Copy from evolution or later -->
 	<copy todir="${server.product.dir}/hq-engine/hq-server" failonerror="false">
       <fileset dir="${server.upgradedir}/hq-engine/hq-server" includes="*.dat"/>
     </copy>	
+
+    <echo>^^^INFO: Copying unprocessed metric data files</echo>
+    <!-- Copy from 4.4 or earlier-->
+    <copy todir="${server.product.dir}/hq-engine/hq-server" failonerror="false">
+      <fileset dir="${server.upgradedir}/hq-engine" includes="*Inserter.tmp"/>
+    </copy>
   	
+    <!--Copy from evolution or later -->
+    <copy todir="${server.product.dir}/hq-engine/hq-server" failonerror="false">
+      <fileset dir="${server.upgradedir}/hq-engine/hq-server" includes="*Inserter.tmp"/>
+    </copy>
 
     <echo>^^^COMPLETION:
       Server successfully upgraded to: ${server.product.dir}
