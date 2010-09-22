@@ -146,7 +146,7 @@
   </metrics>
 
     <filter name="template"
-            value="${domain}/connectionPoolModule:Module=%connpool%:${alias}"/>
+            value="${domain}/connectionPoolModule:Module=%mbeanIdentifier%:${alias}"/>
   <metrics name="WebSphere 6.0 Connection Pool">
     <metric name="Availability"
             category="AVAILABILITY"
@@ -166,6 +166,9 @@
             collectionType="trendsup"/>
     <metric name="JDBC Pool Size"
             alias="poolSize"
+            indicator="true"/>
+    <metric name="Connection Pools"
+            alias="npools"
             indicator="true"/>
     <metric name="JDBC Pool Concurrent Waiters"
             alias="concurrentWaiters"
@@ -603,7 +606,7 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
               class="ConnectionPoolCollector"/>
 
       <config>
-        <option name="connpool"
+        <option name="mbeanIdentifier"
                 description="Connection Pool Name"
                 default="SamplesDataSource"/>
       </config>

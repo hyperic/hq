@@ -54,8 +54,7 @@ import javax.management.modelmbean.ModelMBeanAttributeInfo;
 
 public abstract class WebsphereCollector extends Collector {
 
-    private static final Log log =
-        LogFactory.getLog(WebsphereCollector.class.getName());
+    private final Log log = LogFactory.getLog(this.getClass());
 
     private ObjectName name;
     private String domain;
@@ -217,13 +216,21 @@ public abstract class WebsphereCollector extends Collector {
     }
 
     protected final void collectStatCount(Stats stats, String[][] attrs) {
-        for (int i=0; i<attrs.length; i++) {
+        Stats[] _stats={stats};
+        collectStatCount(_stats,attrs);
+    }
+
+    protected final void collectStatCount(Stats[] stats, String[][] attrs) {
+        for (int i = 0; i < attrs.length; i++) {
             String[] entry = attrs[i];
             String statKey = entry[0];
             String pmiKey = entry.length == 1 ? statKey : entry[1];
-            double val = getStatCount(stats, statKey);
-            if (val == MetricValue.VALUE_NONE) {
-                continue;
+            double val = 0;
+            for (Stats stat : stats) {
+                double _val = getStatCount(stat, statKey);
+                if (_val != MetricValue.VALUE_NONE) {
+                    val += _val;
+                }
             }
             setValue(pmiKey, val);
         }
@@ -269,7 +276,6 @@ public abstract class WebsphereCollector extends Collector {
         String module = getProperties().getProperty("Module");
 
         if (log.isDebugEnabled()) {
-            log.debug("[collect] [" + serverName + "] class=" + this.getClass().getName());
             log.debug("[collect] [" + serverName + "] name=" + getObjectName());
             log.debug("[collect] [" + serverName + "] module=" + module);
             log.debug("[collect] [" + serverName + "] getProperties=" + getProperties());
@@ -299,7 +305,6 @@ public abstract class WebsphereCollector extends Collector {
             setMessage(e.getMessage());
             log.debug("[collect] [" + serverName + "] error:"+e.getMessage(),e);
         }
-        log.debug("[collect] [" + serverName + "] end");
     }
 
     protected abstract void collect(AdminClient mServer) throws PluginException;
