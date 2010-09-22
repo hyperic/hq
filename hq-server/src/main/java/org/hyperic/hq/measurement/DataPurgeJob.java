@@ -26,7 +26,6 @@
 package org.hyperic.hq.measurement;
 
 import java.beans.Introspector;
-import java.sql.SQLException;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
@@ -36,53 +35,96 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
+import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.events.shared.EventLogManager;
 import org.hyperic.hq.measurement.shared.DataCompress;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
+import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.TimeUtil;
+import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("dataPurgeJob")
 public class DataPurgeJob implements Runnable {
 
-    private final Log _log = LogFactory.getLog(DataPurgeJob.class);
-
-    static final long HOUR = MeasurementConstants.HOUR;
-    static final long MINUTE = MeasurementConstants.MINUTE;
     private ServerConfigManager serverConfigManager;
     private MeasurementManager measurementManager;
     private EventLogManager eventLogManager;
     private DataCompress dataCompress;
+    private AlertManager alertManager;
     private ConcurrentStatsCollector concurrentStatsCollector;
     private long _lastAnalyze = 0l;
-    private static final long ANALYZE_INTERVAL = 6 * HOUR;
+    private static final long ANALYZE_INTERVAL = 6 * MeasurementConstants.HOUR;
     private final Object analyzeRunningLock = new Object();
     private boolean analyzeRunning = false;
     private final Object compressRunningLock = new Object();
     private boolean compressRunning = false;
+    private long purgeRaw, purge1h, purge6h, purge1d, purgeAlert;
+    private final Log log = LogFactory.getLog(DataPurgeJob.class);
 
     @Autowired
-    public DataPurgeJob(ServerConfigManager serverConfigManager, MeasurementManager measurementManager,
-                        EventLogManager eventLogManager, DataCompress dataCompress, ConcurrentStatsCollector concurrentStatsCollector) {
+    public DataPurgeJob(ServerConfigManager serverConfigManager,
+                        MeasurementManager measurementManager, EventLogManager eventLogManager,
+                        DataCompress dataCompress,
+                        ConcurrentStatsCollector concurrentStatsCollector, AlertManager alertManager) {
         this.serverConfigManager = serverConfigManager;
         this.measurementManager = measurementManager;
         this.eventLogManager = eventLogManager;
         this.dataCompress = dataCompress;
         this.concurrentStatsCollector = concurrentStatsCollector;
+        this.alertManager = alertManager;
     }
-    
+
     @PostConstruct
-    public void initStatsCollector() {
-    	concurrentStatsCollector.register(ConcurrentStatsCollector.METRIC_DATA_COMPRESS_TIME);
-    	concurrentStatsCollector.register(ConcurrentStatsCollector.DB_ANALYZE_TIME);
-    	concurrentStatsCollector.register(ConcurrentStatsCollector.PURGE_EVENT_LOGS_TIME);
-    	concurrentStatsCollector.register(ConcurrentStatsCollector.PURGE_MEASUREMENTS_TIME);
+    public void init() {
+        initStatsCollector();
+        loadPurgeDefaults();
+        dataCompress.createMetricDataViews();
+    }
+
+    private void initStatsCollector() {
+        concurrentStatsCollector.register(ConcurrentStatsCollector.METRIC_DATA_COMPRESS_TIME);
+        concurrentStatsCollector.register(ConcurrentStatsCollector.DB_ANALYZE_TIME);
+        concurrentStatsCollector.register(ConcurrentStatsCollector.PURGE_EVENT_LOGS_TIME);
+        concurrentStatsCollector.register(ConcurrentStatsCollector.PURGE_MEASUREMENTS_TIME);
+    }
+
+    /**
+     * Get the server purge configuration, loaded on startup.
+     */
+    private void loadPurgeDefaults() {
+        this.log.info("Loading default purge intervals");
+        Properties conf;
+        try {
+            conf = serverConfigManager.getConfig();
+        } catch (ConfigPropertyException e) {
+            // Not gonna happen
+            throw new SystemException(e);
+        }
+
+        String purgeRawString = conf.getProperty(HQConstants.DataPurgeRaw);
+        String purge1hString = conf.getProperty(HQConstants.DataPurge1Hour);
+        String purge6hString = conf.getProperty(HQConstants.DataPurge6Hour);
+        String purge1dString = conf.getProperty(HQConstants.DataPurge1Day);
+        String purgeAlertString = conf.getProperty(HQConstants.AlertPurge);
+
+        try {
+            this.purgeRaw = Long.parseLong(purgeRawString);
+            this.purge1h = Long.parseLong(purge1hString);
+            this.purge6h = Long.parseLong(purge6hString);
+            this.purge1d = Long.parseLong(purge1dString);
+            this.purgeAlert = Long.parseLong(purgeAlertString);
+        } catch (NumberFormatException e) {
+            // Shouldn't happen unless manual edit of config table
+            throw new IllegalArgumentException("Invalid purge interval: " + e);
+        }
     }
 
     public synchronized void run() {
         try {
+
             compressData();
             Properties conf = null;
             try {
@@ -98,19 +140,19 @@ public class DataPurgeJob implements Runnable {
                 purge(conf, now);
             }
         } catch (Throwable e) {
-            _log.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
     /**
      * Entry point into compression routine
      */
-    public void compressData()  {
+    public void compressData() {
 
         // First check if we are already running
         synchronized (compressRunningLock) {
             if (compressRunning) {
-                _log.info("Not starting data compression. (Already running)");
+                log.info("Not starting data compression. (Already running)");
                 return;
             } else {
                 compressRunning = true;
@@ -121,17 +163,46 @@ public class DataPurgeJob implements Runnable {
 
         try {
             // Announce
-            _log.info("Data compression starting at " + TimeUtil.toString(time_start));
+            log.info("Data compression starting at " + TimeUtil.toString(time_start));
 
             runDBAnalyze();
-            concurrentStatsCollector.addStat((now() - time_start), ConcurrentStatsCollector.DB_ANALYZE_TIME);
+            concurrentStatsCollector.addStat((now() - time_start),
+                ConcurrentStatsCollector.DB_ANALYZE_TIME);
 
             final long start = now();
-            dataCompress.compressData();
-            concurrentStatsCollector.addStat((now() - start), ConcurrentStatsCollector.METRIC_DATA_COMPRESS_TIME);
+            // Round down to the nearest hour.
+            long now = TimingVoodoo.roundDownTime(System.currentTimeMillis(),
+                MeasurementConstants.HOUR);
+            long last;
+            // Compress hourly data
+            last = compressData(MeasurementConstants.HOUR, now);
+            // Purge, ensuring we don't purge data not yet compressed.
+            truncateMeasurementData(Math.min(now - this.purgeRaw, last));
+            // Purge metric problems as well
+            purgeMetricProblems(Math.min(now - this.purgeRaw, last));
 
-        } catch (SQLException e) {
-            _log.error("Unable to compress data: " + e, e);
+            // Compress 6 hour data
+            last = compressData(MeasurementConstants.SIX_HOUR, now);
+
+            // Purge, ensuring we don't purge data not yet compressed.
+            purgeMeasurements(MeasurementConstants.HOUR, Math.min(start - this.purge1h, last));
+
+            // Compress daily data
+            last = compressData(MeasurementConstants.DAY, now);
+            // Purge, ensuring we don't purge data not yet compressed.
+            purgeMeasurements(MeasurementConstants.SIX_HOUR, Math.min(now - this.purge6h, last));
+
+            // Purge, we never store more than 1 year of data.
+            purgeMeasurements(MeasurementConstants.DAY, now - this.purge1d);
+
+            // Purge alerts
+            log.info("Purging alerts older than " + TimeUtil.toString(now - this.purgeAlert));
+            int alertsDeleted = alertManager.deleteAlerts(0, now - this.purgeAlert);
+            log.info("Done (Deleted " + alertsDeleted + " alerts)");
+
+            concurrentStatsCollector.addStat((now() - start),
+                ConcurrentStatsCollector.METRIC_DATA_COMPRESS_TIME);
+
         } finally {
             synchronized (compressRunningLock) {
                 compressRunning = false;
@@ -139,8 +210,38 @@ public class DataPurgeJob implements Runnable {
         }
 
         long time_end = System.currentTimeMillis();
-        _log.info("Data compression completed in " + ((time_end - time_start) / 1000) + " seconds.");
+        log.info("Data compression completed in " + ((time_end - time_start) / 1000) + " seconds.");
         runDBMaintenance();
+    }
+
+    long compressData(long toInterval, long now) {
+        long begin = dataCompress.getCompressionStartTime(toInterval, now);
+        if (begin == 0) {
+            //No data to compress
+            return 0;
+        }
+        // Compress all the way up to now.
+        StopWatch watch = new StopWatch();
+        while (begin < now) {
+            long end = begin + toInterval;
+            log.info("Compression interval: " + TimeUtil.toString(begin) + " to " +
+                     TimeUtil.toString(end));
+            try {
+                dataCompress.compressData(toInterval, now, begin, end);
+            } catch (Exception e) {
+                // Just log the error and continue
+                log.debug("Exception when inserting data " + " at " + TimeUtil.toString(begin), e);
+            }
+            // Increment for next iteration.
+            begin = end;
+        }
+        log.info("Done (" + (watch.getElapsed() / 1000) + " seconds)");
+        // Return the last interval that was compressed.
+        return begin;
+    }
+    
+    void truncateMeasurementData(long truncateBefore) {
+        dataCompress.truncateMeasurementData(truncateBefore);
     }
 
     private final long now() {
@@ -152,25 +253,25 @@ public class DataPurgeJob implements Runnable {
         long analyzeStart = System.currentTimeMillis();
         synchronized (analyzeRunningLock) {
             if (analyzeRunning) {
-                _log.info("Not starting db analyze. (Already running)");
+                log.info("Not starting db analyze. (Already running)");
                 return;
             } else if ((_lastAnalyze + ANALYZE_INTERVAL) > analyzeStart) {
                 serverConfigManager.analyzeHqMetricTables(false);
-                _log.info("Only running analyze on current metric data table " + "since last full run was at " +
-                          TimeUtil.toString(_lastAnalyze));
+                log.info("Only running analyze on current metric data table " +
+                         "since last full run was at " + TimeUtil.toString(_lastAnalyze));
                 return;
             } else {
                 analyzeRunning = true;
             }
         }
         try {
-            _log.info("Performing database analyze");
+            log.info("Performing database analyze");
             // Analyze the current and previous hq_metric_data table
             serverConfigManager.analyzeHqMetricTables(true);
             // Analyze all non-metric tables
             serverConfigManager.analyzeNonMetricTables();
             long secs = (System.currentTimeMillis() - analyzeStart) / 1000;
-            _log.info("Completed database analyze " + secs + " secs");
+            log.info("Completed database analyze " + secs + " secs");
         } finally {
             synchronized (analyzeRunningLock) {
                 analyzeRunning = false;
@@ -196,35 +297,39 @@ public class DataPurgeJob implements Runnable {
         String dataMaintenance = conf.getProperty(HQConstants.DataMaintenance);
         if (dataMaintenance == null) {
             // Should never happen
-            _log.error("No data maintenance interval found");
+            log.error("No data maintenance interval found");
             return;
         }
 
         long maintInterval = Long.parseLong(dataMaintenance);
         if (maintInterval <= 0) {
-            _log.error("Maintenance interval was specified as [" + dataMaintenance + "] -- which is invalid");
+            log.error("Maintenance interval was specified as [" + dataMaintenance +
+                      "] -- which is invalid");
             return;
         }
 
         long vacuumStart = System.currentTimeMillis();
-        if (TimingVoodoo.roundDownTime(time_start, HOUR) == TimingVoodoo.roundDownTime(time_start, maintInterval)) {
-            _log.info("Performing database maintenance (VACUUM ANALYZE)");
+        if (TimingVoodoo.roundDownTime(time_start, MeasurementConstants.HOUR) == TimingVoodoo
+            .roundDownTime(time_start, maintInterval)) {
+            log.info("Performing database maintenance (VACUUM ANALYZE)");
             serverConfigManager.vacuum();
 
-            _log.info("Database maintenance completed in " + ((System.currentTimeMillis() - vacuumStart) / 1000) +
-                      " seconds.");
+            log.info("Database maintenance completed in " +
+                     ((System.currentTimeMillis() - vacuumStart) / 1000) + " seconds.");
         } else {
-            _log.info("Not performing database maintenance");
+            log.info("Not performing database maintenance");
         }
     }
 
-    protected void purge(Properties conf, long now)  {
+    protected void purge(Properties conf, long now) {
         long start = now();
         purgeEventLogs(conf, now);
-        concurrentStatsCollector.addStat((now() - start), ConcurrentStatsCollector.PURGE_EVENT_LOGS_TIME);
+        concurrentStatsCollector.addStat((now() - start),
+            ConcurrentStatsCollector.PURGE_EVENT_LOGS_TIME);
         start = now();
         purgeMeasurements();
-        concurrentStatsCollector.addStat((now() - start), ConcurrentStatsCollector.PURGE_MEASUREMENTS_TIME);
+        concurrentStatsCollector.addStat((now() - start),
+            ConcurrentStatsCollector.PURGE_MEASUREMENTS_TIME);
     }
 
     /**
@@ -234,30 +339,64 @@ public class DataPurgeJob implements Runnable {
         long start = System.currentTimeMillis();
         try {
             int dcount = measurementManager.removeOrphanedMeasurements();
-            _log.info("Removed " + dcount + " measurements in " + ((System.currentTimeMillis() - start) / 1000) +
-                      " seconds.");
+            log.info("Removed " + dcount + " measurements in " +
+                     ((System.currentTimeMillis() - start) / 1000) + " seconds.");
         } catch (Throwable t) {
             // Do not allow errors to cause other maintenance functions to
             // not run.
-            _log.error("Error removing measurements", t);
+            log.error("Error removing measurements", t);
+        }
+    }
+
+    void purgeMeasurements(long dataInterval, long purgeAfter) {
+        long min = dataCompress.getMinTimestamp(dataInterval);
+        // No data
+        if (min != 0) {
+            long interval = MeasurementConstants.HOUR;
+            long endWindow = purgeAfter;
+            long startWindow = endWindow - interval;
+            // while oldest timestamp in DB is older than purgeAfter, delete
+            // batches in one hour increments
+            while (endWindow > min) {
+                dataCompress.purgeMeasurements(dataInterval, startWindow, endWindow);
+                endWindow -= interval;
+                startWindow -= interval;
+            }
+        }
+    }
+
+    void purgeMetricProblems(long purgeAfter) {
+        long min = dataCompress.getMetricProblemMinTimestamp();
+        // No data
+        if (min != 0) {
+            long interval = MeasurementConstants.HOUR;
+            long endWindow = purgeAfter;
+            long startWindow = endWindow - interval;
+            // while oldest timestamp in DB is older than purgeAfter, delete
+            // batches in one hour increments
+            while (endWindow > min) {
+                dataCompress.purgeMetricProblems(startWindow, endWindow);
+                endWindow -= interval;
+                startWindow -= interval;
+            }
         }
     }
 
     /**
      * Purge Event Log data
      */
-    private void purgeEventLogs(Properties conf, long now)  {
+    private void purgeEventLogs(Properties conf, long now) {
         String purgeEventString = conf.getProperty(HQConstants.EventLogPurge);
         long purgeEventLog = Long.parseLong(purgeEventString);
 
         // Purge event logs
 
-        _log.info("Purging event logs older than " + TimeUtil.toString(now - purgeEventLog));
+        log.info("Purging event logs older than " + TimeUtil.toString(now - purgeEventLog));
         try {
             int rowsDeleted = eventLogManager.deleteLogs(-1, now - purgeEventLog);
-            _log.info("Done (Deleted " + rowsDeleted + " event logs)");
+            log.info("Done (Deleted " + rowsDeleted + " event logs)");
         } catch (Exception e) {
-            _log.error("Unable to delete event logs: " + e.getMessage(), e);
+            log.error("Unable to delete event logs: " + e.getMessage(), e);
         }
     }
 }
