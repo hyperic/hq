@@ -1,4 +1,4 @@
-/*
+ /*
  * NOTE: This copyright does *not* cover user programs that use HQ
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
@@ -22,9 +22,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.websphere.jmx;
 
+import java.util.Properties;
 import javax.management.ObjectName;
 
 import org.hyperic.hq.plugin.websphere.WebsphereProductPlugin;
@@ -33,33 +33,38 @@ public class JDBCProviderQuery extends WebSphereQuery {
 
     public static final String MBEAN_TYPE = "JDBCProvider";
 
+    @Override
     public String getMBeanType() {
         return MBEAN_TYPE;
     }
 
+    @Override
     public String getResourceType() {
         return WebsphereProductPlugin.CONNPOOL_NAME;
     }
 
-    public String getPropertyName() {
-        return WebsphereProductPlugin.PROP_CONNPOOL_NAME;
+    @Override
+    public void configure(Properties props) {
+        String id = getObjectName().getKeyProperty("mbeanIdentifier");
+        props.setProperty("mbeanIdentifier", id);
     }
 
+    @Override
     public String[] getAttributeNames() {
-        return new String[] {
-            "implementationClassName"   
-        };
+        return new String[]{
+                    "implementationClassName"
+                };
     }
 
-    //see comments in ConnectionPoolCollector
-    public boolean apply(ObjectName name) {
-        String server = name.getKeyProperty("Server");
-        String id = name.getKeyProperty("mbeanIdentifier");
-        if ((server == null) || (id == null)) {
-            return super.apply(name);
-        }
-        else {
-            return id.indexOf(server) != -1;
-        }
+    @Override
+    public String getFullName() {
+        ObjectName oname = getObjectName();
+        String server = oname.getKeyProperty("Server");
+        String node = oname.getKeyProperty("node");
+        String id = oname.getKeyProperty("mbeanIdentifier");
+        String name = oname.getKeyProperty("name");
+        return (id.contains("/"+node+"/") ? node + " " : "")
+                + (id.contains("/"+server+"/") ? server + " " : "")
+                + name ;//+ " (" + super.getFullName() + ")";
     }
 }
