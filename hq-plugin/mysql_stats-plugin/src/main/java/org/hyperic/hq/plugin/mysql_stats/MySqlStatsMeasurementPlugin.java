@@ -6,8 +6,8 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
- * This file is part of HQ.
+ * Copyright (C) [2010], VMware, Inc.
+ * This file is part of Hyperic.
  * 
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
@@ -31,7 +31,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
@@ -72,10 +71,11 @@ public class MySqlStatsMeasurementPlugin
                            LOG_FILES_BEHIND_MASTER = "Log_Files_Behind_Master",
                            SLAVE_SQL_RUNNING       = "Slave_SQL_Running";
     private String _driver;
-    private JDBCQueryCache _globalStatus = null,
-                           _replStatus   = null;
-    private final Map _tableStatusCacheMap = new HashMap();
-    private static final int TIMEOUT_VALUE = 60000;
+    private static final int CACHE_TIMEOUT = Integer.parseInt(System.getProperty("mysql_stats.cache.timeout", "10000"));
+    private Map<String, Map<String, JDBCQueryCache>> _urlQueryCacheMap = new HashMap<String, Map<String, JDBCQueryCache>>();
+    private final Map<String, JDBCQueryCache> _tableStatusCacheMap = new HashMap<String, JDBCQueryCache>();
+    
+    private static final int TIMEOUT_VALUE = Integer.parseInt(System.getProperty("mysql_stats.jdbc.timeout", "60000"));
     private int _consecutiveErrors = 0;
     private static final int MAX_ERRORS = 3;
     
@@ -85,13 +85,12 @@ public class MySqlStatsMeasurementPlugin
                MetricUnreachableException {
         // will look like "mysqlstats:Type=Global,jdbcUser=user,jdbcPasswd=pass"
         String objectName = metric.getObjectName().toLowerCase();
+        
         // will look like "availability"
         String alias = metric.getAttributeName();
         boolean sqlException = false;
         try {
             setDriver(metric);
-            setGlobalStatus(metric, SHOW_GLOBAL_STATUS);
-            setReplStatus(metric, SHOW_SLAVE_STATUS);
             if (objectName.indexOf(SHOW_GLOBAL_STATUS) != -1) {
                 return getGlobalStatusMetric(metric);
             } else if (objectName.indexOf(SHOW_SLAVE_STATUS) != -1) {
@@ -141,12 +140,10 @@ public class MySqlStatsMeasurementPlugin
     }
 
     private void setCacheExpireTime(long expireTime) {
-        Iterator it;
         _log.info("Received more than " + MAX_ERRORS + " SQLExceptions, " +
             "disabling all " + _tableStatusCacheMap.size() +
             " JDBCQueryCaches until " + TimeUtil.toString(expireTime));
-        for (it=_tableStatusCacheMap.values().iterator(); it.hasNext(); ) {
-            JDBCQueryCache cache = (JDBCQueryCache)it.next();
+        for (JDBCQueryCache cache : _tableStatusCacheMap.values()) {
             cache.setExpireTime(expireTime);
             cache.clearCache();
         }
@@ -158,12 +155,14 @@ public class MySqlStatsMeasurementPlugin
                JDBCQueryCacheException {
         final String table = metric.getObjectProperty("table");
         final String dbname = metric.getObjectProperty("database");
+        final String jdbcUrl = metric.getObjectProperty(PROP_URL);
+        final String cacheKey = jdbcUrl +"-"+ table;
         String alias = metric.getAttributeName();
         JDBCQueryCache tableCache =
-            (JDBCQueryCache)_tableStatusCacheMap.get(table);
+            (JDBCQueryCache)_tableStatusCacheMap.get(cacheKey);
         // don't want to cache all of "show table status" in the case
         // we have a deployment with 1000s of tables.  They probably don't care
-        // about all the tables.  There is still a speed/effieciency improvement
+        // about all the tables.  There is still a speed/efficiency improvement
         // over the old mysql plugin since the query only has to be run once for
         // all the individual table metrics.
         if (tableCache == null) {
@@ -174,8 +173,8 @@ public class MySqlStatsMeasurementPlugin
                 .append(" AND lower(table_schema) = '")
                 	.append(dbname.toLowerCase()).append('\'')
                 .append(" AND engine is not null").toString();
-            tableCache = new JDBCQueryCache(sql, "table_name", 10000);
-            _tableStatusCacheMap.put(table, tableCache);
+            tableCache = new JDBCQueryCache(sql, "table_name", CACHE_TIMEOUT);
+            _tableStatusCacheMap.put(cacheKey, tableCache);
         }
         if (metric.isAvail()) {
             alias = "TABLE_ROWS";
@@ -244,6 +243,7 @@ public class MySqlStatsMeasurementPlugin
         throws NumberFormatException,
                SQLException,
                JDBCQueryCacheException {
+        JDBCQueryCache globalStatus = getQueryCache(metric, SHOW_GLOBAL_STATUS);
         String valColumn = metric.getObjectProperty("value");
         String alias = metric.getAttributeName();
         if (metric.isAvail()) {
@@ -251,7 +251,7 @@ public class MySqlStatsMeasurementPlugin
         } else {
             Connection conn = getCachedConnection(metric);
             Double val = Double.valueOf(
-                _globalStatus.get(conn, alias, valColumn).toString());
+                globalStatus.get(conn, alias, valColumn).toString());
             return val.doubleValue();
         }
     }
@@ -264,6 +264,7 @@ public class MySqlStatsMeasurementPlugin
                MetricNotFoundException {
         String valColumn = metric.getObjectProperty("value");
         String alias = metric.getAttributeName();
+        JDBCQueryCache replStatus = getQueryCache(metric, SHOW_SLAVE_STATUS);
         if (alias.equalsIgnoreCase(BYTES_BEHIND_MASTER)) {
             final double tmp = getBytesBehindMaster(metric);
             return (tmp >= 0) ? tmp : 0d;
@@ -274,7 +275,7 @@ public class MySqlStatsMeasurementPlugin
             // http://feedblog.org/2007/09/29/where-does-mysql-lie-about-seconds_behind_master/
             Connection conn = getCachedConnection(metric);
             Double val = Double.valueOf(
-                _replStatus.getOnlyRow(conn, valColumn).toString());
+                replStatus.getOnlyRow(conn, valColumn).toString());
             if (val == null) {
                 throw new MetricNotFoundException("query for " +
                     SECONDS_BEHIND_MASTER + " returned null");
@@ -282,12 +283,12 @@ public class MySqlStatsMeasurementPlugin
             return val.doubleValue();
         } else if (metric.isAvail()) {
             Connection conn = getCachedConnection(metric);
-            String s = _replStatus.getOnlyRow(conn, SLAVE_SQL_RUNNING).toString();
+            String s = replStatus.getOnlyRow(conn, SLAVE_SQL_RUNNING).toString();
             return (s.equalsIgnoreCase("yes")) ?
                 Metric.AVAIL_UP : Metric.AVAIL_DOWN;
         } else {
             Connection conn = getCachedConnection(metric);
-            String s = _replStatus.getOnlyRow(conn, valColumn).toString();
+            String s = replStatus.getOnlyRow(conn, valColumn).toString();
             Double val = null;
             if (s.equalsIgnoreCase("yes")) {
                 val = new Double(1);
@@ -306,16 +307,17 @@ public class MySqlStatsMeasurementPlugin
                JDBCQueryCacheException,
                MetricUnreachableException {
         Connection conn = getCachedConnection(metric);
+        JDBCQueryCache replStatus = getQueryCache(metric, SHOW_SLAVE_STATUS);
         double slaveLogPos = -1d;
         try {
-            slaveLogPos = Double.valueOf(_replStatus.getOnlyRow(
+            slaveLogPos = Double.valueOf(replStatus.getOnlyRow(
                 conn, "Exec_Master_Log_Pos").toString()).doubleValue();
         } catch (Exception e) {
             // for 4.0 replication, the cases are different
-            slaveLogPos = Double.valueOf(_replStatus.getOnlyRow(
+            slaveLogPos = Double.valueOf(replStatus.getOnlyRow(
                 conn, "Exec_master_log_pos").toString()).doubleValue();
         }
-        double masterLogPos = Double.valueOf(_replStatus.getOnlyRow(
+        double masterLogPos = Double.valueOf(replStatus.getOnlyRow(
             conn, "Read_Master_Log_Pos").toString()).doubleValue();
         return masterLogPos - slaveLogPos;
     }
@@ -324,9 +326,10 @@ public class MySqlStatsMeasurementPlugin
         throws SQLException,
                JDBCQueryCacheException {
         Connection conn = getCachedConnection(metric);
-        String masterLogFile =  _replStatus.getOnlyRow(
+        JDBCQueryCache replStatus = getQueryCache(metric, SHOW_SLAVE_STATUS);
+        String masterLogFile =  replStatus.getOnlyRow(
                 conn, "Master_Log_File").toString();
-        String slaveLogFile =  _replStatus.getOnlyRow(
+        String slaveLogFile =  replStatus.getOnlyRow(
                 conn, "Relay_Master_Log_File").toString();
         if (masterLogFile.equals(slaveLogFile)) {
             return 0d;
@@ -336,6 +339,24 @@ public class MySqlStatsMeasurementPlugin
         toks = slaveLogFile.split("\\.");
         int slaveNum = Integer.valueOf(toks[1]).intValue();
         return masterNum - slaveNum;
+    }
+    
+    private JDBCQueryCache getQueryCache(Metric metric, String query){
+        String jdbcUrl = metric.getProperties().getProperty(PROP_URL);
+        String keyColumn = metric.getObjectProperty("key");
+        JDBCQueryCache queryCache;        
+        if (!_urlQueryCacheMap.containsKey(jdbcUrl)){
+            Map<String, JDBCQueryCache> queryMap = new HashMap<String, JDBCQueryCache>();
+            queryCache = new JDBCQueryCache(query, keyColumn, CACHE_TIMEOUT);
+            queryMap.put(query,  queryCache);
+            _urlQueryCacheMap.put(jdbcUrl, queryMap);
+        } else if (!_urlQueryCacheMap.get(jdbcUrl).containsKey(query)){
+            queryCache = new JDBCQueryCache(query, keyColumn, CACHE_TIMEOUT);
+            _urlQueryCacheMap.get(jdbcUrl).put(query, queryCache);
+        } else {
+            queryCache = _urlQueryCacheMap.get(jdbcUrl).get(query);
+        }
+        return queryCache;
     }
     
     protected Connection getCachedConnection(Metric metric) throws SQLException {
@@ -370,24 +391,6 @@ public class MySqlStatsMeasurementPlugin
         } finally {
             // don't close connection, it is cached
             DBUtil.closeJDBCObjects(_logCtx, null, stmt, rs);
-        }
-    }
-
-    private void setReplStatus(Metric metric, String showGlobal)
-        throws MetricNotFoundException
-    {
-        if (_replStatus == null) {
-            String keyColumn = metric.getObjectProperty("key");
-            _replStatus = new JDBCQueryCache(showGlobal, keyColumn, 10000);
-        }
-    }
-
-    private void setGlobalStatus(Metric metric, String showGlobal)
-        throws MetricNotFoundException
-    {
-        if (_globalStatus == null) {
-            String keyColumn = metric.getObjectProperty("key");
-            _globalStatus = new JDBCQueryCache(showGlobal, keyColumn, 10000);
         }
     }
 
