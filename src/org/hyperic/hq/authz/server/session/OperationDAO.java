@@ -80,11 +80,9 @@ public class OperationDAO extends HibernateDAO {
             .append("join r.subjects s ")
             .append("where s = :subject and op = :operation")
             .toString();
-        return null != getSession()
-            .createQuery(hql)
-            .setParameter("subject", subj)
-            .setParameter("operation", op)
-            .uniqueResult();
-    }
-
+		return null != getSession().createQuery(hql)
+			.setParameter("subject", subj)
+			.setParameter("operation", op)
+			.setMaxResults(1);    
+	}
 }
