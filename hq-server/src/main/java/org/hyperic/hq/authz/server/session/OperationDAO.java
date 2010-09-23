@@ -1,5 +1,5 @@
 /*
- * NOTE: This copyright does *not* cover user programs that use HQ
+us * NOTE: This copyright does *not* cover user programs that use HQ
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
@@ -120,8 +120,9 @@ public class OperationDAO
         String hql = new StringBuilder(128).append("select 1 from Role r ").append(
             "join r.operations op ").append("join r.subjects s ").append(
             "where s = :subject and op = :operation").toString();
-        return null != getSession().createQuery(hql).setParameter("subject", subj).setParameter(
-            "operation", op).uniqueResult();
+        return null != getSession().createQuery(hql)
+        	.setParameter("subject", subj)
+        	.setParameter("operation", op)
+        	.setMaxResults(1);
     }
-
 }
