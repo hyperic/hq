@@ -37,6 +37,6 @@ public interface MockService {
      * 
      * @param duration
      */
-    void foo(long duration);
+    void foo(long duration, Pojo obj);
     
 }
