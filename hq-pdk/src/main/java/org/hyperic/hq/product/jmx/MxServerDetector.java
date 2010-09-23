@@ -387,14 +387,17 @@ public class MxServerDetector
         throws PluginException {
 
         String url = serverConfig.getValue(MxUtil.PROP_JMX_URL);
+        log.debug("[discoverMxServices] url="+url);
 
         configure(serverConfig); //for MxServerQuery to use detector.getConfig()
         MxServerQuery serverQuery = new MxServerQuery(this);
         String objName = getTypeProperty(MxQuery.PROP_OBJECT_NAME);
+        log.debug("[discoverMxServices] objName="+objName);
 
         if (objName != null) {
             try {
                 objName = Metric.translate(objName, serverConfig);
+                log.debug("[discoverMxServices] objName="+objName);
                 serverQuery.setObjectName(new ObjectName(objName));
             } catch (MalformedObjectNameException e) {
                 throw new PluginException(objName, e);
@@ -462,6 +465,7 @@ public class MxServerDetector
 
     protected List discoverServices(ConfigResponse serverConfig)
         throws PluginException {
+        log.debug("[discoverServices] serverConfig="+serverConfig);
 
         JMXConnector connector;
         MBeanServerConnection mServer;

@@ -67,6 +67,7 @@ public class MxServerQuery extends MxQuery {
         throws PluginException {
 
         Map servicePlugins = getServerDetector().getServiceInventoryPlugins();
+        log.debug("[findServices] servicePlugins="+servicePlugins);
 
         if (servicePlugins == null) {
             return;
@@ -130,7 +131,9 @@ public class MxServerQuery extends MxQuery {
 
         try {
             name = new ObjectName(query.getQueryName());
+            log.debug("[findServices] name="+name);
             services = mServer.queryNames(name, null);
+            log.debug("[findServices] services=("+services.size()+")"+services);
         } catch (MalformedObjectNameException e) {
             String msg = query.getQueryName() + ": " + e.getMessage();
             throw new IllegalArgumentException(msg);
