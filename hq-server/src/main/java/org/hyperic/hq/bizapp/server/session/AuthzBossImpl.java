@@ -47,6 +47,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceType;
+import org.hyperic.hq.authz.server.session.UserPreferencesUpdatedEvent;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
@@ -61,13 +62,13 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -96,12 +97,14 @@ public class AuthzBossImpl implements AuthzBoss {
     private ResourceManager resourceManager;
 
     private PermissionManager permissionManager;
+    
+    private ZeventEnqueuer zEventEnqueuer;
 
     @Autowired
     public AuthzBossImpl(SessionManager sessionManager, AppdefBoss appdefBoss, AuthBoss authBoss, AuthManager authManager,
                          AuthzSubjectManager authzSubjectManager, ResourceGroupManager resourceGroupManager,
                          ResourceManager resourceManager, 
-                         PermissionManager permissionManager) {
+                         PermissionManager permissionManager, ZeventEnqueuer zeventEnqueuer) {
         this.sessionManager = sessionManager;
         this.appdefBoss = appdefBoss;
         this.authManager = authManager;
@@ -110,6 +113,7 @@ public class AuthzBossImpl implements AuthzBoss {
         this.resourceGroupManager = resourceGroupManager;
         this.resourceManager = resourceManager;
         this.permissionManager = permissionManager;
+        this.zEventEnqueuer = zeventEnqueuer;
     }
 
     /**
@@ -458,23 +462,16 @@ public class AuthzBossImpl implements AuthzBoss {
         }
     }
 
-    /**
-     * Set the UserPreferences
-     * HHQ-3676 Creating a new transaction here to avoid upgrading the hibernate session during user navigation
-     * TODO investigate asynchronously setting prefs instead
-     */
-    @Transactional(propagation=Propagation.REQUIRES_NEW)
+    @Transactional(readOnly=true)
     public void setUserPrefs(Integer sessionId, Integer subjectId, ConfigResponse prefs) throws ApplicationException,
         SessionTimeoutException, SessionNotFoundException {
         if (log.isDebugEnabled()) {
             log.debug("setting preferences for sessionid=" + sessionId +
                 ", subjId=" + subjectId);
         }
-        AuthzSubject who = sessionManager.getSubject(sessionId);       
-        authzSubjectManager.setUserPrefs(who, subjectId, prefs);
-        getUserPrefs(sessionId, subjectId);
+        AuthzSubject who = sessionManager.getSubject(sessionId); 
+        zEventEnqueuer.enqueueEventAfterCommit(new UserPreferencesUpdatedEvent(who.getId(),subjectId,prefs));
     }
-
    
     /**
      * Get the email of a user by name

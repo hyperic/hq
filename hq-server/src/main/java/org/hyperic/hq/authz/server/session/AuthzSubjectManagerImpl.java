@@ -494,6 +494,15 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
             targ.setPrefs(newPrefs);
         }
     }
+    
+    public void setUserPrefs(Integer whoId, Integer subjectId, ConfigResponse prefs)
+        throws PermissionException, SubjectNotFoundException {
+         AuthzSubject who = getSubjectById(whoId);
+         if(who == null) {
+             throw new SubjectNotFoundException("Subject with id " + whoId + " not found");
+         }
+         setUserPrefs(who, subjectId, prefs);
+    }
 
     /**
      * 
