@@ -40,7 +40,6 @@ import org.springframework.stereotype.Component;
  *
  * @author Helena Edelson
  */
-@Component
 public class PluginBeanPostProcessor implements BeanPostProcessor, ApplicationContextAware {
 
     private AbstractApplicationContext applicationContext;
@@ -68,8 +67,6 @@ public class PluginBeanPostProcessor implements BeanPostProcessor, ApplicationCo
         ctx.setParent(applicationContext);
         ctx.register(RabbitConfiguration.class);
         ctx.refresh();
-        /** temporary */
-        ApplicationContextCreator.setChildApplicationContext(ctx);
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {

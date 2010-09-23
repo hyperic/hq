@@ -59,17 +59,17 @@
         class="org.hyperic.hq.plugin.rabbitmq.manage.RabbitBrokerManagerPlugin"/>-->
 
         <config type="product">
-            <option name="server.name" description="RabbitMQ server name"/>
+            <option name="server.name" description="RabbitMQ Node"/>
 
             <option name="server.path" description="Process Path"/>
-
-            <!--<option name="rabbitmq.home" description="RABBITMQ_HOME" optional="true"/>-->
 
             <option name="host" description="RabbitMQ Host"/>
 
             <option name="username" description="RabbitMQ Username"/>
 
             <option name="password" type="secret" description="RabbitMQ Password"/>
+
+            <!--<option name="cookie" description="Path to Erlang cookie" optional="true"/>-->
 
             <option name="port" type="int" default="5672" description="RabbitMQ Port" optional="true"/>
 
