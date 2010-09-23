@@ -3,7 +3,6 @@ import org.hyperic.hq.hqu.rendit.html.HtmlUtil
 import org.hyperic.util.config.ConfigResponse
 import org.json.JSONArray
 import org.json.JSONObject
-import org.hyperic.hq.system.UptimeData
 
 class GemfireController extends BaseController {
     def s=0,g=0,c=0;
