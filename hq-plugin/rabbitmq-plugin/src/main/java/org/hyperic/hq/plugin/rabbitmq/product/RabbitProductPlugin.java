@@ -26,11 +26,10 @@
 package org.hyperic.hq.plugin.rabbitmq.product;
  
 import org.hyperic.hq.plugin.rabbitmq.configure.ApplicationContextCreator;
-import org.hyperic.hq.plugin.rabbitmq.configure.ConnectionFactoryBeanDefinitionBuilder;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerGateway;
+import org.hyperic.hq.plugin.rabbitmq.configure.ConnectionFactoryBeanDefinitionBuilder; 
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.util.config.ConfigResponse; 
+import org.hyperic.util.config.ConfigResponse;
 import org.springframework.util.Assert;
 
 /**
@@ -65,9 +64,8 @@ public class RabbitProductPlugin extends ProductPlugin {
      */
     public static void initializeGateway(ConfigResponse preInitialize) {
         if (!ConnectionFactoryBeanDefinitionBuilder.hasConfigValues(preInitialize)) return;
-
-        ApplicationContextCreator.createApplicationContext(ConnectionFactoryBeanDefinitionBuilder.build(preInitialize));
-        rabbitGateway = ApplicationContextCreator.getChildApplicationContext().getBean(RabbitBrokerGateway.class);
+ 
+        rabbitGateway = ApplicationContextCreator.createGateway(ConnectionFactoryBeanDefinitionBuilder.build(preInitialize));
         Assert.notNull(rabbitGateway, "rabbitGateway must not be null");
     }
 
