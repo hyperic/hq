@@ -27,6 +27,7 @@
 		<module>db2jdbc-plugin</module>
 		<module>dotnet-plugin</module>
 		<module>exchange-plugin</module>
+		<module>gemfire-plugin</module>
 		<module>geronimo-plugin</module>
 		<module>glassfish-plugin</module>
 		<module>groovy-scripting-plugin</module>
