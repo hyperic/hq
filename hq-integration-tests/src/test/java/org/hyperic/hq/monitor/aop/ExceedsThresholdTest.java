@@ -24,15 +24,16 @@
  */
 package org.hyperic.hq.monitor.aop;
 
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.*; 
 
 import org.hyperic.hq.monitor.MockService;
+import org.hyperic.hq.monitor.Pojo;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.StopWatch;
@@ -49,18 +50,18 @@ import org.springframework.util.StopWatch;
  * @see <a href="http://jira.hyperic.com/browse/HE-356">Add aspect to track @Transactional/@Service method runtime and log if exceeded threshold</a>
  */
 @ContextConfiguration
-@Ignore("This test requires manual verification that the aspect logged a message")
 @DirtiesContext
 public class ExceedsThresholdTest extends BaseInfrastructureTest {
 
     @Autowired private MockService mockServiceImpl;
    
- 
-    private long unAcceptableDuration = 300000; 
+    //@Value("${hq.zevent.warnInterval}")
+    private long unAcceptableDuration = 300000;
 
     @Before
     public void before() {
         assertNotNull("mockServiceImpl should not be null", mockServiceImpl);
+        assertTrue(unAcceptableDuration > 0);
     }
 
     /**
@@ -68,15 +69,15 @@ public class ExceedsThresholdTest extends BaseInfrastructureTest {
      * the same variable as unAcceptableDuration
      * 
      */
-    @Test
+    @Test  //@Ignore("This test requires manual verification that the aspect logged a message")
     public void monitorControlPerformance() {
-        StopWatch sw = new StopWatch();
+        final StopWatch sw = new StopWatch();
         sw.start("test");
 
-        mockServiceImpl.foo(unAcceptableDuration);
+        mockServiceImpl.foo(unAcceptableDuration + 1, new Pojo());
 
         sw.stop(); 
-        assertFalse("method exceeded acceptable duration: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < unAcceptableDuration);
+        assertTrue("method exceeded acceptable duration: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() > unAcceptableDuration);
     }
 
 
