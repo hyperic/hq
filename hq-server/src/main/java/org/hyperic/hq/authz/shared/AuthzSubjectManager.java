@@ -42,8 +42,9 @@ public interface AuthzSubjectManager {
      * @param whoami The current running user.
      * @return Value-object for the new Subject.
      */
-    public AuthzSubject createSubject(AuthzSubject whoami, String name, boolean active, String dsn, String dept,
-                                      String email, String first, String last, String phone, String sms, boolean html)
+    public AuthzSubject createSubject(AuthzSubject whoami, String name, boolean active, String dsn,
+                                      String dept, String email, String first, String last,
+                                      String phone, String sms, boolean html)
         throws PermissionException, ApplicationException;
 
     /**
@@ -53,9 +54,9 @@ public interface AuthzSubjectManager {
      *        settings to update. If they are null, then no change will be made
      *        to them.
      */
-    public void updateSubject(AuthzSubject whoami, AuthzSubject target, Boolean active, String dsn, String dept,
-                              String email, String firstName, String lastName, String phone, String sms, Boolean useHtml)
-        throws PermissionException;
+    public void updateSubject(AuthzSubject whoami, AuthzSubject target, Boolean active, String dsn,
+                              String dept, String email, String firstName, String lastName,
+                              String phone, String sms, Boolean useHtml) throws PermissionException;
 
     /**
      * Check if a subject can modify users
@@ -77,7 +78,8 @@ public interface AuthzSubjectManager {
 
     public AuthzSubject getSubjectById(Integer id);
 
-    public AuthzSubject findSubjectByName(AuthzSubject whoami, String name) throws PermissionException;
+    public AuthzSubject findSubjectByName(AuthzSubject whoami, String name)
+        throws PermissionException;
 
     public AuthzSubject findSubjectByName(String name);
 
@@ -87,15 +89,18 @@ public interface AuthzSubjectManager {
      * List all subjects in the system
      * @param excludes the IDs of subjects to exclude from result
      */
-    public PageList<AuthzSubjectValue> getAllSubjects(AuthzSubject whoami, java.util.Collection<Integer> excludes,
-                                                      PageControl pc) throws PermissionException, NotFoundException;
+    public PageList<AuthzSubjectValue> getAllSubjects(AuthzSubject whoami,
+                                                      java.util.Collection<Integer> excludes,
+                                                      PageControl pc) throws PermissionException,
+        NotFoundException;
 
     /**
      * Get the subjects with the specified ids NOTE: This method returns an
      * empty PageList if a null or empty array of ids is received.
      * @param ids the subject ids
      */
-    public PageList<AuthzSubjectValue> getSubjectsById(AuthzSubject subject, java.lang.Integer[] ids, PageControl pc)
+    public PageList<AuthzSubjectValue> getSubjectsById(AuthzSubject subject,
+                                                       java.lang.Integer[] ids, PageControl pc)
         throws PermissionException;
 
     /**
@@ -120,7 +125,14 @@ public interface AuthzSubjectManager {
     /**
      * Set the Preferences for a specified user
      */
-    public void setUserPrefs(AuthzSubject who, Integer subjId, ConfigResponse prefs) throws PermissionException;
+    public void setUserPrefs(AuthzSubject who, Integer subjId, ConfigResponse prefs)
+        throws PermissionException;
+
+    /**
+     * Set the Preferences for a specified user
+     */
+    public void setUserPrefs(Integer whoId, Integer subjectId, ConfigResponse prefs)
+        throws PermissionException, SubjectNotFoundException;
 
     public AuthzSubject getOverlordPojo();
 
@@ -132,6 +144,7 @@ public interface AuthzSubjectManager {
      * @return The value-object of the subject of the given name and
      *         authenticating source.
      */
-    public AuthzSubject findSubjectByAuth(String name, String authDsn) throws SubjectNotFoundException;
+    public AuthzSubject findSubjectByAuth(String name, String authDsn)
+        throws SubjectNotFoundException;
 
 }

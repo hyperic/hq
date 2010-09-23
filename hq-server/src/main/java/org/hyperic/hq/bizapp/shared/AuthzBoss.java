@@ -39,6 +39,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceType;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
@@ -203,7 +204,8 @@ public interface AuthzBoss {
     public ConfigResponse getUserPrefs(Integer sessionId, Integer subjectId);
 
     /**
-     * Set the UserPreferences
+     * Sets the UserPreferences by sending an event to asynchronously persist them after commit.  To update the prefs
+     * synchronously use {@link AuthzSubjectManager}
      */
     public void setUserPrefs(Integer sessionId, Integer subjectId, ConfigResponse prefs) throws ApplicationException,
         SessionTimeoutException, SessionNotFoundException;
