@@ -47,7 +47,7 @@ import static org.junit.Assert.*;
  *
  * @author Helena Edelson
  */
-@Ignore("Until I set up QA RabbitMQ servers")
+@Ignore("Manual cookie value to connect to each node is required")
 public class VersionTests extends RabbitVersionDetector {
 
     private static final String LOCATION = "/path/to/.erlang.cookie";

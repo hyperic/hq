@@ -27,14 +27,15 @@ package org.hyperic.hq.plugin.rabbitmq.configure;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.AbstractApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.util.Assert;
 
 
@@ -46,15 +47,27 @@ public class ApplicationContextCreator implements SmartLifecycle {
 
     private static Log logger = LogFactory.getLog(ApplicationContextCreator.class);
 
-    private static AbstractApplicationContext applicationContext;
+	private volatile boolean autoStartup = true;
 
-    private static AbstractApplicationContext childApplicationContext;
+	private volatile int phase = Integer.MIN_VALUE;
+
+    private static volatile AbstractApplicationContext applicationContext;
+
+    /**
+     * This is only called by the Product plugin. This method is so that the caller knows nothing
+     * about the ApplicationContext api iteself, since in the case we only have one call.
+     * @return org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway
+     */
+    public static RabbitGateway createGateway(GenericBeanDefinition beanDefinition) {
+        createApplicationContext(beanDefinition);
+        return applicationContext.getBean(RabbitGateway.class);
+    }
 
     /**
      * Returns the ApplicationContext.
      * @param beanDefinition
      */
-    public static ApplicationContext createApplicationContext(GenericBeanDefinition beanDefinition) {
+    private static ApplicationContext createApplicationContext(GenericBeanDefinition beanDefinition) {
         return applicationContext == null ? applicationContext = doCreateApplicationContext(beanDefinition) : applicationContext;
     }
 
@@ -64,11 +77,13 @@ public class ApplicationContextCreator implements SmartLifecycle {
      * @return org.springframework.context.ApplicationContext
      */
     private static AbstractApplicationContext doCreateApplicationContext(GenericBeanDefinition beanDefinition) {
-        AbstractApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:/etc/*-context.xml");
-        applicationContext.registerShutdownHook();
-        postProcessAfterCreation(beanDefinition, applicationContext);
+        AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+        DynamicSpringBeanConfigurer.registerBean(beanDefinition, (DefaultListableBeanFactory) ctx.getBeanFactory());
+        Assert.notNull(ctx.getBean(SingleConnectionFactory.class), "SingleConnectionFactory must not be null.");
 
-        return applicationContext;
+        ctx.register(RabbitConfiguration.class);
+        ctx.refresh();
+        return ctx;
     }
 
     /**
@@ -76,7 +91,7 @@ public class ApplicationContextCreator implements SmartLifecycle {
      * @see RabbitConfiguration
      * @param beanDefinition
      * @param applicationContext
-     */ 
+     */
     private static void postProcessAfterCreation(GenericBeanDefinition beanDefinition, ConfigurableApplicationContext applicationContext) {
         if (beanDefinition == null) return;
 
@@ -84,44 +99,35 @@ public class ApplicationContextCreator implements SmartLifecycle {
         Assert.notNull(applicationContext.getBean(SingleConnectionFactory.class), "SingleConnectionFactory must not be null.");
      }
 
-    public static AbstractApplicationContext getChildApplicationContext() {
-        return childApplicationContext;
-    }
-
-    public static void setChildApplicationContext(AbstractApplicationContext childApplicationContext) {
-        ApplicationContextCreator.childApplicationContext = childApplicationContext;
-    }
-
     /** Implement  of SmartLifecycle */
     public boolean isAutoStartup() {
-        return false;
+        return this.autoStartup;
     }
 
-    public void stop(Runnable callback) {
-
+    public boolean isRunning() {
+        return applicationContext.isRunning();
     }
+
+	public void stop(Runnable callback) {
+		this.stop();
+		//callback.run();
+	}
 
     public int getPhase() {
-        return 0;
+        return this.phase;
     }
 
     public void start() {
-        logger.info("Starting " + applicationContext);
+        logger.info("Starting RabbitMQ Plugin - " + applicationContext);
     }
 
     /**
      * Just in case.
      */    
     public void stop() {
-        if (childApplicationContext != null && childApplicationContext.isRunning()) {
-            childApplicationContext.stop();
-        }
         if (applicationContext != null && isRunning()) {
             applicationContext.stop();
         }
     }
 
-    public boolean isRunning() {
-        return applicationContext.isRunning();
-    }
 }
