@@ -216,6 +216,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>gemfire-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>geronimo-plugin</artifactId>
 			<version>${project.version}</version>
 			<classifier>agent</classifier>
