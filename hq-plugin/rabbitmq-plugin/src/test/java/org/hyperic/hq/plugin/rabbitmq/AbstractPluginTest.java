@@ -10,6 +10,7 @@ import org.junit.Before;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.util.Properties;
 
 /**
@@ -23,13 +24,18 @@ public abstract class AbstractPluginTest {
     protected RabbitProductPlugin productPlugin = new RabbitProductPlugin();
 
     protected Properties properties = new Properties();
- 
+
+    private static String HOST = "VMC-SSRC-2K335";
+
     @Before
-    public void doBefore() throws PluginException {
+    public void doBefore() throws PluginException, IOException {
+        /* Resource resource = new ClassPathResource("classpath:/etc/test.properties"); */
+
         this.productPlugin.configure(createConfigResponse());
         assertNotNull(productPlugin);
         this.properties = productPlugin.getConfig().toProperties();
         assertNotNull(properties);
+
     }
 
     @After
@@ -39,7 +45,7 @@ public abstract class AbstractPluginTest {
 
     protected ConfigResponse createConfigResponse() {
         ConfigResponse pluginConfig = new ConfigResponse();
-        pluginConfig.setValue("host", "localhost");
+        pluginConfig.setValue("host", HOST);
         pluginConfig.setValue("username", "guest");
         pluginConfig.setValue("password", "guest");
         

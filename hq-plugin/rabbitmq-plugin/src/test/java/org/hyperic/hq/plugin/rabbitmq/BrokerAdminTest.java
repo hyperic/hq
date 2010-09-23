@@ -18,7 +18,7 @@ import static org.junit.Assert.*;
  *
  * @author Helena Edelson
  */
-@Ignore("Need to set up a rabbit server for QA")
+@Ignore("Manual cookie value to connect to each node is required")
 public class BrokerAdminTest extends AbstractSpringTest {
  
     @Test

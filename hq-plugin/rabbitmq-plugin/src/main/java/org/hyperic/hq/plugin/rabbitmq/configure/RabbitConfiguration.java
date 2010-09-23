@@ -32,6 +32,7 @@ import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.erlang.core.ErlangTemplate;
 
 /**
@@ -39,6 +40,7 @@ import org.springframework.erlang.core.ErlangTemplate;
  *
  * @author Helena Edelson
  */
+@ImportResource("classpath:/etc/rabbitmq-context.xml")
 public class RabbitConfiguration {
 
     @Autowired
@@ -73,11 +75,5 @@ public class RabbitConfiguration {
     public ErlangGateway erlangGatway() {
         return new ErlangBrokerGateway();
     }
-
-    /* Not read for this yet.
-    @Bean
-    public RabbitScheduler rabbitTaskScheduler() {
-        return new RabbitScheduler(rabbitTemplate());
-    }*/
-
+ 
 }

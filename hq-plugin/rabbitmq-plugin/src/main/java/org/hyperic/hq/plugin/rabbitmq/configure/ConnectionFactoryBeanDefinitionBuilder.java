@@ -58,19 +58,7 @@ public class ConnectionFactoryBeanDefinitionBuilder {
     public static boolean hasConfigValues(ConfigResponse config) {
         return (config.getValue(HOST_KEY) != null) &&
                 (config.getValue(USERNAME_KEY) != null) &&
-                (config.getValue(PASSWORD_KEY) != null);
-    }
-
-    /**
-     * ToDo validate UI entries
-     *
-     * @param host
-     * @param username
-     * @param password
-     * @return
-     */
-    public static boolean hasValidValues(String host, String username, String password) {
-        return true;
+                    (config.getValue(PASSWORD_KEY) != null);
     }
 
     /**

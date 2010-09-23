@@ -39,18 +39,6 @@ import java.util.UUID;
  * @author Helena Edelson
  */
 public class DynamicSpringBeanConfigurer {
- 
-    /** 
-     * @param defaultListableBeanFactory
-     * @param preInitialize
-     */
-    public static void createAndRegisterBeans(DefaultListableBeanFactory defaultListableBeanFactory, Class... preInitialize) {
-        if (preInitialize != null) {
-            for (Class beanCanidate : preInitialize) {
-                createAndRegisterBean(beanCanidate, defaultListableBeanFactory);
-            }
-        }
-    }
 
     /**
      * Create a new BeanDefinition for an anonymous bean with no dependencies.
