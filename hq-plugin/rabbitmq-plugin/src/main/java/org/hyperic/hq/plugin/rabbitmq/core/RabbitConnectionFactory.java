@@ -30,13 +30,9 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 
 import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.erlang.OtpIOException;
-import org.springframework.erlang.connection.ConnectionFactory;
 import org.springframework.util.Assert;
 
-import com.ericsson.otp.erlang.OtpAuthException;
-import com.ericsson.otp.erlang.OtpConnection;
 import com.ericsson.otp.erlang.OtpPeer;
 import com.ericsson.otp.erlang.OtpSelf;
 

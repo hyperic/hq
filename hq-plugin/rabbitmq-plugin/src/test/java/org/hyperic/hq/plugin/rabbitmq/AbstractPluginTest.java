@@ -25,7 +25,7 @@ public abstract class AbstractPluginTest {
 
     protected Properties properties = new Properties();
 
-    private static String HOST = "VMC-SSRC-2K335";
+    private static String HOST = "localhost";
 
     @Before
     public void doBefore() throws PluginException, IOException {
