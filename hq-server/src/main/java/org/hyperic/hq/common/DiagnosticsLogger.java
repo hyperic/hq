@@ -101,7 +101,7 @@ public class DiagnosticsLogger implements Runnable {
                 synchronized (diagnosticObjects) {
                     for(DiagnosticObject o: diagnosticObjects) {
                         try {
-                            log.info("[" + o + "] " + o.getStatus());
+                            log.info("[" + o + "] " + o.getShortStatus());
                         } catch (Throwable e) {
                             log.error("Error in diagnostics: " + e, e);
                         }
