@@ -45,7 +45,7 @@
     </version>
 
     <property name="fqdn" type="string">
-      <column name="FQDN" not-null="true" length="200" unique="true"/>
+      <column name="FQDN" not-null="true" length="253" unique="true"/>
     </property>
 
     <property name="certdn" type="string">

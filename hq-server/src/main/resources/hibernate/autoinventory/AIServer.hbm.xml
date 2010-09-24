@@ -52,7 +52,7 @@
     </properties>
 
     <property name="name" type="string">
-      <column name="NAME" index="AIQ_SERVER_NAME" not-null="true" length="200"/>
+      <column name="NAME" index="AIQ_SERVER_NAME" not-null="true" length="500"/>
     </property>
 
     <property name="description" type="string">
