@@ -1,6 +1,7 @@
 package org.hyperic.hq.plugin.rabbitmq.manage;
 
 import org.hyperic.hq.plugin.rabbitmq.AbstractPluginTest;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Map;
@@ -15,7 +16,7 @@ import static org.junit.Assert.assertNotNull;
  */
 public class RabbitBrokerManagerPluginTest extends AbstractPluginTest {
 
-    @Test
+    @Test  @Ignore
     public void testProperties(){
         Properties properties = productPlugin.getConfig().toProperties();
         assertNotNull(properties);

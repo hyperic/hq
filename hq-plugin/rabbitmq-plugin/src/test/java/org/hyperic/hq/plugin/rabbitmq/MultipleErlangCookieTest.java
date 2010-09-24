@@ -24,34 +24,28 @@
  *
  */
 package org.hyperic.hq.plugin.rabbitmq;
-
-import com.ericsson.otp.erlang.OtpAuthException;
-import com.ericsson.otp.erlang.OtpConnection;
-import com.ericsson.otp.erlang.OtpPeer;
-import com.ericsson.otp.erlang.OtpSelf;
-import org.springframework.util.Assert;
-
-import java.io.IOException;
+ 
 
 /**
- * ConnectionTest tests the underlying jinterface connection
+ * - ToDo
+ * Scenario: Many instances of (erlang + rabbit) nodes running on one vm,
+ * each instance will have its own cookie.
+ * <p/>
+ * Simulate the key SingleConnectionFactory created for the rest of the
+ * Spring config that is initialized with one node host name by the user
+ * in the UI (ConfigResponse).
+ * <p/> 
+ * So, for each node the Hyperic Agent auto-detects and the User configures to
+ * connect to, jinterface calls need the right cookie
+ * <p/>
+ * I am testing with this user's cookie (on the test machine) for node a/machine x
+ * while the user sets the host name for node b/machine y, in this case a and b
+ * do not share cookies (are not clustered)
  * @author Helena Edelson
  */
-public class ConnectionTest {
-
-    private static final String NODE = "rabbit@localhost";
-
-    public static void main(String[] args) throws IOException, OtpAuthException {
-        /** if the node's cookie is not locatable use this constructor with the cookie value */
-        //new OtpSelf("rabbit-monitor", cookieString);
-
-        OtpSelf self = new OtpSelf("rabbit-monitor");
-        OtpPeer peer = new OtpPeer(NODE);
-        OtpConnection conn = self.connect(peer);
-
-        Assert.notNull(conn);
-        Assert.state(conn.isAlive());
-        Assert.state(conn.isConnected());
-        Assert.isTrue(conn.getState().name().equalsIgnoreCase("RUNNABLE"), "Connection must be runnable.");
-    }
+public class MultipleErlangCookieTest {
+ 
+    public static void main(String[] args) {
+         
+    } 
 }

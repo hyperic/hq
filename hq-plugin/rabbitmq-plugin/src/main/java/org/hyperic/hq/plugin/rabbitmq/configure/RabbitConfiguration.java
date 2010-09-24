@@ -46,10 +46,13 @@ public class RabbitConfiguration {
     @Autowired
     private SingleConnectionFactory singleConnectionFactory;
 
-    @Bean
+    @Autowired
+    private RabbitBrokerAdmin rabbitBrokerAdmin;
+
+    /*@Bean
     public RabbitBrokerAdmin rabbitBrokerAdmin() {
         return new RabbitBrokerAdmin(singleConnectionFactory);
-    }
+    }*/
 
     @Bean
     public RabbitTemplate rabbitTemplate() { 
@@ -58,12 +61,12 @@ public class RabbitConfiguration {
 
     @Bean
     public ErlangTemplate erlangTemplate() {
-        return rabbitBrokerAdmin().getErlangTemplate();
+        return rabbitBrokerAdmin.getErlangTemplate();
     }
 
     @Bean
     public RabbitGateway rabbitGateway() {
-        return new RabbitBrokerGateway(rabbitBrokerAdmin());
+        return new RabbitBrokerGateway(rabbitBrokerAdmin);
     }
 
     @Bean

@@ -4,6 +4,7 @@ package org.hyperic.hq.plugin.rabbitmq.configure;
 import org.hyperic.hq.plugin.rabbitmq.core.*;
 import org.hyperic.hq.plugin.rabbitmq.populate.PojoHandler;
 import org.hyperic.hq.plugin.rabbitmq.volumetrics.RabbitScheduler;
+import org.hyperic.util.config.ConfigResponse;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
 import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
@@ -36,6 +37,8 @@ public class RabbitTestConfiguration {
 
     private String MARKET_DATA_ROUTING_KEY = "app.stock.quotes.nasdaq.*"; //STOCK_REQUEST_QUEUE_NAME;
 
+    private final String cookieLocation = System.getProperty("user.home");
+ 
     @Bean
     public SingleConnectionFactory singleConnectionFactory() {
         SingleConnectionFactory connectionFactory = new SingleConnectionFactory(hostname);
@@ -46,7 +49,20 @@ public class RabbitTestConfiguration {
 
     @Bean
     public RabbitBrokerAdmin rabbitBrokerAdmin() {
-        return new RabbitBrokerAdmin(singleConnectionFactory());
+        HypericBrokerAdmin rabbitBrokerAdmin = new HypericBrokerAdmin(singleConnectionFactory());
+
+        ConfigResponse conf = new ConfigResponse();
+        conf.setValue("host", hostname);
+        conf.setValue("username", username);
+        conf.setValue("password", password);
+        //todo set platform the way Hyperic does
+        
+        String nodeCookie = RabbitUtils.handleCookie(conf);
+        if (nodeCookie != null) { 
+            rabbitBrokerAdmin.setErlangCookie(nodeCookie);
+        }
+         
+        return rabbitBrokerAdmin;
     }
 
     @Bean

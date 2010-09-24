@@ -97,7 +97,7 @@ public class PopulateData {
         assertNotNull(channels);
         assertTrue(channels.size() > 0);
 
-        Thread.sleep(1000);
+        Thread.sleep(10000);
 
         List<String> users = rabbitGateway.getUsers();
         if (users.contains("foo")) {

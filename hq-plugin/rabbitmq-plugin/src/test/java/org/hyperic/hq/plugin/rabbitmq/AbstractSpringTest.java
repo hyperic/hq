@@ -49,7 +49,7 @@ import static org.junit.Assert.*;
  */
 @ContextConfiguration(loader = TestContextLoader.class)
 @RunWith(SpringJUnit4ClassRunner.class)
-@Ignore("Manual cookie value to connect to each node is required")
+//@Ignore("Manual cookie value to connect to each node is required")
 public abstract class AbstractSpringTest {
 
     protected final Log logger = LogFactory.getLog(this.getClass().getName());
