@@ -50,6 +50,7 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.common.DiagnosticsLogger;
 import org.hyperic.hq.common.NotFoundException;
+import org.hyperic.hq.ha.HAUtil;
 import org.hyperic.hq.hibernate.SessionManager;
 import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
 import org.hyperic.hq.measurement.server.session.Measurement;
@@ -116,6 +117,9 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
     }
     
     private String getReport(final boolean isVerbose) {
+        if (!HAUtil.isMasterNode()) {
+            return "Server must be the primary node in the HA configuration before this report is valid.";
+        }
         if ((now() - THRESHOLD) < started) {
             return "Server must be up for " + THRESHOLD / 1000 / 60 +
                    " minutes before this report is valid";
