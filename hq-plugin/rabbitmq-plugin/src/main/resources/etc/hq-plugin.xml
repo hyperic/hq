@@ -39,6 +39,11 @@
           to connect to the node and query information on Queues, Channels, Connections, Processes, Users, and Exchanges.
           </p>
           <p>
+          <h3>Erlang Cookie</h3>
+          Hyperic makes several attempts to locate the Erlang Cookie. If the Agent is unable to detect Queues, etc. please
+          first insure that the Erlang cookie is the correct value for the managed Node.
+          </p>
+          <p>
           <h3>Help Docs</h3>
           Coming soon: <a href="http://support.hyperic.com/display/EVO/Monitoring+RabbitMQ">Monitoring and Managing RabbitMQ</a>
           </p>
@@ -69,7 +74,7 @@
 
             <option name="password" type="secret" description="RabbitMQ Password"/>
 
-            <!--<option name="cookie" description="Path to Erlang cookie" optional="true"/>-->
+            <option name="node.cookie" description="Path to Node's Erlang cookie" optional="true"/>
 
             <option name="port" type="int" default="5672" description="RabbitMQ Port" optional="true"/>
 

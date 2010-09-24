@@ -28,11 +28,12 @@ package org.hyperic.hq.plugin.rabbitmq.configure;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
+import org.hyperic.util.config.ConfigResponse;
+import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
 import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.ApplicationContext; 
 import org.springframework.context.SmartLifecycle;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.AbstractApplicationContext;
@@ -57,47 +58,44 @@ public class ApplicationContextCreator implements SmartLifecycle {
      * This is only called by the Product plugin. This method is so that the caller knows nothing
      * about the ApplicationContext api iteself, since in the case we only have one call.
      * @return org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway
+     * @param conf
+     * @return
      */
-    public static RabbitGateway createGateway(GenericBeanDefinition beanDefinition) {
-        createApplicationContext(beanDefinition);
+    public static RabbitGateway createBeans(ConfigResponse conf) {
+        createApplicationContext(conf);
         return applicationContext.getBean(RabbitGateway.class);
     }
 
     /**
      * Returns the ApplicationContext.
-     * @param beanDefinition
+     * @param conf
      */
-    private static ApplicationContext createApplicationContext(GenericBeanDefinition beanDefinition) {
-        return applicationContext == null ? applicationContext = doCreateApplicationContext(beanDefinition) : applicationContext;
+    private static ApplicationContext createApplicationContext(ConfigResponse conf) {
+        return applicationContext == null ? applicationContext = doCreateApplicationContext(conf) : applicationContext;
     }
 
     /**
      * Returns the default ApplicationContext type.
-     * @param beanDefinition
+     * @param conf
      * @return org.springframework.context.ApplicationContext
      */
-    private static AbstractApplicationContext doCreateApplicationContext(GenericBeanDefinition beanDefinition) {
+    private static AbstractApplicationContext doCreateApplicationContext(ConfigResponse conf) {
         AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-        DynamicSpringBeanConfigurer.registerBean(beanDefinition, (DefaultListableBeanFactory) ctx.getBeanFactory());
-        Assert.notNull(ctx.getBean(SingleConnectionFactory.class), "SingleConnectionFactory must not be null.");
 
+        GenericBeanDefinition connectionFactoryBean = ConnectionFactoryBeanDefinitionBuilder.build(conf);
+        DynamicSpringBeanConfigurer.registerBean(connectionFactoryBean, (DefaultListableBeanFactory) ctx.getBeanFactory());
+        SingleConnectionFactory cf = ctx.getBean(SingleConnectionFactory.class);
+        Assert.notNull(cf, "SingleConnectionFactory must not be null.");
+
+        GenericBeanDefinition adminBean = BrokerAdminBeanDefinitionBuilder.build(conf, connectionFactoryBean);
+        DynamicSpringBeanConfigurer.registerBean("rabbitBrokerAdmin", adminBean, (DefaultListableBeanFactory) ctx.getBeanFactory());
+        RabbitBrokerAdmin rabbitBrokerAdmin = ctx.getBean(RabbitBrokerAdmin.class);
+        Assert.notNull(ctx.getBean("rabbitBrokerAdmin"), "rabbitBrokerAdmin must not be null.");
+        
         ctx.register(RabbitConfiguration.class);
         ctx.refresh();
         return ctx;
     }
-
-    /**
-     * Programmatically pre-register ConnectionFactory in Spring before all dependent beans.
-     * @see RabbitConfiguration
-     * @param beanDefinition
-     * @param applicationContext
-     */
-    private static void postProcessAfterCreation(GenericBeanDefinition beanDefinition, ConfigurableApplicationContext applicationContext) {
-        if (beanDefinition == null) return;
-
-        DynamicSpringBeanConfigurer.registerBean(beanDefinition, (DefaultListableBeanFactory) applicationContext.getBeanFactory());
-        Assert.notNull(applicationContext.getBean(SingleConnectionFactory.class), "SingleConnectionFactory must not be null.");
-     }
 
     /** Implement  of SmartLifecycle */
     public boolean isAutoStartup() {

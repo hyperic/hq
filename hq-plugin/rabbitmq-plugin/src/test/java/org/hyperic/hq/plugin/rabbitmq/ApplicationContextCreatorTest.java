@@ -25,33 +25,25 @@
  */
 package org.hyperic.hq.plugin.rabbitmq;
 
-import com.ericsson.otp.erlang.OtpAuthException;
-import com.ericsson.otp.erlang.OtpConnection;
-import com.ericsson.otp.erlang.OtpPeer;
-import com.ericsson.otp.erlang.OtpSelf;
-import org.springframework.util.Assert;
-
-import java.io.IOException;
+import org.hyperic.hq.plugin.rabbitmq.configure.ApplicationContextCreator;
+import org.hyperic.util.config.ConfigResponse;
+import org.junit.Test;
 
 /**
- * ConnectionTest tests the underlying jinterface connection
+ * ApplicationContextCreatorTest
  * @author Helena Edelson
  */
-public class ConnectionTest {
+public class ApplicationContextCreatorTest {
 
-    private static final String NODE = "rabbit@localhost";
+    @Test
+    public void create() {
+        ConfigResponse conf = new ConfigResponse();
+        conf.setValue("host", "localhost");
+        conf.setValue("username", "guest");
+        conf.setValue("password", "guest");
 
-    public static void main(String[] args) throws IOException, OtpAuthException {
-        /** if the node's cookie is not locatable use this constructor with the cookie value */
-        //new OtpSelf("rabbit-monitor", cookieString);
 
-        OtpSelf self = new OtpSelf("rabbit-monitor");
-        OtpPeer peer = new OtpPeer(NODE);
-        OtpConnection conn = self.connect(peer);
+        ApplicationContextCreator.createBeans(conf);
 
-        Assert.notNull(conn);
-        Assert.state(conn.isAlive());
-        Assert.state(conn.isConnected());
-        Assert.isTrue(conn.getState().name().equalsIgnoreCase("RUNNABLE"), "Connection must be runnable.");
     }
 }
