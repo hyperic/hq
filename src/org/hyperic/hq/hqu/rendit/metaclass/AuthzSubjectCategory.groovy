@@ -24,17 +24,6 @@ class AuthzSubjectCategory {
     static boolean isSuperUser(AuthzSubject subject) {
         PermissionManagerFactory.getInstance().hasAdminPermission(subject.id)
     }
-    
-    /**
-     * Check if the AuthzSubject has the ability to run the specified operation
-     */
-    static boolean hasOperation(AuthzSubject subject, String opName) {
-        Operation op = operationDao.getByName(opName)
-        if (op == null) {
-            return false
-        }
-        return operationDao.userHasOperation(subject, op)
-    }
 
     /**
      * Get a user preference by key
