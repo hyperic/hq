@@ -82,6 +82,8 @@ public interface AuthzSubjectManager {
         throws PermissionException;
 
     public AuthzSubject findSubjectByName(String name);
+    
+    public String findSubjectName(Integer id);
 
     public PageList<AuthzSubject> findMatchingName(String name, PageControl pc);
 

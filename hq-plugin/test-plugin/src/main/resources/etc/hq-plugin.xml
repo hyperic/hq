@@ -46,8 +46,15 @@
 	<platform name="PluginTestPlatform"/>
 	
 	<server name="PluginTestServer" version="1.0" platforms="PluginTestPlatform">
+	<config type="control">
+      <option name="service_name"
+              default="FakeService"
+              description="Fake Service Name"/>
+    </config>
 	 <plugin type="livedata"
             class="org.hyperic.hq.plugin.test.TestLiveDataPlugin"/>
+      <plugin type="control" class="org.hyperic.hq.plugin.test.TestControlPlugin"/>
+      <actions include="stop"/>
 	</server>
 
 
