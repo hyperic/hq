@@ -195,7 +195,7 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
                                     Map<Integer, MetricValue> values,
                                     Map<Integer, MetricValue> avails,
                                     Map<Resource, Platform> childrenToPlatform, boolean isVerbose) {
-        final Map<Platform, List<String>> platHierarchyNotReporting = new HashMap<Platform, List<String>>();
+        final Map<Platform, Object> platHierarchyNotReporting = new HashMap<Platform, Object>();
         for (final List<Measurement> mList : measurementLists) {
             for (Measurement m : mList) {
                 if (m != null && !m.getTemplate().isAvailability() &&
@@ -204,18 +204,24 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
                     if (platform == null) {
                         continue;
                     }
-                    List<String> tmp;
+                    Object tmp;
                     if (null == (tmp = platHierarchyNotReporting.get(platform))) {
-                        tmp = new ArrayList<String>();
+                        if (isVerbose) {
+                            tmp = new ArrayList<String>();
+                        } else {
+                            tmp = new Counter();
+                        }
                         platHierarchyNotReporting.put(platform, tmp);
                     }
                     if (isVerbose) {
-                        tmp.add(new StringBuilder(128).append("\nmid=").append(m.getId()).append(
+                        List<String> list = (List<String>) tmp;
+                        list.add(new StringBuilder(128).append("\nmid=").append(m.getId()).append(
                             ", name=").append(m.getTemplate().getName()).append(", resid=").append(
                             m.getResource().getId()).append(", resname=").append(
                             m.getResource().getName()).toString());
                     } else {
-                        tmp.add(m.toString());
+                        Counter count = (Counter) tmp;
+                        count.value++;
                     }
                 }
             }
@@ -224,16 +230,20 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
         rtn.append("\nEnabled metrics not reported in for ").append(THRESHOLD / 1000 / 60).append(
             " minutes (by platform hierarchy)\n");
         rtn.append("------------------------------------------------------------------------\n");
-        for (final Entry<Platform, List<String>> entry : platHierarchyNotReporting.entrySet()) {
+        for (final Entry<Platform, Object> entry : platHierarchyNotReporting.entrySet()) {
             final Platform platform = entry.getKey();
-            final List<String> children = entry.getValue();
-            rtn.append("\nfqdn=").append(platform.getFqdn()).append(" (").append(children.size())
-                .append(" not collecting)");
+            rtn.append("\nfqdn=").append(platform.getFqdn()).append(" (");
             if (isVerbose) {
-                rtn.append(":");
+                final List<String> children = (List<String>) entry.getValue();
+                rtn.append(children.size());
+                rtn.append(" not collecting):");
                 for (String xx : children) {
                     rtn.append(xx);
                 }
+            } else {
+                final Counter count = (Counter) entry.getValue();
+                rtn.append(count.value);
+                rtn.append(" not collecting)");
             }
         }
         return rtn.append("\n");
@@ -270,6 +280,9 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
                 final Platform platform = platformManager.findPlatformById(edge.getFrom()
                     .getInstanceId());
                 final Resource child = edge.getTo();
+                if (child == null || child.isInAsyncDeleteState()) {
+                    continue;
+                }
                 children.add(child);
                 rtn.put(child, platform);
             } catch (PlatformNotFoundException e) {
@@ -337,6 +350,10 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
             }
         }
         return rtn;
+    }
+    
+    private class Counter {
+        public long value = 0;
     }
 
 }
