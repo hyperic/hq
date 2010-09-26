@@ -11485,7 +11485,18 @@ has already been defined.
 	    </statement>
 	</schema-directSQL>
  </schemaSpec>
-	
+
+ <!-- Adjusts the platform fqdn length to conform to the hostname RFC length and aiq platform, server and service name length to match resource name length -->
+ <schemaSpec version="3.199"> 
+    <schema-alterColumn table="EAM_PLATFORM" column="fqdn"
+	       	            precision="255" columnType="VARCHAR2" nullable="NOT NULL" />
+    <schema-alterColumn table="EAM_AIQ_PLATFORM" column="name"
+	       	            precision="500" columnType="VARCHAR2" nullable="NOT NULL" />
+    <schema-alterColumn table="EAM_AIQ_SERVER" column="name"
+	       	            precision="500" columnType="VARCHAR2" nullable="NOT NULL" />
+    <schema-alterColumn table="EAM_AIQ_SERVICE" column="name"
+	       	            precision="500" columnType="VARCHAR2" nullable="NOT NULL" />
+ </schemaSpec>
 </dbupgrade>
 </target>
 </project>
