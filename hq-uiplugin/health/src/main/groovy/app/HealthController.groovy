@@ -298,7 +298,7 @@ class HealthController
         def diagName = params.getOne('diag')
         for (d in diagnostics) {
             if (d.shortName == diagName) {
-                return [diagData: '<pre>' + d.status + '</pre>']
+                return [diagData: '<pre>' + d.shortStatus + '</pre>']
             }
         }
     }

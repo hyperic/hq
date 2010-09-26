@@ -1,15 +1,15 @@
 /*
- * NOTE: This copyright does *not* cover user programs that use HQ
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2010], Hyperic, Inc.
- * This file is part of HQ.
+ * Copyright (C) [2004-2010], VMware, Inc.
+ * This file is part of Hyperic.
  *
- * HQ is free software; you can redistribute it and/or modify
+ * Hyperic is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
  * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -50,6 +50,7 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.common.DiagnosticsLogger;
 import org.hyperic.hq.common.NotFoundException;
+import org.hyperic.hq.ha.HAUtil;
 import org.hyperic.hq.hibernate.SessionManager;
 import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
 import org.hyperic.hq.measurement.server.session.Measurement;
@@ -58,6 +59,7 @@ import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -107,6 +109,17 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
     }
 
     public String getStatus() {
+        return getReport(true);
+    }
+    
+    public String getShortStatus() {
+        return getReport(false);
+    }
+    
+    private String getReport(final boolean isVerbose) {
+        if (!HAUtil.isMasterNode()) {
+            return "Server must be the primary node in the HA configuration before this report is valid.";
+        }
         if ((now() - THRESHOLD) < started) {
             return "Server must be up for " + THRESHOLD / 1000 / 60 +
                    " minutes before this report is valid";
@@ -115,7 +128,7 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
         try {
             SessionManager.runInSession(new SessionRunner() {
                 public void run() throws Exception {
-                    setStatusBuf(rtn);
+                    setStatusBuf(rtn, isVerbose);
                 }
 
                 public String getName() {
@@ -128,24 +141,61 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
         return rtn.toString();
     }
 
-    public void setStatusBuf(StringBuilder buf) {
+    private void setStatusBuf(StringBuilder buf, boolean isVerbose) {
+        StopWatch watch = new StopWatch();
+        
+        watch.markTimeBegin("getAllPlatforms");
         final Collection<Platform> platforms = getAllPlatforms();
+        watch.markTimeEnd("getAllPlatforms");
+
+        watch.markTimeBegin("getResources");
         final Collection<Resource> resources = getResources(platforms);
+        watch.markTimeEnd("getResources");
+
+        watch.markTimeBegin("getAvailMeasurements");
         final Map<Integer, List<Measurement>> measCache = measurementManager
             .getAvailMeasurements(resources);
+        watch.markTimeEnd("getAvailMeasurements");
+                
+        watch.markTimeBegin("getLastAvail");
         final Map<Integer, MetricValue> avails = availabilityManager.getLastAvail(resources,
             measCache);
+        watch.markTimeEnd("getLastAvail");
+                
+        watch.markTimeBegin("getChildren");
         final List<Resource> children = new ArrayList<Resource>();
         final Map<Resource,Platform> childrenToPlatform = getChildren(platforms, measCache, avails, children);
+        watch.markTimeEnd("getChildren");
+        
+        watch.markTimeBegin("getEnabledMeasurements");
         final Collection<List<Measurement>> measurements = measurementManager.getEnabledMeasurements(children)
             .values();
+        watch.markTimeEnd("getEnabledMeasurements");
+                
+        watch.markTimeBegin("getLastMetricValues");
         final Map<Integer,MetricValue> values = getLastMetricValues(measurements);
-        buf.append(getStatus(measurements, values, avails, childrenToPlatform));
+        watch.markTimeEnd("getLastMetricValues");
+        
+        watch.markTimeBegin("getStatus");
+        buf.append(getStatus(measurements, values, avails, childrenToPlatform, isVerbose));
+        watch.markTimeEnd("getStatus");
+        
+        if (log.isDebugEnabled()) {
+            log.debug("getStatus: " + watch
+                        + ", { Size: [measCache=" + measCache.size()
+                        + "] [lastAvails=" + avails.size()
+                        + "] [childrenToPlatform=" + childrenToPlatform.size()
+                        + "] [enabledMeasurements=" + measurements.size()
+                        + "] [lastMetricValues=" + values.size()
+                        + "] }");
+        }
     }
 
-    private StringBuilder getStatus(Collection<List<Measurement>> measurementLists, Map<Integer,MetricValue> values,
-                                    Map<Integer,MetricValue> avails, Map<Resource, Platform> childrenToPlatform) {
-        final Map<Platform, List<String>> platHierarchyNotReporting = new HashMap<Platform, List<String>>();
+    private StringBuilder getStatus(Collection<List<Measurement>> measurementLists,
+                                    Map<Integer, MetricValue> values,
+                                    Map<Integer, MetricValue> avails,
+                                    Map<Resource, Platform> childrenToPlatform, boolean isVerbose) {
+        final Map<Platform, Object> platHierarchyNotReporting = new HashMap<Platform, Object>();
         for (final List<Measurement> mList : measurementLists) {
             for (Measurement m : mList) {
                 if (m != null && !m.getTemplate().isAvailability() &&
@@ -154,15 +204,25 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
                     if (platform == null) {
                         continue;
                     }
-                    List<String> tmp;
+                    Object tmp;
                     if (null == (tmp = platHierarchyNotReporting.get(platform))) {
-                        tmp = new ArrayList<String>();
+                        if (isVerbose) {
+                            tmp = new ArrayList<String>();
+                        } else {
+                            tmp = new Counter();
+                        }
                         platHierarchyNotReporting.put(platform, tmp);
                     }
-                    tmp.add(new StringBuilder(128).append("\nmid=").append(m.getId()).append(
-                        ", name=").append(m.getTemplate().getName()).append(", resid=").append(
-                        m.getResource().getId()).append(", resname=").append(
-                        m.getResource().getName()).toString());
+                    if (isVerbose) {
+                        List<String> list = (List<String>) tmp;
+                        list.add(new StringBuilder(128).append("\nmid=").append(m.getId()).append(
+                            ", name=").append(m.getTemplate().getName()).append(", resid=").append(
+                            m.getResource().getId()).append(", resname=").append(
+                            m.getResource().getName()).toString());
+                    } else {
+                        Counter count = (Counter) tmp;
+                        count.value++;
+                    }
                 }
             }
         }
@@ -170,13 +230,20 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
         rtn.append("\nEnabled metrics not reported in for ").append(THRESHOLD / 1000 / 60).append(
             " minutes (by platform hierarchy)\n");
         rtn.append("------------------------------------------------------------------------\n");
-        for (final Entry<Platform, List<String>> entry : platHierarchyNotReporting.entrySet()) {
+        for (final Entry<Platform, Object> entry : platHierarchyNotReporting.entrySet()) {
             final Platform platform = entry.getKey();
-            final List<String> children = entry.getValue();
-            rtn.append("\nfqdn=").append(platform.getFqdn()).append(" (").append(children.size())
-                .append(" not collecting):");
-            for (String xx : children) {
-                rtn.append(xx);
+            rtn.append("\nfqdn=").append(platform.getFqdn()).append(" (");
+            if (isVerbose) {
+                final List<String> children = (List<String>) entry.getValue();
+                rtn.append(children.size());
+                rtn.append(" not collecting):");
+                for (String xx : children) {
+                    rtn.append(xx);
+                }
+            } else {
+                final Counter count = (Counter) entry.getValue();
+                rtn.append(count.value);
+                rtn.append(" not collecting)");
             }
         }
         return rtn.append("\n");
@@ -213,6 +280,9 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
                 final Platform platform = platformManager.findPlatformById(edge.getFrom()
                     .getInstanceId());
                 final Resource child = edge.getTo();
+                if (child == null || child.isInAsyncDeleteState()) {
+                    continue;
+                }
                 children.add(child);
                 rtn.put(child, platform);
             } catch (PlatformNotFoundException e) {
@@ -280,6 +350,10 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
             }
         }
         return rtn;
+    }
+    
+    private class Counter {
+        public long value = 0;
     }
 
 }

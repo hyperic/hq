@@ -43,7 +43,7 @@
     </version>
 
     <property name="name" type="string">
-      <column name="NAME" not-null="true" length="200" index="AIQ_SERVICE_NAME_IDX"/>
+      <column name="NAME" not-null="true" length="500" index="AIQ_SERVICE_NAME_IDX"/>
     </property>
 
     <property name="description" type="string">
