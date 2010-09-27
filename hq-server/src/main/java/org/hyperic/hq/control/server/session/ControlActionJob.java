@@ -24,13 +24,15 @@
  */
 
 package org.hyperic.hq.control.server.session;
- 
+
 import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
+import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.product.PluginException;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -39,40 +41,40 @@ import org.quartz.Trigger;
 
 /**
  * A quartz job class for handling control actions on a single entity
- *
+ * 
  */
-public class ControlActionJob extends ControlJob {
+public class ControlActionJob
+    extends ControlJob {
 
     protected Log log = LogFactory.getLog(ControlActionJob.class.getName());
 
-    public void executeInSession(JobExecutionContext context)
-    {
-        JobDataMap dataMap = context.getJobDetail().getJobDataMap();
-
-        Integer idVal = new Integer(dataMap.getString(PROP_ID));
-        Integer type = new Integer(dataMap.getString(PROP_TYPE));
-        AppdefEntityID id = new AppdefEntityID(type.intValue(), idVal);
-        Integer subjectId = new Integer(dataMap.getString(PROP_SUBJECT));
-        AuthzSubject subject = null;
+    public void execute(JobExecutionContext context) throws JobExecutionException {
         try {
-            subject = getSubject(subjectId);
-        } catch (JobExecutionException e1) {
-            log.error(e1.getMessage(), e1);
-        }
-        String action = dataMap.getString(PROP_ACTION);
-        String args = dataMap.getString(PROP_ARGS);
+            JobDataMap dataMap = context.getJobDetail().getJobDataMap();
 
-        Boolean scheduled = Boolean.valueOf(dataMap.getString(PROP_SCHEDULED));
-        String description = dataMap.getString(PROP_DESCRIPTION);
+            Integer idVal = new Integer(dataMap.getString(PROP_ID));
+            Integer type = new Integer(dataMap.getString(PROP_TYPE));
+            AppdefEntityID id = new AppdefEntityID(type.intValue(), idVal);
+            Integer subjectId = new Integer(dataMap.getString(PROP_SUBJECT));
 
-        Trigger trigger = context.getTrigger();
-        Date dateScheduled = trigger.getPreviousFireTime();
+            String action = dataMap.getString(PROP_ACTION);
+            String args = dataMap.getString(PROP_ARGS);
 
-        try {
-            doAgentControlCommand(id, null, null, subject, dateScheduled,
-                                  scheduled, description, action, args);
-        } catch(PluginException e) {
-            log.error(e.getMessage(), e);
+            Boolean scheduled = Boolean.valueOf(dataMap.getString(PROP_SCHEDULED));
+            String description = dataMap.getString(PROP_DESCRIPTION);
+
+            Trigger trigger = context.getTrigger();
+            Date dateScheduled = trigger.getPreviousFireTime();
+            final String subjectName = Bootstrap.getBean(AuthzSubjectManager.class)
+                .findSubjectName(subjectId);
+            try {
+                Bootstrap.getBean(ControlActionExecutor.class).executeControlAction(id,
+                    subjectName, dateScheduled, scheduled, description, action, args);
+            } catch (PluginException e) {
+                log.error(e.getMessage(), e);
+            }
+        } catch (Exception e) {
+            throw new SystemException(e);
         }
     }
 }

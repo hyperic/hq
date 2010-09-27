@@ -25,8 +25,6 @@
  */
 package org.hyperic.hq.control.shared;
 
-import java.util.Date;
-
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -119,31 +117,16 @@ public interface ControlScheduleManager {
     public void removeScheduledJobs(AuthzSubject subject, AppdefEntityID id) throws ScheduledJobRemoveException;
 
     /**
-     * Execute a single action on an appdef entity
-     */
-    public void doSingleAction(AppdefEntityID id, AuthzSubject subject, String action, String args, int[] order)
-        throws PluginException;
-
-    /**
      * Schedule an action on an appdef entity
      */
-    public void doScheduledAction(AppdefEntityID id, AuthzSubject subject, String action, ScheduleValue schedule,
+    public void scheduleAction(AppdefEntityID id, AuthzSubject subject, String action, ScheduleValue schedule,
                                   int[] order) throws PluginException, SchedulerException;
-    
-    Integer doAgentControlCommand(AppdefEntityID id,
-                                  AppdefEntityID gid,
-                                  Integer batchId,
-                                  AuthzSubject subject,
-                                  Date dateScheduled,
-                                  Boolean scheduled,
-                                  String description,
-                                  String action,
-                                  String args) throws PluginException;
 
     /**
      * Create a control history entry
+     * @return The ID of the created history
      */
-    public ControlHistory createHistory(AppdefEntityID id, Integer groupId, Integer batchId, String subjectName,
+    public Integer createHistory(AppdefEntityID id, Integer groupId, Integer batchId, String subjectName,
                                         String action, String args, Boolean scheduled, long startTime, long stopTime,
                                         long scheduleTime, String status, String description, String errorMessage);
 

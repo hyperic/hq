@@ -246,6 +246,8 @@ public interface ResourceGroupManager
      * Temporary method to convert a ResourceGroup into an AppdefGroupValue
      */
     public AppdefGroupValue getGroupConvert(AuthzSubject subj, ResourceGroup g);
+    
+    public AppdefGroupValue getGroupConvert(AuthzSubject subj, Integer groupId);
 
     /**
      * Get a list of {@link ResourceGroup}s which are compatible with the

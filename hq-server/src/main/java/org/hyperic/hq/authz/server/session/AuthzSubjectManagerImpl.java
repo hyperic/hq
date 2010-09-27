@@ -282,12 +282,14 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
         return findSubjectById(id);
     }
 
-    /** 
-     * 
-     */
     @Transactional(readOnly = true)
     public AuthzSubject findSubjectById(Integer id) {
         return authzSubjectDAO.findById(id);
+    }
+    
+    @Transactional(readOnly = true)
+    public String findSubjectName(Integer id) {
+       return findSubjectById(id).getName();
     }
 
     /** 

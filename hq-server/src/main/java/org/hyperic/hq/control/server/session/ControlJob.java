@@ -25,47 +25,19 @@
 
 package org.hyperic.hq.control.server.session;
 
-import java.util.Date;
+import org.quartz.Job;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.control.shared.ControlScheduleManager;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.scheduler.server.session.BaseJob;
+public abstract class ControlJob implements Job {
 
-public abstract class ControlJob extends BaseJob {
-
-    // The time to wait inbetween checking if a control action has
-    // finished.  This is used to synchronize control calls to the
-    // agent.
-    protected static final int JOB_WAIT_INTERVAL = 500;
-    
     // Configuration paramaters
     public static final String PROP_ACTION         = "action";
     public static final String PROP_ARGS           = "args";
+    public static final String PROP_ID             = "id";
+    public static final String PROP_TYPE           = "type";
+    public static final String PROP_SUBJECT        = "subject";
+    public static final String PROP_SCHEDULED      = "scheduled";
+    public static final String PROP_SCHEDULESTRING = "schedulestring";
+    public static final String PROP_ORDER          = "order";
+    public static final String PROP_DESCRIPTION    = "description";
 
-    protected Log log = LogFactory.getLog(ControlJob.class);
-
-    /**
-     * Do a control command on a single appdef entity
-     *
-     * @return The job id
-     */
-    protected Integer doAgentControlCommand(AppdefEntityID id,
-                                            AppdefEntityID gid,
-                                            Integer batchId,
-                                            AuthzSubject subject,
-                                            Date dateScheduled,
-                                            Boolean scheduled,
-                                            String description,
-                                            String action,
-                                            String args)
-        throws PluginException
-    {
-        return Bootstrap.getBean(ControlScheduleManager.class).doAgentControlCommand(id, gid, batchId,
-            subject, dateScheduled, scheduled, description,action, args);
-    }
 }
