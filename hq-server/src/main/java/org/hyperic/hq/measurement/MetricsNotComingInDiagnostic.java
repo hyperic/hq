@@ -63,11 +63,11 @@ import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component("metricsNotComingInDiagnostic")
 public class MetricsNotComingInDiagnostic implements DiagnosticObject {
 
     private final Log log = LogFactory.getLog(MetricsNotComingInDiagnostic.class);
-    private final long started = now();
+    private long started = now();
     // 60 minutes
     private static final long THRESHOLD = 1000 * 60 * 60;
     private DiagnosticsLogger diagnosticsLogger;
@@ -114,6 +114,10 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
     
     public String getShortStatus() {
         return getReport(false);
+    }
+    
+    public void reset() {
+        this.started = now();
     }
     
     private String getReport(final boolean isVerbose) {
