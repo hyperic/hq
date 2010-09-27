@@ -95,7 +95,7 @@ public class ControlActionResultsCollectorTest
         ApplicationException {
         Integer history = addControlHistory(server.getEntityId(),
             ControlConstants.STATUS_INPROGRESS, "Some message");
-        controlActionResultsCollector.waitForResult(history, 5000);
+        controlActionResultsCollector.waitForResult(history, 100);
     }
 
     @Test
@@ -209,7 +209,7 @@ public class ControlActionResultsCollectorTest
         jobIds.add(history2);
         jobIds.add(history3);
         controlActionResultsCollector.waitForGroupResults(AppdefEntityID.newGroupID(789), jobIds,
-            10000);
+            100);
     }
 
 }
