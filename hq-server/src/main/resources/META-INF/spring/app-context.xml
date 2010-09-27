@@ -221,6 +221,9 @@
 	</util:list>
 	
 	<task:scheduler id="scheduler" />
+	
+	<!--  Executor that ControlManager uses to run tasks that wait for control action results -->
+	<task:executor id="controlExecutor" pool-size="1-5" queue-capacity="500" rejection-policy="CALLER_RUNS"/>
 
 	<bean class="org.hyperic.hq.application.Scheduler">
 		<constructor-arg value="10" />

@@ -124,7 +124,7 @@ public class ControlBossImpl implements ControlBoss {
         } else {
             AuthzSubject subject = sessionManager.getSubject(sessionId);
 
-            controlManager.doAction(subject, id, action, schedule);
+            controlManager.scheduleAction(subject, id, action, schedule);
         }
     }
 
@@ -139,7 +139,7 @@ public class ControlBossImpl implements ControlBoss {
         GroupNotCompatibleException, ApplicationException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
 
-        controlManager.doGroupAction(subject, groupEnt, action, orderSpec, schedule);
+        controlManager.scheduleGroupAction(subject, groupEnt, action, orderSpec, schedule);
     }
 
     /**
