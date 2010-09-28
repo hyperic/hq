@@ -55,7 +55,7 @@ import static org.junit.Assert.*;
  */
 @ContextConfiguration("classpath:/etc/rabbit-test-context.xml")
 @RunWith(SpringJUnit4ClassRunner.class)
-@Ignore("Until I setup a rabbit server for QA")
+@Ignore("Need to mock the connection for automation")
 public class RabbitServerDetectorTest extends RabbitServerDetector {
 
     protected final Log logger = LogFactory.getLog(this.getClass().getName());

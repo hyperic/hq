@@ -116,7 +116,6 @@ public class RabbitVersionDetector {
                     Pattern p = Pattern.compile("\"RabbitMQ\",\\s*\"(\\d+\\.\\d+(?:\\.\\d+)?)\"");
                     Matcher m = p.matcher(input);
                     version = m.find() ? m.group(1) : null;
-                    logger.debug("\n\ninferVersionFromRabbitmqctl.version=" + version);
                 }
             }
 

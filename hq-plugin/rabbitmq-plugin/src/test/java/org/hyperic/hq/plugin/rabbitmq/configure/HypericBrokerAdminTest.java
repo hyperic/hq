@@ -23,51 +23,32 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq.core;
+package org.hyperic.hq.plugin.rabbitmq.configure;
 
-import org.springframework.amqp.core.AmqpAdmin;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.Exchange;
-import org.springframework.amqp.core.Queue;
-
+import org.hyperic.hq.plugin.rabbitmq.AbstractSpringTest;
+import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
+import org.hyperic.hq.plugin.rabbitmq.core.HypericBrokerAdmin;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitUtils;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
+import static org.junit.Assert.*;
 /**
- * AmqpBrokerGateway will provide functionality for
- * non-rabbit AMQP implementations. This can be
- * built-out after the first release.
- *
+ * HypericBrokerAdminTest
  * @author Helena Edelson
  */
-public class AmqpBrokerGateway implements AmqpAdmin {
+@Ignore("Need to mock the connection for automation")
+public class HypericBrokerAdminTest extends AbstractSpringTest {
 
-    public void declareExchange(Exchange exchange) {
+    @Test
+    public void testHypericAdmin() { 
+        String value = RabbitUtils.configureCookie(serverConfig);
+        assertNotNull(value);
 
-    }
-
-    public void deleteExchange(String exchangeName) {
-
-    }
-
-    public Queue declareQueue() {
-        return null;
-    }
-
-    public void declareQueue(Queue queue) {
-
-    }
-
-    public void deleteQueue(String queueName) {
-
-    }
-
-    public void deleteQueue(String queueName, boolean unused, boolean empty) {
-
-    }
-
-    public void purgeQueue(String queueName, boolean noWait) {
-
-    }
-
-    public void declareBinding(Binding binding) {
-         
+        HypericBrokerAdmin admin = new HypericBrokerAdmin(singleConnectionFactory, value);
+        assertNotNull(admin.getQueues());
+ 
+        RabbitBrokerAdmin rba = new RabbitBrokerAdmin(singleConnectionFactory);
+        assertNotNull(rba.getQueues());
     }
 }

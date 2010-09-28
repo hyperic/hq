@@ -4,6 +4,7 @@ package org.hyperic.hq.plugin.rabbitmq.configure;
 import org.hyperic.hq.plugin.rabbitmq.core.*;
 import org.hyperic.hq.plugin.rabbitmq.populate.PojoHandler;
 import org.hyperic.hq.plugin.rabbitmq.volumetrics.RabbitScheduler;
+import org.hyperic.util.config.ConfigResponse;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
 import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
@@ -22,6 +23,9 @@ import org.springframework.erlang.core.ErlangTemplate;
 @ImportResource("classpath:/org/hyperic/hq/plugin/rabbitmq/*-context.xml")
 public class RabbitTestConfiguration {
 
+    /** Mock: Sigar OperatingSystem.getInstance().getName();*/
+    private @Value("${platform.type}") String platformType;
+
     private @Value("${hostname}") String hostname;
 
     private @Value("${username}") String username;
@@ -34,7 +38,18 @@ public class RabbitTestConfiguration {
 
     private String STOCK_RESPONSE_QUEUE_NAME = "app.stock.response";
 
-    private String MARKET_DATA_ROUTING_KEY = "app.stock.quotes.nasdaq.*"; //STOCK_REQUEST_QUEUE_NAME;
+    private String MARKET_DATA_ROUTING_KEY = "app.stock.quotes.nasdaq.*"; 
+
+    @Bean
+    public ConfigResponse serverConfig() {
+        ConfigResponse conf = new ConfigResponse();
+        conf.setValue(DetectorConstants.HOST, hostname);
+        conf.setValue(DetectorConstants.USERNAME, username);
+        conf.setValue(DetectorConstants.PASSWORD, password);
+        conf.setValue(DetectorConstants.PLATFORM_TYPE, platformType);
+        
+        return conf;
+    }
 
     @Bean
     public SingleConnectionFactory singleConnectionFactory() {
@@ -46,7 +61,8 @@ public class RabbitTestConfiguration {
 
     @Bean
     public RabbitBrokerAdmin rabbitBrokerAdmin() {
-        return new RabbitBrokerAdmin(singleConnectionFactory());
+        String value = RabbitUtils.configureCookie(serverConfig());
+        return new HypericBrokerAdmin(singleConnectionFactory(),value);
     }
 
     @Bean

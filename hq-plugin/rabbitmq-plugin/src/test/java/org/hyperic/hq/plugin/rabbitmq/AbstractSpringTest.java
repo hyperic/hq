@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.configure.TestContextLoader;
 import org.hyperic.hq.plugin.rabbitmq.core.ErlangGateway;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
+import org.hyperic.util.config.ConfigResponse;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -38,6 +39,7 @@ import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
 import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.erlang.core.ErlangTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -49,7 +51,7 @@ import static org.junit.Assert.*;
  */
 @ContextConfiguration(loader = TestContextLoader.class)
 @RunWith(SpringJUnit4ClassRunner.class)
-@Ignore("Manual cookie value to connect to each node is required")
+@Ignore("Need to mock the connection for automation")
 public abstract class AbstractSpringTest {
 
     protected final Log logger = LogFactory.getLog(this.getClass().getName());
@@ -69,6 +71,12 @@ public abstract class AbstractSpringTest {
     @Autowired
     protected ErlangGateway erlangGateway;
 
+    @Autowired
+    protected ConfigResponse serverConfig;
+
+    @Autowired
+    protected ErlangTemplate erlangTemplate;
+    
     @Before
     public void before() {
         assertNotNull("singleConnectionFactory should not be null", singleConnectionFactory);
@@ -76,7 +84,7 @@ public abstract class AbstractSpringTest {
         assertNotNull("rabbitTemplate must not be null", rabbitTemplate);
         assertNotNull("rabbitGateway should not be null", rabbitGateway);
         assertNotNull("erlangGateway should not be null", erlangGateway);
-        assertNotNull(rabbitBrokerAdmin.getStatus());
+        //assertNotNull(rabbitBrokerAdmin.getStatus());
     }
 
     @AfterClass
