@@ -23,35 +23,32 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq;
+package org.hyperic.hq.plugin.rabbitmq.configure;
 
-import com.ericsson.otp.erlang.OtpAuthException;
-import com.ericsson.otp.erlang.OtpConnection;
-import com.ericsson.otp.erlang.OtpPeer;
-import com.ericsson.otp.erlang.OtpSelf;
-import org.springframework.util.Assert;
-
-import java.io.IOException;
-
+import org.hyperic.hq.plugin.rabbitmq.AbstractSpringTest;
+import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
+import org.hyperic.hq.plugin.rabbitmq.core.HypericBrokerAdmin;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitUtils;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
+import static org.junit.Assert.*;
 /**
- * ConnectionTest tests the underlying jinterface connection
+ * HypericBrokerAdminTest
  * @author Helena Edelson
  */
-public class ConnectionTest {
+@Ignore("Need to mock the connection for automation")
+public class HypericBrokerAdminTest extends AbstractSpringTest {
 
-    private static final String NODE = "rabbit@localhost";
+    @Test
+    public void testHypericAdmin() { 
+        String value = RabbitUtils.configureCookie(serverConfig);
+        assertNotNull(value);
 
-    public static void main(String[] args) throws IOException, OtpAuthException {
-        /** if the node's cookie is not locatable use this constructor with the cookie value */
-        //new OtpSelf("rabbit-monitor", cookieString);
-
-        OtpSelf self = new OtpSelf("rabbit-monitor");
-        OtpPeer peer = new OtpPeer(NODE);
-        OtpConnection conn = self.connect(peer);
-
-        Assert.notNull(conn);
-        Assert.state(conn.isAlive());
-        Assert.state(conn.isConnected());
-        Assert.isTrue(conn.getState().name().equalsIgnoreCase("RUNNABLE"), "Connection must be runnable.");
+        HypericBrokerAdmin admin = new HypericBrokerAdmin(singleConnectionFactory, value);
+        assertNotNull(admin.getQueues());
+ 
+        RabbitBrokerAdmin rba = new RabbitBrokerAdmin(singleConnectionFactory);
+        assertNotNull(rba.getQueues());
     }
 }

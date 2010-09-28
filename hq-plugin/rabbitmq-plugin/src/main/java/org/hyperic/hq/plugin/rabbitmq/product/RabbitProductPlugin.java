@@ -25,12 +25,16 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.product;
 
-import org.hyperic.hq.plugin.rabbitmq.configure.ApplicationContextCreator; 
+import org.hyperic.hq.plugin.rabbitmq.configure.ApplicationContextCreator;
 import org.hyperic.hq.plugin.rabbitmq.configure.ConnectionFactoryBeanDefinitionBuilder;
+import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.product.ServerResource;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.util.Assert;
+
+import java.util.List;
 
 /**
  * RabbitProductPlugin 
@@ -67,6 +71,5 @@ public class RabbitProductPlugin extends ProductPlugin {
         rabbitGateway = ApplicationContextCreator.createBeans(preInitialized);
         Assert.notNull(rabbitGateway, "rabbitGateway must not be null");
     }
-
-
+ 
 }

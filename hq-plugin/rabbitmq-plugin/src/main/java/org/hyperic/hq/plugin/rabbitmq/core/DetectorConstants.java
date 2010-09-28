@@ -31,6 +31,18 @@ package org.hyperic.hq.plugin.rabbitmq.core;
  */
 public class DetectorConstants {
 
+    public final static String HOST = "host";
+
+    public final static String USERNAME = "username";
+
+    public final static String PASSWORD = "password";
+
+    public final static String PORT = "port";
+
+    public static final String NODE_COOKIE_LOCATION = "node.cookie.location";
+
+    public static final String NODE_COOKIE_VALUE = "node.cookie.value";
+
     public static final String RABBITMQ_HOME = "RABBITMQ_HOME";
 
     public static final String PROCESS_NAME = "proccess.name";
@@ -70,5 +82,7 @@ public class DetectorConstants {
     public static final String NAME = "name";
 
     public static final String DESC = "description";
- 
+
+    public static final String PLATFORM_TYPE = "platform.type";
+
 }

@@ -37,58 +37,46 @@ import java.io.FileReader;
 import java.io.IOException;
 
 /**
- * RabbitUtils
+ * Erlang will automatically create a random cookie file when the RabbitMQ server starts up.
+ * This will be typically located in /var/lib/rabbitmq/.erlang.cookie  on Unix systems
+ * and C:\Documents and Settings\Current User\Application Data\RabbitMQ\.erlang.cookie on Windows.
+ * Otherwise in the user home dir. If it is a manual install it may be in user home.
  * @author Helena Edelson
  */
 public class RabbitUtils {
 
     private static final Log logger = LogFactory.getLog(RabbitUtils.class);
 
-    private static final String NODE_KEY = "node.cookie";
-
     /**
-     * 
      * @param conf
-     * @return
+     * @return the content in the cookie
      */
-    public static String handleCookie(ConfigResponse conf) {
+    public static String configureCookie(ConfigResponse conf) {
+        logger.debug("Configuring cookie");
+        Assert.notNull(conf, "ConfigResponse must not be null.");
+
         String nodeCookie = null;
 
-        /** If this is user input set it regardless if it is not null,
-         * things may have changed, a new node added, etc. */
-        String location = conf.getValue(NODE_KEY);
+        File file = null;
 
-        /** To Do add more user entry validation of path */
-        if (location != null && location.length() > 0) {
-           nodeCookie = doHandleCookie(location);
+        if (conf.getValue(DetectorConstants.NODE_COOKIE_VALUE) == null) {
+            logger.debug("Inferring cookie location");
+            file = inferCookie(conf);
+        }
+        else {
+            String userSetLocation = conf.getValue(DetectorConstants.NODE_COOKIE_LOCATION).trim();
+            if (userSetLocation != null && !userSetLocation.isEmpty()) {
+                file = new File(userSetLocation);
+            }
         }
 
-        /** We could have had location and still the cookie might be null.
-         * if no value, automatically set it by making several best attempts */
-        if (nodeCookie == null) {
-            nodeCookie = doHandleCookie(conf);
+        if (file != null && file.exists()) {
+            nodeCookie = getErlangCookieValue(file);
+            logger.debug("node.cookie.value" + nodeCookie + "node.cookie.location=" + file.getAbsolutePath()); 
         }
 
-        logger.debug("RabbitProductPlugin: node.cookie set to " + nodeCookie);
+        logger.debug("Returning: " + conf);
         return nodeCookie;
-    }
-
-    /**
-     * If the user enters the location, return the value.
-     * @param location
-     * @return
-     */
-    public static String doHandleCookie(String location) {
-        return getErlangCookieValue(new File(location));
-    }
-
-    /**
-     * Makes bet attempt. Can return null.
-     * @param conf
-     * @return
-     */
-    public static String doHandleCookie(ConfigResponse conf) {
-        return getErlangCookieValue(inferCookie(conf));
     }
 
     /**
@@ -97,18 +85,15 @@ public class RabbitUtils {
      * @return
      */
     protected static String getErlangCookieValue(File cookie) {
+        logger.debug("Get cookie from file=" + cookie);
         String erlangCookieValue = null;
 
         BufferedReader in = null;
 
         try {
-            if (cookie != null) {
-                if (cookie.exists()) {
-                    in = new BufferedReader(new FileReader(cookie));
-                    erlangCookieValue = in.readLine();
-                    Assert.notNull("erlangData must not be null.", erlangCookieValue);
-                    Assert.hasText(erlangCookieValue);
-                }
+            if (cookie != null && cookie.exists()) {
+                in = new BufferedReader(new FileReader(cookie));
+                erlangCookieValue = in.readLine();
 
                 if (in != null) {
                     in.close();
@@ -117,8 +102,6 @@ public class RabbitUtils {
         } catch (IOException e) {
             logger.error("Error reading the Erlang Cookie: " + e.getMessage(), e);
         }
-
-        if (logger.isDebugEnabled()) logger.debug("erlangCookieValue=" + erlangCookieValue);
 
         return erlangCookieValue;
     }
@@ -129,27 +112,35 @@ public class RabbitUtils {
      * @param conf
      * @return
      */
-    private static File inferCookie(ConfigResponse conf) {
-        File erlangCookie = null;
+    public static File inferCookie(ConfigResponse conf) {
 
         final String fileName = ".erlang.cookie";
 
-        final String platform = conf.getValue("platform.type");
+        final String platform = conf.getValue(DetectorConstants.PLATFORM_TYPE);
 
         final String home = System.getProperty("user.home");
 
-        /** best attempt generic */
-        erlangCookie = doCrossPlatform(fileName, home);
+        File file = new File("/var/lib/rabbitmq/" + fileName);
 
-        if (erlangCookie == null) {
-            if (platform.equals(OperatingSystem.NAME_WIN32)) {
-                erlangCookie = doWindows(fileName, home);
-            } else {
-                erlangCookie = doGenericUnixLinux(fileName, home);
+        if (file.exists()) {
+            return file;
+        } else {
+            if (home != null) {
+                /** for manual installs */
+                file = new File(new StringBuilder(home).append(File.separator).append(fileName).toString());
+                if (file.exists()) {
+                    return file;
+                }
+                /** best attempt windows */
+                else {
+                    if (platform.equals(OperatingSystem.NAME_WIN32)) {
+                        file = doWindows(fileName, home);
+                    }
+                }
             }
         }
 
-        return erlangCookie;
+        return file;
     }
 
     /**
@@ -159,34 +150,12 @@ public class RabbitUtils {
      */
     private static File doCrossPlatform(String fileName, String home) {
         Assert.hasText(fileName, "fileName must not be null.");
-        File a = null;
-
+        File file = null;
         if (home != null) {
-            a = new File(new StringBuilder(home).append(File.separator).append(fileName).toString());
+            file = new File(new StringBuilder(home).append(File.separator).append(fileName).toString());
         }
 
-        File b = new File(new StringBuilder(System.getProperty("user.dir")).append(File.separator).append(fileName).toString());
-
-        return a != null && a.exists() ? a : (b.exists() ? b : null);
-    }
-
-    /**
-     * Best attempt mac/linux/unix
-     * @param fileName
-     * @param home
-     * @return
-     */
-    private static File doGenericUnixLinux(String fileName, String home) {
-        Assert.hasText(fileName, "fileName must not be null.");
-
-        File a = null;
-        File b = new File("/var/lib/rabbitmq/" + fileName);
-        File c = new File("/opt/local/var/lib/rabbitmq/" + fileName);
-
-        if (home != null) {
-            a = new File(home + fileName);
-        }
-        return a != null && a.exists() ? a : (b.exists() ? b : (c.exists() ? c : null));
+        return file;
     }
 
     /**
@@ -195,12 +164,24 @@ public class RabbitUtils {
      * @return
      */
     private static File doWindows(String fileName, String home) {
-        File a = new File(new StringBuilder("C:").append(File.separator).append("WINDOWS")
-                .append(File.separator).append(fileName).toString());
+        StringBuilder base = new StringBuilder("C:").append(File.separator);
 
-        File b = new File(new StringBuilder("C:").append(File.separator).append("Documents and Settings").append(File.separator)
-                .append(home).append(File.separator).append(fileName).toString());
+        StringBuilder sb = new StringBuilder(base.toString()).append("Documents and Settings").append(File.separator);
 
-        return a.exists() ? a : (b.exists() ? b : null);
+        File a = new File(sb.append(home).append(File.separator).append("Application Data").append(File.separator)
+                .append("RabbitMQ").append(File.separator).append(fileName).toString());
+
+        if (a.exists()) {
+            return a;
+        } else {
+            File b = new File(sb.append(home).append(File.separator).append(fileName).toString());
+
+            if (b.exists()) {
+                return b;
+            } else {
+                File c = new File(base.append("WINDOWS").append(File.separator).append(fileName).toString());
+                return c.exists() ? c : null;
+            }
+        }
     }
 }

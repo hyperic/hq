@@ -49,11 +49,6 @@ public class RabbitConfiguration {
     @Autowired
     private RabbitBrokerAdmin rabbitBrokerAdmin;
 
-    /*@Bean
-    public RabbitBrokerAdmin rabbitBrokerAdmin() {
-        return new RabbitBrokerAdmin(singleConnectionFactory);
-    }*/
-
     @Bean
     public RabbitTemplate rabbitTemplate() { 
         return new RabbitTemplate(singleConnectionFactory);
