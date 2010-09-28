@@ -29,8 +29,8 @@ import java.util.Map;
 import java.util.Properties;
 
 public class MetricProperties extends Properties {
-
-    private transient int hashCode = -1;
+	private transient int hashCode = -1;
+    private transient String propertiesAsString = null;
     
     //copied from Properties.java to shutup eclipse warning
     private static final long serialVersionUID = 4112578634029874840L;
@@ -44,47 +44,73 @@ public class MetricProperties extends Properties {
     }
 
     void setDefaults(Properties defaults) {
-        this.hashCode = -1;
+    	recalculate();
+    	
         this.defaults = defaults;
     }
+    
+    // NOTE:
+    // it is rare plugins would modify the properties
+    // but if they do, force re-calcuation of the hashCode
+    // this applies to any method that modifies the properties.
+    
+    @Override
+	public synchronized Object setProperty(String key, String value) {
+    	Object result = super.setProperty(key, value);
+    	
+    	recalculate();
+    	
+    	return result; 
+	}
 
-    //it is rare plugins would modify the properties
-    //but if they do, force re-calcuation of the hashCode
-    public Object setProperty(String key, String value) {
-        this.hashCode = -1;
-        return super.setProperty(key, value);
-    }
+	@Override
+	public synchronized void clear() {
+		super.clear();
+		recalculate();
+	}
 
-    public void clear() {
-        this.hashCode = -1;
-        super.clear();
-    }
+	@Override
+	public synchronized Object put(Object key, Object value) {
+		Object result = super.put(key, value);
+		
+		recalculate();
+		
+		return result;
+	}
 
-    public Object put(Object key, Object value) {
-        this.hashCode = -1;
-        return super.put(key, value);
-    }
+	@Override
+	public synchronized void putAll(Map<? extends Object, ? extends Object> t) {
+		super.putAll(t);
+		
+		recalculate();
+	}
 
-    public void putAll(Map t) {
-        this.hashCode = -1;
-        super.putAll(t);
-    }
+	@Override
+	public synchronized Object remove(Object key) {
+		Object result = super.remove(key);
+		
+		recalculate();
+		
+		return result;
+	}
 
-    public Object remove(Object key) {
-        this.hashCode = -1;
-        return super.remove(key);
-    }
-
+	@Override
     public boolean equals(Object o) {
-        //XXX optimize.  see comment below
-        return super.equals(o);
+        // See HHQ-4271 for details around the issue
+    	// MetricProperties.equals() used to call Hashtable.equals() and in certain 
+    	// cases caused a race condition.  To remove this possibility, we're opting to override 
+    	// the equals() call to test equality using strings.  The toString() call on each 
+    	// MetricProperties object is synchronized, however the equals() call between them is not.
+    	
+    	return this.toString().equals(o.toString());
     }
 
     //Collector uses MetricProperties objects
     //as the key into its Map of Collectors
     //since a Metric's Properties shouldn't change,
-    //cache the hashCode calcuation.
-    public int hashCode() {
+    //cache the hashCode calculation.
+    @Override
+	public int hashCode() {
         if (this.hashCode == -1) {
             this.hashCode = super.hashCode();
             if ((this.defaults != null) &&
@@ -95,4 +121,15 @@ public class MetricProperties extends Properties {
         }
         return this.hashCode;
     }
+    
+	@Override
+	public synchronized String toString() {
+		return this.propertiesAsString;
+	}
+	
+	// Should be called any time the map changes
+	private void recalculate() {
+		this.hashCode = -1;
+        this.propertiesAsString = super.toString();
+	}
 }
