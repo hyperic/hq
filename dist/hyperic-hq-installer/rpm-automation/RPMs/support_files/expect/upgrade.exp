@@ -1,0 +1,11 @@
+#!/usr/bin/expect --
+
+set timeout -1
+
+spawn ./setup.sh -upgrade
+
+expect "server to upgrade"
+send "[lindex $argv 0]\r"
+expect "installation path"
+send "[lindex $argv 1]\r"
+expect eof

@@ -1,0 +1,19 @@
+#!/usr/bin/expect -f
+
+set timeout -1
+
+spawn ./setup.sh
+
+expect "choices"
+send "1\r"
+expect "installation path"
+send "[lindex $argv 0]\r"
+expect "encryption key"
+send "12345678\r"
+expect {
+	"send email messages" {
+		send "\r"
+	} eof {
+		exit
+	}
+}
