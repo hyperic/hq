@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.hibernate.dialect.Dialect;
-import org.hyperic.hibernate.JmxExposingLocalSessionFactoryBean;
+import org.hyperic.hibernate.CacheInitializingLocalSessionFactoryBean;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.context.Bootstrap;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
@@ -24,8 +24,8 @@ public class HqLazyConnectionDataSourceProxy extends LazyConnectionDataSourcePro
     public Connection getConnection() throws SQLException {
         // main thread launches the app and runs this method, so no need to synchronize
         if (useLazyConnection == null) {
-            JmxExposingLocalSessionFactoryBean sessionFactory =
-                Bootstrap.getBean(JmxExposingLocalSessionFactoryBean.class);
+            CacheInitializingLocalSessionFactoryBean sessionFactory =
+                Bootstrap.getBean(CacheInitializingLocalSessionFactoryBean.class);
             HQDialect dialect =
                 (HQDialect) Dialect.getDialect(sessionFactory.getConfiguration().getProperties());
             useLazyConnection = dialect.useLazyConnection();
