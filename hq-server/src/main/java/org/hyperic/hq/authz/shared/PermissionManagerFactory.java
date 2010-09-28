@@ -31,8 +31,21 @@ import org.hyperic.hq.common.SystemException;
 public class PermissionManagerFactory {
 
     private static String CLASS_PROP = "hyperic.hq.authz.permissionManager";
+    
+    private static PermissionManager permissionManager;
 
     public static PermissionManager getInstance() throws SystemException {
+        if(PermissionManagerFactory.permissionManager != null) {
+            return PermissionManagerFactory.permissionManager;
+        }
         return (PermissionManager) ProductProperties.getPropertyInstance(CLASS_PROP);
+    }
+    
+    /**
+     * Sets the PermissionManager to return from getInstance.  Used for testing.
+     * @param permissionManager
+     */
+    public static void setInstance(PermissionManager permissionManager) {
+        PermissionManagerFactory.permissionManager = permissionManager;
     }
 }
