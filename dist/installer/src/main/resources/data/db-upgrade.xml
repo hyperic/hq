@@ -11491,11 +11491,11 @@ has already been defined.
     <schema-alterColumn table="EAM_PLATFORM" column="fqdn"
 	       	            precision="255" columnType="VARCHAR2" nullable="NOT NULL" />
     <schema-alterColumn table="EAM_AIQ_PLATFORM" column="name"
-	       	            precision="500" columnType="VARCHAR2" nullable="NOT NULL" />
+	       	            precision="255" columnType="VARCHAR2" nullable="NOT NULL" />
     <schema-alterColumn table="EAM_AIQ_SERVER" column="name"
-	       	            precision="500" columnType="VARCHAR2" nullable="NOT NULL" />
+	       	            precision="255" columnType="VARCHAR2" nullable="NOT NULL" />
     <schema-alterColumn table="EAM_AIQ_SERVICE" column="name"
-	       	            precision="500" columnType="VARCHAR2" nullable="NOT NULL" />
+	       	            precision="255" columnType="VARCHAR2" nullable="NOT NULL" />
  </schemaSpec>
 </dbupgrade>
 </target>
