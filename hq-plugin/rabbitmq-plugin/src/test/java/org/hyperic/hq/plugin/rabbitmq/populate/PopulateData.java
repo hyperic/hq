@@ -54,8 +54,9 @@ import static org.junit.Assert.assertTrue;
  */
 public class PopulateData {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException, InterruptedException {
         ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(RabbitTestConfiguration.class);
+        addData(ctx);
         RabbitTemplate rabbitTemplate = ctx.getBean(RabbitTemplate.class);
         Queue marketDataQueue = ctx.getBean("marketDataQueue", Queue.class);
         Queue responseQueue = ctx.getBean("responseQueue", Queue.class);
@@ -74,7 +75,11 @@ public class PopulateData {
         SimpleMessageListenerContainer asyncListenerContainer = ctx.getBean(SimpleMessageListenerContainer.class);
         SingleConnectionFactory singleConnectionFactory = ctx.getBean(SingleConnectionFactory.class);
         RabbitGateway rabbitGateway = ctx.getBean(RabbitGateway.class);
+        Queue marketDataQueue = ctx.getBean("marketDataQueue", Queue.class);
 
+        rabbitGateway.createExchange("app.stock.quotes", ExchangeType.topic.name());
+        rabbitGateway.createQueue(marketDataQueue.getName());
+        
         RabbitBrokerAdmin rabbitBrokerAdmin = ctx.getBean(RabbitBrokerAdmin.class);
         System.out.println(rabbitBrokerAdmin.getStatus());
 
@@ -97,7 +102,7 @@ public class PopulateData {
         assertNotNull(channels);
         assertTrue(channels.size() > 0);
 
-        Thread.sleep(1000);
+        Thread.sleep(10000);
 
         List<String> users = rabbitGateway.getUsers();
         if (users.contains("foo")) {
