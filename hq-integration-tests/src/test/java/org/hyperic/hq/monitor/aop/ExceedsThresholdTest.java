@@ -69,7 +69,7 @@ public class ExceedsThresholdTest extends BaseInfrastructureTest {
      * the same variable as unAcceptableDuration
      * 
      */
-    @Test  //@Ignore("This test requires manual verification that the aspect logged a message")
+    @Test  @Ignore("This test requires manual verification that the aspect logged a message")
     public void monitorControlPerformance() {
         final StopWatch sw = new StopWatch();
         sw.start("test");
