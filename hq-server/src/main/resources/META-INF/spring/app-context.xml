@@ -125,7 +125,8 @@
 	<context:component-scan base-package="org.hyperic,com.hyperic" />
 
 	<bean id="sessionFactory"
-		class="org.hyperic.hibernate.JmxExposingLocalSessionFactoryBean">
+		class="org.hyperic.hibernate.CacheInitializingLocalSessionFactoryBean">
+		<constructor-arg ref="preloadCaches"/>
 		<property name="dataSource" ref="dataSource" />
 		<property name="mappingLocations" value="classpath:/hibernate/**/*.hbm.xml" />
 		<property name="hibernateProperties">
@@ -139,6 +140,7 @@
 						<prop key="hibernate.connection.username">${server.database-user}</prop>
 						<prop key="hibernate.connection.password">${server.database-password}</prop>
 						<prop key="hibernate.dialect">${server.hibernate.dialect}</prop>
+						<prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
 					</props>
 				</property>
 				<property name="localOverride" value="true" />
@@ -148,6 +150,22 @@
 			<bean class="org.hyperic.hibernate.HypericInterceptor" />
 		</property>
 	</bean>
+	
+	<util:list id="preloadCaches">
+		<value>org.hyperic.hq.authz.server.session.Resource</value>
+		<value>org.hyperic.hq.authz.server.session.ResourceType</value>
+	    <value>org.hyperic.hq.authz.server.session.ResourceGroup</value>
+	    <value>org.hyperic.hq.appdef.AgentType</value>
+	    <value>org.hyperic.hq.appdef.Agent</value>
+	    <value>org.hyperic.hq.appdef.server.session.PlatformType</value>
+	    <value>org.hyperic.hq.appdef.server.session.ServerType</value>
+	    <value>org.hyperic.hq.appdef.server.session.ServiceType</value>
+	    <value>org.hyperic.hq.appdef.server.session.Platform</value>
+	    <value>org.hyperic.hq.appdef.server.session.Server</value>
+		<value>org.hyperic.hq.appdef.server.session.Service</value>
+	    <value>org.hyperic.hq.measurement.server.session.Category</value>
+	    <value>org.hyperic.hq.measurement.server.session.MonitorableType</value>
+	</util:list>
 
 	<bean id="transactionManager"
 		class="org.springframework.orm.hibernate3.HibernateTransactionManager"

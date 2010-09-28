@@ -29,23 +29,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.annotation.PostConstruct;
-
-import net.sf.ehcache.CacheManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hyperic.hq.alerts.AlertDefinitionXmlParser;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.CpropKey;
@@ -88,10 +79,8 @@ import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
-import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.hibernate3.SessionFactoryUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -113,8 +102,7 @@ public class ProductManagerImpl implements ProductManager {
     private ServiceManager serviceManager;
     private AlertDefinitionXmlParser alertDefinitionXmlParser;
     private PluginAuditFactory pluginAuditFactory;
-    private SessionFactory sessionFactory;
-    private final AtomicBoolean hasPreloaded = new AtomicBoolean(false);
+   
 
     @Autowired
     public ProductManagerImpl(PluginDAO pluginDao, AlertDefinitionManager alertDefinitionManager,
@@ -122,7 +110,7 @@ public class ProductManagerImpl implements ProductManager {
                               AuditManager auditManager, ServerManager serverManager,
                               ServiceManager serviceManager, PlatformManager platformManager,
                               AlertDefinitionXmlParser alertDefinitionXmlParser,
-                              PluginAuditFactory pluginAuditFactory, SessionFactory sessionFactory) {
+                              PluginAuditFactory pluginAuditFactory) {
         this.pluginDao = pluginDao;
         this.alertDefinitionManager = alertDefinitionManager;
         this.cPropManager = cPropManager;
@@ -133,7 +121,6 @@ public class ProductManagerImpl implements ProductManager {
         this.platformManager = platformManager;
         this.alertDefinitionXmlParser = alertDefinitionXmlParser;
         this.pluginAuditFactory = pluginAuditFactory;
-        this.sessionFactory = sessionFactory;
     }
 
     /**
@@ -190,69 +177,6 @@ public class ProductManagerImpl implements ProductManager {
 
     private ProductPluginManager getProductPluginManager() {
         return Bootstrap.getBean(ProductPluginDeployer.class).getProductPluginManager();
-    }
-
-    /**
-     * Preload the 2nd level caches
-     */
-    @SuppressWarnings("unchecked")
-    @PostConstruct
-    public void preload() {
-        synchronized (hasPreloaded) {
-            if (hasPreloaded.get()) {
-                return;
-            } else {
-                hasPreloaded.set(true);
-            }
-        }
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        InputStream is = loader.getResourceAsStream("preload_caches.txt");
-        List<String> lines;
-        try {
-            lines = FileUtil.readLines(is);
-        } catch (IOException e) {
-            log.warn("Unable to preload.  IO exception reading " + "preload_caches.txt", e);
-            return;
-        } finally {
-            try {
-                is.close();
-            } catch (Exception e) {
-            }
-        }
-        Session s = SessionFactoryUtils.getSession(sessionFactory, true);
-        for (String className : lines) {
-            long start, end;
-            Collection<Object> vals;
-            Class<?> c;
-            className = className.trim();
-            if (className.length() == 0 || className.startsWith("#")) {
-                continue;
-            }
-            try {
-                c = Class.forName(className);
-            } catch (Exception e) {
-                log.warn("Unable to find preload cache for class [" + className + "]", e);
-                continue;
-            }
-            start = System.currentTimeMillis();
-            vals = s.createCriteria(c).list();
-            end = System.currentTimeMillis();
-            log.info("Preloaded " + vals.size() + " [" + c.getName() + "] in " + (end - start) +
-                     " millis");
-            // Evict, to avoid dirty checking everything in the inventory
-            for (Object val : vals) {
-                s.evict(val);
-            }
-        }
-    }
-
-    /**
-     * Clear out all the caches
-     */
-
-    public void clearCaches(int sessionId) {
-        CacheManager cacheManager = CacheManager.getInstance();
-        cacheManager.clearAll();
     }
 
     /**
