@@ -23,6 +23,9 @@ import org.springframework.erlang.core.ErlangTemplate;
 @ImportResource("classpath:/org/hyperic/hq/plugin/rabbitmq/*-context.xml")
 public class RabbitTestConfiguration {
 
+    /** Mock: Sigar OperatingSystem.getInstance().getName();*/
+    private @Value("${platform.type}") String platformType;
+
     private @Value("${hostname}") String hostname;
 
     private @Value("${username}") String username;
@@ -35,10 +38,19 @@ public class RabbitTestConfiguration {
 
     private String STOCK_RESPONSE_QUEUE_NAME = "app.stock.response";
 
-    private String MARKET_DATA_ROUTING_KEY = "app.stock.quotes.nasdaq.*"; //STOCK_REQUEST_QUEUE_NAME;
+    private String MARKET_DATA_ROUTING_KEY = "app.stock.quotes.nasdaq.*"; 
 
-    private final String cookieLocation = System.getProperty("user.home");
- 
+    @Bean
+    public ConfigResponse serverConfig() {
+        ConfigResponse conf = new ConfigResponse();
+        conf.setValue(DetectorConstants.HOST, hostname);
+        conf.setValue(DetectorConstants.USERNAME, username);
+        conf.setValue(DetectorConstants.PASSWORD, password);
+        conf.setValue(DetectorConstants.PLATFORM_TYPE, platformType);
+        
+        return conf;
+    }
+
     @Bean
     public SingleConnectionFactory singleConnectionFactory() {
         SingleConnectionFactory connectionFactory = new SingleConnectionFactory(hostname);
@@ -49,20 +61,8 @@ public class RabbitTestConfiguration {
 
     @Bean
     public RabbitBrokerAdmin rabbitBrokerAdmin() {
-        HypericBrokerAdmin rabbitBrokerAdmin = new HypericBrokerAdmin(singleConnectionFactory());
-
-        ConfigResponse conf = new ConfigResponse();
-        conf.setValue("host", hostname);
-        conf.setValue("username", username);
-        conf.setValue("password", password);
-        //todo set platform the way Hyperic does
-        
-        String nodeCookie = RabbitUtils.handleCookie(conf);
-        if (nodeCookie != null) { 
-            rabbitBrokerAdmin.setErlangCookie(nodeCookie);
-        }
-         
-        return rabbitBrokerAdmin;
+        String value = RabbitUtils.configureCookie(serverConfig());
+        return new HypericBrokerAdmin(singleConnectionFactory(),value);
     }
 
     @Bean

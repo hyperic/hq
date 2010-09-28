@@ -23,7 +23,7 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq;
+package org.hyperic.hq.plugin.rabbitmq.configure;
 
 /**
  * RabbitClusterTest - ToDo

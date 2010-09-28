@@ -35,13 +35,17 @@
           <p>
           <h3>Configure RabbitMQ for Monitoring</h3>
           Once the RabbitMQ nodes are auto-detected and you can select the Server resource by node, go to Tools Menu >
-          Configure Server. Enter the node's hostname, username, and password then select OK. This will allow Hyperic
-          to connect to the node and query information on Queues, Channels, Connections, Processes, Users, and Exchanges.
-          </p>
-          <p>
-          <h3>Erlang Cookie</h3>
-          Hyperic makes several attempts to locate the Erlang Cookie. If the Agent is unable to detect Queues, etc. please
-          first insure that the Erlang cookie is the correct value for the managed Node.
+          Configure Server.
+          <ol><li><h3>Host, Username, Password</h3>
+            Enter the node's hostname, username, and password then select OK. This will allow Hyperic
+            to connect to the node and query information on Queues, Channels, Connections, Processes, Users, and Exchanges.
+           </li><li>
+          <h3>Erlang Cookie Location</h3>
+           Because there can be multiple cookies on each managed host Hyperic is monitoring, each with its own erlang cookie,
+           please supply the 'path/to/.erlang.cookie' for this particular node in the Erlang Cookie text box. This will not be
+           necessary in the next version, and multiple nodes (clustered or not) on one machine will be supported as well.
+           Insure chown rabbitmq: /var/lib/rabbitmq/.erlang.cookie shows the Hyperic Agent can access that file.</li>
+           </ol>
           </p>
           <p>
           <h3>Help Docs</h3>
@@ -74,9 +78,9 @@
 
             <option name="password" type="secret" description="RabbitMQ Password"/>
 
-            <option name="node.cookie" description="Path to Node's Erlang cookie" optional="true"/>
+            <option name="node.cookie.location" description="Erlang cookie location" optional="true"/>
 
-            <option name="port" type="int" default="5672" description="RabbitMQ Port" optional="true"/>
+            <!--<option name="port" type="int" default="5672" description="RabbitMQ Port" optional="true"/>-->
 
         </config>
 
@@ -155,6 +159,7 @@
                     category="UTILIZATION"
                     units="b"
                     indicator="true"
+                    defaultOn="true"
                     collectionType="dynamic"/>
 
             <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitQueueCollector"/>

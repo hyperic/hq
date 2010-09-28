@@ -4,7 +4,7 @@ package org.hyperic.hq.plugin.rabbitmq;
 import org.hyperic.hq.product.PluginException;
 import org.junit.*;
 import org.springframework.amqp.core.*;
-import org.springframework.amqp.core.Queue; 
+import org.springframework.amqp.core.Queue;
 import org.springframework.erlang.OtpIOException;
 import org.springframework.amqp.rabbit.admin.QueueInfo;
 import org.springframework.amqp.rabbit.admin.RabbitStatus;
@@ -18,7 +18,7 @@ import static org.junit.Assert.*;
  *
  * @author Helena Edelson
  */
-@Ignore("Manual cookie value to connect to each node is required")
+@Ignore("Need to mock the connection for automation")
 public class BrokerAdminTest extends AbstractSpringTest {
 
 

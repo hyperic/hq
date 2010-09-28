@@ -25,11 +25,10 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.configure;
 
+import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericBrokerAdmin;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitUtils;
 import org.hyperic.util.config.ConfigResponse;
-import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
-import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.util.Assert;
@@ -40,24 +39,27 @@ import org.springframework.util.Assert;
  */
 public class BrokerAdminBeanDefinitionBuilder {
 
-    private static final String KEY = "erlangCookie";
-
     public static GenericBeanDefinition build(ConfigResponse conf, GenericBeanDefinition cf) {
-        GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
-        beanDefinition.setBeanClass(HypericBrokerAdmin.class);
+        GenericBeanDefinition beanDefinition = null;
 
-        ConstructorArgumentValues constructorArgs = new ConstructorArgumentValues();
-        constructorArgs.addGenericArgumentValue(cf);
-        beanDefinition.setConstructorArgumentValues(constructorArgs);
-
-        String nodeCookie = RabbitUtils.handleCookie(conf);
+        String nodeCookie = null;
+        if (conf.getValue(DetectorConstants.NODE_COOKIE_VALUE) != null) {
+            nodeCookie = conf.getValue(DetectorConstants.NODE_COOKIE_VALUE);
+        } else {
+            nodeCookie = RabbitUtils.configureCookie(conf);
+        }
 
         if (nodeCookie != null && nodeCookie.length() > 0) {
             Assert.hasText(nodeCookie);
 
-            MutablePropertyValues props = new MutablePropertyValues();
-            props.addPropertyValue(KEY, nodeCookie);
-            beanDefinition.setPropertyValues(props);
+            beanDefinition = new GenericBeanDefinition();
+            beanDefinition.setBeanClass(HypericBrokerAdmin.class);
+
+            ConstructorArgumentValues constructorArgs = new ConstructorArgumentValues();
+            constructorArgs.addGenericArgumentValue(cf);
+            constructorArgs.addGenericArgumentValue(nodeCookie);
+            beanDefinition.setConstructorArgumentValues(constructorArgs);
+
         }
 
         return beanDefinition;

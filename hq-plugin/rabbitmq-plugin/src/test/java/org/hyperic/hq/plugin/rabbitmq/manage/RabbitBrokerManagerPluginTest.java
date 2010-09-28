@@ -14,9 +14,10 @@ import static org.junit.Assert.assertNotNull;
  *
  * @author Helena Edelson
  */
+@Ignore("Need to mock the connection for automation")
 public class RabbitBrokerManagerPluginTest extends AbstractPluginTest {
 
-    @Test  @Ignore
+    @Test  
     public void testProperties(){
         Properties properties = productPlugin.getConfig().toProperties();
         assertNotNull(properties);

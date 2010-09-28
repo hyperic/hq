@@ -50,14 +50,14 @@ import java.util.UUID;
  * RabbitGatewayTest
  * @author Helena Edelson
  */
-@Ignore("Manual cookie value to connect to each node is required")
+@Ignore("Need to mock the connection for automation")
 public class RabbitGatewayTest extends AbstractSpringTest {
 
     @Before /** Comforting to see */
     public void before() {
         RabbitBrokerAdmin rabbitBrokerAdmin = new RabbitBrokerAdmin(singleConnectionFactory);
         RabbitStatus s = rabbitBrokerAdmin.getStatus();
-        System.out.println(s);
+        assertNotNull(s);
     }
 
     @Test
@@ -104,6 +104,14 @@ public class RabbitGatewayTest extends AbstractSpringTest {
     public void declareDeleteExchange() {
         rabbitGateway.createExchange("34566", ExchangeType.fanout.name());
         rabbitGateway.deleteExchange("34566");
+    }
+
+    @Test
+    public void getQueues() {
+        List<QueueInfo> queues = rabbitGateway.getQueues();
+        for (QueueInfo q : queues) {
+            logger.debug(q);
+        }
     }
 
     @Test
