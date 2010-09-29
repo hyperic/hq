@@ -23,35 +23,15 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq;
-
-import com.ericsson.otp.erlang.OtpAuthException;
-import com.ericsson.otp.erlang.OtpConnection;
-import com.ericsson.otp.erlang.OtpPeer;
-import com.ericsson.otp.erlang.OtpSelf;
-import org.springframework.util.Assert;
-
-import java.io.IOException;
+package org.hyperic.hq.plugin.rabbitmq.configure;
 
 /**
- * ConnectionTest tests the underlying jinterface connection
+ * RabbitClusterTest - ToDo
  * @author Helena Edelson
  */
-public class ConnectionTest {
+public class RabbitClusterTest {
 
-    private static final String NODE = "rabbit@localhost";
+    public static void main(String[] args) {
 
-    public static void main(String[] args) throws IOException, OtpAuthException {
-        /** if the node's cookie is not locatable use this constructor with the cookie value */
-        //new OtpSelf("rabbit-monitor", cookieString);
-
-        OtpSelf self = new OtpSelf("rabbit-monitor");
-        OtpPeer peer = new OtpPeer(NODE);
-        OtpConnection conn = self.connect(peer);
-
-        Assert.notNull(conn);
-        Assert.state(conn.isAlive());
-        Assert.state(conn.isConnected());
-        Assert.isTrue(conn.getState().name().equalsIgnoreCase("RUNNABLE"), "Connection must be runnable.");    
     }
 }

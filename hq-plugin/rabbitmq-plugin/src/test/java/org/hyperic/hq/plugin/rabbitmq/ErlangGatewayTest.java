@@ -46,7 +46,7 @@ import static org.junit.Assert.*;
  * ErlangGatewayTest
  * @author Helena Edelson
  */
-@Ignore("Manual cookie value to connect to each node is required")
+@Ignore("Need to mock the connection for automation")
 public class ErlangGatewayTest extends AbstractSpringTest {
  
     @Test @Ignore("These conversions are not in the spring amqp yet")
