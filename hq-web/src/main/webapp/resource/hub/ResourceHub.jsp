@@ -373,13 +373,35 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     <tr class="tableRowOdd">
     <td class="ListCellCheckbox" align="left" valign="top"><input type="checkbox" onclick="ToggleSelection(this, widgetProperties)" class="listMember" name="resources" value="<c:out value="${resource.entityId}"/>"></td>
     <td class="tableCell" align="left" nowrap valign="top">
-    <html:link page="/resource/${section}/monitor/Visibility.do?mode=currentHealth" paramId="eid" paramName="resource" paramProperty="entityId"><html:img page="/images/icon_hub_m.gif" width="11" height="11" alt="" border="0"/></html:link>
-    <html:link page="/resource/${section}/Inventory.do?mode=view" paramId="eid" paramName="resource" paramProperty="entityId"><html:img page="/images/icon_hub_i.gif" width="11" height="11" alt="" border="0"/></html:link>
+    <html:link action="/resource/${section}/monitor/Visibility">
+    	<html:param name="mode" value="currentHealth"/>
+    	<html:param name="eid" value="${resource.entityId}"/>
+    	<html:img page="/images/icon_hub_m.gif" width="11" height="11" alt="" border="0"/>
+    </html:link>
+    <html:link action="/resource/${section}/Inventory">
+    	<html:param name="mode" value="view"/>
+    	<html:param name="eid" value="${resource.entityId}"/>
+    	<html:img page="/images/icon_hub_i.gif" width="11" height="11" alt="" border="0"/>
+    </html:link>
     <c:if test="${resource.entityId.type == 1 || resource.entityId.type == 2 || resource.entityId.type == 3}">
-    <html:link page="/alerts/Config.do?mode=list" paramId="eid" paramName="resource" paramProperty="entityId"><html:img page="/images/icon_hub_a.gif" width="11" height="11" alt="" border="0"/></html:link>
+    <html:link action="/alerts/Config">
+    	<html:param name="mode" value="list"/>
+    	<html:param name="eid" value="${resource.entityId}"/>
+    	<html:img page="/images/icon_hub_a.gif" width="11" height="11" alt="" border="0"/>
+    </html:link>
     </c:if>
     </td>
-      <td class="tableCell" align="left" valign="top"><span class="SpanPopup1"><html:link page="/Resource.do" paramId="eid" paramName="resource" paramProperty="entityId"><c:out value="${resource.name}"/></html:link><c:if test="${not empty resource.description}"><span><c:out value="${resource.description}" /></span></c:if></span></td>
+    <td class="tableCell" align="left" valign="top">
+      	<span class="SpanPopup1">
+	      	<html:link action="/Resource">
+	      		<html:param name="eid" value="${resource.entityId}"/>
+	      		<c:out value="${resource.name}"/>
+	      	</html:link>
+	      	<c:if test="${not empty resource.description}">
+	      		<span><c:out value="${resource.description}" /></span>
+	      	</c:if>
+		</span>
+	</td>
       <!-- Insert metrics tile here -->
       <c:forEach items="${indicatorsMap[resource.entityId]}" var="metric">
         <td class="tableCell" align="middle" valign="top">

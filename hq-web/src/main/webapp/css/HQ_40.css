@@ -103,7 +103,6 @@ a:visited,a:hover,a {
 	width: 260px;
 	background-color: #F96115;
 	color: #FFF;
-	padding: 0 1px 0 -1px;
 	text-align: right;
 	cursor: pointer
 }
@@ -397,13 +396,14 @@ a:visited,a:hover,a {
 	color: gray;
 	font-size: 10px;
 	float: left;
-	padding-top: 2px clear : both
+	padding-top: 2px;
+	clear: both;
 }
 
 input[type=password],input[type=text] {
 	border: 1px solid gray;
 	width: 150px;
-	padding: 3px
+	padding: 3px;
 }
 
 fieldset {
@@ -814,8 +814,9 @@ body .dijitMenuItemDisabled * {
 	cursor: default
 }
 
-body .dj_ie .dijit_a11y .dijitMenuItemDisabled td,body .dj_ie .dijitMenuItemDisabled *,body .dj_ie .dijitMenuItemDisabled td
-	{
+body .dj_ie .dijit_a11y .dijitMenuItemDisabled td,
+body .dj_ie .dijitMenuItemDisabled *,
+body .dj_ie .dijitMenuItemDisabled td {
 	color: gray !important;
 	filter: alpha(opacity = 35)
 }
@@ -860,13 +861,12 @@ body .dijitMenuSeparator {
 }
 
 body .dijitMenuExpandEnabled {
-	background: transparent url('/images/4.0/icons/play.png') scroll 0%;
+	background: transparent url('/images/4.0/icons/play.png') scroll 0% no-repeat;
 	width: 16px;
 	height: 16px;
 	overflow: hidden;
 	margin: 0;
 	padding: 0;
-	background-repeat: none
 }
 
 body .dijitArrowNode {
@@ -1563,15 +1563,10 @@ visibility: hidden;*/
 }
 
 /* fix for IE inline-block problem */
-<!--
-[if IE]><!-- > .widget .config form label {
+.widget .config form label {
 	zoom: 1;
-	display: inline;
+	display: "inline";
 }
-
-<!--
-<!
-[endif]-->
 
 .widget .config form ol {
 	margin: 0;
@@ -2535,8 +2530,14 @@ span.returnToLink {
 	width: 9px;
 }
 
+.addMetricIcon {
+	background: url(../images/icon_menu.gif) no-repeat right 50%;
+	height:11px;
+	width:14px;
+	cursor:pointer;
+}
 .resourceCommentIcon {
-	background: url(../images/comment.gif) no-repeat 0 3px;
+	background: url(../images/comment.gif) no-repeat right 50%;
 	height: 14px;
 	width: 14px;
 }

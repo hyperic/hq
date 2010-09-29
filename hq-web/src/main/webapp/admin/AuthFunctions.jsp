@@ -38,37 +38,38 @@
 
 <!--  GENERAL PROPERTIES CONTENTS -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0" class="TableBottomLine" style="margin-bottom: 24px;">
-  <tr>
-    <td width="20%" class="BlockLabel"><fmt:message key="admin.home.Users"/></td>
-    <td width="30%" class="BlockContent"><html:link page="/admin/user/UserAdmin.do?mode=list"><fmt:message key="admin.home.ListUsers"/></html:link></td>
-
-    <td width="20%" class="BlockLabel"><fmt:message key="admin.home.Roles"/></td>
-    <td width="30%" class="BlockContent" rowspan="2" valign="top">
-      <span class="italicInfo">
-      <fmt:message key="feature.available.in.EE">
-        <fmt:param><fmt:message key="header.roles"/></fmt:param>
-        <fmt:param value="http://support.hyperic.com/confluence/display/EVO/ui-Admin.Role.List"/>
-      </fmt:message>
-      </span>
-    </td>
-  </tr>
-  <tr>
-    <td class="BlockLabel">&nbsp;</td>
-    <td class="BlockContent" colspan="2">
-    <c:choose>
-    <c:when test="${useroperations['createSubject']}">
-    <html:link page="/admin/user/UserAdmin.do?mode=new"><fmt:message key="admin.home.NewUser"/></html:link>
-    </c:when>
-    <c:otherwise>
-    &nbsp;
-    </c:otherwise>
-    </c:choose>
-    </td>
-  </tr>
+	<tr>
+    	<td width="20%" class="BlockLabel"><fmt:message key="admin.home.Users"/></td>
+    	<td width="30%" class="BlockContent">
+    		<html:link action="/admin/user/UserAdmin">
+    			<html:param name="mode" value="list" />
+    			<fmt:message key="admin.home.ListUsers"/>
+    		</html:link>
+    	</td>
+	    <td width="20%" class="BlockLabel"><fmt:message key="admin.home.Roles"/></td>
+    	<td width="30%" class="BlockContent" rowspan="2" valign="top">
+		    <span class="italicInfo">
+      			<fmt:message key="feature.available.in.EE">
+        			<fmt:param><fmt:message key="header.roles"/></fmt:param>
+        			<fmt:param value="http://support.hyperic.com/confluence/display/EVO/ui-Admin.Role.List"/>
+      			</fmt:message>
+      		</span>
+    	</td>
+  	</tr>
+  	<tr>
+    	<td class="BlockLabel">&nbsp;</td>
+    	<td class="BlockContent" colspan="2">
+    		<c:choose>
+    			<c:when test="${useroperations['createSubject']}">
+    				<html:link action="/admin/user/UserAdmin">
+		    			<html:param name="mode" value="new" />
+			    		<fmt:message key="admin.home.NewUser"/>
+		    		</html:link>
+		    	</c:when>
+			    <c:otherwise>&nbsp;</c:otherwise>
+		    </c:choose>
+	    </td>
+	</tr>
 </table>
-<!--  /  -->
-
-<!--  some empty space -->
-<br>
-<br>
-
+<br/>
+<br/>
