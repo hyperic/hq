@@ -1,0 +1,5 @@
+The HQ agent has been successfully installed.
+
+You can start and stop your HQ agent by selecting the "Start Agent" and "Stop Agent" shortcuts respectively under the Hyperic application group in the Windows Start menu.
+
+Alternatively,you can then use the Service Control Manager (Control Panel->Services) to manually start and stop the Hyperic HQ agent.
