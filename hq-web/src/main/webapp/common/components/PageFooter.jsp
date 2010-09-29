@@ -40,6 +40,6 @@
 </c:if>
 
     </td>
-    <td>&nbsp;</td>
+    <td style="padding-right:20px;">&nbsp;</td>
   </tr>
 </table>

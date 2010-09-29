@@ -196,9 +196,9 @@
                 <fmt:param value="${metric.metricSource}"/>
               </fmt:message>
             </td>
-          <td nowrap="true" width="13%"><span class="BoldText"><fmt:message key="resource.common.monitor.visibility.LowTH"/></span>: <c:out value="${metric.minMetric.valueFmt}"/></td>
-          <td nowrap="true" width="14%"><span class="BoldText"><fmt:message key="resource.common.monitor.visibility.AvgTH"/></span>: <c:out value="${metric.avgMetric.valueFmt}"/></td>
-          <td nowrap="true" width="15%"><span class="BoldText"><fmt:message key="resource.common.monitor.visibility.PeakTH"/></span>: <c:out value="${metric.maxMetric.valueFmt}"/></td>
+          <td nowrap width="13%"><span class="BoldText"><fmt:message key="resource.common.monitor.visibility.LowTH"/></span>: <c:out value="${metric.minMetric.valueFmt}"/></td>
+          <td nowrap width="14%"><span class="BoldText"><fmt:message key="resource.common.monitor.visibility.AvgTH"/></span>: <c:out value="${metric.avgMetric.valueFmt}"/></td>
+          <td nowrap width="15%"><span class="BoldText"><fmt:message key="resource.common.monitor.visibility.PeakTH"/></span>: <c:out value="${metric.maxMetric.valueFmt}"/></td>
         </tr>
       </table>
     </td>

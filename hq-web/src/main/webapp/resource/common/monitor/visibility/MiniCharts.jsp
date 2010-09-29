@@ -124,7 +124,10 @@ while ( i.hasNext() ) {
             <html:checkbox property="resources" value="${eid}" onclick="ToggleSelection(this, widgetProperties)" styleClass="listMember"/>
           </td>
           <td class="MiniChartHeader" align="left">
-            <html:link page="/Resource.do?eid=${eid}"><c:out value="${resource.name}"/></html:link>
+            <html:link action="/Resource">
+            	<html:param name="eid" value="${eid}"/>
+            	<c:out value="${resource.name}"/>
+            </html:link>
             <fmt:message key="parenthesis">
               <fmt:param value="${resource.appdefResourceTypeValue.name}"/>
             </fmt:message>

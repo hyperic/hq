@@ -35,14 +35,18 @@
 
 <c:choose>
   	<c:when test="${not hasMultipleDashboard && isFavorite}">
-    	<html:link page="/resource/common/QuickFavorites.do?eid=${resource.entityId.appdefKey}&mode=remove">
+    	<html:link action="/resource/common/QuickFavorites">
+    		<html:param name="eid" value="${resource.entityId.appdefKey}"/>
+    		<html:param name="mode" value="remove"/>
     		<fmt:message key="resource.common.quickFavorites.remove"/><html:img width="11" height="9" border="0" page="/images/title_arrow.gif"/>
     	</html:link>
   	</c:when> 
   	<c:otherwise>
   		<c:choose>
   			<c:when test="${not hasMultipleDashboard}">
-  				<html:link page="/resource/common/QuickFavorites.do?eid=${resource.entityId.appdefKey}&mode=add">
+  				<html:link action="/resource/common/QuickFavorites">
+  					<html:param name="eid" value="${resource.entityId.appdefKey}"/>
+  					<html:param name="mode" value="add"/>
     				<fmt:message key="resource.common.quickFavorites.add"/><html:img width="11" height="9" border="0" page="/images/title_arrow.gif"/>
     			</html:link>
     		</c:when>
@@ -61,8 +65,8 @@
 								<table width="100%" cellpadding="0" cellspacing="0" border="0">
 									<thead>
 										<tr class="tableRowHeader">
-											<th class="ListHeaderCheckbox" style="width:20px"><input type="checkbox" id="AddToFavorites_CheckAllBox" onclick="" /></td>
-											<th class="ListHeader" style="width:99%"><fmt:message key="common.header.Name"/></td>
+											<th class="ListHeaderCheckbox" style="width:20px"><input type="checkbox" id="AddToFavorites_CheckAllBox" onclick="" /></th>
+											<th class="ListHeader" style="width:99%"><fmt:message key="common.header.Name"/></th>
 										</tr>
 									</thead>
 									<tbody id="AddToFavorites_TableBody">

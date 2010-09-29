@@ -33,7 +33,9 @@
 
 <tiles:importAttribute name="portlet"/>
 
-<html:link page="/ResourceHub.do?ff=" linkName="browseUrl" styleId="browseUrl" style="visibility:hidden;"></html:link>
+<html:link action="/ResourceHub.do" linkName="browseUrl" styleId="browseUrl" style="visibility:hidden;">
+	<html:param name="ff" value="" />
+</html:link>
 
 <script type="text/javascript">
 function requestAvailSummary<c:out value="${portlet.token}"/>() {

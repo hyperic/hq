@@ -92,7 +92,7 @@
 
 	<table width="680" cellpadding="2" cellspacing="0" border="0">
 		<tr>
-			<td class="ListHeaderInactive" nowrap="true">
+			<td class="ListHeaderInactive" nowrap>
 				<fmt:message key="resource.common.monitor.visibility.IndicatorCharts" />&nbsp;
 				<fmt:message key="common.label.Pipe" />&nbsp;
 				<a href='<html:rewrite page="/ResourceCurrentHealth.do"/>?eid=<c:out value="${eid}"/>&view=<c:out value="${view}"/>&alertDefaults=true'>
@@ -174,7 +174,7 @@
 											</c:otherwise>
 										</c:choose>
 									<div class="<c:out value="${timelineIndicatorColor}" />"
-									     onmousedown="overlay.moveOverlay(this);overlay.showTimePopupTopMetricChart(<c:out value="${status.count - 1}"/>, event)" />
+									     onmousedown="overlay.moveOverlay(this);overlay.showTimePopupTopMetricChart(<c:out value="${status.count - 1}"/>, event)">&nbsp;</div>
 								</td>
 							</c:forEach>
 							<td width="10" align="left">
