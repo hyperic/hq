@@ -27,15 +27,19 @@ package org.hyperic.hq.plugin.rabbitmq;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.plugin.rabbitmq.configure.TestContextLoader;
 import org.hyperic.hq.plugin.rabbitmq.core.ErlangGateway;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
+import org.hyperic.util.config.ConfigResponse;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
-import org.springframework.amqp.core.Queue; 
 import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
 import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.erlang.core.ErlangTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -45,9 +49,10 @@ import static org.junit.Assert.*;
  * AbstractSpringTest
  * @author Helena Edelson
  */
-@ContextConfiguration("classpath:/etc/rabbitmq-test-context.xml")
+@ContextConfiguration(loader = TestContextLoader.class)
 @RunWith(SpringJUnit4ClassRunner.class)
-public class AbstractSpringTest {
+@Ignore("Need to mock the connection for automation")
+public abstract class AbstractSpringTest {
 
     protected final Log logger = LogFactory.getLog(this.getClass().getName());
 
@@ -67,21 +72,24 @@ public class AbstractSpringTest {
     protected ErlangGateway erlangGateway;
 
     @Autowired
-    protected Queue requestQueue;
+    protected ConfigResponse serverConfig;
 
     @Autowired
-    protected Queue responseQueue;
-
+    protected ErlangTemplate erlangTemplate;
+    
     @Before
     public void before() {
-        assertNotNull("rabbitConnectionFactory should not be null", singleConnectionFactory);
+        assertNotNull("singleConnectionFactory should not be null", singleConnectionFactory);
         assertNotNull("rabbitBrokerAdmin should not be null", rabbitBrokerAdmin);
         assertNotNull("rabbitTemplate must not be null", rabbitTemplate);
         assertNotNull("rabbitGateway should not be null", rabbitGateway);
         assertNotNull("erlangGateway should not be null", erlangGateway);
- 
-        assertNotNull(rabbitGateway);
-        assertNotNull(rabbitBrokerAdmin.getStatus());
+        //assertNotNull(rabbitBrokerAdmin.getStatus());
+    }
+
+    @AfterClass
+    public static void doAfter() {
+
     }
     
 }

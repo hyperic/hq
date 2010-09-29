@@ -41,6 +41,7 @@ import org.hyperic.util.config.ConfigResponse;
 import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.rabbit.admin.QueueInfo;
 import org.springframework.erlang.core.Application;
+import org.springframework.util.Assert;
 
 /**
  * RabbitServerDetector
@@ -96,15 +97,20 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      */
     @Override
     protected List discoverServices(ConfigResponse serviceConfig) throws PluginException {
+        /*if (serviceConfig.getValue(DetectorConstants.HOST) == null) {
+            String host = inferHostname(serviceConfig);
+            if (host != null) serviceConfig.setValue(DetectorConstants.HOST, host);
+        }*/
+
+        String value = RabbitUtils.configureCookie(serviceConfig);
+        Assert.notNull(value, "Cookie value for node must not be null");
+
+        if (value != null && value.length() > 0) {
+            serviceConfig.setValue(DetectorConstants.NODE_COOKIE_VALUE, value);
+        }
         configure(serviceConfig);
 
         List<ServiceResource> serviceResources = new ArrayList<ServiceResource>();
-
-        /** get rabbit  services */
-        List<ServiceResource> rabbitResources = createRabbitResources(serviceConfig);
-        if (rabbitResources != null && rabbitResources.size() >= 0) {
-            serviceResources.addAll(rabbitResources);
-        }
 
         /** configure service processes */
         List<ServiceResource> processes = createProcessServiceResources(serviceConfig);
@@ -113,8 +119,73 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
             logger.debug("discoverServices detected " + processes.size() + " processes");
         }
 
+        /** get rabbit  services */
+        List<ServiceResource> rabbitResources = createRabbitResources(serviceConfig);
+        if (rabbitResources != null && rabbitResources.size() >= 0) {
+            serviceResources.addAll(rabbitResources);
+        }
+
         return serviceResources;
     }
+
+    /**
+     * Create RabbitMQ-specific resources to add to inventory.
+     * @param serviceConfig
+     * @return
+     * @throws PluginException
+     */
+    public List<ServiceResource> createRabbitResources(ConfigResponse serviceConfig) throws PluginException {
+        logger.debug("createRabbitResources.config=" + serviceConfig);
+        List<ServiceResource> rabbitResources = null;
+
+        if (serviceConfig.getValue(DetectorConstants.NODE_COOKIE_VALUE) != null) {
+            if (RabbitProductPlugin.getRabbitGateway() == null) {
+                logger.debug("Initializing gateway");
+                RabbitProductPlugin.initializeGateway(serviceConfig);
+            }
+        }
+
+        RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
+
+        if (rabbitGateway != null) {
+            List<String> virtualHosts = rabbitGateway.getVirtualHosts();
+
+            if (virtualHosts != null) {
+                logger.debug("*******************createRabbitResources.virtualHosts.get(0)=" + virtualHosts.get(0));
+                rabbitResources = new ArrayList<ServiceResource>();
+
+                for (String virtualHost : virtualHosts) {
+                    ServiceResource vHostServiceResource = createServiceResource(DetectorConstants.VHOST);
+                    vHostServiceResource.setName(new StringBuilder().append(getTypeInfo().getName())
+                            .append(" ").append(DetectorConstants.VHOST).append(" ").append(virtualHost).toString());
+
+                    List<ServiceResource> queues = createQueueServiceResources(rabbitGateway, virtualHost);
+                    if (queues != null) rabbitResources.addAll(queues);
+                    logger.debug("*******************createRabbitResources.queues.get(0)=" + queues.get(0));
+                    List<ServiceResource> connections = createConnectionServiceResources(rabbitGateway, virtualHost);
+                    if (connections != null) rabbitResources.addAll(connections);
+
+                    List<ServiceResource> channels = createChannelServiceResources(rabbitGateway, virtualHost);
+                    if (channels != null) rabbitResources.addAll(channels);
+
+                    List<ServiceResource> exchanges = createExchangeServiceResources(rabbitGateway, virtualHost);
+                    if (exchanges != null) rabbitResources.addAll(exchanges);
+
+                    List<ServiceResource> runningApps = createAppServiceResources(rabbitGateway, virtualHost);
+                    if (runningApps != null) rabbitResources.addAll(runningApps);
+
+                    List<ServiceResource> users = createUserServiceResources(rabbitGateway, virtualHost);
+                    if (users != null) rabbitResources.addAll(users);
+                }
+            }
+        }
+        if (rabbitResources!= null) {
+            logger.debug("Created " + rabbitResources.size() + " rabbit services");
+        }
+
+        return rabbitResources;
+    }
+
 
     /**
      * Creates service resources from processes.
@@ -170,57 +241,6 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         logger.debug("createProcessServiceResources detected " + serviceResources.size() + " process serviceResources");
 
         return serviceResources;
-    }
-
-
-    /**
-     * Create RabbitMQ-specific resources to add to inventory.
-     * @param serviceConfig
-     * @return
-     * @throws PluginException
-     */
-    public List<ServiceResource> createRabbitResources(ConfigResponse serviceConfig) throws PluginException {
-        List<ServiceResource> rabbitResources = null;
-
-        if (RabbitProductPlugin.getRabbitGateway() == null) {
-            RabbitProductPlugin.initializeGateway(serviceConfig);
-        }
-
-        RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
-
-        if (rabbitGateway != null) {
-            List<String> virtualHosts = rabbitGateway.getVirtualHosts();
-
-            if (virtualHosts != null) {
-                rabbitResources = new ArrayList<ServiceResource>();
-
-                for (String virtualHost : virtualHosts) {
-                    ServiceResource vHostServiceResource = createServiceResource(DetectorConstants.VHOST);
-                    vHostServiceResource.setName(new StringBuilder().append(getTypeInfo().getName())
-                            .append(" ").append(DetectorConstants.VHOST).append(" ").append(virtualHost).toString());
-
-                    List<ServiceResource> queues = createQueueServiceResources(rabbitGateway, virtualHost);
-                    if (queues != null) rabbitResources.addAll(queues);
-
-                    List<ServiceResource> connections = createConnectionServiceResources(rabbitGateway, virtualHost);
-                    if (connections != null) rabbitResources.addAll(connections);
-
-                    List<ServiceResource> channels = createChannelServiceResources(rabbitGateway, virtualHost);
-                    if (channels != null) rabbitResources.addAll(channels);
-
-                    List<ServiceResource> exchanges = createExchangeServiceResources(rabbitGateway, virtualHost);
-                    if (exchanges != null) rabbitResources.addAll(exchanges);
-
-                    List<ServiceResource> runningApps = createAppServiceResources(rabbitGateway, virtualHost);
-                    if (runningApps != null) rabbitResources.addAll(runningApps);
-
-                    List<ServiceResource> users = createUserServiceResources(rabbitGateway, virtualHost);
-                    if (users != null) rabbitResources.addAll(users);
-                }
-            }
-        }
-
-        return rabbitResources;
     }
 
     protected List<ServiceResource> createUserServiceResources(RabbitGateway rabbitGateway, String virtualHost) {
@@ -347,24 +367,19 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                 if (obj instanceof QueueInfo) {
                     name = ((QueueInfo) obj).getName();
                     resource.setCustomProperties(RabbitQueueCollector.getAttributes((QueueInfo) obj));
-                }
-                else if (obj instanceof Connection) {
+                } else if (obj instanceof Connection) {
                     name = ((Connection) obj).getPid();
                     resource.setCustomProperties(RabbitConnectionCollector.getAttributes((Connection) obj));
-                }
-                else if (obj instanceof Exchange) {
+                } else if (obj instanceof Exchange) {
                     name = ((Exchange) obj).getName();
                     resource.setCustomProperties(RabbitExchangeCollector.getAttributes((Exchange) obj));
-                }
-                else if (obj instanceof Application) {
+                } else if (obj instanceof Application) {
                     name = ((Application) obj).getDescription();
                     resource.setCustomProperties(BrokerAppCollector.getAttributes((Application) obj));
-                }
-                else if (obj instanceof Channel) {
+                } else if (obj instanceof Channel) {
                     name = ((Channel) obj).getPid();
                     resource.setCustomProperties(RabbitChannelCollector.getAttributes((Channel) obj));
-                }
-                else if (obj instanceof String) {
+                } else if (obj instanceof String) {
                     name = (String) obj;
                 }
 
@@ -441,6 +456,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
 
         for (int n = 0; n < args.length; n++) {
             if (args[n].equalsIgnoreCase(DetectorConstants.MNESIA) && args[n + 1].equalsIgnoreCase(DetectorConstants.DIR)) {
+                logger.debug("mnesia " + args[n] + " " + args[n + 1] + " " + args[n + 2]);
                 mpath = args[n + 2];
 
                 /*if (mpath.startsWith("\\")) {
@@ -480,6 +496,20 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         }
 
         return paths;
+    }
+
+    private String inferHostname(ConfigResponse conf) {
+        String host = null;
+
+        if (conf.getValue(DetectorConstants.HOST) == null) {
+            String sname = conf.getValue(DetectorConstants.SERVER_NAME);
+            if (sname != null) {
+                Pattern p = Pattern.compile("@(\\S+)");
+                Matcher m = p.matcher(sname);
+                if (m.find()) host = m.group(1);
+            }
+        }
+        return host;
     }
 
 }

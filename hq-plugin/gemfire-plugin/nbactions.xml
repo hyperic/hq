@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+        <action>
+            <actionName>test</actionName>
+            <goals>
+                <goal>install</goal>
+                <goal>org.hyperic.hq.maven.HQplugins:maven-HQplugin-plugin:sayhi</goal>
+            </goals>
+        </action>
+    </actions>

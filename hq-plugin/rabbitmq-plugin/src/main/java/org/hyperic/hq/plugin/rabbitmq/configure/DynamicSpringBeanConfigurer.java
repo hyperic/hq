@@ -26,6 +26,7 @@
 package org.hyperic.hq.plugin.rabbitmq.configure;
 
 import org.apache.commons.lang.StringUtils;
+import org.hyperic.hq.plugin.rabbitmq.core.HypericBrokerAdmin;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
@@ -39,33 +40,6 @@ import java.util.UUID;
  * @author Helena Edelson
  */
 public class DynamicSpringBeanConfigurer {
- 
-    /** 
-     * @param defaultListableBeanFactory
-     * @param preInitialize
-     */
-    public static void createAndRegisterBeans(DefaultListableBeanFactory defaultListableBeanFactory, Class... preInitialize) {
-        if (preInitialize != null) {
-            for (Class beanCanidate : preInitialize) {
-                createAndRegisterBean(beanCanidate, defaultListableBeanFactory);
-            }
-        }
-    }
-
-    /**
-     * Create a new BeanDefinition for an anonymous bean with no dependencies.
-     * Sets the bean name as camelCase of the candidate's simple name + a unique
-     * identifier tag.
-     * @param candidate
-     * @param beanFactory
-     */
-    public static void createAndRegisterBean(Class candidate, DefaultListableBeanFactory beanFactory) {
-        Assert.notNull(candidate, "candidate must not be null.");
-
-        GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
-        beanDefinition.setBeanClass(candidate);
-        registerBean(generateBeanName(candidate, true), beanDefinition, beanFactory);
-    }
 
     /**
      * Register a pre-defined BeanDefinition with a camelCase bean name
@@ -77,7 +51,7 @@ public class DynamicSpringBeanConfigurer {
     public static void registerBean(GenericBeanDefinition beanDefinition, DefaultListableBeanFactory beanFactory) {
         registerBean(generateBeanName(beanDefinition.getBeanClass(), false), beanDefinition, beanFactory);
     }
-
+ 
     /**
      * Register a BeanDefinition by beanName in the Spring application context dynamically.
      * @param beanName

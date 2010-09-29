@@ -32,15 +32,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.erlang.ErlangBadRpcException;
 
 import org.springframework.util.Assert;
-
-import java.io.IOException;
+ 
 import java.util.List;
 
 /**
  * ErlangBrokerGateway provides functionality *not*
  * in the Spring RabbitBrokerAdmin api where we have
- * to use jinterface directly.
- *
+ * to use jinterface directly. 
  * @author Helena Edelson
  */
 public class ErlangBrokerGateway implements ErlangGateway {

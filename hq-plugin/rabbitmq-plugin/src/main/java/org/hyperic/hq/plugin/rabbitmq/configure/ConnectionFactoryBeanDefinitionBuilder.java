@@ -25,6 +25,7 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.configure;
 
+import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
 import org.springframework.beans.MutablePropertyValues;
@@ -39,15 +40,7 @@ import org.springframework.util.Assert;
  * @author Helena Edelson
  */
 public class ConnectionFactoryBeanDefinitionBuilder {
-
-    private final static String HOST_KEY = "host";
-
-    private final static String USERNAME_KEY = "username";
-
-    private final static String PASSWORD_KEY = "password";
-
-    private final static String PORT_KEY = "port";
-
+ 
     /**
      * Pre-test or (as below) internally test that the specific config
      * values have been populated by a user in the UI.
@@ -56,21 +49,10 @@ public class ConnectionFactoryBeanDefinitionBuilder {
      * @return true if ConfigResponse has values for host,username,password.
      */
     public static boolean hasConfigValues(ConfigResponse config) {
-        return (config.getValue(HOST_KEY) != null) &&
-                (config.getValue(USERNAME_KEY) != null) &&
-                (config.getValue(PASSWORD_KEY) != null);
-    }
-
-    /**
-     * ToDo validate UI entries
-     *
-     * @param host
-     * @param username
-     * @param password
-     * @return
-     */
-    public static boolean hasValidValues(String host, String username, String password) {
-        return true;
+        return (config.getValue(DetectorConstants.HOST) != null) &&
+                (config.getValue(DetectorConstants.USERNAME) != null) &&
+                    (config.getValue(DetectorConstants.PASSWORD) != null) &&
+                        (config.getValue(DetectorConstants.NODE_COOKIE_VALUE) != null);
     }
 
     /**
@@ -88,9 +70,9 @@ public class ConnectionFactoryBeanDefinitionBuilder {
 
         /** verify again, in case not previously verified by caller. */
         if (hasConfigValues(config)) {
-            String host = config.getValue(HOST_KEY);
-            String username = config.getValue(USERNAME_KEY);
-            String password = config.getValue(PASSWORD_KEY);
+            String host = config.getValue(DetectorConstants.HOST).trim();
+            String username = config.getValue(DetectorConstants.USERNAME).trim();
+            String password = config.getValue(DetectorConstants.PASSWORD).trim();
               
             Assert.hasText(host);
             Assert.hasText(username);
@@ -104,11 +86,12 @@ public class ConnectionFactoryBeanDefinitionBuilder {
             beanDefinition.setConstructorArgumentValues(constructorArgs);
 
             MutablePropertyValues props = new MutablePropertyValues();
-            props.addPropertyValue(USERNAME_KEY, username);
-            props.addPropertyValue(PASSWORD_KEY, password);
+            props.addPropertyValue(DetectorConstants.USERNAME, username);
+            props.addPropertyValue(DetectorConstants.PASSWORD, password);
 
-            if (config.getValue(PORT_KEY) != null) {
-                props.addPropertyValue(PORT_KEY, Integer.valueOf(config.getValue(PORT_KEY)));
+            
+            if (config.getValue(DetectorConstants.PORT) != null) {
+                props.addPropertyValue(DetectorConstants.PORT, Integer.valueOf(config.getValue(DetectorConstants.PORT)));
             }
 
             beanDefinition.setPropertyValues(props);

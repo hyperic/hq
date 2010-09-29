@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Include>
+
+    <!-- Define variables to be used later.  -->
+    <!-- Define a constant for the current version.  -->
+    <!-- Define a constant for the product name.  -->
+    <!-- Define a constant for where the files are located.  -->
+    <!-- Define a constant for the upgrade code for both os/ee packages.  -->
+
+    <?define HQ_ver="4.5.0"?>
+<!--    <?define HQ_ver="@hq.version@"?> -->
+    <?define HQ_full_ver="$(var.HQ_ver).BUILD-SNAPSHOT"?>
+    <?define HQ_build="BUILD-20100816.174211-75"?>
+    <?define HQ_product_code="{3A121590-ECCC-46BC-BB29-335CA9FB618B}"?>
+<!--
+    <?define HQ_base_path="hyperic-hq-builds\$(var.HQ_build_type)\hyperic-hq-$(var.HQ_ver)-$(var.HQ_build)\hyperic-hq-installer"?>
+    <?define HQ_common_path="hyperic-hq-builds\$(var.HQ_build_type)\common"?>
+-->
+
+    <?define HQ_base_path="hyperic-hqee-installer-$(var.HQ_ver).$(var.HQ_build)"?>
+<!--    <?define HQ_common_path="$(sys.CURRENTDIR)\..\common"?> -->
+    <?define HQ_common_path="common"?>
+    <?define HQ_binary_path="$(var.HQ_common_path)\Binary"?>
+    <?define HQ_icon_path="$(var.HQ_common_path)\Icon"?>
+
+    <?if $(var.HQ_build_type) = ee ?>
+        <?define HQ_full_ver_ee="$(var.HQ_ver).BUILD-SNAPSHOT-EE"?>
+        <?define HQ_name="Hyperic HQ Enterprise"?>
+        <?define HQ_installer_path="$(var.HQ_base_path)\installer"?>
+<!--        <?define HQ_product_code="{9E8C3FF4-2FBD-462B-9CA8-E23E2955B2EB}"?> -->
+    <?else?>
+        <?define HQ_name="Hyperic HQ"?>
+        <?define HQ_installer_path="$(var.HQ_base_path)\installer-$(var.HQ_ver)"?>
+<!--        <?define HQ_product_code="{F0781737-B712-4A5A-AC78-8BF657683AD2}"?> -->
+    <?endif?>
+
+    <?define HQ_upgrade_code="{8ACD129D-24B6-4032-B3CC-E664349C9C32}"?>
+
+</Include>
+

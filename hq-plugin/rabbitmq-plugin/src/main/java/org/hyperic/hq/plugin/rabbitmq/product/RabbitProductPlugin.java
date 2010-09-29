@@ -24,18 +24,20 @@
  *
  */
 package org.hyperic.hq.plugin.rabbitmq.product;
- 
+
 import org.hyperic.hq.plugin.rabbitmq.configure.ApplicationContextCreator;
 import org.hyperic.hq.plugin.rabbitmq.configure.ConnectionFactoryBeanDefinitionBuilder;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerGateway;
+import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.util.config.ConfigResponse; 
+import org.hyperic.hq.product.ServerResource;
+import org.hyperic.util.config.ConfigResponse;
 import org.springframework.util.Assert;
 
+import java.util.List;
+
 /**
- * RabbitProductPlugin
- *
+ * RabbitProductPlugin 
  * @author Helena Edelson
  */
 public class RabbitProductPlugin extends ProductPlugin {
@@ -60,15 +62,14 @@ public class RabbitProductPlugin extends ProductPlugin {
      * If context not initialized, since it can not be initialized until we have
      * necessary parameters from the config parameter, initialize it.
      *
-     * @param preInitialize
+     * @param preInitialized
      * @return
      */
-    public static void initializeGateway(ConfigResponse preInitialize) {
-        if (!ConnectionFactoryBeanDefinitionBuilder.hasConfigValues(preInitialize)) return;
-
-        ApplicationContextCreator.createApplicationContext(ConnectionFactoryBeanDefinitionBuilder.build(preInitialize));
-        rabbitGateway = ApplicationContextCreator.getChildApplicationContext().getBean(RabbitBrokerGateway.class);
+    public static void initializeGateway(ConfigResponse preInitialized) {
+        if (!ConnectionFactoryBeanDefinitionBuilder.hasConfigValues(preInitialized)) return;
+ 
+        rabbitGateway = ApplicationContextCreator.createBeans(preInitialized);
         Assert.notNull(rabbitGateway, "rabbitGateway must not be null");
     }
-
+ 
 }

@@ -30,6 +30,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.PostConstruct;
 
@@ -45,6 +46,8 @@ import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.TimeUtil;
+import org.hyperic.util.stats.StatCollector;
+import org.hyperic.util.stats.StatUnreachableException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,8 +67,9 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
         ConcurrentStatsCollector.AVAIL_BACKFILLER_NUMPLATFORMS;
 
     private long startTime = 0;
-    private long wait = 10 * MeasurementConstants.MINUTE;
+    private long wait = 5 * MeasurementConstants.MINUTE;
     private final Object IS_RUNNING_LOCK = new Object();
+    private final AtomicBoolean hasStarted = new AtomicBoolean(false);
     private boolean isRunning = false;
     private AvailabilityManager availabilityManager;
     private PermissionManager permissionManager;
@@ -317,12 +321,46 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
     }
 
     private boolean canStart(long now) {
-        if (startTime == 0) {
-            startTime = now;
-            return false;
-        } else if ((startTime + wait) > now) {
-            return false;
+        if (!hasStarted.get()) {
+            if (startTime == 0) {
+                startTime = now;
+            } else if ((startTime + wait) <= now) {
+                // start after the initial wait time only if the
+                // availability inserter is not "backlogged"
+                if (getAvailabilityInserterQueueSize() < 1000) {
+                    hasStarted.set(true);
+                }
+            }
         }
-        return true;
+        
+        return hasStarted.get();
+    }
+    
+    private long getAvailabilityInserterQueueSize() {
+        boolean debug = log.isDebugEnabled();
+        String statKey = "AvailabilityInserter_QUEUE_SIZE";
+        long currentQueueSize = -1;
+
+        StatCollector stat = (StatCollector) concurrentStatsCollector.getStatKeys().get(statKey);
+
+        if (stat == null) {
+            if (debug) {
+                log.debug(statKey + " is not registered in the ConcurrentStatsCollector");
+            }
+        } else {
+            try {
+                currentQueueSize = stat.getVal();
+            } catch (StatUnreachableException e) {
+                if (debug) {
+                    log.debug("Could not get value for " + statKey + ": " + e.getMessage(), e);
+                }
+            }
+        }
+        
+        if (debug) {
+            log.debug("Current availability inserter queue size = " + currentQueueSize);
+        }
+
+        return currentQueueSize;
     }
 }

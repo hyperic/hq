@@ -559,6 +559,12 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     public int getNumMembers(ResourceGroup g) {
         return getMembers(g).size();
     }
+    
+    @Transactional(readOnly = true)
+    public AppdefGroupValue getGroupConvert(AuthzSubject subject, Integer groupId) {
+        ResourceGroup group = findResourceGroupById(groupId);
+        return getGroupConvert(subject, group);
+    }
 
     /**
      * Temporary method to convert a ResourceGroup into an AppdefGroupValue

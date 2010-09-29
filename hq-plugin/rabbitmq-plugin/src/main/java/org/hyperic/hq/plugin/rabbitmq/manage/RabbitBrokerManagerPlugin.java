@@ -49,10 +49,9 @@ public class RabbitBrokerManagerPlugin extends ControlPlugin {
 
     public void doAction(String action, String[] args) throws PluginException {
         setResult(ControlPlugin.RESULT_FAILURE);
-        logger.debug("\n\n*****Received " + args.length + " args");
+        logger.debug("Received " + args.length + " args");
         for (String s : args) {
             s = s.trim();
-            logger.debug("\n*****control arg=" + s);
         }
         
         RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();

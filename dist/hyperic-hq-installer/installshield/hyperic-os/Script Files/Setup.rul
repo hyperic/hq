@@ -30,13 +30,21 @@
     export prototype ValidateAdminPrivilege(HWND);
     export prototype ValidatePorts(HWND);   
     prototype ForceDeleteDir(STRING, STRING);
+    prototype STRING GetCurrHqVersion();
+    prototype STRING GetSubFolderName(STRING, STRING);
     
-#define HQ_VERSION "4.3.0"    
+//#define HQ_VERSION "4.3.0"    
     
 #define  SETUP_FILE "setup.conf" 
+
+// UninstallActions properties 
+#define  INSTALLDIR_INDEX 0  
+#define  REMOVE_INDEX 1
+ 
+// RemoveFilesRollback properties 
 #define  INSTALLDIR_INDEX 0  
 #define  ADD_LOCAL_INDEX 1
-#define  REMOVE_INDEX 1 
+
 #define  SHORTCUT_WEBAPP_PORT_INDEX 2 
 #define  SHORTCUT_WEBAPP_HOST_INDEX 3
 
@@ -59,6 +67,7 @@
 #define  HQ_ENGINE_PORT_INDEX  15
 #define  HQ_ENGINE_JNP_PORT_INDEX  16 
 #define SERVER_WINDOWS_TEMP_INDEX 17   
+#define SERVER_DB_ENC_KEY_PW 18   
 
 // agent properties 
 #define  AGENT_INSTALLDIR_INDEX 0  
@@ -76,12 +85,94 @@
 #define  BIN_INDEX 2
 #define  DATA_INDEX 3
                                     
+// String constants for the start of the sub-folder names.
+
+#define AGENT_FOLDER_SUBSTR		"agent"
+#define SERVER_FOLDER_SUBSTR	"server"
+
+// Registry keys for determining current version.
+
+#define HQ_PRODUCT_KEY "SOFTWARE\\Hyperic HQ"
+#define HQ_CURRENT_VERSION "CurrentVersion"
+
+function STRING GetCurrHqVersion()
+STRING sVersion;
+NUMBER nvBufferSize, nvType, nvRetVal;
+begin
+
+   RegDBSetDefaultRoot(HKEY_LOCAL_MACHINE);
+   
+   nvRetVal = RegDBGetKeyValueEx(
+      HQ_PRODUCT_KEY, // [in] subkey
+      HQ_CURRENT_VERSION, // [in] value name
+      nvType, // [out] value type
+      sVersion, // [out] value, in string form
+      nvBufferSize); // [out] value size
+
+    if (nvRetVal < 0) then
+       if (nvRetVal == -1) then
+          sVersion = "return value = -1.";
+       else
+          sVersion = FormatMessage(nvRetVal);
+       endif;
+       
+       MessageBox("Unable to fetch current HQ version information due to " + sVersion, SEVERE);
+       abort;
+    endif;
+   
+//    MessageBox ("sVersion in GetCurrHqVersion is " + sVersion, INFORMATION); 
+	return sVersion;
+end; 
+
+function STRING GetSubFolderName(sInstallDir, sStartsWith)
+	LIST Folders;
+	NUMBER nResult, nLocation;
+	STRING sSubFolderName, svString;
+begin
+	sSubFolderName = "";
+	Folders = ListCreate(STRINGLIST);
+	nResult = FindAllDirs(sInstallDir, EXCLUDE_SUBDIR, Folders);
+	
+	if (nResult < 0) then
+       MessageBox("No subdirectories found under " + sInstallDir + ", not a valid installation.", SEVERE);
+       abort;
+	endif;
+
+	nResult = ListGetFirstString (Folders, svString); 
+ 
+    // Loop while list items continue to be retrieved and we haven't
+    // found the one we want.
+
+    while (nResult != END_OF_LIST) 
+		nLocation = StrFind(svString, sStartsWith);
+		
+		if (nLocation < 0) then
+    		// Get the next string in the list. 
+	    	nResult = ListGetNextString (Folders, svString);
+		else
+			nResult = END_OF_LIST;
+			sSubFolderName = svString;
+	    endif;
+
+    endwhile; 
+
+	if (nLocation < 0) then
+       MessageBox("No subdirectories that contain " + sStartsWith + " found under " + sInstallDir + ", not a valid installation.", SEVERE);
+       abort;
+//    else
+//    	MessageBox("Sub folder = " + sSubFolderName, INFORMATION);
+	endif;
+
+	ListDestroy(Folders);
+	
+	return sSubFolderName;
+end;
 
 function PopulateConfig(hMSI)   
     STRING  sInstallDir, sAddLocal, sInsertLine, sMailHost, sFormattedDir, sDatabasePassword, 
     	sDatabaseUser, sMailSender, sAdminUser, sAdminPassword, sAdminEmail, 
     	sBaseUrl, sWebAppHost, sWebAppPort, sWebAppSecurePort, sMulticastAddr, sMulticastPort,
-    	sPostgresqlPort, sHqEnginePort, sHqEngineJnpPort, sDatabaseUrl, sWindowsTemp;    
+    	sPostgresqlPort, sHqEnginePort, sHqEngineJnpPort, sDatabaseUrl, sWindowsTemp, sDbEncKeyPw;    
     LIST listProperties; 
 begin  
     listProperties = GetMSIProperties(hMSI); 
@@ -109,7 +200,8 @@ begin
     sHqEnginePort = GetIndexedProperty(listProperties, HQ_ENGINE_PORT_INDEX); 
     sHqEngineJnpPort = GetIndexedProperty(listProperties, HQ_ENGINE_JNP_PORT_INDEX); 
     sDatabaseUrl = FixPath("jdbc:postgresql://127.0.0.1:" + sPostgresqlPort + "/hqdb?protocolVersion=2");
-    sWindowsTemp =  GetIndexedProperty(listProperties, SERVER_WINDOWS_TEMP_INDEX); 
+    sWindowsTemp =  GetIndexedProperty(listProperties, SERVER_WINDOWS_TEMP_INDEX);
+    sDbEncKeyPw = GetIndexedProperty(listProperties, SERVER_DB_ENC_KEY_PW); 
     ListDestroy ( listProperties );   
     
     // delete the setup properties if still exists from a previous component installation
@@ -147,6 +239,9 @@ begin
 	    ListAddString ( listProperties, "hq-engine.server.port=" + sHqEnginePort, AFTER );
 	    ListAddString ( listProperties, "hq-engine.jnp.port=" + sHqEngineJnpPort, AFTER );    
 	    ListAddString ( listProperties, "server.ha.bind_addr=*.*", AFTER );  
+        ListAddString ( listProperties, "server.hibernate.dialect=org.hyperic.hibernate.dialect.PostgreSQLDialect", AFTER );
+        ListAddString ( listProperties, "server.connection-validation-sql=select 1", AFTER );  
+        ListAddString ( listProperties, "server.encryption-key=" + sDbEncKeyPw, AFTER );  
     	WritePropertiesToFile(listProperties, sWindowsTemp, SETUP_FILE);   
     	ListDestroy ( listProperties );
 	endif;    
@@ -154,7 +249,7 @@ begin
     	(sAddLocal = "ALL") || (sAddLocal = "")) then 
 	    listProperties = ListCreate (STRINGLIST);  
 	    // populate the properties list before writing out to file
-	    ListAddString ( listProperties, "agent.installdir=" + sFormattedDir, AFTER );
+	    ListAddString ( listProperties, "hyperic-hq-agent.installdir=" + sFormattedDir, AFTER );  
 	    // write out properties to file
 		WritePropertiesToFile(listProperties, sWindowsTemp, SETUP_FILE);  
 		ListDestroy ( listProperties );
@@ -219,7 +314,7 @@ begin
     SubstituteToken("agent.pdkPluginDir", "#agent.pdkPluginDir", sInstallDir + "agent.properties");
     
     // copy properties to agent folder
-    CopyFile ( sInstallDir ^ "agent.properties" , sInstallDir ^ "agent-" + HQ_VERSION ^ "conf" ^ "agent.properties" );           
+    CopyFile ( sInstallDir ^ "agent.properties" , GetSubFolderName(sInstallDir, AGENT_FOLDER_SUBSTR) ^ "conf" ^ "agent.properties" );           
 	DeleteFile( sInstallDir ^ "agent.properties");
 end;    
 
@@ -339,7 +434,7 @@ end;
 
 // clean up files before new install                      
 function RollbackFiles(hMSI)  
-    STRING  sInstallDir, sAddLocal, szFile; 
+    STRING  sInstallDir, sAddLocal, szFile, sFolderName; 
     LIST listProperties; 
 begin   
     listProperties = GetMSIProperties(hMSI); 
@@ -349,21 +444,19 @@ begin
 	// delete feature-specific stuff    
 	if ((StrFind ( sAddLocal , "Server" )>=0) ||
 		(sAddLocal = "ALL") || (sAddLocal = "")) then                       
-		ForceDeleteDir (sInstallDir, sInstallDir ^ "server-" + HQ_VERSION );  
+		sFolderName = GetSubFolderName(sInstallDir, SERVER_FOLDER_SUBSTR);
+		ForceDeleteDir (sInstallDir, sFolderName );
 	endif;    
     if ((StrFind ( sAddLocal , "Agent" )>=0) ||
     	(sAddLocal = "ALL") || (sAddLocal = "")) then                      
-		ForceDeleteDir ( sInstallDir, sInstallDir ^ "agent-" + HQ_VERSION ); 
+		sFolderName = GetSubFolderName(sInstallDir, AGENT_FOLDER_SUBSTR);
+		ForceDeleteDir ( sInstallDir, sFolderName ); 
 	endif;
-    if ((StrFind ( sAddLocal , "Shell" )>=0) || 
-    	(sAddLocal = "ALL") || (sAddLocal = "")) then                        
-		ForceDeleteDir ( sInstallDir, sInstallDir ^ "shell-" + HQ_VERSION ); 
-	endif;  
 end;
                       
 // clean up files before new install                      
 function UninstallActions(hMSI)  
-    STRING  sInstallDir, szFile, sRemoveFeatures; 
+    STRING  sInstallDir, szFile, sRemoveFeatures, sFolderName; 
     NUMBER rslt;
     LIST listProperties; 
 begin   
@@ -377,44 +470,29 @@ begin
     if ((StrFind ( sRemoveFeatures , "Server" )>=0) ||
     	(sRemoveFeatures = "ALL" ) || (sRemoveFeatures = "")) then   
     	// try to stop the service   
-		ServiceStopService ( "hyperic-hq-database"); 
 		ServiceStopService ( "Hyperic HQ Server");   
-		ServiceRemoveService ( "hyperic-hq-database");
 		ServiceRemoveService ( "Hyperic HQ Server");        
-		ForceDeleteDir(sInstallDir, sInstallDir ^ "server-" + HQ_VERSION ); 
+		sFolderName = GetSubFolderName(sInstallDir, SERVER_FOLDER_SUBSTR);
+		ForceDeleteDir(sInstallDir, sFolderName ); 
 	endif;
     if ((StrFind ( sRemoveFeatures , "Agent" )>=0) ||
     	(sRemoveFeatures = "ALL" ) || (sRemoveFeatures = "")) then 
     	// try to stop the service        
 		ServiceStopService ( "Hyperic HQ Agent"); 
 		ServiceRemoveService ( "Hyperic HQ Agent");                            
-		ForceDeleteDir(sInstallDir, sInstallDir ^ "agent-" + HQ_VERSION ); 
+		sFolderName = GetSubFolderName(sInstallDir, AGENT_FOLDER_SUBSTR);
+		ForceDeleteDir(sInstallDir, sFolderName ); 
 	endif;
 	
-	// delete files now that all services have been stopped
-    if ((StrFind ( sRemoveFeatures , "Server" )>=0) ||
-    	(sRemoveFeatures = "ALL" ) || (sRemoveFeatures = "")) then        
-		ForceDeleteDir(sInstallDir, sInstallDir ^ "server-" + HQ_VERSION ); 
-	endif;
-    if ((StrFind ( sRemoveFeatures , "Agent" )>=0) ||
-    	(sRemoveFeatures = "ALL" ) || (sRemoveFeatures = "")) then                            
-		ForceDeleteDir(sInstallDir, sInstallDir ^ "agent-" + HQ_VERSION ); 
-	endif;	
-    if ((StrFind ( sRemoveFeatures , "Shell" )>=0) ||
-    	(sRemoveFeatures = "ALL" ) || (sRemoveFeatures = "")) then  
-    	// TODO
-    	// MessageBox here                     
-		ForceDeleteDir (sInstallDir, sInstallDir ^ "shell-" + HQ_VERSION );    
-	endif;
 	// remove the generated log file so we can clean up properly		
     if ((sRemoveFeatures = "ALL") || (sRemoveFeatures = "")) then
-   		DeleteFile ( sInstallDir ^  "install" ^ "installer-" + HQ_VERSION ^ "hq-install.log" ); 
-		DeleteFile ( sInstallDir ^  "install" ^ "installer-" + HQ_VERSION ^ "hq-install.log.debug" ); 
+   		DeleteFile ( sInstallDir ^  "install" ^ "installer" ^ "logs" ^ "hq-install.log" ); 
+		DeleteFile ( sInstallDir ^  "install" ^ "installer" ^ "logs" ^ "hq-install.log.verbose" );
 	endif;		   
 end;
 
 function CreateServerService(hMSI)
-    STRING  sInstallDir, sShellDir, sJavaHome; 
+    STRING  sInstallDir, sShellDir, sJavaHome, sServerFolderName; 
     LIST listProperties;   
     HWND hRec;
     NUMBER nTimeOut;
@@ -430,20 +508,27 @@ begin
    	// remove service if previously found
 	if (ServiceExistsService ( "Hyperic HQ Server" )) then 
     	// try to stop the service        
-		ServiceStopService ( "hyperic-hq-database"); 
+//		ServiceStopService ( "hyperic-hq-database"); 
 		ServiceStopService ( "Hyperic HQ Server");
-		ServiceRemoveService ( "hyperic-hq-database");
+//		ServiceRemoveService ( "hyperic-hq-database");
 		ServiceRemoveService ( "Hyperic HQ Server");
 	endif;    
            
-    sJavaHome = "JAVA_HOME=" + sInstallDir ^ "server-" + HQ_VERSION ^ "jre";                                      
+	sServerFolderName = GetSubFolderName(sInstallDir, SERVER_FOLDER_SUBSTR);
+    sJavaHome = "JAVA_HOME=" + sServerFolderName ^ "jre";
+
 	LAAW_PARAMETERS.lpEnvironment = &sJavaHome; 
 	LAAW_PARAMETERS.nTimeOut = nTimeOut;
 	LAAW_PARAMETERS.lpCurrentDirectory = &sInstallDir;   	  
 	
-    if (LaunchAppAndWait ( sInstallDir ^ "server-" + HQ_VERSION ^ "bin" ^ "hq-server.exe" , "-i" , 
-       	LAAW_OPTION_WAIT | LAAW_OPTION_HIDDEN ) < 0) then
-       	MessageBox ("Failed to create HQ Server Windows Service" , SEVERE);    	
+	sJavaHome = sServerFolderName ^ "bin" ^ "hq-server.bat";
+	LongPathToQuote( sJavaHome, TRUE );
+
+    if (LaunchAppAndWait ( sJavaHome , "install" , 
+       	LAAW_OPTION_HIDDEN | LAAW_OPTION_WAIT | LAAW_OPTION_USE_SHELLEXECUTE ) < 0) then
+       	sJavaHome = FormatMessage(LAAW_PARAMETERS.nLaunchResult);
+       	MessageBox ("Failed to create HQ Server Windows Service, error message = " +
+       		sJavaHome, SEVERE);    	
 	endif; 		  
 end;   
 
@@ -472,7 +557,7 @@ begin
 end;   
 
 function CreateAgentService(hMSI)   
-    STRING  sInstallDir, sShellDir, sJavaHome, szProgram, szApplicationPath; 
+    STRING  sInstallDir, sShellDir, sJavaHome, szProgram, szApplicationPath, sAgentFolderName; 
     LIST listProperties;     
     HWND hRec;
     NUMBER nTimeOut;
@@ -492,25 +577,29 @@ begin
 		ServiceStopService ( "Hyperic HQ Agent"); 
 		ServiceRemoveService ( "Hyperic HQ Agent");
 	endif;    
-                                          
-    sJavaHome = "JAVA_HOME=" + sInstallDir ^ "agent-" + HQ_VERSION ^ "jre";                                      
+
+	sAgentFolderName = GetSubFolderName(sInstallDir, AGENT_FOLDER_SUBSTR);
+    sJavaHome = "JAVA_HOME=" + sAgentFolderName ^ "jre";                       
+
 	//LAAW_PARAMETERS.lpEnvironment = &sJavaHome; 
 	LAAW_PARAMETERS.nTimeOut = nTimeOut;
 	//LAAW_PARAMETERS.lpCurrentDirectory = &sInstallDir;   	  
 	
 	GetEnvVar ( "COMSPEC", szProgram );     
-	szApplicationPath = sInstallDir ^ "agent-" + HQ_VERSION ^ "bin" ^ "hq-agent.bat";   
+	szApplicationPath = sAgentFolderName ^ "bin" ^ "hq-agent.bat";   
 	LongPathToQuote( szApplicationPath, TRUE );    
 	        
     if (LaunchAppAndWait ( szApplicationPath , "install" , 
 //    if (LaunchAppAndWait ( "", szProgram +  " /c " +  szApplicationPath + " install" ,  
        	LAAW_OPTION_WAIT | LAAW_OPTION_HIDDEN ) < 0) then
-       	MessageBox ("Failed to create HQ Agent Windows Service" , SEVERE);    	
+       	sJavaHome = FormatMessage(LAAW_PARAMETERS.nLaunchResult);
+       	MessageBox ("Failed to create HQ Agent Windows Service, error message = " +
+       		sJavaHome, SEVERE);    	
 	endif; 
 end; 
 
 function StartAgent(hMSI) 
-	STRING  sInstallDir, szProgram, szApplicationPath;       
+	STRING  sInstallDir, szProgram, szApplicationPath, sAgentFolderName;       
 	LIST listProperties;  
     HWND hRec;    
     NUMBER nTimeOut;
@@ -526,8 +615,9 @@ begin
 
 	LAAW_PARAMETERS.nTimeOut = nTimeOut; 	  
 	
+	sAgentFolderName = GetSubFolderName(sInstallDir, AGENT_FOLDER_SUBSTR);
 	GetEnvVar ( "COMSPEC", szProgram );     
-	szApplicationPath = sInstallDir ^ "agent-" + HQ_VERSION ^ "bin" ^ "hq-agent.bat";   
+	szApplicationPath = sAgentFolderName ^ "bin" ^ "hq-agent.bat";   
 	LongPathToQuote( szApplicationPath, TRUE );                                     
 	
 	if (LaunchAppAndWait ( szApplicationPath, "start" , 
@@ -570,7 +660,7 @@ begin
     sTemp = GetIndexedProperty(listProperties, 1);
     ListDestroy ( listProperties );  
 	// update progress bar
-	UpdateProgressBar(hMSI, "Installing components (this may take some minutes)");
+	UpdateProgressBar(hMSI, "Installing components (this may take some time)");
 	// delete any prior jres in the temp folder
 	ForceDeleteDir(sInstallDir, sTemp ^ "jre");	
 	// invoke ant silently in the background
@@ -587,40 +677,32 @@ end;
 
 
 function ValidateInstallDirs(hMSI)
-STRING sInstallDir, sAddLocal;  
+STRING sInstallDir, sAddLocal, sProductVersion;  
 NUMBER nvInstallState, nvActionState, nvSize;
 begin 
     nvSize = 100;                                                           
     // set agent properties
     MsiGetProperty ( hMSI , "INSTALLDIR" , sInstallDir , nvSize );
-    MsiGetProperty ( hMSI , "ADDLOCAL" , sAddLocal , nvSize ); 	
+    MsiGetProperty ( hMSI , "ADDLOCAL" , sAddLocal , nvSize );
+    MsiGetProperty ( hMSI, "ProductVersion", sProductVersion, nvSize);
 	if ((StrFind ( sAddLocal , "Server" )>=0) || 
 		(sAddLocal = "ALL") || (sAddLocal = "")) then
 	    // verify that a server doesn't already exist in the install dir 
 	    // if it does, bail out
-	    if (ExistsDir ( sInstallDir  ^ "server-" + HQ_VERSION) = EXISTS) then
+	    if (ExistsDir ( sInstallDir  ^ "server-" + sProductVersion) = EXISTS) then
 	    	MessageBox ("A server already exists in directory " + sInstallDir, SEVERE); 
 	    	abort;
 	    endif;
 	endif;
 	if ((StrFind ( sAddLocal , "Agent" )>=0) || 
 		(sAddLocal = "ALL") || (sAddLocal = "")) then
-	    // verify that a server doesn't already exist in the install dir 
+	    // verify that an agent doesn't already exist in the install dir 
 	    // if it does, bail out
-	    if (ExistsDir ( sInstallDir  ^ "agent-" + HQ_VERSION) = EXISTS) then
+	    if (ExistsDir ( sInstallDir  ^ "agent-" + sProductVersion) = EXISTS) then
 	    	MessageBox ("An agent already exists in directory " + sInstallDir, SEVERE); 
 	    	abort;
 	    endif;  
 	endif; 
-	if ((StrFind ( sAddLocal , "Shell" )>=0) || 
-		(sAddLocal = "ALL") || (sAddLocal = "")) then
-	    // verify that a server doesn't already exist in the install dir 
-	    // if it does, bail out
-	    if (ExistsDir ( sInstallDir  ^ "shell-" + HQ_VERSION) = EXISTS) then
-	    	MessageBox ("A shell already exists in directory " + sInstallDir, SEVERE); 
-	    	abort;
-	    endif;
-	endif;
 end;	
 
 function ValidateAdminPrivilege(hMSI)
@@ -637,7 +719,7 @@ begin
 end;
 
 function UpdateShortcuts(hMSI)  
-STRING sInstallDir, sAddLocal, sWebAppPort, sBaseUrl, sJavaHome, sFile;
+STRING sInstallDir, sAddLocal, sWebAppPort, sBaseUrl, sJavaHome, sFile, sVersion;
 NUMBER nLineNumber;
 LIST listProperties; 
 begin
@@ -647,6 +729,8 @@ begin
  	sWebAppPort = GetIndexedProperty(listProperties, SHORTCUT_WEBAPP_PORT_INDEX);
 	sBaseUrl = GetIndexedProperty(listProperties, SHORTCUT_WEBAPP_HOST_INDEX);
     ListDestroy ( listProperties );              
+
+	sVersion = GetCurrHqVersion();
 
 	if ((StrFind ( sAddLocal , "Server" )>=0) || 
 		(sAddLocal = "ALL") || (sAddLocal = "")) then
@@ -660,30 +744,20 @@ begin
 	    endif;
 	    sBaseUrl = "http://" + sBaseUrl +":" + sWebAppPort + "/";  	
 		nLineNumber = 0;
-		if (FileInsertLine ( sInstallDir ^ "Hyperic HQ Dashboard.URL" , "URL=" + sBaseUrl, nLineNumber , AFTER ) < 0) then
+		sFile = sInstallDir ^ "Hyperic HQ Dashboard.URL";
+		if (FileInsertLine ( sFile , "URL=" + sBaseUrl, nLineNumber , AFTER ) < 0) then
 			MessageBox("FileInsertLine failed into file " + sFile, SEVERE);
 		endif;       
 	endif;    
     if ((StrFind ( sAddLocal , "Agent" )>=0) || 
     	(sAddLocal = "ALL") || (sAddLocal = "")) then
 		nLineNumber = 0; 
-		sJavaHome =  sInstallDir + "agent-" + HQ_VERSION + "\\jre";
-		if (FileInsertLine ( sInstallDir ^ "start_agent.bat" , "set JAVA_HOME=" + sJavaHome, nLineNumber , AFTER ) < 0) then
+		sJavaHome =  sInstallDir + "agent-" + sVersion + "\\jre";
+		sFile = sInstallDir ^ "start_agent.bat";
+		if (FileInsertLine ( sFile , "set JAVA_HOME=" + sJavaHome, nLineNumber , AFTER ) < 0) then
 			MessageBox("FileInsertLine failed into file " + sFile, SEVERE);
 		endif;  	        
 	endif;
-    if ((StrFind ( sAddLocal , "Shell" )>=0) || 
-    	(sAddLocal = "ALL") || (sAddLocal = "")) then
-		nLineNumber = 0;
-		sJavaHome =  sInstallDir + "shell-" + HQ_VERSION + "\\jre";
-		if (FileInsertLine ( sInstallDir ^ "launch_shell.bat" , "set JAVA_HOME=" + sJavaHome, nLineNumber , AFTER ) < 0) then
-			MessageBox("FileInsertLine failed into file " + sFile, SEVERE);
-		endif;
-		nLineNumber += 1;
-		if (FileInsertLine ( sInstallDir ^ "launch_shell.bat" , "call \"" + sInstallDir + "shell-" + HQ_VERSION + "\\hq-shell.bat\"", nLineNumber , AFTER ) < 0) then
-			MessageBox("FileInsertLine failed into file " + sFile, SEVERE);
-		endif;  		     
-	endif;         
 end;                                     
   
   // initialize MSI installation properties for later      
