@@ -43,7 +43,7 @@ public class ConnectionTest {
 
        public static void main(String[] args) throws IOException, OtpAuthException, OtpErlangExit {
            ConfigResponse conf = new ConfigResponse();
-           conf.setValue(DetectorConstants.HOST, "localhost");
+           conf.setValue(DetectorConstants.HOST, NODE);
            conf.setValue(DetectorConstants.USERNAME, "guest");
            conf.setValue(DetectorConstants.PASSWORD, "guest");
            conf.setValue(DetectorConstants.PLATFORM_TYPE, "Linux");

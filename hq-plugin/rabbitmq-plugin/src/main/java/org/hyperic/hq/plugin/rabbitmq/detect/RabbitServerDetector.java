@@ -97,11 +97,6 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      */
     @Override
     protected List discoverServices(ConfigResponse serviceConfig) throws PluginException {
-        /*if (serviceConfig.getValue(DetectorConstants.HOST) == null) {
-            String host = inferHostname(serviceConfig);
-            if (host != null) serviceConfig.setValue(DetectorConstants.HOST, host);
-        }*/
-
         String value = RabbitUtils.configureCookie(serviceConfig);
         Assert.notNull(value, "Cookie value for node must not be null");
 
@@ -120,7 +115,15 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         }
 
         /** get rabbit  services */
-        List<ServiceResource> rabbitResources = createRabbitResources(serviceConfig);
+
+        List<ServiceResource> rabbitResources = null;
+        try {
+            rabbitResources = createRabbitResources(serviceConfig);
+        }
+        catch(Exception e) {
+            logger.error(e);
+        }
+
         if (rabbitResources != null && rabbitResources.size() >= 0) {
             serviceResources.addAll(rabbitResources);
         }
@@ -134,7 +137,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @return
      * @throws PluginException
      */
-    public List<ServiceResource> createRabbitResources(ConfigResponse serviceConfig) throws PluginException {
+    public List<ServiceResource> createRabbitResources(ConfigResponse serviceConfig) throws PluginException, InterruptedException {
         logger.debug("createRabbitResources.config=" + serviceConfig);
         List<ServiceResource> rabbitResources = null;
 
@@ -151,7 +154,6 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
             List<String> virtualHosts = rabbitGateway.getVirtualHosts();
 
             if (virtualHosts != null) {
-                logger.debug("*******************createRabbitResources.virtualHosts.get(0)=" + virtualHosts.get(0));
                 rabbitResources = new ArrayList<ServiceResource>();
 
                 for (String virtualHost : virtualHosts) {
@@ -161,7 +163,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
 
                     List<ServiceResource> queues = createQueueServiceResources(rabbitGateway, virtualHost);
                     if (queues != null) rabbitResources.addAll(queues);
-                    logger.debug("*******************createRabbitResources.queues.get(0)=" + queues.get(0));
+
                     List<ServiceResource> connections = createConnectionServiceResources(rabbitGateway, virtualHost);
                     if (connections != null) rabbitResources.addAll(connections);
 

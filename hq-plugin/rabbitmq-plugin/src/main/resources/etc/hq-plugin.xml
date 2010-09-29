@@ -41,10 +41,8 @@
             to connect to the node and query information on Queues, Channels, Connections, Processes, Users, and Exchanges.
            </li><li>
           <h3>Erlang Cookie Location</h3>
-           Because there can be multiple cookies on each managed host Hyperic is monitoring, each with its own erlang cookie,
-           please supply the 'path/to/.erlang.cookie' for this particular node in the Erlang Cookie text box. This will not be
-           necessary in the next version, and multiple nodes (clustered or not) on one machine will be supported as well.
-           Insure chown rabbitmq: /var/lib/rabbitmq/.erlang.cookie shows the Hyperic Agent can access that file.</li>
+           If you have multiple cookies on the managed host Hyperic is monitoring and you do not see Queues, etc auto-discovered,
+           please supply the 'path/to/.erlang.cookie' for this particular node in the Erlang Cookie text box.</li>
            </ol>
           </p>
           <p>
@@ -114,13 +112,13 @@
         &process-metrics;
 
 
-        <service name="Proccess">
+        <service name="Process">
             <plugin type="log_track" class="org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerLog"/>
             <config type="product">
                 <option name="process.name" description="XXXXXXX"/>
             </config>
             <config type="measurement">
-                <option name="process.query" default="State.Name.sw=beam,Args.*.eq=-sname,Args.*.eq=%proccess.name%"
+                <option name="process.query" default="State.Name.sw=beam,Args.*.eq=-sname,Args.*.eq=%process.name%"
                         description="XXXXXXX"/>
             </config>
             <metric name="Availability"
@@ -136,23 +134,31 @@
                     category="THROUGHPUT"
                     units="none"
                     indicator="true"
+                    interval="60000"
+                    defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Consumers"
                     alias="consumers"
                     category="UTILIZATION"
                     units="none"
                     indicator="true"
+                    interval="60000"
+                    defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Transactions"
                     alias="transactions"
                     category="THROUGHPUT"
                     units="none"
                     indicator="true"
+                    interval="60000"
+                    defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Availability"
                     category="AVAILABILITY"
                     units="percentage"
                     indicator="true"
+                    interval="60000"
+                    defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Memory"
                     alias="memory"
@@ -184,6 +190,8 @@
                     category="UTILIZATION"
                     units="none"
                     indicator="true"
+                    interval="60000"
+                    defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Availability"
                     category="AVAILABILITY"
@@ -215,12 +223,16 @@
                     category="THROUGHPUT"
                     units="B"
                     indicator="true"
+                    interval="60000"
+                    defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Octets Sent"
                     alias="octetsSent"
                     category="THROUGHPUT"
                     units="B"
                     indicator="true"
+                    interval="60000"
+                    defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Network Packets Received"
                     alias="packetsReceived"
@@ -233,18 +245,24 @@
                     category="THROUGHPUT"
                     units="B"
                     indicator="true"
+                    interval="60000"
+                    defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Channels"
                     alias="channelCount"
                     category="UTILIZATION"
                     units="none"
                     indicator="true"
+                    interval="60000"
+                    defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Pending Sends"
                     alias="pendingSends"
                     category="UTILIZATION"
                     units="none"
                     indicator="true"
+                    interval="60000"
+                    defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Availability"
                     category="AVAILABILITY"
