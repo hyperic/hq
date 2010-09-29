@@ -27,13 +27,9 @@ package org.hyperic.hq.bizapp.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.annotation.PostConstruct;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -58,8 +54,6 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
-import org.hyperic.hq.common.DiagnosticObject;
-import org.hyperic.hq.common.DiagnosticsLogger;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.AttachType;
@@ -70,8 +64,6 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.shared.ProductManager;
-import org.hyperic.util.PrintfFormat;
-import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
@@ -92,13 +84,13 @@ public class ProductBossImpl implements ProductBoss {
     private UIPluginManager uiPluginManager;
     private AuthzSubjectManager authzSubjectManager;
     private SessionManager sessionManager;
-    private DiagnosticsLogger diagnosticsLogger;
+    
 
     @Autowired
     public ProductBossImpl(ResourceGroupManager resourceGroupManager,
                            PlatformManager platformManager, ConfigManager configManager,
                            UIPluginManager uiPluginManager, AuthzSubjectManager authzSubjectManager,
-                           SessionManager sessionManager, DiagnosticsLogger diagnosticsLogger,
+                           SessionManager sessionManager,
                            ProductManager productManager) {
         this.resourceGroupManager = resourceGroupManager;
         this.platformManager = platformManager;
@@ -106,94 +98,13 @@ public class ProductBossImpl implements ProductBoss {
         this.uiPluginManager = uiPluginManager;
         this.authzSubjectManager = authzSubjectManager;
         this.sessionManager = sessionManager;
-        this.diagnosticsLogger = diagnosticsLogger;
         this.productManager = productManager;
     }
 
     private AuthzSubject getOverlord() {
         return authzSubjectManager.getOverlordPojo();
     }
-    
-    @PostConstruct
-    public void initStats() {
-        // Add ehcache statistics to the diagnostics
-        DiagnosticObject cacheDiagnostics = new DiagnosticObject() {
-            private PrintfFormat _fmt = 
-                new PrintfFormat("%-55s %-6d %-6d %6d");
-            private PrintfFormat _hdr = 
-                new PrintfFormat("%-55s %-6s %-6s %6s");
-
-            public String getName() {
-                return "EhCache Diagnostics";
-            }
-
-            public String getShortName() {
-                return "ehcacheDiag";
-            }
-
-            private List<Cache> getSortedCaches() {
-                List<Cache> res = getCaches();
-                
-                Collections.sort(res, new Comparator<Cache>() {
-                    public int compare(Cache c1, Cache c2) {
-                        return c1.getName().compareTo(c2.getName());
-                    }
-                });
-                return res;
-            }
-            
-            public String getStatus() {
-                String separator = System.getProperty("line.separator");
-                StringBuffer buf = new StringBuffer(separator);
-                Object[] fmtArgs = new Object[5];
-
-                fmtArgs[0] = "Cache";
-                fmtArgs[1] = "Size";
-                fmtArgs[2] = "Hits";
-                fmtArgs[3] = "Misses";
-                buf.append(_hdr.sprintf(fmtArgs))
-                   .append(separator);
-                fmtArgs[0] = "=====";
-                fmtArgs[1] = "====";
-                fmtArgs[2] = "====";
-                fmtArgs[3] = "=====";
-                buf.append(_hdr.sprintf(fmtArgs));
-
-                for (Cache cache : getSortedCaches() ) {
-                    fmtArgs[0] = StringUtil.dotProximate(cache.getName(), 55);
-                    fmtArgs[1] = new Integer(cache.getSize());
-                    fmtArgs[2] = new Long(cache.getStatistics().getCacheHits());
-                    fmtArgs[3] = new Long(cache.getStatistics().getCacheMisses());
-                            
-                    buf.append(separator)
-                       .append(_fmt.sprintf(fmtArgs));
-                }
-
-                return buf.toString();
-            }
-            
-            public String getShortStatus() {
-                return getStatus();
-            }
-
-            public String toString() {
-                return "ehcache";
-            }
-        };
-        diagnosticsLogger.addDiagnosticObject(cacheDiagnostics);
-    }
-    
-    private List<Cache> getCaches() {
-        CacheManager cacheManager = CacheManager.getInstance();
-        String[] caches = cacheManager.getCacheNames();
-        List<Cache> res = new ArrayList<Cache>(caches.length);
-        
-        for (int i=0; i<caches.length; i++) {
-            res.add(cacheManager.getCache(caches[i]));
-        }
-        return res;
-    }
-    
+      
     /**
      * TODO stats could be accessed via MBean or some other centralized mechanism
      * @return A List of Maps, where each Map contains individual cache stats
@@ -210,6 +121,17 @@ public class ProductBossImpl implements ProductBoss {
             healths.add(health);
         }
         return healths;
+    }
+    
+    private List<Cache> getCaches() {
+        CacheManager cacheManager = CacheManager.getInstance();
+        String[] caches = cacheManager.getCacheNames();
+        List<Cache> res = new ArrayList<Cache>(caches.length);
+        
+        for (int i=0; i<caches.length; i++) {
+            res.add(cacheManager.getCache(caches[i]));
+        }
+        return res;
     }
 
     /**
