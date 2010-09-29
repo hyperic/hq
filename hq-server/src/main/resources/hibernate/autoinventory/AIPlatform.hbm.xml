@@ -43,7 +43,7 @@
     </version>
 
     <property name="name" type="string">
-      <column name="NAME" not-null="true" length="500" unique="true"/>
+      <column name="NAME" not-null="true" length="255" unique="true"/>
     </property>
 
     <property name="description" type="string">
