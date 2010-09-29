@@ -24,7 +24,7 @@
  *
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
- 
+
 import com.ericsson.otp.erlang.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,7 +37,7 @@ import org.springframework.erlang.support.converter.ErlangConversionException;
 import org.springframework.erlang.support.converter.SimpleErlangConverter;
 import org.springframework.util.Assert;
 
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -64,9 +64,9 @@ public class JErlangConverter implements ErlangConverter {
 
     public Object fromErlangRpc(final String module, final String function, String vHost, Class type) throws ErlangConversionException {
         final OtpErlangObject[] args = vHost == null ? new OtpErlangObject[]{} : new OtpErlangObject[]{toErlang(vHost)};
-        
+
         OtpErlangObject response = (OtpErlangObject) erlangTemplate.execute(new ConnectionCallback<Object>() {
-            public Object doInConnection(OtpConnection connection) throws IOException, OtpErlangExit, OtpAuthException {
+            public Object doInConnection(org.springframework.erlang.connection.Connection connection) throws Exception {
                 connection.sendRPC(module, function, new OtpErlangList(args));
                 return connection.receiveRPC();
             }
@@ -78,7 +78,7 @@ public class JErlangConverter implements ErlangConverter {
 
         return fromErlang(response, vHost, type);
     }
- 
+
     /**
      * @param response
      * @param virtualHost
@@ -106,7 +106,7 @@ public class JErlangConverter implements ErlangConverter {
         }
         catch (OtpErlangException e) {
             throw new ErlangBadRpcException(response.toString());
-        } 
+        }
     }
 
     /**
@@ -398,11 +398,11 @@ public class JErlangConverter implements ErlangConverter {
      */
     private String getExchangeType(OtpErlangAtom atom) {
         String type = null;
-        if (atom.atomValue().equalsIgnoreCase(ExchangeType.topic.name())) {
+        if (atom.atomValue().equalsIgnoreCase(ExchangeTypes.TOPIC)) {
             type = TopicExchange.class.getSimpleName();
-        } else if (atom.atomValue().equalsIgnoreCase(ExchangeType.direct.name())) {
+        } else if (atom.atomValue().equalsIgnoreCase(ExchangeTypes.DIRECT)) {
             type = DirectExchange.class.getSimpleName();
-        } else if (atom.atomValue().equalsIgnoreCase(ExchangeType.fanout.name())) {
+        } else if (atom.atomValue().equalsIgnoreCase(ExchangeTypes.FANOUT)) {
             type = FanoutExchange.class.getSimpleName();
         }
 
@@ -410,6 +410,7 @@ public class JErlangConverter implements ErlangConverter {
     }
 
     /**
+     * ToDo change to isAssignableFrom()
      * @param exchangeName
      * @param vHost
      * @param type

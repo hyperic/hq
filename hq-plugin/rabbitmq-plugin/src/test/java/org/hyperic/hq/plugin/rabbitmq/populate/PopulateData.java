@@ -30,7 +30,7 @@ import org.hyperic.hq.plugin.rabbitmq.core.AMQPStatus;
 import org.hyperic.hq.plugin.rabbitmq.core.Channel;
 import org.hyperic.hq.plugin.rabbitmq.core.Connection;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
-import org.springframework.amqp.core.ExchangeType;
+import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
 import org.springframework.amqp.rabbit.admin.RabbitStatus;
@@ -77,7 +77,7 @@ public class PopulateData {
         RabbitGateway rabbitGateway = ctx.getBean(RabbitGateway.class);
         Queue marketDataQueue = ctx.getBean("marketDataQueue", Queue.class);
 
-        rabbitGateway.createExchange("app.stock.quotes", ExchangeType.topic.name());
+        rabbitGateway.createExchange("app.stock.quotes", ExchangeTypes.TOPIC);
         rabbitGateway.createQueue(marketDataQueue.getName());
         
         RabbitBrokerAdmin rabbitBrokerAdmin = ctx.getBean(RabbitBrokerAdmin.class);
@@ -92,8 +92,8 @@ public class PopulateData {
         assertTrue(status.compareTo(AMQPStatus.RESOURCE_CREATED) == 0);
         assertTrue(status.name().equalsIgnoreCase(AMQPStatus.RESOURCE_CREATED.name()));
 
-        rabbitGateway.createExchange(UUID.randomUUID().toString(), ExchangeType.fanout.name());
-        rabbitGateway.createExchange(UUID.randomUUID().toString(), ExchangeType.direct.name());
+        rabbitGateway.createExchange(UUID.randomUUID().toString(), ExchangeTypes.FANOUT);
+        rabbitGateway.createExchange(UUID.randomUUID().toString(), ExchangeTypes.DIRECT);
 
         conn.createChannel();
         conn.createChannel();

@@ -73,7 +73,6 @@ public class RabbitTestConfiguration {
         rabbitTemplate.setRoutingKey(MARKET_DATA_ROUTING_KEY);
         rabbitTemplate.setImmediatePublish(true);
         rabbitTemplate.setMandatoryPublish(true);
-        rabbitTemplate.setRequireAck(true);
 
         return rabbitTemplate;
     }
@@ -130,7 +129,7 @@ public class RabbitTestConfiguration {
 
     @Bean
     public FanoutExchange fanoutExchange() {
-        return new FanoutExchange(MARKET_DATA_EXCHANGE_NAME + ExchangeType.fanout.name());
+        return new FanoutExchange(MARKET_DATA_EXCHANGE_NAME + ExchangeTypes.FANOUT);
     }
 
     @Bean

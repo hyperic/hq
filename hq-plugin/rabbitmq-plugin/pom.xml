@@ -15,12 +15,12 @@
     <name>Hyperic HQ Plugin - RabbitMQ Plugin</name>
 
     <properties>
-        <spring.amqp.version>1.0.0.M1</spring.amqp.version>
+        <spring.amqp.version>1.0.0.BUILD-SNAPSHOT</spring.amqp.version>
         <org.erlang.otp.version>1.5.3</org.erlang.otp.version>
         <!-- 2.0.0 is not backward compatible and we need
         to support 1.8.0 - later versions. We have to use this
         client version for now. -->
-        <com.rabbitmq.version>1.8.1</com.rabbitmq.version>
+        <com.rabbitmq.version>1.8.0</com.rabbitmq.version>
         <org.mockito.version>1.8.4</org.mockito.version>
     </properties>
 
@@ -134,7 +134,7 @@
             <name>Spring Framework Maven Release Repository</name>
             <url>http://maven.springframework.org/release</url>
         </repository>
-        <!--<repository>
+        <repository>
             <id>repository.springframework.maven.milestone</id>
             <name>Spring Framework Maven Milestone Repository</name>
             <url>http://maven.springframework.org/milestone</url>
@@ -143,7 +143,7 @@
 			<id>repository.springframework.maven.snapshot</id>
 			<name>Spring Framework Maven Snapshot Repository</name>
 			<url>http://maven.springframework.org/snapshot</url>
-		</repository>-->
+		</repository>
     </repositories>
 
 </project>
