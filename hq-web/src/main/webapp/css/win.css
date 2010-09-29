@@ -263,7 +263,7 @@ a.listheaderlink:hover {
    text-align: left;
    background-color: #DBE3F5;
    border-bottom: 1px solid #D5D8DE;
-   whitespace:nowrap;
+   white-space:nowrap;
 }
 
 .listheaderinactivesorted {
@@ -1066,7 +1066,8 @@ a.displaylink:hover {
     z-index: 100
 }
 
-#inventoryprops,.menu {
+#inventoryprops,
+.menu {
     background-color: #F2F4F7;
     border: 2px solid #99a;
     filter: alpha(opacity=90);
@@ -1513,7 +1514,7 @@ ul.eventDetails li {
     border-width: 1px 0;
     font-size: 13px;
     padding: 0 6px;
-    color: fff;
+    color: #fff;
     font-weight: bold
 }
 
@@ -2015,7 +2016,7 @@ a.black:link,a.black:visited {
 }
 
 #alertcenter #alertGroupSelect {
-    width: 150;
+    width: 150px;
 }
 
 /*IE 6 OVERRIDES*/
