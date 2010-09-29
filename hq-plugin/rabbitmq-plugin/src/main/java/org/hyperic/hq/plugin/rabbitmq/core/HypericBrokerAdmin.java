@@ -26,13 +26,11 @@
 package org.hyperic.hq.plugin.rabbitmq.core;
 
 import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
-import org.springframework.amqp.rabbit.admin.RabbitControlErlangConverter;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.erlang.connection.SimpleConnectionFactory;
-import org.springframework.erlang.core.ErlangTemplate;
-import org.springframework.util.Assert;
+import org.springframework.erlang.connection.SingleConnectionFactory; 
+import org.springframework.util.exec.Os;
 
 /**
  * HypericBrokerAdmin
@@ -40,39 +38,37 @@ import org.springframework.util.Assert;
  */
 public class HypericBrokerAdmin extends RabbitBrokerAdmin {
 
-
-    private RabbitTemplate rabbitTemplate;
-
-	private RabbitAdmin rabbitAdmin;
-
-	private ErlangTemplate erlangTemplate;
-
-	private String virtualHost;
-
-
-
+    /**
+     * Constructor uses the Node's cookie
+     * @param connectionFactory
+     * @param erlangCookie
+     */
     public HypericBrokerAdmin(ConnectionFactory connectionFactory, String erlangCookie) {
         super(connectionFactory);
-
         initializeDefaultErlangTemplate(new RabbitTemplate(connectionFactory), erlangCookie);
     }
-    
-    public void initializeDefaultErlangTemplate(RabbitTemplate rabbitTemplate, String erlangCookie) {
-        String peerNodeName = "rabbit@" + rabbitTemplate.getConnectionFactory().getHost();
 
+    /**
+     * Uses the Node's cookie to create ConnectionFactory 
+     * @param rabbitTemplate
+     * @param erlangCookie
+     */
+    public void initializeDefaultErlangTemplate(RabbitTemplate rabbitTemplate, String erlangCookie) {
+        String host = rabbitTemplate.getConnectionFactory().getHost();
+		if (Os.isFamily("windows")) {
+			host = host.toUpperCase();
+		}
+		String peerNodeName = "rabbit@" + host;
         if (erlangCookie == null) {
             throw new IllegalArgumentException("Erlang cookie for " + peerNodeName + " must not be null.");
         }
 
-        logger.debug("Creating jinterface connection with peerNodeName = [" + peerNodeName + "]");
-        SimpleConnectionFactory otpCf = new SimpleConnectionFactory("rabbit-spring-monitor", erlangCookie, peerNodeName);
-
-        Assert.notNull(otpCf, this.getClass().getSimpleName() + ".SimpleConnectionFactory must not be null.");
-
-        otpCf.afterPropertiesSet();
-        createErlangTemplate(otpCf);
-
-        Assert.notNull(this.getErlangTemplate(), this.getClass().getSimpleName() + ".ErlangTemplate must not be null.");
+		logger.debug("Creating jinterface connection with peerNodeName = [" + peerNodeName + "] and erlangCookie = [" + erlangCookie + "]");
+		SingleConnectionFactory otpCf = new SingleConnectionFactory("rabbit-spring-monitor", erlangCookie, peerNodeName);
+		otpCf.afterPropertiesSet();
+		createErlangTemplate(otpCf);
+         
+        //SimpleConnectionFactory otpCf = new SimpleConnectionFactory("rabbit-spring-monitor", erlangCookie, peerNodeName);
     }
 
 }

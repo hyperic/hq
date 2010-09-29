@@ -120,7 +120,15 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         }
 
         /** get rabbit  services */
-        List<ServiceResource> rabbitResources = createRabbitResources(serviceConfig);
+
+        List<ServiceResource> rabbitResources = null;
+        try {
+            rabbitResources = createRabbitResources(serviceConfig);
+        }
+        catch(Exception e) {
+            logger.error(e);
+        }
+
         if (rabbitResources != null && rabbitResources.size() >= 0) {
             serviceResources.addAll(rabbitResources);
         }
@@ -134,7 +142,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @return
      * @throws PluginException
      */
-    public List<ServiceResource> createRabbitResources(ConfigResponse serviceConfig) throws PluginException {
+    public List<ServiceResource> createRabbitResources(ConfigResponse serviceConfig) throws PluginException, InterruptedException {
         logger.debug("createRabbitResources.config=" + serviceConfig);
         List<ServiceResource> rabbitResources = null;
 
@@ -159,21 +167,28 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                     vHostServiceResource.setName(new StringBuilder().append(getTypeInfo().getName())
                             .append(" ").append(DetectorConstants.VHOST).append(" ").append(virtualHost).toString());
 
+                    Thread.sleep(1000);
                     List<ServiceResource> queues = createQueueServiceResources(rabbitGateway, virtualHost);
                     if (queues != null) rabbitResources.addAll(queues);
                     logger.debug("*******************createRabbitResources.queues.get(0)=" + queues.get(0));
+
+                    Thread.sleep(1000);
                     List<ServiceResource> connections = createConnectionServiceResources(rabbitGateway, virtualHost);
                     if (connections != null) rabbitResources.addAll(connections);
 
+                    Thread.sleep(1000);
                     List<ServiceResource> channels = createChannelServiceResources(rabbitGateway, virtualHost);
                     if (channels != null) rabbitResources.addAll(channels);
 
+                    Thread.sleep(1000);
                     List<ServiceResource> exchanges = createExchangeServiceResources(rabbitGateway, virtualHost);
                     if (exchanges != null) rabbitResources.addAll(exchanges);
 
+                    Thread.sleep(1000);
                     List<ServiceResource> runningApps = createAppServiceResources(rabbitGateway, virtualHost);
                     if (runningApps != null) rabbitResources.addAll(runningApps);
 
+                    Thread.sleep(1000);
                     List<ServiceResource> users = createUserServiceResources(rabbitGateway, virtualHost);
                     if (users != null) rabbitResources.addAll(users);
                 }
