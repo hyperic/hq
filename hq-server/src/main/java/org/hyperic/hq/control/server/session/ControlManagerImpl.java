@@ -442,6 +442,8 @@ public class ControlManagerImpl implements ControlManager {
 
         try {
             config = configManager.getConfigResponse(id);
+        } catch (IllegalArgumentException iae) {
+            throw new PluginException(iae);
         } catch (Exception e) {
             throw new PluginException(e);
         }
