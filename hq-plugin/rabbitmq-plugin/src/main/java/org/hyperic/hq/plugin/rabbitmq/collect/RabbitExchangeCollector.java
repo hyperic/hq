@@ -54,7 +54,7 @@ public class RabbitExchangeCollector extends Collector {
                 List<Exchange> exchanges = rabbitGateway.getExchanges();
                 if (exchanges != null) {
                     for (Exchange e : exchanges) {
-                         
+
                         setAvailability(true);
                     }
                 }

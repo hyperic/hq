@@ -67,8 +67,7 @@ public class HypericBrokerAdmin extends RabbitBrokerAdmin {
 		SingleConnectionFactory otpCf = new SingleConnectionFactory("rabbit-spring-monitor", erlangCookie, peerNodeName);
 		otpCf.afterPropertiesSet();
 		createErlangTemplate(otpCf);
-         
-        //SimpleConnectionFactory otpCf = new SimpleConnectionFactory("rabbit-spring-monitor", erlangCookie, peerNodeName);
+          
     }
 
 }
