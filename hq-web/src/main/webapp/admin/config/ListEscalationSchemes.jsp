@@ -44,29 +44,34 @@
     }
 </script>
 <table width="100%" cellpadding="0" cellspacing="10">
-<tr>
-<td width="30%" valign="top" id="escalationsList">
-<tiles:insert definition=".portlet.error"/>
-<tiles:insert definition=".portlet.confirm"/>
-
-    <table width="100%" cellpadding="0" cellspacing="0" class="TableBottomLine">
-    <thead>
-    <tr>
-          <td colspan="2">
-                <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                    <tr>
-                        <td class="BlockTitle"><fmt:message key="common.header.EscalationName"/></td>
-                        <c:if test="${not empty param.escId && useroperations['createEscalation']}"><td class="BlockTitle" id="createButton" style="text-align: right;"><html:link page="/admin/config/Config.do?mode=escalate"><html:img src="/images/tbb_new.gif" border="0"/></html:link></td> </c:if>
-                </tr>
-            </table>
-        </td>
-    </tr>
-    </thead>
-    <tbody id="escalations">
-
-    </tbody>
-    </table>
-</td>
+	<tr>
+		<td width="30%" valign="top" id="escalationsList">
+			<tiles:insert definition=".portlet.error"/>
+			<tiles:insert definition=".portlet.confirm"/>
+			<table width="100%" cellpadding="0" cellspacing="0" class="TableBottomLine">
+		    	<thead>
+		    		<tr>
+		          		<td colspan="2">
+		                	<table cellpadding="0" cellspacing="0" border="0" width="100%">
+		                    	<tr>
+		                        	<td class="BlockTitle"><fmt:message key="common.header.EscalationName"/></td>
+		                        	<c:if test="${not empty param.escId && useroperations['createEscalation']}">
+		                        		<td class="BlockTitle" id="createButton" style="text-align: right;">
+		                        			<html:link action="/admin/config/Config">
+		                        				<html:param name="mode" value="escalate" />
+			                        			<html:img src="/images/tbb_new.gif" border="0"/>
+		    	                    		</html:link>
+		        	                	</td>
+		            	            </c:if>
+		                		</tr>
+				            </table>
+		        		</td>
+				    </tr>
+			    </thead>
+		    	<tbody id="escalations">
+			    </tbody>
+		    </table>
+		</td>
 
 <!-- Do the delete button here so that we don't have to try to duplicate it in javascript -->
 <span id="deleteBtn" style="display: none;">&nbsp;

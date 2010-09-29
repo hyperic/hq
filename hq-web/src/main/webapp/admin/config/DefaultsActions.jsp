@@ -5,4 +5,8 @@
 <tiles:importAttribute name="typeName"/>
 <tiles:importAttribute name="aetid"/>
 
-<td class="ListCell" align="center"><html:link page="/resource/${typeName}/monitor/Config.do?mode=configure&aetid=${aetid}"><html:img page="/images/tbb_editMetricTemplate.gif" width="136" height="16" border="0"/></html:link></td>
+<html:link action="/resource/${typeName}/monitor/Config">
+	<html:param name="mode" value="configure" />
+	<html:param name="aetid" value="${aetid}" />
+	<html:img page="/images/tbb_editMetricTemplate.gif" width="136" height="16" border="0"/>
+</html:link>

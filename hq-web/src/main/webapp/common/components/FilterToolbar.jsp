@@ -50,12 +50,9 @@
 
 <!--  FILTER TOOLBAR  -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr>
-  	<td class="FilterLine" colspan="2"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-  </tr>
   <tr>		
-    <td class="FilterLabelText" nowrap align="right"><fmt:message key="Filter.ViewLabel"/></td>
-    <td class="FilterLabelText" width="100%">
+    <td class="FilterLabelText" nowrap align="right" style="border-top: 1px solid #ABB1C7;"><fmt:message key="Filter.ViewLabel"/></td>
+    <td class="FilterLabelText" width="100%" style="border-top: 1px solid #ABB1C7;">
       <html:select property="f" styleClass="FilterFormText" size="1" onchange="goToSelectLocation(this, '${filterParam}',  '${filterAction}');">
         <html:option value="-1" key="${defaultKey}"/>
         <html:optionsCollection property="${optionsProperty}" value="${valueProperty}" label="${labelProperty}"/>

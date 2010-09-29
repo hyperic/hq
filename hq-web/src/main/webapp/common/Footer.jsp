@@ -30,7 +30,7 @@
 <script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/footer.js"/>" type="text/javascript"></script>
 
-<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<table id="footerContent" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top:60px;">
 	<tr>
 		<td class="FooterBold" nowrap="nowrap" style="padding-left: 30px;" width="20%"><tiles:insert definition=".footer.current.time" /></td>
 		<td class="FooterRegular" nowrap="nowrap" align="center" width="60%">
@@ -47,10 +47,11 @@
   <table cellpadding="2" cellspacing="0" border="0" width="305">
   	<tr>
   		<td class="DisplayLabel" rowspan="3">&nbsp;</td>
-  		<td valign="top" class="DisplaySubhead" colspan="2"><html:img
-  			page="/images/spacer.gif" width="1" height="5" border="0" /><br />
-  		<fmt:message key="footer.version" /> <c:out value="${HQVersion}" /><br />
-  		&nbsp;</td>
+  		<td valign="top" class="DisplaySubhead" colspan="2" style="padding-top:5px;">
+  			<br />
+  			<fmt:message key="footer.version" /> <c:out value="${HQVersion}" />
+  			<br />&nbsp;
+  		</td>
   	</tr>
   	<tr>
   		<td valign="top" class="DisplayContent" colspan="2"><span

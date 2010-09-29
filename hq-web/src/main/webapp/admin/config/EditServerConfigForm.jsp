@@ -47,20 +47,11 @@
     classname="org.hyperic.hq.ui.Constants" 
     symbol="DAYS_LABEL" var="CONST_DAYS" />
 
-  <logic:messagesPresent>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr>
-    <td class="ErrorField"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-    <td colspan="3" align="left" class="ErrorField"><html:errors/></td>
-  </tr>
-  </table>
-  </logic:messagesPresent>
+<logic:messagesPresent>
+  <div class="ErrorField"><html:errors/></div>
+</logic:messagesPresent>
 
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr>
-    <td class="BlockContent"><fmt:message key="admin.settings.RestartNote"/></td>
-  </tr>
-</table>
+<div class="BlockContent"><fmt:message key="admin.settings.RestartNote"/></div>
 
 <!--  EMAIL CONFIG TITLE -->
 <tiles:insert definition=".header.tab">  
@@ -346,9 +337,6 @@
   </tr>
   <tr>
     <td class="BlockContent" colspan="2"><fmt:message key="admin.settings.RestartNote.Alert"/></td>
-  </tr>
-  <tr>
-    <td class="BlockBottomLine" colspan="2"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
   </tr>
 <!--  /  -->
 
