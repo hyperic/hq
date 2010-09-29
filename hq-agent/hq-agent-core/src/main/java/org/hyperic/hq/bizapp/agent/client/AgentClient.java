@@ -29,7 +29,6 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
@@ -44,7 +43,11 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
 import org.apache.log4j.PropertyConfigurator;
+import org.apache.log4j.RollingFileAppender;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentConfigException;
 import org.hyperic.hq.agent.AgentConnectionException;
@@ -52,6 +55,7 @@ import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.LegacyAgentCommandsClientImpl;
 import org.hyperic.hq.agent.server.AgentDaemon;
+import org.hyperic.hq.agent.server.LoggingOutputStream;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.agent.commands.CreateToken_args;
 import org.hyperic.hq.bizapp.agent.commands.CreateToken_result;
@@ -100,6 +104,12 @@ public class AgentClient {
     private static final String QPROP_AGENTPORT  = QPROP_PRE + "agentPort";
     private static final String QPROP_RESETUPTOK = QPROP_PRE + "resetupTokens";
     private static final String QPROP_TIMEOUT    = QPROP_PRE + "serverTimeout";
+    
+    private static final String DEFAULT_LOG_LEVEL = "INFO";
+    private static final String LOG_PATTERN_LAYOUT = "%d %-5p [%t] [%c{1}] %m%n";
+    private static final int BUFFER_SIZE = 1024;
+    private static final String MAX_FILE_SIZE = "5000KB";
+    private static final String MAX_FILES = "1";
 
     private static final String PROP_LOGFILE    = "agent.logFile";
     private static final String PROP_STARTUP_TIMEOUT = "agent.startupTimeOut";
@@ -966,6 +976,24 @@ public class AgentClient {
         }
     }
 
+    private PrintStream newLogStream(String stream, Properties bootProps) throws AgentConfigException, IOException {
+        Logger logger = Logger.getLogger(stream);
+        Level level = Level.toLevel(bootProps.getProperty("agent.startup.logLevel." + stream,
+                                                          bootProps.getProperty("agent.logLevel." + stream,
+                                                                                DEFAULT_LOG_LEVEL)));
+        PatternLayout layout = new PatternLayout(bootProps.getProperty("agent.startup.ConversionPattern",
+                                                                       LOG_PATTERN_LAYOUT));
+        RollingFileAppender fileAppender = new RollingFileAppender(layout, getStartupLogFile(bootProps), true);
+        fileAppender.setImmediateFlush(true);
+        fileAppender.setBufferedIO(false);
+        fileAppender.setBufferSize(BUFFER_SIZE);
+        fileAppender.setMaxFileSize(bootProps.getProperty("agent.startup.MaxFileSize", MAX_FILE_SIZE));
+        fileAppender.setMaxBackupIndex(Integer.parseInt(bootProps.getProperty("agent.startup.MaxBackupIndex", MAX_FILES)));
+        logger.addAppender(fileAppender);
+        logger.setAdditivity(false);
+        return new PrintStream(new LoggingOutputStream(logger, level), true);
+    }
+
     private void redirectOutputs(Properties bootProp) {
         if (this.redirectedOutputs) {
             return;
@@ -973,40 +1001,11 @@ public class AgentClient {
         this.redirectedOutputs = true;
                 
         try {
-            String startupLogFile = getStartupLogFile(bootProp);
-            PrintStream os = 
-                new PrintStream(new FileOutputStream(startupLogFile));
-            System.setErr(os);
-            System.setOut(os);
+            System.setErr(newLogStream("SystemErr", bootProp));
+            System.setOut(newLogStream("SystemOut", bootProp));
         } catch (Exception e) {
             e.printStackTrace(SYSTEM_ERR);
         }
-    }
-
-    private String getPdkClasspath(Properties props) {
-        String pdkLib =
-            props.getProperty("agent.pdkLibDir", "./pdk/lib");
-        File dir = new File(pdkLib);
-        if (!dir.exists()) {
-            throw new IllegalArgumentException(pdkLib +
-                                               " does not exist!");
-        }
-        StringBuffer sb = new StringBuffer();
-        String[] jars = dir.list();
-        for (int i=0; i<jars.length; i++) {
-            String jar = jars[i];
-            if (!(jar.endsWith(".jar") ||
-                  jar.endsWith(".zip")))
-            {
-                continue;
-            }
-            sb.append(pdkLib).append('/').append(jar);
-            if (i < jars.length-1) {
-                sb.append(':');
-            }
-        }
-
-        return sb.toString();
     }
     
     private int cmdStart(boolean force) 
