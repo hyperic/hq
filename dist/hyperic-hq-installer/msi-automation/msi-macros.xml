@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="msi-macros" >
+  <description>Macros used in the MSI creation process.</description>
+
+  <!-- Macro for building HQ MSI's. -->
+
+  <macrodef name="build-one-msi" >
+    <attribute name="src.url" />
+    <attribute name="base.name" />
+    <attribute name="wix.name" />
+    <attribute name="build.name" />
+    <attribute name="installer.path" />
+    <attribute name="installer.folder.name" />
+    <attribute name="common.path" />
+    <attribute name="license.name" />
+    <attribute name="ant.setup.file" />
+    <attribute name="build.type" />
+    <attribute name="msi.dest" />
+
+    <sequential>
+
+      <!-- Do some cleanup first.  -->
+
+      <delete quiet="true">
+        <fileset dir="${build.base}" includes="@{base.name}.msi @{base.name}.wixobj @{base.name}.wixpdb" />
+      </delete>
+
+      <!-- Download the build. -->
+
+      <get src="@{src.url}" dest="${hq.build.src}" usetimestamp="true" />
+
+      <!-- Create a new folder for the installer to be unzipped into.  -->
+
+      <mkdir dir="@{installer.path}" />
+
+      <!-- Unzip the build into the right spot.  -->
+
+      <unzip src="${hq.build.src}\\@{build.name}" dest="@{installer.path}" />
+
+      <!-- Make a copy of the license text file, converting it to RTF. -->
+
+      <copy
+         file="@{installer.path}\\@{installer.folder.name}\\${hq.license.text.file.name}"
+         tofile="@{common.path}\\${hq.license.rtf.file.name}"
+         overwrite="true" >
+
+        <filterchain>
+          <fixcrlf/>
+          <suffixlines suffix="${rtf.line.suffix}" />
+          <concatfilter prepend="${rtf.file.prefix}" append="${rtf.file.suffix}" />
+        </filterchain>
+      </copy>
+
+      <!-- Comment out one line in Ant installer (the pause) code. -->
+
+      <replace file="@{ant.setup.file}"
+               token="${ant.current.line}"
+               value="${ant.replace.line}" />
+
+      <!-- Ensure the uuidgen, candle and light utilities are present. -->
+
+      <property environment="env" />
+
+      <condition property="uuidgen.found" >
+        <available file="uuidgen.exe" filepath="${env.Path}" />
+      </condition>
+
+      <fail message="uuidgen.exe not found on Path, unable to generate a new GUID."
+            unless="uuidgen.found" />
+
+      <condition property="candle.found" >
+        <available file="candle.exe" filepath="${env.Path}" />
+      </condition>
+
+      <fail message="candle.exe not found on Path, unable to generate a new MSI."
+            unless="candle.found" />
+
+      <condition property="light.found" >
+        <available file="light.exe" filepath="${env.Path}" />
+      </condition>
+
+      <fail message="light.exe not found on Path, unable to generate a new MSI."
+            unless="candle.found" />
+
+      <!-- Generate a new GUID for the new MSI. -->
+
+      <exec executable="uuidgen.exe" dir="${build.base}" osfamily="winnt"
+            failonerror="true" outputproperty="guid.@{build.type}" >
+            <arg line="-c" />
+      </exec>
+
+      <!-- Copy variable include file to set params for this run. -->
+
+      <copy file="${build.base}\\hyperic-hq-variables.wxi"
+            tofile="@{installer.path}\\hyperic-hq-variables.wxi"
+            overwrite="true" >
+            <filterset>
+              <filter token="hq.version" value="${hq.version}" />
+              <filter token="hq.build.type" value="${hq.build.type}" />
+              <filter token="hq.os.build" value="${hq.os.build}" />
+              <filter token="hq.ee.build" value="${hq.ee.build}" />
+              <filter token="product.code" value="{${guid.@{build.type}}}" />
+            </filterset>
+      </copy>
+
+      <copy file="${build.base}\\@{wix.name}.wxs"
+            tofile="@{installer.path}\\@{base.name}.wxs"
+            overwrite="true" >
+      </copy>
+
+      <!-- Run Candle compiler from WiX toolset.
+           Note:  for some reason, while you can use the -out switch to candle
+           on the command line and it works fine, it doesn't work when passing
+           it to exec.  So that's why we rename and move the WiX sources.  Also,
+           doing so means we can keep the MSI's separated and we can see what
+           product code was generated for each MSI.
+      -->
+
+      <exec executable="candle.exe"
+            dir="@{installer.path}"
+            osfamily="winnt"
+            failonerror="true" >
+            <arg value="-nologo" />
+            <arg value="@{base.name}.wxs" />
+      </exec>
+
+      <!-- Run Light linker from WiX toolset.  -->
+
+      <exec executable="light.exe"
+            dir="@{installer.path}"
+            osfamily="winnt"
+            failonerror="true" >
+            <arg value="-nologo" />
+            <arg value="-sw1076" />
+            <arg value="@{base.name}.wixobj" />
+      </exec>
+
+      <!-- Move MSI to final destination. -->
+
+      <move
+         file="@{installer.path}\\@{base.name}.msi"
+         todir="@{msi.dest}"
+         overwrite="true" />
+
+      <!-- Clean up DO's (derived objects). -->
+
+      <delete quiet="true">
+        <fileset dir="@{installer.path}" includes="*.wixobj *.wixpdb" />
+      </delete>
+
+    </sequential>
+  </macrodef>
+
+</project>

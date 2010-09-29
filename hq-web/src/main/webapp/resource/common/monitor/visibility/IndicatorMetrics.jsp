@@ -193,11 +193,11 @@
 				<c:choose>
 					<c:when test="${metric.single}">
 						<c:set var="scriptUrl"
-							value="javascript:menuLayers.hide();addMetric('${metric.appdefKey},${metric.templateId}');menuLayers.hide()" />
+							value="menuLayers.hide();addMetric('${metric.appdefKey},${metric.templateId}');menuLayers.hide()" />
 					</c:when>
 					<c:otherwise>
 						<c:set var="scriptUrl"
-							value="javascript:menuLayers.hide();addMetric('${eid},${metric.templateId},${metric.appdefKey}')" />
+							value="menuLayers.hide();addMetric('${eid},${metric.templateId},${metric.appdefKey}')" />
 					</c:otherwise>
 				</c:choose>
 
@@ -220,14 +220,15 @@
     			</c:if>
 
 				<tr>
-					<td class="ListCell" style="padding-left: 10px;"><c:out
-						value="${metric.name}" /></td>
+					<td class="ListCell" style="padding-left: 10px;">
+						<c:out value="${metric.name}" />
 					</td>
-					<td class="ListCell"><html:img page="/images/comment.gif"
-						onmouseover="menuLayers.show('metric_menu_${metric.templateId}', event)"
-						onmouseout="menuLayers.hide()" border="0" /></td>
-					<td class="ListCell"><a href="<c:out value="${scriptUrl}"/>"><html:img
-						page="/images/icon_menu.gif" border="0" /></a></td>
+			        <td class="ListCell resourceCommentIcon"
+			    	    onmouseover="menuLayers.show('metric_menu_<c:out value="${metric.templateId}" />', event)" 
+			    	    onmouseout="menuLayers.hide()"
+			    	    style="width:5%;">&nbsp;
+					</td>
+					<td class="ListCell addMetricIcon" onclick="<c:out value="${scriptUrl}"/>" style="width:10%;">&nbsp;</td>
 				</tr>
 			</c:forEach>
 		</table>

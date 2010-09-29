@@ -151,7 +151,10 @@
       											
       											<c:if test="${not empty resource}">
       												- 
-      												<html:link page="/resource/${resource.entityId.typeName}/Inventory.do?mode=changeOwner&rid=${resource.id}&type=${resource.entityId.type}">
+      												<html:link action="/resource/${resource.entityId.typeName}/Inventory">
+      													<html:param name="mode" value="changeOwner" />
+      													<html:param name="rid" value="${resource.id}" />
+      													<html:param name="type" value="${resource.entityId.type}" />
       												  	<fmt:message key="resource.common.inventory.props.ChangeButton"/>
       												</html:link>
       												<br>
@@ -331,10 +334,4 @@
     	</td>
   	</tr>
   	<tr>
-    	<td class="PageTitle">
-    		<html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/>
-    	</td>
-    	<td>
-    		<html:img page="/images/spacer.gif" width="20" height="1" alt="" border="0"/>
-    	</td>
-    	<td width="100%">
+    	<td style="padding-left:25px; width:100%">

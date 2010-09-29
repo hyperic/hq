@@ -24,6 +24,7 @@
  */
 package org.hyperic.hq.control.server.session;
 
+import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.Criteria;
+import org.hibernate.Hibernate;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
@@ -74,6 +76,13 @@ public class ControlHistoryDAO
         h.setMessage(message);
         save(h);
         return h;
+    }
+   
+    public ControlHistory findByIdAndPopulate(Serializable id) {
+        ControlHistory controlHistory = findById(id);
+        //Fully initialize the object for consumers without a Hibernate session
+        Hibernate.initialize(controlHistory);
+        return controlHistory;
     }
 
     public Collection<ControlHistory> findByStartTime(long time, boolean asc) {

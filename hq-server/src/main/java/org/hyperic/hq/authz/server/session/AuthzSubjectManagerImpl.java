@@ -282,12 +282,14 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
         return findSubjectById(id);
     }
 
-    /** 
-     * 
-     */
     @Transactional(readOnly = true)
     public AuthzSubject findSubjectById(Integer id) {
         return authzSubjectDAO.findById(id);
+    }
+    
+    @Transactional(readOnly = true)
+    public String findSubjectName(Integer id) {
+       return findSubjectById(id).getName();
     }
 
     /** 
@@ -493,6 +495,15 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
             Crispo newPrefs = crispoManager.create(prefs);
             targ.setPrefs(newPrefs);
         }
+    }
+    
+    public void setUserPrefs(Integer whoId, Integer subjectId, ConfigResponse prefs)
+        throws PermissionException, SubjectNotFoundException {
+         AuthzSubject who = getSubjectById(whoId);
+         if(who == null) {
+             throw new SubjectNotFoundException("Subject with id " + whoId + " not found");
+         }
+         setUserPrefs(who, subjectId, prefs);
     }
 
     /**

@@ -26,8 +26,6 @@
 package org.hyperic.hq.plugin.rabbitmq;
 
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.*;
 import org.hyperic.hq.product.PluginException;
 import org.junit.Before;
@@ -37,15 +35,10 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
-import org.junit.runner.RunWith;
-import org.springframework.amqp.core.*;
+import org.springframework.amqp.core.ExchangeType;
 import org.springframework.amqp.rabbit.admin.QueueInfo;
+import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
 import org.springframework.amqp.rabbit.admin.RabbitStatus;
-import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.HashMap;
 import java.util.List;
@@ -57,55 +50,20 @@ import java.util.UUID;
  * RabbitGatewayTest
  * @author Helena Edelson
  */
-//@Ignore("Need to set up a rabbit server for QA")
+@Ignore("Need to mock the connection for automation")
 public class RabbitGatewayTest extends AbstractSpringTest {
 
-    /*@Test
-    public void testPublish()  {
-        ConnectionFactoryStub factory = new ConnectionFactoryStub();
-        Connection connection = createMock(Connection.class);
-        factory.setConnection(connection);
-        Channel channel = createMock(Channel.class);
-        expect(connection.createChannel()).andReturn(channel);
-        // record some more expected calls
-        replay(connection, channel);
-        // create your object under test and inject the ConnectionFactoryStub
-        // invoke the method that you are testing
-        verify(connection, channel);
-        // make some assertions
-    }
-
-    private static class ConnectionFactoryStub extends ConnectionFactory {
-        Connection connection;
-        public void setConnection(Connection connection) {
-            this.connection = connection;
-        }
-        @Override
-        public Connection newConnection() {
-            return this.connection;
-        }
-    }*/
-
-    @Test
-    public void test() throws Exception {
-        com.rabbitmq.client.Connection conn = singleConnectionFactory.createConnection();
-        List<Connection> cons = rabbitGateway.getConnections();
-        assertNotNull(cons);
-
-        conn.createChannel();
-        conn.createChannel();
-        assertNotNull(rabbitGateway.getChannels());
-        Thread.sleep(1000000);
-        conn.close(); 
+    @Before /** Comforting to see */
+    public void before() {
+        RabbitBrokerAdmin rabbitBrokerAdmin = new RabbitBrokerAdmin(singleConnectionFactory);
+        RabbitStatus s = rabbitBrokerAdmin.getStatus();
+        assertNotNull(s);
     }
 
     @Test
     public void getConnections() throws Exception {
         com.rabbitmq.client.Connection conn = singleConnectionFactory.createConnection();
         List<Connection> cons = rabbitGateway.getConnections();
-        for(Connection c : cons) {
-            System.out.println(c);
-        }
         assertNotNull(cons);
         conn.close();
     }
@@ -115,9 +73,7 @@ public class RabbitGatewayTest extends AbstractSpringTest {
         com.rabbitmq.client.Connection conn = singleConnectionFactory.createConnection();
         conn.createChannel();
         conn.createChannel();
-        for(Channel c : rabbitGateway.getChannels()) {
-            System.out.println(c);
-        }
+        Thread.sleep(100000);
         conn.close();
         assertNotNull(rabbitGateway.getChannels());
     }
@@ -127,13 +83,6 @@ public class RabbitGatewayTest extends AbstractSpringTest {
         List<String> virtualHosts = rabbitGateway.getVirtualHosts();
         assertNotNull(virtualHosts);
         assertTrue(virtualHosts.size() >= 0);
-    }
-
-    @Test
-    public void createQueue() {
-        AMQPStatus status = rabbitGateway.createQueue(UUID.randomUUID().toString());
-        assertTrue(status.compareTo(AMQPStatus.RESOURCE_CREATED) == 0);
-        assertTrue(status.name().equalsIgnoreCase(AMQPStatus.RESOURCE_CREATED.name()));
     }
 
     @Test
@@ -153,14 +102,25 @@ public class RabbitGatewayTest extends AbstractSpringTest {
 
     @Test
     public void declareDeleteExchange() {
-        rabbitGateway.createExchange("34566", "fanout");
+        rabbitGateway.createExchange("34566", ExchangeType.fanout.name());
         rabbitGateway.deleteExchange("34566");
+    }
+
+    @Test
+    public void getQueues() {
+        List<QueueInfo> queues = rabbitGateway.getQueues();
+        for (QueueInfo q : queues) {
+            logger.debug(q);
+        }
     }
 
     @Test
     public void listCreateDeletePurgeQueue() {
         String queueName = UUID.randomUUID().toString();
-        rabbitGateway.createQueue(queueName);
+
+        AMQPStatus status = rabbitGateway.createQueue(queueName);
+        assertTrue(status.compareTo(AMQPStatus.RESOURCE_CREATED) == 0);
+        assertTrue(status.name().equalsIgnoreCase(AMQPStatus.RESOURCE_CREATED.name()));
 
         List<QueueInfo> queues = rabbitGateway.getQueues();
         assertNotNull(queues);
@@ -220,4 +180,30 @@ public class RabbitGatewayTest extends AbstractSpringTest {
         assertTrue(status.getRunningNodes().get(0).getName().contains("rabbit"));
     }
 
+
+    /*@Test
+    public void testPublish()  {
+        ConnectionFactoryStub factory = new ConnectionFactoryStub();
+        Connection connection = createMock(Connection.class);
+        factory.setConnection(connection);
+        Channel channel = createMock(Channel.class);
+        expect(connection.createChannel()).andReturn(channel);
+        // record some more expected calls
+        replay(connection, channel);
+        // create your object under test and inject the ConnectionFactoryStub
+        // invoke the method that you are testing
+        verify(connection, channel);
+        // make some assertions
+    }
+
+    private static class ConnectionFactoryStub extends ConnectionFactory {
+        Connection connection;
+        public void setConnection(Connection connection) {
+            this.connection = connection;
+        }
+        @Override
+        public Connection newConnection() {
+            return this.connection;
+        }
+    }*/
 }

@@ -399,7 +399,7 @@ public final class ConcurrentStatsCollector {
         new ScheduledThreadPoolExecutor(8, new ThreadFactory() {
             private final String namePrefix = "hqstats-sampler-";
             private final AtomicInteger threadNumber = new AtomicInteger(0);
-            @Override
+         
             public Thread newThread(Runnable r) {
                 Thread t = new Thread(r, namePrefix + threadNumber.getAndIncrement());
                 if (t.isDaemon()) {
@@ -422,7 +422,7 @@ public final class ConcurrentStatsCollector {
             this.id = s.getId() + "_MAX";
             this.stat = s;
             final Runnable runnable = new Runnable() {
-                @Override
+                
                 public void run() {
                     if (!hasStarted.get()) {
                         return;
@@ -445,11 +445,11 @@ public final class ConcurrentStatsCollector {
             };
             samplerExecutor.scheduleAtFixedRate(runnable, 0, 1, TimeUnit.SECONDS);
         }
-        @Override
+        
         public String getId() {
             return id;
         }
-        @Override
+       
         public long getVal() throws StatUnreachableException {
             StatUnreachableException ex;
             if ((ex = exceptionRef.get()) != null) {
@@ -499,12 +499,12 @@ public final class ConcurrentStatsCollector {
             _isTrend = false;
         }
 
-        @Override
+       
         public String getId() {
             return _id;
         }
 
-        @Override
+       
         public long getVal() throws StatUnreachableException {
             // no need to keep generating a new exception. If it fails
             // 10 times, assume that the mbean server is not on.

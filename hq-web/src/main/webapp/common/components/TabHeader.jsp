@@ -107,12 +107,18 @@
     <c:if test="${showUpAndDown}">
       <td class="BlockTitle">
         <c:if test="${empty portletName && not isFirstPortlet}">
-        <html:link page="/dashboard/MovePortletUp.do?portletName=${portletName}"><html:img page="/images/dash_icon_up.gif" border="0" width="17" height="16"/></html:link>
+	        <html:link action="/dashboard/MovePortletUp">
+	        	<html:param name="portletName" value="${portletName}"/>
+	        	<html:img page="/images/dash_icon_up.gif" border="0" width="17" height="16"/>
+	        </html:link>
         </c:if>
       </td>
       <td class="BlockTitle">
         <c:if test="${empty portletName && not isLastPortlet}">
-        <html:link page="/dashboard/MovePortletDown.do?portletName=${portletName}"><html:img page="/images/dash_icon_down.gif" border="0" width="17" height="16"/></html:link>
+        	<html:link action="/dashboard/MovePortletDown">
+        		<html:param name="portletName" value="${portletName}" />
+        		<html:img page="/images/dash_icon_down.gif" border="0" width="17" height="16"/>
+        	</html:link>
         </c:if>
       </td>
     </c:if>

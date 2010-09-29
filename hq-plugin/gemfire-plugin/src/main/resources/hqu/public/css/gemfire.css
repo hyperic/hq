@@ -1,0 +1,61 @@
+#gemfirePlugin #data{
+    background-color: white;
+    border: 1px solid #60A5EA;
+}
+
+#gemfirePlugin #data h2{
+    background: #EFF0F2;
+    border: 1px solid #D5D8DE;
+    font-size: 1.6em;
+    line-height: 2em;
+    margin: 0px;
+    padding: 5px;
+}
+
+#gemfirePlugin #data table th{
+    border-right: 1px solid #7BAFFF;
+    border-left: 1px solid #7BAFFF;
+    font-weight: bold;
+    padding: 3px 3px 3px 5px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+#gemfirePlugin #data table{
+    margin: 5px;
+    padding: 0px;
+    border-spacing: 0px;
+    border-left: 1px solid #DDD;
+    border-right:  1px solid #DDD;
+    border-bottom:  1px solid #DDD;
+}
+
+#gemfirePlugin #data table td{
+    border-top: 1px solid #DDD;
+    font-size: 12px;
+    margin: 0px;
+    padding: 2px 6px;
+    vertical-align: top;
+}
+
+#gemfirePlugin .loading{
+    background-image: url(/hqu/public/images/ajax-loader-blue.gif);
+    background-position: 0% 0%;
+    background-repeat: no-repeat;
+    display: block;
+    float: right;
+    height: 16px;
+    position: relative;
+    -visibility: hidden;
+    width: 16px;
+}
+
+#gemfirePlugin #tree ul{
+    list-style-type: none;
+    padding: 0px;
+    margin: 0px;
+}
+
+#gemfirePlugin #tree li{
+    margin-left: 10px;
+}

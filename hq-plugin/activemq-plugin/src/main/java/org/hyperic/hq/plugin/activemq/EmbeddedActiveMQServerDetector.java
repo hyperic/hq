@@ -23,21 +23,32 @@
  *  USA.
  *
  */
-
 package org.hyperic.hq.plugin.activemq;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Iterator;
+import java.util.List;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
+import javax.management.MBeanServerConnection;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.management.remote.JMXConnector;
+import org.apache.commons.logging.Log;
+import org.hyperic.hq.product.Metric;
 
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.ServerResource;
+import org.hyperic.hq.product.ServiceResource;
+import org.hyperic.hq.product.jmx.MxQuery;
 import org.hyperic.hq.product.jmx.MxServerDetector;
+import org.hyperic.hq.product.jmx.MxServerQuery;
+import org.hyperic.hq.product.jmx.MxServiceQuery;
+import org.hyperic.hq.product.jmx.MxUtil;
+import org.hyperic.util.config.ConfigResponse;
 
 /**
  * Server detector for activemq brokers embedded in Tomcat/tc Server instances.
@@ -47,41 +58,49 @@ import org.hyperic.hq.product.jmx.MxServerDetector;
  * 
  */
 public class EmbeddedActiveMQServerDetector
-    extends MxServerDetector {
-	
-	boolean recursive = false;
-	private final static String RECURSIVE_PROP = "activemq.search.recursive";
+        extends MxServerDetector {
 
-	public void init(PluginManager manager) throws PluginException {
-	    super.init(manager);
-	    recursive = "true".equalsIgnoreCase(manager.getProperty(RECURSIVE_PROP, "false"));
-	    getLog().debug(RECURSIVE_PROP + "=" + recursive);
-	}
+    Log log = getLog();
+    boolean recursive = false;
+    private final static String RECURSIVE_PROP = "activemq.search.recursive";
 
+    @Override
+    public void init(PluginManager manager) throws PluginException {
+        super.init(manager);
+        recursive = "true".equalsIgnoreCase(manager.getProperty(RECURSIVE_PROP, "false"));
+        getLog().debug(RECURSIVE_PROP + "=" + recursive);
+    }
 
     @Override
     protected File findVersionFile(File dir, Pattern pattern) {
+        File res = null;
+        log.debug("[findVersionFile] dir=" + dir + " pattern=" + pattern);
+        if (!dir.exists()) {
+            log.debug("File '" + dir + "' Not Found");
+            return null;
+        }
         // In an Embedded ActiveMQ instance, we know we are starting with
         // CATALINA_BASE
         // Give preferential search treatment to webapps/*/WEB-INF/lib for
         // performance gains
         File libDir = new File(dir, "lib");
-            if (libDir.exists()) {
-                File versionFile = super.findVersionFile(libDir, pattern);
-                if (versionFile != null) {
-                    return versionFile;
-                }
+        if (libDir.exists()) {
+            File versionFile = super.findVersionFile(libDir, pattern);
+            if (versionFile != null) {
+                res = versionFile;
             }
-    
+        }
+
+        if (res == null) {
             File webappsDir = new File(dir, "webapps");
             if (webappsDir.exists()) {
-                for( File app: webappsDir.listFiles()) {
+                for (File app : webappsDir.listFiles()) {
                     if (app.isDirectory()) {
                         File wlibDir = new File(app, "WEB-INF" + File.separator + "lib");
                         if (wlibDir.exists()) {
                             File versionFile = super.findVersionFile(wlibDir, pattern);
                             if (versionFile != null) {
-                                return versionFile;
+                                res = versionFile;
                             }
                         }
                     } else if (app.getName().endsWith(".war")) {
@@ -91,35 +110,72 @@ public class EmbeddedActiveMQServerDetector
                             while (files.hasMoreElements()) {
                                 final String fileName = files.nextElement().toString();
                                 if (pattern.matcher(fileName).find()) {
-                                    return new File(app + "!" + fileName);
+                                    res = new File(app + "!" + fileName);
                                 }
                             }
                         } catch (IOException ex) {
-                            getLog().debug("Error: '"+app+"': "+ex.getMessage(),ex);
+                            log.debug("Error: '" + app + "': " + ex.getMessage(), ex);
                         }
                     }
                 }
             }
-   
-            if (recursive) {
-                return super.findVersionFile(dir, pattern);
-            }
-            return null;
+        }
 
+        if ((res == null) && recursive) {
+            res = super.findVersionFile(dir, pattern);
+        }
+
+        log.debug("[findVersionFile] res=" + res);
+        return res;
     }
 
     @Override
     protected ServerResource getServerResource(MxProcess process) {
         ServerResource server = super.getServerResource(process);
         String catalinaBase = server.getInstallPath();
-        
+
         File hq = findVersionFile(new File(catalinaBase), Pattern.compile("hq-common.*\\.jar"));
         if (hq != null) {
-            server.setName(getPlatformName()+" HQ ActiveMQ Embedded "+getTypeInfo().getVersion());
+            server.setName(getPlatformName() + " HQ ActiveMQ Embedded " + getTypeInfo().getVersion());
         }
 
         server.setIdentifier(catalinaBase + " Embedded ActiveMQ");
         return server;
     }
 
+    @Override
+    protected List discoverServices(ConfigResponse serverConfig)
+            throws PluginException {
+
+        JMXConnector connector;
+        MBeanServerConnection mServer;
+
+        try {
+            connector = MxUtil.getMBeanConnector(serverConfig.toProperties());
+            mServer = connector.getMBeanServerConnection();
+        } catch (Exception e) {
+            throw new PluginException(e.getMessage(), e);
+        }
+
+        try {
+            return _discoverMxServices(mServer, serverConfig);
+        } finally {
+            try {
+                connector.close();
+            } catch (IOException e) {
+                throw new PluginException(e.getMessage(), e);
+            }
+        }
+    }
+
+    protected List _discoverMxServices(MBeanServerConnection mServer,
+            ConfigResponse serverConfig)
+            throws PluginException {
+
+        String url = serverConfig.getValue(MxUtil.PROP_JMX_URL);
+        String objName = getTypeProperty(MxQuery.PROP_OBJECT_NAME);
+        log.debug("--> url="+url);
+        log.debug("--> objName="+objName);
+        return discoverMxServices(mServer, serverConfig);
+    }
 }

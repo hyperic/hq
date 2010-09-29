@@ -46,6 +46,7 @@ import static org.junit.Assert.*;
  * ErlangGatewayTest
  * @author Helena Edelson
  */
+@Ignore("Need to mock the connection for automation")
 public class ErlangGatewayTest extends AbstractSpringTest {
  
     @Test @Ignore("These conversions are not in the spring amqp yet")
@@ -67,14 +68,14 @@ public class ErlangGatewayTest extends AbstractSpringTest {
         } 
     }
  
-    @Test @Ignore
+    @Test
     public void getVirtualHosts() throws Exception {
         List<String> virtualHosts = erlangGateway.getVirtualHosts();
         assertNotNull(virtualHosts);
         assertTrue(virtualHosts.size() >= 0);
     }
 
-    @Test @Ignore
+    @Test
     public void getExchanges() throws Exception {
         RabbitBrokerAdmin admin = new RabbitBrokerAdmin(singleConnectionFactory);
         new RabbitBrokerGateway(admin).createExchange(UUID.randomUUID().toString(), ExchangeType.fanout.name());
@@ -86,7 +87,7 @@ public class ErlangGatewayTest extends AbstractSpringTest {
         }
     }
 
-    @Test @Ignore 
+    @Test
     public void getConnections() throws IOException {
         com.rabbitmq.client.Connection conn = singleConnectionFactory.createConnection();
         List<Connection> cons = erlangGateway.getConnections();
@@ -94,7 +95,7 @@ public class ErlangGatewayTest extends AbstractSpringTest {
         conn.close();
     }
 
-    @Test @Ignore 
+    @Test
     public void getChannels() throws IOException {
         com.rabbitmq.client.Connection conn = singleConnectionFactory.createConnection();
         conn.createChannel();
