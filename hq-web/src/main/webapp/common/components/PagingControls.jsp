@@ -79,8 +79,11 @@
 				          	<c:if test="${listSize > 100}">
 				            	<html:option value="100" key="ListToolbar.ItemsPerPage.100" />
 				          	</c:if>
-				          	<c:if test="${listSize > 200}">
-				            	<html:option value="200" key="ListToolbar.ItemsPerPage.200" />
+				          	<c:if test="${listSize > 250}">
+				            	<html:option value="250" key="ListToolbar.ItemsPerPage.250" />
+				          	</c:if>
+				          	<c:if test="${listSize > 500}">
+				            	<html:option value="500" key="ListToolbar.ItemsPerPage.500" />
 				          	</c:if>
         				</html:select>
         			</td>
