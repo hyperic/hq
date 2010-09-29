@@ -447,18 +447,18 @@ function showViewEscResponse() {
 <table width="100%" cellpadding="0" cellspacing="0" border="0" id="viewEscalation" style="display: none;">
 	<tbody>
     	<tr>
-      		<td class="BlockLabel" width="20%"nowrap="true"><fmt:message key="alert.config.escalation.acknowledged"/></td>
+      		<td class="BlockLabel" width="20%"nowrap><fmt:message key="alert.config.escalation.acknowledged"/></td>
       		<td id="acknowledged" class="BlockContent"></td>
     	</tr>
     	<tr>
-      		<td class="BlockLabel" nowrap="true"><fmt:message key="alert.config.escalation.state.change"/></td>
+      		<td class="BlockLabel" nowrap><fmt:message key="alert.config.escalation.state.change"/></td>
       		<td id="changed" class="BlockContent"></td>
     	</tr>
     	<tr>
       		<td class="BlockContent" colspan="2">&nbsp;</td>
     	</tr>
     	<tr>
-      		<td class="BlockLabel" nowrap="true" valign="top"><fmt:message key="common.label.EscalationSchemeActions"/></td>
+      		<td class="BlockLabel" nowrap valign="top"><fmt:message key="common.label.EscalationSchemeActions"/></td>
       		<td class="BlockContent">
       			<ul id="viewEscalationUL">
         			<li style="border: none;"><fmt:message key="common.label.None"/></li>
