@@ -18,9 +18,10 @@ import static org.junit.Assert.*;
  *
  * @author Helena Edelson
  */
-@Ignore("Manual cookie value to connect to each node is required")
+@Ignore("Need to mock the connection for automation")
 public class BrokerAdminTest extends AbstractSpringTest {
- 
+
+
     @Test
     public void getHosts() throws PluginException {
         String host = rabbitTemplate.getConnectionFactory().getHost();

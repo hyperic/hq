@@ -320,7 +320,6 @@ public class RabbitBrokerGateway implements RabbitGateway {
      * @return
      */
     public List<String> getVirtualHosts() {
-        /** problem with this , still testing */
         List<String> vHosts = erlangGateway.getVirtualHosts();
 
         if (vHosts == null) {
