@@ -32,7 +32,7 @@ public class BrokerAdminTest extends AbstractSpringTest {
 
     @Test
     public void declareDeleteExchange() {
-        rabbitBrokerAdmin.declareExchange("stocks.nasdaq.*", ExchangeType.fanout.name(), true, false);
+        rabbitBrokerAdmin.declareExchange("stocks.nasdaq.*", ExchangeTypes.FANOUT, true, false);
         rabbitBrokerAdmin.deleteExchange("stocks.nasdaq.*");
     }
  

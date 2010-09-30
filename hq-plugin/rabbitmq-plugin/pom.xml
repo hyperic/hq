@@ -15,13 +15,14 @@
     <name>Hyperic HQ Plugin - RabbitMQ Plugin</name>
 
     <properties>
-        <spring.amqp.version>1.0.0.M1</spring.amqp.version>
+        <spring.amqp.version>1.0.0.BUILD-SNAPSHOT</spring.amqp.version>
         <org.erlang.otp.version>1.5.3</org.erlang.otp.version>
         <!-- 2.0.0 is not backward compatible and we need
         to support 1.8.0 - later versions. We have to use this
         client version for now. -->
-        <com.rabbitmq.version>1.8.1</com.rabbitmq.version>
+        <com.rabbitmq.version>2.1.0</com.rabbitmq.version>
         <org.mockito.version>1.8.4</org.mockito.version>
+        <org.slf4j.version>1.5.10</org.slf4j.version>
     </properties>
 
     <dependencies>
@@ -70,11 +71,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-web</artifactId>
-            <scope>test</scope>
-		</dependency>
-        <dependency>
             <groupId>com.cenqua.clover</groupId>
             <artifactId>clover</artifactId>
             <version>${clover2.version}</version>
@@ -85,11 +81,28 @@
             <artifactId>log4j</artifactId>
             <version>${log4j.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${org.slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>${org.slf4j.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${org.slf4j.version}</version>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
-             <plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
@@ -134,16 +147,16 @@
             <name>Spring Framework Maven Release Repository</name>
             <url>http://maven.springframework.org/release</url>
         </repository>
-        <!--<repository>
+        <repository>
             <id>repository.springframework.maven.milestone</id>
             <name>Spring Framework Maven Milestone Repository</name>
             <url>http://maven.springframework.org/milestone</url>
         </repository>
         <repository>
-			<id>repository.springframework.maven.snapshot</id>
-			<name>Spring Framework Maven Snapshot Repository</name>
-			<url>http://maven.springframework.org/snapshot</url>
-		</repository>-->
+            <id>repository.springframework.maven.snapshot</id>
+            <name>Spring Framework Maven Snapshot Repository</name>
+            <url>http://maven.springframework.org/snapshot</url>
+        </repository>
     </repositories>
 
 </project>

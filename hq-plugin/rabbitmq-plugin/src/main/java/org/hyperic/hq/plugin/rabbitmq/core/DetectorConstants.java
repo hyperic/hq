@@ -45,7 +45,7 @@ public class DetectorConstants {
 
     public static final String RABBITMQ_HOME = "RABBITMQ_HOME";
 
-    public static final String PROCESS_NAME = "proccess.name";
+    public static final String PROCESS_NAME = "process.name";
 
     public static final String PROCESS_QUERY = "process.query";
 
@@ -53,7 +53,7 @@ public class DetectorConstants {
    
     public static final String SERVICE_LOG_TRACK_FILES = "service.log_track.files";
 
-    public static final String PROCESS = "Proccess";
+    public static final String PROCESS = "Process";
 
     public static final String VHOST = "VHost";
 
