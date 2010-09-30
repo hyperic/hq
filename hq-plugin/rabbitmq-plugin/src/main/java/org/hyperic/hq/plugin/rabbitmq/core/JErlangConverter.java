@@ -94,10 +94,10 @@ public class JErlangConverter implements ErlangConverter {
             else if (type.isAssignableFrom(String.class)) {
                 return convertVirtualHosts(response);
             }
-            else if (type.isAssignableFrom(Connection.class)) {
+            else if (type.isAssignableFrom(HypericConnection.class)) {
                 return convertConnections(response);
             }
-            else if (type.isAssignableFrom(Channel.class) && virtualHost == null) {
+            else if (type.isAssignableFrom(HypericChannel.class) && virtualHost == null) {
                 return convertChannels(response);
             }
             else {
@@ -114,19 +114,19 @@ public class JErlangConverter implements ErlangConverter {
      * @param response
      * @return
      */
-    private List<Channel> convertChannels(OtpErlangObject response) {
-        List<Channel> channels = null;
+    private List<HypericChannel> convertChannels(OtpErlangObject response) {
+        List<HypericChannel> channels = null;
 
         long items = ((OtpErlangList) response).elements().length;
 
         if (items > 0) {
-            channels = new ArrayList<Channel>();
+            channels = new ArrayList<HypericChannel>();
 
             if (response instanceof OtpErlangList) {
 
                 for (OtpErlangObject outerList : ((OtpErlangList) response).elements()) {
                     if (outerList instanceof OtpErlangList) {
-                        Channel channel = new Channel();
+                        HypericChannel channel = new HypericChannel();
 
                         for (OtpErlangObject innerListObj : ((OtpErlangList) outerList).elements()) {
 
@@ -239,20 +239,20 @@ public class JErlangConverter implements ErlangConverter {
      * @return
      * @throws OtpErlangException
      */
-    private List<Connection> convertConnections(OtpErlangObject response) throws OtpErlangException {
-        List<Connection> connections = null;
+    private List<HypericConnection> convertConnections(OtpErlangObject response) throws OtpErlangException {
+        List<HypericConnection> connections = null;
 
         long items = ((OtpErlangList) response).elements().length;
 
         if (items > 0) {
-            connections = new ArrayList<Connection>();
+            connections = new ArrayList<HypericConnection>();
 
             if (response instanceof OtpErlangList) {
 
                 for (OtpErlangObject outerList : ((OtpErlangList) response).elements()) {
                     if (outerList instanceof OtpErlangList) {
 
-                        Connection connection = new Connection();
+                        HypericConnection connection = new HypericConnection();
 
                         String host = null;
 

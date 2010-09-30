@@ -27,22 +27,18 @@ package org.hyperic.hq.plugin.rabbitmq.populate;
 
 import org.hyperic.hq.plugin.rabbitmq.configure.RabbitTestConfiguration;
 import org.hyperic.hq.plugin.rabbitmq.core.AMQPStatus;
-import org.hyperic.hq.plugin.rabbitmq.core.Channel;
-import org.hyperic.hq.plugin.rabbitmq.core.Connection;
+import org.hyperic.hq.plugin.rabbitmq.core.HypericChannel;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
-import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.admin.QueueInfo;
 import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
-import org.springframework.amqp.rabbit.admin.RabbitStatus;
 import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -108,7 +104,7 @@ public class PopulateData {
         conn.createChannel();
         conn.createChannel();
 
-        List<Channel> channels = rabbitGateway.getChannels();
+        List<HypericChannel> channels = rabbitGateway.getChannels();
         assertNotNull(channels);
         assertTrue(channels.size() > 0);
 
