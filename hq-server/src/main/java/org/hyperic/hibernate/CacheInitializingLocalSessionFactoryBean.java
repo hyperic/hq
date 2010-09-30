@@ -45,6 +45,7 @@ import net.sf.ehcache.management.ManagementService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.jmx.StatisticsService;
 import org.hyperic.hq.common.DiagnosticObject;
@@ -71,7 +72,7 @@ public class CacheInitializingLocalSessionFactoryBean
 
     @Autowired
     private MBeanServer mBeanServer;
-    
+
     @Autowired
     private DiagnosticsLogger diagnosticsLogger;
 
@@ -80,6 +81,16 @@ public class CacheInitializingLocalSessionFactoryBean
     public CacheInitializingLocalSessionFactoryBean(List<String> classesForCache) {
         super();
         this.classesForCache = classesForCache;
+    }
+
+    @Override
+    public void destroy() throws HibernateException {
+        super.destroy();
+        try {
+            mBeanServer.unregisterMBean(new ObjectName(HIBERNATE_STATS_OBJECT_NAME));
+        } catch (Exception e) {
+            logger.warn("Error unregistering Hibernate Stats MBean", e);
+        }
     }
 
     @Override
@@ -126,14 +137,12 @@ public class CacheInitializingLocalSessionFactoryBean
             }
         }
     }
-    
+
     private void initEhCacheDiagnostics() {
         // Add ehcache statistics to the diagnostics
         DiagnosticObject cacheDiagnostics = new DiagnosticObject() {
-            private PrintfFormat _fmt = 
-                new PrintfFormat("%-55s %-6d %-6d %6d");
-            private PrintfFormat _hdr = 
-                new PrintfFormat("%-55s %-6s %-6s %6s");
+            private PrintfFormat _fmt = new PrintfFormat("%-55s %-6d %-6d %6d");
+            private PrintfFormat _hdr = new PrintfFormat("%-55s %-6s %-6s %6s");
 
             public String getName() {
                 return "EhCache Diagnostics";
@@ -145,7 +154,7 @@ public class CacheInitializingLocalSessionFactoryBean
 
             private List<Cache> getSortedCaches() {
                 List<Cache> res = getCaches();
-                
+
                 Collections.sort(res, new Comparator<Cache>() {
                     public int compare(Cache c1, Cache c2) {
                         return c1.getName().compareTo(c2.getName());
@@ -153,7 +162,7 @@ public class CacheInitializingLocalSessionFactoryBean
                 });
                 return res;
             }
-            
+
             public String getStatus() {
                 String separator = System.getProperty("line.separator");
                 StringBuffer buf = new StringBuffer(separator);
@@ -163,27 +172,25 @@ public class CacheInitializingLocalSessionFactoryBean
                 fmtArgs[1] = "Size";
                 fmtArgs[2] = "Hits";
                 fmtArgs[3] = "Misses";
-                buf.append(_hdr.sprintf(fmtArgs))
-                   .append(separator);
+                buf.append(_hdr.sprintf(fmtArgs)).append(separator);
                 fmtArgs[0] = "=====";
                 fmtArgs[1] = "====";
                 fmtArgs[2] = "====";
                 fmtArgs[3] = "=====";
                 buf.append(_hdr.sprintf(fmtArgs));
 
-                for (Cache cache : getSortedCaches() ) {
+                for (Cache cache : getSortedCaches()) {
                     fmtArgs[0] = StringUtil.dotProximate(cache.getName(), 55);
                     fmtArgs[1] = new Integer(cache.getSize());
                     fmtArgs[2] = new Long(cache.getStatistics().getCacheHits());
                     fmtArgs[3] = new Long(cache.getStatistics().getCacheMisses());
-                            
-                    buf.append(separator)
-                       .append(_fmt.sprintf(fmtArgs));
+
+                    buf.append(separator).append(_fmt.sprintf(fmtArgs));
                 }
 
                 return buf.toString();
             }
-            
+
             public String getShortStatus() {
                 return getStatus();
             }
@@ -194,13 +201,13 @@ public class CacheInitializingLocalSessionFactoryBean
         };
         diagnosticsLogger.addDiagnosticObject(cacheDiagnostics);
     }
-    
+
     private List<Cache> getCaches() {
         CacheManager cacheManager = CacheManager.getInstance();
         String[] caches = cacheManager.getCacheNames();
         List<Cache> res = new ArrayList<Cache>(caches.length);
-        
-        for (int i=0; i<caches.length; i++) {
+
+        for (int i = 0; i < caches.length; i++) {
             res.add(cacheManager.getCache(caches[i]));
         }
         return res;
