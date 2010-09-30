@@ -26,7 +26,8 @@
 package org.hyperic.hq.plugin.rabbitmq;
 
 
-import org.hyperic.hq.plugin.rabbitmq.core.*;
+import org.hyperic.hq.plugin.rabbitmq.core.AMQPStatus;
+import org.hyperic.hq.plugin.rabbitmq.core.HypericConnection;
 import org.hyperic.hq.product.PluginException;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -63,7 +64,7 @@ public class RabbitGatewayTest extends AbstractSpringTest {
     @Test
     public void getConnections() throws Exception {
         com.rabbitmq.client.Connection conn = singleConnectionFactory.createConnection();
-        List<Connection> cons = rabbitGateway.getConnections();
+        List<HypericConnection> cons = rabbitGateway.getConnections();
         assertNotNull(cons);
         conn.close();
     }

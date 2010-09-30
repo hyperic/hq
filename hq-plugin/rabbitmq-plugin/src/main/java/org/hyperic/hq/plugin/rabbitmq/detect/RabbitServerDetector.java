@@ -281,7 +281,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      */
     protected List<ServiceResource> createConnectionServiceResources(RabbitGateway rabbitGateway, String vHost) throws PluginException {
         List<ServiceResource> serviceResources = null;
-        List<Connection> connections = rabbitGateway.getConnections();
+        List<HypericConnection> connections = rabbitGateway.getConnections();
         if (connections != null) {
             serviceResources = doCreateServiceResources(connections, DetectorConstants.CONNECTION, vHost);
         }
@@ -298,7 +298,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      */
     protected List<ServiceResource> createChannelServiceResources(RabbitGateway rabbitGateway, String vHost) throws PluginException {
         List<ServiceResource> serviceResources = null;
-        List<Channel> channels = rabbitGateway.getChannels();
+        List<HypericChannel> channels = rabbitGateway.getChannels();
         if (channels != null) {
             serviceResources = doCreateServiceResources(channels, DetectorConstants.CHANNEL, vHost);
         }
@@ -369,18 +369,18 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                 if (obj instanceof QueueInfo) {
                     name = ((QueueInfo) obj).getName();
                     resource.setCustomProperties(RabbitQueueCollector.getAttributes((QueueInfo) obj));
-                } else if (obj instanceof Connection) {
-                    name = ((Connection) obj).getPid();
-                    resource.setCustomProperties(RabbitConnectionCollector.getAttributes((Connection) obj));
+                } else if (obj instanceof HypericConnection) {
+                    name = ((HypericConnection) obj).getPid();
+                    resource.setCustomProperties(RabbitConnectionCollector.getAttributes((HypericConnection) obj));
                 } else if (obj instanceof Exchange) {
                     name = ((Exchange) obj).getName();
                     resource.setCustomProperties(RabbitExchangeCollector.getAttributes((Exchange) obj));
                 } else if (obj instanceof Application) {
                     name = ((Application) obj).getDescription();
                     resource.setCustomProperties(BrokerAppCollector.getAttributes((Application) obj));
-                } else if (obj instanceof Channel) {
-                    name = ((Channel) obj).getPid();
-                    resource.setCustomProperties(RabbitChannelCollector.getAttributes((Channel) obj));
+                } else if (obj instanceof HypericChannel) {
+                    name = ((HypericChannel) obj).getPid();
+                    resource.setCustomProperties(RabbitChannelCollector.getAttributes((HypericChannel) obj));
                 } else if (obj instanceof String) {
                     name = (String) obj;
                 }

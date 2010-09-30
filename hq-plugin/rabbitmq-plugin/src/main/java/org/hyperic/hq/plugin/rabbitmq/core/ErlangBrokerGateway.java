@@ -63,8 +63,8 @@ public class ErlangBrokerGateway implements ErlangGateway {
      * @throws OtpErlangException
      */
     @SuppressWarnings("unchecked") 
-    public List<Connection> getConnections() throws ErlangBadRpcException {
-        return (List<Connection>) converter.fromErlangRpc("rabbit_networking", "connection_info_all", null, Connection.class);
+    public List<HypericConnection> getConnections() throws ErlangBadRpcException {
+        return (List<HypericConnection>) converter.fromErlangRpc("rabbit_networking", "connection_info_all", null, HypericConnection.class);
     }
 
     /**
@@ -99,8 +99,8 @@ public class ErlangBrokerGateway implements ErlangGateway {
     }
 
     @SuppressWarnings("unchecked")
-    public List<Channel> getChannels() throws ErlangBadRpcException { 
-        return (List<Channel>) converter.fromErlangRpc("rabbit_channel", "info_all", null, Channel.class);
+    public List<HypericChannel> getChannels() throws ErlangBadRpcException {
+        return (List<HypericChannel>) converter.fromErlangRpc("rabbit_channel", "info_all", null, HypericChannel.class);
     }
  
 }
