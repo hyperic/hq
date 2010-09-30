@@ -959,6 +959,92 @@
                 default="DefaultCluster"/>
             </config>
         </service>
+        <!-- Added Support for JBoss Messaging -->
+		<service name="JBoss Messaging Destination" internal="true">
+			<config>
+				<option name="name" description="JBoss Messaging Destination"
+					default="" />
+			</config>
+			<property name="OBJECT_NAME"
+				value="jboss.messaging.destination:service=Queue,name=%name%" />
+			<plugin type="autoinventory" />
+			<properties>
+				<property name="JNDIName" description="JNDIName" />
+				<property name="ServerPeer" description="ServerPeer" />
+				<property name="DLQ" description="DLQ" />
+				<property name="ExpiryQueue" description="ExpiryQueue" />
+				<property name="RedeliveryDelay" description="RedeliveryDelay" />
+				<property name="CreatedProgrammatically" description="CreatedProgrammatically" />
+				<property name="MaxSize" description="MaxSize" />
+				<property name="FullSize" description="FullSize" />
+				<property name="PageSize" description="PageSize" />
+				<property name="DownCacheSize" description="DownCacheSize" />
+				<property name="Clustered" description="Clustered" />
+				<property name="MaxDeliveryAttempts" description="MaxDeliveryAttempts" />
+				<property name="MessageCount" description="AllMessageCount" />
+				<property name="ConsumerCount" description="AllSubscriptionCount" />
+			</properties>
+
+			<metric name="Availability" template="jboss.system:service=MainDeployer:StateString"
+				indicator="true" />
+
+			<metric name="Messages in Queue" template="${OBJECT_NAME}:MessageCount"
+				category="THROUGHPUT" indicator="true" />
+
+			<metric name="Scheduled Messages in Queue" template="${OBJECT_NAME}:ScheduledMessageCount"
+				category="THROUGHPUT" indicator="true" />
+
+			<metric name="Subscriber Count" template="${OBJECT_NAME}:ConsumerCount"
+				indicator="true" />
+
+			<plugin type="control" class="JBossStateServiceControlPlugin" />
+			<actions include="stop" />
+			<actions include="start" />
+			<actions include="removeAllMessages" />
+			<actions include="listAllMessages" />
+		</service>
+
+		<service name="JBoss Messaging Topic" internal="true">
+			<config>
+				<option name="name" description="JBoss Messaging Topic"
+					default="" />
+			</config>
+			<property name="OBJECT_NAME"
+				value="jboss.messaging.destination:service=Topic,name=%name%" />
+			<plugin type="autoinventory" />
+			<properties>
+				<property name="JNDIName" description="JNDIName" />
+				<property name="ServerPeer" description="ServerPeer" />
+				<property name="DLQ" description="DLQ" />
+				<property name="ExpiryQueue" description="ExpiryQueue" />
+				<property name="RedeliveryDelay" description="RedeliveryDelay" />
+				<property name="CreatedProgrammatically" description="CreatedProgrammatically" />
+				<property name="MaxSize" description="MaxSize" />
+				<property name="FullSize" description="FullSize" />
+				<property name="PageSize" description="PageSize" />
+				<property name="DownCacheSize" description="DownCacheSize" />
+				<property name="Clustered" description="Clustered" />
+				<property name="MaxDeliveryAttempts" description="MaxDeliveryAttempts" />
+				<property name="AllMessageCount" description="AllMessageCount" />
+				<property name="AllSubscriptionCount" description="AllSubscriptionCount" />
+			</properties>
+
+			<metric name="Availability" template="jboss.system:service=MainDeployer:StateString"
+				indicator="true" />
+
+			<metric name="Messages in Topic" template="${OBJECT_NAME}:AllMessageCount"
+				category="THROUGHPUT" indicator="true" />
+
+
+			<metric name="Subscription Count" template="${OBJECT_NAME}:AllSubscriptionsCount"
+				indicator="true" />
+
+			<plugin type="control" class="JBossStateServiceControlPlugin" />
+			<actions include="stop" />
+			<actions include="start" />
+			<actions include="removeAllMessages" />
+			<actions include="listAllMessages" />
+		</service>
     </server>
 
     <server name="JBoss"
