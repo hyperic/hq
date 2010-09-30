@@ -78,7 +78,7 @@ public class ErlangGatewayTest extends AbstractSpringTest {
     @Test
     public void getExchanges() throws Exception {
         RabbitBrokerAdmin admin = new RabbitBrokerAdmin(singleConnectionFactory);
-        new RabbitBrokerGateway(admin).createExchange(UUID.randomUUID().toString(), ExchangeType.fanout.name());
+        new RabbitBrokerGateway(admin).createExchange(UUID.randomUUID().toString(), ExchangeTypes.FANOUT);
         
         List<String> vHosts = erlangGateway.getVirtualHosts();
         for(String vHost : vHosts) {
