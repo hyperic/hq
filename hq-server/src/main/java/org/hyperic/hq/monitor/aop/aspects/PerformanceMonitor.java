@@ -44,7 +44,6 @@ import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
-import java.util.UUID;
 
 /**
  * PerformanceMonitor performs around advice on pre-defined service-level
@@ -78,8 +77,8 @@ public class PerformanceMonitor {
     public Object monitorServiceMethod(ProceedingJoinPoint pjp) throws Throwable {
 
         Object invocation = null;
-
-        final StopWatch timer = new StopWatch(pjp.getSignature().getName() + UUID.randomUUID().toString());
+        String uniqueId = String.valueOf(System.currentTimeMillis());
+        final StopWatch timer = new StopWatch(uniqueId);
 
         try {
             timer.start();
