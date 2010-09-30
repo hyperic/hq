@@ -30,8 +30,10 @@ import org.hyperic.hq.plugin.rabbitmq.core.AMQPStatus;
 import org.hyperic.hq.plugin.rabbitmq.core.Channel;
 import org.hyperic.hq.plugin.rabbitmq.core.Connection;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
-import org.springframework.amqp.core.ExchangeType;
+import org.springframework.amqp.core.Exchange;
+import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.admin.QueueInfo;
 import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
 import org.springframework.amqp.rabbit.admin.RabbitStatus;
 import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
@@ -54,14 +56,14 @@ import static org.junit.Assert.assertTrue;
  */
 public class PopulateData {
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws Exception, InterruptedException {
         ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(RabbitTestConfiguration.class);
         addData(ctx);
         RabbitTemplate rabbitTemplate = ctx.getBean(RabbitTemplate.class);
         Queue marketDataQueue = ctx.getBean("marketDataQueue", Queue.class);
         Queue responseQueue = ctx.getBean("responseQueue", Queue.class);
 
-       
+
         int numMessages = 100;
 
         ProducerSample producer = new ProducerSample(rabbitTemplate, marketDataQueue, numMessages);
@@ -71,29 +73,37 @@ public class PopulateData {
         //consumer.receiveSync();
     }
 
-    private static void addData(ConfigurableApplicationContext ctx) throws IOException, InterruptedException {
+    private static void addData(ConfigurableApplicationContext ctx) throws Exception, InterruptedException {
         SimpleMessageListenerContainer asyncListenerContainer = ctx.getBean(SimpleMessageListenerContainer.class);
         SingleConnectionFactory singleConnectionFactory = ctx.getBean(SingleConnectionFactory.class);
         RabbitGateway rabbitGateway = ctx.getBean(RabbitGateway.class);
+
+        rabbitGateway.createQueue("quotes.nasdaq.*");
+        List<QueueInfo> queues = rabbitGateway.getQueues();
+        for(QueueInfo q:queues) {
+           if (q.getName().length() > 17) {
+               rabbitGateway.deleteQueue(q.getName());
+           }
+        }
+        rabbitGateway.createExchange("marketData.topic", ExchangeTypes.TOPIC);
+        rabbitGateway.createExchange("app.stock.marketdata", ExchangeTypes.DIRECT);
+
         Queue marketDataQueue = ctx.getBean("marketDataQueue", Queue.class);
 
-        rabbitGateway.createExchange("app.stock.quotes", ExchangeType.topic.name());
+        rabbitGateway.createExchange("app.stock.quotes", ExchangeTypes.TOPIC);
         rabbitGateway.createQueue(marketDataQueue.getName());
-        
+
         RabbitBrokerAdmin rabbitBrokerAdmin = ctx.getBean(RabbitBrokerAdmin.class);
         System.out.println(rabbitBrokerAdmin.getStatus());
 
         com.rabbitmq.client.Connection conn = singleConnectionFactory.createConnection();
-        Map<String,Object> props = conn.getServerProperties();
+        Map<String, Object> props = conn.getServerProperties();
         System.out.println(props);
 
 
         AMQPStatus status = rabbitGateway.createQueue(UUID.randomUUID().toString());
         assertTrue(status.compareTo(AMQPStatus.RESOURCE_CREATED) == 0);
         assertTrue(status.name().equalsIgnoreCase(AMQPStatus.RESOURCE_CREATED.name()));
-
-        rabbitGateway.createExchange(UUID.randomUUID().toString(), ExchangeType.fanout.name());
-        rabbitGateway.createExchange(UUID.randomUUID().toString(), ExchangeType.direct.name());
 
         conn.createChannel();
         conn.createChannel();

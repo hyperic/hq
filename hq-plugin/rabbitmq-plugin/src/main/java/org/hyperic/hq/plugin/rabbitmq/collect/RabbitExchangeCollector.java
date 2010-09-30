@@ -54,7 +54,7 @@ public class RabbitExchangeCollector extends Collector {
                 List<Exchange> exchanges = rabbitGateway.getExchanges();
                 if (exchanges != null) {
                     for (Exchange e : exchanges) {
-                         
+
                         setAvailability(true);
                     }
                 }
@@ -78,7 +78,7 @@ public class RabbitExchangeCollector extends Collector {
         String durable = e.isDurable() ? "durable" : "not durable";
         ConfigResponse res = new ConfigResponse();
         res.setValue("durable", durable);
-        res.setValue("exchangeType", e.getExchangeType().name());
+        res.setValue("exchangeType", e.getName());
         res.setValue("autoDelete", e.isAutoDelete());
         return res;
     }
