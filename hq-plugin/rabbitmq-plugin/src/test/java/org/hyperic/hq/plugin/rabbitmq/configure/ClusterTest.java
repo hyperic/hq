@@ -23,27 +23,11 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq.core;
- 
-import org.springframework.amqp.core.Exchange;
-import org.springframework.erlang.ErlangBadRpcException;
-
-import java.util.List;
+package org.hyperic.hq.plugin.rabbitmq.configure;
 
 /**
- * ErlangGatway
- *
+ * ClusterOnSameMachineTest
  * @author Helena Edelson
  */
-public interface ErlangGateway {
-
-    List<String> getVirtualHosts() throws ErlangBadRpcException;
-    
-    List<Exchange> getExchanges(String virtualHost) throws ErlangBadRpcException;
-
-    List<HypericConnection> getConnections() throws ErlangBadRpcException;
-
-    List<HypericChannel> getChannels() throws ErlangBadRpcException;
-    
-    String getVersion() throws ErlangBadRpcException;
+public class ClusterTest {
 }

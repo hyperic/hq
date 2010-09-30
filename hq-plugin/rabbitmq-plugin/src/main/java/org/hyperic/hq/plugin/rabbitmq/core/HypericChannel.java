@@ -29,13 +29,13 @@ package org.hyperic.hq.plugin.rabbitmq.core;
  * AmqpChannel
  * @author Helena Edelson
  */
-public class Channel {
+public class HypericChannel {
 
     private String pid;
 
     private String vHost;
 
-    private Connection connection;
+    private HypericConnection connection;
 
     private long number;
 
@@ -67,12 +67,12 @@ public class Channel {
         this.pid = pid;
     }
 
-    public Connection getConnection() {
+    public HypericConnection getConnection() {
         return connection;
     }
 
     public void setConnection(String pid) {
-        this.connection = new Connection(pid);
+        this.connection = new HypericConnection(pid);
     }
 
     public long getNumber() {
