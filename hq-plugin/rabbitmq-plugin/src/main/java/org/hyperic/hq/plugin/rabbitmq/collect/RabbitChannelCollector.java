@@ -27,7 +27,7 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.core.Channel;
+import org.hyperic.hq.plugin.rabbitmq.core.HypericChannel;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.Collector;
@@ -52,17 +52,15 @@ public class RabbitChannelCollector extends Collector {
         if (rabbitGateway != null) {
 
             try {
-                List<Channel> channels = rabbitGateway.getChannels();
+                List<HypericChannel> channels = rabbitGateway.getChannels();
 
                 if (channels != null) {
                     logger.debug("Found " + channels.size() + " channels");
-                    for (Channel channel : channels) {
-                        Map<String, Object> props = new HashMap<String, Object>();
-                        props.put("consumerCount", channel.getConsumerCount()); 
-                        setValue("consumerCount", channel.getConsumerCount());
-
-                        addValues(props);
+                    for (HypericChannel channel : channels) {
+                        
                         setAvailability(true);
+
+                        setValue("consumerCount", channel.getConsumerCount());
                     }
                 }
             }
@@ -79,7 +77,7 @@ public class RabbitChannelCollector extends Collector {
      * @param channel
      * @return
      */
-    public static ConfigResponse getAttributes(Channel channel) {
+    public static ConfigResponse getAttributes(HypericChannel channel) {
         ConfigResponse res = new ConfigResponse();
         res.setValue("pid", channel.getPid());
         res.setValue("connection", channel.getConnection().getPid());

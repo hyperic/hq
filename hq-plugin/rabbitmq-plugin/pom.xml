@@ -20,7 +20,7 @@
         <!-- 2.0.0 is not backward compatible and we need
         to support 1.8.0 - later versions. We have to use this
         client version for now. -->
-        <com.rabbitmq.version>2.1.0</com.rabbitmq.version>
+        <com.rabbitmq.version>1.8.1</com.rabbitmq.version>
         <org.mockito.version>1.8.4</org.mockito.version>
         <org.slf4j.version>1.5.10</org.slf4j.version>
     </properties>

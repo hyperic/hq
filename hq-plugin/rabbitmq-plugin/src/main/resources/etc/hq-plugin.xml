@@ -30,27 +30,7 @@
 
 <plugin class="org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin">
 
-    <help name="RabbitMQ Help">
-        <![CDATA[
-          <p>
-          <h3>Configure RabbitMQ for Monitoring</h3>
-          Once the RabbitMQ nodes are auto-detected and you can select the Server resource by node, go to Tools Menu >
-          Configure Server.
-          <ol><li><h3>Host, Username, Password</h3>
-            Enter the node's hostname, username, and password then select OK. This will allow Hyperic
-            to connect to the node and query information on Queues, Channels, Connections, Processes, Users, and Exchanges.
-           </li><li>
-          <h3>Erlang Cookie Location</h3>
-           If you have multiple cookies on the managed host Hyperic is monitoring and you do not see Queues, etc auto-discovered,
-           please supply the 'path/to/.erlang.cookie' for this particular node in the Erlang Cookie text box.</li>
-           </ol>
-          </p>
-          <p>
-          <h3>Help Docs</h3>
-          Coming soon: <a href="http://support.hyperic.com/display/EVO/Monitoring+RabbitMQ">Monitoring and Managing RabbitMQ</a>
-          </p>
-        ]]>
-    </help>
+
 
     <server name="RabbitMQ" description="RabbitMQ">
 
@@ -346,5 +326,31 @@
         &multi-process-metrics;
 
     </server>
+
+        <help name="RabbitMQ Help">
+        <![CDATA[
+          <p>
+          <h3>Configure RabbitMQ for Monitoring</h3>
+          Once the RabbitMQ nodes are auto-detected and you can select the Server resource by node, go to Tools Menu >
+          Configure Server.
+          <ol><li><h3>Host, Username, Password</h3>
+            Enter the node's hostname, username, and password then select OK. This will allow Hyperic
+            to connect to the node and query information on Queues, Channels, Connections, Processes, Users, and Exchanges.
+           </li><li>
+          <h3>Erlang Cookie Location</h3>
+           If you have multiple cookies on the managed host Hyperic is monitoring and you do not see Queues, etc auto-discovered,
+           please supply the 'path/to/.erlang.cookie' for this particular node in the Erlang Cookie text box.</li>
+           </ol>
+          </p>
+          <p>
+          <h3>Supported Versions</h3>
+          Hyperic supports RabbitMQ versions 1.8.0 and higher.
+          </p>
+          <p>
+          <h3>Help Docs</h3>
+          Coming soon: <a href="http://support.hyperic.com/display/EVO/Monitoring+RabbitMQ">Monitoring and Managing RabbitMQ</a>
+          </p>
+        ]]>
+    </help>
 
 </plugin>
