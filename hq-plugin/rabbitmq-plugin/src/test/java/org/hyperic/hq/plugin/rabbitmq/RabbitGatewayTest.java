@@ -35,7 +35,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
-import org.springframework.amqp.core.ExchangeType;
+import org.springframework.amqp.core.ExchangeTypes; 
 import org.springframework.amqp.rabbit.admin.QueueInfo;
 import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
 import org.springframework.amqp.rabbit.admin.RabbitStatus;
@@ -102,7 +102,7 @@ public class RabbitGatewayTest extends AbstractSpringTest {
 
     @Test
     public void declareDeleteExchange() {
-        rabbitGateway.createExchange("34566", ExchangeType.fanout.name());
+        rabbitGateway.createExchange("34566", ExchangeTypes.FANOUT);
         rabbitGateway.deleteExchange("34566");
     }
 

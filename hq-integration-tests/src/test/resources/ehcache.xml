@@ -250,7 +250,7 @@
 
   <!-- Agent Caches -->
   <cache name="org.hyperic.hq.appdef.Agent"
-         maxElementsInMemory="500"
+         maxElementsInMemory="5000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -262,7 +262,7 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="Agent.findByAgentToken"
-         maxElementsInMemory="500"
+         maxElementsInMemory="5000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"

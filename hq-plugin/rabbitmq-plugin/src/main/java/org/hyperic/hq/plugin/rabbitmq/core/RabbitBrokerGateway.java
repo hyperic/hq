@@ -163,13 +163,13 @@ public class RabbitBrokerGateway implements RabbitGateway {
     public AMQPStatus createExchange(String exchangeName, String exchangeType) {
         Exchange exchange = null;
 
-        if (exchangeType.equals(ExchangeType.fanout.name())) {
+        if (exchangeType.equals(ExchangeTypes.FANOUT)) {
             exchange = new FanoutExchange(exchangeName);
         }
-        else if (exchangeType.equals(ExchangeType.topic.name())) {
+        else if (exchangeType.equals(ExchangeTypes.TOPIC)) {
             exchange = new TopicExchange(exchangeName);
         }
-        else if (exchangeType.equals(ExchangeType.direct.name())) {
+        else if (exchangeType.equals(ExchangeTypes.DIRECT)) {
             exchange = new DirectExchange(exchangeName);
         }
 

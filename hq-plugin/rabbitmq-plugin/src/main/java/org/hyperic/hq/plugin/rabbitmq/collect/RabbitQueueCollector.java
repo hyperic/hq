@@ -64,6 +64,13 @@ public class RabbitQueueCollector extends Collector {
                         props.put("transactions", queue.getTransactions());
                         props.put("memory", queue.getMemory());
                         addValues(props);
+
+                        setValue("messages", queue.getMessages());
+                        setValue("consumers", queue.getConsumers());
+                        setValue("transactions", queue.getTransactions());
+                        setValue("memory", queue.getMemory());
+
+
                         setAvailability(true);
                     }
                 }
