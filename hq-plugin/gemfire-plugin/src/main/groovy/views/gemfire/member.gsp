@@ -77,39 +77,30 @@
   <% } %>
   </tbody>
 </table>
-<%if(clients.size()>0) { %>
+<%if(member.get("clients").size()>0) { %>
 <h3>Clients:</h3>
 <table>
   <thead>
     <tr>
       <th>id</th>
-      <th>name</th>
-      <th>host</th>
       <th>queuesize</th>
       <th>gets</th>
       <th>puts</th>
       <th>cachemisses</th>
-      <th>heap</th>
-      <th>cpu</th>
       <th>threads</th>
     </tr>
   </thead>
   <tbody>
-  <%for (client in clients){%>
+  <%for (client in member.get("clients").values()){%>
     <tr>
-      <td>${client.get("id")}</td>
-      <td><a id="${client.get("id")}" class="member" href="#${client.get("id")}">${client.get("name")}</a></td>
-      <td>${client.get("host")}</td>
-      <td></td>
-      <td>${client.get("cachePerfStats.gets")}</td>
-      <td>${client.get("cachePerfStats.puts")}</td>
-      <td></td>
-      <td>${client.get("heap")}%</td>
-      <td>${client.get("cpu")}%</td>
-      <td></td>
+      <td><a id="${client.get("gemfire.client.id.string")}" class="member" href="#${client.get("gemfire.client.id.string")}">${client.get("gemfire.client.id.string")}</a></td>
+      <td>${client.get("gemfire.client.queuesize.int")}</td>
+      <td>${client.get("gemfire.client.stats.gets.int")}</td>
+      <td>${client.get("gemfire.client.stats.puts.int")}</td>
+      <td>${client.get("gemfire.client.stats.cachemisses.int")}</td>
+      <td>${client.get("gemfire.client.stats.threads.int")}</td>
     </tr>
-      <% } %>
+    <% } %>
   </tbody>
 </table>
-    <% } %>
-
+  <% } %>
