@@ -77,8 +77,8 @@ public class PerformanceMonitor {
     public Object monitorServiceMethod(ProceedingJoinPoint pjp) throws Throwable {
 
         Object invocation = null;
-        String uniqueId = String.valueOf(System.currentTimeMillis());
-        final StopWatch timer = new StopWatch(uniqueId);
+        
+        final StopWatch timer = new StopWatch(pjp.getSignature() + Thread.currentThread().getName());
 
         try {
             timer.start();
