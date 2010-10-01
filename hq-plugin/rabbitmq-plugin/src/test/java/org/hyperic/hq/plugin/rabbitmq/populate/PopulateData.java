@@ -73,9 +73,7 @@ public class PopulateData {
         producer.sendMessages();
  
         List<QueueInfo> queues = rabbitGateway.getQueues();
-        for(QueueInfo q:queues) {
-            System.out.println(q);
-        }
+
         consumer.receiveAsync();
 
     }
@@ -86,9 +84,7 @@ public class PopulateData {
 
         rabbitGateway.createQueue("quotes.nasdaq.*");
         List<QueueInfo> queues = rabbitGateway.getQueues();
-        for(QueueInfo q:queues) {
-            System.out.println(q);
-        }
+      
         rabbitGateway.createExchange("marketData.topic", ExchangeTypes.TOPIC);
         rabbitGateway.createExchange("app.stock.marketdata", ExchangeTypes.DIRECT);
 
