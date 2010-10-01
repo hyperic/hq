@@ -5,7 +5,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitUtils;
+import org.hyperic.hq.plugin.rabbitmq.core.ErlangCookieHandler;
 import org.hyperic.util.config.ConfigResponse;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -40,7 +40,7 @@ public class DynamicSpringBeanConfigurerTest {
         serviceConfig.setValue(DetectorConstants.PASSWORD, "guest");
         serviceConfig.setValue(DetectorConstants.PLATFORM_TYPE, "Linux");
 
-        serviceConfig.setValue(DetectorConstants.NODE_COOKIE_VALUE, RabbitUtils.configureCookie(serviceConfig));
+        serviceConfig.setValue(DetectorConstants.NODE_COOKIE_VALUE, ErlangCookieHandler.configureCookie(serviceConfig));
 
         AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 

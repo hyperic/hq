@@ -48,38 +48,46 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * PopulateData can be run to populate the QA rabbitmq servers
+ * Not finished yet.
  * @author Helena Edelson
  */
 public class PopulateData {
 
-    public static void main(String[] args) throws Exception, InterruptedException {
+    public static void main(String[] args) throws Exception {
         ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(RabbitTestConfiguration.class);
         addData(ctx);
+        RabbitGateway rabbitGateway = ctx.getBean(RabbitGateway.class);
         RabbitTemplate rabbitTemplate = ctx.getBean(RabbitTemplate.class);
         Queue marketDataQueue = ctx.getBean("marketDataQueue", Queue.class);
         Queue responseQueue = ctx.getBean("responseQueue", Queue.class);
-
+        Queue queue = new Queue("stocks.nasdaq.*");
+        queue.setDurable(true);
+        queue.setAutoDelete(false);
+        
+        rabbitGateway.createQueue(queue.getName());
 
         int numMessages = 100;
 
-        ProducerSample producer = new ProducerSample(rabbitTemplate, marketDataQueue, numMessages);
+        ProducerSample producer = new ProducerSample(rabbitTemplate, queue, numMessages);
         ConsumerSample consumer = new ConsumerSample(rabbitTemplate, marketDataQueue);
         producer.sendMessages();
+ 
+        List<QueueInfo> queues = rabbitGateway.getQueues();
+        for(QueueInfo q:queues) {
+            System.out.println(q);
+        }
         consumer.receiveAsync();
-        //consumer.receiveSync();
+
     }
 
-    private static void addData(ConfigurableApplicationContext ctx) throws Exception, InterruptedException {
-        SimpleMessageListenerContainer asyncListenerContainer = ctx.getBean(SimpleMessageListenerContainer.class);
+    private static void addData(ConfigurableApplicationContext ctx) throws Exception {
         SingleConnectionFactory singleConnectionFactory = ctx.getBean(SingleConnectionFactory.class);
         RabbitGateway rabbitGateway = ctx.getBean(RabbitGateway.class);
 
         rabbitGateway.createQueue("quotes.nasdaq.*");
         List<QueueInfo> queues = rabbitGateway.getQueues();
         for(QueueInfo q:queues) {
-           if (q.getName().length() > 17) {
-               rabbitGateway.deleteQueue(q.getName());
-           }
+            System.out.println(q);
         }
         rabbitGateway.createExchange("marketData.topic", ExchangeTypes.TOPIC);
         rabbitGateway.createExchange("app.stock.marketdata", ExchangeTypes.DIRECT);
