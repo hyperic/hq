@@ -26,36 +26,44 @@
 package org.hyperic.hq.plugin.rabbitmq.core;
 
 /**
- * DetectorConstants 
+ * DetectorConstants
  * @author Helena Edelson
  */
 public class DetectorConstants {
 
-    public final static String HOST = "host";
+    public static final String NODE_NAME = "node.name";
 
-    public final static String USERNAME = "username";
+    public static final String NODE_PATH = "node.path";
 
-    public final static String PASSWORD = "password";
+    public static final String HOST = "host";
 
-    public final static String PORT = "port";
+    public static final String USERNAME = "username";
+
+    public static final String PASSWORD = "password";
+
+    public static final String PORT = "port";
 
     public static final String NODE_COOKIE_LOCATION = "node.cookie.location";
 
     public static final String NODE_COOKIE_VALUE = "node.cookie.value";
 
-    public static final String RABBITMQ_HOME = "RABBITMQ_HOME";
+    public static final String NODE_PID = "node.pid";
 
     public static final String PROCESS_NAME = "process.name";
 
     public static final String PROCESS_QUERY = "process.query";
 
+    public static final String ERLANG_PROCESS = "erlang.process";
+
+    public static final String RABBIT_BOOT = "rabbit.boot";
+
     public static final String SERVICE_LOG_TRACK_ENABLE = "service.log_track.enable";
-   
+
     public static final String SERVICE_LOG_TRACK_FILES = "service.log_track.files";
 
     public static final String PROCESS = "Process";
 
-    public static final String VHOST = "VHost";
+    public static final String VIRTUAL_HOST = "Virtual Host";
 
     public static final String QUEUE = "Queue";
 
@@ -68,17 +76,17 @@ public class DetectorConstants {
     public static final String CONNECTION = "Connection";
 
     public static final String BROKER_APP = "BrokerApplication";
- 
+
     public static final String MNESIA = "-mnesia";
 
     public static final String DIR = "dir";
- 
+
     public static final String SNAME = "-sname";
 
     public static final String SERVER_NAME = "server.name";
 
     public static final String SERVER_PATH = "server.path";
- 
+
     public static final String NAME = "name";
 
     public static final String DESC = "description";

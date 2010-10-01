@@ -26,13 +26,12 @@
 package org.hyperic.hq.plugin.rabbitmq.configure;
 
 import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
+import org.hyperic.hq.plugin.rabbitmq.core.ErlangCookieHandler;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitUtils;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.springframework.amqp.rabbit.admin.QueueInfo;
 
 import java.util.List;
 
@@ -55,7 +54,7 @@ public class ApplicationContextCreatorTest {
         serviceConfig.setValue(DetectorConstants.PASSWORD, "guest");
         serviceConfig.setValue(DetectorConstants.PLATFORM_TYPE, "Linux");
 
-        String value = RabbitUtils.configureCookie(serviceConfig);
+        String value = ErlangCookieHandler.configureCookie(serviceConfig);
         serviceConfig.setValue(DetectorConstants.NODE_COOKIE_VALUE, value);
 
         if (RabbitProductPlugin.getRabbitGateway() == null) {

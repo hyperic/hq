@@ -25,12 +25,10 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.detect;
 
-import com.rabbitmq.client.Connection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.util.config.ConfigResponse;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -41,10 +39,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+ 
 import java.util.Properties;
 
 import static org.junit.Assert.*;
@@ -85,46 +80,6 @@ public class RabbitServerDetectorTest extends RabbitServerDetector {
         rabbitServerDetector.configure(createConfigResponse());
         this.properties = rabbitServerDetector.getConfig().toProperties();
         assertNotNull(properties);
-    }
-
-    @Test
-    public void getChannelsAndConnections() throws Exception, IOException {
-
-        /** Insure we have a connection and at least one channel to test */
-        Connection conn = singleConnectionFactory.createConnection();
-        conn.createChannel(0);
-        conn.createChannel(1);
-
-        int total = rabbitGateway.getChannels().size() + rabbitGateway.getConnections().size() +
-                rabbitGateway.getExchanges().size() + rabbitGateway.getUsers().size() +
-                rabbitGateway.getQueues().size() + rabbitGateway.getRunningApplications().size();
-
-        final String virtualHost = rabbitGateway.getVirtualHost();
-        List<ServiceResource> rabbitResources = new ArrayList<ServiceResource>();
-
-        List<ServiceResource> connections = createConnectionServiceResources(rabbitGateway, virtualHost);
-        if (connections != null) rabbitResources.addAll(connections);
-
-        conn.close();
-        
-        List<ServiceResource> channels = createChannelServiceResources(rabbitGateway, virtualHost);
-        if (channels != null) rabbitResources.addAll(channels);
-
-        List<ServiceResource> queues = createQueueServiceResources(rabbitGateway, virtualHost);
-        if (queues != null) rabbitResources.addAll(queues);
-
-        List<ServiceResource> exchanges = createExchangeServiceResources(rabbitGateway, virtualHost);
-        if (exchanges != null) rabbitResources.addAll(exchanges);
-
-        List<ServiceResource> runningApps = createAppServiceResources(rabbitGateway, virtualHost);
-        if (runningApps != null) rabbitResources.addAll(runningApps);
-
-        List<ServiceResource> users = createUserServiceResources(rabbitGateway, virtualHost);
-        if (users != null) rabbitResources.addAll(users);
-
-
-        assertNotNull(rabbitResources);
-        assertEquals(total, rabbitResources.size());
     }
 
     @Test
