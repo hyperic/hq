@@ -79,6 +79,7 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.orm.hibernate3.HibernateTransactionManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,7 +88,6 @@ import org.springframework.transaction.annotation.Transactional;
  * The DataManagerImpl can be used to retrieve measurement data points
  * 
  */
-@SuppressWarnings("restriction")
 @Service
 @Transactional
 public class DataManagerImpl implements DataManager {
@@ -149,6 +149,7 @@ public class DataManagerImpl implements DataManager {
     private MessagePublisher messagePublisher;
     private RegisteredTriggers registeredTriggers;
     private ConcurrentStatsCollector concurrentStatsCollector;
+    private int transactionTimeout;
     
     @Autowired
     public DataManagerImpl(DBUtil dbUtil, MeasurementDAO measurementDAO,
@@ -157,7 +158,8 @@ public class DataManagerImpl implements DataManager {
                            AvailabilityManager availabilityManager,
                            MetricDataCache metricDataCache, ZeventEnqueuer zeventManager,
                            MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers,
-                           ConcurrentStatsCollector concurrentStatsCollector) {
+                           ConcurrentStatsCollector concurrentStatsCollector,
+                           HibernateTransactionManager transactionManager) {
         this.dbUtil = dbUtil;
         this.measurementDAO = measurementDAO;
         this.measurementManager = measurementManager;
@@ -168,6 +170,7 @@ public class DataManagerImpl implements DataManager {
         this.messagePublisher = messagePublisher;
         this.registeredTriggers = registeredTriggers;
         this.concurrentStatsCollector = concurrentStatsCollector;
+        this.transactionTimeout = transactionManager.getDefaultTimeout();
     }
 
     @PostConstruct
@@ -1515,6 +1518,10 @@ public class DataManagerImpl implements DataManager {
         try {
             conn = safeGetConnection();
             stmt = conn.createStatement();
+            int timeout = stmt.getQueryTimeout();
+            if (timeout == 0) {
+                stmt.setQueryTimeout(transactionTimeout);
+            }
             rs = stmt.executeQuery(sqlBuf.toString());
             final int sumValCol = rs.findColumn("sumvalue");
             final int countValCol = rs.findColumn("cnt");
