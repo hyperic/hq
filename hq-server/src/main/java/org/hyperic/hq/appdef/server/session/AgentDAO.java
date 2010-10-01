@@ -88,6 +88,10 @@ public class AgentDAO
         String hql = "from Agent where address=:address";
         return (List<Agent>) getSession().createQuery(hql).setString("address", ip).list();
     }
+    
+    public int countByIp(String ip) {
+        return ((Number) getSession().createQuery("select count(*) from Agent where address=:address").setString("address", ip).uniqueResult()).intValue();
+    }
 
     public int countUsed() {
         return ((Number) getSession().createQuery(

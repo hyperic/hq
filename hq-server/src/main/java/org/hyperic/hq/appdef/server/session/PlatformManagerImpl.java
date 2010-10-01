@@ -694,6 +694,10 @@ public class PlatformManagerImpl implements PlatformManager {
 
         return platform;
     }
+    
+//    public Platform findPlatformByAIPlatform(AuthzSubject subject, AIPlatformValue aiPlatform) {
+//        
+//    }
 
     /**
      * Get the Platform object based on an AIPlatformValue. Checks against FQDN,
@@ -711,7 +715,8 @@ public class PlatformManagerImpl implements PlatformManager {
         String certdn = aiPlatform.getCertdn();
 
         final AIIpValue[] ipvals = aiPlatform.getAIIpValues();
-        if (!isAgentPorker(Arrays.asList(ipvals))) {
+        boolean porker = isAgentPorker(Arrays.asList(ipvals));
+        if (! porker) {
             // We can't use the FQDN to find a platform, because
             // the FQDN can change too easily. Instead we use the
             // IP address now. For now, if we get one IP address
@@ -791,7 +796,7 @@ public class PlatformManagerImpl implements PlatformManager {
 
         if (p != null) {
             permissionManager.checkViewPermission(subject, p.getEntityId());
-            if (isAgentPorker(Arrays.asList(ipvals)) && // Let agent porker
+            if (porker && // Let agent porker
                 // create new platforms
                 !(p.getFqdn().equals(fqdn) || p.getCertdn().equals(certdn) || p.getAgent()
                     .getAgentToken().equals(agentToken))) {
@@ -834,17 +839,18 @@ public class PlatformManagerImpl implements PlatformManager {
         // agent table. If there are more than one IPs match,
         // then assume this is the Agent Porker
 
-        for (AIIpValue ip : ips) {
-
-            if (ip.getAddress().equals(NetFlags.LOOPBACK_ADDRESS)) {
-                continue;
-            }
-            List<Agent> agents = agentManager.findAgentsByIP(ip.getAddress());
-            if (agents.size() > 1) {
-                return true;
-            }
-        }
-        return false;
+//        for (AIIpValue ip : ips) {
+//
+//            if (ip.getAddress().equals(NetFlags.LOOPBACK_ADDRESS)) {
+//                continue;
+//            }
+//            List<Agent> agents = agentManager.findAgentsByIP(ip.getAddress());
+//            if (agents.size() > 1) {
+//                return true;
+//            }
+//        }
+//        return false;
+        return true;
     }
 
     private boolean platformMatchesAllIps(Platform p, List<AIIpValue> ips) {
@@ -1915,7 +1921,9 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      */
     public Ip addIp(Platform platform, String address, String netmask, String macAddress) {
-        return platform.addIp(address, netmask, macAddress);
+        Ip ip =  platform.addIp(address, netmask, macAddress);
+        platformDAO.getSession().save(ip);
+        return ip;
     }
 
     /**
