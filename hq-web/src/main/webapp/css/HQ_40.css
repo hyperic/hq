@@ -2465,9 +2465,9 @@ span.returnToLink {
 }
 
 .autoGroupIcon {
-	background: url(../images/icon_auto-group.gif) no-repeat;
-	height: 10px;
-	width: 11px;
+	background: url(../images/icon_auto-group.gif) 0 2px no-repeat;
+	padding-left:14px;
+	width: 72% !important;
 }
 
 .clusterIcon {
@@ -2537,7 +2537,7 @@ span.returnToLink {
 	cursor:pointer;
 }
 .resourceCommentIcon {
-	background: url(../images/comment.gif) no-repeat right 50%;
+	background: url(../images/comment.gif) no-repeat center center;
 	height: 14px;
 	width: 14px;
 }
@@ -2629,6 +2629,62 @@ span.returnToLink {
 
 .controlCapability {
 	width: 45%;
+}
+
+.resourceList {
+	margin:0;
+	padding:0;
+	overflow-y:scroll;
+	height:165px;
+}
+
+.resourceList li {
+	padding:3px;
+	border-bottom:1px solid #D5D8DE;
+	list-style:none;
+	overflow:hidden;
+	clear:both;
+	zoom:1;
+}
+	
+.resourceList li span {
+	display:block;
+	float:left;
+}
+	
+.resourceList li.header {
+	background:url("../images/4.0/backgrounds/table_header_large.png") repeat;
+	border-top:1px solid #ABB1C7;
+}
+	
+.resourceList li.header span {
+	font-size:1.1em;
+	font-weight:bold;
+	color:#004680;
+}
+
+.popup p {
+	margin:0;
+	padding:3px	
+}
+
+.checkboxColumn {
+	width:7%;
+}
+	
+.nameColumn {
+	width:78%;
+	width:"73%";
+}
+
+.commentColumn,	
+.availColumn {
+	width:10%;
+	text-align:center;
+}
+
+.commentColumn {
+	width:5%;
 }
 
 .bottomBorder {
