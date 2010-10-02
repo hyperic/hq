@@ -240,9 +240,6 @@
   <definition name=".resource.group.monitor.visibility.listchildresources"
               path="/resource/group/monitor/visibility/ListChildResources.jsp"/>
 
-  <definition name=".resource.group.monitor.visibility.listhostresources"
-              path="/resource/group/monitor/visibility/ListHostResources.jsp"/>
-
   <definition name=".resource.group.control.list.detail"
               extends=".resource.common.control.list.detail">
               <put name="section" value="group"/>
