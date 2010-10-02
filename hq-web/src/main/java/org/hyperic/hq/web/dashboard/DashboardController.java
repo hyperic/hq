@@ -65,6 +65,7 @@ public class DashboardController extends BaseDashboardController {
 	private final static String TOKEN_DELIMITER = "_";
 
 	private List<String> multiplePortletsList;
+	private List<String> validPortletsList;
 
 	@Autowired
 	public DashboardController(AuthzBoss authzBoss,
@@ -75,6 +76,10 @@ public class DashboardController extends BaseDashboardController {
 
 	public void setMultiplePortletsList(List<String> multiplePortletsList) {
 		this.multiplePortletsList = multiplePortletsList;
+	}
+
+	public void setValidPortletsList(List<String> validPortletsList) {
+		this.validPortletsList = validPortletsList;
 	}
 
 	// ...helper function to convert a delimited string of portlet names to a
@@ -101,92 +106,102 @@ public class DashboardController extends BaseDashboardController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/dashboard/{dashboardId}/portlets")
-	public String addPortletToDashboard(@PathVariable Integer dashboardId,
+	public String addPortletToDashboard(
+			@PathVariable Integer dashboardId,
 			@RequestParam(RequestParameterKeys.PORTLET_NAME) String portletName,
 			@RequestParam(RequestParameterKeys.IS_PORTLET_WIDE) Boolean isWide,
 			HttpSession session) {
-		WebUser webUser = getWebUser(session);
-		ConfigResponse dashboardSettings = getDashboardSettings(dashboardId,
-				webUser);
-		String userPreferenceKey;
+		if (validPortletsList.contains(portletName)) {
+			WebUser webUser = getWebUser(session);
+			ConfigResponse dashboardSettings = getDashboardSettings(
+					dashboardId, webUser);
+			String userPreferenceKey;
 
-		// ...determine which portlet column we're dealing with...
-		if (isWide) {
-			userPreferenceKey = UserPreferenceKeys.WIDE_PORTLETS;
-		} else {
-			userPreferenceKey = UserPreferenceKeys.NARROW_PORTLETS;
-		}
-
-		// ...then grab the list of associated portlets...
-		String delimitedStringOfPortletNames = dashboardSettings
-				.getValue(userPreferenceKey);
-
-		// ...convert the delimited list of portlet names to an actual List...
-		List<String> currentDashboardPortlets = deconstructDelimitedStringOfPortletNames(delimitedStringOfPortletNames);
-
-		// ...check if the portlet to add, can be added multiple times OR not
-		// already in the list...
-		if (multiplePortletsList.contains(portletName)
-				|| !currentDashboardPortlets.contains(portletName)) {
-			// ...add the requested portlet to the list of dashboard portlets,
-			// and in the event there can be
-			// multiple portlets make sure to make the name unique by appending
-			// an index to the name (index
-			// does not imply ordering, just makes the name unique...
-			int index = 2; // Index starts at two since the first portlet would
-							// already exist in the list
-			String uniquePortletName = portletName;
-
-			while (currentDashboardPortlets.contains(uniquePortletName)) {
-				// ...increment the index until we stop getting a hit...
-				uniquePortletName = portletName + TOKEN_DELIMITER + index++;
+			// ...determine which portlet column we're dealing with...
+			if (isWide) {
+				userPreferenceKey = UserPreferenceKeys.WIDE_PORTLETS;
+			} else {
+				userPreferenceKey = UserPreferenceKeys.NARROW_PORTLETS;
 			}
 
-			// ...update the list of dashboard portlets...
-			currentDashboardPortlets.add(uniquePortletName);
+			// ...then grab the list of associated portlets...
+			String delimitedStringOfPortletNames = dashboardSettings
+					.getValue(userPreferenceKey);
 
-			// ...create the map of updated settings
-			// TODO probably should create a representation object for this
-			Map<String, Object> updatedSettings = new HashMap<String, Object>();
+			// ...convert the delimited list of portlet names to an actual
+			// List...
+			List<String> currentDashboardPortlets = deconstructDelimitedStringOfPortletNames(delimitedStringOfPortletNames);
 
-			updatedSettings
-					.put(
-							userPreferenceKey,
-							constructDelimitedStringOfPortletNames(currentDashboardPortlets));
+			// ...check if the portlet to add, can be added multiple times OR
+			// not
+			// already in the list...
+			if (multiplePortletsList.contains(portletName)
+					|| !currentDashboardPortlets.contains(portletName)) {
+				// ...add the requested portlet to the list of dashboard
+				// portlets,
+				// and in the event there can be
+				// multiple portlets make sure to make the name unique by
+				// appending
+				// an index to the name (index
+				// does not imply ordering, just makes the name unique...
+				int index = 2; // Index starts at two since the first portlet
+								// would
+				// already exist in the list
+				String uniquePortletName = portletName;
 
-			try {
-				boolean updated = compareAndUpdateSettings(session,
-						dashboardSettings, updatedSettings);
-
-				if (updated) {
-					log.debug("[" + portletName + "] added to dashboard ["
-							+ dashboardId + "] successfully");
+				while (currentDashboardPortlets.contains(uniquePortletName)) {
+					// ...increment the index until we stop getting a hit...
+					uniquePortletName = portletName + TOKEN_DELIMITER + index++;
 				}
-			} catch (PermissionException e) {
-				log
-						.debug(
-								"User doesn't have the permission to perform this operation",
-								e);
-			} catch (SessionNotFoundException e) {
-				log.debug("User's session can't be found", e);
-			} catch (SessionTimeoutException e) {
-				log.debug("User's session has timed out", e);
-			} catch (Exception e) {
-				log.debug(e);
+
+				// ...update the list of dashboard portlets...
+				currentDashboardPortlets.add(uniquePortletName);
+
+				// ...create the map of updated settings
+				// TODO probably should create a representation object for this
+				Map<String, Object> updatedSettings = new HashMap<String, Object>();
+
+				updatedSettings
+						.put(
+								userPreferenceKey,
+								constructDelimitedStringOfPortletNames(currentDashboardPortlets));
+
+				try {
+					boolean updated = compareAndUpdateSettings(session,
+							dashboardSettings, updatedSettings);
+
+					if (updated) {
+						log.debug("[" + portletName + "] added to dashboard ["
+								+ dashboardId + "] successfully");
+					}
+				} catch (PermissionException e) {
+					log
+							.debug(
+									"User doesn't have the permission to perform this operation",
+									e);
+				} catch (SessionNotFoundException e) {
+					log.debug("User's session can't be found", e);
+				} catch (SessionTimeoutException e) {
+					log.debug("User's session has timed out", e);
+				} catch (Exception e) {
+					log.debug(e);
+				}
 			}
+		} else {
+			log.debug("Invalid portlet requested [" + portletName + "]");
 		}
 
 		// TODO loop back when we convert the dashboard over to MVC
 		return "redirect:/Dashboard.do";
 	}
-	
+
 	@RequestMapping(method = RequestMethod.DELETE, value = "/dashboard/{dashboardId}/portlets/{portletName:.*}")
 	public String removePortletFromDashboard(@PathVariable Integer dashboardId,
 			@PathVariable String portletName, HttpSession session) {
-			WebUser webUser = getWebUser(session);
+		WebUser webUser = getWebUser(session);
 		ConfigResponse dashboardSettings = getDashboardSettings(dashboardId,
 				webUser);
-		
+
 		// ...grab the lists of all dashboard portlets...
 		List<String> narrowDashboardPortlets = deconstructDelimitedStringOfPortletNames(dashboardSettings
 				.getValue(UserPreferenceKeys.NARROW_PORTLETS));
@@ -219,18 +234,24 @@ public class DashboardController extends BaseDashboardController {
 				// ...make sure we don't end with a multi portlet token...
 				regex += "(?<!_\\d)";
 			}
-			
+
 			// ...make sure we include the end of the string in the mix...
 			regex += "$";
-			
+
 			// ...create the map of updated settings
 			// TODO probably should create a representation object for this
 			Map<String, Object> updatedSettings = new HashMap<String, Object>();
 
 			// ...add modified portlet lists to updated settings map...
-			updatedSettings.put(UserPreferenceKeys.NARROW_PORTLETS, constructDelimitedStringOfPortletNames(narrowDashboardPortlets));
-			updatedSettings.put(UserPreferenceKeys.WIDE_PORTLETS, constructDelimitedStringOfPortletNames(wideDashboardPortlets));
-			
+			updatedSettings
+					.put(
+							UserPreferenceKeys.NARROW_PORTLETS,
+							constructDelimitedStringOfPortletNames(narrowDashboardPortlets));
+			updatedSettings
+					.put(
+							UserPreferenceKeys.WIDE_PORTLETS,
+							constructDelimitedStringOfPortletNames(wideDashboardPortlets));
+
 			// ...now iterate thru the dashboard's setting keys...
 			for (String settingKey : dashboardSettings.getKeys()) {
 				if (settingKey.toLowerCase().matches(regex)) {
@@ -248,7 +269,10 @@ public class DashboardController extends BaseDashboardController {
 							+ dashboardId + "] successfully");
 				}
 			} catch (PermissionException e) {
-				log.debug("User doesn't have the permission to perform this operation", e);
+				log
+						.debug(
+								"User doesn't have the permission to perform this operation",
+								e);
 			} catch (SessionNotFoundException e) {
 				log.debug("User's session can't be found", e);
 			} catch (SessionTimeoutException e) {
@@ -257,7 +281,7 @@ public class DashboardController extends BaseDashboardController {
 				log.debug(e);
 			}
 		}
-		
+
 		// ...now we're done, 302 out of here...
 		return "redirect:/app/dashboard/" + dashboardId + "/portlets";
 	}

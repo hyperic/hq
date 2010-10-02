@@ -39,142 +39,114 @@
 <tiles:importAttribute name="appdefResourceType" ignore="true"/>
 <tiles:importAttribute name="childResourcesTypeKey"/>
 <tiles:importAttribute name="childResourcesHealthKey" ignore="true"/>
-<tiles:importAttribute name="virtual" ignore="true"/>
 <tiles:importAttribute name="checkboxes" ignore="true"/>
 
 <c:if test="${empty mode}">
-  <c:set var="mode" value="currentHealth"/>
+  	<c:set var="mode" value="currentHealth"/>
 </c:if>
-
-<script type="text/javascript">
-  <c:set var="widgetInstanceName" value="childResources"/>
-  <c:set var="listMembersName" value="groupMembers"/>
-
-  initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-  widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-
-<c:if test="${empty params.eids && not virtual}">
-  function checkAllBoxes() {
-    var check = true;
-    for (var i = 0; i < document.forms[0].elements.length; i++) {
-      if (document.forms[0].elements[i].name == 'eids' &&
-        document.forms[0].elements[i].checked)
-        check = false;
-    }
-
-    if (check) {
-      for (var i = 0; i < document.forms[0].elements.length; i++) {
-        if (document.forms[0].elements[i].name == 'eids' ||
-            document.forms[0].elements[i].name == 'groupMembersAll')
-            document.forms[0].elements[i].checked = true;
-      }
-    }
-  }
-
-  onloads.push( checkAllBoxes );
-</c:if>
-</script>
 
 <c:if test="${empty childResourcesHealthKey}">
-  <c:set var="childResourcesHealthKey" value="resource.service.monitor.visibility.MembersTab"/>
+  	<c:set var="childResourcesHealthKey" value="resource.service.monitor.visibility.MembersTab"/>
 </c:if>
 
-<hq:constant classname="org.hyperic.hq.bizapp.shared.uibeans.UIConstants"
-             symbol="SUMMARY_TYPE_AUTOGROUP" var="AUTOGROUP" />
-<hq:constant classname="org.hyperic.hq.bizapp.shared.uibeans.UIConstants"
-             symbol="SUMMARY_TYPE_CLUSTER" var="CLUSTER" />
-<hq:constant classname="org.hyperic.hq.bizapp.shared.uibeans.UIConstants"
-             symbol="SUMMARY_TYPE_SINGLETON" var="SINGLETON" />
+<ul id="childResourceList" class="resourceList">
+	<li class="header">
+		<span class="checkboxColumn">
+			<c:choose>
+				<c:when test="${not empty summaries && checkboxes}">
+					<input id="groupMembersAllCheckbox" type="checkbox" name="groupMembersAll" />
+				</c:when>
+				<c:otherwise>&nbsp;</c:otherwise>
+			</c:choose>
+		</span>
+		<span class="nameColumn"><fmt:message key="${childResourcesHealthKey}"/></span>
+		<span class="availColumn"><fmt:message key="resource.common.monitor.visibility.AVAILTH"/></span>
+		<span class="commentColumn">&nbsp;</span>
+	</li>
+	<c:forEach var="summary" items="${summaries}">
+		<c:url var="gotoResourceLink" value="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do">
+			<c:param name="mode" value="${mode}" />
+			<c:param name="type" value="${summary.resourceTypeId}" />
+			<c:param name="rid" value="${summary.resourceId}" />
+		</c:url>
+		<li>
+			<span class="checkboxColumn">
+				<c:if test="${checkboxes}">
+					<html:multibox property="eids" value="${summary.entityId}" styleClass="childResource" />
+				</c:if>
+			</span>
+			<span class="nameColumn">
+				<a href="<c:out value="${gotoResourceLink}" />"><c:out value="${summary.resourceName}"/></a>
+			</span>
+			<span class="availColumn">
+				<tiles:insert page="/resource/common/monitor/visibility/AvailIcon.jsp">
+   					<tiles:put name="availability" beanName="summary" beanProperty="availability" />
+				</tiles:insert>
+			</span>
+			<span class="commentColumn">
+				<c:set var="metricValue">
+					<hq:metric metric="${summary.throughput}" unit="${summary.throughputUnits}" defaultKey="common.value.notavail" />
+				</c:set>
+				<c:set var="metricValue" value="${fn:substringAfter(metricValue, '<span>')}" />
+				<c:set var="metricValue" value="${fn:substringBefore(metricValue, '</span>')}" />
+				<div class="resourceCommentIcon" 
+				     id="comment_<c:out value="${summary.resourceId}" />" 
+				     resourcename="<c:out value="${summary.resourceTypeName}" />" 
+				     metricvalue="<c:out value="${metricValue}" />">&nbsp;</div>
+			</span>
+		</li>
+	</c:forEach>
+	<c:if test="${empty summaries}">
+		<li style="padding-left:5%;">
+			<tiles:insert definition=".resource.common.monitor.visibility.noHealths"/>
+		</li>
+  	</c:if>
+</ul>
+<div id="resourceInfoPopup" class="menu popup">
+	<p>
+		<span class="BoldText"><fmt:message key="${childResourcesTypeKey}"/></span><br/>
+   		<span id="resourceInfoPopupNameField"></span>
+	</p>
+	<p>
+	   	<span class="BoldText"><fmt:message key="resource.common.monitor.visibility.USAGETH"/></span><br/>
+		<span id="resourceInfoPopupMetricValueField"></span>           	
+	</p>
+</div>
+<script>
+	dojo11.addOnLoad(function() {
+		var masterCheckbox = dojo11.byId("groupMembersAllCheckbox")
+		
+		if (masterCheckbox) {
+			dojo11.connect(masterCheckbox, "onclick", function(e) {
+				var cb = e.target;
+				var ul = cb.parentNode.parentNode.parentNode;
+	
+				dojo11.query("input.childResource", ul).forEach(function(el) {
+					el.checked = cb.checked;
+				});
+			});
+		}
+		
+		var list = dojo11.byId("childResourceList");
 
-<c:set var="useAvailStoplightDimensions" value="false" />
-<c:if test="${useAvailStoplightDimensions}">
-  <c:set var="availStoplightDimensions" value=" width=\"106\" " />
-</c:if>
+		dojo11.connect(list, "onmouseover", function(e) {
+			var el = e.target;
+			
+			if (dojo11.hasClass(el, "resourceCommentIcon")) {
+				var nameEl = dojo11.byId("resourceInfoPopupNameField");
+				var metricValueEl = dojo11.byId("resourceInfoPopupMetricValueField");
 
-<c:choose>
-	<c:when test="${not empty summaries}">
-    	<c:forEach var="summary" items="${summaries}" varStatus="status">
-    		<c:set var="resourceNameId" value="${fn:replace(summary.resourceName, ' ', '_')}" />
-    		
-      		<div id="<c:out value="${resourceNameId}"/>_menu" class="menu">
-        		<ul>
-          			<li>
-          				<div class="BoldText"><fmt:message key="${childResourcesTypeKey}"/></div>
-              			<c:out value="${summary.resourceTypeName}"/>
-          			</li>
-          			<li>
-          				<div class="BoldText"><fmt:message key="resource.common.monitor.visibility.USAGETH"/></div>
-            			<hq:metric metric="${summary.throughput}" unit="${summary.throughputUnits}"  defaultKey="common.value.notavail" />
-          			</li>
-          			<hr/>
-          			<li>
-            			<html:link action="/resource/${summary.resourceEntityTypeName}/monitor/Visibility">
-              				<html:param name="mode" value="${mode}" />
-              				<html:param name="type" value="${summary.resourceTypeId}" />
-              				<html:param name="rid" value="${summary.resourceId}" />
-              				<fmt:message key="resource.common.monitor.visibility.GoToResource"/>
-            			</html:link>
-          			</li>
-        		</ul>
-      		</div>
-
-      		<c:set var="count" value="${status.count}"/>
-    	</c:forEach>
-
-    	<c:if test="${count > 5}">
-      		<div class="scrollable">
-    	</c:if>
-
-		<c:if test="${not empty summaries}">
-			<table width="100%" border="0" cellpadding="1" cellspacing="0" id="ResourceTable">
-    			<tr>
-      				<c:if test="${checkboxes}">
-	      				<td class="ListHeaderCheckbox"><input type="checkbox" onclick="ToggleAllGroup(this, widgetProperties, '<c:out value="${listMembersName}"/>')" name="<c:out value="${listMembersName}"/>All"></td>
-      				</c:if>
-      				<td class="ListHeader" width="90%" align="left"><fmt:message key="${childResourcesHealthKey}"/></td>
-      				<td class="ListHeaderInactive" align="center" nowrap><fmt:message key="resource.common.monitor.visibility.AVAILTH"/></td>
-      				<td class="ListHeaderInactive" width="10%">&nbsp;</td>
-    			</tr>
-    			<c:forEach var="summary" items="${summaries}">
-    				<c:set var="resourceNameId" value="${fn:replace(summary.resourceName, ' ', '_')}" />
-    				<tr>
-      					<c:if test="${checkboxes}">
-      						<td class="ListCellCheckbox"><html:multibox property="eids" value="${summary.entityId}" styleClass="${listMembersName}" onchange="ToggleGroup(this, widgetProperties)"/></td>
-      					</c:if>
-      					<td class="ListCell" style="padding-top:10px;">
-        					<html:link action="/resource/${summary.resourceEntityTypeName}/monitor/Visibility">
-        						<html:param name="mode" value="${mode}" />
-        						<html:param name="eid" value="${summary.resourceTypeId}:${summary.resourceId}" />
-        						<c:out value="${summary.resourceName}"/>
-        					</html:link>
-      					</td>
-      					<td class="ListCellCheckbox">
-    						<tiles:insert page="/resource/common/monitor/visibility/AvailIcon.jsp">
-        						<tiles:put name="availability" beanName="summary" beanProperty="availability" />
-    						</tiles:insert>
-      					</td>
-        				<td class="ListCellCheckbox resourceCommentIcon"
-    	    				onmouseover="menuLayers.show('<c:out value="${resourceNameId}" />_menu', event)" 
-    	    				onmouseout="menuLayers.hide()">&nbsp;
-						</td>
-    				</tr>
-    			</c:forEach>
-    		</table>
-    	</c:if>
-
-    <c:if test="${count > 5}">
-      </div>
-    </c:if>
-
-  </c:when>
-  <c:when test="${not virtual}">
-<table width="100%" border="0" cellpadding="1" cellspacing="0" id="ResourceTable">
-  <tr>
-    <td class="ListHeader" colspan="2" width="100%" align="left"><fmt:message key="resource.service.monitor.visibility.MembersTab"/></td>
-    </td>
-  </tr>
-</table>
-<tiles:insert definition=".resource.common.monitor.visibility.noHealths"/>
-  </c:when>
-</c:choose>
-
+				nameEl.innerHTML = el.attributes["resourcename"].value;
+				metricValueEl.innerHTML = el.attributes["metricvalue"].value;
+				
+				menuLayers.show("resourceInfoPopup", e);
+			}
+		})
+		
+		dojo11.connect(list, "onmouseout", function(e) {
+			if (dojo11.hasClass(e.target, "resourceCommentIcon")) {
+				menuLayers.hide();
+			}
+		});
+	});
+</script>

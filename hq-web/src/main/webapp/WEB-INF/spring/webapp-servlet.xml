@@ -43,13 +43,27 @@
     <context:annotation-config />
 	<mvc:annotation-driven/>
 	
-	<!-- Defines the set of portlets that can be added multiple times on the dashboard -->
+	<!-- Defines the set of portlets as well as the subset that can be added multiple times on the dashboard -->
 	<bean id="dashboardController" class="org.hyperic.hq.web.dashboard.DashboardController">
 		<property name="multiplePortletsList">
 			<util:list>
 				<value>.dashContent.availSummary</value>
 				<value>.dashContent.criticalAlerts</value>
 				<value>.dashContent.metricViewer</value>
+			</util:list>		
+		</property>
+		<property name="validPortletsList">
+			<util:list>
+                <value>.dashContent.availSummary</value>
+                <value>.dashContent.recentlyApproved</value>
+                <value>.dashContent.savedCharts</value>
+                <value>.dashContent.searchResources</value>
+                <value>.dashContent.summaryCounts</value>
+                <value>.dashContent.autoDiscovery</value>
+                <value>.dashContent.controlActions</value>
+                <value>.dashContent.resourceHealth</value>
+                <value>.dashContent.criticalAlerts</value>
+                <value>.dashContent.metricViewer</value>
 			</util:list>		
 		</property>
 	</bean>
