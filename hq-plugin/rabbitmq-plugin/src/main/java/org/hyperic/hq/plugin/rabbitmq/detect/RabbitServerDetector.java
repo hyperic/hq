@@ -82,8 +82,9 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                 final String nodeName = getServerName(nodeArgs);
 
                 ServerResource server = doCreateServerResource(nodeName, nodePath, nodePid, nodeArgs);
-                logger.debug("Created server=" + server.getName());
+
                 if (server != null) {
+                    logger.debug("Created server=" + server.getName());
                     resources.add(server);
                 }
             }
@@ -509,22 +510,24 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
     }
 
     /**
-     * Build server paths from pids
+     * Build installation paths from pids
      * @param pids
      * @return
      */
-    private List<String> getNodes(long[] pids) {
+    private List<String> getNodes(long[] pids) throws PluginException {
         List<String> paths = new ArrayList<String>();
 
         /** Each node per broker has a unique pid */
         for (long pid : pids) {
             String args[] = getProcArgs(pid);
             String path = getServerDir(args);
-
+            /** generally /var/lib/rabbitmq/nodename */
             if (path != null) {
-                path = new File(path).getAbsolutePath();
-                if (!paths.contains(path)) {
+                File file = new File(path);
+                if (file.exists() && !paths.contains(path)) {
                     paths.add(path);
+                } else {
+                    throw new PluginException("User may not have permissions to " + path);
                 }
             }
         }
