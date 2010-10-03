@@ -32,8 +32,7 @@ import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ImportResource;
-import org.springframework.erlang.core.ErlangTemplate;
+import org.springframework.context.annotation.ImportResource; 
 
 /**
  * RabbitConfig configures Spring AMQP RabbitMQ objects
@@ -55,23 +54,13 @@ public class RabbitConfiguration {
     }
 
     @Bean
-    public ErlangTemplate erlangTemplate() {
-        return rabbitBrokerAdmin.getErlangTemplate();
-    }
-
-    @Bean
     public RabbitGateway rabbitGateway() {
-        return new RabbitBrokerGateway(rabbitBrokerAdmin);
+        return new RabbitBrokerGateway();
     }
 
     @Bean
     public ErlangConverter erlangConverter() {
-        return new JErlangConverter();
-    }
-
-    @Bean
-    public ErlangGateway erlangGatway() {
-        return new ErlangBrokerGateway();
+        return new JErlangConverter(rabbitBrokerAdmin.getErlangTemplate());
     }
  
 }

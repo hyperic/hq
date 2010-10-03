@@ -61,6 +61,8 @@ public class DetectorConstants {
 
     public static final String SERVICE_LOG_TRACK_FILES = "service.log_track.files";
 
+    public static final String NODE = "Node";
+
     public static final String PROCESS = "Process";
 
     public static final String VIRTUAL_HOST = "Virtual Host";
@@ -88,8 +90,6 @@ public class DetectorConstants {
     public static final String SERVER_PATH = "server.path";
 
     public static final String NAME = "name";
-
-    public static final String DESC = "description";
 
     public static final String PLATFORM_TYPE = "platform.type";
 

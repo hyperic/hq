@@ -27,38 +27,55 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.plugin.rabbitmq.core.HypericConnection;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.util.config.ConfigResponse; 
-import org.springframework.erlang.core.Application;
 
 import java.util.List;
 
 /**
- * RabbitAppCollector
- *
+ * ConnectionCollector 
  * @author Helena Edelson
  */
-public class BrokerAppCollector extends Collector {
- 
-    private static final Log logger = LogFactory.getLog(BrokerAppCollector.class);
+public class ConnectionCollector extends Collector {
+
+    private static final Log logger = LogFactory.getLog(ConnectionCollector.class);
+
 
     @Override
     public void collect() {
+       
         RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
         if (rabbitGateway != null) {
 
             try {
-                List<Application> apps = rabbitGateway.getRunningApplications();
-                if (apps != null) {
-                    for (Application a : apps) { 
-                        setAvailability(true);
+                List<String> virtualHosts = rabbitGateway.getVirtualHosts();
+                if (virtualHosts != null) {
+                    for (String virtualHost : virtualHosts) {
+                        List<HypericConnection> connections = rabbitGateway.getConnections(virtualHost);
+
+                        if (connections != null) {
+                            logger.debug("Found " + connections.size() + " connections");
+
+                            for (HypericConnection conn : connections) {
+                                setAvailability(conn.getState().equalsIgnoreCase("running"));
+
+                                setValue("packetsReceived", conn.getReceiveCount());
+                                setValue("packetsSent", conn.getSendCount());
+                                setValue("channelCount", conn.getChannels());
+                                setValue("octetsReceived", conn.getOctetsReceived());
+                                setValue("octetsSent", conn.getOctetsSent());
+                                setValue("pendingSends", conn.getPendingSends());
+
+                            }
+                        }
                     }
                 }
             }
-            catch (Exception e) {
-                logger.error(e);
+            catch (Exception ex) {
+                logger.error(ex);
             }
         }
     }
@@ -67,16 +84,19 @@ public class BrokerAppCollector extends Collector {
      * Assemble custom key/value data for each object to set
      * as custom properties in the ServiceResource to display
      * in the UI.
-     * @param app
+     * @param conn
      * @return
      */
-    public static ConfigResponse getAttributes(Application app) {
+    public static ConfigResponse getAttributes(HypericConnection conn) {
         ConfigResponse res = new ConfigResponse();
-        res.setValue("name", app.getId());
-        res.setValue("description", app.getDescription());
-        res.setValue("version", app.getVersion());
+        res.setValue("username", conn.getUsername());
+        res.setValue("vHost", conn.getVhost());
+        res.setValue("pid", conn.getPid());
+        res.setValue("frameMax", conn.getFrameMax());
+        res.setValue("selfNode", conn.getAddress().getHost() + ":" + conn.getAddress().getPort());
+        res.setValue("peerNode", conn.getPeerAddress().getHost() + ":" + conn.getPeerAddress().getPort());
+        res.setValue("state", conn.getState());
+ 
         return res;
     }
-
-
 }

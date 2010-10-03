@@ -26,7 +26,7 @@
 package org.hyperic.hq.plugin.rabbitmq.core;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory; 
+import org.apache.commons.logging.LogFactory;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.admin.QueueInfo;
@@ -50,325 +50,103 @@ import java.util.*;
 
 /**
  * RabbitPluginGateway
- *    
  * @author Helena Edelson
  */
 public class RabbitBrokerGateway implements RabbitGateway {
 
     private static final Log logger = LogFactory.getLog(RabbitBrokerGateway.class);
 
-    private RabbitBrokerAdmin rabbitBrokerAdmin;
-
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
     @Autowired
-    private ErlangGateway erlangGateway;
+    private RabbitBrokerAdmin rabbitBrokerAdmin;
 
-    public RabbitBrokerGateway(RabbitBrokerAdmin rabbitBrokerAdmin) {
-        this.rabbitBrokerAdmin = rabbitBrokerAdmin;
-    }
+    @Autowired
+    private ErlangConverter erlangConverter;
 
     @PostConstruct
     public void initialize() {
-        Assert.notNull(rabbitBrokerAdmin, "rabbitBrokerAdmin must not be null.");
         Assert.notNull(rabbitTemplate, "rabbitTemplate must not be null");
-        Assert.notNull(erlangGateway, "erlangGateway must not be null");
+    }
+    
+    /**
+     * Get a List of virtual hosts.
+     * @return List of String representations of virtual hosts
+     */
+    @SuppressWarnings("unchecked")
+    public List<String> getVirtualHosts() throws ErlangBadRpcException {
+        return (List<String>) erlangConverter.fromErlangRpc("rabbit_access_control", "list_vhosts", null, String.class);
+    }
+
+    /**
+     * Get <connectioninfoitem> must be a member of the list [pid, address, port,
+     * peer_address, peer_port, state, channels, user, vhost, timeout, frame_max,
+     * client_properties, recv_oct, recv_cnt, send_oct, send_cnt, send_pend]
+     * @return
+     * @throws com.ericsson.otp.erlang.OtpErlangException
+     *
+     */
+    @SuppressWarnings("unchecked")
+    public List<HypericConnection> getConnections(String virtualHost) throws ErlangBadRpcException {
+        return (List<HypericConnection>) erlangConverter.fromErlangRpc("rabbit_networking", "connection_info_all", null, HypericConnection.class);
+    }
+
+    /**
+     * Get broker data
+     * @return
+     * @throws ErlangBadRpcException
+     */
+    public String getVersion() throws ErlangBadRpcException {
+        return (String) erlangConverter.fromErlangRpc("rabbit", "status", null, null);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Exchange> getExchanges(String virtualHost) throws ErlangBadRpcException {
+        Assert.hasText(virtualHost);
+        return (List<Exchange>) erlangConverter.fromErlangRpc("rabbit_exchange", "list", virtualHost, Exchange.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<HypericBinding> getBindings(String virtualHost) throws ErlangBadRpcException {
+        Assert.hasText(virtualHost);
+        return (List<HypericBinding>) erlangConverter.fromErlangRpc("rabbit_exchange", "list_bindings", virtualHost, HypericBinding.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<HypericChannel> getChannels(String virtualHost) throws ErlangBadRpcException {
+        return (List<HypericChannel>) erlangConverter.fromErlangRpc("rabbit_channel", "info_all", null, HypericChannel.class);
     }
 
     /**
      * Get a list of QueueInfo objects.
-     *
      * @return
      */
     @SuppressWarnings("unchecked")
-    public List<QueueInfo> getQueues() {
+    public List<QueueInfo> getQueues(String virtualHost) {
         return rabbitBrokerAdmin.getQueues();
     }
 
-    /**
-     * Get a list of Channels
-     * @return
-     * @throws ErlangBadRpcException
-     */
-    public List<HypericChannel> getChannels() throws ErlangBadRpcException {
-        return erlangGateway.getChannels();
-    }
-
-    /**
-     * Get a list of Connections
-     * @return
-     * @throws ErlangBadRpcException
-     */
-    public List<HypericConnection> getConnections() throws ErlangBadRpcException {
-        return erlangGateway.getConnections();
-    }
-
-    /**
-     * Create a Queue. Defines a queue on the broker whose name is automatically created.
-     * The additional properties of this auto-generated queue are exclusive=true, autoDelete=true, and durable=false.
-     * @param queueName
-     */
-    public AMQPStatus createQueue(String queueName) {
-        rabbitBrokerAdmin.declareQueue(new Queue(queueName));
-        if (getQueuesAsMap().containsKey(queueName)) {
-            return AMQPStatus.RESOURCE_CREATED;
-        }
-        return AMQPStatus.RESOURCE_NOT_FOUND;
-    }
-
-    /**
-     * Delete a Queue by name.
-     * @param queueName
-     * @return AMQPStatus
-     */
-    public AMQPStatus deleteQueue(String queueName) {
-        Map<String, QueueInfo> queues = getQueuesAsMap();
-        if (!queues.isEmpty() && queues.containsKey(queueName)) {
-            rabbitBrokerAdmin.deleteQueue(queueName);
-            return AMQPStatus.NO_CONTENT;
-        }
-        return AMQPStatus.RESOURCE_NOT_FOUND;
-    }
-
-    /**
-     * Purge a Queue by name.
-     * Still finishing...
-     * @param queueName
-     * @return AMQPStatus
-     */
-    public AMQPStatus purgeQueue(String queueName) {
-        Map<String, QueueInfo> queues = getQueuesAsMap();
-        if (!queues.isEmpty() && queues.containsKey(queueName)) {
-            rabbitBrokerAdmin.purgeQueue(queueName, true);
-            return AMQPStatus.NO_CONTENT;
-        }
-        return AMQPStatus.RESOURCE_NOT_FOUND;
-    }
-
-    /**
-     * Get a list of Exchanges
-     * @return
-     * @throws Exception
-     */
-    public List<Exchange> getExchanges() throws Exception {
-        return erlangGateway.getExchanges(getVirtualHost());
-    }
-
-    /**
-     * @param exchangeName
-     * @param exchangeType
-     * @return
-     */
-    public AMQPStatus createExchange(String exchangeName, String exchangeType) {
-        Exchange exchange = null;
-
-        if (exchangeType.equals(ExchangeTypes.FANOUT)) {
-            exchange = new FanoutExchange(exchangeName);
-        }
-        else if (exchangeType.equals(ExchangeTypes.TOPIC)) {
-            exchange = new TopicExchange(exchangeName);
-        }
-        else if (exchangeType.equals(ExchangeTypes.DIRECT)) {
-            exchange = new DirectExchange(exchangeName);
-        }
-
-        try {
-            rabbitBrokerAdmin.declareExchange(exchange);
-            return AMQPStatus.RESOURCE_CREATED;
-        }
-        catch (Exception e) {
-            return AMQPStatus.FAIL;
-        }
-    }
-
-    /**
-     * final String exchangeName, final String ExchangeType.fanout.name(),
-     * final boolean durable, final boolean autoDelete
-     * @param exchangeName
-     * @param exchangeType
-     * @param durable
-     * @param autoDelete
-     * @return AMQPStatus
-     */
-    public AMQPStatus createExchange(final String exchangeName, final String exchangeType, final boolean durable, final boolean autoDelete) {
-        try {
-            rabbitBrokerAdmin.declareExchange(exchangeName, exchangeType, durable, autoDelete);
-            return AMQPStatus.RESOURCE_CREATED;
-        }
-        catch (Exception e) {
-            return AMQPStatus.FAIL;
-        }
-    }
-
-    /**
-     * Delete an Exchange by name.
-     * @param exchangeName
-     * @return AMQPStatus
-     */
-    public AMQPStatus deleteExchange(String exchangeName) {
-        try {
-            rabbitBrokerAdmin.deleteExchange(exchangeName);
-            return AMQPStatus.NO_CONTENT;
-        }
-        catch (Exception e) {
-            return AMQPStatus.FAIL;
-        }
-    }
-
-    /**
-     * Delete an Exchange by name, if unused.
-     * @param exchangeName
-     * @param ifUnused
-     * @return DeleteOk
-     */
-    public AMQPStatus deleteExchange(final String exchangeName, final boolean ifUnused) throws Exception {
-        Map<String, Exchange> exchanges = getExchangesAsMap();
-        if (!exchanges.isEmpty() && exchanges.containsKey(exchangeName)) {
-            rabbitBrokerAdmin.deleteExchange(exchangeName);
-            return AMQPStatus.NO_CONTENT;
-        }
-        return AMQPStatus.RESOURCE_NOT_FOUND;
-    }
-
-    /**
-     * 3 types of Exchanges. You can test by Exchange  or ExchangeType.
-     * @param queue
-     * @param exchange
-     * @param routingKey
-     * @return
-     */
-    private Binding getBindingByExchange(final Queue queue, Exchange exchange, final String routingKey) {
-        Binding binding = null;
-        if (exchange instanceof FanoutExchange) {
-            binding = BindingBuilder.from(queue).to((FanoutExchange) exchange);
-        } else if (exchange instanceof TopicExchange) {
-            binding = BindingBuilder.from(queue).to((TopicExchange) exchange).with(routingKey);
-        } else if (exchange instanceof DirectExchange) {
-            binding = BindingBuilder.from(queue).to((DirectExchange) exchange).with(routingKey);
-        }
-        return binding;
-    }
-
-    /**
+     /**
      * Get a list of users.
      * @return
      */
-    public List<String> getUsers() {
+    public List<String> getUsers(String virtualHost) {
         return rabbitBrokerAdmin.listUsers();
     }
 
-    /**
-     * Create a user
-     * @param userName
-     * @param password
-     * @return AMQPStatus
-     */
-    public AMQPStatus createUser(String userName, String password) {
-        if (!getUsers().contains(userName)) {
-            rabbitBrokerAdmin.addUser(userName, password);
-            return AMQPStatus.RESOURCE_CREATED;
-        }
-        return AMQPStatus.RESOURCE_FOUND;
-    }
-
-    /**
-     * Update a User's password
-     * @param userName
-     * @param password
-     * @return AMQPStatus
-     */
-    public AMQPStatus updateUserPassword(String userName, String password) {
-        if (getUsers().contains(userName)) {
-            rabbitBrokerAdmin.changeUserPassword(userName, password);
-            return AMQPStatus.RESOURCE_CREATED;
-        }
-        return AMQPStatus.RESOURCE_NOT_FOUND;
-    }
-
-    /**
-     * Delete a User by username.
-     * @param userName
-     * @return AMQPStatus
-     */
-    public AMQPStatus deleteUser(String userName) {
-        if (getUsers().contains(userName)) {
-            rabbitBrokerAdmin.deleteUser(userName);
-            return AMQPStatus.NO_CONTENT;
-        }
-        return AMQPStatus.RESOURCE_NOT_FOUND;
-    }
-
-    /**
-     * Get the host name;
-     * @return host name.
-     */
     public String getHost() {
         return rabbitTemplate.getConnectionFactory().getHost();
     }
 
-    /**
-     * Get the virtual host name.
-     * Default is "/"
-     * @return
-     */
-    public String getVirtualHost() {
-        return rabbitTemplate.getConnectionFactory().getVirtualHost();
-    }
-
-    /**
-     * @return
-     */
-    public List<String> getVirtualHosts() {
-        List<String> vHosts = erlangGateway.getVirtualHosts();
-
-        if (vHosts == null) {
-            vHosts = new ArrayList<String>();
-            vHosts.add(getVirtualHost());
-        }
-
-        return vHosts;
-    }
-
-    /**
-     * If not running, start the broker application.
-     * @return
-     */
-    public AMQPStatus startBrokerApplication() {
-        List<Node> nodes = getRabbitStatus().getRunningNodes();
-        if (nodes.size() == 0) {
-            rabbitBrokerAdmin.startBrokerApplication();
-            if (nodes.size() == 1 && nodes.get(0).getName().contains("rabbit")) {
-                return AMQPStatus.SUCCESS;
-            }
-        }
-        return AMQPStatus.FAIL;
-    }
-
-    /**
-     * If running, stop the broker application.
-     * @return
-     */
-    public AMQPStatus stopBrokerApplication() {
-        List<Node> nodes = getRabbitStatus().getRunningNodes();
-
-        if (nodes.size() == 1) {
-            rabbitBrokerAdmin.stopBrokerApplication();
-            if (nodes.size() == 0 && nodes.get(0).getName().contains("rabbit")) {
-                return AMQPStatus.SUCCESS;
-            }
-        }
-
-        return AMQPStatus.FAIL;
-    }
-
-    /**
+/**
      * Get the RabbitMQ server version.
      * @return
      */
     public String getServerVersion() {
         return getRabbitStatus().getRunningApplications().get(0).getVersion();
     }
+
 
     /**
      * Get RabbitStatus object.
@@ -401,108 +179,4 @@ public class RabbitBrokerGateway implements RabbitGateway {
     public List<Node> getRunningNodes() {
         return getRabbitStatus().getRunningNodes();
     }
-
-    /**
-     */
-    public AMQPStatus stopRabbitNode() {
-        if (isBrokerAppRunning()) {
-            rabbitBrokerAdmin.stopNode();
-        }
-
-       /* String rabbitHome = System.getenv(DetectorConstants.RABBITMQ_HOME);
-        Assert.notNull(rabbitHome, DetectorConstants.RABBITMQ_HOME + " environment variable not set.");
-        isBrokerAppRunning();
-        rabbitBrokerAdmin.stopNode();*/
-
-
-        return isBrokerAppRunning() ? AMQPStatus.FAIL : AMQPStatus.SUCCESS;
-    }
-
-    /**
-     * Start a node. This is done by SimpleAsyncTaskExecutor
-     * so while we should assert it is running after completion,
-     * assuming completion was successful, we don't want to wait.
-     */
-    public AMQPStatus startRabbitNode(String rabbitHome) {
-        if (!isBrokerAppRunning()) {
-            Assert.hasText(rabbitHome);
-
-            final String RABBITMQ_HOME = System.getenv("RABBITMQ_HOME");
-
-            final Execute execute = new Execute();
-
-            String rabbitStartScript = null;
-
-            if (Os.isFamily("windows") || Os.isFamily("dos")) {
-                rabbitStartScript = "rabbitmq-server.bat";
-            } else if (Os.isFamily("unix") || Os.isFamily("mac")) {
-                rabbitStartScript = "rabbitmq-server";
-            }
-            Assert.notNull(rabbitStartScript, "unsupported OS family");
-
-            if (rabbitStartScript != null) {
-                StringBuilder rabbitStartCommand = null;
-
-                if (RABBITMQ_HOME != null) {
-                    rabbitStartCommand = new StringBuilder(RABBITMQ_HOME);
-                } else if (rabbitHome != null) {
-                    rabbitStartCommand = new StringBuilder(rabbitHome);
-                }
-
-                if (rabbitStartCommand != null) {
-                    rabbitStartCommand.append(System.getProperty("file.separator"))
-                            .append("sbin").append(System.getProperty("file.separator")).append(rabbitStartScript);
-
-                    execute.setCommandline(new String[]{rabbitStartCommand.toString()});
-
-                    SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor();
-                    executor.execute(new Runnable() {
-                        public void run() {
-                            try {
-                                execute.execute();
-                            }
-                            catch (Exception e) {
-                                logger.error("failed to start node", e);
-                            }
-                        }
-                    });
-
-                    return AMQPStatus.PROCESSING;
-                }
-            }
-        }
-
-        return AMQPStatus.DEPENDENCY_NOT_FOUND;
-    }
-  
-    private boolean isBrokerAppRunning() {
-        return !getRunningNodes().isEmpty() && getRunningNodes().get(0).getName().contains("rabbit");
-    }
-
-    private Map<String, QueueInfo> getQueuesAsMap() {
-        Map<String, QueueInfo> queues = null;
-        List<QueueInfo> queueList = getQueues();
-        if (queueList != null) {
-            queues = new HashMap<String, QueueInfo>(queueList.size());
-
-            for (QueueInfo queue : queueList) {
-                queues.put(queue.getName(), queue);
-            }
-        }
-        return queues;
-    }
-
-    private Map<String, Exchange> getExchangesAsMap() throws Exception {
-        Map<String, Exchange> exchanges = null;
-        List<Exchange> exchangeList = getExchanges();
-        if (exchangeList != null && !exchangeList.isEmpty()) {
-            exchanges = new HashMap<String, Exchange>(exchangeList.size());
-
-            for (Exchange e : exchangeList) {
-                exchanges.put(e.getName(), e);
-            }
-        }
-        return exchanges;
-    }
-
 }

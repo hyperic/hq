@@ -51,24 +51,20 @@ public class ConnectionTest {
         String value = ErlangCookieHandler.configureCookie(conf);
         conf.setValue(DetectorConstants.NODE_COOKIE_VALUE, value);
 
-
         OtpSelf self = new OtpSelf("rabbit-spring-monitor", value);
         OtpPeer peer = new OtpPeer("rabbit@" + NODE);
 
         OtpConnection conn = self.connect(peer);
-
         conn.sendRPC("erlang", "date", new OtpErlangList());
         OtpErlangObject received = conn.receiveRPC();
         Assert.notNull(received);
-
 
         Assert.notNull(conn);
         Assert.state(conn.isAlive());
         Assert.state(conn.isConnected());
         Assert.isTrue(conn.getState().name().equalsIgnoreCase("RUNNABLE"), "Connection must be runnable.");
 
-        conn.close();
+        conn.close(); 
     }
-
 
 }

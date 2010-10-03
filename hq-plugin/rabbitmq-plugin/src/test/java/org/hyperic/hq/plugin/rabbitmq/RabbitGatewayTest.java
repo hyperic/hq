@@ -35,8 +35,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
-
-import org.springframework.amqp.core.ExchangeTypes; 
+ 
 import org.springframework.amqp.rabbit.admin.QueueInfo;
 import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
 import org.springframework.amqp.rabbit.admin.RabbitStatus;
@@ -64,8 +63,12 @@ public class RabbitGatewayTest extends AbstractSpringTest {
     @Test
     public void getConnections() throws Exception {
         com.rabbitmq.client.Connection conn = singleConnectionFactory.createConnection();
-        List<HypericConnection> cons = rabbitGateway.getConnections();
-        assertNotNull(cons);
+        List<String> vHosts = rabbitGateway.getVirtualHosts();
+        for (String vhost : vHosts) {
+            List<HypericConnection> cons = rabbitGateway.getConnections(vhost);
+            assertNotNull(cons);
+        }
+
         conn.close();
     }
 
@@ -74,9 +77,13 @@ public class RabbitGatewayTest extends AbstractSpringTest {
         com.rabbitmq.client.Connection conn = singleConnectionFactory.createConnection();
         conn.createChannel();
         conn.createChannel();
-        Thread.sleep(100000);
+        
+        List<String> vHosts = rabbitGateway.getVirtualHosts();
+        for (String vhost : vHosts) {
+            /** may or may not have channels */
+            rabbitGateway.getChannels(vhost);
+        }
         conn.close();
-        assertNotNull(rabbitGateway.getChannels());
     }
 
     @Test
@@ -89,7 +96,7 @@ public class RabbitGatewayTest extends AbstractSpringTest {
     @Test
     @Ignore("this is hanging..have to fix")
     public void purgeQueue() {
-        List<QueueInfo> queues = rabbitGateway.getQueues();
+        List<QueueInfo> queues = rabbitGateway.getQueues("/");
         assertNotNull(queues);
     }
 
@@ -101,15 +108,15 @@ public class RabbitGatewayTest extends AbstractSpringTest {
         assertNotNull(virtualHost);
     }
 
-    @Test
+    /*@Test
     public void declareDeleteExchange() {
         rabbitGateway.createExchange("34566", ExchangeTypes.FANOUT);
         rabbitGateway.deleteExchange("34566");
-    }
+    }*/
 
     @Test
     public void getQueues() {
-        List<QueueInfo> queues = rabbitGateway.getQueues();
+        List<QueueInfo> queues = rabbitGateway.getQueues("/");
         for (QueueInfo q : queues) {
             logger.debug(q);
         }
@@ -119,11 +126,11 @@ public class RabbitGatewayTest extends AbstractSpringTest {
     public void listCreateDeletePurgeQueue() {
         String queueName = UUID.randomUUID().toString();
 
-        AMQPStatus status = rabbitGateway.createQueue(queueName);
+        AMQPStatus status = rabbitManager.createQueue(queueName, "/");
         assertTrue(status.compareTo(AMQPStatus.RESOURCE_CREATED) == 0);
         assertTrue(status.name().equalsIgnoreCase(AMQPStatus.RESOURCE_CREATED.name()));
 
-        List<QueueInfo> queues = rabbitGateway.getQueues();
+        List<QueueInfo> queues = rabbitGateway.getQueues("/");
         assertNotNull(queues);
 
         Map<String, QueueInfo> map = new HashMap<String, QueueInfo>();
@@ -142,26 +149,26 @@ public class RabbitGatewayTest extends AbstractSpringTest {
         RabbitStatus status = rabbitGateway.getRabbitStatus();
         assertBrokerAppRunning(status);
 
-        rabbitGateway.stopBrokerApplication();
+        rabbitManager.stopBrokerApplication();
         status = rabbitGateway.getRabbitStatus();
         assertEquals(0, status.getRunningNodes().size());
 
-        rabbitGateway.startBrokerApplication();
+        rabbitManager.startBrokerApplication();
         status = rabbitGateway.getRabbitStatus();
         assertBrokerAppRunning(status);
     }
 
     @Test
     public void listCreateDeleteChangePwdUser() {
-        List<String> users = rabbitGateway.getUsers();
+        List<String> users = rabbitGateway.getUsers("/");
         if (users.contains("foo")) {
-            rabbitGateway.deleteUser("foo");
+            rabbitManager.deleteUser("foo", "/");
         }
-        rabbitGateway.createUser("foo", "bar");
-        rabbitGateway.updateUserPassword("foo", "12345");
-        users = rabbitGateway.getUsers();
+        rabbitManager.createUser("foo", "bar", "/");
+        rabbitManager.updateUserPassword("foo", "12345", "/");
+        users = rabbitGateway.getUsers("/");
         if (users.contains("foo")) {
-            rabbitGateway.deleteUser("foo");
+            rabbitManager.deleteUser("foo", "/");
         }
     }
 
@@ -169,7 +176,7 @@ public class RabbitGatewayTest extends AbstractSpringTest {
     @Ignore("NEEDS RABBITMQ_HOME to be set and needs additional node running handling/timing")
     public void startStopRabbitNode() {
         //rabbitGateway.stopRabbitNode();
-        rabbitGateway.startRabbitNode("pass in RABBITMQ_HOME path");
+        rabbitManager.startRabbitNode();
     }
 
     private boolean isBrokerAppRunning(RabbitStatus status) {

@@ -28,16 +28,14 @@ package org.hyperic.hq.plugin.rabbitmq.product;
 import org.hyperic.hq.plugin.rabbitmq.configure.ApplicationContextCreator;
 import org.hyperic.hq.plugin.rabbitmq.configure.ConnectionFactoryBeanDefinitionBuilder;
 import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
+import org.hyperic.hq.plugin.rabbitmq.core.ErlangCookieHandler;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.product.ServerResource;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.util.Assert;
 
-import java.util.List;
-
 /**
- * RabbitProductPlugin 
+ * RabbitProductPlugin
  * @author Helena Edelson
  */
 public class RabbitProductPlugin extends ProductPlugin {
@@ -49,7 +47,6 @@ public class RabbitProductPlugin extends ProductPlugin {
      * This is dependent on getting values in ConfigResponse from user input
      * in the UI. We have detected the RabbitMQ server if one exists on the host,
      * however we need to initialize before we get services and do control actions.
-     *
      * @return RabbitGateway or null
      */
     public static RabbitGateway getRabbitGateway() {
@@ -61,15 +58,16 @@ public class RabbitProductPlugin extends ProductPlugin {
      * key/value pairs to dynamically create Spring Beans.
      * If context not initialized, since it can not be initialized until we have
      * necessary parameters from the config parameter, initialize it.
-     *
      * @param preInitialized
      * @return
      */
     public static void initializeGateway(ConfigResponse preInitialized) {
         if (!ConnectionFactoryBeanDefinitionBuilder.hasConfigValues(preInitialized)) return;
- 
-        rabbitGateway = ApplicationContextCreator.createBeans(preInitialized);
-        Assert.notNull(rabbitGateway, "rabbitGateway must not be null");
+
+        if (preInitialized.getValue(DetectorConstants.NODE_COOKIE_VALUE) != null) {
+            rabbitGateway = ApplicationContextCreator.createBeans(preInitialized);
+            Assert.notNull(rabbitGateway, "rabbitGateway must not be null");
+        }
     }
- 
+
 }

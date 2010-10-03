@@ -68,12 +68,6 @@ public class VersionTests extends RabbitVersionDetector {
     }
 
     @Test
-    public void getVersionFromPath() {
-        String version = inferVersionFromPath(RABBITMQ_HOME);
-        assertNotNull(version);
-    }
-
-    @Test
     public void getVersionFromRabbitmqctl() throws PluginException, InterruptedException {
         String version = RabbitVersionDetector.inferVersionFromRabbitmqctl(RABBITMQ_HOME);
         // no exceptions thrown but not getting in.readLine()
@@ -85,13 +79,7 @@ public class VersionTests extends RabbitVersionDetector {
         String version = RabbitVersionDetector.inferVersionFromRabbitAppFile(RABBITMQ_HOME);
         assertNotNull(version);
     }
-
-    @Test
-    public void getVersionFromSelfNodeAndErlang() {
-        String version = RabbitVersionDetector.inferVersionFromErlang(PEER_NODE, LOCATION);
-        assertNotNull(version);
-    }
-
+ 
     @Test
     public void test() {
         String version = null;
