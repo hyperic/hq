@@ -219,7 +219,7 @@
               optional="true"
               default="manager"
               type="secret"/>
-      <option name="ptql"
+      <option name="process.query"
               description="PTQL for Tomcat Process"
               default="${PROC_QUERY}"/>
     </config>
@@ -228,7 +228,7 @@
             class="org.hyperic.hq.product.jmx.MxMeasurementPlugin"/>
 
     <metric name="Availability"
-            template="sigar:Type=ProcState,Arg=%ptql%:State"
+            template="sigar:Type=ProcState,Arg=%process.query%:State"
             indicator="true"/>
 
     <service name="Web Module Stats">
