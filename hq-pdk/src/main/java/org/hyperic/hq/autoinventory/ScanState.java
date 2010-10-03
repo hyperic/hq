@@ -32,11 +32,13 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,6 +52,7 @@ import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.StringifiedException;
+
 
 public class ScanState {
 
@@ -328,7 +331,9 @@ public class ScanState {
      */
     public void addServers ( ScanMethod scanMethod, List servers ) {
         servers = excludeServers(servers);
-
+        if(servers.isEmpty()) {
+            return;
+        }
         ScanMethodState smState = findSMState("addServers", scanMethod);
         AIServerValue[] newServers;
         AIServerValue[] existingServers = smState.getServers();
@@ -337,16 +342,26 @@ public class ScanState {
             for ( int i=0; i<newServers.length; i++ ) {
                 newServers[i] = getServerValue(servers.get(i));
             }
-
+            
         } else {
-            newServers = new AIServerValue[servers.size() + existingServers.length];
-            System.arraycopy(existingServers, 0,
-                             newServers, 0,
-                             existingServers.length);
-            for ( int i=0; i<servers.size(); i++ ) {
-                newServers[i+existingServers.length] =
-                    getServerValue(servers.get(i));
+            List<AIServerValue> allServers = new ArrayList<AIServerValue>(Arrays.asList(existingServers));
+            //Get rid of any servers we have already discovered (by autoinventoryidentifier). 
+            //ServerDetectors are ordered, so first one should always win
+            for(Iterator iterator= servers.iterator();iterator.hasNext();) {
+                AIServerValue server = getServerValue(iterator.next());
+                String identifier =server.getAutoinventoryIdentifier();
+                boolean newIdentifier = true;
+                for(AIServerValue existingServer : existingServers) {
+                    if(existingServer.getAutoinventoryIdentifier().equals(identifier)) {
+                        newIdentifier = false;
+                        break;
+                    }
+                }
+                if(newIdentifier) {
+                    allServers.add(server);
+                }
             }
+            newServers = allServers.toArray(new AIServerValue[allServers.size()]);
         }
         smState.setServers(newServers);
     }
