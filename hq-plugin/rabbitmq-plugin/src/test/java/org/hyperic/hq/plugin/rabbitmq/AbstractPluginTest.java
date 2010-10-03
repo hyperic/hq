@@ -25,12 +25,10 @@ public abstract class AbstractPluginTest {
 
     protected Properties properties = new Properties();
 
-    private static String HOST = "localhost";
+    private static String HOST = "vmc-ssrc-ub902";
 
     @Before
     public void doBefore() throws PluginException, IOException {
-        /* Resource resource = new ClassPathResource("classpath:/etc/test.properties"); */
-
         this.productPlugin.configure(createConfigResponse());
         assertNotNull(productPlugin);
         this.properties = productPlugin.getConfig().toProperties();
