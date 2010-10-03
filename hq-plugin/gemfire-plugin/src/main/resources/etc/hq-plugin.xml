@@ -8,18 +8,6 @@
         <include name="pdk/lib/mx4j" />
     </classpath>
 
-    <!--metrics name="GemFireMetrics">
-        <metric name="cacheListenerCallsCompleted" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
-        <metric name="creates" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
-        <metric name="puts" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
-        <metric name="misses" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
-        <metric name="loadsCompleted" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
-        <metric name="gets" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
-        <metric name="entries" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
-        <metric name="destroys" category="UTILIZATION" collectionType="trendsup" indicator="true" interval="60000" />
-        <metric name="distributionStats,deserializations" collectionType="trendsup" category="UTILIZATION" indicator="true" interval="60000" />
-    </metrics-->
-
     <config name="jmx">
         <option name="jmx.url" description="JMX URL to GemFire Agent" default="service:jmx:rmi://localhost/jndi/rmi://:1099/jmxconnector" />
         <option name="jmx.username" description="JMX username" optional="true" default="" />
@@ -73,14 +61,10 @@
                 <metric name="Used CPU" alias="used_cpu" indicator="true" units="percentage"/>
                 <metric name="Uptime" alias="uptime" indicator="true" collectionType="static" units="sec"/>
                 <metric name="Number of Clients" alias="nclients"/>
-                <metric name="Gets" alias="cachePerfStats.gets" collectionType="trendsup"/>
-                <metric name="GetTime" alias="cachePerfStats.getTime" units="sec"/>
-                <metric name="Puts" alias="cachePerfStats.puts" collectionType="trendsup"/>
-                <metric name="PutTime" alias="cachePerfStats.putTime" units="sec"/>
-                <metric name="Threads" alias="vmStats.threads"/>
-                <metric name="Receivers" alias="distributionStats.receivers"/>
-                <metric name="Sent Bytes" alias="distributionStats.sentBytes" units="B" collectionType="trendsup"/>
-                <metric name="Received Bytes" alias="distributionStats.receivedBytes" units="B" collectionType="trendsup"/>
+                <metric name="Gets" alias="stat.gets" collectionType="trendsup"/>
+                <metric name="GetTime" alias="stat.gettime" units="sec"/>
+                <metric name="Puts" alias="stat.puts" collectionType="trendsup"/>
+                <metric name="PutTime" alias="stat.puttime" units="sec"/>
             </metrics>
             <service name="Region">
                 <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />

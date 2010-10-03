@@ -91,7 +91,7 @@ public class RabbitBrokerGateway implements RabbitGateway {
      * @return
      * @throws ErlangBadRpcException
      */
-    public List<Channel> getChannels() throws ErlangBadRpcException {
+    public List<HypericChannel> getChannels() throws ErlangBadRpcException {
         return erlangGateway.getChannels();
     }
 
@@ -100,7 +100,7 @@ public class RabbitBrokerGateway implements RabbitGateway {
      * @return
      * @throws ErlangBadRpcException
      */
-    public List<Connection> getConnections() throws ErlangBadRpcException {
+    public List<HypericConnection> getConnections() throws ErlangBadRpcException {
         return erlangGateway.getConnections();
     }
 

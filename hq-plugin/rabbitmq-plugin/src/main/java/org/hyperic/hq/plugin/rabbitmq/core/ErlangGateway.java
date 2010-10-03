@@ -25,7 +25,6 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
  
-import com.ericsson.otp.erlang.OtpErlangObject;
 import org.springframework.amqp.core.Exchange;
 import org.springframework.erlang.ErlangBadRpcException;
 
@@ -42,9 +41,9 @@ public interface ErlangGateway {
     
     List<Exchange> getExchanges(String virtualHost) throws ErlangBadRpcException;
 
-    List<Connection> getConnections() throws ErlangBadRpcException;
+    List<HypericConnection> getConnections() throws ErlangBadRpcException;
 
-    List<Channel> getChannels() throws ErlangBadRpcException;
+    List<HypericChannel> getChannels() throws ErlangBadRpcException;
     
     String getVersion() throws ErlangBadRpcException;
 }

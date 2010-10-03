@@ -90,7 +90,7 @@ public class ErlangGatewayTest extends AbstractSpringTest {
     @Test
     public void getConnections() throws IOException {
         com.rabbitmq.client.Connection conn = singleConnectionFactory.createConnection();
-        List<Connection> cons = erlangGateway.getConnections();
+        List<HypericConnection> cons = erlangGateway.getConnections();
         assertNotNull(cons);
         conn.close();
     }
@@ -101,7 +101,7 @@ public class ErlangGatewayTest extends AbstractSpringTest {
         conn.createChannel();
         conn.createChannel();
         conn.close();
-        List<Channel> channels = erlangGateway.getChannels();
+        List<HypericChannel> channels = erlangGateway.getChannels();
         assertNotNull(channels);
         assertTrue(channels.size() > 1);
     }

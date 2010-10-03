@@ -46,6 +46,10 @@
            </ol>
           </p>
           <p>
+          <h3>Supported Verson</h3>
+          Coming soon: <a href="http://support.hyperic.com/display/EVO/Monitoring+RabbitMQ">Monitoring and Managing RabbitMQ</a>
+          </p>
+          <p>
           <h3>Help Docs</h3>
           Coming soon: <a href="http://support.hyperic.com/display/EVO/Monitoring+RabbitMQ">Monitoring and Managing RabbitMQ</a>
           </p>
@@ -68,7 +72,7 @@
         <config type="product">
             <option name="server.name" description="RabbitMQ Node"/>
 
-            <option name="server.path" description="Process Path"/>
+            <option name="server.path" description="Node Path"/>
 
             <option name="host" description="RabbitMQ Host"/>
 
@@ -81,7 +85,15 @@
             <!--<option name="port" type="int" default="5672" description="RabbitMQ Port" optional="true"/>-->
 
         </config>
+        <properties>
+            <property description="Node Name" name="node.name"/>
+            <property description="Node Path" name="node.path"/>
+            <property description="Node PID" name="node.pid"/>
+            <property description="Erlang Process" name="erlang.process"/>
+            <property description="Rabbit -boot" name="rabbit.boot"/>
+        </properties>
 
+        
         <!-- Have not had time to test these.
 
         <actions>
@@ -115,11 +127,11 @@
         <service name="Process">
             <plugin type="log_track" class="org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerLog"/>
             <config type="product">
-                <option name="process.name" description="XXXXXXX"/>
+                <option name="process.name" description="%server.name% Process"/>
             </config>
             <config type="measurement">
                 <option name="process.query" default="State.Name.sw=beam,Args.*.eq=-sname,Args.*.eq=%process.name%"
-                        description="XXXXXXX"/>
+                        description="%server.name% Measurement Query"/>
             </config>
             <metric name="Availability"
                     template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>

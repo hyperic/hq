@@ -4,7 +4,6 @@
 	<classpathentry excluding="**/*.java" kind="src" output="target/test-classes" path="src/test/resources"/>
 	<classpathentry kind="var" path="M2_REPO/javax/activation/activation/1.1/activation-1.1.jar" sourcepath="M2_REPO/javax/activation/activation/1.1/activation-1.1-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/javax/jms/jms/1.1/jms-1.1.jar"/>
-	<classpathentry kind="var" path="M2_REPO/javax/transaction/jta/1.1/jta-1.1.jar" sourcepath="M2_REPO/javax/transaction/jta/1.1/jta-1.1-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/javax/mail/mail/1.4/mail-1.4.jar" sourcepath="M2_REPO/javax/mail/mail/1.4/mail-1.4-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/apache/activemq/activeio-core/3.1.2/activeio-core-3.1.2.jar" sourcepath="M2_REPO/org/apache/activemq/activeio-core/3.1.2/activeio-core-3.1.2-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/apache/activemq/activemq-all/5.3.0/activemq-all-5.3.0.jar" sourcepath="M2_REPO/org/apache/activemq/activemq-all/5.3.0/activemq-all-5.3.0-sources.jar"/>
@@ -57,8 +56,6 @@
 	<classpathentry kind="var" path="M2_REPO/org/springframework/roo/org.springframework.roo.file.monitor.polling/1.0.2.RELEASE/org.springframework.roo.file.monitor.polling-1.0.2.RELEASE.jar" sourcepath="M2_REPO/org/springframework/roo/org.springframework.roo.file.monitor.polling/1.0.2.RELEASE/org.springframework.roo.file.monitor.polling-1.0.2.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/roo/org.springframework.roo.support/1.0.2.RELEASE/org.springframework.roo.support-1.0.2.RELEASE.jar" sourcepath="M2_REPO/org/springframework/roo/org.springframework.roo.support/1.0.2.RELEASE/org.springframework.roo.support-1.0.2.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/oro/oro/2.0.8/oro-2.0.8.jar" sourcepath="M2_REPO/oro/oro/2.0.8/oro-2.0.8-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/postgresql/postgresql/7.4.3/postgresql-7.4.3.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/quartz-scheduler/quartz/1.7.3/quartz-1.7.3.jar" sourcepath="M2_REPO/org/quartz-scheduler/quartz/1.7.3/quartz-1.7.3-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/xalan/serializer/2.7.1/serializer-2.7.1.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/hyperic/sigar/1.6.4/sigar-1.6.4.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-aop/3.0.0.RELEASE/spring-aop-3.0.0.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-aop/3.0.0.RELEASE/spring-aop-3.0.0.RELEASE-sources.jar"/>
