@@ -61,7 +61,7 @@ public class RabbitTestConfiguration {
 
     @Bean
     public RabbitBrokerAdmin rabbitBrokerAdmin() {
-        String value = RabbitUtils.configureCookie(serverConfig());
+        String value = ErlangCookieHandler.configureCookie(serverConfig());
         return new HypericBrokerAdmin(singleConnectionFactory(),value);
     }
 

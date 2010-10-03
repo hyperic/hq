@@ -58,20 +58,13 @@ public class RabbitQueueCollector extends Collector {
 
                     for (QueueInfo queue : queues) {
 
-                        Map<String, Object> props = new HashMap<String, Object>();
-                        props.put("messages", queue.getMessages());
-                        props.put("consumers", queue.getConsumers());
-                        props.put("transactions", queue.getTransactions());
-                        props.put("memory", queue.getMemory());
-                        addValues(props);
+                        setAvailability(true);
 
                         setValue("messages", queue.getMessages());
                         setValue("consumers", queue.getConsumers());
                         setValue("transactions", queue.getTransactions());
                         setValue("memory", queue.getMemory());
 
-
-                        setAvailability(true);
                     }
                 }
             }

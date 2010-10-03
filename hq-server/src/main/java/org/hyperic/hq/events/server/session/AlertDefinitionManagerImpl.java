@@ -800,7 +800,9 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
 
     private void metricsEnabled(AppdefEntityID ent) {
         try {
-            log.info("Inheriting type-based alert defs for " + ent);
+            if(log.isDebugEnabled()) {
+                log.debug("Inheriting type-based alert defs for " + ent);
+            }
             AuthzSubject hqadmin = authzSubjectManager.getSubjectById(AuthzConstants.rootSubjectId);
             inheritResourceTypeAlertDefinition(hqadmin, ent);
         } catch (Exception e) {

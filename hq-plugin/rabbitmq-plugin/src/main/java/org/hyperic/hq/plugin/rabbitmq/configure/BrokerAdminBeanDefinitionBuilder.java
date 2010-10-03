@@ -26,8 +26,8 @@
 package org.hyperic.hq.plugin.rabbitmq.configure;
 
 import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
+import org.hyperic.hq.plugin.rabbitmq.core.ErlangCookieHandler;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericBrokerAdmin;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
@@ -46,7 +46,7 @@ public class BrokerAdminBeanDefinitionBuilder {
         if (conf.getValue(DetectorConstants.NODE_COOKIE_VALUE) != null) {
             nodeCookie = conf.getValue(DetectorConstants.NODE_COOKIE_VALUE);
         } else {
-            nodeCookie = RabbitUtils.configureCookie(conf);
+            nodeCookie = ErlangCookieHandler.configureCookie(conf);
         }
 
         if (nodeCookie != null && nodeCookie.length() > 0) {

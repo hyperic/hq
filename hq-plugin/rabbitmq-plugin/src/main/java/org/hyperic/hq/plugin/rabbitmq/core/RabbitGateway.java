@@ -42,9 +42,9 @@ public interface RabbitGateway {
 
     List<QueueInfo> getQueues();
 
-    List<Connection> getConnections() throws ErlangBadRpcException;
+    List<HypericConnection> getConnections() throws ErlangBadRpcException;
 
-    List<Channel> getChannels() throws ErlangBadRpcException;
+    List<HypericChannel> getChannels() throws ErlangBadRpcException;
     
     List<String> getUsers();
 

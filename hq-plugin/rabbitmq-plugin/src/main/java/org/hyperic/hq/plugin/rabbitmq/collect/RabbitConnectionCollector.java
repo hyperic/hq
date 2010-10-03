@@ -27,7 +27,7 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.core.Connection;
+import org.hyperic.hq.plugin.rabbitmq.core.HypericConnection;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.Collector;
@@ -54,20 +54,14 @@ public class RabbitConnectionCollector extends Collector {
         if (rabbitGateway != null) {
 
             try {
-                List<Connection> connections = rabbitGateway.getConnections();
+                List<HypericConnection> connections = rabbitGateway.getConnections();
 
                 if (connections != null) {
                     logger.debug("Found " + connections.size() + " connections");
 
-                    for (Connection conn : connections) {
-                        Map<String, Object> props = new HashMap<String, Object>();
-                        props.put("packetsReceived", conn.getReceiveCount());
-                        props.put("packetsSent", conn.getSendCount());
-                        props.put("channelCount", conn.getChannels());
-                        props.put("octetsReceived", conn.getOctetsReceived());
-                        props.put("octetsSent", conn.getOctetsSent());
-                        props.put("pendingSends", conn.getPendingSends());
-
+                    for (HypericConnection conn : connections) {
+                        setAvailability(conn.getState().equalsIgnoreCase("running"));
+                        
                         setValue("packetsReceived", conn.getReceiveCount());
                         setValue("packetsSent", conn.getSendCount());
                         setValue("channelCount", conn.getChannels());
@@ -75,8 +69,6 @@ public class RabbitConnectionCollector extends Collector {
                         setValue("octetsSent", conn.getOctetsSent()); 
                         setValue("pendingSends", conn.getPendingSends());  
 
-                        addValues(props);
-                        setAvailability(conn.getState().equalsIgnoreCase("running")); 
                     }
                 }
             }
@@ -93,7 +85,7 @@ public class RabbitConnectionCollector extends Collector {
      * @param conn
      * @return
      */
-    public static ConfigResponse getAttributes(Connection conn) {
+    public static ConfigResponse getAttributes(HypericConnection conn) {
         ConfigResponse res = new ConfigResponse();
         res.setValue("username", conn.getUsername());
         res.setValue("vHost", conn.getVhost());
