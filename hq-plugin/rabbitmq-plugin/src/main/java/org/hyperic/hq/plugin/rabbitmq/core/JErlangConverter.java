@@ -29,7 +29,6 @@ import com.ericsson.otp.erlang.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.amqp.core.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.erlang.ErlangBadRpcException;
 import org.springframework.erlang.core.ConnectionCallback;
 import org.springframework.erlang.core.ErlangTemplate;
@@ -44,15 +43,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * JErlangConverter
+ * JErlangConverter handles jinterface calls that are not currently in Spring AMQP
+ * or are in Spring AMQP not working in the Hyperic Agent environment.
  * @author Helena Edelson
  */
 public class JErlangConverter implements ErlangConverter {
 
     private static final Log logger = LogFactory.getLog(JErlangConverter.class);
 
-    @Autowired
     private ErlangTemplate erlangTemplate;
+
+    public JErlangConverter(ErlangTemplate erlangTemplate) {
+        this.erlangTemplate = erlangTemplate;
+    }
 
     public OtpErlangObject toErlang(Object o) throws ErlangConversionException {
         if (o instanceof String) {
@@ -99,6 +102,8 @@ public class JErlangConverter implements ErlangConverter {
             }
             else if (type.isAssignableFrom(HypericChannel.class) && virtualHost == null) {
                 return convertChannels(response);
+            } else if (type.isAssignableFrom(HypericBinding.class)) {
+                return convertBindings(response);
             }
             else {
                 return convertVersion(response);
@@ -107,6 +112,10 @@ public class JErlangConverter implements ErlangConverter {
         catch (OtpErlangException e) {
             throw new ErlangBadRpcException(response.toString());
         }
+    }
+
+    private List<HypericBinding> convertBindings(OtpErlangObject response) {
+        return null;
     }
 
     /**

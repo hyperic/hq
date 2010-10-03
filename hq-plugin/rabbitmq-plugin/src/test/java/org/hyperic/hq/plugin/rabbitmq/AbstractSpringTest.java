@@ -28,8 +28,8 @@ package org.hyperic.hq.plugin.rabbitmq;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.configure.TestContextLoader;
-import org.hyperic.hq.plugin.rabbitmq.core.ErlangGateway;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
+import org.hyperic.hq.plugin.rabbitmq.manage.RabbitManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -69,22 +69,20 @@ public abstract class AbstractSpringTest {
     protected RabbitGateway rabbitGateway;
 
     @Autowired
-    protected ErlangGateway erlangGateway;
-
-    @Autowired
     protected ConfigResponse serverConfig;
 
     @Autowired
     protected ErlangTemplate erlangTemplate;
+
+    @Autowired
+    protected RabbitManager rabbitManager;
     
     @Before
     public void before() {
         assertNotNull("singleConnectionFactory should not be null", singleConnectionFactory);
         assertNotNull("rabbitBrokerAdmin should not be null", rabbitBrokerAdmin);
         assertNotNull("rabbitTemplate must not be null", rabbitTemplate);
-        assertNotNull("rabbitGateway should not be null", rabbitGateway);
-        assertNotNull("erlangGateway should not be null", erlangGateway);
-        //assertNotNull(rabbitBrokerAdmin.getStatus());
+        assertNotNull("rabbitGateway should not be null", rabbitGateway); 
     }
 
     @AfterClass
