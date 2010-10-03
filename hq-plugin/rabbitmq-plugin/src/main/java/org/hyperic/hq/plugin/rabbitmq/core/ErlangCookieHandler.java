@@ -61,11 +61,12 @@ public class ErlangCookieHandler {
 
         if (conf.getValue(DetectorConstants.NODE_COOKIE_VALUE) == null) {
             file = inferCookie(conf);
-        }
-        else {
-            String userSetLocation = conf.getValue(DetectorConstants.NODE_COOKIE_LOCATION).trim();
-            if (userSetLocation != null && !userSetLocation.isEmpty()) {
-                file = new File(userSetLocation);
+        } else {
+            if (conf.getValue(DetectorConstants.NODE_COOKIE_LOCATION) != null) {
+                String userSetLocation = conf.getValue(DetectorConstants.NODE_COOKIE_LOCATION).trim();
+                if (userSetLocation != null && !userSetLocation.isEmpty()) {
+                    file = new File(userSetLocation);
+                }
             }
         }
 
@@ -73,32 +74,30 @@ public class ErlangCookieHandler {
             nodeCookie = getErlangCookieValue(file);
             if (nodeCookie != null) logger.debug(nodeCookie + " " + file.getAbsolutePath());
         }
- 
+
         return nodeCookie;
     }
 
     /**
      * Read in the erlang cookie string from the path
-     * @param cookie
+     * @param file
      * @return
      */
-    protected static String getErlangCookieValue(File cookie) {
-        logger.debug("Get cookie from file=" + cookie);
+    protected static String getErlangCookieValue(File file) {
+        logger.debug("Attempting to read file " + file);
         String erlangCookieValue = null;
 
-        BufferedReader in = null;
-
         try {
-            if (cookie != null && cookie.exists()) {
-                in = new BufferedReader(new FileReader(cookie));
+            if (file != null && file.exists()) {
+                BufferedReader in = new BufferedReader(new FileReader(file));
                 erlangCookieValue = in.readLine();
 
                 if (in != null) {
                     in.close();
                 }
             }
-        } catch (IOException e) {
-            logger.error("Error reading the Erlang Cookie: " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException("Agent does not have permission to read the cookie: " + e.getMessage(), e);
         }
 
         return erlangCookieValue;

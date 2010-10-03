@@ -4,12 +4,12 @@
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
- *  "derived work".
+ * "derived work".
  *
  *  Copyright (C) [2010], VMware, Inc.
- *  This file is part of Hyperic .
+ *  This file is part of Hyperic.
  *
- *  Hyperic  is free software; you can redistribute it and/or modify
+ *  Hyperic is free software; you can redistribute it and/or modify
  *  it under the terms version 2 of the GNU General Public License as
  *  published by the Free Software Foundation. This program is distributed
  *  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -27,44 +27,42 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.plugin.rabbitmq.core.HypericBinding;
+import org.hyperic.hq.plugin.rabbitmq.core.HypericChannel;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.util.config.ConfigResponse;
-import org.springframework.amqp.rabbit.admin.QueueInfo;
+import org.springframework.amqp.core.Binding;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 
 /**
- * RabbitQueueCollector
- *
+ * BindingCollector
  * @author Helena Edelson
  */
-public class RabbitQueueCollector extends Collector {
+public class BindingCollector extends Collector {
 
-    private static final Log logger = LogFactory.getLog(RabbitQueueCollector.class);
- 
+    private static final Log logger = LogFactory.getLog(ConnectionCollector.class);
+
     @Override
     public void collect() {
+
         RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
         if (rabbitGateway != null) {
 
             try {
-                List<QueueInfo> queues = rabbitGateway.getQueues();
-                if (queues != null) {
+                List<String> virtualHosts = rabbitGateway.getVirtualHosts();
+                if (virtualHosts != null) {
+                    for (String virtualHost : virtualHosts) {
+                        List<HypericBinding> bindings = rabbitGateway.getBindings(virtualHost);
 
-                    for (QueueInfo queue : queues) {
+                        if (bindings != null) {
+                            for (HypericBinding binding : bindings) {
+                                setAvailability(true);
 
-                        setAvailability(true);
-
-                        setValue("messages", queue.getMessages());
-                        setValue("consumers", queue.getConsumers());
-                        setValue("transactions", queue.getTransactions());
-                        setValue("memory", queue.getMemory());
-
+                            }
+                        }
                     }
                 }
             }
@@ -78,20 +76,13 @@ public class RabbitQueueCollector extends Collector {
      * Assemble custom key/value data for each object to set
      * as custom properties in the ServiceResource to display
      * in the UI.
-     * @param queue
+     * @param binding
      * @return
-     */    
-    public static ConfigResponse getAttributes(QueueInfo queue) { 
-        String durable = queue.isDurable() ? "durable" : "not durable";
+     */
+    public static ConfigResponse getAttributes(Object binding) {
         ConfigResponse res = new ConfigResponse();
-        res.setValue("durable", durable);
-        res.setValue("acksUncommitted", queue.getAcksUncommitted());
-        res.setValue("messagesReady", queue.getMessagesReady());
-        res.setValue("messagesUnacknowledged", queue.getMessagesUnacknowledged());
-        res.setValue("messagesUncommitted", queue.getMessageUncommitted());
-        res.setValue("name", queue.getName());
-        res.setValue("pid", queue.getPid().substring(5, queue.getPid().length()-1));
-        return res;        
-    }   
+        
+        return res;
+    }
 
 }

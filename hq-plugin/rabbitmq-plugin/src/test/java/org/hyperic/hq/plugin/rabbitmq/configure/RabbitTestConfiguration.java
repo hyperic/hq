@@ -2,6 +2,8 @@ package org.hyperic.hq.plugin.rabbitmq.configure;
 
 
 import org.hyperic.hq.plugin.rabbitmq.core.*;
+import org.hyperic.hq.plugin.rabbitmq.manage.RabbitBrokerManager;
+import org.hyperic.hq.plugin.rabbitmq.manage.RabbitManager;
 import org.hyperic.hq.plugin.rabbitmq.populate.PojoHandler;
 import org.hyperic.hq.plugin.rabbitmq.volumetrics.RabbitScheduler;
 import org.hyperic.util.config.ConfigResponse;
@@ -79,7 +81,12 @@ public class RabbitTestConfiguration {
 
     @Bean
     public RabbitGateway rabbitGateway() { 
-        return new RabbitBrokerGateway(rabbitBrokerAdmin());
+        return new RabbitBrokerGateway();
+    }
+
+    @Bean
+    public RabbitManager rabbitManager() {
+        return new RabbitBrokerManager(rabbitGateway());
     }
 
     @Bean
@@ -89,12 +96,7 @@ public class RabbitTestConfiguration {
 
     @Bean
     public ErlangConverter erlangConverter() {
-        return new JErlangConverter();
-    }
-
-    @Bean
-    public ErlangGateway erlangGatway() {
-        return new ErlangBrokerGateway();
+        return new JErlangConverter(rabbitBrokerAdmin().getErlangTemplate());
     }
 
     @Bean

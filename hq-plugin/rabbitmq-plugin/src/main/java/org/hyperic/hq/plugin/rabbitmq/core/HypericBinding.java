@@ -23,41 +23,11 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq.collect;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
-import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
-import org.hyperic.hq.product.Collector; 
-
-import java.util.List;
+package org.hyperic.hq.plugin.rabbitmq.core;
 
 /**
- * RabbitUserCollector
+ * HypericBinding
  * @author Helena Edelson
  */
-public class RabbitUserCollector extends Collector {
-
-    private static final Log logger = LogFactory.getLog(RabbitQueueCollector.class);
-
-    @Override
-    public void collect() {
-        RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
-        if (rabbitGateway != null) {
-
-            try {
-                List<String> users = rabbitGateway.getUsers();
-                if (users != null) { 
-                    for (String user : users) {
-                        setAvailability(true);
-                    }
-                }
-            }
-            catch (Exception ex) {
-                logger.error(ex);
-            }
-        }
-    }
-
+public class HypericBinding {
 }

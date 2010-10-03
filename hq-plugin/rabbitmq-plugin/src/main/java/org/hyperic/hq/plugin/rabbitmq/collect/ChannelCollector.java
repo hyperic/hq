@@ -27,48 +27,42 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.core.HypericConnection;
+import org.hyperic.hq.plugin.rabbitmq.core.HypericChannel;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.Collector;
-import org.hyperic.util.config.ConfigResponse; 
+import org.hyperic.util.config.ConfigResponse;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
- * RabbitConnectionCollector
- *
+ * ChannelCollector
  * @author Helena Edelson
  */
-public class RabbitConnectionCollector extends Collector {
+public class ChannelCollector extends Collector {
 
-    private static final Log logger = LogFactory.getLog(RabbitConnectionCollector.class);
-
+    private static final Log logger = LogFactory.getLog(ConnectionCollector.class);
 
     @Override
     public void collect() {
-       
+
         RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
         if (rabbitGateway != null) {
 
             try {
-                List<HypericConnection> connections = rabbitGateway.getConnections();
+                List<String> virtualHosts = rabbitGateway.getVirtualHosts();
+                if (virtualHosts != null) {
+                    for (String virtualHost : virtualHosts) {
+                        List<HypericChannel> channels = rabbitGateway.getChannels(virtualHost);
 
-                if (connections != null) {
-                    logger.debug("Found " + connections.size() + " connections");
+                        if (channels != null) {
+                            for (HypericChannel channel : channels) {
 
-                    for (HypericConnection conn : connections) {
-                        setAvailability(conn.getState().equalsIgnoreCase("running"));
-                        
-                        setValue("packetsReceived", conn.getReceiveCount());
-                        setValue("packetsSent", conn.getSendCount());
-                        setValue("channelCount", conn.getChannels());
-                        setValue("octetsReceived", conn.getOctetsReceived());
-                        setValue("octetsSent", conn.getOctetsSent()); 
-                        setValue("pendingSends", conn.getPendingSends());  
+                                setAvailability(true);
 
+                                setValue("consumerCount", channel.getConsumerCount());
+                            }
+                        }
                     }
                 }
             }
@@ -82,19 +76,21 @@ public class RabbitConnectionCollector extends Collector {
      * Assemble custom key/value data for each object to set
      * as custom properties in the ServiceResource to display
      * in the UI.
-     * @param conn
+     * @param channel
      * @return
      */
-    public static ConfigResponse getAttributes(HypericConnection conn) {
+    public static ConfigResponse getAttributes(HypericChannel channel) {
         ConfigResponse res = new ConfigResponse();
-        res.setValue("username", conn.getUsername());
-        res.setValue("vHost", conn.getVhost());
-        res.setValue("pid", conn.getPid());
-        res.setValue("frameMax", conn.getFrameMax());
-        res.setValue("selfNode", conn.getAddress().getHost() + ":" + conn.getAddress().getPort());
-        res.setValue("peerNode", conn.getPeerAddress().getHost() + ":" + conn.getPeerAddress().getPort());
-        res.setValue("state", conn.getState());
- 
+        res.setValue("pid", channel.getPid());
+        res.setValue("connection", channel.getConnection().getPid());
+        res.setValue("number", channel.getNumber());
+        res.setValue("user", channel.getUser());
+        res.setValue("transactional", channel.getTransactional());
+        res.setValue("prefetchCount", channel.getPrefetchCount());
+        res.setValue("acksUncommitted", channel.getAcksUncommitted());
+        res.setValue("messagesUnacknowledged", channel.getMessagesUnacknowledged());
+
         return res;
     }
+
 }

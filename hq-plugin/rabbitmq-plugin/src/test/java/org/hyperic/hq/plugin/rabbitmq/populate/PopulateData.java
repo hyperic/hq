@@ -29,6 +29,7 @@ import org.hyperic.hq.plugin.rabbitmq.configure.RabbitTestConfiguration;
 import org.hyperic.hq.plugin.rabbitmq.core.AMQPStatus;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericChannel;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
+import org.hyperic.hq.plugin.rabbitmq.manage.RabbitManager;
 import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.admin.QueueInfo;
@@ -55,69 +56,59 @@ public class PopulateData {
 
     public static void main(String[] args) throws Exception {
         ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(RabbitTestConfiguration.class);
-        addData(ctx);
+        SingleConnectionFactory singleConnectionFactory = ctx.getBean(SingleConnectionFactory.class);
         RabbitGateway rabbitGateway = ctx.getBean(RabbitGateway.class);
         RabbitTemplate rabbitTemplate = ctx.getBean(RabbitTemplate.class);
+        RabbitBrokerAdmin rabbitBrokerAdmin = ctx.getBean(RabbitBrokerAdmin.class);
+
+        System.out.println(rabbitBrokerAdmin.getStatus());
+
+        String vHost = singleConnectionFactory.getVirtualHost();
+
+        rabbitBrokerAdmin.declareExchange("app.stock.quotes", ExchangeTypes.TOPIC, true, false);
+        rabbitBrokerAdmin.declareExchange("marketData.topic", ExchangeTypes.TOPIC, true, false);
+        rabbitBrokerAdmin.declareExchange("app.stock.marketdata", ExchangeTypes.DIRECT, true, false);
+
         Queue marketDataQueue = ctx.getBean("marketDataQueue", Queue.class);
+                
+        rabbitBrokerAdmin.declareQueue(new Queue("quotes.nasdaq.*"));
+        rabbitBrokerAdmin.declareQueue(marketDataQueue);
+        List<QueueInfo> queues = rabbitGateway.getQueues(vHost);
+
         Queue responseQueue = ctx.getBean("responseQueue", Queue.class);
         Queue queue = new Queue("stocks.nasdaq.*");
         queue.setDurable(true);
         queue.setAutoDelete(false);
-        
-        rabbitGateway.createQueue(queue.getName());
+
+        addData(ctx);
 
         int numMessages = 100;
 
         ProducerSample producer = new ProducerSample(rabbitTemplate, queue, numMessages);
-        ConsumerSample consumer = new ConsumerSample(rabbitTemplate, marketDataQueue);
+        //ConsumerSample consumer = new ConsumerSample(rabbitTemplate, marketDataQueue);
         producer.sendMessages();
- 
-        List<QueueInfo> queues = rabbitGateway.getQueues();
-
-        consumer.receiveAsync();
+        //consumer.receiveAsync();
 
     }
 
     private static void addData(ConfigurableApplicationContext ctx) throws Exception {
         SingleConnectionFactory singleConnectionFactory = ctx.getBean(SingleConnectionFactory.class);
         RabbitGateway rabbitGateway = ctx.getBean(RabbitGateway.class);
-
-        rabbitGateway.createQueue("quotes.nasdaq.*");
-        List<QueueInfo> queues = rabbitGateway.getQueues();
-      
-        rabbitGateway.createExchange("marketData.topic", ExchangeTypes.TOPIC);
-        rabbitGateway.createExchange("app.stock.marketdata", ExchangeTypes.DIRECT);
-
-        Queue marketDataQueue = ctx.getBean("marketDataQueue", Queue.class);
-
-        rabbitGateway.createExchange("app.stock.quotes", ExchangeTypes.TOPIC);
-        rabbitGateway.createQueue(marketDataQueue.getName());
-
-        RabbitBrokerAdmin rabbitBrokerAdmin = ctx.getBean(RabbitBrokerAdmin.class);
-        System.out.println(rabbitBrokerAdmin.getStatus());
+        String vHost = singleConnectionFactory.getVirtualHost();
 
         com.rabbitmq.client.Connection conn = singleConnectionFactory.createConnection();
         Map<String, Object> props = conn.getServerProperties();
         System.out.println(props);
 
-
-        AMQPStatus status = rabbitGateway.createQueue(UUID.randomUUID().toString());
-        assertTrue(status.compareTo(AMQPStatus.RESOURCE_CREATED) == 0);
-        assertTrue(status.name().equalsIgnoreCase(AMQPStatus.RESOURCE_CREATED.name()));
-
         conn.createChannel();
         conn.createChannel();
 
-        List<HypericChannel> channels = rabbitGateway.getChannels();
+        List<HypericChannel> channels = rabbitGateway.getChannels(vHost);
         assertNotNull(channels);
         assertTrue(channels.size() > 0);
 
         Thread.sleep(10000);
 
-        List<String> users = rabbitGateway.getUsers();
-        if (users.contains("foo")) {
-            rabbitGateway.deleteUser("foo");
-        }
         /** kept it open for a while to show some metrics */
         conn.close();
     }
