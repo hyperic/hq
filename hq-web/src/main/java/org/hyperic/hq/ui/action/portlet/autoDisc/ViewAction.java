@@ -80,8 +80,6 @@ public class ViewAction
 
     public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
                                  HttpServletRequest request, HttpServletResponse response) throws Exception {
-        StopWatch overallWatch = new StopWatch();
-        overallWatch.start("All");
         HttpSession session = request.getSession();
 
         WebUser user = RequestUtils.getWebUser(request);
@@ -95,12 +93,18 @@ public class ViewAction
         ConfigResponse dashPrefs = dashConfig.getConfig();
         page.setPagesize(Integer.parseInt(dashPrefs.getValue(".dashContent.autoDiscovery.range")));
 
-        // always show ignored platforms and already-processed platforms
+        
         StopWatch watch = new StopWatch();
-        watch.start("get queue");
+        if(log.isDebugEnabled()) {
+            watch.start("getQueue");
+        }
+        // always show ignored platforms and already-processed platforms
         PageList<AIPlatformValue> aiQueue = aiBoss.getQueue(sessionId, true, false, true, page);
-        watch.stop();
-        log.info(watch.prettyPrint());
+        
+        if(log.isDebugEnabled()) {
+            watch.stop();
+            log.debug(watch.prettyPrint());
+        }
         List<AIPlatformWithStatus> queueWithStatus = getStatuses(aiQueue);
         context.putAttribute("resources", queueWithStatus);
 
@@ -152,8 +156,6 @@ public class ViewAction
             ActionMessage err = new ActionMessage("dash.autoDiscovery.import.Error", exc);
             RequestUtils.setError(request, err, ActionMessages.GLOBAL_MESSAGE);
         }
-        overallWatch.stop();
-        log.info(overallWatch.prettyPrint());
         return null;
     }
 
