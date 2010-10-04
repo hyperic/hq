@@ -50,9 +50,9 @@ public class RabbitBrokerManager implements RabbitManager {
      /**
      * Create a Queue. Defines a queue on the broker whose name is automatically created.
      * The additional properties of this auto-generated queue are exclusive=true, autoDelete=true, and durable=false.
-     * @param queueName
+     * @param queue
      */
-    public AMQPStatus createQueue(String queueName, String virtualHost) {
+    public AMQPStatus createQueue(Queue queue, String virtualHost) {
        /* rabbitBrokerAdmin.declareQueue(new Queue(queueName));
         if (getQueuesAsMap(virtualHost).containsKey(queueName)) {
             return AMQPStatus.RESOURCE_CREATED;

@@ -26,6 +26,7 @@
 package org.hyperic.hq.plugin.rabbitmq.manage;
 
 import org.hyperic.hq.plugin.rabbitmq.core.AMQPStatus;
+import org.springframework.amqp.core.Queue;
 
 /**
  * RabbitManager
@@ -33,7 +34,7 @@ import org.hyperic.hq.plugin.rabbitmq.core.AMQPStatus;
  */
 public interface RabbitManager {
 
-    AMQPStatus createQueue(String queueName, String virtualHost);
+    AMQPStatus createQueue(Queue queue, String virtualHost);
 
     AMQPStatus createExchange(String exchangeName, String type, String virtualHost);
 

@@ -64,7 +64,8 @@ public class ConnectionTest {
         Assert.state(conn.isConnected());
         Assert.isTrue(conn.getState().name().equalsIgnoreCase("RUNNABLE"), "Connection must be runnable.");
 
-        conn.close(); 
+        conn.close();
+        System.exit(0);
     }
 
 }

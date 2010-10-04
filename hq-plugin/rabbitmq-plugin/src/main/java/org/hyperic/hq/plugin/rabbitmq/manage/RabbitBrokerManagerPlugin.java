@@ -31,6 +31,7 @@ import org.hyperic.hq.plugin.rabbitmq.core.AMQPStatus;
 import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.amqp.core.Queue;
 
 /**
  * RabbitBrokerManagerPlugin
@@ -61,7 +62,8 @@ public class RabbitBrokerManagerPlugin extends ControlPlugin {
 
                 if (action.equals("createQueue")) {
                     if (args.length == 1) {
-                        AMQPStatus status = manager.createQueue(args[1], virtualHost);
+                        Queue queue = new Queue(args[1]);
+                        AMQPStatus status = manager.createQueue(queue, virtualHost);
 
                         if (status.compareTo(AMQPStatus.RESOURCE_CREATED) == 0) {
                             setResult(ControlPlugin.RESULT_SUCCESS);
