@@ -26,12 +26,11 @@
 package org.hyperic.hq.plugin.rabbitmq.configure;
 
 import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
-import org.hyperic.hq.plugin.rabbitmq.core.ErlangCookieHandler;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericBrokerAdmin;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
-import org.springframework.beans.factory.support.GenericBeanDefinition;
-import org.springframework.util.Assert;
+import org.springframework.beans.factory.support.GenericBeanDefinition; 
 
 /**
  * BrokerAdminBeanDefinitionBuilder
@@ -39,27 +38,21 @@ import org.springframework.util.Assert;
  */
 public class BrokerAdminBeanDefinitionBuilder {
 
-    public static GenericBeanDefinition build(ConfigResponse conf, GenericBeanDefinition cf) {
+    public static GenericBeanDefinition build(ConfigResponse conf, BeanDefinition cf) {
         GenericBeanDefinition beanDefinition = null;
-
-        String nodeCookie = null;
+ 
         if (conf.getValue(DetectorConstants.NODE_COOKIE_VALUE) != null) {
-            nodeCookie = conf.getValue(DetectorConstants.NODE_COOKIE_VALUE);
-        } else {
-            nodeCookie = ErlangCookieHandler.configureCookie(conf);
-        }
+            String auth = conf.getValue(DetectorConstants.NODE_COOKIE_VALUE);
 
-        if (nodeCookie != null && nodeCookie.length() > 0) {
-            Assert.hasText(nodeCookie);
+            if (auth != null && auth.length() > 0) {
+                beanDefinition = new GenericBeanDefinition();
+                beanDefinition.setBeanClass(HypericBrokerAdmin.class);
 
-            beanDefinition = new GenericBeanDefinition();
-            beanDefinition.setBeanClass(HypericBrokerAdmin.class);
-
-            ConstructorArgumentValues constructorArgs = new ConstructorArgumentValues();
-            constructorArgs.addGenericArgumentValue(cf);
-            constructorArgs.addGenericArgumentValue(nodeCookie);
-            beanDefinition.setConstructorArgumentValues(constructorArgs);
-
+                ConstructorArgumentValues constructorArgs = new ConstructorArgumentValues();
+                constructorArgs.addIndexedArgumentValue(0, cf);
+                constructorArgs.addIndexedArgumentValue(1, auth);
+                beanDefinition.setConstructorArgumentValues(constructorArgs);
+            }
         }
 
         return beanDefinition;

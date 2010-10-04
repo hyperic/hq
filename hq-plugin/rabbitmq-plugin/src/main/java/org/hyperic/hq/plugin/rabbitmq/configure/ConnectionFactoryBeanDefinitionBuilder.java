@@ -51,8 +51,7 @@ public class ConnectionFactoryBeanDefinitionBuilder {
     public static boolean hasConfigValues(ConfigResponse config) {
         return (config.getValue(DetectorConstants.HOST) != null) &&
                 (config.getValue(DetectorConstants.USERNAME) != null) &&
-                    (config.getValue(DetectorConstants.PASSWORD) != null) &&
-                        (config.getValue(DetectorConstants.NODE_COOKIE_VALUE) != null);
+                    (config.getValue(DetectorConstants.PASSWORD) != null);
     }
 
     /**
@@ -82,7 +81,7 @@ public class ConnectionFactoryBeanDefinitionBuilder {
             beanDefinition.setBeanClass(SingleConnectionFactory.class);
 
             ConstructorArgumentValues constructorArgs = new ConstructorArgumentValues();
-            constructorArgs.addGenericArgumentValue(host);
+            constructorArgs.addGenericArgumentValue(host, "String");
             beanDefinition.setConstructorArgumentValues(constructorArgs);
 
             MutablePropertyValues props = new MutablePropertyValues();
