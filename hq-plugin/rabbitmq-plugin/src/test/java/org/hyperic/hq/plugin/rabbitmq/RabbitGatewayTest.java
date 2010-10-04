@@ -26,6 +26,8 @@
 package org.hyperic.hq.plugin.rabbitmq;
 
 
+import org.hyperic.hq.plugin.rabbitmq.core.HypericChannel;
+import org.springframework.amqp.core.Queue;
 import org.hyperic.hq.plugin.rabbitmq.core.AMQPStatus;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericConnection;
 import org.hyperic.hq.product.PluginException;
@@ -37,14 +39,11 @@ import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
  
 import org.springframework.amqp.rabbit.admin.QueueInfo;
-import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
 import org.springframework.amqp.rabbit.admin.RabbitStatus;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
+import java.util.Map; 
 
 /**
  * RabbitGatewayTest
@@ -53,11 +52,20 @@ import java.util.UUID;
 @Ignore("Need to mock the connection for automation")
 public class RabbitGatewayTest extends AbstractSpringTest {
 
-    @Before /** Comforting to see */
-    public void before() {
-        RabbitBrokerAdmin rabbitBrokerAdmin = new RabbitBrokerAdmin(singleConnectionFactory);
+    @Before 
+    public void before() { 
         RabbitStatus s = rabbitBrokerAdmin.getStatus();
         assertNotNull(s);
+    }
+
+
+    @Test
+    public void getQueues() throws PluginException { 
+        List<QueueInfo> queues = rabbitGateway.getQueues("/");
+        for(QueueInfo q:queues) {
+            System.out.println(q);
+        }
+        assertNotNull(queues);
     }
 
     @Test
@@ -66,7 +74,7 @@ public class RabbitGatewayTest extends AbstractSpringTest {
         List<String> vHosts = rabbitGateway.getVirtualHosts();
         for (String vhost : vHosts) {
             List<HypericConnection> cons = rabbitGateway.getConnections(vhost);
-            assertNotNull(cons);
+            assertTrue(cons.size() > 0);
         }
 
         conn.close();
@@ -80,8 +88,8 @@ public class RabbitGatewayTest extends AbstractSpringTest {
         
         List<String> vHosts = rabbitGateway.getVirtualHosts();
         for (String vhost : vHosts) {
-            /** may or may not have channels */
-            rabbitGateway.getChannels(vhost);
+            List<HypericChannel> channels = rabbitGateway.getChannels(vhost);
+            assertTrue(channels.size() > 0);
         }
         conn.close();
     }
@@ -115,18 +123,8 @@ public class RabbitGatewayTest extends AbstractSpringTest {
     }*/
 
     @Test
-    public void getQueues() {
-        List<QueueInfo> queues = rabbitGateway.getQueues("/");
-        for (QueueInfo q : queues) {
-            logger.debug(q);
-        }
-    }
-
-    @Test
     public void listCreateDeletePurgeQueue() {
-        String queueName = UUID.randomUUID().toString();
-
-        AMQPStatus status = rabbitManager.createQueue(queueName, "/");
+        AMQPStatus status = rabbitManager.createQueue(new Queue("test"), "/");
         assertTrue(status.compareTo(AMQPStatus.RESOURCE_CREATED) == 0);
         assertTrue(status.name().equalsIgnoreCase(AMQPStatus.RESOURCE_CREATED.name()));
 
@@ -137,7 +135,7 @@ public class RabbitGatewayTest extends AbstractSpringTest {
         for (QueueInfo qi : queues) {
             map.put(qi.getName(), qi);
         }
-        assertTrue(map.containsKey(queueName));
+        assertTrue(map.containsKey("test"));
         /** hangs forever */
         //rabbitGateway.purgeQueue(queueName);
 

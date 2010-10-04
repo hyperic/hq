@@ -15,11 +15,10 @@
     <name>Hyperic HQ Plugin - RabbitMQ Plugin</name>
 
     <properties>
-        <spring.amqp.version>1.0.0.BUILD-SNAPSHOT</spring.amqp.version>
+        <spring.amqp.version>1.0.0.20101001.003011-82</spring.amqp.version>
+        <spring.erlang.version>1.0.0.20101001.003011-75</spring.erlang.version>
+        <spring.rabbit.version>1.0.0.20101001.003011-94</spring.rabbit.version>
         <org.erlang.otp.version>1.5.3</org.erlang.otp.version>
-        <!-- 2.0.0 is not backward compatible and we need
-        to support 1.8.0 - later versions. We have to use this
-        client version for now. -->
         <com.rabbitmq.version>1.8.1</com.rabbitmq.version>
         <org.mockito.version>1.8.4</org.mockito.version>
         <org.slf4j.version>1.5.10</org.slf4j.version>
@@ -39,18 +38,18 @@
         <dependency>
             <groupId>org.springframework.amqp</groupId>
             <artifactId>spring-rabbit</artifactId>
-            <version>${spring.amqp.version}</version>
+            <version>${spring.rabbit.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.amqp</groupId>
             <artifactId>spring-rabbit-admin</artifactId>
-            <version>${spring.amqp.version}</version>
+            <version>${spring.rabbit.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.amqp</groupId>
             <artifactId>spring-erlang</artifactId>
-            <version>${spring.amqp.version}</version>
-        </dependency>
+            <version>${spring.erlang.version}</version>
+        </dependency> 
         <dependency>
             <groupId>org.erlang.otp</groupId>
             <artifactId>jinterface</artifactId>

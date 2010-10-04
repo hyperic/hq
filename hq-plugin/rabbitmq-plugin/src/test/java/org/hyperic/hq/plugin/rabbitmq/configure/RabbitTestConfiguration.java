@@ -4,15 +4,12 @@ package org.hyperic.hq.plugin.rabbitmq.configure;
 import org.hyperic.hq.plugin.rabbitmq.core.*;
 import org.hyperic.hq.plugin.rabbitmq.manage.RabbitBrokerManager;
 import org.hyperic.hq.plugin.rabbitmq.manage.RabbitManager;
-import org.hyperic.hq.plugin.rabbitmq.populate.PojoHandler;
 import org.hyperic.hq.plugin.rabbitmq.volumetrics.RabbitScheduler;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
 import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
-import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean; 
 import org.springframework.context.annotation.ImportResource;
@@ -34,13 +31,13 @@ public class RabbitTestConfiguration {
 
     private @Value("${password}") String password;
 
-    private String MARKET_DATA_EXCHANGE_NAME = "app.stock.quotes";
+    private String MARKET_DATA_EXCHANGE_NAME = "stocks.*";
 
-    private String STOCK_REQUEST_QUEUE_NAME = "app.stock.quotes";
+    private String STOCK_REQUEST_QUEUE_NAME = "stocks.*";
 
-    private String STOCK_RESPONSE_QUEUE_NAME = "app.stock.response";
+    private String STOCK_RESPONSE_QUEUE_NAME = "stocks.response";
 
-    private String MARKET_DATA_ROUTING_KEY = "app.stock.quotes.nasdaq.*"; 
+    private String MARKET_DATA_ROUTING_KEY = "stocks.nasdaq.*"; 
 
     @Bean
     public ConfigResponse serverConfig() {
@@ -70,9 +67,6 @@ public class RabbitTestConfiguration {
     @Bean
     public RabbitTemplate rabbitTemplate() {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(singleConnectionFactory());
-        rabbitTemplate.setExchange(marketDataExchange().getName());
-        rabbitTemplate.setQueue(marketDataQueue().getName());
-        rabbitTemplate.setRoutingKey(MARKET_DATA_ROUTING_KEY);
         rabbitTemplate.setImmediatePublish(true);
         rabbitTemplate.setMandatoryPublish(true);
 
@@ -90,19 +84,14 @@ public class RabbitTestConfiguration {
     }
 
     @Bean
-    public ErlangTemplate erlangTemplate() {
-        return rabbitBrokerAdmin().getErlangTemplate();
-    }
-
-    @Bean
     public ErlangConverter erlangConverter() {
-        return new JErlangConverter(rabbitBrokerAdmin().getErlangTemplate());
+        return new HypericErlangConverter(rabbitBrokerAdmin().getErlangTemplate());
     }
 
     @Bean
     public Queue marketDataQueue() {
         Queue marketDataQueue = new Queue(STOCK_REQUEST_QUEUE_NAME);
-        rabbitBrokerAdmin().declareQueue(marketDataQueue);
+        marketDataQueue.setDurable(true); 
         return marketDataQueue;
     }
 
@@ -120,21 +109,13 @@ public class RabbitTestConfiguration {
     }
 
     @Bean
-    public Queue requestQueue() {
-        return new Queue(STOCK_REQUEST_QUEUE_NAME);
-    }
-
-    @Bean
     public Queue responseQueue() {
-        return new Queue(STOCK_RESPONSE_QUEUE_NAME);
+        Queue queue = new Queue(STOCK_RESPONSE_QUEUE_NAME);
+        queue.setDurable(true);
+        return queue;
     }
 
-    @Bean
-    public FanoutExchange fanoutExchange() {
-        return new FanoutExchange(MARKET_DATA_EXCHANGE_NAME + ExchangeTypes.FANOUT);
-    }
-
-    @Bean
+   /* @Bean
     public SimpleMessageListenerContainer asyncListenerContainer() {
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
         container.setConnectionFactory(singleConnectionFactory());
@@ -145,7 +126,7 @@ public class RabbitTestConfiguration {
         container.setMessageListener(adapter);
  
         return container;
-    }
+    }*/
 
     @Bean
     public RabbitScheduler rabbitTaskScheduler() {

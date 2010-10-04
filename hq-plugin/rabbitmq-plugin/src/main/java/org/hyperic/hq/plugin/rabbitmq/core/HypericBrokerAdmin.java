@@ -27,9 +27,8 @@ package org.hyperic.hq.plugin.rabbitmq.core;
 
 import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.erlang.connection.SimpleConnectionFactory;
-import org.springframework.erlang.connection.SingleConnectionFactory; 
+import org.springframework.amqp.rabbit.core.RabbitTemplate; 
+import org.springframework.erlang.connection.SingleConnectionFactory;
 import org.springframework.util.exec.Os;
 
 /**
