@@ -160,6 +160,21 @@ public interface PlatformManager {
     public Platform findPlatformById(Integer id) throws PlatformNotFoundException;
 
     /**
+     * Finds platform by AI platform when it is EXPECTED to be there (when the
+     * AIPlatform queuestatus represents a change or removal). Avoids the poor-performing
+     * isAgentPorker method used by other AI use cases
+     * @param subject The user performing the action
+     * @param aiPlatform The AIPlatform that may represent a change to an
+     *        existing platform
+     * @return The existing Platform
+     * @throws PermissionException
+     * @throws PlatformNotFoundException If a Platform that matches IP addresses
+     *         or FQDN cannot be found
+     */
+    Platform findPlatformByAIPlatform(AuthzSubject subject, AIPlatformValue aiPlatform)
+        throws PermissionException, PlatformNotFoundException;
+
+    /**
      * Get the Platform object based on an AIPlatformValue. Checks against FQDN,
      * CertDN, then checks to see if all IP addresses match. If all of these
      * checks fail null is returned.
