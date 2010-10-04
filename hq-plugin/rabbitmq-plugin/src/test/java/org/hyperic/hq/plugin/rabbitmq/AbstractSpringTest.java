@@ -70,10 +70,7 @@ public abstract class AbstractSpringTest {
 
     @Autowired
     protected ConfigResponse serverConfig;
-
-    @Autowired
-    protected ErlangTemplate erlangTemplate;
-
+ 
     @Autowired
     protected RabbitManager rabbitManager;
     

@@ -60,7 +60,7 @@ public class RabbitConfiguration {
 
     @Bean
     public ErlangConverter erlangConverter() {
-        return new JErlangConverter(rabbitBrokerAdmin.getErlangTemplate());
+        return new HypericErlangConverter(rabbitBrokerAdmin.getErlangTemplate());
     }
  
 }

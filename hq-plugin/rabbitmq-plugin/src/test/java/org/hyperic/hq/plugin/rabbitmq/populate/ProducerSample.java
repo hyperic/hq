@@ -26,10 +26,7 @@
 package org.hyperic.hq.plugin.rabbitmq.populate;
  
 import org.springframework.amqp.AmqpException;
-import org.springframework.amqp.core.Address;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessagePostProcessor;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.io.UnsupportedEncodingException;
@@ -48,9 +45,7 @@ import java.util.UUID;
  * @author Mark Fisher
  */
 public class ProducerSample {
-    /*//OtpSelf self = new OtpSelf("rabbit-monitor", "FNJRXNGNYJQXWHIEZFHT");
-        OtpSelf self = new OtpSelf("rabbit-monitor");
-        OtpPeer peer = new OtpPeer(NODE);*/
+
     private int numMessages;
 
     private static final Random random = new Random();
@@ -59,11 +54,8 @@ public class ProducerSample {
 
     private RabbitTemplate rabbitTemplate;
 
-    private final Queue responseQueue;
-
-    public ProducerSample(RabbitTemplate rabbitTemplate, Queue responseQueue, int numMessages) {
+    public ProducerSample(RabbitTemplate rabbitTemplate, int numMessages) {
         this.rabbitTemplate = rabbitTemplate;
-        this.responseQueue = responseQueue;
         this.numMessages = numMessages;
 
         stocks.add(new MockStock("AAPL", StockExchange.nasdaq, 255));
@@ -98,14 +90,8 @@ public class ProducerSample {
     protected void send(TradeRequest tradeRequest) {
         rabbitTemplate.convertAndSend(tradeRequest, new MessagePostProcessor() {
             public Message postProcessMessage(Message message) throws AmqpException {
-                message.getMessageProperties().setReplyTo(new Address(responseQueue.getName()));
-                try {
-                    message.getMessageProperties().setCorrelationId(
-                            UUID.randomUUID().toString().getBytes("UTF-8"));
-                }
-                catch (UnsupportedEncodingException e) {
-                    throw new AmqpException(e);
-                }
+                message.getMessageProperties().setReplyTo(new Address("queuename")); //todo
+                message.getMessageProperties().setCorrelationId(Thread.currentThread().getName().getBytes());
                 return message;
             }
         });
@@ -116,7 +102,7 @@ public class ProducerSample {
         Stock stock = quote.getStock();
         System.out.println("Sending Market Data for " + stock.getTicker());
         String routingKey = "app.stock.quotes." + stock.getStockExchange() + "." + stock.getTicker();
-        rabbitTemplate.convertAndSend(routingKey, quote);
+        rabbitTemplate.convertAndSend(quote);
     }
 
     private Quote generateFakeQuote() {
