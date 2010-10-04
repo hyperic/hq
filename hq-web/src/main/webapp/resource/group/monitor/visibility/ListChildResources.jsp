@@ -99,7 +99,7 @@
 				</li>
 			</c:forEach>
 			<c:if test="${empty summaries}">
-				<li style="padding-left:25px;">
+				<li style="padding: 3px 0pt 3px 25px;">
 					<i><fmt:message key="resource.common.monitor.visibility.NoHealthsEtc"/></i>
 				</li>
 		  	</c:if>
