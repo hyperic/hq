@@ -694,6 +694,70 @@ public class PlatformManagerImpl implements PlatformManager {
 
         return platform;
     }
+    
+    @Transactional(readOnly = true)
+    public Platform findPlatformByAIPlatform(AuthzSubject subject, AIPlatformValue aiPlatform) 
+        throws PermissionException, PlatformNotFoundException {
+        Platform p =  platformDAO.findByFQDN(aiPlatform.getFqdn());
+        if(p == null) {
+            final AIIpValue[] ipvals = aiPlatform.getAIIpValues();
+            // Find by IP address. For now, if we get one IP address
+            // match (and it isn't localhost), we assume that it is
+            // the same platform. In the future, we are probably going
+            // to need to do better.
+            for (int i = 0; i < ipvals.length; i++) {
+                AIIpValue qip = ipvals[i];
+    
+                String address = qip.getAddress();
+                // XXX This is a hack that we need to get rid of
+                // at some point. The idea is simple. Every platform
+                // has the localhost address. So, if we are looking
+                // for a platform based on IP address, searching for
+                // localhost doesn't give us any information. Long
+                // term, when we are trying to match all addresses,
+                // this can go away.
+                if (address.equals(NetFlags.LOOPBACK_ADDRESS) && ipvals.length > 1) {
+                    continue;
+                }
+    
+                Collection<Platform> platforms = platformDAO.findByIpAddr(address);
+    
+                Set<Platform> platformsMatchingIp = new HashSet<Platform>();
+                if (!platforms.isEmpty()) {               
+                    for (Platform plat : platforms) {
+                        // Make sure the types match
+                        if (!plat.getPlatformType().getName().equals(
+                            aiPlatform.getPlatformTypeName())) {
+                            continue;
+                        }
+                        if (platformMatchesAllIps(plat, Arrays.asList(ipvals))) {
+                            platformsMatchingIp.add(plat);
+                        }
+                    }
+                    if(platformsMatchingIp.size() > 1) {
+                        //This could happen in an agent porker situation, but shouldn't
+                        log.warn("Found multiple existing platforms with IP address " + address + 
+                            " matching platform in AI Queue, but no FQDN match.  Change to platform with FQDN: " + 
+                                aiPlatform.getFqdn() + " may not be processed");
+                    }else if(platformsMatchingIp.size() == 1) {
+                        // If FQDN was not matched, but all IPs are
+                        p = platformsMatchingIp.iterator().next();
+                    } 
+                }
+            }
+        }
+        if (p == null) {
+            p = getPhysPlatformByAgentToken(aiPlatform.getAgentToken());
+        }
+        if (p != null) {
+            permissionManager.checkViewPermission(subject, p.getEntityId());
+        }
+        if(p == null) {
+            throw new PlatformNotFoundException("platform not found for ai " + "platform: " +
+                aiPlatform.getId());
+        }
+        return p;
+    }
 
     /**
      * Get the Platform object based on an AIPlatformValue. Checks against FQDN,
@@ -711,7 +775,8 @@ public class PlatformManagerImpl implements PlatformManager {
         String certdn = aiPlatform.getCertdn();
 
         final AIIpValue[] ipvals = aiPlatform.getAIIpValues();
-        if (!isAgentPorker(Arrays.asList(ipvals))) {
+        boolean porker = isAgentPorker(Arrays.asList(ipvals));
+        if (! porker) {
             // We can't use the FQDN to find a platform, because
             // the FQDN can change too easily. Instead we use the
             // IP address now. For now, if we get one IP address
@@ -791,7 +856,7 @@ public class PlatformManagerImpl implements PlatformManager {
 
         if (p != null) {
             permissionManager.checkViewPermission(subject, p.getEntityId());
-            if (isAgentPorker(Arrays.asList(ipvals)) && // Let agent porker
+            if (porker && // Let agent porker
                 // create new platforms
                 !(p.getFqdn().equals(fqdn) || p.getCertdn().equals(certdn) || p.getAgent()
                     .getAgentToken().equals(agentToken))) {
@@ -845,6 +910,7 @@ public class PlatformManagerImpl implements PlatformManager {
             }
         }
         return false;
+        
     }
 
     private boolean platformMatchesAllIps(Platform p, List<AIIpValue> ips) {
