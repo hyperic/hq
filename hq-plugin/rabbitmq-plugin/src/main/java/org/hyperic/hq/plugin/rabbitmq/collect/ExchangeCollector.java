@@ -37,13 +37,12 @@ import org.springframework.amqp.core.Exchange;
 import java.util.List;
 
 /**
- * RabbitExchangeCollector
- *
+ * ExchangeCollector
  * @author Helena Edelson
  */
-public class RabbitExchangeCollector extends Collector {
+public class ExchangeCollector extends Collector {
 
-    private static final Log logger = LogFactory.getLog(RabbitExchangeCollector.class);
+    private static final Log logger = LogFactory.getLog(ExchangeCollector.class);
 
     @Override
     public void collect() {
@@ -51,11 +50,15 @@ public class RabbitExchangeCollector extends Collector {
         if (rabbitGateway != null) {
 
             try {
-                List<Exchange> exchanges = rabbitGateway.getExchanges();
-                if (exchanges != null) {
-                    for (Exchange e : exchanges) {
-
-                        setAvailability(true);
+                List<String> virtualHosts = rabbitGateway.getVirtualHosts();
+                if (virtualHosts != null) {
+                    for (String virtualHost : virtualHosts) {
+                        List<Exchange> exchanges = rabbitGateway.getExchanges(virtualHost);
+                        if (exchanges != null) {
+                            for (Exchange e : exchanges) {
+                                setAvailability(true);
+                            }
+                        }
                     }
                 }
             }
@@ -78,7 +81,7 @@ public class RabbitExchangeCollector extends Collector {
         String durable = e.isDurable() ? "durable" : "not durable";
         ConfigResponse res = new ConfigResponse();
         res.setValue("durable", durable);
-        res.setValue("exchangeType", e.getName());
+        res.setValue("exchangeType", e.getType());
         res.setValue("autoDelete", e.isAutoDelete());
         return res;
     }
