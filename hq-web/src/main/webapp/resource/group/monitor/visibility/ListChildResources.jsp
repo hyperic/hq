@@ -16,7 +16,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004-2009], Hyperic, Inc.
+  Copyright (C) [2004-2010], VMware, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -63,44 +63,48 @@
 		<span class="availColumn"><fmt:message key="resource.common.monitor.visibility.AVAILTH"/></span>
 		<span class="commentColumn">&nbsp;</span>
 	</li>
-	<c:forEach var="summary" items="${summaries}">
-		<c:url var="gotoResourceLink" value="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do">
-			<c:param name="mode" value="${mode}" />
-			<c:param name="type" value="${summary.resourceTypeId}" />
-			<c:param name="rid" value="${summary.resourceId}" />
-		</c:url>
-		<li>
-			<span class="checkboxColumn">
-				<c:if test="${checkboxes}">
-					<html:multibox property="eids" value="${summary.entityId}" styleClass="childResource" />
-				</c:if>
-			</span>
-			<span class="nameColumn">
-				<a href="<c:out value="${gotoResourceLink}" />"><c:out value="${summary.resourceName}"/></a>
-			</span>
-			<span class="availColumn">
-				<tiles:insert page="/resource/common/monitor/visibility/AvailIcon.jsp">
-   					<tiles:put name="availability" beanName="summary" beanProperty="availability" />
-				</tiles:insert>
-			</span>
-			<span class="commentColumn">
-				<c:set var="metricValue">
-					<hq:metric metric="${summary.throughput}" unit="${summary.throughputUnits}" defaultKey="common.value.notavail" />
-				</c:set>
-				<c:set var="metricValue" value="${fn:substringAfter(metricValue, '<span>')}" />
-				<c:set var="metricValue" value="${fn:substringBefore(metricValue, '</span>')}" />
-				<div class="resourceCommentIcon" 
-				     id="comment_<c:out value="${summary.resourceId}" />" 
-				     resourcename="<c:out value="${summary.resourceTypeName}" />" 
-				     metricvalue="<c:out value="${metricValue}" />">&nbsp;</div>
-			</span>
-		</li>
-	</c:forEach>
-	<c:if test="${empty summaries}">
-		<li style="padding-left:5%;">
-			<tiles:insert definition=".resource.common.monitor.visibility.noHealths"/>
-		</li>
-  	</c:if>
+	<li>
+		<ul class="resourceListContainer">
+			<c:forEach var="summary" items="${summaries}">
+				<c:url var="gotoResourceLink" value="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do">
+					<c:param name="mode" value="${mode}" />
+					<c:param name="type" value="${summary.resourceTypeId}" />
+					<c:param name="rid" value="${summary.resourceId}" />
+				</c:url>
+				<li>
+					<span class="checkboxColumn">
+						<c:if test="${checkboxes}">
+							<html:multibox property="eids" value="${summary.entityId}" styleClass="childResource" />
+						</c:if>
+					</span>
+					<span class="nameColumn">
+						<a href="<c:out value="${gotoResourceLink}" />"><c:out value="${summary.resourceName}"/></a>
+					</span>
+					<span class="availColumn">
+						<tiles:insert page="/resource/common/monitor/visibility/AvailIcon.jsp">
+		   					<tiles:put name="availability" beanName="summary" beanProperty="availability" />
+						</tiles:insert>
+					</span>
+					<span class="commentColumn">
+						<c:set var="metricValue">
+							<hq:metric metric="${summary.throughput}" unit="${summary.throughputUnits}" defaultKey="common.value.notavail" />
+						</c:set>
+						<c:set var="metricValue" value="${fn:substringAfter(metricValue, '<span>')}" />
+						<c:set var="metricValue" value="${fn:substringBefore(metricValue, '</span>')}" />
+						<div class="resourceCommentIcon" 
+						     id="comment_<c:out value="${summary.resourceId}" />" 
+						     resourcename="<c:out value="${summary.resourceTypeName}" />" 
+						     metricvalue="<c:out value="${metricValue}" />">&nbsp;</div>
+					</span>
+				</li>
+			</c:forEach>
+			<c:if test="${empty summaries}">
+				<li style="padding-left:5%;">
+					<tiles:insert definition=".resource.common.monitor.visibility.noHealths"/>
+				</li>
+		  	</c:if>
+		</ul>
+	</li>	  	
 </ul>
 <div id="resourceInfoPopup" class="menu popup">
 	<p>
