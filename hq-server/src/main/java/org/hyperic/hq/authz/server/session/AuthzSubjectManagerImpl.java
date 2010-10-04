@@ -512,6 +512,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
     @Transactional(readOnly = true)
     public AuthzSubject getOverlordPojo() {
         AuthzSubject overlord = authzSubjectDAO.findById(AuthzConstants.overlordId);
+        //initialize name to pass Subject b/w method during non-tx testing
         overlord.getName();
         return overlord;
     }
