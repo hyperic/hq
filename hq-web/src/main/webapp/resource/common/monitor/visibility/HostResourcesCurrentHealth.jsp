@@ -57,7 +57,7 @@
 		<span class="availColumn"><fmt:message key="resource.common.monitor.visibility.AVAILTH"/></span>
 		<span class="commentColumn">&nbsp;</span>
 	</li>
-	<li>
+	<li style="border-bottom:0px;">
 		<ul class="resourceListContainer">
 			<c:forEach var="summary" items="${summaries}">
 				<c:url var="gotoResourceLink" value="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do">
