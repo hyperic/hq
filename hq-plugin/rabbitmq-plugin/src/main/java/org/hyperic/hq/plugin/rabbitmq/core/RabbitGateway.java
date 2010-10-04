@@ -53,7 +53,7 @@ public interface RabbitGateway {
     List<HypericBinding> getBindings(String virtualHost) throws PluginException;
 
     List<QueueInfo> getQueues(String virtualHost);
-
+ 
     List<String> getUsers(String virtualHost);
  
     String getHost();

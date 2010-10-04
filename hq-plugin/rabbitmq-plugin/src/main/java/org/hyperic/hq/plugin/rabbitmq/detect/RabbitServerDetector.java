@@ -40,7 +40,7 @@ import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.*;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.amqp.core.Exchange;
-import org.springframework.amqp.rabbit.admin.QueueInfo; 
+import org.springframework.amqp.rabbit.admin.QueueInfo;
 import org.springframework.util.Assert;
 
 /**
@@ -107,33 +107,30 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
     @Override
     protected List discoverServices(ConfigResponse serviceConfig) throws PluginException {
         logger.debug("discoverServices [" + serviceConfig + "]");
-        try {
-            /** For the moment this is how we have to do this. */
-            if (serviceConfig.getValue(DetectorConstants.NODE_COOKIE_VALUE) == null) {
-                /** Letting throw a potential OtpAuthException so the user can see permissions issue */
-                String auth = ErlangCookieHandler.configureCookie(serviceConfig);
-                Assert.notNull(auth, "Cookie value for node must not be null");
 
-                /** Since we can never connect without the cookie on any test environment: this is what we have to
-                 * do for the moment and will modify as soon as possible. */
-                if (auth != null && auth.length() > 0) {
-                    serviceConfig.setValue(DetectorConstants.NODE_COOKIE_VALUE, auth);
-                }
-            }
+        /** For the moment this is how we have to do this. */
+        if (serviceConfig.getValue(DetectorConstants.NODE_COOKIE_VALUE) == null) {
+            /** Letting throw a potential OtpAuthException so the user can see permissions issue */
+            String auth = ErlangCookieHandler.configureCookie(serviceConfig);
+            Assert.notNull(auth, "Cookie value for node must not be null");
 
-            if (serviceConfig.getValue(DetectorConstants.SERVER_NAME) != null) {
-                String nodeName = serviceConfig.getValue(DetectorConstants.SERVER_NAME);
-                if (nodeName != null) {
-                    String hostName = getHostFromNode(nodeName);
-                    if (hostName != null) {
-                        serviceConfig.setValue(DetectorConstants.HOST, hostName);
-                    }
-                }
+            /** Since we can never connect without the cookie on any test environment: this is what we have to
+             * do for the moment and will modify as soon as possible. */
+            if (auth != null && auth.length() > 0) {
+                serviceConfig.setValue(DetectorConstants.NODE_COOKIE_VALUE, auth);
             }
-        } catch (Exception e) {
-            logger.error(e);
         }
-        
+
+        if (serviceConfig.getValue(DetectorConstants.SERVER_NAME) != null) {
+            String nodeName = serviceConfig.getValue(DetectorConstants.SERVER_NAME);
+            if (nodeName != null) {
+                String hostName = getHostFromNode(nodeName);
+                if (hostName != null) {
+                    serviceConfig.setValue(DetectorConstants.HOST, hostName);
+                }
+            }
+        }
+
         configure(serviceConfig);
 
         List<ServiceResource> serviceResources = new ArrayList<ServiceResource>();
@@ -171,7 +168,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         logger.debug("createRabbitResources [" + serviceConfig + "]");
         List<ServiceResource> rabbitResources = null;
 
-        String nodeName = serviceConfig.getValue(DetectorConstants.SERVER_NAME); 
+        String nodeName = serviceConfig.getValue(DetectorConstants.SERVER_NAME);
 
         if (RabbitProductPlugin.getRabbitGateway() == null) {
             logger.debug("Initializing gateway");
