@@ -11,7 +11,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004 - 2010], VMware, Inc.
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -49,7 +49,6 @@
         <tiles:put name="childResourcesHealthKey" value="resource.common.monitor.visibility.PlatformServicesHealthTab"/>
         <tiles:put name="childResourcesTypeKey" value="resource.server.monitor.visibility.ServiceTypeTH"/>
         <tiles:put name="checkboxes" beanName="showProblems"/>
-		<tiles:put name="token" value="service"/>
       </tiles:insert>
     </td>
   </tr>
@@ -62,7 +61,6 @@
         <tiles:put name="childResourcesHealthKey" value="resource.platform.monitor.visibility.DeployedServersHealthTab"/>
         <tiles:put name="childResourcesTypeKey" value="resource.platform.monitor.visibility.ServerTypeTH"/>
         <tiles:put name="checkboxes" beanName="showProblems"/>
-        <tiles:put name="token" value="server"/>
       </tiles:insert>
     </td>
   </tr>
