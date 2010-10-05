@@ -2468,7 +2468,6 @@ span.returnToLink {
 	background: url(../images/icon_auto-group.gif) 0 5px no-repeat;
 	padding-left:14px !important;
 	width:176px !important;
-	width:"186px";
 }
 
 .clusterIcon {
@@ -2640,8 +2639,7 @@ span.returnToLink {
 
 .resourceListContainer {
 	overflow-y:auto;
-	max-height:135px;
-	height:expression(this.scrollHeight > 134 ? "135px" : "auto");
+	height:135px;
 }
 
 .resourceList li {

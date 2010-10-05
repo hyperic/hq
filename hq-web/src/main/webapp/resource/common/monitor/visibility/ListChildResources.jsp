@@ -74,7 +74,7 @@
 		<span class="availColumn"><fmt:message key="resource.common.monitor.visibility.AVAILTH"/></span>
 		<span class="commentColumn">&nbsp;</span>
 	</li>
-	<li style="border-bottom:0px;">
+	<li>
 		<ul class="resourceListContainer">
 			<c:forEach var="summary" items="${summaries}">
 				<c:choose>
@@ -173,8 +173,8 @@
 		  		</li>
 		    </c:forEach>
 			<c:if test="${empty summaries}">
-				<li style="padding-left:25px;">
-					<i><fmt:message key="resource.common.monitor.visibility.NoHealthsEtc"/></i>
+				<li style="padding-left:5%;">
+					<tiles:insert definition=".resource.common.monitor.visibility.noHealths"/>
 				</li>
 		  	</c:if>
 		</ul>
