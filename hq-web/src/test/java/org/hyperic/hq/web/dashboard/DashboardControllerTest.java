@@ -54,18 +54,12 @@ public class DashboardControllerTest extends BaseDashboardControllerTest {
 	private ConfigurationProxy mockConfigurationProxy;
 	private DashboardManager mockDashboardManager;
 	private List<String> mockMulitplePortletsList;
-	private List<String> mockValidPortletsList;
 	private DashboardController controller;
 
 	@Before
 	public void setUp() {
 		super.setUp();
-		
-		mockAuthzBoss = getMockAuthzBoss();
-		mockConfigurationProxy = getMockConfigurationProxy();
-		mockDashboardManager = getMockDashboardManager();
-		controller = new DashboardController(mockAuthzBoss,
-				mockConfigurationProxy, mockDashboardManager);
+
 		mockMulitplePortletsList = new ArrayList<String>();
 
 		mockMulitplePortletsList.add("portlet1");
@@ -73,31 +67,13 @@ public class DashboardControllerTest extends BaseDashboardControllerTest {
 		mockMulitplePortletsList.add("portlet4");
 		mockMulitplePortletsList.add("portlet5");
 
+		mockAuthzBoss = getMockAuthzBoss();
+		mockConfigurationProxy = getMockConfigurationProxy();
+		mockDashboardManager = getMockDashboardManager();
+		controller = new DashboardController(mockAuthzBoss,
+				mockConfigurationProxy, mockDashboardManager);
+
 		controller.setMultiplePortletsList(mockMulitplePortletsList);
-		
-		mockValidPortletsList = new ArrayList<String>();
-		
-		for (int x = 1; x <= 100; x++) {
-			mockValidPortletsList.add("portlet" + x);
-		}
-
-		controller.setValidPortletsList(mockValidPortletsList);
-	}
-
-	@Test
-	public void testAddPortletToDashboardInvalidPortlet()
-			throws SessionNotFoundException, SessionTimeoutException,
-			PermissionException {
-		// ...setup inputs and outputs...
-		final Integer DASHBOARD_ID = 10000;
-		final String PORTLET_NAME = "portletABC";
-		final Boolean IS_PORTLET_WIDE = Boolean.TRUE;
-		final String DASHBOARD_PORTLETS = "|portlet1|portlet2|portlet3";
-		final String EXPECTED_RESULT = "|portlet1|portlet2|portlet3";
-		final Boolean EXPECTED_TO_UPDATE = Boolean.FALSE;
-
-		testAddPortletToDashboard(DASHBOARD_ID, PORTLET_NAME, IS_PORTLET_WIDE,
-				DASHBOARD_PORTLETS, EXPECTED_RESULT, EXPECTED_TO_UPDATE);
 	}
 
 	@Test
@@ -718,25 +694,23 @@ public class DashboardControllerTest extends BaseDashboardControllerTest {
 
 		DashboardConfig dashboardConfig = constructDashboardConfig(configResponse);
 
-		if (mockValidPortletsList.contains(portletName)) {
-			// ...setup our great expectations...
-			expect(
-					mockDashboardManager.findDashboard(eq(dashboardId),
-							isA(WebUser.class), isA(AuthzBoss.class))).andReturn(
-					dashboardConfig);
-	
-			if (expectedToUpdate) {
-				mockConfigurationProxy.setDashboardPreferences(
-						isA(HttpSession.class), isA(WebUser.class),
-						isA(ConfigResponse.class));
-	
-				expectLastCall();
-			}
+		// ...setup our great expectations...
+		expect(
+				mockDashboardManager.findDashboard(eq(dashboardId),
+						isA(WebUser.class), isA(AuthzBoss.class))).andReturn(
+				dashboardConfig);
+
+		if (expectedToUpdate) {
+			mockConfigurationProxy.setDashboardPreferences(
+					isA(HttpSession.class), isA(WebUser.class),
+					isA(ConfigResponse.class));
+
+			expectLastCall();
 		}
-		
+
 		// ...replay those expectations...
 		replay(mockDashboardManager, mockConfigurationProxy);
-		
+
 		// ...test it...
 		String result = controller.addPortletToDashboard(dashboardId,
 				portletName, isWide, getMockSession());
