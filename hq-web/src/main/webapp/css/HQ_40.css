@@ -2465,9 +2465,9 @@ span.returnToLink {
 }
 
 .autoGroupIcon {
-	background: url(../images/icon_auto-group.gif) 0 5px no-repeat;
-	padding-left:14px !important;
-	width:186px !important;
+	background: url(../images/icon_auto-group.gif) 0 2px no-repeat;
+	padding-left:14px;
+	width: 72% !important;
 }
 
 .clusterIcon {
@@ -2631,18 +2631,15 @@ span.returnToLink {
 	width: 45%;
 }
 
-.resourceListContainer,
 .resourceList {
 	margin:0;
 	padding:0;
-}
-
-.resourceListContainer {
-	overflow-y:auto;
+	overflow-y:scroll;
 	height:165px;
 }
 
 .resourceList li {
+	padding:3px;
 	border-bottom:1px solid #D5D8DE;
 	list-style:none;
 	overflow:hidden;
@@ -2653,7 +2650,6 @@ span.returnToLink {
 .resourceList li span {
 	display:block;
 	float:left;
-	padding:3px 0;
 }
 	
 .resourceList li.header {
@@ -2673,28 +2669,22 @@ span.returnToLink {
 }
 
 .checkboxColumn {
-	text-align:center;
-	width:20px;
+	width:7%;
 }
 	
 .nameColumn {
-	margin-left:5px;
-	width:190px;
+	width:78%;
+	width:"73%";
 }
 
 .commentColumn,	
 .availColumn {
-	width:29px;
+	width:10%;
 	text-align:center;
 }
 
 .commentColumn {
-	width:9px;
-	margin-left:5px;
-}
-
-.resourceList li.header .commentColumn {
-	width:22px;
+	width:5%;
 }
 
 .bottomBorder {
