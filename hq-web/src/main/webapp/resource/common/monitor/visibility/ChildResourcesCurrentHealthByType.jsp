@@ -115,7 +115,9 @@ chbtWidgetProps['subGroup'] = 'chbtListMember';
 
   </c:when>
   <c:otherwise>
-<tiles:insert definition=".resource.common.monitor.visibility.noHealths"/>
+  	<div>
+  		<i><fmt:message key="resource.common.monitor.visibility.NoHealthsEtc"/></i>
+  	</div>
   </c:otherwise>
 </c:choose>
 

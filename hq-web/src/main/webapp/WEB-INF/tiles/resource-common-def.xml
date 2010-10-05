@@ -154,9 +154,6 @@
   <definition name=".resource.common.monitor.visibility.noMetrics"
               path="/resource/common/monitor/visibility/NoMetrics.jsp"/>
 
-  <definition name=".resource.common.monitor.visibility.noHealths"
-              path="/resource/common/monitor/visibility/NoHealths.jsp"/>
-
   <definition name=".resource.common.monitor.visibility.HostHealthError"
               path="/resource/common/monitor/visibility/HostHealthError.jsp"/>
 
