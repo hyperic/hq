@@ -40,7 +40,6 @@
 <tiles:importAttribute name="childResourceType" ignore="true"/>
 <tiles:importAttribute name="internal" ignore="true"/>
 <tiles:importAttribute name="checkboxes" ignore="true"/>
-<tiles:importAttribute name="token" ignore="true"/>
 
 <c:if test="${empty mode}">
   <c:set var="mode" value="currentHealth"/>
@@ -51,21 +50,12 @@
 <hq:constant classname="org.hyperic.hq.bizapp.shared.uibeans.UIConstants"
              symbol="SUMMARY_TYPE_CLUSTER" var="CLUSTER" />
 
-<c:choose>
-	<c:when test="${empty token}">
-		<c:set var="childResourceListId" value="childResourceList" />
-	</c:when>
-	<c:otherwise>
-		<c:set var="childResourceListId" value="childResourceList_${token}" />
-	</c:otherwise>
-</c:choose>
-
-<ul id="<c:out value="${childResourceListId}" />" class="resourceList">
+<ul id="childResourceList" class="resourceList">
 	<li class="header">
 		<span class="checkboxColumn">
 			<c:choose>
 				<c:when test="${not empty summaries && checkboxes}">
-					<input id="<c:out value="${childResourceListId}" />AllCheckbox" type="checkbox" name="<c:out value="${childResourceListId}" />All" />
+					<input id="childResourcesAllCheckbox" type="checkbox" name="childResourcesAll" />
 				</c:when>
 				<c:otherwise>&nbsp;</c:otherwise>
 			</c:choose>
@@ -195,7 +185,7 @@
 <c:url var="stoplightUrl" value="/resource/AvailStoplight" />
 <script>
 	dojo11.addOnLoad(function() {
-		var masterCheckbox = dojo11.byId("<c:out value="${childResourceListId}" />AllCheckbox")
+		var masterCheckbox = dojo11.byId("childResourcesAllCheckbox")
 		
 		if (masterCheckbox) {
 			dojo11.connect(masterCheckbox, "onclick", function(e) {
@@ -208,7 +198,7 @@
 			});
 		}
 		
-		var list = dojo11.byId("<c:out value="${childResourceListId}" />");
+		var list = dojo11.byId("childResourceList");
 
 		dojo11.connect(list, "onmouseover", function(e) {
 			var el = e.target;
