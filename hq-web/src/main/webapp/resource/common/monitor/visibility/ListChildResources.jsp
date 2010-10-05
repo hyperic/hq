@@ -45,175 +45,179 @@
   <c:set var="mode" value="currentHealth"/>
 </c:if>
 
+<c:choose>
+  <c:when test="${internal}">
+    <c:set var="listMembersName" value="internalChildResources"/>
+  </c:when>
+  <c:otherwise>
+    <c:set var="listMembersName" value="deployedChildResources"/>
+  </c:otherwise>
+</c:choose>
+
+<c:if test="${checkboxes}">
+  <c:set var="widgetInstanceName" value="childResources"/>
+
+  <script type="text/javascript">
+    initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+    widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+  </script>
+</c:if>
+
 <hq:constant classname="org.hyperic.hq.bizapp.shared.uibeans.UIConstants"
              symbol="SUMMARY_TYPE_AUTOGROUP" var="AUTOGROUP" />
 <hq:constant classname="org.hyperic.hq.bizapp.shared.uibeans.UIConstants"
              symbol="SUMMARY_TYPE_CLUSTER" var="CLUSTER" />
+<hq:constant classname="org.hyperic.hq.bizapp.shared.uibeans.UIConstants"
+             symbol="SUMMARY_TYPE_SINGLETON" var="SINGLETON" />
 
-<ul id="childResourceList" class="resourceList">
-	<li class="header">
-		<span class="checkboxColumn">
-			<c:choose>
-				<c:when test="${not empty summaries && checkboxes}">
-					<input id="childResourcesAllCheckbox" type="checkbox" name="childResourcesAll" />
-				</c:when>
-				<c:otherwise>&nbsp;</c:otherwise>
-			</c:choose>
-		</span>
-		<span class="nameColumn"><fmt:message key="${childResourcesHealthKey}"/></span>
-		<span class="availColumn"><fmt:message key="resource.common.monitor.visibility.AVAILTH"/></span>
-		<span class="commentColumn">&nbsp;</span>
-	</li>
-	<c:forEach var="summary" items="${summaries}">
-		<c:choose>
-  			<c:when test="${summary.summaryType == AUTOGROUP}">
-    			<c:url var="gotoResourceLink" value="/resource/autogroup/monitor/Visibility.do">
-      				<c:param name="mode" value="${mode}" />
-      				<c:param name="eid" value="${Resource.entityId.type}:${Resource.id}"/>
-      				<c:choose>
-        				<c:when test="${not empty appdefResourceType && appdefResourceType == 4}"> <!-- AppdefEntityConstants.APPDEF_TYPE_APPLICATION-->
-          					<c:param name="ctype" value="3:${summary.resourceType.id}" />
-        				</c:when>
-        				<c:otherwise>
-          					<c:choose>
-            					<c:when test="${not empty childResourceType}">
-              						<c:param name="ctype" value="${childResourceType}:${summary.resourceType.id}" />
-            					</c:when>
-          						<c:otherwise>
-            						<c:param name="ctype" value="${summary.resourceType.id}"/>
-          						</c:otherwise>
-        					</c:choose>
-        				</c:otherwise>
-      				</c:choose>
-    			</c:url>
-  			</c:when>
-  			<c:otherwise>
-    			<c:url var="gotoResourceLink" value="/resource/${summary.entityId.typeName}/monitor/Visibility.do">
-      				<c:param name="mode" value="${mode}" />
-      				<c:param name="eid" value="${summary.entityId.appdefKey}" />
-    			</c:url>
-    		</c:otherwise>
-  		</c:choose>
-		<li>
-			<span class="checkboxColumn">
-				<c:if test="${checkboxes}">
-					<html:multibox property="child" value="${summary.resourceType.appdefTypeKey}" styleClass="childResource" />
-				</c:if>
-			</span>
-			<c:choose>
-   				<c:when test="${summary.summaryType == AUTOGROUP}">
-      				<c:set var="icon" value=" autoGroupIcon" />
-      			</c:when>
-      			<c:when test="${summary.summaryType == CLUSTER}">
-      				<c:set var="icon" value=" clusterIcon" />
-  				</c:when>
-			</c:choose>
-			<span class="nameColumn<c:out value="${icon}" />">
-				<a href="<c:out value="${gotoResourceLink}" />">
-					<c:choose>
-   						<c:when test="${summary.summaryType == AUTOGROUP}">
-        					<c:out value="${summary.resourceType.name}"/>
-      					</c:when>
-      					<c:otherwise>
-        					<c:out value="${summary.entityName}"/>
-      					</c:otherwise>
-    				</c:choose>
-				</a>
-			</span>
-			<span class="availColumn">
-				<tiles:insert page="/resource/common/monitor/visibility/AvailIcon.jsp">
-   					<tiles:put name="availability" beanName="summary" beanProperty="availability" />
-				</tiles:insert>
-			</span>
-			<span class="commentColumn">
-				<c:choose>
+<c:set var="useAvailStoplightDimensions" value="false" />
+<c:if test="${useAvailStoplightDimensions}">
+  <c:set var="availStoplightDimensions" value=" width=\"106\" " />
+</c:if>
+
+<c:forEach var="summary" items="${summaries}" varStatus="status">
+	<c:url var="stoplightUrl" value="/resource/AvailStoplight">
+    	<c:choose>
+      		<c:when test="${summary.summaryType == CLUSTER}">
+        		<c:param name="eid" value="${summary.entityId.appdefKey}" />
+        		<c:param name="ctype" value="${summary.resourceType.appdefType}:${summary.resourceType.id}" />
+      		</c:when>
+      		<c:otherwise>
+        		<c:param name="rid" value="${Resource.id}" />
+        		<c:param name="type" value="${Resource.entityId.type}" />
+        		<c:param name="ctype" value="${summary.resourceType.appdefType}:${summary.resourceType.id}" />
+      		</c:otherwise>
+    	</c:choose>
+  	</c:url>
+	<c:set var="resourceTypeNameId" value="${fn:replace(summary.resourceType.name, ' ', '_')}" />
+	<div id="<c:out value="${resourceTypeNameId}"/>_menu" class="menu">
+  		<ul>
+    		<li>
+    			<div class="BoldText"><fmt:message key="${childResourcesTypeKey}"/></div>
+    			<c:choose>
       				<c:when test="${summary.summaryType == AUTOGROUP}">
-	        			<c:set var="commentResourceName">
-	        				<fmt:message key="resource.common.monitor.health.autoGroupType"><fmt:param value="${summary.resourceType.name}"/></fmt:message>
-	        			</c:set>
-	        			<c:set var="commentEID">
-							<c:out value="${Resource.entityId}" />
-						</c:set>
-    	  			</c:when>
+        				<fmt:message key="resource.common.monitor.health.autoGroupType"><fmt:param value="${summary.resourceType.name}"/></fmt:message>
+      				</c:when>
       				<c:when test="${summary.summaryType == CLUSTER}">
- 	        			<c:set var="commentResourceName">
-	        				<fmt:message key="resource.common.monitor.health.clusterGroupType"><fmt:param value="${summary.resourceType.name}"/></fmt:message>
-	        			</c:set>
-	        			<c:set var="commentEID">
-							<c:out value="${summary.entityId.appdefKey}" />
-						</c:set>
+        				<fmt:message key="resource.common.monitor.health.clusterGroupType"><fmt:param value="${summary.resourceType.name}"/></fmt:message>
       				</c:when>
       				<c:otherwise>
-	        			<c:set var="commentResourceName">
-							<c:out value="${summary.resourceType.name}"/>
-	        			</c:set>
-	        			<c:set var="commentEID">
-							<c:out value="${Resource.entityId}" />
-						</c:set>
+        				<c:out value="${summary.resourceType.name}"/>
       				</c:otherwise>
     			</c:choose>
-				<div class="resourceCommentIcon" 
-					resourcename="<c:out value="${commentResourceName}" />"
-				    eid="<c:out value="${commentEID}" />"
-  					ctype="<c:out value="${summary.resourceType.appdefType}:${summary.resourceType.id}" />">&nbsp;</div>
-			</span>
+    		</li>
+    		<li>
+    			<div class="BoldText"><fmt:message key="resource.common.monitor.visibility.AVAILTH"/></div>
+    			<img id="<c:out value="${resourceTypeNameId}"/>_menu_availabilityIcon" 
+    			     src="/images/progress-running.gif" 
+    			     original="<c:out value="${stoplightUrl}" escapeXml="false" />" 
+    			     <c:out value="${availStoplightDimensions}" escapeXml="false" /> 
+    			     border="0" height="12" />
+    		</li>
+    		<c:if test="${not empty url}">
+    			<hr />
+    			<li>
+        			<a href="<c:out value="${url}"/>"><fmt:message key="resource.common.monitor.visibility.GoToResource"/></a>
+    			</li>
+    		</c:if>
+  		</ul>
+	</div>
+
+	<c:set var="count" value="${status.count}"/>
+</c:forEach>
+
+<div<c:if test="${count > 5}">	class="scrollable"</c:if>>
+	<table border="0" cellpadding="1" cellspacing="0" id="ResourceTable" class="portletLRBorder" width="100%">
+  		<tr>
+    		<c:if test="${not empty summaries && checkboxes}">
+    			<td class="ListHeaderCheckbox" width="3%">
+    				<input type="checkbox" onclick="ToggleAllGroup(this, widgetProperties, '<c:out value="${listMembersName}"/>')" 
+    				       name="<c:out value="${listMembersName}"/>All" />
+    			</td>
+    		</c:if>
+    		<td class="ListHeader" colspan="2" align="left"><fmt:message key="${childResourcesHealthKey}"/></td>
+    		<c:if test="${not empty summaries}">
+    		    <td class="ListHeaderInactive" align="center" nowrap><fmt:message key="resource.common.monitor.visibility.AVAILTH"/></td>
+    			<td class="ListHeaderInactive">&nbsp;</td>
+    		</c:if>
+  		</tr>
+		<c:forEach var="summary" items="${summaries}">
 			<c:set var="resourceTypeNameId" value="${fn:replace(summary.resourceType.name, ' ', '_')}" />
-  		</li>
-    </c:forEach>
-	<c:if test="${empty summaries}">
-		<li style="padding-left:5%;">
-			<tiles:insert definition=".resource.common.monitor.visibility.noHealths"/>
-		</li>
-  	</c:if>
-</ul>
-<div id="resourceInfoPopup" class="menu popup">
-	<p>
-		<span class="BoldText"><fmt:message key="${childResourcesTypeKey}"/></span><br/>
-   		<span id="resourceInfoPopupNameField"></span>
-	</p>
-	<p>
-	   	<span class="BoldText"><fmt:message key="resource.common.monitor.visibility.AVAILTH"/></span><br/>
-		<img id="resourceInfoPopupAvailabilityIcon" 
-    			     src="/images/progress-running.gif"
-    			     border="0" height="12" />         	
-	</p>
+			<c:choose>
+  				<c:when test="${summary.summaryType == AUTOGROUP}">
+    				<c:url var="url" value="/resource/autogroup/monitor/Visibility.do">
+      					<c:param name="mode" value="${mode}" />
+      					<c:param name="eid" value="${Resource.entityId.type}:${Resource.id}"/>
+      					<c:choose>
+        					<c:when test="${not empty appdefResourceType && appdefResourceType == 4}"> <!-- AppdefEntityConstants.APPDEF_TYPE_APPLICATION-->
+          						<c:param name="ctype" value="3:${summary.resourceType.id}" />
+        					</c:when>
+        					<c:otherwise>
+          						<c:choose>
+            						<c:when test="${not empty childResourceType}">
+              							<c:param name="ctype" value="${childResourceType}:${summary.resourceType.id}" />
+            						</c:when>
+          							<c:otherwise>
+            							<c:param name="ctype" value="${summary.resourceType.id}"/>
+          							</c:otherwise>
+        						</c:choose>
+        					</c:otherwise>
+      					</c:choose>
+    				</c:url>
+  				</c:when>
+  				<c:otherwise>
+    				<c:url var="url" value="/resource/${summary.entityId.typeName}/monitor/Visibility.do">
+      					<c:param name="mode" value="${mode}" />
+      					<c:param name="eid" value="${summary.entityId.appdefKey}" />
+    				</c:url>
+    			</c:otherwise>
+  			</c:choose>
+  			<tr class="ListRow">
+    			<c:if test="${checkboxes}">
+    				<td class="ListCellCheckbox">
+    					<html:multibox property="child" 
+    					               value="${summary.resourceType.appdefTypeKey}" 
+    					               styleClass="${listMembersName}" 
+    					               onchange="ToggleGroup(this, widgetProperties)" />
+    				</td>
+    			</c:if>
+    			<td width="1%" class="ListCellCheckbox">
+    				<c:choose>
+      					<c:when test="${summary.summaryType == AUTOGROUP}">
+      						<div class="autoGroupIcon">&nbsp;</div>
+      					</c:when>
+      					<c:when test="${summary.summaryType == CLUSTER}">
+      						<div class="clusterIcon">&nbsp;</div>
+      					</c:when>
+      					<c:otherwise>&nbsp;</c:otherwise>
+    				</c:choose>
+    			</td>
+    			<td class="ListCell">
+    				<c:choose>
+      					<c:when test="${empty url}">
+        					<c:out value="${summary.resourceType.name}"/>
+      					</c:when>
+      					<c:when test="${summary.summaryType == AUTOGROUP}">
+        					<a href="<c:out value="${url}" />"><c:out value="${summary.resourceType.name}"/></a>
+      					</c:when>
+      					<c:otherwise>
+        					<a href="<c:out value="${url}" />"><c:out value="${summary.entityName}"/></a>
+      					</c:otherwise>
+    				</c:choose>
+    			</td>
+    			<td class="ListCellCheckbox">
+    				<tiles:insert page="/resource/common/monitor/visibility/AvailIcon.jsp">
+        				<tiles:put name="availability" beanName="summary" beanProperty="availability" />
+    				</tiles:insert>
+    			</td>
+    			<td class="ListCellCheckbox resourceCommentIcon" 
+    				onmouseover="var img = document.getElementById('<c:out value="${resourceTypeNameId}" />_menu_availabilityIcon'); if (img.src.indexOf('/images/progress-running.gif')) { img.setAttribute('src', img.getAttribute('original')); }; menuLayers.show('<c:out value="${resourceTypeNameId}" />_menu', event)" 
+        			onmouseout="menuLayers.hide()">&nbsp;
+    			</td>
+  			</tr>
+    	</c:forEach>
+	</table>
 </div>
-<c:url var="stoplightUrl" value="/resource/AvailStoplight" />
-<script>
-	dojo11.addOnLoad(function() {
-		var masterCheckbox = dojo11.byId("childResourcesAllCheckbox")
-		
-		if (masterCheckbox) {
-			dojo11.connect(masterCheckbox, "onclick", function(e) {
-				var cb = e.target;
-				var ul = cb.parentNode.parentNode.parentNode;
-	
-				dojo11.query("input.childResource", ul).forEach(function(el) {
-					el.checked = cb.checked;
-				});
-			});
-		}
-		
-		var list = dojo11.byId("childResourceList");
-
-		dojo11.connect(list, "onmouseover", function(e) {
-			var el = e.target;
-			
-			if (dojo11.hasClass(el, "resourceCommentIcon")) {
-				var nameEl = dojo11.byId("resourceInfoPopupNameField");
-				var iconEl = dojo11.byId("resourceInfoPopupAvailabilityIcon");
-				
-				nameEl.innerHTML = el.attributes["resourcename"].value;
-				iconEl.src = "<c:out value="${stoplightUrl}" />?eid=" + el.attributes["eid"].value + "&ctype=" + el.attributes["ctype"].value;
-
-				menuLayers.show("resourceInfoPopup", e);
-			}
-		})
-		
-		dojo11.connect(list, "onmouseout", function(e) {
-			if (dojo11.hasClass(e.target, "resourceCommentIcon")) {
-				menuLayers.hide();
-			}
-		});
-	});
-</script>
+<c:if test="${empty summaries}">
+  <tiles:insert definition=".resource.common.monitor.visibility.noHealths"/>
+</c:if>
