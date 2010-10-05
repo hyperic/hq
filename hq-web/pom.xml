@@ -49,7 +49,6 @@
 		<dependency>
   			<groupId>org.apache.struts</groupId>
   			<artifactId>struts-el</artifactId>
- 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -701,7 +700,7 @@
 					</webResources>
 				</configuration>
 			</plugin>
-            <plugin>
+			<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <executions>
@@ -729,9 +728,9 @@
 							<skip>true</skip>
 					</configuration>
 				</plugin>
+				
 		</plugins>
 	</build>
-
 	<profiles>
 		<profile>
 			<id>gConsoleTemplates</id>
@@ -742,24 +741,75 @@
 			</activation>
 			<build>
 				<plugins>
-					<plugin>
+				 	<plugin>
+        				<artifactId>maven-resources-plugin</artifactId>
+        				<version>2.4.3</version>
+        				<executions>
+          					<execution>
+            					<id>copy-resources</id>
+            					<phase>validate</phase>
+            					<goals>
+              						<goal>copy-resources</goal>
+            					</goals>
+            					<configuration>
+              						<outputDirectory>${project.build.directory}/generated-resources/WEB-INF/gconsoleTemplates</outputDirectory>
+              						<resources>          
+                						<resource>
+                  							<directory>${user.home}/.hq/gconsoleTemplates</directory>
+                						</resource>
+              						</resources>              
+            					</configuration>            
+          					</execution>
+        				</executions>
+      				</plugin>
+				</plugins>
+			</build>
+		</profile>
+    	<profile>
+      		<id>production</id>
+      		<activation>
+        		<property><name>production</name></property>
+      		</activation>
+      		<build>
+      			<plugins>
+       				<plugin>
+    					<groupId>org.codehaus.mojo.jspc</groupId>
+    					<artifactId>jspc-maven-plugin</artifactId>
+    					<executions>
+        					<execution>
+            					<goals>
+                 					<goal>compile</goal>
+            					</goals>
+        					</execution>
+    					</executions>
+    					<dependencies>
+        					<dependency>
+            					<groupId>org.codehaus.mojo.jspc</groupId>
+            					<artifactId>jspc-compiler-tomcat6</artifactId>
+								<version>2.0-alpha-3</version>
+        					</dependency>
+							<dependency>
+								<groupId>org.slf4j</groupId>
+								<artifactId>slf4j-log4j12</artifactId>
+								<version>1.5.8</version>
+							</dependency>
+    					</dependencies>
+					</plugin>
+        			<plugin>
 						<artifactId>maven-war-plugin</artifactId>
 						<configuration>
 							<warName>ROOT</warName>
 							<webResources>
 								<resource>
-									<directory>${user.home}/.hq/gconsoleTemplates</directory>
-									<targetPath>WEB-INF/gconsoleTemplates</targetPath>
-								</resource>
-								<resource>
 									<directory>${project.build.directory}/generated-resources</directory>
 								</resource>
 							</webResources>
+							<webXml>${basedir}/target/jspweb.xml</webXml>
 						</configuration>
 					</plugin>
-				</plugins>
-			</build>
-		</profile>
+      			</plugins>
+      		</build>
+    	</profile>
 	</profiles>
 	
 	<repositories>
