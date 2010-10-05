@@ -23,27 +23,41 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq.core;
- 
-import org.springframework.amqp.core.Exchange;
-import org.springframework.erlang.ErlangBadRpcException;
+package org.hyperic.hq.plugin.rabbitmq.manage;
 
-import java.util.List;
+import org.hyperic.hq.plugin.rabbitmq.core.AMQPStatus;
+import org.springframework.amqp.core.Queue;
 
 /**
- * ErlangGatway
- *
+ * RabbitManager
  * @author Helena Edelson
  */
-public interface ErlangGateway {
+public interface RabbitManager {
 
-    List<String> getVirtualHosts() throws ErlangBadRpcException;
+    AMQPStatus createQueue(Queue queue, String virtualHost);
+
+    AMQPStatus createExchange(String exchangeName, String type, String virtualHost);
+
+    AMQPStatus createExchange(String exchangeName, String exchangeType, boolean durable, boolean autoDelete, String virtualHost);
+
+    AMQPStatus createUser(String userName, String password, String virtualHost);
+
+    AMQPStatus deleteQueue(String queueName, String virtualHost);
+
+    AMQPStatus deleteExchange(String exchangeName, boolean ifUnused, String virtualHost) throws Exception;
+
+    AMQPStatus deleteUser(String userName, String virtualHost);
+
+    AMQPStatus purgeQueue(String queueName, String virtualHost);
+
+    AMQPStatus updateUserPassword(String userName, String password, String virtualHost);
+
+    AMQPStatus stopRabbitNode();
+
+    AMQPStatus startRabbitNode();
+
+    AMQPStatus startBrokerApplication();
+
+    AMQPStatus stopBrokerApplication();
     
-    List<Exchange> getExchanges(String virtualHost) throws ErlangBadRpcException;
-
-    List<HypericConnection> getConnections() throws ErlangBadRpcException;
-
-    List<HypericChannel> getChannels() throws ErlangBadRpcException;
-    
-    String getVersion() throws ErlangBadRpcException;
 }

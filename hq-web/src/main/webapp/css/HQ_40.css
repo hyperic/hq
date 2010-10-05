@@ -2465,9 +2465,10 @@ span.returnToLink {
 }
 
 .autoGroupIcon {
-	background: url(../images/icon_auto-group.gif) 0 2px no-repeat;
-	padding-left:14px;
-	width: 72% !important;
+	background: url(../images/icon_auto-group.gif) 0 5px no-repeat;
+	padding-left:14px !important;
+	width:176px !important;
+	width:"186px";
 }
 
 .clusterIcon {
@@ -2631,15 +2632,19 @@ span.returnToLink {
 	width: 45%;
 }
 
+.resourceListContainer,
 .resourceList {
 	margin:0;
 	padding:0;
-	overflow-y:scroll;
-	height:165px;
+}
+
+.resourceListContainer {
+	overflow-y:auto;
+	max-height:135px;
+	height:expression(this.scrollHeight > 134 ? "135px" : "auto");
 }
 
 .resourceList li {
-	padding:3px;
 	border-bottom:1px solid #D5D8DE;
 	list-style:none;
 	overflow:hidden;
@@ -2650,6 +2655,7 @@ span.returnToLink {
 .resourceList li span {
 	display:block;
 	float:left;
+	padding:3px 0;
 }
 	
 .resourceList li.header {
@@ -2669,22 +2675,28 @@ span.returnToLink {
 }
 
 .checkboxColumn {
-	width:7%;
+	text-align:center;
+	width:20px;
 }
 	
 .nameColumn {
-	width:78%;
-	width:"73%";
+	margin-left:5px;
+	width:190px;
 }
 
 .commentColumn,	
 .availColumn {
-	width:10%;
+	width:29px;
 	text-align:center;
 }
 
 .commentColumn {
-	width:5%;
+	width:9px;
+	margin-left:5px;
+}
+
+.resourceList li.header .commentColumn {
+	width:22px;
 }
 
 .bottomBorder {
