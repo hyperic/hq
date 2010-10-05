@@ -379,7 +379,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     	<html:img page="/images/icon_hub_m.gif" width="11" height="11" alt="" border="0"/>
     </html:link>
     <html:link action="/resource/${section}/Inventory">
-    	<html:param name="mode" value="view"/>
+    	<html:param name="mode" value="view"/>
     	<html:param name="eid" value="${resource.entityId}"/>
     	<html:img page="/images/icon_hub_i.gif" width="11" height="11" alt="" border="0"/>
     </html:link>
