@@ -180,14 +180,14 @@
 		</ul>
 	</li>
 </ul>
-<div id="<c:out value="${childResourceListId}" />Popup" class="menu popup">
+<div id="resourceInfoPopup" class="menu popup">
 	<p>
 		<span class="BoldText"><fmt:message key="${childResourcesTypeKey}"/></span><br/>
-   		<span id="<c:out value="${childResourceListId}" />PopupNameField"></span>
+   		<span id="resourceInfoPopupNameField"></span>
 	</p>
 	<p>
 	   	<span class="BoldText"><fmt:message key="resource.common.monitor.visibility.AVAILTH"/></span><br/>
-		<img id="<c:out value="${childResourceListId}" />PopupAvailabilityIcon" 
+		<img id="resourceInfoPopupAvailabilityIcon" 
     			     src="/images/progress-running.gif"
     			     border="0" height="12" />         	
 	</p>
@@ -214,13 +214,13 @@
 			var el = e.target;
 			
 			if (dojo11.hasClass(el, "resourceCommentIcon")) {
-				var nameEl = dojo11.byId("<c:out value="${childResourceListId}" />PopupNameField");
-				var iconEl = dojo11.byId("<c:out value="${childResourceListId}" />PopupAvailabilityIcon");
+				var nameEl = dojo11.byId("resourceInfoPopupNameField");
+				var iconEl = dojo11.byId("resourceInfoPopupAvailabilityIcon");
 				
 				nameEl.innerHTML = el.attributes["resourcename"].value;
 				iconEl.src = "<c:out value="${stoplightUrl}" />?eid=" + el.attributes["eid"].value + "&ctype=" + el.attributes["ctype"].value;
 
-				menuLayers.show("<c:out value="${childResourceListId}" />Popup", e);
+				menuLayers.show("resourceInfoPopup", e);
 			}
 		})
 		
