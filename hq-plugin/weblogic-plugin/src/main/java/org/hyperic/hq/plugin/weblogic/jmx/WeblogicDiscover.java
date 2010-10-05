@@ -50,7 +50,7 @@ import org.hyperic.hq.product.PluginException;
 
 public class WeblogicDiscover {
 
-	private static Log log = LogFactory.getLog("WeblogicDiscover");
+	private static Log log = LogFactory.getLog(WeblogicDiscover.class);
 
 	private String adminName = null;
     private String version;
