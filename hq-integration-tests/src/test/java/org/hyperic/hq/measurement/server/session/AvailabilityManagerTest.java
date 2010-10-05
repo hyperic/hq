@@ -112,7 +112,7 @@ public class AvailabilityManagerTest {
         Assert.assertTrue(dao.getClass().getName() == AvailabilityDataDAO.class.getName());
     }
 
-//    @Test
+    @Test
     public void testCatchup() throws Exception {
         // need to invoke backfiller once so that its initial time is set
         // so that it can start when invoked the next time
@@ -127,7 +127,7 @@ public class AvailabilityManagerTest {
      * THIS CONDITION -> } else if (state.getValue() == after.getAvailVal() &&
      * state.getValue() != before.getAvailVal()) {
      */
-//    @Test
+    @Test
     public void testInsertIntoMiddle() throws Exception {
         setupAvailabilityTable();
         int INCRTIME = 240000;
@@ -146,7 +146,7 @@ public class AvailabilityManagerTest {
         Assert.assertTrue(isAvailDataRLEValid(PLAT_MEAS_ID, pt));
     }
 
-//    @Test
+    @Test
     public void testOverlap() throws Exception {
         List<DataPoint> list = new ArrayList<DataPoint>();
         long now = now();
@@ -159,7 +159,7 @@ public class AvailabilityManagerTest {
         Assert.assertTrue(isAvailDataRLEValid(PLAT_MEAS_ID, pt));
     }
 
-//    @Test
+    @Test
     public void stressTest2() throws Exception {
         setupAvailabilityTable();
         ArrayList<DataPoint> list = new ArrayList<DataPoint>();
@@ -183,7 +183,7 @@ public class AvailabilityManagerTest {
         Assert.assertTrue(isAvailDataRLEValid(PLAT_MEAS_ID, pt));
     }
 
-//    @Test
+    @Test
     public void stressTest1() throws Exception {
         setupAvailabilityTable();
         long now = now();
@@ -282,7 +282,7 @@ public class AvailabilityManagerTest {
         return pt;
     }
 
-//    @Test
+    @Test
     public void testAvailabilityStatusWhenNtwkDwn() throws Exception {
         testAvailabilityForPlatform(PLAT_MEAS_ID);
     }
@@ -342,7 +342,7 @@ public class AvailabilityManagerTest {
         Assert.assertTrue(avails.size() == 3);
     }
 
-//    @Test
+    @Test
     public void testBackfillingForService() throws Exception {
         // Following method will verify that when the platform is down it's
         // associated resources will be marked down by the backfiller
@@ -406,7 +406,7 @@ public class AvailabilityManagerTest {
      * CONDITION -> } else if (newStartime == avail.getEndtime()) { } else {
      * dao.updateVal(after, pt.getValue()); }
      */
-//    @Test
+    @Test
     public void testNonOneorZeroDupPtInsertAtBegin() throws Exception {
         setupAvailabilityTable();
         long INCRTIME = 60000;
@@ -428,7 +428,7 @@ public class AvailabilityManagerTest {
      * this code path updateOutOfOrderState(List) --> merge(DataPoint) MATCHES
      * THIS CONDITION -> } else if (before == null) {
      */
-//    @Test
+    @Test
     public void testPrependWithDupValue() throws Exception {
         setupAvailabilityTable();
         long baseTime = now();
@@ -449,7 +449,7 @@ public class AvailabilityManagerTest {
      * this code path updateOutOfOrderState(List) --> merge(DataPoint) MATCHES
      * THIS CONDITION -> } else if (before == null) {
      */
-//    @Test
+    @Test
     public void testPrepend() throws Exception {
         setupAvailabilityTable();
         long baseTime = now();
