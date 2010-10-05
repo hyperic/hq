@@ -172,7 +172,5 @@ symbol="SUMMARY_TYPE_SINGLETON" var="SINGLETON" />
 <!--  /  -->
 
 <c:if test="${empty summaries}">
-	<div>
-		<i><fmt:message key="resource.common.monitor.visibility.NoHealthsEtc"/></i>
-	</div>
+<tiles:insert definition=".resource.common.monitor.visibility.noHealths"/>
 </c:if>

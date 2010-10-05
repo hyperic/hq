@@ -334,4 +334,4 @@
     	</td>
   	</tr>
   	<tr>
-    	<td style="padding-left:25px;">
+    	<td style="padding-left:25px; width:100%">
