@@ -212,7 +212,7 @@ sometimes we don't want any left side buttons or checkboxes at all
       </td>
       </c:if>
       <c:if test="${MetricsDisplayForm.showNumberCollecting}">
-      <td width="5%" class="ListHeaderInactiveSorted" align="center" nowrap>
+      <td width="5%" class="ListHeaderInactiveSorted" align="center" nowrap="true">
       <fmt:message key="resource.common.monitor.visibility.CollectingTH"/>
       </td>
       </c:if>
