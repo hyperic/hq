@@ -211,14 +211,10 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
         final int maxRecords = pageInfo.getStartRow() + pageInfo.getPageSize();
         
         Map<Integer, List<String>> result = new HashMap<Integer, List<String>>();
-
-        for (int x = 0; x < groupIds.length && x < maxRecords; x++) {
-            if (x < pageInfo.getStartRow()) {
-                continue;
-            }
-            
-            Integer groupId = groupIds[x];
-            ResourceGroup group = resourceGroupManager.findResourceGroupById(subj, groupId);
+        int index = 0;
+        
+        for (int x = pageInfo.getStartRow(); x < groupIds.length && (maxRecords == 0 || x <= maxRecords); x++) {
+            ResourceGroup group = resourceGroupManager.findResourceGroupById(subj, groupIds[x]);
             
             if (group != null) {
             	List<String> alertStatus = new ArrayList<String>();
@@ -227,6 +223,8 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
             	alertStatus.add(getGroupStatus(subj, group, PORTLET_RANGE));
             	result.put(group.getId(), alertStatus);
             }
+            
+            index++;
         }
         
         return result;
