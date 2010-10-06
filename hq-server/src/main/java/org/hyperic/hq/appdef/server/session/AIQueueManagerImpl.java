@@ -265,9 +265,13 @@ public class AIQueueManagerImpl implements AIQueueManager {
                 Platform pValue = null;
                 if (aipLocal.getQueueStatus() != AIQueueConstants.Q_STATUS_ADDED) {
                     try {
-                        pValue = getPlatformByAI(subject, aipLocal);
-                    } catch (Exception e) {
-                        log.debug("Error finding platform for aiplatform: ", e);
+                        pValue = platformManager.findPlatformByAIPlatform(subject, aipLocal.getAIPlatformValue());
+                    } catch (PlatformNotFoundException e) {
+                        log.warn("Removing platform with ID: " + aipLocal.getId() + 
+                            " because it doesn't exist and queue status is not set to ADDED");
+                        iter.remove();
+                    } catch(Exception e) {
+                        log.debug("Error finding platform by for aiplatform: ",e);
                         pValue = null;
                     }
                 }

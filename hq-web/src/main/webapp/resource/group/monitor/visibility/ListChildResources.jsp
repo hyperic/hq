@@ -5,7 +5,6 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
 
 <%--
@@ -94,9 +93,7 @@
 <c:choose>
 	<c:when test="${not empty summaries}">
     	<c:forEach var="summary" items="${summaries}" varStatus="status">
-    		<c:set var="resourceNameId" value="${fn:replace(summary.resourceName, ' ', '_')}" />
-    		
-      		<div id="<c:out value="${resourceNameId}"/>_menu" class="menu">
+      		<div id="<c:out value="${summary.resourceName}"/>_menu" class="menu">
         		<ul>
           			<li>
           				<div class="BoldText"><fmt:message key="${childResourcesTypeKey}"/></div>
@@ -108,10 +105,7 @@
           			</li>
           			<hr/>
           			<li>
-            			<html:link action="/resource/${summary.resourceEntityTypeName}/monitor/Visibility">
-              				<html:param name="mode" value="${mode}" />
-              				<html:param name="type" value="${summary.resourceTypeId}" />
-              				<html:param name="rid" value="${summary.resourceId}" />
+            			<html:link page="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do?mode=${mode}&type=${summary.resourceTypeId}" paramId="rid" paramName="summary" paramProperty="resourceId">
               				<fmt:message key="resource.common.monitor.visibility.GoToResource"/>
             			</html:link>
           			</li>
@@ -136,17 +130,12 @@
       				<td class="ListHeaderInactive" width="10%">&nbsp;</td>
     			</tr>
     			<c:forEach var="summary" items="${summaries}">
-    				<c:set var="resourceNameId" value="${fn:replace(summary.resourceName, ' ', '_')}" />
     				<tr>
       					<c:if test="${checkboxes}">
       						<td class="ListCellCheckbox"><html:multibox property="eids" value="${summary.entityId}" styleClass="${listMembersName}" onchange="ToggleGroup(this, widgetProperties)"/></td>
       					</c:if>
       					<td class="ListCell" style="padding-top:10px;">
-        					<html:link action="/resource/${summary.resourceEntityTypeName}/monitor/Visibility">
-        						<html:param name="mode" value="${mode}" />
-        						<html:param name="eid" value="${summary.resourceTypeId}:${summary.resourceId}" />
-        						<c:out value="${summary.resourceName}"/>
-        					</html:link>
+        					<html:link page="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do?mode=${mode}&eid=${summary.resourceTypeId}:${summary.resourceId}"><c:out value="${summary.resourceName}"/></html:link>
       					</td>
       					<td class="ListCellCheckbox">
     						<tiles:insert page="/resource/common/monitor/visibility/AvailIcon.jsp">
@@ -154,7 +143,7 @@
     						</tiles:insert>
       					</td>
         				<td class="ListCellCheckbox resourceCommentIcon"
-    	    				onmouseover="menuLayers.show('<c:out value="${resourceNameId}" />_menu', event)" 
+    	    				onmouseover="menuLayers.show('<c:out value="${summary.resourceName}" />_menu', event)" 
     	    				onmouseout="menuLayers.hide()">&nbsp;
 						</td>
     				</tr>

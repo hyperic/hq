@@ -1094,4 +1094,15 @@ public abstract class ServerDetector
         return ((AutoinventoryPluginManager)getManager()).
             getServiceConfigs(type);
     }
+    
+    /**
+     * 
+     * @return The order in which this ServerDetector should be executed as compared with other ServerDetectors in the same scan.
+     * This allows for one ServerDetector to "win" if multiple plugins detect Servers with the same autoinventory identifier.
+     * The ServerDetector that returns the lowest number will call the shots.  If the same server is detected later, it will
+     * be ignored and not sent back to the Hyperic server.
+     */
+    public int getScanOrder() {
+        return Integer.MAX_VALUE;
+    }
 }

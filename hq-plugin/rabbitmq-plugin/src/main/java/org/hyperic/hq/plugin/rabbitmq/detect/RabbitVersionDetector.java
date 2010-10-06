@@ -27,11 +27,7 @@ package org.hyperic.hq.plugin.rabbitmq.detect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.core.ErlangBrokerGateway;
-import org.hyperic.hq.plugin.rabbitmq.core.ErlangGateway;
 import org.hyperic.hq.product.PluginException;
-import org.springframework.erlang.connection.SimpleConnectionFactory;
-import org.springframework.erlang.core.ErlangTemplate;
 import org.springframework.util.Assert;
 
 import java.io.*;
@@ -60,16 +56,7 @@ public class RabbitVersionDetector {
         String version = inferVersionFromRabbitmqctl(rabbitHome);
 
         if (version == null) {
-            version = inferVersionFromRabbitAppFile(rabbitHome); 
-
-            if (version == null) {
-                version = inferVersionFromPath(rabbitHome);
-
-                if (version == null) { 
-                    String location = null; //RabbitProductPlugin.getErlangCookieLocation();
-                    version = location != null ? inferVersionFromErlang(node, location) : null;
-                }
-            }
+            version = inferVersionFromRabbitAppFile(rabbitHome);
         }
 
         Assert.notNull(version, "RabbitMQ version must not be null.");
@@ -79,22 +66,6 @@ public class RabbitVersionDetector {
     }
 
     /**
-     * @param node
-     * @param erlangCookieValue
-     * @return
-     */
-    public static ErlangGateway getErlangGateway(String node, String erlangCookieValue) {
-        SimpleConnectionFactory cf = new SimpleConnectionFactory("rabbit-monitor", erlangCookieValue, node);
-        cf.afterPropertiesSet();
-
-        ErlangTemplate template = new ErlangTemplate(cf);
-        template.afterPropertiesSet();
-
-        return new ErlangBrokerGateway();
-    }
-
-    /**
-     * No errors but not working yet...
      * @param rabbitHome
      * @return
      * @throws PluginException
@@ -174,70 +145,6 @@ public class RabbitVersionDetector {
         }
 
         return version;
-    }
-
-
-    /**
-     * The location of .erlang.cookie file can easily be null.
-     * @param peerNode
-     * @param location
-     * @return
-     */
-    protected static String inferVersionFromErlang(String peerNode, String location) {
-        String version = null;
-
-        if (location != null) {
-            String value = getErlangCookieValue(location);
-            if (value != null) {
-                ErlangGateway erlangGateway = getErlangGateway(peerNode, value);
-                if (erlangGateway != null) {
-                    version = erlangGateway.getVersion();
-                }
-            }
-        }
-
-        return version;
-    }
-
-    /**
-     * @param installPath
-     * @return
-     */
-    protected static String inferVersionFromPath(String installPath) {
-        Pattern p = Pattern.compile("rabbitmq_server[-_](\\d+\\.\\d+(?:\\.\\d+)?)");
-        Matcher m = p.matcher(installPath);
-        return m.find() ? m.group(1) : null;
-    }
-
-    /**
-     * Read in the erlang cookie string from the path
-     * @param erlangCookieLocation
-     * @return
-     */
-    protected static String getErlangCookieValue(String erlangCookieLocation) {
-        String erlangCookieValue = null;
-
-        BufferedReader in = null;
-
-        try {
-            if (erlangCookieLocation != null) {
-                File file = new File(erlangCookieLocation);
-
-                if (file.exists()) {
-                    in = new BufferedReader(new FileReader(file));
-                    erlangCookieValue = in.readLine();
-                    Assert.notNull("erlangData must not be null.", erlangCookieValue);
-                }
-
-                if (in != null) {
-                    in.close();
-                }
-            }
-        } catch (IOException e) {
-            logger.error(e);
-        }
-
-        return erlangCookieValue;
     }
 
 }

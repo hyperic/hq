@@ -28,8 +28,22 @@ import org.hyperic.hq.product.PluginException;
 
 import com.ibm.websphere.management.AdminClient;
 import javax.management.ObjectName;
+import javax.management.j2ee.statistics.Stats;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class WebappCollector extends WebsphereCollector {
+
+    private static final Log log = LogFactory.getLog(WebappCollector.class.getName());
+    private ObjectName sessionStatsObjectName = null;
+    private static final String[] sessionStatNames = {
+        "CreateCount", "InvalidateCount", "LifeTime",
+        "ActiveCount", "LiveCount", "NoRoomForNewSessionCount",
+        "CacheDiscardCount", "ExternalReadTime", "ExternalReadSize",
+        "ExternalWriteTime", "ExternalWriteSize", "AffinityBreakCount",
+        "TimeSinceLastActivated", "TimeoutInvalidationCount",
+        "ActivateNonExistSessionCount", "SessionObjectSize"
+    };
 
     protected void init(AdminClient mServer) throws PluginException {
         String module = getModuleName();
@@ -46,6 +60,21 @@ public class WebappCollector extends WebsphereCollector {
                 + getProcessAttributes());
 
         setObjectName(resolve(mServer, name));
+
+        // for session manager
+        name = newObjectNamePattern("name="
+                + getModuleName() + ","
+                + "type=SessionManager,"
+                + getProcessAttributes());
+
+        // better catch this resolve, don't want to
+        // fail if stats are not found.
+        try {
+            sessionStatsObjectName = resolve(mServer, name);
+        } catch (PluginException e) {
+            log.debug("Can't resolve session stats object name. "
+                    + "Not collecting session statistics.");
+        }
     }
 
     public void collect(AdminClient mServer) throws PluginException {
@@ -54,6 +83,17 @@ public class WebappCollector extends WebsphereCollector {
             setAvailability(false);
         } else {
             setAvailability(true);
+            if (sessionStatsObjectName == null) {
+                init(mServer);
+            }
+            Stats stats = (Stats) getStats(mServer, sessionStatsObjectName);
+            if (stats != null) {
+                for (int i = 0; i < sessionStatNames.length; i++) {
+                    setValue(sessionStatNames[i], getStatCount(stats, sessionStatNames[i]));
+                }
+            } else {
+                log.debug("No session manager stats");
+            }
         }
     }
 }

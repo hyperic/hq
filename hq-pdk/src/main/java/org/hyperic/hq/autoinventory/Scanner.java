@@ -26,6 +26,8 @@
 package org.hyperic.hq.autoinventory;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -232,8 +234,8 @@ public class Scanner {
 
         ServerSignature sig;
         ServerDetector detector;
-        List detectorList = new ArrayList();
-        ServerDetector[] detectors;
+        List<ServerDetector> detectorList = new ArrayList<ServerDetector>();
+        
         String pluginName = null;
         int i;
 
@@ -259,13 +261,16 @@ public class Scanner {
                 pluginName + "'";
             throw new AutoinventoryException(msg, e);
         }
+        
+        Collections.sort(detectorList, new Comparator<ServerDetector>() {
+            public int compare(ServerDetector detector1, ServerDetector detector2) {
+                int order1 = detector1.getScanOrder();
+                int order2 = detector2.getScanOrder();
+                return order1 - order2;
+            }
+        });
 
-        detectors = new ServerDetector[detectorList.size()];
-        for ( i=0; i<detectorList.size(); i++ ) {
-            detectors[i] = (ServerDetector) detectorList.get(i);
-        }
-
-        return detectors;
+        return detectorList.toArray(new ServerDetector[detectorList.size()]);
     }
 
     private void notifyScanComplete () {

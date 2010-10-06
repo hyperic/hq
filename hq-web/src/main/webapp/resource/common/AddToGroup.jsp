@@ -45,9 +45,9 @@
 					<table width="100%" cellpadding="0" cellspacing="0" border="0">
 						<thead>
 							<tr class="tableRowHeader">
-								<th class="ListHeaderCheckbox" style="width:20px"><input type="checkbox" id="AddToExistingGroup_CheckAllBox" onclick="MyGroupManager.dialogs.AddToExistingGroup.toggleAll(this);" /></th>
-								<th class="tableRowInactive" style="width:52%">Group</th>
-								<th class="tableRowInactive">Description</th>
+								<th class="ListHeaderCheckbox" style="width:20px"><input type="checkbox" id="AddToExistingGroup_CheckAllBox" onclick="MyGroupManager.dialogs.AddToExistingGroup.toggleAll(this);" /></td>
+								<th class="tableRowInactive" style="width:52%">Group</td>
+								<th class="tableRowInactive">Description</td>
 							</tr>
 						</thead>
 						<tfoot id="AddToExistingGroupTableFooter">
@@ -63,7 +63,7 @@
 		<div id="AddToExistingGroupButtonDiv" style="padding-top:5px">
 			<table cellspacing="0" cellpadding="0">
 				<tr>
-					<td valign="middle" nowrap>
+					<td valign="middle" nowrap="true">
 						<input type="button" id="AddToExistingGroupButton" value="ADD TO EXISTING GROUP" class="CompactButton" onclick="javascript:MyGroupManager.addResourcesToGroups(this.form);" />
 						&nbsp;&nbsp;
   						<input type="button" id="AddToNewGroupButton" value="ADD TO NEW GROUP" class="CompactButton" onclick="javascript:MyGroupManager.addNewGroup(this.form.eid.value);" />

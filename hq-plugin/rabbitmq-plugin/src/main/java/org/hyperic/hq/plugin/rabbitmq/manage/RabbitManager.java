@@ -23,31 +23,41 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq.configure;
+package org.hyperic.hq.plugin.rabbitmq.manage;
 
-import org.hyperic.hq.plugin.rabbitmq.AbstractSpringTest;
-import org.hyperic.hq.plugin.rabbitmq.core.ErlangCookieHandler;
-import org.hyperic.hq.plugin.rabbitmq.core.HypericBrokerAdmin;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
-import static org.junit.Assert.*;
+import org.hyperic.hq.plugin.rabbitmq.core.AMQPStatus;
+import org.springframework.amqp.core.Queue;
+
 /**
- * HypericBrokerAdminTest
+ * RabbitManager
  * @author Helena Edelson
  */
-@Ignore("Need to mock the connection for automation")
-public class HypericBrokerAdminTest extends AbstractSpringTest {
+public interface RabbitManager {
 
-    @Test
-    public void testHypericAdmin() { 
-        String value = ErlangCookieHandler.configureCookie(serverConfig);
-        assertNotNull(value);
+    AMQPStatus createQueue(Queue queue, String virtualHost);
 
-        HypericBrokerAdmin admin = new HypericBrokerAdmin(singleConnectionFactory, value);
-        assertNotNull(admin.getQueues());
- 
-        RabbitBrokerAdmin rba = new RabbitBrokerAdmin(singleConnectionFactory);
-        assertNotNull(rba.getQueues());
-    }
+    AMQPStatus createExchange(String exchangeName, String type, String virtualHost);
+
+    AMQPStatus createExchange(String exchangeName, String exchangeType, boolean durable, boolean autoDelete, String virtualHost);
+
+    AMQPStatus createUser(String userName, String password, String virtualHost);
+
+    AMQPStatus deleteQueue(String queueName, String virtualHost);
+
+    AMQPStatus deleteExchange(String exchangeName, boolean ifUnused, String virtualHost) throws Exception;
+
+    AMQPStatus deleteUser(String userName, String virtualHost);
+
+    AMQPStatus purgeQueue(String queueName, String virtualHost);
+
+    AMQPStatus updateUserPassword(String userName, String password, String virtualHost);
+
+    AMQPStatus stopRabbitNode();
+
+    AMQPStatus startRabbitNode();
+
+    AMQPStatus startBrokerApplication();
+
+    AMQPStatus stopBrokerApplication();
+    
 }
