@@ -86,14 +86,8 @@ function setActiveInactive() {
 
 <c:set var="tmpTitle" value=".page.title.resource.${section}"/>
 <tiles:insert beanName="tmpTitle">
-	<tiles:put name="titleName">
-  		<html:link action="/admin/config/Config">
-	  		<html:param name="mode" value="monitor" />
-  			<fmt:message key="admin.home.ResourceTemplates"/>
-  		</html:link> 
-	  	&gt;
-    	<c:out value="${ResourceType.name}"/> <c:out value="${section}"/>s
-	</tiles:put>
+  <tiles:put name="titleName"><html:link page="/admin/config/Config.do?mode=monitor"><fmt:message key="admin.home.ResourceTemplates"/></html:link> >
+        <c:out value="${ResourceType.name}"/> <c:out value="${section}"/>s</tiles:put>
 </tiles:insert>
 
 <!-- FORM -->

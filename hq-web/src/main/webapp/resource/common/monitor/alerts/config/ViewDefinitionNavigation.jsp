@@ -31,19 +31,11 @@
 
 
 <c:choose>
-	<c:when test="${not empty Resource}">
-		<html:link action="/alerts/Config">
-			<html:param name="mode" value="list"/>
-			<html:param name="eid" value="${Resource.entityId.appdefKey}"/>
-			<fmt:message key="alert.config.props.ReturnLink"/>
-		</html:link>
-	</c:when>
-	<c:when test="${not empty ResourceType}">
-		<html:link action="/admin/alerts/Config">
-			<html:param name="mode" value="list"/>
-			<html:param name="aetid" value="${ResourceType.appdefTypeKey}"/>
-			<fmt:message key="alert.config.props.ReturnLink"/>
-		</html:link>
-	</c:when>
+<c:when test="${not empty Resource}">
+<html:link page="/alerts/Config.do?mode=list&eid=${Resource.entityId.appdefKey}"><fmt:message key="alert.config.props.ReturnLink"/></html:link>
+</c:when>
+<c:when test="${not empty ResourceType}">
+<html:link page="/admin/alerts/Config.do?mode=list&aetid=${ResourceType.appdefTypeKey}"><fmt:message key="alert.config.props.ReturnLink"/></html:link>
+</c:when>
 </c:choose>
-<br/><br/>
+<br><br>

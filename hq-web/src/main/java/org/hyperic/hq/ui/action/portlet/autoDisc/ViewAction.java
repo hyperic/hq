@@ -58,6 +58,7 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StopWatch;
 
 public class ViewAction
     extends TilesAction {
@@ -79,7 +80,6 @@ public class ViewAction
 
     public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
                                  HttpServletRequest request, HttpServletResponse response) throws Exception {
-
         HttpSession session = request.getSession();
 
         WebUser user = RequestUtils.getWebUser(request);
@@ -93,8 +93,18 @@ public class ViewAction
         ConfigResponse dashPrefs = dashConfig.getConfig();
         page.setPagesize(Integer.parseInt(dashPrefs.getValue(".dashContent.autoDiscovery.range")));
 
+        
+        StopWatch watch = new StopWatch();
+        if(log.isDebugEnabled()) {
+            watch.start("getQueue");
+        }
         // always show ignored platforms and already-processed platforms
         PageList<AIPlatformValue> aiQueue = aiBoss.getQueue(sessionId, true, false, true, page);
+        
+        if(log.isDebugEnabled()) {
+            watch.stop();
+            log.debug(watch.prettyPrint());
+        }
         List<AIPlatformWithStatus> queueWithStatus = getStatuses(aiQueue);
         context.putAttribute("resources", queueWithStatus);
 
