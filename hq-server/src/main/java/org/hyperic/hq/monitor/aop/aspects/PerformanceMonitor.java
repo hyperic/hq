@@ -91,10 +91,8 @@ public class PerformanceMonitor {
         long duration = timer.getTotalTimeMillis();
 
         if (duration > maximumDuration) {
-            String args = StringUtils.arrayToCommaDelimitedString(pjp.getArgs());
-
             logger.warn(new StringBuilder(warningMessage).append(pjp.getTarget()).append(".")
-                .append(pjp.getSignature().getName()).append("(").append(args).append(")")
+                .append(pjp.getSignature().getName())
                     .append(" executed in ").append(timer.getTotalTimeMillis()).append(":ms").toString());
         }
 
