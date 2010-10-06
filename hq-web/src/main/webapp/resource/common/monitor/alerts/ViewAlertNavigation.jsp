@@ -31,17 +31,11 @@
 
 
 <c:choose>
-	<c:when test="${empty Resource}">
-		<html:link action="/Dashboard">
-			<fmt:message key="alert.current.detail.link.noresource.Rtn"/>
-		</html:link>
-	</c:when>
-	<c:otherwise>
-		<html:link action="/alerts/Alerts">
-			<html:param name="mode" value="list" />
-			<html:param name="eid" value="${Resource.entityId.appdefKey}"/>
-			<fmt:message key="alert.current.detail.link.Rtn"/>
-		</html:link>
-	</c:otherwise>
+<c:when test="${empty Resource}">
+<html:link page="/Dashboard.do"><fmt:message key="alert.current.detail.link.noresource.Rtn"/></html:link>
+</c:when>
+<c:otherwise>
+<html:link page="/alerts/Alerts.do?mode=list&eid=${Resource.entityId.appdefKey}"><fmt:message key="alert.current.detail.link.Rtn"/></html:link>
+</c:otherwise>
 </c:choose>
-<br/><br/>
+<br><br>

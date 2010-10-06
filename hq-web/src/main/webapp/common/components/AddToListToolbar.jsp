@@ -187,7 +187,7 @@
  <tr>
   <td width="40">&nbsp;</td>
   <td width="40">&nbsp;</td>
-  <td class="ErrorField" nowrap colspan="3"><span class="ErrorFieldContent">- <html:errors property="collectionInterval"/></span></td>
+  <td class="ErrorField" nowrap="true" colspan="3"><span class="ErrorFieldContent">- <html:errors property="collectionInterval"/></span></td>
   <td width="100%">&nbsp;</td>
  </tr>
  </logic:messagesPresent>

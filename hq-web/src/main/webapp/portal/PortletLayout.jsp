@@ -158,9 +158,7 @@ var onloads = [];
 	
 	onloads.push(refreshPortlets);
 </script>
-<html:link action="/Resource" linkName="viewResUrl" styleId="viewResUrl" style="display:none;">
-	<html:param name="eid" value="" />
-</html:link>
+<html:link page="/Resource.do?eid=" linkName="viewResUrl" styleId="viewResUrl" style="display:none;"></html:link>
 
 <tiles:insert beanProperty="url" beanName="portlet" flush="true">
 	<tiles:put name="portlet" beanName="portlet" />

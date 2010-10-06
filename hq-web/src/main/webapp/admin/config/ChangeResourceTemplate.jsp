@@ -31,125 +31,142 @@
  --%>
 
 <tiles:insert page="/admin/config/AdminHomeNav.jsp"/>
-<script  type="text/javascript">
-	dojo11.addOnLoad(function() {
-		dojo11.query("li.tableRow").onmouseenter(function(e) {
-				dojo11.addClass(e.currentTarget, "hover");
-			}).onmouseleave(function(e) {
-				dojo11.removeClass(e.currentTarget, "hover");
-			});
-		});
-	});
+ <script  type="text/javascript">
+     function onMouseRow(el) {
+             el.style.background="#a6c2e7";
+         }
+
+         function offMouseRowEven(el) {
+             el.style.background="#F2F4F7";
+         }
+
+         function offMouseRowOdd(el) {
+             el.style.background="#EBEDF2";
+         }
 </script>
 
+<table width="100%" cellpadding="0" cellspacing="0" border="0" id="listTable">
 <!-- PLATFORM CONTENTS -->
-<ul style="width:100%;margin:0;padding:0;list-style:none;">
-	<li class="ListHeaderDark ListHeaderInactiveSorted"><fmt:message key="resource.hub.PlatformTypeTH"/>s</li>
-	<c:forEach var="entry" items="${platformTypes}" varStatus="loopStatus">
-		<li class="tableRow<c:if test="${(loopStatus.index % 2) != 0}"> tableRowOdd</c:if>"
-		    style="position:relative;">
-			<div class="tableCell" style="">
-				<html:link action="/ResourceHub">
-      				<html:param name="ff" value="1" />
-      				<html:param name="ft" value="1:${entry.id}" />
-      				<c:out value="${entry.name}"/>
-      			</html:link>
-			</div>
-			<div style="position:absolute;right:0;top:0;padding:2px;">
-				<tiles:insert definition=".admin.config.DefaultsAction">
-        			<tiles:put name="typeName" value="platform"/>
-        			<tiles:put name="aetid" value="1:${entry.id}" />
-      			</tiles:insert>
-			</div>
-		</li>
-    </c:forEach>
-</ul>
-  	
+	<tr class="ListHeaderDark">
+      <td width="85%" class="ListHeaderInactiveSorted"><fmt:message key="resource.hub.PlatformTypeTH"/>s</td>
+      <td width="15%" class="ListHeaderInactive" align="center" nowrap>&nbsp;</td>
+  	</tr>
+    <c:forEach var="entry" varStatus="status" items="${platformTypes}">
+    <c:choose>
+      <c:when test="${even}">
+        <tr class="tableRowEven" onmouseover=onMouseRow(this); onmouseout=offMouseRowEven(this);>
+        <c:set var="even" value="false"/>
+      </c:when>
+      <c:otherwise>
+        <tr class="tableRowOdd" onmouseover=onMouseRow(this); onmouseout=offMouseRowEven(this);>
+        <c:set var="even" value="true"/>
+      </c:otherwise>
+    </c:choose>
+      <td class="tableCell"><html:link page="/ResourceHub.do?ff=1&ft=1:${entry.id}"><c:out value="${entry.name}"/></html:link></td>
+      <tiles:insert definition=".admin.config.DefaultsAction">
+        <tiles:put name="typeName" value="platform"/>
+        <tiles:put name="aetid">1:<c:out value="${entry.id}"/></tiles:put>
+      </tiles:insert>
+    </tr>
+  </c:forEach>
+<!--  /  -->
+	<tr>
+	  <td style="padding-top:5px;" colspan="100%">&nbsp;</td>
+	</tr>
 <!-- Platform Services -->
-<ul style="width:100%;margin:0;padding:0;list-style:none;margin-top:15px;">
-	<li class="ListHeaderDark ListHeaderInactiveSorted"><fmt:message key="resource.hub.PlatformServiceTypeTH"/>s</li>
-	<c:forEach var="platSvc" items="${platformServiceTypes}" varStatus="loopStatus">
-		<li class="tableRow<c:if test="${(loopStatus.index % 2) != 0}"> tableRowOdd</c:if>"
-		    style="position:relative;">
-			<div class="tableCell indentArrowIcon" style="">
-      			<html:link action="/ResourceHub">
-      				<html:param name="ff" value="3" />
-      				<html:param name="ft" value="3:${platSvc.id}" />
-      				<c:out value="${platSvc.name}"/>
-      			</html:link>
-			</div>
-			<div style="position:absolute;right:0;top:0;padding:2px;">
-				<tiles:insert definition=".admin.config.DefaultsAction">
-    	    		<tiles:put name="typeName" value="service"/>
-	        		<tiles:put name="aetid" value="3:${platSvc.id}" />
-      			</tiles:insert>
-			</div>
-		</li>
+	<tr class="ListHeaderDark">
+      <td width="85%" class="ListHeaderInactiveSorted" colspan="100%"><fmt:message key="resource.hub.PlatformServiceTypeTH"/>s</td>
+  	</tr>
+	<c:forEach var="platSvc" varStatus="psStatus" items="${platformServiceTypes}">
+    <c:choose>
+      <c:when test="${even}">
+        <tr class="tableRowEven" onmouseover=onMouseRow(this); onmouseout=offMouseRowEven(this);>
+        <c:set var="even" value="false"/>
+      </c:when>
+      <c:otherwise>
+        <tr class="tableRowOdd" onmouseover=onMouseRow(this); onmouseout=offMouseRowOdd(this);>
+        <c:set var="even" value="true"/>
+      </c:otherwise>
+    </c:choose>
+      <td class="tableCell"><html:img page="/images/icon_indent_arrow.gif" width="16" height="16" border="0"/><html:link page="/ResourceHub.do?ff=3&ft=3:${platSvc.id}"><c:out value="${platSvc.name}"/></html:link></td>
+      <tiles:insert definition=".admin.config.DefaultsAction">
+        <tiles:put name="typeName" value="service"/>
+        <tiles:put name="aetid">3:<c:out value="${platSvc.id}"/></tiles:put>
+      </tiles:insert>
+    </tr>
     </c:forEach>
-	<c:forEach var="winSvc" items="${windowsServiceTypes}" varStatus="loopStatus">
-		<li class="tableRow<c:if test="${(loopStatus.index % 2) != 0}"> tableRowOdd</c:if>"
-		    style="position:relative;">
-			<div class="tableCell indentArrowIcon" style="">
-      			<html:link action="/ResourceHub">
-      				<html:param name="ff" value="3" />
-      				<html:param name="ft" value="3:${winSvc.id}" />
-      				<c:out value="${winSvc.name}"/>
-      			</html:link>
-			</div>
-			<div style="position:absolute;right:0;top:0;padding:2px;">
-				<tiles:insert definition=".admin.config.DefaultsAction">
-	        		<tiles:put name="typeName" value="service"/>
-	        		<tiles:put name="aetid" value="3:${winSvc.id}" />
-      			</tiles:insert>
-			</div>
-		</li>
+    <c:forEach var="winSvc" varStatus="wsStatus" items="${windowsServiceTypes}">
+    <c:choose>
+      <c:when test="${even}">
+        <tr class="tableRowEven" onmouseover=onMouseRow(this); onmouseout=offMouseRowEven(this);>
+        <c:set var="even" value="false"/>
+      </c:when>
+      <c:otherwise>
+        <tr class="tableRowOdd" onmouseover=onMouseRow(this); onmouseout=offMouseRowOdd(this);>
+        <c:set var="even" value="true"/>
+      </c:otherwise>
+    </c:choose>
+      <td class="ListCellPrimary"><html:img page="/images/icon_indent_arrow.gif" width="16" height="16" border="0"/><html:link page="/ResourceHub.do?ff=3&ft=3:${winSvc.id}"><c:out value="${winSvc.name}"/></html:link></td>
+      <tiles:insert definition=".admin.config.DefaultsAction">
+        <tiles:put name="typeName" value="service"/>
+        <tiles:put name="aetid">3:<c:out value="${winSvc.id}"/></tiles:put>
+      </tiles:insert>
+    </tr>
     </c:forEach>
-</ul>
+
+	<tr>
+	  <td style="padding-top:5px;" colspan="100%">&nbsp;</td>
+	</tr>
 <!-- SERVER CONTENTS -->
-<!-- Platform Services -->
-<ul style="width:100%;margin:0;padding:0;list-style:none;margin-top:15px;">
-	<li class="ListHeaderDark ListHeaderInactiveSorted"><fmt:message key="resource.hub.ServerTypeTH"/>s</li>
-    <c:forEach var="entry" items="${serverTypes}">
-	    <c:set var="server" value="${entry.key}"/>
-    	<c:set var="services" value="${entry.value}"/>
-    	
-    	<c:if test="${server.virtual == false}">
-			<li class="tableRow<c:if test="${(loopStatus.index % 2) != 0}"> tableRowOdd</c:if>"
-			    style="position:relative;">
-				<div class="tableCell" style="">
-      				<html:link action="/ResourceHub">
-      					<html:param name="ff" value="2" />
-      					<html:param name="ft" value="2:${server.id}" />
-      					<c:out value="${server.name}"/>
-      				</html:link>
-      			</div>
-	 			<div style="position:absolute;right:0;top:0;padding:2px;">
-					<tiles:insert definition=".admin.config.DefaultsAction">
-		       			<tiles:put name="typeName" value="server"/>
-		       			<tiles:put name="aetid" value="2:${server.id}" />
-	      			</tiles:insert>
-				</div>
-    		</li>
-       		<c:forEach var="serviceType" items="${services}" varStatus="loopStatus">
-				<li class="tableRow<c:if test="${(loopStatus.index % 2) != 0}"> tableRowOdd</c:if>"
-				    style="position:relative;">
-					<div class="tableCell indentArrowIcon" style="">
-           				<html:link action="/ResourceHub">
-           					<html:param name="ff" value="3" />
-           					<html:param name="ft" value="3:${serviceType.id}" />
-           					<c:out value="${serviceType.name}"/>
-           				</html:link>
-           			</div>
-           			<div style="position:absolute;right:0;top:0;padding:2px;">
-	   					<tiles:insert definition=".admin.config.DefaultsAction">
-	       					<tiles:put name="typeName" value="service"/>
-	       					<tiles:put name="aetid">3:<c:out value="${serviceType.id}"/></tiles:put>
-	   					</tiles:insert>
-	   				</div>
-       			</li>
-       		</c:forEach>
-    	</c:if>
-	</c:forEach>
-</ul>
-<br/><br/>
+	<tr>
+      <td class="ListCellHeaderSorted" colspan="100%"><fmt:message key="resource.hub.ServerTypeTH"/>s</td>
+	</tr>
+    <c:forEach var="entry" varStatus="status" items="${serverTypes}">
+    <c:set var="server" value="${entry.key}"/>
+    <c:set var="services" value="${entry.value}"/>
+    <c:if test="${server.virtual == false}">
+    <c:choose>
+      <c:when test="${even}">
+        <tr class="tableRowEven" onmouseover=onMouseRow(this); onmouseout=offMouseRowEven(this);>
+        <c:set var="even" value="false"/>
+      </c:when>
+      <c:otherwise>
+        <tr class="tableRowOdd" onmouseover=onMouseRow(this); onmouseout=offMouseRowOdd(this);>
+        <c:set var="even" value="true"/>
+      </c:otherwise>
+    </c:choose>
+      <td class="ListCellPrimary"><html:link page="/ResourceHub.do?ff=2&ft=2:${server.id}"><c:out value="${server.name}"/></html:link></td>
+      <tiles:insert definition=".admin.config.DefaultsAction">
+        <tiles:put name="typeName" value="server"/>
+        <tiles:put name="aetid">2:<c:out value="${server.id}"/></tiles:put>
+      </tiles:insert>
+    </tr>
+    <tr class="ListRow">
+        <c:forEach var="serviceType" varStatus="status" items="${services}">
+    <c:choose>
+      <c:when test="${even}">
+        <tr class="tableRowEven" onmouseover=onMouseRow(this); onmouseout=offMouseRowEven(this);>
+        <c:set var="even" value="false"/>
+      </c:when>
+      <c:otherwise>
+        <tr class="tableRowOdd" onmouseover=onMouseRow(this); onmouseout=offMouseRowOdd(this);>
+        <c:set var="even" value="true"/>
+      </c:otherwise>
+    </c:choose>
+            <td class="ListCellPrimary"><html:img page="/images/icon_indent_arrow.gif" width="16" height="16" border="0"/>
+            <html:link page="/ResourceHub.do?ff=3&ft=3:${serviceType.id}"><c:out value="${serviceType.name}"/></html:link>
+            </td>
+      <tiles:insert definition=".admin.config.DefaultsAction">
+        <tiles:put name="typeName" value="service"/>
+        <tiles:put name="aetid">3:<c:out value="${serviceType.id}"/></tiles:put>
+      </tiles:insert>
+        </tr>
+        </c:forEach>   
+    </c:if>
+    </c:forEach>
+<!--  /  -->
+</table>
+
+<br/>
+<br/>
 <tiles:insert page="/admin/config/AdminHomeNav.jsp"/>

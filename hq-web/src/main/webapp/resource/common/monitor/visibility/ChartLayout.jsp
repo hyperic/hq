@@ -47,7 +47,7 @@
 						</tr>
 						<tr class="ListRow">
 							<td>
-								<html:link action="/Dashboard">
+								<html:link page="/Dashboard.do">
 									<fmt:message key="alert.current.detail.link.noresource.Rtn" />
 								</html:link>
 							</td>

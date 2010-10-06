@@ -41,27 +41,13 @@
     <tr>
         <c:choose>
             <c:when test="${empty ParentResource}">
-	            <td width="20%" class="BlockLabel"><fmt:message key="resource.service.inventory.type.HostServer"/></td>
-	            <td width="30%" class="BlockContent">
-	            	<html:link action="/resource/server/Inventory">
-	            		<html:param name="mode" value="view"/>
-	            		<html:param name="type" value="${Resource.server.entityId.type}"/>
-	            		<html:param name="rid" value="${Resource.server.id}"/>
-	            		<c:out value="${Resource.server.name}"/>
-	            	</html:link>
-	            </td>
+            <td width="20%" class="BlockLabel"><fmt:message key="resource.service.inventory.type.HostServer"/></td>
+            <td width="30%" class="BlockContent"><html:link page="/resource/server/Inventory.do?mode=view&type=${Resource.server.entityId.type}&rid=${Resource.server.id}"><c:out value="${Resource.server.name}"/></html:link></td>
             </c:when>
             <c:otherwise>
-	            <td width="20%" class="BlockLabel"><fmt:message key="resource.server.inventory.type.HostPlatform"/></td>
-	            <td width="30%" class="BlockContent">
-	            	<html:link action="/resource/platform/Inventory">
-	            		<html:param name="mode" value="view"/>
-	            		<html:param name="type" value="${ParentResource.entityId.type}"/>
-	            		<html:param name="rid" value="${ParentResource.id}"/>
-	            		<c:out value="${ParentResource.name}"/>
-	            	</html:link>
-	            </td>
-	        </c:otherwise>
+            <td width="20%" class="BlockLabel"><fmt:message key="resource.server.inventory.type.HostPlatform"/></td>
+            <td width="30%" class="BlockContent"><html:link page="/resource/platform/Inventory.do?mode=view&type=${ParentResource.entityId.type}&rid=${ParentResource.id}"><c:out value="${ParentResource.name}"/></html:link></td>
+            </c:otherwise>
         </c:choose>
         <td width="50%" class="BlockLabel">&nbsp;</td>
     </tr>
