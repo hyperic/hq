@@ -346,7 +346,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      * 
      * @return a List of the associated Measurement objects
      */
-    private List<Measurement> createDefaultMeasurements(AuthzSubject subject, AppdefEntityID id,
+    public List<Measurement> createDefaultMeasurements(AuthzSubject subject, AppdefEntityID id,
                                                         String mtype, ConfigResponse props)
         throws TemplateNotFoundException, PermissionException, MeasurementCreateException {
         // We're going to make sure there aren't metrics already
@@ -1621,18 +1621,18 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         // Check the configuration
         if (verify) {
-            try {
-                checkConfiguration(subj, id, config);
-            } catch (InvalidConfigException e) {
-                log.warn("Error turning on default metrics, configuration (" + config + ") " +
-                         "couldn't be validated", e);
-                configManager.setValidationError(subj, id, e.getMessage());
-                return rtn;
-            } catch (Exception e) {
-                log.warn("Error turning on default metrics, " + "error in validation", e);
-                configManager.setValidationError(subj, id, e.getMessage());
-                return rtn;
-            }
+//            try {
+//                checkConfiguration(subj, id, config);
+//            } catch (InvalidConfigException e) {
+//                log.warn("Error turning on default metrics, configuration (" + config + ") " +
+//                         "couldn't be validated", e);
+//                configManager.setValidationError(subj, id, e.getMessage());
+//                return rtn;
+//            } catch (Exception e) {
+//                log.warn("Error turning on default metrics, " + "error in validation", e);
+//                configManager.setValidationError(subj, id, e.getMessage());
+//                return rtn;
+//            }
         }
 
         // Enable the metrics
