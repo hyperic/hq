@@ -1981,7 +1981,9 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      */
     public Ip addIp(Platform platform, String address, String netmask, String macAddress) {
-        return platform.addIp(address, netmask, macAddress);
+        Ip ip = platform.addIp(address, netmask, macAddress);
+        platformDAO.getSession().save(ip);
+        return ip;
     }
 
     /**

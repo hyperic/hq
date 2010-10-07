@@ -346,7 +346,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      * 
      * @return a List of the associated Measurement objects
      */
-    private List<Measurement> createDefaultMeasurements(AuthzSubject subject, AppdefEntityID id,
+    public List<Measurement> createDefaultMeasurements(AuthzSubject subject, AppdefEntityID id,
                                                         String mtype, ConfigResponse props)
         throws TemplateNotFoundException, PermissionException, MeasurementCreateException {
         // We're going to make sure there aren't metrics already
@@ -1140,6 +1140,30 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         disableMeasurements(subject, agent, ids, false);
     }
     
+    public void disableMeasurementsForDeletion(AuthzSubject subject, Agent agent,
+                    AppdefEntityID[] ids) throws PermissionException {
+        List<Resource> resources = new ArrayList<Resource>();
+        for (int i = 0; i < ids.length; i++) {
+            permissionManager.checkModifyPermission(subject.getId(), ids[i]);
+            resources.add(resourceManager.findResource(ids[i]));
+        } 
+        List<Measurement> mcol = measurementDAO.findByResources(resources);
+        
+        Integer[] mids = new Integer[mcol.size()];
+        Iterator<Measurement> it = mcol.iterator();
+        for (int j = 0; it.hasNext(); j++) {
+            Measurement dm = it.next();
+            dm.setEnabled(false);
+            mids[j] = dm.getId();
+        }
+
+        removeMeasurementsFromCache(mids);
+        
+        enqueueZeventsForMeasScheduleCollectionDisabled(mids);
+    
+        ZeventManager.getInstance().enqueueEventAfterCommit(new AgentUnscheduleZevent(Arrays.asList(ids), agent.getAgentToken()));
+    }
+    
     /**
      * Disable all measurements for the given resources.
      *
@@ -1621,18 +1645,18 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         // Check the configuration
         if (verify) {
-            try {
-                checkConfiguration(subj, id, config);
-            } catch (InvalidConfigException e) {
-                log.warn("Error turning on default metrics, configuration (" + config + ") " +
-                         "couldn't be validated", e);
-                configManager.setValidationError(subj, id, e.getMessage());
-                return rtn;
-            } catch (Exception e) {
-                log.warn("Error turning on default metrics, " + "error in validation", e);
-                configManager.setValidationError(subj, id, e.getMessage());
-                return rtn;
-            }
+//            try {
+//                checkConfiguration(subj, id, config);
+//            } catch (InvalidConfigException e) {
+//                log.warn("Error turning on default metrics, configuration (" + config + ") " +
+//                         "couldn't be validated", e);
+//                configManager.setValidationError(subj, id, e.getMessage());
+//                return rtn;
+//            } catch (Exception e) {
+//                log.warn("Error turning on default metrics, " + "error in validation", e);
+//                configManager.setValidationError(subj, id, e.getMessage());
+//                return rtn;
+//            }
         }
 
         // Enable the metrics

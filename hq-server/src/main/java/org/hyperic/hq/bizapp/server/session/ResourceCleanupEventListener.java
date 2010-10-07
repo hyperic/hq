@@ -166,9 +166,12 @@ public class ResourceCleanupEventListener implements ZeventListener<ResourcesCle
         final StopWatch watch = new StopWatch();
         final AuthzSubject subject = authzSubjectManager.findSubjectById(AuthzConstants.overlordId);
         watch.markTimeBegin("unscheduleMeasurementsForAsyncDelete");
+        org.springframework.util.StopWatch stopWatch = new org.springframework.util.StopWatch();
+        stopWatch.start("Unschedule");
         unscheduleMeasurementsForAsyncDelete(agentCache);
         watch.markTimeEnd("unscheduleMeasurementsForAsyncDelete");
-
+        stopWatch.stop();
+        log.info("Unschedule took " + stopWatch.getLastTaskTimeMillis());
         // Look through services, servers, platforms, applications, and groups
         watch.markTimeBegin("removeApplications");
         Collection<Application> applications = applicationManager.findDeletedApplications();
@@ -215,9 +218,9 @@ public class ResourceCleanupEventListener implements ZeventListener<ResourcesCle
 
                 Agent agent = agentManager.getAgent(agentId);
                 List<AppdefEntityID> resources = agentCache.get(agentId);
-
-                measurementManager.disableMeasurements(subject, agent, (AppdefEntityID[]) resources
-                    .toArray(new AppdefEntityID[0]), true);
+               
+                measurementManager.disableMeasurementsForDeletion(subject, agent, (AppdefEntityID[]) resources
+                    .toArray(new AppdefEntityID[resources.size()]));
             }
         } catch (Exception e) {
             log.error("Error unscheduling measurements during async delete", e);
@@ -310,6 +313,6 @@ public class ResourceCleanupEventListener implements ZeventListener<ResourcesCle
 
 
     public String toString() {
-        return "AppdefBoss.removeDeletedResources";
+        return "ResourceCleanupEventListener";
     }
 }
