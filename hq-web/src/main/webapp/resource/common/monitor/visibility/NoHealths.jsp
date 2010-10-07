@@ -2,8 +2,6 @@
 <%@ page errorPage="/common/Error.jsp" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
-<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -31,15 +29,11 @@
  --%>
 
 
-<tiles:importAttribute name="msgKey" ignore="true"/>
-
-<c:if test="${not empty msgKey}">
-      <div class="footerMessageContainer">
- 	  <i><fmt:message key="${msgKey}"/></i>
- 	  </div>
-</c:if>
-
-    </td>
-    <td>&nbsp;</td>
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td class="BlockContent" width="100%"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/><i><fmt:message key="resource.common.monitor.visibility.NoHealthsEtc"/></i></td>
+  </tr>
+  <tr>
+    <td class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
   </tr>
 </table>

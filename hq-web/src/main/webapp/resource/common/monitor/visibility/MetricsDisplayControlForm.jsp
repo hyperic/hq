@@ -162,10 +162,9 @@
           </td>
           <td><html:image property="range" page="/images/4.0/icons/accept.png" border="0"/></td>
           <td width="100%" style="padding-left: 5px;">
+            <a href='<html:rewrite page="/ResourceCurrentHealth.do?eid=${eid}&view=${view}&alertDefaults=true"/>'>
             <c:if test="${form.a != 1 || (rangeEnd - rangeBegin) > 172800000}">
-              <a href='<html:rewrite page="/ResourceCurrentHealth.do?eid=${eid}&view=${view}&alertDefaults=true"/>'>
-              	<fmt:message key="resource.common.monitor.visibility.now"/>
-              </a>&nbsp;<fmt:message key="common.label.Pipe"/>&nbsp;
+              <fmt:message key="resource.common.monitor.visibility.now"/></a>&nbsp;<fmt:message key="common.label.Pipe"/>&nbsp;
             </c:if>
 			<html:link href="javascript:moveIt(dojo.byId('advancedDisplay'), '-20px', '25px');showAdvanced();"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.AdvancedSettingsBtn"/></html:link>
           </td>

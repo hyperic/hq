@@ -53,4 +53,4 @@
       <c:set var="availabilityClassName" value="availabilityError" />
     </c:otherwise>
   </c:choose>
-<div class="<c:out value="${availabilityClassName}" />">&nbsp;</div>
+<div class="<c:out value="${availabilityClassName}" />" />

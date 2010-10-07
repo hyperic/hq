@@ -62,6 +62,19 @@
   </tr>
   <tr>
     <td>
+      <tiles:insert definition=".resource.common.monitor.visibility.listvirtualresources">
+        <tiles:put name="mode" beanName="mode"/>
+        <tiles:put name="internal" value="false"/>
+        <tiles:put name="childResourceType" value="3"/>
+        <tiles:put name="virtual" value="true"/>
+        <tiles:put name="childResourcesHealthKey" value="resource.common.monitor.visibility.VirtualServicesHealthTab"/>
+        <tiles:put name="childResourcesTypeKey" value="resource.group.monitor.visibility.ServiceTypeTH"/>
+        <tiles:put name="checkboxes" beanName="showProblems"/>
+      </tiles:insert>
+    </td>
+  </tr>
+  <tr>
+    <td>
   <c:choose>
     <c:when test="${showProblems}">
       <tiles:insert definition=".resource.common.monitor.visibility.problemmetrics"/>

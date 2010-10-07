@@ -55,8 +55,8 @@ public class ExceedsThresholdTest extends BaseInfrastructureTest {
 
     @Autowired private MockService mockServiceImpl;
    
-    //@Value("${hq.zevent.warnInterval}")
-    private long unAcceptableDuration = 300000;
+    @Value("${hq.methodWarn.time}")
+    private long unAcceptableDuration;
 
     @Before
     public void before() {

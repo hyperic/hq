@@ -3,8 +3,6 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
-
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -13,7 +11,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004-2010], VMware, Inc.
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -42,140 +40,124 @@
 	<c:set var="mode" value="currentHealth"/>
 </c:if>
 
+<c:if test="${empty listMembersName}">
+  	<c:set var="listMembersName" value="defaultValue"/>
+</c:if>
+
+<c:if test="${checkboxes}">
+	<c:set var="widgetInstanceName" value="hostResources"/>
+
+  	<script type="text/javascript">
+    	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+    	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+  	</script>
+</c:if>
+
+<c:forEach var="summary" items="${summaries}" varStatus="status">
+	<div id="<c:out value="${summary.resourceTypeId}_${summary.resourceId}_menu"/>" class="menu">
+    	<ul>
+      		<li>
+      			<div class="BoldText">
+      				<fmt:message key="${hostResourcesHealthKey}"/>&nbsp;
+      				<fmt:message key="resource.common.monitor.visibility.TypeTH"/>
+      			</div>
+      
+      			<c:out value="${summary.resourceTypeName}"/>
+      		</li>
+
+    		<c:if test="${showHostPlatform}">
+      			<li>
+      				<div class="BoldText">
+      					<fmt:message key="resource.common.monitor.visibility.HostPlatformTH"/>
+      				</div>
+      
+      				<html:link page="/resource/platform/monitor/Visibility.do?mode=${param['mode']}&eid=${summary.parentResourceTypeId}:${summary.parentResourceId}">
+      					<c:out value="${summary.parentResourceName}" default="PARENT RESOURCE NAME NOT SET"/>
+      				</html:link>
+      			</li>
+    		</c:if>
+      	
+      		<li>
+      			<div class="BoldText">
+      				<fmt:message key="resource.common.monitor.visibility.USAGETH"/>
+      			</div>
+        
+        		<hq:metric metric="${summary.throughput}" unit="none"  defaultKey="common.value.notavail" />
+      		</li>
+    	</ul>
+  	</div>
+
+	<c:set var="count" value="${status.count}"/>
+</c:forEach>
+
+<hq:pageSize var="pageSize"/>
+
 <!--  HOST RESOURCES CONTENTS -->
-<ul id="hostResourceList" class="resourceList">
-	<li class="header">
-		<span class="checkboxColumn">
-			<c:choose>
-				<c:when test="${not empty summaries && checkboxes}">
-					<input id="hostResourcesAllCheckbox" type="checkbox" name="hostResourcesAll" />
-   				</c:when>
-   				<c:otherwise>&nbsp;</c:otherwise>
-   			</c:choose>
-		</span>
-		<span class="nameColumn"><fmt:message key="${tabKey}"/></span>
-		<span class="availColumn"><fmt:message key="resource.common.monitor.visibility.AVAILTH"/></span>
-		<span class="commentColumn">&nbsp;</span>
-	</li>
-	<li style="border-bottom:0px;">
-		<ul class="resourceListContainer">
-			<c:forEach var="summary" items="${summaries}">
-				<c:url var="gotoResourceLink" value="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do">
-					<c:param name="mode" value="${mode}" />
-					<c:param name="type" value="${summary.resourceTypeId}" />
-					<c:param name="rid" value="${summary.resourceId}" />
-				</c:url>
-				<li>
-					<span class="checkboxColumn">
-						<c:choose>
-							<c:when test="${checkboxes}">
-		    					<html:multibox property="host" value="${summary.resourceTypeId}:${summary.resourceId}" styleClass="hostResource"/>
-		    				</c:when>
-		    				<c:otherwise>&nbsp;</c:otherwise>
-		    			</c:choose>
-		    		</span>
-		    		<span class="nameColumn">
-		   				<a href="<c:out value="${gotoResourceLink}" />"><c:out value="${summary.resourceName}"/></a>
-		   			</span>
-		   			<span class="availColumn">
-		   				<tiles:insert page="/resource/common/monitor/visibility/AvailIcon.jsp">
-			       			<tiles:put name="availability" beanName="summary" beanProperty="availability" />
-			   			</tiles:insert>
-			   		</span>
-			   		<span class="commentColumn">
-			   			<c:set var="metricValue">
-							<hq:metric metric="${summary.throughput}" unit="none" defaultKey="common.value.notavail" />
-						</c:set>
-						<c:set var="metricValue" value="${fn:substringAfter(metricValue, '<span>')}" />
-			   			<c:set var="metricValue" value="${fn:substringBefore(metricValue, '</span>')}" />
-			   			<div class="resourceCommentIcon" 
-			   			     id="comment_<c:out value="${summary.resourceId}" />" 
-			   			     resourcename="<c:out value="${summary.resourceTypeName}" />" 
-			   			     <c:if test="${showHostPlatform}">
-			   			     	parentname="<c:out value="${summary.parentResourceName}" default="PARENT RESOURCE NAME NOT SET"/>"
-			   			     	parenteid="<c:out value="${summary.parentResourceTypeId}:${summary.parentResourceId}"/>"
-			   			     </c:if>
-			   			     metricvalue="<c:out value="${metricValue}" />">&nbsp;</div>
-			   		</span>
-				</li>
-			</c:forEach>
-			<c:if test="${empty summaries}">
-				<li>
-		  			<c:if test="${empty errKey}">
-		    			<c:set var="errKey" value="resource.common.monitor.visibility.NoHealthsEtc" />
-		  			</c:if>
-		  			<tiles:insert definition=".resource.common.monitor.visibility.HostHealthError">
-		    			<tiles:put name="errKey" beanName="errKey" />
-		  			</tiles:insert>
-		  		</li>
-			</c:if>
-		</ul>
-	</li>
-</ul>
-<div id="hostResourceInfoPopup" class="menu popup">
-	<p>
-		<span class="BoldText">
-			<fmt:message key="${hostResourcesHealthKey}"/> <fmt:message key="resource.common.monitor.visibility.TypeTH"/>
-		</span><br/>
-	    <span id="hostResourceInfoPopupNameField"></span>
-	</p>
-    <c:if test="${showHostPlatform}">
-    	<p>
-	    	<span class="BoldText"><fmt:message key="resource.common.monitor.visibility.HostPlatformTH"/></span><br/>
-	    	<a id="hostResourceInfoPopupParentLink" href="#"></a>
-    	</p>
-    </c:if>
-    <p>
-	    <span class="BoldText"><fmt:message key="resource.common.monitor.visibility.USAGETH"/></span><br/>
-		<span id="hostResourceInfoPopupMetricValueField"></span>           	
-    </p>
+<c:choose>
+	<c:when test="${count > 5}">
+		<div id="hostResourcesDiv" class="scrollable">
+	</c:when>
+	<c:otherwise>
+    	<div id="hostResourcesDiv">
+  	</c:otherwise>
+</c:choose>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0" id="listTable">
+	<tr class="ListHeaderLight">
+    	<c:if test="${not empty summaries && checkboxes}">
+    		<td class="ListHeaderCheckbox" width="3%">
+    			<input type="checkbox" onclick="ToggleAllGroup(this, widgetProperties, '<c:out value="${listMembersName}"/>')" name="listToggleAll"/>
+    		</td>
+    	</c:if>
+
+    	<td class="ListHeader">
+    		<fmt:message key="${tabKey}"/>
+    	</td>
+    
+    	<c:if test="${not empty summaries}">
+    		<td class="ListHeaderCheckbox">
+    			<fmt:message key="resource.common.monitor.visibility.AVAILTH"/>
+    		</td>
+    		<td class="ListHeaderInactive" width="6%">&nbsp;</td>
+		</c:if>
+  	</tr>
+
+    <c:forEach var="summary" items="${summaries}">
+  		<tr class="ListRow">
+  			<c:url var="url" value="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do?mode=${mode}&eid=${summary.resourceTypeId}:${summary.resourceId}"/>
+    
+    		<c:if test="${checkboxes}">
+    			<td class="ListCellCheckbox" width="3%">
+    				<html:multibox property="host" value="${summary.resourceTypeId}:${summary.resourceId}" styleClass="${listMembersName}"/>
+    			</td>
+    		</c:if>
+
+    		<td class="ListCell">
+    			<a href="<c:out value="${url}"/>">
+    				<c:out value="${summary.resourceName}"/>
+    			</a>
+    		</td>
+    		<td class="ListCellCheckbox">
+    			<tiles:insert page="/resource/common/monitor/visibility/AvailIcon.jsp">
+        			<tiles:put name="availability" beanName="summary" beanProperty="availability" />
+    			</tiles:insert>
+    		</td>
+    		<td class="ListCellCheckbox resourceCommentIcon"
+    		    onmouseover="menuLayers.show('<c:out value="${summary.resourceTypeId}" />_<c:out value="${summary.resourceId}" />_menu', event)" 
+    		    onmouseout="menuLayers.hide()">&nbsp;
+			</td>
+  		</tr>
+	</c:forEach>
+</table>
+
+<c:if test="${empty summaries}">
+	<c:if test="${empty errKey}">
+    	<c:set var="errKey" value="resource.common.monitor.visibility.NoHealthsEtc" />
+  	</c:if>
+  
+  	<tiles:insert definition=".resource.common.monitor.visibility.HostHealthError">
+    	<tiles:put name="errKey" beanName="errKey" />
+  	</tiles:insert>
+</c:if>
+
 </div>
-<script>
-	dojo11.addOnLoad(function() {
-		var masterCheckbox = dojo11.byId("hostResourcesAllCheckbox");
-
-		if (masterCheckbox) {
-			dojo11.connect(masterCheckbox, "onclick", function(e) {
-				var cb = e.target;
-				var ul = cb.parentNode.parentNode.parentNode;
-		
-				dojo11.query("input.hostResource", ul).forEach(function(el) {
-					el.checked = cb.checked;
-				});
-			});
-		}
-			
-		var list = dojo11.byId("hostResourceList");
-		
-		dojo11.connect(list, "onmouseover", function(e) {
-			var el = e.target;
-			
-			if (dojo11.hasClass(el, "resourceCommentIcon")) {
-				var nameEl = dojo11.byId("hostResourceInfoPopupNameField");
-				var metricValueEl = dojo11.byId("hostResourceInfoPopupMetricValueField");
-				var parentLink = dojo11.byId("hostResourceInfoPopupParentLink");
-				
-				nameEl.innerHTML = el.attributes["resourcename"].value;
-				metricValueEl.innerHTML = el.attributes["metricvalue"].value;
-
-				if (parentLink) {
-					<c:url var="parentLink" value="/resource/platform/monitor/Visibility.do">
-  						<c:param name="mode" value="${param['mode']}"/>
-  					</c:url>
-					var baseUrl = "<c:out value="${parentLink}" />";
-					
-					parentLink.innerHTML = el.attributes["parentname"].value;
-					parentLink.href = baseUrl + "&eid=" + el.attributes["parenteid"].value;
-				}
-				
-				menuLayers.show("hostResourceInfoPopup", e);
-			}
-		})
-		
-		dojo11.connect(list, "onmouseout", function(e) {
-			if (dojo11.hasClass(e.target, "resourceCommentIcon")) {
-				menuLayers.hide();
-			}
-		});
-	});
-</script>
