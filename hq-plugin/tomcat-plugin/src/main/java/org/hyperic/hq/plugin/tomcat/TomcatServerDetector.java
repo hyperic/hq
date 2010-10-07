@@ -260,6 +260,7 @@ public class TomcatServerDetector
         File hq = findVersionFile(new File(catalinaBase), Pattern.compile("hq-common.*\\.jar"));
         if (hq != null) {
             server.setName(getPlatformName()+" HQ Tomcat "+getTypeInfo().getVersion());
+            server.setIdentifier("HQ Tomcat");
         }
 
         return server;
