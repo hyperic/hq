@@ -56,9 +56,8 @@
   <tr><td>
     <c:set var="tabKey" value="resource.common.monitor.visibility.Host${hostType}sTab"/>
     <c:set var="hostResourcesHealthKey" value="resource.common.monitor.visibility.${hostType}TH"/>
-    <tiles:insert definition=".resource.common.monitor.visibility.hostResourcesCurrentHealth">
+    <tiles:insert definition=".resource.group.monitor.visibility.listhostresources">
       <tiles:put name="tabKey" beanName="tabKey"/>
-      <tiles:put name="summaries" beanName="HostHealthSummaries"/>
       <tiles:put name="hostResourcesHealthKey" beanName="hostResourcesHealthKey"/>
     </tiles:insert>
   </td></tr>

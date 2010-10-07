@@ -396,4 +396,6 @@ public interface MeasurementManager {
      */
     List<Measurement> getMetricsCollecting(ResourceGroup g, Integer templateId);
 
+    List<Measurement> getEnabledMeasurements(Integer[] tids, Integer[] aeids);
+
 }

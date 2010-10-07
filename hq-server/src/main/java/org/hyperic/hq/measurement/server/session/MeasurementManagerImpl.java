@@ -1558,6 +1558,14 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      * @return List {@link Measurement} of MeasurementIds
      */
     @Transactional(readOnly = true)
+    public List<Measurement> getEnabledMeasurements(Integer[] tids, Integer[] aeids) {
+        return measurementDAO.findMeasurements(tids, aeids, true);
+    }
+
+    /**
+     * @return List {@link Measurement} of MeasurementIds
+     */
+    @Transactional(readOnly = true)
     public List<Measurement> getMeasurements(Integer[] tids, Integer[] aeids) {
         return measurementDAO.findMeasurements(tids, aeids);
     }

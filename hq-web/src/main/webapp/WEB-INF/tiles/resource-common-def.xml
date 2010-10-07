@@ -154,6 +154,9 @@
   <definition name=".resource.common.monitor.visibility.noMetrics"
               path="/resource/common/monitor/visibility/NoMetrics.jsp"/>
 
+  <definition name=".resource.common.monitor.visibility.noHealths"
+              path="/resource/common/monitor/visibility/NoHealths.jsp"/>
+
   <definition name=".resource.common.monitor.visibility.HostHealthError"
               path="/resource/common/monitor/visibility/HostHealthError.jsp"/>
 
@@ -242,6 +245,10 @@
   <!-- monitor list resources -->
   <definition name=".resource.common.monitor.visibility.listchildresources"
               path="/resource/common/monitor/visibility/ListChildResources.jsp"/>
+
+  <definition name=".resource.common.monitor.visibility.listvirtualresources"
+              extends=".resource.group.monitor.visibility.listchildresources"
+              controllerUrl="/resource/common/monitor/visibility/ListVirtualResources.do"/>
 
   <!-- control portlets -->
   <definition name=".resource.common.control.quickControl" 

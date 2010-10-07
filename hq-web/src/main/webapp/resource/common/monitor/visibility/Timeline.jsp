@@ -51,24 +51,19 @@
       <html:img page="/images/timeline_lr.gif" height="10"/> 
     </td>
   </tr>
-  
-  <fmt:formatNumber var="halfOfIntervalCount"
-  value="${count / 2}"
-  pattern="0"/>
-  
   <tr>
     <td></td>
-    <td colspan="<c:out value="${halfOfIntervalCount}"/>" valign="top">
+    <td colspan="<c:out value="${count / 2}"/>" valign="top">
       <hq:dateFormatter value="${timeIntervals[0].time}"/>
       <div id="timePopup" class="timepopup" onmousedown="overlay.hideTimePopup()"></div>
     </td>
-    <td colspan="<c:out value="${halfOfIntervalCount}"/>" align="right" valign="top">
+    <td colspan="<c:out value="${count / 2}"/>" align="right" valign="top">
       <hq:dateFormatter value="${timeIntervals[count - 1].time}"/>
     </td>
     <td></td>
   </tr>
   <tr>
-    <td colspan="100%" valign="top">
+    <td colspan="<c:out value="${count + 2}"/>" valign="top">
       <a name="eventDetail"></a>
       <div id="eventDetailTable"
            style="position: relative; height: 230px; display: none;">
@@ -91,25 +86,25 @@
 </script>
       <table cellspacing="0" width="100%">
         <tr>
-          <td id="ALLEventsTab" width="10%" class="eventsTabOn" nowrap>
+          <td id="ALLEventsTab" width="10%" class="eventsTabOn" nowrap="true">
             <a href="#eventDetail" onclick="filterEventsDetails('ALL')" class="black"><fmt:message key="resource.common.monitor.label.events.All"/></a>
           </td>
-          <td id="ERREventsTab" width="10%" class="eventsTab" nowrap>
+          <td id="ERREventsTab" width="10%" class="eventsTab" nowrap="true">
             <a href="#eventDetail" onclick="filterEventsDetails('ERR')" class="red"><fmt:message key="resource.common.monitor.label.events.Error"/></a>
           </td>
-          <td id="WRNEventsTab" width="10%" class="eventsTab" nowrap>
+          <td id="WRNEventsTab" width="10%" class="eventsTab" nowrap="true">
             <a href="#eventDetail" onclick="filterEventsDetails('WRN')" class="yellow"><fmt:message key="resource.common.monitor.label.events.Warn"/></a>
           </td>
-          <td id="INFEventsTab" width="10%" class="eventsTab" nowrap>
+          <td id="INFEventsTab" width="10%" class="eventsTab" nowrap="true">
             <a href="#eventDetail" onclick="filterEventsDetails('INF')" class="green"><fmt:message key="resource.common.monitor.label.events.Info"/></a>
           </td>
-          <td id="DBGEventsTab" width="10%" class="eventsTab" nowrap>
+          <td id="DBGEventsTab" width="10%" class="eventsTab" nowrap="true">
             <a href="#eventDetail" onclick="filterEventsDetails('DBG')" class="green"><fmt:message key="resource.common.monitor.label.events.Debug"/></a>
           </td>
-          <td id="ALREventsTab" width="10%" class="eventsTab" nowrap>
+          <td id="ALREventsTab" width="10%" class="eventsTab" nowrap="true">
             <a href="#eventDetail" onclick="filterEventsDetails('ALR')" class="red"><fmt:message key="resource.common.monitor.label.events.Alert"/></a>
           </td>
-          <td id="CTLEventsTab" width="10%" class="eventsTab" nowrap>
+          <td id="CTLEventsTab" width="10%" class="eventsTab" nowrap="true">
             <a href="#eventDetail" onclick="filterEventsDetails('CTL')" class="navy"><fmt:message key="resource.common.monitor.label.events.Control"/></a>
           </td>
           <td valign="top" style="text-align: right; border-bottom: solid; border-width: 1px; border-color: #000000;">

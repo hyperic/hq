@@ -225,10 +225,9 @@
 					</td>
 			        <td class="ListCell resourceCommentIcon"
 			    	    onmouseover="menuLayers.show('metric_menu_<c:out value="${metric.templateId}" />', event)" 
-			    	    onmouseout="menuLayers.hide()"
-			    	    style="width:5%;">&nbsp;
+			    	    onmouseout="menuLayers.hide()">&nbsp;
 					</td>
-					<td class="ListCell addMetricIcon" onclick="<c:out value="${scriptUrl}"/>" style="width:10%;">&nbsp;</td>
+					<td class="ListCell addMetricIcon" onclick="<c:out value="${scriptUrl}"/>">&nbsp;</td>
 				</tr>
 			</c:forEach>
 		</table>

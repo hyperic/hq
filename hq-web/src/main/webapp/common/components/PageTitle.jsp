@@ -151,10 +151,7 @@
       											
       											<c:if test="${not empty resource}">
       												- 
-      												<html:link action="/resource/${resource.entityId.typeName}/Inventory">
-      													<html:param name="mode" value="changeOwner" />
-      													<html:param name="rid" value="${resource.id}" />
-      													<html:param name="type" value="${resource.entityId.type}" />
+      												<html:link page="/resource/${resource.entityId.typeName}/Inventory.do?mode=changeOwner&rid=${resource.id}&type=${resource.entityId.type}">
       												  	<fmt:message key="resource.common.inventory.props.ChangeButton"/>
       												</html:link>
       												<br>
@@ -334,4 +331,4 @@
     	</td>
   	</tr>
   	<tr>
-    	<td style="padding-left:25px;">
+    	<td style="padding-left:25px; width:100%">
