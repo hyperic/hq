@@ -1,5 +1,5 @@
 /**
- * NOTE: This copyright does *not* cover user programs that use HQ
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
@@ -7,9 +7,9 @@
  *  "derived work".
  *
  *  Copyright (C) [2010], VMware, Inc.
- *  This file is part of HQ.
+ *  This file is part of Hyperic.
  *
- *  HQ is free software; you can redistribute it and/or modify
+ *  Hyperic is free software; you can redistribute it and/or modify
  *  it under the terms version 2 of the GNU General Public License as
  *  published by the Free Software Foundation. This program is distributed
  *  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -91,9 +91,15 @@ public class ProcessManagerImpl implements ProcessManager {
         if (timeout != -1) {
             watchdog = new ExecuteWatchdog(timeout);
         }
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
 
-        Execute ex = new Execute(new PumpStreamHandler(output), watchdog);
+        Execute ex = null;
+        if (suppressOutput) {
+            ex = new Execute(new PumpStreamHandler(new ByteArrayOutputStream()), watchdog);
+        } else {
+            // send standard output and error of subprocesses to standard 
+            // output and error of the parent process
+            ex = new Execute(new PumpStreamHandler(System.out, System.err), watchdog);
+        }
         ex.setWorkingDirectory(new File(workingDir));
         ex.setCommandline(commandLine);
         if (envVariables != null) {
@@ -106,13 +112,14 @@ public class ProcessManagerImpl implements ProcessManager {
             exitCode = 1;
             log.error(e.getMessage(), e);
         }
-        String message = output.toString();
-        // Don't log error messages if exit code is 143 - will happen if process
+        // Don't log as error if exit code is 143 - will happen if process
         // is terminated by kill
-        if (message.length() > 0 && exitCode != 0 && exitCode != 143) {
-            log.error(message);
-        } else if (message.length() > 0 && !(suppressOutput)) {
-            log.info(message);
+        if (exitCode != 0 && exitCode != 143) {
+            String err = "Command did not execute successfully (exit code = " + exitCode + ")";
+            log.error(err);
+        } else {
+            String info = "Command executed successfully (exit code = " + exitCode + ") ";
+            log.info(info);
         }
         if (watchdog != null && watchdog.killedProcess()) {
             String err = "Command did not complete within timeout of " +
