@@ -33,45 +33,40 @@ import org.hyperic.hq.product.Collector;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.amqp.rabbit.admin.QueueInfo;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 /**
- * RabbitQueueCollector
- *
+ * QueueCollector
  * @author Helena Edelson
  */
-public class RabbitQueueCollector extends Collector {
+public class QueueCollector extends Collector {
 
-    private static final Log logger = LogFactory.getLog(RabbitQueueCollector.class);
- 
+    private static final Log logger = LogFactory.getLog(QueueCollector.class);
+
     @Override
     public void collect() {
         RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
         if (rabbitGateway != null) {
 
             try {
-                List<QueueInfo> queues = rabbitGateway.getQueues();
-                if (queues != null) {
 
-                    for (QueueInfo queue : queues) {
+                List<String> virtualHosts = rabbitGateway.getVirtualHosts();
+                if (virtualHosts != null) {
+                    for (String virtualHost : virtualHosts) {
 
-                        Map<String, Object> props = new HashMap<String, Object>();
-                        props.put("messages", queue.getMessages());
-                        props.put("consumers", queue.getConsumers());
-                        props.put("transactions", queue.getTransactions());
-                        props.put("memory", queue.getMemory());
-                        addValues(props);
+                        List<QueueInfo> queues = rabbitGateway.getQueues(virtualHost);
+                        if (queues != null) {
 
-                        setValue("messages", queue.getMessages());
-                        setValue("consumers", queue.getConsumers());
-                        setValue("transactions", queue.getTransactions());
-                        setValue("memory", queue.getMemory());
+                            for (QueueInfo queue : queues) {
+                                setAvailability(true);
+                                setValue("messages", queue.getMessages());
+                                setValue("consumers", queue.getConsumers());
+                                setValue("transactions", queue.getTransactions());
+                                setValue("memory", queue.getMemory());
 
-
-                        setAvailability(true);
+                            }
+                        }
                     }
                 }
             }
@@ -87,8 +82,8 @@ public class RabbitQueueCollector extends Collector {
      * in the UI.
      * @param queue
      * @return
-     */    
-    public static ConfigResponse getAttributes(QueueInfo queue) { 
+     */
+    public static ConfigResponse getAttributes(QueueInfo queue) {
         String durable = queue.isDurable() ? "durable" : "not durable";
         ConfigResponse res = new ConfigResponse();
         res.setValue("durable", durable);
@@ -97,8 +92,8 @@ public class RabbitQueueCollector extends Collector {
         res.setValue("messagesUnacknowledged", queue.getMessagesUnacknowledged());
         res.setValue("messagesUncommitted", queue.getMessageUncommitted());
         res.setValue("name", queue.getName());
-        res.setValue("pid", queue.getPid().substring(5, queue.getPid().length()-1));
-        return res;        
-    }   
+        res.setValue("pid", queue.getPid().substring(5, queue.getPid().length() - 1));
+        return res;
+    }
 
 }

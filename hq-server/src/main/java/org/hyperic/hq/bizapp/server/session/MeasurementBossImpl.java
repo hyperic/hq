@@ -2524,15 +2524,14 @@ public class MeasurementBossImpl implements MeasurementBoss {
 
         // Now get the aggregate data, keyed by template ID's
 
-        final List<Measurement> measurements = measurementManager.getMeasurements(tids, eids);
-        final Map<Integer, double[]> datamap = dataManager.getAggregateDataByTemplate(measurements,
-            begin, end);
+        final List<Measurement> measurements = measurementManager.getEnabledMeasurements(tids, eids);
+        final Map<Integer, double[]> datamap =
+            dataManager.getAggregateDataByTemplate(measurements, begin, end);
 
         // Get the intervals, keyed by template ID's as well
-        final Map<Integer, Long> intervals = (showNoCollect == null) ? new HashMap<Integer, Long>()
-                                                                    : measurementManager
-                                                                        .findMetricIntervals(
-                                                                            subject, aeids, tids);
+        final Map<Integer, Long> intervals = (showNoCollect == null) ?
+            new HashMap<Integer, Long>() :
+            measurementManager.findMetricIntervals(subject, aeids, tids);
 
         for (it = templates.iterator(); it.hasNext();) {
             MeasurementTemplate tmpl = (MeasurementTemplate) it.next();

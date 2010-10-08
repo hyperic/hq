@@ -4,7 +4,7 @@
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
- * "derived work".
+ *  "derived work".
  *
  *  Copyright (C) [2010], VMware, Inc.
  *  This file is part of Hyperic.
@@ -23,28 +23,16 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq.core;
- 
-import com.ericsson.otp.erlang.OtpErlangObject;
-import org.springframework.amqp.core.Exchange;
-import org.springframework.erlang.ErlangBadRpcException;
+package org.hyperic.hq.measurement.server.session;
 
-import java.util.List;
+import java.util.Map;
 
 /**
- * ErlangGatway
- *
- * @author Helena Edelson
+ * Responsible for calculating backfill points based on a current time.
+ * @author jhickey
+ * 
  */
-public interface ErlangGateway {
+public interface BackfillPointsService {
 
-    List<String> getVirtualHosts() throws ErlangBadRpcException;
-    
-    List<Exchange> getExchanges(String virtualHost) throws ErlangBadRpcException;
-
-    List<Connection> getConnections() throws ErlangBadRpcException;
-
-    List<Channel> getChannels() throws ErlangBadRpcException;
-    
-    String getVersion() throws ErlangBadRpcException;
+    Map<Integer, DataPoint> getBackfillPoints(long current);
 }

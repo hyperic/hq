@@ -92,7 +92,7 @@
 
 	<table width="680" cellpadding="2" cellspacing="0" border="0">
 		<tr>
-			<td class="ListHeaderInactive" nowrap>
+			<td class="ListHeaderInactive" nowrap="true">
 				<fmt:message key="resource.common.monitor.visibility.IndicatorCharts" />&nbsp;
 				<fmt:message key="common.label.Pipe" />&nbsp;
 				<a href='<html:rewrite page="/ResourceCurrentHealth.do"/>?eid=<c:out value="${eid}"/>&view=<c:out value="${view}"/>&alertDefaults=true'>
@@ -174,7 +174,7 @@
 											</c:otherwise>
 										</c:choose>
 									<div class="<c:out value="${timelineIndicatorColor}" />"
-									     onmousedown="overlay.moveOverlay(this);overlay.showTimePopupTopMetricChart(<c:out value="${status.count - 1}"/>, event)">&nbsp;</div>
+									     onmousedown="overlay.moveOverlay(this);overlay.showTimePopupTopMetricChart(<c:out value="${status.count - 1}"/>, event)" />
 								</td>
 							</c:forEach>
 							<td width="10" align="left">
@@ -218,15 +218,7 @@
 						</c:if>
 					
 						<c:param name="view" value="${view}" />
-					
-						<c:choose>
-							<c:when test="${ProblemMetricsDisplayForm.fresh}">
-								<c:param name="action" value="fresh" />
-							</c:when>
-							<c:otherwise>
-								<c:param name="action" value="refresh" />
-							</c:otherwise>
-						</c:choose>
+						<c:param name="action" value="fresh" />
 					</c:url> 
 					<iframe id="chartFrame" src="<c:out value="${chartUrl}"/>" 
 					        marginwidth="0" marginheight="0" frameborder="no" scrolling="auto"

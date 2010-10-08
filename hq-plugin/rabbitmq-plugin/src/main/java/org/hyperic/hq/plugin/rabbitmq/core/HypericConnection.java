@@ -33,7 +33,7 @@ import java.util.Map;
  * ErlangConnection is a simple POJO reflecting the response <connectioninfoitem>
  * @author Helena Edelson
  */
-public class Connection {
+public class HypericConnection {
  
     private String pid;
    
@@ -75,11 +75,11 @@ public class Connection {
 
     }
 
-    public Connection() {
+    public HypericConnection() {
 
     }
     
-    public Connection(String pid) {
+    public HypericConnection(String pid) {
         this.pid = pid;
     }
 

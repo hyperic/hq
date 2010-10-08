@@ -27,38 +27,47 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.plugin.rabbitmq.core.HypericBinding;
+import org.hyperic.hq.plugin.rabbitmq.core.HypericChannel;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.Collector;
-import org.hyperic.util.config.ConfigResponse; 
-import org.springframework.erlang.core.Application;
+import org.hyperic.util.config.ConfigResponse;
+import org.springframework.amqp.core.Binding;
 
 import java.util.List;
 
 /**
- * RabbitAppCollector
- *
+ * BindingCollector
  * @author Helena Edelson
  */
-public class BrokerAppCollector extends Collector {
- 
-    private static final Log logger = LogFactory.getLog(BrokerAppCollector.class);
+public class BindingCollector extends Collector {
+
+    private static final Log logger = LogFactory.getLog(ConnectionCollector.class);
 
     @Override
     public void collect() {
+
         RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
         if (rabbitGateway != null) {
 
             try {
-                List<Application> apps = rabbitGateway.getRunningApplications();
-                if (apps != null) {
-                    for (Application a : apps) { 
-                        setAvailability(true);
+                List<String> virtualHosts = rabbitGateway.getVirtualHosts();
+                if (virtualHosts != null) {
+                    for (String virtualHost : virtualHosts) {
+                        List<HypericBinding> bindings = rabbitGateway.getBindings(virtualHost);
+
+                        if (bindings != null) {
+                            for (HypericBinding binding : bindings) {
+                                setAvailability(true);
+
+                            }
+                        }
                     }
                 }
             }
-            catch (Exception e) {
-                logger.error(e);
+            catch (Exception ex) {
+                logger.error(ex);
             }
         }
     }
@@ -67,16 +76,13 @@ public class BrokerAppCollector extends Collector {
      * Assemble custom key/value data for each object to set
      * as custom properties in the ServiceResource to display
      * in the UI.
-     * @param app
+     * @param binding
      * @return
      */
-    public static ConfigResponse getAttributes(Application app) {
+    public static ConfigResponse getAttributes(Object binding) {
         ConfigResponse res = new ConfigResponse();
-        res.setValue("name", app.getId());
-        res.setValue("description", app.getDescription());
-        res.setValue("version", app.getVersion());
+        
         return res;
     }
-
 
 }

@@ -34,10 +34,7 @@
 <tiles:importAttribute name="portlet"/>
 
 <c:set var="widgetInstanceName" value="alerts"/>
-<html:link action="/alerts/Alerts" linkName="viewAlertUrl" styleId="viewAlertUrl" style="visibility:hidden;">
-	<html:param name="mode" value="viewAlert" />
-	<html:param name="eid" value="" />
-</html:link>
+<html:link page="/alerts/Alerts.do?mode=viewAlert&eid=" linkName="viewAlertUrl" styleId="viewAlertUrl" style="visibility:hidden;"></html:link>
 <script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
 
 <script type="text/javascript">
@@ -145,7 +142,7 @@ dojo11.addOnLoad(function(){
       <tiles:put name="defaultSortColumn" value="1"/>
     </tiles:insert>
              </td>
-             <td id="modifiedCritTime<c:out value="${portlet.token}"/>" class="modifiedDate" nowrap></td>
+             <td id="modifiedCritTime<c:out value="${portlet.token}"/>" class="modifiedDate" nowrap="true"></td>
           </tr>
       </tfoot>
   </table>

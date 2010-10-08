@@ -511,7 +511,10 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
      */
     @Transactional(readOnly = true)
     public AuthzSubject getOverlordPojo() {
-        return authzSubjectDAO.findById(AuthzConstants.overlordId);
+        AuthzSubject overlord = authzSubjectDAO.findById(AuthzConstants.overlordId);
+        //initialize name to pass Subject b/w method during non-tx testing
+        overlord.getName();
+        return overlord;
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {

@@ -1,22 +1,22 @@
 /*
- * NOTE: This copyright does *not* cover user programs that use HQ
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
- * This file is part of HQ.
- * 
- * HQ is free software; you can redistribute it and/or modify
+ *
+ * Copyright (C) [2004-2010], VMware, Inc.
+ * This file is part of Hyperic.
+ *
+ * Hyperic is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
  * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -59,6 +59,7 @@ import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplayConstants;
 import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplayValue;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.UnitsConvert;
@@ -75,6 +76,8 @@ import org.hyperic.util.TimeUtil;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.timer.StopWatch;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -337,39 +340,68 @@ public class IndicatorChartsAction
     }
 
 
-    private List<IndicatorDisplaySummary> getViewMetrics(HttpServletRequest request, AppdefEntityID aeid,
-                                                      AppdefEntityTypeID ctype, String viewName)
+    private List<IndicatorDisplaySummary> getViewMetrics(HttpServletRequest request,
+                                                         AppdefEntityID aeid,
+                                                         AppdefEntityTypeID ctype,
+                                                         IndicatorViewsForm indicatorViews)
         throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException, PermissionException,
         AppdefCompatException, RemoteException, ServletException {
         final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
         MessageResources res = getResources(request);
         int sessionId = RequestUtils.getSessionId(request).intValue();
 
         String key = Constants.INDICATOR_VIEWS + generateUniqueKey(request);
         WebUser user = RequestUtils.getWebUser(request);
+        List<IndicatorDisplaySummary> summaries = new ArrayList<IndicatorDisplaySummary>();
+        
+        // for groups, we get the chart data one at a time to improve UI performance
+        // when rendering the charts
+        if (aeid.isGroup() || ctype != null) {
+            if (indicatorViews.getDisplaySize() > 0) {
+                summaries = this.retrieveMetrics(request, indicatorViews);
+            } else {
+                // first view should return one so that the charts will
+                // progressively load one by one using ajax
+                indicatorViews.setDisplaySize(1);
+            }
+        }
 
         try {
             // First we try to find the metrics
-            String metricsStr = user.getPreference(generatePrefsMetricsKey(key, viewName));
+            String metricsStr = user.getPreference(generatePrefsMetricsKey(key, indicatorViews.getView()));
 
             // The metrics have to come from the preferences
             List<String> metrics = StringUtil.explode(metricsStr, PREF_DELIMITER);
-          
+            
+            for (String m : metrics) {
+                IndicatorDisplaySummary ids = new IndicatorDisplaySummary(m);
 
-            List<IndicatorDisplaySummary> summaries = new ArrayList<IndicatorDisplaySummary>();
-            for (Iterator<String> it = metrics.iterator(); it.hasNext();) {
-                IndicatorDisplaySummary ids = new IndicatorDisplaySummary((String) it.next());
-
+                if (indicatorViews.getDisplaySize() > 0 &&
+                    indicatorDisplaySummaryExists(ids.getTemplateId(), summaries)) {
+                    continue;
+                }
+                
                 List<Integer> tids = new ArrayList<Integer>();
                 tids.add(ids.getTemplateId());
-
+                
+                String label = "getMetrics[" + m + "]";
+                watch.markTimeBegin(label);
                 summaries.addAll(this.getMetrics(request, ids.getEntityId(), ids.getChildType(), tids));
+                watch.markTimeEnd(label);
+                                
+                if (indicatorViews.getDisplaySize() > 0) {
+                    if (summaries.size() >= metrics.size()) {
+                        // all summaries fetched
+                        indicatorViews.setDisplaySize(-1);
+                    } else if (summaries.size() == indicatorViews.getDisplaySize()) {
+                        break;
+                    }
+                }
             }
-
-            return summaries;
         } catch (InvalidOptionException e) {
             // Maybe we have a "default" view
-            if (viewName.equals(res.getMessage(DEFAULT_VIEW))) {
+            if (indicatorViews.getView().equals(res.getMessage(DEFAULT_VIEW))) {
                 ArrayList<Integer> tids = new ArrayList<Integer>();
                 HashSet<String> cats = new HashSet<String>(4);
                 cats.add(MeasurementConstants.CAT_AVAILABILITY);
@@ -377,7 +409,7 @@ public class IndicatorChartsAction
                 cats.add(MeasurementConstants.CAT_THROUGHPUT);
                 cats.add(MeasurementConstants.CAT_PERFORMANCE);
 
-                List<MeasurementTemplate> tmpls;
+                List<MeasurementTemplate> tmpls = new ArrayList<MeasurementTemplate>();
                 try {
                     if (ctype == null) {
                         tmpls = measurementBoss.getDesignatedTemplates(sessionId, aeid, cats);
@@ -385,11 +417,18 @@ public class IndicatorChartsAction
                         tmpls = measurementBoss.getAGDesignatedTemplates(sessionId, new AppdefEntityID[] { aeid },
                             ctype, cats);
                     }
-
+                    
                     for (MeasurementTemplate mtv : tmpls) {
-
+                        if (indicatorViews.getDisplaySize() > 0 &&
+                            indicatorDisplaySummaryExists(mtv.getId(), summaries)) {
+                            continue;
+                        }
+                        
                         if (!mtv.getAlias().equalsIgnoreCase(MeasurementConstants.CAT_AVAILABILITY)) {
                             tids.add(mtv.getId());
+                            if (indicatorViews.getDisplaySize() > 0) {
+                                break;
+                            }
                         }
                     }
                 } catch (MeasurementNotFoundException me) {
@@ -397,15 +436,35 @@ public class IndicatorChartsAction
                     if (debug) log.debug("Designated metrics not found for autogroup " + ctype);
                 }
 
-                return this.getMetrics(request, aeid, ctype, tids);
+                watch.markTimeBegin("getMetrics");
+                summaries.addAll(this.getMetrics(request, aeid, ctype, tids)); 
+                watch.markTimeEnd("getMetrics");
+                
+                if ((indicatorViews.getDisplaySize() > 0) && (summaries.size() >= tmpls.size() - 1)) {
+                    // all summaries fetched
+                    indicatorViews.setDisplaySize(-1);
+                }
+            }
+        } finally {
+            if (debug) {
+                log.debug("IndicatorChartsAction.getViewMetrics: " + watch);
             }
         }
 
-        // No metrics
-        return new ArrayList<IndicatorDisplaySummary>();
+        return summaries;
     }
 
-    
+    private boolean indicatorDisplaySummaryExists(Integer templateId,
+                                                  List<IndicatorDisplaySummary> summaries) {
+        boolean found = false;
+        for (IndicatorDisplaySummary summary : summaries) {
+            if (summary.getTemplateId().equals(templateId)) {
+                found = true;
+                break;
+            }
+        }
+        return found;
+    }
 
     private String generateUniqueKey(HttpServletRequest request) {
         String sessionKey = RequestUtils.generateSessionKey(request);
@@ -433,10 +492,10 @@ public class IndicatorChartsAction
         request.getSession().setAttribute(key, metrics);
     }
 
-    private List retrieveMetrics(HttpServletRequest request, IndicatorViewsForm form) throws SessionNotFoundException,
+    private List<IndicatorDisplaySummary> retrieveMetrics(HttpServletRequest request, IndicatorViewsForm form) throws SessionNotFoundException,
         SessionTimeoutException, AppdefEntityNotFoundException, PermissionException, RemoteException, ServletException {
         String key = RequestUtils.generateSessionKey(request);
-        return (List) request.getSession().getAttribute(key);
+        return (List<IndicatorDisplaySummary>) request.getSession().getAttribute(key);
     }
 
     private ActionForward error(ActionMapping mapping, HttpServletRequest request, String key) {
@@ -451,27 +510,33 @@ public class IndicatorChartsAction
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
 
         IndicatorViewsForm ivf = (IndicatorViewsForm) form;
-        String viewName = ivf.getView();
 
         // Look up the metrics based on view name
         List<IndicatorDisplaySummary> metrics;
         try {
             // See if there's a ctype
             AppdefEntityTypeID childTypeId = RequestUtils.getChildResourceTypeId(request);
-            metrics = this.getViewMetrics(request, aeid, childTypeId, viewName);
+            metrics = this.getViewMetrics(request, aeid, childTypeId, ivf);
         } catch (ParameterNotFoundException e) {
             // No problem, this is not an autogroup
-            metrics = this.getViewMetrics(request, aeid, null, viewName);
+            metrics = this.getViewMetrics(request, aeid, null, ivf);
         }
-
+        
         this.storeMetrics(request, metrics, ivf);
         if (debug) log.debug("IndicatorChartsAction.fresh: " + watch);
-        return mapping.findForward(Constants.SUCCESS_URL);
-    }
-
-    public ActionForward refresh(ActionMapping mapping, ActionForm form, HttpServletRequest request,
-                                 HttpServletResponse response) throws Exception {
-        return fresh(mapping, form, request, response);
+        
+        if ("json".equals(ivf.getOutput())) {
+            IndicatorDisplaySummary metric = metrics.get(metrics.size()-1);
+            JSONObject json = metric.toJSON();            
+            json.put("index", metrics.size()-1);
+            json.put("displaySize", ivf.getDisplaySize());
+            json.put("timeToken", ivf.getTimeToken());
+            
+            request.setAttribute(Constants.AJAX_JSON, json);
+            return mapping.findForward("json");
+        } else {
+            return mapping.findForward(Constants.SUCCESS_URL);
+        }
     }
 
     public ActionForward add(ActionMapping mapping, ActionForm form, HttpServletRequest request,
@@ -849,6 +914,30 @@ public class IndicatorChartsAction
             }
 
             return strBuf.toString();
+        }
+        
+        public JSONObject toJSON() {
+            JSONObject json = new JSONObject();
+            try {                
+                json.put("entityId", getEntityId().toString());
+                json.put("entityType", getEntityId().getType());
+                
+                if (getChildType() != null) {
+                    json.put("ctype", getChildType().toString());
+                }
+                
+                json.put("metricId", getTemplateId());
+                json.put("metricLabel", getLabel());
+                json.put("metricSource", getMetricSource());
+                json.put("minMetric", getMinMetric().getValueFmt().toString());
+                json.put("avgMetric", getAvgMetric().getValueFmt().toString());
+                json.put("maxMetric", getMaxMetric().getValueFmt().toString());
+                json.put("unitUnits", getUnitUnits());
+                json.put("unitScale", getUnitScale());
+           } catch (JSONException e) {
+                throw new SystemException(e);
+            }
+            return json;
         }
     }
 }

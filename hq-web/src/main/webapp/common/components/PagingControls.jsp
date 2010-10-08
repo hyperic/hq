@@ -70,19 +70,19 @@
         			<td>
         				<html:select property="${pageSizeParam}" size="1" onchange="goToSelectLocation(this, '${pageSizeParam}',  '${pageSizeAction}');">
           					<html:option value="15" key="ListToolbar.ItemsPerPage.15" />
-				          	<c:if test="${listSize > 30}">
+				          	<c:if test="${listSize > 15}">
 				            	<html:option value="30" key="ListToolbar.ItemsPerPage.30" />
 				          	</c:if>
-				          	<c:if test="${listSize > 50}">
+				          	<c:if test="${listSize > 30}">
 				            	<html:option value="50" key="ListToolbar.ItemsPerPage.50" />
 				          	</c:if>
-				          	<c:if test="${listSize > 100}">
+				          	<c:if test="${listSize > 50}">
 				            	<html:option value="100" key="ListToolbar.ItemsPerPage.100" />
 				          	</c:if>
-				          	<c:if test="${listSize > 250}">
+				          	<c:if test="${listSize > 100}">
 				            	<html:option value="250" key="ListToolbar.ItemsPerPage.250" />
 				          	</c:if>
-				          	<c:if test="${listSize > 500}">
+				          	<c:if test="${listSize > 250}">
 				            	<html:option value="500" key="ListToolbar.ItemsPerPage.500" />
 				          	</c:if>
         				</html:select>

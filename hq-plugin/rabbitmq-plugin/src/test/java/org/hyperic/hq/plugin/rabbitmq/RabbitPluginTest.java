@@ -1,13 +1,15 @@
 package org.hyperic.hq.plugin.rabbitmq;
 
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitUtils;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.PluginException;
-import org.hyperic.util.config.ConfigResponse;
 import org.junit.Ignore;
 import org.junit.Test;
-import static org.junit.Assert.*; 
+import org.springframework.amqp.rabbit.admin.QueueInfo;
+
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 /**
  * RabbitMQPluginTest
@@ -23,5 +25,8 @@ public class RabbitPluginTest extends AbstractPluginTest {
 
         RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
         assertNotNull(rabbitGateway);
+        System.out.println(rabbitGateway);
+        List<QueueInfo> queues = rabbitGateway.getQueues("/");
+        System.out.println(queues.size());
     }
 }

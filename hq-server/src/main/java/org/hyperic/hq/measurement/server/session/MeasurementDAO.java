@@ -472,27 +472,48 @@ public class MeasurementDAO
             "Measurement.findAvailMeasurementsForGroup").list();
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * @param tids - {@link Integer[]} of templateIds
+     * @param iids - {@link Integer[]} of AppdefEntityIds
+     */
     List<Measurement> findMeasurements(Integer[] tids, Integer[] iids) {
+        return findMeasurements(tids, iids, false);
+    }
+
+    /**
+     * @param tids - {@link Integer[]} of templateIds
+     * @param iids - {@link Integer[]} of AppdefEntityIds
+     * @param onlyEnabled - only selects enabled measurements
+     */
+    @SuppressWarnings("unchecked")
+    List<Measurement> findMeasurements(Integer[] tids, Integer[] iids, boolean onlyEnabled) {
         final IntegerType iType = new IntegerType();
         // sort to take advantage of query cache
         final List<Integer> iidList = new ArrayList<Integer>(Arrays.asList(iids));
         final List<Integer> tidList = new ArrayList<Integer>(Arrays.asList(tids));
         Collections.sort(tidList);
         Collections.sort(iidList);
-        final String sql = new StringBuilder(256).append("select m from Measurement m ").append(
-            "join m.template t ").append("where m.instanceId in (:iids) AND t.id in (:tids)")
-            .toString();
+        final StringBuilder buf = new StringBuilder(32)
+            .append("select m from Measurement m ")
+            .append("join m.template t ")
+            .append("where m.instanceId in (:iids) AND t.id in (:tids)");
+        if (onlyEnabled) {
+            buf.append(" and enabled = :enabled");
+        }
+        final String sql = buf.toString();
         final List<Measurement> rtn = new ArrayList<Measurement>(iidList.size());
         final int batch = BATCH_SIZE/2;
         for (int xx=0; xx<iidList.size(); xx+=batch) {
             final int iidEnd = Math.min(xx+batch, iidList.size());
             for (int yy=0; yy<tidList.size(); yy+=batch) {
                 final int tidEnd = Math.min(yy+batch, tidList.size());
-                rtn.addAll(getSession().createQuery(sql)
+                Query query = getSession().createQuery(sql)
                     .setParameterList("iids", iidList.subList(xx, iidEnd), iType)
-                    .setParameterList("tids", tidList.subList(yy, tidEnd), iType)
-                    .setCacheable(true)
+                    .setParameterList("tids", tidList.subList(yy, tidEnd), iType);
+                if (onlyEnabled) {
+                    query.setBoolean("enabled", onlyEnabled);
+                }
+                rtn.addAll(query.setCacheable(true)
                     .setCacheRegion("Measurement.findMeasurements")
                     .list());
             }

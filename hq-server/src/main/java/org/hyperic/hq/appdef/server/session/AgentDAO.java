@@ -88,7 +88,7 @@ public class AgentDAO
         String hql = "from Agent where address=:address";
         return (List<Agent>) getSession().createQuery(hql).setString("address", ip).list();
     }
-
+    
     public int countUsed() {
         return ((Number) getSession().createQuery(
             "select count(distinct a) from Platform p " + "join p.agent a").uniqueResult())

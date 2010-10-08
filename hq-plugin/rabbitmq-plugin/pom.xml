@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -15,12 +14,11 @@
     <name>Hyperic HQ Plugin - RabbitMQ Plugin</name>
 
     <properties>
-        <spring.amqp.version>1.0.0.BUILD-SNAPSHOT</spring.amqp.version>
+        <spring.amqp.version>1.0.0.20101001.003011-82</spring.amqp.version>
+        <spring.erlang.version>1.0.0.20101001.003011-75</spring.erlang.version>
+        <spring.rabbit.version>1.0.0.20101001.003011-94</spring.rabbit.version>
         <org.erlang.otp.version>1.5.3</org.erlang.otp.version>
-        <!-- 2.0.0 is not backward compatible and we need
-        to support 1.8.0 - later versions. We have to use this
-        client version for now. -->
-        <com.rabbitmq.version>2.1.0</com.rabbitmq.version>
+        <com.rabbitmq.version>1.8.1</com.rabbitmq.version>
         <org.mockito.version>1.8.4</org.mockito.version>
         <org.slf4j.version>1.5.10</org.slf4j.version>
     </properties>
@@ -39,18 +37,18 @@
         <dependency>
             <groupId>org.springframework.amqp</groupId>
             <artifactId>spring-rabbit</artifactId>
-            <version>${spring.amqp.version}</version>
+            <version>${spring.rabbit.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.amqp</groupId>
             <artifactId>spring-rabbit-admin</artifactId>
-            <version>${spring.amqp.version}</version>
+            <version>${spring.rabbit.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.amqp</groupId>
             <artifactId>spring-erlang</artifactId>
-            <version>${spring.amqp.version}</version>
-        </dependency>
+            <version>${spring.erlang.version}</version>
+        </dependency> 
         <dependency>
             <groupId>org.erlang.otp</groupId>
             <artifactId>jinterface</artifactId>

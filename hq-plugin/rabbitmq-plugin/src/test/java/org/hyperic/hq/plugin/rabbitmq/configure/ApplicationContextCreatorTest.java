@@ -26,13 +26,13 @@
 package org.hyperic.hq.plugin.rabbitmq.configure;
 
 import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
+import org.hyperic.hq.plugin.rabbitmq.core.ErlangCookieHandler;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitUtils;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
+import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.springframework.amqp.rabbit.admin.QueueInfo;
 
 import java.util.List;
 
@@ -46,29 +46,29 @@ import static org.junit.Assert.*;
 public class ApplicationContextCreatorTest {
 
     private static final String HOST = "localhost";
-    
+
     @Test
-    public void create() {
+    public void create() throws PluginException {
         ConfigResponse serviceConfig = new ConfigResponse();
         serviceConfig.setValue(DetectorConstants.HOST, HOST);
         serviceConfig.setValue(DetectorConstants.USERNAME, "guest");
         serviceConfig.setValue(DetectorConstants.PASSWORD, "guest");
         serviceConfig.setValue(DetectorConstants.PLATFORM_TYPE, "Linux");
 
-        String value = RabbitUtils.configureCookie(serviceConfig);
+        String value = ErlangCookieHandler.configureCookie(serviceConfig);
+        assertNotNull(value);
         serviceConfig.setValue(DetectorConstants.NODE_COOKIE_VALUE, value);
 
         if (RabbitProductPlugin.getRabbitGateway() == null) {
             RabbitProductPlugin.initializeGateway(serviceConfig);
         }
-
-        // detect rabbit resources
+ 
         RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
 
         if (rabbitGateway != null) {
             assertTrue(rabbitGateway.getRabbitStatus().getNodes().size() > 0);
             List<String> virtualHosts = rabbitGateway.getVirtualHosts();
-            assertNotNull(virtualHosts.get(0));    
+            assertNotNull(virtualHosts.get(0));
         }
     }
 }

@@ -94,7 +94,7 @@ public class TomcatEngineControllerTest {
                                                  "-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager",
                                                  "org.apache.catalina.startup.Bootstrap",
                                                  "start" }), EasyMock.eq(serverHome), EasyMock
-                            .eq(true), EasyMock.eq(-1))).andReturn(0);
+                            .eq(false), EasyMock.eq(-1))).andReturn(0);
         replay();
         int exitCode = tomcatEngineController.start(expectedOpts);
         verify();

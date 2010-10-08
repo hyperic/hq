@@ -29,7 +29,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.util.config.ConfigResponse;
-import org.springframework.util.Assert;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -40,77 +39,74 @@ import java.io.IOException;
  * Erlang will automatically create a random cookie file when the RabbitMQ server starts up.
  * This will be typically located in /var/lib/rabbitmq/.erlang.cookie  on Unix systems
  * and C:\Documents and Settings\Current User\Application Data\RabbitMQ\.erlang.cookie on Windows.
- * Otherwise in the user home dir. If it is a manual install it may be in user home.
+ * If it is a manual install it may be in user home.
  * @author Helena Edelson
  */
-public class RabbitUtils {
+public class ErlangCookieHandler {
 
-    private static final Log logger = LogFactory.getLog(RabbitUtils.class);
+    private static final Log logger = LogFactory.getLog(ErlangCookieHandler.class);
 
     /**
      * @param conf
      * @return the content in the cookie
      */
     public static String configureCookie(ConfigResponse conf) {
-        logger.debug("Configuring cookie");
-        Assert.notNull(conf, "ConfigResponse must not be null.");
+        if (conf == null) {
+            throw new IllegalArgumentException("ConfigResponse must not be null.");
+        }
 
         String nodeCookie = null;
 
         File file = null;
 
         if (conf.getValue(DetectorConstants.NODE_COOKIE_VALUE) == null) {
-            logger.debug("Inferring cookie location");
             file = inferCookie(conf);
-        }
-        else {
-            String userSetLocation = conf.getValue(DetectorConstants.NODE_COOKIE_LOCATION).trim();
-            if (userSetLocation != null && !userSetLocation.isEmpty()) {
-                file = new File(userSetLocation);
+        } else {
+            if (conf.getValue(DetectorConstants.NODE_COOKIE_LOCATION) != null) {
+                String userSetLocation = conf.getValue(DetectorConstants.NODE_COOKIE_LOCATION).trim();
+                if (userSetLocation != null && !userSetLocation.isEmpty()) {
+                    file = new File(userSetLocation);
+                }
             }
         }
 
         if (file != null && file.exists()) {
             nodeCookie = getErlangCookieValue(file);
-            logger.debug("node.cookie.value" + nodeCookie + "node.cookie.location=" + file.getAbsolutePath()); 
+            if (nodeCookie != null) logger.debug(nodeCookie + " " + file.getAbsolutePath());
         }
 
-        logger.debug("Returning: " + conf);
         return nodeCookie;
     }
 
     /**
      * Read in the erlang cookie string from the path
-     * @param cookie
+     * @param file
      * @return
      */
-    protected static String getErlangCookieValue(File cookie) {
-        logger.debug("Get cookie from file=" + cookie);
+    protected static String getErlangCookieValue(File file) {
+        logger.debug("Attempting to read file " + file);
         String erlangCookieValue = null;
 
-        BufferedReader in = null;
-
         try {
-            if (cookie != null && cookie.exists()) {
-                in = new BufferedReader(new FileReader(cookie));
+            if (file != null && file.exists()) {
+                BufferedReader in = new BufferedReader(new FileReader(file));
                 erlangCookieValue = in.readLine();
 
                 if (in != null) {
                     in.close();
                 }
             }
-        } catch (IOException e) {
-            logger.error("Error reading the Erlang Cookie: " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException("Agent does not have permission to read the cookie: " + e.getMessage(), e);
         }
 
         return erlangCookieValue;
     }
 
     /**
-     * Make a few attempts to acquire the cookie by most likely
-     * location per OS.
-     * @param conf
-     * @return
+     * Infer the cookie file by most likely location.
+     * @param conf The ConfigResponse is from RabbitServerDetector.discoverServices
+     * @return java.io.File '/path/to/.erlang.cookie'
      */
     public static File inferCookie(ConfigResponse conf) {
 
@@ -138,21 +134,6 @@ public class RabbitUtils {
                     }
                 }
             }
-        }
-
-        return file;
-    }
-
-    /**
-     * @param fileName
-     * @param home
-     * @return
-     */
-    private static File doCrossPlatform(String fileName, String home) {
-        Assert.hasText(fileName, "fileName must not be null.");
-        File file = null;
-        if (home != null) {
-            file = new File(new StringBuilder(home).append(File.separator).append(fileName).toString());
         }
 
         return file;

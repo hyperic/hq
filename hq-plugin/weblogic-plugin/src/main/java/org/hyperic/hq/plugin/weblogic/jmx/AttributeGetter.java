@@ -53,7 +53,7 @@ public class AttributeGetter {
 
     public static final String PROP_ATTR_EXPIRE =
         "weblogic.attrcache.expire";
-    private static Log log = LogFactory.getLog("AttributeGetter");
+    private static Log log = LogFactory.getLog(AttributeGetter.class);
 
     private static Map attrCache =
         Collections.synchronizedMap(new HashMap());

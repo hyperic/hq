@@ -674,7 +674,6 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      * @mval The MetricValue to store.
      * 
      */
-    @Transactional(propagation=Propagation.REQUIRES_NEW)
     public void addData(Integer mid, MetricValue mval) {
         List<DataPoint> l = new ArrayList<DataPoint>(1);
         l.add(new DataPoint(mid, mval));
@@ -689,7 +688,6 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      * 
      * 
      */
-    @Transactional(propagation=Propagation.REQUIRES_NEW)
     public void addData(List<DataPoint> availPoints) {
         addData(availPoints, true);
     }
@@ -704,7 +702,6 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      * 
      * 
      */
-    @Transactional(propagation=Propagation.REQUIRES_NEW)
     public void addData(List<DataPoint> availPoints, boolean sendData) {
         if (availPoints == null || availPoints.size() == 0) {
             return;

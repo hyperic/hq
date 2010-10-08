@@ -29,7 +29,8 @@ import com.ericsson.otp.erlang.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.amqp.core.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.amqp.rabbit.admin.QueueInfo;
+import org.springframework.amqp.rabbit.admin.RabbitControlErlangConverter;
 import org.springframework.erlang.ErlangBadRpcException;
 import org.springframework.erlang.core.ConnectionCallback;
 import org.springframework.erlang.core.ErlangTemplate;
@@ -44,20 +45,24 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * JErlangConverter
+ * HypericErlangConverter handles jinterface calls that are not currently in Spring AMQP
+ * or are in Spring AMQP not working in the Hyperic Agent environment.
  * @author Helena Edelson
  */
-public class JErlangConverter implements ErlangConverter {
+public class HypericErlangConverter extends RabbitControlErlangConverter implements ErlangConverter {
 
-    private static final Log logger = LogFactory.getLog(JErlangConverter.class);
+    private static final Log logger = LogFactory.getLog(HypericErlangConverter.class);
 
-    @Autowired
     private ErlangTemplate erlangTemplate;
+
+    public HypericErlangConverter(ErlangTemplate erlangTemplate) {
+        this.erlangTemplate = erlangTemplate;
+    }
 
     public OtpErlangObject toErlang(Object o) throws ErlangConversionException {
         if (o instanceof String) {
             /** can be binary or atom but we have no use case for atom */
-            return new OtpErlangBinary(((String)o).getBytes());
+            return new OtpErlangBinary(((String) o).getBytes());
         }
         return null;
     }
@@ -76,7 +81,7 @@ public class JErlangConverter implements ErlangConverter {
             throw new ErlangBadRpcException(response.toString());
         }
 
-        return fromErlang(response, vHost, type);
+        return this.fromErlang(response, vHost, type);
     }
 
     /**
@@ -90,17 +95,17 @@ public class JErlangConverter implements ErlangConverter {
         try {
             if (type.isAssignableFrom(Exchange.class)) {
                 return convertExchanges(response, virtualHost);
-            }
-            else if (type.isAssignableFrom(String.class)) {
+            } else if (type.isAssignableFrom(String.class)) {
                 return convertVirtualHosts(response);
-            }
-            else if (type.isAssignableFrom(Connection.class)) {
+            } else if (type.isAssignableFrom(HypericConnection.class)) {
                 return convertConnections(response);
-            }
-            else if (type.isAssignableFrom(Channel.class) && virtualHost == null) {
+            } else if (type.isAssignableFrom(HypericChannel.class)) {
                 return convertChannels(response);
-            }
-            else {
+            } else if (type.isAssignableFrom(HypericBinding.class)) {
+                return convertBindings(response);
+            } else if (type.isAssignableFrom(QueueInfo.class)) {
+                return convertQueues(response);
+            } else {
                 return convertVersion(response);
             }
         }
@@ -109,24 +114,33 @@ public class JErlangConverter implements ErlangConverter {
         }
     }
 
+    public Object convertQueues(OtpErlangObject response) {
+        QueueInfoAllConverter queueConverter = new QueueInfoAllConverter();
+        return queueConverter.fromErlang(response);
+    }
+
+    private List<HypericBinding> convertBindings(OtpErlangObject response) {
+        return null;
+    }
+
     /**
      * Get a list of Channels
      * @param response
      * @return
      */
-    private List<Channel> convertChannels(OtpErlangObject response) {
-        List<Channel> channels = null;
+    private List<HypericChannel> convertChannels(OtpErlangObject response) {
+        List<HypericChannel> channels = null;
 
         long items = ((OtpErlangList) response).elements().length;
 
         if (items > 0) {
-            channels = new ArrayList<Channel>();
+            channels = new ArrayList<HypericChannel>();
 
             if (response instanceof OtpErlangList) {
 
                 for (OtpErlangObject outerList : ((OtpErlangList) response).elements()) {
                     if (outerList instanceof OtpErlangList) {
-                        Channel channel = new Channel();
+                        HypericChannel channel = new HypericChannel();
 
                         for (OtpErlangObject innerListObj : ((OtpErlangList) outerList).elements()) {
 
@@ -239,20 +253,20 @@ public class JErlangConverter implements ErlangConverter {
      * @return
      * @throws OtpErlangException
      */
-    private List<Connection> convertConnections(OtpErlangObject response) throws OtpErlangException {
-        List<Connection> connections = null;
+    private List<HypericConnection> convertConnections(OtpErlangObject response) throws OtpErlangException {
+        List<HypericConnection> connections = null;
 
         long items = ((OtpErlangList) response).elements().length;
 
         if (items > 0) {
-            connections = new ArrayList<Connection>();
+            connections = new ArrayList<HypericConnection>();
 
             if (response instanceof OtpErlangList) {
 
                 for (OtpErlangObject outerList : ((OtpErlangList) response).elements()) {
                     if (outerList instanceof OtpErlangList) {
 
-                        Connection connection = new Connection();
+                        HypericConnection connection = new HypericConnection();
 
                         String host = null;
 
@@ -431,5 +445,12 @@ public class JErlangConverter implements ErlangConverter {
         return exchange;
     }
 
+    private boolean extractAtomBoolean(OtpErlangObject value) {
+        return ((OtpErlangAtom) value).booleanValue();
+    }
 
+    private String extractNameValueFromTuple(OtpErlangTuple value) {
+        Object nameElement = value.elementAt(3);
+        return new String(((OtpErlangBinary) nameElement).binaryValue());
+    }
 }
