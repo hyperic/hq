@@ -564,6 +564,23 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
             <include name="/**/lib/wasjmx.jar"/>
         </scan>
 
+        <properties>
+            <property name="javaVendor"
+                description="Java Vendor"/>
+
+            <property name="javaVersion"
+                description="Java Version"/>
+
+            <property name="version"
+                description="WebSphere Version"/>
+
+            <property name="pid"
+                description="Process ID"/>
+
+            <property name="cellName"
+                description="Cell Name"/>
+        </properties>
+        
         <config include="connector"/>
         <config include="control" type="control"/>
 
