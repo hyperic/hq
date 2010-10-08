@@ -30,33 +30,29 @@
 
 <plugin class="org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin">
 
-    <help name="RabbitMQ Help">
-        <![CDATA[
+    <server name="RabbitMQ" description="RabbitMQ">
+
+        <help>
+            <![CDATA[
           <p>
           <h3>Configure RabbitMQ for Monitoring</h3>
           Once the RabbitMQ nodes are auto-detected and you can select the Server resource by node, go to Tools Menu >
           Configure Server.
-          <ol><li><h3>Host, Username, Password</h3>
-            Enter the node's hostname, username, and password then select OK. This will allow Hyperic
-            to connect to the node and query information on Queues, Channels, Connections, Processes, Users, and Exchanges.
-           </li><li>
-          <h3>Erlang Cookie Location</h3>
-           If you have multiple cookies on the managed host Hyperic is monitoring and you do not see Queues, etc auto-discovered,
-           please supply the 'path/to/.erlang.cookie' for this particular node in the Erlang Cookie text box.</li>
+          <ol><li>Enter a username and password for the node, then select OK. This will allow Hyperic to authenticate and query
+            information on Queues, Channels, Connections, Users, and Exchanges.
+           </li><li>For the first release of this plugin, the Hyperic agent requires permissions to read the Erlang cookie.</li>
            </ol>
           </p>
-          <p>
-          <h3>Supported Verson</h3>
-          Coming soon: <a href="http://support.hyperic.com/display/EVO/Monitoring+RabbitMQ">Monitoring and Managing RabbitMQ</a>
+           <p>
+          <h3>Supported Versons</h3>
+          Hyperic supports RabbitMQ versions 1.8.1 and higher.
           </p>
           <p>
           <h3>Help Docs</h3>
           Coming soon: <a href="http://support.hyperic.com/display/EVO/Monitoring+RabbitMQ">Monitoring and Managing RabbitMQ</a>
           </p>
         ]]>
-    </help>
-
-    <server name="RabbitMQ" description="RabbitMQ">
+        </help>
 
         <plugin type="autoinventory"
                 class="org.hyperic.hq.plugin.rabbitmq.detect.RabbitServerDetector"/>
@@ -73,7 +69,7 @@
             <option name="server.name" description="RabbitMQ Node" type="hidden"/>
 
             <option name="server.path" description="Node Path" type="hidden"/>
- 
+
             <option name="username" description="RabbitMQ Username for %server.name%"/>
 
             <option name="password" type="secret" description="RabbitMQ Password for %server.name%"/>
@@ -89,7 +85,7 @@
             <property description="Rabbit -boot" name="rabbit.boot"/>
         </properties>
 
-        
+
         <!-- Have not had time to test these.
 
         <actions>
@@ -315,6 +311,8 @@
 
         &multi-process-metrics;
 
+
     </server>
+
 
 </plugin>
