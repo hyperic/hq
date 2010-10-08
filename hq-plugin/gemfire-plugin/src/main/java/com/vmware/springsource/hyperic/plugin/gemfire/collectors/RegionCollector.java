@@ -25,6 +25,7 @@ public class RegionCollector extends Collector {
     public void collect() {
         Properties props = getProperties();
         log.debug("[collect] props=" + props);
+        setAvailability(true);
         try {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(props);
             log.info("mServer=" + mServer);
@@ -44,9 +45,11 @@ public class RegionCollector extends Collector {
                 }
             } else {
                 log.debug("Member '" + memberID + "' nof found!!!");
+                setAvailability(false);
             }
         } catch (Exception ex) {
             log.debug(ex, ex);
+            setAvailability(false);
         }
     }
 }

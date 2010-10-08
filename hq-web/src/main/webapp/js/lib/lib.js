@@ -1791,9 +1791,12 @@ hyperic.dashboard.chartWidget = function(args) {
         var chartId = that.currentChartId;
         var chartIndex = that.chartselect.select.selectedIndex;
         if(confirm('Remove ' + that.charts[chartId].name + ' from saved charts?')) {
-            dojo11.xhrDelete( {
+            dojo11.xhrPost( {
                 url: baseUrl + "/chart/" + that.charts[chartId].rid + "/" + that.charts[chartId].mtid + "/",
-                handleAs: 'json',
+                content: {
+            		"_method" : "DELETE" // need to work around issue using PUT directly
+            	},
+            	handleAs: 'json',
                 //headers: { "Content-Type": "application/json"},
                 preventCache: true,
                 load: function(data){
@@ -2055,7 +2058,7 @@ hyperic.dashboard.chartWidget = function(args) {
 	            that.config.range = data.tr || that.config.range;
 	            that.config.rotation = data.rot || that.config.rotation;
 
-	            if(typeof data.payload.length != 'undefined' && data.payload.length > 0)
+	            if (data.payload && data.payload.length > 0)
                 {
                     that.charts = data.payload.sort(
                         function(a,b) { 
@@ -2112,7 +2115,7 @@ hyperic.dashboard.chartWidget = function(args) {
             preventCache: true,
             load: function(data){
                 // that.charts[chart].data = data;
-                if(!data.error && data.payload.length > 0)
+                if(!data.error && data.payload && data.payload.length > 0)
                 {
                     that.charts[chart].data = {};
                     
@@ -3865,9 +3868,12 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
     };
     
     that.clear_schedule_action = function() {
-        return dojo11.xhrDelete( {
+        return dojo11.xhrPost( {
             url: baseUrl + "/schedule/" + that.group_id,
-            handleAs: 'json',
+            content: {
+        		"_method" : "DELETE" // need to work around issue using PUT directly
+        	},
+        	handleAs: 'json',
             load: function(data){
                 if(data && !data.error)
                 {
