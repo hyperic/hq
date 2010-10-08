@@ -168,7 +168,7 @@ public class ResourceCleanupEventListener implements ZeventListener<ResourcesCle
         watch.markTimeBegin("unscheduleMeasurementsForAsyncDelete");
         unscheduleMeasurementsForAsyncDelete(agentCache);
         watch.markTimeEnd("unscheduleMeasurementsForAsyncDelete");
-
+        
         // Look through services, servers, platforms, applications, and groups
         watch.markTimeBegin("removeApplications");
         Collection<Application> applications = applicationManager.findDeletedApplications();
@@ -215,9 +215,9 @@ public class ResourceCleanupEventListener implements ZeventListener<ResourcesCle
 
                 Agent agent = agentManager.getAgent(agentId);
                 List<AppdefEntityID> resources = agentCache.get(agentId);
-
-                measurementManager.disableMeasurements(subject, agent, (AppdefEntityID[]) resources
-                    .toArray(new AppdefEntityID[0]), true);
+               
+                measurementManager.disableMeasurementsForDeletion(subject, agent, (AppdefEntityID[]) resources
+                    .toArray(new AppdefEntityID[resources.size()]));
             }
         } catch (Exception e) {
             log.error("Error unscheduling measurements during async delete", e);
@@ -310,6 +310,6 @@ public class ResourceCleanupEventListener implements ZeventListener<ResourcesCle
 
 
     public String toString() {
-        return "AppdefBoss.removeDeletedResources";
+        return "ResourceCleanupEventListener";
     }
 }
