@@ -2995,6 +2995,247 @@ hyperic.group_manager = function(args) {
 	that.init();
 }
 
+hyperic.indicator_charts_manager = function(props, charts) {
+	var that = this;
+	that.name = props.name;
+	that.view = props.view;
+	that.eid = props.eid;
+	if (props.ctype) {
+		that.ctype = props.ctype;
+	}
+	that.displaySize = props.displaySize;
+	that.baseUrl = props.baseUrl;
+	that.labels = props.labels;
+	that.charts = charts;
+	that.chartsStartTime = null;
+	that.chartsEndTime = null;
+
+	that.getChartLink = function(chartArgs) {		
+		var url = "/resource/common/monitor/Visibility.do"
+				+ "?m=" + chartArgs.metricId
+				+ "&eid=" + chartArgs.entityId;
+
+		if (chartArgs.ctype) {
+			url += "&ctype=" + chartArgs.ctype
+				+ "&mode=chartSingleMetricMultiResource";
+		} else if (chartArgs.entityType == 5) {
+			url += "&mode=chartSingleMetricMultiResource";
+		} else {
+			url += "&mode=chartSingleMetricSingleResource";
+		}
+		  
+		return url;
+	}
+	
+	that.getChartImg = function(chartArgs) {
+		var url = "/resource/HighLowChart?imageWidth=647&imageHeight=100"
+				+ "&tid=" + chartArgs.metricId
+				+ "&eid=" + chartArgs.entityId
+				+ "&unitUnits=" + chartArgs.unitUnits
+				+ "&unitScale=" + chartArgs.unitScale
+				+ "&index=" + chartArgs.index
+				+ "&now=" + chartArgs.timeToken;
+
+		if (chartArgs.ctype) {
+			url += "&ctype=" + chartArgs.ctype;
+		}
+		  
+		return url;
+	}
+	
+	that.drawChart = function(chartArgs) {
+		var rootObj = $("root");
+		var liNode = document.createElement("li");
+		liNode.id = chartArgs.metricId;
+
+		var liInnerHtml = 
+			'<table width="650" border="0" cellpadding="2" bgcolor="#DBE3F5">' +
+			'<tr>' +
+			'  <td>' +
+			'    <table width="100%" border="0" cellpadding="0" cellspacing="1" style="margin-top: 1px; margin-bottom: 1px;">' +
+		    '    <tr>' +
+		    '      <td class="BoldText">' +
+		    '        <img src="/images/icon_chart.gif"/>' +
+		    '        <a href="' + that.getChartLink(chartArgs) + '" target="_top">' + chartArgs.metricLabel + '</a>' +
+		    '      </td>' +
+		    '      <td colspan="3" align="right">' +
+		    '        <a href="javascript:' + that.name + '.moveMetricUp(\'' + chartArgs.metricId + '\')"><img src="/images/dash_icon_up.gif" border="0"/></a>' +
+		    '        <a href="javascript:' + that.name + '.moveMetricDown(\'' + chartArgs.metricId + '\')"><img src="/images/dash_icon_down.gif" border="0"/></a>' +
+		    '        <a href="javascript:' + that.name + '.removeMetric(\'' + chartArgs.metricId + '\')"><img src="/images/dash-icon_delete.gif" border="0"/></a>' +
+		    '      </td></tr>' +
+		    '    <tr>' +
+		    '      <td style="font-size: 10px; padding-left: 12px;">(' + chartArgs.metricSource + ')</td>' +
+		    '      <td nowrap="nowrap" width="13%"><span class="BoldText">' + that.labels.low + '</span>: ' + chartArgs.minMetric + '</td>' +
+		    '      <td nowrap="nowrap" width="14%"><span class="BoldText">' + that.labels.avg + '</span>: ' + chartArgs.avgMetric + '</td>' +
+		    '      <td nowrap="nowrap" width="15%"><span class="BoldText">' + that.labels.peak + '</span>: ' + chartArgs.maxMetric + '</td>' +
+		    '    </tr>' +
+		    '    </table>' +
+		    '  </td>' +
+		    '</tr>' +
+		    '</table>';
+			    
+		if (chartArgs.error) {
+			liInnerHtml += '<table><tr><td class="ErrorBlock" colspan="2">' + chartArgs.error + '</td></tr></table>';
+			liNode.innerHTML = liInnerHtml;
+		} else {
+			// create IMG
+			var chartNode = document.createElement("img");
+			chartNode.border = "0";
+			chartNode.width = "647";
+			chartNode.height = "100";
+			chartNode.src = that.getChartImg(chartArgs);
+
+			// add to DOM
+			liNode.innerHTML = liInnerHtml;
+			liNode.appendChild(chartNode);
+			rootObj.appendChild(liNode);
+		}
+	}
+	
+	that.loadChart = function(chartIndex) {
+		if (chartIndex <= that.charts.length-1) {
+			if (chartIndex == 0) {
+				that.chartsStartTime = new Date();
+		  	}
+
+			that.drawChart(that.charts[chartIndex]);
+
+			// load each chart individually in a separate javascript thread
+			// to improve rendering performance
+			if (chartIndex < that.charts.length-1) {
+				setTimeout(that.name + ".loadChart(" + (chartIndex+1) + ")", 10);
+			} else if (chartIndex == that.charts.length-1) {
+				setTimeout(that.name + ".fetchChart(" + that.displaySize + ")", 10);
+			}
+		}
+	}
+
+	that.logLoadTime = function() {
+		console.log("chartsLoadTime(ms)=" + (that.chartsEndTime.getTime()-that.chartsStartTime.getTime()));
+	}
+
+	that.fetchChart = function(displaySize) {
+	    var url = that.baseUrl + '?action=fresh&output=json'
+	    		+ '&eid=' + that.eid 
+	    		+ '&view=' + that.view;
+		
+	    if (that.ctype) {
+	      url += '&ctype=' + that.ctype;
+	    }
+	    
+		if (displaySize > 0) { 
+			url += '&displaySize=' + (displaySize+1);
+
+		    dojo.xhrGet({
+		        url: url,
+		        handleAs: "json",
+		        preventCache: true,
+		        load: function(data) {
+		          that.drawChart(data);
+		          that.fetchChart(data.displaySize);
+		        },
+		        error: function(data){
+		          console.debug("Could not fetch chart:");
+		          console.debug(data);
+		        }
+		      });	    	
+		} else {
+			dojo.byId("slowScreenSplash").style.display = "none";
+			that.chartsEndTime = new Date();
+			that.logLoadTime();
+		}
+	}
+  
+	that.removeMetric = function(metric) {
+    	var url = that.baseUrl + '?action=remove'
+    			+ '&metric=' + metric 
+    			+ '&eid=' + that.eid 
+    			+ '&view=' + that.view;
+    			
+	    if (that.ctype) {
+			url += '&ctype=' + that.ctype;
+		}
+    	
+        dojo.xhrGet({
+            url: url,
+            handleAs: "text",
+            preventCache: true,
+            timeout: 5000,
+            load: function(data, ioArgs) {
+              console.log(data);
+              console.log('removed metric');
+              new Effect.Fade(metric);
+            },
+            error: function(data){
+              console.debug("could not remove metric:");
+              console.debug(data);
+              new Effect.Pulsate($(metric));
+            }
+          });
+	}
+
+	that.moveMetricUp = function(metric) {
+    	var url = that.baseUrl + '?action=moveUp'
+    			+ '&metric=' + metric 
+    			+ '&eid=' + that.eid 
+    			+ '&view=' + that.view;
+
+	    if (that.ctype) {
+			url += '&ctype=' + that.ctype;
+		}
+    	
+        dojo.xhrGet({
+            url: url,
+            handleAs: "text",
+            preventCache: true,
+            timeout: 5000,
+            load: function(data, ioArgs) {
+              console.log(data);
+              console.log('moved metric up');
+              var root = dojo.byId('root');
+              var elem = $(metric);
+              moveElementUp(elem, root);
+            },
+            error: function(data){
+              console.debug("could not move metric up:");
+              console.debug(data);
+              new Effect.Pulsate($(metric));
+            }
+          });
+	}
+
+	that.moveMetricDown = function(metric) {
+    	var url = that.baseUrl + '?action=moveDown'
+    			+ '&metric=' + metric 
+    			+ '&eid=' + that.eid 
+    			+ '&view=' + that.view;
+
+	    if (that.ctype) {
+			url += '&ctype=' + that.ctype;
+		}
+    	
+        dojo.xhrGet({
+            url: url,
+            handleAs: "text",
+            preventCache: true,
+            timeout: 5000,
+            load: function(data, ioArgs) {
+              console.log(data);
+              console.log('moved metric down');
+              var root = dojo.byId('root');
+              var elem = $(metric);
+              moveElementDown(elem, root);
+            },
+            error: function(data){
+              console.debug("could not move metric down:");
+              console.debug(data);
+              new Effect.Pulsate($(metric));
+            }
+          });
+	}
+
+}
+
 hyperic.alert_center = function(title_name) {
 	var that = this;
 	that.title_name = title_name;

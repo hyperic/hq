@@ -190,7 +190,8 @@ public class TomcatServerDetector
                     if (tcServerVersionFile != null) {
                         File homeVersionFile = new File(catalinaHome, tcServerVersionFile);
                         File baseVersionFile = new File(catalinaBase, tcServerVersionFile);
-                        if (homeVersionFile.exists() || baseVersionFile.exists()) {
+                        if ((homeVersionFile.exists() || baseVersionFile.exists()) && findVersionFile(new File(catalinaBase), Pattern.compile("hq-common.*\\.jar")) == null) {
+                            //This is a tc Server that is not the HQ server
                             getLog().debug("[isInstallTypeVersion] '" + getTypeInfo().getName() + " [" + process.getInstallPath() + "]' is a '" + extend_server + "'");
                             return false;
                         } else {
@@ -259,8 +260,18 @@ public class TomcatServerDetector
         File hq = findVersionFile(new File(catalinaBase), Pattern.compile("hq-common.*\\.jar"));
         if (hq != null) {
             server.setName(getPlatformName()+" HQ Tomcat "+getTypeInfo().getVersion());
+            server.setIdentifier("HQ Tomcat");
         }
 
         return server;
+    }
+
+    /**
+     * We want this ServerDetector going first to win the battle for monitoring HQ Server in an EE env
+     * TODO more elegant way to do this?
+     */
+    @Override
+    public int getScanOrder() {
+       return 0;
     }
 }

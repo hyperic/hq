@@ -27,42 +27,55 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.plugin.rabbitmq.core.HypericConnection;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.Collector;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.util.config.ConfigResponse;
-import org.springframework.amqp.core.Exchange;
+import org.hyperic.util.config.ConfigResponse; 
 
 import java.util.List;
 
 /**
- * RabbitExchangeCollector
- *
+ * ConnectionCollector 
  * @author Helena Edelson
  */
-public class RabbitExchangeCollector extends Collector {
+public class ConnectionCollector extends Collector {
 
-    private static final Log logger = LogFactory.getLog(RabbitExchangeCollector.class);
+    private static final Log logger = LogFactory.getLog(ConnectionCollector.class);
+
 
     @Override
     public void collect() {
+       
         RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
         if (rabbitGateway != null) {
 
             try {
-                List<Exchange> exchanges = rabbitGateway.getExchanges();
-                if (exchanges != null) {
-                    for (Exchange e : exchanges) {
+                List<String> virtualHosts = rabbitGateway.getVirtualHosts();
+                if (virtualHosts != null) {
+                    for (String virtualHost : virtualHosts) {
+                        List<HypericConnection> connections = rabbitGateway.getConnections(virtualHost);
 
-                        setAvailability(true);
+                        if (connections != null) {
+                            logger.debug("Found " + connections.size() + " connections");
+
+                            for (HypericConnection conn : connections) {
+                                setAvailability(conn.getState().equalsIgnoreCase("running"));
+
+                                setValue("packetsReceived", conn.getReceiveCount());
+                                setValue("packetsSent", conn.getSendCount());
+                                setValue("channelCount", conn.getChannels());
+                                setValue("octetsReceived", conn.getOctetsReceived());
+                                setValue("octetsSent", conn.getOctetsSent());
+                                setValue("pendingSends", conn.getPendingSends());
+
+                            }
+                        }
                     }
                 }
             }
-            catch (PluginException ex) {
+            catch (Exception ex) {
                 logger.error(ex);
-            } catch (Exception e) {
-                logger.error(e);
             }
         }
     }
@@ -71,17 +84,19 @@ public class RabbitExchangeCollector extends Collector {
      * Assemble custom key/value data for each object to set
      * as custom properties in the ServiceResource to display
      * in the UI.
-     * @param e
+     * @param conn
      * @return
      */
-    public static ConfigResponse getAttributes(Exchange e) {
-        String durable = e.isDurable() ? "durable" : "not durable";
+    public static ConfigResponse getAttributes(HypericConnection conn) {
         ConfigResponse res = new ConfigResponse();
-        res.setValue("durable", durable);
-        res.setValue("exchangeType", e.getName());
-        res.setValue("autoDelete", e.isAutoDelete());
+        res.setValue("username", conn.getUsername());
+        res.setValue("vHost", conn.getVhost());
+        res.setValue("pid", conn.getPid());
+        res.setValue("frameMax", conn.getFrameMax());
+        res.setValue("selfNode", conn.getAddress().getHost() + ":" + conn.getAddress().getPort());
+        res.setValue("peerNode", conn.getPeerAddress().getHost() + ":" + conn.getPeerAddress().getPort());
+        res.setValue("state", conn.getState());
+ 
         return res;
     }
-
-
 }

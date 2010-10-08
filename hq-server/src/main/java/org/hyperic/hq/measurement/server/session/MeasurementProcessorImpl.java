@@ -62,6 +62,7 @@ import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -126,7 +127,8 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
             if (resource == null || resource.isInAsyncDeleteState()) {
                 continue;
             }
-            final Collection<ResourceEdge> edges = resourceManager.findResourceEdges(resourceManager.getContainmentRelation(), resource);
+            final Collection<ResourceEdge> edges =
+                resourceManager.findResourceEdges(resourceManager.getContainmentRelation(), resource);
             aeids.ensureCapacity(aeids.size()+edges.size()+1);
             aeids.add(AppdefUtil.newAppdefEntityId(resource));
             for (final ResourceEdge e : edges ) {
@@ -179,7 +181,7 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
     /**
      * @param eids List<AppdefEntityID>
      */
-    @Transactional(readOnly=true)
+    @Transactional(propagation=Propagation.NOT_SUPPORTED, readOnly=true)
     public void scheduleEnabled(Agent agent, Collection<AppdefEntityID> eids) throws MonitorAgentException {
         final StopWatch watch = new StopWatch();
         final boolean debug = log.isDebugEnabled();
@@ -192,7 +194,7 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
         // not being multi-threaded and processing the scheduled measurements one-by-one while
         // reading the socket. Once that is enhanced it should be fine to remove the batching here.
         final int batchSize = 100;
-        final List aeids = new ArrayList(eids);
+        final List<AppdefEntityID> aeids = new ArrayList<AppdefEntityID>(eids);
         for (int i=0; i<aeids.size(); i+=batchSize) {
             final int end = Math.min(i+batchSize, aeids.size());
             if (debug) watch.markTimeBegin("scheduleMeasurements");
@@ -202,7 +204,8 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
         if (debug) log.debug(watch);
     }
     
-    private void scheduleMeasurements(Agent agent, Map<Integer,List<Measurement>> measMap, Collection<AppdefEntityID> eids)
+    private void scheduleMeasurements(Agent agent, Map<Integer,List<Measurement>> measMap,
+                                      Collection<AppdefEntityID> eids)
     throws MonitorAgentException {
         final boolean debug = log.isDebugEnabled();
         final Map<SRN,List<Measurement>> schedMap = new HashMap<SRN,List<Measurement>>();

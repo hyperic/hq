@@ -2300,6 +2300,8 @@
         <forward name="success" path="/resource/common/monitor/visibility/DashCharts.jsp"/>
         <forward name="failure" path="/Dashboard.do" redirect="true"/>
         <forward name="currentHealth" path="/Resource.do?mode=currentHealth"/>
+		<!-- optional json output -->
+		<forward name="json" path="/common/JSONResponse.jsp" />
       </action>
 
       <action path="/resource/common/monitor/visibility/MetricsControl"

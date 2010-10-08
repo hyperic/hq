@@ -72,7 +72,7 @@ public class WeblogicRuntimeDiscoverer implements RuntimeDiscoverer, PrivilegedA
 
 	private static final boolean useJAAS = WeblogicProductPlugin.useJAAS();
     private static final String PROP_FQDN = "weblogic.discover.fqdn";
-	private static Log log = LogFactory.getLog("WeblogicRuntimeDiscoverer");
+	private static Log log = LogFactory.getLog(WeblogicRuntimeDiscoverer.class);
 
 	private int serverId;
     private Properties props;

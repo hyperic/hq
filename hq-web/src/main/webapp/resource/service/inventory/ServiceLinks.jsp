@@ -37,11 +37,7 @@
  <hq:userResourcePermissions debug="false" resource="${Resource}"/>
   <table border="0"><tr><td class="LinkBox">
     <c:if test="${canModify}">
-    	<html:link action="/resource/service/Inventory">
-    		<html:param name="mode" value="editConfig" />
-    		<html:param name="eid" value="${Resource.entityId}"/>
-    		<fmt:message key="resource.service.inventory.link.Configure"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/>
-    	</html:link>
+    	<html:link page="/resource/service/Inventory.do?mode=editConfig&eid=${Resource.entityId}"><fmt:message key="resource.service.inventory.link.Configure"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link>
 		<br />
 	</c:if>
     <c:if test="${canRemove}" >

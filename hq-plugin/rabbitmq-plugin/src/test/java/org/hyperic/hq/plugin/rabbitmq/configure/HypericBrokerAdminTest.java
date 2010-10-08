@@ -26,9 +26,8 @@
 package org.hyperic.hq.plugin.rabbitmq.configure;
 
 import org.hyperic.hq.plugin.rabbitmq.AbstractSpringTest;
-import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
+import org.hyperic.hq.plugin.rabbitmq.core.ErlangCookieHandler;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericBrokerAdmin;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
@@ -42,7 +41,7 @@ public class HypericBrokerAdminTest extends AbstractSpringTest {
 
     @Test
     public void testHypericAdmin() { 
-        String value = RabbitUtils.configureCookie(serverConfig);
+        String value = ErlangCookieHandler.configureCookie(serverConfig);
         assertNotNull(value);
 
         HypericBrokerAdmin admin = new HypericBrokerAdmin(singleConnectionFactory, value);

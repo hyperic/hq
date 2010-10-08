@@ -42,12 +42,8 @@
     <hq:userResourcePermissions debug="false" resource="${Resource}"/>    
 <table border="0"><tr><td class="LinkBox">
     <c:if test="${canModify}" >
-    	<html:link action="/resource/server/Inventory">
-    		<html:param name="mode" value="editConfig"/>
-    		<html:param name="eid" value="${resource.entityId.appdefKey}"/>
-    		<fmt:message key="resource.server.inventory.link.Configure"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/>
-    	</html:link>
-		<br/>
+    	<html:link page="/resource/server/Inventory.do?mode=editConfig&eid=${resource.entityId.appdefKey}" ><fmt:message key="resource.server.inventory.link.Configure"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link>
+		<br>
 	</c:if>
     <c:if test="${canRemove}" >
     	<tiles:insert definition=".resource.common.quickDelete">

@@ -29,8 +29,6 @@ public abstract class AbstractPluginTest {
 
     @Before
     public void doBefore() throws PluginException, IOException {
-        /* Resource resource = new ClassPathResource("classpath:/etc/test.properties"); */
-
         this.productPlugin.configure(createConfigResponse());
         assertNotNull(productPlugin);
         this.properties = productPlugin.getConfig().toProperties();

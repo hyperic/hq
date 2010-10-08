@@ -29,16 +29,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.util.config.ConfigResponse;
-import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
-import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.support.AbstractApplicationContext;
-import org.springframework.util.Assert;
+import org.springframework.context.support.AbstractApplicationContext; 
 
 
 /**
@@ -81,17 +77,12 @@ public class ApplicationContextCreator implements SmartLifecycle {
      */
     private static AbstractApplicationContext doCreateApplicationContext(ConfigResponse conf) {
         AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-
         GenericBeanDefinition connectionFactoryBean = ConnectionFactoryBeanDefinitionBuilder.build(conf);
         DynamicSpringBeanConfigurer.registerBean(connectionFactoryBean, (DefaultListableBeanFactory) ctx.getBeanFactory());
-        SingleConnectionFactory cf = ctx.getBean(SingleConnectionFactory.class);
-        Assert.notNull(cf, "SingleConnectionFactory must not be null.");
 
         GenericBeanDefinition adminBean = BrokerAdminBeanDefinitionBuilder.build(conf, connectionFactoryBean);
-        DynamicSpringBeanConfigurer.registerBean("rabbitBrokerAdmin", adminBean, (DefaultListableBeanFactory) ctx.getBeanFactory());
-        RabbitBrokerAdmin rabbitBrokerAdmin = ctx.getBean(RabbitBrokerAdmin.class);
-        Assert.notNull(ctx.getBean("rabbitBrokerAdmin"), "rabbitBrokerAdmin must not be null.");
-
+        DynamicSpringBeanConfigurer.registerBean(adminBean, (DefaultListableBeanFactory) ctx.getBeanFactory());
+         
         ctx.register(RabbitConfiguration.class);
         ctx.refresh();
         return ctx;

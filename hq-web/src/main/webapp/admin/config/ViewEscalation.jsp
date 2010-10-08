@@ -1445,21 +1445,21 @@ function saveAddEscalation() {
             <td id="description" class="BlockContent"></td>
         </tr>
         <tr>
-            <td class="BlockLabel" nowrap>
+            <td class="BlockLabel" nowrap="true">
                 <fmt:message
                         key="alert.config.escalation.acknowledged"/>
             </td>
             <td id="acknowledged" class="BlockContent"></td>
         </tr>
         <tr>
-            <td class="BlockLabel" nowrap>
+            <td class="BlockLabel" nowrap="true">
                 <fmt:message
                         key="alert.config.escalation.state.change"/>
             </td>
             <td id="changed" class="BlockContent"></td>
         </tr>
         <tr>
-            <td class="BlockLabel" nowrap>
+            <td class="BlockLabel" nowrap="true">
                 <fmt:message key="alert.config.escalation.state.ended"/>
             </td>
             <td id="ended" class="BlockContent"></td>

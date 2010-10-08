@@ -73,7 +73,7 @@ public class WeblogicProductPlugin extends ProductPlugin {
     public static final String PROP_INSTALLPATH =
         "weblogic." + ProductPlugin.PROP_INSTALLPATH;
 
-    private static Log log = LogFactory.getLog("WeblogicProductPlugin");
+    private static Log log = LogFactory.getLog(WeblogicProductPlugin.class);
 
     public static boolean useJAAS() {
         return useJAAS;

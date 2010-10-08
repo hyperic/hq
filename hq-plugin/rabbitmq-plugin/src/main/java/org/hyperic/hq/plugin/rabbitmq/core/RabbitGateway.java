@@ -25,10 +25,10 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
  
+import org.hyperic.hq.product.PluginException;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.admin.QueueInfo; 
-import org.springframework.amqp.rabbit.admin.RabbitStatus;
-import org.springframework.erlang.ErlangBadRpcException;
+import org.springframework.amqp.rabbit.admin.RabbitStatus; 
 import org.springframework.erlang.core.Application;
 import org.springframework.erlang.core.Node;
 
@@ -40,21 +40,23 @@ import java.util.List;
  */
 public interface RabbitGateway {
 
-    List<QueueInfo> getQueues();
+    List<String> getVirtualHosts() throws PluginException;
 
-    List<Connection> getConnections() throws ErlangBadRpcException;
+    List<Exchange> getExchanges(String virtualHost) throws PluginException;
 
-    List<Channel> getChannels() throws ErlangBadRpcException;
-    
-    List<String> getUsers();
+    List<HypericConnection> getConnections(String virtualHost) throws PluginException;
 
-    List<Exchange> getExchanges() throws Exception;
+    List<HypericChannel> getChannels(String virtualHost) throws PluginException;
 
+    String getVersion() throws PluginException;
+
+    List<HypericBinding> getBindings(String virtualHost) throws PluginException;
+
+    List<QueueInfo> getQueues(String virtualHost);
+ 
+    List<String> getUsers(String virtualHost);
+ 
     String getHost();
-
-    String getVirtualHost();
-
-    List<String> getVirtualHosts();
 
     RabbitStatus getRabbitStatus();
 
@@ -62,31 +64,5 @@ public interface RabbitGateway {
 
     List<Node> getRunningNodes();
 
-    AMQPStatus createQueue(String queueName);
-
-    AMQPStatus createExchange(String exchangeName, String type);
-
-    AMQPStatus createExchange(String exchangeName, String exchangeType, boolean durable, boolean autoDelete);
-
-    AMQPStatus createUser(String userName, String password);
-
-    AMQPStatus deleteQueue(String queueName);
-
-    AMQPStatus deleteExchange(String exchangeName);
-
-    AMQPStatus deleteExchange(String exchangeName, boolean ifUnused) throws Exception;
-
-    AMQPStatus deleteUser(String userName);
-
-    AMQPStatus purgeQueue(String queueName);
-
-    AMQPStatus updateUserPassword(String userName, String password);
     
-    AMQPStatus stopRabbitNode();
- 
-    AMQPStatus startRabbitNode(String rabbitHome);
-
-    AMQPStatus startBrokerApplication();
-
-    AMQPStatus stopBrokerApplication();
 }

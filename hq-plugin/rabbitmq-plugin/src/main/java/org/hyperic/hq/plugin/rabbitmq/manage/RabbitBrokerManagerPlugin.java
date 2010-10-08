@@ -28,15 +28,14 @@ package org.hyperic.hq.plugin.rabbitmq.manage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.AMQPStatus;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
-import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.amqp.core.Queue;
 
 /**
  * RabbitBrokerManagerPlugin
- *
+ * In development.
  * @author Helena Edelson
  */
 public class RabbitBrokerManagerPlugin extends ControlPlugin {
@@ -50,18 +49,21 @@ public class RabbitBrokerManagerPlugin extends ControlPlugin {
     public void doAction(String action, String[] args) throws PluginException {
         setResult(ControlPlugin.RESULT_FAILURE);
         logger.debug("Received " + args.length + " args");
-        for (String s : args) {
-            s = s.trim();
-        }
-        
-        RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
-        if (rabbitGateway != null) {
+
+        /** ToDo trim/validate input */
+    
+        RabbitManager manager = null; //RabbitProductPlugin.getRabbitGateway();
+        if (manager != null) {
+
+            /** ToDo validate args[0] */
+            String virtualHost = args[0];
 
             try {
 
                 if (action.equals("createQueue")) {
                     if (args.length == 1) {
-                        AMQPStatus status = rabbitGateway.createQueue(args[0]);
+                        Queue queue = new Queue(args[1]);
+                        AMQPStatus status = manager.createQueue(queue, virtualHost);
 
                         if (status.compareTo(AMQPStatus.RESOURCE_CREATED) == 0) {
                             setResult(ControlPlugin.RESULT_SUCCESS);
@@ -76,7 +78,7 @@ public class RabbitBrokerManagerPlugin extends ControlPlugin {
                 } else if (action.equals("deleteQueue")) {
 
                     if (args.length == 1) {
-                        AMQPStatus status = rabbitGateway.deleteQueue(args[1]);
+                        AMQPStatus status = manager.deleteQueue(args[1], virtualHost);
 
                         if (status.compareTo(AMQPStatus.NO_CONTENT) == 0) {
                             setResult(ControlPlugin.RESULT_SUCCESS);
@@ -90,7 +92,9 @@ public class RabbitBrokerManagerPlugin extends ControlPlugin {
 
                 } else if (action.equals("purgeQueue")) {
                     if (args.length == 1) {
-                        AMQPStatus status = rabbitGateway.purgeQueue(args[1]);
+                        String queue = args[1];
+
+                        AMQPStatus status = manager.purgeQueue(queue, virtualHost);
 
                         if (status.compareTo(AMQPStatus.NO_CONTENT) == 0) {
                             setResult(ControlPlugin.RESULT_SUCCESS);
@@ -107,7 +111,8 @@ public class RabbitBrokerManagerPlugin extends ControlPlugin {
                     if (args.length == 2) {
                         String exchangeName = args[1];
                         String exchangeType = args[2];
-                        AMQPStatus status = rabbitGateway.createExchange(exchangeName, exchangeType);
+
+                        AMQPStatus status = manager.createExchange(exchangeName, exchangeType, virtualHost);
 
                         if (status.compareTo(AMQPStatus.NO_CONTENT) == 0) {
                             setResult(ControlPlugin.RESULT_SUCCESS);
@@ -123,7 +128,7 @@ public class RabbitBrokerManagerPlugin extends ControlPlugin {
 
                      if (args.length == 2) {
                         String exchangeName = args[1];
-                        AMQPStatus status = rabbitGateway.deleteExchange(exchangeName, true);
+                        AMQPStatus status = manager.deleteExchange(exchangeName, true, virtualHost);
 
                         if (status.compareTo(AMQPStatus.NO_CONTENT) == 0) {
                             setResult(ControlPlugin.RESULT_SUCCESS);
@@ -139,7 +144,7 @@ public class RabbitBrokerManagerPlugin extends ControlPlugin {
                     if (args.length == 2) {
                         String username = args[1];
                         String password = args[2];
-                        AMQPStatus status = rabbitGateway.createUser(username, password);
+                        AMQPStatus status = manager.createUser(username, password, virtualHost);
 
                         if (status.compareTo(AMQPStatus.RESOURCE_CREATED) == 0) {
                             setResult(ControlPlugin.RESULT_SUCCESS);
@@ -154,7 +159,7 @@ public class RabbitBrokerManagerPlugin extends ControlPlugin {
                     if (args.length == 2) {
                         String username = args[1];
                         String password = args[2];
-                        AMQPStatus status = rabbitGateway.updateUserPassword(username, password);
+                        AMQPStatus status = manager.updateUserPassword(username, password, virtualHost);
 
                         if (status.compareTo(AMQPStatus.RESOURCE_CREATED) == 0) {
                             setResult(ControlPlugin.RESULT_SUCCESS);
@@ -167,7 +172,7 @@ public class RabbitBrokerManagerPlugin extends ControlPlugin {
                 }
                 else if (action.equals("deleteUser")) {
                     if (args.length == 1) {
-                        AMQPStatus status = rabbitGateway.deleteUser(args[1]);
+                        AMQPStatus status = manager.deleteUser(args[1], virtualHost);
                         if (status.compareTo(AMQPStatus.NO_CONTENT) == 0) {
                             setResult(ControlPlugin.RESULT_SUCCESS);
                         } else {
@@ -178,7 +183,7 @@ public class RabbitBrokerManagerPlugin extends ControlPlugin {
                     }
                 }
                 else if (action.equals("startBrokerApplication")) {
-                    AMQPStatus status = rabbitGateway.startBrokerApplication();
+                    AMQPStatus status = manager.startBrokerApplication();
                     if (status.compareTo(AMQPStatus.SUCCESS) == 0) {
                             setResult(ControlPlugin.RESULT_SUCCESS);
                     } else {
@@ -186,20 +191,14 @@ public class RabbitBrokerManagerPlugin extends ControlPlugin {
                     }
                 }
                 else if (action.equals("stopBrokerApplication")) {
-                    AMQPStatus status = rabbitGateway.stopBrokerApplication();
+                    AMQPStatus status = manager.stopBrokerApplication();
                     if (status.compareTo(AMQPStatus.SUCCESS) == 0) {
                             setResult(ControlPlugin.RESULT_SUCCESS);
                     } else {
                             handleResult(status, "Failed to stop broker app.");
                     }
                 }
-                /** test for RabbitMQ_HOME set - a requirement */
-                /* else if (action.equals("stopNode")) { 
-                    AMQPStatus status = rabbitGateway.stopRabbitNode();
-                }
-                else if (action.equals("startNode")) {
-                    AMQPStatus status = rabbitGateway.startRabbitNode();
-                }*/
+
                 else {
                     throw new PluginException("Unsupported action: " + action);
                 }

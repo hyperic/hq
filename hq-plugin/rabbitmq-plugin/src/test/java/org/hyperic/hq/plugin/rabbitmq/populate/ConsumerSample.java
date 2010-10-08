@@ -25,12 +25,14 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.populate;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
- 
+
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
+import org.springframework.amqp.rabbit.admin.QueueInfo;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 /**
@@ -39,55 +41,56 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
  */
 public class ConsumerSample {
 
-    private static int NUM_MESSAGES = 500;
+    private int numMessages;
 
     private RabbitTemplate rabbitTemplate;
-
-    private Queue marketDataQueue;
-
-    public ConsumerSample(RabbitTemplate rabbitTemplate, Queue marketDataQueue) {
+ 
+    public ConsumerSample(RabbitTemplate rabbitTemplate, int numMessages) {
         this.rabbitTemplate = rabbitTemplate;
-        this.marketDataQueue = marketDataQueue;
+        this.numMessages = numMessages;
     }
 
-	protected void receiveSync() {
-		for (int i = 0; i < NUM_MESSAGES; i++) {
-			Message message = this.rabbitTemplate.receive();//this.marketDataQueue.getName()
-			if (message == null) {
-				//System.out.println("Thread [" + Thread.currentThread().getId() + "] Received Null Message!");
-			}
-			else {
-				System.out.println("Thread [" + Thread.currentThread().getId() + "] Received Message = " + new String(message.getBody()));
-				Map<String, Object> headers = message.getMessageProperties().getHeaders();
-				Object objFloat = headers.get("float");
-				Object objcp = headers.get("object");
-				System.out.println("float header type = " + objFloat.getClass());
-				System.out.println("object header type = " + objcp.getClass());
-			}
-		}
-	}
+    protected void receiveSync(List<QueueInfo> queues) {
+        if (queues != null) {
+            for (QueueInfo q : queues) { 
+                for (int i = 0; i < numMessages; i++) {
+                    Message message = rabbitTemplate.receive(q.getName());
+                    if (message == null) {
+                        System.out.println("Thread [" + Thread.currentThread().getId() + "] Received Null Message!");
+                    } else {
+                        System.out.println("Thread [" + Thread.currentThread().getId() + "] Received Message = " + new String(message.getBody()));
+                        Map<String, Object> headers = message.getMessageProperties().getHeaders();
+                        Object objFloat = headers.get("float");
+                        Object objcp = headers.get("object");
+                        System.out.println("float header type = " + objFloat.getClass());
+                        System.out.println("object header type = " + objcp.getClass());
+                    }
+                }
+            }
+        }
+    }
 
     protected void receiveAsync() {
         SimpleMessageListener ml = new SimpleMessageListener();
-		System.out.println("Main execution thread sleeping 5 seconds...");
+        System.out.println("Main execution thread sleeping 5 seconds...");
         try {
             Thread.sleep(50000);
         } catch (InterruptedException e) {
             System.out.println(e);
         }
         System.out.println("Application exiting.");
-		System.exit(0);
-	}
-    
-	public static class SimpleMessageListener implements MessageListener {
+        System.exit(0);
+    }
 
-		private final AtomicInteger messageCount = new AtomicInteger();
+    public static class SimpleMessageListener implements MessageListener {
 
-		public void onMessage(Message message) {
-			int msgCount = this.messageCount.incrementAndGet();
-			System.out.println("Thread [" + Thread.currentThread().getId()
-					+ "] SimpleMessageListener Received Message " + msgCount
-					+ ", = " + new String(message.getBody()));
-		}
-	}
+        private final AtomicInteger messageCount = new AtomicInteger();
+
+        public void onMessage(Message message) {
+            int msgCount = this.messageCount.incrementAndGet();
+            System.out.println("Thread [" + Thread.currentThread().getId()
+                    + "] SimpleMessageListener Received Message " + msgCount
+                    + ", = " + new String(message.getBody()));
+        }
+    }
 }

@@ -27,10 +27,10 @@ package org.hyperic.hq.plugin.rabbitmq.configure;
 
 import com.ericsson.otp.erlang.*;
 import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitUtils;
+import org.hyperic.hq.plugin.rabbitmq.core.ErlangCookieHandler;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.util.Assert;
- 
+
 import java.io.IOException;
 
 /**
@@ -41,34 +41,31 @@ public class ConnectionTest {
 
     private static final String NODE = "localhost";
 
-       public static void main(String[] args) throws IOException, OtpAuthException, OtpErlangExit {
-           ConfigResponse conf = new ConfigResponse();
-           conf.setValue(DetectorConstants.HOST, NODE);
-           conf.setValue(DetectorConstants.USERNAME, "guest");
-           conf.setValue(DetectorConstants.PASSWORD, "guest");
-           conf.setValue(DetectorConstants.PLATFORM_TYPE, "Linux");
+    public static void main(String[] args) throws IOException, OtpAuthException, OtpErlangExit {
+        ConfigResponse conf = new ConfigResponse();
+        conf.setValue(DetectorConstants.HOST, NODE);
+        conf.setValue(DetectorConstants.USERNAME, "guest");
+        conf.setValue(DetectorConstants.PASSWORD, "guest");
+        conf.setValue(DetectorConstants.PLATFORM_TYPE, "Linux");
 
-           String value = RabbitUtils.configureCookie(conf);
-           conf.setValue(DetectorConstants.NODE_COOKIE_VALUE, value);
+        String value = ErlangCookieHandler.configureCookie(conf);
+        conf.setValue(DetectorConstants.NODE_COOKIE_VALUE, value);
 
+        OtpSelf self = new OtpSelf("rabbit-spring-monitor", value);
+        OtpPeer peer = new OtpPeer("rabbit@" + NODE);
 
-           OtpSelf self = new OtpSelf("rabbit-spring-monitor", value);
-           OtpPeer peer = new OtpPeer("rabbit@"+NODE);
-           //peer.setCookie(value);
-           OtpConnection conn = self.connect(peer);
+        OtpConnection conn = self.connect(peer);
+        conn.sendRPC("erlang", "date", new OtpErlangList());
+        OtpErlangObject received = conn.receiveRPC();
+        Assert.notNull(received);
 
-           conn.sendRPC("erlang","date",new OtpErlangList());
-           OtpErlangObject received = conn.receiveRPC();
-           Assert.notNull(received);
+        Assert.notNull(conn);
+        Assert.state(conn.isAlive());
+        Assert.state(conn.isConnected());
+        Assert.isTrue(conn.getState().name().equalsIgnoreCase("RUNNABLE"), "Connection must be runnable.");
 
-
-           Assert.notNull(conn);
-           Assert.state(conn.isAlive());
-           Assert.state(conn.isConnected());
-           Assert.isTrue(conn.getState().name().equalsIgnoreCase("RUNNABLE"), "Connection must be runnable.");
-
-           conn.close();
-       }
-
+        conn.close();
+        System.exit(0);
+    }
 
 }

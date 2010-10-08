@@ -73,8 +73,8 @@
       </span>
       <fmt:message key="error.Error.ReturnTo"/>
       <html:link href="javascript:history.back(1)"><fmt:message key="error.Error.PreviousPageLink"/></html:link> 
-      <html:link action="/Dashboard"><fmt:message key="error.Error.DashboardLink"/></html:link> 
-      <html:link action="/ResourceHub"><fmt:message key="error.Error.ResourceHubLink"/></html:link> 
+      <html:link page="/Dashboard.do"><fmt:message key="error.Error.DashboardLink"/></html:link> 
+      <html:link page="/ResourceHub.do"><fmt:message key="error.Error.ResourceHubLink"/></html:link> 
       <fmt:message key="error.Error.Page"/>
       </p>
     </td>

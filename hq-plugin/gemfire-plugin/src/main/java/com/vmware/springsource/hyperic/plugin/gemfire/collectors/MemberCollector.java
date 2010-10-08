@@ -1,16 +1,10 @@
 package com.vmware.springsource.hyperic.plugin.gemfire.collectors;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import javax.management.ReflectionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.Collector;
@@ -43,52 +37,7 @@ public class MemberCollector extends Collector {
             log.debug(ex, ex);
         }
     }
-    private final static String[] vmStats_metrics = {"processCpuTime", "cpus", "threads"};
-    private final static String[] cachePerfStats_metrics = {"gets", "puts", "getTime", "putTime"};
-    private final static String[] vmHeapMemoryStats_metrics = {"usedMemory", "maxMemory"};
-    private final static String[] distributionStats_metrics = {"receivers", "sentBytes", "receivedBytes"};
-    private final static Map<String, String[]> metrics = new HashMap();
-
-/*    static {
-        metrics.put("vmStats", vmStats_metrics);
-        metrics.put("cachePerfStats", cachePerfStats_metrics);
-        metrics.put("vmHeapMemoryStats", vmHeapMemoryStats_metrics);
-        metrics.put("distributionStats", distributionStats_metrics);
-    }*/
     private static final int prefixLength = "gemfire.member.".length();
-
-/*    private static void refresh(String memberID, MBeanServerConnection mServer) throws IOException, MalformedObjectNameException, InstanceNotFoundException, MBeanException, ReflectionException {
-        String memberIDjmx = memberID.replaceAll("\\((\\d*)\\)<(\\w*)>:(\\d*)/(\\d*)", "($1)<$2>-$3/$4");
-        Object[] args = new Object[0];
-        String[] def = new String[0];
-        for (String name : metrics.keySet()) {
-            String omq = "GemFire.Statistic:source=" + memberIDjmx + ",name=" + name + ",*";
-            log.debug("[collect] omq = " + omq);
-            Set<ObjectName> names = mServer.queryNames(new ObjectName(omq), null);
-            log.debug("[collect] names = " + names);
-
-            if (!names.iterator().hasNext()) {
-                String mq = "GemFire.*:id=" + memberIDjmx + ",*";
-                Set<ObjectName> mn = mServer.queryNames(new ObjectName(mq), null);
-                log.debug("[collect] mn = " + mn);
-                if (mn.iterator().hasNext()) {
-                    ObjectName mon = mn.iterator().next();
-                    log.debug("[collect] " + mon + " -> manageStats");
-                    mServer.invoke(mon, "manageStats", args, def);
-                    names = mServer.queryNames(new ObjectName(omq), null);
-                }
-            }
-            ObjectName mbean = names.iterator().next();
-
-            //mServer.invoke(mbean, "getStatistics", args, def);
-            mServer.invoke(mbean, "refresh", args, def);
-//            Iterator attrs = mServer.getAttributes(mbean, metrics.get(name)).iterator();
-//            while (attrs.hasNext()) {
-//                Attribute attr = (Attribute) attrs.next();
-//                res.put(name + "." + attr.getName(), attr.getValue());
-//            }
-        }
-    }*/
 
     public static Map getMetrics(String memberID, MBeanServerConnection mServer, boolean hqu) {
         Map res = new java.util.HashMap<String, Object>();
