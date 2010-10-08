@@ -964,6 +964,127 @@
     <server name="JBoss"
           version="4.3"
           include="4.2">
+          <service name="JMS Queue Destination" internal="true">
+            <config>
+                <option name="name"
+                description="JMS Destination"
+                default=""/>
+            </config>
+
+            <property name="OBJECT_NAME"
+                value="jboss.messaging.destination:service=Queue,name=%name%"/>
+
+            <plugin type="autoinventory"/>
+
+            <plugin type="measurement" class="JBoss5MeasurementPlugin"/>
+            <plugin type="control"
+              class="JBoss5ServiceControlPlugin"/>
+
+            <actions include="stop,start,removeAllMessages"/>
+
+            <properties>
+				<property name="RedeliveryDelay" description="Redelivery Delay" />
+				<property name="JNDIName" description="JNDI Name" />
+                <property name="ServerPeer" description="Server Peer" />
+				<property name="CreatedProgrammatically" description="Created Programmatically" />
+				<property name="MaxSize" description="Max Size" />
+				<property name="FullSize" description="Full Size" />
+				<property name="PageSize" description="Page Size" />
+				<property name="DownCacheSize" description="Down Cache Size" />
+				<property name="Clustered" description="Clustered" />
+				<property name="MaxDeliveryAttempts" description="Max Delivery Attempts" />
+				<property name="MessageCount" description="All Message Count" />
+				<property name="ConsumerCount" description="All Subscriptions Count" />
+            </properties>
+
+            <metric name="Availability" template="jboss.system:service=MainDeployer:StateString"
+				indicator="true" />
+
+            <metric name="Messages in Queue"
+                alias="MessageCount"
+            template="${OBJECT_NAME}:${alias}"
+              category="THROUGHPUT"
+              indicator="true"/>
+
+            <metric name="Delivering Count"
+                 alias="DeliveringCount"
+           template="${OBJECT_NAME}:${alias}"
+              indicator="true"/>
+
+            <metric name="Consumer Count"
+                 alias="ConsumerCount"
+           template="${OBJECT_NAME}:${alias}"
+              indicator="true"/>
+
+            <metric name="Scheduled Message Count"
+                  alias="ScheduledMessageCount"
+          template="${OBJECT_NAME}:${alias}"/>
+        </service>
+
+        <service name="JMS Topic" internal="true">
+            <config>
+                <option name="name"
+                description="JMS Topic"
+                default=""/>
+            </config>
+
+            <property name="OBJECT_NAME"
+                value="jboss.messaging.destination:service=Topic,name=%name%"/>
+
+            <plugin type="autoinventory"/>
+
+            <plugin type="control"
+              class="JBoss5ServiceControlPlugin"/>
+
+            <actions include="stop,start,removeAllMessages"/>
+
+            <properties>
+				<property name="RedeliveryDelay" description="Redelivery Delay" />
+				<property name="ServerPeer" description="Server Peer" />
+				<property name="JNDIName" description="JNDI Name" />
+                <property name="CreatedProgrammatically" description="Created Programmatically" />
+				<property name="MaxSize" description="Max Size" />
+				<property name="FullSize" description="Full Size" />
+				<property name="PageSize" description="Page Size" />
+				<property name="DownCacheSize" description="Down Cache Size" />
+				<property name="Clustered" description="Clustered" />
+				<property name="MaxDeliveryAttempts" description="Max Delivery Attempts" />
+				<property name="AllMessageCount" description="All Message Count" />
+				<property name="AllSubscriptionsCount" description="All Subscriptions Count" />
+            </properties>
+
+            <metric name="Availability" template="jboss.system:service=MainDeployer:StateString"
+				indicator="true" />
+
+            <metric name="All Subscriptions Count"
+              template="${OBJECT_NAME}:AllSubscriptionsCount"
+              category="UTILIZATION"
+              indicator="true"/>
+
+            <metric name="Non Durable Subscriptions Count"
+              template="${OBJECT_NAME}:NonDurableSubscriptionsCount"
+              category="UTILIZATION"/>
+
+            <metric name="Durable Subscriptions Count"
+              template="${OBJECT_NAME}:DurableSubscriptionsCount"
+              category="UTILIZATION"
+              indicator="true"/>
+
+            <metric name="All Message Count"
+              template="${OBJECT_NAME}:AllMessageCount"
+              category="THROUGHPUT"
+              indicator="true"/>
+
+            <metric name="Durable Message Count"
+              template="${OBJECT_NAME}:DurableMessageCount"
+              category="THROUGHPUT"
+              indicator="true"/>
+
+            <metric name="NonDurableMessageCount"
+              template="${OBJECT_NAME}:NonDurableMessageCount"
+              category="THROUGHPUT"/>
+        </service>
+          
     </server>
 
     <metrics name="JBoss 5.0 JCA Connection Pool" include="JBoss 4.2 JCA Connection Pool"/>
