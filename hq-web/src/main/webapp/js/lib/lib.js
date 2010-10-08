@@ -2115,7 +2115,7 @@ hyperic.dashboard.chartWidget = function(args) {
             preventCache: true,
             load: function(data){
                 // that.charts[chart].data = data;
-                if(!data.error && data.payload.length > 0)
+                if(!data.error && data.payload && data.payload.length > 0)
                 {
                     that.charts[chart].data = {};
                     
