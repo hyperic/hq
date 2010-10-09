@@ -55,7 +55,7 @@
 
 	<bean id="loggingDispatcher" class="org.hyperic.hq.bizapp.server.mdb.LoggingDispatcherImpl" />
 	<bean id="serverRestartHandler"
-		class="org.hyperic.hq.bizapp.server.mdb.ServerRestartHandlerImpl" />
+		class="org.hyperic.hq.bizapp.server.mdb.ServerRestartedListener" />
 	<bean id="registeredDispatcher"
 		class="org.hyperic.hq.bizapp.server.mdb.RegisteredDispatcherImpl" />
 

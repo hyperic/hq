@@ -15,16 +15,16 @@ import org.hyperic.hq.control.shared.ControlConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Uses transaction manager ("Required") and is bound to topic/eventsTopic
+ * Bound to topic/eventsTopic
  */
-public class ServerRestartHandlerImpl implements MessageListener {
+public class ServerRestartedListener implements MessageListener {
 
     private ServerRestartHandler serverRestartHandler;
 
-    private final Log log = LogFactory.getLog(ServerRestartHandlerImpl.class);
+    private final Log log = LogFactory.getLog(ServerRestartedListener.class);
 
     @Autowired
-    public ServerRestartHandlerImpl(ServerRestartHandler serverRestartHandler) {
+    public ServerRestartedListener(ServerRestartHandler serverRestartHandler) {
         this.serverRestartHandler = serverRestartHandler;
     }
 
