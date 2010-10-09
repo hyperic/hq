@@ -131,9 +131,8 @@
     <td class="ListHeader" colspan="2" align="left"><fmt:message key="${childResourcesHealthKey}"/></td>
 
     <c:if test="${not empty summaries}">
-    <!--<td class="ListHeaderInactive" width="20%" align="center" nowrap><fmt:message key="resource.common.monitor.visibility.TotalNumTH"/></td>-->
-    <td class="ListHeaderInactive" align="center" nowrap><fmt:message key="resource.common.monitor.visibility.AVAILTH"/></td>
-    <td class="ListHeaderInactive">&nbsp;</td>
+    <td class="ListHeaderInactive"  width="24" align="center" nowrap><fmt:message key="resource.common.monitor.visibility.AVAILTH"/></td>
+    <td class="ListHeaderInactive" width="14">&nbsp;</td>
     </c:if>
   </tr>
 
@@ -200,9 +199,6 @@
       </c:otherwise>
     </c:choose>
     </td>
-    <!--<td class="ListCellCheckbox">
-        <c:out value="${summary.numResources}" default="0"/>
-    </td>-->
     <td class="ListCellCheckbox">
     <tiles:insert page="/resource/common/monitor/visibility/AvailIcon.jsp">
         <tiles:put name="availability" beanName="summary" beanProperty="availability" />

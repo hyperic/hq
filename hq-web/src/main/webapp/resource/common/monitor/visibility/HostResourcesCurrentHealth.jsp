@@ -115,10 +115,10 @@
     	</td>
     
     	<c:if test="${not empty summaries}">
-    		<td class="ListHeaderCheckbox">
+    		<td width="24" class="ListHeaderCheckbox">
     			<fmt:message key="resource.common.monitor.visibility.AVAILTH"/>
     		</td>
-    		<td class="ListHeaderInactive" width="6%">&nbsp;</td>
+    		<td class="ListHeaderInactive" width="14">&nbsp;</td>
 		</c:if>
   	</tr>
 
