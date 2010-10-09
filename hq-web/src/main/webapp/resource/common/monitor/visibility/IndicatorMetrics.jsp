@@ -186,7 +186,7 @@
 			<tr class="tableRowHeader">
 				<th class="ListHeaderInactive"><fmt:message
 					key="resource.common.monitor.visibility.MiniTab.All" /></th>
-				<th class="ListHeaderInactive" colspan="2" width="4%"><fmt:message
+				<th class="ListHeaderInactive" colspan="2" width="38"><fmt:message
 					key="nbsp" /></th>
 			</tr>
 			<c:forEach var="metric" items="${problems}">
