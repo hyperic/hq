@@ -32,8 +32,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
@@ -88,10 +86,9 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class AIQueueManagerImpl implements AIQueueManager {
-    protected static final String AIPLATFORM_PROCESSOR = "org.hyperic.hq.appdef.server.session.PagerProcessor_aiplatform";
-    protected static final String AIPLATFORM_PROCESSOR_NOPLACEHOLDERS = "org.hyperic.hq.appdef.server.session.PagerProcessor_aiplatform_excludePlaceholders";
-    private Pager aiplatformPager;
-    private Pager aiplatformPagerNoPlaceholders;
+  
+    private Pager aiplatformPager = new Pager(new PagerProcessor_aiplatform());
+    private Pager aiplatformPagerNoPlaceholders= new Pager(new PagerProcessor_aiplatform_excludePlaceholders());
 
     private final AI2AppdefDiff appdefDiffProcessor = new AI2AppdefDiff();
     private final AIQSynchronizer queueSynchronizer = new AIQSynchronizer();
@@ -765,16 +762,4 @@ public class AIQueueManagerImpl implements AIQueueManager {
         throws PermissionException, GroupNotCompatibleException {
         permissionManager.checkAIScanPermission(subject, id);
     }
-
-    /**
-     * 
-     */
-    @PostConstruct
-    public void afterPropertiesSet() throws Exception {
-
-        aiplatformPager = Pager.getPager(AIPLATFORM_PROCESSOR);
-        aiplatformPagerNoPlaceholders = Pager.getPager(AIPLATFORM_PROCESSOR_NOPLACEHOLDERS);
-
-    }
-
 }
