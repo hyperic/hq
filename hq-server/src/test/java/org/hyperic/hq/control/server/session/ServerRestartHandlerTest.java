@@ -49,7 +49,7 @@ public class ServerRestartHandlerTest
     extends TestCase
 {
 
-    private ServerRestartHandler serverRestartHandler;
+    private ServerRestartHandlerImpl serverRestartHandler;
 
     private AutoinventoryManager autoInvManager;
 
@@ -71,7 +71,7 @@ public class ServerRestartHandlerTest
         this.serverManager = EasyMock.createMock(ServerManager.class);
         this.configManager = EasyMock.createMock(ConfigManager.class);
         this.trackerManager = EasyMock.createMock(TrackerManager.class);
-        this.serverRestartHandler = new ServerRestartHandler(serverManager,
+        this.serverRestartHandler = new ServerRestartHandlerImpl(serverManager,
                                                              configManager,
                                                              autoInvManager,
                                                              trackerManager);

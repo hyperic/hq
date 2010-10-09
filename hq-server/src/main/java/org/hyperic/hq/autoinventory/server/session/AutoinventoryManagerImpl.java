@@ -301,6 +301,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
     /**
      * Toggle Runtime-AI config for the given server.
      */
+    @Transactional
     public void toggleRuntimeScan(AuthzSubject subject, AppdefEntityID id, boolean enable)
         throws PermissionException, AutoinventoryException, ResourceDeletedException {
         Resource res = resourceManager.findResource(id);
