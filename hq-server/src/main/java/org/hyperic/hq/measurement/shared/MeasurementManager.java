@@ -78,6 +78,13 @@ public interface MeasurementManager {
                                                 Integer[] templates, long[] intervals,
                                                 ConfigResponse props) throws PermissionException,
         MeasurementCreateException, TemplateNotFoundException;
+    
+    List<Measurement> createDefaultMeasurements(AuthzSubject subject, AppdefEntityID id,
+        String mtype, ConfigResponse props) throws TemplateNotFoundException, PermissionException, 
+        MeasurementCreateException;
+    
+    void disableMeasurementsForDeletion(AuthzSubject subject, Agent agent,
+             AppdefEntityID[] ids) throws PermissionException;
 
     /**
      * Create Measurement objects based their templates and default intervals
