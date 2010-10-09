@@ -174,17 +174,16 @@ public final class ConcurrentStatsCollector {
 
     private final void registerInternalStats() {
         register(new StatCollector() {
-            private final CacheManager _cMan = CacheManager.getInstance();
-
+           
             public String getId() {
                 return EHCACHE_TOTAL_OBJECTS;
             }
 
             public long getVal() {
                 long rtn = 0l;
-                String[] caches = _cMan.getCacheNames();
+                String[] caches = CacheManager.getInstance().getCacheNames();
                 for (int i = 0; i < caches.length; i++) {
-                    rtn += _cMan.getCache(caches[i]).getStatistics().getObjectCount();
+                    rtn += CacheManager.getInstance().getCache(caches[i]).getStatistics().getObjectCount();
                 }
                 return rtn;
             }
