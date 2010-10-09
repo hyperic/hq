@@ -53,7 +53,7 @@ public class Pager {
     private boolean _skipNulls = false;
     private PagerEventHandler _eventHandler;
 
-    private Pager(PagerProcessor processor) {
+    public Pager(PagerProcessor processor) {
         _processor = processor;
         _skipNulls = false;
         _eventHandler = null;
