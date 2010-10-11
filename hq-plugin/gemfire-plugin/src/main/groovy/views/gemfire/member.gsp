@@ -10,8 +10,8 @@
   </thead>
   <tbody>
     <tr>
-      <td>${member.get("heap")}%</td>
-      <td>${member.get("cpu")}%</td>
+      <td>${member.get("heap")}</td>
+      <td>${member.get("cpu")}</td>
       <td>${member.get("uptime")}</td>
       <td>${member.get("clients").size()}</td>
     </tr>
