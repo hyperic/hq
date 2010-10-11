@@ -600,10 +600,10 @@ public class AIQueueManagerImpl implements AIQueueManager {
             }
         }
 
-        // If the action was "approve", then resync queued platforms
+        // If the action was "approve" or "ignore", then resync queued platforms
         // to appdef, now that appdef may have been updated.
 
-        if (isApproveAction) {
+        if (!isPurgeAction) {
 
             for (Integer id : aiplatformsToResync.keySet()) {
 
