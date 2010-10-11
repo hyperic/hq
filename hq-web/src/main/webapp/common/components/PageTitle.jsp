@@ -168,7 +168,14 @@
       											<td class="PageTitleSmallText" width="33%" valign="top">
       												<b><c:out value="${cprop.key}"/></b>
       												<fmt:message key="common.label.Colon"/>
-      												<hq:shortenText maxlength="30" value="${cprop.value}" styleClass="ListCellPopup5"/>
+ 													<c:choose>
+ 	 	 	 											<c:when test="${cprop.key == 'VM Instance'}">
+ 	 	 	 												<c:out value="${cprop.value}" escapeXml="false" />
+ 	 	 	 											</c:when>
+ 	 	 	 											<c:otherwise>
+ 	 	 	 												<hq:shortenText maxlength="30" value="${cprop.value}" styleClass="ListCellPopup5"/>
+ 	 	 	 											</c:otherwise>
+ 	 	 	 										</c:choose>      												
       											</td>
   												
   												<c:choose>
