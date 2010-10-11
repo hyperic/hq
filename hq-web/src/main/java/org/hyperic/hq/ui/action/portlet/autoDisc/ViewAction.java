@@ -26,6 +26,7 @@
 package org.hyperic.hq.ui.action.portlet.autoDisc;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -42,6 +43,7 @@ import org.apache.struts.action.ActionMessages;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
+import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.bizapp.shared.AIBoss;
@@ -100,12 +102,12 @@ public class ViewAction
         }
         // always show ignored platforms and already-processed platforms
         PageList<AIPlatformValue> aiQueue = aiBoss.getQueue(sessionId, true, false, true, page);
-        
+
         if(log.isDebugEnabled()) {
             watch.stop();
             log.debug(watch.prettyPrint());
         }
-        List<AIPlatformWithStatus> queueWithStatus = getStatuses(aiQueue);
+        List<AIPlatformWithStatus> queueWithStatus = getStatuses(sessionId, aiQueue);
         context.putAttribute("resources", queueWithStatus);
 
         // If the queue is empty, check to see if there are ANY agents
@@ -159,15 +161,24 @@ public class ViewAction
         return null;
     }
 
-    private List<AIPlatformWithStatus> getStatuses(PageList<AIPlatformValue> aiQueue) {
+    private List<AIPlatformWithStatus> getStatuses(int sessionId, PageList<AIPlatformValue> aiQueue) 
+        throws Exception {
+        
         ScanStateCore ssc = null;
-        AIPlatformValue aiPlatform;
         List<AIPlatformWithStatus> results = new ArrayList<AIPlatformWithStatus>();
 
-        for (int i = 0; i < aiQueue.size(); i++) {
-            aiPlatform = aiQueue.get(i);
-
-            results.add(new AIPlatformWithStatus(aiPlatform, ssc));
+        for (Iterator<AIPlatformValue> it = aiQueue.iterator(); it.hasNext();) {
+            AIPlatformValue aiPlatform = it.next();
+            
+            // FIXME: HHQ-4242: This needs to be done at the server-side / manager layer,
+            // not at the UI layer. Re-sync the queue, ensuring the status is up-to-date
+            aiPlatform = aiBoss.findAIPlatformById(sessionId, aiPlatform.getId().intValue());
+            
+            if (aiPlatform.getQueueStatus() == AIQueueConstants.Q_STATUS_PLACEHOLDER) {
+                it.remove();
+            } else {
+                results.add(new AIPlatformWithStatus(aiPlatform, ssc));
+            }
         }
 
         return results;
