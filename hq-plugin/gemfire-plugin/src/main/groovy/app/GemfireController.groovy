@@ -37,8 +37,16 @@ class GemfireController extends BaseController {
     def translate(members){
         s=0; g=0; c=0;
         members.each{k,it ->
-            it.put("cpu",String.format("%.02f",(it.get("used_cpu")*100)))
-            it.put("heap",String.format("%.02f",(it.get("used_memory")*100)))
+            if(it.get("used_cpu")!=null){
+                it.put("cpu",String.format("%.02f",(it.get("used_cpu")*100))+"%")
+            }else{
+                it.put("cpu","N/A")
+            }
+            if(it.get("used_memory")!=null){
+                it.put("heap",String.format("%.02f",(float)(it.get("used_memory")*100))+"%")
+            }else{
+                it.put("heap","N/A")
+            }
             it.put("id",HtmlUtil.escapeHtml(it.get("id")))
             it.put("name",HtmlUtil.escapeHtml(it.get("name")))
             it.get("isserver") ? ++s : void
