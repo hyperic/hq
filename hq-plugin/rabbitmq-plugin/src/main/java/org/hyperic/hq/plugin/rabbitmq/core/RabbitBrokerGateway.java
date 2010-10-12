@@ -31,23 +31,17 @@ import com.ericsson.otp.erlang.OtpErlangObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.amqp.core.*;
-import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.admin.QueueInfo;
 import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
 import org.springframework.amqp.rabbit.admin.RabbitStatus;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
 import org.springframework.erlang.ErlangBadRpcException;
 import org.springframework.erlang.core.*;
 import org.springframework.erlang.core.Application;
-import org.springframework.erlang.support.converter.ErlangConversionException;
 import org.springframework.util.Assert;
-
-import org.springframework.util.exec.Execute;
-import org.springframework.util.exec.Os;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
@@ -75,21 +69,25 @@ public class RabbitBrokerGateway implements RabbitGateway {
         Assert.notNull(rabbitBrokerAdmin, "rabbitBrokerAdmin must not be null");
         Assert.notNull(erlangConverter, "erlangConverter must not be null");
     }
-  
-    /**
-     * Get a list of QueueInfo objects.
-     * @return
-     */
-    /*public List<QueueInfo> getQueues(String virtualHost) {
-        return rabbitBrokerAdmin.getQueues();
-    }*/
 
     @SuppressWarnings("unchecked")
     public List<QueueInfo> getQueues(String virtualHost) throws ErlangBadRpcException {
-         List<String> vHosts = getVirtualHosts();
+        Assert.hasText(virtualHost);
         return (List<QueueInfo>) erlangConverter.fromErlangRpc("rabbit_amqqueue", "info_all", virtualHost, QueueInfo.class);
     }
- 
+
+    @SuppressWarnings("unchecked")
+    public List<Exchange> getExchanges(String virtualHost) throws ErlangBadRpcException {
+        Assert.hasText(virtualHost);
+        return (List<Exchange>) erlangConverter.fromErlangRpc("rabbit_exchange", "list", virtualHost, Exchange.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<HypericBinding> getBindings(String virtualHost) throws ErlangBadRpcException {
+        Assert.hasText(virtualHost);
+        return (List<HypericBinding>) erlangConverter.fromErlangRpc("rabbit_exchange", "list_bindings", virtualHost, HypericBinding.class);
+    }
+    
     /**
      * Get a List of virtual hosts.
      * @return List of String representations of virtual hosts
@@ -97,15 +95,6 @@ public class RabbitBrokerGateway implements RabbitGateway {
     @SuppressWarnings("unchecked")
     public List<String> getVirtualHosts() throws ErlangBadRpcException {
         return (List<String>) erlangConverter.fromErlangRpc("rabbit_access_control", "list_vhosts", null, String.class);
-    }
-
-    /**
-     * Get broker data
-     * @return
-     * @throws ErlangBadRpcException
-     */
-    public String getVersion() throws ErlangBadRpcException {
-        return (String) erlangConverter.fromErlangRpc("rabbit", "status", null, null);
     }
 
     /**
@@ -122,23 +111,20 @@ public class RabbitBrokerGateway implements RabbitGateway {
     }
 
     @SuppressWarnings("unchecked")
-    public List<Exchange> getExchanges(String virtualHost) throws ErlangBadRpcException {
-        Assert.hasText(virtualHost);
-        return (List<Exchange>) erlangConverter.fromErlangRpc("rabbit_exchange", "list", virtualHost, Exchange.class);
-    }
-
-    @SuppressWarnings("unchecked")
-    public List<HypericBinding> getBindings(String virtualHost) throws ErlangBadRpcException {
-        Assert.hasText(virtualHost);
-        return (List<HypericBinding>) erlangConverter.fromErlangRpc("rabbit_exchange", "list_bindings", virtualHost, HypericBinding.class);
-    }
-
-    @SuppressWarnings("unchecked")
     public List<HypericChannel> getChannels(String virtualHost) throws ErlangBadRpcException {
         return (List<HypericChannel>) erlangConverter.fromErlangRpc("rabbit_channel", "info_all", null, HypericChannel.class);
     }
 
-     /**
+    /**
+     * Get broker data
+     * @return
+     * @throws ErlangBadRpcException
+     */
+    public String getVersion() throws ErlangBadRpcException {
+        return (String) erlangConverter.fromErlangRpc("rabbit", "status", null, null);
+    }
+
+    /**
      * Get a list of users.
      * @return
      */
@@ -150,7 +136,7 @@ public class RabbitBrokerGateway implements RabbitGateway {
         return rabbitTemplate.getConnectionFactory().getHost();
     }
 
-/**
+    /**
      * Get the RabbitMQ server version.
      * @return
      */

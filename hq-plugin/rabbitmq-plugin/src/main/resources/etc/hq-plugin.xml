@@ -1,8 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE plugin [
-        <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
-        <!ENTITY multi-process-metrics SYSTEM "/pdk/plugins/multi-process-metrics.xml">
-        ]>
+    <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
 <!--
  * NOTE: This copyright does *not* cover user programs that use HQ
  * program services by normal system calls through the application
@@ -34,49 +33,54 @@
 
         <help>
             <![CDATA[
-          <p>
-          <h3>Configure RabbitMQ for Monitoring</h3>
-          Once the RabbitMQ nodes are auto-detected and you can select the Server resource by node, go to Tools Menu >
-          Configure Server.
-          <ol><li>Enter a username and password for the node, then select OK. This will allow Hyperic to authenticate and query
-            information on Queues, Channels, Connections, Users, and Exchanges.
-           </li><li>For the first release of this plugin, the Hyperic agent requires permissions to read the Erlang cookie.</li>
-           </ol>
-          </p>
-           <p>
-          <h3>Supported Versons</h3>
-          Hyperic supports RabbitMQ versions 1.8.1 and higher.
-          </p>
-          <p>
-          <h3>Help Docs</h3>
-          Coming soon: <a href="http://support.hyperic.com/display/EVO/Monitoring+RabbitMQ">Monitoring and Managing RabbitMQ</a>
-          </p>
-        ]]>
+                  <p>
+                    <h3>Configure RabbitMQ for Monitoring</h3>
+                      Once the RabbitMQ nodes are auto-detected and you can select the Server resource by node, go to Tools Menu >
+                      Configure Server.
+                      <ol><li>Enter a user name and password for the node, then select OK. This will allow Hyperic to authenticate and query
+                      information on Queues, Channels, Connections, Users, and Exchanges.
+                      </li><li>For the first release of this plugin, the Hyperic agent requires permissions to read the Erlang cookie.</li>
+                      </ol>
+                  </p>
+                  <p>
+                    <h3>Supported Versions</h3>
+                    Hyperic supports RabbitMQ versions 1.8.1 and higher.
+                  </p>
+                  <p>
+                    <h3>Help Docs</h3>
+                    Coming soon: <a href="http://support.hyperic.com/display/EVO/Monitoring+RabbitMQ">Monitoring and Managing RabbitMQ</a>
+                  </p>
+            ]]>
         </help>
 
-        <plugin type="autoinventory"
-                class="org.hyperic.hq.plugin.rabbitmq.detect.RabbitServerDetector"/>
-        <plugin type="measurement"
-                class="org.hyperic.hq.product.MeasurementPlugin"/>
-        <plugin type="collector"
-                class="org.hyperic.hq.product.MeasurementPlugin"/>
-        <plugin type="log_track"
-                class="org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerLog"/>
-        <!--  <plugin type="control"
-        class="org.hyperic.hq.plugin.rabbitmq.manage.RabbitBrokerManagerPlugin"/>-->
+        <plugin type="autoinventory" class="org.hyperic.hq.plugin.rabbitmq.detect.RabbitServerDetector"/>
+
+        <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <plugin type="collector" class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <plugin type="log_track" class="org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerLog"/>
+
+        <!--
+        <plugin type="control" class="org.hyperic.hq.plugin.rabbitmq.manage.RabbitBrokerManagerPlugin"/>
+        -->
 
         <config type="product">
             <option name="server.name" description="RabbitMQ Node" type="hidden"/>
-
             <option name="server.path" description="Node Path" type="hidden"/>
+            <option name="process.name" description="%server.name% Process" type="hidden"/> 
 
             <option name="username" description="RabbitMQ Username for %server.name%"/>
-
             <option name="password" type="secret" description="RabbitMQ Password for %server.name%"/>
-
-            <!--<option name="node.cookie.location" description="Erlang cookie location" optional="true"/>-->
-
         </config>
+
+        <config type="measurement">
+            <option name="process.query" default="State.Name.sw=beam,Args.*.eq=-sname,Args.*.eq=%process.name%"
+                    description="%process.name% Measurement Query"/>
+        </config>
+
+        <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>
+    
         <properties>
             <property description="Node Name" name="node.name"/>
             <property description="Node Path" name="node.path"/>
@@ -85,50 +89,21 @@
             <property description="Rabbit -boot" name="rabbit.boot"/>
         </properties>
 
-
-        <!-- Have not had time to test these.
-
-        <actions>
-            <include name="startNode"/>
-            <include name="stopNode"/>
-            <include name="startBrokerApplication"/>
-            <include name="stopBrokerApplication"/>
-            <include name="createQueue"/>
-            <include name="deleteQueue"/>
-            hanging: <include name="purgeQueue"/>
-            <include name="createExchange"/>
-            <include name="deleteExchangeIfUnused"/>
-            <include name="createUser"/>
-            <include name="updateUserPassword"/>
-            <include name="deleteUser"/>
-        </actions>
-        -->
-
         <config type="measurement">
             <option name="process.query" default="State.Name.sw=beam,Args.*.eq=-sname,Args.*.ct=%server.path%"
                     description="XXXXXXX"/>
         </config>
 
-        <metric name="Availability"
-                template="sigar:Type=ProcState,Arg=%process.query%:State"
-                indicator="true"/>
+        <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>
 
         &process-metrics;
 
-
-        <service name="Process">
-            <plugin type="log_track" class="org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerLog"/>
-            <config type="product">
-                <option name="process.name" description="%server.name% Process"/>
-            </config>
-            <config type="measurement">
-                <option name="process.query" default="State.Name.sw=beam,Args.*.eq=-sname,Args.*.eq=%process.name%"
-                        description="%server.name% Measurement Query"/>
-            </config>
-            <metric name="Availability"
-                    template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>
-            &process-metrics;
-        </service>
+        <!--
+        <actions>
+           <include name="startNode,stopNode,startBrokerApplication,stopBrokerApplication,createQueue,deleteQueue,
+                       purgeQueue,createExchange,deleteExchangeIfUnused,createUser,updateUserPassword,deleteUser"/>
+         </actions>
+         -->
 
         <service name="Queue">
             <property name="template" value="rabbitmq:queue=%name%,vhost=%vhost%,server=%server.name%:${alias}"/>
@@ -309,10 +284,6 @@
             </properties>
         </service>
 
-        &multi-process-metrics;
-
-
     </server>
-
 
 </plugin>
