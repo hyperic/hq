@@ -28,6 +28,7 @@ package org.hyperic.hq.plugin.rabbitmq.configure;
 import com.ericsson.otp.erlang.*;
 import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
 import org.hyperic.hq.plugin.rabbitmq.core.ErlangCookieHandler;
+import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.util.Assert;
 
@@ -41,7 +42,7 @@ public class ConnectionTest {
 
     private static final String NODE = "localhost";
 
-    public static void main(String[] args) throws IOException, OtpAuthException, OtpErlangExit {
+    public static void main(String[] args) throws IOException, OtpAuthException, OtpErlangExit, PluginException {
         ConfigResponse conf = new ConfigResponse();
         conf.setValue(DetectorConstants.HOST, NODE);
         conf.setValue(DetectorConstants.USERNAME, "guest");

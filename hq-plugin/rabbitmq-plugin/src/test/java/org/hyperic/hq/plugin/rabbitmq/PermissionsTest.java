@@ -33,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
 import org.hyperic.hq.plugin.rabbitmq.core.ErlangCookieHandler;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericBrokerAdmin;
+import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.amqp.rabbit.admin.QueueInfo;
 import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
@@ -52,7 +53,7 @@ public class PermissionsTest {
 
     private static final String NODE_FROM_PTQL = "rabbit@localhost";
 
-    public static void main(String[] args) throws IOException, OtpAuthException, OtpErlangExit {
+    public static void main(String[] args) throws IOException, OtpAuthException, OtpErlangExit, PluginException {
         List<QueueInfo> queues = new ArrayList<QueueInfo>();
 
         try {
