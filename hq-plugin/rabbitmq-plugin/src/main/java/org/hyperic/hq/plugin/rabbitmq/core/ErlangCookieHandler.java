@@ -27,6 +27,7 @@ package org.hyperic.hq.plugin.rabbitmq.core;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.product.PluginException;
 import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.util.config.ConfigResponse;
 
@@ -48,19 +49,18 @@ public class ErlangCookieHandler {
 
     /**
      * @param conf
-     * @return the content in the cookie
+     * @return
+     * @throws PluginException
      */
-    public static String configureCookie(ConfigResponse conf) {
+    public static String configureCookie(ConfigResponse conf) throws PluginException {
         if (conf == null) {
             throw new IllegalArgumentException("ConfigResponse must not be null.");
         }
 
-        String nodeCookie = null;
-
         File file = null;
 
         if (conf.getValue(DetectorConstants.NODE_COOKIE_VALUE) == null) {
-            file = inferCookie(conf);
+            file = inferCookieLocation(conf);
         } else {
             if (conf.getValue(DetectorConstants.NODE_COOKIE_LOCATION) != null) {
                 String userSetLocation = conf.getValue(DetectorConstants.NODE_COOKIE_LOCATION).trim();
@@ -70,37 +70,35 @@ public class ErlangCookieHandler {
             }
         }
 
-        if (file != null && file.exists()) {
-            nodeCookie = getErlangCookieValue(file);
-            if (nodeCookie != null) logger.debug(nodeCookie + " " + file.getAbsolutePath());
-        }
-
-        return nodeCookie;
+        return getErlangCookieValue(file);
     }
 
     /**
      * Read in the erlang cookie string from the path
      * @param file
-     * @return
+     * @return erlang cookie value if file is readable, else null.
+     * @throws PluginException
      */
-    protected static String getErlangCookieValue(File file) {
+    private static String getErlangCookieValue(File file) throws PluginException {
         logger.debug("Attempting to read file " + file);
-        String erlangCookieValue = null;
 
-        try {
-            if (file != null && file.exists()) {
+        if (isValidFile(file)) {
+            try {
+
                 BufferedReader in = new BufferedReader(new FileReader(file));
-                erlangCookieValue = in.readLine();
+                String erlangCookieValue = in.readLine();
+                in.close();
 
-                if (in != null) {
-                    in.close();
+                if (erlangCookieValue != null && erlangCookieValue.length() > 0) {
+                    logger.debug(erlangCookieValue + ": " + file.getAbsolutePath());
+                    return erlangCookieValue;
                 }
             }
-        } catch (Exception e) {
-            throw new RuntimeException("Agent does not have permission to read the cookie: " + e.getMessage(), e);
+            catch (IOException e) {
+                throw new RuntimeException(e.getCause());
+            }
         }
-
-        return erlangCookieValue;
+        return null;
     }
 
     /**
@@ -108,7 +106,7 @@ public class ErlangCookieHandler {
      * @param conf The ConfigResponse is from RabbitServerDetector.discoverServices
      * @return java.io.File '/path/to/.erlang.cookie'
      */
-    public static File inferCookie(ConfigResponse conf) {
+    public static File inferCookieLocation(ConfigResponse conf) {
 
         final String fileName = ".erlang.cookie";
 
@@ -142,6 +140,7 @@ public class ErlangCookieHandler {
     /**
      * Best attempt Windows
      * @param fileName
+     * @param home
      * @return
      */
     private static File doWindows(String fileName, String home) {
@@ -164,5 +163,22 @@ public class ErlangCookieHandler {
                 return c.exists() ? c : null;
             }
         }
+    }
+
+    /**
+     * @param file
+     * @return
+     * @throws PluginException
+     */
+    private static boolean isValidFile(File file) throws PluginException {
+        if (file != null) {
+            if (file.exists() && file.canRead()) {
+                return true;
+            } else {
+                throw new PluginException("The Hyperic Agent does not have permission to read the Erlang Cookie at "
+                        + file.getAbsolutePath());
+            }
+        }
+        return false;
     }
 }

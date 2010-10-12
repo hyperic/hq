@@ -27,11 +27,8 @@ package org.hyperic.hq.plugin.rabbitmq.populate;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import org.springframework.amqp.core.*;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessageListener;
+import org.springframework.amqp.core.Message; 
 import org.springframework.amqp.rabbit.admin.QueueInfo;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
@@ -69,28 +66,5 @@ public class ConsumerSample {
             }
         }
     }
-
-    protected void receiveAsync() {
-        SimpleMessageListener ml = new SimpleMessageListener();
-        System.out.println("Main execution thread sleeping 5 seconds...");
-        try {
-            Thread.sleep(50000);
-        } catch (InterruptedException e) {
-            System.out.println(e);
-        }
-        System.out.println("Application exiting.");
-        System.exit(0);
-    }
-
-    public static class SimpleMessageListener implements MessageListener {
-
-        private final AtomicInteger messageCount = new AtomicInteger();
-
-        public void onMessage(Message message) {
-            int msgCount = this.messageCount.incrementAndGet();
-            System.out.println("Thread [" + Thread.currentThread().getId()
-                    + "] SimpleMessageListener Received Message " + msgCount
-                    + ", = " + new String(message.getBody()));
-        }
-    }
+  
 }

@@ -6,6 +6,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.plugin.rabbitmq.core.ErlangCookieHandler;
+import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -33,7 +34,7 @@ public class DynamicSpringBeanConfigurerTest {
 
 
     @Test
-    public void createDynamicBeans() throws InterruptedException {
+    public void createDynamicBeans() throws InterruptedException, PluginException {
         ConfigResponse serviceConfig = new ConfigResponse();
         serviceConfig.setValue(DetectorConstants.HOST, "localhost");
         serviceConfig.setValue(DetectorConstants.USERNAME, "guest");

@@ -80,8 +80,9 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
 
                 final String nodeName = getServerName(nodeArgs);
 
-                //isNodePathValid(nodePath) && 
-                if (!nodes.contains(nodePath)) {
+                logger.debug("node.pid=" + nodePid + " node.args=" + Arrays.toString(nodeArgs) + " server.name=" + nodeName);
+
+                if (nodePath != null && !nodes.contains(nodePath)) {
                     nodes.add(nodePath);
 
                     ServerResource server = doCreateServerResource(nodeName, nodePath, nodePid, nodeArgs);
@@ -136,11 +137,11 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         List<ServiceResource> serviceResources = new ArrayList<ServiceResource>();
 
         /** configure node process */
-        List<ServiceResource> processes = createProcessServiceResources(serviceConfig);
+        /*List<ServiceResource> processes = createProcessServiceResources(serviceConfig);
         if (processes != null) {
             serviceResources.addAll(processes);
             logger.debug("discoverServices detected " + processes.size() + " processes");
-        }
+        }*/
 
         /** get rabbit  services */
         List<ServiceResource> rabbitResources = null;
@@ -408,7 +409,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @param nodePid
      * @return
      */
-    private ServerResource doCreateServerResource(String nodeName, String nodePath, long nodePid, String nodeArgs[]) {
+    private ServerResource doCreateServerResource(String nodeName, String nodePath, long nodePid, String[] nodeArgs) {
         Assert.hasText(nodeName);
         Assert.hasText(nodePath);
 
@@ -422,8 +423,52 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         conf.setValue(DetectorConstants.SERVER_NAME, nodeName);
         conf.setValue(DetectorConstants.SERVER_PATH, nodePath);
         setProductConfig(node, conf);
-        setMeasurementConfig(node, new ConfigResponse());
 
+        ConfigResponse custom = createCustomConfig(nodeName,nodePath, nodePid, nodeArgs);
+        if (custom != null) node.setCustomProperties(custom);
+
+        ConfigResponse log = createLogConfig(nodeArgs);
+        if (log != null) setMeasurementConfig(node, log);
+
+        return node;
+    }
+
+    /**
+     * -kernel error_logger {file,"/path/to/rabbitnode@localhost.log"}
+     * @param nodeArgs
+     * @return
+     */
+    private ConfigResponse createLogConfig(String[] nodeArgs) {
+        Pattern p = Pattern.compile("[{]file,\\s*\"([^\"]+)\"}");
+
+        ConfigResponse logConfig = null;
+
+        for (int n = 0; n < nodeArgs.length; n++) {
+            if (nodeArgs[n].equalsIgnoreCase("-kernel") && nodeArgs[n + 1].equalsIgnoreCase("error_logger") && nodeArgs[n + 2].startsWith("{file,")) {
+                Matcher m = p.matcher(nodeArgs[n + 2]);
+                if (m.find()) {
+                    File log = new File(m.group(1));
+                    if (log.exists() && log.canRead()) {
+                        logConfig = new ConfigResponse();
+                        logConfig.setValue(DetectorConstants.SERVICE_LOG_TRACK_ENABLE, true);
+                        logConfig.setValue(DetectorConstants.SERVICE_LOG_TRACK_FILES, log.getAbsolutePath());
+                    }
+                }
+            }
+        }
+
+        return logConfig;
+    }
+
+    /**
+     * Create ConfigResponse for custom node properties to display.
+     * @param nodeName
+     * @param nodePath
+     * @param nodePid
+     * @param nodeArgs
+     * @return
+     */
+    private ConfigResponse createCustomConfig(String nodeName, String nodePath, long nodePid, String[] nodeArgs) {
         ConfigResponse custom = new ConfigResponse();
         custom.setValue(DetectorConstants.NODE_NAME, nodeName);
         custom.setValue(DetectorConstants.NODE_PATH, nodePath);
@@ -438,9 +483,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
             }
         }
 
-        node.setCustomProperties(custom);
-
-        return node;
+        return custom;
     }
 
     /**
@@ -481,21 +524,6 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
             }
         }
         return mpath;
-    }
-
-    private boolean isNodePathValid(String nodePath) throws PluginException {
-
-        try {
-            if (nodePath != null) {
-                File file = new File(nodePath);
-                return file.exists() && file.isDirectory();
-            }
-            return false;
-        }
-        catch (Exception e) {
-            throw new PluginException(new StringBuilder("User may not have permissions to ")
-                    .append(nodePath).append(". Please insure the Agent can access that path.").toString());
-        }
     }
 
     private String getHostFromNode(String nodeName) {
