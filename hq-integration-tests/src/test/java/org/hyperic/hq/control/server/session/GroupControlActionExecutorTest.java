@@ -218,7 +218,7 @@ public class GroupControlActionExecutorTest
 
         GroupControlActionResult result = groupControlActionExecutor.executeGroupControlAction(
             groupId, authzSubjectManager.getOverlordPojo().getName(), new Date(), false, "",
-            "stop", null, new int[0], ControlManagerImpl.DEFAULT_RESOURCE_TIMEOUT);
+            "stop", null, null, ControlManagerImpl.DEFAULT_RESOURCE_TIMEOUT);
         flushSession();
         EasyMock.verify(clientFactory);
         // validate returned DTO
@@ -241,7 +241,7 @@ public class GroupControlActionExecutorTest
 
         GroupControlActionResult result = groupControlActionExecutor.executeGroupControlAction(
             groupId, authzSubjectManager.getOverlordPojo().getName(), new Date(), false, "",
-            "stop", null, new int[0], ControlManagerImpl.DEFAULT_RESOURCE_TIMEOUT);
+            "stop", null, null, ControlManagerImpl.DEFAULT_RESOURCE_TIMEOUT);
         flushSession();
         EasyMock.verify(clientFactory);
         // validate returned DTO
