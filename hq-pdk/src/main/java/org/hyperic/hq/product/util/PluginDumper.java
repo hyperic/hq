@@ -6,8 +6,8 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
- * This file is part of HQ.
+ * Copyright (C) [2004-2010], VMware, Inc.
+ * This file is part of Hyperic.
  * 
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
@@ -511,7 +511,7 @@ public class PluginDumper {
         }
     }
 
-    private void loadPlugins() throws PluginException {
+    private void loadPlugins() {
 
         int nplugins =
             ppm.registerPlugins(this.config.pluginDir);

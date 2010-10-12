@@ -6,8 +6,8 @@
  * normal use of the program, and does *not* fall under the heading of
  *  "derived work".
  *
- *  Copyright (C) [2010], VMware, Inc.
- *  This file is part of Hyperic.
+ * Copyright (C) [2004-2010], VMware, Inc.
+ * This file is part of Hyperic.
  *
  *  Hyperic is free software; you can redistribute it and/or modify
  *  it under the terms version 2 of the GNU General Public License as
@@ -685,18 +685,17 @@ public class ProductPluginManager
         }
     }
 
-    public int registerCustomPlugins(String startDir) throws PluginException, PluginExistsException {
+    public int registerCustomPlugins(String startDir) {
         // check startDir and higher for hq-plugins
         File dir = new File(startDir).getAbsoluteFile();
+        
         while (dir != null) {
             File customPluginDir = new File(dir, "hq-plugins");
+            
             if (customPluginDir.exists()) {
-                try {
-                    return registerPlugins(customPluginDir.toString());
-                } catch (PluginExistsException e) {
-                    continue;
-                }
+                return registerPlugins(customPluginDir.toString());
             }
+            
             dir = dir.getParentFile();
         }
         return 0;
@@ -723,7 +722,7 @@ public class ProductPluginManager
         }
     }
 
-    public int registerPlugins(String path) throws PluginException, PluginExistsException {
+    public int registerPlugins(String path) {
 
         int nplugins = 0;
         List<String> dirs = StringUtil.explode(path, File.pathSeparator);
@@ -742,20 +741,25 @@ public class ProductPluginManager
             File[] plugins = listPlugins(dir);
             for (int j = 0; j < plugins.length; j++) {
                 String name = plugins[j].getName();
+                
                 if (!isLoadablePluginName(name)) {
                     continue;
                 }
+                
                 log.info("Loading plugin: " + name);
+                
                 try {
-                    if (registerPluginJar(plugins[j].getAbsolutePath()) == null)
-                        continue;
+                    if (registerPluginJar(plugins[j].getAbsolutePath()) != null) {
+                    	nplugins++;
+                    }
                 } catch (UnsupportedClassVersionError e) {
                     log.info("Cannot load " + name + ": " + unsupportedClassVersionMessage(e.getMessage()));
-                    continue;
                 } catch (PluginExistsException e) {
-                    continue;
+                    log.debug("Plugin " + name + " already exists.");
+                } catch (PluginException e) {
+                	// ...we're unable to register this particular plugin, log it and press on...
+                	log.error("A problem occured while registering plugin [" + name + "]", e);
                 }
-                nplugins++;
             }
         }
 
