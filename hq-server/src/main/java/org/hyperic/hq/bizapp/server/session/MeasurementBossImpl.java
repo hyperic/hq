@@ -108,6 +108,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
+import org.hyperic.hq.measurement.ext.ProblemMetricInfo;
 import org.hyperic.hq.measurement.server.session.Baseline;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
@@ -115,6 +116,7 @@ import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
+import org.hyperic.hq.measurement.shared.ProblemMetricManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.ProductPlugin;
@@ -159,6 +161,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
     private VirtualManager virtualManager;
     private ApplicationManager applicationManager;
     private CritterTranslator critterTranslator;
+    private ProblemMetricManager problemMetricManager;
 
     @Autowired
     public MeasurementBossImpl(SessionManager sessionManager, AuthBoss authBoss,
@@ -170,7 +173,8 @@ public class MeasurementBossImpl implements MeasurementBoss {
                                ResourceGroupManager resourceGroupManager,
                                ServerManager serverManager, ServiceManager serviceManager,
                                VirtualManager virtualManager, ApplicationManager applicationManager, 
-                               CritterTranslator critterTranslator) {
+                               CritterTranslator critterTranslator,
+                               ProblemMetricManager problemMetricManager) {
         this.sessionManager = sessionManager;
         this.authBoss = authBoss;
         this.measurementManager = measurementManager;
@@ -186,6 +190,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         this.virtualManager = virtualManager;
         this.applicationManager = applicationManager;
         this.critterTranslator = critterTranslator;
+        this.problemMetricManager = problemMetricManager;
     }
 
     private List<Measurement> findDesignatedMetrics(AuthzSubject subject, AppdefEntityID id,
@@ -2466,8 +2471,9 @@ public class MeasurementBossImpl implements MeasurementBoss {
         Integer[] tids;
 
         // Create Map of all resources
-        HashMap<String, Set<MetricDisplaySummary>> resmap = new HashMap<String, Set<MetricDisplaySummary>>(
-            MeasurementConstants.VALID_CATEGORIES.length);
+        final int size = MeasurementConstants.VALID_CATEGORIES.length;
+        HashMap<String, Set<MetricDisplaySummary>> resmap =
+            new HashMap<String, Set<MetricDisplaySummary>>(size);
 
         if (tmpls.size() == 0 || resources.size() == 0)
             return resmap;
@@ -2493,11 +2499,13 @@ public class MeasurementBossImpl implements MeasurementBoss {
         // Create the EntityIds array and map of counts
         Integer[] eids = new Integer[resources.size()];
         AppdefEntityID[] aeids = new AppdefEntityID[resources.size()];
-        AppdefEntityID aeid;
         Map<String, Integer> totalCounts = new HashMap<String, Integer>();
-        Iterator it = resources.iterator();
-        for (int i = 0; it.hasNext(); i++) {
+        Map<Integer, Collection<AppdefEntityID>> aeidsByType =
+            new HashMap<Integer, Collection<AppdefEntityID>>();
+        int i=0;
+        for (Iterator<Object> it=resources.iterator(); it.hasNext(); i++) {
             // We understand two types
+            AppdefEntityID aeid;
             Object resource = it.next();
             if (resource instanceof AppdefResourceValue) {
                 AppdefResourceValue resVal = (AppdefResourceValue) resource;
@@ -2517,6 +2525,13 @@ public class MeasurementBossImpl implements MeasurementBoss {
                                                 "not understand resource class: " +
                                                 resource.getClass());
             }
+            
+            Collection<AppdefEntityID> tmp;
+            if (null == (tmp = aeidsByType.get(aeid.getType()))) {
+                tmp = new ArrayList<AppdefEntityID>();
+                aeidsByType.put(aeid.getType(), tmp);
+            }
+            tmp.add(aeid);
 
             eids[i] = aeid.getId();
             aeids[i] = aeid;
@@ -2532,9 +2547,15 @@ public class MeasurementBossImpl implements MeasurementBoss {
         final Map<Integer, Long> intervals = (showNoCollect == null) ?
             new HashMap<Integer, Long>() :
             measurementManager.findMetricIntervals(subject, aeids, tids);
+            
+        final Map<Integer, ProblemMetricInfo> probmap = new HashMap<Integer, ProblemMetricInfo>();
+        for (Integer aeidType : aeidsByType.keySet()) {
+            probmap.putAll(problemMetricManager.getProblemsByTemplate(
+                aeidType, eids, begin, end));
+        }
 
-        for (it = templates.iterator(); it.hasNext();) {
-            MeasurementTemplate tmpl = (MeasurementTemplate) it.next();
+        for (Iterator<MeasurementTemplate> it = templates.iterator(); it.hasNext();) {
+            MeasurementTemplate tmpl = it.next();
 
             int total = eids.length;
             String type = tmpl.getMonitorableType().getName();
@@ -2544,12 +2565,12 @@ public class MeasurementBossImpl implements MeasurementBoss {
 
             double[] data = (double[]) datamap.get(tmpl.getId());
 
-            if (data == null && (showNoCollect == null || showNoCollect.equals(Boolean.FALSE)))
+            if (data == null && (showNoCollect == null || showNoCollect.equals(Boolean.FALSE))) {
                 continue;
+            }
 
             String category = tmpl.getCategory().getName();
-            TreeSet<MetricDisplaySummary> summaries = (TreeSet<MetricDisplaySummary>) resmap
-                .get(category);
+            Set<MetricDisplaySummary> summaries = resmap.get(category);
             if (summaries == null) {
                 summaries = new TreeSet<MetricDisplaySummary>();
                 resmap.put(category, summaries);
@@ -2558,9 +2579,17 @@ public class MeasurementBossImpl implements MeasurementBoss {
             Long interval = (Long) intervals.get(tmpl.getId());
 
             // Now create a MetricDisplaySummary and add it to the list
-            MetricDisplaySummary summary = getMetricDisplaySummary(tmpl, interval, begin, end,
-                data, total);
-
+            MetricDisplaySummary summary =
+                getMetricDisplaySummary(tmpl, interval, begin, end, data, total);
+            
+            if (data != null) {
+                // See if there are problems, too
+                if (probmap.containsKey(tmpl.getId())) {
+                    ProblemMetricInfo pmi = (ProblemMetricInfo) probmap.get(tmpl.getId());
+                    summary.setAlertCount(pmi.getAlertCount());
+                    summary.setOobCount(pmi.getOobCount());
+                }
+            }
             summaries.add(summary);
         }
 
