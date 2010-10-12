@@ -356,8 +356,4 @@ public class MySQL5InnoDBDialect
     public boolean useMetricUnion() {
         return false;
     }
-
-    public boolean useLazyConnection() {
-        return true;
-    }
 }

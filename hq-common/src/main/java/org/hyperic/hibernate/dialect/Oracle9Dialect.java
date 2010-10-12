@@ -181,8 +181,4 @@ public class Oracle9Dialect
         }
         return rtn.toString();
     }
-
-    public boolean useLazyConnection() {
-        return true;
-    }
 }
