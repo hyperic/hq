@@ -23,32 +23,31 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq.configure;
+package org.hyperic.hq.plugin.rabbitmq.populate;
 
-import org.hyperic.hq.plugin.rabbitmq.AbstractSpringTest;
-import org.hyperic.hq.plugin.rabbitmq.core.ErlangCookieHandler;
-import org.hyperic.hq.plugin.rabbitmq.core.HypericBrokerAdmin;
-import org.hyperic.hq.product.PluginException;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
-import static org.junit.Assert.*;
 /**
- * HypericBrokerAdminTest
+ * Quote
  * @author Helena Edelson
  */
-@Ignore("Need to mock the connection for automation")
-public class HypericBrokerAdminTest extends AbstractSpringTest {
+public class Quote {
+    private Stock stock;
+    private String price;
 
-    @Test
-    public void testHypericAdmin() throws PluginException {
-        String value = ErlangCookieHandler.configureCookie(serverConfig);
-        assertNotNull(value);
+    public Quote(Stock stock, String price) {
+            this.stock = stock;
+            this.price = price;
+        }
 
-        HypericBrokerAdmin admin = new HypericBrokerAdmin(singleConnectionFactory, value);
-        assertNotNull(admin.getQueues());
- 
-        RabbitBrokerAdmin rba = new RabbitBrokerAdmin(singleConnectionFactory);
-        assertNotNull(rba.getQueues());
-    }
+        public String toString() {
+            return new StringBuilder(stock.getStockExchange().name()).append(".").append(stock.getTicker()).append(" $").append(price).toString();
+        }
+
+        public Stock getStock() {
+            return this.stock;
+        }
+
+        public String getPrice() {
+            return price;
+        }
+
 }
