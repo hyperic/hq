@@ -118,9 +118,4 @@ public interface HQDialect
      * @return the limit sql associated with the offset and limit params
      */
     public String getLimitBuf(String sql, int offset, int limit);
-
-    /**
-     * @return true if the associated db should use the LazyConnectionDataSourceProxy
-     */
-    public boolean useLazyConnection();
 }

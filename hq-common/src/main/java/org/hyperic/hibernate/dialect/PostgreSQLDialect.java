@@ -162,8 +162,4 @@ public class PostgreSQLDialect
     public boolean useMetricUnion() {
         return false;
     }
-
-    public boolean useLazyConnection() {
-        return false;
-    }
 }
