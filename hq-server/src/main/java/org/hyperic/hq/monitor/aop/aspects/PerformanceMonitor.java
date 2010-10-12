@@ -34,6 +34,8 @@
  */
 package org.hyperic.hq.monitor.aop.aspects;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -41,9 +43,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.util.Assert;
 import org.springframework.util.StopWatch;
-import org.springframework.util.StringUtils;
-
-import javax.annotation.PostConstruct;
 
 /**
  * PerformanceMonitor performs around advice on pre-defined service-level
@@ -90,12 +89,10 @@ public class PerformanceMonitor {
 
         long duration = timer.getTotalTimeMillis();
 
-        if (duration > maximumDuration) {
-            String args = StringUtils.arrayToCommaDelimitedString(pjp.getArgs());
-
-            logger.warn(new StringBuilder(warningMessage).append(pjp.getTarget()).append(".")
-                .append(pjp.getSignature().getName()).append("(").append(args).append(")")
-                    .append(" executed in ").append(timer.getTotalTimeMillis()).append(":ms").toString());
+        if (duration > maximumDuration) { 
+            logger.warn(new StringBuilder(warningMessage)
+                .append(pjp.getSignature()).append(" executed in ").
+                append(timer.getTotalTimeMillis()).append(":ms").toString());
         }
 
         return invocation;
