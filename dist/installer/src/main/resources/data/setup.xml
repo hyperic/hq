@@ -545,15 +545,13 @@ ${errMsg}
   	
     <echo>^^^INFO: Copying existing HQU plugins</echo>
   	<!-- Copy from 4.4 or earlier-->
-    <copy todir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/hqu" failonerror="false">
-      <fileset dir="${server.upgradedir}/hq-engine/server/default/deploy/hq.ear/hq.war/hqu"/>
-    </copy>
+    <uiPluginUpgrade newHquDir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/hqu" 
+    	existingHquDir="${server.upgradedir}/hq-engine/server/default/deploy/hq.ear/hq.war/hqu"/>
   	
   	<!--Copy from evolution or later -->
-  	<copy todir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/hqu" failonerror="false">
-  	      <fileset dir="${server.upgradedir}/hq-engine/hq-server/webapps/ROOT/hqu"/>
-  	</copy>
-
+  	<uiPluginUpgrade newHquDir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/hqu" 
+  	      existingHquDir="${server.upgradedir}/hq-engine/hq-server/webapps/ROOT/hqu"/>
+  	
   	<echo>^^^INFO: Copying existing state files</echo>
   	<!-- Copy from 4.4 or earlier-->
   	<copy todir="${server.product.dir}/hq-engine/hq-server" failonerror="false">
