@@ -1,3 +1,29 @@
+/**
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ *  "derived work".
+ *
+ *  Copyright (C) [2009-2010], VMware, Inc.
+ *  This file is part of HQ.
+ *
+ *  HQ is free software; you can redistribute it and/or modify
+ *  it under the terms version 2 of the GNU General Public License as
+ *  published by the Free Software Foundation. This program is distributed
+ *  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ *  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ *  PARTICULAR PURPOSE. See the GNU General Public License for more
+ *  details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ *  USA.
+ *
+ */
+
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.appdef.server.session.Server
@@ -20,7 +46,6 @@ import org.hyperic.hq.common.Humidor
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.util.jdbc.DBUtil
 import org.hyperic.hibernate.PageInfo
-import org.hyperic.hibernate.Util
 import org.hyperic.hq.measurement.shared.MeasurementManager
 
 import java.text.DateFormat;
@@ -71,10 +96,6 @@ class HealthController
                 [field: AgentSortField.VERSION,
                  width: '10%',
                  label: {it.agent.version}],
-                [field: [getValue: {localeBundle.build},
-                 description:'build', sortable:false],
-                 width: '5%',
-                 label: {it.build}],                 
                 [field: [getValue: {localeBundle.bundleVersion},
                  description:'bundleVersion', sortable:false],
                  width: '10%',
@@ -277,7 +298,7 @@ class HealthController
         def diagName = params.getOne('diag')
         for (d in diagnostics) {
             if (d.shortName == diagName) {
-                return [diagData: '<pre>' + d.status + '</pre>']
+                return [diagData: '<pre>' + d.shortStatus + '</pre>']
             }
         }
     }
@@ -409,7 +430,6 @@ class HealthController
             metricsPerMinute: metricsPerMinute,
             diagnostics:      diagnostics,
             hqVersion:        Bootstrap.getBean(ProductBoss.class).version,
-            buildNumber:      Bootstrap.getBean(ProductBoss.class).buildNumber,
             jvmProps:         System.properties,
             schemaVersion:    Bootstrap.getBean(ServerConfigManager.class).config.getProperty('CAM_SCHEMA_VERSION'),
             cmdLine:          cmdLine,
@@ -423,7 +443,7 @@ class HealthController
         ] + getSystemStats([:])
         
         if (HQUtil.isEnterpriseEdition()) {
-            locals.licenseInfo = com.hyperic.hq.license.LicenseManager.licenseInfo
+            locals.licenseInfo = Bootstrap.getBean(com.hyperic.hq.license.LicenseManager.class).licenseInfo
         }
         
         render(locals: locals)

@@ -1,15 +1,15 @@
 /*
- * NOTE: This copyright does *not* cover user programs that use HQ
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2009], Hyperic, Inc.
- * This file is part of HQ.
+ * Copyright (C) [2004-2010], VMware, Inc.
+ * This file is part of Hyperic.
  *
- * HQ is free software; you can redistribute it and/or modify
+ * Hyperic is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
  * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -77,9 +77,6 @@ import org.hyperic.util.config.ConfigResponse;
 public class EmailAction extends EmailActionConfig
     implements ActionInterface, Notify
 {
-    public static final String RES_NAME_HOLDER = "RES_NAME_REPL";
-    public static final String RES_DESC_HOLDER = "RES_DESC_REPL";
-
     protected static String baseUrl = null;
     private static final int _alertThreshold;
     private static final List _emails = new ArrayList();
@@ -163,11 +160,12 @@ public class EmailAction extends EmailActionConfig
 
     private String createSubject(AlertDefinitionInterface alertdef,
                                  AlertInterface alert, Resource resource,
-                                 String status) {
+                                 ActionExecutionInfo action, String status) {
         Map params = new HashMap();
         params.put("resource", resource);
         params.put("alertDef", alertdef);
         params.put("alert", alert);
+        params.put("action", action);
         params.put("status", status);
         params.put("isSms", new Boolean(isSms()));
 
@@ -237,7 +235,7 @@ public class EmailAction extends EmailActionConfig
             						"text_email.gsp", user);
             		}
 
-            		final String subject = createSubject(alertDef, alert, resource, "");
+            		final String subject = createSubject(alertDef, alert, resource, info, "");
             		sendAlert(appEnt, to, subject, body, htmlBody,
             				alertDef.getPriority(), alertDef.isNotifyFiltered());
 
@@ -380,7 +378,7 @@ public class EmailAction extends EmailActionConfig
                                                   appEnt.getId());
 
         final String subject = createSubject(
-            defInfo, alert.getAlertInfo(), resource, change.getDescription());
+            defInfo, alert.getAlertInfo(), resource, null, change.getDescription());
         sendAlert(getResource(defInfo), to, subject, messages, messages,
             defInfo.getPriority(), false);
     }
@@ -406,8 +404,10 @@ public class EmailAction extends EmailActionConfig
                 _emails.add(obj);
             }
         }
-        ConcurrentStatsCollector.getInstance().addStat(
-            System.currentTimeMillis()-start, SEND_ALERT_TIME);
+        
+        ConcurrentStatsCollector concurrentStatsCollector = Bootstrap.getBean(ConcurrentStatsCollector.class);
+        
+        concurrentStatsCollector.addStat(System.currentTimeMillis()-start, SEND_ALERT_TIME);
     }
 
     private static final EmailManager getEmailMan() {

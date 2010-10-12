@@ -251,6 +251,10 @@ public class OracleMeasurementPlugin
                            "t3.name = 'physical reads' AND " +
                            "t4.name = 'consistent gets' AND " +
                            "t5.name = 'db block gets'");
+        genericQueries.put("DataDictionaryCacheHitRatio",
+                            "SELECT (1 - (sum(GETMISSES) / sum(GETS))) hit_ratio from V$ROWCACHE");
+        genericQueries.put("LibraryCacheHitRatio",
+                           "SELECT (sum(PINS) - sum(RELOADS)) / sum(PINS) hit_ratio from V$LIBRARYCACHE");
         genericQueries.put("ChangedBlockRatio",
                            "SELECT t1.value/(t2.value + t3.value) FROM " +
                            "V$SYSSTAT t1, V$SYSSTAT t2, " +

@@ -37,7 +37,7 @@ import org.hyperic.hq.plugin.weblogic.WeblogicProductPlugin;
 
 public class ApplicationQuery extends ServiceQuery {
 
-    private static final Log log = LogFactory.getLog("ApplicationQuery");
+    private static final Log log = LogFactory.getLog(ApplicationQuery.class);
 
     public static final String MBEAN_TYPE = "ApplicationRuntime";
     public static final String MBEAN_TYPE_61 = "ApplicationConfig";

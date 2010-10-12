@@ -51,16 +51,17 @@ public class RegisteredDispatcherImpl implements MessageListener {
     private final Log log = LogFactory.getLog(RegisteredDispatcherImpl.class);
     
     private RegisteredTriggers registeredTriggers;
-    
+    private ConcurrentStatsCollector concurrentStatsCollector;
     
     @Autowired
-    public RegisteredDispatcherImpl(RegisteredTriggers registeredTriggers) {
+    public RegisteredDispatcherImpl(RegisteredTriggers registeredTriggers, ConcurrentStatsCollector concurrentStatsCollector) {
         this.registeredTriggers = registeredTriggers;
+        this.concurrentStatsCollector = concurrentStatsCollector;
     }
     
     @PostConstruct
     public void initStatsCollector() {
-        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.EVENT_PROCESSING_TIME);
+    	concurrentStatsCollector.register(ConcurrentStatsCollector.EVENT_PROCESSING_TIME);
     }
 
     /**
@@ -82,7 +83,7 @@ public class RegisteredDispatcherImpl implements MessageListener {
             long startTime = System.currentTimeMillis();
             try {
                 trigger.processEvent(event);
-                ConcurrentStatsCollector.getInstance().addStat(System.currentTimeMillis() - startTime, ConcurrentStatsCollector.EVENT_PROCESSING_TIME);
+                concurrentStatsCollector.addStat(System.currentTimeMillis() - startTime, ConcurrentStatsCollector.EVENT_PROCESSING_TIME);
             } catch (EventTypeException e) {
                 // The trigger was not meant to process this event
                 log.error("dispatchEvent dispatched to trigger (" + trigger.getClass() + " that's not " +

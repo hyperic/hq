@@ -65,4 +65,8 @@ public class ResourceRelation extends PersistedObject {
         
         return o.getName().equals(getName());
     }
+    
+    public String toString() {
+        return _name;
+    }
 }

@@ -23,27 +23,20 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.Win32ControlPlugin;
 import org.hyperic.hq.product.jmx.MxServerDetector;
 import org.hyperic.hq.product.jmx.MxUtil;
-import org.hyperic.hq.product.jmx.MxServerDetector.MxProcess;
 import org.hyperic.hq.product.pluginxml.PluginData;
-import org.hyperic.util.config.ConfigOption;
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.ConfigSchema;
-
 import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.sigar.win32.Win32Exception;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.hyperic.util.config.ConfigResponse;
 
 public class TomcatServerDetector
     extends MxServerDetector
@@ -162,17 +155,25 @@ public class TomcatServerDetector
     protected boolean isInstallTypeVersion(MxProcess process) {
         final String[] processArgs = process.getArgs();
         String catalinaHome = getCatalinaHome(processArgs);
-        if (catalinaHome == null) {
-            getLog().warn("Unable to determine Tomcat version of possible Tomcat process with install path: " +
+        String catalinaBase = getCatalinaBase(processArgs);
+        
+        //check catalina base first - we are using it for the process query, so it must be present
+        boolean correctVersion = isInstallTypeVersion(catalinaBase);
+        if(! correctVersion) {
+            //check catalina home for version file
+            if (catalinaHome == null) {
+                getLog().warn("Unable to determine Tomcat version of possible Tomcat process with install path: " +
                           process.getInstallPath() +
                           ".  Could not find value of catalina.home in process system properties.  This process will be skipped.");
-            return false;
+                return false;
+            }
+            correctVersion = isInstallTypeVersion(catalinaHome);
         }
-        boolean correctVersion = isInstallTypeVersion(catalinaHome);
         if (!correctVersion) {
             return false;
         }
 
+        //Make sure this isn't a tc Server (if plugin present)
         Iterator keys = PluginData.getGlobalProperties().keySet().iterator();
         String extend_server = null;
         while (keys.hasNext()) {
@@ -187,8 +188,10 @@ public class TomcatServerDetector
                     extend_server = key.substring(0, key.lastIndexOf("."));
                     final String tcServerVersionFile = getTypeProperty(extend_server, "VERSION_FILE");
                     if (tcServerVersionFile != null) {
-                        File file = new File(catalinaHome, tcServerVersionFile);
-                        if (file.exists()) {
+                        File homeVersionFile = new File(catalinaHome, tcServerVersionFile);
+                        File baseVersionFile = new File(catalinaBase, tcServerVersionFile);
+                        if ((homeVersionFile.exists() || baseVersionFile.exists()) && findVersionFile(new File(catalinaBase), Pattern.compile("hq-common.*\\.jar")) == null) {
+                            //This is a tc Server that is not the HQ server
                             getLog().debug("[isInstallTypeVersion] '" + getTypeInfo().getName() + " [" + process.getInstallPath() + "]' is a '" + extend_server + "'");
                             return false;
                         } else {
@@ -208,6 +211,14 @@ public class TomcatServerDetector
             }
         }
         return null;
+    }
+
+    protected String getProcQuery(String path) {
+        String query = super.getProcessQuery();
+        if (path != null) {
+            query += path;
+        }
+        return query;
     }
 
     /**
@@ -249,8 +260,18 @@ public class TomcatServerDetector
         File hq = findVersionFile(new File(catalinaBase), Pattern.compile("hq-common.*\\.jar"));
         if (hq != null) {
             server.setName(getPlatformName()+" HQ Tomcat "+getTypeInfo().getVersion());
+            server.setIdentifier("HQ Tomcat");
         }
 
         return server;
+    }
+
+    /**
+     * We want this ServerDetector going first to win the battle for monitoring HQ Server in an EE env
+     * TODO more elegant way to do this?
+     */
+    @Override
+    public int getScanOrder() {
+       return 0;
     }
 }

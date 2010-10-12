@@ -1,0 +1,927 @@
+#include "ifx.h"
+#include "winsock.rul"
+#include "validate.rul"
+    export prototype RollbackFiles(HWND); 
+	export prototype STRING FixPath(STRING);
+    export prototype PopulateConfig(HWND); 
+    prototype STRING GetIndexedProperty(LIST, NUMBER);
+    export prototype LIST GetMSIProperties(HWND);
+    prototype WritePropertiesToFile(LIST, STRING, STRING);
+    export prototype UninstallActions(HWND); 
+    export prototype CreateServerService(HWND); 
+    export prototype StartServer(HWND);
+    export prototype CreateAgentService(HWND);  
+    export prototype StartAgent(HWND); 
+    export prototype LaunchAnt(HWND); 
+    export prototype LaunchBrowser(HWND);   
+    export prototype ValidateInstallDirs(HWND);
+    export prototype DefaultPasswords(HWND);  
+    export prototype UpdateShortcuts(HWND);     
+    prototype NUMBER Shell32.ShellExecuteA(HWND, BYVAL STRING, BYVAL STRING,  BYVAL  STRING, BYVAL STRING, INT);            
+    export prototype InitializeServerConfig(HWND);
+    export prototype InitializeAgentConfig(HWND); 
+    export prototype CopyAgentConfigFromServer(HWND); 
+    export prototype WriteAgentProperties(HWND);
+    export prototype WriteInstallSummary(HWND); 
+    prototype SubstituteToken(STRING, STRING, STRING); 
+    prototype UpdateProgressBar(HWND, STRING); 
+    prototype DeleteEnvironmentVariable(STRING);
+    prototype CreateFileWithContents(STRING, STRING, LIST);  
+    export prototype ValidateAdminPrivilege(HWND);
+    export prototype ValidatePorts(HWND);   
+    prototype ForceDeleteDir(STRING, STRING);
+    prototype STRING GetCurrHqVersion();
+    prototype STRING GetSubFolderName(STRING, STRING);
+    
+//#define HQ_VERSION "4.3.0"    
+    
+#define  SETUP_FILE "setup.conf" 
+
+// UninstallActions properties 
+#define  INSTALLDIR_INDEX 0  
+#define  REMOVE_INDEX 1
+ 
+// RemoveFilesRollback properties 
+#define  INSTALLDIR_INDEX 0  
+#define  ADD_LOCAL_INDEX 1
+
+#define  SHORTCUT_WEBAPP_PORT_INDEX 2 
+#define  SHORTCUT_WEBAPP_HOST_INDEX 3
+
+// server properties
+#define  SERVER_INSTALLDIR_INDEX 0
+#define  SERVER_ADD_LOCAL_INDEX 1    
+#define  SERVER_MAIL_HOST_INDEX 2
+#define  SERVER_DATABASE_PASSWORD_INDEX 3
+#define  SERVER_DATABASE_USER_INDEX 4
+#define  SERVER_MAIL_SENDER_INDEX 5
+#define  SERVER_ADMIN_USER_INDEX 6
+#define  SERVER_ADMIN_PASSWORD_INDEX 7
+#define  SERVER_ADMIN_EMAIL_INDEX 8
+#define  SERVER_WEB_APP_HOST_INDEX 9
+#define  SERVER_WEB_APP_PORT_INDEX 10
+#define  SERVER_WEB_APP_SECURE_PORT_INDEX 11
+#define  SERVER_MULTICAST_ADDR_INDEX 12
+#define  SERVER_MULTICAST_PORT_INDEX  13
+#define  SERVER_POSTGRESQL_PORT_INDEX 14
+#define  HQ_ENGINE_PORT_INDEX  15
+#define  HQ_ENGINE_JNP_PORT_INDEX  16 
+#define SERVER_WINDOWS_TEMP_INDEX 17   
+#define SERVER_DB_ENC_KEY_PW 18   
+
+// agent properties 
+#define  AGENT_INSTALLDIR_INDEX 0  
+#define  AGENT_SERVER_ADDRESS_INDEX   1
+#define  AGENT_SERVER_PORT_INDEX   2
+#define  AGENT_SERVER_SSL_PORT_INDEX      3
+#define  AGENT_IS_SECURE_INDEX     4
+#define  AGENT_SERVER_USER_INDEX     5
+#define  AGENT_SERVER_PASSWORD_INDEX  6
+#define  AGENT_ADDRESS_INDEX       7
+#define  AGENT_PORT_INDEX        8
+
+// ant properties 
+#define  TEMP_INDEX 1
+#define  BIN_INDEX 2
+#define  DATA_INDEX 3
+                                    
+// String constants for the start of the sub-folder names.
+
+#define AGENT_FOLDER_SUBSTR		"agent"
+#define SERVER_FOLDER_SUBSTR	"server"
+
+// Registry keys for determining current version.
+
+#define HQ_PRODUCT_KEY "SOFTWARE\\Hyperic HQ"
+#define HQ_CURRENT_VERSION "CurrentVersion"
+
+function STRING GetCurrHqVersion()
+STRING sVersion;
+NUMBER nvBufferSize, nvType, nvRetVal;
+begin
+
+   RegDBSetDefaultRoot(HKEY_LOCAL_MACHINE);
+   
+   nvRetVal = RegDBGetKeyValueEx(
+      HQ_PRODUCT_KEY, // [in] subkey
+      HQ_CURRENT_VERSION, // [in] value name
+      nvType, // [out] value type
+      sVersion, // [out] value, in string form
+      nvBufferSize); // [out] value size
+
+    if (nvRetVal < 0) then
+       if (nvRetVal == -1) then
+          sVersion = "return value = -1.";
+       else
+          sVersion = FormatMessage(nvRetVal);
+       endif;
+       
+       MessageBox("Unable to fetch current HQ version information due to " + sVersion, SEVERE);
+       abort;
+    endif;
+   
+//    MessageBox ("sVersion in GetCurrHqVersion is " + sVersion, INFORMATION); 
+	return sVersion;
+end; 
+
+function STRING GetSubFolderName(sInstallDir, sStartsWith)
+	LIST Folders;
+	NUMBER nResult, nLocation;
+	STRING sSubFolderName, svString;
+begin
+	sSubFolderName = "";
+	Folders = ListCreate(STRINGLIST);
+	nResult = FindAllDirs(sInstallDir, EXCLUDE_SUBDIR, Folders);
+	
+	if (nResult < 0) then
+       MessageBox("No subdirectories found under " + sInstallDir + ", not a valid installation.", SEVERE);
+       abort;
+	endif;
+
+	nResult = ListGetFirstString (Folders, svString); 
+ 
+    // Loop while list items continue to be retrieved and we haven't
+    // found the one we want.
+
+    while (nResult != END_OF_LIST) 
+		nLocation = StrFind(svString, sStartsWith);
+		
+		if (nLocation < 0) then
+    		// Get the next string in the list. 
+	    	nResult = ListGetNextString (Folders, svString);
+		else
+			nResult = END_OF_LIST;
+			sSubFolderName = svString;
+	    endif;
+
+    endwhile; 
+
+	if (nLocation < 0) then
+       MessageBox("No subdirectories that contain " + sStartsWith + " found under " + sInstallDir + ", not a valid installation.", SEVERE);
+       abort;
+//    else
+//    	MessageBox("Sub folder = " + sSubFolderName, INFORMATION);
+	endif;
+
+	ListDestroy(Folders);
+	
+	return sSubFolderName;
+end;
+
+function PopulateConfig(hMSI)   
+    STRING  sInstallDir, sAddLocal, sInsertLine, sMailHost, sFormattedDir, sDatabasePassword, 
+    	sDatabaseUser, sMailSender, sAdminUser, sAdminPassword, sAdminEmail, 
+    	sBaseUrl, sWebAppHost, sWebAppPort, sWebAppSecurePort, sMulticastAddr, sMulticastPort,
+    	sPostgresqlPort, sHqEnginePort, sHqEngineJnpPort, sDatabaseUrl, sWindowsTemp, sDbEncKeyPw;    
+    LIST listProperties; 
+begin  
+    listProperties = GetMSIProperties(hMSI); 
+    sInstallDir =  GetIndexedProperty(listProperties, SERVER_INSTALLDIR_INDEX);
+    sAddLocal = GetIndexedProperty(listProperties, SERVER_ADD_LOCAL_INDEX);
+    // fix up the directory string for ant
+    sFormattedDir = sInstallDir;    
+    StrRemoveLastSlash ( sFormattedDir );
+    sFormattedDir = FixPath(sFormattedDir);
+    sMailHost = GetIndexedProperty(listProperties, SERVER_MAIL_HOST_INDEX);    
+    sDatabasePassword = GetIndexedProperty(listProperties, SERVER_DATABASE_PASSWORD_INDEX);
+    sDatabaseUser = GetIndexedProperty(listProperties, SERVER_DATABASE_USER_INDEX);      
+    sAdminUser = GetIndexedProperty(listProperties, SERVER_ADMIN_USER_INDEX);
+    sAdminPassword = GetIndexedProperty(listProperties, SERVER_ADMIN_PASSWORD_INDEX); 
+    sAdminEmail = GetIndexedProperty(listProperties, SERVER_ADMIN_EMAIL_INDEX);    
+    sMailSender = GetIndexedProperty(listProperties, SERVER_MAIL_SENDER_INDEX);     
+    sWebAppPort = GetIndexedProperty(listProperties, SERVER_WEB_APP_PORT_INDEX);
+    sWebAppSecurePort = GetIndexedProperty(listProperties, SERVER_WEB_APP_SECURE_PORT_INDEX);
+    sWebAppHost = GetIndexedProperty(listProperties, SERVER_WEB_APP_HOST_INDEX);
+    sBaseUrl = "http://" + sWebAppHost +":" + sWebAppPort + "/";
+    sBaseUrl = FixPath(sBaseUrl);    
+    sMulticastAddr = GetIndexedProperty(listProperties, SERVER_MULTICAST_ADDR_INDEX); 
+    sMulticastPort = GetIndexedProperty(listProperties, SERVER_MULTICAST_PORT_INDEX); 
+    sPostgresqlPort = GetIndexedProperty(listProperties, SERVER_POSTGRESQL_PORT_INDEX);
+    sHqEnginePort = GetIndexedProperty(listProperties, HQ_ENGINE_PORT_INDEX); 
+    sHqEngineJnpPort = GetIndexedProperty(listProperties, HQ_ENGINE_JNP_PORT_INDEX); 
+    sDatabaseUrl = FixPath("jdbc:postgresql://127.0.0.1:" + sPostgresqlPort + "/hqdb?protocolVersion=2");
+    sWindowsTemp =  GetIndexedProperty(listProperties, SERVER_WINDOWS_TEMP_INDEX);
+    sDbEncKeyPw = GetIndexedProperty(listProperties, SERVER_DB_ENC_KEY_PW); 
+    ListDestroy ( listProperties );   
+    
+    // delete the setup properties if still exists from a previous component installation
+    DeleteFile(sWindowsTemp ^ SETUP_FILE);
+    
+   	// delete feature-specific stuff    
+	if ((StrFind ( sAddLocal , "Server" )>=0) || 
+		(sAddLocal = "ALL") || (sAddLocal = "")) then
+    	// write out properties to file 
+    	listProperties = ListCreate (STRINGLIST);  
+	    // populate the properties list before writing out to file
+	    ListAddString ( listProperties, "server.installdir=" + sFormattedDir, AFTER );                   
+	    ListAddString ( listProperties, "using.builtin.db=true", AFTER );    
+	    ListAddString ( listProperties, "server.database.choice=HQ Built-in Database", AFTER ); 
+	    ListAddString ( listProperties, "server.database=PostgreSQL", AFTER );    
+	    ListAddString ( listProperties, "server.database-driver=org.postgresql.Driver", AFTER );
+	    ListAddString ( listProperties, "server.database.create=Yes", AFTER );   
+	    ListAddString ( listProperties, "server.database-user=" + sDatabaseUser, AFTER );    
+	    ListAddString ( listProperties, "server.database-password=" + sDatabasePassword, AFTER );
+	    ListAddString ( listProperties, "server.database-url=" + sDatabaseUrl, AFTER );
+	    ListAddString ( listProperties, "server.database.upgrade.choice=Overwrite the HQ server database (ERASE all existing data)", AFTER );    
+	    ListAddString ( listProperties, "server.postgresql.port=" + sPostgresqlPort, AFTER );
+	    ListAddString ( listProperties, "server.quartzDelegate=org.quartz.impl.jdbcjobstore.PostgreSQLDelegate", AFTER );        
+	    ListAddString ( listProperties, "server.admin.username=" + sAdminUser, AFTER );
+	    ListAddString ( listProperties, "server.admin.password=" + sAdminPassword, AFTER );
+	    ListAddString ( listProperties, "server.admin.email=" + sAdminEmail, AFTER );
+	    ListAddString ( listProperties, "server.overwrite=No", AFTER );
+	    ListAddString ( listProperties, "server.webapp.baseurl=" + sBaseUrl, AFTER );
+	    ListAddString ( listProperties, "server.webapp.port=" + sWebAppPort, AFTER );
+	    ListAddString ( listProperties, "server.webapp.secure.port=" + sWebAppSecurePort, AFTER );    
+	    ListAddString ( listProperties, "server.mail.host=" + sMailHost, AFTER );
+	    ListAddString ( listProperties, "server.mail.sender=" + sMailSender, AFTER );    
+	    ListAddString ( listProperties, "server.multicast.addr=" + sMulticastAddr, AFTER ); 
+	    ListAddString ( listProperties, "server.multicast.port=" + sMulticastPort, AFTER );    
+	    ListAddString ( listProperties, "hq-engine.server.port=" + sHqEnginePort, AFTER );
+	    ListAddString ( listProperties, "hq-engine.jnp.port=" + sHqEngineJnpPort, AFTER );    
+	    ListAddString ( listProperties, "server.ha.bind_addr=*.*", AFTER );  
+        ListAddString ( listProperties, "server.hibernate.dialect=org.hyperic.hibernate.dialect.PostgreSQLDialect", AFTER );
+        ListAddString ( listProperties, "server.connection-validation-sql=select 1", AFTER );  
+        ListAddString ( listProperties, "server.encryption-key=" + sDbEncKeyPw, AFTER );  
+    	WritePropertiesToFile(listProperties, sWindowsTemp, SETUP_FILE);   
+    	ListDestroy ( listProperties );
+	endif;    
+    if ((StrFind ( sAddLocal , "Agent" )>=0) || 
+    	(sAddLocal = "ALL") || (sAddLocal = "")) then 
+	    listProperties = ListCreate (STRINGLIST);  
+	    // populate the properties list before writing out to file
+	    ListAddString ( listProperties, "hyperic-hq-agent.installdir=" + sFormattedDir, AFTER );  
+	    // write out properties to file
+		WritePropertiesToFile(listProperties, sWindowsTemp, SETUP_FILE);  
+		ListDestroy ( listProperties );
+	endif;
+    if ((StrFind ( sAddLocal , "Shell" )>=0) || 
+    	(sAddLocal = "ALL") || (sAddLocal = "")) then  
+	    listProperties = ListCreate (STRINGLIST);  
+	    // populate the properties list before writing out to file
+	    ListAddString ( listProperties, "shell.installdir=" + sFormattedDir, AFTER );
+	    // write out properties to file
+	    WritePropertiesToFile(listProperties, sWindowsTemp, SETUP_FILE);
+	    ListDestroy(listProperties);    	
+	endif;       
+end;
+
+function STRING FixPath(sPath)
+begin
+	StrRemoveLastSlash ( sPath ); 
+	StrReplace ( sPath , "\\" , "\\\\" , 0 );	
+	StrReplace ( sPath , ":" , "\\:" , 0 ); 
+	StrReplace ( sPath , "=" , "\\=" , 0 ); 
+	return sPath;	
+end;
+
+function WriteAgentProperties(hMSI)
+    STRING  sInstallDir, sServerAddress, sServerPort, sServerSSL;
+    STRING sIsSecure, sUser, sPassword, sAddress, sPort; 
+    LIST listProperties;   
+    NUMBER nTimeOut;   
+    HWND hRec;
+begin 
+	UpdateProgressBar(hMSI, "Generating HQ Agent Properties"); 
+    listProperties = GetMSIProperties(hMSI); 
+    sInstallDir = GetIndexedProperty(listProperties, INSTALLDIR_INDEX);
+    sServerAddress = GetIndexedProperty(listProperties, AGENT_SERVER_ADDRESS_INDEX);  
+    sServerPort = GetIndexedProperty(listProperties, AGENT_SERVER_PORT_INDEX);
+    sServerSSL = GetIndexedProperty(listProperties, AGENT_SERVER_SSL_PORT_INDEX);
+    sIsSecure = GetIndexedProperty(listProperties, AGENT_IS_SECURE_INDEX);
+    sUser = GetIndexedProperty(listProperties, AGENT_SERVER_USER_INDEX);
+    sPassword = GetIndexedProperty(listProperties, AGENT_SERVER_PASSWORD_INDEX);
+    sAddress = GetIndexedProperty(listProperties, AGENT_ADDRESS_INDEX);
+    sPort = GetIndexedProperty(listProperties, AGENT_PORT_INDEX);    
+    ListDestroy ( listProperties );
+    // Find the search string in the source file. 
+    SubstituteToken("%AGENT_SERVER_ADDRESS%", sServerAddress, sInstallDir + "agent.properties");  
+    SubstituteToken("%AGENT_SERVER_PORT%", sServerPort, sInstallDir + "agent.properties");  
+    SubstituteToken("%AGENT_SERVER_SSL_PORT%", sServerSSL, sInstallDir + "agent.properties");
+    if (sIsSecure = "1") then
+    	sIsSecure = "Yes";
+    else
+    	sIsSecure = "No";
+    endif;  
+    SubstituteToken("%AGENT_IS_SECURE%", sIsSecure, sInstallDir + "agent.properties");  
+    SubstituteToken("%AGENT_SERVER_USER%", sUser, sInstallDir + "agent.properties");  
+    SubstituteToken("%AGENT_SERVER_PASSWORD%", sPassword, sInstallDir + "agent.properties");  
+    SubstituteToken("%AGENT_ADDRESS%", sAddress, sInstallDir + "agent.properties");   
+    SubstituteToken("%AGENT_PORT%", sPort, sInstallDir + "agent.properties");
+    SubstituteToken("%AGENT_UNIDIRECTIONAL%", "no", sInstallDir + "agent.properties");
+    
+    // Need to comment out PDK variables that are wrong
+    SubstituteToken("agent.pdkLibDir", "#agent.pdkLibDir", sInstallDir + "agent.properties");
+    SubstituteToken("agent.pdkPluginDir", "#agent.pdkPluginDir", sInstallDir + "agent.properties");
+    
+    // copy properties to agent folder
+    CopyFile ( sInstallDir ^ "agent.properties" , GetSubFolderName(sInstallDir, AGENT_FOLDER_SUBSTR) ^ "conf" ^ "agent.properties" );           
+	DeleteFile( sInstallDir ^ "agent.properties");
+end;    
+
+function WriteInstallSummary(hMSI)
+    STRING  sInstallDir, sServerAddress, sServerPort;
+    STRING sAddLocal, sUser, sPassword; 
+    LIST listProperties;   
+    NUMBER nTimeOut;   
+    HWND hRec;
+begin  
+    listProperties = GetMSIProperties(hMSI); 
+    sInstallDir = GetIndexedProperty(listProperties, 0); 
+    sAddLocal = GetIndexedProperty(listProperties, 1);
+    sServerAddress = GetIndexedProperty(listProperties, 2);
+    sServerPort = GetIndexedProperty(listProperties, 3);     
+    sUser= GetIndexedProperty(listProperties, 4);
+    sPassword = GetIndexedProperty(listProperties, 5);   
+    ListDestroy ( listProperties );
+    // Find the search string in the source file. 
+	if ((StrFind ( sAddLocal , "Server" )>=0) || 
+		(sAddLocal = "ALL") || (sAddLocal = "")) then
+		SubstituteToken("%WEB_HOST%", sServerAddress, sInstallDir ^ "server-summary.txt");
+		SubstituteToken("%WEB_PORT%", sServerPort, sInstallDir ^ "server-summary.txt");
+		SubstituteToken("%ADMIN_USER%", sUser, sInstallDir ^ "server-summary.txt");  
+		SubstituteToken("%ADMIN_PASSWORD%", sPassword, sInstallDir ^ "server-summary.txt");  
+	endif; 
+end;
+
+function SubstituteToken(sToken, sValue, sFile)
+   STRING  svLine, szNewString, svReturnLine, szMsg; 
+    NUMBER  nvLineNumber, nvResult, nvStart; 
+begin 
+	nvStart = 0;
+    // Find the search string in the source file. 
+    nvResult = FileGrep (sFile, sToken, svReturnLine, 
+                                nvLineNumber, RESTART); 
+    switch(nvResult) 
+        case FILE_NOT_FOUND: 
+            // Report error; then abort. 
+            MessageBox( sFile + " not found.", WARNING); 
+            abort; 
+        case FILE_LINE_LENGTH: 
+            // Report error; then abort. 
+            MessageBox (sFile + "lines too long.", WARNING); 
+            abort; 
+        case OTHER_FAILURE: 
+            // Report error; then abort. 
+            MessageBox (sFile + "Unknown failure on call to FileGrep.", 
+                       WARNING); 
+            abort; 
+    endswitch; 
+    // Loop until end of file. 
+    while (nvResult != END_OF_FILE) 
+        StrReplace ( svReturnLine, sToken, sValue, nvStart );  
+        FileInsertLine ( sFile , svReturnLine , nvLineNumber , REPLACE );
+        // Search again. 
+        nvResult = FileGrep (sFile, sToken, svReturnLine, 
+                            nvLineNumber, CONTINUE); 
+    endwhile; 
+end;                                                 
+                        
+function LIST GetMSIProperties(hMSI) 
+STRING sCustomActionData;
+NUMBER nvBufferSize;
+LIST listProperties;
+begin
+    nvBufferSize = MAX_PATH;
+    MsiGetProperty ( hMSI , "CustomActionData" , sCustomActionData , nvBufferSize ); 
+    listProperties = ListCreate (STRINGLIST);  
+    if (StrGetTokens ( listProperties , sCustomActionData , ";" ) < 0) then
+       	MessageBox ("StrGetTokens failed.", SEVERE); 
+       	abort;
+    endif;    
+    return listProperties;
+end;
+
+function STRING GetIndexedProperty(listProperties, svIndex)   
+STRING sInstallDir, sResult; 
+begin                       
+	ListSetIndex(listProperties,svIndex);        
+	ListCurrentString(listProperties, sResult);
+	return sResult;
+end;
+ 
+function WritePropertiesToFile(listProperties, sDir, sFile)  
+STRING sInsertLine, svResult;
+NUMBER nLineNumber, nvFileHandle, nvResult ;
+begin        
+	if (FindFile (sDir, sFile, svResult) < 0) then 
+	    // Set the file mode to append. 
+	    OpenFileMode (FILE_MODE_APPEND); 
+	    // Create a new file and leave it open. 
+	    if (CreateFile (nvFileHandle, sDir, sFile) < 0) then 
+	        // Report the error. 
+	        MessageBox ("CreateFile failed.", SEVERE); 
+	        abort; 
+	    else 
+	        // Append the message to the file. 
+	        if (WriteLine(nvFileHandle, "# Properties file created by installshield") < 0) then 
+	            // Report the error. 
+	            MessageBox ("WriteLine failed.", SEVERE); 
+	        endif; 
+	    endif;
+		CloseFile ( nvFileHandle );  
+   endif;     
+	nLineNumber = 0;
+	nvResult = ListGetFirstString ( listProperties, sInsertLine );
+	while (nvResult == 0) 
+		if (FileInsertLine ( sDir ^ sFile , sInsertLine , nLineNumber , AFTER ) < 0) then
+	      	MessageBox("FileInsertLine failed into file " + sFile, SEVERE);
+	      	abort; 
+	    endif;
+	    nvResult = ListGetNextString ( listProperties, sInsertLine );
+	    nLineNumber++;
+	endwhile; 
+end;
+
+// clean up files before new install                      
+function RollbackFiles(hMSI)  
+    STRING  sInstallDir, sAddLocal, szFile, sFolderName; 
+    LIST listProperties; 
+begin   
+    listProperties = GetMSIProperties(hMSI); 
+    sInstallDir = GetIndexedProperty(listProperties, INSTALLDIR_INDEX); 
+    sAddLocal = GetIndexedProperty(listProperties, ADD_LOCAL_INDEX);
+    ListDestroy ( listProperties );
+	// delete feature-specific stuff    
+	if ((StrFind ( sAddLocal , "Server" )>=0) ||
+		(sAddLocal = "ALL") || (sAddLocal = "")) then                       
+		sFolderName = GetSubFolderName(sInstallDir, SERVER_FOLDER_SUBSTR);
+		ForceDeleteDir (sInstallDir, sFolderName );
+	endif;    
+    if ((StrFind ( sAddLocal , "Agent" )>=0) ||
+    	(sAddLocal = "ALL") || (sAddLocal = "")) then                      
+		sFolderName = GetSubFolderName(sInstallDir, AGENT_FOLDER_SUBSTR);
+		ForceDeleteDir ( sInstallDir, sFolderName ); 
+	endif;
+end;
+                      
+// clean up files before new install                      
+function UninstallActions(hMSI)  
+    STRING  sInstallDir, szFile, sRemoveFeatures, sFolderName; 
+    NUMBER rslt;
+    LIST listProperties; 
+begin   
+    listProperties = GetMSIProperties(hMSI); 
+    sInstallDir = GetIndexedProperty(listProperties, INSTALLDIR_INDEX);
+    sRemoveFeatures = GetIndexedProperty(listProperties, REMOVE_INDEX);
+    ListDestroy ( listProperties ); 
+    
+    // first, stop all services before deleting any files to 
+    // ensure they are not being used at deletion
+    if ((StrFind ( sRemoveFeatures , "Server" )>=0) ||
+    	(sRemoveFeatures = "ALL" ) || (sRemoveFeatures = "")) then   
+    	// try to stop the service   
+		ServiceStopService ( "Hyperic HQ Server");   
+		ServiceRemoveService ( "Hyperic HQ Server");        
+		sFolderName = GetSubFolderName(sInstallDir, SERVER_FOLDER_SUBSTR);
+		ForceDeleteDir(sInstallDir, sFolderName ); 
+	endif;
+    if ((StrFind ( sRemoveFeatures , "Agent" )>=0) ||
+    	(sRemoveFeatures = "ALL" ) || (sRemoveFeatures = "")) then 
+    	// try to stop the service        
+		ServiceStopService ( "Hyperic HQ Agent"); 
+		ServiceRemoveService ( "Hyperic HQ Agent");                            
+		sFolderName = GetSubFolderName(sInstallDir, AGENT_FOLDER_SUBSTR);
+		ForceDeleteDir(sInstallDir, sFolderName ); 
+	endif;
+	
+	// remove the generated log file so we can clean up properly		
+    if ((sRemoveFeatures = "ALL") || (sRemoveFeatures = "")) then
+   		DeleteFile ( sInstallDir ^  "install" ^ "installer" ^ "logs" ^ "hq-install.log" ); 
+		DeleteFile ( sInstallDir ^  "install" ^ "installer" ^ "logs" ^ "hq-install.log.verbose" );
+	endif;		   
+end;
+
+function CreateServerService(hMSI)
+    STRING  sInstallDir, sShellDir, sJavaHome, sServerFolderName; 
+    LIST listProperties;   
+    HWND hRec;
+    NUMBER nTimeOut;
+begin  
+	// set timeout to 60 seconds
+	nTimeOut = 60 * 1000;
+	                    
+    listProperties = GetMSIProperties(hMSI); 
+    sInstallDir = GetIndexedProperty(listProperties, INSTALLDIR_INDEX);
+    ListDestroy ( listProperties );  
+    
+    UpdateProgressBar(hMSI, "Installing HQ Server Windows Service");
+   	// remove service if previously found
+	if (ServiceExistsService ( "Hyperic HQ Server" )) then 
+    	// try to stop the service        
+//		ServiceStopService ( "hyperic-hq-database"); 
+		ServiceStopService ( "Hyperic HQ Server");
+//		ServiceRemoveService ( "hyperic-hq-database");
+		ServiceRemoveService ( "Hyperic HQ Server");
+	endif;    
+           
+	sServerFolderName = GetSubFolderName(sInstallDir, SERVER_FOLDER_SUBSTR);
+    sJavaHome = "JAVA_HOME=" + sServerFolderName ^ "jre";
+
+	LAAW_PARAMETERS.lpEnvironment = &sJavaHome; 
+	LAAW_PARAMETERS.nTimeOut = nTimeOut;
+	LAAW_PARAMETERS.lpCurrentDirectory = &sInstallDir;   	  
+	
+	sJavaHome = sServerFolderName ^ "bin" ^ "hq-server.bat";
+	LongPathToQuote( sJavaHome, TRUE );
+
+    if (LaunchAppAndWait ( sJavaHome , "install" , 
+       	LAAW_OPTION_HIDDEN | LAAW_OPTION_WAIT | LAAW_OPTION_USE_SHELLEXECUTE ) < 0) then
+       	sJavaHome = FormatMessage(LAAW_PARAMETERS.nLaunchResult);
+       	MessageBox ("Failed to create HQ Server Windows Service, error message = " +
+       		sJavaHome, SEVERE);    	
+	endif; 		  
+end;   
+
+function ForceDeleteDir(sInstallDir, sDelDir)
+STRING sCmd;
+NUMBER maxTimeOut, nTimeOut, count;              
+begin           
+	// wait at most 60 seconds before giving up on delete   
+	nTimeOut = 60 * 1000;
+	// try to read the cmd path from the environment variable
+	GetEnvVar ("Comspec", sCmd);
+	if (sCmd = "") then
+		sCmd = "cmd";
+	endif;	    
+   	LaunchApplication ( sCmd , "/c rd /Q /S \"" + sDelDir + "\"" , 
+       	sInstallDir , SW_FORCEMINIMIZE , nTimeOut  , LAAW_OPTION_WAIT );
+end;
+
+function StartServer(hMSI)      
+    HWND hRec;
+begin      
+	UpdateProgressBar(hMSI, "Starting HQ Server Windows Service");                                                           
+	if (ServiceStartService ( "Hyperic HQ Server" , "" ) < 0) then 
+	    MessageBox ("Failed to start the HQ Server Windows Service" , SEVERE); 
+	endif;	   	 	  
+end;   
+
+function CreateAgentService(hMSI)   
+    STRING  sInstallDir, sShellDir, sJavaHome, szProgram, szApplicationPath, sAgentFolderName; 
+    LIST listProperties;     
+    HWND hRec;
+    NUMBER nTimeOut;
+begin  
+	// set timeout to 60 seconds
+	nTimeOut = 60 * 1000;
+	           
+    listProperties = GetMSIProperties(hMSI); 
+    sInstallDir = GetIndexedProperty(listProperties, INSTALLDIR_INDEX);
+    ListDestroy ( listProperties );  
+    
+    UpdateProgressBar(hMSI, "Starting HQ Agent Windows Service");    
+        
+	// remove service if previously found
+	if (ServiceExistsService ( "Hyperic HQ Agent" )) then 
+    	// try to stop the service        
+		ServiceStopService ( "Hyperic HQ Agent"); 
+		ServiceRemoveService ( "Hyperic HQ Agent");
+	endif;    
+
+	sAgentFolderName = GetSubFolderName(sInstallDir, AGENT_FOLDER_SUBSTR);
+    sJavaHome = "JAVA_HOME=" + sAgentFolderName ^ "jre";                       
+
+	//LAAW_PARAMETERS.lpEnvironment = &sJavaHome; 
+	LAAW_PARAMETERS.nTimeOut = nTimeOut;
+	//LAAW_PARAMETERS.lpCurrentDirectory = &sInstallDir;   	  
+	
+	GetEnvVar ( "COMSPEC", szProgram );     
+	szApplicationPath = sAgentFolderName ^ "bin" ^ "hq-agent.bat";   
+	LongPathToQuote( szApplicationPath, TRUE );    
+	        
+    if (LaunchAppAndWait ( szApplicationPath , "install" , 
+//    if (LaunchAppAndWait ( "", szProgram +  " /c " +  szApplicationPath + " install" ,  
+       	LAAW_OPTION_WAIT | LAAW_OPTION_HIDDEN ) < 0) then
+       	sJavaHome = FormatMessage(LAAW_PARAMETERS.nLaunchResult);
+       	MessageBox ("Failed to create HQ Agent Windows Service, error message = " +
+       		sJavaHome, SEVERE);    	
+	endif; 
+end; 
+
+function StartAgent(hMSI) 
+	STRING  sInstallDir, szProgram, szApplicationPath, sAgentFolderName;       
+	LIST listProperties;  
+    HWND hRec;    
+    NUMBER nTimeOut;
+begin    
+	// set timeout to 5 minutes
+	nTimeOut = 5 * 60 * 1000;          
+	
+    listProperties = GetMSIProperties(hMSI); 
+    sInstallDir = GetIndexedProperty(listProperties, INSTALLDIR_INDEX);
+    ListDestroy ( listProperties );  
+    	
+	UpdateProgressBar(hMSI, "Starting HQ Agent Windows Service"); 
+
+	LAAW_PARAMETERS.nTimeOut = nTimeOut; 	  
+	
+	sAgentFolderName = GetSubFolderName(sInstallDir, AGENT_FOLDER_SUBSTR);
+	GetEnvVar ( "COMSPEC", szProgram );     
+	szApplicationPath = sAgentFolderName ^ "bin" ^ "hq-agent.bat";   
+	LongPathToQuote( szApplicationPath, TRUE );                                     
+	
+	if (LaunchAppAndWait ( szApplicationPath, "start" , 
+//	if (LaunchAppAndWait ( "", szProgram +  " /c " +  szApplicationPath + " start" ,  
+       	LAAW_OPTION_WAIT | LAAW_OPTION_HIDDEN ) < 0) then
+	   	MessageBox ("Failed to start the HQ Agent Windows Service" , SEVERE); 	
+	endif; 		  
+end;
+
+function LaunchBrowser(hMSI)
+begin    
+     	   		//attemp to start a browser window
+	if (UseDLL(WINSYSDIR ^ "shell32.dll") >= 0) then
+		ShellExecuteA(HWND_INSTALL, "open", "http://localhost:7080", "", "", SW_SHOWNORMAL); 
+	endif;
+	UnUseDLL("shell32.dll");
+end;  
+
+function UpdateProgressBar(hMSI, sText)
+    HWND hRec;
+begin   
+    // update progress bar
+ 	hRec = MsiCreateRecord(3);
+	MsiRecordSetString(hRec, 1, "Progress Custom Action");
+	MsiRecordSetString(hRec, 2, sText);
+	MsiRecordSetString(hRec, 3, "incrementing tick [1] of [2]");
+	MsiProcessMessage(hMSI, INSTALLMESSAGE_ACTIONSTART, hRec);  
+end;
+
+function LaunchAnt(hMSI)   
+    STRING  sInstallDir, sBin, sData, sTemp, sJavaHome;
+    LIST listProperties;   
+    NUMBER nTimeOut;   
+    HWND hRec;
+begin 
+	// set timeout for 30 minutes for slow machines 
+	nTimeOut = 30 * 60 * 1000;
+    listProperties = GetMSIProperties(hMSI); 
+    sInstallDir = GetIndexedProperty(listProperties, 0);
+    sTemp = GetIndexedProperty(listProperties, 1);
+    ListDestroy ( listProperties );  
+	// update progress bar
+	UpdateProgressBar(hMSI, "Installing components (this may take some time)");
+	// delete any prior jres in the temp folder
+	ForceDeleteDir(sInstallDir, sTemp ^ "jre");	
+	// invoke ant silently in the background
+	if (LaunchApplication ( sInstallDir ^ "install" ^ "setup.bat" , 
+		"\"" + sTemp ^ "setup.conf\"" , sInstallDir , 
+		SW_FORCEMINIMIZE , nTimeOut  , LAAW_OPTION_WAIT ) < 0) then
+    	// unrecoverable; just bail out
+    	MessageBox ("Installation failed: see hq-install.log for more information" , SEVERE);
+    	abort; 
+   	endif;  
+   	// remove temp files
+   	UpdateProgressBar(hMSI, "Removing Temporary Files"); 		                                                      
+end;
+
+
+function ValidateInstallDirs(hMSI)
+STRING sInstallDir, sAddLocal, sProductVersion;  
+NUMBER nvInstallState, nvActionState, nvSize;
+begin 
+    nvSize = 100;                                                           
+    // set agent properties
+    MsiGetProperty ( hMSI , "INSTALLDIR" , sInstallDir , nvSize );
+    MsiGetProperty ( hMSI , "ADDLOCAL" , sAddLocal , nvSize );
+    MsiGetProperty ( hMSI, "ProductVersion", sProductVersion, nvSize);
+	if ((StrFind ( sAddLocal , "Server" )>=0) || 
+		(sAddLocal = "ALL") || (sAddLocal = "")) then
+	    // verify that a server doesn't already exist in the install dir 
+	    // if it does, bail out
+	    if (ExistsDir ( sInstallDir  ^ "server-" + sProductVersion) = EXISTS) then
+	    	MessageBox ("A server already exists in directory " + sInstallDir, SEVERE); 
+	    	abort;
+	    endif;
+	endif;
+	if ((StrFind ( sAddLocal , "Agent" )>=0) || 
+		(sAddLocal = "ALL") || (sAddLocal = "")) then
+	    // verify that an agent doesn't already exist in the install dir 
+	    // if it does, bail out
+	    if (ExistsDir ( sInstallDir  ^ "agent-" + sProductVersion) = EXISTS) then
+	    	MessageBox ("An agent already exists in directory " + sInstallDir, SEVERE); 
+	    	abort;
+	    endif;  
+	endif; 
+end;	
+
+function ValidateAdminPrivilege(hMSI)
+STRING sPrivileged;  
+NUMBER nvSize;
+begin 
+    nvSize = 100;                                                           
+    // set agent properties
+    MsiGetProperty ( hMSI , "Privileged" , sPrivileged , nvSize );
+	if (sPrivileged = "") then
+	    MessageBox ("The installation must be run with Administrator privileges!", SEVERE);
+		abort;
+	endif;
+end;
+
+function UpdateShortcuts(hMSI)  
+STRING sInstallDir, sAddLocal, sWebAppPort, sBaseUrl, sJavaHome, sFile, sVersion;
+NUMBER nLineNumber;
+LIST listProperties; 
+begin
+    listProperties = GetMSIProperties(hMSI); 
+    sInstallDir = GetIndexedProperty(listProperties, INSTALLDIR_INDEX);   
+    sAddLocal = GetIndexedProperty(listProperties, ADD_LOCAL_INDEX); 
+ 	sWebAppPort = GetIndexedProperty(listProperties, SHORTCUT_WEBAPP_PORT_INDEX);
+	sBaseUrl = GetIndexedProperty(listProperties, SHORTCUT_WEBAPP_HOST_INDEX);
+    ListDestroy ( listProperties );              
+
+	sVersion = GetCurrHqVersion();
+
+	if ((StrFind ( sAddLocal , "Server" )>=0) || 
+		(sAddLocal = "ALL") || (sAddLocal = "")) then
+	    // autodetect IP sAddLocal if none provided
+	    if (sBaseUrl = "") then
+	    	sBaseUrl = GetIPAddress(); 
+	    	// default to localhost in case of failure
+	    	if (sBaseUrl = "") then
+	    		sBaseUrl = "127.0.0.1";
+	    	endif;
+	    endif;
+	    sBaseUrl = "http://" + sBaseUrl +":" + sWebAppPort + "/";  	
+		nLineNumber = 0;
+		sFile = sInstallDir ^ "Hyperic HQ Dashboard.URL";
+		if (FileInsertLine ( sFile , "URL=" + sBaseUrl, nLineNumber , AFTER ) < 0) then
+			MessageBox("FileInsertLine failed into file " + sFile, SEVERE);
+		endif;       
+	endif;    
+    if ((StrFind ( sAddLocal , "Agent" )>=0) || 
+    	(sAddLocal = "ALL") || (sAddLocal = "")) then
+		nLineNumber = 0; 
+		sJavaHome =  sInstallDir + "agent-" + sVersion + "\\jre";
+		sFile = sInstallDir ^ "start_agent.bat";
+		if (FileInsertLine ( sFile , "set JAVA_HOME=" + sJavaHome, nLineNumber , AFTER ) < 0) then
+			MessageBox("FileInsertLine failed into file " + sFile, SEVERE);
+		endif;  	        
+	endif;
+end;                                     
+  
+  // initialize MSI installation properties for later      
+  function InitializeServerConfig(hMSI)
+  STRING sMailHost,sAdminEmail,sAdminUser, sMailSender,sWebAppHost, sDatabaseUrl, sPostgresqlPort;
+  STRING sIPAddress, sHostname;  
+  NUMBER nvSize;
+  begin  
+  	nvSize = 100;                                                           
+  	sIPAddress = GetIPAddress();
+  	sHostname = GetHostname();  
+    MsiGetProperty ( hMSI , "SERVER_MAIL_HOST" , sMailHost, nvSize );   	
+    MsiGetProperty ( hMSI , "SERVER_ADMIN_EMAIL" , sAdminEmail , nvSize );
+    MsiGetProperty ( hMSI , "SERVER_ADMIN_USER" , sAdminUser , nvSize ); 
+    MsiGetProperty ( hMSI , "SERVER_MAIL_SENDER" , sMailSender , nvSize );    
+    MsiGetProperty ( hMSI , "SERVER_WEBAPP_HOST" , sWebAppHost , nvSize );
+    if (sMailHost = "") then
+    	sMailHost = sHostname;
+    endif;
+    if (sAdminEmail = "") then
+    	sAdminEmail = sAdminUser + "@" + sMailHost;
+    endif;    
+    if (sMailSender = "") then
+        sMailSender = sAdminEmail;
+    endif; 
+    // autodetect IP address if none provided
+    if (sWebAppHost = "") then
+    	sWebAppHost = sIPAddress; 
+    	// default to localhost in case of failure
+    	if (sWebAppHost = "") then
+    		sWebAppHost = "127.0.0.1";
+    	endif;
+    endif;
+    // write out the initialized properties  
+    MsiSetProperty ( hMSI , "SERVER_MAIL_HOST" , sMailHost );
+    MsiSetProperty ( hMSI , "SERVER_ADMIN_EMAIL" , sAdminEmail );
+    MsiSetProperty ( hMSI , "SERVER_MAIL_SENDER" , sMailSender );    
+    MsiSetProperty ( hMSI , "SERVER_WEBAPP_HOST" , sWebAppHost );      
+  end;
+ 
+  function InitializeAgentConfig(hMSI)
+  STRING sProperty; 
+  NUMBER nvSize;
+  begin  
+  	nvSize = 100;                                                           
+    // set agent properties
+    MsiGetProperty ( hMSI , "AGENT_ADDRESS" , sProperty , nvSize );
+    if (sProperty = "") then
+    	sProperty = GetIPAddress();
+    endif; 
+    MsiSetProperty ( hMSI , "AGENT_ADDRESS" , sProperty ); 
+    
+    // try to copy server configuration from server component configuration       
+    // if not set, default to the local machine's address
+    MsiGetProperty ( hMSI , "AGENT_SERVER_ADDRESS" , sProperty , nvSize );
+    if (sProperty = "") then
+    	MsiGetProperty ( hMSI , "SERVER_WEBAPP_HOST" , sProperty , nvSize );
+    endif; 
+    if (sProperty = "") then
+    	sProperty = GetIPAddress();
+    endif;  
+    MsiSetProperty ( hMSI , "AGENT_SERVER_ADDRESS" , sProperty ); 
+        
+    MsiGetProperty ( hMSI , "AGENT_SERVER_PORT" , sProperty , nvSize );
+    if (sProperty = "") then
+    	MsiGetProperty ( hMSI , "SERVER_WEBAPP_PORT" , sProperty , nvSize );
+    endif; 
+    MsiSetProperty ( hMSI , "AGENT_SERVER_PORT" , sProperty );     
+    
+    MsiGetProperty ( hMSI , "AGENT_SERVER_SSL_PORT" , sProperty , nvSize );
+    if (sProperty = "") then
+    	MsiGetProperty ( hMSI , "SERVER_WEBAPP_SECURE_PORT" , sProperty , nvSize );
+    endif;    
+    MsiSetProperty ( hMSI , "AGENT_SERVER_SSL_PORT" , sProperty ); 
+        
+    MsiGetProperty ( hMSI , "AGENT_SERVER_USER" , sProperty , nvSize );
+    if (sProperty = "") then
+    	MsiGetProperty ( hMSI , "SERVER_ADMIN_USER" , sProperty , nvSize );
+    endif;         
+    MsiSetProperty ( hMSI , "AGENT_SERVER_USER" , sProperty ); 
+      
+    MsiGetProperty ( hMSI , "AGENT_SERVER_PASSWORD" , sProperty , nvSize );
+    if (sProperty = "") then
+    	MsiGetProperty ( hMSI , "SERVER_ADMIN_PASSWORD" , sProperty , nvSize );
+    endif;         
+    MsiSetProperty ( hMSI , "AGENT_SERVER_PASSWORD" , sProperty );        
+                  
+end;
+
+// used to override agent properties when doing a server + agent
+// install through the UI. All agent properties will be populated from server
+function CopyAgentConfigFromServer(hMSI)
+  STRING sProperty; 
+  NUMBER nvSize;
+  begin  
+  	nvSize = 100;                                                           
+
+    MsiGetProperty ( hMSI , "SERVER_WEBAPP_HOST" , sProperty , nvSize );
+    MsiSetProperty ( hMSI , "AGENT_SERVER_ADDRESS" , sProperty );         
+
+    MsiGetProperty ( hMSI , "SERVER_WEBAPP_PORT" , sProperty , nvSize );
+    MsiSetProperty ( hMSI , "AGENT_SERVER_PORT" , sProperty );     
+    
+    MsiGetProperty ( hMSI , "SERVER_WEBAPP_SECURE_PORT" , sProperty , nvSize );  
+    MsiSetProperty ( hMSI , "AGENT_SERVER_SSL_PORT" , sProperty ); 
+        
+    MsiGetProperty ( hMSI , "SERVER_ADMIN_USER" , sProperty , nvSize );       
+    MsiSetProperty ( hMSI , "AGENT_SERVER_USER" , sProperty ); 
+      
+    MsiGetProperty ( hMSI , "SERVER_ADMIN_PASSWORD" , sProperty , nvSize );        
+    MsiSetProperty ( hMSI , "AGENT_SERVER_PASSWORD" , sProperty );        
+                  
+end;
+    
+// used in standard install flow to default the password
+// if it is not already set
+function DefaultPasswords(hMSI)
+STRING sDefaultPassword, sPassword;
+NUMBER szBufferSize;
+begin
+	szBufferSize = 100;
+	sDefaultPassword = "hqadmin";            	
+	MsiGetProperty ( hMSI, "SERVER_ADMIN_PASSWORD", sPassword, szBufferSize);
+	if (sPassword = "") then
+    	MsiSetProperty ( hMSI , "SERVER_ADMIN_PASSWORD" , sDefaultPassword );	
+	endif;    
+	
+	MsiGetProperty ( hMSI, "SERVER_DATABASE_PASSWORD", sPassword, szBufferSize);
+	if (sPassword = "") then
+    	MsiSetProperty ( hMSI , "SERVER_DATABASE_PASSWORD" , sDefaultPassword ); 		
+	endif; 
+	
+	MsiGetProperty ( hMSI, "AGENT_SERVER_PASSWORD", sPassword, szBufferSize);
+	if (sPassword = "") then
+    	MsiSetProperty ( hMSI , "AGENT_SERVER_PASSWORD" , sDefaultPassword ); 		
+	endif;
+end;                            
+    
+// validates all the ports passed in as CustomData
+// this is useful to catch errors before invoking the ant script
+// which would otherwise silently fail
+function ValidatePorts(hMSI)  
+STRING sPort, sCustomActionData;
+NUMBER nvBufferSize, nvPort, nvResult;
+LIST listPorts;
+begin
+  	nvBufferSize = 100;    
+  	UpdateProgressBar(hMSI, "Validating installation ports");
+  	MsiGetProperty ( hMSI , "CustomActionData" , sCustomActionData , nvBufferSize );  
+    listPorts = ListCreate (STRINGLIST);  
+    if (StrGetTokens ( listPorts , sCustomActionData , ";" ) < 0) then
+       	MessageBox ("StrGetTokens failed.", SEVERE); 
+       	abort;
+    endif;    
+ 	nvResult = ListGetFirstString ( listPorts, sPort );
+	while (nvResult == 0) 	
+	  	StrToNum ( nvPort , sPort );
+	   	if (!ValidatePort(nvPort)) then
+	 		MessageBox("Port " + sPort + " is already taken. Please select a different port.",
+	 			SEVERE);
+	 		ListDestroy(listPorts); 
+	 		abort;
+	 	endif; 
+	    nvResult = ListGetNextString ( listPorts, sPort );
+	endwhile; 
+	ListDestroy(listPorts); 	 	         
+end;

@@ -1,0 +1,172 @@
+#include "ifx.h"   
+
+export prototype ValidateAgentConfig(HWND);
+export prototype ValidateAgentServerAdminUser(HWND);
+export prototype ValidateAgentServerConfig(HWND);
+export prototype ValidateServerAdminUserConfig(HWND);
+export prototype ValidateServerHQEngineConfig(HWND);
+export prototype ValidateServerMailConfig(HWND);
+export prototype ValidateServerWebConfig(HWND);
+export prototype ValidateServerDbEncKeyPw(HWND);
+
+prototype BOOL ValidatePortProperty(HWND, STRING); 
+prototype BOOL ValidatePasswordProperty(HWND, STRING);     
+prototype BOOL ValidateField(HWND, STRING, BOOL);
+
+prototype BOOL Shlwapi.StrTrimA(BYREF STRING, BYVAL STRING);
+
+function ValidateAgentConfig(hMSI)
+begin 
+	if (ValidateField(hMSI, "AGENT_ADDRESS", FALSE) &&
+		ValidatePortProperty(hMSI, "AGENT_PORT")) then
+		MsiSetProperty ( hMSI , "VALIDATE_AGENT_CONFIG" , "1" );   
+	else
+		MsiSetProperty ( hMSI , "VALIDATE_AGENT_CONFIG" , "0" );   
+	endif;
+end;
+
+function ValidateServerDbEncKeyPw(hMSI)
+STRING sPw1;
+NUMBER nvBufferSize, nvValue;
+begin
+  	nvBufferSize = 100;            
+  	MsiGetProperty ( hMSI , "DB_ENC_KEY_PW", sPw1 , nvBufferSize );
+  	
+  	StrTrimA(sPw1, " \t");
+
+	if (StrLength(sPw1) >= 8) then
+		MsiSetProperty ( hMSI , "VALIDATE_DB_ENC_KEY_PW", "1" );   
+	else
+		MsiSetProperty ( hMSI , "VALIDATE_DB_ENC_KEY_PW", "0" );
+		MessageBox("Database encryption key must be at least eight characters long; whitespace at the beginning or end of the string are removed.", SEVERE);
+	endif;
+end;
+
+function ValidateAgentServerAdminUser(hMSI)
+begin
+	if (ValidateField(hMSI, "AGENT_SERVER_USER", FALSE) &&
+		ValidatePasswordProperty(hMSI, "AGENT_SERVER_PASSWORD")) then
+		MsiSetProperty ( hMSI , "VALIDATE_AGENT_SERVER_ADMIN_USER" , "1" );   
+	else
+		MsiSetProperty ( hMSI , "VALIDATE_AGENT_SERVER_ADMIN_USER" , "0" );   
+	endif;                                      
+end;
+
+function ValidateAgentServerConfig(hMSI)
+begin 
+	if (ValidateField(hMSI, "AGENT_SERVER_ADDRESS", FALSE) &&            
+		ValidateField(hMSI, "AGENT_SERVER_PORT", TRUE) &&
+		ValidateField(hMSI, "AGENT_SERVER_SSL_PORT", TRUE)) then
+		MsiSetProperty ( hMSI , "VALIDATE_AGENT_SERVER_CONFIG" , "1" );   
+	else
+		MsiSetProperty ( hMSI , "VALIDATE_AGENT_SERVER_CONFIG" , "0" );   
+	endif; 
+end;                                                  
+
+function ValidateServerAdminUserConfig(hMSI)
+begin 
+	if (ValidateField(hMSI, "SERVER_ADMIN_EMAIL", FALSE) &&
+		ValidateField(hMSI, "SERVER_ADMIN_USER", FALSE) &&
+		ValidatePasswordProperty(hMSI, "SERVER_ADMIN_PASSWORD")) then
+		MsiSetProperty ( hMSI , "VALIDATE_SERVER_ADMIN_USER_CONFIG" , "1" );   
+	else
+		MsiSetProperty ( hMSI , "VALIDATE_SERVER_ADMIN_USER_CONFIG" , "0" );   
+	endif; 
+end;
+
+function ValidateServerHQEngineConfig(hMSI)
+begin    
+	if (ValidatePortProperty(hMSI, "HQ_ENGINE_PORT") && 
+		ValidatePortProperty(hMSI, "HQ_ENGINE_JNP_PORT")) then
+		MsiSetProperty ( hMSI , "VALIDATE_SERVER_HQ_ENGINE_CONFIG" , "1" );   
+	else
+		MsiSetProperty ( hMSI , "VALIDATE_SERVER_HQ_ENGINE_CONFIG" , "0" );   
+	endif; 
+
+end;
+
+function ValidateServerMailConfig(hMSI)
+begin   
+	if (ValidateField(hMSI, "SERVER_MAIL_HOST", FALSE) &&
+		ValidateField(hMSI, "SERVER_MAIL_SENDER", FALSE)) then
+		MsiSetProperty ( hMSI , "VALIDATE_SERVER_MAIL_CONFIG" , "1" );   
+	else
+		MsiSetProperty ( hMSI , "VALIDATE_SERVER_MAIL_CONFIG" , "0" );   
+	endif;  
+end;
+
+function ValidateServerWebConfig(hMSI)
+begin
+	if (ValidateField(hMSI, "SERVER_WEBAPP_HOST", FALSE) &&
+		ValidatePortProperty(hMSI, "SERVER_WEBAPP_PORT") && 
+		ValidatePortProperty(hMSI, "SERVER_WEBAPP_SECURE_PORT")) then
+		MsiSetProperty ( hMSI , "VALIDATE_SERVER_WEB_CONFIG" , "1" );   
+	else
+		MsiSetProperty ( hMSI , "VALIDATE_SERVER_WEB_CONFIG" , "0" );   
+	endif; 
+end;
+
+         
+// validates the port specified in the given property
+// and sets its validation property if valid
+function BOOL ValidatePortProperty(hMSI, sProperty)
+STRING sPort;
+NUMBER nvBufferSize, nvPort;
+begin
+  nvBufferSize = 100;            
+  MsiGetProperty ( hMSI , sProperty, sPort , nvBufferSize ); 
+  if (sPort = "") then
+     MessageBox("Port field may not be blank!", SEVERE);   
+     return FALSE;
+  elseif (StrToNum ( nvPort , sPort ) < 0) then
+  	MessageBox("Port " + sPort + " is not a valid port.", SEVERE);
+ 	return FALSE;
+  elseif (ValidatePort(nvPort)) then  
+  	  return TRUE;
+  else 
+  	  MessageBox("Port " + sPort + " is already taken. Please select a different port.",
+  	  		SEVERE);  
+  	  return FALSE;
+  endif;    
+end;                                
+
+function BOOL ValidateField(hMSI, sProperty, isNumber)
+STRING sValue;
+NUMBER nvBufferSize, nvValue;
+begin
+  nvBufferSize = 100;            
+  MsiGetProperty ( hMSI , sProperty, sValue , nvBufferSize ); 
+  if (sValue = "") then
+     MessageBox("Field may not be blank!", SEVERE);   
+     return FALSE; 
+  elseif (isNumber && (StrToNum(nvValue, sValue) < 0)) then
+  	MessageBox("Invalid field " + sValue + " is not a valid number", SEVERE); 
+  	return FALSE;
+  else 
+  	return TRUE; 
+  endif;
+end;                                
+
+// validates the port specified in the given property
+// and sets its validation property if valid
+function BOOL ValidatePasswordProperty(hMSI, sPasswordProperty)
+STRING sUser, sPwd, sPwdRetype;
+NUMBER nvBufferSize;
+begin 
+  	nvBufferSize = 100;
+	MsiGetProperty ( hMSI , sPasswordProperty, sPwd , nvBufferSize );
+	MsiGetProperty ( hMSI , sPasswordProperty + "_RETYPE", sPwdRetype , nvBufferSize );
+	if (sPwd = sPwdRetype) then  
+		if (sPwd = "") then 
+	   		// handle blank password as failure
+	   		MessageBox("Password field may not be blank!", SEVERE);   
+	 	 	// unset the property
+	 	 	return FALSE;	  	
+	  	else 
+			return TRUE;
+	   	endif;
+	else             
+	  	 MessageBox("Password fields do not match! Please retype your password.", SEVERE);
+	  	 return FALSE; 
+	endif;      
+end;           

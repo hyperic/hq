@@ -49,7 +49,7 @@ public class UserDashboardConfig
         _user = user;
     }
     
-    boolean isEditable(AuthzSubject by) {
+    public boolean isEditable(AuthzSubject by) {
         return getUser().equals(by);
     }
 

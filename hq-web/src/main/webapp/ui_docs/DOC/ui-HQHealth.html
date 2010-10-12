@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hyperic HQ 4.x Documentation : ui-HQHealth</title>
+        <title>Evolution : ui-HQHealth</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,19 +12,23 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic HQ 4.x Documentation : ui-HQHealth
+                            Evolution : ui-HQHealth
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 20, 2009 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Sep 10, 2010 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <h1><a name="ui-HQHealth-HQHealth"></a><a name="ui-HQHealth-top"></a>HQ Health</h1>
 
 <p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Pre-Release Documentation</b><br />This space is a staging area for Hyperic 4.5 documentation. See <a href="http://support.hyperic.com/confluence/display/DOC/HQ+Documentation" title="HQ Documentation">HQ Documentation</a> for Hyperic 4.2, 4.3, and 4.4 documentation.</td></tr></table></div> 
 <p>This screen provides real-time diagnostic data for the machine on which the HQ Server is installed. This data is mostly useful for HQ Support to troubleshoot problems with the system and is not intended for customers to use on their own. This screen is available to Administrators only.</p>
 
-<p>This screen displays statistics from HQ's internal caches. For information about modifying cache settings, see <a href="http://support.hyperic.com/confluence/display/DOC/Configuring+HQ+for+Large+Environments+and+Improved+Performance#ConfiguringHQforLargeEnvironmentsandImprovedPerformance-ConfigureHQCacheSettingsforImprovedPerformance">Configure HQ Cache Settings for Improved Performance.</a></p>
+<p>This screen displays statistics from HQ's internal caches. For information about modifying cache settings, see <a href="http://support.hyperic.com/confluence/display/EVO/Configuring+HQ+for+Large+Environments+and+Improved+Performance#ConfiguringHQforLargeEnvironmentsandImprovedPerformance-ConfigureHQCacheSettingsforImprovedPerformance">Configure HQ Cache Settings for Improved Performance.</a></p>
+
+
 <ul>
 	<li><a href="#ui-HQHealth-Tasks">Tasks</a> available on this screen</li>
 	<li><a href="#ui-HQHealth-Sections">Sections</a> on this screen</li>
@@ -48,6 +52,8 @@
 <p>Gathering all the data to be printed might take a few moments. When that is done, a simple text display of the statistics are displayed in a browser window, from which you can easily print.</p>
 
 <p><a href="#ui-HQHealth-top"><em>back to top</em></a></p>
+
+
 
 <p><a name="ui-HQHealth-Sections"></a></p>
 
@@ -117,12 +123,12 @@
 		<li>AutoInventory Servers</li>
 		<li>Orphaned AlertDef Count (See <a href="#ui-HQHealth-OrphanedDatabaseRows">Orphaned Database Rows</a>)</li>
 		<li>Orphaned Audit Count (See <a href="#ui-HQHealth-OrphanedDatabaseRows">Orphaned Database Rows</a>)</li>
-		<li>Stalled Escalation s&#45; In HQ 4.1 and later.</li>
+		<li>Stalled Escalations&#45; In HQ 4.1 and later.</li>
 		<li>Orphaned Group Count (See <a href="#ui-HQHealth-OrphanedDatabaseRows">Orphaned Database Rows</a>)</li>
+		<li>Orphaned Resource Count (See <a href="#ui-HQHealth-OrphanedDatabaseRows">Orphaned Database Rows</a>)</li>
 		<li>Postgres Locks - In HQ 4.1 and later.</li>
 		<li>Postgres Activity - In HQ 4.1 and later.</li>
 		<li>Active But Disabled Resource Alert Defs</li>
-		<li>Resource Type Alert Defs with Triggers</li>
 		<li>Database Version Information&nbsp; <br class="atl-forced-newline" /></li>
 	</ul>
 	</li>
@@ -137,7 +143,7 @@
 	<li>Address &#45;&nbsp; The IP address upon which the agent listens for server communications.</li>
 	<li>Port - The port on the agent's listen address upon which it listens for server communications. Be default, the listen port is 2144.&nbsp;</li>
 	<li>Version - HQ version</li>
-	<li>Build Version - HQ build</li>
+	<li>Bundle Version</li>
 	<li>Creation Time - When the platform where the agent runs was first added to HQ inventory.&nbsp;</li>
 	<li>&#35; Platforms - The number of platforms the agent is monitoring. Typically this value is "1", indicated that the agent is monitoring only the platform where it runs. The value is greater, if the agent is also monitoring an an agentless device, for instance an SNMP device.&nbsp;</li>
 	<li>&#35; Metrics - This is the number of metrics the agent collects. Hyperic recommends balancing the metric collection load across agents. For example, don't use a single agent to monitor every SNMP devices in your network - this would constitute a single point of failure, and the metric load might downgrade the performance of other services running on the host. .</li>
@@ -159,19 +165,12 @@
 
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<pre class="code-java">org.hyperic.hq.events.AlertConditionCreateException:
-org.hyperic.hq.measurement.MeasurementNotFoundException: No measurement found <span class="code-keyword">for</span> 10288 with template 33434 at org.hyperic.hq.bizapp.server.session.EventsBossEJBImpl.updateAlertDefinition(EventsBossEJBImpl.java:887)
+<pre class="code-java">
+org.hyperic.hq.events.AlertConditionCreateException:
+org.hyperic.hq.measurement.MeasurementNotFoundException: No measurement found <span class="code-keyword">for</span> 10288 with template 33434 at org.hyperic.hq.bizapp.server.session.EventsBossImpl.updateAlertDefinition(EventsBossImpl.java:887)
 </pre>
 </div></div>
-<ul>
-	<li>If the HQ database contains orphaned resources, an exception like this may result:</li>
-</ul>
 
-
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<pre class="code-java">java.rmi.ServerException: RuntimeException; nested exception is: org.hyperic.hq.common.SystemException: javax.ejb.TransactionRolledbackLocalException: Error updating platform with <span class="code-keyword">new</span> AIServer data.; CausedByException is: Error updating platform with <span class="code-keyword">new</span> AIServer data. at org.jboss.ejb.plugins.LogInterceptor.handleException(LogInterceptor.java:386) at org.jboss.ejb.plugins.LogInterceptor.invoke(LogInterceptor.java:196) at
-</pre>
-</div></div>
 <p>The HQ Health page provides orphaned item queries for alert definitions, resources, groups, and audits.</p>
 
 <p>If these queries indicate that there are any orphaned rows in the HQ database, contact Hyperic support for assistance in removing the orphaned rows.&nbsp;</p>
@@ -188,11 +187,11 @@ org.hyperic.hq.measurement.MeasurementNotFoundException: No measurement found <s
 </tr>
 <tr>
 <td class='confluenceTd'> <b>Resources</b> </td>
-<td class='confluenceTd'> Click the menu name to access either <b>Browse</b> (takes users to the <a href="ui-Resources.html" title="ui-Resources">Browse Resources</a> screen, where they can locate and navigate through information about all <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-managedresource">managed resources</a>), <b>Currently Down</b> (takes users to the <a href="ui-CurrentlyDown.html" title="ui-CurrentlyDown">Currently Down</a> screen, where they can look at all managed resources that are unavailable), <b>Nagios Availability</b> (available only when Nagios is installed), or <b>Recently Viewed</b> (provides a drop-down list of <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-resource">resources</a> that the user has recently viewed. Selecting one of those resources takes the user to the <a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Current Health</a> screen for the resource). </td>
+<td class='confluenceTd'> Click the menu name to access either <b>Browse</b> (takes users to the <a href="ui-Resources.html" title="ui-Resources">Browse Resources</a> screen, where they can locate and navigate through information about all <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-managedresource">managed resources</a>), <b>Currently Down</b> (takes users to the <a href="ui-CurrentlyDown.html" title="ui-CurrentlyDown">Currently Down</a> screen, where they can look at all managed resources that are unavailable), <b>Nagios Availability</b> (available only when Nagios is installed), or <b>Recently Viewed</b> (provides a drop-down list of <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resource">resources</a> that the user has recently viewed. Selecting one of those resources takes the user to the <a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Current Health</a> screen for the resource). </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <b>Analyze</b> </td>
-<td class='confluenceTd'> Click the menu name to access <b>Reporting</b> <font color="red">&#42;</font> (presents the <a href="ui-ReportCenter.html" title="ui-ReportCenter">Reporting</a> screen, from which reports can be generated), <b>Alert Center</b> (presents the <a href="ui-Alert.Center.html" title="ui-Alert.Center">Alert Center</a>, which displays a deployment wide alert summary), or <b>Event Center</b> (presents the <a href="ui-Event.Center.html" title="ui-Event.Center">Event Center</a>, which displays a deployment-wide event summary). <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Click the menu name to access <b>Reporting</b> <font color="red">&#42;</font> (presents the <a href="ui-ReportCenter.html" title="ui-ReportCenter">Reporting</a> screen, from which reports can be generated), <b>Alert Center</b> (presents the <a href="ui-Alert.Center.html" title="ui-Alert.Center">Alert Center</a>, which displays a deployment wide alert summary), or <b>Event Center</b> (presents the <a href="http://support.hyperic.com/confluence/display/DOC/ui-Event.Center" title="ui-Event.Center">Event Center</a>, which displays a deployment-wide event summary). <br class="atl-forced-newline" /> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <b>Administration</b> </td>
@@ -211,7 +210,9 @@ Double-click a resource in the list to navigate to its Resource page. </td>
 <p>The masthead also displays the two most recently triggered alerts. Users can click the alert's time to be taken to the <a href="ui-Alert.Detail.html" title="ui-Alert.Detail">alert detail</a>.</p>
 <p><a href="#ui-HQHealth-top"><em>back to top</em></a></p>
 
-<h5><a name="ui-HQHealth-ReturntotheHQUserInterfaceReference."></a>Return to the <a href="HQ User Interface Reference.html" title="HQ User Interface Reference">HQ User Interface Reference</a>.</h5>
+
+
+<h5><a name="ui-HQHealth-ReturntotheUserInterfaceReference."></a>Return to the <a href="User Interface Reference.html" title="User Interface Reference">User Interface Reference</a>.</h5>
 
 				    
                     			    </td>
@@ -222,7 +223,7 @@ Double-click a resource in the list to navigate to its Resource page. </td>
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Apr 20, 2010 15:01</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Sep 10, 2010 15:54</font></td>
 		    </tr>
 	    </table>
     </body>

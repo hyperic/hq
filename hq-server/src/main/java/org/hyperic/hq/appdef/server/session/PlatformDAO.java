@@ -27,6 +27,7 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -36,7 +37,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.type.IntegerType;
-import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.Ip;
@@ -205,7 +205,7 @@ public class PlatformDAO
     }
 
     public List<Platform> findByTypeAndRegEx(Integer pType, String regex) {
-        HQDialect dialect = Util.getHQDialect();
+        HQDialect dialect = getHQDialect();
         String fqdnEx = dialect.getRegExSQL("p.fqdn", ":regex", true, false);
         String nameEx = dialect.getRegExSQL("rez.sort_name", ":regex", true, false);
         String sql = "select {p.*} from EAM_PLATFORM p" +
@@ -238,7 +238,7 @@ public class PlatformDAO
         }
 
         if (platformName != null && platformName.trim().length() > 0) {
-            HQDialect dialect = Util.getHQDialect();
+            HQDialect dialect = getHQDialect();
             nameEx = dialect.getRegExSQL("r.sort_name", ":regex", true, false);
 
             whereClause.append((whereClause.length() > 0) ? " and" : "").append(" (")
@@ -274,7 +274,7 @@ public class PlatformDAO
                      AuthzConstants.RELATION_NETWORK_ID + " and e.to_id = p.resource_id ) ";
 
         if (platformName != null && platformName.trim().length() > 0) {
-            HQDialect dialect = Util.getHQDialect();
+            HQDialect dialect = getHQDialect();
             nameEx = dialect.getRegExSQL("r.sort_name", ":regex", true, false);
             String fqdnEx = dialect.getRegExSQL("p.fqdn", ":regex", true, false);
 
@@ -347,6 +347,22 @@ public class PlatformDAO
         String sql = "select distinct p from Platform p " + "join p.ips ip where ip.address=?";
         return (Collection<Platform>) getSession().createQuery(sql).setString(0, addr).list();
     }
+    
+    @SuppressWarnings("unchecked")
+    public Collection<Platform> findByMacAddr(String macAddress) {
+        if (macAddress == null) {
+            return Collections.EMPTY_LIST;
+        }
+        // Both the VM and the Guest will have IP entries with 
+        // the given MAC address.
+        String hql = "select distinct p from Platform p " +
+                     "join p.ips ip where upper(ip.macAddress)=?";
+         
+        return getSession().createQuery(hql)
+                    .setString(0, macAddress.toUpperCase())
+                    .list();
+    }
+
 
     public Resource findVirtualByInstanceId(Integer id) {
 

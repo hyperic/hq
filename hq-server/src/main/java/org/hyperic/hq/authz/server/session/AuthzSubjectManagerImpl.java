@@ -282,12 +282,14 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
         return findSubjectById(id);
     }
 
-    /** 
-     * 
-     */
     @Transactional(readOnly = true)
     public AuthzSubject findSubjectById(Integer id) {
         return authzSubjectDAO.findById(id);
+    }
+    
+    @Transactional(readOnly = true)
+    public String findSubjectName(Integer id) {
+       return findSubjectById(id).getName();
     }
 
     /** 
@@ -494,13 +496,25 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
             targ.setPrefs(newPrefs);
         }
     }
+    
+    public void setUserPrefs(Integer whoId, Integer subjectId, ConfigResponse prefs)
+        throws PermissionException, SubjectNotFoundException {
+         AuthzSubject who = getSubjectById(whoId);
+         if(who == null) {
+             throw new SubjectNotFoundException("Subject with id " + whoId + " not found");
+         }
+         setUserPrefs(who, subjectId, prefs);
+    }
 
     /**
      * 
      */
     @Transactional(readOnly = true)
     public AuthzSubject getOverlordPojo() {
-        return authzSubjectDAO.findById(AuthzConstants.overlordId);
+        AuthzSubject overlord = authzSubjectDAO.findById(AuthzConstants.overlordId);
+        //initialize name to pass Subject b/w method during non-tx testing
+        overlord.getName();
+        return overlord;
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {

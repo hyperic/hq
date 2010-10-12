@@ -29,6 +29,12 @@
 
 	<dependencies>
 		<dependency>
+			<!-- Making hqapi jar available to plugins on agent side only for now, due to issues with Spring app context being loaded when hqapi jar is in server lib.  
+			     May make this a dependency of hq-pdk once that is fixed-->
+			<groupId>org.hyperic.hq.hqapi</groupId>
+			<artifactId>hqapi1</artifactId>
+		</dependency>
+		<dependency>
   			<groupId>mysql</groupId>
   			<artifactId>mysql-connector-java</artifactId>
 		</dependency>
@@ -93,7 +99,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
-			<artifactId>hq-pdk-shared</artifactId>
+			<artifactId>hq-pdk</artifactId>
 			<version>${project.version}</version>
 			<classifier>agent</classifier>
 			<type>zip</type>
@@ -148,15 +154,8 @@
 		    <type>zip</type>
 		</dependency>
 		<dependency>
-			<groupId>org.hyperic.hq.agent</groupId>
-			<artifactId>hq-agent-pdk</artifactId>
-			<version>${project.version}</version>
-			<classifier>agent</classifier>
-		    <type>zip</type>
-		</dependency>
-		<dependency>
 			<groupId>org.hyperic.hq</groupId>
-			<artifactId>hq-pdk-shared</artifactId>
+			<artifactId>hq-pdk</artifactId>
 			<version>${project.version}</version>
 			<classifier>javadoc</classifier>
 		</dependency>
@@ -212,6 +211,11 @@
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>exchange-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>gemfire-plugin</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -327,6 +331,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>netapp-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>netservices-plugin</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -376,6 +385,11 @@
 			<version>${project.version}</version>
 			<classifier>agent</classifier>
 		    <type>zip</type>
+		</dependency>
+        <dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>rabbitmq-plugin</artifactId>
+			<version>${project.version}</version> 
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
@@ -438,6 +452,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
+			<artifactId>vsphere-plugin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>weblogic-plugin</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -457,4 +476,22 @@
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
+	<repositories>
+		<repository>
+			<id>hqapi-snapshot</id>
+			<name>HQApi Snapshot Repository</name>
+			<url>http://maven.hyperic.org/hqapi/snapshot/</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>hqapi-milestone</id>
+			<name>HQApi Milestone Repository</name>
+			<url>http://maven.hyperic.org/hqapi/milestone/</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 </project>

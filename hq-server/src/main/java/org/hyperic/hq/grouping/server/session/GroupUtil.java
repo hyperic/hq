@@ -129,8 +129,6 @@ public class GroupUtil {
     {
         ResourceGroupManager groupMan = 
             Bootstrap.getBean(ResourceGroupManager.class);
-
-        ResourceGroup group = groupMan.findResourceGroupById(entity.getId());
-        return groupMan.getGroupConvert(subject, group);
+        return groupMan.getGroupConvert(subject, entity.getId());
     }
 }

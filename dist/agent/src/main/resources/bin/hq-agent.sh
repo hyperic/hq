@@ -144,7 +144,7 @@ SIGAR_PROC_NET=$AGENT_BUNDLE_HOME/tmp
 
 if [ "x${HQ_JAVA_HOME}" != "x" ] ; then
     HQ_JAVA_HOME=${HQ_JAVA_HOME}
-elif [ -d "${AGENT_INSTALL_HOME}/jre" ]; then
+elif [ -d "${AGENT_INSTALL_HOME}"/jre ]; then
     HQ_JAVA_HOME="${AGENT_INSTALL_HOME}"/jre
     # Just in case
     chmod -R +x "${AGENT_INSTALL_HOME}"/jre/bin/* > /dev/null 2>&1
@@ -180,8 +180,7 @@ CLIENT_CLASSPATH="${AGENT_LIB}/hq-agent-core-${project.version}.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/hq-common-${project.version}.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/hq-util-${project.version}.jar"
-CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/hq-pdk-shared-${project.version}.jar"
-CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/hq-agent-pdk-${project.version}.jar"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/hq-pdk-${project.version}.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/ant-1.7.1.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/commons-logging-1.0.4.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/log4j-1.2.14.jar"
@@ -489,9 +488,37 @@ getpid() {
                         pidtest=`$PSEXE -ww -p $pid -o command | grep "$WRAPPER_CMD_PS" | tail -1`
                         ;;
                     'solaris')
-                        PSEXE="/usr/ucb/ps" 
-                        pidtest=`$PSEXE ww $pid | grep "$WRAPPER_CMD" | tail -1` 
-                        ;;
+	                    if [ -f "/usr/bin/pargs" ]
+	                    then
+	                       pidtest=`pargs $pid | grep "$WRAPPER_CMD" | tail -1`
+	                    else
+	                       case "$PSEXE" in
+	                          '/usr/ucb/ps')
+	                             pidtest=`$PSEXE -auxww  $pid | grep "$WRAPPER_CMD" | tail -1`
+	                             ;;
+	                          '/usr/bin/ps')
+	                             TRUNCATED_CMD=`$PSEXE -o comm -p $pid | tail -1`
+	                             COUNT=`echo $TRUNCATED_CMD | wc -m`
+	                             COUNT=`echo ${COUNT}`
+	                             COUNT=`expr $COUNT - 1`
+	                             TRUNCATED_CMD=`echo $WRAPPER_CMD | cut -c1-$COUNT`
+	                             pidtest=`$PSEXE -o comm -p $pid | grep "$TRUNCATED_CMD" | tail -1`
+	                             ;;
+	                          '/bin/ps')
+	                             TRUNCATED_CMD=`$PSEXE -o comm -p $pid | tail -1`
+	                             COUNT=`echo $TRUNCATED_CMD | wc -m`
+	                             COUNT=`echo ${COUNT}`
+	                             COUNT=`expr $COUNT - 1`
+	                             TRUNCATED_CMD=`echo $WRAPPER_CMD | cut -c1-$COUNT`
+	                             pidtest=`$PSEXE -o comm -p $pid | grep "$TRUNCATED_CMD" | tail -1`
+	                             ;;
+                              *)
+	                             echo "Unsupported ps command $PSEXE"
+	                             exit 1
+	                             ;;
+	                          esac
+	                     fi
+	                     ;;
                     'hpux')
                         pidtest=`$PSEXE -p $pid -x -o args | grep "$WRAPPER_CMD_PS" | tail -1`
                         ;;
@@ -550,16 +577,26 @@ testpid() {
     # The ps statement below looks for the specific wrapper command running as
     # the pid. If it is not found then the pid file is considered to be stale.
     case "$DIST_OS" in
-        'macosx')
-            pid=`$PSEXE -ww $pid | grep $pid | grep -v grep | awk '{print $1}' | tail -1`
+     'solaris')
+        case "$PSEXE" in
+        '/usr/ucb/ps')
+            pid=`$PSEXE  $pid | grep $pid | grep -v grep | awk '{print $1}' | tail -1`
             ;;
-        'solaris')
-            PSEXE="/usr/ucb/ps"
-            pid=`$PSEXE ww $pid | grep $pid | grep -v grep | awk '{print $1}' | tail -1`
-            ;;
-        *)
+        '/usr/bin/ps')
             pid=`$PSEXE -p $pid | grep $pid | grep -v grep | awk '{print $1}' | tail -1`
             ;;
+        '/bin/ps')
+            pid=`$PSEXE -p $pid | grep $pid | grep -v grep | awk '{print $1}' | tail -1`
+            ;;
+        *)
+            echo "Unsupported ps command $PSEXE"
+            exit 1
+            ;;
+        esac
+        ;;
+    *)
+        pid=`$PSEXE -p $pid | grep $pid | grep -v grep | awk '{print $1}' | tail -1` 2>/dev/null
+        ;;
     esac
     if [ "X$pid" = "X" ]
     then

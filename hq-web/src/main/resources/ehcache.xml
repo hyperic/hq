@@ -1,3 +1,31 @@
+<!--
+
+    NOTE: This copyright does *not* cover user programs that use HQ
+    program services by normal system calls through the application
+    program interfaces provided as part of the Hyperic Plug-in Development
+    Kit or the Hyperic Client Development Kit - this is merely considered
+    normal use of the program, and does *not* fall under the heading of
+     "derived work".
+
+     Copyright (C) [2009-2010], VMware, Inc.
+     This file is part of HQ.
+
+     HQ is free software; you can redistribute it and/or modify
+     it under the terms version 2 of the GNU General Public License as
+     published by the Free Software Foundation. This program is distributed
+     in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+     even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+     PARTICULAR PURPOSE. See the GNU General Public License for more
+     details.
+
+     You should have received a copy of the GNU General Public License
+     along with this program; if not, write to the Free Software
+     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+     USA.
+
+
+-->
+
 <ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="ehcache.xsd">
 
@@ -213,15 +241,6 @@
          memoryStoreEvictionPolicy="LRU">
   </cache>
 
-  <!-- Cache used outside of hibernate, which maintains a set of agents
-       which we are currently processing for AI services -->
-  <cache name="ServiceMergerWorking"
-         maxElementsInMemory="3000"
-         timeToIdleSeconds="0"
-         timeToLiveSeconds="0"
-         memoryStoreEvictionPolicy="LRU">
-  </cache>
-
   <!-- The SRN cache, used outside of hibernate -->
   <cache name="SRNCache"
          maxElementsInMemory="100000"
@@ -231,7 +250,7 @@
 
   <!-- Agent Caches -->
   <cache name="org.hyperic.hq.appdef.Agent"
-         maxElementsInMemory="500"
+         maxElementsInMemory="5000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -243,7 +262,7 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="Agent.findByAgentToken"
-         maxElementsInMemory="500"
+         maxElementsInMemory="5000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -312,7 +331,7 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  <cache name="org.hyperic.hq.appdef.server.session.Platform.servers"
+  <cache name="org.hyperic.hq.appdef.server.session.Platform.serversBag"
          maxElementsInMemory="500"
          eternal="true"
          timeToIdleSeconds="0"
@@ -680,7 +699,7 @@
 
   <!-- Availability Down Alert Definition cache, used outside of hibernate -->
   <cache name="AvailabilityDownAlertDefinitionCache"
-         maxElementsInMemory="10000"
+         maxElementsInMemory="250000"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>

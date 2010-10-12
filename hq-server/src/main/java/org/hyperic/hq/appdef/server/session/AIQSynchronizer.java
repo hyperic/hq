@@ -79,6 +79,15 @@ public class AIQSynchronizer {
                     if (s.getIgnored()) {
                         _log.info("Platform " + existingQplatform.getName() +
                                   " has ignored servers, leaving in queue.");
+
+                        if (aiPlatform.getQueueStatus() != existingQplatform.getQueueStatus()) {
+                            _log.info("Updating queue status of existing platform: " +
+                                      aiPlatform.getFqdn());
+
+                            aiPlatformLH.updateQueueState(existingQplatform, aiPlatform,
+                                updateServers, isApproval, isReport);
+                        }
+
                         return aiPlatform;
                     }
                 }

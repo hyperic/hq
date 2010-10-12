@@ -25,8 +25,6 @@
 
 package org.hyperic.hq.measurement.galerts;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.galerts.processor.Gtrigger;
 import org.hyperic.hq.galerts.server.session.GtriggerType;
@@ -37,6 +35,8 @@ import org.hyperic.util.config.ConfigSchema;
 public class MeasurementGtriggerType 
     implements GtriggerType
 {
+    public static final String CFG_TIME_SKEW = "timeSkew";
+    public static final String CFG_MIN_COLL_INTERVAL = "minCollectionInterval";
     public static final String CFG_SIZE_COMPAR  = "sizeComparison";
     public static final String CFG_NUM_RESOURCE = "numResources";
     public static final String CFG_IS_PERCENT   = "isPercent";
@@ -45,7 +45,6 @@ public class MeasurementGtriggerType
     public static final String CFG_COMP_OPER    = "comparisonOperator";
     public static final String CFG_METRIC_VAL   = "metricValue";
     
-    private final Log _log = LogFactory.getLog(MeasurementGtriggerType.class);
 
     public Gtrigger createTrigger(ConfigResponse cfg) {        
         int sizeCompareCode = Integer.parseInt(cfg.getValue(CFG_SIZE_COMPAR));
@@ -60,14 +59,21 @@ public class MeasurementGtriggerType
         int comparatorCode = Integer.parseInt(cfg.getValue(CFG_COMP_OPER));
         ComparisonOperator comparator = ComparisonOperator.findByCode(comparatorCode);
         float metricValue = Float.parseFloat(cfg.getValue(CFG_METRIC_VAL));
-        
-        return new MeasurementGtrigger(sizeCompare, 
+      
+        MeasurementGtrigger trigger = new MeasurementGtrigger(sizeCompare, 
                                        numResources, 
                                        isPercent, 
                                        templateId,
                                        comparator, 
                                        metricValue, 
                                        isNotReportingOffending);
+        if(cfg.getValue(CFG_MIN_COLL_INTERVAL) != null) {
+            trigger.setMinCollectionInterval(Integer.parseInt(cfg.getValue(CFG_MIN_COLL_INTERVAL)));
+        }
+        if(cfg.getValue(CFG_TIME_SKEW) != null) {
+            trigger.setTimeSkew(Integer.parseInt(cfg.getValue(CFG_TIME_SKEW)));
+        }
+        return trigger;
     }
 
     public ConfigSchema getSchema() {

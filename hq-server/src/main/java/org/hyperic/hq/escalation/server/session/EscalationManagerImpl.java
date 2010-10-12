@@ -51,6 +51,7 @@ import org.hyperic.hq.events.server.session.AlertRegulator;
 import org.hyperic.hq.events.server.session.AlertableRoleCalendarType;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.events.shared.ActionManager;
+import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
 import org.hyperic.util.units.FormattedNumber;
 import org.hyperic.util.units.UnitNumber;
 import org.hyperic.util.units.UnitsConstants;
@@ -93,7 +94,8 @@ public class EscalationManagerImpl implements EscalationManager {
     public void initialize() {
         // Make sure the escalation enumeration is loaded and registered so
         // that the escalations run
-        ClassicEscalationAlertType.class.getClass();
+        ClassicEscalationAlertType.CLASSIC.toString();
+    	GalertEscalationAlertType.GALERT.toString();
         AlertableRoleCalendarType.class.getClass();
     }
 

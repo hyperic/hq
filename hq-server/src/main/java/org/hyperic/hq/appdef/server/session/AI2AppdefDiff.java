@@ -381,7 +381,9 @@ public class AI2AppdefDiff {
 
                 revisedAIplatform.addAIServerValue(scannedServer);
             } else {
-                if (!scannedServer.getInstallPath().equals(appdefServer.getInstallPath())) {
+                String scannedInstallPath = scannedServer.getInstallPath();
+                if ((scannedInstallPath == null && appdefServer.getInstallPath() != null) ||
+                    (scannedInstallPath != null && !scannedInstallPath.equals(appdefServer.getInstallPath()))){
                     // InstallPath has changed
                     scannedServer.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
                     addDiff(scannedServer, AIQueueConstants.Q_SERVER_INSTALLPATH_CHANGED); 
@@ -514,7 +516,7 @@ public class AI2AppdefDiff {
         return o1.equals(o2);
     }
 
-    //XXX this seems odd to update something in a method
+    //TODO this seems odd to update something in a method
     //that is checking for differences.  however, at this point
     //we have the ai object, the existing appdef object and the cpropMgr.
     //this is simply the easiest place until server AI code is refactored.

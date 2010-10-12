@@ -102,11 +102,20 @@
        Make sure that the setup property is set to the correct file and
        try running the installer again.
     </msgfail>
-
+       	
+    <findWritable property="newSetup"
+       	                  preferredDir="${install.dir}"
+       	                  filename="data/setup.properties"
+       	                  altDirPrefix="HQ_tmp">^^^INFO:
+       	WARNING: New setup properties file can't be written to %ORIGINALFILE%
+       	Setup properties will be written to %WRITABLEFILE% instead.
+    </findWritable>
+     <delete file="${newSetup}"/>
     <echo>^^^INFO: Loading install configuration...</echo>
     <echo>^^^DEBUG: Loading from ${setup}...</echo>
-    <property file="${setup.absolute}"/>
+   
     <ant antfile="setup-noninteractive.xml" target="generate-props"/>
+    <property file="${newSetup}"/>
     <echo>^^^DEBUG: Install configuration loaded.</echo>
   </target>
 
@@ -150,7 +159,7 @@ __ll__
   </target>
 
   <target name="init"
-          depends="load-basics,load-user-setup-properties,show-eula,load-default-setup-properties">
+          depends="load-basics,check-eula,load-user-setup-properties,show-eula,load-default-setup-properties">
 
     <!-- Parameterized names of things to deploy -->
     <echo>^^^INFO: Preparing to install...</echo>
@@ -366,6 +375,7 @@ __ll__
     <dbprivcheck jdbcUrl="${server.database-url}"
                  jdbcUser="${server.database-user}"
                  jdbcPassword="${server.database-password}"
+                 encryptionKey="${server.encryption-key}"
                  property="server.db.user.permission"
                  errMsgProperty="errMsg"/>
     <antcall target="fail-if-no-permission">
@@ -500,6 +510,15 @@ ${errMsg}
     <echo>^^^INFO: Upgrading the server...</echo>
     <antcall target="setup-server"/>
     <echo>^^^INFO: Copying existing hq-server.conf</echo>
+  	<!-- Backup conf file to maintain comments -->
+  	<tstamp>
+  	    <format property="current.time" pattern="yyyy-MM-dd.hhmm"/>
+ 	</tstamp>
+
+  	<copy file="${server.upgradedir}/conf/hq-server.conf"
+  	            tofile="${server.product.dir}/conf/hq-server-${current.time}.conf"
+  	            failonerror="false"/>
+  	
     <!-- Copy the existing config -->
     <serverConfigUpgrade existing="${server.upgradedir}/conf/hq-server.conf" 
     	new="${server.product.dir}/conf/hq-server.conf" upgradeDir="${server.upgradedir}"/>
@@ -516,7 +535,7 @@ ${errMsg}
             failonerror="false"/>
   	
     <echo>^^^INFO: Copying existing HQ server cache information</echo>
-  	<!-- Copy from 4.3 or earlier -->
+  	<!-- Copy from 4.4 or earlier -->
     <ehcacheUpgrade existing="${server.upgradedir}/hq-engine/server/default/deploy/hq.ear/ehcache.xml"
                     new="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/ehcache.xml"/>
 
@@ -525,27 +544,35 @@ ${errMsg}
   	                    new="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/ehcache.xml"/>
   	
     <echo>^^^INFO: Copying existing HQU plugins</echo>
-  	<!-- Copy from 4.3 or earlier-->
-    <copy todir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/hqu" failonerror="false">
-      <fileset dir="${server.upgradedir}/hq-engine/server/default/deploy/hq.ear/hq.war/hqu"/>
-    </copy>
+  	<!-- Copy from 4.4 or earlier-->
+    <uiPluginUpgrade newHquDir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/hqu" 
+    	existingHquDir="${server.upgradedir}/hq-engine/server/default/deploy/hq.ear/hq.war/hqu"/>
   	
   	<!--Copy from evolution or later -->
-  	<copy todir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/hqu" failonerror="false">
-  	      <fileset dir="${server.upgradedir}/hq-engine/hq-server/webapps/ROOT/hqu"/>
-  	</copy>
-
+  	<uiPluginUpgrade newHquDir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/hqu" 
+  	      existingHquDir="${server.upgradedir}/hq-engine/hq-server/webapps/ROOT/hqu"/>
+  	
   	<echo>^^^INFO: Copying existing state files</echo>
-  	<!-- Copy from 4.3 or earlier-->
+  	<!-- Copy from 4.4 or earlier-->
   	<copy todir="${server.product.dir}/hq-engine/hq-server" failonerror="false">
-      <fileset dir="${server.upgradedir}/hq-engine/" includes="*.dat"/>
+      <fileset dir="${server.upgradedir}/hq-engine" includes="*.dat"/>
     </copy>
   	
   	<!--Copy from evolution or later -->
 	<copy todir="${server.product.dir}/hq-engine/hq-server" failonerror="false">
       <fileset dir="${server.upgradedir}/hq-engine/hq-server" includes="*.dat"/>
     </copy>	
+
+    <echo>^^^INFO: Copying unprocessed metric data files</echo>
+    <!-- Copy from 4.4 or earlier-->
+    <copy todir="${server.product.dir}/hq-engine/hq-server" failonerror="false">
+      <fileset dir="${server.upgradedir}/hq-engine" includes="*Inserter.tmp"/>
+    </copy>
   	
+    <!--Copy from evolution or later -->
+    <copy todir="${server.product.dir}/hq-engine/hq-server" failonerror="false">
+      <fileset dir="${server.upgradedir}/hq-engine/hq-server" includes="*Inserter.tmp"/>
+    </copy>
 
     <echo>^^^COMPLETION:
       Server successfully upgraded to: ${server.product.dir}

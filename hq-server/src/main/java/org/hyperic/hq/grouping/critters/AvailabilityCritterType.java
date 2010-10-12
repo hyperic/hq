@@ -33,6 +33,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterDump;
 import org.hyperic.hq.grouping.CritterTranslationContext;
@@ -136,5 +137,9 @@ public class AvailabilityCritterType extends BaseCritterType {
                 .toString();
         }
 
+        public boolean meets(Resource resource) {
+           //TODO implement
+           throw new UnsupportedOperationException();
+        }
     }
 }

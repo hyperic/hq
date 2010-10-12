@@ -40,7 +40,6 @@
 <tiles:importAttribute name="serviceType" ignore="true" />
 <tiles:importAttribute name="serviceCount"/>
 
-<c:url var="spacerUrl" value="/images/spacer.gif" />
 <c:set var="baseSelfAction" value="/resource/application/monitor/Visibility.do" />
 <hq:pageSize var="pageSize"/>
 

@@ -1,22 +1,22 @@
 /*
- * NOTE: This copyright does *not* cover user programs that use HQ
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
- * Copyright (C) [2004-2009], Hyperic, Inc.
- * This file is part of HQ.
- * 
- * HQ is free software; you can redistribute it and/or modify
+ *
+ * Copyright (C) [2004-2010], VMware, Inc.
+ * This file is part of Hyperic.
+ *
+ * Hyperic is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
  * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -65,6 +65,7 @@ import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_args;
 import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_result;
 import org.hyperic.hq.measurement.agent.commands.UnscheduleMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.UnscheduleMeasurements_result;
+import org.hyperic.hq.measurement.agent.server.ScheduleThread.ParsedTemplate;
 import org.hyperic.hq.product.ConfigTrackPluginManager;
 import org.hyperic.hq.product.LogTrackPluginManager;
 import org.hyperic.hq.product.MeasurementPluginManager;
@@ -330,6 +331,7 @@ public class MeasurementCommandsServer
                 while (scheduleIter.hasNext()) { 
                     ScheduledMeasurement metric = (ScheduledMeasurement) scheduleIter.next();
                     if (metric != null) {
+                        ParsedTemplate templ = ScheduleThread.getParsedTemplate(metric);
                         scheduleSize++;
                         StringBuffer s = new StringBuffer("Measurement Schedule[")
                                 .append(scheduleSize)
@@ -338,14 +340,16 @@ public class MeasurementCommandsServer
                                 .append(", interval=").append(metric.getInterval())
                                 .append(", derivedId=").append(metric.getDerivedID())
                                 .append(", dsnId=").append(metric.getDsnID())
-                                .append(", dsn=").append(metric.getDSN());
+                                .append(", dsn=").append(templ.metric.toDebugString());
                     
                         this.log.debug(s.toString());
                     }
                 }
                 this.log.debug("Measurement schedule list size=" + scheduleSize);
             } catch (Exception e) {
-                this.log.error("Error displaying measurement schedule: " + e.getMessage(), e);
+                // since logging the measurement schedule is in debug mode,
+                // also log any exceptions in debug mode
+                this.log.debug("Could not display measurement schedule: " + e.getMessage(), e);
             }
         }
     }

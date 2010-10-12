@@ -51,11 +51,10 @@ public class PluginLoader extends URLClassLoader {
     private static final boolean ESCAPE_SPACES =
         !"false".equals(System.getProperty("PluginLoader.ESCAPE_SPACES"));
     private Map addedURLs = new HashMap();
-    private ClassLoader previousClassLoader = null;
-
     private String pluginClassName = null;
     private String pluginName;
-
+    private ThreadLocal<ClassLoader> previousClassLoader = new ThreadLocal<ClassLoader>();
+    
     private static String toFileURL(String file) {
         if (ESCAPE_SPACES) {
             file = StringUtil.replace(file, " ", "%20");
@@ -136,27 +135,28 @@ public class PluginLoader extends URLClassLoader {
         //XXX: should probably be dealt with by the caller
         if (cl instanceof PluginLoader) {
             PluginLoader pl = (PluginLoader)cl;
-            setClassLoader(pl.previousClassLoader);
-            pl.previousClassLoader = null;
+            
+            setClassLoader(pl.previousClassLoader.get());
+            
+            pl.previousClassLoader.set(null);
         }
     }
 
     public static boolean setClassLoader(Object obj) {
-
         ClassLoader current = getClassLoader();
         ClassLoader cl = obj.getClass().getClassLoader();
-        if (cl == current) {
-            return false; //already set
+        
+        if (cl == current || !(cl instanceof PluginLoader)) {
+            return false; //already set or not a PluginLoader
         }
 
-        if (cl instanceof PluginLoader) {
-            PluginLoader pl = (PluginLoader)cl;
-            pl.previousClassLoader = current;
-            setClassLoader(pl);
-            return true;
-        }
-
-        return false;
+        PluginLoader pl = (PluginLoader)cl;
+       
+        pl.previousClassLoader.set(current);
+        
+        setClassLoader(pl);
+        
+        return true;
     }
 
     public static void setClassLoader(ClassLoader loader) {
@@ -319,7 +319,7 @@ public class PluginLoader extends URLClassLoader {
     {
         super(urls, parent);
         pluginClassName = name;
-        previousClassLoader = getClassLoader();
+        previousClassLoader.set(getClassLoader());
     }
 
     public String toString() {

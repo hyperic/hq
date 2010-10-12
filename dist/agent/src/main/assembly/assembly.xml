@@ -49,9 +49,10 @@
 				<exclude>mysql:mysql-connector-java</exclude>
 				<exclude>postgresql:postgresql</exclude>
 				<exclude>mx4j:*</exclude>
-				<exclude>org.hyperic.hq:hq-pdk-shared</exclude>
+				<exclude>org.hyperic.hq:hq-pdk:*:javadoc</exclude>
 				<exclude>org.hyperic:sigar</exclude>
 				<exclude>org.hyperic.hq.agent:hq-product</exclude>
+				<exclude>org.hyperic.hq.hqapi:hqapi1</exclude>
 			</excludes>
 			<unpack>true</unpack>
 			<fileMode>0644</fileMode>
@@ -62,7 +63,7 @@
 			<useTransitiveDependencies>false</useTransitiveDependencies>
 			<outputDirectory>/pdk/javadoc</outputDirectory>
 			<includes>
-				<include>org.hyperic.hq:hq-pdk-shared:*:javadoc</include>
+				<include>org.hyperic.hq:hq-pdk:*:javadoc</include>
 			</includes>
 			<unpack>true</unpack>
 			<fileMode>0644</fileMode>
@@ -145,6 +146,26 @@
 				<directoryMode>0755</directoryMode>
 				<includes>
 					<include>org.hyperic:sigar</include>
+				</includes>
+		</dependencySet>
+		<dependencySet>
+				<useProjectArtifact>false</useProjectArtifact>
+				<useTransitiveDependencies>true</useTransitiveDependencies>
+				<useTransitiveFiltering>false</useTransitiveFiltering>
+				<outputDirectory>pdk/lib</outputDirectory>
+				<fileMode>0644</fileMode>
+				<directoryMode>0755</directoryMode>
+				<!-- Argh - for some reason mvn is still applying filtering to hqapi's transitive deps.  Adding them in explicitly -->
+				<includes>
+					<include>org.hyperic.hq.hqapi:hqapi1</include>
+					<include>org.jvnet.ws.wadl:*</include>
+					<include>com.sun.localizer:*</include>
+					<include>javax.xml.bind:*</include>
+					<include>javax.xml:*</include>
+					<include>net.sf.jopt-simple:*</include>
+					<include>javax.activation:*</include>
+					<include>com.sun.xml.bind:*</include>
+					<include>javax.xml.stream:*</include>
 				</includes>
 		</dependencySet>
 	</dependencySets>

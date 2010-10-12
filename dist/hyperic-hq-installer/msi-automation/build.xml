@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="test-replace" default="all" >
+  <description>Builds MSI packages from HQ bundles.</description>
+
+  <property file="${basedir}/build.properties" />
+  <import file="msi-macros.xml" />
+
+  <target name="build-os-msi" >
+    <build-one-msi
+       src.url="${hq.os.build.url}"
+       base.name="${hq.os.name}"
+       wix.name="${hq.os.wix.file}"
+       build.name="${hq.os.build.name}"
+       installer.path="${installer.dest.path.os}"
+       installer.folder.name="${installer.os.dest.folder.name}"
+       common.path="${common.path.os}"
+       license.name="${hq.license.name}"
+       ant.setup.file="${installer.dest.path.os}\\${installer.os.dest.folder.name}\\installer\\data\\setup.xml"
+       build.type="${hq.build.type.os}"
+       msi.dest="${hq.msi.dest}" />
+  </target>
+
+  <target name="build-ee-msi" depends="build-os-msi" >
+    <build-one-msi
+       src.url="${hq.ee.build.url}"
+       base.name="${hq.ee.name}"
+       wix.name="${hq.ee.wix.file}"
+       build.name="${hq.ee.build.name}"
+       installer.path="${installer.dest.path.ee}"
+       installer.folder.name="${installer.ee.dest.folder.name}"
+       common.path="${common.path.ee}"
+       license.name="${hq.license.name}"
+       ant.setup.file="${installer.dest.path.ee}\\${installer.ee.dest.folder.name}\\installer\\data\\setup.xml"
+       build.type="${hq.build.type.ee}"
+       msi.dest="${hq.msi.dest}" />
+  </target>
+
+  <target name="all" depends="build-ee-msi" >
+  </target>
+
+</project>

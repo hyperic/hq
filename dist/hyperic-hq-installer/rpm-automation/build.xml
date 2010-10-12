@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="build-rpms" default="all" >
+  <description>Creates RPM's from the HQ bundles.</description>
+
+  <property file="${basedir}/build.properties"/>
+  <import file="rpm-macros.xml" />
+
+  <!-- Ensure all folders we need are there. -->                                
+                                                                                
+  <target name="create-folders"                                                 
+    description="Ensure directory structure is created before RPM build." >     
+    <echo message="Creating folders prior to building RPM's..." />              
+                                                                                
+    <mkdir dir="${bundle.src.dir}" />                                           
+    <mkdir dir="${rpm.build.home}/BUILD" />                                     
+    <mkdir dir="${rpm.build.home}/RPMS/i386" />                                 
+    <mkdir dir="${rpm.build.home}/RPMS/noarch" />                               
+    <mkdir dir="${rpm.build.home}/RPMS/x86_64" />                               
+    <mkdir dir="${rpm.build.home}/SOURCES" />                                   
+    <mkdir dir="${rpm.build.home}/SPECS" />                                     
+    <mkdir dir="${rpm.build.home}/SRPMS" />                                     
+                                                                                
+  </target>                                                                     
+                                                                                
+   <!-- Clean out any leftover or old stuff. -->
+
+  <target name="clean" depends="create-folders"
+    description="Clean up directory structure before starting RPM build." >
+    <echo message="Cleaning prior to building RPM's..." />
+
+    <delete quiet="true">
+      <fileset dir="${build.base}" includes="*.spec *.gz *.log" />
+      <dirset dir="${rpm.build.home}/BUILD" includes="*" />
+      <fileset dir="${rpm.build.home}/RPMS" includes="**/.rpm" />
+      <fileset dir="${rpm.build.home}/SOURCES" includes="**/.${hq.file.type}" />
+      <fileset dir="${build.base}" includes="**/.${hq.file.type}" />
+      <fileset dir="${rpm.build.home}/SPECS" includes="**/.spec" />
+      <fileset dir="${support.files}" />
+      <fileset dir="${support.files.EE}" />
+    </delete>
+  </target>
+
+  <!-- Download builds from Maven repos. -->
+
+  <target name="download-builds" depends="clean"
+    description="Download agent and installer builds from Maven repos." >
+    <echo message="Downloading HQ builds from Maven repos..." />
+
+    <get src="${hq.os.agent.url}" dest="${bundle.src.dir}" usetimestamp="true" />
+    <get src="${hq.ee.agent.url}" dest="${bundle.src.dir}" usetimestamp="true" />
+
+    <get src="${hq.os.installer.linux.url}" dest="${bundle.src.dir}" usetimestamp="true" />
+    <get src="${hq.ee.installer.linux.url}" dest="${bundle.src.dir}" usetimestamp="true" />
+    <get src="${hq.os.installer.linux64.url}" dest="${bundle.src.dir}" usetimestamp="true" />
+    <get src="${hq.ee.installer.linux64.url}" dest="${bundle.src.dir}" usetimestamp="true" />
+  </target>
+
+  <!-- Make new directory structure we'll use in the RPM creation process.  -->
+
+  <target name="make-folders" depends="download-builds"
+    description="Create directory structure in preparation for RPM build." >
+    <echo message="Making version directories..." />
+
+    <mkdir dir="${build.base}/${hq.version}" />
+    <mkdir dir="${build.base}/${hq.version}-EE" />
+    <mkdir dir="${build.base}/${hq.version}-server" />
+    <mkdir dir="${build.base}/${hq.version}-EE-server" />
+  </target>
+
+  <!-- Copy HQ kits into place. -->
+
+  <target name="cp-src-bundles" depends="make-folders"
+    description="Copy HQ source bundles in preparation for RPM build." >
+    <echo message="Copying sources bundles..." />
+
+    <copy file="${bundle.src.dir}/${hq.os.agent.nojre}" todir="${build.base}/${hq.version}" />
+    <copy file="${bundle.src.dir}/${hq.ee.agent.nojre}" todir="${build.base}/${hq.version}-EE" />
+    <copy file="${bundle.src.dir}/${hq.os.installer.linux}" todir="${build.base}/${hq.version}-server" />
+    <copy file="${bundle.src.dir}/${hq.os.installer.linux64}" todir="${build.base}/${hq.version}-server" />
+    <copy file="${bundle.src.dir}/${hq.ee.installer.linux}" todir="${build.base}/${hq.version}-EE-server" />
+    <copy file="${bundle.src.dir}/${hq.ee.installer.linux64}" todir="${build.base}/${hq.version}-EE-server" />
+  </target>
+
+  <!-- Update spec files with latest version/build information. -->
+
+  <target name="update-spec-files" depends="cp-src-bundles"
+    description="Update SPEC files with version/build information." >
+    <echo message="Updating spec files..." />
+    <copy todir="${build.base}" >
+
+      <fileset dir="${build.base}/specs" includes="*.spec" />
+
+      <filterset>
+        <filter token="hq.version" value="${hq.version}"/>
+        <filter token="hq.os.build" value="${hq.os.build}"/>
+        <filter token="hq.ee.build" value="${hq.ee.build}"/>
+        <filter token="hq.build.type" value="${hq.build.type}"/>
+      </filterset>
+    </copy>
+
+    <chmod perm="+x" dir="${build.base}" includes="*.spec" />
+
+  </target>
+
+  <!-- Build client RPM's. -->
+
+  <target name="build-noarch-EE" depends="update-spec-files"
+    description="Build noarch-EE rpm" >
+    <echo message="Building noarch-EE RPM..." />
+
+    <build-one-client-rpm
+      rpm.dir="${build.base}"
+      rpm.subfolder="${hq.version}-EE"
+      build.subfolder="${hq.ee.agent.subfolder}"
+      tarball.name="${hq.ee.agent.nojre}"
+      spec.file.name="noarch-EE.spec"
+      init.file.name="${init.files}/hyperic-hq-agent.init.rh" />
+
+  </target>
+
+  <target name="build-noarch-dotorg" depends="build-noarch-EE"
+    description="Build noarch-dotorg rpm" >
+    <echo message="Building noarch-dotorg RPM..." />
+
+    <build-one-client-rpm
+      rpm.dir="${build.base}"
+      rpm.subfolder="${hq.version}"
+      build.subfolder="${hq.os.agent.subfolder}"
+      tarball.name="${hq.os.agent.nojre}"
+      spec.file.name="noarch-dotorg.spec"
+      init.file.name="${init.files}/hyperic-hq-agent.init.rh" />
+
+  </target>
+
+  <!-- Build server RPM's. -->
+
+  <target name="build-x86_64-EE" depends="build-noarch-dotorg"
+    description="Build x86 64 bit EE RPM" >
+    <echo message="Building x86 64 bit EE RPM..." />
+
+    <build-one-server-rpm
+      rpm.dir="${build.base}"
+      rpm.subfolder="${hq.version}-EE-server"
+      build.subfolder="${hq.ee.installer.subfolder}"
+      tarball.name="${hq.ee.installer.linux64}"
+      spec.file.name="x86_64-EE-server.spec"
+      init.file.name="${init.files}/hyperic-hq-server.init.rh" />
+
+  </target>
+
+  <target name="build-x86_64" depends="build-x86_64-EE"
+    description="Build x86 64 bit RPM" >
+    <echo message="Building x86 64 bit RPM..." />
+
+    <build-one-server-rpm
+      rpm.dir="${build.base}"
+      rpm.subfolder="${hq.version}-server"
+      build.subfolder="${hq.os.installer.subfolder}"
+      tarball.name="${hq.os.installer.linux64}"
+      spec.file.name="x86_64-server.spec"
+      init.file.name="${init.files}/hyperic-hq-server.init.rh" />
+
+  </target>
+
+  <target name="build-x86-EE" depends="build-x86_64"
+    description="Build x86 EE RPM" >
+    <echo message="Building x86 EE RPM..." />
+
+    <build-one-server-rpm
+      rpm.dir="${build.base}"
+      rpm.subfolder="${hq.version}-EE-server"
+      build.subfolder="${hq.ee.installer.subfolder}"
+      tarball.name="${hq.ee.installer.linux}"
+      spec.file.name="x86-EE-server.spec"
+      init.file.name="${init.files}/hyperic-hq-server.init.rh"
+      rpm.command="-tb --target=i386" />
+
+  </target>
+
+  <target name="build-x86" depends="build-x86-EE"
+    description="Build x86 RPM" >
+    <echo message="Building x86 RPM..." />
+
+    <build-one-server-rpm
+      rpm.dir="${build.base}"
+      rpm.subfolder="${hq.version}-server"
+      build.subfolder="${hq.os.installer.subfolder}"
+      tarball.name="${hq.os.installer.linux}"
+      spec.file.name="x86-server.spec"
+      init.file.name="${init.files}/hyperic-hq-server.init.rh"
+      rpm.command="-tb --target=i386" />
+
+  </target>
+
+  <!-- Move RPM's to their final destination. -->
+
+  <target name="move-RPMs" depends="build-x86"
+    description="Move the RPM's once they're built to their destination." >
+    <echo message="Moving RPM's to destination folder..." />
+    <move todir="${rpm.dest.dir}" >
+
+      <fileset dir="${rpm.build.home}" includes="**/*.rpm" />
+      <flattenmapper />
+
+    </move>
+  </target>
+
+  <!-- Build the support archives. -->
+
+  <target name="build-support-archives" depends="move-RPMs"
+    description="Build support archives for customers." >
+    <echo message="Building support files archive...." />
+
+    <delete dir="${support.files}" />
+    <delete dir="${support.files.EE}" />
+
+    <mkdir dir="${support.files}" />
+    <mkdir dir="${support.files.EE}" />
+
+    <copy todir="${support.files}" >
+
+      <fileset dir="${build.base}" >
+        <patternset>
+          <include name="expect/" />
+          <include name="*.spec" />
+          <exclude name="*-EE*.spec" />
+        </patternset>
+      </fileset>
+
+      <fileset dir="${init.files}" includes="*" />
+
+    </copy>
+
+    <chmod perm="+x" dir="${support.files}" includes="*.rh,*.suse,*.spec" />
+    <chmod perm="+x" dir="${support.files}/expect" includes="*" />
+
+    <tar destfile="${rpm.dest.dir}/rpm_support_files-${hq.version}.tgz"
+      compression="gzip"
+      longfile="gnu" >
+
+      <tarfileset dir="${support.files}" includes="expect/" />
+      <tarfileset dir="${support.files}"
+        includes="*.spec,*.rh,*.suse"
+        filemode="755" />
+    </tar>
+
+    <copy todir="${support.files.EE}" >
+
+      <fileset dir="${build.base}" >
+        <patternset>
+          <include name="expect/" />
+          <include name="*-EE*.spec" />
+        </patternset>
+      </fileset>
+
+      <fileset dir="${init.files}" includes="*" />
+
+    </copy>
+
+    <chmod perm="+x" dir="${support.files.EE}" includes="*.rh,*.suse,*.spec" />
+    <chmod perm="+x" dir="${support.files.EE}/expect" includes="*" />
+
+    <tar destfile="${rpm.dest.dir}/rpm_support_files-${hq.version}-EE.tgz"
+      compression="gzip"
+      longfile="gnu" >
+
+      <tarfileset dir="${support.files.EE}" includes="expect/" />
+      <tarfileset dir="${support.files.EE}"
+        includes="*.spec,*.rh,*.suse"
+        filemode="755" />
+    </tar>
+
+  </target>
+
+  <!-- Email results to interested parties. -->
+
+  <target name="email-results" depends="build-support-archives"
+    description="Email results of RPM build to interested parties." >
+    <echo message="Mailing the results..." />
+
+    <gzip src="${rpm.error.log}"
+      destfile="${rpm.error.log.gz}" />
+
+    <mail tolist="${email.notify.list}" from="${email.from}"
+      subject="RPMs for HQ ${hq.version} and build type ${hq.build.type} are ready!"
+      files="${rpm.error.log.gz}" />
+  </target>
+
+  <!-- Cleanup after ourselves. -->
+
+  <target name="cleanup-after" depends="rm-folders"
+    description="Cleanup after RPM build." >
+    <echo message="RPM build complete, cleaning up afterwards..." />
+
+    <delete>
+      <fileset dir="${build.base}" includes="*.spec *.gz" />
+    </delete>
+
+  </target>
+
+  <!-- Remove the directory structure we created earlier. -->
+
+  <target name="rm-folders"
+    description="Remove version folders used in RPM build." >
+    <echo message="Removing version directories..." />
+
+    <delete dir="${build.base}/${hq.version}" />
+    <delete dir="${build.base}/${hq.version}-EE" />
+    <delete dir="${build.base}/${hq.version}-server" />
+    <delete dir="${build.base}/${hq.version}-EE-server" />
+  </target>
+
+  <!-- One target to rule them all... -->
+
+  <target name="all" depends="email-results, cleanup-after"
+    description="Perform complete RPM build including cleanup afterwards." >
+  </target>
+
+</project>

@@ -25,10 +25,6 @@
 
 package org.hyperic.hq.control.server.session;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Collections;
@@ -40,22 +36,15 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
-import org.hyperic.hibernate.Util;
-import org.hyperic.hq.agent.AgentConnectionException;
-import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.control.agent.client.ControlCommandsClient;
-import org.hyperic.hq.control.agent.client.ControlCommandsClientFactory;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlFrequencyValue;
 import org.hyperic.hq.control.shared.ControlScheduleManager;
@@ -106,22 +95,18 @@ public class ControlScheduleManagerImpl
     private static final String SCHEDULE_PAGER = PAGER_BASE + "PagerProcessor_control_schedule";
 
     private ControlHistoryDAO controlHistoryDAO;
-    private ControlScheduleDAO controlScheduleDAO;
-    private PlatformManager platformManager;
+    private ControlScheduleDAO controlScheduleDAO; 
     private PermissionManager permissionManager;
-    private ControlCommandsClientFactory controlCommandsClientFactory;
+  
 
     @Autowired
     public ControlScheduleManagerImpl(Scheduler scheduler, DBUtil dbUtil, ControlHistoryDAO controlHistoryDAO,
                                       ControlScheduleDAO controlScheduleDAO, 
-                                      PermissionManager permissionManager, PlatformManager platformManager, 
-                                      ControlCommandsClientFactory controlCommandsClientFactory) {
+                                      PermissionManager permissionManager) {
         super(scheduler, dbUtil);
         this.controlHistoryDAO = controlHistoryDAO;
         this.controlScheduleDAO = controlScheduleDAO;
         this.permissionManager = permissionManager;
-        this.controlCommandsClientFactory = controlCommandsClientFactory;
-        this.platformManager = platformManager;
     }
 
     protected String getHistoryPagerClass() {
@@ -264,55 +249,26 @@ public class ControlScheduleManagerImpl
     @Transactional(readOnly=true)
     public PageList<ControlFrequencyValue> getOnDemandControlFrequency(AuthzSubject subject, int numToReturn)
         throws ApplicationException {
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
+    
         PageList<ControlFrequencyValue> list = new PageList<ControlFrequencyValue>();
 
         try {
-            conn = Util.getConnection();
-
-            String sqlStr = "SELECT entity_type, entity_id, action, COUNT(id) AS num " + "FROM EAM_CONTROL_HISTORY " +
-                            "WHERE scheduled = " + DBUtil.getBooleanValue(false, conn) +
-                            " GROUP BY entity_type, entity_id, action " + "ORDER by num DESC ";
-
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery(sqlStr);
-
-            int i = 0;
-            while (rs.next() && i++ < numToReturn) {
-
-                AppdefEntityID id;
-                String name;
-                try {
-
-                    id = new AppdefEntityID(rs.getInt(1), rs.getInt(2));
-
-                    try {
-                        checkControlPermission(subject, id);
-                    } catch (PermissionException e) {
-                        continue;
-                    }
-
-                    AppdefEntityValue aVal = new AppdefEntityValue(id, subject);
-                    name = aVal.getName();
-
-                } catch (Exception e) {
-                    // Should never happen
-                    log.error("Error looking up appdef name for type=" + rs.getInt(1) + " id=" + rs.getInt(2));
-                    continue;
-                }
-
-                ControlFrequencyValue cv = new ControlFrequencyValue(name, id.getType(), id.getID(), rs.getString(3),
-                    rs.getInt(4));
+              List<ControlFrequency> frequencies = controlHistoryDAO.getControlFrequencies(numToReturn);
+              for(ControlFrequency frequency: frequencies) {
+                 try {
+                     checkControlPermission(subject, frequency.getId());
+                 } catch (PermissionException e) {
+                     continue;
+                 }
+                 AppdefEntityValue aVal = new AppdefEntityValue(frequency.getId(), subject);
+                 String name = aVal.getName();
+                 ControlFrequencyValue cv = new ControlFrequencyValue(name, frequency.getId().getType(), frequency.getId().getID(), frequency.getAction(),
+                   (int)frequency.getCount());
                 list.add(cv);
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             throw new ApplicationException(e);
-        } finally {
-            DBUtil.closeJDBCObjects(log, null, stmt, rs);
-
-        }
+        } 
 
         return list;
     }
@@ -621,160 +577,6 @@ public class ControlScheduleManagerImpl
         }
     }
     
-    /**
-    * Do a control command on a single appdef entity
-    *
-    * @return The control history id
-    *
-    */
-    @Transactional
-    public Integer doAgentControlCommand(AppdefEntityID id,
-                                     AppdefEntityID gid,
-                                     Integer batchId,
-                                     AuthzSubject subject,
-                                     Date dateScheduled,
-                                     Boolean scheduled,
-                                     String description,
-                                     String action,
-                                     String args)
-    throws PluginException {
-        final StopWatch watch = new StopWatch();
-        final boolean debug = log.isDebugEnabled();
-       
-        long startTime = System.currentTimeMillis();
-        ControlHistory commandHistory = null;
-        String errorMsg = null;
-        Integer groupId = (gid != null) ? gid.getId() : null;
-        
-        try {
-            ControlCommandsClient client =
-                controlCommandsClientFactory.getClient(id);
-            String pluginName  = id.toString();
-            String productName = platformManager
-                                    .getPlatformPluginName(id);
-        
-            // Regular command
-            
-            if (debug) watch.markTimeBegin("createHistory");
-        
-            commandHistory = 
-                    createHistory(id, groupId, batchId,
-                                  subject.getName(), action, args,
-                                  scheduled, startTime, startTime, 
-                                  dateScheduled.getTime(),
-                                  ControlConstants.STATUS_INPROGRESS, 
-                                  description, null);
-        
-            if (debug) {
-                watch.markTimeEnd("createHistory");
-                watch.markTimeBegin("controlPluginCommand");
-            }
-        
-            client.controlPluginCommand(pluginName, 
-                                        productName,
-                                        commandHistory.getId(),
-                                        action, args);
-            
-            if (debug) watch.markTimeEnd("controlPluginCommand");
-        
-        } catch (AgentNotFoundException e) {
-            errorMsg = "Agent not found: " + e.getMessage();
-        } catch (AgentConnectionException e) {
-            errorMsg = "Error getting agent connection: " + e.getMessage();
-        } catch (AgentRemoteException e) {
-            errorMsg = "Agent error: " + e.getMessage();
-        } catch (SystemException e) {
-            errorMsg = "System error";
-        } catch (AppdefEntityNotFoundException e) {
-            errorMsg = "System error";
-        } finally {
-            if (debug) {
-                log.debug("doAgentControlCommand: " + watch
-                            + " {resource=" + id
-                            + ", action=" + action
-                            + ", dateScheduled=" + dateScheduled
-                            + ", error=" + errorMsg
-                            + "}");
-            }
-            
-            if (errorMsg != null) {
-                this.log.error("Unable to execute command: " + errorMsg);
-            
-                // Add the failed job to the history
-                try {
-                    AppdefEntityID aid = (gid != null) ? gid : id;
-        
-                    // Remove the old history
-                    if (commandHistory != null) {
-                        removeHistory(commandHistory.getId());
-                    }
-        
-                    // Add the new one
-                    createHistory(aid, groupId, batchId,
-                                  subject.getName(), action, args,
-                                  scheduled, startTime, 
-                                  System.currentTimeMillis(),
-                                  dateScheduled.getTime(),
-                                  ControlConstants.STATUS_FAILED,
-                                  description, errorMsg);
-                } catch (Exception exc) {
-                    this.log.error("Unable to create history entry for " +
-                                   "failed control action");
-                }
-        
-                throw new PluginException(errorMsg);
-            }
-        }
-        
-            return commandHistory.getId();
-    }
-
-
-    /**
-     * Execute a single action on an appdef entity
-     * 
-     * 
-     */
-    public void doSingleAction(AppdefEntityID id, AuthzSubject subject, String action, String args, int order[])
-        throws PluginException {
-        final boolean debug = log.isDebugEnabled();
-
-        // HQ-2080: Control action for a resource (non-group) intended
-        // for immediate execution no longer use the Quartz scheduler.
-        // However, group control actions still need to go through the
-        // Quartz scheduler because we need to wait for each job to complete.
-        // There is no need to keep track of them in the ScheduleEntity.
-        if (id.isGroup()) {
-            String jobName = getJobName(subject, id, action);
-            JobDetail jobDetail = new JobDetail(jobName, GROUP,ControlActionGroupJob.class);
-            jobDetail.setVolatility(true);
-            setupJobData(jobDetail, subject, id, action, args, "Single execution",Boolean.FALSE, null, order);
-           
-
-        // All single actions use cron triggers
-            SimpleTrigger trigger = new SimpleTrigger(getTriggerName(subject, id, action), GROUP);
-            trigger.setVolatility(true);
-            try {
-                if (debug) log.debug("Scheduling job for immediate execution: " + jobDetail);
-                scheduler.scheduleJob(jobDetail, trigger);
-            } catch (SchedulerException e) {
-                log.error("Unable to schedule job: " + e.getMessage(), e);
-            }           
-        } else {
-            try {
-                if (debug) {
-                    log.debug("Running control action for immediate execution: "
-                        + " {resource=" + id
-                        + ", action=" + action
-                        + "}");
-                }
-                doAgentControlCommand(id, null, null, subject, new Date(),
-                        Boolean.FALSE, "", action, args);
-            } catch(PluginException e) {
-                log.error("Unable to execute control action: " + e.getMessage(), e);
-            }
-        }
-    }
 
     /**
      * Schedule an action on an appdef entity
@@ -783,7 +585,7 @@ public class ControlScheduleManagerImpl
      * 
      */
     @Transactional
-    public void doScheduledAction(AppdefEntityID id, AuthzSubject subject, String action, ScheduleValue schedule,
+    public void scheduleAction(AppdefEntityID id, AuthzSubject subject, String action, ScheduleValue schedule,
                                   int[] order) throws PluginException, SchedulerException {
         // Scheduled jobs are persisted in the control subsystem
         String jobName = getJobName(subject, id, action);
@@ -871,12 +673,12 @@ public class ControlScheduleManagerImpl
      * 
      */
     @Transactional
-    public ControlHistory createHistory(AppdefEntityID id, Integer groupId, Integer batchId, String subjectName,
+    public Integer createHistory(AppdefEntityID id, Integer groupId, Integer batchId, String subjectName,
                                         String action, String args, Boolean scheduled, long startTime, long stopTime,
                                         long scheduleTime, String status, String description, String errorMessage) {
         return controlHistoryDAO.create(id, groupId, batchId, subjectName, action, truncateText(MAX_HISTORY_TEXT_SIZE,
             args), scheduled, startTime, stopTime, scheduleTime, status, truncateText(MAX_HISTORY_TEXT_SIZE,
-            description), truncateText(MAX_HISTORY_TEXT_SIZE, errorMessage));
+            description), truncateText(MAX_HISTORY_TEXT_SIZE, errorMessage)).getId();
     }
 
     /**
@@ -909,7 +711,7 @@ public class ControlScheduleManagerImpl
     @Transactional(readOnly=true)
     public ControlHistory getJobHistoryValue(Integer jobId) throws ApplicationException {
         try {
-            return controlHistoryDAO.findById(jobId);
+            return controlHistoryDAO.findByIdAndPopulate(jobId);
         } catch (ObjectNotFoundException e) {
             throw new ApplicationException(e);
         }
@@ -940,7 +742,7 @@ public class ControlScheduleManagerImpl
     private void checkControlPermission(AuthzSubject caller, AppdefEntityID id) throws PermissionException {
         permissionManager.checkControlPermission(caller, id);
     }
-
+    
     private class ControlHistoryLocalComparatorAsc implements Comparator<ControlHistory> {
 
         public int compare(ControlHistory o1, ControlHistory o2) {

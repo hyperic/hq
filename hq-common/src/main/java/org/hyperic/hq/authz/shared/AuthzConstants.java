@@ -144,6 +144,10 @@ public final class AuthzConstants {
     public static final String serverPrototypeTypeName = "ServerPrototype";
     public static final String servicePrototypeTypeName = "ServicePrototype";
     public static final String appPrototypeTypeName = "ApplicationPrototype";
+    
+    public static final String platformPrototypeVmwareVsphereVm = "VMware vSphere VM";
+    public static final String platformPrototypeVmwareVsphereHost = "VMware vSphere Host";
+    public static final String serverPrototypeVmwareVcenter = "VMware vCenter";
         
     public static final String rootOpCAMAdmin = "administerCAM";
 
@@ -188,8 +192,10 @@ public final class AuthzConstants {
     // Resource Relation constants
     public static final Integer RELATION_CONTAINMENT_ID = new Integer(1);
     public static final Integer RELATION_NETWORK_ID = new Integer(2);
+    public static final Integer RELATION_VIRTUAL_ID = new Integer(3);
     public static final String ResourceEdgeContainmentRelation = "containment";
     public static final String ResourceEdgeNetworkRelation = "network";
+    public static final String ResourceEdgeVirtualRelation = "virtual";
     
     // List of alert operations
     public static final String[] VIEW_ALERTS_OPS =

@@ -46,17 +46,9 @@ public final class GalertEscalationAlertType
     public static final GalertEscalationAlertType GALERT = 
         new GalertEscalationAlertType(0xbadbabe, "Group Alert",
                                       "escalation.type.galert");
-
-    private static Object INIT_LOCK = new Object();
-    private static GalertManager _alertMan;
     
     private GalertManager getGalertMan() {
-        synchronized (INIT_LOCK) {
-            if (_alertMan == null) {
-                _alertMan = Bootstrap.getBean(GalertManager.class);
-            }
-        }
-        return _alertMan;
+         return Bootstrap.getBean(GalertManager.class);
     }
     
     public Escalatable findEscalatable(Integer id) {

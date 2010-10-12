@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    NOTE: This copyright does *not* cover user programs that use HQ
+    program services by normal system calls through the application
+    program interfaces provided as part of the Hyperic Plug-in Development
+    Kit or the Hyperic Client Development Kit - this is merely considered
+    normal use of the program, and does *not* fall under the heading of
+     "derived work".
+
+     Copyright (C) [2010], VMware, Inc.
+     This file is part of HQ.
+
+     HQ is free software; you can redistribute it and/or modify
+     it under the terms version 2 of the GNU General Public License as
+     published by the Free Software Foundation. This program is distributed
+     in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+     even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+     PARTICULAR PURPOSE. See the GNU General Public License for more
+     details.
+
+     You should have received a copy of the GNU General Public License
+     along with this program; if not, write to the Free Software
+     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+     USA.
+
+
+-->
+
+<!DOCTYPE log4j:configuration PUBLIC "-//LOGGER" "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+	<!-- ============================== -->
+	<!-- Appenders -->
+	<!-- ============================== -->
+
+	<!-- Provides Console Logging -->
+	<appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+		<param name="Target" value="System.out" />
+
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern"  value="%d %-5p [%t] %c@%L: %m%n" />
+		</layout>
+	</appender>
+
+
+	<!--  Provides File Logging  -->
+	<appender name="FILE" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="${server.home}/logs/server.log" />
+		<param name="Append" value="true" />
+		<param name="DatePattern" value="'.'yyyy-MM-dd" />
+
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d %-5p [%t] %c@%L: %m%n" />
+		</layout>
+	</appender>
+
+	<appender name="ASYNC" class="org.apache.log4j.AsyncAppender">
+		<appender-ref ref="FILE" />
+		<!--
+    <appender-ref ref="SMTP"/>
+    -->
+	</appender>
+
+	<logger name="org.springframework">
+		<level value="warn" />
+	</logger>
+
+	<root>
+		<level value="INFO" />
+		<appender-ref ref="CONSOLE" />
+	</root>
+
+</log4j:configuration>
+
+

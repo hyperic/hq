@@ -25,11 +25,6 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -41,7 +36,6 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
-import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -60,7 +54,6 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
-import org.hyperic.util.jdbc.DBUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,9 +61,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class CPropManagerImpl implements CPropManager {
-    private final int CHUNKSIZE = 1000; // Max size for each row
-    private final String CPROP_TABLE = "EAM_CPROP";
-    private final String CPROPKEY_TABLE = "EAM_CPROP_KEY";
 
     private static Log log = LogFactory.getLog(CPropManagerImpl.class.getName());
 
@@ -284,95 +274,24 @@ public class CPropManagerImpl implements CPropManager {
      */
     public void setValue(AppdefEntityID aID, int typeId, String key, String val)
         throws CPropKeyNotFoundException, AppdefEntityNotFoundException, PermissionException {
-        Statement stmt = null;
-        PreparedStatement pstmt = null;
-        CpropKey propKey;
-        Connection conn = null;
-        ResultSet rs = null;
-        StringBuilder sql;
-
-        propKey = getKey(aID, typeId, key);
-
+        String oldval;
         try {
-            Integer pk = propKey.getId();
-            final int keyId = pk.intValue();
-
-            conn = Util.getConnection();
-            stmt = conn.createStatement();
-            // no need to grab the for update since we are in a transaction
-            // and therefore automatically get a shared lock
-            sql = new StringBuilder().append("SELECT PROPVALUE FROM ").append(CPROP_TABLE).append(
-                " WHERE KEYID=").append(keyId).append(" AND APPDEF_ID=").append(aID.getID());
-            rs = stmt.executeQuery(sql.toString());
-
-            String oldval = null;
-
-            if (rs.next()) {
-                // vals are the same, no update
-                if ((oldval = rs.getString(1)).equals(val)) {
-                    return;
-                }
-            }
-
-            DBUtil.closeStatement(this, stmt);
-
-            if (oldval != null) {
-                stmt = conn.createStatement();
-                sql = new StringBuilder().append("DELETE FROM ").append(CPROP_TABLE).append(
-                    " WHERE KEYID=").append(keyId).append(" AND APPDEF_ID=").append(aID.getID());
-
-                stmt.executeUpdate(sql.toString());
-            }
-
-            // Optionally add new values
-            if (val != null) {
-                String[] chunks = chunk(val, CHUNKSIZE);
-
-                sql = new StringBuilder().append("INSERT INTO ").append(CPROP_TABLE);
-
-                Cprop nprop = new Cprop();
-
-                sql.append(" (id,keyid,appdef_id,value_idx,PROPVALUE) VALUES ").append(
-                    "(?, ?, ?, ?, ?)");
-
-                pstmt = conn.prepareStatement(sql.toString());
-
-                pstmt.setInt(2, keyId);
-                pstmt.setInt(3, aID.getID());
-
-                for (int i = 0; i < chunks.length; i++) {
-                    int id = Util.generateId("org.hyperic.hq.appdef.server.session.Cprop", nprop)
-                        .intValue();
-
-                    pstmt.setInt(1, id);
-                    pstmt.setInt(4, i);
-                    pstmt.setString(5, chunks[i]);
-                    pstmt.addBatch();
-                }
-
-                pstmt.executeBatch();
-            }
-
-            if (log.isDebugEnabled()) {
-                log.debug("Entity " + aID.getAppdefKey() + " " + key + " changed from " + oldval +
-                          " to " + val);
-            }
-
-            // Send cprop value changed event
-            CPropChangeEvent event = new CPropChangeEvent(aID, key, oldval, val);
-
-            // Now publish the event
-            sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
-        } catch (SQLException exc) {
-            log.error("Unable to update CPropKey values: " + exc.getMessage(), exc);
-
-            throw new SystemException(exc);
-        } finally {
-            DBUtil.closeResultSet(this, rs);
-            DBUtil.closeStatement(this, stmt);
-            DBUtil.closeStatement(this, pstmt);
-
+           oldval = cPropDAO.setValue(aID, typeId, key, val);
+        }catch(Exception e) {
+            log.error("Unable to update CPropKey values: " + e.getMessage(), e);
+            throw new SystemException(e);
         }
+        if((val == null && oldval == null) || (val != null && val.equals(oldval))) {
+            //We didn't change anything
+            return;
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Entity " + aID.getAppdefKey() + " " + key + " changed from " + oldval +
+                      " to " + val);
+        }
+        // Send cprop value changed event
+        CPropChangeEvent event = new CPropChangeEvent(aID, key, oldval, val);
+        sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
     }
 
     /**
@@ -390,105 +309,12 @@ public class CPropManagerImpl implements CPropManager {
     @Transactional(readOnly = true)
     public String getValue(AppdefEntityValue aVal, String key) throws CPropKeyNotFoundException,
         AppdefEntityNotFoundException, PermissionException {
-        PreparedStatement stmt = null;
-        Connection conn = null;
-        ResultSet rs = null;
-        AppdefEntityID aID = aVal.getID();
-        AppdefResourceType recType = aVal.getAppdefResourceType();
-        int typeId = recType.getId().intValue();
-        CpropKey propKey = this.getKey(aID, typeId, key);
-
         try {
-            Integer pk = propKey.getId();
-            final int keyId = pk.intValue();
-            StringBuffer buf = new StringBuffer();
-            boolean didSomething;
-
-            conn = Util.getConnection();
-            stmt = conn.prepareStatement("SELECT PROPVALUE FROM " + CPROP_TABLE +
-                                         " WHERE KEYID=? AND APPDEF_ID=? " + "ORDER BY VALUE_IDX");
-
-            stmt.setInt(1, keyId);
-            stmt.setInt(2, aID.getID());
-
-            rs = stmt.executeQuery();
-            didSomething = false;
-
-            while (rs.next()) {
-                didSomething = true;
-                buf.append(rs.getString(1));
-            }
-
-            if (didSomething) {
-                return buf.toString();
-            } else {
-                return null;
-            }
-        } catch (SQLException exc) {
-            log.error("Unable to get CPropKey values: " + exc.getMessage(), exc);
-
-            throw new SystemException(exc);
-        } finally {
-            DBUtil.closeResultSet(this, rs);
-            DBUtil.closeStatement(this, stmt);
-
+            return cPropDAO.getValue(aVal, key);
+        }catch(Exception e) {
+            log.error("Unable to get CPropKey values: " + e.getMessage(), e);
+            throw new SystemException(e);
         }
-    }
-
-    private Properties getEntries(AppdefEntityID aID, String column) {
-        PreparedStatement stmt = null;
-        Connection conn = null;
-        Properties res = new Properties();
-        ResultSet rs = null;
-
-        try {
-            StringBuffer buf;
-            String lastKey;
-
-            conn = Util.getConnection();
-            stmt = conn.prepareStatement("SELECT A." + column + ", B.propvalue FROM " +
-                                         CPROPKEY_TABLE + " A, " + CPROP_TABLE + " B WHERE " +
-                                         "B.keyid=A.id AND A.appdef_type=? " +
-                                         "AND B.appdef_id=? " + "ORDER BY B.value_idx");
-
-            stmt.setInt(1, aID.getType());
-            stmt.setInt(2, aID.getID());
-
-            rs = stmt.executeQuery();
-            lastKey = null;
-            buf = null;
-
-            while (rs.next()) {
-                String keyName = rs.getString(1);
-                String valChunk = rs.getString(2);
-
-                if (lastKey == null || lastKey.equals(keyName) == false) {
-                    if (lastKey != null) {
-                        res.setProperty(lastKey, buf.toString());
-                    }
-
-                    buf = new StringBuffer();
-                    lastKey = keyName;
-                }
-
-                buf.append(valChunk);
-            }
-
-            // Have one at the end to add
-            if (buf != null && buf.length() != 0) {
-                res.setProperty(lastKey, buf.toString());
-            }
-        } catch (SQLException exc) {
-            log.error("Unable to get CPropKey values: " + exc.getMessage(), exc);
-
-            throw new SystemException(exc);
-        } finally {
-            DBUtil.closeResultSet(this, rs);
-            DBUtil.closeStatement(this, stmt);
-
-        }
-
-        return res;
     }
 
     /**
@@ -504,7 +330,7 @@ public class CPropManagerImpl implements CPropManager {
     @Transactional(readOnly = true)
     public Properties getEntries(AppdefEntityID aID) throws PermissionException,
         AppdefEntityNotFoundException {
-        return getEntries(aID, "propkey");
+        return cPropDAO.getEntries(aID, "propkey");
     }
 
     /**
@@ -518,7 +344,7 @@ public class CPropManagerImpl implements CPropManager {
     @Transactional(readOnly = true)
     public Properties getDescEntries(AppdefEntityID aID) throws PermissionException,
         AppdefEntityNotFoundException {
-        return getEntries(aID, "description");
+        return cPropDAO.getEntries(aID, "description");
     }
 
     /**
@@ -564,25 +390,11 @@ public class CPropManagerImpl implements CPropManager {
      * Remove custom properties for a given resource.
      */
     public void deleteValues(int appdefType, int id) {
-        PreparedStatement stmt = null;
-        Connection conn = null;
-
         try {
-            conn = Util.getConnection();
-            stmt = conn.prepareStatement("DELETE FROM " + CPROP_TABLE + " WHERE keyid IN " +
-                                         "(SELECT id FROM " + CPROPKEY_TABLE +
-                                         " WHERE appdef_type = ?) " + "AND appdef_id = ?");
-
-            stmt.setInt(1, appdefType);
-            stmt.setInt(2, id);
-            stmt.executeUpdate();
-        } catch (SQLException exc) {
-            log.error("Unable to delete CProp values: " + exc.getMessage(), exc);
-
-            throw new SystemException(exc);
-        } finally {
-            DBUtil.closeStatement(this, stmt);
-
+            cPropDAO.deleteValues(appdefType, id);
+        }catch(Exception e) {
+            log.error("Unable to delete CProp values: " + e.getMessage(), e);
+            throw new SystemException(e);
         }
     }
 
@@ -597,61 +409,5 @@ public class CPropManagerImpl implements CPropManager {
         CpropKey pkey = cPropKeyDAO.findByKey(type, instanceId, key);
 
         return cPropDAO.findByKeyName(pkey, asc);
-    }
-
-    private CpropKey getKey(AppdefEntityID aID, int typeId, String key)
-        throws CPropKeyNotFoundException, AppdefEntityNotFoundException, PermissionException {
-        CpropKey res = cPropKeyDAO.findByKey(aID.getType(), typeId, key);
-
-        if (res == null) {
-            String msg = "Key, '" + key + "', does " + "not exist for aID=" + aID + ", typeId=" +
-                         typeId;
-
-            throw new CPropKeyNotFoundException(msg);
-        }
-
-        return res;
-    }
-
-    /**
-     * Split a string into a list of same sized chunks, and a chunk of
-     * potentially different size at the end, which contains the remainder.
-     * 
-     * e.g. chunk("11223", 2) -> { "11", "22", "3" }
-     * 
-     * @param src String to chunk
-     * @param chunkSize The max size of any chunk
-     * 
-     * @return an array containing the chunked string
-     */
-    private static String[] chunk(String src, int chunkSize) {
-        String[] res;
-        int strLen, nAlloc;
-
-        if (chunkSize <= 0) {
-            throw new IllegalArgumentException("chunkSize must be >= 1");
-        }
-
-        strLen = src.length();
-        nAlloc = strLen / chunkSize;
-
-        if ((strLen % chunkSize) != 0) {
-            nAlloc++;
-        }
-
-        res = new String[nAlloc];
-
-        for (int i = 0; i < nAlloc; i++) {
-            int begIdx, endIdx;
-
-            begIdx = i * chunkSize;
-            endIdx = (i + 1) * chunkSize;
-            if (endIdx > strLen)
-                endIdx = strLen;
-
-            res[i] = src.substring(begIdx, endIdx);
-        }
-
-        return res;
     }
 }

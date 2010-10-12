@@ -27,7 +27,7 @@ cd %_REALPATH%
 
 if not "%HQ_JAVA_HOME%"=="" goto gothqjava
 
-if EXIST "%AGENT_INSTALL_HOME%\jre" (
+if EXIST "%AGENT_INSTALL_HOME%"\jre (
     set HQ_JAVA_HOME=%AGENT_INSTALL_HOME%\jre
     goto gotjava
 )
@@ -90,8 +90,7 @@ set CLIENT_CLASSPATH=%AGENT_LIB%\hq-agent-core-${project.version}.jar
 set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%AGENT_LIB%
 set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\hq-common-${project.version}.jar
 set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\hq-util-${project.version}.jar
-set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\hq-pdk-shared-${project.version}.jar
-set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\hq-agent-pdk-${project.version}.jar
+set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\hq-pdk-${project.version}.jar
 set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\ant-1.7.1.jar
 set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\commons-logging-1.0.4.jar
 set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\log4j-1.2.14.jar

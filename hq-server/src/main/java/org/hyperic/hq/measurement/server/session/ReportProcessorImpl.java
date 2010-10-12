@@ -183,6 +183,7 @@ public class ReportProcessorImpl implements ReportProcessor {
 
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
+        final List<AppdefEntityID> nonEntities = new ArrayList<AppdefEntityID>();
         for (DSNList dsnList : dsnLists) {
             Integer dmId = new Integer(dsnList.getClientId());
             if (debug) watch.markTimeBegin("getMeasurement");
@@ -234,6 +235,7 @@ public class ReportProcessorImpl implements ReportProcessor {
                           res.getName() + ") is not associated " +
                           " with that agent.  Dropping measurement.");
                 if (debug) watch.markTimeEnd("resMatchesAgent");
+                nonEntities.add(res.getAppdefEntity());
                 continue;
             }
             if (debug) watch.markTimeEnd("resMatchesAgent");
@@ -265,7 +267,7 @@ public class ReportProcessorImpl implements ReportProcessor {
 
         // Check the SRNs to make sure the agent is up-to-date
         if (debug) watch.markTimeBegin("reportAgentSRNs");
-        Collection<AppdefEntityID> nonEntities = srnManager.reportAgentSRNs(report.getSRNList());
+        nonEntities.addAll(srnManager.reportAgentSRNs(report.getSRNList()));
         if (debug) watch.markTimeEnd("reportAgentSRNs");
 
         if (report.getAgentToken() != null && !nonEntities.isEmpty()) {

@@ -1,3 +1,29 @@
+/**
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ *  "derived work".
+ *
+ *  Copyright (C) [2010], VMware, Inc.
+ *  This file is part of Hyperic.
+ *
+ *  Hyperic is free software; you can redistribute it and/or modify
+ *  it under the terms version 2 of the GNU General Public License as
+ *  published by the Free Software Foundation. This program is distributed
+ *  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ *  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ *  PARTICULAR PURPOSE. See the GNU General Public License for more
+ *  details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ *  USA.
+ *
+ */
+
 package org.hyperic.bootstrap;
 
 import java.io.File;
@@ -73,8 +99,9 @@ public class TomcatEngineController implements EngineController {
         commandLine[index] = "org.apache.catalina.startup.Bootstrap";
         commandLine[index + 1] = "start";
         // This blocks on the tomcat process to keep the server process alive
-        // until stop is called
-        return processManager.executeProcess(commandLine, serverHome, true, -1);
+        // until stop is called. Set suppressOutput=false to allow standard
+        // out and error (e.g. thread dump) to be outputted.
+        return processManager.executeProcess(commandLine, serverHome, false, -1);
     }
 
     public boolean stop() throws Exception {

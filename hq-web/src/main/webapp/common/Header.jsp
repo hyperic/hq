@@ -50,7 +50,7 @@
     }
     var resourceURL = '<html:rewrite action="/Resource" />';
 	var userURL = '<html:rewrite action="/admin/user/UserAdmin" />';
-    var searchWidget = new hyperic.widget.search({search:'/search.shtml'}, 3, {keyCode: 83, ctrl: true});
+    var searchWidget = new hyperic.widget.search({search:'/app/search'}, 3, {keyCode: 83, ctrl: true});
     dojo.require("dojo.lfx.html");
     dojo.event.connect(window, "onload",function(){ 
         activateHeaderTab();
@@ -117,37 +117,55 @@
     <div id="headerLogo" title="Home" onclick="location.href='<html:rewrite action="/Dashboard" />'">&nbsp;</div>
     <div id="navTabContainer">
         <c:set var="pageURL" value="${requestURL}"/>
-        <ul class="adxm mainMenu" style="position: absolute; z-index: 10">
-            <li id="dashTab"><a href="/Dashboard.do"><fmt:message key="header.dashboard"/></a></li>
-            <li id="resTab"><a href="<html:rewrite page="/ResourceHub.do"/>" onclick="useBreadcrumbHrefIfAvailable(this);"><fmt:message key="header.resources"/></a>
-              <div>
-              <ul>
-                <li><a href="<html:rewrite page="/ResourceHub.do"/>" onclick="useBreadcrumbHrefIfAvailable(this);"><fmt:message key="header.Browse"/></a></li>
+        <div id="dashTab" class="tab">
+        	<a href="/Dashboard.do"><fmt:message key="header.dashboard"/></a>
+        </div>
+        <div id="resTab" class="tab">
+        	<a href="<html:rewrite page="/ResourceHub.do"/>" onclick="useBreadcrumbHrefIfAvailable(this);"><fmt:message key="header.resources"/></a>
+        	<ul class="root">
+        		<li>
+        			<a href="<html:rewrite page="/ResourceHub.do"/>" onclick="useBreadcrumbHrefIfAvailable(this);"><fmt:message key="header.Browse"/></a>
+        		</li>
                 <tiles:insert definition=".header.optional.tabs">
-                  <tiles:put name="location" value="resources"/>
+                	<tiles:put name="location" value="resources"/>
                 </tiles:insert>
-                <li class="hasSubmenu"><a href=""><fmt:message key=".dashContent.recentResources"/></a>
-                  <div>
-                  <ul>
-                    <tiles:insert definition=".toolbar.recentResources"/>
-                  </ul>
-                  </div>
+                <li class="hasSubmenu">
+                	<a href=""><fmt:message key=".dashContent.recentResources"/></a>
+                  	<ul>
+                    	<tiles:insert definition=".toolbar.recentResources"/>
+                  	</ul>
                 </li>
-              </ul>
-              </div>
-            </li>
-            <li id="analyzeTab"><a href="#"><fmt:message key="header.analyze"/></a>
-              <div>
-              <ul>
-              <tiles:insert definition=".header.optional.tabs">
-                  <tiles:put name="location" value="tracking"/>
-              </tiles:insert>
-              </ul>
-              </div>
-            </li>
-            <li id="adminTab"><a href="/Admin.do"><fmt:message key="header.admin"/></a></li>
-        </ul>
+        	</ul>
+        </div>
+        <div id="analyzeTab" class="tab">
+        	<a href="#"><fmt:message key="header.analyze"/></a>
+        	<ul class="root">
+              	<tiles:insert definition=".header.optional.tabs">
+                  	<tiles:put name="location" value="tracking"/>
+              	</tiles:insert>
+          	</ul>
+        </div>
+        <div id="adminTab" class="tab">
+        	<a href="/Admin.do"><fmt:message key="header.admin"/></a>
+        </div>
     </div>
+    <script type="text/javascript">
+	    dojo11.addOnLoad(function() {
+	    	var menu = dojo.byId("navTabContainer");
+	    	
+	    	dojo11.query(".tab", menu).onmouseenter(function(e) {
+	    		dojo11.addClass(e.currentTarget, "over");
+	    	}).onmouseleave(function(e) {
+	    		dojo11.removeClass(e.currentTarget, "over")
+	    	});
+	    	
+	    	dojo11.query("li", menu).onmouseover(function(e) {
+	    		dojo11.addClass(e.currentTarget, "over");
+	    	}).onmouseout(function(e) {
+	    		dojo11.removeClass(e.currentTarget, "over")
+	    	});
+	    });
+    </script>
     <div class="ajaxLoading" style="display:none;" id="loading">
         <html:img page="/images/4.0/icons/ajax-loader.gif" border="0" width="16" height="16"/>
     </div>
@@ -202,7 +220,7 @@
         </c:choose>
          <span><a href="<html:rewrite page="/j_spring_security_logout" />"><fmt:message key="header.SignOut"/></a></span>
         <span><html:link href="javascript:void(0)" onclick="tutorialWin=window.open('http://www.hyperic.com/demo/screencasts.html','tutorials','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');tutorialWin.focus();return false;"><fmt:message key="header.Screencasts"/></html:link></span>
-        <span><a href="javascript:void(0)" onclick="helpWin=window.open((typeof help != 'undefined' ? help : '<hq:help/>'),'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;"><fmt:message key="header.Help"/></a></span>
+        <span><a id="hqHelpLink" href="<hq:help/>" onclick="helpWin=window.open((typeof help != 'undefined' ? help : this.href),'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;"><fmt:message key="header.Help"/></a></span>
     </div>
     <div id="headerSearch"><fmt:message key="header.Search"/></div>
         <div id="headerSearchBox" style="display:none">
@@ -244,4 +262,3 @@
         -->
     </div>     
 </div>
-

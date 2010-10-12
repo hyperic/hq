@@ -1,0 +1,113 @@
+<?xml version="1.0"?>
+<!-- standard include for process metrics -->
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+<plugin>
+    <classpath>
+        <include name="pdk/lib/mx4j" />
+    </classpath>
+
+    <config name="jmx">
+        <option name="jmx.url" description="JMX URL to GemFire Agent" default="service:jmx:rmi://localhost/jndi/rmi://:1099/jmxconnector" />
+        <option name="jmx.username" description="JMX username" optional="true" default="" />
+        <option name="jmx.password" description="JMX password" optional="true" default="" />
+    </config>
+    <property name="JXMCFG" value="jmx.url=%jmx.url%,jmx.username=%jmx.username%,jmx.password=%jmx.password%"/>
+
+
+    <platform name="GemFire Distributed System">
+        <plugin type="autoinventory" class="com.vmware.springsource.hyperic.plugin.gemfire.detectors.GemfirePlatformDetector"/>
+        <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+        <plugin type="collector" class="com.vmware.springsource.hyperic.plugin.gemfire.collectors.GemfireCollector" />
+        <plugin type="livedata" class="com.vmware.springsource.hyperic.plugin.gemfire.GemFireLiveData" />
+        <plugin type="log_track" class="com.vmware.springsource.hyperic.plugin.gemfire.AlertsPlugin" />
+
+        <config include="jmx"/>
+        <filter name="template" value="GemFire:jmx.url=%jmx.url%:${alias}"/>
+        <metrics>
+            <metric name="Availability" indicator="true" />
+            <metric name="Cache Servers"     alias="n_caches"   indicator="true" />
+            <metric name="Applications Peer" alias="n_apps"     indicator="true" />
+            <metric name="Gateway Hubs"      alias="n_gateways" indicator="true" />
+        </metrics>
+        <server name="JMX Agent" version="6.5">
+            <plugin type="autoinventory" class="com.vmware.springsource.hyperic.plugin.gemfire.detectors.JMXAgentDetector" />
+            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+            <plugin type="collector" class="com.vmware.springsource.hyperic.plugin.gemfire.collectors.JMXAgentCollector" />
+            <filter name="template" value="collector:${JXMCFG}:${alias}"/>
+            <metrics>
+                <metric name="Availability"  indicator="true" />
+            </metrics>
+        </server>
+        <server name="Cache Server" version="6.5">
+            <plugin type="autoinventory" class="com.vmware.springsource.hyperic.plugin.gemfire.detectors.CacheServerDetector" />
+            <plugin type="measurement" class="com.vmware.springsource.hyperic.plugin.gemfire.MemberMeasurement" />
+            <plugin type="collector" class="com.vmware.springsource.hyperic.plugin.gemfire.collectors.MemberCollector" />
+            <plugin type="livedata" class="com.vmware.springsource.hyperic.plugin.gemfire.GemFireLiveData" />
+            <config type="measurement">
+                <option name="memberID" description="Cache Server Id"/>
+            </config>
+            <properties>
+                <property name="id" description="ID"/>
+                <property name="type" description="Type"/>
+                <property name="host" description="Peer Host"/>
+                <property name="port" description="Peer Port"/>
+            </properties>
+            <filter name="template" value="collector:${JXMCFG},memberID=%memberID%:${alias}"/>
+            <metrics>
+                <metric name="Availability"  indicator="true" />
+                <metric name="Used Heap" alias="used_memory" indicator="true" units="percentage"/>
+                <metric name="Used CPU" alias="used_cpu" indicator="true" units="percentage"/>
+                <metric name="Uptime" alias="uptime" indicator="true" collectionType="static" units="sec"/>
+                <metric name="Number of Clients" alias="nclients"/>
+                <metric name="Gets" alias="stat.gets" collectionType="trendsup"/>
+                <metric name="GetTime" alias="stat.gettime" units="sec"/>
+                <metric name="Puts" alias="stat.puts" collectionType="trendsup"/>
+                <metric name="PutTime" alias="stat.puttime" units="sec"/>
+            </metrics>
+            <service name="Region">
+                <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+                <plugin type="collector" class="com.vmware.springsource.hyperic.plugin.gemfire.collectors.RegionCollector" />
+                <config type="measurement">
+                    <option name="memberID" description="Cache Server Id"/>
+                    <option name="regionID" description="Region Name"/>
+                </config>
+                <properties>
+                    <property description="gemfire.member.id" name="ID"/>
+                    <property description="Name" name="name"/>
+                    <property description="Path" name="path"/>
+                    <property description="Scope" name="scope"/>
+                    <property description="Data Policy" name="datapolicy"/>
+                    <property description="Interest Policy" name="interestpolicy"/>
+                    <property description="Disk Attributes" name="diskattrs"/>
+                </properties>
+                <filter name="template" value="GemFire:${JXMCFG},memberID=%memberID%:%regionID%.${alias}"/>
+                <metrics>
+                    <metric name="Availability"  indicator="true" />
+                    <metric name="Entry Count" alias="entry_count" indicator="true" />
+                </metrics>
+            </service>
+        </server>
+        <server name="Application Peer" version="6.5" include="Cache Server 6.5">
+            <plugin type="autoinventory" class="com.vmware.springsource.hyperic.plugin.gemfire.detectors.ApplicationServerDetector" />
+        </server>
+        <server name="Gateway Hub" version="6.5" include="Cache Server 6.5">
+            <plugin type="autoinventory" class="com.vmware.springsource.hyperic.plugin.gemfire.detectors.GatewayServerDetector" />
+            <service name="Gateway">
+                <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
+                <plugin type="collector" class="com.vmware.springsource.hyperic.plugin.gemfire.collectors.GatewayCollector" />
+                <config type="measurement">
+                    <option name="memberID" description="Cache Server Id"/>
+                    <option name="gatewayID" description="Gateway Id"/>
+                </config>
+                <filter name="template" value="GemFire:${JXMCFG},memberID=%memberID%,gatewayID=%gatewayID%:${alias}"/>
+                <metrics>
+                    <metric name="Availability"  indicator="true" />
+                    <metric name="Queue size" alias="queuesize" indicator="true" />
+                </metrics>
+            </service>
+        </server>
+    </platform>
+</plugin>
+

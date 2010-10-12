@@ -68,7 +68,7 @@ public class WeblogicAuth
     //see agent/jaas.properties
     private static final String LOGIN_MODULE = "org.hyperic.hq.weblogic";
 
-    private static Log log = LogFactory.getLog("WeblogicAuth");
+    private static Log log = LogFactory.getLog(WeblogicAuth.class);
 
     private LoginContext loginContext = null;
     private Subject subject = null;

@@ -62,6 +62,10 @@ public class StringConfigOption extends ConfigOption implements Serializable {
             min = 1;
         }
         
+        if(value == null) {
+            throw invalidOption("cannot be null");
+        }
+        
         if (value.length() < min) {
             throw invalidOption("must be at least " + min + " characters long");
         }

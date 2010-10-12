@@ -30,6 +30,8 @@
   USA.
  --%>
 
+<c:set var="selectedDashboardId" value="${sessionScope['.user.dashboard.selected.id']}"/>
+
 <script src="<html:rewrite page='/js/dash.js' />" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/scriptaculous.js' />" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/requests.js' />" type="text/javascript" id="requests"></script>
@@ -44,8 +46,8 @@
 	autoLogout = false;
 	
 	function removePortlet(name, label) {
-	    dojo11.xhrGet({
-	        url: '<html:rewrite page="/dashboard/RemovePortlet.do"/>' + '?portletName=' + name,
+	    dojo11.xhrDelete({
+	        url: '/app/dashboard/<c:out value="${selectedDashboardId}" />/portlets/' + name,
 	        load: function(){postRemovet(name,label)}
 	    });
 	}
@@ -165,19 +167,13 @@
 <div class="effectsContainer">
 	<table width="100%" border="0" cellspacing="0" cellpadding="0">
 		<tr>
-			<td colspan="<c:out value="${headerColspan}"/>">
+			<td colspan="100%">
 				<tiles:insert page="/portal/DashboardHeader.jsp" />
 			</td>
 		</tr>
 		<tr>
 			<!-- Role based config dashboard area -->
-			<td class="PageTitle">
-				<html:img page="/images/spacer.gif"	width="1" height="1" alt="" border="0" />
-			</td>
-			<td class="rowSpanLeft">
-				<html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0" />
-			</td>
-			<td colspan="2">
+			<td colspan="100%" style="padding-left:16px; padding-right:15px;">
 				<c:choose>
 					<c:when test="${DashboardForm.dashboardSelectable}">
 						<html:form method="post" action="/SetDashboard.do" styleId="DashboardForm">
@@ -222,17 +218,8 @@
 					</c:otherwise>
 				</c:choose>
 			</td>
-			<td class="rowSpanRight">
-				<html:img page="/images/spacer.gif"	width="15" height="1" alt="" border="0" />
-			</td>
 		</tr>
 		<tr>
-			<td class="PageTitle">
-				<html:img page="/images/spacer.gif"	width="5" height="1" alt="" border="0" />
-			</td>
-			<td class="rowSpanLeft">
-				<html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0" />
-			</td>
 			<%-- Multi-columns Layout
 	  		This layout render lists of tiles in multi-columns. Each column renders its tiles
 	  		vertically stacked.  
@@ -243,114 +230,98 @@
 			<c:set var="showUpAndDown" value="true" scope="request" />
 	
 			<!-- Content Block -->
-			<c:forEach var="columnsList" items="${portal.portlets}">
+			<c:forEach var="columnsList" items="${portal.portlets}" varStatus="loopStatus">
 				<c:choose>
 					<c:when test="${portal.columns eq 1}">
 						<c:set var="narrow" value="false" />
-						<c:set var="hr" value="95%" />
-						<c:set var="width" value="width='100%'" />
+						<c:set var="styleSpec" value="style='padding-left:16px;padding-right:15px;width:100%;'" />
 					</c:when>
 					<c:otherwise>
-						<c:set var="hr" value="50%" />
-						<c:set var="width" value="width='50%'" />
+						<c:choose>
+							<c:when test="${loopStatus.index == 0}">
+								<c:set var="styleSpec" value="style='padding-left:16px;padding-right:5px;width:50%;'" />							
+							</c:when>
+							<c:otherwise>
+								<c:set var="styleSpec" value="style='padding-left:5px;padding-right:15px;width:50%;'" />
+							</c:otherwise>
+						</c:choose>
 					</c:otherwise>
 				</c:choose>
 	
-				<td valign="top" style="padding: 0px 5px;" name="specialTd" <c:out value="${width}" escapeXml="false"/> >
+				<td valign="top" name="specialTd" <c:out value="${styleSpec}" escapeXml="false"/>>
+					<%=divStart%>
+						<ul id="<c:out value="narrowList_${narrow}"/>" class="boxy">
+							<c:forEach var="portlet" items="${columnsList}">
+								<c:set var="isFirstPortlet" value="${portlet.isFirst}" scope="request" />
+								<c:set var="isLastPortlet" value="${portlet.isLast}" scope="request" />
+								<li id="<c:out value="${portlet.fullUrl}"/>">
+									<tiles:insert beanProperty="url" beanName="portlet" flush="true">
+										<tiles:put name="portlet" beanName="portlet" />
+									</tiles:insert>
+								</li>
+							</c:forEach>
+						</ul>
 				
-				<%=divStart%>
-	
-				<ul id="<c:out value="narrowList_${narrow}"/>" class="boxy">
-					<c:forEach var="portlet" items="${columnsList}">
-						<c:set var="isFirstPortlet" value="${portlet.isFirst}" scope="request" />
-						<c:set var="isLastPortlet" value="${portlet.isLast}" scope="request" />
-						
-						<li id="<c:out value="${portlet.fullUrl}"/>">
-							<tiles:insert beanProperty="url" beanName="portlet" flush="true">
-								<tiles:put name="portlet" beanName="portlet" />
-							</tiles:insert>
-						</li>
-					</c:forEach>
-				</ul>
-				
-				<c:if test="${sessionScope.modifyDashboard}">
-					<table width="100%" border="0" cellspacing="0" cellpadding="0">
-						<tr>
-							<td valign="top" class="DashboardPadding">
-								<c:choose>
-									<c:when test="${narrow eq 'true'}">
-										<tiles:insert name=".dashContent.addContent.narrow" flush="true" />
-									</c:when>
-									<c:otherwise>
-										<tiles:insert name=".dashContent.addContent.wide" flush="true" />
-									</c:otherwise>
-								</c:choose>
-							</td>
-						</tr>
-					</table>
+						<c:if test="${sessionScope.modifyDashboard}">
+							<table width="100%" border="0" cellspacing="0" cellpadding="0">
+								<tr>
+									<td valign="top" class="DashboardPadding">
+										<c:choose>
+											<c:when test="${narrow eq 'true'}">
+												<tiles:insert name=".dashContent.addContent.narrow" flush="true" />
+											</c:when>
+											<c:otherwise>
+												<tiles:insert name=".dashContent.addContent.wide" flush="true" />
+											</c:otherwise>
+										</c:choose>
+									</td>
+								</tr>
+							</table>
 					
+							<script type="text/javascript">
+						        // -----------
+						        // XXX:
+						        // This should be rewritten using dojo 1.1 dnd.move package
+						        // http://docs.google.com/View?docid=d764479_11fcs7s397
+						        // writing a new Sortable version using dojo 1.1 which will hopefully play better with IE
+						        // Anton Stroganov <anton@hyperic.com>
+						        // -----------
+					            Sortable.create("<c:out value="narrowList_${narrow}"/>", {
+						            dropOnEmpty: true,
+			               			format: /^(.*)$/,
+			               			containment: ["<c:out value="narrowList_${narrow}"/>"],
+			               			handle: 'widgetHandle',
+			               			onUpdate: function() {
+			                    		dojo11.xhrPost({
+			                        		url: "<html:rewrite page="/dashboard/ReorderPortlets.do"/>?"+Sortable.serialize('<c:out value="narrowList_${narrow}"/>'),
+			                        		load: function(){ }
+			                    		});
+			                    	},
+			               			constraint: 'vertical'
+				               	});
+				      		</script>
+				      	</c:if> 
+				      	<c:choose>
+							<c:when test="${narrow eq 'true'}">
+								<c:set var="narrow" value="false" />
+							</c:when>
+							<c:otherwise>
+								<c:set var="narrow" value="true" />
+							</c:otherwise>
+						</c:choose> 
+					<%=divEnd%> 
+				
 					<script type="text/javascript">
-				        // -----------
-				        // XXX:
-				        // This should be rewritten using dojo 1.1 dnd.move package
-				        // http://docs.google.com/View?docid=d764479_11fcs7s397
-				        // writing a new Sortable version using dojo 1.1 which will hopefully play better with IE
-				        // Anton Stroganov <anton@hyperic.com>
-				        // -----------
-			            Sortable.create("<c:out value="narrowList_${narrow}"/>", {
-				            dropOnEmpty: true,
-	               			format: /^(.*)$/,
-	               			containment: ["<c:out value="narrowList_${narrow}"/>"],
-	               			handle: 'widgetHandle',
-	               			onUpdate: function() {
-	                    		dojo11.xhrPost({
-	                        		url: "<html:rewrite page="/dashboard/ReorderPortlets.do"/>?"+Sortable.serialize('<c:out value="narrowList_${narrow}"/>'),
-	                        		load: function(){ }
-	                    		});
-	                    	},
-	               			constraint: 'vertical'
-		               	});
-		      		</script>
-		      	</c:if> 
-		      	
-		      	<c:choose>
-					<c:when test="${narrow eq 'true'}">
-						<c:set var="narrow" value="false" />
-					</c:when>
-					<c:otherwise>
-						<c:set var="narrow" value="true" />
-					</c:otherwise>
-				</c:choose> 
-				
-				<small name="footer"><br></small>
-				<html:img page="/images/spacer.gif" width="${hr}" height="1" border="0" /> 
-				
-				<%=divEnd%> 
-				
-				<script type="text/javascript">
-					if (!Prototype.Browser.IE) {
-		        		resizeToCorrectWidth();
-		      		}
-		    	</script>
-		    </td>
-		</c:forEach>
-	
-		<td class="rowSpanRight">
-			<html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0" />
-		</td>
-	</tr>
-	<tr>
-		<td class="PageTitle">
-			<html:img page="/images/spacer.gif"	width="5" height="1" alt="" border="0" />
-		</td>
-		<td class="rowSpanLeft">
-			<html:img page="/images/spacer.gif"	width="15" height="1" alt="" border="0" />
-		</td>
-			<td colspan="2">
+						if (!Prototype.Browser.IE) {
+		        			resizeToCorrectWidth();
+		      			}
+		    		</script>
+		    	</td>
+			</c:forEach>
+		</tr>
+		<tr>
+			<td colspan="100%" style="padding-left:20px; padding-right:15px;">
 				<div style=""></div>
-			</td>
-			<td class="rowSpanRight">
-				<html:img page="/images/spacer.gif"	width="15" height="1" alt="" border="0" />
 			</td>
 		</tr>
 	</table>

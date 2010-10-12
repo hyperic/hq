@@ -1,28 +1,28 @@
-/*
- * NOTE: This copyright does *not* cover user programs that use HQ
+/**
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
- * "derived work".
- * 
- * Copyright (C) [2004-2009], Hyperic, Inc.
- * This file is part of HQ.
- * 
- * HQ is free software; you can redistribute it and/or modify
- * it under the terms version 2 of the GNU General Public License as
- * published by the Free Software Foundation. This program is distributed
- * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- * USA.
+ *  "derived work".
+ *
+ *  Copyright (C) [2004-2010], VMware, Inc.
+ *  This file is part of Hyperic.
+ *
+ *  Hyperic is free software; you can redistribute it and/or modify
+ *  it under the terms version 2 of the GNU General Public License as
+ *  published by the Free Software Foundation. This program is distributed
+ *  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ *  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ *  PARTICULAR PURPOSE. See the GNU General Public License for more
+ *  details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ *  USA.
+ *
  */
-
 package org.hyperic.hq.bizapp.server.session;
 
 import java.text.MessageFormat;
@@ -105,6 +105,7 @@ import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.ServiceManager;
+import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
@@ -187,7 +188,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class AppdefBossImpl implements AppdefBoss {
     private static final String BUNDLE = "org.hyperic.hq.bizapp.Resources";
-    
+
     private static final String APPDEF_PAGER_PROCESSOR = "org.hyperic.hq.appdef.shared.pager.AppdefPagerProc";
 
     private SessionManager sessionManager;
@@ -231,6 +232,8 @@ public class AppdefBossImpl implements AppdefBoss {
     private AppdefManager appdefManager;
 
     private ZeventEnqueuer zEventManager;
+    
+    private CritterTranslator critterTranslator; 
 
     protected Log log = LogFactory.getLog(AppdefBossImpl.class.getName());
     protected boolean debug = log.isDebugEnabled();
@@ -239,15 +242,18 @@ public class AppdefBossImpl implements AppdefBoss {
     protected final int APPDEF_GROUP_TYPE_UNDEFINED = -1;
 
     @Autowired
-    public AppdefBossImpl(SessionManager sessionManager, AgentManager agentManager, AIQueueManager aiQueueManager,
-                          AppdefStatManager appdefStatManager, ApplicationManager applicationManager,
-                          AuthzSubjectManager authzSubjectManager, AutoinventoryManager autoinventoryManager,
+    public AppdefBossImpl(SessionManager sessionManager, AgentManager agentManager,
+                          AIQueueManager aiQueueManager, AppdefStatManager appdefStatManager,
+                          ApplicationManager applicationManager,
+                          AuthzSubjectManager authzSubjectManager,
+                          AutoinventoryManager autoinventoryManager,
                           AvailabilityManager availabilityManager, ConfigManager configManager,
                           CPropManager cPropManager, PermissionManager permissionManager,
-                          MeasurementManager measurementManager, PlatformManager platformManager, AIBoss aiBoss,
-                          ResourceGroupManager resourceGroupManager, ResourceManager resourceManager,
-                          ServerManager serverManager, ServiceManager serviceManager, TrackerManager trackerManager,
-                          AppdefManager appdefManager, ZeventEnqueuer zEventManager) {
+                          MeasurementManager measurementManager, PlatformManager platformManager,
+                          AIBoss aiBoss, ResourceGroupManager resourceGroupManager,
+                          ResourceManager resourceManager, ServerManager serverManager,
+                          ServiceManager serviceManager, TrackerManager trackerManager,
+                          AppdefManager appdefManager, ZeventEnqueuer zEventManager, CritterTranslator critterTranslator) {
         this.sessionManager = sessionManager;
         this.agentManager = agentManager;
         this.aiQueueManager = aiQueueManager;
@@ -269,6 +275,7 @@ public class AppdefBossImpl implements AppdefBoss {
         this.trackerManager = trackerManager;
         this.appdefManager = appdefManager;
         this.zEventManager = zEventManager;
+        this.critterTranslator = critterTranslator;
     }
 
     /**
@@ -295,9 +302,10 @@ public class AppdefBossImpl implements AppdefBoss {
      * @throws SessionTimeoutException
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public AppdefResourceType findCommonResourceType(int sessionID, String[] aeids)
-        throws AppdefEntityNotFoundException, PermissionException, SessionNotFoundException, SessionTimeoutException {
+        throws AppdefEntityNotFoundException, PermissionException, SessionNotFoundException,
+        SessionTimeoutException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         if (aeids == null || aeids.length == 0) {
             return null;
@@ -341,7 +349,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return A list of PlatformTypeValue objects.
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public PageList<PlatformTypeValue> findAllPlatformTypes(int sessionID, PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException {
 
@@ -357,11 +365,13 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return A list of PlatformTypeValue objects.
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public PageList<PlatformTypeValue> findViewablePlatformTypes(int sessionID, PageControl pc)
-        throws SessionTimeoutException, SessionNotFoundException, PermissionException, NotFoundException {
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException,
+        NotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
-        PageList<PlatformTypeValue> platTypeList = platformManager.getViewablePlatformTypes(subject, pc);
+        PageList<PlatformTypeValue> platTypeList = platformManager.getViewablePlatformTypes(
+            subject, pc);
 
         return platTypeList;
     }
@@ -372,9 +382,9 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return A list of ServerTypeValue objects.
      * 
      */
-    @Transactional(readOnly=true)
-    public PageList<ServerTypeValue> findAllServerTypes(int sessionID, PageControl pc) throws SessionNotFoundException,
-        SessionTimeoutException, PermissionException {
+    @Transactional(readOnly = true)
+    public PageList<ServerTypeValue> findAllServerTypes(int sessionID, PageControl pc)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException {
 
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return serverManager.getAllServerTypes(subject, pc);
@@ -386,9 +396,10 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return A list of ServerTypeValue objects.
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public PageList<ServerTypeValue> findViewableServerTypes(int sessionID, PageControl pc)
-        throws SessionNotFoundException, SessionTimeoutException, PermissionException, NotFoundException {
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException,
+        NotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return serverManager.getViewableServerTypes(subject, pc);
     }
@@ -396,8 +407,9 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
-    public List<AppdefResourceTypeValue> findAllApplicationTypes(int sessionID) throws ApplicationException {
+    @Transactional(readOnly = true)
+    public List<AppdefResourceTypeValue> findAllApplicationTypes(int sessionID)
+        throws ApplicationException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         return applicationManager.getAllApplicationTypes(subject);
@@ -407,8 +419,9 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
-    public ApplicationType findApplicationTypeById(int sessionId, Integer id) throws ApplicationException {
+    @Transactional(readOnly = true)
+    public ApplicationType findApplicationTypeById(int sessionId, Integer id)
+        throws ApplicationException {
         sessionManager.authenticate(sessionId);
         return applicationManager.findApplicationType(id);
     }
@@ -416,7 +429,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public PageList<ServiceTypeValue> findAllServiceTypes(int sessionID, PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -426,9 +439,10 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public PageList<ServiceTypeValue> findViewableServiceTypes(int sessionID, PageControl pc)
-        throws SessionTimeoutException, SessionNotFoundException, PermissionException, NotFoundException {
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException,
+        NotFoundException {
 
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return serviceManager.getViewableServiceTypes(subject, pc);
@@ -437,7 +451,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public PageList<ServiceTypeValue> findViewablePlatformServiceTypes(int sessionID, Integer platId)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -447,9 +461,10 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
-    public ApplicationValue findApplicationById(int sessionID, Integer id) throws AppdefEntityNotFoundException,
-        PermissionException, SessionTimeoutException, SessionNotFoundException {
+    @Transactional(readOnly = true)
+    public ApplicationValue findApplicationById(int sessionID, Integer id)
+        throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException,
+        SessionNotFoundException {
 
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return applicationManager.findApplicationById(subject, id).getApplicationValue();
@@ -481,11 +496,13 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      * 
      */
-    @Transactional(readOnly=true)
-    public PageList<? extends AppdefResourceValue> findChildResources(int sessionID, AppdefEntityID parent,
+    @Transactional(readOnly = true)
+    public PageList<? extends AppdefResourceValue> findChildResources(
+                                                                      int sessionID,
+                                                                      AppdefEntityID parent,
                                                                       AppdefEntityTypeID childResourceType,
-                                                                      PageControl pc) throws SessionException,
-        PermissionException, AppdefEntityNotFoundException {
+                                                                      PageControl pc)
+        throws SessionException, PermissionException, AppdefEntityNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         AppdefEntityValue adev = new AppdefEntityValue(parent, subject);
 
@@ -498,7 +515,8 @@ public class AppdefBossImpl implements AppdefBoss {
                 AppdefGroupValue grp = findGroup(sessionID, parent.getId());
                 if (grp.getGroupEntResType() != childResourceType.getId().intValue()) {
                     throw new IllegalArgumentException("childResourceType " + childResourceType +
-                                                       " does not match group resource type" + grp.getGroupEntResType());
+                                                       " does not match group resource type" +
+                                                       grp.getGroupEntResType());
                 }
                 AppdefEntityID[] ids = new AppdefEntityID[grp.getSize()];
                 int idx = 0;
@@ -514,9 +532,11 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
-    public PageList<ApplicationValue> findApplications(int sessionID, AppdefEntityID id, PageControl pc)
-        throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException, SessionNotFoundException {
+    @Transactional(readOnly = true)
+    public PageList<ApplicationValue> findApplications(int sessionID, AppdefEntityID id,
+                                                       PageControl pc)
+        throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException,
+        SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return applicationManager.getApplicationsByResource(subject, id, pc);
     }
@@ -524,9 +544,11 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
-    public PageList<ServiceValue> findPlatformServices(int sessionID, Integer platformId, PageControl pc)
-        throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException, SessionNotFoundException {
+    @Transactional(readOnly = true)
+    public PageList<ServiceValue> findPlatformServices(int sessionID, Integer platformId,
+                                                       PageControl pc)
+        throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException,
+        SessionNotFoundException {
         // Get the AuthzSubject for the user's session
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return serviceManager.getPlatformServices(subject, platformId, pc);
@@ -535,9 +557,11 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
-    public PageList<ServiceValue> findPlatformServices(int sessionID, Integer platformId, Integer typeId, PageControl pc)
-        throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException, SessionNotFoundException {
+    @Transactional(readOnly = true)
+    public PageList<ServiceValue> findPlatformServices(int sessionID, Integer platformId,
+                                                       Integer typeId, PageControl pc)
+        throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException,
+        SessionNotFoundException {
         // Get the AuthzSubject for the user's session
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return serviceManager.getPlatformServices(subject, platformId, typeId, pc);
@@ -547,8 +571,10 @@ public class AppdefBossImpl implements AppdefBoss {
      * Find service inventory by application - including services and clusters
      * 
      */
-    @Transactional(readOnly=true)
-    public PageList<AppdefResourceValue> findServiceInventoryByApplication(int sessionID, Integer appId, PageControl pc)
+    @Transactional(readOnly = true)
+    public PageList<AppdefResourceValue> findServiceInventoryByApplication(int sessionID,
+                                                                           Integer appId,
+                                                                           PageControl pc)
         throws AppdefEntityNotFoundException, SessionException, PermissionException {
         AppdefEntityID aeid = AppdefEntityID.newAppID(appId);
 
@@ -561,16 +587,17 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return A list of ServiceValue objects.
      * 
      */
-    @Transactional(readOnly=true)
-    public PageList<AppdefResourceValue> findServicesByServer(int sessionID, Integer serverId, PageControl pc)
+    @Transactional(readOnly = true)
+    public PageList<AppdefResourceValue> findServicesByServer(int sessionID, Integer serverId,
+                                                              PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException, SessionException {
         AppdefEntityID aeid = AppdefEntityID.newServerID(serverId);
         return findServices(sessionID, aeid, false, pc);
     }
 
-    private PageList<AppdefResourceValue> findServices(int sessionID, AppdefEntityID aeid, boolean allServiceInventory,
-                                                       PageControl pc) throws AppdefEntityNotFoundException,
-        PermissionException, SessionException {
+    private PageList<AppdefResourceValue> findServices(int sessionID, AppdefEntityID aeid,
+                                                       boolean allServiceInventory, PageControl pc)
+        throws AppdefEntityNotFoundException, PermissionException, SessionException {
         PageList<AppdefResourceValue> res = null;
 
         if (pc == null) {
@@ -590,13 +617,16 @@ public class AppdefBossImpl implements AppdefBoss {
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
                 // fetch all service inventory including clusters.
                 if (allServiceInventory) {
-                    res = serviceManager.getServiceInventoryByApplication(subject, aeid.getId(), pc);
+                    res = serviceManager
+                        .getServiceInventoryByApplication(subject, aeid.getId(), pc);
                     // app services will include service clusters which need
                     // to be converted to their service group counterpart.
                     for (int i = 0; i < res.size(); i++) {
                         Object o = res.get(i);
                         if (o instanceof ServiceClusterValue) {
-                            res.set(i, findGroup(sessionID, ((ServiceClusterValue) o).getGroupId()));
+                            res
+                                .set(i,
+                                    findGroup(sessionID, ((ServiceClusterValue) o).getGroupId()));
                         }
                     }
                 } else {
@@ -613,9 +643,10 @@ public class AppdefBossImpl implements AppdefBoss {
      * Find the platform by service.
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public PlatformValue findPlatformByDependentID(int sessionID, AppdefEntityID entityId)
-        throws AppdefEntityNotFoundException, SessionTimeoutException, SessionNotFoundException, PermissionException {
+        throws AppdefEntityNotFoundException, SessionTimeoutException, SessionNotFoundException,
+        PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         Integer id = entityId.getId();
         switch (entityId.getType()) {
@@ -633,18 +664,21 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
-    public ServerValue findServerByService(int sessionID, Integer serviceID) throws AppdefEntityNotFoundException,
-        SessionTimeoutException, SessionNotFoundException, PermissionException {
-        return (ServerValue) findServers(sessionID, AppdefEntityID.newServiceID(serviceID), null).get(0);
+    @Transactional(readOnly = true)
+    public ServerValue findServerByService(int sessionID, Integer serviceID)
+        throws AppdefEntityNotFoundException, SessionTimeoutException, SessionNotFoundException,
+        PermissionException {
+        return (ServerValue) findServers(sessionID, AppdefEntityID.newServiceID(serviceID), null)
+            .get(0);
     }
 
     /**
      * 
      */
-    public PageList<ServerValue> findServersByTypeAndPlatform(int sessionId, Integer platformId, int adResTypeId,
-                                                              PageControl pc) throws AppdefEntityNotFoundException,
-        PermissionException, SessionTimeoutException, SessionNotFoundException {
+    public PageList<ServerValue> findServersByTypeAndPlatform(int sessionId, Integer platformId,
+                                                              int adResTypeId, PageControl pc)
+        throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException,
+        SessionNotFoundException {
         return findServers(sessionId, AppdefEntityID.newPlatformID(platformId), adResTypeId, pc);
     }
 
@@ -653,11 +687,13 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      * 
      */
-    public ServerValue findVirtualServerByPlatformServiceType(int sessionID, Integer platId, Integer svcTypeId)
-        throws ServerNotFoundException, PlatformNotFoundException, PermissionException, SessionNotFoundException,
-        SessionTimeoutException {
+    public ServerValue findVirtualServerByPlatformServiceType(int sessionID, Integer platId,
+                                                              Integer svcTypeId)
+        throws ServerNotFoundException, PlatformNotFoundException, PermissionException,
+        SessionNotFoundException, SessionTimeoutException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
-        List<ServerValue> servers = serverManager.getServersByPlatformServiceType(subject, platId, svcTypeId);
+        List<ServerValue> servers = serverManager.getServersByPlatformServiceType(subject, platId,
+            svcTypeId);
 
         // There should only be one
         return servers.get(0);
@@ -669,8 +705,10 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return A list of ServerValue objects
      * 
      */
-    public PageList<ServerValue> findServersByPlatform(int sessionID, Integer platformId, PageControl pc)
-        throws AppdefEntityNotFoundException, SessionTimeoutException, SessionNotFoundException, PermissionException {
+    public PageList<ServerValue> findServersByPlatform(int sessionID, Integer platformId,
+                                                       PageControl pc)
+        throws AppdefEntityNotFoundException, SessionTimeoutException, SessionNotFoundException,
+        PermissionException {
         return findServers(sessionID, AppdefEntityID.newPlatformID(platformId), pc);
     }
 
@@ -679,8 +717,10 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      * 
      */
-    public PageList<ServerValue> findViewableServersByPlatform(int sessionID, Integer platformId, PageControl pc)
-        throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException, SessionNotFoundException {
+    public PageList<ServerValue> findViewableServersByPlatform(int sessionID, Integer platformId,
+                                                               PageControl pc)
+        throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException,
+        SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return serverManager.getServersByPlatform(subject, platformId, true, pc);
     }
@@ -688,9 +728,11 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
-    public PageList<ServerTypeValue> findServerTypesByPlatform(int sessionID, Integer platformId, PageControl pc)
-        throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException, SessionNotFoundException {
+    @Transactional(readOnly = true)
+    public PageList<ServerTypeValue> findServerTypesByPlatform(int sessionID, Integer platformId,
+                                                               PageControl pc)
+        throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException,
+        SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return serverManager.getServerTypesByPlatform(subject, platformId, true, pc);
     }
@@ -698,20 +740,24 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
-    public PageList<ServerTypeValue> findServerTypesByPlatformType(int sessionID, Integer platformId, PageControl pc)
+    @Transactional(readOnly = true)
+    public PageList<ServerTypeValue> findServerTypesByPlatformType(int sessionID,
+                                                                   Integer platformId,
+                                                                   PageControl pc)
         throws AppdefEntityNotFoundException, SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return serverManager.getServerTypesByPlatformType(subject, platformId, pc);
     }
 
     private PageList<ServerValue> findServers(int sessionID, AppdefEntityID aeid, PageControl pc)
-        throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException, SessionNotFoundException {
+        throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException,
+        SessionNotFoundException {
         return findServers(sessionID, aeid, APPDEF_RES_TYPE_UNDEFINED, pc);
     }
 
-    private PageList<ServerValue> findServers(int sessionID, AppdefEntityID aeid, int servTypeId, PageControl pc)
-        throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException, SessionNotFoundException {
+    private PageList<ServerValue> findServers(int sessionID, AppdefEntityID aeid, int servTypeId,
+                                              PageControl pc) throws AppdefEntityNotFoundException,
+        PermissionException, SessionTimeoutException, SessionNotFoundException {
 
         PageList<ServerValue> res;
 
@@ -724,7 +770,8 @@ public class AppdefBossImpl implements AppdefBoss {
                     res = serverManager.getServersByPlatform(subject, aeid.getId(), false, pc);
                 } else {
                     // exclude virtual servers
-                    res = serverManager.getServersByPlatform(subject, aeid.getId(), new Integer(servTypeId), true, pc);
+                    res = serverManager.getServersByPlatform(subject, aeid.getId(), new Integer(
+                        servTypeId), true, pc);
                 }
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
@@ -753,9 +800,10 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return A List of PlatformValue objects representing all of the platforms
      *         that the given subject is allowed to view.
      */
-    @Transactional(readOnly=true)
-    public PageList<PlatformValue> findAllPlatforms(int sessionID, PageControl pc) throws SessionTimeoutException,
-        SessionNotFoundException, PermissionException, NotFoundException {
+    @Transactional(readOnly = true)
+    public PageList<PlatformValue> findAllPlatforms(int sessionID, PageControl pc)
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException,
+        NotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return platformManager.getAllPlatforms(subject, pc);
     }
@@ -769,9 +817,10 @@ public class AppdefBossImpl implements AppdefBoss {
      *         that the given subject is allowed to view that was created in the
      *         past time range specified.
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public PageList<PlatformValue> findRecentPlatforms(int sessionID, long range, int size)
-        throws SessionTimeoutException, SessionNotFoundException, PermissionException, NotFoundException {
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException,
+        NotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return platformManager.getRecentPlatforms(subject, range, size);
     }
@@ -784,10 +833,11 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return list of appdefResourceValue
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
-    public PageList<AppdefResourceValue> findByIds(int sessionId, AppdefEntityID[] entities, PageControl pc)
-        throws PermissionException, SessionTimeoutException, SessionNotFoundException {
+    public PageList<AppdefResourceValue> findByIds(int sessionId, AppdefEntityID[] entities,
+                                                   PageControl pc) throws PermissionException,
+        SessionTimeoutException, SessionNotFoundException {
         // get the user
         AuthzSubject subject = sessionManager.getSubject(sessionId);
 
@@ -839,9 +889,10 @@ public class AppdefBossImpl implements AppdefBoss {
      * return value is upcasted.
      * 
      */
-    @Transactional(readOnly=true)
-    public AppdefResourceValue findById(int sessionId, AppdefEntityID entityId) throws AppdefEntityNotFoundException,
-        PermissionException, SessionTimeoutException, SessionNotFoundException {
+    @Transactional(readOnly = true)
+    public AppdefResourceValue findById(int sessionId, AppdefEntityID entityId)
+        throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException,
+        SessionNotFoundException {
         // get the user
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return findById(subject, entityId);
@@ -858,12 +909,14 @@ public class AppdefBossImpl implements AppdefBoss {
      * return value is upcasted.
      */
     private AppdefResourceValue findById(AuthzSubject subject, AppdefEntityID entityId)
-        throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException, SessionNotFoundException {
+        throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException,
+        SessionNotFoundException {
         AppdefEntityValue aeval = new AppdefEntityValue(entityId, subject);
         AppdefResourceValue retVal = aeval.getResourceValue();
 
         if (retVal == null) {
-            throw new IllegalArgumentException(entityId.getType() + " is not a valid appdef entity type");
+            throw new IllegalArgumentException(entityId.getType() +
+                                               " is not a valid appdef entity type");
         }
 
         if (entityId.isServer()) {
@@ -880,9 +933,10 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
-    public PlatformValue findPlatformById(int sessionID, Integer id) throws AppdefEntityNotFoundException,
-        SessionTimeoutException, SessionNotFoundException, PermissionException {
+    @Transactional(readOnly = true)
+    public PlatformValue findPlatformById(int sessionID, Integer id)
+        throws AppdefEntityNotFoundException, SessionTimeoutException, SessionNotFoundException,
+        PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return (PlatformValue) findById(subject, AppdefEntityID.newPlatformID(id));
     }
@@ -890,18 +944,20 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Agent findResourceAgent(AppdefEntityID entityId) throws AppdefEntityNotFoundException,
-        SessionTimeoutException, SessionNotFoundException, PermissionException, AgentNotFoundException {
+        SessionTimeoutException, SessionNotFoundException, PermissionException,
+        AgentNotFoundException {
         return agentManager.getAgent(entityId);
     }
 
     /**
      * 
      */
-    @Transactional(readOnly=true)
-    public ServerValue findServerById(int sessionID, Integer id) throws AppdefEntityNotFoundException,
-        SessionTimeoutException, SessionNotFoundException, PermissionException {
+    @Transactional(readOnly = true)
+    public ServerValue findServerById(int sessionID, Integer id)
+        throws AppdefEntityNotFoundException, SessionTimeoutException, SessionNotFoundException,
+        PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return (ServerValue) findById(subject, AppdefEntityID.newServerID(id));
     }
@@ -909,9 +965,10 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
-    public ServiceValue findServiceById(int sessionID, Integer id) throws AppdefEntityNotFoundException,
-        SessionTimeoutException, SessionNotFoundException, PermissionException {
+    @Transactional(readOnly = true)
+    public ServiceValue findServiceById(int sessionID, Integer id)
+        throws AppdefEntityNotFoundException, SessionTimeoutException, SessionNotFoundException,
+        PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return (ServiceValue) findById(subject, AppdefEntityID.newServiceID(id));
     }
@@ -921,7 +978,7 @@ public class AppdefBossImpl implements AppdefBoss {
      *         three group specific resource types.
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public PageList<AppdefResourceTypeValue> findAllResourceTypes(int sessionId, PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException {
         return findAllResourceTypes(sessionId, APPDEF_TYPE_UNDEFINED, pc);
@@ -932,8 +989,9 @@ public class AppdefBossImpl implements AppdefBoss {
      *         particular entity type.
      * 
      */
-    @Transactional(readOnly=true)
-    public PageList<AppdefResourceTypeValue> findAllResourceTypes(int sessionId, int entType, PageControl pc)
+    @Transactional(readOnly = true)
+    public PageList<AppdefResourceTypeValue> findAllResourceTypes(int sessionId, int entType,
+                                                                  PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
 
@@ -992,13 +1050,15 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return PlatformValue - the saved Value object
      * 
      */
-    public Platform createPlatform(int sessionID, PlatformValue platformVal, Integer platTypePK, Integer agent)
-        throws ValidationException, SessionTimeoutException, SessionNotFoundException, PermissionException,
+    public Platform createPlatform(int sessionID, PlatformValue platformVal, Integer platTypePK,
+                                   Integer agent) throws ValidationException,
+        SessionTimeoutException, SessionNotFoundException, PermissionException,
         AppdefDuplicateNameException, AppdefDuplicateFQDNException, ApplicationException {
         try {
             // Get the AuthzSubject for the user's session
             AuthzSubject subject = sessionManager.getSubject(sessionID);
-            Platform platform = platformManager.createPlatform(subject, platTypePK, platformVal, agent);
+            Platform platform = platformManager.createPlatform(subject, platTypePK, platformVal,
+                agent);
             return platform;
         } catch (AppdefDuplicateNameException e) {
             log.error("Unable to create platform. Rolling back", e);
@@ -1018,7 +1078,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public AppdefResourceTypeValue findResourceTypeById(int sessionID, AppdefEntityTypeID id)
         throws SessionTimeoutException, SessionNotFoundException {
         try {
@@ -1045,9 +1105,9 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
-    public PlatformType findPlatformTypeById(int sessionID, Integer id) throws PlatformNotFoundException,
-        SessionTimeoutException, SessionNotFoundException {
+    @Transactional(readOnly = true)
+    public PlatformType findPlatformTypeById(int sessionID, Integer id)
+        throws PlatformNotFoundException, SessionTimeoutException, SessionNotFoundException {
         sessionManager.authenticate(sessionID);
         return platformManager.findPlatformType(id);
     }
@@ -1055,9 +1115,9 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
-    public PlatformType findPlatformTypeByName(int sessionID, String name) throws PlatformNotFoundException,
-        SessionTimeoutException, SessionNotFoundException {
+    @Transactional(readOnly = true)
+    public PlatformType findPlatformTypeByName(int sessionID, String name)
+        throws PlatformNotFoundException, SessionTimeoutException, SessionNotFoundException {
         sessionManager.authenticate(sessionID);
         return platformManager.findPlatformTypeByName(name);
     }
@@ -1065,9 +1125,9 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
-    public ServiceType findServiceTypeById(int sessionID, Integer id) throws SessionTimeoutException,
-        SessionNotFoundException {
+    @Transactional(readOnly = true)
+    public ServiceType findServiceTypeById(int sessionID, Integer id)
+        throws SessionTimeoutException, SessionNotFoundException {
         sessionManager.authenticate(sessionID);
         return serviceManager.findServiceType(id);
     }
@@ -1075,7 +1135,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public PageList<ServiceTypeValue> findServiceTypesByServerType(int sessionID, int serverTypeId)
         throws SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
@@ -1085,7 +1145,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public ServerType findServerTypeById(int sessionID, Integer id) throws SessionTimeoutException,
         SessionNotFoundException {
         sessionManager.authenticate(sessionID);
@@ -1097,9 +1157,10 @@ public class AppdefBossImpl implements AppdefBoss {
      * @param subject Subject setting the values
      * @param cProps A map of String key/value pairs to set
      */
-    private void setCPropValues(AuthzSubject subject, AppdefEntityID entityId, Map<String, String> cProps)
-        throws SessionNotFoundException, SessionTimeoutException, CPropKeyNotFoundException,
-        AppdefEntityNotFoundException, PermissionException {
+    private void setCPropValues(AuthzSubject subject, AppdefEntityID entityId,
+                                Map<String, String> cProps) throws SessionNotFoundException,
+        SessionTimeoutException, CPropKeyNotFoundException, AppdefEntityNotFoundException,
+        PermissionException {
         AppdefEntityValue aVal = new AppdefEntityValue(entityId, subject);
         int typeId = aVal.getAppdefResourceType().getId().intValue();
         for (Map.Entry<String, String> entry : cProps.entrySet()) {
@@ -1115,9 +1176,10 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return ServerValue - the saved server
      * 
      */
-    public ServerValue createServer(int sessionID, ServerValue serverVal, Integer platformPK, Integer serverTypePK,
-                                    Map<String, String> cProps) throws ValidationException, SessionTimeoutException,
-        SessionNotFoundException, PermissionException, AppdefDuplicateNameException, CPropKeyNotFoundException,
+    public ServerValue createServer(int sessionID, ServerValue serverVal, Integer platformPK,
+                                    Integer serverTypePK, Map<String, String> cProps)
+        throws ValidationException, SessionTimeoutException, SessionNotFoundException,
+        PermissionException, AppdefDuplicateNameException, CPropKeyNotFoundException,
         NotFoundException {
         try {
             // Get the AuthzSubject for the user's session
@@ -1125,7 +1187,8 @@ public class AppdefBossImpl implements AppdefBoss {
 
             // Call into appdef to create the platform.
 
-            Server server = serverManager.createServer(subject, platformPK, serverTypePK, serverVal);
+            Server server = serverManager
+                .createServer(subject, platformPK, serverTypePK, serverVal);
             if (cProps != null) {
                 AppdefEntityID entityId = server.getEntityId();
                 setCPropValues(subject, entityId, cProps);
@@ -1144,12 +1207,12 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     public ApplicationValue createApplication(int sessionID, ApplicationValue appVal,
-                                              Collection<ServiceValue> services, ConfigResponse protoProps)
-        throws ValidationException, SessionTimeoutException, SessionNotFoundException, PermissionException,
-        AppdefDuplicateNameException, NotFoundException {
+                                              ConfigResponse protoProps)
+        throws ValidationException, SessionTimeoutException, SessionNotFoundException,
+        PermissionException, AppdefDuplicateNameException, NotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
-        Application pk = applicationManager.createApplication(subject, appVal, services);
+        Application pk = applicationManager.createApplication(subject, appVal);
         return pk.getApplicationValue();
     }
 
@@ -1159,16 +1222,18 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return ServiceValue - the saved ServiceValue
      * 
      */
-    public ServiceValue createService(int sessionID, ServiceValue serviceVal, Integer serviceTypePK, AppdefEntityID aeid)
-        throws SessionNotFoundException, SessionTimeoutException, ServerNotFoundException, PlatformNotFoundException,
-        PermissionException, AppdefDuplicateNameException, ValidationException {
+    public ServiceValue createService(int sessionID, ServiceValue serviceVal,
+                                      Integer serviceTypePK, AppdefEntityID aeid)
+        throws SessionNotFoundException, SessionTimeoutException, ServerNotFoundException,
+        PlatformNotFoundException, PermissionException, AppdefDuplicateNameException,
+        ValidationException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         try {
             Integer serverPK;
             if (aeid.isPlatform()) {
                 // Look up the platform's virtual server
-                List<ServerValue> servers = serverManager.getServersByPlatformServiceType(subject, aeid.getId(),
-                    serviceTypePK);
+                List<ServerValue> servers = serverManager.getServersByPlatformServiceType(subject,
+                    aeid.getId(), serviceTypePK);
 
                 // There should only be 1 virtual server of this type
                 ServerValue server = servers.get(0);
@@ -1193,14 +1258,14 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return Service - the saved Service
      * 
      */
-    public Service createService(AuthzSubject subject, ServiceValue serviceVal, Integer serviceTypePK,
-                                 Integer serverPK, Map<String, String> cProps) throws SessionNotFoundException,
-        SessionTimeoutException, AppdefDuplicateNameException, ValidationException, PermissionException,
-        CPropKeyNotFoundException {
+    public Service createService(AuthzSubject subject, ServiceValue serviceVal,
+                                 Integer serviceTypePK, Integer serverPK, Map<String, String> cProps)
+        throws SessionNotFoundException, SessionTimeoutException, AppdefDuplicateNameException,
+        ValidationException, PermissionException, CPropKeyNotFoundException {
         try {
 
-            Service savedService = serviceManager.createService(subject, serverPK, serviceTypePK, serviceVal.getName(),
-                serviceVal.getDescription(), serviceVal.getLocation());
+            Service savedService = serviceManager.createService(subject, serverPK, serviceTypePK,
+                serviceVal.getName(), serviceVal.getDescription(), serviceVal.getLocation());
             if (cProps != null) {
                 AppdefEntityID entityId = savedService.getEntityId();
                 setCPropValues(subject, entityId, cProps);
@@ -1221,8 +1286,9 @@ public class AppdefBossImpl implements AppdefBoss {
      *         deleted
      * 
      */
-    public AppdefEntityID[] removeAppdefEntity(int sessionId, AppdefEntityID aeid) throws SessionNotFoundException,
-        SessionTimeoutException, ApplicationException, VetoException {
+    public AppdefEntityID[] removeAppdefEntity(int sessionId, AppdefEntityID aeid)
+        throws SessionNotFoundException, SessionTimeoutException, ApplicationException,
+        VetoException {
         final StopWatch timer = new StopWatch();
 
         final AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -1231,23 +1297,26 @@ public class AppdefBossImpl implements AppdefBoss {
         if (aeid.isGroup()) {
             // HQ-1577: Do not delete group if downtime schedule exists
             try {
-                MaintenanceEvent event = getMaintenanceEventManager().getMaintenanceEvent(subject, aeid.getId());
+                MaintenanceEvent event = getMaintenanceEventManager().getMaintenanceEvent(subject,
+                    aeid.getId());
 
                 if (event != null && event.getStartTime() != 0) {
-                    String msg = ResourceBundle.getBundle(BUNDLE).getString("resource.groups.remove.error.downtime.exists");
-                    throw new VetoException(MessageFormat.format(msg, new String[] {res.getName()}));
+                    String msg = ResourceBundle.getBundle(BUNDLE).getString(
+                        "resource.groups.remove.error.downtime.exists");
+                    throw new VetoException(MessageFormat.format(msg,
+                        new String[] { res.getName() }));
                 }
             } catch (SchedulerException se) {
                 // HHQ-3772: This should not happen. However, if it does,
                 // log the exception as a warning and do not allow to delete
                 // until the scheduler issue is resolved
-                log.warn("Scheduler error getting the downtime schedule for group[" + aeid + "]: "
-                    + se.getMessage(), se);
-           
-                String msg = ResourceBundle.getBundle(BUNDLE)
-                    .getString("resource.groups.remove.error.downtime.scheduler.failure");
-                 
-                throw new VetoException(MessageFormat.format(msg, new String[] {res.getName()}));
+                log.warn("Scheduler error getting the downtime schedule for group[" + aeid + "]: " +
+                         se.getMessage(), se);
+
+                String msg = ResourceBundle.getBundle(BUNDLE).getString(
+                    "resource.groups.remove.error.downtime.scheduler.failure");
+
+                throw new VetoException(MessageFormat.format(msg, new String[] { res.getName() }));
             }
         }
         if (res == null) {
@@ -1255,26 +1324,27 @@ public class AppdefBossImpl implements AppdefBoss {
             return new AppdefEntityID[0];
         }
         AppdefEntityID[] removed = resourceManager.removeResourcePerms(subject, res, false);
-        Map<Integer,List<AppdefEntityID>> agentCache = null;
-       
+        Map<Integer, List<AppdefEntityID>> agentCache = null;
+
         final Integer id = aeid.getId();
         switch (aeid.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                 Server server = serverManager.findServerById(id);
                 agentCache = buildAsyncDeleteAgentCache(server);
-                removeServer(subject, server);
+                removeServer(subject, server.getId());
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                 Platform platform = platformManager.findPlatformById(id);
                 agentCache = buildAsyncDeleteAgentCache(platform);
-                removePlatform(subject, platform);
+                removePlatform(subject, platform.getId());
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
 
                 serviceManager.removeService(subject, serviceManager.findServiceById(id));
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                resourceGroupManager.removeResourceGroup(subject, resourceGroupManager.findResourceGroupById(id));
+                resourceGroupManager.removeResourceGroup(subject, resourceGroupManager
+                    .findResourceGroupById(id));
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
                 applicationManager.removeApplication(subject, id);
@@ -1282,7 +1352,7 @@ public class AppdefBossImpl implements AppdefBoss {
             default:
                 break;
         }
-        
+
         if (log.isDebugEnabled()) {
             log.debug("removeAppdefEntity() for " + aeid + " executed in " + timer.getElapsed());
         }
@@ -1290,164 +1360,6 @@ public class AppdefBossImpl implements AppdefBoss {
         zEventManager.enqueueEventAfterCommit(new ResourcesCleanupZevent(agentCache));
 
         return removed;
-    }
-    
-    // TODO modify javadoc comment below regarding NotSupported
-    /**
-     * Remove all delete resources Method was "NotSupported" since all the
-     * resource deletes may take longer than the transaction timeout. No
-     * need for a transaction in this context.
-     * 
-     */
-    public void removeDeletedResources(Map<Integer,List<AppdefEntityID>> agentCache) throws ApplicationException, VetoException {
-        final StopWatch watch = new StopWatch();
-        final AuthzSubject subject = authzSubjectManager.findSubjectById(AuthzConstants.overlordId);
-        watch.markTimeBegin("unscheduleMeasurementsForAsyncDelete");
-        unscheduleMeasurementsForAsyncDelete(agentCache);
-        watch.markTimeEnd("unscheduleMeasurementsForAsyncDelete");
-        
-        // Look through services, servers, platforms, applications, and groups
-        watch.markTimeBegin("removeApplications");
-        Collection<Application> applications = applicationManager.findDeletedApplications();
-        removeApplications(subject, applications);
-        watch.markTimeEnd("removeApplications");
-       
-
-        watch.markTimeBegin("removeResourceGroups");
-        Collection<ResourceGroup> groups = resourceGroupManager.findDeletedGroups();
-        removeResourceGroups(subject, groups);
-        
-        watch.markTimeEnd("removeResourceGroups");
-      
-        Collection<Service> services = serviceManager.findDeletedServices();
-        removeServices(subject, services);
-
-        Collection<Server> servers = serverManager.findDeletedServers();
-        removeServers(subject, servers);
-
-        watch.markTimeBegin("removePlatforms");
-        Collection<Platform> platforms = platformManager.findDeletedPlatforms();
-        for (Platform platform : platforms) {
-            try {
-                removeServers(subject, platform.getServers());
-                _removePlatformInNewTran(subject, platform);
-            } catch (Exception e) {
-                log.error("Unable to remove platform: " + e, e);
-            }
-        }
-        watch.markTimeEnd("removePlatforms");
-        if (log.isDebugEnabled()) {
-            log.debug("removeDeletedResources: " + watch);
-        }
-    }
-    
-        /**
-         * Disable measurements and unschedule from the agent in bulk
-         * with the agent cache info because the resources have been
-         * de-referenced from the agent
-         * 
-         * @param agentCache {@link Map} of {@link Integer} of agentIds 
-         * to {@link List} of {@link AppdefEntityID}s
-         */
-        private void unscheduleMeasurementsForAsyncDelete(Map<Integer,List<AppdefEntityID>> agentCache) {
-            if (agentCache == null) {
-                return;
-            }
-            
-            try {
-                AuthzSubject subject =
-                    authzSubjectManager.findSubjectById(AuthzConstants.overlordId);
-    
-                for (Integer agentId : agentCache.keySet() ) {
-                    
-                    Agent agent = agentManager.getAgent(agentId);
-                    List<AppdefEntityID> resources = agentCache.get(agentId);
-                    
-                    measurementManager.disableMeasurements(
-                            subject, 
-                            agent,
-                            (AppdefEntityID[]) resources.toArray(new AppdefEntityID[0]), 
-                            true);
-                 }
-            } catch (Exception e) {
-                log.error("Error unscheduling measurements during async delete", e);
-             }
-         }
-         
-        private final void removeApplications(AuthzSubject subject, Collection<Application> applications) {
-            for (Application application: applications ) {
-                try {
-                    _removeApplicationInNewTran(
-                        subject, application);
-                } catch (Exception e) {
-                    log.error("Unable to remove application: "  + e, e);
-                }
-            }
-            if (log.isDebugEnabled()) {
-                log.debug("Removed "  + applications.size() +  " applications");
-            }
-        }
-        
-        private final void removeResourceGroups(AuthzSubject subject, Collection<ResourceGroup> groups) {
-            for (ResourceGroup group: groups ) {
-                try {
-                    _removeGroupInNewTran(subject, group);
-                } catch (Exception e) {
-                    log.error("Unable to remove group: "  + e, e);
-                }
-            }
-            if (log.isDebugEnabled()) {
-                log.debug("Removed " +  groups.size()  + " resource groups");
-            }
-        }
-        
-
-
-    private final void removeServers(AuthzSubject subject, Collection<Server> servers) {
-        final StopWatch watch = new StopWatch();
-        watch.markTimeBegin("removeServers");
-        final List<Server> svrs = new ArrayList<Server>(servers);
-        // can't use iterator for loop here. Since we are modifying the
-        // internal hibernate collection, which this collection is based on,
-        // it will throw a ConcurrentModificationException
-        // This occurs even if you disassociate the Collection by trying
-        // something like new ArrayList(servers). Not sure why.
-        for (int i = 0; i < svrs.size(); i++) {
-            try {
-                final Server server = svrs.get(i);
-                removeServices(subject, server.getServices());
-                _removeServerInNewTran(subject, server);
-            } catch (Exception e) {
-                log.error("Unable to remove server: " + e, e);
-            }
-        }
-        watch.markTimeEnd("removeServers");
-        if (log.isDebugEnabled()) {
-            log.debug("Removed " + servers.size() + " services");
-        }
-    }
-
-    private final void removeServices(AuthzSubject subject, Collection<Service> services) {
-        final StopWatch watch = new StopWatch();
-        watch.markTimeBegin("removeServices");
-        final List<Service> svcs = new ArrayList<Service>(services);
-        // can't use iterator for loop here. Since we are modifying the
-        // internal hibernate collection, which this collection is based on,
-        // it will throw a ConcurrentModificationException
-        // This occurs even if you disassociate the Collection by trying
-        // something like new ArrayList(services). Not sure why.
-        for (int i = 0; i < svcs.size(); i++) {
-            try {
-                final Service service = svcs.get(i);
-                _removeServiceInNewTran(subject, service);
-            } catch (Exception e) {
-                log.error("Unable to remove service: " + e, e);
-            }
-        }
-        watch.markTimeEnd("removeServices");
-        if (log.isDebugEnabled()) {
-            log.debug("Removed " + services.size() + " services");
-        }
     }
 
     /**
@@ -1466,7 +1378,8 @@ public class AppdefBossImpl implements AppdefBoss {
         ConfigResponse response;
 
         try {
-            response = configManager.getMergedConfigResponse(subject, ProductPlugin.TYPE_MEASUREMENT, id, true);
+            response = configManager.getMergedConfigResponse(subject,
+                ProductPlugin.TYPE_MEASUREMENT, id, true);
         } catch (Throwable t) {
             log.debug("Unable to get config response: " + t.getMessage(), t);
             // If anything goes wrong getting the config, just move
@@ -1484,20 +1397,14 @@ public class AppdefBossImpl implements AppdefBoss {
         }
     }
 
-    /**
-     * 
-     * 
-     */
-    public void _removePlatformInNewTran(AuthzSubject subject, Platform platform) throws ApplicationException,
-        VetoException {
-        removePlatform(subject, platform);
-    }
-
+   
     /**
      * 
      */
-    public void removePlatform(AuthzSubject subject, Platform platform) throws ApplicationException, VetoException {
+    public void removePlatform(AuthzSubject subject, Integer platformId)
+        throws ApplicationException, VetoException {
         try {
+            Platform platform = platformManager.findPlatformById(platformId);
             // Disable all measurements for this platform. We don't actually
             // remove the measurements here to avoid delays in deleting
             // resources.
@@ -1507,12 +1414,14 @@ public class AppdefBossImpl implements AppdefBoss {
             try {
                 List<Integer> aiplatformList = new ArrayList<Integer>();
                 Integer platformID = platform.getId();
-                AIPlatformValue aiPlatform = aiQueueManager.getAIPlatformByPlatformID(subject, platformID);
+                AIPlatformValue aiPlatform = aiQueueManager.getAIPlatformByPlatformID(subject,
+                    platformID);
 
                 if (aiPlatform != null) {
                     aiplatformList.add(aiPlatform.getId());
                     log.info("Removing from AIqueue: " + aiPlatform.getId());
-                    aiQueueManager.processQueue(subject, aiplatformList, null, null, AIQueueConstants.Q_DECISION_PURGE);
+                    aiQueueManager.processQueue(subject, aiplatformList, null, null,
+                        AIQueueConstants.Q_DECISION_PURGE);
                 }
             } catch (AIQApprovalException e) {
                 log.error("Error removing from AI queue", e);
@@ -1521,112 +1430,70 @@ public class AppdefBossImpl implements AppdefBoss {
             // now, remove the platform.
             platformManager.removePlatform(subject, platform);
         } catch (PermissionException e) {
-            log.error("Caught PermissionException while removing platform: " + platform.getId(), e);
+            log.error("Caught PermissionException while removing platform: " + platformId, e);
             throw e;
         }
     }
 
-    private void removeServer(AuthzSubject subject, Server server) throws PermissionException, VetoException {
-        try {
-            // now remove the measurements
-            disableMeasurements(subject, server.getResource());
-            try {
-                autoinventoryManager.toggleRuntimeScan(authzSubjectManager.getOverlordPojo(), server.getEntityId(),
-                    false);
-            } catch (ResourceDeletedException e) {
-                log.debug(e);
-            } catch (AutoinventoryException e) {
-                log.warn("Exception while turning off RuntimeScan for: " +
-                    server + " (handled gracefully).  " + e);
-            } catch (Exception e) {
-                log.error("Unexpected error turning off RuntimeScan for: " +
-                    server + " (handled gracefully).", e);
-            }
-            // finally, remove the server
-            serverManager.removeServer(subject, server);
-           
-        } catch (PermissionException e) {
-
-            log.error("Caught permission exception: [server:" + server.getId() + "]");
-            throw (PermissionException) e;
-        }
-    }
-    
     /**
      * @param server The server being deleted
      * 
-     * @return {@link Map} of {@link Integer} of agentIds 
-     * to {@link List} of {@link AppdefEntityID}s
+     * @return {@link Map} of {@link Integer} of agentIds to {@link List} of
+     *         {@link AppdefEntityID}s
      */
-    private Map<Integer,List<AppdefEntityID>> buildAsyncDeleteAgentCache(Server server) {        
-        Map<Integer,List<AppdefEntityID>> cache = new HashMap<Integer,List<AppdefEntityID>>();
-        
+    private Map<Integer, List<AppdefEntityID>> buildAsyncDeleteAgentCache(Server server) {
+        Map<Integer, List<AppdefEntityID>> cache = new HashMap<Integer, List<AppdefEntityID>>();
+
         try {
             Agent agent = findResourceAgent(server.getEntityId());
             List<AppdefEntityID> resources = new ArrayList<AppdefEntityID>();
-            
-            for (Service s : server.getServices() ) {
+
+            for (Service s : server.getServices()) {
                 resources.add(s.getEntityId());
             }
             cache.put(agent.getId(), resources);
         } catch (Exception e) {
-            log.warn("Unable to build AsyncDeleteAgentCache for server[id=" 
-                            + server.getId()
-                            + ", name=" + server.getName() + "]: "
-                            + e.getMessage());
+            log.warn("Unable to build AsyncDeleteAgentCache for server[id=" + server.getId() +
+                     ", name=" + server.getName() + "]: " + e.getMessage());
         }
-        
+
         return cache;
     }
 
     /**
      * @param platform The platform being deleted
      * 
-     * @return {@link Map} of {@link Integer} of agentIds 
-     * to {@link List} of {@link AppdefEntityID}s
+     * @return {@link Map} of {@link Integer} of agentIds to {@link List} of
+     *         {@link AppdefEntityID}s
      */
-    private Map<Integer,List<AppdefEntityID>> buildAsyncDeleteAgentCache(Platform platform) {
-        Map<Integer,List<AppdefEntityID>> cache = new HashMap<Integer,List<AppdefEntityID>>();
+    private Map<Integer, List<AppdefEntityID>> buildAsyncDeleteAgentCache(Platform platform) {
+        Map<Integer, List<AppdefEntityID>> cache = new HashMap<Integer, List<AppdefEntityID>>();
 
         try {
             Agent agent = platform.getAgent();
             List<AppdefEntityID> resources = new ArrayList<AppdefEntityID>();
-            
-            for (Server s: platform.getServers() ) {
+
+            for (Server s : platform.getServers()) {
                 if (!s.getServerType().isVirtual()) {
                     resources.add(s.getEntityId());
                 }
-                List<AppdefEntityID> services =  buildAsyncDeleteAgentCache(s).get(agent.getId());
+                List<AppdefEntityID> services = buildAsyncDeleteAgentCache(s).get(agent.getId());
                 resources.addAll(services);
             }
             cache.put(agent.getId(), resources);
         } catch (Exception e) {
-            log.warn("Unable to build AsyncDeleteAgentCache for platform[id=" 
-                        + platform.getId()
-                        + ", name=" + platform.getName() + "]: "
-                        + e.getMessage());
+            log.warn("Unable to build AsyncDeleteAgentCache for platform[id=" + platform.getId() +
+                     ", name=" + platform.getName() + "]: " + e.getMessage());
         }
-        
+
         return cache;
     }
 
-    
-
-    /**
-     * 
-     * 
-     */
-    public void _removeServerInNewTran(AuthzSubject subject, Server server) throws VetoException, PermissionException {
-        removeServer(subject, server);
-    }
-
-    /**
-     * 
-     * 
-     */
-    public void _removeServiceInNewTran(AuthzSubject subject, Service service) throws VetoException,
-        PermissionException {
+  
+    public void removeService(AuthzSubject subject, Integer serviceId)
+        throws VetoException, PermissionException, ServiceNotFoundException {
         try {
+            Service service = serviceManager.findServiceById(serviceId);
             // now remove any measurements associated with the service
             disableMeasurements(subject, service.getResource());
             removeTrackers(subject, service.getEntityId());
@@ -1635,24 +1502,6 @@ public class AppdefBossImpl implements AppdefBoss {
 
             throw (PermissionException) e;
         }
-    }
-
-    /**
-     * 
-     * 
-     */
-    public void _removeGroupInNewTran(AuthzSubject subject, ResourceGroup group) throws SessionException,
-        PermissionException, VetoException {
-        resourceGroupManager.removeResourceGroup(subject, group);
-    }
-
-    /**
-     * 
-     * 
-     */
-    public void _removeApplicationInNewTran(AuthzSubject subject, Application app) throws ApplicationException,
-        PermissionException, SessionException, VetoException {
-        applicationManager.removeApplication(subject, app.getId());
     }
 
     /**
@@ -1675,8 +1524,9 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     public ServerValue updateServer(int sessionId, ServerValue aServer, Map<String, String> cProps)
-        throws ValidationException, SessionTimeoutException, SessionNotFoundException, PermissionException,
-        UpdateException, AppdefDuplicateNameException, CPropKeyNotFoundException {
+        throws ValidationException, SessionTimeoutException, SessionNotFoundException,
+        PermissionException, UpdateException, AppdefDuplicateNameException,
+        CPropKeyNotFoundException {
         try {
             try {
                 AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -1714,9 +1564,9 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    public ServiceValue updateService(int sessionId, ServiceValue aService) throws PermissionException,
-        ValidationException, SessionTimeoutException, SessionNotFoundException, UpdateException,
-        AppdefDuplicateNameException, NotFoundException {
+    public ServiceValue updateService(int sessionId, ServiceValue aService)
+        throws PermissionException, ValidationException, SessionTimeoutException,
+        SessionNotFoundException, UpdateException, AppdefDuplicateNameException, NotFoundException {
         try {
             return updateService(sessionId, aService, null);
         } catch (CPropKeyNotFoundException exc) {
@@ -1730,9 +1580,10 @@ public class AppdefBossImpl implements AppdefBoss {
      * @param cProps - the map with Custom Properties for the service
      * 
      */
-    public ServiceValue updateService(int sessionId, ServiceValue aService, Map<String, String> cProps)
-        throws ValidationException, SessionTimeoutException, SessionNotFoundException, PermissionException,
-        UpdateException, AppdefDuplicateNameException, CPropKeyNotFoundException, NotFoundException {
+    public ServiceValue updateService(int sessionId, ServiceValue aService,
+                                      Map<String, String> cProps) throws ValidationException,
+        SessionTimeoutException, SessionNotFoundException, PermissionException, UpdateException,
+        AppdefDuplicateNameException, CPropKeyNotFoundException, NotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return updateService(subject, aService, cProps);
     }
@@ -1742,9 +1593,10 @@ public class AppdefBossImpl implements AppdefBoss {
      * @param cProps - the map with Custom Properties for the service
      * 
      */
-    public ServiceValue updateService(AuthzSubject subject, ServiceValue aService, Map<String, String> cProps)
-        throws ValidationException, SessionTimeoutException, SessionNotFoundException, PermissionException,
-        UpdateException, AppdefDuplicateNameException, CPropKeyNotFoundException, NotFoundException {
+    public ServiceValue updateService(AuthzSubject subject, ServiceValue aService,
+                                      Map<String, String> cProps) throws ValidationException,
+        SessionTimeoutException, SessionNotFoundException, PermissionException, UpdateException,
+        AppdefDuplicateNameException, CPropKeyNotFoundException, NotFoundException {
         try {
             Service updated = serviceManager.updateService(subject, aService);
 
@@ -1775,8 +1627,9 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    public PlatformValue updatePlatform(int sessionId, PlatformValue aPlatform) throws ValidationException,
-        PermissionException, SessionTimeoutException, SessionNotFoundException, UpdateException, ApplicationException,
+    public PlatformValue updatePlatform(int sessionId, PlatformValue aPlatform)
+        throws ValidationException, PermissionException, SessionTimeoutException,
+        SessionNotFoundException, UpdateException, ApplicationException,
         AppdefDuplicateNameException, AppdefDuplicateFQDNException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return updatePlatform(subject, aPlatform);
@@ -1785,8 +1638,9 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    public PlatformValue updatePlatform(AuthzSubject subject, PlatformValue aPlatform) throws ValidationException,
-        PermissionException, SessionTimeoutException, SessionNotFoundException, UpdateException, ApplicationException,
+    public PlatformValue updatePlatform(AuthzSubject subject, PlatformValue aPlatform)
+        throws ValidationException, PermissionException, SessionTimeoutException,
+        SessionNotFoundException, UpdateException, ApplicationException,
         AppdefDuplicateNameException, AppdefDuplicateFQDNException {
         try {
             return platformManager.updatePlatform(subject, aPlatform).getPlatformValue();
@@ -1802,7 +1656,8 @@ public class AppdefBossImpl implements AppdefBoss {
             } else if (e instanceof ApplicationException) {
                 throw (ApplicationException) e;
             } else {
-                throw new UpdateException("Unknown error updating platform: " + aPlatform.getId(), e);
+                throw new UpdateException("Unknown error updating platform: " + aPlatform.getId(),
+                    e);
             }
         }
     }
@@ -1810,8 +1665,8 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    public ApplicationValue updateApplication(int sessionId, ApplicationValue app) throws ApplicationException,
-        PermissionException {
+    public ApplicationValue updateApplication(int sessionId, ApplicationValue app)
+        throws ApplicationException, PermissionException {
         try {
             AuthzSubject caller = sessionManager.getSubject(sessionId);
             return applicationManager.updateApplication(caller, app);
@@ -1840,9 +1695,9 @@ public class AppdefBossImpl implements AppdefBoss {
      * Get the dependency tree for a given application
      * 
      */
-    @Transactional(readOnly=true)
-    public DependencyTree getAppDependencyTree(int sessionId, Integer appId) throws ApplicationException,
-        PermissionException {
+    @Transactional(readOnly = true)
+    public DependencyTree getAppDependencyTree(int sessionId, Integer appId)
+        throws ApplicationException, PermissionException {
         try {
             AuthzSubject caller = sessionManager.getSubject(sessionId);
             return applicationManager.getServiceDepsForApp(caller, appId);
@@ -1854,8 +1709,8 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    public void setAppDependencyTree(int sessionId, DependencyTree depTree) throws ApplicationException,
-        PermissionException {
+    public void setAppDependencyTree(int sessionId, DependencyTree depTree)
+        throws ApplicationException, PermissionException {
         try {
             AuthzSubject caller = sessionManager.getSubject(sessionId);
             applicationManager.setServiceDepsForApp(caller, depTree);
@@ -1865,13 +1720,34 @@ public class AppdefBossImpl implements AppdefBoss {
         }
     }
 
-    /**
-     * 
-     */
+   
     public void removeServer(AuthzSubject subj, Integer serverId) throws ServerNotFoundException,
-        SessionNotFoundException, SessionTimeoutException, PermissionException, SessionException, VetoException {
+        SessionNotFoundException, SessionTimeoutException, PermissionException, SessionException,
+        VetoException {
         Server server = serverManager.findServerById(serverId);
-        removeServer(subj, server);
+        try {
+            // now remove the measurements
+            disableMeasurements(subj, server.getResource());
+            try {
+                autoinventoryManager.toggleRuntimeScan(authzSubjectManager.getOverlordPojo(),
+                    server.getEntityId(), false);
+            } catch (ResourceDeletedException e) {
+                log.debug(e);
+            } catch (AutoinventoryException e) {
+                log.warn("Exception while turning off RuntimeScan for: " + server +
+                         " (handled gracefully).  " + e);
+            } catch (Exception e) {
+                log.error("Unexpected error turning off RuntimeScan for: " + server +
+                          " (handled gracefully).", e);
+            }
+            // finally, remove the server
+            serverManager.removeServer(subj, server);
+
+        } catch (PermissionException e) {
+
+            log.error("Caught permission exception: [server:" + server.getId() + "]");
+            throw (PermissionException) e;
+        }
     }
 
     /**
@@ -1879,8 +1755,9 @@ public class AppdefBossImpl implements AppdefBoss {
      * @param appId - The application identifier.
      * 
      */
-    public void removeAppService(int sessionId, Integer appId, Integer serviceId) throws ApplicationException,
-        ApplicationNotFoundException, PermissionException, SessionTimeoutException, SessionNotFoundException {
+    public void removeAppService(int sessionId, Integer appId, Integer serviceId)
+        throws ApplicationException, ApplicationNotFoundException, PermissionException,
+        SessionTimeoutException, SessionNotFoundException {
 
         AuthzSubject caller = sessionManager.getSubject(sessionId);
         applicationManager.removeAppService(caller, appId, serviceId);
@@ -1891,8 +1768,9 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return The updated Resource
      * 
      */
-    public AppdefResourceValue changeResourceOwner(int sessionId, AppdefEntityID eid, Integer newOwnerId)
-        throws ApplicationException, PermissionException {
+    public AppdefResourceValue changeResourceOwner(int sessionId, AppdefEntityID eid,
+                                                   Integer newOwnerId) throws ApplicationException,
+        PermissionException {
         try {
             AuthzSubject caller = sessionManager.getSubject(sessionId);
             AuthzSubject newOwner = authzSubjectManager.findSubjectById(newOwnerId);
@@ -1939,9 +1817,9 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     @SuppressWarnings("unchecked")
-    public ResourceGroup createGroup(int sessionId, String name, String description, String location,
-                                     String[] resources, boolean privGrp) throws GroupCreationException,
-        GroupDuplicateNameException, SessionException {
+    public ResourceGroup createGroup(int sessionId, String name, String description,
+                                     String location, String[] resources, boolean privGrp)
+        throws GroupCreationException, GroupDuplicateNameException, SessionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         ResourceGroupCreateInfo cInfo = new ResourceGroupCreateInfo(name, description,
             AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS, null, // prototype
@@ -1950,8 +1828,8 @@ public class AppdefBossImpl implements AppdefBoss {
             privGrp);
 
         // No roles or resources
-        return resourceGroupManager
-            .createResourceGroup(subject, cInfo, Collections.EMPTY_LIST, getResources(resources));
+        return resourceGroupManager.createResourceGroup(subject, cInfo, Collections.EMPTY_LIST,
+            getResources(resources));
     }
 
     /**
@@ -1969,9 +1847,9 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     @SuppressWarnings("unchecked")
-    public ResourceGroup createGroup(int sessionId, int adType, String name, String description, String location,
-                                     String[] resources, boolean privGrp) throws GroupCreationException,
-        SessionException, GroupDuplicateNameException {
+    public ResourceGroup createGroup(int sessionId, int adType, String name, String description,
+                                     String location, String[] resources, boolean privGrp)
+        throws GroupCreationException, SessionException, GroupDuplicateNameException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         int groupType;
 
@@ -1980,18 +1858,20 @@ public class AppdefBossImpl implements AppdefBoss {
         } else if (adType == AppdefEntityConstants.APPDEF_TYPE_APPLICATION) {
             groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP;
         } else {
-            throw new IllegalArgumentException("Invalid group type. Strict " + "mixed group types can be "
+            throw new IllegalArgumentException("Invalid group type. Strict "
+                                               + "mixed group types can be "
                                                + "group or application");
         }
 
-        ResourceGroupCreateInfo cInfo = new ResourceGroupCreateInfo(name, description, groupType, null, // prototype
+        ResourceGroupCreateInfo cInfo = new ResourceGroupCreateInfo(name, description, groupType,
+            null, // prototype
             location, 0, // clusterId
             false, // system?
             privGrp);
 
         // No roles or resources
-        return resourceGroupManager
-            .createResourceGroup(subject, cInfo, Collections.EMPTY_LIST, getResources(resources));
+        return resourceGroupManager.createResourceGroup(subject, cInfo, Collections.EMPTY_LIST,
+            getResources(resources));
     }
 
     /**
@@ -2009,9 +1889,10 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     @SuppressWarnings("unchecked")
-    public ResourceGroup createGroup(int sessionId, int adType, int adResType, String name, String description,
-                                     String location, String[] resources, boolean privGrp)
-        throws GroupCreationException, GroupDuplicateNameException, SessionException {
+    public ResourceGroup createGroup(int sessionId, int adType, int adResType, String name,
+                                     String description, String location, String[] resources,
+                                     boolean privGrp) throws GroupCreationException,
+        GroupDuplicateNameException, SessionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         int groupType;
 
@@ -2024,19 +1905,21 @@ public class AppdefBossImpl implements AppdefBoss {
                 groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS;
                 break;
             default:
-                throw new IllegalArgumentException("Invalid group compatibility " + "type specified");
+                throw new IllegalArgumentException("Invalid group compatibility "
+                                                   + "type specified");
         }
 
-        Resource prototype = resourceManager.findResourcePrototype(new AppdefEntityTypeID(adType, adResType));
+        Resource prototype = resourceManager.findResourcePrototype(new AppdefEntityTypeID(adType,
+            adResType));
 
-        ResourceGroupCreateInfo cInfo = new ResourceGroupCreateInfo(name, description, groupType, prototype, location,
-            0, // clusterId
+        ResourceGroupCreateInfo cInfo = new ResourceGroupCreateInfo(name, description, groupType,
+            prototype, location, 0, // clusterId
             false, // system?
             privGrp);
 
         // No roles or resources
-        return resourceGroupManager
-            .createResourceGroup(subject, cInfo, Collections.EMPTY_LIST, getResources(resources));
+        return resourceGroupManager.createResourceGroup(subject, cInfo, Collections.EMPTY_LIST,
+            getResources(resources));
     }
 
     /**
@@ -2044,8 +1927,9 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      * 
      */
-    public void removeResourcesFromGroup(int sessionId, ResourceGroup group, Collection<Resource> resources)
-        throws SessionException, PermissionException, VetoException {
+    public void removeResourcesFromGroup(int sessionId, ResourceGroup group,
+                                         Collection<Resource> resources) throws SessionException,
+        PermissionException, VetoException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
 
         resourceGroupManager.removeResources(subject, group, resources);
@@ -2054,8 +1938,9 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
-    public ResourceGroup findGroupById(int sessionId, Integer groupId) throws PermissionException, SessionException {
+    @Transactional(readOnly = true)
+    public ResourceGroup findGroupById(int sessionId, Integer groupId) throws PermissionException,
+        SessionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
 
         return resourceGroupManager.findResourceGroupById(subject, groupId);
@@ -2064,9 +1949,9 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
-    public Map<String, Number> getResourceTypeCountMap(int sessionId, Integer groupId) throws PermissionException,
-        SessionException {
+    @Transactional(readOnly = true)
+    public Map<String, Number> getResourceTypeCountMap(int sessionId, Integer groupId)
+        throws PermissionException, SessionException {
         ResourceGroup g = findGroupById(sessionId, groupId);
         return resourceGroupManager.getMemberTypes(g);
     }
@@ -2074,8 +1959,9 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
-    public AppdefGroupValue findGroup(int sessionId, Integer id) throws PermissionException, SessionException {
+    @Transactional(readOnly = true)
+    public AppdefGroupValue findGroup(int sessionId, Integer id) throws PermissionException,
+        SessionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         ResourceGroup group = resourceGroupManager.findResourceGroupById(subject, id);
         return resourceGroupManager.getGroupConvert(subject, group);
@@ -2084,9 +1970,9 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
-    public Collection<ResourceGroup> getGroupsForResource(int sessionId, Resource r) throws SessionNotFoundException,
-        SessionTimeoutException {
+    @Transactional(readOnly = true)
+    public Collection<ResourceGroup> getGroupsForResource(int sessionId, Resource r)
+        throws SessionNotFoundException, SessionTimeoutException {
         sessionManager.authenticate(sessionId);
         return resourceGroupManager.getGroups(r);
     }
@@ -2099,7 +1985,7 @@ public class AppdefBossImpl implements AppdefBoss {
      *         id is incorrect.
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public PageList<AppdefGroupValue> findGroups(int sessionId, Integer[] groupIds, PageControl pc)
         throws PermissionException, SessionException {
         List<AppdefGroupValue> toBePaged = new ArrayList<AppdefGroupValue>(groupIds.length);
@@ -2117,9 +2003,11 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      * 
      */
-    @Transactional(readOnly=true)
-    public PageList<AppdefGroupValue> findAllGroupsMemberInclusive(int sessionId, PageControl pc, AppdefEntityID entity)
-        throws PermissionException, SessionTimeoutException, SessionNotFoundException, ApplicationException {
+    @Transactional(readOnly = true)
+    public PageList<AppdefGroupValue> findAllGroupsMemberInclusive(int sessionId, PageControl pc,
+                                                                   AppdefEntityID entity)
+        throws PermissionException, SessionTimeoutException, SessionNotFoundException,
+        ApplicationException {
         return findAllGroupsMemberInclusive(sessionId, pc, entity, new Integer[0]);
     }
 
@@ -2130,10 +2018,12 @@ public class AppdefBossImpl implements AppdefBoss {
      * @param entity for use in group member filtering.
      * @return List containing AppdefGroupValue.
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     private PageList<AppdefGroupValue> findAllGroupsMemberInclusive(int sessionId, PageControl pc,
-                                                                    AppdefEntityID entity, Integer[] excludeIds)
-        throws PermissionException, SessionTimeoutException, SessionNotFoundException, ApplicationException {
+                                                                    AppdefEntityID entity,
+                                                                    Integer[] excludeIds)
+        throws PermissionException, SessionTimeoutException, SessionNotFoundException,
+        ApplicationException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
 
         List<ResourceGroup> excludeGroups = new ArrayList<ResourceGroup>(excludeIds.length);
@@ -2143,7 +2033,8 @@ public class AppdefBossImpl implements AppdefBoss {
 
         Resource r = resourceManager.findResource(entity);
         PageInfo pInfo = PageInfo.create(pc, ResourceGroupSortField.NAME);
-        PageList<ResourceGroup> res = resourceGroupManager.findGroupsContaining(subject, r, excludeGroups, pInfo);
+        PageList<ResourceGroup> res = resourceGroupManager.findGroupsContaining(subject, r,
+            excludeGroups, pInfo);
         List<AppdefGroupValue> appVals = new ArrayList<AppdefGroupValue>(res.size());
         for (ResourceGroup g : res) {
             appVals.add(resourceGroupManager.getGroupConvert(subject, g));
@@ -2159,8 +2050,9 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return List containing AppdefGroupValue.
      * 
      */
-    @Transactional(readOnly=true)
-    public PageList<AppdefGroupValue> findAllGroupsMemberExclusive(int sessionId, PageControl pc, AppdefEntityID entity)
+    @Transactional(readOnly = true)
+    public PageList<AppdefGroupValue> findAllGroupsMemberExclusive(int sessionId, PageControl pc,
+                                                                   AppdefEntityID entity)
         throws PermissionException, SessionTimeoutException, SessionNotFoundException {
         return findAllGroupsMemberExclusive(sessionId, pc, entity, null, null);
     }
@@ -2172,9 +2064,10 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return List containing AppdefGroupValue.
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public PageList<AppdefGroupValue> findAllGroupsMemberExclusive(int sessionId, PageControl pc,
-                                                                   AppdefEntityID entity, Integer[] removeIds)
+                                                                   AppdefEntityID entity,
+                                                                   Integer[] removeIds)
         throws PermissionException, SessionTimeoutException, SessionNotFoundException {
         return findAllGroupsMemberExclusive(sessionId, pc, entity, removeIds, null);
     }
@@ -2187,11 +2080,12 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return List containing AppdefGroupValue.
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public PageList<AppdefGroupValue> findAllGroupsMemberExclusive(int sessionId, PageControl pc,
-                                                                   AppdefEntityID entity, Integer[] removeIds,
-                                                                   Resource resourceType) throws PermissionException,
-        SessionTimeoutException, SessionNotFoundException {
+                                                                   AppdefEntityID entity,
+                                                                   Integer[] removeIds,
+                                                                   Resource resourceType)
+        throws PermissionException, SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         List<ResourceGroup> excludeGroups = new ArrayList<ResourceGroup>(removeIds.length);
 
@@ -2200,8 +2094,8 @@ public class AppdefBossImpl implements AppdefBoss {
         }
         Resource r = resourceManager.findResource(entity);
         PageInfo pInfo = PageInfo.create(pc, ResourceGroupSortField.NAME);
-        PageList<ResourceGroup> res = resourceGroupManager.findGroupsNotContaining(subject, r, resourceType,
-            excludeGroups, pInfo);
+        PageList<ResourceGroup> res = resourceGroupManager.findGroupsNotContaining(subject, r,
+            resourceType, excludeGroups, pInfo);
 
         // Now convert those ResourceGroups into AppdefResourceGroupValues
         List<AppdefGroupValue> appVals = new ArrayList<AppdefGroupValue>(res.size());
@@ -2220,7 +2114,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return List containing AppdefGroupValue.
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public PageList<AppdefGroupValue> findAllGroupsMemberExclusive(int sessionId, PageControl pc,
                                                                    AppdefEntityID[] entities)
         throws PermissionException, SessionException {
@@ -2229,8 +2123,8 @@ public class AppdefBossImpl implements AppdefBoss {
         for (int i = 0; i < entities.length; i++) {
             AppdefEntityID eid = entities[i];
             Resource resource = resourceManager.findResource(eid);
-            List<AppdefGroupValue> result = findAllGroupsMemberExclusive(sessionId, pc, eid, new Integer[] {}, resource
-                .getPrototype());
+            List<AppdefGroupValue> result = findAllGroupsMemberExclusive(sessionId, pc, eid,
+                new Integer[] {}, resource.getPrototype());
 
             if (i == 0) {
                 commonList.addAll(result);
@@ -2252,12 +2146,13 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return List containing AppdefGroup.
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Collection<ResourceGroup> findAllGroupPojos(int sessionId) throws PermissionException,
         SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
 
-        Collection<ResourceGroup> resGrps = resourceGroupManager.getAllResourceGroups(subject, true);
+        Collection<ResourceGroup> resGrps = resourceGroupManager
+            .getAllResourceGroups(subject, true);
 
         // We only want the appdef resource groups
         for (Iterator<ResourceGroup> it = resGrps.iterator(); it.hasNext();) {
@@ -2289,16 +2184,18 @@ public class AppdefBossImpl implements AppdefBoss {
      * @see ResourceGroupManagerImpl.updateGroup
      * 
      */
-    public void updateGroup(int sessionId, ResourceGroup group, String name, String description, String location)
-        throws SessionException, PermissionException, GroupDuplicateNameException {
+    public void updateGroup(int sessionId, ResourceGroup group, String name, String description,
+                            String location) throws SessionException, PermissionException,
+        GroupDuplicateNameException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
 
         resourceGroupManager.updateGroup(subject, group, name, description, location);
     }
 
     // Return a PageList of authz resources.
-    private List<AppdefEntityID> findViewableEntityIds(AuthzSubject subject, int appdefTypeId, String rName,
-                                                       Integer filterType, PageControl pc) {
+    private List<AppdefEntityID> findViewableEntityIds(AuthzSubject subject, int appdefTypeId,
+                                                       String rName, Integer filterType,
+                                                       PageControl pc) {
         List<AppdefEntityID> appentResources = new ArrayList<AppdefEntityID>();
 
         if (appdefTypeId != APPDEF_TYPE_UNDEFINED) {
@@ -2320,14 +2217,15 @@ public class AppdefBossImpl implements AppdefBoss {
                 appdefTypeStr = null;
             }
 
-            List<Integer> instanceIds = resourceManager.findViewableInstances(subject, authzResType, rName,
-                appdefTypeStr, filterType, pc);
+            List<Integer> instanceIds = resourceManager.findViewableInstances(subject,
+                authzResType, rName, appdefTypeStr, filterType, pc);
 
             for (Integer instanceId : instanceIds) {
                 appentResources.add(new AppdefEntityID(appdefTypeId, instanceId));
             }
         } else {
-            Map<String, List<Integer>> authzResources = resourceManager.findAllViewableInstances(subject);
+            Map<String, List<Integer>> authzResources = resourceManager
+                .findAllViewableInstances(subject);
             for (Map.Entry<String, List<Integer>> entry : authzResources.entrySet()) {
 
                 int appdefType;
@@ -2366,17 +2264,19 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return page list of value objects that extend AppdefResourceValue
      * 
      */
-    @Transactional(readOnly=true)
-    public PageList findCompatInventory(int sessionId, int groupType, int appdefTypeId, int groupEntTypeId,
-                                        int appdefResTypeId, String resourceName, AppdefEntityID[] pendingEntities,
-                                        PageControl pc) throws AppdefEntityNotFoundException, PermissionException,
-        SessionException {
-        if (groupType != APPDEF_GROUP_TYPE_UNDEFINED && !AppdefEntityConstants.groupTypeIsValid(groupType)) {
+    @Transactional(readOnly = true)
+    public PageList findCompatInventory(int sessionId, int groupType, int appdefTypeId,
+                                        int groupEntTypeId, int appdefResTypeId,
+                                        String resourceName, AppdefEntityID[] pendingEntities,
+                                        PageControl pc) throws AppdefEntityNotFoundException,
+        PermissionException, SessionException {
+        if (groupType != APPDEF_GROUP_TYPE_UNDEFINED &&
+            !AppdefEntityConstants.groupTypeIsValid(groupType)) {
             throw new IllegalArgumentException("Invalid group type: " + groupType);
         }
 
-        return findCompatInventory(sessionId, appdefTypeId, appdefResTypeId, groupEntTypeId, null, false,
-            pendingEntities, resourceName, null, groupType, pc);
+        return findCompatInventory(sessionId, appdefTypeId, appdefResTypeId, groupEntTypeId, null,
+            false, pendingEntities, resourceName, null, groupType, pc);
     }
 
     /**
@@ -2398,15 +2298,16 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return page list of value objects that extend AppdefResourceValue
      * 
      */
-    @Transactional(readOnly=true)
-    public PageList<AppdefResourceValue> findCompatInventory(int sessionId, int appdefTypeId, int appdefResTypeId,
+    @Transactional(readOnly = true)
+    public PageList<AppdefResourceValue> findCompatInventory(int sessionId, int appdefTypeId,
+                                                             int appdefResTypeId,
                                                              AppdefEntityID groupEntity,
-                                                             AppdefEntityID[] pendingEntities, String resourceName,
-                                                             PageControl pc) throws AppdefEntityNotFoundException,
-        PermissionException, SessionException {
-        PageList<AppdefResourceValue> ret = findCompatInventory(sessionId, appdefTypeId, appdefResTypeId,
-            APPDEF_GROUP_TYPE_UNDEFINED, groupEntity, false, pendingEntities, resourceName, null,
-            APPDEF_GROUP_TYPE_UNDEFINED, pc);
+                                                             AppdefEntityID[] pendingEntities,
+                                                             String resourceName, PageControl pc)
+        throws AppdefEntityNotFoundException, PermissionException, SessionException {
+        PageList<AppdefResourceValue> ret = findCompatInventory(sessionId, appdefTypeId,
+            appdefResTypeId, APPDEF_GROUP_TYPE_UNDEFINED, groupEntity, false, pendingEntities,
+            resourceName, null, APPDEF_GROUP_TYPE_UNDEFINED, pc);
 
         if (appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVER ||
             appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
@@ -2425,17 +2326,21 @@ public class AppdefBossImpl implements AppdefBoss {
         return ret;
     }
 
-    private PageList<AppdefResourceValue> findCompatInventory(int sessionId, int appdefTypeId, int appdefResTypeId,
-                                                              int grpEntId, AppdefEntityID groupEntity,
-                                                              boolean members, AppdefEntityID[] pendingEntities,
-                                                              String resourceName, List<AppdefPagerFilter> filterList,
+    private PageList<AppdefResourceValue> findCompatInventory(int sessionId, int appdefTypeId,
+                                                              int appdefResTypeId, int grpEntId,
+                                                              AppdefEntityID groupEntity,
+                                                              boolean members,
+                                                              AppdefEntityID[] pendingEntities,
+                                                              String resourceName,
+                                                              List<AppdefPagerFilter> filterList,
                                                               int groupType, PageControl pc)
         throws PermissionException, SessionException {
         AuthzSubject subj = sessionManager.getSubject(sessionId);
         AppdefPagerFilterGroupEntityResource erFilter;
         AppdefPagerFilterAssignSvc assignedSvcFilter;
         AppdefPagerFilterGroupMemExclude groupMemberFilter;
-        boolean groupEntContext = groupType != APPDEF_GROUP_TYPE_UNDEFINED || grpEntId != APPDEF_GROUP_TYPE_UNDEFINED;
+        boolean groupEntContext = groupType != APPDEF_GROUP_TYPE_UNDEFINED ||
+                                  grpEntId != APPDEF_GROUP_TYPE_UNDEFINED;
 
         StopWatch watch = new StopWatch();
         watch.markTimeBegin("findCompatInventory");
@@ -2495,10 +2400,12 @@ public class AppdefBossImpl implements AppdefBoss {
         // resource type to filter the inventory set. This facilitates
         // the HTML selectors that appear all over the product.
         if (groupEntContext) {
-            erFilter = new AppdefPagerFilterGroupEntityResource(subj, groupType, grpEntId, appdefResTypeId, true);
+            erFilter = new AppdefPagerFilterGroupEntityResource(subj, groupType, grpEntId,
+                appdefResTypeId, true);
             filterList.add(erFilter);
         } else if (groupEntity != null) {
-            erFilter = new AppdefPagerFilterGroupEntityResource(subj, groupType, appdefTypeId, appdefResTypeId, true);
+            erFilter = new AppdefPagerFilterGroupEntityResource(subj, groupType, appdefTypeId,
+                appdefResTypeId, true);
             erFilter.setGroupSelected(true);
             filterList.add(erFilter);
         } else {
@@ -2512,7 +2419,8 @@ public class AppdefBossImpl implements AppdefBoss {
         watch.markTimeBegin("findViewableEntityIds");
         Integer filterType = appdefResTypeId != -1 ? new Integer(appdefResTypeId) : null;
 
-        List<AppdefEntityID> toBePaged = findViewableEntityIds(subj, appdefTypeId, resourceName, filterType, pc);
+        List<AppdefEntityID> toBePaged = findViewableEntityIds(subj, appdefTypeId, resourceName,
+            filterType, pc);
         watch.markTimeEnd("findViewableEntityIds");
 
         // Page it, then convert to AppdefResourceValue
@@ -2570,15 +2478,18 @@ public class AppdefBossImpl implements AppdefBoss {
      * Perform a search for resources from the resource hub
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public PageList<AppdefResourceValue> search(int sessionId, int appdefTypeId, String searchFor,
-                                                AppdefEntityTypeID appdefResType, Integer groupId, int[] groupSubType,
-                                                boolean matchAny, boolean matchOwn, boolean matchUnavail, PageControl pc)
-        throws PermissionException, SessionException, PatternSyntaxException {
+                                                AppdefEntityTypeID appdefResType, Integer groupId,
+                                                int[] groupSubType, boolean matchAny,
+                                                boolean matchOwn, boolean matchUnavail,
+                                                PageControl pc) throws PermissionException,
+        SessionException, PatternSyntaxException {
         int grpEntId = APPDEF_GROUP_TYPE_UNDEFINED;
 
         if (appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
-            grpEntId = (appdefResType == null) ? AppdefEntityConstants.APPDEF_TYPE_GROUP : appdefResType.getType();
+            grpEntId = (appdefResType == null) ? AppdefEntityConstants.APPDEF_TYPE_GROUP
+                                              : appdefResType.getType();
         }
         AppdefEntityID grpId = (groupId == null) ? null : AppdefEntityID.newGroupID(groupId);
 
@@ -2589,12 +2500,12 @@ public class AppdefBossImpl implements AppdefBoss {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         PageList<AppdefResourceValue> res = new PageList<AppdefResourceValue>();
 
-        CritterTranslator trans = new CritterTranslator();
+       
         CritterTranslationContext ctx = new CritterTranslationContext(subject);
-        CritterList cList = getCritterList(subject, matchAny, appdefResType, searchFor, grpId, grpEntId, groupSubType,
-            appdefTypeId, matchOwn, matchUnavail);
+        CritterList cList = getCritterList(subject, matchAny, appdefResType, searchFor, grpId,
+            grpEntId, groupSubType, appdefTypeId, matchOwn, matchUnavail);
         // TODO: G
-        PageList<Resource> children = trans.translate(ctx, cList, pc);
+        PageList<Resource> children = critterTranslator.translate(ctx, cList, pc);
         res.ensureCapacity(children.size());
         res.setTotalSize(children.getTotalSize());
         for (Resource child : children) {
@@ -2614,30 +2525,36 @@ public class AppdefBossImpl implements AppdefBoss {
         return res;
     }
 
-    private CritterList getCritterList(AuthzSubject subj, boolean matchAny, AppdefEntityTypeID appdefResType,
-                                       String resourceName, AppdefEntityID grpId, int grpEntId, int[] groupTypes,
+    private CritterList getCritterList(AuthzSubject subj, boolean matchAny,
+                                       AppdefEntityTypeID appdefResType, String resourceName,
+                                       AppdefEntityID grpId, int grpEntId, int[] groupTypes,
                                        int appdefTypeId, boolean matchOwn, boolean matchUnavail)
         throws PatternSyntaxException {
         Critter tmp;
-        Resource proto = null;
-        if (appdefResType != null) {
-
-            proto = resourceManager.findResourcePrototype(appdefResType);
-        }
+        Resource proto = (appdefResType != null) ? resourceManager
+            .findResourcePrototype(appdefResType) : null;
         boolean isGroup = (groupTypes == null) ? false : true;
         List<Critter> critters = new ArrayList<Critter>();
         if (isGroup) {
             critters.add(getGrpTypeCritter(groupTypes, proto));
-            if (null != (tmp = getResourceTypeCritter(grpEntId))) {
+            if (null != (tmp = getResourceTypeCritter(grpEntId, null))) {
                 critters.add(tmp);
-            } else if (null != (tmp = getResourceTypeCritter(appdefTypeId))) {
+            } else if (null != (tmp = getResourceTypeCritter(appdefTypeId, null))) {
                 critters.add(tmp);
             }
         } else {
             if (null != (tmp = getProtoCritter(appdefResType, proto))) {
                 critters.add(tmp);
             }
-            if (null != (tmp = getResourceTypeCritter(appdefTypeId))) {
+            // HPD-476 want to hide vm images from browse resources when viewing
+            // all
+            Resource protoToExclude = resourceManager
+                .findResourcePrototypeByName(AuthzConstants.platformPrototypeVmwareVsphereVm);
+            Integer excludeId = (protoToExclude == null) ? null : protoToExclude.getId();
+            if (proto != null && excludeId != null && excludeId.equals(proto.getId())) {
+                excludeId = null;
+            }
+            if (null != (tmp = getResourceTypeCritter(appdefTypeId, excludeId))) {
                 critters.add(tmp);
             }
         }
@@ -2688,14 +2605,14 @@ public class AppdefBossImpl implements AppdefBoss {
         return null;
     }
 
-    private Critter getResourceTypeCritter(int appdefTypeId) {
+    private Critter getResourceTypeCritter(int appdefTypeId, Integer protoToExclude) {
         if (appdefTypeId == APPDEF_GROUP_TYPE_UNDEFINED || appdefTypeId == APPDEF_TYPE_UNDEFINED ||
             appdefTypeId == APPDEF_RES_TYPE_UNDEFINED) {
             return null;
         }
         String resTypeName = AppdefUtil.appdefTypeIdToAuthzTypeStr(appdefTypeId);
         ResourceTypeCritterType type = new ResourceTypeCritterType();
-        return type.newInstance(resTypeName);
+        return type.newInstance(resTypeName, protoToExclude);
     }
 
     private Critter getResourceNameCritter(String resourceName) throws PatternSyntaxException {
@@ -2720,7 +2637,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * Perform a search for resources
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public PageList<SearchResult> search(int sessionId, String searchFor, PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -2729,8 +2646,8 @@ public class AppdefBossImpl implements AppdefBoss {
         List<SearchResult> searchResults = new ArrayList<SearchResult>(resources.size());
         for (Resource res : resources) {
             AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(res);
-            searchResults.add(new SearchResult(res.getName(), AppdefEntityConstants.typeToString(aeid.getType()), aeid
-                .getAppdefKey()));
+            searchResults.add(new SearchResult(res.getName(), AppdefEntityConstants
+                .typeToString(aeid.getType()), aeid.getAppdefKey()));
         }
 
         return new PageList<SearchResult>(searchResults, resources.getTotalSize());
@@ -2750,10 +2667,13 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return page list of value objects that extend AppdefResourceValue
      * 
      */
-    @Transactional(readOnly=true)
-    public PageList<AppdefResourceValue> findAvailableServicesForApplication(int sessionId, Integer appId,
+    @Transactional(readOnly = true)
+    public PageList<AppdefResourceValue> findAvailableServicesForApplication(
+                                                                             int sessionId,
+                                                                             Integer appId,
                                                                              AppdefEntityID[] pendingEntities,
-                                                                             String nameFilter, PageControl pc)
+                                                                             String nameFilter,
+                                                                             PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException, SessionException {
 
         final StopWatch watch = new StopWatch();
@@ -2770,24 +2690,32 @@ public class AppdefBossImpl implements AppdefBoss {
 
         int oriPageSize = pc.getPagesize();
         pc.setPagesize(PageControl.SIZE_UNLIMITED);
-        if (debug) watch.markTimeBegin("findViewableSvcResources");
-        Set<Resource> authzResources = new TreeSet<Resource>(resourceManager.findViewableSvcResources(subject, nameFilter, pc));
-        if (debug) watch.markTimeEnd("findViewableSvcResources");
-     
+        if (debug)
+            watch.markTimeBegin("findViewableSvcResources");
+        Set<Resource> authzResources = new TreeSet<Resource>(resourceManager
+            .findViewableSvcResources(subject, nameFilter, pc));
+        if (debug)
+            watch.markTimeEnd("findViewableSvcResources");
+
         int authzResourcesSize = authzResources.size();
 
         pc.setPagesize(oriPageSize);
 
         // Remove existing application assigned inventory
-        if (debug) watch.markTimeBegin("findServiceInventoryByApplication");
-        List<AppdefResourceValue> assigned = findServiceInventoryByApplication(sessionId, appId, PageControl.PAGE_ALL);
-        if (debug) watch.markTimeEnd("findServiceInventoryByApplication");
-        if (debug) watch.markTimeBegin("loop1");
-      
-        for (AppdefResourceValue val : assigned ) {
+        if (debug)
+            watch.markTimeBegin("findServiceInventoryByApplication");
+        List<AppdefResourceValue> assigned = findServiceInventoryByApplication(sessionId, appId,
+            PageControl.PAGE_ALL);
+        if (debug)
+            watch.markTimeEnd("findServiceInventoryByApplication");
+        if (debug)
+            watch.markTimeBegin("loop1");
+
+        for (AppdefResourceValue val : assigned) {
             authzResources.remove(resourceManager.findResource(val.getEntityId()));
         }
-        if (debug) watch.markTimeEnd("loop1");
+        if (debug)
+            watch.markTimeEnd("loop1");
 
         List<AppdefEntityID> toBePaged = new ArrayList<AppdefEntityID>(authzResources.size());
         for (Resource r : authzResources) {
@@ -2795,7 +2723,8 @@ public class AppdefBossImpl implements AppdefBoss {
         }
 
         // Page it, then convert to AppdefResourceValue
-        List<AppdefResourceValue> finalList = new ArrayList<AppdefResourceValue>(authzResources.size());
+        List<AppdefResourceValue> finalList = new ArrayList<AppdefResourceValue>(authzResources
+            .size());
         // TODO: G
         PageList<AppdefEntityID> pl = getPageList(toBePaged, pc, filterList);
         for (AppdefEntityID ent : pl) {
@@ -2811,8 +2740,10 @@ public class AppdefBossImpl implements AppdefBoss {
 
         int pendingSize = (pendingEntities != null) ? pendingEntities.length : 0;
         int adjustedSize = authzResourcesSize - pendingSize;
-        PageList<AppdefResourceValue> rtn = new PageList<AppdefResourceValue>(finalList,adjustedSize);
-        if (debug) log.debug(watch);
+        PageList<AppdefResourceValue> rtn = new PageList<AppdefResourceValue>(finalList,
+            adjustedSize);
+        if (debug)
+            log.debug(watch);
         return rtn;
     }
 
@@ -2847,8 +2778,8 @@ public class AppdefBossImpl implements AppdefBoss {
      * @param groupIds identifier array
      * 
      */
-    public void batchGroupAdd(int sessionId, AppdefEntityID entityId, Integer[] groupIds) throws SessionException,
-        PermissionException, VetoException {
+    public void batchGroupAdd(int sessionId, AppdefEntityID entityId, Integer[] groupIds)
+        throws SessionException, PermissionException, VetoException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
 
         Resource resource = resourceManager.findResource(entityId);
@@ -2867,8 +2798,8 @@ public class AppdefBossImpl implements AppdefBoss {
      * before a user is about to be deleted
      * 
      */
-    public void resetResourceOwnership(int sessionId, AuthzSubject currentOwner) throws UpdateException,
-        PermissionException, AppdefEntityNotFoundException {
+    public void resetResourceOwnership(int sessionId, AuthzSubject currentOwner)
+        throws UpdateException, PermissionException, AppdefEntityNotFoundException {
 
         // first look up the appdef resources by owner
 
@@ -2878,7 +2809,8 @@ public class AppdefBossImpl implements AppdefBoss {
             AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(aRes);
 
             if (aeid.isGroup()) {
-                ResourceGroup g = resourceGroupManager.findResourceGroupById(overlord, aRes.getInstanceId());
+                ResourceGroup g = resourceGroupManager.findResourceGroupById(overlord, aRes
+                    .getInstanceId());
                 resourceGroupManager.changeGroupOwner(overlord, g, overlord);
             } else {
                 resourceManager.setResourceOwner(overlord, aRes, overlord);
@@ -2912,7 +2844,7 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public AppdefResourcePermissions getResourcePermissions(int sessionId, AppdefEntityID id)
         throws SessionNotFoundException, SessionTimeoutException {
         AuthzSubject who = sessionManager.getSubject(sessionId);
@@ -2922,8 +2854,9 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
-    public int getAgentCount(int sessionId) throws SessionNotFoundException, SessionTimeoutException {
+    @Transactional(readOnly = true)
+    public int getAgentCount(int sessionId) throws SessionNotFoundException,
+        SessionTimeoutException {
         sessionManager.authenticate(sessionId);
         return agentManager.getAgentCount();
     }
@@ -2931,8 +2864,9 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    @Transactional(readOnly=true)
-    public List<Agent> findAllAgents(int sessionId) throws SessionNotFoundException, SessionTimeoutException {
+    @Transactional(readOnly = true)
+    public List<Agent> findAllAgents(int sessionId) throws SessionNotFoundException,
+        SessionTimeoutException {
         sessionManager.authenticate(sessionId);
         return agentManager.getAgents();
     }
@@ -2942,9 +2876,9 @@ public class AppdefBossImpl implements AppdefBoss {
      * listening
      * 
      */
-    @Transactional(readOnly=true)
-    public Agent findAgentByIpAndPort(int sessionId, String ip, int port) throws SessionNotFoundException,
-        SessionTimeoutException, AgentNotFoundException {
+    @Transactional(readOnly = true)
+    public Agent findAgentByIpAndPort(int sessionId, String ip, int port)
+        throws SessionNotFoundException, SessionTimeoutException, AgentNotFoundException {
         sessionManager.authenticate(sessionId);
         return agentManager.getAgent(ip, port);
     }
@@ -2959,8 +2893,8 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     public void setCPropValue(int sessionId, AppdefEntityID id, String key, String val)
-        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException, PermissionException,
-        CPropKeyNotFoundException {
+        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException,
+        PermissionException, CPropKeyNotFoundException {
         AuthzSubject who = sessionManager.getSubject(sessionId);
         AppdefEntityValue aVal = new AppdefEntityValue(id, who);
         int typeId = aVal.getAppdefResourceType().getId().intValue();
@@ -2974,9 +2908,10 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return The properties stored for a specific entity ID
      * 
      */
-    @Transactional(readOnly=true)
-    public Properties getCPropDescEntries(int sessionId, AppdefEntityID id) throws SessionNotFoundException,
-        SessionTimeoutException, PermissionException, AppdefEntityNotFoundException {
+    @Transactional(readOnly = true)
+    public Properties getCPropDescEntries(int sessionId, AppdefEntityID id)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException,
+        AppdefEntityNotFoundException {
         sessionManager.authenticate(sessionId);
         return cPropManager.getDescEntries(id);
     }
@@ -2988,7 +2923,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return a List of CPropKeyValue objects
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public List<CpropKey> getCPropKeys(int sessionId, int appdefType, int appdefTypeId)
         throws SessionNotFoundException, SessionTimeoutException {
         sessionManager.authenticate(sessionId);
@@ -3003,9 +2938,10 @@ public class AppdefBossImpl implements AppdefBoss {
      * @throws AppdefEntityNotFoundException
      * 
      */
-    @Transactional(readOnly=true)
-    public List<CpropKey> getCPropKeys(int sessionId, AppdefEntityID aeid) throws SessionNotFoundException,
-        SessionTimeoutException, AppdefEntityNotFoundException, PermissionException {
+    @Transactional(readOnly = true)
+    public List<CpropKey> getCPropKeys(int sessionId, AppdefEntityID aeid)
+        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException,
+        PermissionException {
         AuthzSubject who = sessionManager.getSubject(sessionId);
 
         AppdefEntityValue av = new AppdefEntityValue(aeid, who);
@@ -3018,7 +2954,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * Get the appdef inventory summary visible to a user
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public AppdefInventorySummary getInventorySummary(int sessionId, boolean countTypes)
         throws SessionNotFoundException, SessionTimeoutException {
         AuthzSubject who = sessionManager.getSubject(sessionId);
@@ -3030,7 +2966,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * Suitable for populating an HTML selector.
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public String[][] getAppdefTypeStrArrMap() {
         int[] validTypes = AppdefEntityConstants.getAppdefTypes();
         String[][] retVal = new String[validTypes.length][2];
@@ -3053,9 +2989,9 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     public void setAllConfigResponses(int sessionInt, AllConfigResponses allConfigs,
-                                      AllConfigResponses allConfigsRollback) throws PermissionException,
-        EncodingException, PluginException, ApplicationException, AutoinventoryException,
-        ScheduleWillNeverFireException, AgentConnectionException {
+                                      AllConfigResponses allConfigsRollback)
+        throws PermissionException, EncodingException, PluginException, ApplicationException,
+        AutoinventoryException, ScheduleWillNeverFireException, AgentConnectionException {
         AuthzSubject subject = sessionManager.getSubject(sessionInt);
         boolean doRollback = true;
         boolean doValidation = (allConfigsRollback != null);
@@ -3081,7 +3017,8 @@ public class AppdefBossImpl implements AppdefBoss {
                 } catch (PermissionException pe) {
                     aiSubject = authzSubjectManager.getSubjectById(AuthzConstants.rootSubjectId);
                 }
-                autoinventoryManager.startScan(aiSubject, id, new ScanConfigurationCore(), null, null, null);
+                autoinventoryManager.startScan(aiSubject, id, new ScanConfigurationCore(), null,
+                    null, null);
             }
         } catch (InvalidConfigException e) {
             // setValidationError for InventoryHelper.isResourceConfigured
@@ -3095,17 +3032,19 @@ public class AppdefBossImpl implements AppdefBoss {
         }
     }
 
-    private void doSetAll(AuthzSubject subject, AllConfigResponses allConfigs, boolean doValidation, boolean force)
-        throws EncodingException, PermissionException, ConfigFetchException, PluginException, ApplicationException {
+    private void doSetAll(AuthzSubject subject, AllConfigResponses allConfigs,
+                          boolean doValidation, boolean force) throws EncodingException,
+        PermissionException, ConfigFetchException, PluginException, ApplicationException {
         AppdefEntityID entityId = allConfigs.getResource();
         Set<AppdefEntityID> ids = new HashSet<AppdefEntityID>();
         ConfigResponseDB existingConfig;
         Service svc = null;
         try {
             existingConfig = configManager.getConfigResponse(entityId);
-            boolean wasUpdated = configManager.configureResponse(subject, existingConfig, entityId, ConfigResponse.safeEncode(allConfigs
-                .getProductConfig()), ConfigResponse.safeEncode(allConfigs.getMetricConfig()), ConfigResponse
-                .safeEncode(allConfigs.getControlConfig()), ConfigResponse.safeEncode(allConfigs.getRtConfig()),
+            boolean wasUpdated = configManager.configureResponse(subject, existingConfig, entityId,
+                ConfigResponse.safeEncode(allConfigs.getProductConfig()), ConfigResponse
+                    .safeEncode(allConfigs.getMetricConfig()), ConfigResponse.safeEncode(allConfigs
+                    .getControlConfig()), ConfigResponse.safeEncode(allConfigs.getRtConfig()),
                 Boolean.TRUE, force);
             if (wasUpdated) {
                 ids.add(entityId);
@@ -3189,9 +3128,11 @@ public class AppdefBossImpl implements AppdefBoss {
                 ids.add(entityId);
 
             if (ids.size() > 0) { // Actually updated
-                List<ResourceUpdatedZevent> events = new ArrayList<ResourceUpdatedZevent>(ids.size());
+                List<ResourceUpdatedZevent> events = new ArrayList<ResourceUpdatedZevent>(ids
+                    .size());
 
-                AuthzSubject hqadmin = authzSubjectManager.getSubjectById(AuthzConstants.rootSubjectId);
+                AuthzSubject hqadmin = authzSubjectManager
+                    .getSubjectById(AuthzConstants.rootSubjectId);
 
                 for (AppdefEntityID ade : ids) {
                     AuthzSubject eventSubject = subject;
@@ -3225,18 +3166,23 @@ public class AppdefBossImpl implements AppdefBoss {
      * @return all navigable resources for the given appdef entity
      * 
      */
-    public ResourceTreeNode[] getNavMapData(int sessionId, AppdefEntityID adeId) throws SessionNotFoundException,
-        SessionTimeoutException, PermissionException, AppdefEntityNotFoundException {
+    public ResourceTreeNode[] getNavMapData(int sessionId, AppdefEntityID adeId)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException,
+        AppdefEntityNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         switch (adeId.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                return appdefStatManager.getNavMapDataForPlatform(subject, new Integer(adeId.getID()));
+                return appdefStatManager.getNavMapDataForPlatform(subject, new Integer(adeId
+                    .getID()));
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                return appdefStatManager.getNavMapDataForServer(subject, new Integer(adeId.getID()));
+                return appdefStatManager
+                    .getNavMapDataForServer(subject, new Integer(adeId.getID()));
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                return appdefStatManager.getNavMapDataForService(subject, new Integer(adeId.getID()));
+                return appdefStatManager.getNavMapDataForService(subject,
+                    new Integer(adeId.getID()));
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                return appdefStatManager.getNavMapDataForApplication(subject, new Integer(adeId.getID()));
+                return appdefStatManager.getNavMapDataForApplication(subject, new Integer(adeId
+                    .getID()));
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                 return appdefStatManager.getNavMapDataForGroup(subject, new Integer(adeId.getID()));
         }
@@ -3253,7 +3199,8 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     public ResourceTreeNode[] getNavMapData(int sessionId, AppdefEntityID[] adeIds, int ctype)
-        throws SessionNotFoundException, SessionTimeoutException, PermissionException, AppdefEntityNotFoundException {
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException,
+        AppdefEntityNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return appdefStatManager.getNavMapDataForAutoGroup(subject, adeIds, new Integer(ctype));
     }
@@ -3262,8 +3209,10 @@ public class AppdefBossImpl implements AppdefBoss {
      * Get the list of resources that are unavailable
      * 
      */
-    public Collection<DownResource> getUnavailableResources(AuthzSubject user, String typeId, PageInfo info)
-        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException, PermissionException {
+    public Collection<DownResource> getUnavailableResources(AuthzSubject user, String typeId,
+                                                            PageInfo info)
+        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException,
+        PermissionException {
         List<DownMetricValue> unavailEnts = availabilityManager.getUnavailEntities(null);
 
         if (unavailEnts.size() == 0) {
@@ -3271,7 +3220,8 @@ public class AppdefBossImpl implements AppdefBoss {
         }
 
         DownResSortField sortField = (DownResSortField) info.getSort();
-        Set<DownResource> ret = new TreeSet<DownResource>(sortField.getComparator(!info.isAscending()));
+        Set<DownResource> ret = new TreeSet<DownResource>(sortField.getComparator(!info
+            .isAscending()));
 
         int appdefType = -1;
         int appdefTypeId = -1;
@@ -3286,8 +3236,8 @@ public class AppdefBossImpl implements AppdefBoss {
             }
         }
 
-        Set<AppdefEntityID> viewables = new HashSet<AppdefEntityID>(findViewableEntityIds(user, APPDEF_TYPE_UNDEFINED,
-            null, null, null));
+        Set<AppdefEntityID> viewables = new HashSet<AppdefEntityID>(findViewableEntityIds(user,
+            APPDEF_TYPE_UNDEFINED, null, null, null));
         for (DownMetricValue dmv : unavailEnts) {
             AppdefEntityID entityId = dmv.getEntityId();
             if (!viewables.contains(entityId)) {
@@ -3347,8 +3297,8 @@ public class AppdefBossImpl implements AppdefBoss {
             return ret;
         }
 
-        Set<AppdefEntityID> viewables = new HashSet<AppdefEntityID>(findViewableEntityIds(user, APPDEF_TYPE_UNDEFINED,
-            null, null, null));
+        Set<AppdefEntityID> viewables = new HashSet<AppdefEntityID>(findViewableEntityIds(user,
+            APPDEF_TYPE_UNDEFINED, null, null, null));
         for (DownMetricValue dmv : unavailEnts) {
 
             AppdefEntityID aeid = dmv.getEntityId();
@@ -3381,5 +3331,13 @@ public class AppdefBossImpl implements AppdefBoss {
             Collections.sort(list);
         }
         return ret;
+    }
+
+    /**
+     * Check whether or not a given resource exists in the virtual hierarchy
+     * 
+     */
+    public boolean hasVirtualResourceRelation(Resource resource) {
+        return resourceManager.hasResourceRelation(resource, resourceManager.getVirtualRelation());
     }
 }

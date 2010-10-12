@@ -16,16 +16,16 @@ then
    cdir=$PWD
    mkdir -p $AGENT_BASE_DIR
    cd $AGENT_BASE_DIR
-   wget http://10.0.0.240/raid/release/candidates/hq/hyperic-hq-agent-$AGENT_BUILD_VERSION-EE-$AGENT_BUILD_NUMBER-noJRE.tgz
+   wget http://10.0.0.58/raid/release/candidates/hq/hyperic-hqee-agent-$AGENT_BUILD_VERSION.BUILD-$AGENT_BUILD_NUMBER-noJRE.tar.gz
    if [ -d $AGENT_HOME ]
    then
      rm -rf $AGENT_HOME
    fi
-   tar -zxf hyperic-hq-agent-$AGENT_BUILD_VERSION-EE-$AGENT_BUILD_NUMBER-noJRE.tgz
+   tar -zxf hyperic-hqee-agent-$AGENT_BUILD_VERSION.BUILD-$AGENT_BUILD_NUMBER-noJRE.tar.gz
    # Deploy JMX Test Data Cache Plugin under Agent
-   wget -r -l2 -nH -np -nd -Pmbeanserver  http://10.0.0.240/raid/release/candidates/qatools/mbeanserver/
+   wget -r -l2 -nH -np -nd -Pmbeanserver  http://10.0.0.58/raid/release/candidates.restore/qatools/mbeanserver/
    chmod +x mbeanserver/*.sh
-   wget http://10.0.0.240/raid/release/candidates/qatools/testserver-plugin.xml
+   wget http://10.0.0.58/raid/release/candidates.restore/qatools/testserver-plugin.xml
    cp mbeanserver/jmx-testdata-plugin.xml $AGENT_BUNDLE_HOME/pdk/plugins
    cp testserver-plugin.xml $AGENT_BUNDLE_HOME/pdk/plugins
    cd $cdir

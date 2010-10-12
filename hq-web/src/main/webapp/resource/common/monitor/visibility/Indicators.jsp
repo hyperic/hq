@@ -160,6 +160,9 @@
 											<c:when test="${avail.value == -0.01}">
 												<c:set var="timelineIndicatorColor" value="timelineOrange" />
 											</c:when>
+											 <c:when test="${avail.value == -0.02}">
+ 	 	 	 									<c:set var="timelineIndicatorColor" value="timelineBlack" />
+ 	 	 	 								</c:when>
 											<c:when test="${avail.value <= 0}">
 												<c:set var="timelineIndicatorColor" value="timelineRed" />
 											</c:when>
@@ -215,15 +218,7 @@
 						</c:if>
 					
 						<c:param name="view" value="${view}" />
-					
-						<c:choose>
-							<c:when test="${ProblemMetricsDisplayForm.fresh}">
-								<c:param name="action" value="fresh" />
-							</c:when>
-							<c:otherwise>
-								<c:param name="action" value="refresh" />
-							</c:otherwise>
-						</c:choose>
+						<c:param name="action" value="fresh" />
 					</c:url> 
 					<iframe id="chartFrame" src="<c:out value="${chartUrl}"/>" 
 					        marginwidth="0" marginheight="0" frameborder="no" scrolling="auto"

@@ -46,6 +46,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.apache.struts.action.ActionRedirect;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
@@ -95,9 +96,13 @@ public class ViewAction
 
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);
-
         DashboardConfig dashConfig = dashboardManager.findDashboard((Integer) session
             .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
+        
+        if (dashConfig == null) {
+        	return new ActionRedirect("/Dashboard.do");
+        }
+        
         ConfigResponse dashPrefs = dashConfig.getConfig();
 
         String token;

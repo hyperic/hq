@@ -1,4 +1,32 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+
+    NOTE: This copyright does *not* cover user programs that use HQ
+    program services by normal system calls through the application
+    program interfaces provided as part of the Hyperic Plug-in Development
+    Kit or the Hyperic Client Development Kit - this is merely considered
+    normal use of the program, and does *not* fall under the heading of
+     "derived work".
+
+     Copyright (C) [2009-2010], VMware, Inc.
+     This file is part of HQ.
+
+     HQ is free software; you can redistribute it and/or modify
+     it under the terms version 2 of the GNU General Public License as
+     published by the Free Software Foundation. This program is distributed
+     in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+     even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+     PARTICULAR PURPOSE. See the GNU General Public License for more
+     details.
+
+     You should have received a copy of the GNU General Public License
+     along with this program; if not, write to the Free Software
+     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+     USA.
+
+
+-->
+
 
 <web-app xmlns="http://java.sun.com/xml/ns/j2ee"
   		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
@@ -9,7 +37,10 @@
 
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
-		<param-value>/WEB-INF/spring/*-context.xml,classpath*:/META-INF/spring/*-context.xml</param-value>
+		<param-value>
+			/WEB-INF/spring/security-web-context.xml,
+			classpath*:/META-INF/spring/*-context.xml
+		</param-value>
 	</context-param>
 	
 	<listener>
@@ -32,36 +63,14 @@
 		<param-name>RtEnabled</param-name>
 		<param-value>false</param-value>
 	</context-param>
-	<!-- Tapestry servelet and mappings -->
-	<servlet>
-		<servlet-name>hq</servlet-name>
-		<servlet-class>org.apache.tapestry.ApplicationServlet</servlet-class>
-		<load-on-startup>0</load-on-startup>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>hq</servlet-name>
-		<url-pattern>*.html</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>hq</servlet-name>
-		<url-pattern>*.shtml</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>hq</servlet-name>
-		<url-pattern>*.sshq</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>hq</servlet-name>
-		<url-pattern>*.shq</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>hq</servlet-name>
-		<url-pattern>/assets/*</url-pattern>
-	</servlet-mapping>
-
+	
 	<servlet>
         <servlet-name>webapp</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>/WEB-INF/spring/webapp-servlet.xml</param-value>
+		</init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
 
@@ -101,6 +110,11 @@
 		<filter-class>org.hyperic.hq.ui.RenditFilter</filter-class>
 	</filter>
 
+	<filter>
+    	<filter-name>httpMethodFilter</filter-name>
+	    <filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
+	</filter>
+
 	<filter-mapping>
 		<filter-name>UrlRewriteFilter</filter-name>
 		<url-pattern>/*</url-pattern>
@@ -115,6 +129,11 @@
       <filter-name>filterChainProxy</filter-name>
       <url-pattern>/*</url-pattern>
     </filter-mapping> 
+
+	<filter-mapping>
+    	<filter-name>httpMethodFilter</filter-name>
+	    <servlet-name>webapp</servlet-name>
+	</filter-mapping>
 
 	<filter-mapping>
 		<filter-name>Resource-Filter</filter-name>

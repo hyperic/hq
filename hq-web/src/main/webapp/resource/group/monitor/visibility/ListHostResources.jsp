@@ -84,13 +84,10 @@
     <td class="ListHeaderCheckbox" width="3%"><input type="checkbox" onclick="ToggleAllGroup(this, widgetProperties, '<c:out value="${listMembersName}"/>')" name="listToggleAll"></td>
     </c:if>
 
-    <td width="100%" class="ListHeader"><fmt:message key="${tabKey}"/></td>
+    <td class="ListHeader"><fmt:message key="${tabKey}"/></td>
     <c:if test="${not empty HostHealthSummaries}">
-    <td width="20%" class="ListHeaderCheckbox"><fmt:message key="resource.common.monitor.visibility.AVAILTH"/></td>
-    <td class="ListHeaderInactive" width="6%"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-    <!--
-    <td width="8%" class="ListHeaderCheckbox"><fmt:message key="resource.common.monitor.visibility.PERFTH"/></td>
-  -->
+    <td width="24" class="ListHeaderCheckbox"><fmt:message key="resource.common.monitor.visibility.AVAILTH"/></td>
+    <td class="ListHeaderInactive" width="14">&nbsp;</td>
     </c:if>
   </tr>
 
@@ -107,11 +104,10 @@
         <tiles:put name="availability" beanName="summary" beanProperty="availability" />
     </tiles:insert>
     </td>
-    <td class="ListCellCheckbox">
-      <!--<a href="<c:out value="${url}"/>">-->
-      <html:img page="/images/comment.gif" onmouseover="menuLayers.show('${summary.resourceTypeId}_${summary.resourceId}_menu', event)" onmouseout="menuLayers.hide()" border="0"/>
-      <!--</a>-->
-    </td>
+    <td class="ListCellCheckbox resourceCommentIcon"
+        onmouseover="menuLayers.show('<c:out value="${summary.resourceTypeId}" />_<c:out value="${summary.resourceId}" />_menu', event)" 
+        onmouseout="menuLayers.hide()">&nbsp;
+	</td>
   </tr>
 
     </c:forEach>

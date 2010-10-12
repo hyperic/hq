@@ -1,3 +1,29 @@
+/**
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ *  "derived work".
+ *
+ *  Copyright (C) [2009-2010], VMware, Inc.
+ *  This file is part of HQ.
+ *
+ *  HQ is free software; you can redistribute it and/or modify
+ *  it under the terms version 2 of the GNU General Public License as
+ *  published by the Free Software Foundation. This program is distributed
+ *  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ *  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ *  PARTICULAR PURPOSE. See the GNU General Public License for more
+ *  details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ *  USA.
+ *
+ */
+
 package org.hyperic.hq.auth.server.session;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -35,7 +61,7 @@ public class UserAuditFactory {
     }
 
     public UserAudit loginAudit(AuthzSubject user) {
-        String msg = MSGS.format("auditMsg.user.login", user.getFullName());
+        String msg = MSGS.format("auditMsg.user.login", getAuditUserName(user));
         UserAudit res = new UserAudit(user.getResource(), user, USER_LOGIN, AuditImportance.LOW, AuditNature.START, msg);
 
         auditManager.saveAudit(res);
@@ -43,7 +69,7 @@ public class UserAuditFactory {
     }
 
     public UserAudit logoutAudit(AuthzSubject user) {
-        String msg = MSGS.format("auditMsg.user.logout", user.getFullName());
+        String msg = MSGS.format("auditMsg.user.logout", getAuditUserName(user));
         UserAudit res = new UserAudit(user.getResource(), user, USER_LOGOUT, AuditImportance.LOW, AuditNature.STOP, msg);
 
         auditManager.saveAudit(res);
@@ -70,5 +96,15 @@ public class UserAuditFactory {
         res.setNewFieldValue(newVal);
         auditManager.saveAudit(res);
         return res;
+    }
+    
+    private String getAuditUserName(AuthzSubject user) {
+        String userName = user.getFullName();
+        
+        if (userName == null || userName.trim().length() == 0) {
+            userName = user.getName();
+        }
+        
+        return userName;
     }
 }

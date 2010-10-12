@@ -1,15 +1,15 @@
 /*
- * NOTE: This copyright does *not* cover user programs that use HQ
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2008], Hyperic, Inc.
- * This file is part of HQ.
+ * Copyright (C) [2004-2010], VMware, Inc.
+ * This file is part of Hyperic.
  *
- * HQ is free software; you can redistribute it and/or modify
+ * Hyperic is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
  * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -39,7 +39,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.type.IntegerType;
-import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentDAO;
@@ -199,6 +198,21 @@ public class MeasurementDAO
         }
 
         return appdefEntityIds;
+    }
+    
+    @SuppressWarnings("unchecked")
+    List<Measurement> findByResources(List<Resource> resources) {
+        List<Measurement> measurements = new ArrayList<Measurement>();
+        String hql="select m from Measurement m "
+                     + "where m.resource in (:resources)";
+        final Query query = getSession().createQuery(hql);
+        final int size = resources.size();
+        for (int i = 0; i < size; i += BATCH_SIZE) {
+            int end = Math.min(size, i + BATCH_SIZE);
+            final List<Resource> sublist = resources.subList(i, end);
+            measurements.addAll(query.setParameterList("resources", sublist).list());
+        }
+        return measurements;
     }
 
     @SuppressWarnings("unchecked")
@@ -362,6 +376,44 @@ public class MeasurementDAO
             .setCacheable(true).setCacheRegion("Measurement.findDesignatedByCategoryForGroup")
             .list();
     }
+    
+    /**
+     * Return the maximum collection interval for the given template within the
+     * group.
+     * 
+     * @param g The group in question.
+     * @param templateId The measurement template to query.
+     * @return templateId The maximum collection time in milliseconds.
+     */
+    public Long getMaxCollectionInterval(ResourceGroup g, Integer templateId) {
+        String sql = "select max(m.interval) from Measurement m, GroupMember g "
+                     + "join g.group rg " + "join g.resource r "
+                     + "where m.instanceId = r.instanceId and " + "rg = ? and m.template.id = ?";
+
+        return (Long) getSession().createQuery(sql).setParameter(0, g).setInteger(1,
+            templateId.intValue()).setCacheable(true).setCacheRegion(
+            "ResourceGroup.getMaxCollectionInterval").uniqueResult();
+    }
+
+    /**
+     * Return a List of Measurements that are collecting for the given template
+     * ID and group.
+     * 
+     * @param g The group in question.
+     * @param templateId The measurement template to query.
+     * @return templateId A list of Measurement objects with the given template
+     *         id in the group that are set to be collected.
+     */
+    @SuppressWarnings("unchecked")
+    public List<Measurement> getMetricsCollecting(ResourceGroup g, Integer templateId) {
+        String sql = "select m from Measurement m, GroupMember g " + "join g.group rg "
+                     + "join g.resource r " + "where m.instanceId = r.instanceId and "
+                     + "rg = ? and m.template.id = ? and m.enabled = true";
+
+        return (List<Measurement>) getSession().createQuery(sql).setParameter(0, g).setInteger(1,
+            templateId.intValue()).setCacheable(true).setCacheRegion(
+            "ResourceGroup.getMetricsCollecting").list();
+    }
 
     @SuppressWarnings("unchecked")
     List<Measurement> findByCategory(String cat) {
@@ -435,27 +487,48 @@ public class MeasurementDAO
             "Measurement.findAvailMeasurementsForGroup").list();
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * @param tids - {@link Integer[]} of templateIds
+     * @param iids - {@link Integer[]} of AppdefEntityIds
+     */
     List<Measurement> findMeasurements(Integer[] tids, Integer[] iids) {
+        return findMeasurements(tids, iids, false);
+    }
+
+    /**
+     * @param tids - {@link Integer[]} of templateIds
+     * @param iids - {@link Integer[]} of AppdefEntityIds
+     * @param onlyEnabled - only selects enabled measurements
+     */
+    @SuppressWarnings("unchecked")
+    List<Measurement> findMeasurements(Integer[] tids, Integer[] iids, boolean onlyEnabled) {
         final IntegerType iType = new IntegerType();
         // sort to take advantage of query cache
         final List<Integer> iidList = new ArrayList<Integer>(Arrays.asList(iids));
         final List<Integer> tidList = new ArrayList<Integer>(Arrays.asList(tids));
         Collections.sort(tidList);
         Collections.sort(iidList);
-        final String sql = new StringBuilder(256).append("select m from Measurement m ").append(
-            "join m.template t ").append("where m.instanceId in (:iids) AND t.id in (:tids)")
-            .toString();
+        final StringBuilder buf = new StringBuilder(32)
+            .append("select m from Measurement m ")
+            .append("join m.template t ")
+            .append("where m.instanceId in (:iids) AND t.id in (:tids)");
+        if (onlyEnabled) {
+            buf.append(" and enabled = :enabled");
+        }
+        final String sql = buf.toString();
         final List<Measurement> rtn = new ArrayList<Measurement>(iidList.size());
         final int batch = BATCH_SIZE/2;
         for (int xx=0; xx<iidList.size(); xx+=batch) {
             final int iidEnd = Math.min(xx+batch, iidList.size());
             for (int yy=0; yy<tidList.size(); yy+=batch) {
                 final int tidEnd = Math.min(yy+batch, tidList.size());
-                rtn.addAll(getSession().createQuery(sql)
+                Query query = getSession().createQuery(sql)
                     .setParameterList("iids", iidList.subList(xx, iidEnd), iType)
-                    .setParameterList("tids", tidList.subList(yy, tidEnd), iType)
-                    .setCacheable(true)
+                    .setParameterList("tids", tidList.subList(yy, tidEnd), iType);
+                if (onlyEnabled) {
+                    query.setBoolean("enabled", onlyEnabled);
+                }
+                rtn.addAll(query.setCacheable(true)
                     .setCacheRegion("Measurement.findMeasurements")
                     .list());
             }
@@ -501,7 +574,7 @@ public class MeasurementDAO
 
         final String sql = new StringBuilder().append("select e.from.id,m from Measurement m ")
             .append("join m.resource.toEdges e ").append("join m.template t ").append(
-                "join e.relation r ").append("where m.resource is not null ").append(
+                "join e.relation r ").append("where m.resource.resourceType is not null ").append(
                 "and e.distance > 0 ").append("and r.name = :relationType ").append(
                 "and e.from in (:resourceIds) and ").append(ALIAS_CLAUSE).toString();
 
@@ -510,7 +583,7 @@ public class MeasurementDAO
         final List sortedResourceIds = new ArrayList(resourceIds);
         Collections.sort(sortedResourceIds);
 
-        final HQDialect dialect = Util.getHQDialect();
+        final HQDialect dialect = getHQDialect();
         final int max = (dialect.getMaxExpressions() <= 0) ? Integer.MAX_VALUE : dialect
             .getMaxExpressions();
         final List rtn = new ArrayList(sortedResourceIds.size());
@@ -551,7 +624,7 @@ public class MeasurementDAO
         Collections.sort(sortedResourceIds);
 
         final List rtn = new ArrayList(sortedResourceIds.size());
-        final HQDialect dialect = Util.getHQDialect();
+        final HQDialect dialect = getHQDialect();
         final int max = (dialect.getMaxExpressions() <= 0) ? Integer.MAX_VALUE : dialect
             .getMaxExpressions();
 

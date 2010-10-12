@@ -32,7 +32,6 @@ import java.sql.Statement;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -61,40 +60,42 @@ public class MeasTabManagerUtil {
         return _baseCal.getTimeInMillis();
     }
 
-   
-    
+    public static MeasRange[] getMetricRanges(long begin, long end) {
+        List<MeasRange> ranges = MeasRangeObj.getInstance().getRanges();
+        List<MeasRange> rtn = new ArrayList<MeasRange>(ranges.size());
+        for (MeasRange range : ranges) {
+            long rBegin = range.getMinTimestamp();
+            long rEnd   = range.getMaxTimestamp();
+            if (begin > rEnd || end < rBegin) {
+                continue;
+            }
+            rtn.add(range);
+        }
+        return (MeasRange[]) rtn.toArray(new MeasRange[0]);
+    }
+
     /**
      * Get the array of tables that fall in the time range
      */
     public static String[] getMetricTables(long begin, long end) {
-        List ranges = MeasRangeObj.getInstance().getRanges();
+        List<MeasRange> ranges = MeasRangeObj.getInstance().getRanges();
         String[] tables = new String[ranges.size()];
-        
         int i = 0;
-        for (Iterator it = ranges.iterator(); it.hasNext(); ) {
-            MeasRange range = (MeasRange) it.next();
-            long rBegin = range.getMinTimestamp(),
-                 rEnd   = range.getMaxTimestamp();
-
-            if (begin > rEnd || end < rBegin)
+        for (MeasRange range : ranges) {
+            long rBegin = range.getMinTimestamp();
+            long rEnd   = range.getMaxTimestamp();
+            if (begin > rEnd || end < rBegin) {
                 continue;
-            
+            }
             tables[i++] = range.getTable();
         }
-        
         // Now we want to trim the empties
         String[] retTables = new String[i];
-        
         for (i = 0; i < retTables.length; i++) {
             retTables[i] = tables[i];
         }
-        
         return retTables;
     }
-
-    
-
-    
 
     public static String getMeasInStmt(Integer[] measIds, boolean prependAnd) {
         if (measIds.length == 0) {
@@ -112,7 +113,7 @@ public class MeasTabManagerUtil {
             if (measIds[i] == null) {
                 continue;
             }
-            rtn.append(measIds[i]+",");
+            rtn.append(measIds[i]).append(",");
         }
         rtn.deleteCharAt(rtn.length()-1);
         rtn.append(")");
@@ -241,37 +242,33 @@ public class MeasTabManagerUtil {
 
    
 
-    public static List getMeasIdsFromTemplateIds(Connection conn,
-                                                 Integer[] tids)
-        throws SQLException
-    {
-        List rtn = new ArrayList();
-        StringBuffer tidsConj = new StringBuffer(
-                DBUtil.composeConjunctions("template_id", tids.length));
+    public static List<Integer> getMeasIdsFromTemplateIds(Connection conn, Integer[] tids)
+    throws SQLException {
+        List<Integer> rtn = new ArrayList<Integer>();
+        StringBuffer tidsConj =
+            new StringBuffer(DBUtil.composeConjunctions("template_id", tids.length));
         DBUtil.replacePlaceHolders(tidsConj, tids);
-        final String sql = "SELECT distinct id FROM " + TAB_MEAS +
-                           " WHERE " + tidsConj;
+        final String sql = new StringBuilder(tidsConj.length()+64)
+            .append("SELECT distinct id FROM ").append(TAB_MEAS)
+            .append(" WHERE ").append(tidsConj)
+            .toString();
         Statement stmt = null;
         ResultSet rs   = null;
-        try
-        {
+        try {
             stmt = conn.createStatement();
             rs = stmt.executeQuery(sql);
             while (rs.next()) {
                 rtn.add(new Integer(rs.getInt(1)));
             }
-        }
-        finally {
+        } finally {
             DBUtil.closeResultSet(logCtx, rs);
             DBUtil.closeStatement(logCtx, stmt);
         }
         return rtn;
     }
 
-    public static List<Integer> getMeasIds(Connection conn, Integer[] tids,
-                                  Integer[] iids)
-        throws SQLException
-    {
+    public static List<Integer> getMeasIds(Connection conn, Integer[] tids, Integer[] iids)
+    throws SQLException {
         List<Integer> rtn = new ArrayList<Integer>();
         StringBuffer iidsConj = new StringBuffer(
                 DBUtil.composeConjunctions("instance_id", iids.length));
@@ -279,19 +276,19 @@ public class MeasTabManagerUtil {
         StringBuffer tidsConj = new StringBuffer(
                 DBUtil.composeConjunctions("template_id", tids.length));
         DBUtil.replacePlaceHolders(tidsConj, tids);
-        final String sql = "SELECT distinct id FROM " + TAB_MEAS +
-                           " WHERE " + iidsConj + " AND " + tidsConj;
+        final String sql = new StringBuilder(iidsConj.length()+tidsConj.length()+64)
+            .append("SELECT distinct id FROM ").append(TAB_MEAS)
+            .append(" WHERE ").append(iidsConj).append(" AND ").append(tidsConj)
+            .toString();
         Statement stmt = null;
         ResultSet rs   = null;
-        try
-        {
+        try {
             stmt = conn.createStatement();
             rs = stmt.executeQuery(sql);
             while (rs.next()) {
                 rtn.add(new Integer(rs.getInt(1)));
             }
-        }
-        finally {
+        } finally {
             DBUtil.closeResultSet(logCtx, rs);
             DBUtil.closeStatement(logCtx, stmt);
         }
@@ -307,8 +304,7 @@ public class MeasTabManagerUtil {
         for (int i = 0; i < 2000; i++) {
             Calendar cal = Calendar.getInstance();
             cal.setTime(new java.util.Date(regressTime));
-            cal.add(Calendar.DAY_OF_YEAR,
-                    (NUMBER_OF_TABLES / NUMBER_OF_TABLES_PER_DAY));
+            cal.add(Calendar.DAY_OF_YEAR, (NUMBER_OF_TABLES / NUMBER_OF_TABLES_PER_DAY));
             regressTime = cal.getTimeInMillis();
             String firstTable = getMeasTabname(regressTime);
             String[] a = firstTable.split("_");

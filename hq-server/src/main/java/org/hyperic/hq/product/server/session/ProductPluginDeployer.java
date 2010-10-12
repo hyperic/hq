@@ -83,7 +83,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
 
     private ProductPluginManager productPluginManager;
 
-    private File pluginDir;
+    private List<File> pluginDirs = new ArrayList<File>(2);
     private File hquDir;
 
     @Autowired
@@ -92,12 +92,12 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         this.productManager = productManager;
     }
 
-    private void initializePlugins() {
+    private void initializePlugins(File pluginDir) {
         List<String> plugins = new ArrayList<String>();
         // On startup, it's necessary to load all plugins first due to
         // inter-plugin class dependencies
         try {
-            plugins = loadPlugins();
+            plugins = loadPlugins(pluginDir);
         } catch (Exception e) {
             log.error("Error loading product plugins", e);
         }
@@ -114,22 +114,6 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
      */
     public ProductPluginManager getProductPluginManager() {
         return productPluginManager;
-    }
-
-    /**
-     * 
-     */
-    @ManagedAttribute
-    public void setPluginDir(String name) {
-        pluginDir = new File(name);
-    }
-
-    /**
-     * 
-     */
-    @ManagedAttribute
-    public String getPluginDir() {
-        return pluginDir.getAbsolutePath();
     }
 
     private Set<String> getPluginNames(String type) throws PluginException {
@@ -272,15 +256,17 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
             log.info("Loaded custom properties from: " + propFile);
         }
 
-        if (this.pluginDir != null) {
-            ProductPluginManager.setPdkPluginsDir(pluginDir.getAbsolutePath());
+        if (!(pluginDirs.isEmpty())) {
+            ProductPluginManager.setPdkPluginsDir(pluginDirs.get(0).getAbsolutePath());
         }
         productPluginManager.init();
-        if (this.pluginDir != null) {
-            initializePlugins();
-            FileWatcher fileWatcher = new FileWatcher();
-            fileWatcher.addDir(this.pluginDir.toString(), false);
-            fileWatcher.addFileEventListener(new ProductPluginFileEventListener());
+        FileWatcher fileWatcher = new FileWatcher();
+        fileWatcher.addFileEventListener(new ProductPluginFileEventListener());
+        for(File pluginDir: this.pluginDirs) {
+            initializePlugins(pluginDir);
+            fileWatcher.addDir(pluginDir.toString(), false);
+        }
+        if(!(pluginDirs.isEmpty())) {
             fileWatcher.start();
         }
     }
@@ -331,8 +317,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         } // else Rendit watcher will deploy the new plugin
     }
 
-    private List<String> loadPlugins() throws Exception {
-        File pluginDir = new File(getPluginDir());
+    private List<String> loadPlugins(File pluginDir) throws Exception {
         File[] plugins = pluginDir.listFiles();
         List<String> pluginNames = new ArrayList<String>();
         for (File pluginFile : plugins) {
@@ -373,10 +358,17 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
             log.info("HQU directory not found");
         }
         try {
-            this.pluginDir = applicationContext.getResource("WEB-INF/" + PLUGIN_DIR).getFile();
+             File pluginDir = applicationContext.getResource("WEB-INF/" + PLUGIN_DIR).getFile();
+             pluginDirs.add(pluginDir);
         } catch (IOException e) {
             log.info("Plugins directory not found");
         }
+        //Add custom hq-plugins dir at same level as server home
+        File workingDirParent = new File(System.getProperty("user.dir")).getParentFile();
+        if( workingDirParent != null && new File(workingDirParent,"hq-plugins").exists()) {
+                File customPluginDir = new File(workingDirParent,"hq-plugins");
+                pluginDirs.add(customPluginDir);
+         }  
     }
 
     private class ProductPluginFileEventListener implements FileEventListener {
@@ -389,7 +381,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
                 } else if (FileOperation.DELETED.equals(fileEvent.getOperation())) {
                     undeployPlugin(fileEvent.getFileDetails().getFile());
                 } else if (FileOperation.UPDATED.equals(fileEvent.getOperation()) &&
-                           !(pluginDir.equals(fileEvent.getFileDetails().getFile()))) {
+                           !(pluginDirs.contains(fileEvent.getFileDetails().getFile()))) {
                     undeployPlugin(fileEvent.getFileDetails().getFile());
                     loadAndDeployPlugin(fileEvent.getFileDetails().getFile());
                 }

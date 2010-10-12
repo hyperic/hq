@@ -151,7 +151,7 @@ public abstract class AppdefBean
         return
             ((creationTime == o.getCTime()) ||
              (creationTime!=null && o.getCTime()!=null &&
-              creationTime.equals(o)));
+              creationTime.equals(o.getCTime())));
     }
 
     public int hashCode()

@@ -1,28 +1,28 @@
-/*
- * NOTE: This copyright does *not* cover user programs that use HQ
+/**
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
- * "derived work".
+ *  "derived work".
  *
- * Copyright (C) [2004-2009], Hyperic, Inc.
- * This file is part of HQ.
+ *  Copyright (C) [2010], VMware, Inc.
+ *  This file is part of Hyperic.
  *
- * HQ is free software; you can redistribute it and/or modify
- * it under the terms version 2 of the GNU General Public License as
- * published by the Free Software Foundation. This program is distributed
- * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
+ *  Hyperic is free software; you can redistribute it and/or modify
+ *  it under the terms version 2 of the GNU General Public License as
+ *  published by the Free Software Foundation. This program is distributed
+ *  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ *  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ *  PARTICULAR PURPOSE. See the GNU General Public License for more
+ *  details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- * USA.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ *  USA.
+ *
  */
-
 package org.hyperic.hq.appdef.server.session;
 
 import java.util.ArrayList;
@@ -31,8 +31,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,7 +55,6 @@ import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -89,10 +86,9 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class AIQueueManagerImpl implements AIQueueManager {
-    protected static final String AIPLATFORM_PROCESSOR = "org.hyperic.hq.appdef.server.session.PagerProcessor_aiplatform";
-    protected static final String AIPLATFORM_PROCESSOR_NOPLACEHOLDERS = "org.hyperic.hq.appdef.server.session.PagerProcessor_aiplatform_excludePlaceholders";
-    private Pager aiplatformPager;
-    private Pager aiplatformPagerNoPlaceholders;
+  
+    private Pager aiplatformPager = new Pager(new PagerProcessor_aiplatform());
+    private Pager aiplatformPagerNoPlaceholders= new Pager(new PagerProcessor_aiplatform_excludePlaceholders());
 
     private final AI2AppdefDiff appdefDiffProcessor = new AI2AppdefDiff();
     private final AIQSynchronizer queueSynchronizer = new AIQSynchronizer();
@@ -118,9 +114,8 @@ public class AIQueueManagerImpl implements AIQueueManager {
     public AIQueueManagerImpl(AIServerDAO aIServerDAO, AIIpDAO aiIpDAO,
                               AIPlatformDAO aiPlatformDAO, ConfigManager configManager,
                               CPropManager cPropManager, PlatformDAO platformDAO,
-                              PlatformManager platformManager, 
-                              PermissionManager permissionManager, AuditManager auditManager,
-                              AuthzSubjectManager authzSubjectManager,
+                              PlatformManager platformManager, PermissionManager permissionManager,
+                              AuditManager auditManager, AuthzSubjectManager authzSubjectManager,
                               AgentCommandsClientFactory agentCommandsClientFactory,
                               AgentManager agentManager, AIAuditFactory aiAuditFactory,
                               AIQResourceVisitorFactory aiqResourceVisitorFactory, AgentDAO agentDAO) {
@@ -223,7 +218,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * 
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public PageList<AIPlatformValue> getQueue(AuthzSubject subject, boolean showIgnored,
                                               boolean showPlaceholders,
                                               boolean showAlreadyProcessed, PageControl pc) {
@@ -267,9 +262,13 @@ public class AIQueueManagerImpl implements AIQueueManager {
                 Platform pValue = null;
                 if (aipLocal.getQueueStatus() != AIQueueConstants.Q_STATUS_ADDED) {
                     try {
-                        pValue = getPlatformByAI(subject, aipLocal);
-                    } catch (Exception e) {
-                        log.debug("Error finding platform for aiplatform: ", e);
+                        pValue = platformManager.findPlatformByAIPlatform(subject, aipLocal.getAIPlatformValue());
+                    } catch (PlatformNotFoundException e) {
+                        log.warn("Removing platform with ID: " + aipLocal.getId() + 
+                            " because it doesn't exist and queue status is not set to ADDED");
+                        iter.remove();
+                    } catch(Exception e) {
+                        log.debug("Error finding platform by for aiplatform: ",e);
                         pValue = null;
                     }
                 }
@@ -319,11 +318,12 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * Get an AIPlatformValue by id.
      * 
      * 
-     * 
+     * TODO can't mark this as readOnly transaction b/c syncQueue may end up
+     * calling AI2AppdefDiff.updateCProps(). That behavior should be moved
      * @return An AIPlatformValue with the given id, or null if that platform id
      *         is not present in the queue.
      */
-    @Transactional(readOnly=true)
+    @Transactional
     public AIPlatformValue findAIPlatformById(AuthzSubject subject, int aiplatformID) {
 
         AIPlatform aiplatform = aiPlatformDAO.get(new Integer(aiplatformID));
@@ -339,24 +339,16 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * Get an AIPlatformValue by FQDN.
      * 
      * 
-     * 
+     * TODO can't mark this as readOnly transaction b/c syncQueue may end up
+     * calling AI2AppdefDiff.updateCProps(). That behavior should be moved
      * @return The AIPlatformValue with the given FQDN, or null if that FQDN
      *         does not exist in the queue.
      */
-    @Transactional(readOnly=true)
+    @Transactional
     public AIPlatformValue findAIPlatformByFqdn(AuthzSubject subject, String fqdn) {
-        AIPlatform aiplatform = null;
-        AIPlatformValue aiplatformValue = null;
-
         // XXX Do authz check
         AIPlatform aiPlatform = aiPlatformDAO.findByFQDN(fqdn);
-        aiplatformValue = aiPlatform.getAIPlatformValue();
-
-        if (aiplatformValue == null) {
-            return null;
-        }
-
-        aiplatformValue = syncQueue(aiplatform, false);
+        AIPlatformValue aiplatformValue = syncQueue(aiPlatform, false);
         return aiplatformValue;
     }
 
@@ -368,7 +360,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * @return The AIServerValue with the given id, or null if that server id
      *         does not exist in the queue.
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public AIServerValue findAIServerById(AuthzSubject subject, int serverID) {
         AIServer aiserver = aIServerDAO.get(new Integer(serverID));
 
@@ -398,7 +390,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * @return The AIServerValue with the given id, or null if that server name
      *         does not exist in the queue.
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public AIServerValue findAIServerByName(AuthzSubject subject, String name) {
         // XXX Do authz check
         AIServer aiserver = aIServerDAO.findByName(name);
@@ -416,7 +408,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * 
      * @return The AIIp with the given id, or null if that ip does not exist.
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public AIIpValue findAIIpById(AuthzSubject subject, int ipID) {
         AIIp aiip = aiIpDAO.get(new Integer(ipID));
         if (aiip == null) {
@@ -433,7 +425,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * @return The AIIpValue with the given address, or null if an ip with that
      *         address does not exist in the queue.
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public AIIpValue findAIIpByAddress(AuthzSubject subject, String address) {
         // XXX Do authz check
         List<AIIp> aiips = aiIpDAO.findByAddress(address);
@@ -608,10 +600,10 @@ public class AIQueueManagerImpl implements AIQueueManager {
             }
         }
 
-        // If the action was "approve", then resync queued platforms
+        // If the action was "approve" or "ignore", then resync queued platforms
         // to appdef, now that appdef may have been updated.
 
-        if (isApproveAction) {
+        if (!isPurgeAction) {
 
             for (Integer id : aiplatformsToResync.keySet()) {
 
@@ -647,7 +639,8 @@ public class AIQueueManagerImpl implements AIQueueManager {
 
         for (Integer id : ipList) {
             final AIIp aiip = aiIpDAO.get(id);
-            if (AIQueueConstants.Q_STATUS_REMOVED == aiip.getQueueStatus() && aiip.getAddress().equals(agent.getAddress())) {
+            if (AIQueueConstants.Q_STATUS_REMOVED == aiip.getQueueStatus() &&
+                aiip.getAddress().equals(agent.getAddress())) {
                 return true;
             }
         }
@@ -670,7 +663,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * Find a platform given an AI platform id
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public PlatformValue getPlatformByAI(AuthzSubject subject, int aiPlatformID)
         throws PermissionException, PlatformNotFoundException {
         AIPlatform aiplatform;
@@ -684,7 +677,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * Get a platform given an AI platform, returns null if none found
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public AIPlatformValue getAIPlatformByPlatformID(AuthzSubject subject, Integer platformID) {
         AIPlatform aip = getAIPlatformByPlatformID(platformID);
         return (aip == null) ? null : aip.getAIPlatformValue();
@@ -745,7 +738,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * Find an AI platform given an platform
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Platform getPlatformByAI(AuthzSubject subject, AIPlatform aipLocal)
         throws PermissionException, PlatformNotFoundException {
 
@@ -764,21 +757,9 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * specified resource.
      * 
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public void checkAIScanPermission(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException, GroupNotCompatibleException {
         permissionManager.checkAIScanPermission(subject, id);
     }
-
-    /**
-     * 
-     */
-    @PostConstruct
-    public void afterPropertiesSet() throws Exception {
-
-        aiplatformPager = Pager.getPager(AIPLATFORM_PROCESSOR);
-        aiplatformPagerNoPlaceholders = Pager.getPager(AIPLATFORM_PROCESSOR_NOPLACEHOLDERS);
-
-    }
-
 }

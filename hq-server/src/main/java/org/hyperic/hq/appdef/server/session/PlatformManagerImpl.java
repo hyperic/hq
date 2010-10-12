@@ -429,25 +429,16 @@ public class PlatformManagerImpl implements PlatformManager {
             return;
         }
         final Collection<Platform> platforms = agent.getPlatforms();
-        Platform phys = null;
+        
         for (final Iterator<Platform> it = platforms.iterator(); it.hasNext();) {
             final Platform p = it.next();
             if (p == null) {
                 continue;
             }
-            final String platType = platform.getPlatformType().getName();
-            if (PlatformDetector.isSupportedPlatform(platType)) {
-                phys = p;
-            }
+         
             if (p.getId().equals(platform.getId())) {
                 it.remove();
             }
-        }
-        if (phys == null) {
-            return;
-        }
-        if (phys.getId().equals(platform.getId())) {
-            agentManager.removeAgentStatus(agent);
         }
     }
 
@@ -574,7 +565,8 @@ public class PlatformManagerImpl implements PlatformManager {
         PlatformType platType = platformTypeDAO.findByName(aipValue.getPlatformTypeName());
 
         if (platType == null) {
-            throw new SystemException("Unable to find PlatformType [" + aipValue.getPlatformTypeName() + "]");
+            throw new SystemException("Unable to find PlatformType [" +
+                                      aipValue.getPlatformTypeName() + "]");
         }
 
         Platform checkP = platformDAO.findByName(aipValue.getName());
@@ -702,6 +694,70 @@ public class PlatformManagerImpl implements PlatformManager {
 
         return platform;
     }
+    
+    @Transactional(readOnly = true)
+    public Platform findPlatformByAIPlatform(AuthzSubject subject, AIPlatformValue aiPlatform) 
+        throws PermissionException, PlatformNotFoundException {
+        Platform p =  platformDAO.findByFQDN(aiPlatform.getFqdn());
+        if(p == null) {
+            final AIIpValue[] ipvals = aiPlatform.getAIIpValues();
+            // Find by IP address. For now, if we get one IP address
+            // match (and it isn't localhost), we assume that it is
+            // the same platform. In the future, we are probably going
+            // to need to do better.
+            for (int i = 0; i < ipvals.length; i++) {
+                AIIpValue qip = ipvals[i];
+    
+                String address = qip.getAddress();
+                // XXX This is a hack that we need to get rid of
+                // at some point. The idea is simple. Every platform
+                // has the localhost address. So, if we are looking
+                // for a platform based on IP address, searching for
+                // localhost doesn't give us any information. Long
+                // term, when we are trying to match all addresses,
+                // this can go away.
+                if (address.equals(NetFlags.LOOPBACK_ADDRESS) && ipvals.length > 1) {
+                    continue;
+                }
+    
+                Collection<Platform> platforms = platformDAO.findByIpAddr(address);
+    
+                Set<Platform> platformsMatchingIp = new HashSet<Platform>();
+                if (!platforms.isEmpty()) {               
+                    for (Platform plat : platforms) {
+                        // Make sure the types match
+                        if (!plat.getPlatformType().getName().equals(
+                            aiPlatform.getPlatformTypeName())) {
+                            continue;
+                        }
+                        if (platformMatchesAllIps(plat, Arrays.asList(ipvals))) {
+                            platformsMatchingIp.add(plat);
+                        }
+                    }
+                    if(platformsMatchingIp.size() > 1) {
+                        //This could happen in an agent porker situation, but shouldn't
+                        log.warn("Found multiple existing platforms with IP address " + address + 
+                            " matching platform in AI Queue, but no FQDN match.  Change to platform with FQDN: " + 
+                                aiPlatform.getFqdn() + " may not be processed");
+                    }else if(platformsMatchingIp.size() == 1) {
+                        // If FQDN was not matched, but all IPs are
+                        p = platformsMatchingIp.iterator().next();
+                    } 
+                }
+            }
+        }
+        if (p == null) {
+            p = getPhysPlatformByAgentToken(aiPlatform.getAgentToken());
+        }
+        if (p != null) {
+            permissionManager.checkViewPermission(subject, p.getEntityId());
+        }
+        if(p == null) {
+            throw new PlatformNotFoundException("platform not found for ai " + "platform: " +
+                aiPlatform.getId());
+        }
+        return p;
+    }
 
     /**
      * Get the Platform object based on an AIPlatformValue. Checks against FQDN,
@@ -719,7 +775,8 @@ public class PlatformManagerImpl implements PlatformManager {
         String certdn = aiPlatform.getCertdn();
 
         final AIIpValue[] ipvals = aiPlatform.getAIIpValues();
-        if (!isAgentPorker(Arrays.asList(ipvals))) {
+        boolean porker = isAgentPorker(Arrays.asList(ipvals));
+        if (! porker) {
             // We can't use the FQDN to find a platform, because
             // the FQDN can change too easily. Instead we use the
             // IP address now. For now, if we get one IP address
@@ -799,7 +856,7 @@ public class PlatformManagerImpl implements PlatformManager {
 
         if (p != null) {
             permissionManager.checkViewPermission(subject, p.getEntityId());
-            if (isAgentPorker(Arrays.asList(ipvals)) && // Let agent porker
+            if (porker && // Let agent porker
                 // create new platforms
                 !(p.getFqdn().equals(fqdn) || p.getCertdn().equals(certdn) || p.getAgent()
                     .getAgentToken().equals(agentToken))) {
@@ -853,6 +910,7 @@ public class PlatformManagerImpl implements PlatformManager {
             }
         }
         return false;
+        
     }
 
     private boolean platformMatchesAllIps(Platform p, List<AIIpValue> ips) {
@@ -931,6 +989,63 @@ public class PlatformManagerImpl implements PlatformManager {
     public Collection<Platform> getPlatformByIpAddr(AuthzSubject subject, String address)
         throws PermissionException {
         return platformDAO.findByIpAddr(address);
+    }
+
+    @Transactional(readOnly = true)
+    public Collection<Platform> getPlatformByMacAddr(AuthzSubject subject, String address)
+        throws PermissionException {
+
+        // TODO: Add permission check
+
+        return platformDAO.findByMacAddr(address);
+    }
+
+    @Transactional(readOnly = true)
+    public Platform getAssociatedPlatformByMacAddress(AuthzSubject subject, Resource r)
+        throws PermissionException, PlatformNotFoundException {
+        // TODO: Add permission check
+
+        ResourceType rt = r.getResourceType();
+        if (rt != null && !rt.getId().equals(AuthzConstants.authzPlatform)) {
+            throw new PlatformNotFoundException("Invalid resource type = " + rt.getName());
+        }
+
+        Platform platform = findPlatformById(r.getInstanceId());
+        String macAddr = getPlatformMacAddress(platform);
+        Collection<Platform> platforms = getPlatformByMacAddr(subject, macAddr);
+        Platform associatedPlatform = null;
+
+        for (Platform p : platforms) {
+            if (!p.getId().equals(platform.getId())) {
+                // TODO: Add additional logic if there are more than 2 platforms
+                associatedPlatform = p;
+                break;
+            }
+        }
+
+        if (associatedPlatform == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("No matching platform found from " + platforms.size() + " platforms" +
+                           " for resource[id=" + r.getId() + ", macAddress=" + macAddr + "].");
+            }
+        }
+
+        return associatedPlatform;
+    }
+
+    private String getPlatformMacAddress(Platform platform) {
+        // TODO: Should this method be part of the Platform object?
+
+        String macAddress = null;
+
+        for (Ip ip : platform.getIps()) {
+            if (!"00:00:00:00:00:00".equals(ip.getMacAddress())) {
+                macAddress = ip.getMacAddress();
+                break;
+            }
+        }
+
+        return macAddress;
     }
 
     /**
@@ -1721,9 +1836,9 @@ public class PlatformManagerImpl implements PlatformManager {
 
         // need to check if IPs have changed, if so update Agent
         updateAgentIps(subj, aiplatform, platform);
-        
+
     }
-    
+
     private void updateAgentIps(AuthzSubject subj, AIPlatformValue aiplatform, Platform platform) {
         List<AIIpValue> ips = Arrays.asList(aiplatform.getAIIpValues());
 
@@ -1739,12 +1854,13 @@ public class PlatformManagerImpl implements PlatformManager {
             throw new SystemException(e);
         }
         boolean changeAgentIp = false;
-        
+
         for (AIIpValue ip : ips) {
 
-            if (ip.getQueueStatus() == AIQueueConstants.Q_STATUS_REMOVED && agent.getAddress().equals(ip.getAddress())) {
-               changeAgentIp = true;
-             }
+            if (ip.getQueueStatus() == AIQueueConstants.Q_STATUS_REMOVED &&
+                agent.getAddress().equals(ip.getAddress())) {
+                changeAgentIp = true;
+            }
         }
         // Keep in mind that a unidirectional agent address
         // doesn't matter since the communication is always
@@ -1754,14 +1870,14 @@ public class PlatformManagerImpl implements PlatformManager {
             // In a perfect world this loop would key on platform.getIps() but
             // then there are other issues with verifying that the agent is up
             // before approving since platform IPs are updated later in the
-            // code flow.  Since ips contains new and current IP addresses
+            // code flow. Since ips contains new and current IP addresses
             // of the platform it works.
-            for (AIIpValue ip : ips) { 
+            for (AIIpValue ip : ips) {
                 if (ip.getQueueStatus() != AIQueueConstants.Q_STATUS_ADDED &&
-               // Q_STATUS_PLACEHOLDER in this context simply means that
-               // the ip is already associated with the platform and there
-                // is no change.  Therefore it needs to be part of our checks
-                ip.getQueueStatus() != AIQueueConstants.Q_STATUS_PLACEHOLDER) {
+                // Q_STATUS_PLACEHOLDER in this context simply means that
+                    // the ip is already associated with the platform and there
+                    // is no change. Therefore it needs to be part of our checks
+                    ip.getQueueStatus() != AIQueueConstants.Q_STATUS_PLACEHOLDER) {
                     continue;
                 }
                 try {
@@ -1771,8 +1887,8 @@ public class PlatformManagerImpl implements PlatformManager {
                     // scottmf had with chip 9/17/2009.
                     agent.setAddress(ip.getAddress());
                     agentManager.pingAgent(subj, agent);
-                    log.info("updating ip for agentId=" + agent.getId() + " and platformid=" + platform.getId() +
-                        " from ip=" + origIp + " to ip=" + ip.getAddress());
+                    log.info("updating ip for agentId=" + agent.getId() + " and platformid=" +
+                             platform.getId() + " from ip=" + origIp + " to ip=" + ip.getAddress());
                     platform.setAgent(agent);
                     enableMeasurements(subj, platform);
                     break;
@@ -1783,15 +1899,15 @@ public class PlatformManagerImpl implements PlatformManager {
                     log.error(e, e);
                 }
                 // make sure address does not change if/when last ping fails
-                 agent.setAddress(origIp);
-           }
+                agent.setAddress(origIp);
+            }
             if (platform.getAgent() == null) {
-               log.warn("Removing agent reference from platformid=" + platform.getId() +
-                                          ".  Server cannot ping the agent from any IP " +
-                                           "associated with the platform");
+                log.warn("Removing agent reference from platformid=" + platform.getId() +
+                         ".  Server cannot ping the agent from any IP " +
+                         "associated with the platform");
             }
         }
-     
+
     }
 
     private void enableMeasurements(AuthzSubject subj, Platform platform) {

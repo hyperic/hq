@@ -1,22 +1,22 @@
 /*
- * NOTE: This copyright does *not* cover user programs that use HQ
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
- * This file is part of HQ.
- * 
- * HQ is free software; you can redistribute it and/or modify
+ *
+ * Copyright (C) [2004-2010], VMware, Inc.
+ * This file is part of Hyperic.
+ *
+ * Hyperic is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
  * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -43,13 +43,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectManager;
-import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.server.action.email.EmailAction;
 import org.hyperic.hq.bizapp.server.action.email.EmailFilterJob;
@@ -78,9 +73,10 @@ import org.springframework.stereotype.Service;
 public class EmailManagerImpl implements EmailManager {
     private JavaMailSender mailSender;
     private ServerConfigManager serverConfigManager;
-    private AuthzSubjectManager authzSubjectManager;
     private PlatformManager platformManager;
     private ResourceManager resourceManager;
+    private ConcurrentStatsCollector concurrentStatsCollector;
+    
     final Log log = LogFactory.getLog(EmailManagerImpl.class);
 
     public static final String JOB_GROUP = "EmailFilterGroup";
@@ -89,17 +85,18 @@ public class EmailManagerImpl implements EmailManager {
 
     @Autowired
     public EmailManagerImpl(JavaMailSender mailSender, ServerConfigManager serverConfigManager,
-                            AuthzSubjectManager authzSubjectManager, PlatformManager platformManager, ResourceManager resourceManager) {
+                            PlatformManager platformManager, ResourceManager resourceManager,
+                            ConcurrentStatsCollector concurrentStatsCollector) {
         this.mailSender = mailSender;
         this.serverConfigManager = serverConfigManager;
-        this.authzSubjectManager = authzSubjectManager;
         this.platformManager = platformManager;
         this.resourceManager = resourceManager;
+        this.concurrentStatsCollector = concurrentStatsCollector;
     }
     
     @PostConstruct
     public void initStats() {
-        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.SEND_ALERT_TIME);
+    	concurrentStatsCollector.register(ConcurrentStatsCollector.SEND_ALERT_TIME);
     }
 
     public void sendEmail(EmailRecipient[] addresses, String subject, String[] body, String[] htmlBody, Integer priority) {
@@ -133,7 +130,7 @@ public class EmailManagerImpl implements EmailManager {
                 mimeMessage.setRecipient(Message.RecipientType.TO, addresses[i].getAddress());
 
                 if (addresses[i].useHtml()) {
-                    mimeMessage.setContent(htmlBody[i], "text/html");
+                    mimeMessage.setContent(htmlBody[i], "text/html; charset=UTF-8");
                     if (log.isDebugEnabled()) {
                         log.debug("Sending HTML Alert notification: " + subject + " to " +
                                   addresses[i].getAddress().getAddress() +
@@ -145,7 +142,7 @@ public class EmailManagerImpl implements EmailManager {
                                   addresses[i].getAddress().getAddress() +
                                   "\n" + body[i]);
                     }
-                    mimeMessage.setContent(body[i], "text/plain");
+                    mimeMessage.setContent(body[i], "text/plain; charset=UTF-8");
                 }
 
                 mailSender.send(mimeMessage);
@@ -211,30 +208,6 @@ public class EmailManagerImpl implements EmailManager {
         }
     }
 
-    private void replaceAppdefEntityHolders(AppdefEntityID appEnt, String[] strs) {
-        AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-
-        try {
-            AppdefEntityValue entVal = new AppdefEntityValue(appEnt, overlord);
-            String name = entVal.getName();
-            String desc = entVal.getDescription();
-
-            if (desc == null) {
-                desc = "";
-            }
-
-            for (int i = 0; i < strs.length; i++) {
-                strs[i] = strs[i].replaceAll(EmailAction.RES_NAME_HOLDER, name);
-                strs[i] = strs[i].replaceAll(EmailAction.RES_DESC_HOLDER, desc);
-            }
-        } catch (AppdefEntityNotFoundException e) {
-            log.error("Entity ID invalid", e);
-        } catch (PermissionException e) {
-            // Should never happen, because we are overlord
-            log.error("Overlord not allowed to lookup resource", e);
-        }
-    }
-
     public void sendAlert(AppdefEntityID appEnt, EmailRecipient[] addresses, String subject, String[] body,
                           String[] htmlBody, int priority, boolean filter) {
         if (appEnt == null) {
@@ -242,11 +215,6 @@ public class EmailManagerImpl implements EmailManager {
             sendEmail(addresses, subject, body, htmlBody, new Integer(priority));
             return;
         }
-
-        // Replace the resource name
-        String[] replStrs = new String[] { subject };
-        replaceAppdefEntityHolders(appEnt, replStrs);
-        subject = replStrs[0];
 
         // See if alert needs to be filtered
         if (filter) {

@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hyperic HQ 4.x Documentation : ui-Alert.Edit</title>
+        <title>Evolution : ui-Alert.Edit</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,7 +12,7 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic HQ 4.x Documentation : ui-Alert.Edit
+                            Evolution : ui-Alert.Edit
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
@@ -20,33 +20,45 @@
 				    </div>
 
 				    <p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Pre-Release Documentation</b><br />This space is a staging area for Hyperic 4.5 documentation. See <a href="http://support.hyperic.com/confluence/display/DOC/HQ+Documentation" title="HQ Documentation">HQ Documentation</a> for Hyperic 4.2, 4.3, and 4.4 documentation.</td></tr></table></div> 
 <p>On the <b>Alert Definition</b> page, you can edit an alert definition's properties and condition set, and define and edit the alert actions HQ should perform when the alert fires.  </p>
 
 <p>The <b>Alert Definition</b> page, which appears when you save a new alert definition or edit an existing alert definition, is similar to the <b>New Alert</b> page, with the addition of <b>Edit</b> controls in the "Alert Properties" and "Condition Set" sections, and a set of tabs at the bottom of the page for defining alert actions.</p>
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1247693270630 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1247693270630 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1247693270630 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1281566128217 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1281566128217 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1281566128217 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1247693270630'>
+/*]]>*/</style><div class='rbtoc1281566128217'>
 <ul>
     <li><a href='#ui-Alert.Edit-EditAlertProperties'>Edit Alert Properties</a></li>
     <li><a href='#ui-Alert.Edit-EditAlertConditionSet'>Edit Alert Condition Set</a></li>
 <ul>
-    <li><a href='#ui-Alert.Edit-DefineAlertCondition'>Define Alert Condition</a></li>
+    <li><a href='#ui-Alert.Edit-ConditionSet'>Condition Set</a></li>
     <li><a href='#ui-Alert.Edit-DefineAdditionalConditions'>Define Additional Conditions <span style="color: red">*</span></a></li>
     <li><a href='#ui-Alert.Edit-DefineRecoveryAlertBehavior'>Define Recovery Alert Behavior <span style="color: red">*</span></a></li>
-    <li><a href='#ui-Alert.Edit-EnableActions'>Enable Actions <span style="color: red">*</span></a></li>
+    <li><a href='#ui-Alert.Edit-EnableActions'>Enable Actions</a></li>
     <li><a href='#ui-Alert.Edit-EnableActionFilters'>Enable Action Filters</a></li>
 </ul>
     <li><a href='#ui-Alert.Edit-CreateorEditAlertActions'>Create or Edit Alert Actions</a></li>
+<ul>
+    <li><a href='#ui-Alert.Edit-Escalation'>Escalation</a></li>
+    <li><a href='#ui-Alert.Edit-ControlAction'>Control Action <span style="color: red">*</span></a></li>
+    <li><a href='#ui-Alert.Edit-NotifyRoles'>Notify Roles <span style="color: red">*</span></a></li>
+    <li><a href='#ui-Alert.Edit-NotifyHQUsers'>Notify HQ Users</a></li>
+    <li><a href='#ui-Alert.Edit-NotifyOtherRecipients'>Notify Other Recipients</a></li>
+    <li><a href='#ui-Alert.Edit-Script'>Script <span style="color: red">*</span></a></li>
+    <li><a href='#ui-Alert.Edit-OpenNMS'>OpenNMS</a></li>
+    <li><a href='#ui-Alert.Edit-SNMPNotification'>SNMP Notification <span style="color: red">*</span></a></li>
+</ul>
 </ul></div>
 <p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
 
 <h2><a name="ui-Alert.Edit-EditAlertProperties"></a>Edit Alert Properties</h2>
 
-<p>Click <span class="image-wrap" style=""><img src="attachments/59375878/59539770.gif" style="border: 0px solid black"/></span> in "Alert Properties" section.&nbsp;</p>
+<p>Click <span class="image-wrap" style=""><img src="attachments/71828481/71926166.gif" style="border: 0px solid black"/></span> in "Alert Properties" section.&nbsp;</p>
 
 <ul>
 	<li><b>Name</b> &#45; Name assigned by the user creating an alert definition. A fired alert is identified, in the HQ user interface and alert notifications, by the alert definition name and a timestamp. An alert definition name should clearly communicate the nature of the problem. For example, "Down" for an alert on availability, or "Low Memory" for an alert on free memory.</li>
@@ -70,7 +82,7 @@ div.rbtoc1247693270630 li {margin-left: 0px;padding-left: 0px;}
 
 <h2><a name="ui-Alert.Edit-EditAlertConditionSet"></a>Edit Alert Condition Set</h2>
 
-<p>Click <span class="image-wrap" style=""><img src="attachments/59375878/59539770.gif" style="border: 0px solid black"/></span> in "Condition Set" section.</p>
+<p>Click <span class="image-wrap" style=""><img src="attachments/71828481/71926166.gif" style="border: 0px solid black"/></span> in "Condition Set" section.</p>
 <h3><a name="ui-Alert.Edit-ConditionSet"></a>Condition Set</h3>
 
 <p>An alert condition specifies a resource metric value or event that will initiate the alert firing process.</p>
@@ -84,9 +96,9 @@ div.rbtoc1247693270630 li {margin-left: 0px;padding-left: 0px;}
 		<li><b>Metric</b> &#45; Select a metric from the selector list.&nbsp; Only currently enabled metrics are listed.&nbsp; (If the metric you're looking for is not listed, see the note below.)</li>
 		<li>Define the rule for evaluating the metric value.&nbsp; You can:
 		<ul>
-			<li><ins>Compare metric value to a specified value</ins>. Select a comparison operator:&nbsp; <b>&gt;(greater than)</b>, <b>&lt;(less than)</b>, <b>=(equal to)</b>, or <b>&#33;= (not equal to)</b>, and enter the absolute value, or</li>
+			<li><ins>Compare metric value to an absolute value</ins>. Select an operator: <b>&gt;(greater than)</b>, <b>&lt;(less than)</b>, <b>=(equal to)</b>, or <b>&#33;= (not equal to)</b>, and enter a metric value. If the metric value is a percentage, specify it as a float value. For example, enter <tt>.99</tt> for <tt>99%</tt>, <tt>1.0</tt> for 100%. Use a period (.) as a decimal separator, rather than a comma (,).</li>
+			<li><ins>Compare metric value to its minimum, baseline, or maximum value</ins> <font color="red">&#42;</font>, in HQ Enterprise only. Select an operator: <b>&gt;(greater than)</b>, <b>&lt;(less than)</b>, <b>=(equal to)</b>, or <b>&#33;= (not equal to)</b>, and choose "Min Value", "Baseline Value" or "Max Value". Baselining must be enabled. For more information, see <a href="http://support.hyperic.com/confluence/display/DOC/Baselines" title="Baselines">Baselines</a>.</li>
 			<li><ins>Fire upon change in metric value</ins>.&nbsp; Click <b>value changes</b>.</li>
-			<li><ins>Compare to metric value to baseline</ins>, in HQ Enterprise only. Select an operator:&nbsp; <b>&gt;(greater than)</b>, <b>&lt;(less than)</b>, <b>=(equal to)</b>, or <b>&#33;= (not equal to)</b>, and choose "Baseline Value" from the pulldown. Baselining must be enabled. For more information, see <a href="http://support.hyperic.com/confluence/display/DOC/Baselines" title="Baselines">Baselines</a>.<font color="red">&#42;</font></li>
 		</ul>
 		</li>
 	</ol>
@@ -137,7 +149,7 @@ div.rbtoc1247693270630 li {margin-left: 0px;padding-left: 0px;}
 
 
 <ul>
-	<li><b>Once every &#95;<em>&#95; times conditions are met within a time period of &#95;</em>&#95;</b> <b>minutes</b>. This option configures an alert to fire when the condition(s) occur multiple times over a period of time.&nbsp; Enter the number of&nbsp; occurrences and period of time.</li>
+	<li><b>Once every</b> <b>_ times conditions are met within a time period of _</b> <b>minutes</b>. This option configures an alert to fire when the condition(s) occur multiple times over a period of time.&nbsp; Enter the number of&nbsp; occurrences and period of time.</li>
 </ul>
 
 
@@ -172,26 +184,26 @@ div.rbtoc1247693270630 li {margin-left: 0px;padding-left: 0px;}
 <p>Under these circumstances, this configuration option ensures that if multiple alerts are fired within a short period for resources that are members of the same application, only one control action will be executed. For example, this would prevent a server from being restarted several times in a short period of time for the same alert conditions. For instance, you might have an alert with an action to restart a Tomcat server if the JVM Free Memory got too low and another alert with an action to restart the same server if the JVM Active Thread count got too high. If both alerts fired at the same time and they were filtering control actions, only 1 restart control action would be executed and not two.</p>
 
 <div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Option removed in 4.2</b></div><div class="panelContent">
-<p>Versions of HQ previous to 4.2 also had a <b>Filter notification actions that are defined for related alerts</b> option to prevent multiple notification when alerts fire for resources on the same platform. In HQ 4.2, the option was removed. HQ 4.2 provides enhanced functionality for global control of notification volume.&nbsp; For more information, see <a href="http://support.hyperic.com/confluence/display/DOC/Controlling+Alert+and+Notification+Volume#ControllingAlertandNotificationVolume-SetaNotificationThrottle">Set a Notification Throttle</a>.</p>
+<p>Versions of HQ previous to 4.2 also had a <b>Filter notification actions that are defined for related alerts</b> option to prevent multiple notification when alerts fire for resources on the same platform. In HQ 4.2, the option was removed. HQ 4.2 provides enhanced functionality for global control of notification volume.&nbsp; For more information, see <a href="http://support.hyperic.com/confluence/display/EVO/Controlling+Alert+and+Notification+Volume#ControllingAlertandNotificationVolume-SetaNotificationThrottle">Set a Notification Throttle</a>.</p>
 </div></div>
 
 <h2><a name="ui-Alert.Edit-CreateorEditAlertActions"></a>Create or Edit Alert Actions</h2>
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1271613058863 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1271613058863 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1271613058863 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1281566128297 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1281566128297 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1281566128297 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1271613058863'>
+/*]]>*/</style><div class='rbtoc1281566128297'>
 <ul>
-    <li><a href='#ui-Alert.Actions-Escalation'>Escalation</a></li>
-    <li><a href='#ui-Alert.Actions-ControlAction'>Control Action <span style="color: red">*</span></a></li>
-    <li><a href='#ui-Alert.Actions-NotifyRoles'>Notify Roles <span style="color: red">*</span></a></li>
-    <li><a href='#ui-Alert.Actions-NotifyHQUsers'>Notify HQ Users</a></li>
-    <li><a href='#ui-Alert.Actions-NotifyOtherRecipients'>Notify Other Recipients</a></li>
-    <li><a href='#ui-Alert.Actions-Script'>Script <span style="color: red">*</span></a></li>
-    <li><a href='#ui-Alert.Actions-OpenNMS'>OpenNMS</a></li>
-    <li><a href='#ui-Alert.Actions-SNMPNotification'>SNMP Notification <span style="color: red">*</span></a></li>
+    <li><a href='#ui-Alert.Edit-Escalation'>Escalation</a></li>
+    <li><a href='#ui-Alert.Edit-ControlAction'>Control Action <span style="color: red">*</span></a></li>
+    <li><a href='#ui-Alert.Edit-NotifyRoles'>Notify Roles <span style="color: red">*</span></a></li>
+    <li><a href='#ui-Alert.Edit-NotifyHQUsers'>Notify HQ Users</a></li>
+    <li><a href='#ui-Alert.Edit-NotifyOtherRecipients'>Notify Other Recipients</a></li>
+    <li><a href='#ui-Alert.Edit-Script'>Script <span style="color: red">*</span></a></li>
+    <li><a href='#ui-Alert.Edit-OpenNMS'>OpenNMS</a></li>
+    <li><a href='#ui-Alert.Edit-SNMPNotification'>SNMP Notification <span style="color: red">*</span></a></li>
 </ul></div>
 <p>You assign actions to an alert definition on the <b>Alert Definition</b> page, which appears when you save a new alert definition or edit an existing alert definition.</p>
 
@@ -203,30 +215,32 @@ div.rbtoc1271613058863 li {margin-left: 0px;padding-left: 0px;}
 
 <h3><a name="ui-Alert.Edit-Escalation"></a>Escalation</h3>
 
-<p>Select an escalation from the "Escalation Scheme" pulldown; the tab refreshes and shows the escalation steps. You must define an escalation before you can assign it to an alert definition. Using an escalation that is configured to repeat until the alert is fixed is a good way to prevent redundant alerts firing for the same problem. To create an escalation, click <b>Escalation Schemes Configuration</b> on the <b>Administration</b> tab. For more information about escalations, see <a href="http://support.hyperic.com/confluence/display/DOC/Understanding+Escalations" title="Understanding Escalations">Understanding Escalations</a>.</p>
+<p>Select an escalation from the "Escalation Scheme" pulldown; the tab refreshes and shows the escalation steps. You must define an escalation before you can assign it to an alert definition. Using an escalation that is configured to repeat until the alert is fixed is a good way to prevent redundant alerts firing for the same problem. To create an escalation, click <b>Escalation Schemes Configuration</b> on the <b>Administration</b> tab. For more information about escalations, see <a href="http://support.hyperic.com/confluence/display/DOC/Working+with+Escalations" title="Working with Escalations">Working with Escalations</a>.</p>
 
 <h3><a name="ui-Alert.Edit-ControlAction"></a>Control Action<font color="red">&#42;</font></h3>
+<p><a name="ui-Alert.Edit-AlertControlAction"></a><br/>
+In HQ Enterprise, you can define a resource control action for HQ to perform when the alert fires. The control action can target the current resource (the one to which the alert definition is assigned) or a different resource on the same platform, as long as the resource type has HQ-supported control actions. To configure a control action for the alert, select the <b>Control Action</b> tab and click <b>Edit. &nbsp;*The *Add Control Actio</b><b>n</b> page appears; click the thumbnail below for a screenshot. Follow the instructions on the associated <a href="http://support.hyperic.com/confluence/display/DOC/ui-Alert.ControlAction" title="ui-Alert.ControlAction">help page</a>. You can only assign a single control action to an alert definition. <b>Note:</b> You cannot assign a control action to a resource type alert.</p>
 
-<p>In HQ Enterprise, you can define a resource control action for HQ to perform when the alert fires. The control action can target the current resource (the one to which the alert definition is assigned) or a different resource on the same platform, as long as the resource type has HQ-supported control actions. To configure a control action for the alert, select the <b>Control Action</b> tab, click <b>Edit</b>, and follow the instructions on the associated <a href="ui-Alert.ControlAction.html" title="ui-Alert.ControlAction">help page</a>. You can only assign a single control action to an alert definition. <b>Note:</b> You cannot assign a control action to a resource type alert.</p>
+<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 1010x314" href='http://support.hyperic.com/confluence/download/attachments/71828283/AddControlAction.png'><img src="attachments/thumbnails/71828283/71925892" style="border: 0px solid black"/></a></span></p>
 
 <h3><a name="ui-Alert.Edit-NotifyRoles"></a>Notify Roles<font color="red">&#42;</font></h3>
 
-<p>In HQ Enterprise you can specify one or more HQ roles as notification recipients. HQ users with a role you specify will be notified when an alert is fired.&nbsp; Click <b>Add to List</b> on the <b>Notify Roles</b> tab.&nbsp; On the roles selection page, choose the role(s) to be notified when the alert fires. The <a href="ui-Alert.Notification.html" title="ui-Alert.Notification">help page</a>&nbsp;has instructions.&nbsp;</p>
+<p>In HQ Enterprise you can specify one or more HQ roles as notification recipients. HQ users with a role you specify will be notified when an alert is fired.&nbsp; Click <b>Add to List</b> on the <b>Notify Roles</b> tab.&nbsp; On the roles selection page, choose the role(s) to be notified when the alert fires. The <a href="http://support.hyperic.com/confluence/display/DOC/ui-Alert.Notification" title="ui-Alert.Notification">help page</a>&nbsp;has instructions.&nbsp;</p>
 
 <p>For information about creating roles specifically for use in notification actions, see in <a href="http://support.hyperic.com/confluence/display/DOC/HQ+Users+and+Roles#HQUsersandRoles-RoleBasedAlertNotifications">Role-Based Alert Notifications</a>.</p>
 
 
 <h3><a name="ui-Alert.Edit-NotifyHQUsers"></a>Notify HQ Users</h3>
 
-<p>Click <b>Add to List</b> on  this tab to specify one or more HQ uses as notification recipients. On the user selection page, choose the users to be notified when the alert fires. The <a href="ui-Alert.Notification.html" title="ui-Alert.Notification">help page</a> has instructions.&nbsp;</p>
+<p>Click <b>Add to List</b> on  this tab to specify one or more HQ uses as notification recipients. On the user selection page, choose the users to be notified when the alert fires. The <a href="http://support.hyperic.com/confluence/display/DOC/ui-Alert.Notification" title="ui-Alert.Notification">help page</a> has instructions.&nbsp;</p>
 
 <h3><a name="ui-Alert.Edit-NotifyOtherRecipients"></a>Notify Other Recipients</h3>
 
-<p>Click <b>Add to List</b> on this tab to specify non-HQ user email recipients for alert notifications.&nbsp; The <a href="ui-Alert.Notification.html" title="ui-Alert.Notification">help page</a> has instructions.&nbsp;</p>
+<p>Click <b>Add to List</b> on this tab to specify non-HQ user email recipients for alert notifications.&nbsp; The <a href="http://support.hyperic.com/confluence/display/DOC/ui-Alert.Notification" title="ui-Alert.Notification">help page</a> has instructions.&nbsp;</p>
 
 <h3><a name="ui-Alert.Edit-Script"></a>Script<font color="red">&#42;</font></h3>
 
-<p>In HQ Enterprise, to assign a script action to the alert definition, click the <b>Script</b> tab, enter the full path to the script, and click <b>Set</b>.&nbsp; HQ will run the script when the alert fires. Scripts can reference alert-related HQ environment variables to perform custom notification logic. For information, see <a href="ui-Alert.Script.html" title="ui-Alert.Script">Define a Script Action for an Alert</a>.</p>
+<p>In HQ Enterprise, to assign a script action to the alert definition, click the <b>Script</b> tab, enter the full path to the script, and click <b>Set</b>.&nbsp; HQ will run the script when the alert fires. Scripts can reference alert-related HQ environment variables to perform custom notification logic. For information, see <a href="http://support.hyperic.com/confluence/display/DOC/ui-Alert.Script" title="ui-Alert.Script">Define a Script Action for an Alert</a>.</p>
 
 
 <h3><a name="ui-Alert.Edit-OpenNMS"></a>OpenNMS</h3>
@@ -261,11 +275,11 @@ div.rbtoc1271613058863 li {margin-left: 0px;padding-left: 0px;}
 
 
 <ul>
-	<li>A variable binding for the alert data specified in the <tt>snmp_trap.gsp</tt> alert notification template - the alert definition name and the "short reason" for firing. Note that Alert templates may be customized, as described in <a href="http://support.hyperic.com/confluence/display/DOC/Tailoring+Alert+Notification+Templates" title="Tailoring Alert Notification Templates">Tailoring Alert Notification Templates</a>.</li>
+	<li>A variable binding for the alert data specified in the <tt>snmp_trap.gsp</tt> alert notification template - the alert definition name and the "short reason" for firing. Note that Alert templates may be customized, as described in <a href="http://support.hyperic.com/confluence/display/EVO/Tailoring+Alert+Notification+Templates" title="Tailoring Alert Notification Templates">Tailoring Alert Notification Templates</a>.</li>
 </ul>
 
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Including more variable bindings in SNMP messages</b><br />For richer capability, you can configure a SNMP notification as a step in an escalation. An SNMP notification in an escalation can be configured with additional variable bindings. For more information, see <a href="http://support.hyperic.com/confluence/display/DOC/Understanding+Escalations" title="Understanding Escalations">Understanding Escalations</a></td></tr></table></div>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Including more variable bindings in SNMP messages</b><br />For richer capability, you can configure a SNMP notification as a step in an escalation. An SNMP notification in an escalation can be configured with additional variable bindings. For more information, see <a href="http://support.hyperic.com/confluence/display/EVO/Understanding+Escalations" title="Understanding Escalations">Understanding Escalations</a></td></tr></table></div>
 
 <p>To configure an SNMP notification action on HQ Enterprise 4.3, enter:</p>
 
@@ -296,19 +310,19 @@ div.rbtoc1271613058863 li {margin-left: 0px;padding-left: 0px;}
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/59375878/59539770.gif">tbb_edit.gif</a> (image/gif)
+                                <a href="attachments/71828481/71926166.gif">tbb_edit.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/59375878/59539669.gif">tbb_remove.gif</a> (image/gif)
+                                <a href="attachments/71828481/71926169.gif">tbb_set.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/59375878/59539606.gif">tbb_set.gif</a> (image/gif)
+                                <a href="attachments/71828481/71926167.gif">tbb_remove.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/59375878/59539610.gif">tbb_addtolist.gif</a> (image/gif)
+                                <a href="attachments/71828481/71926170.gif">tbb_removefromlist.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/59375878/59539508.gif">tbb_removefromlist.gif</a> (image/gif)
+                                <a href="attachments/71828481/71926168.gif">tbb_addtolist.gif</a> (image/gif)
                                 <br/>
                                                     </div>
 				    
@@ -320,7 +334,7 @@ div.rbtoc1271613058863 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Apr 20, 2010 15:01</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Sep 10, 2010 15:54</font></td>
 		    </tr>
 	    </table>
     </body>

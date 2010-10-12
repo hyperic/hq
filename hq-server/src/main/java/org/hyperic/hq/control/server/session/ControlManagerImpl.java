@@ -26,7 +26,10 @@
 package org.hyperic.hq.control.server.session;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import javax.annotation.PostConstruct;
 
@@ -57,7 +60,9 @@ import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.MessagePublisher;
+import org.hyperic.hq.control.ControlActionResult;
 import org.hyperic.hq.control.ControlEvent;
+import org.hyperic.hq.control.GroupControlActionResult;
 import org.hyperic.hq.control.agent.client.ControlCommandsClient;
 import org.hyperic.hq.control.agent.client.ControlCommandsClientFactory;
 import org.hyperic.hq.control.shared.ControlConstants;
@@ -77,6 +82,8 @@ import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -102,6 +109,13 @@ public class ControlManagerImpl implements ControlManager {
 
     private MessagePublisher messagePublisher;
     private ControlCommandsClientFactory controlCommandsClientFactory;
+    private ControlActionResultsCollector controlActionResultsCollector;
+    private AsyncTaskExecutor executor;
+    private ControlActionExecutor controlActionExecutor;
+    private GroupControlActionExecutor groupControlActionExecutor;
+    // Default timeout is 10 minutes. If a plugin does not define its
+    // own timeout, this is the value that will be used.
+    static final int DEFAULT_RESOURCE_TIMEOUT = 10 * 60 * 1000;
 
     @Autowired
     public ControlManagerImpl(ProductManager productManager, ControlScheduleManager controlScheduleManager,
@@ -109,7 +123,11 @@ public class ControlManagerImpl implements ControlManager {
                               ConfigManager configManager, PlatformManager platformManager,
                               AuthzSubjectManager authzSubjectManager, PermissionManager permissionManager,
                               MessagePublisher messagePublisher,
-                              ControlCommandsClientFactory controlCommandsClientFactory) {
+                              ControlCommandsClientFactory controlCommandsClientFactory, 
+                              ControlActionResultsCollector controlActionResultsCollector, 
+                              @Value("#{controlExecutor}")AsyncTaskExecutor executor, 
+                              ControlActionExecutor controlActionExecutor, 
+                              GroupControlActionExecutor groupControlActionExecutor) {
         this.productManager = productManager;
         this.controlScheduleManager = controlScheduleManager;
         this.controlHistoryDao = controlHistoryDao;
@@ -120,6 +138,10 @@ public class ControlManagerImpl implements ControlManager {
         this.permissionManager = permissionManager;
         this.messagePublisher = messagePublisher;
         this.controlCommandsClientFactory = controlCommandsClientFactory;
+        this.controlActionResultsCollector = controlActionResultsCollector;
+        this.executor = executor;
+        this.controlActionExecutor = controlActionExecutor;
+        this.groupControlActionExecutor = groupControlActionExecutor;
     }
 
     @PostConstruct
@@ -159,11 +181,16 @@ public class ControlManagerImpl implements ControlManager {
             throw new PluginException("Agent error: " + e.getMessage(), e);
         }
     }
+    
+    public void doAction(AuthzSubject subject, AppdefEntityID id, String action, String args) throws PluginException,
+    PermissionException {
+        doSingleAction(subject, id, action, args);
+    }
 
     /**
      * Execute a single control action on a given entity.
      */
-    public void doAction(AuthzSubject subject, AppdefEntityID id, String action, String args) throws PluginException,
+    private Integer doSingleAction(AuthzSubject subject, AppdefEntityID id, String action, String args) throws PluginException,
         PermissionException {
         // This method doesn't support groups.
         if (id.isGroup()) {
@@ -172,8 +199,14 @@ public class ControlManagerImpl implements ControlManager {
 
         checkControlEnabled(subject, id);
         checkControlPermission(subject, id);
-
-        controlScheduleManager.doSingleAction(id, subject, action, args, null);
+        if (log.isDebugEnabled()) {
+            log.debug("Running control action for immediate execution: "
+                + " {resource=" + id
+                + ", action=" + action
+                + "}");
+        }
+        return controlActionExecutor.executeControlAction(id, subject.getName(), new Date(),
+                Boolean.FALSE, "", action, args);
     }
 
     /**
@@ -184,11 +217,30 @@ public class ControlManagerImpl implements ControlManager {
         String args = null;
         doAction(subject, id, action, args);
     }
+      
+    public Future<ControlActionResult> doAction(AuthzSubject subject, AppdefEntityID id,
+                                                String action, int waitTimeout)
+        throws PluginException, PermissionException {       
+        return doAction(subject, id, action, null,waitTimeout);
+    }
+
+    public Future<ControlActionResult> doAction(final AuthzSubject subject, final AppdefEntityID id,
+                                                String action, String args, final int defaultTimeout)
+        throws PluginException, PermissionException {
+        final Integer jobId = doSingleAction(subject,id,action, args);
+        Future<ControlActionResult> result = executor.submit(new Callable<ControlActionResult>() {
+            public ControlActionResult call() throws Exception {
+                return controlActionResultsCollector.waitForResult(jobId, 
+                    controlActionResultsCollector.getTimeout(subject, id, defaultTimeout));
+            }
+        });
+        return result;
+    }
 
     /**
      * Schedule a new control action.
      */
-    public void doAction(AuthzSubject subject, AppdefEntityID id, String action, ScheduleValue schedule)
+    public void scheduleAction(AuthzSubject subject, AppdefEntityID id, String action, ScheduleValue schedule)
         throws PluginException, PermissionException, SchedulerException {
         // This method doesn't support groups.
         if (id.isGroup()) {
@@ -198,13 +250,14 @@ public class ControlManagerImpl implements ControlManager {
         checkControlEnabled(subject, id);
         checkControlPermission(subject, id);
 
-        controlScheduleManager.doScheduledAction(id, subject, action, schedule, null);
+        controlScheduleManager.scheduleAction(id, subject, action, schedule, null);
     }
 
     /**
      * Single control action for a group of given entities.
      */
-    public void doGroupAction(AuthzSubject subject, AppdefEntityID id, String action, String args, int[] order)
+    public Future<GroupControlActionResult> doGroupAction(final AuthzSubject subject, final AppdefEntityID id, 
+        final String action, final String args, final int[] order, final int defaultResourceTimeout)
         throws PluginException, PermissionException, AppdefEntityNotFoundException, GroupNotCompatibleException {
         List<AppdefEntityID> groupMembers = GroupUtil.getCompatGroupMembers(subject, id, order, PageControl.PAGE_ALL);
 
@@ -213,15 +266,26 @@ public class ControlManagerImpl implements ControlManager {
             checkControlEnabled(subject, entity);
             checkControlPermission(subject, entity);
         }
-
-        controlScheduleManager.doSingleAction(id, subject, action, args, order);
+        final String subjectName = subject.getName();
+        return executor.submit(new Callable<GroupControlActionResult>() {        
+            public GroupControlActionResult call() throws Exception {
+                return groupControlActionExecutor.executeGroupControlAction(id, subjectName, new Date(), false,
+                    "", action, args, order, defaultResourceTimeout);
+            }
+        });
+    }
+    
+    public void doGroupAction(AuthzSubject subject, AppdefEntityID id, String action, String args,
+                              int[] order) throws PluginException, PermissionException,
+        AppdefEntityNotFoundException, GroupNotCompatibleException {
+        doGroupAction(subject, id, action, args, order, DEFAULT_RESOURCE_TIMEOUT); 
     }
 
     /**
      * Schedule a single control action for a group of given entities.
      * @throws SchedulerException
      */
-    public void doGroupAction(AuthzSubject subject, AppdefEntityID id, String action, int[] order,
+    public void scheduleGroupAction(AuthzSubject subject, AppdefEntityID id, String action, int[] order,
                               ScheduleValue schedule) throws PluginException, PermissionException, SchedulerException,
         GroupNotCompatibleException, AppdefEntityNotFoundException {
         List<AppdefEntityID> groupMembers = GroupUtil.getCompatGroupMembers(subject, id, order, PageControl.PAGE_ALL);
@@ -232,7 +296,7 @@ public class ControlManagerImpl implements ControlManager {
             checkControlPermission(subject, entity);
         }
 
-        controlScheduleManager.doScheduledAction(id, subject, action, schedule, order);
+        controlScheduleManager.scheduleAction(id, subject, action, schedule, order);
     }
 
     /**
@@ -378,6 +442,8 @@ public class ControlManagerImpl implements ControlManager {
 
         try {
             config = configManager.getConfigResponse(id);
+        } catch (IllegalArgumentException iae) {
+            throw new PluginException(iae);
         } catch (Exception e) {
             throw new PluginException(e);
         }
@@ -387,32 +453,7 @@ public class ControlManagerImpl implements ControlManager {
         }
     }
 
-    /**
-     * Get the control config response
-     */
-    @Transactional(readOnly=true)
-    public ConfigResponse getConfigResponse(AuthzSubject subject, AppdefEntityID id) throws PluginException {
-        ConfigResponseDB config;
-        try {
-            config = configManager.getConfigResponse(id);
-        } catch (Exception e) {
-            throw new PluginException(e);
-        }
-
-        if (config == null || config.getControlResponse() == null) {
-            throw new PluginException("Control not " + "configured for " + id);
-        }
-
-        byte[] controlResponse = config.getControlResponse();
-        ConfigResponse configResponse;
-        try {
-            configResponse = ConfigResponse.decode(controlResponse);
-        } catch (Exception e) {
-            throw new PluginException("Unable to decode configuration");
-        }
-
-        return configResponse;
-    }
+   
 
     /**
      * Send an agent a plugin configuration. This is needed when agents restart,
@@ -440,7 +481,8 @@ public class ControlManagerImpl implements ControlManager {
             throw new PluginException("Unable to get plugin configuration: " + e.getMessage());
         }
     }
-
+    
+   
     /**
      * Receive status information about a previous control action
      */
@@ -608,5 +650,4 @@ public class ControlManagerImpl implements ControlManager {
                 throw new IllegalArgumentException("Invalid appdef type:" + id.getType());
         }
     }
-
 }

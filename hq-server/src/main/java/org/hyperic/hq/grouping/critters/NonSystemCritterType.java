@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.Query;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterDump;
 import org.hyperic.hq.grouping.CritterTranslationContext;
@@ -113,6 +114,11 @@ public class NonSystemCritterType
         public int hashCode() {
             // all nonsystem critters are logically identical for now
             return 0;
+        }
+        
+        public boolean meets(Resource resource) {
+            //TODO implement
+            throw new UnsupportedOperationException();
         }
     }
 }

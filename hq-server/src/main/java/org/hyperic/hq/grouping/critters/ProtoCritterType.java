@@ -159,6 +159,10 @@ public class ProtoCritterType extends BaseCritterType {
             int result = _proto != null ? _proto.hashCode() : 0;
             return result;
         }
+        
+        public boolean meets(Resource resource) {
+            return _proto.equals(resource.getPrototype());
+        }
     }
 
 }

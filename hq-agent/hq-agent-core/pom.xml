@@ -22,7 +22,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
-			<artifactId>hq-pdk-shared</artifactId>
+			<artifactId>hq-pdk</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -57,6 +57,9 @@
 						<descriptor>src/main/assembly/agent.xml</descriptor>
 					</descriptors>
 				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-source-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>

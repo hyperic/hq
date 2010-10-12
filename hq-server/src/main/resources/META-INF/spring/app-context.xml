@@ -1,4 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    NOTE: This copyright does *not* cover user programs that use HQ
+    program services by normal system calls through the application
+    program interfaces provided as part of the Hyperic Plug-in Development
+    Kit or the Hyperic Client Development Kit - this is merely considered
+    normal use of the program, and does *not* fall under the heading of
+     "derived work".
+
+     Copyright (C) [2009-2010], VMware, Inc.
+     This file is part of HQ.
+
+     HQ is free software; you can redistribute it and/or modify
+     it under the terms version 2 of the GNU General Public License as
+     published by the Free Software Foundation. This program is distributed
+     in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+     even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+     PARTICULAR PURPOSE. See the GNU General Public License for more
+     details.
+
+     You should have received a copy of the GNU General Public License
+     along with this program; if not, write to the Free Software
+     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+     USA.
+
+
+-->
+
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:p="http://www.springframework.org/schema/p"
@@ -43,6 +71,7 @@
 				<value>classpath:/quartz.properties</value>
 				<value>classpath:/jms.properties</value>
 				<value>classpath:/hibernate.properties</value>
+				<value>classpath:/tweak.properties</value>
 				<value>file://#{ systemProperties['user.home'] }/.hq/build.properties</value>
 				<value>classpath:/hq-server.conf</value>
 			</list>
@@ -59,21 +88,30 @@
 			</props>
 		</property>
 	</bean>
+	
+    <bean id="lazyDataSource" class="org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy">
+        <property name="targetDataSource"><ref local="tomcatDataSource"/></property>
+    </bean>
 
 	<bean id="dataSource"
 		class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
-		<constructor-arg ref="tomcatDataSource"/>
+		<constructor-arg ref="lazyDataSource"/>
 	</bean>
-	
+
 	<bean id="tomcatDataSource" class="org.apache.tomcat.jdbc.pool.DataSource"
 				p:driverClassName="${server.database-driver}" p:url="${server.database-url}"
 				p:username="${server.database-user}" p:password="${server.database-password}"
 				p:defaultAutoCommit="false" p:minIdle="${server.database-minpoolsize}"
 				p:maxActive="${server.database-maxpoolsize}" p:maxIdle="${server.database-maxpoolsize}" 
 				p:initialSize="${server.database-minpoolsize}"
-				p:maxWait="${server.database-blockingtimeout}" p:jdbcInterceptors="ConnectionState;StatementFinalizer"
+				p:maxWait="${server.database-blockingtimeout}"
+                p:jdbcInterceptors="ConnectionState;StatementFinalizer"
 				p:validationQuery="${server.connection-validation-sql}"
 				p:validationInterval="30000" p:logAbandoned="true" p:testOnBorrow="true" />
+				
+	 <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
 	
 	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"
 		lazy-init="false">
@@ -87,9 +125,9 @@
 
 	<context:component-scan base-package="org.hyperic,com.hyperic" />
 
-
 	<bean id="sessionFactory"
-		class="org.hyperic.hibernate.JmxExposingLocalSessionFactoryBean">
+		class="org.hyperic.hibernate.CacheInitializingLocalSessionFactoryBean">
+		<constructor-arg ref="preloadCaches"/>
 		<property name="dataSource" ref="dataSource" />
 		<property name="mappingLocations" value="classpath:/hibernate/**/*.hbm.xml" />
 		<property name="hibernateProperties">
@@ -103,6 +141,7 @@
 						<prop key="hibernate.connection.username">${server.database-user}</prop>
 						<prop key="hibernate.connection.password">${server.database-password}</prop>
 						<prop key="hibernate.dialect">${server.hibernate.dialect}</prop>
+						<prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
 					</props>
 				</property>
 				<property name="localOverride" value="true" />
@@ -112,6 +151,22 @@
 			<bean class="org.hyperic.hibernate.HypericInterceptor" />
 		</property>
 	</bean>
+	
+	<util:list id="preloadCaches">
+		<value>org.hyperic.hq.authz.server.session.Resource</value>
+		<value>org.hyperic.hq.authz.server.session.ResourceType</value>
+	    <value>org.hyperic.hq.authz.server.session.ResourceGroup</value>
+	    <value>org.hyperic.hq.appdef.AgentType</value>
+	    <value>org.hyperic.hq.appdef.Agent</value>
+	    <value>org.hyperic.hq.appdef.server.session.PlatformType</value>
+	    <value>org.hyperic.hq.appdef.server.session.ServerType</value>
+	    <value>org.hyperic.hq.appdef.server.session.ServiceType</value>
+	    <value>org.hyperic.hq.appdef.server.session.Platform</value>
+	    <value>org.hyperic.hq.appdef.server.session.Server</value>
+		<value>org.hyperic.hq.appdef.server.session.Service</value>
+	    <value>org.hyperic.hq.measurement.server.session.Category</value>
+	    <value>org.hyperic.hq.measurement.server.session.MonitorableType</value>
+	</util:list>
 
 	<bean id="transactionManager"
 		class="org.springframework.orm.hibernate3.HibernateTransactionManager"
@@ -152,10 +207,8 @@
 		class="org.springframework.beans.factory.config.PropertiesFactoryBean"
 		p:location="classpath:/tweak.properties" />
 
-
 	<context:mbean-export />
 	<context:mbean-server />
-
 
 	<bean class="org.hyperic.hq.transport.util.AsynchronousInvoker">
 		<constructor-arg value="4" />
@@ -177,7 +230,19 @@
 		<bean class="org.hyperic.hq.bizapp.server.trigger.conditional.ValueChangeTrigger" />
 	</util:list>
 
+	<!--
+		This bean refers to various classes that should be loaded at startup.
+		Its only interest is loading the classes listed to have the
+		no-argument constructor called to do some initialization.
+	-->
+	<util:list id="actions">
+		<bean class="org.hyperic.hq.bizapp.server.action.integrate.OpenNMSAction" />
+	</util:list>
+	
 	<task:scheduler id="scheduler" />
+	
+	<!--  Executor that ControlManager uses to run tasks that wait for control action results -->
+	<task:executor id="controlExecutor" pool-size="1-5" queue-capacity="500" rejection-policy="CALLER_RUNS"/>
 
 	<bean class="org.hyperic.hq.application.Scheduler">
 		<constructor-arg value="10" />
@@ -186,7 +251,5 @@
     <bean class="org.hyperic.hq.common.Log4jWatcher">
         <constructor-arg value="/log4j.xml"/>
     </bean>
-
-
 
 </beans>

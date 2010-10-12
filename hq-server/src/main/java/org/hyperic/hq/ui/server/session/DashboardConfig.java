@@ -64,7 +64,7 @@ public abstract class DashboardConfig
         _name = n;
     }
     
-    abstract boolean isEditable(AuthzSubject by);
+    public abstract boolean isEditable(AuthzSubject by);
     
     public int hashCode() {
         int hash = 17;

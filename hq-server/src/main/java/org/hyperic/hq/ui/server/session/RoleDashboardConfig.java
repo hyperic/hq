@@ -54,7 +54,7 @@ public class RoleDashboardConfig
         return _role;
     }
     
-    boolean isEditable(AuthzSubject by) {
+    public boolean isEditable(AuthzSubject by) {
         PermissionManager pMan = PermissionManagerFactory.getInstance();
         
         try {

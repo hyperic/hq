@@ -1,4 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    NOTE: This copyright does *not* cover user programs that use HQ
+    program services by normal system calls through the application
+    program interfaces provided as part of the Hyperic Plug-in Development
+    Kit or the Hyperic Client Development Kit - this is merely considered
+    normal use of the program, and does *not* fall under the heading of
+     "derived work".
+
+     Copyright (C) [2009-2010], VMware, Inc.
+     This file is part of HQ.
+
+     HQ is free software; you can redistribute it and/or modify
+     it under the terms version 2 of the GNU General Public License as
+     published by the Free Software Foundation. This program is distributed
+     in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+     even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+     PARTICULAR PURPOSE. See the GNU General Public License for more
+     details.
+
+     You should have received a copy of the GNU General Public License
+     along with this program; if not, write to the Free Software
+     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+     USA.
+
+
+-->
+
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
 	xsi:schemaLocation="
@@ -34,7 +62,6 @@
 	<bean name="/admin/user/Register" class="org.hyperic.hq.ui.action.admin.user.RegisterAction" />
 	<bean name="/admin/user/RegisterFormPrepare"
 		class="org.hyperic.hq.ui.action.admin.user.RegisterFormPrepareAction" />
-	
 	<bean name="/admin/user/Plugins" class="org.hyperic.hq.ui.action.admin.plugins.PluginsAction" />
 	<bean name="/admin/config/EditConfigPrep"
 		class="org.hyperic.hq.ui.action.admin.config.EditConfigPrepAction" />
@@ -83,6 +110,8 @@
 		class="org.hyperic.hq.ui.action.resource.common.control.CurrentStatusAction" />
 	<bean name="/resource/common/control/UpdateStatus"
 		class="org.hyperic.hq.ui.action.resource.common.control.UpdateStatusAction" />
+	<bean name="/resource/common/control/RemoveControlJobs"
+		class="org.hyperic.hq.ui.action.resource.common.control.RemoveControlJobsAction" />
 	<bean name="/resource/platform/InventoryPortal"
 		class="org.hyperic.hq.ui.action.resource.platform.inventory.PlatformInventoryPortalAction" />
 	<bean name="/resource/platform/inventory/NewPlatformFormPrepare"
@@ -176,12 +205,22 @@
 		class="org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsFormPrepareAction" />
 	<bean name="/resource/platform/monitor/config/ConfigMetrics"
 		class="org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsAction" />
+	<bean name="/resource/platform/PlatformController"
+		class="org.hyperic.hq.ui.action.resource.platform.control.PlatformControllerAction" />
 	<bean name="/resource/platform/control/RemoveHistory"
 		class="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction" />
 	<bean name="/resource/platform/control/RemoveCurrentStatus"
 		class="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction" />
-	<bean name="/resource/platform/PlatformController"
-		class="org.hyperic.hq.ui.action.resource.platform.control.PlatformControllerAction" />
+	<bean name="/resource/platform/control/RemoveControlJobs"
+		class="org.hyperic.hq.ui.action.resource.common.control.RemoveControlJobsAction" />
+	<bean name="/resource/platform/control/NewFormPrepare"
+		class="org.hyperic.hq.ui.action.resource.common.control.NewFormPrepareAction" />
+	<bean name="/resource/platform/control/New"
+		class="org.hyperic.hq.ui.action.resource.common.control.NewAction" />
+	<bean name="/resource/platform/control/EditFormPrepare"
+		class="org.hyperic.hq.ui.action.resource.common.control.EditFormPrepareAction" />
+	<bean name="/resource/platform/control/Edit"
+		class="org.hyperic.hq.ui.action.resource.common.control.EditAction" />
 	<bean name="/resource/server/monitor/visibility/ServerCurrentHealth"
 		class="org.hyperic.hq.ui.action.resource.common.monitor.visibility.CurrentHealthAction" />
 	<bean name="/resource/server/monitor/visibility/ListChildrenResources"
@@ -220,7 +259,7 @@
 	<bean name="/resource/server/inventory/EditConfigProperties"
 		class="org.hyperic.hq.ui.action.resource.common.inventory.EditConfigPropertiesAction" />
 	<bean name="/resource/server/inventory/RemoveService"
-		class="org.hyperic.hq.ui.action.resource.server.inventory.RemoveServiceAction" />
+		class="org.hyperic.hq.ui.action.resource.server.inventory.RemoveServiceAction" />	
 	<bean name="/resource/server/ServerController"
 		class="org.hyperic.hq.ui.action.resource.server.control.ServerControllerAction" />
 	<bean name="/resource/server/control/NewFormPrepare"
@@ -235,9 +274,9 @@
 		class="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction" />
 	<bean name="/resource/server/control/RemoveCurrentStatus"
 		class="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction" />
-	<bean name="/resource/common/control/RemoveControlJobs"
-		class="org.hyperic.hq.ui.action.resource.common.control.RemoveControlJobsAction" />
 	<bean name="/resource/server/control/RemoveControlJobs"
+		class="org.hyperic.hq.ui.action.resource.common.control.RemoveControlJobsAction" />	
+	<bean name="/resource/service/control/RemoveControlJobs"
 		class="org.hyperic.hq.ui.action.resource.common.control.RemoveControlJobsAction" />
 	<bean name="/resource/service/InventoryPortal"
 		class="org.hyperic.hq.ui.action.resource.service.inventory.ServiceInventoryPortalAction" />
@@ -352,10 +391,6 @@
 		class="org.hyperic.hq.ui.action.portlet.SetDefaultDashboardAction" />
 	<bean name="/dashboard/AddContent"
 		class="org.hyperic.hq.ui.action.portlet.addcontent.ViewAction" />
-	<bean name="/dashboard/RemovePortlet"
-		class="org.hyperic.hq.ui.action.portlet.admin.RemovePortletAction" />
-	<bean name="/dashboard/AddPortlet"
-		class="org.hyperic.hq.ui.action.portlet.addcontent.AddPortletAction" />
 	<bean name="/dashboard/SearchHubPrepare" class="org.hyperic.hq.ui.action.portlet.search.ViewAction" />
 	<bean name="/dashboard/ModifySavedQueries"
 		class="org.hyperic.hq.ui.action.portlet.savedqueries.ModifyAction" />

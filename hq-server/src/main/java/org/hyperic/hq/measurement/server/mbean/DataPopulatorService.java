@@ -1,3 +1,29 @@
+/**
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ *  "derived work".
+ *
+ *  Copyright (C) [2009-2010], VMware, Inc.
+ *  This file is part of HQ.
+ *
+ *  HQ is free software; you can redistribute it and/or modify
+ *  it under the terms version 2 of the GNU General Public License as
+ *  published by the Free Software Foundation. This program is distributed
+ *  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ *  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ *  PARTICULAR PURPOSE. See the GNU General Public License for more
+ *  details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ *  USA.
+ *
+ */
+
 package org.hyperic.hq.measurement.server.mbean;
 
 import java.sql.Connection;
@@ -10,6 +36,9 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.SessionFactory;
+import org.hibernate.engine.SessionFactoryImplementor;
+import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -17,7 +46,6 @@ import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementUnionStatementBuilder;
 import org.hyperic.hq.measurement.shared.DataManager;
-import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.StringUtil;
@@ -46,16 +74,18 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
     private MeasurementManager measurementManager;
     private DataManager dataManager;
     private ServerConfigManager serverConfigManager;
+    private SessionFactory sessionFactory;
     
     
     
     @Autowired
     public DataPopulatorService(DBUtil dbUtil, MeasurementManager measurementManager, DataManager dataManager,
-                                ServerConfigManager serverConfigManager) {
+                                ServerConfigManager serverConfigManager, SessionFactory sessionFactory) {
         this.dbUtil = dbUtil;
         this.measurementManager = measurementManager;
         this.dataManager = dataManager;
         this.serverConfigManager = serverConfigManager;
+        this.sessionFactory = sessionFactory;
     }
 
     /**
@@ -136,7 +166,8 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
     private DataPoint getLastDataPoint(Integer mid) throws Exception {
 
         String table = MeasurementUnionStatementBuilder.getUnionStatement(
-            getDetailedPurgeInterval(), mid.intValue());
+            getDetailedPurgeInterval(), mid.intValue(), (HQDialect) ((SessionFactoryImplementor) sessionFactory)
+            .getDialect());
         final String SQL =
             "SELECT timestamp, value FROM " + table +
             " WHERE measurement_id = ? AND timestamp = " +

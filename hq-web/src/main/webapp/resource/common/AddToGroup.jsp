@@ -81,7 +81,9 @@
 
     var MyGroupManager = null;
     dojo11.addOnLoad(function(){
-    	MyGroupManager = new hyperic.group_manager();
+    	MyGroupManager = new hyperic.group_manager({
+			url: "/app/resource/"
+    	});
     });
 
     var AddToGroupMenuLink = dojo11.byId("AddToGroupMenuLink");

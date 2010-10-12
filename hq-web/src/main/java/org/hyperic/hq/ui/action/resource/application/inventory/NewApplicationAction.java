@@ -97,7 +97,7 @@ public class NewApplicationAction
             log.trace("creating application [" + app.getName() + "] with attributes " + newForm);
             // XXX ConfigResponse is a dummy arg, must be nuked when the boss
             // interface fixed
-            app = appdefBoss.createApplication(sessionId.intValue(), app, new ArrayList<ServiceValue>(),
+            app = appdefBoss.createApplication(sessionId.intValue(), app, 
                 new ConfigResponse());
             AppdefEntityID appId = app.getEntityId();
             log.trace("created application [" + app.getName() + "] with attributes " + app.toString() +

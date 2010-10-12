@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="rpm-macros" >
+  <description>Macros used in the RPM creation process.</description>
+
+  <!-- Macro for building client RPM's. -->
+
+  <macrodef name="build-one-client-rpm" >
+    <attribute name="rpm.dir" />
+    <attribute name="rpm.subfolder" />
+    <attribute name="build.subfolder" />
+    <attribute name="tarball.name" />
+    <attribute name="spec.file.name" />
+    <attribute name="init.file.name" />
+
+    <sequential>
+      <copy file="@{rpm.dir}/@{rpm.subfolder}/@{tarball.name}" toDir="${rpm.build.home}/SOURCES" />
+      <copy file="${build.base}/@{spec.file.name}" toDir="${rpm.build.home}/SPECS" />
+      <chmod perm="+x" file="${rpm.build.home}/SPECS/@{spec.file.name}" />
+
+      <mkdir dir="${rpm.build.home}/BUILD/@{build.subfolder}/rcfiles" />
+
+      <copy file="@{init.file.name}" todir="${rpm.build.home}/BUILD/@{build.subfolder}/rcfiles" />
+
+      <rpm
+        specFile="@{spec.file.name}"
+        topDir="${rpm.build.home}"
+        quiet="true"
+        cleanBuildDir="true"
+        removeSpec="true"
+        removeSource="true"
+        failOnError="true"
+        error="${top.rpm.dir}/rpm_error.log" />
+
+    </sequential>
+  </macrodef>
+
+  <!-- Macro for building server RPM's. -->
+
+  <macrodef name="build-one-server-rpm" >
+    <attribute name="rpm.dir" />
+    <attribute name="rpm.subfolder" />
+    <attribute name="build.subfolder" />
+    <attribute name="tarball.name" />
+    <attribute name="spec.file.name" />
+    <attribute name="init.file.name" />
+    <attribute name="rpm.command" default="-tb" />
+
+    <sequential>
+      <untar
+        src="@{rpm.dir}/@{rpm.subfolder}/@{tarball.name}"
+        dest="@{rpm.dir}/@{rpm.subfolder}"
+        compression="gzip" />
+
+      <copy
+        file="${build.base}/@{spec.file.name}"
+        tofile="@{rpm.dir}/@{rpm.subfolder}/@{build.subfolder}/rpm.spec"
+        overwrite="true" />
+
+      <mkdir
+        dir="@{rpm.dir}/@{rpm.subfolder}/@{build.subfolder}/rcfiles" />
+
+      <copy
+        file="@{init.file.name}"
+        todir="@{rpm.dir}/@{rpm.subfolder}/@{build.subfolder}/rcfiles"
+        overwrite="true" />
+
+      <copy
+        todir="@{rpm.dir}/@{rpm.subfolder}/@{build.subfolder}"
+        overwrite="true" >
+
+        <fileset dir="@{rpm.dir}" >
+          <include name="expect/" />
+        </fileset>
+      </copy>
+
+      <tar
+        destfile="${rpm.build.home}/SOURCES/@{tarball.name}"
+        compression="gzip"
+        longfile="gnu" >
+
+        <tarfileset dir="@{rpm.dir}/@{rpm.subfolder}"
+          includes="@{build.subfolder}/"
+          excludes="expect/*.*,rcfiles/*.*,**/*.sh,**/*.bat,**/bin/" />
+
+        <tarfileset dir="@{rpm.dir}/@{rpm.subfolder}"
+          includes="@{build.subfolder}/expect/*.*,@{build.subfolder}/rcfiles/*.*,@{build.subfolder}/*.sh,@{build.subfolder}/*.bat,**/bin/"
+          filemode="755" />
+
+      </tar>
+
+      <delete quiet="true">
+        <dirset dir="@{rpm.dir}/@{rpm.subfolder}/@{build.subfolder}" />
+        <fileset file="@{rpm.dir}/@{rpm.subfolder}/@{tarball.name}" />
+      </delete>
+
+      <rpm
+        specFile="../SOURCES/@{tarball.name}"
+        topDir="${rpm.build.home}"
+        command="@{rpm.command}"
+        quiet="true"
+        cleanBuildDir="true"
+        removeSpec="true"
+        removeSource="true"
+        failOnError="true"
+        error="${top.rpm.dir}/rpm_error.log" />
+
+    </sequential>
+  </macrodef>
+
+</project>

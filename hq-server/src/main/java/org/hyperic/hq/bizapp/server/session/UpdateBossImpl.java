@@ -28,10 +28,13 @@ package org.hyperic.hq.bizapp.server.session;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.zip.GZIPOutputStream;
+
+import javax.sql.DataSource;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -60,7 +63,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class UpdateBossImpl implements UpdateBoss {
-    private static final Log log = LogFactory.getLog(UpdateBossImpl.class.getName());
+    private final Log log = LogFactory.getLog(UpdateBossImpl.class.getName());
 
     private ServerConfigManager serverConfigManager;
     private PlatformManager platformManager;
@@ -71,6 +74,8 @@ public class UpdateBossImpl implements UpdateBoss {
     private ServerConfigAuditFactory serverConfigAuditFactory;
     private String updateNotifyUrl;
     private static final int HTTP_TIMEOUT_MILLIS = 30000;
+    private DataSource dataSource;
+ 
 
     @Autowired
     public UpdateBossImpl(
@@ -81,6 +86,7 @@ public class UpdateBossImpl implements UpdateBoss {
                           ServiceManager serviceManager,
                           UIPluginManager uiPluginManager,
                           ServerConfigAuditFactory serverConfigAuditFactory,
+                          DataSource dataSource,
                           @Value("#{tweakProperties['hq.updateNotify.url'] }") String updateNotifyUrl) {
         this.updateDAO = updateDAO;
         this.serverConfigManager = serverConfigManager;
@@ -89,6 +95,7 @@ public class UpdateBossImpl implements UpdateBoss {
         this.serviceManager = serviceManager;
         this.uiPluginManager = uiPluginManager;
         this.serverConfigAuditFactory = serverConfigAuditFactory;
+        this.dataSource = dataSource;
         this.updateNotifyUrl = updateNotifyUrl;
     }
 
@@ -116,7 +123,11 @@ public class UpdateBossImpl implements UpdateBoss {
         addResourceProperties(req, svcs, "hq.rsrc.svc.");
 
         req.putAll(SysStats.getCpuMemStats());
-        req.putAll(SysStats.getDBStats());
+        try {
+            req.putAll(SysStats.getDBStats(dataSource.getConnection()));
+        } catch (SQLException e) {
+            log.warn("Error obtaining DB Stats: " + e.getMessage(),e);
+        }
         req.putAll(getHQUPlugins());
         return req;
     }

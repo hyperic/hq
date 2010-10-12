@@ -1,15 +1,15 @@
 /*
- * NOTE: This copyright does *not* cover user programs that use HQ
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2008], Hyperic, Inc.
- * This file is part of HQ.
+ * Copyright (C) [2004-2010], VMware, Inc.
+ * This file is part of Hyperic.
  *
- * HQ is free software; you can redistribute it and/or modify
+ * Hyperic is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
  * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -51,6 +51,7 @@ import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -181,6 +182,29 @@ public class AlertDefinitionDAO
             session.setFlushMode(oldFlushMode);
         }
     }
+    
+    /**
+     * Get a list of all alert definitions with an availability metric condition
+     * @return a list of alert definitions
+     */
+    public List<AlertDefinition> findAvailAlertDefs() {
+    	// To improve performance, need to explicitly fetch the resource,
+    	// resource type, and conditions so that they are not lazy loaded
+        String hql = new StringBuilder(256)
+            .append("from AlertDefinition ad ")
+            .append("join fetch ad.resource rez ")
+            .append("join fetch rez.resourceType ")
+            .append("join fetch ad.conditionsBag c ")
+            .append("where ad.active = true ")
+            .append("and ad.deleted = false ")
+            .append("and upper(c.name) = '")
+            .append(MeasurementConstants.CAT_AVAILABILITY.toUpperCase())
+            .append("' ")
+            .append("and (ad.parent is null or ad.parent.id != 0) ")
+            .toString();
+        
+        return getSession().createQuery(hql).list();
+    }
 
     /**
      * Find an alert definition by Id, loading from the given session.
@@ -224,7 +248,7 @@ public class AlertDefinitionDAO
     public List<AlertDefinition> findByRootResource(AuthzSubject subject, Resource r) {
         EdgePermCheck wherePermCheck = permissionManager.makePermCheckHql("rez", true);
         String hql = "select ad from AlertDefinition ad join ad.resource rez " + wherePermCheck +
-                     " and ad.deleted = false and ad.resource is not null ";
+                     " and ad.deleted = false and rez.resourceType is not null ";
 
         Query q = createQuery(hql);
 

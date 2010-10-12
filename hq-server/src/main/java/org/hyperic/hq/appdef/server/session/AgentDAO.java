@@ -25,9 +25,14 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.sql.SQLException;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
 import org.hyperic.hibernate.PageInfo;
@@ -35,6 +40,8 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AgentType;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.orm.hibernate3.HibernateCallback;
+import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -45,17 +52,35 @@ public class AgentDAO
         super(Agent.class, f);
     }
 
+    @SuppressWarnings("unchecked")
+    @PostConstruct
+    public void preloadQueryCache() {
+        new HibernateTemplate(sessionFactory, true).execute(new HibernateCallback() {
+            public Object doInHibernate(Session session) throws HibernateException, SQLException {
+                List<String> tokens = session.createQuery("select agentToken from Agent").list();
+                final String sql = "from Agent where agentToken=?";
+                for(String token : tokens) {
+                    //HQ-2575 Preload findByAgentToken query cache to minimize DB connections when multiple agents
+                    //send measurement reports to a restarted server 
+                    session.createQuery(sql).setString(0,token).setCacheRegion(
+                        "Agent.findByAgentToken").setCacheable(true).uniqueResult();
+                }
+                return null;
+            }
+        });
+    }
+
     public Agent create(AgentType type, String address, Integer port, boolean unidirectional,
                         String authToken, String agentToken, String version) {
         Agent ag = new Agent(type, address, port, unidirectional, authToken, agentToken, version);
         save(ag);
         return ag;
     }
-    
+
     @SuppressWarnings("unchecked")
     public List<Agent> findAll() {
-        return getSession().createCriteria(Agent.class).addOrder(Order.asc("address")).addOrder(Order.asc("port"))
-        .list();
+        return getSession().createCriteria(Agent.class).addOrder(Order.asc("address")).addOrder(
+            Order.asc("port")).list();
     }
 
     @SuppressWarnings("unchecked")
@@ -63,7 +88,7 @@ public class AgentDAO
         String hql = "from Agent where address=:address";
         return (List<Agent>) getSession().createQuery(hql).setString("address", ip).list();
     }
-
+    
     public int countUsed() {
         return ((Number) getSession().createQuery(
             "select count(distinct a) from Platform p " + "join p.agent a").uniqueResult())

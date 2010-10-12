@@ -412,9 +412,11 @@ public class ServerConfig
                     .getValue("server.database-password"));
 
                 schema.addOption(new HiddenConfigOption("server.encryption-key", encryptionKey));
-
-                schema.addOption(new HiddenConfigOption("server.database-password-encrypted",
-                    encryptedPw.toString()));
+                //Make this optional for non-interactive installers so the default value created here will be used instead
+                HiddenConfigOption encryptedPwOption = new HiddenConfigOption("server.database-password-encrypted",
+                    encryptedPw.toString());
+                encryptedPwOption.setOptional(true);
+                schema.addOption(encryptedPwOption);
                 break;
 
             case 8:
@@ -465,8 +467,12 @@ public class ServerConfig
                     throw new EarlyExitException("No modifications made to existing database.  "
                                                  + "Exiting installer.");
                 }
+                break;            
+            case 11:
+                if(isEEInstall) {
+                    schema.addOption(new HiddenConfigOption("accept.eula",YesNoConfigOption.NO));
+                }
                 break;
-
             default:
                 return null;
         }

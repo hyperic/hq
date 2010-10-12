@@ -25,18 +25,17 @@
 
 package org.hyperic.hq.measurement.shared;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.measurement.server.session.DataPoint;
-import org.hyperic.util.TimeUtil;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.measurement.server.session.DataPoint;
+import org.hyperic.util.TimeUtil;
 
 public class MeasRangeObj
 {
@@ -44,8 +43,8 @@ public class MeasRangeObj
     private final Log _log = LogFactory.getLog(logCtx);
 
     private static MeasRangeObj _onlyInst = new MeasRangeObj();
-    private List _ranges = new ArrayList(),
-                 _umRanges;
+    private List<MeasRange> _ranges = new ArrayList<MeasRange>();
+    private List<MeasRange> _umRanges;
 
     private MeasRangeObj()
     {
@@ -86,7 +85,7 @@ public class MeasRangeObj
     public Map<String, List<DataPoint>> bucketData(List<DataPoint> data)
     {
         HashMap<String, List<DataPoint>> buckets = new HashMap<String, List<DataPoint>>();
-        List ranges = getRanges();
+        List<MeasRange> ranges = getRanges();
         for (DataPoint pt : data )
         {
             
@@ -101,7 +100,7 @@ public class MeasRangeObj
         return buckets;
     }
 
-    public List getRanges()
+    public List<MeasRange> getRanges()
     {
         synchronized(_ranges)
         {
@@ -124,11 +123,9 @@ public class MeasRangeObj
         return getTable(getRanges(), timestamp);
     }
 
-    public String getTable(List ranges, long timestamp)
+    public String getTable(List<MeasRange> ranges, long timestamp)
     {
-        for (Iterator i=ranges.iterator(); i.hasNext(); )
-        {
-            MeasRange range = (MeasRange)i.next();
+        for (MeasRange range : ranges) {
             if (timestamp <= range.getMaxTimestamp() &&
                 timestamp >= range.getMinTimestamp()) {
                 return range.getTable();

@@ -1,15 +1,15 @@
 /*
- * NOTE: This copyright does *not* cover user programs that use HQ
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
- * This file is part of HQ.
+ * Copyright (C) [2004-2010], VMware, Inc.
+ * This file is part of Hyperic.
  *
- * HQ is free software; you can redistribute it and/or modify
+ * Hyperic is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
  * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -76,14 +76,20 @@ public class GalertDefDAO
      */
     @SuppressWarnings("unchecked")
     public List<GalertDef> findAll() {
-        return (List<GalertDef>) getSession().createQuery(
-            "from GalertDef d " + "where d.deleted = false " + "order by name").list();
+    	String sql = "from GalertDef d "
+    		+ "where d.deleted = false "
+    		+ "and d.group.resource.resourceType is not null "
+    		+ "order by d.name";
+
+        return (List<GalertDef>) getSession().createQuery(sql).list();
     }
 
     @SuppressWarnings("unchecked")
     Collection<GalertDef> findAll(ResourceGroup g) {
         String sql = "from GalertDef d where d.group = :group "
-                     + "and d.deleted = false order by name";
+                     + "and d.deleted = false "
+                     + "and d.group.resource.resourceType is not null "
+                     + "order by d.name";
 
         return (Collection<GalertDef>) getSession().createQuery(sql).setParameter("group", g)
             .list();
@@ -95,6 +101,7 @@ public class GalertDefDAO
         String sql = PermissionManagerFactory.getInstance().getGroupAlertDefsHQL();
 
         sql += " and d.deleted = false";
+        sql += " and d.group.resource.resourceType is not null ";
         if (enabled != null) {
             sql += " and d.enabled = " + (enabled.booleanValue() ? "true" : "false");
         }

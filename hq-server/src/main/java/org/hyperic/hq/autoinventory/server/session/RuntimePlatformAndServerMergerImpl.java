@@ -59,18 +59,16 @@ public class RuntimePlatformAndServerMergerImpl implements ApplicationContextAwa
     private final Log log = LogFactory.getLog(RuntimePlatformAndServerMergerImpl.class);
 
     private AgentManager agentManager;
-    private AgentReportStatusDAO agentReportStatusDao;
     private ServiceMerger serviceMerger;
     private AuthzSubjectManager authzSubjectManager;
     private ProductManager productManager;
     private ApplicationContext applicationContext;
 
     @Autowired
-    public RuntimePlatformAndServerMergerImpl(AgentManager agentManager, AgentReportStatusDAO agentReportStatusDao,
+    public RuntimePlatformAndServerMergerImpl(AgentManager agentManager, 
                                               ServiceMerger serviceMerger, AuthzSubjectManager authzSubjectManager,
                                               ProductManager productManager) {
         this.agentManager = agentManager;
-        this.agentReportStatusDao = agentReportStatusDao;
         this.serviceMerger = serviceMerger;
         this.authzSubjectManager = authzSubjectManager;
         this.productManager = productManager;
@@ -138,16 +136,6 @@ public class RuntimePlatformAndServerMergerImpl implements ApplicationContextAwa
         List<ServiceMergeInfo> serviceMerges = mergePlatformsAndServers(agentToken, crrr);
 
         Agent a = agentManager.getAgent(agentToken);
-
-        AgentReportStatus status = agentReportStatusDao.getOrCreate(a);
-
-        if (serviceMerges.isEmpty()) {
-            log.debug("Agent [" + agentToken + "] reported no services.  " + "Marking clean");
-            status.markClean();
-        } else {
-            log.debug("Agent [" + agentToken + "] reported " + serviceMerges.size() + " services.  Marking dirty");
-            status.markDirty();
-        }
 
         serviceMerger.scheduleServiceMerges(agentToken, serviceMerges);
     }

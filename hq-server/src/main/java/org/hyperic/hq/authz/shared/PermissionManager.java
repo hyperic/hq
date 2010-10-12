@@ -747,9 +747,6 @@ public abstract class PermissionManager {
     public abstract List<Operation> getAllOperations(AuthzSubject subject, PageControl pc)
         throws PermissionException;
 
-    public abstract String getResourceTypeSQL(String instanceId, Integer subjectId, String resType,
-                                              String op);
-
     public abstract String getOperableGroupsHQL(AuthzSubject subject, String alias, String oper);
 
     public abstract Collection<Resource> getGroupResources(Integer subjectId, Integer groupId,

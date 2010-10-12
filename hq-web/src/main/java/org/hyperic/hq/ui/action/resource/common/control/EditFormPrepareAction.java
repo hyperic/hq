@@ -45,6 +45,7 @@ import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.beans.OptionItem;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This populates the EditForm associated with a server control action.
@@ -54,6 +55,12 @@ public class EditFormPrepareAction
 
     private final Log log = LogFactory.getLog(EditFormPrepareAction.class.getName());
     private ControlBoss controlBoss;
+
+    @Autowired
+    public EditFormPrepareAction(ControlBoss controlBoss) {
+        super();
+        this.controlBoss = controlBoss;
+    }
 
     /**
      * Retrieve server action data and store it in the specified request

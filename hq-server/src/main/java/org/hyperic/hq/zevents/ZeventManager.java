@@ -1,15 +1,15 @@
 /*
- * NOTE: This copyright does *not* cover user programs that use HQ
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2008], Hyperic, Inc.
- * This file is part of HQ.
+ * Copyright (C) [2004-2010], VMware, Inc.
+ * This file is part of Hyperic.
  *
- * HQ is free software; you can redistribute it and/or modify
+ * Hyperic is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
  * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -107,9 +107,11 @@ public class ZeventManager implements ZeventEnqueuer {
     private ThreadWatchdog threadWatchdog;
     private long maxQueue;
     private long batchSize;
-
+    private ConcurrentStatsCollector concurrentStatsCollector;
+    
     @Autowired
     public ZeventManager(DiagnosticsLogger diagnosticsLogger, ThreadWatchdog threadWatchdog,
+    					 ConcurrentStatsCollector concurrentStatsCollector,
                          @Value("#{tweakProperties['hq.zevent.maxQueueEnts'] }") Long maxQueue,
                          @Value("#{tweakProperties['hq.zevent.batchSize'] }") Long batchSize,
                          @Value("#{tweakProperties['hq.zevent.warnInterval'] }") Long warnInterval,  
@@ -119,6 +121,7 @@ public class ZeventManager implements ZeventEnqueuer {
         this._threadGroup.setDaemon(true);
         this.diagnosticsLogger = diagnosticsLogger;
         this.threadWatchdog = threadWatchdog;
+        this.concurrentStatsCollector = concurrentStatsCollector;
         this.maxQueue = maxQueue;
         this.batchSize = batchSize;
         this._warnInterval = warnInterval;
@@ -163,6 +166,10 @@ public class ZeventManager implements ZeventEnqueuer {
             public String getStatus() {
                 return getDiagnostics();
             }
+            
+            public String getShortStatus() {
+                return getStatus();
+            }
 
             public String toString() {
                 return "ZEvent Subsystem";
@@ -178,7 +185,7 @@ public class ZeventManager implements ZeventEnqueuer {
         };
 
         diagnosticsLogger.addDiagnosticObject(myDiag);
-        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.ZEVENT_QUEUE_SIZE);
+        concurrentStatsCollector.register(ConcurrentStatsCollector.ZEVENT_QUEUE_SIZE);
     }
 
     public long getQueueSize() {
@@ -411,8 +418,8 @@ public class ZeventManager implements ZeventEnqueuer {
             e.enterQueue();
             _eventQueue.offer(e, 1, TimeUnit.SECONDS);
         }
-        ConcurrentStatsCollector.getInstance().addStat(_eventQueue.size(),
-            ConcurrentStatsCollector.ZEVENT_QUEUE_SIZE);
+        
+        concurrentStatsCollector.addStat(_eventQueue.size(), ConcurrentStatsCollector.ZEVENT_QUEUE_SIZE);
     }
 
     public void enqueueEventAfterCommit(Zevent event) {

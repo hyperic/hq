@@ -27,7 +27,6 @@ package org.hyperic.hq.events.server.session;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -41,9 +40,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -513,7 +510,7 @@ public class EventLogDAO
 
     private String getLogsExistSQL(Resource resource, long begin, long end, int intervals,
                                    EdgePermCheck wherePermCheck) {
-        HQDialect dialect = Util.getHQDialect();
+        HQDialect dialect = getHQDialect();
         StringBuilder sql = new StringBuilder();
         String resVar = wherePermCheck.getResourceVar();
         String permSql = wherePermCheck.getSql();

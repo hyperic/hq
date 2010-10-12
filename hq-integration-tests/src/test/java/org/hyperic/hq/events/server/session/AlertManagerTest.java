@@ -1,3 +1,29 @@
+/**
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ *  "derived work".
+ *
+ *  Copyright (C) [2010], VMware, Inc.
+ *  This file is part of HQ.
+ *
+ *  HQ is free software; you can redistribute it and/or modify
+ *  it under the terms version 2 of the GNU General Public License as
+ *  published by the Free Software Foundation. This program is distributed
+ *  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ *  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ *  PARTICULAR PURPOSE. See the GNU General Public License for more
+ *  details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ *  USA.
+ *
+ */
+
 package org.hyperic.hq.events.server.session;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -19,17 +45,8 @@ import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.ServiceType;
-import org.hyperic.hq.appdef.shared.AIPlatformValue;
-import org.hyperic.hq.appdef.shared.AgentManager;
-import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.PlatformManager;
-import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.ServerManager;
-import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.appdef.shared.ServiceManager;
-import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.OperationDAO;
@@ -38,16 +55,14 @@ import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.RoleManager;
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.context.IntegrationTestContextLoader;
 import org.hyperic.hq.escalation.server.session.Escalatable;
+import org.hyperic.hq.events.AlertDefinitionCreateException;
 import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerFiredEvent;
@@ -60,19 +75,14 @@ import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
-import org.hyperic.hq.product.ServerTypeInfo;
-import org.hyperic.hq.product.ServiceTypeInfo;
+import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -81,11 +91,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @author jhickey
  * 
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = IntegrationTestContextLoader.class, locations = { "classpath*:META-INF/spring/*-context.xml" })
-@Transactional
 @DirtiesContext
-public class AlertManagerTest {
+public class AlertManagerTest
+    extends BaseInfrastructureTest {
 
     @Autowired
     private AlertManager alertManager;
@@ -94,31 +102,13 @@ public class AlertManagerTest {
     private AlertDefinitionManager alertDefinitionManager;
 
     @Autowired
-    private PlatformManager platformManager;
-
-    @Autowired
-    private AuthzSubjectManager authzSubjectManager;
-
-    @Autowired
     private RoleManager roleManager;
 
     @Autowired
-    private ResourceGroupManager resourceGroupManager;
-
-    @Autowired
-    private AgentManager agentManager;
+    private MeasurementManager measurementManager;
 
     @Autowired
     private SessionFactory sessionFactory;
-
-    @Autowired
-    private ServerManager serverManager;
-
-    @Autowired
-    private ServiceManager serviceManager;
-
-    @Autowired
-    private MeasurementManager measurementManager;
 
     private AlertDefinition testPlatformAlertDef;
 
@@ -134,50 +124,8 @@ public class AlertManagerTest {
 
     private List<Role> testRoles = new ArrayList<Role>();
 
-    private Platform createPlatform(String agentToken, String platformType, String fqdn)
-        throws ApplicationException {
-        AIPlatformValue aiPlatform = new AIPlatformValue();
-        aiPlatform.setCpuCount(2);
-        aiPlatform.setPlatformTypeName(platformType);
-        aiPlatform.setAgentToken(agentToken);
-        aiPlatform.setFqdn(fqdn);
-        return platformManager.createPlatform(authzSubjectManager.getOverlordPojo(), aiPlatform);
-    }
-
- 
-    private Server createServer(Platform platform, ServerType serverType)
-        throws PlatformNotFoundException, AppdefDuplicateNameException, ValidationException,
-        PermissionException, NotFoundException {
-        ServerValue server = new ServerValue();
-        return serverManager.createServer(authzSubjectManager.getOverlordPojo(), platform.getId(),
-            serverType.getId(), server);
-    }
-
-   
-    private ServerType createServerType(String serverName, String serverVersion,
-                                        String[] validPlatformTypes, String plugin)
-        throws NotFoundException {
-        ServerTypeInfo serverTypeInfo = new ServerTypeInfo();
-        serverTypeInfo.setDescription(serverName);
-        serverTypeInfo.setName(serverName);
-        serverTypeInfo.setVersion(serverVersion);
-        serverTypeInfo.setVirtual(false);
-        serverTypeInfo.setValidPlatformTypes(validPlatformTypes);
-        return serverManager.createServerType(serverTypeInfo, plugin);
-    }
-
-  
-    private ServiceType createServiceType(String serviceTypeName, String plugin,
-                                          ServerType serverType) throws NotFoundException {
-        ServiceTypeInfo sinfo = new ServiceTypeInfo();
-        sinfo.setDescription(serviceTypeName);
-        sinfo.setInternal(false);
-        sinfo.setName(serviceTypeName);
-        return serviceManager.createServiceType(sinfo, plugin, serverType);
-    }
-
     private AlertDefinition createAlertDefinition(Integer appdefId, Integer appdefType,
-                                                  String alertDefName) {
+                                                  String alertDefName) throws AlertDefinitionCreateException {
         AlertDefinitionValue alertDefValue = new AlertDefinitionValue();
         alertDefValue.setName(alertDefName);
         alertDefValue.setAppdefId(appdefId);
@@ -193,19 +141,18 @@ public class AlertManagerTest {
         String platformType = "Linux";
         platformManager.createPlatformType(platformType, "Test Plugin");
         // Create test platform
-        this.testPlatform = createPlatform(agentToken, platformType, "leela.local");
+        this.testPlatform = createPlatform(agentToken, platformType, "leela.local", "leela.local");
         // Create ServerType
         ServerType testServerType = createServerType("Tomcat", "6.0", new String[] { "Linux" },
-            "Test Server Plugin");
+            "Test Server Plugin", false);
         // Create test server
-        Server testServer = createServer(testPlatform, testServerType);
+        Server testServer = createServer(testPlatform, testServerType, "My Server");
         // Create ServiceType
         ServiceType serviceType = createServiceType("Spring JDBC Template", "Test Server Plugin",
             testServerType);
         // Create test service
-        serviceManager.createService(authzSubjectManager.getOverlordPojo(),
-            testServer.getId(), serviceType.getId(), "leela.local jdbcTemplate",
-            "Spring JDBC Template", "my computer");
+        serviceManager.createService(authzSubjectManager.getOverlordPojo(), testServer.getId(),
+            serviceType.getId(), "leela.local jdbcTemplate", "Spring JDBC Template", "my computer");
         return testPlatform;
     }
 
@@ -311,11 +258,11 @@ public class AlertManagerTest {
         ResourceGroupCreateInfo gCInfo = new ResourceGroupCreateInfo("AllResourcesGroup", "",
             AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP, null, "", 0, false, false);
         ResourceGroup resGrp = resourceGroupManager.createResourceGroup(overlord, gCInfo,
-           new ArrayList<Role>(0), resources);
+            new ArrayList<Role>(0), resources);
         return resGrp;
     }
 
-    private void createResourceAlertDefs(Platform testPlatform) {
+    private void createResourceAlertDefs(Platform testPlatform) throws AlertDefinitionCreateException {
         // Create Platform Alert Definition
         this.testPlatformAlertDef = createAlertDefinition(testPlatform.getId(),
             AppdefEntityConstants.APPDEF_TYPE_PLATFORM, "Platform Down");
@@ -346,7 +293,7 @@ public class AlertManagerTest {
         // Manual flush is required in any method in which you are updating the
         // Hibernate session in
         // order to avoid false positive in test
-        sessionFactory.getCurrentSession().flush();
+        flushSession();
     }
 
     @Test
@@ -416,7 +363,7 @@ public class AlertManagerTest {
         Alert testPlatformAlert = alertManager.createAlert(this.testPlatformAlertDef, ctime);
         alertManager.setAlertFixed(testPlatformAlert);
         // flush the update
-        // sessionFactory.getCurrentSession().flush();
+        // flushSession();
         // retrieve the alert and check if it was fixed
         assertTrue("Alert is not fixed", alertManager.findAlertById(testPlatformAlert.getId())
             .isFixed());
@@ -432,7 +379,7 @@ public class AlertManagerTest {
         testPlatformAlert.createActionLog("Notified users:", alertAction, authzSubjectManager
             .getOverlordPojo());
         // Flush the changes
-        sessionFactory.getCurrentSession().flush();
+        flushSession();
         Collection<AlertActionLog> actionLogs = testPlatformAlert.getActionLog();
         assertEquals("Incorrect Detail", actionLogs.iterator().next().getDetail(),
             "Notified users:");
@@ -454,7 +401,7 @@ public class AlertManagerTest {
         // The underlying DAO uses HQL to do bulk delete. This will NOT update
         // the session cache, so a subsequent query will make it seem as though
         // alert is still there. We have to explicitly remove it from cache.
-        sessionFactory.getCurrentSession().clear();
+        clearSession();
         // verify alert cannot be loaded from DB
         try {
             alertManager.findAlertById(testPlatformAlert.getId());
@@ -486,7 +433,7 @@ public class AlertManagerTest {
         alertManager.deleteAlerts(authzSubjectManager.getOverlordPojo(), testPlatformAlertDef);
         alertManager.deleteAlerts(authzSubjectManager.getOverlordPojo(), testServerAlertDef);
         alertManager.deleteAlerts(authzSubjectManager.getOverlordPojo(), testServiceAlertDef);
-        sessionFactory.getCurrentSession().clear();
+        clearSession();
         // Verify Alerts not present
         try {
             alertManager.findAlertById(testPlatformAlert.getId());
@@ -524,7 +471,7 @@ public class AlertManagerTest {
 
         // Now, delete alerts for a specific range
         alertManager.deleteAlerts(time3, time4);
-        sessionFactory.getCurrentSession().clear();
+        clearSession();
         // Verify the alerts are deleted only within the given range
         assertNotNull("Alert1 shouldn't be deleted", alertManager.findAlertById(alert1.getId()));
         assertNotNull("Alert2 shouldn't be deleted", alertManager.findAlertById(alert2.getId()));
@@ -573,8 +520,7 @@ public class AlertManagerTest {
     public void testFindLastUnfixedByDefinition() {
         long ctime = System.currentTimeMillis();
         alertManager.createAlert(this.testPlatformAlertDef, ctime);
-        alertManager
-            .createAlert(this.testPlatformAlertDef, ctime + 999l);
+        alertManager.createAlert(this.testPlatformAlertDef, ctime + 999l);
         Alert testPlatformAlert3 = alertManager.createAlert(this.testPlatformAlertDef,
             ctime + 2999l);
         Alert lastUnfixed = alertManager.findLastUnfixedByDefinition(authzSubjectManager
@@ -595,7 +541,7 @@ public class AlertManagerTest {
         alertManager.setAlertFixed(testPlatformAlert2);
         alertManager.setAlertFixed(testPlatformAlert3);
         // flush the update
-        sessionFactory.getCurrentSession().flush();
+        flushSession();
         Alert lastUnfixed = alertManager.findLastUnfixedByDefinition(authzSubjectManager
             .getOverlordPojo(), testPlatformAlertDef.getId());
         assertNull("There should be no last unfixed alerts", lastUnfixed);
@@ -613,7 +559,7 @@ public class AlertManagerTest {
         alertManager.setAlertFixed(testPlatformAlert2);
         alertManager.setAlertFixed(testPlatformAlert3);
         // flush the update
-        sessionFactory.getCurrentSession().flush();
+        flushSession();
         Alert lastFixed = alertManager.findLastFixedByDefinition(testPlatformAlertDef);
         assertEquals("Incorrect Last fixed Alert", testPlatformAlert3.getId(), lastFixed.getId());
     }
@@ -719,7 +665,7 @@ public class AlertManagerTest {
         alertManager.createAlert(this.testServiceAlertDef, time6);
         alertManager.setAlertFixed(alert3);
         alertManager.setAlertFixed(alert4);
-        sessionFactory.getCurrentSession().flush();
+        flushSession();
         // Following query should fetch only the platform alert which has
         // priority 3 & unfixed
         List<Alert> alerts = alertManager.findAlerts(overlord.getId(), 3, 10 * 60000l,
@@ -755,7 +701,7 @@ public class AlertManagerTest {
         alertManager.createAlert(this.testServiceAlertDef, time6);
         alertManager.setAlertFixed(alert4);
         alertManager.setAlertFixed(alert5);
-        sessionFactory.getCurrentSession().flush();
+        flushSession();
         // Following query should fetch only the platform alerts & unfixed
         List<Alert> alerts = alertManager.findAlerts(overlord.getId(), 3, 10 * 60000l,
             time1 + 2 * 60000l, false, true, resGrp.getId(), this.testPlatformAlertDef.getId(), pi);
@@ -842,11 +788,11 @@ public class AlertManagerTest {
         alertManager.createAlert(this.testServerAlertDef, time2);
         Alert alert3 = alertManager.createAlert(this.testServiceAlertDef, time3);
         Alert alert4 = alertManager.createAlert(this.testPlatformAlertDef, time4);
-         alertManager.createAlert(this.testServerAlertDef, time5);
+        alertManager.createAlert(this.testServerAlertDef, time5);
         alertManager.createAlert(this.testServiceAlertDef, time6);
         alertManager.setAlertFixed(alert3);
         alertManager.setAlertFixed(alert4);
-        sessionFactory.getCurrentSession().flush();
+        flushSession();
         int unfixedCounts = alertManager.getUnfixedCount(overlord.getId(), 10 * 60000l,
             time1 + 60000l, resGrp.getId());
         assertEquals("Unfixed alerts count is incorrect", 4, unfixedCounts);
@@ -1162,9 +1108,9 @@ public class AlertManagerTest {
         long ctime = System.currentTimeMillis();
         Alert testPlatformAlert = alertManager.createAlert(this.testPlatformAlertDef, ctime);
         testPlatformAlert.createActionLog("Notified users:", alertAction, overlord); // Flush
-                                                                                     // the
-                                                                                     // changes
-        sessionFactory.getCurrentSession().flush();
+        // the
+        // changes
+        flushSession();
         Collection<AlertActionLog> alertActionLogs = testPlatformAlert.getActionLog();
         for (AlertActionLog actionLog : alertActionLogs) {
             assertNotNull(actionLog.getSubject());
@@ -1173,7 +1119,7 @@ public class AlertManagerTest {
         // The underlying DAO uses HQL to do bulk update. This will NOT update
         // the session cache, so a subsequent query will make it seem as though
         // subject is still there. We have to explicitly remove it from cache.
-        sessionFactory.getCurrentSession().clear();
+        clearSession();
         // Now retrieve the alert and action log bag again
         Alert updatedAlert = alertManager.findAlertById(testPlatformAlert.getId());
         alertActionLogs = updatedAlert.getActionLog();

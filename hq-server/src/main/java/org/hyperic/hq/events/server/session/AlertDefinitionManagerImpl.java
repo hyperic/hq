@@ -1,23 +1,32 @@
 /*
- * NOTE: This copyright does *not* cover user programs that use HQ program
- * services by normal system calls through the application program interfaces
- * provided as part of the Hyperic Plug-in Development Kit or the Hyperic Client
- * Development Kit - this is merely considered normal use of the program, and
- * does *not* fall under the heading of "derived work". Copyright (C)
- * [2004-2009], Hyperic, Inc. This file is part of HQ. HQ is free software; you
- * can redistribute it and/or modify it under the terms version 2 of the GNU
- * General Public License as published by the Free Software Foundation. This
- * program is distributed in the hope that it will be useful, but WITHOUT ANY
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
- * Place, Suite 330, Boston, MA 02111-1307 USA.
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ * "derived work".
+ *
+ * Copyright (C) [2004-2010], VMware, Inc.
+ * This file is part of Hyperic.
+ *
+ * Hyperic is free software; you can redistribute it and/or modify
+ * it under the terms version 2 of the GNU General Public License as
+ * published by the Free Software Foundation. This program is distributed
+ * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA.
  */
 
 package org.hyperic.hq.events.server.session;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -29,17 +38,25 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceDeleteRequestedEvent;
+import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.action.EnableAlertDefActionConfig;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.ActionCreateException;
+import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.AlertConditionCreateException;
 import org.hyperic.hq.events.AlertDefinitionCreateException;
 import org.hyperic.hq.events.AlertPermissionManager;
@@ -51,8 +68,11 @@ import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerManager;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
+import org.hyperic.hq.measurement.MeasurementNotFoundException;
+import org.hyperic.hq.measurement.action.MetricAlertAction;
 import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.server.session.MeasurementDAO;
+import org.hyperic.hq.measurement.server.session.MetricsEnabledEvent;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.config.InvalidOptionException;
@@ -62,10 +82,9 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.util.timer.StopWatch;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -78,7 +97,9 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class AlertDefinitionManagerImpl implements AlertDefinitionManager, ApplicationContextAware {
+public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
+    ApplicationListener<ApplicationEvent> {
+    
     private Log log = LogFactory.getLog(AlertDefinitionManagerImpl.class);
 
     private AlertPermissionManager alertPermissionManager;
@@ -92,44 +113,58 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
     private ActionDAO actionDao;
 
     private AlertConditionDAO alertConditionDAO;
-
-    private MeasurementDAO measurementDAO;
     
     private AlertDAO alertDAO;
+    
+    private MeasurementManager measurementManager;
 
     private RegisteredTriggerManager registeredTriggerManager;
 
     private ResourceManager resourceManager;
 
     private EscalationManager escalationManager;
+    
+    private AuthzSubjectManager authzSubjectManager;
 
     private AlertAuditFactory alertAuditFactory;
     
-    private ApplicationContext applicationContext;
+    private AvailabilityDownAlertDefinitionCache availabilityDownAlertDefinitionCache;
 
     @Autowired
     public AlertDefinitionManagerImpl(AlertPermissionManager alertPermissionManager, AlertDefinitionDAO alertDefDao,
                                       ActionDAO actionDao, AlertConditionDAO alertConditionDAO, 
-                                      MeasurementDAO measurementDAO, RegisteredTriggerManager registeredTriggerManager,
+                                      MeasurementManager measurementManager, RegisteredTriggerManager registeredTriggerManager,
                                       ResourceManager resourceManager, EscalationManager escalationManager,
-                                      AlertAuditFactory alertAuditFactory, AlertDAO alertDAO) {
+                                      AlertAuditFactory alertAuditFactory, AlertDAO alertDAO,
+                                      AuthzSubjectManager authzSubjectManager,
+                                      AvailabilityDownAlertDefinitionCache availabilityDownAlertDefinitionCache) {
         this.alertPermissionManager = alertPermissionManager;
         this.alertDefDao = alertDefDao;
         this.actionDao = actionDao;
         this.alertConditionDAO = alertConditionDAO;
-        this.measurementDAO = measurementDAO;
+        this.measurementManager = measurementManager;
         this.registeredTriggerManager = registeredTriggerManager;
         this.resourceManager = resourceManager;
         this.escalationManager = escalationManager;
+        this.authzSubjectManager = authzSubjectManager;
         this.alertAuditFactory = alertAuditFactory;
         this.alertDAO = alertDAO;
+        this.availabilityDownAlertDefinitionCache = availabilityDownAlertDefinitionCache;
     }
 
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
         _valuePager = Pager.getPager(VALUE_PROCESSOR);
     }
-
+    
+    public void onApplicationEvent(ApplicationEvent event) {        
+        if (event instanceof ResourceDeleteRequestedEvent) {
+            disassociateResource(((ResourceDeleteRequestedEvent) event).getResource());
+        } else if (event instanceof MetricsEnabledEvent) {
+            metricsEnabled(((MetricsEnabledEvent) event).getEntityId());
+        }
+    }
+    
     private boolean deleteAlertDefinitionStuff(AuthzSubject subj, AlertDefinition alertdef, EscalationManager escMan) {
         StopWatch watch = new StopWatch();
 
@@ -140,7 +175,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
         }
         watch.markTimeEnd("endEscalation");
 
-        applicationContext.publishEvent(new AlertDefinitionDeletedEvent(alertdef));
+        availabilityDownAlertDefinitionCache.removeFromCache(alertdef);
 
         if (log.isDebugEnabled()) {
             log.debug("deleteAlertDefinitionStuff: " + watch);
@@ -209,6 +244,50 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
     }
 
     /**
+     * Get the MetricAlertAction ActionValue from an AlertDefinitionValue. If
+     * none exists, return null.
+     */
+    private ActionValue getMetricAlertAction(AlertDefinitionValue adv) {
+        ActionValue[] actions = adv.getActions();
+        for (int i = 0; i < actions.length; ++i) {
+            String actionClass = actions[i].getClassname();
+            if (MetricAlertAction.class.getName().equals(actionClass)) {
+                return actions[i];
+            }
+        }
+        return null;
+    }
+
+    private void setMetricAlertAction(AlertDefinitionValue adval) {
+        AlertConditionValue[] conds = adval.getConditions();
+        for (int i = 0; i < conds.length; i++) {
+            if (conds[i].getType() == EventConstants.TYPE_THRESHOLD ||
+                conds[i].getType() == EventConstants.TYPE_BASELINE ||
+                conds[i].getType() == EventConstants.TYPE_CHANGE) {
+                ActionValue action = getMetricAlertAction(adval);
+
+                // if MetricAlertAction doesn't exist, add one
+                if (action == null) {
+                    action = new ActionValue();
+                    action.setClassname(MetricAlertAction.class.getName());
+
+                    ConfigResponse config = new ConfigResponse();
+                    try {
+                        action.setConfig(config.encode());
+                    } catch (EncodingException e) {
+                        // This should never happen
+                        log.error("Empty ConfigResponse threw an encoding error", e);
+                    }
+
+                    adval.addAction(action);
+                }
+                break;
+
+            }
+        }
+    }
+     
+    /**
      * Create a new alert definition
      */
     public AlertDefinitionValue createAlertDefinition(AuthzSubject subj, AlertDefinitionValue a)
@@ -231,8 +310,12 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
     /**
      * Create a new alert definition
      */
-    public AlertDefinitionValue createAlertDefinition(AlertDefinitionValue a) {
+    public AlertDefinitionValue createAlertDefinition(AlertDefinitionValue a) 
+    	throws AlertDefinitionCreateException {
 
+        // Create a measurement AlertLogAction if necessary
+        setMetricAlertAction(a);
+        
         // HHQ-1054: since the alert definition mtime is managed explicitly,
         // let's initialize it
         a.initializeMTimeToNow();
@@ -254,18 +337,27 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
 
             AlertCondition cond = res.createCondition(condition, trigger);
 
-            if (res.getName() == null || res.getName().length() == 0) {
-                Measurement dm = null;
-                if (cond.getType() == EventConstants.TYPE_THRESHOLD || cond.getType() == EventConstants.TYPE_BASELINE) {
+            if (res.getName() == null || res.getName().trim().length() == 0) {
+                Measurement dm = measurementManager.findMeasurementById(new Integer(cond.getMeasurementId()));
 
-                    dm = measurementDAO.findById(new Integer(cond.getMeasurementId()));
-                }
                 if (dm == null) {
-                    log.warn("AlertCondition (id=" + cond.getId() + ") has an " + "associated Measurement (id=" +
-                             cond.getMeasurementId() + ") that does not exist, ignoring");
-                    continue;
+                	throw new AlertDefinitionCreateException(
+                				"Could not automatically name the alert definition "
+                				+ "because the AlertCondition (id=" + cond.getId() 
+                				+ ") has an associated Measurement (id="
+                				+ cond.getMeasurementId() + ") that does not exist.");
                 }
-                res.setName(cond.describe(dm));
+                
+                String predefinedAlertDefName = cond.describe(dm);
+                
+                if (predefinedAlertDefName == null 
+                		|| predefinedAlertDefName.trim().length() == 0) {
+                	throw new AlertDefinitionCreateException(
+                				"Could not automatically name the alert definition "
+                				+ "based on the alert condition.");
+                }
+                
+                res.setName(predefinedAlertDefName);
             }
 
             if (cond.getType() == EventConstants.TYPE_ALERT) {
@@ -306,8 +398,8 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
         // Alert definitions are the root of the cascade relationship, so
         // we must explicitly save them
         alertDefDao.save(res);
-
-        applicationContext.publishEvent(new AlertDefinitionCreatedEvent(res));
+        
+        availabilityDownAlertDefinitionCache.removeFromCache(res);
 
         return res.getAlertDefinitionValue();
     }
@@ -352,7 +444,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
             }
             child.setMtime(System.currentTimeMillis());
 
-            applicationContext.publishEvent(new AlertDefinitionChangedEvent(child));
+            availabilityDownAlertDefinitionCache.removeFromCache(child);
         }
         if (debug) {
             watch.markTimeEnd("updateBasic");
@@ -437,6 +529,9 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
 
         AlertDefinition aldef = alertDefDao.findById(adval.getId());
 
+        // Create a measurement AlertLogAction if necessary
+        setMetricAlertAction(adval);
+
         // Find recovery actions first
         int recoverId = -1;
 
@@ -514,7 +609,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
         // we must explicitly save them
         alertDefDao.save(aldef);
 
-        applicationContext.publishEvent(new AlertDefinitionChangedEvent(aldef));
+        availabilityDownAlertDefinitionCache.removeFromCache(aldef);
 
         return aldef.getAlertDefinitionValue();
     }
@@ -566,7 +661,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
 
         alertDefDao.setChildrenActive(def, activate);
 
-        applicationContext.publishEvent(new AlertDefinitionChangedEvent(def));
+        availabilityDownAlertDefinitionCache.removeFromCache(def);
     }
 
     /**
@@ -693,7 +788,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
     /**
      * Set Resource to null on entity's alert definitions
      */
-    public void disassociateResource(Resource r) {
+    private void disassociateResource(Resource r) {
         List<AlertDefinition> adefs = alertDefDao.findAllByResource(r);
 
         for (AlertDefinition alertdef : adefs) {
@@ -701,6 +796,187 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
             alertdef.setDeleted(true);
         }
         alertDefDao.getSession().flush();
+    }
+
+    private void metricsEnabled(AppdefEntityID ent) {
+        try {
+            if(log.isDebugEnabled()) {
+                log.debug("Inheriting type-based alert defs for " + ent);
+            }
+            AuthzSubject hqadmin = authzSubjectManager.getSubjectById(AuthzConstants.rootSubjectId);
+            inheritResourceTypeAlertDefinition(hqadmin, ent);
+        } catch (Exception e) {
+            throw new SystemException(e);
+        }
+    }
+    
+    private void inheritResourceTypeAlertDefinition(AuthzSubject subject, AppdefEntityID id)
+        throws AppdefEntityNotFoundException, PermissionException, InvalidOptionException,
+        InvalidOptionValueException, AlertDefinitionCreateException {
+
+        AppdefEntityValue rv = new AppdefEntityValue(id, subject);
+        AppdefResourceType type = rv.getAppdefResourceType();
+
+        // Find the alert definitions for the type
+        AppdefEntityTypeID aetid = new AppdefEntityTypeID(type.getAppdefType(), type.getId());
+
+        // The alert definitions should be returned sorted by creation time.
+        // This should minimize the possibility of creating a recovery alert
+        // before the recover from alert.
+        PageControl pc = new PageControl(0, PageControl.SIZE_UNLIMITED, PageControl.SORT_ASC,
+            SortAttribute.CTIME);
+
+        List<AlertDefinitionValue> defs = findAlertDefinitions(subject,
+            aetid, pc);
+
+        ArrayList<RegisteredTriggerValue> triggers = new ArrayList<RegisteredTriggerValue>();
+        for (AlertDefinitionValue adval : defs) {
+            // Only create if definition does not already exist
+            if (isAlertDefined(id, adval.getId())) {
+                continue;
+            }
+
+            // Set the parent ID
+            adval.setParentId(adval.getId());
+
+            // Reset the value object with this entity ID
+            adval.setAppdefId(id.getId());
+
+            try {
+                boolean succeeded = cloneParentConditions(subject, id, adval,
+                    adval.getConditions(), true, false);
+
+                if (!succeeded) {
+                    continue;
+                }
+            } catch (MeasurementNotFoundException e) {
+                throw new AlertDefinitionCreateException(
+                    "Expected parent condition cloning to fail silently", e);
+            }
+
+            // Create the triggers
+            registeredTriggerManager.createTriggers(subject, adval);
+            triggers.addAll(Arrays.asList(adval.getTriggers()));
+
+            // Recreate the actions
+            cloneParentActions(id, adval, adval.getActions());
+
+            // Now create the alert definition
+            createAlertDefinition(subject, adval);
+        }
+    }
+
+    /**
+     * Clone the parent actions into the alert definition.
+     */
+    public void cloneParentActions(AppdefEntityID parentId, AlertDefinitionValue child,
+                                   ActionValue[] actions) {
+        child.removeAllActions();
+        for (int i = 0; i < actions.length; i++) {
+            ActionValue childAct;
+            try {
+                ActionInterface actInst = (ActionInterface) Class
+                    .forName(actions[i].getClassname()).newInstance();
+                ConfigResponse config = ConfigResponse.decode(actions[i].getConfig());
+                actInst.setParentActionConfig(parentId, config);
+                childAct = new ActionValue(null, actInst.getImplementor(), actInst
+                    .getConfigResponse().encode(), actions[i].getId());
+            } catch (Exception e) {
+                // Not a valid action, skip it then
+                log.debug("Invalid action to clone: " + actions[i].getClassname(), e);
+                continue;
+            }
+            child.addAction(childAct);
+        }
+    }
+    
+    /**
+     * Clone the parent conditions into the alert definition.
+     * 
+     * @param subject The subject.
+     * @param id The entity to which the alert definition is assigned.
+     * @param adval The alert definition where the cloned conditions are set.
+     * @param conds The parent conditions to clone.
+     * @param failSilently <code>true</code> fail silently if cloning fails
+     *        because no measurement is found corresponding to the measurement
+     *        template specified in a parent condition; <code>false</code> to
+     *        throw a {@link MeasurementNotFoundException} when this occurs.
+     * @param allowStale True if we don't need to perform a flush to query for measurements
+     * (this will be the case if we are not in the same transaction that measurements are created in)    
+     * @return <code>true</code> if cloning succeeded; <code>false</code> if
+     *         cloning failed.
+     */
+    public boolean cloneParentConditions(AuthzSubject subject, AppdefEntityID id,
+                                         AlertDefinitionValue adval, AlertConditionValue[] conds,
+                                         boolean failSilently, boolean allowStale) 
+        throws MeasurementNotFoundException {
+        
+        // scrub and copy the parent's conditions
+        adval.removeAllConditions();
+
+        for (int i = 0; i < conds.length; i++) {
+            AlertConditionValue clone = new AlertConditionValue(conds[i]);
+
+            switch (clone.getType()) {
+                case EventConstants.TYPE_THRESHOLD:
+                case EventConstants.TYPE_BASELINE:
+                case EventConstants.TYPE_CHANGE:
+                    Integer tid = new Integer(clone.getMeasurementId());
+
+                    // If allowStale is true, don't need to synch the Measurement with the db
+                    // since changes to the Measurement aren't cascaded
+                    // on saving the AlertCondition.
+                    try {
+                        Measurement dmv = measurementManager.findMeasurement(subject, tid, id
+                            .getId(), allowStale);
+                        clone.setMeasurementId(dmv.getId().intValue());
+                    } catch (MeasurementNotFoundException e) {
+                        log.error("No measurement found for entity " + id +
+                                  " associated with template id=" + tid +
+                                  ". Alert definition name [" + adval.getName() + "]");
+                        log.debug("Root cause", e);
+
+                        if (failSilently) {
+                            log.info("Alert condition creation failed. " +
+                                     "The alert definition for entity " + id + " with name [" +
+                                     adval.getName() + "] should not be created.");
+                            // Just set to 0, it'll never fire
+                            clone.setMeasurementId(0);
+                            return false;
+                        } else {
+                            throw e;
+                        }
+                    }
+
+                    break;
+                case EventConstants.TYPE_ALERT:
+
+                    // Don't need to synch the child alert definition Id lookup.
+                    Integer recoverId = findChildAlertDefinitionId(id,
+                        new Integer(clone.getMeasurementId()), true);
+
+                    if (recoverId == null) {
+                        // recoverId should never be null, but if it is and
+                        // assertions
+                        // are disabled, just move on.
+                        assert false : "recover Id should not be null.";
+
+                        log.error("A recovery alert has no associated recover "
+                                   + "from alert. Setting alert condition "
+                                   + "measurement Id to 0.");
+                        clone.setMeasurementId(0);
+                    } else {
+                        clone.setMeasurementId(recoverId.intValue());
+                    }
+
+                    break;
+            }
+
+            // Now add it to the alert definition
+            adval.addCondition(clone);
+        }
+
+        return true;
     }
     
     @Transactional(readOnly=true)
@@ -1029,6 +1305,23 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
     }
 
     /**
+     * Get a list of all alert definitions with an availability metric condition
+     * @param subj the caller
+     * @return a list of alert definitions
+     */
+    @Transactional(readOnly=true)
+    public List<AlertDefinition> findAvailAlertDefinitions(AuthzSubject subj) 
+    	throws PermissionException {
+    	
+        if (!PermissionManagerFactory.getInstance()
+                .hasAdminPermission(subj.getId())) {
+            throw new PermissionException("Only administrators can do this");
+        }
+        
+        return alertDefDao.findAvailAlertDefs();
+    }
+    
+    /**
      * Get list of children alert definition for a parent alert definition
      * 
      */
@@ -1101,9 +1394,5 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager, Appli
     @Transactional(readOnly=true)
     public int getActiveCount() {
         return alertDefDao.getNumActiveDefs();
-    }
-
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-       this.applicationContext = applicationContext;
     }
 }

@@ -115,9 +115,7 @@ public class AgentConnection {
         throws AgentRemoteException, AgentConnectionException
     {
         AgentStreamPair sPair;
-
-        // XXX: DEBUG: Print out commands made to agents
-        _log.info(_agentAddress + ":" + _agentPort + " -> " + cmdName);
+        if (_log.isDebugEnabled()) _log.debug(_agentAddress + ":" + _agentPort + " -> " + cmdName);
         sPair = this.sendCommandHeaders(cmdName, cmdVersion, arg);
         return this.getCommandResult(sPair);
     }

@@ -5,7 +5,6 @@
 	<classpathentry excluding="**/*.java" kind="src" path="src/main/resources"/>
 	<classpathentry kind="var" path="M2_REPO/javax/activation/activation/1.1/activation-1.1.jar" sourcepath="M2_REPO/javax/activation/activation/1.1/activation-1.1-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/javax/jms/jms/1.1/jms-1.1.jar"/>
-	<classpathentry kind="var" path="M2_REPO/javax/transaction/jta/1.1/jta-1.1.jar" sourcepath="M2_REPO/javax/transaction/jta/1.1/jta-1.1-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/javax/mail/mail/1.4/mail-1.4.jar" sourcepath="M2_REPO/javax/mail/mail/1.4/mail-1.4-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/javax/servlet/servlet-api/2.4/servlet-api-2.4.jar" sourcepath="M2_REPO/javax/servlet/servlet-api/2.4/servlet-api-2.4-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/apache/activemq/activeio-core/3.1.2/activeio-core-3.1.2.jar" sourcepath="M2_REPO/org/apache/activemq/activeio-core/3.1.2/activeio-core-3.1.2-sources.jar"/>
@@ -46,7 +45,7 @@
 	<classpathentry kind="var" path="M2_REPO/org/hibernate/hibernate/3.2.6.ga/hibernate-3.2.6.ga.jar" sourcepath="M2_REPO/org/hibernate/hibernate/3.2.6.ga/hibernate-3.2.6.ga-sources.jar"/>
 	<classpathentry kind="src" path="/hq-common"/>
 	<classpathentry kind="src" path="/hq-lather"/>
-	<classpathentry kind="src" path="/hq-pdk-shared"/>
+	<classpathentry kind="src" path="/hq-pdk"/>
 	<classpathentry kind="src" path="/hq-server"/>
 	<classpathentry kind="src" path="/hq-util"/>
 	<classpathentry kind="var" path="M2_REPO/org/jasypt/jasypt/1.6/jasypt-1.6.jar" sourcepath="M2_REPO/org/jasypt/jasypt/1.6/jasypt-1.6-sources.jar"/>
@@ -64,11 +63,8 @@
 	<classpathentry kind="var" path="M2_REPO/org/springframework/roo/org.springframework.roo.file.monitor.polling/1.0.2.RELEASE/org.springframework.roo.file.monitor.polling-1.0.2.RELEASE.jar" sourcepath="M2_REPO/org/springframework/roo/org.springframework.roo.file.monitor.polling/1.0.2.RELEASE/org.springframework.roo.file.monitor.polling-1.0.2.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/roo/org.springframework.roo.support/1.0.2.RELEASE/org.springframework.roo.support-1.0.2.RELEASE.jar" sourcepath="M2_REPO/org/springframework/roo/org.springframework.roo.support/1.0.2.RELEASE/org.springframework.roo.support-1.0.2.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/oro/oro/2.0.8/oro-2.0.8.jar" sourcepath="M2_REPO/oro/oro/2.0.8/oro-2.0.8-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/postgresql/postgresql/7.4.3/postgresql-7.4.3.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/quartz-scheduler/quartz/1.7.3/quartz-1.7.3.jar" sourcepath="M2_REPO/org/quartz-scheduler/quartz/1.7.3/quartz-1.7.3-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/xalan/serializer/2.7.1/serializer-2.7.1.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/hyperic/sigar/1.6.4/sigar-1.6.4.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/snmp4j/snmp4j/1.10.1/snmp4j-1.10.1.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-aop/3.0.0.RELEASE/spring-aop-3.0.0.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-aop/3.0.0.RELEASE/spring-aop-3.0.0.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-asm/3.0.1.RELEASE/spring-asm-3.0.1.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-asm/3.0.1.RELEASE/spring-asm-3.0.1.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-beans/3.0.1.RELEASE/spring-beans-3.0.1.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-beans/3.0.1.RELEASE/spring-beans-3.0.1.RELEASE-sources.jar"/>

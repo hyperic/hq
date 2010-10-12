@@ -1,0 +1,289 @@
+<?xml version="1.0"?>
+<!DOCTYPE plugin [
+    <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+<!--
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ *  "derived work".
+ *
+ *  Copyright (C) [2010], VMware, Inc.
+ *  This file is part of HQ.
+ *
+ *  HQ is free software; you can redistribute it and/or modify
+ *  it under the terms version 2 of the GNU General Public License as
+ *  published by the Free Software Foundation. This program is distributed
+ *  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ *  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ *  PARTICULAR PURPOSE. See the GNU General Public License for more
+ *  details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ *  USA.
+ -->
+
+<plugin class="org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin">
+
+    <server name="RabbitMQ" description="RabbitMQ">
+
+        <help>
+            <![CDATA[
+                  <p>
+                    <h3>Configure RabbitMQ for Monitoring</h3>
+                      Once the RabbitMQ nodes are auto-detected and you can select the Server resource by node, go to Tools Menu >
+                      Configure Server.
+                      <ol><li>Enter a user name and password for the node, then select OK. This will allow Hyperic to authenticate and query
+                      information on Queues, Channels, Connections, Users, and Exchanges.
+                      </li><li>For the first release of this plugin, the Hyperic agent requires permissions to read the Erlang cookie.</li>
+                      </ol>
+                  </p>
+                  <p>
+                    <h3>Supported Versions</h3>
+                    Hyperic supports RabbitMQ versions 1.8.1 and higher.
+                  </p>
+                  <p>
+                    <h3>Help Docs</h3>
+                    Coming soon: <a href="http://support.hyperic.com/display/EVO/Monitoring+RabbitMQ">Monitoring and Managing RabbitMQ</a>
+                  </p>
+            ]]>
+        </help>
+
+        <plugin type="autoinventory" class="org.hyperic.hq.plugin.rabbitmq.detect.RabbitServerDetector"/>
+
+        <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <plugin type="collector" class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <plugin type="log_track" class="org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerLog"/>
+
+        <!--
+        <plugin type="control" class="org.hyperic.hq.plugin.rabbitmq.manage.RabbitBrokerManagerPlugin"/>
+        -->
+
+        <config type="product">
+            <option name="server.name" description="RabbitMQ Node" type="hidden"/>
+            <option name="server.path" description="Node Path" type="hidden"/>
+            <option name="process.name" description="%server.name% Process" type="hidden"/> 
+
+            <option name="username" description="RabbitMQ Username for %server.name%"/>
+            <option name="password" type="secret" description="RabbitMQ Password for %server.name%"/>
+        </config>
+
+        <config type="measurement">
+            <option name="process.query" default="State.Name.sw=beam,Args.*.eq=-sname,Args.*.eq=%process.name%"
+                    description="%process.name% Measurement Query"/>
+        </config>
+
+        <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>
+    
+        <properties>
+            <property description="Node Name" name="node.name"/>
+            <property description="Node Path" name="node.path"/>
+            <property description="Node PID" name="node.pid"/>
+            <property description="Erlang Process" name="erlang.process"/>
+            <property description="Rabbit -boot" name="rabbit.boot"/>
+        </properties>
+
+        <config type="measurement">
+            <option name="process.query" default="State.Name.sw=beam,Args.*.eq=-sname,Args.*.ct=%server.path%"
+                    description="XXXXXXX"/>
+        </config>
+
+        <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>
+
+        &process-metrics;
+
+        <!--
+        <actions>
+           <include name="startNode,stopNode,startBrokerApplication,stopBrokerApplication,createQueue,deleteQueue,
+                       purgeQueue,createExchange,deleteExchangeIfUnused,createUser,updateUserPassword,deleteUser"/>
+         </actions>
+         -->
+
+        <service name="Queue">
+            <property name="template" value="rabbitmq:queue=%name%,vhost=%vhost%,server=%server.name%:${alias}"/>
+
+            <metric name="Messages"
+                    alias="messages"
+                    category="THROUGHPUT"
+                    units="none"
+                    indicator="true"
+                    interval="60000"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="Consumers"
+                    alias="consumers"
+                    category="UTILIZATION"
+                    units="none"
+                    indicator="true"
+                    interval="60000"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="Transactions"
+                    alias="transactions"
+                    category="THROUGHPUT"
+                    units="none"
+                    indicator="true"
+                    interval="60000"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="Availability"
+                    category="AVAILABILITY"
+                    units="percentage"
+                    indicator="true"
+                    interval="60000"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="Memory"
+                    alias="memory"
+                    category="UTILIZATION"
+                    units="b"
+                    indicator="true"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+
+            <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.QueueCollector"/>
+            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="autoinventory"/>
+            <properties>
+                <property description="Name" name="name"/>
+                <property description="Process ID" name="pid"/>
+                <property description="Acks Uncommitted" name="acksUncommitted"/>
+                <property description="Messages Ready" name="messagesReady"/>
+                <property description="Messages Unacknowledged" name="messagesUnacknowledged"/>
+                <property description="Messages Uncommitted" name="messagesUncommitted"/>
+                <property description="Durable" name="durable"/>
+            </properties>
+        </service>
+
+        <service name="Channel">
+            <property name="template" value="rabbitmq:channel=%name%,vhost=%vhost%,server=%server.name%:${alias}"/>
+
+            <metric name="Consumers"
+                    alias="consumerCount"
+                    category="UTILIZATION"
+                    units="none"
+                    indicator="true"
+                    interval="60000"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="Availability"
+                    category="AVAILABILITY"
+                    units="percentage"
+                    indicator="true"
+                    collectionType="dynamic"/>
+
+            <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.ChannelCollector"/>
+            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="autoinventory"/>
+
+            <properties>
+                <property description="Process ID" name="pid"/>
+                <property description="Connection" name="connection"/>
+                <property description="Number" name="number"/>
+                <property description="User" name="user"/>
+                <property description="Transactional" name="transactional"/>
+                <property description="Prefetch Count" name="prefetchCount"/>
+                <property description="Acks Uncommitted" name="acksUncommitted"/>
+                <property description="Messages Unacknowledged" name="messagesUnacknowledged"/>
+            </properties>
+        </service>
+
+        <service name="Connection">
+            <property name="template" value="rabbitmq:connection=%name%,vhost=%vhost%,server=%server.name%:${alias}"/>
+
+            <metric name="Octets Received"
+                    alias="octetsReceived"
+                    category="THROUGHPUT"
+                    units="B"
+                    indicator="true"
+                    interval="60000"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="Octets Sent"
+                    alias="octetsSent"
+                    category="THROUGHPUT"
+                    units="B"
+                    indicator="true"
+                    interval="60000"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="Network Packets Received"
+                    alias="packetsReceived"
+                    category="THROUGHPUT"
+                    units="B"
+                    indicator="true"
+                    collectionType="dynamic"/>
+            <metric name="Network Packets Sent"
+                    alias="packetsSent"
+                    category="THROUGHPUT"
+                    units="B"
+                    indicator="true"
+                    interval="60000"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="Channels"
+                    alias="channelCount"
+                    category="UTILIZATION"
+                    units="none"
+                    indicator="true"
+                    interval="60000"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="Pending Sends"
+                    alias="pendingSends"
+                    category="UTILIZATION"
+                    units="none"
+                    indicator="true"
+                    interval="60000"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="Availability"
+                    category="AVAILABILITY"
+                    units="percentage"
+                    indicator="true"
+                    collectionType="dynamic"/>
+
+            <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.ConnectionCollector"/>
+            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="autoinventory"/>
+
+            <properties>
+                <property description="PID" name="pid"/>
+                <property description="Self Node" name="selfNode"/>
+                <property description="Peer Node" name="peerNode"/>
+                <property description="Frame Max" name="frameMax"/>
+                <property description="State" name="state"/>
+                <property description="VHost" name="vHost"/>
+                <property description="Username" name="username"/>
+            </properties>
+        </service>
+
+        <service name="Exchange">
+            <property name="template" value="rabbitmq:exchange=%name%,vhost=%vhost%,server=%server.name%:${alias}"/>
+
+            <metric name="Availability"
+                    category="AVAILABILITY"
+                    units="percentage"
+                    indicator="true"
+                    collectionType="dynamic"/>
+
+            <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.ExchangeCollector"/>
+            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="autoinventory"/>
+
+            <properties>
+                <property description="Durable" name="durable"/>
+                <property description="Exchange Type" name="exchangeType"/>
+                <property description="Auto-delete" name="autoDelete"/>
+            </properties>
+        </service>
+
+    </server>
+
+</plugin>

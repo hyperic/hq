@@ -32,21 +32,19 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hibernate.Util;
 import org.hyperic.sigar.CpuInfo;
 import org.hyperic.sigar.Sigar;
 
 class SysStats {
     private static final Log _log = LogFactory.getLog(SysStats.class);
 
-    static Properties getDBStats() {
+    static Properties getDBStats(Connection connection) {
         Properties props = new Properties();
         DatabaseMetaData md;
-        Connection conn = null;
+      
         
         try {
-            conn = Util.getConnection();
-            md   = conn.getMetaData();
+            md   = connection.getMetaData();
             props.setProperty("hq.db.product.name", md.getDatabaseProductName());
             props.setProperty("hq.db.product.ver", md.getDatabaseProductVersion());
             props.setProperty("hq.db.driver.name", md.getDriverName());

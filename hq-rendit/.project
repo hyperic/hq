@@ -5,7 +5,7 @@
 	<projects>
 		<project>hq-common</project>
 		<project>hq-lather</project>
-		<project>hq-pdk-shared</project>
+		<project>hq-pdk</project>
 		<project>hq-server</project>
 		<project>hq-util</project>
 	</projects>

@@ -63,8 +63,6 @@ import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
-import org.hyperic.hq.autoinventory.server.session.AgentReportStatus;
-import org.hyperic.hq.autoinventory.server.session.AgentReportStatusDAO;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
@@ -93,7 +91,6 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     private static final String PLUGINS_EXTENSION = "-plugin";
 
     private final Log log = LogFactory.getLog(AgentManagerImpl.class.getName());
-    private AgentReportStatusDAO agentReportStatusDao;
     private AgentTypeDAO agentTypeDao;
     private AgentDAO agentDao;
     private ServiceDAO serviceDao;
@@ -105,12 +102,11 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     private ApplicationContext applicationContext;
 
     @Autowired
-    public AgentManagerImpl(AgentReportStatusDAO agentReportStatusDao, AgentTypeDAO agentTypeDao,
+    public AgentManagerImpl(AgentTypeDAO agentTypeDao,
                             AgentDAO agentDao, ServiceDAO serviceDao, ServerDAO serverDao,
                             PermissionManager permissionManager, PlatformDAO platformDao,
                             ServerConfigManager serverConfigManager,
                             AgentCommandsClientFactory agentCommandsClientFactory) {
-        this.agentReportStatusDao = agentReportStatusDao;
         this.agentTypeDao = agentTypeDao;
         this.agentDao = agentDao;
         this.serviceDao = serviceDao;
@@ -143,22 +139,11 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         return agent;
     }
 
-    /**
-     */
-    public void removeAgentStatus(Agent agent) {
-        AgentReportStatus status = agentReportStatusDao.getReportStatus(agent);
-        if (status != null) {
-            agentReportStatusDao.remove(status);
-        }
-    }
+    
 
     /**
      */
     public void removeAgent(Agent agent) {
-        AgentReportStatus status = agentReportStatusDao.getReportStatus(agent);
-        if (status != null) {
-            agentReportStatusDao.remove(status);
-        }
         agentDao.remove(agent);
     }
 
@@ -178,6 +163,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         int i = 0;
         for (Platform plat : plats) {
             platIds[i] = AppdefEntityID.newPlatformID(plat.getId());
+            i++;
         }
 
         ResourceTreeGenerator generator = Bootstrap.getBean(ResourceTreeGenerator.class);

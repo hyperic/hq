@@ -27,6 +27,7 @@
 		<module>db2jdbc-plugin</module>
 		<module>dotnet-plugin</module>
 		<module>exchange-plugin</module>
+		<module>gemfire-plugin</module>
 		<module>geronimo-plugin</module>
 		<module>glassfish-plugin</module>
 		<module>groovy-scripting-plugin</module>
@@ -56,6 +57,7 @@
 		<module>postfix-plugin</module>
 		<module>postgresql-plugin</module>
 		<module>process-plugin</module>
+        <module>rabbitmq-plugin</module>
 		<module>resin-plugin</module>
 		<module>samba-plugin</module>
 		<module>sendmail-plugin</module>
@@ -67,6 +69,7 @@
 		<module>tomcat-plugin</module>
 		<module>vim-plugin</module>
 		<module>vmware-plugin</module>
+		<module>vsphere-plugin</module>
 		<module>weblogic-plugin</module>
 		<module>websphere-plugin</module>
 		<module>xen-plugin</module>

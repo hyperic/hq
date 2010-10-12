@@ -74,6 +74,7 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -117,11 +118,13 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     private MessagePublisher messagePublisher;
     private RegisteredTriggers registeredTriggers;
     private AvailabilityCache availabilityCache;
-
+    private ConcurrentStatsCollector concurrentStatsCollector;
+    
     @Autowired
     public AvailabilityManagerImpl(ResourceManager resourceManager, MessagePublisher messenger,
                                    AvailabilityDataDAO availabilityDataDAO, MeasurementDAO measurementDAO,
-                                   MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers, AvailabilityCache availabilityCache) {
+                                   MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers, AvailabilityCache availabilityCache,
+                                   ConcurrentStatsCollector concurrentStatsCollector) {
         this.resourceManager = resourceManager;
         this.messenger = messenger;
         this.availabilityDataDAO = availabilityDataDAO;
@@ -129,11 +132,12 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         this.messagePublisher = messagePublisher;
         this.registeredTriggers = registeredTriggers;
         this.availabilityCache = availabilityCache;
+        this.concurrentStatsCollector = concurrentStatsCollector;
     }
 
     @PostConstruct
     public void initStatsCollector() {
-        ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.AVAIL_MANAGER_METRICS_INSERTED);
+    	concurrentStatsCollector.register(ConcurrentStatsCollector.AVAIL_MANAGER_METRICS_INSERTED);
     }
     
     // To break AvailabilityManager - MeasurementManager circular dependency
@@ -182,7 +186,12 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             if (endtime == MAX_AVAIL_TIMESTAMP) {
                 endtime = System.currentTimeMillis();
             }
-            rtn += (endtime - avail.getStartime());
+            long rangeStartTime = avail.getStartime();
+            // Make sure the start of the down time is not earlier then the begin time
+            if (rangeStartTime < begin){
+            	rangeStartTime = begin;
+            }
+            rtn += (endtime - rangeStartTime);
         }
         return rtn;
     }
@@ -721,7 +730,9 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                 throw new SystemException(e);
             }
         }
-        ConcurrentStatsCollector.getInstance().addStat(availPoints.size(), AVAIL_MANAGER_METRICS_INSERTED);
+        
+        concurrentStatsCollector.addStat(availPoints.size(), AVAIL_MANAGER_METRICS_INSERTED);
+        
         if (sendData) {
             sendDataToEventHandlers(availPoints);
         }
@@ -1446,16 +1457,20 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                 continue;
             }
             if (last.getAvailVal() == avail.getAvailVal()) {
-                _log.error("consecutive availpoints have the same value");
+                _log.error("consecutive availpoints have the same value, " +
+                    "first={" + last + "}, last={" + avail + "}");
                 return false;
             } else if (last.getEndtime() != avail.getStartime()) {
-                _log.error("there are gaps in the availability table");
+                _log.error("there are gaps in the availability table" +
+                   "first={" + last + "}, last={" + avail + "}");
                 return false;
             } else if (last.getStartime() > avail.getStartime()) {
-                _log.error("startime availability is out of order");
+                _log.error("startime availability is out of order" +
+                   "first={" + last + "}, last={" + avail + "}");
                 return false;
             } else if (last.getEndtime() > avail.getEndtime()) {
-                _log.error("endtime availability is out of order");
+                _log.error("endtime availability is out of order" +
+                   "first={" + last + "}, last={" + avail + "}");
                 return false;
             }
             last = avail;

@@ -1,4 +1,32 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
+<!--
+
+    NOTE: This copyright does *not* cover user programs that use HQ
+    program services by normal system calls through the application
+    program interfaces provided as part of the Hyperic Plug-in Development
+    Kit or the Hyperic Client Development Kit - this is merely considered
+    normal use of the program, and does *not* fall under the heading of
+     "derived work".
+
+     Copyright (C) [2009-2010], VMware, Inc.
+     This file is part of HQ.
+
+     HQ is free software; you can redistribute it and/or modify
+     it under the terms version 2 of the GNU General Public License as
+     published by the Free Software Foundation. This program is distributed
+     in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+     even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+     PARTICULAR PURPOSE. See the GNU General Public License for more
+     details.
+
+     You should have received a copy of the GNU General Public License
+     along with this program; if not, write to the Free Software
+     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+     USA.
+
+
+-->
+
 <!DOCTYPE struts-config PUBLIC
           "-//Apache Software Foundation//DTD Struts Configuration 1.2//EN"
           "http://struts.apache.org/dtds/struts-config_1_2.dtd">
@@ -38,10 +66,6 @@
         <!-- DASHBOARD FORMS -->
         <form-bean name="DashboardForm"
                    type="org.hyperic.hq.ui.action.portlet.DashboardForm"/>
-        <form-bean name="LayoutForm"
-                   type="org.hyperic.hq.ui.action.portlet.admin.PortalPropertiesForm"/>                   
-        <form-bean name="AddPortletForm"
-                   type="org.hyperic.hq.ui.action.portlet.addcontent.PropertiesForm"/>
         <!-- this is used when rendering the AI portlet and processing the queue -->
         <form-bean name="AIQueueForm"
                    type="org.hyperic.hq.ui.action.portlet.autoDisc.AIQueueForm"/>
@@ -915,7 +939,49 @@
               <forward name="success" path="/resource/platform/monitor/Config.do?mode=configure"/> 
       </action>
            
-     <!-- Platform Control Actions -->
+      <!-- Platform Control Actions -->
+      <action path="/resource/platform/control/NewFormPrepare"
+              name="ServerControlForm"
+              scope="request"
+              type="org.springframework.web.struts.DelegatingActionProxy">
+        <set-property property="title" value="Control.New"/>
+      </action>
+
+      <action path="/resource/platform/control/New"   
+              type="org.springframework.web.struts.DelegatingActionProxy"
+              name="ServerControlForm"
+              scope="request"
+              input="/resource/platform/Control.do?mode=new">
+        <forward name="add" path="/resource/platform/Control.do?mode=new"/>
+        <forward name="remove" path="/resource/platform/Control.do?mode=new"/>
+        <forward name="cancel" path="/resource/platform/Control.do?mode=view"
+                 redirect="true"/>
+        <forward name="reset" path="/resource/platform/Control.do?mode=new"
+                 redirect="true"/>
+        <forward name="failure" path="/resource/platform/Control.do?mode=new" />
+        <forward name="success" path="/resource/platform/Control.do?mode=view" redirect="true" />
+      </action>
+
+      <action path="/resource/platform/control/EditFormPrepare"
+              name="ServerControlForm"
+              scope="request"
+              type="org.springframework.web.struts.DelegatingActionProxy">
+        <set-property property="title" value="Control"/>
+      </action>
+
+      <action path="/resource/platform/control/Edit"
+              type="org.springframework.web.struts.DelegatingActionProxy"
+              name="ServerControlForm"
+              scope="request"
+              input="/resource/platform/Control.do?mode=edit">
+        <forward name="add" path="/resource/platform/Control.do?mode=edit"/>
+        <forward name="remove" path="/resource/platform/Control.do?mode=edit"/>              
+        <forward name="cancel" path="/resource/platform/Control.do?mode=view" redirect="true"/>
+        <forward name="reset" path="/resource/platform/Control.do?mode=edit"/>
+        <forward name="failure" path="/resource/platform/Control.do?mode=edit"/>
+        <forward name="success" path="/resource/platform/Control.do?mode=view" redirect="true"/>
+      </action>
+     
      <action path="/resource/platform/control/RemoveHistory"
              type="org.springframework.web.struts.DelegatingActionProxy"
              name="RemoveControlForm"
@@ -1776,20 +1842,7 @@
       
       <action path="/dashboard/AddContent"
               type="org.springframework.web.struts.DelegatingActionProxy">
-      </action> 
-      
-      <action path="/dashboard/RemovePortlet"
-              type="org.springframework.web.struts.DelegatingActionProxy">
-              <forward name="success" path="/Dashboard.do" redirect="true"/>
-      </action>
-      <action path="/dashboard/AddPortlet"
-              type="org.springframework.web.struts.DelegatingActionProxy"
-              name="AddPortletForm"
-              scope="request"
-              input="/Dashboard.do">
-              <forward name="success" path="/Dashboard.do" redirect="true"/>
-      </action>                 
-      
+      </action>      
       <action path="/dashboard/SearchHubPrepare"
               type="org.springframework.web.struts.DelegatingActionProxy"
               name="ResourceHubForm"
@@ -2247,6 +2300,8 @@
         <forward name="success" path="/resource/common/monitor/visibility/DashCharts.jsp"/>
         <forward name="failure" path="/Dashboard.do" redirect="true"/>
         <forward name="currentHealth" path="/Resource.do?mode=currentHealth"/>
+		<!-- optional json output -->
+		<forward name="json" path="/common/JSONResponse.jsp" />
       </action>
 
       <action path="/resource/common/monitor/visibility/MetricsControl"

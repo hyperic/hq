@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -59,7 +60,7 @@ public class Application extends AppdefResource
     private String _opsContact;
     private String _businessContact;
     private ApplicationType _applicationType;
-    private Collection<AppService> _appServices;
+    private Collection<AppService> _appServices = new ArrayList();
     /**
      * default constructor
      */

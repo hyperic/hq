@@ -103,15 +103,17 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 	private AlertDAO alertDAO;
 	private final Log log = LogFactory.getLog(EscalationRuntime.class);
 	private GalertLogDAO galertLogDAO;
-
+	private ConcurrentStatsCollector concurrentStatsCollector;
+	
 	@Autowired
 	public EscalationRuntimeImpl(EscalationStateDAO escalationStateDao,
 			AuthzSubjectManager authzSubjectManager, AlertDAO alertDAO,
-			GalertLogDAO galertLogDAO) {
+			GalertLogDAO galertLogDAO, ConcurrentStatsCollector concurrentStatsCollector) {
 		this.escalationStateDao = escalationStateDao;
 		this.authzSubjectManager = authzSubjectManager;
 		this.alertDAO = alertDAO;
 		this.galertLogDAO = galertLogDAO;
+		this.concurrentStatsCollector = concurrentStatsCollector;
 		// Want threads to never die (XXX, scottmf, keeping current
 		// functionality to get rid of
 		// backport apis but don't think this is a good idea)
@@ -121,7 +123,7 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 	
 	@PostConstruct
 	public void initStatsCollection() {
-	    ConcurrentStatsCollector.getInstance().register(ConcurrentStatsCollector.ESCALATION_EXECUTE_STATE_TIME);
+		concurrentStatsCollector.register(ConcurrentStatsCollector.ESCALATION_EXECUTE_STATE_TIME);
 	}
 
 	/**

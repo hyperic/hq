@@ -19,7 +19,6 @@
 			<artifactId>hq-util</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>
 			<artifactId>xstream</artifactId>
@@ -36,6 +35,10 @@
 					<groupId>net.sf.ehcache</groupId>
 					<artifactId>ehcache</artifactId>
 				</exclusion>
+				<exclusion>
+                	<groupId>javax.transaction</groupId>
+                   	<artifactId>jta</artifactId>
+                </exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -82,6 +85,9 @@
 				<configuration>
 					<skip>false</skip>
 				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-source-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>

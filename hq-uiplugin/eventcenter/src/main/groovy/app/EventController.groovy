@@ -1,3 +1,29 @@
+/**
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ *  "derived work".
+ *
+ *  Copyright (C) [2009-2010], VMware, Inc.
+ *  This file is part of HQ.
+ *
+ *  HQ is free software; you can redistribute it and/or modify
+ *  it under the terms version 2 of the GNU General Public License as
+ *  published by the Free Software Foundation. This program is distributed
+ *  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ *  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ *  PARTICULAR PURPOSE. See the GNU General Public License for more
+ *  details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ *  USA.
+ *
+ */
+
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.AlertFiredEvent
 import org.hyperic.hq.measurement.shared.ResourceLogEvent
@@ -10,6 +36,8 @@ import org.hyperic.hq.events.shared.EventLogManager;
 import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.events.EventLogStatus
 import java.text.DateFormat
+
+import org.apache.commons.lang.StringEscapeUtils
 
 class EventController 
 	extends BaseController
@@ -35,14 +63,14 @@ class EventController
             [field:EventLogSortField.DATE, width:'12%',
              label:{df.format(it.eventLog.timestamp)}],
             [field:EventLogSortField.STATUS, width:'8%',
-             label:{getSexyStatus(it.eventLog)}],
+             label:{StringEscapeUtils.escapeHtml(getSexyStatus(it.eventLog))}],
             [field:EventLogSortField.RESOURCE, width:'31%',
-             label:{linkTo(it.resource.name, [resource:it.resource]) }],
+             label:{linkTo(StringEscapeUtils.escapeHtml(it.resource.name), [resource:it.resource]) }],
             [field:EventLogSortField.SUBJECT, width:'20%',
-             label:{it.eventLog.subject}],
+             label:{StringEscapeUtils.escapeHtml(it.eventLog.subject)}],
             [field:EventLogSortField.DETAIL, width:'29%',
              label:{
-                getSexyDetail(it.eventLog)
+            	StringEscapeUtils.escapeHtml(getSexyDetail(it.eventLog))
              }],
         ],
     ]   
