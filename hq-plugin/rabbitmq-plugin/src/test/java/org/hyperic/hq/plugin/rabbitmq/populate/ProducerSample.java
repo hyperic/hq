@@ -74,14 +74,14 @@ public class ProducerSample {
         stocks.add(new MockStock("TM", StockExchange.nyse, 76));
     }
 
-    protected void sendMessages() {
+    public void sendMessages() {
         for (int i = 1; i <= numMessages; i++) {
             sendMarketData();
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 System.out.println(e);
-            }
+            } 
         }
 
         System.out.println("Sending complete");
@@ -101,8 +101,9 @@ public class ProducerSample {
         Quote quote = generateFakeQuote();
         Stock stock = quote.getStock();
         System.out.println("Sending Market Data for " + stock.getTicker());
-        String routingKey = "app.stock.quotes." + stock.getStockExchange() + "." + stock.getTicker();
-        rabbitTemplate.convertAndSend(quote);
+        String routingKey = "stocks.quotes";
+        /** Until I set up a converter for from byte[] */ 
+        rabbitTemplate.convertAndSend(quote.toString());
     }
 
     private Quote generateFakeQuote() {
@@ -110,11 +111,7 @@ public class ProducerSample {
         String price = stock.randomPrice();
         return new Quote(stock, price);
     }
-
-    private enum StockExchange {
-        nyse, nasdaq
-    }
-
+ 
     private class MockStock extends Stock {
 
         private final int basePrice;
@@ -130,60 +127,5 @@ public class ProducerSample {
             return this.twoPlacesFormat.format(this.basePrice + Math.abs(random.nextGaussian()));
         }
     }
-
-    private class Stock {
-
-        private String ticker;
-
-        private StockExchange stockExchange;
-
-        public String getTicker() {
-            return ticker;
-        }
-
-        public void setTicker(String ticker) {
-            this.ticker = ticker;
-        }
-
-        public StockExchange getStockExchange() {
-            return stockExchange;
-        }
-
-        public void setStockExchange(StockExchange stockExchange) {
-            this.stockExchange = stockExchange;
-        }
-
-    }
-
-    private class Quote {
-
-        private Stock stock;
-        private String price;
-
-        public Quote() {
-        }
-
-        public Quote(Stock stock, String price) {
-            this.stock = stock;
-            this.price = price;
-        }
-
-        public Stock getStock() {
-            return this.stock;
-        }
-
-        public void setStock(Stock stock) {
-            this.stock = stock;
-        }
-
-        public String getPrice() {
-            return price;
-        }
-
-        public void setPrice(String price) {
-            this.price = price;
-        }
-
-    }
-
+ 
 }
