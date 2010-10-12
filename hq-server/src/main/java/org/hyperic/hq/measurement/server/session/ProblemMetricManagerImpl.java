@@ -1,6 +1,7 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -10,9 +11,9 @@ import org.hyperic.hq.measurement.ext.ProblemResourceInfo;
 import org.hyperic.hq.measurement.shared.ProblemMetricManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.pager.PageControl;
+import org.springframework.stereotype.Service;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-
+@Service
 public class ProblemMetricManagerImpl implements ProblemMetricManager {
 
     @Override
