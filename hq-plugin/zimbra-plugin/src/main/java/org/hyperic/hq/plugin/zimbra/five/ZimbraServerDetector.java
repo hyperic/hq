@@ -23,7 +23,6 @@
  *  USA.
  *
  */
-
 package org.hyperic.hq.plugin.zimbra.five;
 
 import java.io.ByteArrayOutputStream;
@@ -39,7 +38,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.LogFileTrackPlugin;
-import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerControlPlugin;
 import org.hyperic.hq.product.ServerDetector;
@@ -181,16 +179,15 @@ public class ZimbraServerDetector extends ServerDetector implements AutoServerDe
         for (int n = 0; n < SERVICES.length; n++) {
             Service serviceData = SERVICES[n];
             File pidFile = new File(config.getValue("installpath"), serviceData.getPidFile());
-            if (pidFile.exists()) {
+            Object args[] = {pidFile.getAbsolutePath()};
+            String q = MessageFormat.format(PROCESS_PID_QUERY, args);
+            long[] pids = getPids(q);
+            if (pids.length > 0) {
                 ServiceResource service = createService(serviceData, pidFile.getAbsolutePath());
-
                 ConfigResponse props = new ConfigResponse();
-                Object args[] = {pidFile.getAbsolutePath()};
-                props.setValue("process.query", MessageFormat.format(PROCESS_PID_QUERY, args));
+                props.setValue("process.query", q);
                 setProductConfig(service, props);
-
                 service.setCustomProperties(new ConfigResponse());
-
                 services.add(service);
             } else {
                 log.debug("SERVICES '" + serviceData.getName() + "(" + serviceData.getPidFile() + ")' not found");
@@ -235,8 +232,8 @@ public class ZimbraServerDetector extends ServerDetector implements AutoServerDe
             log.debug("[discoverServices] <- " + serviceData.getName());
         }
 
-        long[] pids = getPids("State.Name.eq=java,Args.*.eq=com.zimbra.cs.convertd.TransformationServer");
-        if (pids.length > 0) {
+        long[] Convertd_pids = getPids("State.Name.eq=java,Args.*.eq=com.zimbra.cs.convertd.TransformationServer");
+        if (Convertd_pids.length > 0) {
             ServiceResource service = new ServiceResource();
             service.setServiceName("Convertd");
             service.setType(this, "Convertd");
@@ -257,7 +254,12 @@ public class ZimbraServerDetector extends ServerDetector implements AutoServerDe
         String[] pids_files = dir_pids.list(new PIDFilter());
         for (int n = 0; n < pids_files.length; n++) {
             String pid_file = pids_files[n];
-            services.add(cerateStatService(pid_file));
+            Object args[] = {pid_file};
+            String q = MessageFormat.format(PROCESS_PID_QUERY, args);
+            long[] pids = getPids(q);
+            if (pids.length > 0) {
+                services.add(cerateStatService(pid_file));
+            }
         }
 
         return services;
