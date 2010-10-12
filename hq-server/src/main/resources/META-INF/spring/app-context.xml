@@ -89,7 +89,7 @@
 		</property>
 	</bean>
 	
-    <bean id="lazyDataSource" class="org.hyperic.hq.common.util.HqLazyConnectionDataSourceProxy">
+    <bean id="lazyDataSource" class="org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy">
         <property name="targetDataSource"><ref local="tomcatDataSource"/></property>
     </bean>
 
