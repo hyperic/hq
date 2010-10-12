@@ -110,7 +110,7 @@ public class GroupControlActionExecutorImpl implements GroupControlActionExecuto
                 jobIds.add(jobId);
 
                 // If the job is ordered, synchronize the commands
-                if (order.length > 0) {
+                if (order!=null && order.length > 0) {
                     ControlActionResult memberResult = controlActionResultsCollector.waitForResult(
                         jobId, timeout);
                     individualResults.add(memberResult);
@@ -124,7 +124,7 @@ public class GroupControlActionExecutorImpl implements GroupControlActionExecuto
                 }
             }
 
-            if (order.length == 0) {
+            if (order == null || order.length == 0) {
                 result = controlActionResultsCollector.waitForGroupResults(id, jobIds,
                     longestTimeout);
                 if (result.getStatus().equals(ControlConstants.STATUS_FAILED)) {
