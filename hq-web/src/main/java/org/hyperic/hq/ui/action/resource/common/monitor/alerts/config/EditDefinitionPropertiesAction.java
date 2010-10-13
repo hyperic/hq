@@ -86,8 +86,13 @@ public class EditDefinitionPropertiesAction
 
         int sessionID = RequestUtils.getSessionId(request).intValue();
 
-        eventsBoss.updateAlertDefinitionBasic(sessionID, defForm.getAd(), defForm.getName(), defForm.getDescription(),
-            defForm.getPriority(), defForm.isActive());
+        try {
+	        eventsBoss.updateAlertDefinitionBasic(sessionID, defForm.getAd(), defForm.getName(), defForm.getDescription(),
+	            defForm.getPriority(), defForm.isActive());
+        } catch(Exception e) {
+        	RequestUtils.setError(request, "error.generic.temporarily.unavailable", "editAlertDefinitionError");
+        	return returnFailure(request, mapping, params);
+        }
 
         log.trace("returning success");
         return returnSuccess(request, mapping, params);
