@@ -5,8 +5,8 @@
 // normal use of the program, and does *not* fall under the heading of
 // "derived work".
 // 
-// Copyright (C) [2004-2009], Hyperic, Inc.
-// This file is part of HQ.
+// Copyright (C) [2004-2010], VMware, Inc.
+// This file is part of Hyperic.
 // 
 // HQ is free software; you can redistribute it and/or modify
 // it under the terms version 2 of the GNU General Public License as
@@ -1667,8 +1667,7 @@ hyperic.dashboard.chartWidget = function(args) {
         		"_method" : "PUT" // need to work around issue using PUT directly
         	},
         	handle: "json",
-        	//headers: { "Content-Type": "application/json"},
-            load: function(data){
+        	load: function(data){
                 that.config.interval = parseInt(data.ivl,10) || that.config.interval;
                 that.config.range = data.tr || that.config.range;
                 that.config.rotation = data.rot || that.config.rotation;
@@ -1797,7 +1796,6 @@ hyperic.dashboard.chartWidget = function(args) {
             		"_method" : "DELETE" // need to work around issue using PUT directly
             	},
             	handleAs: 'json',
-                //headers: { "Content-Type": "application/json"},
                 preventCache: true,
                 load: function(data){
                     if(data.error)
@@ -2462,7 +2460,6 @@ hyperic.dashboard.summaryWidget = function(args) {
         		"_method" : "PUT" // need to work around issue using PUT directly
         	},
             handleAs: 'json',
-            //headers: { "Content-Type": "application/json"},
             preventCache: true,
             load: function(data){
         		that.selected_alert_groups = data.rid
@@ -2928,13 +2925,13 @@ hyperic.group_manager = function(args) {
 	}
 	
 	that.getGroupsNotContaining = function(eids) {    
-		dojo11.xhrGet( {
+		dojo11.xhrPost( {
             url: baseUrl + "associations",
             content: {
-				eid: eids
+				eid: eids,
+				"_method": "PUT"
 			},
-			headers: { "Content-Type": "application/json"},
-            handleAs: 'json',
+			handleAs: 'json',
             preventCache: true,
             load: function(data) {            	
             	var tbody = dojo11.byId("AddToExistingGroupTableBody");
