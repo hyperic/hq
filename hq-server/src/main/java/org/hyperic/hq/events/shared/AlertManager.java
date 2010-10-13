@@ -73,11 +73,6 @@ public interface AlertManager {
      */
     public int deleteAlerts(AuthzSubject subj, AlertDefinition ad) throws PermissionException;
 
-    /**
-     * Remove alerts for a range of time
-     */
-    public int deleteAlerts(long begin, long end);
-    
     Alert getAlertById(Integer id);
 
     /**
@@ -194,5 +189,12 @@ public interface AlertManager {
     public String getLongReason(Alert alert);
 
     public void handleSubjectRemoval(AuthzSubject subject);
+
+    /**
+     * Remove alerts before the specified create time (ctime) that do not have an associated
+     * escalation
+     * The max number of records to delete is specified by maxDeletes
+     */
+    public int deleteAlerts(long before, int maxDeletes);
 
 }
