@@ -1,8 +1,11 @@
 package com.vmware.springsource.hyperic.plugin.gemfire.collectors;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import javax.management.InstanceNotFoundException;
+import javax.management.JMException;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
@@ -33,26 +36,32 @@ public class MemberCollector extends Collector {
             setAvailability(true);
         } catch (Exception ex) {
             setAvailability(false);
-            log.debug("[collect] ERROR!!! " + ex.getMessage(), ex);
+            log.debug("[collect] " + ex.getMessage(), ex);
         }
     }
     private static final int prefixLength = "gemfire.member.".length();
 
-    public static Map getMetrics(String memberID, MBeanServerConnection mServer, boolean hqu) {
+    public static Map getMetrics(String memberID, MBeanServerConnection mServer, boolean hqu) throws PluginException {
         Map res = new java.util.HashMap<String, Object>();
-
+        Map<String, Object> memberDetails = null;
         try {
             Object[] args2 = {memberID};
             String[] def2 = {String.class.getName()};
-            Map<String, Object> memberDetails = (Map) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMemberDetails", args2, def2);
-            for (String k : memberDetails.keySet()) {
-                res.put(k.substring(prefixLength, k.lastIndexOf('.')), memberDetails.get(k));
-                if (log.isDebugEnabled()) {
-                    log.debug("[getMetrics] " + k + "=" + memberDetails.get(k));
-                }
-            }
+            memberDetails = (Map) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMemberDetails", args2, def2);
         } catch (Exception ex) {
-            log.debug(ex, ex);
+            throw new PluginException(ex.getMessage(), ex);
+        }
+
+        log.debug("[getMetrics] memberDetails=" + memberDetails);
+        if ((memberDetails==null) || memberDetails.isEmpty()) {
+            throw new PluginException("Member '" + memberID + "' not found!!!");
+        }
+
+        for (String k : memberDetails.keySet()) {
+            res.put(k.substring(prefixLength, k.lastIndexOf('.')), memberDetails.get(k));
+            if (log.isDebugEnabled()) {
+                log.debug("[getMetrics] " + k + "=" + memberDetails.get(k));
+            }
         }
 
         Long max = ((Long) res.get("stat.maxmemory"));
