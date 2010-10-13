@@ -470,24 +470,23 @@ public class AlertManagerTest
         Alert alert5 = alertManager.createAlert(this.testPlatformAlertDef, time5);
 
         // Now, delete alerts for a specific range
-        alertManager.deleteAlerts(time3, time4);
+        alertManager.deleteAlerts(time3+1, 10);
         clearSession();
         // Verify the alerts are deleted only within the given range
-        assertNotNull("Alert1 shouldn't be deleted", alertManager.findAlertById(alert1.getId()));
-        assertNotNull("Alert2 shouldn't be deleted", alertManager.findAlertById(alert2.getId()));
-        try {
-            alertManager.findAlertById(alert3.getId());
-            fail("Alert was not deleted");
-        } catch (ObjectNotFoundException e) {
-            // expected
-        }
-        try {
-            alertManager.findAlertById(alert4.getId());
-            fail("Alert was not deleted");
-        } catch (ObjectNotFoundException e) {
-            // expected
-        }
+        testAlertNotExists(alert1);
+        testAlertNotExists(alert2);
+        testAlertNotExists(alert3);
+        assertNotNull("Alert4 shouldn't be deleted", alertManager.findAlertById(alert4.getId()));
         assertNotNull("Alert5 shouldn't be deleted", alertManager.findAlertById(alert5.getId()));
+    }
+    
+    private void testAlertNotExists(Alert alert) {
+        try {
+            alertManager.findAlertById(alert.getId());
+            fail("alertId=" + alert.getId() + " was not deleted");
+        } catch (ObjectNotFoundException e) {
+            // expected
+        }
     }
 
     /*
