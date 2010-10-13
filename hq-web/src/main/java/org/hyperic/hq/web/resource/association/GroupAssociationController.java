@@ -70,7 +70,7 @@ public class GroupAssociationController extends BaseController {
 		super(appdefBoss, authzBoss);
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/resource/associations")
+	@RequestMapping(method = RequestMethod.PUT, value = "/resource/associations")
 	public @ResponseBody
 	Map<String, List<Map<String, Object>>> getAvailableAssociations(
 			@RequestParam(RequestParameterKeys.RESOURCE_IDS) String[] resourceAppdefEntityIds,
