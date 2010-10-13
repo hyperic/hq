@@ -94,8 +94,14 @@ public class EditDefinitionConditionsAction
         AlertDefinitionValue adv = eventsBoss.getAlertDefinition(sessionID, defForm.getAd());
         defForm.exportConditionsEnablement(adv, request, sessionID, measurementBoss, EventConstants.TYPE_ALERT_DEF_ID
             .equals(adv.getParentId()));
-        eventsBoss.updateAlertDefinition(sessionID, adv);
-
+        
+        try {
+        	eventsBoss.updateAlertDefinition(sessionID, adv);
+        } catch(Exception e) {
+        	RequestUtils.setError(request, "error.generic.temporarily.unavailable", "editAlertDefinitionError");
+        	return returnFailure(request, mapping, params);
+        }
+        
         return returnSuccess(request, mapping, params);
     }
 }
