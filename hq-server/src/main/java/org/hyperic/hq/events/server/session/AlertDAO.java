@@ -69,31 +69,51 @@ public class AlertDAO
         return (Alert) super.get(id);
     }
 
+    /**
+     * @param before (in ms) - deletes all alerts with ctime < before
+     * @param maxDeletes - max number of rows to delete.  if maxDeletes <= 0, 0 is returned
+     * @return number of rows deleted
+     */
     @SuppressWarnings("unchecked")
-    int deleteByCreateTime(long begin, long end) {
+    int deleteAlertsByCreateTime(long before, int maxDeletes) {
+        if (maxDeletes <= 0) {
+            return 0;
+        }
         // don't want to thrash the Alert cache, so select and do an explicit
         // remove() on each Object
-        final String sql = new StringBuilder().append("from Alert where ").append(
-            "ctime between :timeStart and :timeEnd and ").append(
-            "not id in (select alertId from EscalationState es ").append(
-            "where alertTypeEnum = :type)").toString();
-
+        final String hql = new StringBuilder(64)
+            .append("from Alert where ")
+            .append("ctime < :before and ")
+            .append("not id in (select alertId from EscalationState es ")
+            .append("where alertTypeEnum = :type)")
+            .toString();
         List<Alert> list = null;
-        int rtn = 0;
+        int count = 0;
         // due to
         // http://opensource.atlassian.com/projects/hibernate/browse/HHH-1985
         // need to batch this
-        while (list == null || list.size() > 0) {
-            list = (List<Alert>) getSession().createQuery(sql).setLong("timeStart", begin).setLong(
-                "timeEnd", end).setInteger("type", ClassicEscalationAlertType.CLASSIC.getCode())
-                .setMaxResults(1000).list();
+        while (list == null || count < maxDeletes) {
+            int batchSize = (BATCH_SIZE + count > maxDeletes) ? (maxDeletes - count) : BATCH_SIZE;
+            list = getSession().createQuery(hql)
+                .setLong("before", before)
+                .setInteger("type", ClassicEscalationAlertType.CLASSIC.getCode())
+                .setMaxResults(batchSize)
+                .list();
+            if (list.size() == 0) {
+                break;
+            }
             alertActionLogDAO.deleteAlertActions(list);
             for (Alert alert : list) {
-                rtn++;
+                count++;
                 remove(alert);
             }
+            // need to flush or else the removed alerts won't be reflected in the next hql
+            getSession().flush();
+            if (count >= maxDeletes) {
+                break;
+            }
         }
-        return rtn;
+        return count;
     }
 
     public List<Alert> findByResource(Resource res) {

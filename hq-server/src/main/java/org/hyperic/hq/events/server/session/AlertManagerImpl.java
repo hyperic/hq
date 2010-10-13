@@ -229,11 +229,13 @@ public class AlertManagerImpl implements AlertManager,
     }
 
     /**
-     * Remove alerts for a range of time
-     * 
+     * Remove alerts before the specified create time (ctime) that do not have an associated
+     * escalation
+     * The max number of records to delete is specified by maxDeletes
      */
-    public int deleteAlerts(long begin, long end) {
-        return alertDAO.deleteByCreateTime(begin, end);
+    @Override
+    public int deleteAlerts(long before, int maxDeletes) {
+        return alertDAO.deleteAlertsByCreateTime(before, maxDeletes);
     }
     
     @Transactional(readOnly = true)
@@ -243,8 +245,6 @@ public class AlertManagerImpl implements AlertManager,
 
     /**
      * Find an alert pojo by ID
-     * 
-     * 
      */
     @Transactional(readOnly = true)
     public Alert findAlertById(Integer id) {

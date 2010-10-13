@@ -195,10 +195,7 @@ public class DataPurgeJob implements Runnable {
             // Purge, we never store more than 1 year of data.
             purgeMeasurements(MeasurementConstants.DAY, now - this.purge1d);
 
-            // Purge alerts
-            log.info("Purging alerts older than " + TimeUtil.toString(now - this.purgeAlert));
-            int alertsDeleted = alertManager.deleteAlerts(0, now - this.purgeAlert);
-            log.info("Done (Deleted " + alertsDeleted + " alerts)");
+            purgeAlerts(now);
 
             concurrentStatsCollector.addStat((now() - start),
                 ConcurrentStatsCollector.METRIC_DATA_COMPRESS_TIME);
@@ -212,6 +209,20 @@ public class DataPurgeJob implements Runnable {
         long time_end = System.currentTimeMillis();
         log.info("Data compression completed in " + ((time_end - time_start) / 1000) + " seconds.");
         runDBMaintenance();
+    }
+
+    private void purgeAlerts(long now) {
+        log.info("Purging alerts older than " + TimeUtil.toString(now - this.purgeAlert));
+        int alertsDeleted = -1;
+        int totalDeleted = 0;
+        // HQ-2731 - want to batch this 10,000 rows at a time
+        // this avoids the session getting too large and will (hopefully) avoid transaction timeouts
+        int maxBatch = 10000;
+        do {
+            alertsDeleted = alertManager.deleteAlerts(now - this.purgeAlert, maxBatch);
+            totalDeleted += alertsDeleted;
+        } while (alertsDeleted >= maxBatch);
+        log.info("Done (Deleted " + totalDeleted + " alerts)");
     }
 
     long compressData(long toInterval, long now) {
