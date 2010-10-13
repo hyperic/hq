@@ -43,7 +43,6 @@ import javax.security.auth.login.LoginException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -62,7 +61,6 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -102,7 +100,6 @@ import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.events.server.session.TriggersCreatedZevent;
 import org.hyperic.hq.events.shared.ActionManager;
 import org.hyperic.hq.events.shared.ActionValue;
-import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertManager;
@@ -114,8 +111,6 @@ import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
 import org.hyperic.hq.galerts.server.session.GalertLogSortField;
 import org.hyperic.hq.galerts.shared.GalertManager;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
-import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.server.session.MetricsEnabledEvent;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
@@ -124,7 +119,6 @@ import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
-import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.util.timer.StopWatch;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -690,18 +684,6 @@ public class EventsBossImpl implements EventsBoss {
         SessionTimeoutException, PermissionException {
         sessionManager.authenticate(sessionID);
         alertManager.deleteAlerts(ids);
-    }
-
-    /**
-     * Delete all alerts for a given period of time
-     * 
-     * 
-     */
-    public int deleteAlerts(int sessionID, long begin, long end) throws SessionNotFoundException,
-        SessionTimeoutException, PermissionException {
-        sessionManager.authenticate(sessionID);
-        // XXX - check security
-        return alertManager.deleteAlerts(begin, end);
     }
 
     /**

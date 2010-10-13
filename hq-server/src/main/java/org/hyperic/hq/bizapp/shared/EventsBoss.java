@@ -151,12 +151,6 @@ public interface EventsBoss {
         throws SessionNotFoundException, SessionTimeoutException, PermissionException;
 
     /**
-     * Delete all alerts for a given period of time
-     */
-    public int deleteAlerts(int sessionID, long begin, long end) throws SessionNotFoundException,
-        SessionTimeoutException, PermissionException;
-
-    /**
      * Delete all alerts for a list of alert definitions
      * 
      */
