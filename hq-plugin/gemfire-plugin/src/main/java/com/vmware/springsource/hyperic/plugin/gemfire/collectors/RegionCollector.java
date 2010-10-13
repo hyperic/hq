@@ -7,7 +7,9 @@ import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.Collector;
+import org.hyperic.hq.product.CollectorResult;
 import org.hyperic.hq.product.Metric;
+import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.jmx.MxUtil;
 
@@ -25,10 +27,8 @@ public class RegionCollector extends Collector {
     public void collect() {
         Properties props = getProperties();
         log.debug("[collect] props=" + props);
-        setAvailability(true);
         try {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(props);
-            log.info("mServer=" + mServer);
             String memberID = props.getProperty("memberID");
             Object[] args2 = {memberID};
             String[] def2 = {String.class.getName()};
@@ -45,11 +45,21 @@ public class RegionCollector extends Collector {
                 }
             } else {
                 log.debug("Member '" + memberID + "' nof found!!!");
-                setAvailability(false);
             }
         } catch (Exception ex) {
             log.debug(ex, ex);
-            setAvailability(false);
         }
+    }
+
+    @Override
+    public MetricValue getValue(Metric metric, CollectorResult result) {
+        MetricValue res = result.getMetricValue(metric.getAttributeName());
+        if (metric.getAttributeName().endsWith(Metric.ATTR_AVAIL)) {
+            if (res.getValue() != Metric.AVAIL_UP) {
+                res=new MetricValue(Metric.AVAIL_DOWN, System.currentTimeMillis());
+            }
+            log.debug("[getValue] Member="+metric.getObjectProperty("memberID")+" metric=" + metric.getAttributeName() + " res=" + res.getValue());
+        }
+        return res;
     }
 }
