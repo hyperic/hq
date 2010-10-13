@@ -33,6 +33,7 @@ import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.hyperic.hq.product.AutoServerDetector;
@@ -58,14 +59,14 @@ public class PostgreSQLServerDetector
                RegistryServerDetector,
                AutoServerDetector {
 
-    private Log log =  LogFactory.getLog("PostgreSQLServerDetector");
+    private static Log log =  LogFactory.getLog("PostgreSQLServerDetector");
 
     private static final String POSTGRESQL_VERSION = "(PostgreSQL)";
     //likely will only work w/ linux due to permissions
     //and setting of argv[0] to the full binary path.
     //State.Name == 'postgres' on OSX, 'postmaster' elsewhere
     private static final String PTQL_QUERY =
-        "State.Name.re=post(master|gres),State.Name.Pne=$1,Args.0.re=.*post(master|gres)$";
+        "State.Name.re=post(master|gres),State.Name.Pne=$1,Args.0.re=.*post(master|gres)(.exe)?$";
 
     // Table discovery query
     private static final String TABLE_QUERY = 
@@ -94,10 +95,13 @@ public class PostgreSQLServerDetector
         ArrayList servers = new ArrayList();
 
         long[] pids = getPids(PTQL_QUERY);
+        log.debug("[getServerProcessList] pids.length="+pids.length);
 
         for (int i=0; i<pids.length; i++) {
             String exe = getProcExe(pids[i]);
-
+            if (log.isDebugEnabled()) {
+                log.debug("[getServerProcessList] pid=" + pids[i] + " exec=" + exe + " args=" + Arrays.asList(getProcArgs(pids[i])));
+            }
             if (exe == null) {
                 continue;
             }
@@ -121,6 +125,7 @@ public class PostgreSQLServerDetector
 
         for (int i = 0; i < paths.size(); i++) {
             String dir = (String)paths.get(i);
+            log.debug("[getServerResources] dir="+dir);
             List found = getServerList(dir);
             if (!found.isEmpty()) {
                 servers.addAll(found);
@@ -206,16 +211,8 @@ public class PostgreSQLServerDetector
             }
         }
 
-        String installPath;
-        if(binary.endsWith("postgres") ||
-           binary.endsWith("postmaster") ||
-           binary.endsWith("pg_ctl.exe")) {
-            // Move up 2 dirs
-            installPath = getParentDir(binary, 2);
-        } else {
-            // nothing to detect
-            return servers;
-        }
+        String installPath = getParentDir(binary, 2);
+        log.debug("[getServerList] installPath="+installPath);
         
         ServerResource server = createServerResource(installPath);
 
