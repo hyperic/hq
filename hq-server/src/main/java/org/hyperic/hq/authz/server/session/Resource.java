@@ -61,35 +61,6 @@ public class Resource extends AuthzNamedBean implements Comparable {
         _owner        = owner;
         _system       = system;
     }
-    
-    public AppdefEntityID getAppdefEntity() {
-        ResourceType resType = getResourceType();
-        int entityId = getInstanceId();
-        if (resType == null) {
-            throw new IllegalArgumentException(getName() + " does not have a Resource Type");
-        }
-        int entityType;
-        if(resType.getId().equals(AuthzConstants.authzPlatform)) {
-            entityType = AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
-        }
-        else if(resType.getId().equals(AuthzConstants.authzServer)) {
-            entityType = AppdefEntityConstants.APPDEF_TYPE_SERVER;
-        }
-        else if(resType.getId().equals(AuthzConstants.authzService)) {
-            entityType = AppdefEntityConstants.APPDEF_TYPE_SERVICE;
-        }
-        else if(resType.getId().equals(AuthzConstants.authzApplication)) {
-            entityType = AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
-        }
-        else if(resType.getId().equals(AuthzConstants.authzGroup)) {
-            entityType = AppdefEntityConstants.APPDEF_TYPE_GROUP;
-        }
-        else {
-            throw new IllegalArgumentException(resType.getName() +
-                " is not a valid Appdef Resource Type");
-        }
-        return new AppdefEntityID(entityId, entityType);
-    }
 
     protected Collection getGroupBag() {
         return _groupBag;
