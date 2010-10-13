@@ -27,7 +27,6 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -39,6 +38,7 @@ import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerManager;
@@ -235,7 +235,7 @@ public class ReportProcessorImpl implements ReportProcessor {
                           res.getName() + ") is not associated " +
                           " with that agent.  Dropping measurement.");
                 if (debug) watch.markTimeEnd("resMatchesAgent");
-                nonEntities.add(res.getAppdefEntity());
+                nonEntities.add(AppdefUtil.newAppdefEntityId(res));
                 continue;
             }
             if (debug) watch.markTimeEnd("resMatchesAgent");
