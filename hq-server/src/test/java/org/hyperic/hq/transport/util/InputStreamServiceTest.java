@@ -29,12 +29,14 @@ import java.io.IOException;
 
 import org.hyperic.util.SpinBarrier;
 import org.hyperic.util.SpinBarrierCondition;
+import org.junit.Ignore;
 
 import junit.framework.TestCase;
 
 /**
  * Tests the InputStreamService_test class.
  */
+@Ignore("This test still has timing issues.  We should investigate and/or move to hq-integration-test module")
 public class InputStreamServiceTest extends TestCase {
 
     private InputStreamServiceImpl _streamService;

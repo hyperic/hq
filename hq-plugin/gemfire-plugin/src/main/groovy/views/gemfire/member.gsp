@@ -1,4 +1,5 @@
 <h2>Details of ${member.get("name")} with ID: ${member.get("id")}<span class="loading"></span></h2>
+<div class="frame">
 <table>
   <thead>
     <tr>
@@ -10,10 +11,10 @@
   </thead>
   <tbody>
     <tr>
-      <td>${member.get("heap")}</td>
-      <td>${member.get("cpu")}</td>
+      <td class="number">${member.get("heap")}</td>
+      <td class="number">${member.get("cpu")}</td>
       <td>${member.get("uptime")}</td>
-      <td>${member.get("clients").size()}</td>
+      <td class="number">${member.get("clients").size()}</td>
     </tr>
   </tbody>
 </table>
@@ -71,7 +72,7 @@
       <td>${region.get("gemfire.region.scope.string")}</td>
       <td>${region.get("gemfire.region.datapolicy.string")}</td>
       <td>${region.get("gemfire.region.interestpolicy.string")}</td>
-      <td>${region.get("gemfire.region.entrycount.int")}</td>
+      <td class="number">${region.get("gemfire.region.entrycount.int")}</td>
       <td>${region.get("gemfire.region.diskattrs.string")}</td>
     </tr>
   <% } %>
@@ -94,13 +95,14 @@
   <%for (client in member.get("clients").values()){%>
     <tr>
       <td><a id="${client.get("gemfire.client.id.string")}" class="member" href="#${client.get("gemfire.client.id.string")}">${client.get("gemfire.client.id.string")}</a></td>
-      <td>${client.get("gemfire.client.queuesize.int")}</td>
-      <td>${client.get("gemfire.client.stats.gets.int")}</td>
-      <td>${client.get("gemfire.client.stats.puts.int")}</td>
-      <td>${client.get("gemfire.client.stats.cachemisses.int")}</td>
-      <td>${client.get("gemfire.client.stats.threads.int")}</td>
+      <td class="number">${client.get("gemfire.client.queuesize.int")}</td>
+      <td class="number">${client.get("gemfire.client.stats.gets.int")}</td>
+      <td class="number">${client.get("gemfire.client.stats.puts.int")}</td>
+      <td class="number">${client.get("gemfire.client.stats.cachemisses.int")}</td>
+      <td class="number">${client.get("gemfire.client.stats.threads.int")}</td>
     </tr>
     <% } %>
   </tbody>
 </table>
   <% } %>
+</div>

@@ -27,7 +27,7 @@ public class GatewayCollector extends Collector {
         log.debug("[collect] props=" + props);
         try {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(props);
-            log.info("mServer=" + mServer);
+            log.debug("mServer=" + mServer);
             String memberID = props.getProperty("memberID");
             Object[] args2 = {memberID};
             String[] def2 = {String.class.getName()};

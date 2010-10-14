@@ -1,3 +1,11 @@
+#gemfirePlugin div.frame{
+    margin: 5px;
+}
+
+#gemfirePlugin td.number{
+    text-align: right;
+}
+
 #gemfirePlugin #data{
     background-color: white;
     border: 1px solid #60A5EA;
