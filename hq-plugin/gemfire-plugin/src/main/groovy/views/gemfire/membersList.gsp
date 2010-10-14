@@ -26,10 +26,10 @@
       <td><a id="${member.get("id")}" class="member" href="#${member.get("id")}">${member.get("name")}</a></td>
       <td>${member.get("host")}</td>
       <td>${member.get("port")}</td>
-      <td>${member.get("heap")}%</td>
-      <td>${member.get("cpu")}%</td>
+      <td class="number">${member.get("heap")}</td>
+      <td class="number">${member.get("cpu")}</td>
       <td>${member.get("uptime")}</td>
-      <td>${member.get("clients").size()}</td>
+      <td class="number">${member.get("clients").size()}</td>
       <td>${member.get("type")}</td>
     </tr>
     <% } %>

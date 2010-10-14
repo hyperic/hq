@@ -26,7 +26,7 @@ public class JMXAgentDetector extends ServerDetector
         List servers = new ArrayList();
         try {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(pc.toProperties());
-            log.info("mServer=" + mServer);
+            log.debug("mServer=" + mServer);
 
             ObjectName mbean = new ObjectName("GemFire:type=MemberInfoWithStatsMBean");
             String version = (String) mServer.getAttribute(mbean, "Version");
