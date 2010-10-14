@@ -416,7 +416,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         ServerResource node = createServerResource(nodePath);
         node.setName(new StringBuilder(getPlatformName()).append(" ").append(getTypeInfo().getName()).append(" ")
                 .append(DetectorConstants.NODE).append(" ").append(nodeName).toString());
-        node.setIdentifier(new StringBuilder(String.valueOf(nodePid)).append("-").append(nodeName).toString());
+        node.setIdentifier(nodePath);
         node.setDescription(new StringBuilder(getTypeInfo().getName()).append(" ").append(DetectorConstants.NODE).toString());
 
         ConfigResponse conf = new ConfigResponse();

@@ -8,8 +8,29 @@
         <include name="pdk/lib/mx4j" />
     </classpath>
 
+  <help name="GemFire Distributed System">
+    <![CDATA[
+    <h2>Configuration Properties</h2>
+    <ul>
+        <li>
+        jmx.url: format "<b>service:jmx:rmi:///jndi/rmi://&lt;host&gt;:&lt;port&gt;/jmxconnector</b>" (GemFire: rmi-bind-address,rmi-host,rmi-port)
+        </li>
+    </ul>
+    <h2>Configure Gemfire  for Monitoring</h2>
+    <p>
+    Monitoring of GemFire is done through the "GemFire JMX Agent". In order to
+    collect metrics, the parameter '<b>statistic-sampling-enabled=true</b>'
+    must be defined in the gemfire.properties for each member (See GemFire docs for more info).
+    </p>
+    <p>
+    In order to support remote connection to "GemFire JMX Agent", it must be
+    configure using "<b>rmi-bind-address</b>" property (See GemFire docs for more info).
+    </p>
+        ]]>
+  </help>
+
     <config name="jmx">
-        <option name="jmx.url" description="JMX URL to GemFire Agent" default="service:jmx:rmi://localhost/jndi/rmi://:1099/jmxconnector" />
+        <option name="jmx.url" description="URL to GemFire JMX Agent" default="service:jmx:rmi:///jndi/rmi://localhost:1099/jmxconnector" />
         <option name="jmx.username" description="JMX username" optional="true" default="" />
         <option name="jmx.password" description="JMX password" optional="true" default="" />
     </config>

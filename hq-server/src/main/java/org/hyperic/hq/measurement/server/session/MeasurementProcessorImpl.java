@@ -1,22 +1,22 @@
 /*
- * NOTE: This copyright does *not* cover user programs that use HQ
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
- * This file is part of HQ.
- * 
- * HQ is free software; you can redistribute it and/or modify
+ *
+ * Copyright (C) [2004-2010], VMware, Inc.
+ * This file is part of Hyperic.
+ *
+ * Hyperic is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
  * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -54,6 +54,7 @@ import org.hyperic.hq.measurement.agent.client.AgentMonitor;
 import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
 import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClientFactory;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
+import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.measurement.shared.SRNManager;
@@ -74,6 +75,7 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
     private final Log log = LogFactory.getLog(LOG_CTX);
 
     private AgentManager agentManager;
+    private AvailabilityManager availManager;
     private MeasurementManager measurementManager;
     private SRNManager srnManager;
     private AgentMonitor agentMonitor;
@@ -86,7 +88,8 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
     public MeasurementProcessorImpl(AgentManager agentManager, MeasurementManager measurementManager,
                                     SRNManager srnManager,
                                     AgentMonitor agentMonitor,
-                                    MeasurementCommandsClientFactory measurementCommandsClientFactory, ResourceManager resourceManager,
+                                    MeasurementCommandsClientFactory measurementCommandsClientFactory, 
+                                    ResourceManager resourceManager, AvailabilityManager availManager,
                                     ZeventEnqueuer zEventManager, ConcurrentStatsCollector concurrentStatsCollector) {
 
         this.agentManager = agentManager;
@@ -95,6 +98,7 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
         this.agentMonitor = agentMonitor;
         this.measurementCommandsClientFactory = measurementCommandsClientFactory;
         this.resourceManager = resourceManager;
+        this.availManager = availManager;
         this.zEventManager = zEventManager;
         this.concurrentStatsCollector = concurrentStatsCollector;
     }
@@ -188,6 +192,23 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
         if (debug) watch.markTimeBegin("findEnabledMeasurements");
         Map<Integer,List<Measurement>> measMap = measurementManager.findEnabledMeasurements(eids);
         if (debug) watch.markTimeEnd("findEnabledMeasurements");
+        
+        // availability measurements in scheduled downtime are disabled, but not unscheduled.
+        // need to schedule these measurements for "new" agents.
+        if (debug) watch.markTimeBegin("getAvailMeasurementsInDowntime");
+        Map<Integer, Measurement> downtimeMeasMap = availManager.getAvailMeasurementsInDowntime(eids);
+        if (debug) watch.markTimeEnd("getAvailMeasurementsInDowntime");
+                
+        for (Map.Entry<Integer, Measurement> entry : downtimeMeasMap.entrySet()) {
+            Integer resourceId = entry.getKey();
+            List<Measurement> measurements = measMap.get(resourceId);
+            if (measurements == null) {
+                measurements = new ArrayList<Measurement>();
+                measMap.put(resourceId, measurements);
+            }
+            measurements.add(entry.getValue());
+        }
+        
         // Want to batch this operation.  There is something funky with the agent where it
         // appears to slow down drastically when too many measurements are scheduled at
         // once.  I believe (not 100% sure) this is due to the agent socket listener
