@@ -30,7 +30,7 @@ public class MemberCollector extends Collector {
         Properties props = getProperties();
         try {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(props);
-            log.info("mServer=" + mServer);
+            log.debug("mServer=" + mServer);
             String memberID = props.getProperty("memberID");
             addValues(getMetrics(memberID, mServer, false));
             setAvailability(true);
