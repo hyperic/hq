@@ -29,7 +29,7 @@ public class GemfireCollector extends Collector {
         Properties props = getProperties();
         try {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(props);
-            log.info("mServer=" + mServer);
+            log.debug("mServer=" + mServer);
             Object[] args = {};
             String[] def = {};
             String[] members = (String[]) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMembers", args, def);

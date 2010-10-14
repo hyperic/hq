@@ -14,7 +14,7 @@ class GemfireController extends BaseController {
         if(!liveData.hasError()){
             def _members = liveData.objectResult
             _members.each{i -> members.add(HtmlUtil.escapeHtml(i))}
-            log.info("[tree] members="+members)
+            log.debug("[tree] members="+members)
         }else{
             log.error(liveData.errorMessage);
         }
@@ -24,7 +24,7 @@ class GemfireController extends BaseController {
     def member(params){
         def mid=params.getOne("mid")
         //mid = (mid =~ /([^(]*).(\d*)..(\w*)..(\d*).(\d*)/).replaceAll("\$1(\$2)<\$3>:\$4/\$5")
-        log.info("mid="+mid)
+        log.debug("mid="+mid)
         def members = getMembersList(params)
         def member=((Map)members).get(mid)
         if(member!=null){
@@ -58,7 +58,7 @@ class GemfireController extends BaseController {
         members.each{k,it ->
             def cl=it.get("clients")
             cl.each{ client,i ->
-                log.info("client = "+client)
+                log.debug("client = "+client)
                 clients.put(client,true)
             }
         }
@@ -74,7 +74,7 @@ class GemfireController extends BaseController {
             it.put("uptime",String.format( "%d hours %d mins %d secs",hours,minutes,sec))
         }
 
-        members.each{k,it -> log.info(it.get("id")+" -> "+it.get("name")+" -> "+it.get("type")) }
+        members.each{k,it -> log.debug(it.get("id")+" -> "+it.get("name")+" -> "+it.get("type")) }
     }
 
     def membersList(params) {
@@ -88,7 +88,7 @@ class GemfireController extends BaseController {
         def name = ":"
         if(!liveData.hasError()){
             name = liveData.objectResult
-            log.info("name="+name)
+            log.debug("name="+name)
         }else{
             log.error(liveData.errorMessage);
         }
