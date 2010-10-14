@@ -1,15 +1,15 @@
 /*
- * NOTE: This copyright does *not* cover user programs that use HQ
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2009], Hyperic, Inc.
- * This file is part of HQ.
+ * Copyright (C) [2004-2010], VMware, Inc.
+ * This file is part of Hyperic.
  *
- * HQ is free software; you can redistribute it and/or modify
+ * Hyperic is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
  * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -50,12 +50,17 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.MessagePublisher;
 import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
@@ -108,6 +113,8 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
 
     private MeasurementManager measurementManager;
 
+    private ResourceGroupManager groupManager;
+    
     private ResourceManager resourceManager;
 
     private MessagePublisher messenger;
@@ -121,11 +128,12 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     private ConcurrentStatsCollector concurrentStatsCollector;
     
     @Autowired
-    public AvailabilityManagerImpl(ResourceManager resourceManager, MessagePublisher messenger,
+    public AvailabilityManagerImpl(ResourceManager resourceManager, ResourceGroupManager groupManager, MessagePublisher messenger,
                                    AvailabilityDataDAO availabilityDataDAO, MeasurementDAO measurementDAO,
                                    MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers, AvailabilityCache availabilityCache,
                                    ConcurrentStatsCollector concurrentStatsCollector) {
         this.resourceManager = resourceManager;
+        this.groupManager = groupManager;
         this.messenger = messenger;
         this.availabilityDataDAO = availabilityDataDAO;
         this.measurementDAO = measurementDAO;
@@ -270,6 +278,48 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         return rtn;
     }
 
+    /**
+     * Get Availability measurements (disabled) in scheduled downtime. 
+     */
+    @Transactional(readOnly = true) 
+    public Map<Integer, Measurement> getAvailMeasurementsInDowntime(Collection<AppdefEntityID> eids) {
+        Map<Integer, Measurement> measMap = new HashMap<Integer, Measurement>();
+        
+        try {
+            List<MaintenanceEvent> events = PermissionManagerFactory.getInstance()
+                .getMaintenanceEventManager().getRunningMaintenanceEvents();
+
+            for (MaintenanceEvent event : events) {
+                ResourceGroup group = groupManager.findResourceGroupById(event.getGroupId());
+                Collection<Resource> resources = groupManager.getMembers(group);
+
+                for (Resource resource : resources) {
+                    List<Measurement> measurements = getAvailMeasurementChildren(
+                        resource, AuthzConstants.ResourceEdgeContainmentRelation);
+
+                    measurements.add(getAvailMeasurement(resource));
+
+                    if (!measurements.isEmpty()) {
+                        for (Measurement m : measurements) {
+                            Resource r = m.getResource();
+                            if (r == null || r.isInAsyncDeleteState()) {
+                                continue;
+                            }
+                            // availability measurement in scheduled downtime are disabled
+                            if (!m.isEnabled() && eids.contains(AppdefUtil.newAppdefEntityId(r))) {
+                                measMap.put(r.getId(), m);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            _log.error("Could not find availability measurements in downtime: " + e.getMessage(), e);
+        }
+
+        return measMap;
+    }
+    
     /**
      * TODO: Can this method be combined with the one that takes an array?
      * 

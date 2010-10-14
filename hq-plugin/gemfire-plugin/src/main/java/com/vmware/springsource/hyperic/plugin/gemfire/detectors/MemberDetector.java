@@ -24,7 +24,7 @@ public abstract class MemberDetector extends ServerDetector implements AutoServe
         List servers = new ArrayList();
         try {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(pc.toProperties());
-            log.info("mServer=" + mServer);
+            log.debug("mServer=" + mServer);
 
             Object[] args = {};
             String[] def = {};
@@ -62,7 +62,7 @@ public abstract class MemberDetector extends ServerDetector implements AutoServe
         List services = new ArrayList();
         try {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(config.toProperties());
-            log.info("mServer=" + mServer);
+            log.debug("mServer=" + mServer);
 
             String memberId = config.getValue("memberID");
             Object[] args2 = {memberId};

@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.events.shared;
 
+import java.util.List;
+
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.events.MaintenanceEvent;
@@ -37,6 +39,12 @@ public interface MaintenanceEventManager {
     public MaintenanceEvent getMaintenanceEvent(AuthzSubject subject,
     											Integer groupId)
         throws PermissionException, SchedulerException;
+    
+    /**
+     * Get currently running maintenance events
+     */
+    public List<MaintenanceEvent> getRunningMaintenanceEvents()
+        throws SchedulerException;
 
     /**
      * Schedule or reschedule a maintenance event
