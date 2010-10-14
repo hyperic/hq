@@ -20,10 +20,10 @@ public class GemFireLiveData extends LiveDataPlugin {
     public Object getData(String command, ConfigResponse config) throws PluginException {
         Object res = null;
 
-        log.info("command='" + command + "' config='" + config + "'");
+        log.debug("[getData] command='" + command + "' config='" + config + "'");
         try {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(config.toProperties());
-            log.info("mServer="+mServer);
+            log.debug("[getData] mServer="+mServer);
             if ("getDetails".equals(command)) {
                 res = getDetails(mServer);
             } else if ("getMembers".equals(command)) {
