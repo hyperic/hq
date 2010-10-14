@@ -286,6 +286,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         Map<Integer, Measurement> measMap = new HashMap<Integer, Measurement>();
         
         try {
+            // TODO: Resolve circular dependency and autowire MaintenanceEventManager
             List<MaintenanceEvent> events = PermissionManagerFactory.getInstance()
                 .getMaintenanceEventManager().getRunningMaintenanceEvents();
 

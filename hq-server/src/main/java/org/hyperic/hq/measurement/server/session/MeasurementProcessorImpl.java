@@ -218,11 +218,16 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
         final List<AppdefEntityID> aeids = new ArrayList<AppdefEntityID>(eids);
         for (int i=0; i<aeids.size(); i+=batchSize) {
             final int end = Math.min(i+batchSize, aeids.size());
-            if (debug) watch.markTimeBegin("scheduleMeasurements");
+            if (debug) watch.markTimeBegin("scheduleMeasurements[" + end + "]");
             scheduleMeasurements(agent, measMap, aeids.subList(i, end));
-            if (debug) watch.markTimeEnd("scheduleMeasurements");
+            if (debug) watch.markTimeEnd("scheduleMeasurements[" + end + "]");
         }
-        if (debug) log.debug(watch);
+        if (debug) {
+            log.debug("scheduleEnabled: " + watch
+                        + ", { Size: [appdefEntity=" + eids.size()
+                        + "] [availMeasurementsInDowntime=" + downtimeMeasMap.size() 
+                        + "] }");
+        }
     }
     
     private void scheduleMeasurements(Agent agent, Map<Integer,List<Measurement>> measMap,
