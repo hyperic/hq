@@ -51,8 +51,8 @@ public class RabbitProductPlugin extends ProductPlugin {
     @Override
     public void init(PluginManager manager) throws PluginException {
         super.init(manager);
-        logger.debug("\n\n***********[init] manager.getProps=" + manager.getProperties());
-        logger.debug("\n\n***********init getConfig="+getConfig());
+        logger.debug("init manager.getProps=" + manager.getProperties());
+        logger.debug("init getConfig="+getConfig());
         //ERLANG_COOKIE_FILE = manager.getProperty(ERLANG_COOKIE_PROP);
         //System.getProperties().setProperty("OtpConnection.trace", "99");
     }

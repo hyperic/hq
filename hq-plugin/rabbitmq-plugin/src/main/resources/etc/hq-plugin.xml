@@ -66,8 +66,6 @@
 
         <plugin type="autoinventory" class="org.hyperic.hq.plugin.rabbitmq.detect.RabbitServerDetector"/>
 
-        <!--<plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitServerCollector"/>-->
-
         <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
 
         <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitServerCollector"/>
