@@ -2103,8 +2103,16 @@ hyperic.dashboard.chartWidget = function(args) {
         });
     };
 
+    that._fetchingChart = false;
+    
     that.fetchChartData = function(chart)
     {
+    	if (that._fetchingChart) {
+    		return new dojo.Deferred();
+    	}
+    	
+    	that._fetchingChart = true;
+    	
     	// console.log('fetching from url ' + "/api.shtml?v=1.0&s_id=chart&rid=" + that.charts[chart].rid + "&mtid=[" + that.charts[chart].mtid + "]");
         return dojo11.xhrGet( {
             url: baseUrl + "/chart/" + that.charts[chart].rid + "/" + that.charts[chart].mtid + "/",
@@ -2137,7 +2145,9 @@ hyperic.dashboard.chartWidget = function(args) {
                     that.charts[chart].last_updated = new Date();
                     that.charts[chart].maxTitleLength = (that.sheets.content.offsetWidth - 150) * 1.5;
                 }
-            },
+    
+	        	that._fetchingChart = false;
+    		},
             error: function(data){
                 console.info("An error occurred fetching charts config ", data);
             },
