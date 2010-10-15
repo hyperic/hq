@@ -819,7 +819,7 @@
                 <repository>
                         <id>hqapi-release</id>
                         <name>HQApi Release Repository</name>
-                        <url>http://maven.hyperic.org/hqapi/release/</url>
+                        <url>http://maven.hyperic.org/hqapi/release</url>
                         <snapshots>
                                 <enabled>false</enabled>
                         </snapshots>
@@ -827,7 +827,7 @@
 		<repository>
 			<id>hqapi-snapshot</id>
 			<name>HQApi Snapshot Repository</name>
-			<url>http://maven.hyperic.org/hqapi/snapshot/</url>
+			<url>http://maven.hyperic.org/hqapi/snapshot</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
@@ -835,7 +835,7 @@
 		<repository>
 			<id>hqapi-milestone</id>
 			<name>HQApi Milestone Repository</name>
-			<url>http://maven.hyperic.org/hqapi/milestone/</url>
+			<url>http://maven.hyperic.org/hqapi/milestone</url>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
