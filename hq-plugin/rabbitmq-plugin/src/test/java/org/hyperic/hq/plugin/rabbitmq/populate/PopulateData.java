@@ -25,16 +25,17 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.populate;
 
+import com.rabbitmq.client.Channel;
 import org.hyperic.hq.plugin.rabbitmq.configure.RabbitTestConfiguration;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericChannel;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericConnection;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.plugin.rabbitmq.manage.RabbitManager;
-import org.springframework.amqp.core.*;
-import org.springframework.amqp.rabbit.admin.QueueInfo;
+import org.hyperic.hq.product.PluginException;
+import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
 import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate; 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -56,10 +57,10 @@ public class PopulateData {
         RabbitManager rabbitManager = ctx.getBean(RabbitManager.class);
         RabbitGateway rabbitGateway = ctx.getBean(RabbitGateway.class);
         RabbitTemplate rabbitTemplate = ctx.getBean(RabbitTemplate.class);
-        //RabbitBrokerAdmin rba = ctx.getBean(RabbitBrokerAdmin.class);
+        RabbitBrokerAdmin rba = ctx.getBean(RabbitBrokerAdmin.class);
    
         Queue marketDataQueue = ctx.getBean("marketDataQueue", Queue.class);
-        //rba.declareQueue(marketDataQueue);
+        rba.declareQueue(marketDataQueue);
 
         rabbitTemplate.setRoutingKey(marketDataQueue.getName());
         rabbitTemplate.setQueue(marketDataQueue.getName());

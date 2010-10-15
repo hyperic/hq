@@ -58,6 +58,8 @@ public class ExchangeCollector extends Collector {
                             for (Exchange e : exchanges) {
                                 setAvailability(true);
                             }
+                        } else {
+                            setAvailability(false);
                         }
                     }
                 }
@@ -67,6 +69,8 @@ public class ExchangeCollector extends Collector {
             } catch (Exception e) {
                 logger.error(e);
             }
+        } else {
+            setAvailability(false);
         }
     }
 

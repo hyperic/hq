@@ -35,7 +35,7 @@ public class DetectorConstants {
 
     public static final String NODE_PATH = "node.path";
 
-    public static final String HOST = "host";
+    public static final String HOST = "hostname";
 
     public static final String USERNAME = "username";
 
@@ -45,7 +45,7 @@ public class DetectorConstants {
 
     public static final String NODE_COOKIE_LOCATION = "node.cookie.location";
 
-    public static final String NODE_COOKIE_VALUE = "node.cookie.value";
+    public static final String AUTHENTICATION = "authentication";
 
     public static final String NODE_PID = "node.pid";
 

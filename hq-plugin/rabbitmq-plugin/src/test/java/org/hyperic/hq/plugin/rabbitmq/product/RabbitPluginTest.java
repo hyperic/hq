@@ -1,5 +1,6 @@
-package org.hyperic.hq.plugin.rabbitmq;
+package org.hyperic.hq.plugin.rabbitmq.product;
 
+import org.hyperic.hq.plugin.rabbitmq.AbstractPluginTest;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.PluginException;
@@ -21,12 +22,11 @@ public class RabbitPluginTest extends AbstractPluginTest {
 
     @Test 
     public void initialize() throws PluginException {
-        RabbitProductPlugin.initializeGateway(productPlugin.getConfig());
+        RabbitProductPlugin.createRabbitContext(productPlugin.getConfig());
 
         RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
         assertNotNull(rabbitGateway);
-        System.out.println(rabbitGateway);
         List<QueueInfo> queues = rabbitGateway.getQueues("/");
-        System.out.println(queues.size());
+        assertTrue(queues.size() > 0);
     }
 }

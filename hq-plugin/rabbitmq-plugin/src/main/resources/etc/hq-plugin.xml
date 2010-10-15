@@ -34,41 +34,52 @@
         <help>
             <![CDATA[
                   <p>
-                    <h3>Configure RabbitMQ for Monitoring</h3>
-                      Once the RabbitMQ nodes are auto-detected and you can select the Server resource by node, go to Tools Menu >
-                      Configure Server.
-                      <ol><li>Enter a user name and password for the node, then select OK. This will allow Hyperic to authenticate and query
-                      information on Queues, Channels, Connections, Users, and Exchanges.
-                      </li><li>For the first release of this plugin, the Hyperic agent requires permissions to read the Erlang cookie.</li>
-                      </ol>
-                  </p>
-                  <p>
-                    <h3>Supported Versions</h3>
-                    Hyperic supports RabbitMQ versions 1.8.1 and higher.
+                    <h2>Configure RabbitMQ for Monitoring</h2>
+
+                      <h3>Prerequisites and Support</h3>
+                        The RabbitMQ plugin runs under HQ 4.5 and later and supports RabbitMQ versions 1.8.1 and higher.
+
+                        This version of the plugin requires that the HQ Agent that manages RabbitMQ has permission to read the Erlang cookie.
+
+                        <h4>Configuration Requirements</h4>
+                        The HQ Agent on the platform where the RabbitMQ server should auto-discover the "RabbitMQ" server instance — assuming
+                        at least one RabbitMQ Node is running. — and present it as a new server on the platform in the Auto-Discovery portlet
+                        of the HQ Dashboard. To enable metric collection and auto-discovery of RabbitMQ services:
+
+                        <ol>
+                           <li>Import the platform with the new RabbitMQ server to inventory</li>
+                           <li>Navigate to the Rabbit MQ server, using Resources > Browse > Servers</li>
+                           <li>Under the Server (Node), navigate to Tools Menu > Configure Server</li>
+                           <li>Enter the RabbitMQ username and password for the RabbitMQ server and click OK. Hyperic assumes the default</li>
+                           RabbitMQ username and password have been changed for security reasons and does set them as the default</li>
+                        </ol>
+
+                         This will allow enable the plugin to authenticate, auto-discover Queue, Channel, Connection, Exchanges, etc., and
+                         proceed with metric collection. Note: Discovered services are automatically imported to HQ inventory.
                   </p>
                   <p>
                     <h3>Help Docs</h3>
-                    Coming soon: <a href="http://support.hyperic.com/display/EVO/Monitoring+RabbitMQ">Monitoring and Managing RabbitMQ</a>
+                    <a href="http://support.hyperic.com/display/EVO/Monitoring+RabbitMQ">Monitoring and Managing RabbitMQ</a>
                   </p>
             ]]>
         </help>
 
         <plugin type="autoinventory" class="org.hyperic.hq.plugin.rabbitmq.detect.RabbitServerDetector"/>
 
+        <!--<plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitServerCollector"/>-->
+
         <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
 
-        <plugin type="collector" class="org.hyperic.hq.product.MeasurementPlugin"/>
+        <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitServerCollector"/>
 
         <plugin type="log_track" class="org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerLog"/>
 
-        <!--
-        <plugin type="control" class="org.hyperic.hq.plugin.rabbitmq.manage.RabbitBrokerManagerPlugin"/>
-        -->
-
         <config type="product">
-            <option name="server.name" description="RabbitMQ Node" type="hidden"/>
-            <option name="server.path" description="Node Path" type="hidden"/>
-            <option name="process.name" description="%server.name% Process" type="hidden"/> 
+            <option name="server.name" description="rabbit node name" type="hidden"/>
+            <option name="server.path" description="node path" type="hidden"/>
+            <option name="process.name" description="node process" type="hidden"/>
+            <option name="hostname" description="host" type="hidden"/>
+            <option name="authentication" description="erlang cookie" type="hidden"/>
 
             <option name="username" description="RabbitMQ Username for %server.name%"/>
             <option name="password" type="secret" description="RabbitMQ Password for %server.name%"/>
@@ -79,8 +90,6 @@
                     description="%process.name% Measurement Query"/>
         </config>
 
-        <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>
-    
         <properties>
             <property description="Node Name" name="node.name"/>
             <property description="Node Path" name="node.path"/>
@@ -91,18 +100,17 @@
 
         <config type="measurement">
             <option name="process.query" default="State.Name.sw=beam,Args.*.eq=-sname,Args.*.ct=%server.path%"
-                    description="XXXXXXX"/>
+                    description="Node Process Query"/>
         </config>
-
-        <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>
+        <!--for the collector-->
+        <metric name="Availability" template="rabbitmq:hostname=%hostname%,username=%username%,password=%password%,authentication=%authentication%:Availability" indicator="true"/>
 
         &process-metrics;
 
-        <!--
-        <actions>
-           <include name="startNode,stopNode,startBrokerApplication,stopBrokerApplication,createQueue,deleteQueue,
+         <!-- Next release:
+        <plugin type="control" class="org.hyperic.hq.plugin.rabbitmq.manage.RabbitBrokerManagerPlugin"/> 
+        <actions include name="startNode,stopNode,startBrokerApplication,stopBrokerApplication,createQueue,deleteQueue,
                        purgeQueue,createExchange,deleteExchangeIfUnused,createUser,updateUserPassword,deleteUser"/>
-         </actions>
          -->
 
         <service name="Queue">

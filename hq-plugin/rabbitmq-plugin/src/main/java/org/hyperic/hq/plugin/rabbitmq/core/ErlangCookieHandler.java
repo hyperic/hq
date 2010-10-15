@@ -59,17 +59,18 @@ public class ErlangCookieHandler {
 
         File file = null;
 
-        if (conf.getValue(DetectorConstants.NODE_COOKIE_VALUE) == null) {
+        if (conf.getValue(DetectorConstants.AUTHENTICATION) == null) {
             file = inferCookieLocation(conf);
-        } else {
+        }
+        else {
             if (conf.getValue(DetectorConstants.NODE_COOKIE_LOCATION) != null) {
                 String userSetLocation = conf.getValue(DetectorConstants.NODE_COOKIE_LOCATION).trim();
-                if (userSetLocation != null && !userSetLocation.isEmpty()) {
+                if (userSetLocation != null && userSetLocation.length() > 0) {
                     file = new File(userSetLocation);
                 }
             }
         }
-
+        
         return getErlangCookieValue(file);
     }
 
@@ -90,7 +91,7 @@ public class ErlangCookieHandler {
                 in.close();
 
                 if (erlangCookieValue != null && erlangCookieValue.length() > 0) {
-                    logger.debug(erlangCookieValue + ": " + file.getAbsolutePath());
+                    logger.debug("Successfully read " + erlangCookieValue + " from " + file.getAbsolutePath());
                     return erlangCookieValue;
                 }
             }
@@ -103,7 +104,7 @@ public class ErlangCookieHandler {
 
     /**
      * Infer the cookie file by most likely location.
-     * @param conf The ConfigResponse is from RabbitServerDetector.discoverServices
+     * @param conf The ConfigResponse is from RabbitServerDetector
      * @return java.io.File '/path/to/.erlang.cookie'
      */
     public static File inferCookieLocation(ConfigResponse conf) {

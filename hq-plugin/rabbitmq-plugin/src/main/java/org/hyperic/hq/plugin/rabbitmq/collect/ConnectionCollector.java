@@ -31,22 +31,22 @@ import org.hyperic.hq.plugin.rabbitmq.core.HypericConnection;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.Collector;
-import org.hyperic.util.config.ConfigResponse; 
+import org.hyperic.hq.product.PluginException;
+import org.hyperic.util.config.ConfigResponse;
 
 import java.util.List;
 
 /**
- * ConnectionCollector 
+ * ConnectionCollector
  * @author Helena Edelson
  */
 public class ConnectionCollector extends Collector {
 
     private static final Log logger = LogFactory.getLog(ConnectionCollector.class);
 
-
     @Override
     public void collect() {
-       
+
         RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
         if (rabbitGateway != null) {
 
@@ -57,8 +57,6 @@ public class ConnectionCollector extends Collector {
                         List<HypericConnection> connections = rabbitGateway.getConnections(virtualHost);
 
                         if (connections != null) {
-                            logger.debug("Found " + connections.size() + " connections");
-
                             for (HypericConnection conn : connections) {
                                 setAvailability(conn.getState().equalsIgnoreCase("running"));
 
@@ -70,6 +68,8 @@ public class ConnectionCollector extends Collector {
                                 setValue("pendingSends", conn.getPendingSends());
 
                             }
+                        } else {
+                            setAvailability(false);
                         }
                     }
                 }
@@ -77,6 +77,8 @@ public class ConnectionCollector extends Collector {
             catch (Exception ex) {
                 logger.error(ex);
             }
+        } else {
+            setAvailability(false);
         }
     }
 
@@ -96,7 +98,7 @@ public class ConnectionCollector extends Collector {
         res.setValue("selfNode", conn.getAddress().getHost() + ":" + conn.getAddress().getPort());
         res.setValue("peerNode", conn.getPeerAddress().getHost() + ":" + conn.getPeerAddress().getPort());
         res.setValue("state", conn.getState());
- 
+
         return res;
     }
 }

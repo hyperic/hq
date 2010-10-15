@@ -35,7 +35,6 @@ import org.springframework.amqp.rabbit.admin.QueueInfo;
 
 import java.util.List;
 
-
 /**
  * QueueCollector
  * @author Helena Edelson
@@ -47,25 +46,24 @@ public class QueueCollector extends Collector {
     @Override
     public void collect() {
         RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
+
         if (rabbitGateway != null) {
 
             try {
-
                 List<String> virtualHosts = rabbitGateway.getVirtualHosts();
                 if (virtualHosts != null) {
                     for (String virtualHost : virtualHosts) {
-
                         List<QueueInfo> queues = rabbitGateway.getQueues(virtualHost);
                         if (queues != null) {
-
                             for (QueueInfo queue : queues) {
                                 setAvailability(true);
                                 setValue("messages", queue.getMessages());
                                 setValue("consumers", queue.getConsumers());
                                 setValue("transactions", queue.getTransactions());
                                 setValue("memory", queue.getMemory());
-
                             }
+                        } else {
+                            setAvailability(false);
                         }
                     }
                 }
@@ -73,6 +71,8 @@ public class QueueCollector extends Collector {
             catch (Exception ex) {
                 logger.error(ex);
             }
+        } else {
+            setAvailability(false);
         }
     }
 

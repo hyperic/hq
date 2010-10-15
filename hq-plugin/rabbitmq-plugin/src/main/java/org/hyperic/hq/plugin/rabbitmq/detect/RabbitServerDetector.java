@@ -27,8 +27,8 @@ package org.hyperic.hq.plugin.rabbitmq.detect;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,6 +37,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.collect.*;
 import org.hyperic.hq.plugin.rabbitmq.core.*;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
+import org.hyperic.hq.plugin.rabbitmq.validate.PluginValidator;
 import org.hyperic.hq.product.*;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.amqp.core.Exchange;
@@ -53,6 +54,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
 
     private final static String PTQL_QUERY = "State.Name.sw=beam,Args.*.eq=-sname";
 
+
     /**
      * @param serverConfig
      * @return
@@ -61,35 +63,29 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
     public List getServerResources(ConfigResponse serverConfig) throws PluginException {
         configure(serverConfig);
 
-        /** ToDo does the caller handle NullPointer's */
         List<ServerResource> resources = new ArrayList<ServerResource>();
-
         long[] pids = getPids(PTQL_QUERY);
 
         if (pids.length > 0) {
-
             List<String> nodes = new ArrayList<String>();
 
-            /** Each node has/is a unique PID */
             for (long nodePid : pids) {
-
-                /** Each Node in Broker */
                 final String nodeArgs[] = getProcArgs(nodePid);
-
                 final String nodePath = getNodePath(nodeArgs);
-
                 final String nodeName = getServerName(nodeArgs);
-
-                logger.debug("node.pid=" + nodePid + " node.args=" + Arrays.toString(nodeArgs) + " server.name=" + nodeName);
 
                 if (nodePath != null && !nodes.contains(nodePath)) {
                     nodes.add(nodePath);
 
                     ServerResource server = doCreateServerResource(nodeName, nodePath, nodePid, nodeArgs);
-
                     if (server != null) {
-                        logger.debug("Created server=" + server.getName());
                         resources.add(server);
+
+                        if (logger.isDebugEnabled()) {
+                            StringBuilder sb = new StringBuilder("Discovered ").append(server.getName()).append(" productConfig=")
+                                    .append(server.getProductConfig()).append(" customProps=").append(server.getCustomProperties());
+                            logger.debug(sb.toString());
+                        }
                     }
                 }
             }
@@ -108,52 +104,26 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
     @Override
     protected List discoverServices(ConfigResponse serviceConfig) throws PluginException {
         logger.debug("discoverServices [" + serviceConfig + "]");
-
-        /** For the moment this is how we have to do this. */
-        if (serviceConfig.getValue(DetectorConstants.NODE_COOKIE_VALUE) == null) {
-            /** Letting throw a potential OtpAuthException so the user can see permissions issue */
-            String auth = ErlangCookieHandler.configureCookie(serviceConfig);
-            Assert.notNull(auth, "Cookie value for node must not be null");
-
-            /** Since we can never connect without the cookie on any test environment: this is what we have to
-             * do for the moment and will modify as soon as possible. */
-            if (auth != null && auth.length() > 0) {
-                serviceConfig.setValue(DetectorConstants.NODE_COOKIE_VALUE, auth);
-            }
-        }
-
-        if (serviceConfig.getValue(DetectorConstants.SERVER_NAME) != null) {
-            String nodeName = serviceConfig.getValue(DetectorConstants.SERVER_NAME);
-            if (nodeName != null) {
-                String hostName = getHostFromNode(nodeName);
-                if (hostName != null) {
-                    serviceConfig.setValue(DetectorConstants.HOST, hostName);
-                }
-            }
-        }
+        List<ServiceResource> serviceResources = new ArrayList<ServiceResource>();
 
         configure(serviceConfig);
 
-        List<ServiceResource> serviceResources = new ArrayList<ServiceResource>();
+        logger.debug("discoverServices validating to init spring [" + serviceConfig + "]");
 
-        /** configure node process */
-        /*List<ServiceResource> processes = createProcessServiceResources(serviceConfig);
-        if (processes != null) {
-            serviceResources.addAll(processes);
-            logger.debug("discoverServices detected " + processes.size() + " processes");
-        }*/
+        if (PluginValidator.isConfigured(serviceConfig.toProperties())) {
+            logger.debug("\n\n\n*******has valid entries. configuring spring");
+            /** If this is the first time through with config values present, initialize. */
+            if (RabbitProductPlugin.getRabbitGateway() == null) {
+                RabbitProductPlugin.createRabbitContext(serviceConfig);
+                logger.debug("\n\n\n*******Spring configured? Gateway=" + RabbitProductPlugin.getRabbitGateway());
+            }
 
-        /** get rabbit  services */
-        List<ServiceResource> rabbitResources = null;
-        try {
-            rabbitResources = createRabbitResources(serviceConfig);
-        }
-        catch (Exception e) {
-            logger.error(e);
-        }
-
-        if (rabbitResources != null && rabbitResources.size() >= 0) {
-            serviceResources.addAll(rabbitResources);
+            logger.debug("\n\n\n*******getting rabbit resources...");
+            List<ServiceResource> rabbitResources = createRabbitResources(serviceConfig);
+            if (rabbitResources != null && rabbitResources.size() > 0) {
+                serviceResources.addAll(rabbitResources);
+                logger.debug("Detected " + rabbitResources.size() + " Rabbit resources");
+            }
         }
 
         return serviceResources;
@@ -166,21 +136,15 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @throws PluginException
      */
     public List<ServiceResource> createRabbitResources(ConfigResponse serviceConfig) throws PluginException {
-        logger.debug("createRabbitResources [" + serviceConfig + "]");
         List<ServiceResource> rabbitResources = null;
-
-        String nodeName = serviceConfig.getValue(DetectorConstants.SERVER_NAME);
-
-        if (RabbitProductPlugin.getRabbitGateway() == null) {
-            logger.debug("Initializing gateway");
-            RabbitProductPlugin.initializeGateway(serviceConfig);
-        }
 
         RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
 
         try {
             if (rabbitGateway != null) {
                 List<String> virtualHosts = rabbitGateway.getVirtualHosts();
+
+                String nodeName = serviceConfig.getValue(DetectorConstants.SERVER_NAME);
 
                 if (virtualHosts != null) {
                     rabbitResources = new ArrayList<ServiceResource>();
@@ -208,68 +172,9 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                 logger.debug("Created " + rabbitResources.size() + " rabbit services");
             }
         } catch (Exception e) {
-
+            throw new PluginException("Error creating RabbitMQ services", e);
         }
         return rabbitResources;
-    }
-
-
-    /**
-     * Creates service resources from processes.
-     * @return
-     */
-    List<ServiceResource> createProcessServiceResources(ConfigResponse config) {
-        List<ServiceResource> serviceResources = new ArrayList<ServiceResource>();
-
-        long[] pids = getPids(Metric.translate(config.getValue(DetectorConstants.PROCESS_QUERY), config));
-
-        StringBuilder id = new StringBuilder(DetectorConstants.PROCESS).append(" ");
-
-        for (long nodePid : pids) {
-            String nodeArgs[] = getProcArgs(nodePid);
-            String sName = getServerName(nodeArgs);
-            logger.debug("Creating process: pid=" + nodePid + " args=" + Arrays.toString(nodeArgs) + " servername=" + sName);
-
-            id.append(nodePid).append(":").append(sName);
-
-            ServiceResource processResource = createServiceResource(DetectorConstants.PROCESS);
-            processResource.setName(new StringBuilder().append(getTypeInfo().getName()).append(" ").
-                    append(DetectorConstants.PROCESS).append(" ").append(sName).toString());
-
-            ConfigResponse productConfig = new ConfigResponse();
-            productConfig.setValue(DetectorConstants.PROCESS_NAME, sName);
-            processResource.setProductConfig(productConfig);
-
-            for (int n = 0; n < nodeArgs.length; n++) {
-
-                /** -kernel error_logger {file,"/path/to/rabbitnode@localhost.log"} */
-                if (nodeArgs[n].equalsIgnoreCase("-kernel") && nodeArgs[n + 1].equalsIgnoreCase("error_logger") && nodeArgs[n + 2].startsWith("{file,")) {
-
-                    Pattern p = Pattern.compile("[{]file,\\s*\"([^\"]+)\"}");
-                    Matcher m = p.matcher(nodeArgs[n + 2]);
-                    String logPath = m.find() ? m.group(1) : null;
-
-                    if (logPath != null) {
-                        File logFile = new File(logPath);
-                        if (logFile.exists()) {
-                            logger.debug("Log file exists at " + logFile.getAbsolutePath());
-                            ConfigResponse c = new ConfigResponse();
-                            c.setValue(DetectorConstants.SERVICE_LOG_TRACK_ENABLE, true);
-                            c.setValue(DetectorConstants.SERVICE_LOG_TRACK_FILES, logFile.getAbsolutePath());
-                            setMeasurementConfig(processResource, c);
-                        }
-                    }
-                }
-            }
-
-            if (processResource != null) {
-                serviceResources.add(processResource);
-            }
-        }
-
-        logger.debug("createProcessServiceResources detected " + serviceResources.size() + " process serviceResources");
-
-        return serviceResources;
     }
 
     /**
@@ -332,15 +237,9 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      */
     protected List<ServiceResource> createExchangeServiceResources(RabbitGateway rabbitGateway, String nodeName, String vHost) throws PluginException {
         List<ServiceResource> serviceResources = null;
-
-        try {
-            List<Exchange> exchanges = rabbitGateway.getExchanges(vHost);
-            if (exchanges != null) {
-                serviceResources = doCreateServiceResources(exchanges, DetectorConstants.EXCHANGE, nodeName, vHost);
-            }
-        }
-        catch (Exception e) {
-            logger.error(e);
+        List<Exchange> exchanges = rabbitGateway.getExchanges(vHost);
+        if (exchanges != null) {
+            serviceResources = doCreateServiceResources(exchanges, DetectorConstants.EXCHANGE, nodeName, vHost);
         }
 
         return serviceResources;
@@ -359,39 +258,37 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         List<ServiceResource> serviceResources = null;
 
         if (rabbitObjects != null) {
+
             serviceResources = new ArrayList<ServiceResource>();
+
+            IdentityBuilder builder = new ObjectIdentityBuilder();
 
             for (Object obj : rabbitObjects) {
 
-                ServiceResource resource = createServiceResource(rabbitType);
-                String name = null;
+                ServiceResource service = createServiceResource(rabbitType);
+
+                String name = builder.buildIdentity(obj, vHost);
 
                 if (obj instanceof QueueInfo) {
-                    name = ((QueueInfo) obj).getName();
-                    resource.setCustomProperties(QueueCollector.getAttributes((QueueInfo) obj));
+                    service.setCustomProperties(QueueCollector.getAttributes((QueueInfo) obj));
                 } else if (obj instanceof HypericConnection) {
-                    name = ((HypericConnection) obj).getPid();
-                    resource.setCustomProperties(ConnectionCollector.getAttributes((HypericConnection) obj));
+                    service.setCustomProperties(ConnectionCollector.getAttributes((HypericConnection) obj));
                 } else if (obj instanceof Exchange) {
-                    name = ((Exchange) obj).getName();
-                    resource.setCustomProperties(ExchangeCollector.getAttributes((Exchange) obj));
+                    service.setCustomProperties(ExchangeCollector.getAttributes((Exchange) obj));
                 } else if (obj instanceof HypericChannel) {
-                    name = ((HypericChannel) obj).getPid();
-                    resource.setCustomProperties(ChannelCollector.getAttributes((HypericChannel) obj));
+                    service.setCustomProperties(ChannelCollector.getAttributes((HypericChannel) obj));
                 }
-
-                StringBuilder desc = new StringBuilder(rabbitType).append(":").append(name).append(" on ").append(vHost);
 
                 ConfigResponse configResponse = new ConfigResponse();
                 configResponse.setValue(DetectorConstants.VIRTUAL_HOST.toLowerCase(), vHost);
                 configResponse.setValue(DetectorConstants.NAME, name);
 
-                resource.setName(desc.toString());
-                resource.setProductConfig(configResponse);
-                resource.setDescription(desc.toString());
-                setMeasurementConfig(resource, configResponse);
+                service.setName(name);
+                service.setDescription(name);
+                service.setProductConfig(configResponse);
+                setMeasurementConfig(service, configResponse);
 
-                if (resource != null) serviceResources.add(resource);
+                if (service != null) serviceResources.add(service);
             }
         }
 
@@ -402,33 +299,52 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
     }
 
     /**
-     * Configures a ServiceResource
+     * Configure a ServerResource
      * @param nodeName
      * @param nodePath
      * @param nodeArgs
      * @param nodePid
      * @return
      */
-    private ServerResource doCreateServerResource(String nodeName, String nodePath, long nodePid, String[] nodeArgs) {
+    private ServerResource doCreateServerResource(String nodeName, String nodePath, long nodePid, String[] nodeArgs) throws PluginException {
+        logger.debug("\ndoCreateServerResource");
         Assert.hasText(nodeName);
         Assert.hasText(nodePath);
 
         ServerResource node = createServerResource(nodePath);
+        node.setIdentifier(nodePath);
         node.setName(new StringBuilder(getPlatformName()).append(" ").append(getTypeInfo().getName()).append(" ")
                 .append(DetectorConstants.NODE).append(" ").append(nodeName).toString());
-        node.setIdentifier(nodePath);
-        node.setDescription(new StringBuilder(getTypeInfo().getName()).append(" ").append(DetectorConstants.NODE).toString());
+        node.setDescription(new StringBuilder(getTypeInfo().getName()).append(" ").append(DetectorConstants.NODE)
+                .append(" ").append(nodePid).toString());
 
         ConfigResponse conf = new ConfigResponse();
         conf.setValue(DetectorConstants.SERVER_NAME, nodeName);
         conf.setValue(DetectorConstants.SERVER_PATH, nodePath);
-        setProductConfig(node, conf);
+        conf.setValue(DetectorConstants.NODE_PID, nodePid);
 
-        ConfigResponse custom = createCustomConfig(nodeName,nodePath, nodePid, nodeArgs);
+        Properties props = conf.toProperties();
+
+        if (!PluginValidator.hasValue(props.getProperty(DetectorConstants.AUTHENTICATION))) {
+            String auth = ErlangCookieHandler.configureCookie(conf);
+            conf.setValue(DetectorConstants.AUTHENTICATION, auth);
+        }
+
+        if (!PluginValidator.hasValue(props.getProperty(DetectorConstants.HOST))) {
+            if (nodeName != null) {
+                String hostName = getHostFromNode(nodeName);
+                conf.setValue(DetectorConstants.HOST, hostName);
+            }
+        }
+        
+        ConfigResponse custom = createCustomConfig(nodeName, nodePath, nodePid, nodeArgs);
         if (custom != null) node.setCustomProperties(custom);
 
         ConfigResponse log = createLogConfig(nodeArgs);
         if (log != null) setMeasurementConfig(node, log);
+
+        setProductConfig(node, conf);
+        logger.debug("\nSetProductConfig for serverResource=" + node + "\nSetProductConfig=" + conf);
 
         return node;
     }
@@ -492,13 +408,12 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @return rabbit@host
      */
     private String getServerName(String[] args) {
-        String name = null;
         for (int n = 0; n < args.length; n++) {
             if (args[n].equalsIgnoreCase(DetectorConstants.SNAME)) {
-                name = args[n + 1];
+                return args[n + 1];
             }
         }
-        return name;
+        return null;
     }
 
     /**
@@ -512,7 +427,6 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
 
         for (int n = 0; n < args.length; n++) {
             if (args[n].equalsIgnoreCase(DetectorConstants.MNESIA) && args[n + 1].equalsIgnoreCase(DetectorConstants.DIR)) {
-                logger.debug("mnesia " + args[n] + " " + args[n + 1] + " " + args[n + 2]);
                 mpath = args[n + 2];
 
                 if (mpath.startsWith("\"")) {
@@ -521,13 +435,14 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                 if (mpath.endsWith("\"")) {
                     mpath = mpath.substring(0, mpath.length() - 1);
                 }
+                logger.debug("mnesia " + args[n] + " " + args[n + 1] + " " + args[n + 2]);
             }
         }
         return mpath;
     }
 
     private String getHostFromNode(String nodeName) {
-        if (nodeName != null) {
+        if (nodeName != null && nodeName.length() > 0) {
             Pattern p = Pattern.compile("@([^\\s.]+)");
             Matcher m = p.matcher(nodeName);
             return (m.find()) ? m.group(1) : null;

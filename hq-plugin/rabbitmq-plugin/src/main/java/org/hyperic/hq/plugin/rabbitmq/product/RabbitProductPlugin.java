@@ -25,14 +25,16 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.product;
 
-import org.hyperic.hq.plugin.rabbitmq.configure.ApplicationContextCreator;
-import org.hyperic.hq.plugin.rabbitmq.configure.ConnectionFactoryBeanDefinitionBuilder;
-import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
-import org.hyperic.hq.plugin.rabbitmq.core.ErlangCookieHandler;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.plugin.rabbitmq.configure.PluginContextCreator;
+import org.hyperic.hq.plugin.rabbitmq.configure.RabbitConfiguration;
+import org.hyperic.hq.plugin.rabbitmq.validate.PluginValidator;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
-import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.product.*;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.util.Assert;
+ 
 
 /**
  * RabbitProductPlugin
@@ -40,7 +42,24 @@ import org.springframework.util.Assert;
  */
 public class RabbitProductPlugin extends ProductPlugin {
 
+    private static final Log logger = LogFactory.getLog(RabbitProductPlugin.class);
+
     private static RabbitGateway rabbitGateway;
+
+    private static String authentication;
+
+    @Override
+    public void init(PluginManager manager) throws PluginException {
+        super.init(manager);
+        logger.debug("\n\n***********[init] manager.getProps=" + manager.getProperties());
+        logger.debug("\n\n***********init getConfig="+getConfig());
+        //ERLANG_COOKIE_FILE = manager.getProperty(ERLANG_COOKIE_PROP);
+        //System.getProperties().setProperty("OtpConnection.trace", "99");
+    }
+
+    public static String getAuthentication() {
+        return authentication;
+    }
 
     /**
      * Object could be null if gateway has not been initialized yet.
@@ -58,16 +77,21 @@ public class RabbitProductPlugin extends ProductPlugin {
      * key/value pairs to dynamically create Spring Beans.
      * If context not initialized, since it can not be initialized until we have
      * necessary parameters from the config parameter, initialize it.
-     * @param preInitialized
-     * @return
+     * @param conf ConfigResponse from discoverServices
      */
-    public static void initializeGateway(ConfigResponse preInitialized) {
-        if (!ConnectionFactoryBeanDefinitionBuilder.hasConfigValues(preInitialized)) return;
+    public static void createRabbitContext(ConfigResponse conf) throws PluginException {
 
-        if (preInitialized.getValue(DetectorConstants.NODE_COOKIE_VALUE) != null) {
-            rabbitGateway = ApplicationContextCreator.createBeans(preInitialized);
-            Assert.notNull(rabbitGateway, "rabbitGateway must not be null");
+        if (PluginValidator.isValidConfiguration(conf.toProperties())) {
+            logger.debug("Initializing Rabbit context");
+            PluginContextCreator.createContext(conf, new Class[]{RabbitConfiguration.class});
+
+            if (PluginContextCreator.isInitialized()) {
+                rabbitGateway = PluginContextCreator.getBean(RabbitGateway.class);
+                Assert.notNull(rabbitGateway, "rabbitGateway must not be null");
+            }
+        } else {
+            logger.info("Postponing initialization of RabbitMQ metric Services until all required config values are set.");
         }
     }
-
+ 
 }

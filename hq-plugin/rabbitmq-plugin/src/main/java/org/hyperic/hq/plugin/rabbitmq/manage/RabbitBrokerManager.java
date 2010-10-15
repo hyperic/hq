@@ -190,7 +190,7 @@ public class RabbitBrokerManager implements RabbitManager {
     }
 
     private boolean isBrokerAppRunning() {
-        return !rabbitGateway.getRunningNodes().isEmpty() && rabbitGateway.getRunningNodes().get(0).getName().contains("rabbit");
+        return rabbitGateway.getRunningNodes().get(0).getName().contains("rabbit");
     }
 
     private Map<String, QueueInfo> getQueuesAsMap(String virtualHost) {
@@ -209,7 +209,7 @@ public class RabbitBrokerManager implements RabbitManager {
     private Map<String, Exchange> getExchangesAsMap(String virtualHost) throws Exception {
         Map<String, Exchange> exchanges = null;
         List<Exchange> exchangeList = rabbitGateway.getExchanges(virtualHost);
-        if (exchangeList != null && !exchangeList.isEmpty()) {
+        if (exchangeList != null) {
             exchanges = new HashMap<String, Exchange>(exchangeList.size());
 
             for (Exchange e : exchangeList) {

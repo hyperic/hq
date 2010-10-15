@@ -1,67 +1,50 @@
 package org.hyperic.hq.plugin.rabbitmq.configure;
 
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
-import org.hyperic.hq.plugin.rabbitmq.core.ErlangCookieHandler;
+import org.hyperic.hq.plugin.rabbitmq.core.*; 
+import org.hyperic.hq.plugin.rabbitmq.validate.PluginValidator;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.test.annotation.ExpectedException;
 
 import static org.junit.Assert.*;
-
-import org.springframework.amqp.rabbit.admin.QueueInfo;
-import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
-import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.GenericBeanDefinition;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.util.Assert;
-
-import java.util.List;
 
 /**
  * DynamicSpringBeanConfigurerTest
  * @author Helena Edelson
  */
-@Ignore
 public class DynamicSpringBeanConfigurerTest {
 
-    protected static final Log logger = LogFactory.getLog(DynamicSpringBeanConfigurerTest.class);
+    private static final String HOSTNAME = "vmhost";
 
+    private ConfigResponse serviceConfig;
 
-    @Test
-    public void createDynamicBeans() throws InterruptedException, PluginException {
-        ConfigResponse serviceConfig = new ConfigResponse();
-        serviceConfig.setValue(DetectorConstants.HOST, "localhost");
+    @Before
+    public void before() throws PluginException {
+        this.serviceConfig = new ConfigResponse();
+        this.serviceConfig.setValue(DetectorConstants.HOST, HOSTNAME);
+        this.serviceConfig.setValue(DetectorConstants.PLATFORM_TYPE, "Linux");
+        this.serviceConfig.setValue(DetectorConstants.AUTHENTICATION, ErlangCookieHandler.configureCookie(serviceConfig));
+    }
+
+    @Test @ExpectedException(IllegalArgumentException.class) 
+    public void noUsername() {
+        PluginContextCreator.createContext(serviceConfig, new Class[]{RabbitConfiguration.class});
+    }
+
+    @Test @Ignore("Until connections are mocked")
+    public void createDynamicBeansAssertSuccess() throws PluginException {
         serviceConfig.setValue(DetectorConstants.USERNAME, "guest");
         serviceConfig.setValue(DetectorConstants.PASSWORD, "guest");
-        serviceConfig.setValue(DetectorConstants.PLATFORM_TYPE, "Linux");
 
-        serviceConfig.setValue(DetectorConstants.NODE_COOKIE_VALUE, ErlangCookieHandler.configureCookie(serviceConfig));
-
-        AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-
-        GenericBeanDefinition connectionFactoryBean = ConnectionFactoryBeanDefinitionBuilder.build(serviceConfig);
-        DynamicSpringBeanConfigurer.registerBean(connectionFactoryBean, (DefaultListableBeanFactory) ctx.getBeanFactory());
-        SingleConnectionFactory cf = ctx.getBean(SingleConnectionFactory.class);
-        Assert.notNull(cf, "SingleConnectionFactory must not be null.");
-
-        GenericBeanDefinition adminBean = BrokerAdminBeanDefinitionBuilder.build(serviceConfig, connectionFactoryBean);
-        DynamicSpringBeanConfigurer.registerBean("rabbitBrokerAdmin", adminBean, (DefaultListableBeanFactory) ctx.getBeanFactory());
-        RabbitBrokerAdmin rabbitBrokerAdmin = ctx.getBean(RabbitBrokerAdmin.class);
-        Assert.notNull(ctx.getBean("rabbitBrokerAdmin"), "rabbitBrokerAdmin must not be null.");
-
-        ctx.register(RabbitConfiguration.class);
-        ctx.refresh();
-        RabbitGateway rabbitGateway = ctx.getBean(RabbitGateway.class);
-        assertNotNull(rabbitGateway.getRabbitStatus());
-
-        List<QueueInfo> queues = rabbitBrokerAdmin.getQueues();
-        ctx.close();
+        if (PluginValidator.isConfigured(serviceConfig.toProperties())) {
+            PluginContextCreator.createContext(serviceConfig, new Class[]{RabbitConfiguration.class});
+            RabbitGateway rabbitGateway = PluginContextCreator.getBean(RabbitGateway.class);
+            assertNotNull(rabbitGateway);
+            assertNotNull(rabbitGateway.getRabbitStatus());
+        }
     }
 
 }

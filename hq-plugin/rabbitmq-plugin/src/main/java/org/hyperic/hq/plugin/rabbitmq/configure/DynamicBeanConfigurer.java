@@ -25,8 +25,7 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.configure;
 
-import org.apache.commons.lang.StringUtils;
-import org.hyperic.hq.plugin.rabbitmq.core.HypericBrokerAdmin;
+import org.apache.commons.lang.StringUtils; 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
@@ -35,11 +34,11 @@ import org.springframework.util.Assert;
 import java.util.UUID;
 
 /**
- * DynamicSpringBeanConfigurer dynamically configures and registers objects as Spring Beans
+ * DynamicBeanConfigurer dynamically configures and registers objects as Spring Beans
  * where programmatic BeanDefinition generation and bean registration is called for.
  * @author Helena Edelson
  */
-public class DynamicSpringBeanConfigurer {
+public class DynamicBeanConfigurer {
 
     /**
      * Register a pre-defined BeanDefinition with a camelCase bean name

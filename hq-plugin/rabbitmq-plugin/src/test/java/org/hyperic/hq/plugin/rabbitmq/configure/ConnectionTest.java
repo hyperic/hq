@@ -40,7 +40,7 @@ import java.io.IOException;
  */
 public class ConnectionTest {
 
-    private static final String NODE = "localhost";
+    private static final String NODE = "vmhost";
 
     public static void main(String[] args) throws IOException, OtpAuthException, OtpErlangExit, PluginException {
         ConfigResponse conf = new ConfigResponse();
@@ -50,7 +50,7 @@ public class ConnectionTest {
         conf.setValue(DetectorConstants.PLATFORM_TYPE, "Linux");
 
         String value = ErlangCookieHandler.configureCookie(conf);
-        conf.setValue(DetectorConstants.NODE_COOKIE_VALUE, value);
+        conf.setValue(DetectorConstants.AUTHENTICATION, value);
 
         OtpSelf self = new OtpSelf("rabbit-spring-monitor", value);
         OtpPeer peer = new OtpPeer("rabbit@" + NODE);
@@ -58,6 +58,7 @@ public class ConnectionTest {
         OtpConnection conn = self.connect(peer);
         conn.sendRPC("erlang", "date", new OtpErlangList());
         OtpErlangObject received = conn.receiveRPC();
+        //System.out.println(received);
         Assert.notNull(received);
 
         Assert.notNull(conn);

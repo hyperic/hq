@@ -48,7 +48,7 @@ import static org.junit.Assert.*;
  * RabbitServerDetectorTest
  * @author Helena Edelson
  */
-@ContextConfiguration("classpath:/etc/rabbit-test-context.xml")
+@ContextConfiguration("classpath:/etc/*-context.xml")
 @RunWith(SpringJUnit4ClassRunner.class)
 @Ignore("Need to mock the connection for automation")
 public class RabbitServerDetectorTest extends RabbitServerDetector {
