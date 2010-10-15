@@ -108,17 +108,12 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
 
         configure(serviceConfig);
 
-        logger.debug("discoverServices validating to init spring [" + serviceConfig + "]");
-
         if (PluginValidator.isConfigured(serviceConfig.toProperties())) {
-            logger.debug("\n\n\n*******has valid entries. configuring spring");
             /** If this is the first time through with config values present, initialize. */
             if (RabbitProductPlugin.getRabbitGateway() == null) {
                 RabbitProductPlugin.createRabbitContext(serviceConfig);
-                logger.debug("\n\n\n*******Spring configured? Gateway=" + RabbitProductPlugin.getRabbitGateway());
             }
 
-            logger.debug("\n\n\n*******getting rabbit resources...");
             List<ServiceResource> rabbitResources = createRabbitResources(serviceConfig);
             if (rabbitResources != null && rabbitResources.size() > 0) {
                 serviceResources.addAll(rabbitResources);
@@ -307,7 +302,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @return
      */
     private ServerResource doCreateServerResource(String nodeName, String nodePath, long nodePid, String[] nodeArgs) throws PluginException {
-        logger.debug("\ndoCreateServerResource");
+        logger.debug("doCreateServerResource");
         Assert.hasText(nodeName);
         Assert.hasText(nodePath);
 
@@ -343,8 +338,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         ConfigResponse log = createLogConfig(nodeArgs);
         if (log != null) setMeasurementConfig(node, log);
 
-        setProductConfig(node, conf);
-        logger.debug("\nSetProductConfig for serverResource=" + node + "\nSetProductConfig=" + conf);
+        setProductConfig(node, conf); 
 
         return node;
     }
