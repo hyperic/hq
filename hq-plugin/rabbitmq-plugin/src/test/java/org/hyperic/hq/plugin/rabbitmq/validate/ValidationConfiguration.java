@@ -23,39 +23,51 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq.configure;
+package org.hyperic.hq.plugin.rabbitmq.validate;
 
 import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
-import org.hyperic.hq.plugin.rabbitmq.core.HypericBrokerAdmin;
 import org.hyperic.util.config.ConfigResponse;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConstructorArgumentValues;
-import org.springframework.beans.factory.support.GenericBeanDefinition; 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ImportResource;
+
 
 /**
- * BrokerAdminBeanDefinitionBuilder
+ * ValidationConfiguration
  * @author Helena Edelson
  */
-public class BrokerAdminBeanDefinitionBuilder {
+@ImportResource("classpath:/org/hyperic/hq/plugin/rabbitmq/validate/ValidationTest-context.xml")
+public class ValidationConfiguration {
 
-    public static GenericBeanDefinition build(ConfigResponse conf, BeanDefinition cf) {
-        GenericBeanDefinition beanDefinition = null;
- 
-        if (conf.getValue(DetectorConstants.NODE_COOKIE_VALUE) != null) {
-            String auth = conf.getValue(DetectorConstants.NODE_COOKIE_VALUE);
+    private
+    @Value("${platform.type}")
+    String platformType;
 
-            if (auth != null && auth.length() > 0) {
-                beanDefinition = new GenericBeanDefinition();
-                beanDefinition.setBeanClass(HypericBrokerAdmin.class);
+    private
+    @Value("${hostname}")
+    String hostname;
 
-                ConstructorArgumentValues constructorArgs = new ConstructorArgumentValues();
-                constructorArgs.addIndexedArgumentValue(0, cf);
-                constructorArgs.addIndexedArgumentValue(1, auth);
-                beanDefinition.setConstructorArgumentValues(constructorArgs);
-            }
-        }
+    private
+    @Value("${username}")
+    String username;
 
-        return beanDefinition;
+    private
+    @Value("${password}")
+    String password;
+
+    @Bean
+    public ConfigResponse serverConfig() {
+        ConfigResponse conf = new ConfigResponse();
+        conf.setValue(DetectorConstants.HOST, hostname);
+        conf.setValue(DetectorConstants.USERNAME, username);
+        conf.setValue(DetectorConstants.PASSWORD, password);
+        conf.setValue(DetectorConstants.PLATFORM_TYPE, platformType);
+
+        return conf;
     }
 
+    @Bean
+    public PluginValidator rabbitValidator() {
+        return new PluginValidator();
+    }
 }

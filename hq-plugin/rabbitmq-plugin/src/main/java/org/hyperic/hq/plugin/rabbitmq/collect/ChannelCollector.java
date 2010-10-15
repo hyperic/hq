@@ -31,6 +31,7 @@ import org.hyperic.hq.plugin.rabbitmq.core.HypericChannel;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.Collector;
+import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 
 import java.util.List;
@@ -54,14 +55,13 @@ public class ChannelCollector extends Collector {
                 if (virtualHosts != null) {
                     for (String virtualHost : virtualHosts) {
                         List<HypericChannel> channels = rabbitGateway.getChannels(virtualHost);
-
                         if (channels != null) {
                             for (HypericChannel channel : channels) {
-
                                 setAvailability(true);
-
                                 setValue("consumerCount", channel.getConsumerCount());
                             }
+                        } else {
+                            setAvailability(false);
                         }
                     }
                 }
@@ -69,6 +69,8 @@ public class ChannelCollector extends Collector {
             catch (Exception ex) {
                 logger.error(ex);
             }
+        } else {
+            setAvailability(false);
         }
     }
 

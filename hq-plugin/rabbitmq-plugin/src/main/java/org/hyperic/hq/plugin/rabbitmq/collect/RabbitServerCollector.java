@@ -23,38 +23,46 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq.configure;
+package org.hyperic.hq.plugin.rabbitmq.collect;
 
-import org.hyperic.hq.plugin.rabbitmq.AbstractSpringTest;
-import org.hyperic.hq.plugin.rabbitmq.core.ErlangCookieHandler;
-import org.hyperic.hq.plugin.rabbitmq.core.HypericBrokerAdmin;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.plugin.rabbitmq.validate.PluginValidator;
+import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
-import org.springframework.test.annotation.ExpectedException;
 
-import static org.junit.Assert.*;
+import java.util.Properties;
+
 /**
- * HypericBrokerAdminTest
+ * RabbitServiceCollector
  * @author Helena Edelson
+ * @author German Laullon
  */
-@Ignore("Need to mock the connection for automation")
-public class HypericBrokerAdminTest extends AbstractSpringTest {
+public class RabbitServerCollector extends Collector {
 
-    @Test
-    public void testHypericAdmin() throws PluginException {
-        assertNotNull(rabbitGateway.getQueues("/"));
+    private static final Log logger = LogFactory.getLog(RabbitServerCollector.class);
 
-        String value = ErlangCookieHandler.configureCookie(serverConfig);
-        assertNotNull(value);
-        HypericBrokerAdmin admin = new HypericBrokerAdmin(singleConnectionFactory, value);
-        assertNotNull(admin.getQueues()); 
+    @Override
+    protected void init() throws PluginException {
+        Properties props = getProperties();
+        logger.debug("init[" + props + "]");
+        super.init();
+
+        PluginValidator.isValidConfiguration(props);
     }
 
-    @Test @ExpectedException(org.springframework.erlang.OtpAuthException.class)
-    public void testSpringAdmin() throws PluginException {
-        RabbitBrokerAdmin rba = new RabbitBrokerAdmin(singleConnectionFactory);
-        assertNotNull(rba.getQueues());
+    @Override
+    public void collect() {
+        logger.debug("collect[" + getProperties() + "]");
+
+        try {
+            setAvailability(PluginValidator.isValidConfiguration(getProperties()));
+        }
+        catch (PluginException ex) {
+            setAvailability(false);
+            logger.debug(ex, ex);
+        }
     }
+
+
 }

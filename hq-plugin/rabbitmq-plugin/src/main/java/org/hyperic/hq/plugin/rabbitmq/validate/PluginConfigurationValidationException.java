@@ -23,38 +23,29 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq.configure;
-
-import org.hyperic.hq.plugin.rabbitmq.AbstractSpringTest;
-import org.hyperic.hq.plugin.rabbitmq.core.ErlangCookieHandler;
-import org.hyperic.hq.plugin.rabbitmq.core.HypericBrokerAdmin;
+package org.hyperic.hq.plugin.rabbitmq.validate;
+  
 import org.hyperic.hq.product.PluginException;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
-import org.springframework.test.annotation.ExpectedException;
 
-import static org.junit.Assert.*;
 /**
- * HypericBrokerAdminTest
+ * PluginConfigurationValidationException
  * @author Helena Edelson
  */
-@Ignore("Need to mock the connection for automation")
-public class HypericBrokerAdminTest extends AbstractSpringTest {
+public class PluginConfigurationValidationException extends PluginException {
 
-    @Test
-    public void testHypericAdmin() throws PluginException {
-        assertNotNull(rabbitGateway.getQueues("/"));
+    private String message;
 
-        String value = ErlangCookieHandler.configureCookie(serverConfig);
-        assertNotNull(value);
-        HypericBrokerAdmin admin = new HypericBrokerAdmin(singleConnectionFactory, value);
-        assertNotNull(admin.getQueues()); 
+    public PluginConfigurationValidationException(String s) {
+        super(s);
+        this.message = s;
     }
 
-    @Test @ExpectedException(org.springframework.erlang.OtpAuthException.class)
-    public void testSpringAdmin() throws PluginException {
-        RabbitBrokerAdmin rba = new RabbitBrokerAdmin(singleConnectionFactory);
-        assertNotNull(rba.getQueues());
+    public PluginConfigurationValidationException(String s, Throwable t) {
+        super(s, t);
+        this.message = s;
+    }
+
+    @Override public String toString() {
+        return message;
     }
 }

@@ -23,52 +23,49 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq.configure;
+package org.hyperic.hq.plugin.rabbitmq.validate;
 
+import org.hyperic.hq.plugin.rabbitmq.configure.PluginContextCreator;
+import org.hyperic.hq.plugin.rabbitmq.configure.RabbitConfiguration;
 import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
 import org.hyperic.hq.plugin.rabbitmq.core.ErlangCookieHandler;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
-import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
+import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin; 
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import java.util.List;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.ExpectedException;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static org.junit.Assert.*;
 
+
 /**
- * ApplicationContextCreatorTest
+ * ValidationTest
  * @author Helena Edelson
  */
-@Ignore("Need to mock the connection for automation")
-public class ApplicationContextCreatorTest {
-
-    private static final String HOST = "localhost";
+@ContextConfiguration(loader = ValidationTestContextLoader.class)
+@RunWith(SpringJUnit4ClassRunner.class)
+@Ignore
+public class ValidationTest {
+     
+    @Autowired
+    ConfigResponse serviceConfig;
 
     @Test
-    public void create() throws PluginException {
-        ConfigResponse serviceConfig = new ConfigResponse();
-        serviceConfig.setValue(DetectorConstants.HOST, HOST);
-        serviceConfig.setValue(DetectorConstants.USERNAME, "guest");
-        serviceConfig.setValue(DetectorConstants.PASSWORD, "guest");
-        serviceConfig.setValue(DetectorConstants.PLATFORM_TYPE, "Linux");
+    @ExpectedException(IllegalArgumentException.class) 
+    public void noHost() throws PluginException {
+        serviceConfig.setValue(DetectorConstants.HOST, null);
 
-        String value = ErlangCookieHandler.configureCookie(serviceConfig);
-        assertNotNull(value);
-        serviceConfig.setValue(DetectorConstants.AUTHENTICATION, value);
-
-        if (RabbitProductPlugin.getRabbitGateway() == null) {
-            RabbitProductPlugin.createRabbitContext(serviceConfig);
-        }
- 
-        RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
-
-        if (rabbitGateway != null) {
-            assertTrue(rabbitGateway.getRabbitStatus().getNodes().size() > 0);
-            List<String> virtualHosts = rabbitGateway.getVirtualHosts();
-            assertNotNull(virtualHosts.get(0));
-        }
+        PluginContextCreator.createContext(serviceConfig, new Class[]{RabbitConfiguration.class});
+        RabbitGateway rabbitGateway = PluginContextCreator.getBean(RabbitGateway.class);
+        assertNotNull(rabbitGateway);
     }
+
+
 }

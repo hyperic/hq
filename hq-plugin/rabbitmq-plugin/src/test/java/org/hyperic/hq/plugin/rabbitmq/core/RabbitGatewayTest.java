@@ -23,9 +23,10 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq;
+package org.hyperic.hq.plugin.rabbitmq.core;
 
 
+import org.hyperic.hq.plugin.rabbitmq.AbstractSpringTest;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericChannel;
 import org.springframework.amqp.core.Queue;
 import org.hyperic.hq.plugin.rabbitmq.core.AMQPStatus;

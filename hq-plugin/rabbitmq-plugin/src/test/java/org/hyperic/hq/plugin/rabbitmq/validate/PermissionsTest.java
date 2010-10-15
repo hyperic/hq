@@ -23,11 +23,13 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq;
+package org.hyperic.hq.plugin.rabbitmq.validate;
 
 import com.ericsson.otp.erlang.OtpAuthException;
 import com.ericsson.otp.erlang.OtpErlangExit;
-import junit.framework.Assert;
+
+import static org.junit.Assert.*;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
@@ -51,7 +53,8 @@ public class PermissionsTest {
 
     private static final String FULLY_QUALIFIED_HOST = "localhost.foo.com";
 
-    private static final String NODE_FROM_PTQL = "rabbit@localhost";
+    private static final String NODE_FROM_PTQL = "rabbit@hostname";
+
 
     public static void main(String[] args) throws IOException, OtpAuthException, OtpErlangExit, PluginException {
         List<QueueInfo> queues = new ArrayList<QueueInfo>();
@@ -63,10 +66,10 @@ public class PermissionsTest {
             scf.setUsername("guest");
             scf.setPassword("guest");
             RabbitBrokerAdmin admin = new RabbitBrokerAdmin(scf);
-            queues = admin.getQueues(); 
+            queues = admin.getQueues();
         }
         catch (Exception e) {
-            Assert.assertTrue(e instanceof org.springframework.erlang.OtpIOException);
+            assertTrue(e instanceof org.springframework.erlang.OtpIOException);
             logger.debug("Anticipated 'java.net.UnknownHostException: " + FULLY_QUALIFIED_HOST + "'\n" + e);
         }
 
@@ -85,8 +88,8 @@ public class PermissionsTest {
             logger.debug(queues.size());
             logger.debug("Test Spring RabbitBrokerAdmin and " + hostFromPS + " as host no cookie successful.");
         }
-        catch (Exception e) { 
-            Assert.assertTrue(e instanceof org.springframework.erlang.OtpAuthException);
+        catch (Exception e) {
+            assertTrue(e instanceof org.springframework.erlang.OtpAuthException);
             logger.debug("Anticipated 'java.net.SocketException: Connection reset or java.io.IOException: expected 2 bytes, got EOF after 0 bytes\n'" + e);
         }
 
@@ -95,21 +98,21 @@ public class PermissionsTest {
             String c = ErlangCookieHandler.configureCookie(getConfigResponse(NODE_FROM_PTQL));
             RabbitBrokerAdmin admin = new HypericBrokerAdmin(cf, c);
             queues = admin.getQueues();
-            Assert.assertTrue("Queues using cookie: ", queues.size() > 0);
+            assertTrue("Queues using cookie: ", queues.size() > 0);
             logger.debug("Testing HypericBrokerAdmin (extends RBA) with cookie successful.");
 
 
             ErlangTemplate template = admin.getErlangTemplate();
             org.springframework.erlang.connection.ConnectionFactory factory = template.getConnectionFactory();
-            Assert.assertTrue(factory instanceof org.springframework.erlang.connection.SingleConnectionFactory);
+            assertTrue(factory instanceof org.springframework.erlang.connection.SingleConnectionFactory);
 
             org.springframework.erlang.connection.Connection conn = factory.createConnection();
-            Assert.assertNotNull(conn);
+            assertNotNull(conn);
             conn.close();
         } catch (org.springframework.erlang.OtpAuthException e) {
             logger.debug(e);
         }
- 
+
     }
 
     private static ConfigResponse getConfigResponse(String node) {
