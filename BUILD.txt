@@ -40,20 +40,22 @@ Integration testing:
     
 
 Setting up a database:
-    Add the following properties to ~/.hq/build.properties to connect the hq-web app or integration tests to your DB:
-        server.database-url=jdbc:mysql://localhost:3306/hqdb
-        server.database-driver=com.mysql.jdbc.Driver
-        server.database=MySQL
-        server.database-user=hq
-        server.database-password=hq
-        server.admin.username=hqadmin
-        server.admin.password=hqadmin
-        
-    You will also need to install the schema prior to running the tests or deploying the HQ web app.
-    To install the schema:
-        $ cd dist/installer
-        $ mvn assembly:directory
-        $ ant dbsetup
+	- Create the Database
+		Manually create and configure your database as documented here: http://support.hyperic.com/display/DOC/Set+Up+HQ+Database
+	_ Add Connection Properties
+    	Add the following properties to ~/.hq/build.properties to connect the schema installer, hq-web app, or integration tests to your DB:
+        	server.database-url=jdbc:mysql://localhost:3306/hqdb
+        	server.database-driver=com.mysql.jdbc.Driver
+        	server.database=MySQL
+        	server.database-user=hq
+        	server.database-password=hq
+        	server.admin.username=hqadmin
+        	server.admin.password=hqadmin
+    - Install the Schema
+    	To install the schema:
+        	$ cd dist/installer
+        	$ mvn assembly:directory
+        	$ ant dbsetup
         
   
 Artifacts:
