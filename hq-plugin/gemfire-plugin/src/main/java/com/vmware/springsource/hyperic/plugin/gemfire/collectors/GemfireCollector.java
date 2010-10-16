@@ -1,18 +1,28 @@
 package com.vmware.springsource.hyperic.plugin.gemfire.collectors;
 
+import com.vmware.springsource.hyperic.plugin.gemfire.detectors.GemfirePlatformDetector;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Properties;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.AgentCommand;
+import org.hyperic.hq.agent.AgentRemoteValue;
+import org.hyperic.hq.agent.server.AgentDaemon;
+import org.hyperic.hq.autoinventory.ScanConfigurationCore;
+import org.hyperic.hq.autoinventory.agent.AICommandsAPI;
+import org.hyperic.hq.hqapi1.HQApi;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.jmx.MxUtil;
+import org.hyperic.util.config.ConfigResponse;
 
 public class GemfireCollector extends Collector {
 
     static Log log = LogFactory.getLog(GemfireCollector.class);
+    String last_signature = "";
 
     @Override
     protected void init() throws PluginException {
@@ -30,9 +40,20 @@ public class GemfireCollector extends Collector {
         try {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(props);
             log.debug("mServer=" + mServer);
+
+            ObjectName mbean = new ObjectName("GemFire:type=MemberInfoWithStatsMBean");
+            String id = (String) mServer.getAttribute(mbean, "Id");
+
             Object[] args = {};
             String[] def = {};
             String[] members = (String[]) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMembers", args, def);
+
+            String signature = Arrays.asList(members).toString();
+            if (!signature.equals(last_signature)) {
+                last_signature=signature;
+                GemfirePlatformDetector.runAutoDiscovery(id);
+            }
+
             for (String menber : members) {
                 Object[] args2 = {menber};
                 String[] def2 = {String.class.getName()};

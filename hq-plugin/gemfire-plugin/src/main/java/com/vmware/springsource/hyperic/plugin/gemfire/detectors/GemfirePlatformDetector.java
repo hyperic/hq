@@ -1,31 +1,58 @@
 package com.vmware.springsource.hyperic.plugin.gemfire.detectors;
 
+import java.util.HashMap;
+import java.util.Map;
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.AgentCommand;
+import org.hyperic.hq.agent.AgentRemoteValue;
+import org.hyperic.hq.agent.server.AgentDaemon;
+import org.hyperic.hq.autoinventory.ScanConfigurationCore;
+import org.hyperic.hq.autoinventory.agent.AICommandsAPI;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformResource;
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.jmx.MxUtil;
 import org.hyperic.util.config.ConfigResponse;
 
 public class GemfirePlatformDetector extends PlatformDetector {
 
-    private static final String DEF_URL = "service:jmx:rmi://localhost/jndi/rmi://:1099/jmxconnector";
-//
-//    @Override
-//    public PlatformResource getPlatformResource(ConfigResponse config) throws PluginException {
-//        getLog().debug("[getPlatformResource] config=" + config);
-//        PlatformResource res = super.getPlatformResource(config);
-//
-//        ConfigResponse c = new ConfigResponse();
-//        c.setValue("jmx.url", DEF_URL);
-//        c.setValue("jmx.username", "");
-//        c.setValue("jmx.password", "");
-//
-//        config.merge(c, true);
-//        res.setProductConfig(config);
-//        res.setMeasurementConfig(new ConfigResponse());
-//
-//        getLog().debug("[getPlatformResource] res=" + res);
-//
-//        return res;
-//    }
+    private static Log log = LogFactory.getLog(GemfirePlatformDetector.class);
+    private static Map<String, ConfigResponse> configs = new HashMap();
+
+    @Override
+    public PlatformResource getPlatformResource(ConfigResponse config) throws PluginException {
+        log.debug("[getPlatformResource] config=" + config);
+        PlatformResource res = super.getPlatformResource(config);
+
+        try {
+            MBeanServerConnection mServer = MxUtil.getMBeanServer(config.toProperties());
+            log.debug("mServer=" + mServer);
+            ObjectName mbean = new ObjectName("GemFire:type=MemberInfoWithStatsMBean");
+            String id = (String) mServer.getAttribute(mbean, "Id");
+            configs.put(id, config);
+        } catch (Exception e) {
+            throw new PluginException(e.getMessage(), e);
+        }
+
+        return res;
+    }
+
+    public static void runAutoDiscovery(String id) {
+
+        log.info("[runAutoDiscovery] id="+id+" >> ****************************************");
+        try {
+            ScanConfigurationCore scanConfig = new ScanConfigurationCore();
+            scanConfig.setConfigResponse(configs.get(id));
+            AgentRemoteValue configARV = new AgentRemoteValue();
+            scanConfig.toAgentRemoteValue(AICommandsAPI.PROP_SCANCONFIG, configARV);
+            AgentCommand ac = new AgentCommand(1, 1, "autoinv:startScan", configARV);
+            AgentDaemon.getMainInstance().getCommandDispatcher().processRequest(ac, null, null);
+        } catch (Exception ex) {
+            log.error(ex, ex);
+        }
+        log.info("[runAutoDiscovery] id="+id+" << ****************************************");
+    }
 }
