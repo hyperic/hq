@@ -45,7 +45,7 @@ import org.apache.commons.logging.LogFactory;
  * is processed, their registered methods will be invoked.
  */
 
-class CommandDispatcher {
+public class CommandDispatcher {
     private Log log;     
     private Hashtable commands;
 
@@ -86,7 +86,7 @@ class CommandDispatcher {
      *                              the method.
      */
 
-    AgentRemoteValue processRequest(AgentCommand cmd, InputStream inStream, 
+    public AgentRemoteValue processRequest(AgentCommand cmd, InputStream inStream,
                                     OutputStream outStream)
         throws AgentRemoteException
     {

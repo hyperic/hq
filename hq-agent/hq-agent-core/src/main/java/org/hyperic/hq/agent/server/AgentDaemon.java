@@ -125,6 +125,10 @@ public class AgentDaemon
         }
     }
     
+    public CommandDispatcher getCommandDispatcher(){
+        return dispatcher;
+    }
+    
     private static File getAgentCommandsServerJar(String libHandlersDir) 
         throws FileNotFoundException {
         
