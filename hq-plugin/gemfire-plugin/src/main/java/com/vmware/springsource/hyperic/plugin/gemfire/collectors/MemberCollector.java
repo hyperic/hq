@@ -1,11 +1,8 @@
 package com.vmware.springsource.hyperic.plugin.gemfire.collectors;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import javax.management.InstanceNotFoundException;
-import javax.management.JMException;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;

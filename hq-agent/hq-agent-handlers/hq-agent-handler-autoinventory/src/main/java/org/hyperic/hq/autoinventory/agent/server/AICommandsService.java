@@ -172,6 +172,7 @@ public class AICommandsService implements AICommandsClient {
     }
     
     void startScan(ScanConfiguration scanConfig) {
+        _log.debug("[startScan] scanConfig="+scanConfig);
         ConfigResponse platformConfig = scanConfig.getConfigResponse();
         String platformType = null;
         boolean isDefault = scanConfig.getIsDefaultScan();

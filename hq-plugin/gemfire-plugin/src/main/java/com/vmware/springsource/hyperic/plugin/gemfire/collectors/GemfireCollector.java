@@ -8,16 +8,9 @@ import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.AgentCommand;
-import org.hyperic.hq.agent.AgentRemoteValue;
-import org.hyperic.hq.agent.server.AgentDaemon;
-import org.hyperic.hq.autoinventory.ScanConfigurationCore;
-import org.hyperic.hq.autoinventory.agent.AICommandsAPI;
-import org.hyperic.hq.hqapi1.HQApi;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.jmx.MxUtil;
-import org.hyperic.util.config.ConfigResponse;
 
 public class GemfireCollector extends Collector {
 
