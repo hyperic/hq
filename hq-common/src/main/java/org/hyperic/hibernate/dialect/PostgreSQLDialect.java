@@ -162,4 +162,8 @@ public class PostgreSQLDialect
     public boolean useMetricUnion() {
         return false;
     }
+    
+    public String getMetricDataHint() {
+        return "";
+    }
 }

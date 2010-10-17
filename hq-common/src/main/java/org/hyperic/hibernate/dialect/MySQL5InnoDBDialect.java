@@ -356,4 +356,8 @@ public class MySQL5InnoDBDialect
     public boolean useMetricUnion() {
         return false;
     }
+    
+    public String getMetricDataHint() {
+        return "USE INDEX (PRIMARY)";
+    }
 }

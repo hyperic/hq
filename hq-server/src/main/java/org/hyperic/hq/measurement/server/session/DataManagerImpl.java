@@ -1037,14 +1037,17 @@ public class DataManagerImpl implements DataManager {
         ResultSet rs = null;
         // The table to query from
         final String table = getDataTable(begin, end, m.getId().intValue());
+        final HQDialect dialect = measurementDAO.getHQDialect();
         try {
             conn = dbUtil.getConnection();
             stmt = conn.createStatement();
             try {
                 final boolean sizeLimit = (pc.getPagesize() != PageControl.SIZE_UNLIMITED);
-                final StringBuilder sqlBuf = new StringBuilder().append("SELECT :fields FROM ")
-                    .append(table).append(" WHERE timestamp BETWEEN ").append(begin)
-                    .append(" AND ").append(end).append(" AND measurement_id=").append(m.getId())
+                final StringBuilder sqlBuf = new StringBuilder()
+                    .append("SELECT :fields FROM ")
+                    .append(table).append(" WHERE timestamp BETWEEN ")
+                    .append(begin).append(" AND ").append(end)
+                    .append(" AND measurement_id=").append(m.getId())
                     .append(" ORDER BY timestamp ").append(pc.isAscending() ? "ASC" : "DESC");
                 Integer total = null;
                 if (sizeLimit) {
@@ -1062,11 +1065,10 @@ public class DataManagerImpl implements DataManager {
                                   pc.getPagesize());
                     }
                 }
-                final HQDialect dialect = measurementDAO.getHQDialect();
                 final int offset = pc.getPageEntityIndex();
                 final int limit = pc.getPagesize();
-                final String sql = (sizeLimit) ? dialect.getLimitBuf(sqlBuf.toString(), offset,
-                    limit) : sqlBuf.toString();
+                final String sql = (sizeLimit) ?
+                    dialect.getLimitBuf(sqlBuf.toString(), offset, limit) : sqlBuf.toString();
                 if (log.isDebugEnabled()) {
                     log.debug(sql);
                 }
@@ -1428,10 +1430,20 @@ public class DataManagerImpl implements DataManager {
             log.debug("gathering data from begin=" + TimeUtil.toString(begin) + 
                       ", end=" + TimeUtil.toString(end));
         }
+        final HQDialect dialect = measurementDAO.getHQDialect();
+        // XXX I don't like adding the sql hint, when we start testing against mysql 5.5 we should
+        //     re-evaluate if this is necessary
+        // 1) we shouldn't have to tell the db to explicitly use the Primary key for these
+        //    queries, it should just know because we update stats every few hours
+        // 2) we only want to use the primary key for bigger queries.  Our tests show
+        //    that the primary key performance is very consistent for large queries and smaller
+        //    queries.  But for smaller queries the measurement_id index is more effective
+        final String hint = (dialect.getMetricDataHint().isEmpty() || mids.length < 100) ?
+            "" : " " + dialect.getMetricDataHint();
         final String sql = new StringBuilder(1024 + (mids.length * 5))
             .append("SELECT count(*) as cnt, sum(value) as sumvalue, ")
             .append("min(value) as minvalue, max(value) as maxvalue, timestamp")
-            .append(" FROM :table")
+            .append(" FROM :table").append(hint)
             .append(" WHERE timestamp BETWEEN ").append(begin).append(" AND ").append(end)
             .append(MeasTabManagerUtil.getMeasInStmt(mids, true))
             .append(" GROUP BY timestamp")
@@ -1461,14 +1473,15 @@ public class DataManagerImpl implements DataManager {
                                              final long windowSize, final boolean returnNulls,
                                              final AtomicLong publishedInterval) {
         final MeasRange[] ranges = MeasTabManagerUtil.getMetricRanges(start, finish);
-        if (ranges.length == 0) {
-            return getHistDataSet(mids, start, finish, start, finish, windowSize, returnNulls,
-                                  publishedInterval);
-        }
+        final String threadName = Thread.currentThread().getName();
         final List<Thread> threads = new ArrayList<Thread>(ranges.length);
         final Collection<AggMetricValue[]> data = new ArrayList<AggMetricValue[]>(ranges.length);
         final int maxThreads = 4;
-        final boolean debug = log.isDebugEnabled();
+        // The result encapsulates the timeframe start -> finish.  The results are gathered
+        // via sub-queries.  Each sub-query is from begin -> end
+        // start                                                                    finish
+        // <----------------------------------------------------------------------------->
+        // (begin-end)(begin-end)(begin-end)(begin-end)(begin-end)(begin-end)(begin-end)..
         for (int ii = 0; ii < ranges.length; ii++) {
             final MeasRange range = ranges[ii];
             final long min = range.getMinTimestamp();
@@ -1478,26 +1491,9 @@ public class DataManagerImpl implements DataManager {
             waitForThreads(threads, maxThreads);
             // XXX may want to add a thread pool or a static Executor here so that these
             // queries don't overwhelm the DB
-            final Thread thread = new Thread() {
-                public void run() {
-                    final StopWatch watch = new StopWatch();
-                    if (debug) {
-                        watch.markTimeBegin("data gatherer begin=" + TimeUtil.toString(begin) + 
-                                            ", end=" + TimeUtil.toString(end));
-                    }
-                    final AggMetricValue[] array = getHistDataSet(mids, start, finish, begin, end,
-                                                                  windowSize, returnNulls,
-                                                                  publishedInterval);
-                    if (debug) {
-                        watch.markTimeEnd("data gatherer begin=" + TimeUtil.toString(begin) + 
-                                          ", end=" + TimeUtil.toString(end));
-                        log.debug(watch);
-                    }
-                    synchronized (data) {
-                        data.add(array);
-                    }
-                }
-            };
+            Thread thread = getNewDataWorkerThread(mids, start, finish, begin, end, windowSize,
+                                                   returnNulls, publishedInterval, threadName,
+                                                   data);
             thread.start();
             threads.add(thread);
         }
@@ -1505,10 +1501,46 @@ public class DataManagerImpl implements DataManager {
         return mergeThreadData(start, finish, windowSize, data);
     }
     
+    /**
+     * @param begin - the begin time of the sub window
+     * @param end - the end time of the sub window
+     * @param start - the start time of the user specified window
+     * @param finish - the finish time of the user specified window
+     */
+    private Thread getNewDataWorkerThread(final Integer[] mids, final long start,
+                                          final long finish, final long begin, final long end,
+                                          final long windowSize, final boolean returnNulls,
+                                          final AtomicLong publishedInterval,
+                                          final String threadName,
+                                          final Collection<AggMetricValue[]> data) {
+        final boolean debug = log.isDebugEnabled();
+        final Thread thread = new Thread() {
+            public void run() {
+                final StopWatch watch = new StopWatch();
+                if (debug) {
+                    watch.markTimeBegin("data gatherer begin=" + TimeUtil.toString(begin) + 
+                                        ", end=" + TimeUtil.toString(end));
+                }
+                final AggMetricValue[] array = getHistDataSet(mids, start, finish, begin, end,
+                                                              windowSize, returnNulls,
+                                                              publishedInterval, threadName);
+                if (debug) {
+                    watch.markTimeEnd("data gatherer begin=" + TimeUtil.toString(begin) + 
+                                      ", end=" + TimeUtil.toString(end));
+                    log.debug(watch);
+                }
+                synchronized (data) {
+                    data.add(array);
+                }
+            }
+        };
+        return thread;
+    }
+
     private AggMetricValue[] getHistDataSet(Integer[] mids, long start, long finish,
                                             long rangeBegin, long rangeEnd,
                                             long windowSize, final boolean returnNulls,
-                                            AtomicLong publishedInterval) {
+                                            AtomicLong publishedInterval, String threadName) {
         final CharSequence sqlBuf = getRawDataSql(mids, rangeBegin, rangeEnd, publishedInterval);
         final int buckets = (int) ((finish - start) / windowSize);
         final AggMetricValue[] array = new AggMetricValue[buckets];
@@ -1522,7 +1554,7 @@ public class DataManagerImpl implements DataManager {
             if (timeout == 0) {
                 stmt.setQueryTimeout(transactionTimeout);
             }
-            rs = stmt.executeQuery(sqlBuf.toString());
+            rs = stmt.executeQuery("/* " + threadName + " */ " + sqlBuf.toString());
             final int sumValCol = rs.findColumn("sumvalue");
             final int countValCol = rs.findColumn("cnt");
             final int minValCol = rs.findColumn("minvalue");

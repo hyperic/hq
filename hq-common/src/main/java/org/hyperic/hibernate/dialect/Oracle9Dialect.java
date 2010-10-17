@@ -181,4 +181,8 @@ public class Oracle9Dialect
         }
         return rtn.toString();
     }
+    
+    public String getMetricDataHint() {
+        return "";
+    }
 }

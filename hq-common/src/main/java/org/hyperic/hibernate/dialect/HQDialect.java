@@ -118,4 +118,9 @@ public interface HQDialect
      * @return the limit sql associated with the offset and limit params
      */
     public String getLimitBuf(String sql, int offset, int limit);
+
+    /**
+     * @return emptyString or a string representing the optimizer hint.  null is not expected here
+     */
+    public String getMetricDataHint();
 }
