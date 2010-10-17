@@ -27,7 +27,11 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -183,7 +187,7 @@ public class ReportProcessorImpl implements ReportProcessor {
 
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
-        final List<AppdefEntityID> nonEntities = new ArrayList<AppdefEntityID>();
+        final Set<AppdefEntityID> toUnschedule = new HashSet<AppdefEntityID>();
         for (DSNList dsnList : dsnLists) {
             Integer dmId = new Integer(dsnList.getClientId());
             if (debug) watch.markTimeBegin("getMeasurement");
@@ -235,7 +239,7 @@ public class ReportProcessorImpl implements ReportProcessor {
                           res.getName() + ") is not associated " +
                           " with that agent.  Dropping measurement.");
                 if (debug) watch.markTimeEnd("resMatchesAgent");
-                nonEntities.add(AppdefUtil.newAppdefEntityId(res));
+                toUnschedule.add(AppdefUtil.newAppdefEntityId(res));
                 continue;
             }
             if (debug) watch.markTimeEnd("resMatchesAgent");
@@ -267,12 +271,23 @@ public class ReportProcessorImpl implements ReportProcessor {
 
         // Check the SRNs to make sure the agent is up-to-date
         if (debug) watch.markTimeBegin("reportAgentSRNs");
-        nonEntities.addAll(srnManager.reportAgentSRNs(report.getSRNList()));
+        Collection<AppdefEntityID> toReschedule = srnManager.reportAgentSRNs(report.getSRNList());
         if (debug) watch.markTimeEnd("reportAgentSRNs");
+        // remove all AppdefEntities that do not belong to the agent.  If they belong and srns are
+        // out of sync, then reschedule
+        for (final Iterator<AppdefEntityID> it=toReschedule.iterator(); it.hasNext(); ) {
+            final AppdefEntityID aeidToResched = it.next();
+            if (toUnschedule.contains(aeidToResched)) {
+                it.remove();
+            }
+        }
 
-        if (report.getAgentToken() != null && !nonEntities.isEmpty()) {
-            // Better tell the agent to stop reporting non-existent entities
-            zEventManager.enqueueEventAfterCommit(new AgentUnscheduleZevent(nonEntities, agentToken));
+        if (agentToken != null && !toUnschedule.isEmpty()) {
+        	// Better tell the agent to stop reporting non-existent entities
+            zEventManager.enqueueEventAfterCommit(new AgentUnscheduleZevent(toUnschedule, agentToken));
+        }
+        if (!toReschedule.isEmpty()) {
+            zEventManager.enqueueEventAfterCommit(new AgentScheduleSyncZevent(toReschedule));
         }
     }
 
