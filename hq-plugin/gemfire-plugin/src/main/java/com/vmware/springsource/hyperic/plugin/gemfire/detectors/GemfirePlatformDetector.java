@@ -42,17 +42,22 @@ public class GemfirePlatformDetector extends PlatformDetector {
 
     public static void runAutoDiscovery(String id) {
 
-        log.info("[runAutoDiscovery] id="+id+" >> ****************************************");
+        log.debug("[runAutoDiscovery] id=" + id + " >> start");
         try {
             ScanConfigurationCore scanConfig = new ScanConfigurationCore();
-            scanConfig.setConfigResponse(configs.get(id));
-            AgentRemoteValue configARV = new AgentRemoteValue();
-            scanConfig.toAgentRemoteValue(AICommandsAPI.PROP_SCANCONFIG, configARV);
-            AgentCommand ac = new AgentCommand(1, 1, "autoinv:startScan", configARV);
-            AgentDaemon.getMainInstance().getCommandDispatcher().processRequest(ac, null, null);
+            ConfigResponse c = configs.get(id);
+            if (c != null) {
+                scanConfig.setConfigResponse(c);
+                AgentRemoteValue configARV = new AgentRemoteValue();
+                scanConfig.toAgentRemoteValue(AICommandsAPI.PROP_SCANCONFIG, configARV);
+                AgentCommand ac = new AgentCommand(1, 1, "autoinv:startScan", configARV);
+                AgentDaemon.getMainInstance().getCommandDispatcher().processRequest(ac, null, null);
+                log.info("[runAutoDiscovery] id=" + id + " << OK");
+            } else {
+                log.debug("[runAutoDiscovery] Config not found for id=" + id);
+            }
         } catch (Exception ex) {
-            log.error(ex, ex);
+            log.error("[runAutoDiscovery] id=" + id + " " + ex, ex);
         }
-        log.info("[runAutoDiscovery] id="+id+" << ****************************************");
     }
 }
