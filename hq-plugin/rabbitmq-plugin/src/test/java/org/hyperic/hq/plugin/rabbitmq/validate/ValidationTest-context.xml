@@ -34,24 +34,4 @@ NOTE: This copyright does *not* cover user programs that use HQ
 
     <context:property-placeholder location="/etc/test.properties"/>
 
-    <context:annotation-config/>
-
-    <aop:aspectj-autoproxy/>
- 
-    <!--
-    <aop:config>
-		<aop:aspect ref="validationAspect">
-			<aop:after-throwing pointcut-ref="validationOperation" throwing="e" method="rethrowConfigurationException"/>
-            <aop:pointcut id="validationOperation" expression="execution(* org.hyperic.hq.plugin.rabbitmq.validate.RabbitPluginValidator.*(..))"/>
-		</aop:aspect>
-	</aop:config>
-
-    <bean id="validationAspect" class="org.hyperic.hq.plugin.rabbitmq.validate.ValidationAspect">
-        <description>Decouples behavior needed which is constrained by the current Hyperic class hierarchy.</description>
-    </bean>
-
-    <bean class="org.hyperic.hq.plugin.rabbitmq.validate.RabbitPluginValidator">
-        <description>Validates plugin configuration data: user entered and inferred.</description>
-    </bean>
-    -->
 </beans>

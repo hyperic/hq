@@ -25,47 +25,39 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.product;
 
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.plugin.rabbitmq.configure.ConfigurationManager;
 import org.hyperic.hq.plugin.rabbitmq.configure.PluginContextCreator;
-import org.hyperic.hq.plugin.rabbitmq.configure.RabbitConfiguration;
+import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
 import org.hyperic.hq.plugin.rabbitmq.validate.PluginValidator;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.product.*;
-import org.hyperic.util.config.ConfigResponse;
-import org.springframework.util.Assert;
- 
 
 /**
  * RabbitProductPlugin
+ * manager.getProps={user.home=/root, file.encoding=UTF-8, user.name=root, user.language=en, file.separator=/ }
  * @author Helena Edelson
  */
 public class RabbitProductPlugin extends ProductPlugin {
 
     private static final Log logger = LogFactory.getLog(RabbitProductPlugin.class);
 
+    private static ConfigurationManager configurationManager;
+
+    private static String nodename;
+
+    private static String auth;
+
     private static RabbitGateway rabbitGateway;
-
-    private static String authentication;
-
-    @Override
-    public void init(PluginManager manager) throws PluginException {
-        super.init(manager);
-        logger.debug("init manager.getProps=" + manager.getProperties());
-        logger.debug("init getConfig="+getConfig());
-        //ERLANG_COOKIE_FILE = manager.getProperty(ERLANG_COOKIE_PROP);
-        //System.getProperties().setProperty("OtpConnection.trace", "99");
-    }
-
-    public static String getAuthentication() {
-        return authentication;
-    }
 
     /**
      * Object could be null if gateway has not been initialized yet.
      * This is dependent on getting values in ConfigResponse from user input
      * in the UI. We have detected the RabbitMQ server if one exists on the host,
-     * however we need to initialize before we get services and do control actions.
+     * however we need to initialize before we get services.
      * @return RabbitGateway or null
      */
     public static RabbitGateway getRabbitGateway() {
@@ -73,25 +65,52 @@ public class RabbitProductPlugin extends ProductPlugin {
     }
 
     /**
-     * Intercept bean registration in order to extract ConfigResponse plugin parameters and inject
-     * key/value pairs to dynamically create Spring Beans.
-     * If context not initialized, since it can not be initialized until we have
-     * necessary parameters from the config parameter, initialize it.
-     * @param conf ConfigResponse from discoverServices
+     * Determine if the node available for the ServerResource Collector
+     * @param configuration
+     * @return
+     * @throws org.hyperic.hq.product.PluginException
+     *
      */
-    public static void createRabbitContext(ConfigResponse conf) throws PluginException {
+    public static boolean isNodeAvailabile(Configuration configuration) throws PluginException {
+        logger.debug("Node check with incoming " + configuration + " and preset auth=" + auth + " node=" + nodename);
+        if (!configuration.isConfiguredOtpConnection() && auth != null && nodename != null) {
+            configuration.setAuthentication(auth);
+            configuration.setNodename(nodename);
+        }
+        logger.debug("Node check proceeding with " + configuration);
+        
+        return configuration.isConfiguredOtpConnection() && PluginValidator.isValidOtpConnection(configuration);
+    }
 
-        if (PluginValidator.isValidConfiguration(conf.toProperties())) {
-            logger.debug("Initializing Rabbit context");
-            PluginContextCreator.createContext(conf, new Class[]{RabbitConfiguration.class});
+    /**
+     * Called by Collectors which only have Properties.
+     * @param configuration
+     * @return true if all values are set and valid
+     * @throws org.hyperic.hq.product.PluginException
+     *
+     */
+    public static boolean initialize(Configuration configuration) throws PluginException {
+        logger.debug("Configuration for init " + configuration);
+        if (configuration.isConfigured()) {
+            nodename = configuration.getNodename();
+            auth = configuration.getAuthentication();
+            logger.debug("All configurations are set. Creating context.");
+
+            PluginContextCreator.createContext(configuration);
 
             if (PluginContextCreator.isInitialized()) {
-                rabbitGateway = PluginContextCreator.getBean(RabbitGateway.class);
-                Assert.notNull(rabbitGateway, "rabbitGateway must not be null");
+                logger.debug("Context initalized. Validating rabbit connection.");
+                configurationManager = PluginContextCreator.getBean(ConfigurationManager.class);
+                rabbitGateway = configurationManager.getRabbitGateway();
+                /** ToDo add a valid username/password check. */
+                return getRabbitGateway() != null;
             }
+
         } else {
-            logger.info("Postponing initialization of RabbitMQ metric Services until all required config values are set.");
+            logger.debug("Postponing initialization of RabbitMQ metric Services until all required config values are set.");
         }
+
+        return false;
     }
- 
+
 }

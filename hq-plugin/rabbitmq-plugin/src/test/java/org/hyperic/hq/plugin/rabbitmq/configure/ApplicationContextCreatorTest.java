@@ -60,7 +60,7 @@ public class ApplicationContextCreatorTest {
         serviceConfig.setValue(DetectorConstants.AUTHENTICATION, value);
 
         if (RabbitProductPlugin.getRabbitGateway() == null) {
-            RabbitProductPlugin.createRabbitContext(serviceConfig);
+            RabbitProductPlugin.initialize(Configuration.toConfiguration(serviceConfig));
         }
  
         RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();

@@ -30,7 +30,7 @@ package org.hyperic.hq.plugin.rabbitmq.core;
  * @author Helena Edelson
  */
 public class DetectorConstants {
-
+ 
     public static final String NODE_NAME = "node.name";
 
     public static final String NODE_PATH = "node.path";

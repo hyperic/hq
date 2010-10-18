@@ -70,7 +70,7 @@ public class ErlangCookieHandler {
                 }
             }
         }
-        
+
         return getErlangCookieValue(file);
     }
 
@@ -96,7 +96,7 @@ public class ErlangCookieHandler {
                 }
             }
             catch (IOException e) {
-                throw new RuntimeException(e.getCause());
+                throw new PluginException(e.getCause());
             }
         }
         return null;

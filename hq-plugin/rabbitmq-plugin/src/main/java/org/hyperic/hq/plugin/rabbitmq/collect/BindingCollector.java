@@ -27,15 +27,9 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.core.HypericBinding;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
-import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.Collector;
-import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
-
-import java.util.List;
-
+ 
 /**
  * BindingCollector
  * @author Helena Edelson
@@ -47,31 +41,7 @@ public class BindingCollector extends Collector {
     @Override
     public void collect() {
 
-        RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
-        if (rabbitGateway != null) {
-
-            try {
-                List<String> virtualHosts = rabbitGateway.getVirtualHosts();
-                if (virtualHosts != null) {
-                    for (String virtualHost : virtualHosts) {
-                        List<HypericBinding> bindings = rabbitGateway.getBindings(virtualHost);
-                        if (bindings != null) {
-                            for (HypericBinding binding : bindings) {
-                                setAvailability(true);
-
-                            }
-                        } else {
-                            setAvailability(false);
-                        }
-                    }
-                }
-            }
-            catch (Exception ex) {
-                logger.error(ex);
-            }
-        } else {
-            setAvailability(false);
-        }
+       
     }
 
     /**

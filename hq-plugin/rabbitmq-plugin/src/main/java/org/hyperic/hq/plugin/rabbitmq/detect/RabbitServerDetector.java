@@ -28,16 +28,15 @@ package org.hyperic.hq.plugin.rabbitmq.detect;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.collect.*;
+import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
 import org.hyperic.hq.plugin.rabbitmq.core.*;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
-import org.hyperic.hq.plugin.rabbitmq.validate.PluginValidator;
 import org.hyperic.hq.product.*;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.amqp.core.Exchange;
@@ -103,24 +102,27 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      */
     @Override
     protected List discoverServices(ConfigResponse serviceConfig) throws PluginException {
-        logger.debug("discoverServices [" + serviceConfig + "]");
         List<ServiceResource> serviceResources = new ArrayList<ServiceResource>();
 
         configure(serviceConfig);
 
-        if (PluginValidator.isConfigured(serviceConfig.toProperties())) {
-            /** If this is the first time through with config values present, initialize. */
-            if (RabbitProductPlugin.getRabbitGateway() == null) {
-                RabbitProductPlugin.createRabbitContext(serviceConfig);
+        if (RabbitProductPlugin.getRabbitGateway() == null) {
+            Configuration configuration = Configuration.toConfiguration(serviceConfig);
+            
+            if (RabbitProductPlugin.isNodeAvailabile(configuration)) {
+                logger.debug("Attempting to initialize plugin...");
+                RabbitProductPlugin.initialize(configuration);
             }
-
-            List<ServiceResource> rabbitResources = createRabbitResources(serviceConfig);
-            if (rabbitResources != null && rabbitResources.size() > 0) {
-                serviceResources.addAll(rabbitResources);
-                logger.debug("Detected " + rabbitResources.size() + " Rabbit resources");
+            else {
+                throw new PluginException("Please enter a username and password and insure the Agent has permission to read the Erlang cookie.");
             }
         }
 
+        List<ServiceResource> rabbitResources = createRabbitResources(serviceConfig);
+        if (rabbitResources != null && rabbitResources.size() > 0) {
+            serviceResources.addAll(rabbitResources);
+            logger.debug("Detected " + rabbitResources.size() + " Rabbit resources");
+        }
         return serviceResources;
     }
 
@@ -134,7 +136,6 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         List<ServiceResource> rabbitResources = null;
 
         RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
-
         try {
             if (rabbitGateway != null) {
                 List<String> virtualHosts = rabbitGateway.getVirtualHosts();
@@ -148,6 +149,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                         ServiceResource vHost = createServiceResource(DetectorConstants.VIRTUAL_HOST);
                         vHost.setName(new StringBuilder().append(getTypeInfo().getName())
                                 .append(" Node: ").append(nodeName).append(" ").append(DetectorConstants.VIRTUAL_HOST).append(": ").append(virtualHost).toString());
+                        //rabbitResources.add(vHost);
 
                         List<ServiceResource> queues = createQueueServiceResources(rabbitGateway, nodeName, virtualHost);
                         if (queues != null) rabbitResources.addAll(queues);
@@ -318,27 +320,27 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         conf.setValue(DetectorConstants.SERVER_PATH, nodePath);
         conf.setValue(DetectorConstants.NODE_PID, nodePid);
 
-        Properties props = conf.toProperties();
-
-        if (!PluginValidator.hasValue(props.getProperty(DetectorConstants.AUTHENTICATION))) {
-            String auth = ErlangCookieHandler.configureCookie(conf);
+        String auth = ErlangCookieHandler.configureCookie(conf);
+        if (auth != null) {
             conf.setValue(DetectorConstants.AUTHENTICATION, auth);
         }
 
-        if (!PluginValidator.hasValue(props.getProperty(DetectorConstants.HOST))) {
-            if (nodeName != null) {
-                String hostName = getHostFromNode(nodeName);
-                conf.setValue(DetectorConstants.HOST, hostName);
-            }
+        String hostName = nodeName != null ? getHostFromNode(nodeName) : null;
+        if (hostName != null) {
+            conf.setValue(DetectorConstants.HOST, hostName);
         }
-        
+
+        logger.debug("ProductConfig[" + conf + "]");
+
         ConfigResponse custom = createCustomConfig(nodeName, nodePath, nodePid, nodeArgs);
         if (custom != null) node.setCustomProperties(custom);
 
         ConfigResponse log = createLogConfig(nodeArgs);
-        if (log != null) setMeasurementConfig(node, log);
+        if (log != null)
 
-        setProductConfig(node, conf); 
+            setMeasurementConfig(node, log);
+
+        setProductConfig(node, conf);
 
         return node;
     }
