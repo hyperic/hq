@@ -52,6 +52,7 @@
 		<mx4j.version>3.0.1</mx4j.version>
 		<mysql.connector.version>5.1.10</mysql.connector.version>
 		<oro.version>2.0.8</oro.version>
+		<poi.version>3.0.1-FINAL</poi.version>
 		<postgresql.agent.driver.version>7.4.3</postgresql.agent.driver.version>
 		<postgresql.server.driver.version>8.2-511-A.jdbc3</postgresql.server.driver.version>
 		<quartz.version>1.7.2</quartz.version>
@@ -231,6 +232,11 @@
 				<groupId>org.json</groupId>
 				<artifactId>json</artifactId>
 				<version>${json.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.poi</groupId>
+				<artifactId>poi</artifactId>
+				<version>${poi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.snmp4j</groupId>
