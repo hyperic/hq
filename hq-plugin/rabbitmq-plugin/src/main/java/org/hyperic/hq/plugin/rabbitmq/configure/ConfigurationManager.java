@@ -34,7 +34,7 @@ import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 /**
- * BrokerService
+ * ConfigurationManager
  * @author Helena Edelson
  */
 public interface ConfigurationManager {
