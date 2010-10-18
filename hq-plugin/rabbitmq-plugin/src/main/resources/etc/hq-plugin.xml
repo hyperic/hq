@@ -80,8 +80,8 @@
             <option name="authentication" description="erlang cookie" type="hidden"/>
 
             <option name="username" description="RabbitMQ Username for %server.name%"/>
-            <option name="password" type="secret" description="RabbitMQ Password for %server.name%"/>
-        </config>
+            <option name="password" description="RabbitMQ Password for %server.name%"/>
+        </config>                   <!--type="secret" -->
 
         <config type="measurement">
             <option name="process.query" default="State.Name.sw=beam,Args.*.eq=-sname,Args.*.eq=%process.name%"
@@ -101,7 +101,7 @@
                     description="Node Process Query"/>
         </config>
         <!--for the collector-->
-        <metric name="Availability" template="rabbitmq:hostname=%hostname%,username=%username%,password=%password%,authentication=%authentication%:Availability" indicator="true"/>
+        <metric name="Availability" template="rabbitmq:server.name=%server.name%,hostname=%hostname%,username=%username%,password=%password%,authentication=%authentication%:Availability" indicator="true"/>
 
         &process-metrics;
 

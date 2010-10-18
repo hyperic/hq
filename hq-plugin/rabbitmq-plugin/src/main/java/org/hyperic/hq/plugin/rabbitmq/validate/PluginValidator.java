@@ -26,14 +26,14 @@
 package org.hyperic.hq.plugin.rabbitmq.validate;
 
 import com.ericsson.otp.erlang.*;
-import com.rabbitmq.client.Channel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
-import org.hyperic.hq.product.PluginException; 
-
-import java.io.IOException;
-import java.util.Properties;
+import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
+import org.hyperic.hq.product.PluginException;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.util.Assert;
+ 
 
 /**
  * PluginValidator
@@ -44,131 +44,52 @@ public class PluginValidator {
     private static final Log logger = LogFactory.getLog(PluginValidator.class);
 
     /**
-     * ToDo isValidConnection(getHost(props), getUsername(props), getPassword(props))
-     * @param props
-     * @return true if all criteria are true.
-     * @throws org.hyperic.hq.product.PluginException
-     */
-    public static boolean isValidConfiguration(Properties props) throws PluginException {
-        return isConfigured(props) && isValidAuthentication(props);
-    }
-  
-    /**
-     * Validate host, username, password against the broker.
-     * @param host
-     * @param username
-     * @param password
+     * Validate against the broker.
+     * @param template RabbitTemplate
      * @return true if successful connection is made, false if not.
      * @throws PluginException
      */
-    public static boolean isValidConnection(String host, String username, String password) throws PluginException {
-        logger.debug("isValidConnection with=" + host + ", " + username + ", " + password);
-
-        boolean isValid = false;
-
-        Channel channel = null;
-        com.rabbitmq.client.ConnectionFactory connectionFactory = new com.rabbitmq.client.ConnectionFactory();
-        connectionFactory.setHost(host);
-        connectionFactory.setUsername(username);
-        connectionFactory.setPassword(password);
-
+    public static boolean isValidRabbitConnection(RabbitTemplate template) throws PluginException {
+        Assert.notNull(template, "template must not be null.");
         try {
-            channel = connectionFactory.newConnection().createChannel();
-            isValid = channel != null;
+            template.convertAndSend("Hyperic Test Message"); 
+            return true;
+        } catch (AmqpException e) {
+            return false;
         }
-        catch (java.net.ConnectException e) {
-            throw new PluginException("Connection refused to using host " + host);
-        }
-        catch (java.io.IOException e) {
-            throw new PluginException(new StringBuilder("Unable to authenticate with the broker using username: ")
-                    .append(username).append(", password: *******").append(". Please re-enter the correct username and password").toString());
-        }
-        /* for pending factory.setPort(0) Can't assign requested address
-        catch (java.net.NoRouteToHostException e) {
-        }
-        */
-        finally {
-            if (channel != null) {
-                try {
-                    channel.getConnection().close();
-                } catch (IOException e) {
-                    logger.debug(e);
-                }
-            }
-        }
-
-        logger.debug("isValidConnection=" + isValid);
-        return isValid;
     }
 
     /**
      * Validate the cookie.
-     * @param props
+     * @param configuration
      * @return true if the test connection was successful.
      * @throws PluginException If cookie value or host are not set
      *                         or if the test connection fails, throw a PluginException to alert the user.
      */
-    public static boolean isValidAuthentication(Properties props) throws PluginException {
-        logger.debug("isValidAuthentication with=" + props);
-        String authentication = getAuthentication(props);
-        String host = getHost(props);
-        boolean isValid = false;
-        OtpConnection conn = null;
+    public static boolean isValidOtpConnection(Configuration configuration) throws PluginException {
+        logger.debug("isValidOtpConnection with=" + configuration);
+        Object response = null;
 
-        try {
-            OtpSelf self = new OtpSelf("rabbit-spring-monitor", authentication);
-            OtpPeer peer = new OtpPeer("rabbit@" + host);
-            conn = self.connect(peer);
-            conn.sendRPC("erlang", "date", new OtpErlangList());
-            isValid = conn.receiveRPC() != null;
-            logger.debug("isValidAuthentication=" + isValid);
-        }
-        catch (Exception e) {
-            throw new PluginException("Can not connect to peer node.");
-        }
-        finally {
-            if (conn != null) conn.close();
-        }
-        logger.debug("isValidAuthentication=" + isValid);
-        return isValid;
-    }
+        if (configuration.isConfiguredOtpConnection()) {
+            OtpConnection conn = null;
 
-    public static boolean hasValue(String value) {
-        return value != null && value.length() > 0;
-    }
-
-    public static boolean isConfigured(Properties props) throws PluginException {
-
-        /** 2 user-entered configuration values */
-        if (!hasValue(getUsername(props)) && !hasValue(getPassword(props))) {
-            throw new PluginException("This resource requires a username and password for the broker.");
+            try {
+                OtpSelf self = new OtpSelf("rabbit-spring-monitor", configuration.getAuthentication());
+                OtpPeer peer = new OtpPeer(configuration.getNodename());
+                conn = self.connect(peer);
+                conn.sendRPC("erlang", "date", new OtpErlangList());
+                response = conn.receiveRPC() != null;
+                logger.debug("Received RPC " + response);
+            }
+            catch (Exception e) {
+                throw new PluginException("Can not connect to peer node.");
+            }
+            finally {
+                if (conn != null) conn.close();
+            }
         }
 
-        if (!hasValue(getAuthentication(props))) {
-            throw new PluginException("Erlang cookie value is not set yet.");
-        }
-
-        if (!hasValue(getHost(props))) {
-            throw new PluginException("Host name must not be null.");
-        }
-        return true;
+        return response != null;
     }
-
-    public static String getAuthentication(Properties props) {
-        return props.getProperty(DetectorConstants.AUTHENTICATION);
-    }
-
-    public static String getHost(Properties props) {
-        return props.getProperty(DetectorConstants.HOST);
-    }
-
-    public static String getUsername(Properties props) {
-        return props.getProperty(DetectorConstants.USERNAME) != null ? props.getProperty(DetectorConstants.USERNAME).trim() : null;
-    }
-
-    public static String getPassword(Properties props) {
-        return props.getProperty(DetectorConstants.PASSWORD) != null ? props.getProperty(DetectorConstants.PASSWORD).trim() : null;
-    }
-
 
 }

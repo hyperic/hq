@@ -25,42 +25,46 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.configure;
 
-import org.hyperic.hq.plugin.rabbitmq.core.*; 
+import org.hyperic.hq.plugin.rabbitmq.core.*;
 
-import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
-import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.hyperic.hq.product.PluginException; 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ImportResource; 
+import org.springframework.context.annotation.ImportResource;
 
 /**
  * RabbitConfig configures Spring AMQP RabbitMQ objects
- *
  * @author Helena Edelson
  */
 @ImportResource("classpath:/etc/rabbitmq-context.xml")
 public class RabbitConfiguration {
 
     @Autowired
-    private SingleConnectionFactory singleConnectionFactory;
+    private Configuration initialConfiguration;
 
-    @Autowired
-    private RabbitBrokerAdmin rabbitBrokerAdmin;
+    @Bean(initMethod = "initialize")
+    public ConfigurationManager configurationManager() throws PluginException {
+        return new RabbitConfigurationManager();
+    }
 
-    @Bean
-    public RabbitTemplate rabbitTemplate() { 
-        return new RabbitTemplate(singleConnectionFactory);
+   /* @Bean
+    public RabbitBrokerAdmin rabbitBrokerAdmin() {
+        return new HypericBrokerAdmin(configurationManager().getConnectionFactory(), initialConfiguration.getAuthentication());
     }
 
     @Bean
-    public RabbitGateway rabbitGateway() {
-        return new RabbitBrokerGateway();
+    public RabbitTemplate rabbitTemplate() {
+        return new RabbitTemplate(configurationManager().getConnectionFactory());
     }
 
     @Bean
     public ErlangConverter erlangConverter() {
-        return new HypericErlangConverter(rabbitBrokerAdmin.getErlangTemplate());
+        return new HypericErlangConverter(rabbitBrokerAdmin().getErlangTemplate());
     }
- 
+
+    @Bean
+    public RabbitGateway rabbitGateway() {
+        return new RabbitBrokerGateway(rabbitTemplate(), rabbitBrokerAdmin(), erlangConverter());
+    }*/
+
 }
