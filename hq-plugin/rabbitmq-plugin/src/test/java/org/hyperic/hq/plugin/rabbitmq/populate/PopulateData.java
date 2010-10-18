@@ -26,6 +26,7 @@
 package org.hyperic.hq.plugin.rabbitmq.populate;
 
 import com.rabbitmq.client.Channel;
+import org.hyperic.hq.plugin.rabbitmq.configure.ConfigurationManager;
 import org.hyperic.hq.plugin.rabbitmq.configure.RabbitTestConfiguration;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericChannel;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericConnection;
@@ -33,6 +34,7 @@ import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.plugin.rabbitmq.manage.RabbitManager;
 import org.hyperic.hq.product.PluginException;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.admin.QueueInfo;
 import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
 import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -53,32 +55,31 @@ public class PopulateData {
 
     public static void main(String[] args) throws Exception {
         ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(RabbitTestConfiguration.class);
-        SingleConnectionFactory scf = ctx.getBean("singleConnectionFactory", SingleConnectionFactory.class);
-        RabbitManager rabbitManager = ctx.getBean(RabbitManager.class);
-        RabbitGateway rabbitGateway = ctx.getBean(RabbitGateway.class);
-        RabbitTemplate rabbitTemplate = ctx.getBean(RabbitTemplate.class);
-        RabbitBrokerAdmin rba = ctx.getBean(RabbitBrokerAdmin.class);
-   
+        ConfigurationManager cf = ctx.getBean(ConfigurationManager.class);
+        RabbitGateway rabbitGateway = cf.getRabbitGateway();
+        RabbitTemplate rabbitTemplate = cf.getRabbitTemplate();
+        RabbitBrokerAdmin admin = cf.getRabbitBrokerAdmin();
+
         Queue marketDataQueue = ctx.getBean("marketDataQueue", Queue.class);
-        rba.declareQueue(marketDataQueue);
+        admin.declareQueue(marketDataQueue);
 
         rabbitTemplate.setRoutingKey(marketDataQueue.getName());
         rabbitTemplate.setQueue(marketDataQueue.getName());
 
-        refresh(scf, rabbitGateway, rabbitManager);
+        refresh(cf.getConnectionFactory(), cf.getRabbitGateway());
 
-        int numMessages = 500;
+        int numMessages = 100;
 
         ProducerSample producer = new ProducerSample(rabbitTemplate, numMessages);
         producer.sendMessages();
 
-        /*List<QueueInfo> queues = rabbitGateway.getQueues("/");
+        List<QueueInfo> queues = rabbitGateway.getQueues("/");
         if (queues != null) {
             System.out.println("queues has " + queues.size());
             for (QueueInfo q : queues) {
                 System.out.println(q);
             }
-        }*/
+        }
 
         ctx.close();
         System.exit(0);
@@ -87,11 +88,10 @@ public class PopulateData {
     /**
      *
      * @param scf
-     * @param rabbitGateway
-     * @param rabbitManager
+     * @param rabbitGateway 
      * @throws Exception
      */
-    private static void refresh(SingleConnectionFactory scf, RabbitGateway rabbitGateway, RabbitManager rabbitManager) throws Exception {
+    private static void refresh(SingleConnectionFactory scf, RabbitGateway rabbitGateway) throws Exception {
         com.rabbitmq.client.Connection conn = scf.createConnection();
         Map<String, Object> props = conn.getServerProperties();
         System.out.println(props);

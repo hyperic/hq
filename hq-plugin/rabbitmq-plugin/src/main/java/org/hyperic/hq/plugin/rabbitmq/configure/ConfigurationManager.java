@@ -23,27 +23,45 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq.collect;
+package org.hyperic.hq.plugin.rabbitmq.configure;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.product.Collector;
+import org.hyperic.hq.plugin.rabbitmq.core.ErlangConverter;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.util.config.ConfigResponse;
+import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 /**
- * RabbitServiceCollector
+ * BrokerService
  * @author Helena Edelson
  */
-public class RabbitServiceCollector extends Collector {
+public interface ConfigurationManager {
 
-    private static final Log logger = LogFactory.getLog(RabbitServerCollector.class);
+    void initialize() throws PluginException;
+    
+    CachingConnectionFactory getConnectionFactory();
 
-    protected void init() throws PluginException {
-        super.init();
-    }
+    RabbitGateway getRabbitGateway();
 
-    @Override
-    public void collect() {
+    RabbitTemplate getRabbitTemplate();
 
-    }
+    RabbitBrokerAdmin getRabbitBrokerAdmin();
+
+    ErlangConverter getErlangConverter();
+    
+    void configureUsernamePassword(ConfigResponse conf);
+
+    void configureVirtualHost(ConfigResponse conf);
+
+    void configurePort(ConfigResponse conf);
+
+    void configureBrokerAdmin();
+
+    boolean isActive();
+
+    int getPort();
+
+    void setPort(int port);
 }

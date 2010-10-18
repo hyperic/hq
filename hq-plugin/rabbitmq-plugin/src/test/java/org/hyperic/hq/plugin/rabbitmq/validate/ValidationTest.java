@@ -26,21 +26,22 @@
 package org.hyperic.hq.plugin.rabbitmq.validate;
 
 import org.hyperic.hq.plugin.rabbitmq.configure.PluginContextCreator;
-import org.hyperic.hq.plugin.rabbitmq.configure.RabbitConfiguration;
+import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
 import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
 import org.hyperic.hq.plugin.rabbitmq.core.ErlangCookieHandler;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
-import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin; 
+import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.erlang.connection.Connection;
 import org.springframework.test.annotation.ExpectedException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+ 
 
 import static org.junit.Assert.*;
 
@@ -51,21 +52,32 @@ import static org.junit.Assert.*;
  */
 @ContextConfiguration(loader = ValidationTestContextLoader.class)
 @RunWith(SpringJUnit4ClassRunner.class)
-@Ignore
 public class ValidationTest {
-     
+
     @Autowired
-    ConfigResponse serviceConfig;
+    ConfigResponse serverConfig;
 
     @Test
-    @ExpectedException(IllegalArgumentException.class) 
+    @Ignore
+    @ExpectedException(IllegalArgumentException.class)
     public void noHost() throws PluginException {
-        serviceConfig.setValue(DetectorConstants.HOST, null);
-
-        PluginContextCreator.createContext(serviceConfig, new Class[]{RabbitConfiguration.class});
+        serverConfig.setValue(DetectorConstants.HOST, null);
+        PluginContextCreator.createContext(Configuration.toConfiguration(serverConfig));
         RabbitGateway rabbitGateway = PluginContextCreator.getBean(RabbitGateway.class);
         assertNotNull(rabbitGateway);
     }
 
+    @Test
+    @Ignore("Until connections are mocked")
+    public void pluginInitializationAssertSuccess() throws PluginException {
+        /** in the plugin the erlang cookie value is set during creation
+         * of the ServerResource and the value set in the productConfig.
+         */
+        serverConfig.setValue(DetectorConstants.AUTHENTICATION, ErlangCookieHandler.configureCookie(serverConfig));        
+        RabbitProductPlugin.initialize(Configuration.toConfiguration(serverConfig));
+        assertNotNull(RabbitProductPlugin.getRabbitGateway());
+    }
+
+    
 
 }

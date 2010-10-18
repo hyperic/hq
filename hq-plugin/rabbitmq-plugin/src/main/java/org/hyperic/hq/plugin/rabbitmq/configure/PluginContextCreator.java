@@ -28,17 +28,21 @@ package org.hyperic.hq.plugin.rabbitmq.configure;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericBrokerAdmin;
-import org.hyperic.util.config.ConfigResponse;
-import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
+import org.hyperic.hq.product.PluginException;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.beans.factory.support.GenericBeanDefinition; 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.AbstractApplicationContext;
 
+
 /**
- * PluginContextCreator
- * ToDo make a parent class and interface for all
- * plugin usage.
+ * PluginContextCreator handles, in this plugin, a pretty complicated
+ * use case for initialization of Spring beans within the context of
+ * timing of plugin class instantiation order and what data is available when
+ * in relation to that, as well as in relation to Spring AMQP api.
  * @author Helena Edelson
  */
 public class PluginContextCreator {
@@ -47,54 +51,90 @@ public class PluginContextCreator {
 
     private static volatile AbstractApplicationContext applicationContext;
 
-    public static boolean isInitialized() {
-        return applicationContext != null && applicationContext.isActive();
-    }
+
     /**
      * This is only called by the Product plugin. This method is so that the caller knows nothing
      * about the ApplicationContext api itself, since in the case we only have one call.
      * @param requiredType
      * @return
+     * @throws org.hyperic.hq.product.PluginException
+     *
      */
-    public static <T> T getBean(Class<T> requiredType) {
+    public static <T> T getBean(Class<T> requiredType) throws PluginException {
         try {
             return applicationContext.getBean(requiredType);
         }
-        catch (Throwable t) {
-            logger.error(t);
+        catch (NoSuchBeanDefinitionException e) {
+            throw new PluginException(e.getMessage());
         }
-        return null;
     }
 
     /**
-     * Returns the ApplicationContext.
-     * @param conf
-     * @param annotationConfigurations
-     * @return org.springframework.context.ApplicationContext
+     * Create and set the ApplicationContext.
+     * @param configuration
+     * @return true if initialized
+     * @throws org.hyperic.hq.product.PluginException
+     *
      */
-    public static AbstractApplicationContext createContext(ConfigResponse conf, Class[] annotationConfigurations) {
-        return applicationContext == null ? applicationContext = doCreateApplicationContext(conf, annotationConfigurations) : applicationContext;
+    public static void createContext(Configuration configuration) throws PluginException {
+        if (applicationContext == null) {
+            applicationContext = doCreateApplicationContext(configuration); 
+        } 
     }
 
     /**
-     * Create the default ApplicationContext type.
+     * Create the default ApplicationContext.
      * @param conf
-     * @param annotationConfigurations
-     * @return org.springframework.context.ApplicationContext
+     * @return org.springframework.context.support.AbstractApplicationContext
+     * @throws org.hyperic.hq.product.PluginException
+     *
      */
-    protected static AbstractApplicationContext doCreateApplicationContext(ConfigResponse conf, Class[] annotationConfigurations) {
+    protected static AbstractApplicationContext doCreateApplicationContext(Configuration conf) throws PluginException {
         AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
         ctx.registerShutdownHook();
 
-        BeanDefinitionBuilder beanDefinitionBuilder = new BeanDefinitionBuilder();
-        GenericBeanDefinition connFactoryBeanDef = beanDefinitionBuilder.build(SingleConnectionFactory.class, conf, null);
-        DynamicBeanConfigurer.registerBean(connFactoryBeanDef, (DefaultListableBeanFactory) ctx.getBeanFactory());
-        GenericBeanDefinition adminBeanDef = beanDefinitionBuilder.build(HypericBrokerAdmin.class, conf, connFactoryBeanDef);
-        DynamicBeanConfigurer.registerBean(adminBeanDef, (DefaultListableBeanFactory) ctx.getBeanFactory());
+        try {
 
-        ctx.register(annotationConfigurations);
-        ctx.refresh();
+            GenericBeanDefinition configProcessorBeanDef = new BeanDefinitionBuilder().build(Configuration.class, conf, null);
+            DynamicBeanConfigurer.registerBean(configProcessorBeanDef, (DefaultListableBeanFactory) ctx.getBeanFactory());
+
+            /*GenericBeanDefinition connBeanDef = new BeanDefinitionBuilder().build(RabbitConfigurationManager.class, conf, null);
+            DynamicBeanConfigurer.registerBean(connBeanDef, (DefaultListableBeanFactory) ctx.getBeanFactory());
+
+            GenericBeanDefinition adminBeanDef = new BeanDefinitionBuilder().build(HypericBrokerAdmin.class, conf, connBeanDef);
+            DynamicBeanConfigurer.registerBean(adminBeanDef, (DefaultListableBeanFactory) ctx.getBeanFactory());*/
+
+            ctx.register(RabbitConfiguration.class);
+            ctx.refresh();
+        }
+        catch (BeansException e) { 
+            logger.error(e.getMessage());
+            ctx.close();
+            ctx = null;
+            throw new PluginException("Unable to initialize context. Configuration may not be correct.");
+        }
+
         return ctx;
+    }
+
+    /**
+     * Do the programmatically-created beans exist plus one from the @Configuration class.
+     * Note: the context can be successfully initialized with invalid username/password for
+     * the ConnectionFactory because we init with the default and alert the user post validation
+     * that they need to configure these properly.
+     * @return true if initialized
+     * @throws org.hyperic.hq.product.PluginException
+     *
+     */
+    public static boolean isInitialized() throws PluginException {
+        return applicationContext != null && getBean(RabbitConfigurationManager.class) != null;
+    }
+
+    /**
+     * Do graceful shutdown and close on demand if needed.
+     */
+    public static void shutdown() {
+        if (applicationContext != null) applicationContext.close();
     }
 
 }

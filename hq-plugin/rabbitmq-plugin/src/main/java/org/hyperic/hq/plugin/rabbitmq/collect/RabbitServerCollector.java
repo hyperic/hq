@@ -27,6 +27,8 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
+import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.plugin.rabbitmq.validate.PluginValidator;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
@@ -41,22 +43,29 @@ import java.util.Properties;
 public class RabbitServerCollector extends Collector {
 
     private static final Log logger = LogFactory.getLog(RabbitServerCollector.class);
-
+ 
     @Override
     protected void init() throws PluginException {
-        Properties props = getProperties();
-        logger.debug("init[" + props + "]");
         super.init();
 
-        PluginValidator.isValidConfiguration(props);
+        Configuration configuration = Configuration.toConfiguration(getProperties());
+        logger.debug("init " + configuration);
+
+        if (RabbitProductPlugin.isNodeAvailabile(configuration)) {
+            logger.debug("Attempting to initialize plugin...");
+            RabbitProductPlugin.initialize(configuration);
+        } else {
+            throw new PluginException("Please enter a username and password and insure the Agent has permission to read the Erlang cookie.");
+        }
     }
 
     @Override
     public void collect() {
         logger.debug("collect[" + getProperties() + "]");
+        Configuration configuration = Configuration.toConfiguration(getProperties());
 
         try {
-            setAvailability(PluginValidator.isValidConfiguration(getProperties()));
+            setAvailability(RabbitProductPlugin.isNodeAvailabile(configuration));
         }
         catch (PluginException ex) {
             setAvailability(false);

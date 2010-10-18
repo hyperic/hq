@@ -76,10 +76,10 @@ public class DynamicBeanConfigurer {
      * @param isAnonymous
      * @return
      */
-    private static String generateBeanName(Class candidate, boolean isAnonymous) {
+    public static String generateBeanName(Class candidate, boolean isAnonymous) {
         String tmp = candidate.getSimpleName();
         String replace = String.valueOf(tmp.charAt(0));
-        String beanName = StringUtils.replace(tmp, replace, replace.toLowerCase());
+        String beanName = StringUtils.replace(tmp, replace, replace.toLowerCase(), 1);
         return isAnonymous ? new StringBuilder().append(beanName).append("-").append(UUID.randomUUID()).toString() : beanName;
     }                                                                
 

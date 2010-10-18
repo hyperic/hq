@@ -27,9 +27,11 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.Collector;
+import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.amqp.rabbit.admin.QueueInfo;
 
@@ -45,18 +47,27 @@ public class QueueCollector extends Collector {
 
     @Override
     public void collect() {
+        Configuration configuration = Configuration.toConfiguration(getProperties());
+        boolean isAvailable = false;
+
+        try {
+            isAvailable = RabbitProductPlugin.isNodeAvailabile(configuration);
+        } catch (PluginException e) {
+            logger.error(e.getMessage());
+        }
+
         RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
 
         if (rabbitGateway != null) {
-
+          
             try {
                 List<String> virtualHosts = rabbitGateway.getVirtualHosts();
                 if (virtualHosts != null) {
                     for (String virtualHost : virtualHosts) {
                         List<QueueInfo> queues = rabbitGateway.getQueues(virtualHost);
                         if (queues != null) {
-                            for (QueueInfo queue : queues) {
-                                setAvailability(true);
+                            for (QueueInfo queue : queues) { 
+                                setAvailability(isAvailable);
                                 setValue("messages", queue.getMessages());
                                 setValue("consumers", queue.getConsumers());
                                 setValue("transactions", queue.getTransactions());

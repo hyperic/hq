@@ -27,6 +27,7 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericChannel;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
@@ -46,8 +47,17 @@ public class ChannelCollector extends Collector {
 
     @Override
     public void collect() {
+        Configuration configuration = Configuration.toConfiguration(getProperties());
+        boolean isAvailable = false;
+
+        try {
+            isAvailable = RabbitProductPlugin.isNodeAvailabile(configuration);
+        } catch (PluginException e) {
+            logger.error(e.getMessage());
+        }
 
         RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
+
         if (rabbitGateway != null) {
 
             try {
@@ -57,7 +67,7 @@ public class ChannelCollector extends Collector {
                         List<HypericChannel> channels = rabbitGateway.getChannels(virtualHost);
                         if (channels != null) {
                             for (HypericChannel channel : channels) {
-                                setAvailability(true);
+                                setAvailability(isAvailable);
                                 setValue("consumerCount", channel.getConsumerCount());
                             }
                         } else {
