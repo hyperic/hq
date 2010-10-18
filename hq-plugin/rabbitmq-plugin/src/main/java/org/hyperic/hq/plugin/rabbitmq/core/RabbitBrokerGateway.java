@@ -25,9 +25,6 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
 
-import com.ericsson.otp.erlang.OtpErlangBinary;
-import com.ericsson.otp.erlang.OtpErlangList;
-import com.ericsson.otp.erlang.OtpErlangObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.amqp.core.*;
@@ -35,15 +32,12 @@ import org.springframework.amqp.rabbit.admin.QueueInfo;
 import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
 import org.springframework.amqp.rabbit.admin.RabbitStatus;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-
-
+ 
 import org.springframework.erlang.ErlangBadRpcException;
 import org.springframework.erlang.core.*;
 import org.springframework.erlang.core.Application;
 import org.springframework.util.Assert;
 
-import javax.annotation.PostConstruct;
 import java.util.*;
 
 /**
@@ -54,17 +48,17 @@ public class RabbitBrokerGateway implements RabbitGateway {
 
     private static final Log logger = LogFactory.getLog(RabbitBrokerGateway.class);
 
-    @Autowired
     private RabbitTemplate rabbitTemplate;
 
-    @Autowired
     private RabbitBrokerAdmin rabbitBrokerAdmin;
 
-    @Autowired
     private ErlangConverter erlangConverter;
 
-    @PostConstruct
-    public void initialize() {
+    public RabbitBrokerGateway(RabbitTemplate rabbitTemplate, RabbitBrokerAdmin rabbitBrokerAdmin, ErlangConverter erlangConverter) {
+        this.rabbitTemplate = rabbitTemplate;
+        this.rabbitBrokerAdmin = rabbitBrokerAdmin;
+        this.erlangConverter = erlangConverter;
+
         Assert.notNull(rabbitTemplate, "rabbitTemplate must not be null");
         Assert.notNull(rabbitBrokerAdmin, "rabbitBrokerAdmin must not be null");
         Assert.notNull(erlangConverter, "erlangConverter must not be null");

@@ -27,13 +27,11 @@ package org.hyperic.hq.plugin.rabbitmq.configure;
 
 import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericBrokerAdmin;
-import org.hyperic.util.config.ConfigResponse;
-import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
-import org.springframework.util.Assert;
 
 /**
  * BeanDefinitionBuilder
@@ -41,87 +39,106 @@ import org.springframework.util.Assert;
  */
 public class BeanDefinitionBuilder {
 
-    public GenericBeanDefinition build(Class beanType, ConfigResponse conf, BeanDefinition beanDef) {
-        if (beanType.isAssignableFrom(SingleConnectionFactory.class)) {
-            return build(conf);
+    public GenericBeanDefinition build(Class beanType, Configuration conf, BeanDefinition beanDef) {
+
+        if (beanType.isAssignableFrom(CachingConnectionFactory.class)) {
+            return build(beanType, conf.getHostname());
         }
-        else if (beanType.isAssignableFrom(HypericBrokerAdmin.class) && beanDef!= null) {
-            return build(conf, beanDef);
+        else if (beanType.isAssignableFrom(Configuration.class)) {
+            return build(beanType, conf);
+        }
+        else if (beanType.isAssignableFrom(HypericBrokerAdmin.class) && beanDef != null) {
+            return build(beanType, conf.getAuthentication(), beanDef);
         }
         return null;
     }
 
-    private GenericBeanDefinition build(ConfigResponse conf) {
-        ConnectionFactoryBeanDefinitionBuilder builder = new ConnectionFactoryBeanDefinitionBuilder();
-        return builder.build(conf);
+    public GenericBeanDefinition build(Class beanType) {
+        GenericBeanDefinitionBuilder builder = new GenericBeanDefinitionBuilder();
+        return builder.build(beanType);
     }
 
-    private GenericBeanDefinition build(ConfigResponse conf, BeanDefinition beanDef) {
+    private GenericBeanDefinition build(Class beanType, Configuration conf) {
+        ConfigBeanDefinitionBuilder builder = new ConfigBeanDefinitionBuilder();
+        return builder.build(beanType, conf);
+    }
+
+    private GenericBeanDefinition build(Class beanType, String host) {
+        ConnectionFactoryBeanDefinitionBuilder builder = new ConnectionFactoryBeanDefinitionBuilder();
+        return builder.build(beanType, host);
+    }
+
+    private GenericBeanDefinition build(Class beanType, String auth, BeanDefinition beanDef) {
         BrokerAdminBeanDefinitionBuilder builder = new BrokerAdminBeanDefinitionBuilder();
-        return builder.build(conf, beanDef);
+        return builder.build(beanType, auth, beanDef);
     }
 
     /**
-     * Create a BeanDefinition for org.springframework.amqp.rabbit.connection.SingleConnectionFactory
-     * programmatically to pre-initialize pending dependent beans initialized normally by Spring.
-     * </p>
-     * Replace SingleConnectionFactory with CachingConnectionFactory when it's ready.
-     * @see org.springframework.amqp.rabbit.connection.SingleConnectionFactory
+     * Build BeanDefinition dynamically for beans with no dependencies to inject.
+     */
+    private class GenericBeanDefinitionBuilder {
+
+        private GenericBeanDefinition build(Class beanType) {
+            GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
+            beanDefinition.setBeanClass(beanType);
+            return beanDefinition;
+        }
+    }
+    
+    /**
+     * Build BeanDefinition for org.springframework.amqp.rabbit.connection.CachingConnectionFactory
+     * to pre-initialize all pending dependent beans in the plugin context.
+     * This BeanDefinition is created after host is set and before it is validated against the broker.
      * @see org.springframework.amqp.rabbit.connection.CachingConnectionFactory
      */
     private class ConnectionFactoryBeanDefinitionBuilder {
 
-        private GenericBeanDefinition build(ConfigResponse config) {
-            String host = config.getValue(DetectorConstants.HOST);
-            String username = config.getValue(DetectorConstants.USERNAME);
-            String password = config.getValue(DetectorConstants.PASSWORD);
-
-            Assert.hasText(host, "Connection: host must not be null");
-            Assert.hasText(username, "Connection: username must not be null");
-            Assert.hasText(password, "Connection: password must not be null");
-
+        private GenericBeanDefinition build(Class beanType, String hostName) {
             GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
-            beanDefinition.setBeanClass(SingleConnectionFactory.class);
+            beanDefinition.setBeanClass(beanType);
+            ConstructorArgumentValues.ValueHolder vh = new ConstructorArgumentValues.ValueHolder(hostName, "java.lang.String", "hostName");
 
             ConstructorArgumentValues constructorArgs = new ConstructorArgumentValues();
-            constructorArgs.addGenericArgumentValue(host, "String");
+            constructorArgs.addGenericArgumentValue(vh);
             beanDefinition.setConstructorArgumentValues(constructorArgs);
-
-            MutablePropertyValues props = new MutablePropertyValues();
-            props.addPropertyValue(DetectorConstants.USERNAME, username);
-            props.addPropertyValue(DetectorConstants.PASSWORD, password);
-
-            if (config.getValue(DetectorConstants.PORT) != null) {
-                props.addPropertyValue(DetectorConstants.PORT, Integer.valueOf(config.getValue(DetectorConstants.PORT)));
-            }
-
-            beanDefinition.setPropertyValues(props);
-
             return beanDefinition;
         }
     }
 
     /**
-     * Build BeanDefinition for HypericBrokerAdmin
+     * Build BeanDefinition for HypericBrokerAdmin is created after
+     * an erlang cookie value is set and validated against the broker.
      */
     private class BrokerAdminBeanDefinitionBuilder {
 
-        private GenericBeanDefinition build(ConfigResponse conf, BeanDefinition beanDef) {
-            if (conf.getValue(DetectorConstants.AUTHENTICATION) != null) {
-                String auth = conf.getValue(DetectorConstants.AUTHENTICATION);
-                Assert.hasText(auth, "ErlangConnection: cookie auth must not be null");
+        private GenericBeanDefinition build(Class beanType, String auth, BeanDefinition beanDef) {
+            GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
+            beanDefinition.setBeanClass(beanType);
 
-                GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
-                beanDefinition.setBeanClass(HypericBrokerAdmin.class);
+            ConstructorArgumentValues constructorArgs = new ConstructorArgumentValues();
+            constructorArgs.addIndexedArgumentValue(0, beanDef);
+            constructorArgs.addIndexedArgumentValue(1, auth);
+            beanDefinition.setConstructorArgumentValues(constructorArgs);
 
-                ConstructorArgumentValues constructorArgs = new ConstructorArgumentValues();
-                constructorArgs.addIndexedArgumentValue(0, beanDef);
-                constructorArgs.addIndexedArgumentValue(1, auth);
-                beanDefinition.setConstructorArgumentValues(constructorArgs);
+            return beanDefinition;
+        }
+    }
 
-                return beanDefinition;
-            }
-            return null;
+    private class ConfigBeanDefinitionBuilder {
+
+        private GenericBeanDefinition build(Class beanType, Configuration conf) {
+            GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
+            beanDefinition.setBeanClass(beanType);
+
+            MutablePropertyValues props = new MutablePropertyValues();
+            props.add(DetectorConstants.HOST, conf.getHostname());
+            props.add(DetectorConstants.AUTHENTICATION, conf.getAuthentication());
+            props.add(DetectorConstants.USERNAME, conf.getUsername());
+            props.add(DetectorConstants.PASSWORD, conf.getPassword());
+
+            beanDefinition.setPropertyValues(props);
+
+            return beanDefinition;
         }
     }
 }

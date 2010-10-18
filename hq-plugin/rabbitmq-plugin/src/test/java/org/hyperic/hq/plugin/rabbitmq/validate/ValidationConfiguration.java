@@ -65,9 +65,5 @@ public class ValidationConfiguration {
 
         return conf;
     }
-
-    @Bean
-    public PluginValidator rabbitValidator() {
-        return new PluginValidator();
-    }
+ 
 }

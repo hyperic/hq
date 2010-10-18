@@ -63,9 +63,6 @@ public class RabbitGatewayTest extends AbstractSpringTest {
     @Test
     public void getQueues() throws PluginException { 
         List<QueueInfo> queues = rabbitGateway.getQueues("/");
-        for(QueueInfo q:queues) {
-            System.out.println(q);
-        }
         assertNotNull(queues);
     }
 
