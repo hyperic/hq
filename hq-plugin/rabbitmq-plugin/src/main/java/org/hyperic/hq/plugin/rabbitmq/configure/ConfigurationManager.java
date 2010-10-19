@@ -27,6 +27,7 @@ package org.hyperic.hq.plugin.rabbitmq.configure;
 
 import org.hyperic.hq.plugin.rabbitmq.core.ErlangConverter;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitVirtualHost;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
@@ -40,25 +41,9 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 public interface ConfigurationManager {
 
     void initialize() throws PluginException;
+
+    void addVirtualHost(Configuration configuration) throws PluginException;
     
-    CachingConnectionFactory getConnectionFactory();
-
-    RabbitGateway getRabbitGateway();
-
-    RabbitTemplate getRabbitTemplate();
-
-    RabbitBrokerAdmin getRabbitBrokerAdmin();
-
-    ErlangConverter getErlangConverter();
-    
-    void configureUsernamePassword(ConfigResponse conf);
-
-    void configureVirtualHost(ConfigResponse conf);
-
-    void configurePort(ConfigResponse conf);
-
-    void configureBrokerAdmin();
-
     boolean isActive();
 
     int getPort();

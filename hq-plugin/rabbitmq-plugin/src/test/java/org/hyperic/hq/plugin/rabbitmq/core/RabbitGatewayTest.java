@@ -27,10 +27,7 @@ package org.hyperic.hq.plugin.rabbitmq.core;
 
 
 import org.hyperic.hq.plugin.rabbitmq.AbstractSpringTest;
-import org.hyperic.hq.plugin.rabbitmq.core.HypericChannel;
 import org.springframework.amqp.core.Queue;
-import org.hyperic.hq.plugin.rabbitmq.core.AMQPStatus;
-import org.hyperic.hq.plugin.rabbitmq.core.HypericConnection;
 import org.hyperic.hq.product.PluginException;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -71,7 +68,7 @@ public class RabbitGatewayTest extends AbstractSpringTest {
         com.rabbitmq.client.Connection conn = singleConnectionFactory.createConnection();
         List<String> vHosts = rabbitGateway.getVirtualHosts();
         for (String vhost : vHosts) {
-            List<HypericConnection> cons = rabbitGateway.getConnections(vhost);
+            List<RabbitConnection> cons = rabbitGateway.getConnections(vhost);
             assertTrue(cons.size() > 0);
         }
 
@@ -86,7 +83,7 @@ public class RabbitGatewayTest extends AbstractSpringTest {
         
         List<String> vHosts = rabbitGateway.getVirtualHosts();
         for (String vhost : vHosts) {
-            List<HypericChannel> channels = rabbitGateway.getChannels(vhost);
+            List<RabbitChannel> channels = rabbitGateway.getChannels(vhost);
             assertTrue(channels.size() > 0);
         }
         conn.close();

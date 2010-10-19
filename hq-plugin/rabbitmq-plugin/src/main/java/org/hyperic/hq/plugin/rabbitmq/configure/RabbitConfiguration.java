@@ -27,34 +27,42 @@ package org.hyperic.hq.plugin.rabbitmq.configure;
 
 import org.hyperic.hq.plugin.rabbitmq.core.*;
 
-import org.hyperic.hq.product.PluginException; 
+import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ImportResource;
 
 /**
- * RabbitConfig configures Spring AMQP RabbitMQ objects
+ * RabbitConfiguration is a prototype configuration bean:
+ * one for each node/virtualHost.
  * @author Helena Edelson
  */
-@ImportResource("classpath:/etc/rabbitmq-context.xml")
 public class RabbitConfiguration {
+      
+    @Autowired
+    private Configuration configuration;
 
     @Autowired
-    private Configuration initialConfiguration;
+    private ConfigurationManager configurationManager;
 
-    @Bean(initMethod = "initialize")
-    public ConfigurationManager configurationManager() throws PluginException {
-        return new RabbitConfigurationManager();
+    @Bean
+    public CachingConnectionFactory connectionFactory() {
+        CachingConnectionFactory ccf = new CachingConnectionFactory(configuration.getHostname());
+        ccf.setUsername(configuration.getUsername());
+        ccf.setPassword(configuration.getPassword());
+        ccf.setVirtualHost(configuration.getVirtualHost());
+        return ccf;
     }
 
-   /* @Bean
+    @Bean
     public RabbitBrokerAdmin rabbitBrokerAdmin() {
-        return new HypericBrokerAdmin(configurationManager().getConnectionFactory(), initialConfiguration.getAuthentication());
+        return new HypericBrokerAdmin(connectionFactory(), configuration.getAuthentication());
     }
 
     @Bean
     public RabbitTemplate rabbitTemplate() {
-        return new RabbitTemplate(configurationManager().getConnectionFactory());
+        return new RabbitTemplate(connectionFactory());
     }
 
     @Bean
@@ -65,6 +73,6 @@ public class RabbitConfiguration {
     @Bean
     public RabbitGateway rabbitGateway() {
         return new RabbitBrokerGateway(rabbitTemplate(), rabbitBrokerAdmin(), erlangConverter());
-    }*/
+    }
 
 }

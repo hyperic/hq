@@ -47,18 +47,12 @@ public class ExchangeCollector extends Collector {
 
     @Override
     public void collect() {
-        Configuration configuration = Configuration.toConfiguration(getProperties());
         boolean isAvailable = false;
-
-        try {
-            isAvailable = RabbitProductPlugin.isNodeAvailabile(configuration);
-        } catch (PluginException e) {
-            logger.error(e.getMessage());
-        }
 
         RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
 
         if (rabbitGateway != null) {
+            isAvailable = true;
 
             try {
                 List<String> virtualHosts = rabbitGateway.getVirtualHosts();

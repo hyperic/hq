@@ -29,17 +29,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.*;
 import org.hyperic.hq.product.PluginException;
-import org.hyperic.util.config.ConfigResponse;
-import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
-import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.AbstractApplicationContext; 
 import org.springframework.util.Assert;
  
 import java.util.List;
 
 /**
- * BrokerServiceGateway
+ * RabbitConfigurationManager
  * @author Helena Edelson
  */
 public class RabbitConfigurationManager implements ConfigurationManager {
@@ -49,102 +46,26 @@ public class RabbitConfigurationManager implements ConfigurationManager {
     @Autowired
     private Configuration configuration;
 
-    private CachingConnectionFactory connectionFactory;
-
-    private RabbitBrokerAdmin rabbitBrokerAdmin;
-
-    private RabbitTemplate rabbitTemplate;
-
-    private RabbitGateway rabbitGateway;
-
-    private ErlangConverter erlangConverter;
-
-    private volatile List<String> virtualHosts;
+    private List<AbstractApplicationContext> contexts;
+        
+    private volatile List<RabbitNode> nodes;
 
     private volatile boolean active;
-
-    private int port;
 
     public void initialize() throws PluginException {
 
         if (configuration.isConfigured()) {
-            this.connectionFactory = new CachingConnectionFactory(configuration.getHostname());
-            this.connectionFactory.setUsername(configuration.getUsername());
-            this.connectionFactory.setPassword(configuration.getPassword());
-            this.connectionFactory.setChannelCacheSize(10);
-            Assert.notNull(connectionFactory, "connectionFactory must not be null.");
 
-            this.rabbitBrokerAdmin = new HypericBrokerAdmin(connectionFactory, configuration.getAuthentication());
-            Assert.notNull(rabbitBrokerAdmin, "rabbitBrokerAdmin must not be null.");
+        } 
+    }
 
-            this.rabbitTemplate = new RabbitTemplate(connectionFactory);
-            Assert.notNull(rabbitTemplate, "rabbitTemplate must not be null.");
-
-            this.erlangConverter = new HypericErlangConverter(rabbitBrokerAdmin.getErlangTemplate());
-            Assert.notNull(erlangConverter, "erlangConverter must not be null.");
-
-            this.rabbitGateway = new RabbitBrokerGateway(rabbitTemplate, rabbitBrokerAdmin, erlangConverter);
-            Assert.notNull(rabbitGateway, "rabbitGateway must not be null.");
-
-            this.active = rabbitGateway.getRabbitStatus() != null; 
+    public void addVirtualHost(Configuration configuration) throws PluginException {
+        if (configuration.isConfigured() && configuration.getVirtualHost() != null) {
+            RabbitVirtualHost vh = RabbitVirtualHost.fromConfiguration(configuration);
+            if (vh != null) {
+                
+            }
+            RabbitContextCreator.createContext();
         }
     }
-
-    public CachingConnectionFactory getConnectionFactory() {
-        return connectionFactory;
-    }
-
-    public RabbitGateway getRabbitGateway() {
-        return rabbitGateway;
-    }
-
-    public RabbitBrokerAdmin getRabbitBrokerAdmin() {
-        return rabbitBrokerAdmin;
-    }
-
-    public RabbitTemplate getRabbitTemplate() {
-        return rabbitTemplate;
-    }
-
-    public ErlangConverter getErlangConverter() {
-        return erlangConverter;
-    }
- 
-    /**
-     * make these cleaner
-     */
-    public void configureUsernamePassword(ConfigResponse conf) {
-        Assert.hasText(conf.getValue(DetectorConstants.USERNAME), connectionFactory + ": username must not be null");
-        this.connectionFactory.setUsername(conf.getValue(DetectorConstants.USERNAME));
-
-        Assert.hasText(conf.getValue(DetectorConstants.PASSWORD), connectionFactory + ": password must not be null");
-        this.connectionFactory.setPassword(conf.getValue(DetectorConstants.PASSWORD));
-    }
-
-    public void configureVirtualHost(ConfigResponse conf) {
-        Assert.hasText(conf.getValue(DetectorConstants.VIRTUAL_HOST), connectionFactory + ": virtualHost must not be null");
-        this.connectionFactory.setVirtualHost(conf.getValue(DetectorConstants.VIRTUAL_HOST));
-    }
-
-    public void configurePort(ConfigResponse conf) {
-        this.connectionFactory.setPort(Integer.valueOf(conf.getValue(DetectorConstants.PORT)));
-    }
-
-    public void configureBrokerAdmin() {
-
-    }
-
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
-
 }

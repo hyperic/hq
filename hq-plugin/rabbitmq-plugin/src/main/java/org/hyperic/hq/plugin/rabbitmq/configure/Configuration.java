@@ -26,6 +26,7 @@
 package org.hyperic.hq.plugin.rabbitmq.configure;
 
 import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
+import org.hyperic.hq.plugin.rabbitmq.validate.PluginConfigurationException;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 
@@ -41,6 +42,8 @@ public class Configuration {
 
     private String hostname;
 
+    private String virtualHost;
+
     private String authentication;
 
     private String username;
@@ -51,7 +54,8 @@ public class Configuration {
 
     @Override
     public String toString() {
-        return new StringBuilder("[nodename=").append(nodename).append(" host=").append(hostname).append(" authentication=").append(authentication)
+        return new StringBuilder("[nodename=").append(nodename).append(" host=").append(hostname)
+                .append(" virtualHost=").append(virtualHost).append(" authentication=").append(authentication)
                 .append(" username=").append(username).append(" password=").append(password).append("]").toString();
     }
 
@@ -63,16 +67,20 @@ public class Configuration {
      * @throws org.hyperic.hq.product.PluginException 
      */
     public boolean isConfigured() throws PluginException {
+        if (nodename == null || virtualHost == null) {
+            throw new PluginConfigurationException("This resource requires the node and virtual host names of the broker.");
+        }
+
         if (username == null || password == null) {
-            throw new PluginException("This resource requires a username and password for the broker.");
+            throw new PluginConfigurationException("This resource requires a username and password for the broker.");
         }
 
         if (authentication == null) {
-            throw new PluginException("Erlang cookie value is not set yet.");
+            throw new PluginConfigurationException("Erlang cookie value is not set yet.");
         }
 
         if (hostname == null) {
-            throw new PluginException("Host name must not be null.");
+            throw new PluginConfigurationException("Host name must not be null.");
         }
         return true;
     }
@@ -141,9 +149,18 @@ public class Configuration {
         this.port = port;
     }
 
+    public String getVirtualHost() {
+        return virtualHost;
+    }
+
+    public void setVirtualHost(String virtualHost) {
+        this.virtualHost = virtualHost;
+    }
+
     public static Configuration toConfiguration(Properties props) {
         Configuration conf = new Configuration();
         conf.setNodename(props.getProperty(DetectorConstants.SERVER_NAME));
+        conf.setVirtualHost(props.getProperty(DetectorConstants.VIRTUALHOST));
         conf.setAuthentication(props.getProperty(DetectorConstants.AUTHENTICATION));
         conf.setHostname(props.getProperty(DetectorConstants.HOST));
         conf.setUsername(props.getProperty(DetectorConstants.USERNAME));
@@ -159,6 +176,7 @@ public class Configuration {
     public static Configuration toConfiguration(ConfigResponse configResponse) {
         Configuration conf = new Configuration();
         conf.setNodename(configResponse.getValue(DetectorConstants.SERVER_NAME));
+        conf.setVirtualHost(configResponse.getValue(DetectorConstants.VIRTUALHOST));
         conf.setAuthentication(configResponse.getValue(DetectorConstants.AUTHENTICATION));
         conf.setHostname(configResponse.getValue(DetectorConstants.HOST));
         conf.setUsername(configResponse.getValue(DetectorConstants.USERNAME));

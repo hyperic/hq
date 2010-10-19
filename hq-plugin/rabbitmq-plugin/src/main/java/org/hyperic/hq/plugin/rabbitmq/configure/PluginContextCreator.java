@@ -27,13 +27,11 @@ package org.hyperic.hq.plugin.rabbitmq.configure;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.core.HypericBrokerAdmin;
-import org.hyperic.hq.product.PluginException;
-import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.hyperic.hq.product.PluginException; 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.GenericBeanDefinition; 
+import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.AbstractApplicationContext;
 
@@ -72,14 +70,14 @@ public class PluginContextCreator {
     /**
      * Create and set the ApplicationContext.
      * @param configuration
-     * @return true if initialized
+     * @return initialized context if operation successful, else null
      * @throws org.hyperic.hq.product.PluginException
      *
      */
     public static void createContext(Configuration configuration) throws PluginException {
         if (applicationContext == null) {
-            applicationContext = doCreateApplicationContext(configuration); 
-        } 
+            applicationContext = doCreateApplicationContext(configuration);
+        }
     }
 
     /**
@@ -90,28 +88,22 @@ public class PluginContextCreator {
      *
      */
     protected static AbstractApplicationContext doCreateApplicationContext(Configuration conf) throws PluginException {
-        AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-        ctx.registerShutdownHook();
+        AnnotationConfigApplicationContext ctx = null;
 
         try {
 
-            GenericBeanDefinition configProcessorBeanDef = new BeanDefinitionBuilder().build(Configuration.class, conf, null);
+            ctx = new AnnotationConfigApplicationContext();
+            ctx.registerShutdownHook();
+
+            GenericBeanDefinition configProcessorBeanDef = new BeanDefinitionBuilder().build(Configuration.class, conf);
             DynamicBeanConfigurer.registerBean(configProcessorBeanDef, (DefaultListableBeanFactory) ctx.getBeanFactory());
-
-            /*GenericBeanDefinition connBeanDef = new BeanDefinitionBuilder().build(RabbitConfigurationManager.class, conf, null);
-            DynamicBeanConfigurer.registerBean(connBeanDef, (DefaultListableBeanFactory) ctx.getBeanFactory());
-
-            GenericBeanDefinition adminBeanDef = new BeanDefinitionBuilder().build(HypericBrokerAdmin.class, conf, connBeanDef);
-            DynamicBeanConfigurer.registerBean(adminBeanDef, (DefaultListableBeanFactory) ctx.getBeanFactory());*/
-
-            ctx.register(RabbitConfiguration.class);
+            
+            ctx.register(PluginConfiguration.class);
             ctx.refresh();
         }
-        catch (BeansException e) { 
+        catch (BeansException e) {
             logger.error(e.getMessage());
-            ctx.close();
-            ctx = null;
-            throw new PluginException("Unable to initialize context. Configuration may not be correct.");
+            ctx.close(); 
         }
 
         return ctx;

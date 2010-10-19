@@ -34,7 +34,6 @@ import org.springframework.amqp.rabbit.admin.RabbitStatus;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
  
 import org.springframework.erlang.ErlangBadRpcException;
-import org.springframework.erlang.core.*;
 import org.springframework.erlang.core.Application;
 import org.springframework.util.Assert;
 
@@ -77,9 +76,9 @@ public class RabbitBrokerGateway implements RabbitGateway {
     }
 
     @SuppressWarnings("unchecked")
-    public List<HypericBinding> getBindings(String virtualHost) throws ErlangBadRpcException {
+    public List<RabbitBinding> getBindings(String virtualHost) throws ErlangBadRpcException {
         Assert.hasText(virtualHost);
-        return (List<HypericBinding>) erlangConverter.fromErlangRpc("rabbit_exchange", "list_bindings", virtualHost, HypericBinding.class);
+        return (List<RabbitBinding>) erlangConverter.fromErlangRpc("rabbit_exchange", "list_bindings", virtualHost, RabbitBinding.class);
     }
     
     /**
@@ -100,13 +99,13 @@ public class RabbitBrokerGateway implements RabbitGateway {
      *
      */
     @SuppressWarnings("unchecked")
-    public List<HypericConnection> getConnections(String virtualHost) throws ErlangBadRpcException {
-        return (List<HypericConnection>) erlangConverter.fromErlangRpc("rabbit_networking", "connection_info_all", null, HypericConnection.class);
+    public List<RabbitConnection> getConnections(String virtualHost) throws ErlangBadRpcException {
+        return (List<RabbitConnection>) erlangConverter.fromErlangRpc("rabbit_networking", "connection_info_all", null, RabbitConnection.class);
     }
 
     @SuppressWarnings("unchecked")
-    public List<HypericChannel> getChannels(String virtualHost) throws ErlangBadRpcException {
-        return (List<HypericChannel>) erlangConverter.fromErlangRpc("rabbit_channel", "info_all", null, HypericChannel.class);
+    public List<RabbitChannel> getChannels(String virtualHost) throws ErlangBadRpcException {
+        return (List<RabbitChannel>) erlangConverter.fromErlangRpc("rabbit_channel", "info_all", null, RabbitChannel.class);
     }
 
     /**
