@@ -2113,9 +2113,15 @@ hyperic.dashboard.chartWidget = function(args) {
     	
     	that._fetchingChart = true;
     	
-    	// console.log('fetching from url ' + "/api.shtml?v=1.0&s_id=chart&rid=" + that.charts[chart].rid + "&mtid=[" + that.charts[chart].mtid + "]");
-        return dojo11.xhrGet( {
-            url: baseUrl + "/chart/" + that.charts[chart].rid + "/" + that.charts[chart].mtid + "/",
+    	var chartUrl = baseUrl + "/chart/" + that.charts[chart].rid + "/" + that.charts[chart].mtid + "/";
+    	var ctype = that.charts[chart].ctype;
+    	
+    	if (ctype != null) {
+    		chartUrl += ctype + "/";
+    	}
+    
+    	return dojo11.xhrGet( {
+            url: chartUrl,
             handleAs: 'json',
             headers: { "Content-Type": "application/json"},
             preventCache: true,
