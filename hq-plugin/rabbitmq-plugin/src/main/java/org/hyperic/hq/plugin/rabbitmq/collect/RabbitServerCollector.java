@@ -43,7 +43,7 @@ import java.util.Properties;
 public class RabbitServerCollector extends Collector {
 
     private static final Log logger = LogFactory.getLog(RabbitServerCollector.class);
- 
+
     @Override
     protected void init() throws PluginException {
         super.init();
@@ -51,7 +51,7 @@ public class RabbitServerCollector extends Collector {
         Configuration configuration = Configuration.toConfiguration(getProperties());
         logger.debug("init " + configuration);
 
-        if (RabbitProductPlugin.isNodeAvailabile(configuration)) {
+        if (RabbitProductPlugin.getRabbitGateway() == null && configuration.isConfiguredOtpConnection()) {
             logger.debug("Attempting to initialize plugin...");
             RabbitProductPlugin.initialize(configuration);
         } else {
@@ -65,13 +65,21 @@ public class RabbitServerCollector extends Collector {
         Configuration configuration = Configuration.toConfiguration(getProperties());
 
         try {
+
             setAvailability(RabbitProductPlugin.isNodeAvailabile(configuration));
+
+            if (RabbitProductPlugin.getRabbitGateway() == null && configuration.isConfiguredOtpConnection()) {
+                logger.debug("Attempting to initialize plugin...");
+                RabbitProductPlugin.initialize(configuration);
+            }
+            else {
+                throw new PluginException("Please enter a username and password and insure the Agent has permission to read the Erlang cookie.");
+            }
+            
         }
         catch (PluginException ex) {
             setAvailability(false);
             logger.debug(ex, ex);
         }
     }
-
-
 }

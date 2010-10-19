@@ -97,11 +97,11 @@ public class HypericErlangConverter extends RabbitControlErlangConverter impleme
                 return convertExchanges(response, virtualHost);
             } else if (type.isAssignableFrom(String.class)) {
                 return convertVirtualHosts(response);
-            } else if (type.isAssignableFrom(HypericConnection.class)) {
+            } else if (type.isAssignableFrom(RabbitConnection.class)) {
                 return convertConnections(response);
-            } else if (type.isAssignableFrom(HypericChannel.class)) {
+            } else if (type.isAssignableFrom(RabbitChannel.class)) {
                 return convertChannels(response);
-            } else if (type.isAssignableFrom(HypericBinding.class)) {
+            } else if (type.isAssignableFrom(RabbitBinding.class)) {
                 return convertBindings(response);
             } else if (type.isAssignableFrom(QueueInfo.class)) {
                 return convertQueues(response);
@@ -119,7 +119,7 @@ public class HypericErlangConverter extends RabbitControlErlangConverter impleme
         return queueConverter.fromErlang(response);
     }
 
-    private List<HypericBinding> convertBindings(OtpErlangObject response) {
+    private List<RabbitBinding> convertBindings(OtpErlangObject response) {
         return null;
     }
 
@@ -128,19 +128,19 @@ public class HypericErlangConverter extends RabbitControlErlangConverter impleme
      * @param response
      * @return
      */
-    private List<HypericChannel> convertChannels(OtpErlangObject response) {
-        List<HypericChannel> channels = null;
+    private List<RabbitChannel> convertChannels(OtpErlangObject response) {
+        List<RabbitChannel> channels = null;
 
         long items = ((OtpErlangList) response).elements().length;
 
         if (items > 0) {
-            channels = new ArrayList<HypericChannel>();
+            channels = new ArrayList<RabbitChannel>();
 
             if (response instanceof OtpErlangList) {
 
                 for (OtpErlangObject outerList : ((OtpErlangList) response).elements()) {
                     if (outerList instanceof OtpErlangList) {
-                        HypericChannel channel = new HypericChannel();
+                        RabbitChannel channel = new RabbitChannel();
 
                         for (OtpErlangObject innerListObj : ((OtpErlangList) outerList).elements()) {
 
@@ -253,20 +253,20 @@ public class HypericErlangConverter extends RabbitControlErlangConverter impleme
      * @return
      * @throws OtpErlangException
      */
-    private List<HypericConnection> convertConnections(OtpErlangObject response) throws OtpErlangException {
-        List<HypericConnection> connections = null;
+    private List<RabbitConnection> convertConnections(OtpErlangObject response) throws OtpErlangException {
+        List<RabbitConnection> connections = null;
 
         long items = ((OtpErlangList) response).elements().length;
 
         if (items > 0) {
-            connections = new ArrayList<HypericConnection>();
+            connections = new ArrayList<RabbitConnection>();
 
             if (response instanceof OtpErlangList) {
 
                 for (OtpErlangObject outerList : ((OtpErlangList) response).elements()) {
                     if (outerList instanceof OtpErlangList) {
 
-                        HypericConnection connection = new HypericConnection();
+                        RabbitConnection connection = new RabbitConnection();
 
                         String host = null;
 

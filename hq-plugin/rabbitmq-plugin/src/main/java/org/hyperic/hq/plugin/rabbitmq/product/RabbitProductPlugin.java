@@ -32,9 +32,12 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.configure.ConfigurationManager;
 import org.hyperic.hq.plugin.rabbitmq.configure.PluginContextCreator;
 import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitVirtualHost;
 import org.hyperic.hq.plugin.rabbitmq.validate.PluginValidator;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.product.*;
+
+import java.util.List;
 
 /**
  * RabbitProductPlugin
@@ -46,10 +49,6 @@ public class RabbitProductPlugin extends ProductPlugin {
     private static final Log logger = LogFactory.getLog(RabbitProductPlugin.class);
 
     private static ConfigurationManager configurationManager;
-
-    private static String nodename;
-
-    private static String auth;
 
     private static RabbitGateway rabbitGateway;
 
@@ -72,15 +71,19 @@ public class RabbitProductPlugin extends ProductPlugin {
      *
      */
     public static boolean isNodeAvailabile(Configuration configuration) throws PluginException {
-        logger.debug("Node check with incoming " + configuration + " and preset auth=" + auth + " node=" + nodename);
-        if (!configuration.isConfiguredOtpConnection() && auth != null && nodename != null) {
-            configuration.setAuthentication(auth);
-            configuration.setNodename(nodename);
-        }
-        logger.debug("Node check proceeding with " + configuration);
-        
         return configuration.isConfiguredOtpConnection() && PluginValidator.isValidOtpConnection(configuration);
     }
+
+    public static List<String> getVirtualHosts(Configuration configuration) throws PluginException {
+        return PluginValidator.getVirtualHosts(configuration);
+    }
+
+    public static void addVirtualHost(Configuration configuration) throws PluginException {
+        if (configurationManager != null) {
+            configurationManager.addVirtualHost(configuration);
+        }
+    }
+
 
     /**
      * Called by Collectors which only have Properties.
@@ -90,16 +93,11 @@ public class RabbitProductPlugin extends ProductPlugin {
      *
      */
     public static boolean initialize(Configuration configuration) throws PluginException {
-        logger.debug("Configuration for init " + configuration);
         if (configuration.isConfigured()) {
-            nodename = configuration.getNodename();
-            auth = configuration.getAuthentication();
-            logger.debug("All configurations are set. Creating context.");
 
             PluginContextCreator.createContext(configuration);
 
             if (PluginContextCreator.isInitialized()) {
-                logger.debug("Context initalized. Validating rabbit connection.");
                 configurationManager = PluginContextCreator.getBean(ConfigurationManager.class);
                 rabbitGateway = configurationManager.getRabbitGateway();
                 /** ToDo add a valid username/password check. */

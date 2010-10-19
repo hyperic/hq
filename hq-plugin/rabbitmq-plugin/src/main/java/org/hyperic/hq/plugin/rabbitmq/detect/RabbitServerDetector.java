@@ -37,6 +37,7 @@ import org.hyperic.hq.plugin.rabbitmq.collect.*;
 import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
 import org.hyperic.hq.plugin.rabbitmq.core.*;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
+import org.hyperic.hq.plugin.rabbitmq.validate.PluginValidator;
 import org.hyperic.hq.product.*;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.amqp.core.Exchange;
@@ -106,16 +107,10 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
 
         configure(serviceConfig);
 
-        if (RabbitProductPlugin.getRabbitGateway() == null) {
-            Configuration configuration = Configuration.toConfiguration(serviceConfig);
-            
-            if (RabbitProductPlugin.isNodeAvailabile(configuration)) {
-                logger.debug("Attempting to initialize plugin...");
-                RabbitProductPlugin.initialize(configuration);
-            }
-            else {
-                throw new PluginException("Please enter a username and password and insure the Agent has permission to read the Erlang cookie.");
-            }
+        Configuration configuration = Configuration.toConfiguration(serviceConfig);
+
+        if (RabbitProductPlugin.getRabbitGateway() == null && configuration.isConfigured()) {
+            RabbitProductPlugin.initialize(configuration);
         }
 
         List<ServiceResource> rabbitResources = createRabbitResources(serviceConfig);
@@ -144,7 +139,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
 
                 if (virtualHosts != null) {
                     rabbitResources = new ArrayList<ServiceResource>();
-
+                     
                     for (String virtualHost : virtualHosts) {
                         ServiceResource vHost = createServiceResource(DetectorConstants.VIRTUAL_HOST);
                         vHost.setName(new StringBuilder().append(getTypeInfo().getName())
@@ -200,7 +195,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      */
     protected List<ServiceResource> createConnectionServiceResources(RabbitGateway rabbitGateway, String nodeName, String vHost) throws PluginException {
         List<ServiceResource> serviceResources = null;
-        List<HypericConnection> connections = rabbitGateway.getConnections(vHost);
+        List<RabbitConnection> connections = rabbitGateway.getConnections(vHost);
         if (connections != null) {
             serviceResources = doCreateServiceResources(connections, DetectorConstants.CONNECTION, nodeName, vHost);
         }
@@ -217,7 +212,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      */
     protected List<ServiceResource> createChannelServiceResources(RabbitGateway rabbitGateway, String nodeName, String vHost) throws PluginException {
         List<ServiceResource> serviceResources = null;
-        List<HypericChannel> channels = rabbitGateway.getChannels(vHost);
+        List<RabbitChannel> channels = rabbitGateway.getChannels(vHost);
         if (channels != null) {
             serviceResources = doCreateServiceResources(channels, DetectorConstants.CHANNEL, nodeName, vHost);
         }
@@ -268,12 +263,15 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
 
                 if (obj instanceof QueueInfo) {
                     service.setCustomProperties(QueueCollector.getAttributes((QueueInfo) obj));
-                } else if (obj instanceof HypericConnection) {
-                    service.setCustomProperties(ConnectionCollector.getAttributes((HypericConnection) obj));
-                } else if (obj instanceof Exchange) {
+                }
+                else if (obj instanceof RabbitConnection) {
+                    service.setCustomProperties(ConnectionCollector.getAttributes((RabbitConnection) obj));
+                }
+                else if (obj instanceof Exchange) {
                     service.setCustomProperties(ExchangeCollector.getAttributes((Exchange) obj));
-                } else if (obj instanceof HypericChannel) {
-                    service.setCustomProperties(ChannelCollector.getAttributes((HypericChannel) obj));
+                }
+                else if (obj instanceof RabbitChannel) {
+                    service.setCustomProperties(ChannelCollector.getAttributes((RabbitChannel) obj));
                 }
 
                 ConfigResponse configResponse = new ConfigResponse();

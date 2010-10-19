@@ -44,13 +44,13 @@ public interface RabbitGateway {
 
     List<Exchange> getExchanges(String virtualHost) throws PluginException;
 
-    List<HypericConnection> getConnections(String virtualHost) throws PluginException;
+    List<RabbitConnection> getConnections(String virtualHost) throws PluginException;
 
-    List<HypericChannel> getChannels(String virtualHost) throws PluginException;
+    List<RabbitChannel> getChannels(String virtualHost) throws PluginException;
 
     String getVersion() throws PluginException;
 
-    List<HypericBinding> getBindings(String virtualHost) throws PluginException;
+    List<RabbitBinding> getBindings(String virtualHost) throws PluginException;
 
     List<QueueInfo> getQueues(String virtualHost);
  

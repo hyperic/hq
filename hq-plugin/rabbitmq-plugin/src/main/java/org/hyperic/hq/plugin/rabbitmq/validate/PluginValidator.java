@@ -33,7 +33,10 @@ import org.hyperic.hq.product.PluginException;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.util.Assert;
- 
+
+import java.util.Collections;
+import java.util.List;
+
 
 /**
  * PluginValidator
@@ -64,7 +67,7 @@ public class PluginValidator {
      * @param configuration
      * @return true if the test connection was successful.
      * @throws PluginException If cookie value or host are not set
-     *                         or if the test connection fails, throw a PluginException to alert the user.
+     * or if the test connection fails, throw a PluginException to alert the user.
      */
     public static boolean isValidOtpConnection(Configuration configuration) throws PluginException {
         logger.debug("isValidOtpConnection with=" + configuration);
@@ -91,5 +94,30 @@ public class PluginValidator {
 
         return response != null;
     }
+
+    public static List<String> getVirtualHosts(Configuration configuration) {
+        Object response = null;
+
+        if (configuration.isConfiguredOtpConnection()) {
+            OtpConnection conn = null;
+
+            try {
+                OtpSelf self = new OtpSelf("rabbit-spring-monitor", configuration.getAuthentication());
+                OtpPeer peer = new OtpPeer(configuration.getNodename());
+                conn = self.connect(peer);
+                conn.sendRPC("the", "query", new OtpErlangList());
+                response = conn.receiveRPC();
+                //convert the response and return list
+            }
+            catch (Exception e) {
+
+            }
+            finally {
+                if (conn != null) conn.close();
+            }
+        }
+        return Collections.emptyList();
+    }
+
 
 }

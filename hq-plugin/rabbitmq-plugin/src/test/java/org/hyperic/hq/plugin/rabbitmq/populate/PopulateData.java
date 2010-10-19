@@ -25,14 +25,11 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.populate;
 
-import com.rabbitmq.client.Channel;
 import org.hyperic.hq.plugin.rabbitmq.configure.ConfigurationManager;
 import org.hyperic.hq.plugin.rabbitmq.configure.RabbitTestConfiguration;
-import org.hyperic.hq.plugin.rabbitmq.core.HypericChannel;
-import org.hyperic.hq.plugin.rabbitmq.core.HypericConnection;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitChannel;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitConnection;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
-import org.hyperic.hq.plugin.rabbitmq.manage.RabbitManager;
-import org.hyperic.hq.product.PluginException;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.admin.QueueInfo;
 import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
@@ -99,10 +96,10 @@ public class PopulateData {
         conn.createChannel();
         conn.createChannel();
 
-        List<HypericChannel> channels = rabbitGateway.getChannels("/");
+        List<RabbitChannel> channels = rabbitGateway.getChannels("/");
         assertNotNull(channels);
 
-        List<HypericConnection> connections = rabbitGateway.getConnections("/");
+        List<RabbitConnection> connections = rabbitGateway.getConnections("/");
         assertNotNull(connections);
         
         /** kept it open for a while to show some metrics */
