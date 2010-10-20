@@ -208,9 +208,9 @@ public class MxNotificationListener implements NotificationListener {
         if(typeString != null) {
             if(typeString.equalsIgnoreCase(LogTrackPlugin.LOGLEVEL_ERROR_LABEL)) {
                 level = LogTrackPlugin.LOGLEVEL_ERROR;
-            } else if(typeString.equals(LogTrackPlugin.LOGLEVEL_WARN_LABEL)) {
+            } else if(typeString.equalsIgnoreCase(LogTrackPlugin.LOGLEVEL_WARN_LABEL)) {
                 level = LogTrackPlugin.LOGLEVEL_WARN;
-            } else if(typeString.equals(LogTrackPlugin.LOGLEVEL_DEBUG_LABEL)) {
+            } else if(typeString.equalsIgnoreCase(LogTrackPlugin.LOGLEVEL_DEBUG_LABEL)) {
                 level = LogTrackPlugin.LOGLEVEL_DEBUG;
             }
         }
