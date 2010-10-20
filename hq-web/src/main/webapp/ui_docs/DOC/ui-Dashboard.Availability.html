@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Evolution : ui-Dashboard.Availability</title>
+        <title>Hyperic 4.5 Documentation : ui-Dashboard.Availability</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,58 +12,61 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Evolution : ui-Dashboard.Availability
+                            Hyperic 4.5 Documentation : ui-Dashboard.Availability
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Apr 18, 2010 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Sep 26, 2010 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <h1><a name="ui-Dashboard.Availability-HQDashboardSettings%3AAvailabilitySummary"></a>HQ Dashboard Settings: Availability Summary</h1>
-<p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
+				    <p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Pre-Release Documentation</b><br />This space is a staging area for Hyperic 4.5 documentation. See <a href="http://support.hyperic.com/confluence/display/DOC/HQ+Documentation" title="HQ Documentation">HQ Documentation</a> for Hyperic 4.2, 4.3, and 4.4 documentation.</td></tr></table></div> 
 
-<p>This screen allows users to control which and how <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resource">resources</a> are displayed in the Dashboard's <a href="ui-Dashboard.html#ui-Dashboard-AvailabilitySummary">"Availability Summary" portlet</a>. </p>
 
-<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
 
-<h3><a name="ui-Dashboard.Availability-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h3>
+<h1><a name="ui-Dashboard.Availability-AbouttheAvailabilitySummaryPortlet"></a>About the Availability Summary Portlet</h1>
 
-<p>On this screen, users can do the following tasks:</p>
+<p>The <b>Availability Summary</b> portlet presents the availability of selected resources by resource type. The portlet is empty until you configure the resources to include.</p>
 
-<p><b>To specify a header description to appear in the portlet:</b></p>
+<p>In the screenshot below, the portlet summarizes the available of 6 resources - five Linux platforms and one Win32 platform:&nbsp;</p>
+
 <ul>
-	<li>Type a <ins>Description</ins> and click <span class="image-wrap" style=""><img src="attachments/71828438/71926084.gif" style="border: 0px solid black"/></span>.</li>
+	<li>One Linux platform is unavailable, the other four are available.</li>
+	<li>The Win32 platform is available</li>
 </ul>
 
 
-<p><b>To change the number of <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resourcetype">resource types</a> displayed in the portlet:</b></p>
-<ul>
-	<li>Select a <ins>Display Range</ins> value and click <span class="image-wrap" style=""><img src="attachments/71828438/71926084.gif" style="border: 0px solid black"/></span>.</li>
-</ul>
+<p><span class="image-wrap" style=""><img src="attachments/71828283/71926648.png" style="border: 0px solid black"/></span></p>
+
+<h1><a name="ui-Dashboard.Availability-ConfiguretheAvailabilitySummaryPortlet"></a>Configure the Availability Summary Portlet</h1>
+
+<ol>
+	<li>Click <span class="image-wrap" style=""><img src="attachments/71830509/71926775.png" style="border: 0px solid black"/></span> in the upper right corner of the <b>Availability Summary</b> portlet.</li>
+	<li>The <b>HQ Dashboard Settings: Availability Summary</b> page appears.<br/>
+<span class="image-wrap" style=""><img src="attachments/71828283/71926649.png" width="950" style="border: 0px solid black"/></span></li>
+	<li>In the <b>Description</b> field, enter the title to appear at the top of the portlet.</li>
+	<li>In the <b>Display Range</b> pulldown, select the maximum number of resource types to list in the portlet.</li>
+	<li>If the Selected Resources section contains resources that you do not want to be included in the availability summary, checkmark them and click <b>Remove From List</b>.</li>
+	<li>To add resources to the portlet:
+	<ol>
+		<li>Click <b>Add to List</b>.</li>
+		<li>The <b>Dashboard Settings: Availability Summary Add/Remove Resources</b> page appears.<br/>
+<span class="image-wrap" style=""><img src="attachments/71828283/71926647.png" width="950" style="border: 0px solid black"/></span></li>
+		<li>In the <b>Resources</b> column:
+		<ol>
+			<li>Use the <b>View</b> filters to filter by inventory type, resource type, or both, as desired.</li>
+			<li>Enter a substring in the <b>Filter by Name</b> field to filter by resource name, as desired.</li>
+			<li>In the list of resources, checkmark desired resources, and click the right arrow between the columns to include them in the availability summary.&nbsp;</li>
+		</ol>
+		</li>
+		<li>If the <b>Add Resources</b> column contains resources you don not wish to include in the availability summary, checkmark those resources and click the left arrow between the panels</li>
+	</ol>
+	</li>
+	<li>Click <b>OK</b>.</li>
+</ol>
 
 
-<p><b>To add a resource to the portlet:</b></p>
-<ul>
-	<li>In the "Selected Resources" section, click <span class="image-wrap" style=""><img src="attachments/71828438/71926085.gif" style="border: 0px solid black"/></span> and proceed to the "Add/Remove Resources" screen.</li>
-</ul>
-
-
-<p><b>To remove a resource from the portlet:</b></p>
-<ul>
-	<li>In the "Selected Resources" section, check the resource and click <span class="image-wrap" style=""><img src="attachments/71828438/71926086.gif" style="border: 0px solid black"/></span>.</li>
-</ul>
-
-
-<p><br class="atl-forced-newline" /></p>
-<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Related Information</b></div><div class="panelContent">
-<p>Learn more about <a href="http://support.hyperic.com/confluence/display/EVO/HQ+Metric+Categories#HQMetricCategories-Availability">availability metrics</a></p>
-</div></div>
-</tr></tbody></table>
-
-<h5><a name="ui-Dashboard.Availability-ReturntotheDashboarduiDashboard."></a>Return to the <a href="ui-Dashboard.html" title="ui-Dashboard">Dashboard</a>.</h5>
+<div class="scroll-pagebreak"></div>
 
 				    					    <br/>
                         <div class="tabletitle">
@@ -72,13 +75,22 @@
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828438/71926086.gif">tbb_removefromlist.gif</a> (image/gif)
+                                <a href="attachments/71828438/71926617.gif">tbb_removefromlist.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/71828438/71926616.gif">tbb_addtolist.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/71828438/71926615.gif">fb_ok.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/71828438/71926084.gif">fb_ok.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
                                 <a href="attachments/71828438/71926085.gif">tbb_addtolist.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828438/71926084.gif">fb_ok.gif</a> (image/gif)
+                                <a href="attachments/71828438/71926086.gif">tbb_removefromlist.gif</a> (image/gif)
                                 <br/>
                                                     </div>
 				    
@@ -90,7 +102,7 @@
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Sep 10, 2010 15:54</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 19, 2010 16:39</font></td>
 		    </tr>
 	    </table>
     </body>
