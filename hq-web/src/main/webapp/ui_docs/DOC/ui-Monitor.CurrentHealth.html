@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Evolution : ui-Monitor.CurrentHealth</title>
+        <title>Hyperic 4.5 Documentation : ui-Monitor.CurrentHealth</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,19 +12,19 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Evolution : ui-Monitor.CurrentHealth
+                            Hyperic 4.5 Documentation : ui-Monitor.CurrentHealth
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on May 20, 2010 by <font color="#0050B2">clee</font>.
+					    This page last changed on Sep 19, 2010 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1281566513407 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1281566513407 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1281566513407 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1284935575781 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1284935575781 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1284935575781 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1281566513407'>
+/*]]>*/</style><div class='rbtoc1284935575781'>
 <ul>
     <li><a href='#ui-Monitor.CurrentHealth-TasksAvailableonThisScreen'>Tasks Available on This Screen</a></li>
     <li><a href='#ui-Monitor.CurrentHealth-SectionsonThisScreen'>Sections on This Screen</a></li>
@@ -44,7 +44,7 @@ div.rbtoc1281566513407 li {margin-left: 0px;padding-left: 0px;}
 </ul></div> 
 <p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Pre-Release Documentation</b><br />This space is a staging area for Hyperic 4.5 documentation. See <a href="http://support.hyperic.com/confluence/display/DOC/HQ+Documentation" title="HQ Documentation">HQ Documentation</a> for Hyperic 4.2, 4.3, and 4.4 documentation.</td></tr></table></div> 
+
 <p>The Current Health page presents an overview of the <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resource">resource's</a> current health, and the health of related resources (for example, in the case of a <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-group">group</a>, other group members; in the case of a <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-server">server</a>, the hosting <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-platform">platform</a> and the hosted <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-service">services</a>).&nbsp; Metric data is displayed in both numerical and graphical formats. (A resource's "default" metrics are the ones displayed on this screen. To see what the default metrics are for a resource type are, <a href="ui-Admin.Monitor.MetricTemplate.html" title="ui-Admin.Monitor.MetricTemplate">view the resource type's metric template</a> from the "<a href="ui-Admin.html" title="ui-Admin">HQ Administration</a>" screen.)</p>
 <ul>
 	<li><a href="#ui-Monitor.CurrentHealth-Tasks">Tasks</a> available on this screen</li>
@@ -53,12 +53,16 @@ div.rbtoc1281566513407 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 
 
+
+
 <p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
+
+
 <p><a name="ui-Monitor.CurrentHealth-Tasks"></a></p>
 
 <h3><a name="ui-Monitor.CurrentHealth-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h3>
 
-<p>On this screen, most tasks are available through individual portlets, which are described <a href="#ui-Monitor.CurrentHealth-portlets">below</a>. Other tasks are available through the Tools Menu in the upper-right; the listed tasks vary by the <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resourcetype">resource type</a> being viewed.  In HQ 4.1 and later, the Tools menu for any resource type has <b>Delete</b> and <b>Add to Group</b> options.</p>
+<p>On this screen, most tasks are available through individual portlets, which are described <a href="#ui-Monitor.CurrentHealth-portlets">below</a>. Other tasks are available through the Tools Menu in the upper-right; the listed tasks vary by the <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resourcetype">resource type</a> being viewed. The Tools menu for any resource type has <b>Delete</b> and <b>Add to Group</b> options.</p>
 
 <p><a name="ui-Monitor.CurrentHealth-map"></a><b>To view an interactive network map centered on this resource:</b></p>
 <ul>
@@ -253,7 +257,7 @@ The metric charts on the screen automatically refresh to reflect the new display
 </tr>
 <tr>
 <td class='confluenceTd'> <b>Analyze</b> </td>
-<td class='confluenceTd'> Click the menu name to access <b>Reporting</b> <font color="red">&#42;</font> (presents the <a href="ui-ReportCenter.html" title="ui-ReportCenter">Reporting</a> screen, from which reports can be generated), <b>Alert Center</b> (presents the <a href="ui-Alert.Center.html" title="ui-Alert.Center">Alert Center</a>, which displays a deployment wide alert summary), or <b>Event Center</b> (presents the <a href="http://support.hyperic.com/confluence/display/DOC/ui-Event.Center" title="ui-Event.Center">Event Center</a>, which displays a deployment-wide event summary). <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Click the menu name to access <b>Reporting</b> <font color="red">&#42;</font> (presents the <a href="ui-Report.Center.html" title="ui-Report.Center">Reporting</a> screen, from which reports can be generated), <b>Alert Center</b> (presents the <a href="ui-Alert.Center.html" title="ui-Alert.Center">Alert Center</a>, which displays a deployment wide alert summary), or <b>Event Center</b> (presents the <a href="http://support.hyperic.com/confluence/display/DOC/ui-Event.Center" title="ui-Event.Center">Event Center</a>, which displays a deployment-wide event summary). <br class="atl-forced-newline" /> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <b>Administration</b> </td>
@@ -362,7 +366,7 @@ Double-click a resource in the list to navigate to its Resource page. </td>
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Sep 10, 2010 15:54</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 19, 2010 16:39</font></td>
 		    </tr>
 	    </table>
     </body>

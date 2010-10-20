@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Evolution : ui-Dashboard</title>
+        <title>Hyperic 4.5 Documentation : ui-Dashboard</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,370 +12,163 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Evolution : ui-Dashboard
+                            Hyperic 4.5 Documentation : ui-Dashboard
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Apr 20, 2010 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Sep 26, 2010 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <h1><a name="ui-Dashboard-HQDashboard"></a><a name="ui-Dashboard-top"></a>HQ Dashboard</h1>
+				    <p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
 
-<p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Pre-Release Documentation</b><br />This space is a staging area for Hyperic 4.5 documentation. See <a href="http://support.hyperic.com/confluence/display/DOC/HQ+Documentation" title="HQ Documentation">HQ Documentation</a> for Hyperic 4.2, 4.3, and 4.4 documentation.</td></tr></table></div> 
-<p>This screen is a user's starting point in HQ. Users can organize the screen to correspond to their workflow or infrastructure. By default, the screen displays information about <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resource">resource</a> health, recent <a href="http://support.hyperic.com/confluence/display/EVO/Alerts+Overview" title="Alerts Overview">alerts</a>, recently performed <a href="http://support.hyperic.com/confluence/display/EVO/Auto-Discovery" title="Auto-Discovery">auto-discovery</a> scans, and <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-controlaction">control actions</a>. In addition, users can search for specific resources  and view summary counts for all <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-managedresource">managed resources</a>.</p>
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1285543088372 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1285543088372 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1285543088372 li {margin-left: 0px;padding-left: 0px;}
 
-<p>The Dashboard is simply a compendium of user-selected portlets. Each portlet contains a different type of data. Users can manipulate which portlets are displayed, where they are displayed, and what data they display.</p>
-
-<p>The data (portlets) displayed in the Dashboard is determined by the user's role(s) via role-based Dashboards. <font color="red">&#42;</font></p>
+/*]]>*/</style><div class='rbtoc1285543088372'>
 <ul>
-	<li><a href="#ui-Dashboard-Tasks">Tasks</a> available on this screen</li>
-	<li>Available <a href="#ui-Dashboard-portlets">portlets</a></li>
-	<li><a href="#ui-Dashboard-Navigating">Navigating</a> via the masthead menu</li>
-</ul>
+    <li><a href='#ui-Dashboard-HQDashboard'>HQ Dashboard</a></li>
+    <li><a href='#ui-Dashboard-PortletQuickFactsandLinks'>Portlet Quick Facts and Links</a></li>
+    <li><a href='#ui-Dashboard-TailorDashboard'>Tailor Dashboard</a></li>
+    <li><a href='#ui-Dashboard-WorkingwithMultipleDashboardsinHQEnterprise'>Working with Multiple Dashboards in HQ Enterprise</a></li>
+</ul></div>
 
+<h1><a name="ui-Dashboard-HQDashboard"></a>HQ Dashboard</h1>
 
-<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
-<p><a name="ui-Dashboard-Tasks"></a></p>
+<p>The HQ Dashboard is the first page displayed in the HQ user interface when you log on.&nbsp;The dashboard contains multiple portlets, each of which presents a particular type of information, such as&nbsp;resource health, recent alerts, recently discovered resource or changes to resources, recently performed resource control actions, and so on.&nbsp;</p>
 
-<h3><a name="ui-Dashboard-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h3>
+<p>You can can personalize the dashboard to suit your responsibilities and preferences; you can add or remove portlets, rearrange them, and customize the contents of many of the portlets.</p>
 
-<p>Users can customize the Dashboard so that, when they log in, it displays only the information that matters to them. Portlets can be added and removed from the Dashboard, and users can view and manage each portlet's configuration information (the amount or kind of data that is displayed in the portlet and how it is displayed). Portlets can be moved around the screen to make the display most useful. Also, some portlets can update users through RSS.</p>
+<p>In HQ Enterprise, you can have multiple dashboards &#8212; one for each role to which you are assigned. Note also that in HQ Enterprise&nbsp;the roles you are assigned to govern what resource data appears in Dashboard portlets. Portlets will contain only the resource data to which your HQ role(s) allows access. For more information, see <a href="http://support.hyperic.com/confluence/display/EVO/Understanding+Roles+in+HQ+Enterprise" title="Understanding Roles in HQ Enterprise">Understanding Roles in HQ Enterprise</a>.</p>
 
-<p>For all portlet-specific tasks, see the description of the <a href="#ui-Dashboard-portlets">portlets</a> below.</p>
+<p>Click the thumbnail to see a screenshot of the dashboard.</p>
 
-<p><b>To add a portlet:</b></p>
-<ul>
-	<li>In <ins>Add content to this column</ins> at the bottom of either the right or left side of the screen, select the portlet name and click <span class="image-wrap" style=""><img src="attachments/71828426/71926063.png" height="16" width="16" style="border: 0px solid black"/></span>.</li>
-</ul>
+<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 1200x1112" href='http://support.hyperic.com/confluence/download/attachments/71828283/Dashboard.png'><img src="attachments/thumbnails/71828283/71926660" style="border: 0px solid black"/></a></span></p>
 
+<h1><a name="ui-Dashboard-PortletQuickFactsandLinks"></a>Portlet Quick Facts and Links</h1>
 
-<p><b>To delete a portlet:</b></p>
-<ul>
-	<li>Click <span class="image-wrap" style=""><img src="attachments/71828426/71926066.png" height="17" width="17" style="border: 0px solid black"/></span> in the upper right-hand corner of the portlet.</li>
-</ul>
-
-
-<p><b>To move a portlet's position on the screen:</b></p>
-<ul>
-	<li>Click the header of the portlet and drag and drop it to its desired location with its column.</li>
-</ul>
-
-
-<p><b>To change the configuration of the portlet:</b></p>
-<ul>
-	<li>Click <span class="image-wrap" style=""><img src="attachments/71828426/71926062.png" height="17" width="17" style="border: 0px solid black"/></span> in the upper right-hand corner of the portlet.</li>
-</ul>
-
-
-<p><b>To get the RSS-feed URL from RSS-enabled portlets:</b></p>
-<ul>
-	<li>Click <span class="image-wrap" style=""><img src="attachments/71828426/71926059.gif" height="17" width="17" style="border: 0px solid black"/></span> in the upper left-hand corner of the portlet or copy the icon's link.</li>
-</ul>
-
-
-<p><b>To view a different Dashboard:</b> <font color="red">&#42;</font></p>
-<ul>
-	<li>Select a different role-based Dashboard in <ins>Select a Dashboard</ins> in the upper left.<br/>
-Only those Dashboards associated with the roles the user is assigned to are available for selection.</li>
-</ul>
-
-
-<p><a href="#ui-Dashboard-top"><em>back to top</em></a></p>
-
-<p><a name="ui-Dashboard-portlets"></a></p>
-
-<h3><a name="ui-Dashboard-AvailablePortlets"></a>Available Portlets</h3>
-
-<p>Users can select from among the following portlets on the Dashboard (listed in alphabetical order):</p>
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
 <tr>
-<th class='confluenceTh'> Portlet Name </th>
-<th class='confluenceTh'> Portlet Description </th>
+<th class='confluenceTh'> Portlet </th>
+<th class='confluenceTh'> Description </th>
+<th class='confluenceTh'> More Information and Configuration Options </th>
 </tr>
 <tr>
-<td class='confluenceTd'> <a name="ui-Dashboard-AutoDiscovery"></a>Auto-Discovery </td>
-<td class='confluenceTd'> Lists the <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-platform">platforms</a> and their hosted <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-server">servers</a> that HQ has most recently discovered via <a href="http://support.hyperic.com/confluence/display/EVO/Auto-Discovery" title="Auto-Discovery">auto-discovery</a>. These resources now need to be added to the HQ <a href="http://support.hyperic.com/confluence/display/EVO/HQ+Inventory+and+Access+Model" title="HQ Inventory and Access Model">inventory</a>. When a platform is added, all its hosted servers are, by default, also added; however, users can opt to add a platform without its servers. When a server is added, its hosting platform is <em>always</em> added. (<a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-service">Services</a> are automatically added to the HQ inventory as part of their hosting platforms or servers.) By default, results of only the last five auto-discovery scans are shown. <b>"Skipping resources":</b> Sometimes HQ discovers a resource (specifically here, a server) that users just don't care about. If that is the case with a server displayed here, users can banish the server from display in the portlet by "skipping" it. For a skipped server to be displayed in the UI again, it must first be rediscovered in a new auto-discovery scan and then be marked for "Import" on the "Auto-Discovery Results" screen. <br class="atl-forced-newline" />
-<ul>
-	<li><b>To change the number of auto-discovery scan whose results are displayed in the portlet:</b>
-	<ul>
-		<li>Click <span class="image-wrap" style=""><img src="attachments/71828426/71926062.png" height="16" width="16" style="border: 0px solid black"/></span> and proceed to the "<a href="ui-Dashboard.AutoDiscovery.html" title="ui-Dashboard.AutoDiscovery">HQ Dashboard Settings: Auto-Discovery Queue</a>" screen.</li>
-	</ul>
-	</li>
-	<li><b>To add a discovered platform to the HQ inventory:</b>
-	<ol>
-		<li>Select the platform's radio button.</li>
-		<li>To <em>not</em> add some of the platform's hosted servers, uncheck those servers.</li>
-		<li>Click <b>Add to inventory</b>.</li>
-	</ol>
-	</li>
-	<li><b>To add a discovered server to the HQ inventory:</b>
-	<ul>
-		<li>Check the server and click <b>Add to inventory</b>.</li>
-	</ul>
-	</li>
-	<li><b>To skip a server:</b>
-	<ul>
-		<li>Check the server(s) and click <b>Skip Checked Resources</b></li>
-	</ul>
-	</li>
-	<li><b>To view the results of an auto-discovery scan on a listed platform:</b>
-	<ul>
-		<li>Click the platform's name and proceed to the "<a href="ui-Inventory.AutoDiscovery.Results.html" title="ui-Inventory.AutoDiscovery.Results">Auto-Discovery Results</a>" screen.</li>
-	</ul>
-	</li>
-</ul>
-</td>
+<td class='confluenceTd'> <b>Autodiscovery&nbsp;</b> </td>
+<td class='confluenceTd'> Lists new and changed resources, and allows you to add them inventory. </td>
+<td class='confluenceTd'> <a href="ui-Dashboard.AutoDiscovery.html" title="ui-Dashboard.AutoDiscovery">Auto-Discovery Portlet</a> </td>
 </tr>
 <tr>
-<td class='confluenceTd'> <a name="ui-Dashboard-AvailabilitySummary"></a>Availability Summary </td>
-<td class='confluenceTd'> Displays the <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-availability">availability</a> of a user-selected set of <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resource">resources</a>, aggregated to the <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resourcetype">resource type</a>&#45;level. This portlet refreshes every minute. <br class="atl-forced-newline" />
-<ul>
-	<li><b>To change the set of resources counted in this portlet:</b>
-	<ul>
-		<li>Click <span class="image-wrap" style=""><img src="attachments/71828426/71926062.png" height="16" width="16" style="border: 0px solid black"/></span> and proceed to the "<a href="ui-Dashboard.Availability.html" title="ui-Dashboard.Availability">HQ Dashboard Settings: Availability Summary</a>" screen.</li>
-	</ul>
-	</li>
-</ul>
-</td>
-</tr>
-<tr>
-<td class='confluenceTd'> <a name="ui-Dashboard-ControlActions"></a>Control Actions </td>
-<td class='confluenceTd'> Lists the <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-controlactions">control actions</a> that HQ has most recently performed on any of the <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-managedresource">managed resources</a> (either as part of an alert action or by schedule) ("Recent Control Actions"), upcoming scheduled control actions ("Scheduled Control Actions"), and the most frequently performed "<a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-quickcontrol">quick control</a>" actions ("Quick Control Frequency"). <br class="atl-forced-newline" />
-<ul>
-	<li><b>To change the number of control actions displayed in the portlet:</b>
-	<ul>
-		<li>Click <span class="image-wrap" style=""><img src="attachments/71828426/71926062.png" height="16" width="16" style="border: 0px solid black"/></span> and proceed to the "<a href="ui-Dashboard.Control.html" title="ui-Dashboard.Control">HQ Dashboard Settings: Control Actions</a>" screen.</li>
-	</ul>
-	</li>
-	<li><b>To view the control-action history of a listed resource:</b>
-	<ul>
-		<li>Click the resource name and proceed to the <a href="ui-Control.History.html" title="ui-Control.History">"Control History"</a>" screen.</li>
-	</ul>
-	</li>
-</ul>
-</td>
-</tr>
-<tr>
-<td class='confluenceTd'> <a name="ui-Dashboard-FavoriteResources"></a>Favorite Resources </td>
-<td class='confluenceTd'> Lists user-selected favorite resources. Resources can be designated as "favorite" throughout the UI via the <b>Add to Dashboard Favorites</b> link in the Tools Menu (which appears on most monitoring and inventory screens). This portlet refreshes every minute. The portlet shows the resource's:
-<ul>
-	<li><a href="http://support.hyperic.com/confluence/display/EVO/HQ+Metric+Categories#HQMetricCategories-Performance">Performance</a>. If a single performance metric is being collected for the resource, that value is displayed here. If several performance metrics are being collected, then HQ chooses the one marked as an <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-indicator">indicator metric</a>. An "N/A" value indicates that no performance metrics are being collected for the resource. To see what performance metrics are being collected for a resource, click the resource name and proceed to the "<a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Current Health</a>" screen. Click <span class="image-wrap" style=""><img src="attachments/71828426/71926061.gif" height="32" width="32" style="border: 0px solid black"/></span>. (<a href="ui-Monitor.CurrentHealth.Metrics.html" title="ui-Monitor.CurrentHealth.Metrics">Help</a> for that tab)</li>
-	<li><a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-availability">Availability</a></li>
-	<li>Number of triggered alerts <br class="atl-forced-newline" />
-<b>To add resources to this portlet:</b>
-	<ul>
-		<li>Click <span class="image-wrap" style=""><img src="attachments/71828426/71926062.png" height="16" width="16" style="border: 0px solid black"/></span> and proceed to the "<a href="ui-Dashboard.FavoriteResources.html" title="ui-Dashboard.FavoriteResources">HQ Dashboard Settings: Favorite Resources</a>" screen.</li>
-	</ul>
-	</li>
-</ul>
-</td>
-</tr>
-<tr>
-<td class='confluenceTd'> <a name="ui-Dashboard-GroupAlertSummary"></a> Group Alert Summary<font color="red">&#42;</font> </td>
-<td class='confluenceTd'> Displays alert status for the groups in the the portlet. Two traffic light indicators are shown for each group. The <b>Resource Alerts</b> traffic light indicates the status of alerts on individual group members. The <b>Group Alerts</b> traffic light indicates the status alerts on the group as a whole. (A group alert fires if its condition is "true" for a percentage, or a specific number, of group members).&nbsp; <br class="atl-forced-newline" />
-Click on a traffic light for a group alert to view a list of alerts that have fired. <br class="atl-forced-newline" />
-Click on a group name to view the group page.
-<ul>
-	<li>Green - Indicates no that there are no fired alerts, or that all fired alerts have been fixed.</li>
-	<li>Yellow - Indicates that there is one or more unfixed alerts in escalation that have been acknowledged, and are currently "paused".&nbsp; (An escalation can be configured to allow a user to temporarily pause the escalation process when acknowledging the alert.)&nbsp;&nbsp;</li>
-	<li>Red - Indicates unfixed alerts.</li>
-	<li>Grey - A grey traffic light is shown if there are no active alerts of that type. <br class="atl-forced-newline" />  <br class="atl-forced-newline" /> To add groups to the portlet, click <span class="image-wrap" style=""><img src="attachments/71828426/71926062.png" height="16" width="16" style="border: 0px solid black"/></span>. Move desired groups from the <b>Available groups</b> list to the <b>Enabled</b> <b>groups</b> list and click <b>save</b>. To filter the <b>Available groups</b> list, enter a search string in the search box.</li>
-</ul>
-</td>
-</tr>
-<tr>
-<td class='confluenceTd'> <a name="ui-Dashboard-HypericIQReports"></a>Hyperic IQ Reports<font color="red">&#42;</font> </td>
-<td class='confluenceTd'> In HQ Enterprise 4.1 and later, in deployments that include HQ Hyperic IQ, this portlet allow users to run IQ reports that reside in Hyperic IQ's Dashboard Reports directory. The HQ Server must be configured with the Hyperic IQ URL. For more information see <a href="ui-Admin.HQServer.html" title="ui-Admin.HQServer">Edit HQ Server Settings</a>. </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <a name="ui-Dashboard-MetricViewer"></a>Metric Viewer </td>
-<td class='confluenceTd'> Shows the user-selected metrics for a user-selected set of <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resource">resources</a>. This portlet refreshes every minute. <br class="atl-forced-newline" />
-<ul>
-	<li><b>To change the metrics or resources in this portlet:</b>
-	<ul>
-		<li>Click <span class="image-wrap" style=""><img src="attachments/71828426/71926062.png" height="16" width="16" style="border: 0px solid black"/></span> and proceed to the "<a href="ui-Dashboard.Metric.html" title="ui-Dashboard.Metric">HQ Dashboard Settings: Metric Viewer</a>" screen.</li>
-	</ul>
-	</li>
-</ul>
-</td>
-</tr>
-<tr>
-<td class='confluenceTd'> <a name="ui-Dashboard-ProblemResources"></a>Problem Resources<font color="red">&#42;</font> </td>
-<td class='confluenceTd'> Lists resources that have recently had <a href="http://support.hyperic.com/confluence/display/EVO/Monitoring+Overview#MonitoringOverview-ProblemMetrics">Problem Metrics</a>. You can configure look-back period, up to maximum of 48 hours, and the number of resource to list, up to 30. Resources are ordered first by inventory level - platforms, then servers, then services. Within an inventory level, resources are ordered by the date/time of most recent problem, starting with most recent.&nbsp; For each resource, <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-availability">availability</a>, the number of fired alerts, the number of out-of-bound (<a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-OOB">OOB</a>) metrics reported, and the timestamp of the most recent problem are shown. The data refreshes every minute.&nbsp; <br class="atl-forced-newline" />
-<ul>
-	<li><b>To change how many hours to consider and the number of resources to include:</b>
-	<ul>
-		<li>Click <span class="image-wrap" style=""><img src="attachments/71828426/71926062.png" height="16" width="16" style="border: 0px solid black"/></span> and proceed to the "<a href="ui-Dashboard.ProblemResources.html" title="ui-Dashboard.ProblemResources">HQ Dashboard Settings: Problem Resources</a>" screen.</li>
-	</ul>
-	</li>
-	<li><b>To view metrics for a problem resource:</b>
-	<ul>
-		<li>Click the resource name to display the resource's "<a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Current Health</a>" page.</li>
-	</ul>
-	</li>
-</ul>
-</td>
-</tr>
-<tr>
-<td class='confluenceTd'> <a name="ui-Dashboard-RecentAlerts"></a>Recent Alerts </td>
-<td class='confluenceTd'> Lists the most recently triggered alerts for a set of user-selected <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resource">resources</a>. This portlet refreshes every minute. <br class="atl-forced-newline" />
-<ul>
-	<li><b>To select the resources whose alerts are displayed in the portlet or to change the number of alerts displayed:</b>
-	<ul>
-		<li>Click <span class="image-wrap" style=""><img src="attachments/71828426/71926062.png" height="16" width="16" style="border: 0px solid black"/></span> and proceed to the "<a href="ui-Dashboard.Alerts.html" title="ui-Dashboard.Alerts">HQ Dashboard Settings: Alerts</a>" screen.</li>
-	</ul>
-	</li>
-	<li><b>To mark a single alert or group of alerts fixed:</b>
-	<ul>
-		<li>Check the alert(s) and click <b>Fixed</b>.</li>
-		<li>A pop-up box will prompt you to enter a comment describing the fix. As of HQ 4.1.1, if there are other unfixed alerts with the same definition, you are offered the option to "Fix all previous alerts".</li>
-	</ul>
-	</li>
-	<li><b>To</b> <b><a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-ack"><b>acknowledge</b></a></b> <b>an alert:</b>
-	<ul>
-		<li>Click <span class="image-wrap" style=""><img src="attachments/71828426/71926060.gif" height="32" width="32" style="border: 0px solid black"/></span> in the alert's row. As of HQ 4.1.1, if the escalation has pause options, you are offered the option to pause the escalation. <br class="atl-forced-newline" />
-The icon is available only for as-yet-unacknowledged alerts with escalation schemes assigned to them. </li>
-	</ul>
-	</li>
-</ul>
-</td>
-</tr>
-<tr>
-<td class='confluenceTd'> <a name="ui-Dashboard-RecentlyAddedResources"></a>Recently Added </td>
-<td class='confluenceTd'> Lists all <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-platform">platforms</a> recently added to the HQ <a href="http://support.hyperic.com/confluence/display/EVO/HQ+Inventory+and+Access+Model" title="HQ Inventory and Access Model">inventory</a> and how long ago it was added. By default only platforms added in the last 48 hours are listed. <br class="atl-forced-newline" />
-<ul>
-	<li><b>To change the number of resources displayed in the portlet:</b>
-	<ul>
-		<li>Click <span class="image-wrap" style=""><img src="attachments/71828426/71926062.png" height="16" width="16" style="border: 0px solid black"/></span> and proceed to the "<a href="ui-Dashboard.RecentlyAdded.html" title="ui-Dashboard.RecentlyAdded">HQ Dashboard Settings: Recently Added</a>" screen.</li>
-	</ul>
-	</li>
-	<li><b>To view a recently added resource:</b>
-	<ul>
-		<li>Click the alert name and proceed to the "<a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Current Health</a>" screen for the resource.</li>
-	</ul>
-	</li>
-</ul>
-</td>
-</tr>
-<tr>
-<td class='confluenceTd'> <a name="ui-Dashboard-SearchResources"></a>Search Resources </td>
-<td class='confluenceTd'> Allows users to search for <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resource">resources</a> in the HQ <a href="http://support.hyperic.com/confluence/display/EVO/HQ+Inventory+and+Access+Model" title="HQ Inventory and Access Model">inventory</a>. The search supports case-insensitive, partial-term queries and is restricted to a single <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-invlevel">inventory level</a> per search. <br class="atl-forced-newline" />
-<ul>
-	<li><b>To search for resources:</b>
-	<ul>
-		<li>Type in at least part of the resource name, select the resource's inventory level and click <span class="image-wrap" style=""><img src="attachments/71828426/71926065.gif" height="32" width="32" style="border: 0px solid black"/></span>. <br class="atl-forced-newline" />
-HQ displays all matching resources on the "<a href="ui-Resources.html" title="ui-Resources">Browse Resources</a>" screen. </li>
-	</ul>
-	</li>
-</ul>
-</td>
-</tr>
-<tr>
-<td class='confluenceTd'> <a name="ui-Dashboard-SummaryCounts"></a>Summary Counts </td>
-<td class='confluenceTd'> Displays a count of all the <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-managedresource">managed resources</a> of each <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-invlevel">inventory level</a> (how many platforms, services, etc.) that the user has the permissions to view. HQ includes all <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resourcetype">resource types</a> in the counts, but users can choose to see additional counts of specific resource types. Users can also create new <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-application">applications</a>, <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-group">groups</a>, and <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-platform">platform</a>. <br class="atl-forced-newline" />
-<ul>
-	<li><b>To view counts of a subset of resource types:</b>
-	<ul>
-		<li>Click <span class="image-wrap" style=""><img src="attachments/71828426/71926062.png" height="16" width="16" style="border: 0px solid black"/></span> and proceed to the "<a href="ui-Dashboard.Summary.html" title="ui-Dashboard.Summary">HQ Dashboard Settings: Summary Counts</a>" screen.</li>
-	</ul>
-	</li>
-	<li><b>To view all the resources of a particular inventory level:</b>
-	<ul>
-		<li>Click inventory level or the count. <br class="atl-forced-newline" />
-HQ displays all the resources of that level in the "<a href="ui-Resources.html" title="ui-Resources">Browse Resources</a>" screen.</li>
-	</ul>
-	</li>
-	<li><b>To create a new application:</b>
-	<ul>
-		<li>Click <b>New Application</b> and proceed to the "<a href="ui-Inventory.Application.New.html" title="ui-Inventory.Application.New">New Application</a>" screen.</li>
-	</ul>
-	</li>
-	<li><b>To create a new group:</b>
-	<ul>
-		<li>Click <b>New Group</b> and proceed to the "<a href="ui-Inventory.Group.New.html" title="ui-Inventory.Group.New">New Group</a>" screen.</li>
-	</ul>
-	</li>
-	<li><b>To create a new platform:</b>
-	<ul>
-		<li>Click <b>New Platform</b> and proceed to the "<a href="ui-Inventory.Platform.New.html" title="ui-Inventory.Platform.New">New Platform</a>" screen.</li>
-	</ul>
-	</li>
-</ul>
-</td>
-</tr>
-<tr>
-<td class='confluenceTd'> <a name="ui-Dashboard-SavedCharts"></a>Saved Charts<font color="red">&#42;</font>&nbsp; </td>
-<td class='confluenceTd'> Displays saved charts as a slideshow. Charts can be saved to the Dashboard from the "<a href="ui-Monitor.CurrentHealth.Chart.html" title="ui-Monitor.CurrentHealth.Chart">Charts</a>" screen. <br class="atl-forced-newline" />
+<td class='confluenceTd'> <b>Availability Summary</b> </td>
+<td class='confluenceTd'> Displays the availablility of selected of resources, aggregated by resource type. Refreshes every minute. <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
-Click <span class="image-wrap" style=""><img src="attachments/71828426/71926062.png" height="16" width="16" style="border: 0px solid black"/></span> to display the Saved Charts Configuration panel.&nbsp; You can toggle Chart Rotation on and off, set the Rotation Interval and the Time Range over which the data is charted.&nbsp; <br class="atl-forced-newline" />
+This portlet does not contain any resources until you configure it. </td>
+<td class='confluenceTd'> <a href="ui-Dashboard.Availability.html" title="ui-Dashboard.Availability">Availability Summary Portlet</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Control Actions</b> </td>
+<td class='confluenceTd'> Lists the control actions that HQ has most recently performed on any managed resource, upcoming scheduled control actions, and the most frequently performed quick control actions. </td>
+<td class='confluenceTd'> <a href="ui-Dashboard.Control.html" title="ui-Dashboard.Control">Control Actions Portlet</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Favorite Resources</b> </td>
+<td class='confluenceTd'> Lists resources that have been added to the portlet.  This portlet does not contain any resources until you configure it. </td>
+<td class='confluenceTd'> <a href="ui-Dashboard.FavoriteResources.html" title="ui-Dashboard.FavoriteResources">Favorite Resources Portlet</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Saved Charts</b> </td>
+<td class='confluenceTd'> Displays charts that have been saved to the Dashboard. In HQ Enterprise, charts are displayed as a slideshow. </td>
+<td class='confluenceTd'> <a href="ui-Dashboard.Charts.html" title="ui-Dashboard.Charts">Saved Charts Portlet</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Recent Alerts</b> </td>
+<td class='confluenceTd'> Lists the most recently triggered alerts for a set of user-selected resources. Refreshes every minute. </td>
+<td class='confluenceTd'> <a href="ui-Dashboard.Alerts.html" title="ui-Dashboard.Alerts">Recent Alerts Portlet</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Recently Added</b> </td>
+<td class='confluenceTd'> Lists platforms recently added to inventory. </td>
+<td class='confluenceTd'> <a href="ui-Dashboard.RecentlyAdded.html" title="ui-Dashboard.RecentlyAdded">Recently Added Portlet</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Search Resources Portlet</b> </td>
+<td class='confluenceTd'> Allows you to search for resources. The search supports case-insensitive, partial-term queries and is restricted to a single inventory type. </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Summary Counts</b> </td>
+<td class='confluenceTd'> Displays a count of all the managed resource of each inventory type. In HQ Enterprise, the resources that appear are limited to those that you have permissions to view. </td>
+<td class='confluenceTd'> <a href="ui-Dashboard.Summary.html" title="ui-Dashboard.Summary">Summary Counts</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Group Alert Summary</b><font color="red">&#42;</font> </td>
+<td class='confluenceTd'> Displays traffic light indicators for resource alerts and group alerts for selected groups. Click on the traffic light for a group alert to view a list of alerts that have fired. Click on a group name to view the group page. This portlet does not present any groups until you add them to it.  </td>
+<td class='confluenceTd'><a href="Group Alerts Summary Portlet.html" title="Group Alerts Summary Portlet">Group Alerts Summary Portlet</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Hyperic IQ Reports</b><font color="red">&#42;</font> </td>
+<td class='confluenceTd'> In deployments that include HQ Hyperic IQ, this portlet allow users to run IQ reports that reside in Hyperic IQ's Dashboard Reports directory. The HQ Server must be configured with the Hyperic IQ URL, on the <b>Administration &gt; HQ Server Settings</b>&nbsp;page. </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Metric Viewer</b> </td>
+<td class='confluenceTd'> Shows selected metrics for selected resources. Refreshes every minute. <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
-Chart rotation can be toggled on and off. <br class="atl-forced-newline" /> </td>
+This portlet does not contain any resources until they have been added to it. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> <a href="ui-Dashboard.Metric.html" title="ui-Dashboard.Metric">Metric Viewer Portlet</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <b>Problem Resources</b><font color="red">&#42;</font> </td>
+<td class='confluenceTd'> Lists all resources with problem metrics, their availability, the number of alerts triggered on each, the number of times the metric has been out of bounds, and the last time the OOB metric was collected. &nbsp;<br class="atl-forced-newline" />
+ <br class="atl-forced-newline" />
+Click the resource name to view the <b>Monitor</b>&nbsp;page for it.<br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> <a href="ui-Dashboard.ProblemResources.html" title="ui-Dashboard.ProblemResources">Problem Resources Portlet</a> </td>
 </tr>
 </tbody></table>
 </div>
 
-<p><a href="#ui-Dashboard-top"><em>back to top</em></a></p>
 
-<p><a name="ui-Dashboard-Navigating"></a></p>
-<h3><a name="ui-Dashboard-NavigatingviatheMastheadMenu"></a>Navigating via the Masthead Menu</h3>
+<h1><a name="ui-Dashboard-TailorDashboard"></a>Tailor Dashboard</h1>
 
-<p>Main screens in Hyperic contain a masthead menu. Users can navigate to the following parts of HQ using this menu:</p>
-<div class='table-wrap'>
-<table class='confluenceTable'><tbody>
-<tr>
-<td class='confluenceTd'> <b>Dashboard</b> </td>
-<td class='confluenceTd'> Displays the <a href="ui-Dashboard.html" title="ui-Dashboard">Dashboard</a>, the starting screen in HQ, which displays information about resource health, recent alerts, recently performed auto-discovery scan, and control actions </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Resources</b> </td>
-<td class='confluenceTd'> Click the menu name to access either <b>Browse</b> (takes users to the <a href="ui-Resources.html" title="ui-Resources">Browse Resources</a> screen, where they can locate and navigate through information about all <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-managedresource">managed resources</a>), <b>Currently Down</b> (takes users to the <a href="ui-CurrentlyDown.html" title="ui-CurrentlyDown">Currently Down</a> screen, where they can look at all managed resources that are unavailable), <b>Nagios Availability</b> (available only when Nagios is installed), or <b>Recently Viewed</b> (provides a drop-down list of <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resource">resources</a> that the user has recently viewed. Selecting one of those resources takes the user to the <a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Current Health</a> screen for the resource). </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Analyze</b> </td>
-<td class='confluenceTd'> Click the menu name to access <b>Reporting</b> <font color="red">&#42;</font> (presents the <a href="ui-ReportCenter.html" title="ui-ReportCenter">Reporting</a> screen, from which reports can be generated), <b>Alert Center</b> (presents the <a href="ui-Alert.Center.html" title="ui-Alert.Center">Alert Center</a>, which displays a deployment wide alert summary), or <b>Event Center</b> (presents the <a href="http://support.hyperic.com/confluence/display/DOC/ui-Event.Center" title="ui-Event.Center">Event Center</a>, which displays a deployment-wide event summary). <br class="atl-forced-newline" /> </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Administration</b> </td>
-<td class='confluenceTd'> Takes users (with "Administer Hyperic HQ Server Configuration" permissions) to the <a href="ui-Admin.html" title="ui-Admin">Administration</a> screen, where they can manage the system-wide settings </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Search</b> <br class="atl-forced-newline" /> </td>
-<td class='confluenceTd'> The Search box in the upper right of the Masthead allows you to search for HQ resources of any type and HQ users. <br class="atl-forced-newline" />
-<br class="atl-forced-newline" />
-Search results appear after four characters are entered in the text box. Results will include the first 10 platforms, servers, services, and groups whose name includes the search string. <br class="atl-forced-newline" />  <br class="atl-forced-newline" />
-Double-click a resource in the list to navigate to its Resource page. </td>
-</tr>
-</tbody></table>
-</div>
+<p>You can customize the dashboard in these ways:</p>
+<ul>
+	<li>Add portlets &#8212; At the bottom of each column of portlet, click <b>Add Content to this column</b> to list portlets you can add.</li>
+</ul>
 
-<p>The masthead also displays the two most recently triggered alerts. Users can click the alert's time to be taken to the <a href="ui-Alert.Detail.html" title="ui-Alert.Detail">alert detail</a>.</p>
-<p><a href="#ui-Dashboard-top"><em>back to top</em></a></p>
-<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Next Steps</b></div><div class="panelContent">
-<p>Configure the portlets:<br/>
-<a href="ui-Dashboard.AutoDiscovery.html" title="ui-Dashboard.AutoDiscovery">Auto-Discovery</a><br/>
-<a href="ui-Dashboard.Availability.html" title="ui-Dashboard.Availability">Availability Summary</a><br/>
-<a href="ui-Dashboard.Control.html" title="ui-Dashboard.Control">Control Actions</a><br/>
-<a href="ui-Dashboard.FavoriteResources.html" title="ui-Dashboard.FavoriteResources">Favorite Resources</a><br/>
-<a href="ui-Dashboard.Metric.html" title="ui-Dashboard.Metric">Metric Viewer</a><br/>
-<a href="ui-Dashboard.ProblemResources.html" title="ui-Dashboard.ProblemResources">Problem Resources</a><br/>
-<a href="ui-Dashboard.Alerts.html" title="ui-Dashboard.Alerts">Recent Alerts</a><br/>
-<a href="ui-Dashboard.RecentlyAdded.html" title="ui-Dashboard.RecentlyAdded">Recently Added</a><br/>
-<a href="ui-Dashboard.Charts.html" title="ui-Dashboard.Charts">Saved Charts</a><br/>
-<a href="ui-Dashboard.Summary.html" title="ui-Dashboard.Summary">Summary Counts</a></p>
-</div></div>
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Related Information</b></div><div class="panelContent">
-<p>An explanation of HQ's <a href="http://support.hyperic.com/confluence/display/EVO/Auto-Discovery" title="Auto-Discovery">auto-discovery</a><br/>
-An explanation of HQ's <a href="http://support.hyperic.com/confluence/display/EVO/HQ+Inventory+and+Access+Model" title="HQ Inventory and Access Model">inventory model</a><br/>
-What it means to "<a href="http://support.hyperic.com/confluence/display/EVO/Controlling+Resources" title="Controlling Resources">control</a>" resources<br/>
-How HQ uses <a href="http://support.hyperic.com/confluence/display/EVO/Monitoring+Overview#MonitoringOverview-metrics">metrics</a><br/>
-What are <a href="http://support.hyperic.com/confluence/display/EVO/Monitoring+Overview#MonitoringOverview-ProblemMetrics">problem resources</a>?<br/>
-An overview of <a href="http://support.hyperic.com/confluence/display/EVO/Alerts+Overview" title="Alerts Overview">alerts</a><br/>
-More information about <a href="http://support.hyperic.com/confluence/display/EVO/Charting+Metric+Data" title="Charting Metric Data">charts</a></p>
-</div></div></tr></tbody></table>
+
+<ul>
+	<li>Remove portlets &#8212; The top right corner of each portlet has a delete icon  you can use to remove it from your Dashboard. If you remove a portlet, you can add it back later &#8212; removed portlets can be selected from the list that displays when you click <b>Add Content to this column</b>.</li>
+</ul>
+
+
+<ul>
+	<li>Change layout &#8212; You move a portlet to a different location in a column by grabbing it by the bar at the top of it and dragging it to the desired location.</li>
+</ul>
+
+
+<ul>
+	<li>Change portlet behavior &#8212; Most portlets have a gear-shaped icon in the bar at the top, which you can click to display a configuration dialog.</li>
+</ul>
+
+
+<h1><a name="ui-Dashboard-WorkingwithMultipleDashboardsinHQEnterprise"></a>Working with Multiple Dashboards in HQ Enterprise</h1>
+
+<p>In HQ Enterprise, you can:</p>
+
+<ul>
+	<li>Select a dashboard &#8212; Select which dashboard to view using the <b>Select a Dashboard</b> pull-down in the upper left of the page. In addition to your personal dashboard, the list will contain the role-specific dashboard for each role to which you are assigned.</li>
+</ul>
+
+
+<ul>
+	<li>Set a default dashboard &#8212; By default, your default dashboard is your personal dashboard. To change the default dashboard, select the desired dashboard, and click <b>Make Default</b> to the right of the <b>Select a Dashboard</b> pull-down &#8212; this control appears on a dashboard that is not currently your default dashboard.</li>
+</ul>
+
+
+<div class="scroll-pagebreak"></div>
 
 				    					    <br/>
                         <div class="tabletitle">
@@ -384,10 +177,31 @@ More information about <a href="http://support.hyperic.com/confluence/display/EV
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828426/71926067.png">dash_icon_up.png</a> (image/png)
+                                <a href="attachments/71828426/71926607.png">dash_icon_up.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828426/71926064.png">dash_icon_down.png</a> (image/png)
+                                <a href="attachments/71828426/71926604.png">dash_icon_down.png</a> (image/png)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/71828426/71926599.gif">icon_feed.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/71828426/71926600.gif">icon_ack.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/71828426/71926605.gif">dash-button_go-arrow.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/71828426/71926601.gif">MiniTab_MetricData_on.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/71828426/71926602.png">dash-icon_edit.png</a> (image/png)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/71828426/71926606.png">dash-icon_delete.png</a> (image/png)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/71828426/71926603.png">dash_moveContent_add.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
                                 <a href="attachments/71828426/71926059.gif">icon_feed.gif</a> (image/gif)
@@ -396,19 +210,25 @@ More information about <a href="http://support.hyperic.com/confluence/display/EV
                                 <a href="attachments/71828426/71926060.gif">icon_ack.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828426/71926065.gif">dash-button_go-arrow.gif</a> (image/gif)
-                                <br/>
-                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
                                 <a href="attachments/71828426/71926061.gif">MiniTab_MetricData_on.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
                                 <a href="attachments/71828426/71926062.png">dash-icon_edit.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/71828426/71926063.png">dash_moveContent_add.png</a> (image/png)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/71828426/71926064.png">dash_icon_down.png</a> (image/png)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/71828426/71926065.gif">dash-button_go-arrow.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
                                 <a href="attachments/71828426/71926066.png">dash-icon_delete.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828426/71926063.png">dash_moveContent_add.png</a> (image/png)
+                                <a href="attachments/71828426/71926067.png">dash_icon_up.png</a> (image/png)
                                 <br/>
                                                     </div>
 				    
@@ -420,7 +240,7 @@ More information about <a href="http://support.hyperic.com/confluence/display/EV
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Sep 10, 2010 15:54</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 19, 2010 16:39</font></td>
 		    </tr>
 	    </table>
     </body>
