@@ -1,5 +1,6 @@
 package com.vmware.springsource.hyperic.plugin.gemfire.collectors;
 
+import com.vmware.springsource.hyperic.plugin.gemfire.GemFireLiveData;
 import com.vmware.springsource.hyperic.plugin.gemfire.detectors.GemfirePlatformDetector;
 import java.util.Arrays;
 import java.util.Map;
@@ -34,8 +35,7 @@ public class GemfireCollector extends Collector {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(props);
             log.debug("mServer=" + mServer);
 
-            ObjectName mbean = new ObjectName("GemFire:type=MemberInfoWithStatsMBean");
-            String id = (String) mServer.getAttribute(mbean, "Id");
+            String id=GemFireLiveData.getSystemID(mServer);
 
             Object[] args = {};
             String[] def = {};
