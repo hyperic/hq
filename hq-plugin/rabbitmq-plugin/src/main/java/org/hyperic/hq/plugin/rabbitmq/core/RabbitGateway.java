@@ -27,8 +27,10 @@ package org.hyperic.hq.plugin.rabbitmq.core;
  
 import org.hyperic.hq.product.PluginException;
 import org.springframework.amqp.core.*;
-import org.springframework.amqp.rabbit.admin.QueueInfo; 
-import org.springframework.amqp.rabbit.admin.RabbitStatus; 
+import org.springframework.amqp.rabbit.admin.QueueInfo;
+import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
+import org.springframework.amqp.rabbit.admin.RabbitStatus;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.erlang.core.Application;
 import org.springframework.erlang.core.Node;
 
@@ -42,27 +44,30 @@ public interface RabbitGateway {
 
     List<String> getVirtualHosts() throws PluginException;
 
-    List<Exchange> getExchanges(String virtualHost) throws PluginException;
+    boolean isValidUsernamePassword();
 
-    List<RabbitConnection> getConnections(String virtualHost) throws PluginException;
+    List<Exchange> getExchanges() throws PluginException;
 
-    List<RabbitChannel> getChannels(String virtualHost) throws PluginException;
+    List<RabbitConnection> getConnections() throws PluginException;
+
+    List<RabbitChannel> getChannels() throws PluginException;
 
     String getVersion() throws PluginException;
 
-    List<RabbitBinding> getBindings(String virtualHost) throws PluginException;
+    List<RabbitBinding> getBindings() throws PluginException;
 
-    List<QueueInfo> getQueues(String virtualHost);
+    List<QueueInfo> getQueues();
  
-    List<String> getUsers(String virtualHost);
- 
-    String getHost();
-
-    RabbitStatus getRabbitStatus();
+    List<String> getUsers();
+  
+    RabbitStatus getStatus();
 
     List<Application> getRunningApplications();
 
     List<Node> getRunningNodes();
 
+    RabbitTemplate getRabbitTemplate();
+
+    RabbitBrokerAdmin getRabbitBrokerAdmin();
     
 }

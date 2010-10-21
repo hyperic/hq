@@ -94,7 +94,7 @@ public class PluginContextCreator {
 
             ctx = new AnnotationConfigApplicationContext();
             ctx.registerShutdownHook();
-
+   
             GenericBeanDefinition configProcessorBeanDef = new BeanDefinitionBuilder().build(Configuration.class, conf);
             DynamicBeanConfigurer.registerBean(configProcessorBeanDef, (DefaultListableBeanFactory) ctx.getBeanFactory());
             
@@ -119,7 +119,7 @@ public class PluginContextCreator {
      *
      */
     public static boolean isInitialized() throws PluginException {
-        return applicationContext != null && getBean(RabbitConfigurationManager.class) != null;
+        return applicationContext != null && getBean(Configuration.class) != null;
     }
 
     /**

@@ -25,19 +25,13 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.product;
 
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.configure.ConfigurationManager;
-import org.hyperic.hq.plugin.rabbitmq.configure.PluginContextCreator;
 import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitVirtualHost;
-import org.hyperic.hq.plugin.rabbitmq.validate.PluginValidator;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerGateway; 
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
+import org.hyperic.hq.plugin.rabbitmq.validate.PluginValidator;
 import org.hyperic.hq.product.*;
-
-import java.util.List;
 
 /**
  * RabbitProductPlugin
@@ -48,18 +42,23 @@ public class RabbitProductPlugin extends ProductPlugin {
 
     private static final Log logger = LogFactory.getLog(RabbitProductPlugin.class);
 
-    private static ConfigurationManager configurationManager;
-
     private static RabbitGateway rabbitGateway;
 
-    /**
-     * Object could be null if gateway has not been initialized yet.
-     * This is dependent on getting values in ConfigResponse from user input
-     * in the UI. We have detected the RabbitMQ server if one exists on the host,
-     * however we need to initialize before we get services.
-     * @return RabbitGateway or null
-     */
-    public static RabbitGateway getRabbitGateway() {
+    public static RabbitGateway getRabbitGateway(){
+        return rabbitGateway;
+    }
+
+    public static void initialize(Configuration configuration) throws PluginException {
+        if (configuration != null && configuration.isConfigured()) {
+            rabbitGateway = new RabbitBrokerGateway(configuration);
+        } 
+    }
+
+
+    public static RabbitGateway getRabbitGateway(Configuration configuration) throws PluginException {
+        if (rabbitGateway == null) {
+            initialize(configuration);  
+        }
         return rabbitGateway;
     }
 
@@ -71,44 +70,11 @@ public class RabbitProductPlugin extends ProductPlugin {
      *
      */
     public static boolean isNodeAvailabile(Configuration configuration) throws PluginException {
-        return configuration.isConfiguredOtpConnection() && PluginValidator.isValidOtpConnection(configuration);
+         return getRabbitGateway(configuration).getStatus() != null;
     }
-
-    public static List<String> getVirtualHosts(Configuration configuration) throws PluginException {
-        return PluginValidator.getVirtualHosts(configuration);
+  
+    public static boolean isValidUsernamePassword(Configuration configuration) throws PluginException {
+         return getRabbitGateway(configuration).isValidUsernamePassword();
     }
-
-    public static void addVirtualHost(Configuration configuration) throws PluginException {
-        if (configurationManager != null) {
-            configurationManager.addVirtualHost(configuration);
-        }
-    }
-
-
-    /**
-     * Called by Collectors which only have Properties.
-     * @param configuration
-     * @return true if all values are set and valid
-     * @throws org.hyperic.hq.product.PluginException
-     *
-     */
-    public static boolean initialize(Configuration configuration) throws PluginException {
-        if (configuration.isConfigured()) {
-
-            PluginContextCreator.createContext(configuration);
-
-            if (PluginContextCreator.isInitialized()) {
-                configurationManager = PluginContextCreator.getBean(ConfigurationManager.class);
-                rabbitGateway = configurationManager.getRabbitGateway();
-                /** ToDo add a valid username/password check. */
-                return getRabbitGateway() != null;
-            }
-
-        } else {
-            logger.debug("Postponing initialization of RabbitMQ metric Services until all required config values are set.");
-        }
-
-        return false;
-    }
-
+   
 }

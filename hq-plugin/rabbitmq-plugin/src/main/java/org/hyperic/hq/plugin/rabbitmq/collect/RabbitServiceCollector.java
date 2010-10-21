@@ -23,30 +23,19 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq.configure;
+package org.hyperic.hq.plugin.rabbitmq.collect;
 
-import org.hyperic.hq.plugin.rabbitmq.core.ErlangConverter;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitVirtualHost;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.util.config.ConfigResponse;
-import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
-import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.hyperic.hq.product.Collector;
 
 /**
- * ConfigurationManager
+ * RabbitServiceCollector
  * @author Helena Edelson
  */
-public interface ConfigurationManager {
+public class RabbitServiceCollector extends Collector {
 
-    void initialize() throws PluginException;
+    @Override
+    public void collect() {
 
-    void addVirtualHost(Configuration configuration) throws PluginException;
-    
-    boolean isActive();
 
-    int getPort();
-
-    void setPort(int port);
+    }
 }

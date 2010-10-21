@@ -52,10 +52,10 @@ public class RabbitBrokerManagerPlugin extends ControlPlugin {
 
         /** ToDo trim/validate input */
     
-        RabbitManager manager = null; //RabbitProductPlugin.getRabbitGateway();
+        /*RabbitManager manager = null; //RabbitProductPlugin.getRabbitGateway();
         if (manager != null) {
 
-            /** ToDo validate args[0] */
+            *//** ToDo validate args[0] *//*
             String virtualHost = args[0];
 
             try {
@@ -214,9 +214,9 @@ public class RabbitBrokerManagerPlugin extends ControlPlugin {
                 throw new PluginException("", e);
             }
             finally {
-                /** cleanup */
+                *//** cleanup *//*
             }
-        }
+        }*/
     }
 
     private void handleResult(AMQPStatus status, String message) {

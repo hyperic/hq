@@ -38,6 +38,7 @@ import static org.junit.Assert.assertEquals;
  
 import org.springframework.amqp.rabbit.admin.QueueInfo;
 import org.springframework.amqp.rabbit.admin.RabbitStatus;
+import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -52,23 +53,24 @@ public class RabbitGatewayTest extends AbstractSpringTest {
 
     @Before 
     public void before() { 
-        RabbitStatus s = rabbitBrokerAdmin.getStatus();
+        RabbitStatus s = rabbitGateway.getStatus();
         assertNotNull(s);
     }
 
 
     @Test
     public void getQueues() throws PluginException { 
-        List<QueueInfo> queues = rabbitGateway.getQueues("/");
+        List<QueueInfo> queues = rabbitGateway.getQueues();
         assertNotNull(queues);
     }
 
     @Test
     public void getConnections() throws Exception {
-        com.rabbitmq.client.Connection conn = singleConnectionFactory.createConnection();
+        SingleConnectionFactory cf = new SingleConnectionFactory(configuration.getHostname());
+        com.rabbitmq.client.Connection conn = cf.createConnection();
         List<String> vHosts = rabbitGateway.getVirtualHosts();
         for (String vhost : vHosts) {
-            List<RabbitConnection> cons = rabbitGateway.getConnections(vhost);
+            List<RabbitConnection> cons = rabbitGateway.getConnections();
             assertTrue(cons.size() > 0);
         }
 
@@ -77,13 +79,14 @@ public class RabbitGatewayTest extends AbstractSpringTest {
 
     @Test
     public void getChannels() throws Exception {
-        com.rabbitmq.client.Connection conn = singleConnectionFactory.createConnection();
+        SingleConnectionFactory cf = new SingleConnectionFactory(configuration.getHostname());
+        com.rabbitmq.client.Connection conn = cf.createConnection();
         conn.createChannel();
         conn.createChannel();
         
         List<String> vHosts = rabbitGateway.getVirtualHosts();
         for (String vhost : vHosts) {
-            List<RabbitChannel> channels = rabbitGateway.getChannels(vhost);
+            List<RabbitChannel> channels = rabbitGateway.getChannels();
             assertTrue(channels.size() > 0);
         }
         conn.close();
@@ -99,16 +102,8 @@ public class RabbitGatewayTest extends AbstractSpringTest {
     @Test
     @Ignore("this is hanging..have to fix")
     public void purgeQueue() {
-        List<QueueInfo> queues = rabbitGateway.getQueues("/");
+        List<QueueInfo> queues = rabbitGateway.getQueues();
         assertNotNull(queues);
-    }
-
-    @Test
-    public void getHosts() throws PluginException {
-        String host = rabbitTemplate.getConnectionFactory().getHost();
-        String virtualHost = rabbitTemplate.getConnectionFactory().getVirtualHost();
-        assertNotNull(host);
-        assertNotNull(virtualHost);
     }
 
     /*@Test
@@ -119,11 +114,11 @@ public class RabbitGatewayTest extends AbstractSpringTest {
 
     @Test
     public void listCreateDeletePurgeQueue() {
-        AMQPStatus status = rabbitManager.createQueue(new Queue("test"), "/");
+        AMQPStatus status = rabbitManager.createQueue(new Queue("test"));
         assertTrue(status.compareTo(AMQPStatus.RESOURCE_CREATED) == 0);
         assertTrue(status.name().equalsIgnoreCase(AMQPStatus.RESOURCE_CREATED.name()));
 
-        List<QueueInfo> queues = rabbitGateway.getQueues("/");
+        List<QueueInfo> queues = rabbitGateway.getQueues();
         assertNotNull(queues);
 
         Map<String, QueueInfo> map = new HashMap<String, QueueInfo>();
@@ -139,29 +134,29 @@ public class RabbitGatewayTest extends AbstractSpringTest {
 
     @Test
     public void stopStartBrokerApplication() {
-        RabbitStatus status = rabbitGateway.getRabbitStatus();
+        RabbitStatus status = rabbitGateway.getStatus();
         assertBrokerAppRunning(status);
 
         rabbitManager.stopBrokerApplication();
-        status = rabbitGateway.getRabbitStatus();
+        status = rabbitGateway.getStatus();
         assertEquals(0, status.getRunningNodes().size());
 
         rabbitManager.startBrokerApplication();
-        status = rabbitGateway.getRabbitStatus();
+        status = rabbitGateway.getStatus();
         assertBrokerAppRunning(status);
     }
 
     @Test
     public void listCreateDeleteChangePwdUser() {
-        List<String> users = rabbitGateway.getUsers("/");
+        List<String> users = rabbitGateway.getUsers();
         if (users.contains("foo")) {
-            rabbitManager.deleteUser("foo", "/");
+            rabbitManager.deleteUser("foo");
         }
-        rabbitManager.createUser("foo", "bar", "/");
-        rabbitManager.updateUserPassword("foo", "12345", "/");
-        users = rabbitGateway.getUsers("/");
+        rabbitManager.createUser("foo", "bar");
+        rabbitManager.updateUserPassword("foo", "12345");
+        users = rabbitGateway.getUsers();
         if (users.contains("foo")) {
-            rabbitManager.deleteUser("foo", "/");
+            rabbitManager.deleteUser("foo");
         }
     }
 

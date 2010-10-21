@@ -75,7 +75,7 @@
         <config type="product">
             <option name="server.name" description="rabbit node name" type="hidden"/>
             <option name="server.path" description="node path" type="hidden"/>
-            <option name="virtualhost" description="rabbit node-virtualhost name" type="hidden"/>
+            <!--<option name="virtualhost" description="rabbit node-virtualhost name" type="hidden"/>-->
             <option name="process.name" description="node process" type="hidden"/>
             <option name="hostname" description="host" type="hidden"/>
             <option name="authentication" description="erlang cookie" type="hidden"/>
@@ -101,8 +101,8 @@
             <option name="process.query" default="State.Name.sw=beam,Args.*.eq=-sname,Args.*.ct=%server.path%"
                     description="Node Process Query"/>
         </config>
-        <!--for the collector-->
-        <metric name="Availability" template="rabbitmq:server.name=%server.name%,virtualhost=%virtualhost%,hostname=%hostname%,username=%username%,password=%password%,authentication=%authentication%:Availability" indicator="true"/>
+
+        <metric name="Availability" template="rabbitmq:server.name=%server.name%,hostname=%hostname%,username=%username%,password=%password%,authentication=%authentication%:Availability" indicator="true"/>
 
         &process-metrics;
 
@@ -113,7 +113,7 @@
          -->
 
         <service name="Queue">
-            <property name="template" value="rabbitmq:queue=%name%,virtualhost=%virtualhost%,server=%server.name%:${alias}"/>
+            <property name="template" value="rabbitmq:queue=%name%,server.name=%server.name%,hostname=%hostname%,username=%username%,password=%password%,authentication=%authentication%:${alias}"/>
 
             <metric name="Messages"
                     alias="messages"
@@ -169,7 +169,7 @@
         </service>
 
         <service name="Channel">
-            <property name="template" value="rabbitmq:channel=%name%,virtualhost=%virtualhost%,server=%server.name%:${alias}"/>
+            <property name="template" value="rabbitmq:channel=%name%,server.name=%server.name%,hostname=%hostname%,username=%username%,password=%password%,authentication=%authentication%:${alias}"/>
 
             <metric name="Consumers"
                     alias="consumerCount"
@@ -202,7 +202,7 @@
         </service>
 
         <service name="Connection">
-            <property name="template" value="rabbitmq:connection=%name%,virtualhost=%virtualhost%,server=%server.name%:${alias}"/>
+            <property name="template" value="rabbitmq:connection=%name%,server.name=%server.name%,hostname=%hostname%,username=%username%,password=%password%,authentication=%authentication%:${alias}"/>
 
             <metric name="Octets Received"
                     alias="octetsReceived"
@@ -272,7 +272,7 @@
         </service>
 
         <service name="Exchange">
-            <property name="template" value="rabbitmq:exchange=%name%,virtualhost=%virtualhost%,server=%server.name%:${alias}"/>
+            <property name="template" value="rabbitmq:exchange=%name%,server.name=%server.name%,hostname=%hostname%,username=%username%,password=%password%,authentication=%authentication%:${alias}"/>
 
             <metric name="Availability"
                     category="AVAILABILITY"
