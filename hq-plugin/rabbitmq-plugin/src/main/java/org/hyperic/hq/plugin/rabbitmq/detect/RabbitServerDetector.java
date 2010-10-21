@@ -36,8 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.collect.*;
 import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
 import org.hyperic.hq.plugin.rabbitmq.core.*;
-import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
-import org.hyperic.hq.plugin.rabbitmq.validate.PluginValidator;
+import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin; 
 import org.hyperic.hq.product.*;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.amqp.core.Exchange;
@@ -106,13 +105,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         List<ServiceResource> serviceResources = new ArrayList<ServiceResource>();
 
         configure(serviceConfig);
-
-        Configuration configuration = Configuration.toConfiguration(serviceConfig);
-
-        if (RabbitProductPlugin.getRabbitGateway() == null && configuration.isConfigured()) {
-            RabbitProductPlugin.initialize(configuration);
-        }
-
+ 
         List<ServiceResource> rabbitResources = createRabbitResources(serviceConfig);
         if (rabbitResources != null && rabbitResources.size() > 0) {
             serviceResources.addAll(rabbitResources);
@@ -130,42 +123,45 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
     public List<ServiceResource> createRabbitResources(ConfigResponse serviceConfig) throws PluginException {
         List<ServiceResource> rabbitResources = null;
 
-        RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
-        try {
-            if (rabbitGateway != null) {
-                List<String> virtualHosts = rabbitGateway.getVirtualHosts();
+        RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway(Configuration.toConfiguration(serviceConfig));
 
+        if (rabbitGateway != null) {
+            List<String> virtualHosts = rabbitGateway.getVirtualHosts();
+
+            if (virtualHosts != null) {
                 String nodeName = serviceConfig.getValue(DetectorConstants.SERVER_NAME);
+                rabbitResources = new ArrayList<ServiceResource>();
 
-                if (virtualHosts != null) {
-                    rabbitResources = new ArrayList<ServiceResource>();
-                     
-                    for (String virtualHost : virtualHosts) {
-                        ServiceResource vHost = createServiceResource(DetectorConstants.VIRTUAL_HOST);
-                        vHost.setName(new StringBuilder().append(getTypeInfo().getName())
-                                .append(" Node: ").append(nodeName).append(" ").append(DetectorConstants.VIRTUAL_HOST).append(": ").append(virtualHost).toString());
-                        //rabbitResources.add(vHost);
+                for (String virtualHost : virtualHosts) {
+                    Configuration configuration = Configuration.toConfiguration(serviceConfig);
+                    configuration.setVirtualHost(virtualHost);
 
-                        List<ServiceResource> queues = createQueueServiceResources(rabbitGateway, nodeName, virtualHost);
-                        if (queues != null) rabbitResources.addAll(queues);
+                    RabbitGateway gateway = new RabbitBrokerGateway(configuration); 
 
-                        List<ServiceResource> connections = createConnectionServiceResources(rabbitGateway, nodeName, virtualHost);
-                        if (connections != null) rabbitResources.addAll(connections);
+                    ServiceResource vHost = createServiceResource(DetectorConstants.VIRTUAL_HOST);
+                    vHost.setName(new StringBuilder().append(getTypeInfo().getName())
+                            .append(" Node: ").append(nodeName).append(" ").append(DetectorConstants.VIRTUAL_HOST).append(": ").append(virtualHost).toString());
+                    //rabbitResources.add(vHost);
 
-                        List<ServiceResource> channels = createChannelServiceResources(rabbitGateway, nodeName, virtualHost);
-                        if (channels != null) rabbitResources.addAll(channels);
+                    List<ServiceResource> queues = createQueueServiceResources(gateway, virtualHost);
+                    if (queues != null && queues.size() > 0) rabbitResources.addAll(queues);
 
-                        List<ServiceResource> exchanges = createExchangeServiceResources(rabbitGateway, nodeName, virtualHost);
-                        if (exchanges != null) rabbitResources.addAll(exchanges);
-                    }
+                    List<ServiceResource> connections = createConnectionServiceResources(gateway, virtualHost);
+                    if (connections != null) rabbitResources.addAll(connections);
+
+                    List<ServiceResource> channels = createChannelServiceResources(gateway, virtualHost);
+                    if (channels != null) rabbitResources.addAll(channels);
+
+                    List<ServiceResource> exchanges = createExchangeServiceResources(gateway, virtualHost);
+                    if (exchanges != null) rabbitResources.addAll(exchanges);
+                }
+
+                if (rabbitResources != null) {
+                    logger.debug("Created " + rabbitResources.size() + " rabbit services");
                 }
             }
-            if (rabbitResources != null) {
-                logger.debug("Created " + rabbitResources.size() + " rabbit services");
-            }
-        } catch (Exception e) {
-            throw new PluginException("Error creating RabbitMQ services", e);
         }
+
         return rabbitResources;
     }
 
@@ -176,11 +172,11 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @return
      * @throws PluginException
      */
-    protected List<ServiceResource> createQueueServiceResources(RabbitGateway rabbitGateway, String nodeName, String vHost) throws PluginException {
+    protected List<ServiceResource> createQueueServiceResources(RabbitGateway rabbitGateway, String vHost) throws PluginException {
         List<ServiceResource> serviceResources = null;
-        List<QueueInfo> queues = rabbitGateway.getQueues(vHost);
+        List<QueueInfo> queues = rabbitGateway.getQueues();
         if (queues != null) {
-            serviceResources = doCreateServiceResources(queues, DetectorConstants.QUEUE, nodeName, vHost);
+            serviceResources = doCreateServiceResources(queues, DetectorConstants.QUEUE, vHost);
         }
 
         return serviceResources;
@@ -193,11 +189,11 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @return
      * @throws PluginException
      */
-    protected List<ServiceResource> createConnectionServiceResources(RabbitGateway rabbitGateway, String nodeName, String vHost) throws PluginException {
+    protected List<ServiceResource> createConnectionServiceResources(RabbitGateway rabbitGateway, String vHost) throws PluginException {
         List<ServiceResource> serviceResources = null;
-        List<RabbitConnection> connections = rabbitGateway.getConnections(vHost);
+        List<RabbitConnection> connections = rabbitGateway.getConnections();
         if (connections != null) {
-            serviceResources = doCreateServiceResources(connections, DetectorConstants.CONNECTION, nodeName, vHost);
+            serviceResources = doCreateServiceResources(connections, DetectorConstants.CONNECTION, vHost);
         }
 
         return serviceResources;
@@ -210,11 +206,11 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @return
      * @throws PluginException
      */
-    protected List<ServiceResource> createChannelServiceResources(RabbitGateway rabbitGateway, String nodeName, String vHost) throws PluginException {
+    protected List<ServiceResource> createChannelServiceResources(RabbitGateway rabbitGateway, String vHost) throws PluginException {
         List<ServiceResource> serviceResources = null;
-        List<RabbitChannel> channels = rabbitGateway.getChannels(vHost);
+        List<RabbitChannel> channels = rabbitGateway.getChannels();
         if (channels != null) {
-            serviceResources = doCreateServiceResources(channels, DetectorConstants.CHANNEL, nodeName, vHost);
+            serviceResources = doCreateServiceResources(channels, DetectorConstants.CHANNEL, vHost);
         }
 
         return serviceResources;
@@ -227,11 +223,11 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @return
      * @throws PluginException
      */
-    protected List<ServiceResource> createExchangeServiceResources(RabbitGateway rabbitGateway, String nodeName, String vHost) throws PluginException {
+    protected List<ServiceResource> createExchangeServiceResources(RabbitGateway rabbitGateway, String vHost) throws PluginException {
         List<ServiceResource> serviceResources = null;
-        List<Exchange> exchanges = rabbitGateway.getExchanges(vHost);
+        List<Exchange> exchanges = rabbitGateway.getExchanges();
         if (exchanges != null) {
-            serviceResources = doCreateServiceResources(exchanges, DetectorConstants.EXCHANGE, nodeName, vHost);
+            serviceResources = doCreateServiceResources(exchanges, DetectorConstants.EXCHANGE, vHost);
         }
 
         return serviceResources;
@@ -246,31 +242,25 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @param vHost
      * @return
      */
-    private List<ServiceResource> doCreateServiceResources(List rabbitObjects, String rabbitType, String nodeName, String vHost) {
+    private List<ServiceResource> doCreateServiceResources(List rabbitObjects, String rabbitType, String vHost) {
         List<ServiceResource> serviceResources = null;
 
         if (rabbitObjects != null) {
-
             serviceResources = new ArrayList<ServiceResource>();
 
             IdentityBuilder builder = new ObjectIdentityBuilder();
 
             for (Object obj : rabbitObjects) {
-
                 ServiceResource service = createServiceResource(rabbitType);
-
                 String name = builder.buildIdentity(obj, vHost);
 
                 if (obj instanceof QueueInfo) {
                     service.setCustomProperties(QueueCollector.getAttributes((QueueInfo) obj));
-                }
-                else if (obj instanceof RabbitConnection) {
+                } else if (obj instanceof RabbitConnection) {
                     service.setCustomProperties(ConnectionCollector.getAttributes((RabbitConnection) obj));
-                }
-                else if (obj instanceof Exchange) {
+                } else if (obj instanceof Exchange) {
                     service.setCustomProperties(ExchangeCollector.getAttributes((Exchange) obj));
-                }
-                else if (obj instanceof RabbitChannel) {
+                } else if (obj instanceof RabbitChannel) {
                     service.setCustomProperties(ChannelCollector.getAttributes((RabbitChannel) obj));
                 }
 

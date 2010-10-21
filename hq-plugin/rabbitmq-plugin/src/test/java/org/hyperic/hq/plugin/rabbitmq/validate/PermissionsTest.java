@@ -93,7 +93,7 @@ public class PermissionsTest {
             logger.debug("Anticipated 'java.net.SocketException: Connection reset or java.io.IOException: expected 2 bytes, got EOF after 0 bytes\n'" + e);
         }
 
-        try {
+        /*try {
             logger.debug("Testing HypericBrokerAdmin (extends RBA) with cookie...");
             String c = ErlangCookieHandler.configureCookie(getConfigResponse(NODE_FROM_PTQL));
             RabbitBrokerAdmin admin = new HypericBrokerAdmin(cf, c);
@@ -112,7 +112,7 @@ public class PermissionsTest {
         } catch (org.springframework.erlang.OtpAuthException e) {
             logger.debug(e);
         }
-
+*/
     }
 
     private static ConfigResponse getConfigResponse(String node) {

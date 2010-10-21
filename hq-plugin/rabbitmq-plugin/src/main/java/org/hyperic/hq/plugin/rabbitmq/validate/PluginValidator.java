@@ -29,6 +29,8 @@ import com.ericsson.otp.erlang.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerGateway;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.product.PluginException;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -48,18 +50,20 @@ public class PluginValidator {
 
     /**
      * Validate against the broker.
-     * @param template RabbitTemplate
+     * 
      * @return true if successful connection is made, false if not.
      * @throws PluginException
      */
-    public static boolean isValidRabbitConnection(RabbitTemplate template) throws PluginException {
-        Assert.notNull(template, "template must not be null.");
-        try {
+    public static boolean isValidRabbitConnection(Configuration configuration) throws PluginException {
+        Assert.notNull(configuration, "template must not be null.");
+        /*try {
+            RabbitGateway
             template.convertAndSend("Hyperic Test Message"); 
             return true;
         } catch (AmqpException e) {
             return false;
-        }
+        }*/
+        return true;
     }
 
     /**
@@ -94,30 +98,6 @@ public class PluginValidator {
 
         return response != null;
     }
-
-    public static List<String> getVirtualHosts(Configuration configuration) {
-        Object response = null;
-
-        if (configuration.isConfiguredOtpConnection()) {
-            OtpConnection conn = null;
-
-            try {
-                OtpSelf self = new OtpSelf("rabbit-spring-monitor", configuration.getAuthentication());
-                OtpPeer peer = new OtpPeer(configuration.getNodename());
-                conn = self.connect(peer);
-                conn.sendRPC("the", "query", new OtpErlangList());
-                response = conn.receiveRPC();
-                //convert the response and return list
-            }
-            catch (Exception e) {
-
-            }
-            finally {
-                if (conn != null) conn.close();
-            }
-        }
-        return Collections.emptyList();
-    }
-
-
+ 
+ 
 }

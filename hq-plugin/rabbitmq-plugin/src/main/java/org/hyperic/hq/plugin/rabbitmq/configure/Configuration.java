@@ -25,18 +25,24 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.configure;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
 import org.hyperic.hq.plugin.rabbitmq.validate.PluginConfigurationException;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Configuration
  * @author Helena Edelson
  */
 public class Configuration {
+
+    private static final Log logger = LogFactory.getLog(Configuration.class);
 
     private String nodename;
 
@@ -52,11 +58,17 @@ public class Configuration {
 
     private int port;
 
+    private String defaultVirtualHost = "/";
+    
     @Override
     public String toString() {
-        return new StringBuilder("[nodename=").append(nodename).append(" host=").append(hostname)
+        return new StringBuilder("[nodename=").append(nodename).append(" hostname=").append(hostname)
                 .append(" virtualHost=").append(virtualHost).append(" authentication=").append(authentication)
                 .append(" username=").append(username).append(" password=").append(password).append("]").toString();
+    }
+
+    public boolean isDefaultVirtualHost() {
+        return virtualHost.equalsIgnoreCase(defaultVirtualHost);
     }
 
     /**
@@ -64,11 +76,12 @@ public class Configuration {
      * Log which one failed.
      * ToDo Not yet handling port, ran out of time
      * @return
-     * @throws org.hyperic.hq.product.PluginException 
+     * @throws org.hyperic.hq.product.PluginException
+     *
      */
     public boolean isConfigured() throws PluginException {
-        if (nodename == null || virtualHost == null) {
-            throw new PluginConfigurationException("This resource requires the node and virtual host names of the broker.");
+        if (nodename == null) {
+            throw new PluginConfigurationException("This resource requires the node name of the broker.");
         }
 
         if (username == null || password == null) {
@@ -95,7 +108,7 @@ public class Configuration {
 
     /**
      * Call before creating HypericBrokerAdmin
-     * @return true if has values 
+     * @return true if has values
      */
     public boolean isConfiguredConnectionFactory() {
         return username != null && password != null && hostname != null;
@@ -130,7 +143,7 @@ public class Configuration {
     }
 
     public void setUsername(String username) {
-        this.username = username != null  && username.length() > 0 ? username.trim() : null;
+        this.username = username != null && username.length() > 0 ? username.trim() : null;
     }
 
     public String getPassword() {
@@ -167,7 +180,7 @@ public class Configuration {
         conf.setPassword(props.getProperty(DetectorConstants.PASSWORD));
 
         if (props.getProperty(DetectorConstants.PORT) != null) {
-            conf.setPort(Integer.parseInt(props.getProperty(DetectorConstants.PORT)));    
+            conf.setPort(Integer.parseInt(props.getProperty(DetectorConstants.PORT)));
         }
 
         return conf;
@@ -187,4 +200,5 @@ public class Configuration {
         }
         return conf;
     }
+
 }

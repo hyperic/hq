@@ -28,6 +28,7 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.plugin.rabbitmq.validate.PluginValidator;
 import org.hyperic.hq.product.Collector;
@@ -48,34 +49,31 @@ public class RabbitServerCollector extends Collector {
     protected void init() throws PluginException {
         super.init();
 
-        Configuration configuration = Configuration.toConfiguration(getProperties());
-        logger.debug("init " + configuration);
+        if (RabbitProductPlugin.getRabbitGateway() == null) {
+            Configuration configuration = Configuration.toConfiguration(getProperties());
+            logger.debug("init " + configuration);
 
-        if (RabbitProductPlugin.getRabbitGateway() == null && configuration.isConfiguredOtpConnection()) {
-            logger.debug("Attempting to initialize plugin...");
-            RabbitProductPlugin.initialize(configuration);
-        } else {
-            throw new PluginException("Please enter a username and password and insure the Agent has permission to read the Erlang cookie.");
+            RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway(configuration);
+
+            if (!rabbitGateway.isValidUsernamePassword()) {
+               throw new PluginException("Please enter a username and password.");
+            }
+
+            if (rabbitGateway.getStatus() == null) {
+                throw new PluginException("Please insure the Agent has permission to read the Erlang cookie.");
+            }
         }
     }
 
     @Override
     public void collect() {
         logger.debug("collect[" + getProperties() + "]");
-        Configuration configuration = Configuration.toConfiguration(getProperties());
 
         try {
 
+            Configuration configuration = Configuration.toConfiguration(getProperties());
             setAvailability(RabbitProductPlugin.isNodeAvailabile(configuration));
 
-            if (RabbitProductPlugin.getRabbitGateway() == null && configuration.isConfiguredOtpConnection()) {
-                logger.debug("Attempting to initialize plugin...");
-                RabbitProductPlugin.initialize(configuration);
-            }
-            else {
-                throw new PluginException("Please enter a username and password and insure the Agent has permission to read the Erlang cookie.");
-            }
-            
         }
         catch (PluginException ex) {
             setAvailability(false);

@@ -27,19 +27,15 @@ package org.hyperic.hq.plugin.rabbitmq;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
 import org.hyperic.hq.plugin.rabbitmq.configure.TestContextLoader;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.plugin.rabbitmq.manage.RabbitManager;
-import org.hyperic.util.config.ConfigResponse;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.runner.RunWith;
-import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
-import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.erlang.core.ErlangTemplate;
+import org.springframework.beans.factory.annotation.Autowired; 
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -57,29 +53,19 @@ public abstract class AbstractSpringTest {
     protected final Log logger = LogFactory.getLog(this.getClass().getName());
 
     @Autowired
-    protected SingleConnectionFactory singleConnectionFactory;
-
-    @Autowired
-    protected RabbitBrokerAdmin rabbitBrokerAdmin;
-
-    @Autowired
-    protected RabbitTemplate rabbitTemplate;
-
-    @Autowired
     protected RabbitGateway rabbitGateway;
 
     @Autowired
-    protected ConfigResponse serverConfig;
+    protected Configuration configuration;
  
     @Autowired
     protected RabbitManager rabbitManager;
     
     @Before
-    public void before() {
-        assertNotNull("singleConnectionFactory should not be null", singleConnectionFactory);
-        assertNotNull("rabbitBrokerAdmin should not be null", rabbitBrokerAdmin);
-        assertNotNull("rabbitTemplate must not be null", rabbitTemplate);
-        assertNotNull("rabbitGateway should not be null", rabbitGateway); 
+    public void before() { 
+        assertNotNull("rabbitGateway should not be null", rabbitGateway);
+        assertNotNull("configuration must not be null", configuration);
+        assertNotNull("rabbitManager should not be null", rabbitManager);
     }
 
     @AfterClass

@@ -25,13 +25,19 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.configure;
 
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerGateway;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
+import org.hyperic.hq.plugin.rabbitmq.manage.RabbitBrokerManager;
+import org.hyperic.hq.plugin.rabbitmq.manage.RabbitManager;
 import org.hyperic.hq.product.PluginException;
+import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.context.annotation.Scope;
 
 /**
- * PluginConfiguration 
+ * PluginConfiguration
  * @author Helena Edelson
  */
 @ImportResource("classpath:/etc/rabbitmq-context.xml")
@@ -40,9 +46,24 @@ public class PluginConfiguration {
     @Autowired
     private Configuration configuration;
 
-    @Bean(initMethod = "initialize")
-    public ConfigurationManager configurationManager() throws PluginException {
-        ConfigurationManager manager = new RabbitConfigurationManager();
-        return manager;
+    @Bean
+    public com.rabbitmq.client.ConnectionFactory targetConnectionFactory() {
+        com.rabbitmq.client.ConnectionFactory cf = new com.rabbitmq.client.ConnectionFactory();
+        cf.setHost(configuration.getHostname());
+        cf.setUsername(configuration.getUsername());
+        cf.setPassword(configuration.getPassword());
+        return cf;
     }
+    
+    @Bean 
+    public RabbitGateway rabbitGateway() throws PluginException {
+        return new RabbitBrokerGateway(configuration);
+        //return new RabbitBrokerGateway(configuration, targetConnectionFactory());
+    }
+
+    @Bean
+    public RabbitManager rabbitManager() throws PluginException {
+        return new RabbitBrokerManager(rabbitGateway());
+    }
+
 }
