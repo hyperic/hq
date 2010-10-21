@@ -46,8 +46,11 @@
 	autoLogout = false;
 	
 	function removePortlet(name, label) {
-	    dojo11.xhrDelete({
+	    dojo11.xhrPost({
 	        url: '/app/dashboard/<c:out value="${selectedDashboardId}" />/portlets/' + name,
+	        content: {
+				_method: "DELETE"
+	        },
 	        load: function(){postRemovet(name,label)}
 	    });
 	}
