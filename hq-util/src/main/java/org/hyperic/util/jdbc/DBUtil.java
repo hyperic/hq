@@ -1,15 +1,15 @@
 /*
- * NOTE: This copyright does *not* cover user programs that use HQ
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2008], Hyperic, Inc.
- * This file is part of HQ.
+ * Copyright (C) [2004-2010], VMware, Inc.
+ * This file is part of Hyperic.
  *
- * HQ is free software; you can redistribute it and/or modify
+ * Hyperic is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
  * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -74,6 +74,10 @@ public class DBUtil {
     public static final int DATABASE_ORACLE_10 = 8;
     public static final int DATABASE_ORACLE_11 = 10;
     public static final int DATABASE_MYSQL5 = 9;
+
+    // Built-in DB constants
+    private static String BUILTIN_DB_JDBC_URL = "jdbc:postgresql://127.0.0.1";
+    private static String BUILTIN_DB_NAME = "hqdb";
 
     public static final int IN_CHUNK_SIZE = 200;
 
@@ -287,6 +291,34 @@ public class DBUtil {
 
     public static boolean isMySQL(int type) {
         return type == DATABASE_MYSQL5;
+    }
+    
+    public boolean isBuiltinDB() {
+        boolean isBuiltin = false;
+
+        try {
+            Connection conn = getConnection();
+            DatabaseMetaData dbMetaData = conn.getMetaData();
+            String url = dbMetaData.getURL();
+            closeConnection(log, conn);
+
+            if (url != null) {
+                // built-in db url in the format of:
+                // jdbc:postgresql://127.0.0.1:9432/hqdb?protocolVersion=2
+
+                url = url.toLowerCase();
+                isBuiltin = url.startsWith(BUILTIN_DB_JDBC_URL) &&
+                            url.indexOf(BUILTIN_DB_NAME) > BUILTIN_DB_JDBC_URL.length();
+            }
+        } catch (SQLException e) {
+            log.warn("Error retrieving database meta data.", e);
+        } finally {
+            if (log.isDebugEnabled()) {
+                log.debug("isBuiltinDB=" + isBuiltin);
+            }
+        }
+
+        return isBuiltin;
     }
 
     /**
