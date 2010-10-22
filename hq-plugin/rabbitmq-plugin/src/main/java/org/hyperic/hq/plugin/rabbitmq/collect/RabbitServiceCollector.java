@@ -23,29 +23,19 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq.validate;
-  
-import org.hyperic.hq.product.PluginException;
+package org.hyperic.hq.plugin.rabbitmq.collect;
+
+import org.hyperic.hq.product.Collector;
 
 /**
- * PluginConfigurationValidationException
+ * RabbitServiceCollector
  * @author Helena Edelson
  */
-public class PluginConfigurationValidationException extends PluginException {
+public class RabbitServiceCollector extends Collector {
 
-    private String message;
+    @Override
+    public void collect() {
 
-    public PluginConfigurationValidationException(String s) {
-        super(s);
-        this.message = s;
-    }
 
-    public PluginConfigurationValidationException(String s, Throwable t) {
-        super(s, t);
-        this.message = s;
-    }
-
-    @Override public String toString() {
-        return message;
     }
 }

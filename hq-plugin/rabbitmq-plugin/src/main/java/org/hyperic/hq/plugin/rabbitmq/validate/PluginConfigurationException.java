@@ -23,45 +23,29 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq.configure;
-
-import org.hyperic.hq.plugin.rabbitmq.core.ErlangConverter;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
+package org.hyperic.hq.plugin.rabbitmq.validate;
+  
 import org.hyperic.hq.product.PluginException;
-import org.hyperic.util.config.ConfigResponse;
-import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
-import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 /**
- * ConfigurationManager
+ * PluginConfigurationException
  * @author Helena Edelson
  */
-public interface ConfigurationManager {
+public class PluginConfigurationException extends PluginException {
 
-    void initialize() throws PluginException;
-    
-    CachingConnectionFactory getConnectionFactory();
+    private String message;
 
-    RabbitGateway getRabbitGateway();
+    public PluginConfigurationException(String s) {
+        super(s);
+        this.message = s;
+    }
 
-    RabbitTemplate getRabbitTemplate();
+    public PluginConfigurationException(String s, Throwable t) {
+        super(s, t);
+        this.message = s;
+    }
 
-    RabbitBrokerAdmin getRabbitBrokerAdmin();
-
-    ErlangConverter getErlangConverter();
-    
-    void configureUsernamePassword(ConfigResponse conf);
-
-    void configureVirtualHost(ConfigResponse conf);
-
-    void configurePort(ConfigResponse conf);
-
-    void configureBrokerAdmin();
-
-    boolean isActive();
-
-    int getPort();
-
-    void setPort(int port);
+    @Override public String toString() {
+        return message;
+    }
 }

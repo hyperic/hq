@@ -29,5 +29,5 @@ package org.hyperic.hq.plugin.rabbitmq.core;
  * HypericBinding
  * @author Helena Edelson
  */
-public class HypericBinding {
+public class RabbitBinding {
 }
