@@ -28,12 +28,14 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerGateway;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.amqp.core.Exchange;
+import org.springframework.amqp.rabbit.admin.QueueInfo;
 
 import java.util.List;
 
@@ -48,40 +50,32 @@ public class ExchangeCollector extends Collector {
     @Override
     public void collect() {
         Configuration configuration = Configuration.toConfiguration(getProperties());
-        boolean isAvailable = false;
+
 
         try {
-            isAvailable = RabbitProductPlugin.isNodeAvailabile(configuration);
-        } catch (PluginException e) {
-            logger.error(e.getMessage());
-        }
+            RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway(configuration);
 
-        RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
-
-        if (rabbitGateway != null) {
-
-            try {
+            if (rabbitGateway != null) { 
+                boolean isAvailable = RabbitProductPlugin.isNodeAvailabile(configuration);
                 List<String> virtualHosts = rabbitGateway.getVirtualHosts();
+
                 if (virtualHosts != null) {
                     for (String virtualHost : virtualHosts) {
-                        List<Exchange> exchanges = rabbitGateway.getExchanges(virtualHost);
+                        configuration.setVirtualHost(virtualHost);
+                        List<Exchange> exchanges = new RabbitBrokerGateway(configuration).getExchanges();
                         if (exchanges != null) {
-                            for (Exchange e : exchanges) {
-                                setAvailability(isAvailable);
+                            for (Exchange exchange : exchanges) {
+                                setAvailability(isAvailable && exchange != null);
                             }
-                        } else {
-                            setAvailability(false);
                         }
                     }
                 }
+            } else {
+                setAvailability(false);
             }
-            catch (PluginException ex) {
-                logger.error(ex);
-            } catch (Exception e) {
-                logger.error(e);
-            }
-        } else {
-            setAvailability(false);
+        }
+        catch (PluginException e) {
+
         }
     }
 

@@ -28,7 +28,9 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
-import org.hyperic.hq.plugin.rabbitmq.core.HypericChannel;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerGateway;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitChannel;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitConnection;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.Collector;
@@ -48,39 +50,33 @@ public class ChannelCollector extends Collector {
     @Override
     public void collect() {
         Configuration configuration = Configuration.toConfiguration(getProperties());
-        boolean isAvailable = false;
 
         try {
-            isAvailable = RabbitProductPlugin.isNodeAvailabile(configuration);
-        } catch (PluginException e) {
-            logger.error(e.getMessage());
-        }
+            RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway(configuration);
 
-        RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
-
-        if (rabbitGateway != null) {
-
-            try {
+            if (rabbitGateway != null) {
+                boolean isAvailable = RabbitProductPlugin.isNodeAvailabile(configuration);
                 List<String> virtualHosts = rabbitGateway.getVirtualHosts();
+
                 if (virtualHosts != null) {
                     for (String virtualHost : virtualHosts) {
-                        List<HypericChannel> channels = rabbitGateway.getChannels(virtualHost);
+                        configuration.setVirtualHost(virtualHost);
+
+                        List<RabbitChannel> channels = new RabbitBrokerGateway(configuration).getChannels();
                         if (channels != null) {
-                            for (HypericChannel channel : channels) {
-                                setAvailability(isAvailable);
+                            for (RabbitChannel channel : channels) {
+                                setAvailability(isAvailable && channel != null);
                                 setValue("consumerCount", channel.getConsumerCount());
                             }
-                        } else {
-                            setAvailability(false);
                         }
                     }
                 }
+            } else {
+                setAvailability(false);
             }
-            catch (Exception ex) {
-                logger.error(ex);
-            }
-        } else {
-            setAvailability(false);
+        }
+        catch (PluginException e) {
+
         }
     }
 
@@ -91,7 +87,7 @@ public class ChannelCollector extends Collector {
      * @param channel
      * @return
      */
-    public static ConfigResponse getAttributes(HypericChannel channel) {
+    public static ConfigResponse getAttributes(RabbitChannel channel) {
         ConfigResponse res = new ConfigResponse();
         res.setValue("pid", channel.getPid());
         res.setValue("connection", channel.getConnection().getPid());

@@ -28,12 +28,15 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
-import org.hyperic.hq.plugin.rabbitmq.core.HypericConnection;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerGateway;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitConnection;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.amqp.core.Exchange;
+import org.springframework.amqp.rabbit.admin.QueueInfo;
 
 import java.util.List;
 
@@ -48,28 +51,23 @@ public class ConnectionCollector extends Collector {
     @Override
     public void collect() {
         Configuration configuration = Configuration.toConfiguration(getProperties());
-        boolean isAvailable = false;
 
-        try { 
-            isAvailable = RabbitProductPlugin.isNodeAvailabile(configuration);
-        } catch (PluginException e) {
-            logger.error(e.getMessage());
-        }
+        try {
+            RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway(configuration);
 
-        RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
-
-        if (rabbitGateway != null) {
-
-            try {
+            if (rabbitGateway != null) {
+                boolean isAvailable = RabbitProductPlugin.isNodeAvailabile(configuration);
                 List<String> virtualHosts = rabbitGateway.getVirtualHosts();
+
                 if (virtualHosts != null) {
                     for (String virtualHost : virtualHosts) {
-                        List<HypericConnection> connections = rabbitGateway.getConnections(virtualHost);
+                        configuration.setVirtualHost(virtualHost);
+                        List<RabbitConnection> connections = new RabbitBrokerGateway(configuration).getConnections();
 
                         if (connections != null) {
-                            for (HypericConnection conn : connections) {
-                                setAvailability(isAvailable);
-                                 
+                            for (RabbitConnection conn : connections) {
+                                setAvailability(isAvailable && conn != null);
+
                                 setValue("packetsReceived", conn.getReceiveCount());
                                 setValue("packetsSent", conn.getSendCount());
                                 setValue("channelCount", conn.getChannels());
@@ -78,17 +76,15 @@ public class ConnectionCollector extends Collector {
                                 setValue("pendingSends", conn.getPendingSends());
 
                             }
-                        } else {
-                            setAvailability(false);
                         }
                     }
                 }
+            } else {
+                setAvailability(false);
             }
-            catch (Exception ex) {
-                logger.error(ex);
-            }
-        } else {
-            setAvailability(false);
+        }
+        catch (PluginException e) {
+
         }
     }
 
@@ -99,7 +95,7 @@ public class ConnectionCollector extends Collector {
      * @param conn
      * @return
      */
-    public static ConfigResponse getAttributes(HypericConnection conn) {
+    public static ConfigResponse getAttributes(RabbitConnection conn) {
         ConfigResponse res = new ConfigResponse();
         res.setValue("username", conn.getUsername());
         res.setValue("vHost", conn.getVhost());

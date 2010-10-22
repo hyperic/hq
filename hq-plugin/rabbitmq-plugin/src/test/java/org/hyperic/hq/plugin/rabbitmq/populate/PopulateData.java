@@ -24,27 +24,20 @@
  *
  */
 package org.hyperic.hq.plugin.rabbitmq.populate;
-
-import com.rabbitmq.client.Channel;
-import org.hyperic.hq.plugin.rabbitmq.configure.ConfigurationManager;
-import org.hyperic.hq.plugin.rabbitmq.configure.RabbitTestConfiguration;
-import org.hyperic.hq.plugin.rabbitmq.core.HypericChannel;
-import org.hyperic.hq.plugin.rabbitmq.core.HypericConnection;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
-import org.hyperic.hq.plugin.rabbitmq.manage.RabbitManager;
-import org.hyperic.hq.product.PluginException;
 import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.rabbit.admin.QueueInfo;
+import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
+import org.hyperic.hq.plugin.rabbitmq.core.*;
+import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
+import org.hyperic.hq.product.PluginException;
+import org.hyperic.util.config.ConfigResponse;
 import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
-import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-
+ 
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertNotNull; 
+import static org.junit.Assert.assertNotNull;
 
 /**
  * PopulateData can be run to populate the QA rabbitmq servers
@@ -53,45 +46,62 @@ import static org.junit.Assert.assertNotNull;
  */
 public class PopulateData {
 
+    private static final String SERVER_NAME = "rabbit@server";
+
+    private static final String HOST = "server";
+
+
     public static void main(String[] args) throws Exception {
-        ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(RabbitTestConfiguration.class);
-        ConfigurationManager cf = ctx.getBean(ConfigurationManager.class);
-        RabbitGateway rabbitGateway = cf.getRabbitGateway();
-        RabbitTemplate rabbitTemplate = cf.getRabbitTemplate();
-        RabbitBrokerAdmin admin = cf.getRabbitBrokerAdmin();
+        Configuration configuration = getConfig();
+        configuration.setVirtualHost("/");
+        RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway(configuration);
+        RabbitTemplate rabbitTemplate = rabbitGateway.getRabbitTemplate();
+        RabbitBrokerAdmin rabbitBrokerAdmin = rabbitGateway.getRabbitBrokerAdmin();
+        System.out.println(rabbitBrokerAdmin.getStatus());
 
-        Queue marketDataQueue = ctx.getBean("marketDataQueue", Queue.class);
-        admin.declareQueue(marketDataQueue);
+        int numMessages = 500;
 
-        rabbitTemplate.setRoutingKey(marketDataQueue.getName());
-        rabbitTemplate.setQueue(marketDataQueue.getName());
-
-        refresh(cf.getConnectionFactory(), cf.getRabbitGateway());
-
-        int numMessages = 100;
-
+        final Queue stocksQueue = new Queue("stocks.quotes");
+        rabbitBrokerAdmin.declareQueue(stocksQueue);
+        rabbitTemplate.setRoutingKey(stocksQueue.getName());
+        rabbitTemplate.setQueue(stocksQueue.getName());
         ProducerSample producer = new ProducerSample(rabbitTemplate, numMessages);
         producer.sendMessages();
+ 
+        Queue alertsQueue = new Queue("market.alerts");
+        rabbitBrokerAdmin.declareQueue(alertsQueue);
+        rabbitTemplate.setRoutingKey(alertsQueue.getName());
+        rabbitTemplate.setQueue(alertsQueue.getName());
+        ProducerSample producer2 = new ProducerSample(rabbitTemplate, numMessages);
+        producer2.sendMessages();
 
-        List<QueueInfo> queues = rabbitGateway.getQueues("/");
+
+        Queue trendsQueue = new Queue("market.trends");
+        rabbitBrokerAdmin.declareQueue(trendsQueue);
+        rabbitTemplate.setRoutingKey(trendsQueue.getName());
+        rabbitTemplate.setQueue(trendsQueue.getName());
+        ProducerSample producer3 = new ProducerSample(rabbitTemplate, numMessages);
+        producer3.sendMessages();
+
+        refresh((CachingConnectionFactory) rabbitTemplate.getConnectionFactory(), rabbitGateway);
+
+        /*List<QueueInfo> queues = rabbitGateway.getQueues();
         if (queues != null) {
             System.out.println("queues has " + queues.size());
             for (QueueInfo q : queues) {
                 System.out.println(q);
             }
-        }
+        }*/
 
-        ctx.close();
         System.exit(0);
     }
 
     /**
-     *
      * @param scf
-     * @param rabbitGateway 
+     * @param rabbitGateway
      * @throws Exception
      */
-    private static void refresh(SingleConnectionFactory scf, RabbitGateway rabbitGateway) throws Exception {
+    private static void refresh(CachingConnectionFactory scf, RabbitGateway rabbitGateway) throws Exception {
         com.rabbitmq.client.Connection conn = scf.createConnection();
         Map<String, Object> props = conn.getServerProperties();
         System.out.println(props);
@@ -99,13 +109,27 @@ public class PopulateData {
         conn.createChannel();
         conn.createChannel();
 
-        List<HypericChannel> channels = rabbitGateway.getChannels("/");
+        List<RabbitChannel> channels = rabbitGateway.getChannels();
         assertNotNull(channels);
 
-        List<HypericConnection> connections = rabbitGateway.getConnections("/");
+        List<RabbitConnection> connections = rabbitGateway.getConnections();
         assertNotNull(connections);
-        
+
         /** kept it open for a while to show some metrics */
         conn.close();
+    }
+
+    private static Configuration getConfig() throws PluginException {
+        ConfigResponse conf = new ConfigResponse();
+        conf.setValue(DetectorConstants.HOST, HOST);
+        conf.setValue(DetectorConstants.USERNAME, "guest");
+        conf.setValue(DetectorConstants.PASSWORD, "guest");
+        conf.setValue(DetectorConstants.PLATFORM_TYPE, "Linux");
+        conf.setValue(DetectorConstants.SERVER_NAME, SERVER_NAME);
+
+        String value = ErlangCookieHandler.configureCookie(conf);
+        assertNotNull(value);
+        conf.setValue(DetectorConstants.AUTHENTICATION, value);
+        return Configuration.toConfiguration(conf);
     }
 }

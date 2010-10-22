@@ -25,11 +25,16 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.configure;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
+import org.hyperic.hq.plugin.rabbitmq.validate.PluginConfigurationException;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Configuration
@@ -37,9 +42,13 @@ import java.util.Properties;
  */
 public class Configuration {
 
+    private static final Log logger = LogFactory.getLog(Configuration.class);
+
     private String nodename;
 
     private String hostname;
+
+    private String virtualHost;
 
     private String authentication;
 
@@ -49,10 +58,17 @@ public class Configuration {
 
     private int port;
 
+    private String defaultVirtualHost = "/";
+    
     @Override
     public String toString() {
-        return new StringBuilder("[nodename=").append(nodename).append(" host=").append(hostname).append(" authentication=").append(authentication)
+        return new StringBuilder("[nodename=").append(nodename).append(" hostname=").append(hostname)
+                .append(" virtualHost=").append(virtualHost).append(" authentication=").append(authentication)
                 .append(" username=").append(username).append(" password=").append(password).append("]").toString();
+    }
+
+    public boolean isDefaultVirtualHost() {
+        return virtualHost.equalsIgnoreCase(defaultVirtualHost);
     }
 
     /**
@@ -60,19 +76,24 @@ public class Configuration {
      * Log which one failed.
      * ToDo Not yet handling port, ran out of time
      * @return
-     * @throws org.hyperic.hq.product.PluginException 
+     * @throws org.hyperic.hq.product.PluginException
+     *
      */
     public boolean isConfigured() throws PluginException {
+        if (nodename == null) {
+            throw new PluginConfigurationException("This resource requires the node name of the broker.");
+        }
+
         if (username == null || password == null) {
-            throw new PluginException("This resource requires a username and password for the broker.");
+            throw new PluginConfigurationException("This resource requires a username and password for the broker.");
         }
 
         if (authentication == null) {
-            throw new PluginException("Erlang cookie value is not set yet.");
+            throw new PluginConfigurationException("Erlang cookie value is not set yet.");
         }
 
         if (hostname == null) {
-            throw new PluginException("Host name must not be null.");
+            throw new PluginConfigurationException("Host name must not be null.");
         }
         return true;
     }
@@ -87,7 +108,7 @@ public class Configuration {
 
     /**
      * Call before creating HypericBrokerAdmin
-     * @return true if has values 
+     * @return true if has values
      */
     public boolean isConfiguredConnectionFactory() {
         return username != null && password != null && hostname != null;
@@ -122,7 +143,7 @@ public class Configuration {
     }
 
     public void setUsername(String username) {
-        this.username = username != null  && username.length() > 0 ? username.trim() : null;
+        this.username = username != null && username.length() > 0 ? username.trim() : null;
     }
 
     public String getPassword() {
@@ -141,16 +162,25 @@ public class Configuration {
         this.port = port;
     }
 
+    public String getVirtualHost() {
+        return virtualHost;
+    }
+
+    public void setVirtualHost(String virtualHost) {
+        this.virtualHost = virtualHost;
+    }
+
     public static Configuration toConfiguration(Properties props) {
         Configuration conf = new Configuration();
         conf.setNodename(props.getProperty(DetectorConstants.SERVER_NAME));
+        conf.setVirtualHost(props.getProperty(DetectorConstants.VIRTUALHOST));
         conf.setAuthentication(props.getProperty(DetectorConstants.AUTHENTICATION));
         conf.setHostname(props.getProperty(DetectorConstants.HOST));
         conf.setUsername(props.getProperty(DetectorConstants.USERNAME));
         conf.setPassword(props.getProperty(DetectorConstants.PASSWORD));
 
         if (props.getProperty(DetectorConstants.PORT) != null) {
-            conf.setPort(Integer.parseInt(props.getProperty(DetectorConstants.PORT)));    
+            conf.setPort(Integer.parseInt(props.getProperty(DetectorConstants.PORT)));
         }
 
         return conf;
@@ -159,6 +189,7 @@ public class Configuration {
     public static Configuration toConfiguration(ConfigResponse configResponse) {
         Configuration conf = new Configuration();
         conf.setNodename(configResponse.getValue(DetectorConstants.SERVER_NAME));
+        conf.setVirtualHost(configResponse.getValue(DetectorConstants.VIRTUALHOST));
         conf.setAuthentication(configResponse.getValue(DetectorConstants.AUTHENTICATION));
         conf.setHostname(configResponse.getValue(DetectorConstants.HOST));
         conf.setUsername(configResponse.getValue(DetectorConstants.USERNAME));
@@ -169,4 +200,5 @@ public class Configuration {
         }
         return conf;
     }
+
 }

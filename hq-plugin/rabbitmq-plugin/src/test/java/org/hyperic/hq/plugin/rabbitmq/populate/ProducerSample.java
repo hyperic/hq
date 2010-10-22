@@ -77,11 +77,11 @@ public class ProducerSample {
     public void sendMessages() {
         for (int i = 1; i <= numMessages; i++) {
             sendMarketData();
-            try {
+            /*try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 System.out.println(e);
-            } 
+            }*/ 
         }
 
         System.out.println("Sending complete");
