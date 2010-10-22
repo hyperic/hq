@@ -336,4 +336,9 @@
           version="8.3"
           include="8.2"/>
 
+  <!-- Define 8.4 server type -->
+  <server name="PostgreSQL"
+          version="8.4"
+          include="8.3"/>
+
 </plugin>
