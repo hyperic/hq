@@ -51,23 +51,25 @@ public class RabbitServerCollector extends Collector {
 
         if (RabbitProductPlugin.getRabbitGateway() == null) {
             Configuration configuration = Configuration.toConfiguration(getProperties());
-            logger.debug("init " + configuration);
+            logger.debug("Init " + configuration);
 
             RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway(configuration);
 
-            if (!rabbitGateway.isValidUsernamePassword()) {
-               throw new PluginException("Please enter a username and password.");
-            }
+            if (rabbitGateway != null) {
+                if (!rabbitGateway.isValidUsernamePassword()) {
+                    throw new PluginException("Please enter a username and password.");
+                }
 
-            if (rabbitGateway.getStatus() == null) {
-                throw new PluginException("Please insure the Agent has permission to read the Erlang cookie.");
+                if (rabbitGateway.getStatus() == null) {
+                    throw new PluginException("Please insure the Agent has permission to read the Erlang cookie.");
+                }
             }
         }
     }
 
     @Override
     public void collect() {
-        logger.debug("collect[" + getProperties() + "]");
+        logger.debug("Collect " + getProperties());
 
         try {
 

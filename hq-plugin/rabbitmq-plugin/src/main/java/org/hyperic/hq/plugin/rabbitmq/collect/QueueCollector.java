@@ -49,10 +49,8 @@ public class QueueCollector extends Collector {
 
     @Override
     public void collect() {
-        logger.debug("\n\n\n\n ************queue props = " + getProperties());
         Configuration configuration = Configuration.toConfiguration(getProperties());
-        logger.debug("\n\n\n\n ************queue Configuration = " + configuration);
-
+       
         try {
             RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway(configuration);
 
