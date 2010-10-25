@@ -85,7 +85,7 @@ public class Configuration {
         }
 
         if (username == null || password == null) {
-            throw new PluginConfigurationException("This resource requires a username and password for the broker.");
+            throw new PluginConfigurationException("Please configure a username and password for the broker.");
         }
 
         if (authentication == null) {
