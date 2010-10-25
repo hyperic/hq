@@ -23,26 +23,11 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq.validate;
- 
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.test.context.support.GenericXmlContextLoader;
-
-import static org.junit.Assert.assertTrue;
+package org.hyperic.hq.plugin.rabbitmq.configure;
 
 /**
- * ValidationTestContextLoader
+ * ConfigurationManager
  * @author Helena Edelson
  */
-public class ValidationTestContextLoader extends GenericXmlContextLoader {
-
-    @Override
-    protected void customizeContext(GenericApplicationContext context) {
-        AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-        ctx.register(ValidationConfiguration.class);
-        ctx.refresh();
-        context.setParent(ctx);
-        assertTrue(ctx.isRunning());
-    }
+public interface ConfigurationManager {
 }

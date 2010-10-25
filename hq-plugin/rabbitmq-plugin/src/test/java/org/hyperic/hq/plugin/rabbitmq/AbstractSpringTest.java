@@ -31,6 +31,7 @@ import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
 import org.hyperic.hq.plugin.rabbitmq.configure.TestContextLoader;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.plugin.rabbitmq.manage.RabbitManager;
+import org.hyperic.util.config.ConfigResponse;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -57,7 +58,10 @@ public abstract class AbstractSpringTest {
 
     @Autowired
     protected Configuration configuration;
- 
+
+    @Autowired
+    protected ConfigResponse configResponse;
+
     @Autowired
     protected RabbitManager rabbitManager;
     

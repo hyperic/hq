@@ -42,24 +42,14 @@ import static org.junit.Assert.*;
 
 
 /**
- * VersionTests
- * ToDo properly set RABBITMQ_HOME on each test vm
- *
  * @author Helena Edelson
  */
 @Ignore("Need to mock the connection for automation")
 public class VersionTests extends RabbitVersionDetector {
-
-    private static final String LOCATION = "/path/to/.erlang.cookie";
-
+ 
     private static final String PEER_NODE = "rabbit@localhost";
 
     private static final String RABBITMQ_HOME = System.getenv("RABBITMQ_HOME");
-
-    @Before
-    public void doBefore() {
-        //String home = System.getenv("RABBITMQ_HOME");
-    }
 
     @Test
     public void getVersion() {

@@ -23,47 +23,37 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq.validate;
+package org.hyperic.hq.plugin.rabbitmq.configure;
 
-import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
-import org.hyperic.util.config.ConfigResponse;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ImportResource;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerGateway;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
+import org.springframework.util.Assert;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * ValidationConfiguration
+ * RabbitConfigurationManager
  * @author Helena Edelson
  */
-@ImportResource("classpath:/org/hyperic/hq/plugin/rabbitmq/validate/ValidationTest-context.xml")
-public class ValidationConfiguration {
+public class RabbitConfigurationManager implements ConfigurationManager {
 
-    private
-    @Value("${platform.type}")
-    String platformType;
+    protected volatile Map<Configuration, RabbitGateway> virtualHostsByNode = new HashMap<Configuration, RabbitGateway>();
 
-    private
-    @Value("${hostname}")
-    String hostname;
-
-    private
-    @Value("${username}")
-    String username;
-
-    private
-    @Value("${password}")
-    String password;
-
-    @Bean
-    public ConfigResponse serverConfig() {
-        ConfigResponse conf = new ConfigResponse();
-        conf.setValue(DetectorConstants.HOST, hostname);
-        conf.setValue(DetectorConstants.USERNAME, username);
-        conf.setValue(DetectorConstants.PASSWORD, password);
-        conf.setValue(DetectorConstants.PLATFORM_TYPE, platformType);
-
-        return conf;
+    public void addVirtualHostForNode(Configuration configuration) {
+        synchronized(virtualHostsByNode) {
+            virtualHostsByNode.put(configuration, new RabbitBrokerGateway(configuration));
+        }
     }
- 
+
+    public void removeVirtualHostForNode(String virtualHost, String node) {
+        synchronized(virtualHostsByNode) {
+
+        }
+    }
+
+    public Map<Configuration, RabbitGateway> getVirtualHostsByNode() {
+        return virtualHostsByNode;
+    }
 }

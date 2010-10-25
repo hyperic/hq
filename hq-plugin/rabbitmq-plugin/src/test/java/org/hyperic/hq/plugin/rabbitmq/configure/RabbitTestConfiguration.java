@@ -28,19 +28,27 @@ public class RabbitTestConfiguration {
 
     private @Value("${nodename}") String nodename;
 
-
     @Bean
-    public Configuration configuration() throws PluginException {
+    public ConfigResponse configResponse() {
         ConfigResponse conf = new ConfigResponse();
-        conf.setValue(DetectorConstants.HOST, "hedelson");
-        conf.setValue(DetectorConstants.SERVER_NAME, "rabbit@localhost");
+        conf.setValue(DetectorConstants.HOST, hostname);
+        conf.setValue(DetectorConstants.SERVER_NAME, nodename);
         conf.setValue(DetectorConstants.USERNAME, username);
         conf.setValue(DetectorConstants.PASSWORD, password);
         conf.setValue(DetectorConstants.PLATFORM_TYPE, platformType);
-        String auth = ErlangCookieHandler.configureCookie(conf);
+        String auth = null;
+        try {
+            auth = ErlangCookieHandler.configureCookie(conf);
+        } catch (PluginException e) {
+            //handle
+        }
         conf.setValue(DetectorConstants.AUTHENTICATION, auth);
+        return conf;
+    }
 
-        return Configuration.toConfiguration(conf);
+    @Bean
+    public Configuration configuration() {
+        return Configuration.toConfiguration(configResponse());
     }
 
     @Bean
