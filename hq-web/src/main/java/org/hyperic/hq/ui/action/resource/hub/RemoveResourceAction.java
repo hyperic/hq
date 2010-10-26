@@ -131,7 +131,7 @@ public class RemoveResourceAction
             // if something actually, um, was
             for (AppdefEntityID resourceId : entities) {
                 try {
-                    deleted.addAll(Arrays.asList(appdefBoss.removeAppdefEntity(sessionId.intValue(), resourceId)));
+                    deleted.addAll(Arrays.asList(appdefBoss.removeAppdefEntity(sessionId.intValue(), resourceId, false)));
                 } catch (AppdefEntityNotFoundException e) {
                     log.error("Removing resource " + resourceId + "failed.");
                 } catch (VetoException v) {

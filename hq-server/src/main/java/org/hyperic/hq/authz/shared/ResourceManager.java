@@ -143,11 +143,14 @@ public interface ResourceManager {
      * @see {@link ResourcesCleanupZevent}
      * @param r {@link Resource} resource to be removed.
      * @param nullResourceType tells the method to null out the resourceType
+     * @param removeAllVirtual tells the method to remove all resources, including
+     *        associated platforms, under the virtual resource hierarchy
      * @return AppdefEntityID[] - an array of the resources (including children)
      *         deleted
      */
     public AppdefEntityID[] removeResourcePerms(AuthzSubject subj, Resource r,
-                                                boolean nullResourceType) throws VetoException,
+                                                boolean nullResourceType,
+                                                boolean removeAllVirtual) throws VetoException,
         PermissionException;
 
     public void _removeResource(AuthzSubject subj, Resource r, boolean nullResourceType);

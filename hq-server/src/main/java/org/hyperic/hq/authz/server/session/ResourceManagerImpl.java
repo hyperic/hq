@@ -1,22 +1,26 @@
 /*
- * NOTE: This copyright does *not* cover user programs that use HQ program
- * services by normal system calls through the application program interfaces
- * provided as part of the Hyperic Plug-in Development Kit or the Hyperic Client
- * Development Kit - this is merely considered normal use of the program, and
- * does *not* fall under the heading of "derived work".
- * 
- * Copyright (C) [2004-2009], Hyperic, Inc. This file is part of HQ.
- * 
- * HQ is free software; you can redistribute it and/or modify it under the terms
- * version 2 of the GNU General Public License as published by the Free Software
- * Foundation. This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
- * Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
- * Place, Suite 330, Boston, MA 02111-1307 USA.
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ * "derived work".
+ *
+ * Copyright (C) [2004-2010], VMware, Inc.
+ * This file is part of Hyperic.
+ *
+ * Hyperic is free software; you can redistribute it and/or modify
+ * it under the terms version 2 of the GNU General Public License as
+ * published by the Free Software Foundation. This program is distributed
+ * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA.
  */
 
 package org.hyperic.hq.authz.server.session;
@@ -429,12 +433,15 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      * @see {@link ResourcesCleanupZevent}
      * @param r {@link Resource} resource to be removed.
      * @param nullResourceType tells the method to null out the resourceType
+     * @param removeAllVirtual tells the method to remove all resources, including
+     *        associated platforms, under the virtual resource hierarchy
      * @return AppdefEntityID[] - an array of the resources (including children)
      *         deleted
      * 
      */
     public AppdefEntityID[] removeResourcePerms(AuthzSubject subj, Resource r,
-                                                boolean nullResourceType) throws VetoException,
+                                                boolean nullResourceType,
+                                                boolean removeAllVirtual) throws VetoException,
         PermissionException {
         final ResourceType resourceType = r.getResourceType();
 
@@ -480,13 +487,23 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         Set<AppdefEntityID> removed = new HashSet<AppdefEntityID>();
         for (ResourceEdge edge : edges) {
             // Remove descendants' permissions
-            removed.addAll(Arrays.asList(removeResourcePerms(subj, edge.getTo(), true)));
+            removed.addAll(Arrays.asList(removeResourcePerms(subj, edge.getTo(), true, removeAllVirtual)));
         }
-        
-        for (ResourceEdge edge : virtEdges ) {
-           _removeResource(subj, edge.getTo(), true);
-        }
+		
+		for (ResourceEdge edge : virtEdges) {
+			Resource prototype = edge.getTo().getPrototype();
 
+			if (!removeAllVirtual
+					&& (prototype == null || !AuthzConstants.VMWARE_PROTOTYPES
+							.contains(prototype.getName()))) {
+				// do not remove the associated resources,
+				// but remove the virtual resource edges
+				edgeDao.deleteEdges(edge.getTo(), getVirtualRelation());
+			} else {
+				_removeResource(subj, edge.getTo(), true);
+			}
+		}
+		
         removed.add(AppdefUtil.newAppdefEntityId(r));
         if (debug) {
             watch.markTimeBegin("removeResource");

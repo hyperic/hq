@@ -357,12 +357,27 @@ public interface AppdefBoss {
      * Removes an appdef entity by nulling out any reference from its children
      * and then deleting it synchronously. The children are then cleaned up in
      * the zevent queue by issuing a {@link ResourcesCleanupZevent}
+     * @param aeid {@link AppdefEntityID} resource to be removed.
      * @return AppdefEntityID[] - an array of the resources (including children)
      *         deleted
      */
-    public AppdefEntityID[] removeAppdefEntity(int sessionId, AppdefEntityID aeid) throws SessionNotFoundException,
-        SessionTimeoutException, ApplicationException, VetoException;
-    
+    public AppdefEntityID[] removeAppdefEntity(int sessionId, AppdefEntityID aeid) 
+    	throws SessionNotFoundException, SessionTimeoutException, ApplicationException, VetoException;
+
+    /**
+     * Removes an appdef entity by nulling out any reference from its children
+     * and then deleting it synchronously. The children are then cleaned up in
+     * the zevent queue by issuing a {@link ResourcesCleanupZevent}
+     * @param aeid {@link AppdefEntityID} resource to be removed.
+     * @param removeAllVirtual tells the method to remove all resources, including
+     *        associated platforms, under the virtual resource hierarchy
+     * @return AppdefEntityID[] - an array of the resources (including children)
+     *         deleted
+     */
+    public AppdefEntityID[] removeAppdefEntity(int sessionId, AppdefEntityID aeid,
+    										   boolean removeAllVirtual) 
+    	throws SessionNotFoundException, SessionTimeoutException, ApplicationException, VetoException;
+
     public void removePlatform(AuthzSubject subject, Integer platformId) throws ApplicationException, VetoException;
 
     public ServerValue updateServer(int sessionId, ServerValue aServer) throws PermissionException,
