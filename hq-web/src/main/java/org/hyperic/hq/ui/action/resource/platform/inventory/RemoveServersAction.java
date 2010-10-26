@@ -81,7 +81,7 @@ public class RemoveServersAction
             log.trace("removing servers " + servers + " for platform [" + platformId + "]");
 
             for (Integer serverId : servers) {
-                appdefBoss.removeAppdefEntity(sessionId.intValue(), AppdefEntityID.newServerID(serverId));
+                appdefBoss.removeAppdefEntity(sessionId.intValue(), AppdefEntityID.newServerID(serverId), false);
             }
 
             RequestUtils.setConfirmation(request, "resource.platform.inventory.confirm.RemoveServers");

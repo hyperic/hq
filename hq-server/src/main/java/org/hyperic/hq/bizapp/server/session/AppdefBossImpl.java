@@ -1282,11 +1282,30 @@ public class AppdefBossImpl implements AppdefBoss {
      * Removes an appdef entity by nulling out any reference from its children
      * and then deleting it synchronously. The children are then cleaned up in
      * the zevent queue by issuing a {@link ResourcesCleanupZevent}
+     * @param aeid {@link AppdefEntityID} resource to be removed.
      * @return AppdefEntityID[] - an array of the resources (including children)
      *         deleted
      * 
      */
     public AppdefEntityID[] removeAppdefEntity(int sessionId, AppdefEntityID aeid)
+    	throws SessionNotFoundException, SessionTimeoutException, ApplicationException,
+    	VetoException {
+    	return removeAppdefEntity(sessionId, aeid, true);
+    }
+
+    /**
+     * Removes an appdef entity by nulling out any reference from its children
+     * and then deleting it synchronously. The children are then cleaned up in
+     * the zevent queue by issuing a {@link ResourcesCleanupZevent}
+     * @param aeid {@link AppdefEntityID} resource to be removed.
+     * @param removeAllVirtual tells the method to remove all resources, including
+     *        associated platforms, under the virtual resource hierarchy
+     * @return AppdefEntityID[] - an array of the resources (including children)
+     *         deleted
+     * 
+     */
+    public AppdefEntityID[] removeAppdefEntity(int sessionId, AppdefEntityID aeid,
+    										   boolean removeAllVirtual)
         throws SessionNotFoundException, SessionTimeoutException, ApplicationException,
         VetoException {
         final StopWatch timer = new StopWatch();
@@ -1323,7 +1342,7 @@ public class AppdefBossImpl implements AppdefBoss {
             log.warn("AppdefEntityId=" + aeid + " is not associated with a Resource");
             return new AppdefEntityID[0];
         }
-        AppdefEntityID[] removed = resourceManager.removeResourcePerms(subject, res, false);
+        AppdefEntityID[] removed = resourceManager.removeResourcePerms(subject, res, false, removeAllVirtual);
         Map<Integer, List<AppdefEntityID>> agentCache = null;
 
         final Integer id = aeid.getId();
