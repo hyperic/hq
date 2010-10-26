@@ -18,8 +18,8 @@
 	<modules>
 		<module>agent</module>
 		<module>hyperic-hq-agent</module>
-		<module>server</module>
 		<module>bootstrap</module>
+		<module>server</module>
 		<module>installer</module>
 		<module>hyperic-hq-installer</module>
 	</modules>
