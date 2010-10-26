@@ -60,7 +60,7 @@
     </property>
 
     <property name="version">
-      <column name="VERSION" length="20"/>
+      <column name="VERSION" length="50"/>
     </property>
 
     <property name="creationTime">

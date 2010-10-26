@@ -11497,6 +11497,12 @@ has already been defined.
     <schema-alterColumn table="EAM_AIQ_SERVICE" column="name"
 	       	            precision="255" columnType="VARCHAR2" nullable="NOT NULL" />
  </schemaSpec>
+
+ <!-- Increase agent version column for long build snapshot version numbers -->
+ <schemaSpec version="3.200">
+    <schema-alterColumn table="EAM_AGENT" column="version"
+	       	            precision="50" columnType="VARCHAR2" /> 	
+ </schemaSpec>
 </dbupgrade>
 </target>
 </project>
