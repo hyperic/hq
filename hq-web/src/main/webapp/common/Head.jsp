@@ -50,11 +50,12 @@ djConfig.scopeMap = [
 
 <!--[if IE]>
 <script type="text/javascript">
+// since dojo has trouble when it comes to using relative urls + ssl, we
+// use this workaorund to provide absolute urls.
 function qualifyURL(url) {
-        var a = document.createElement('img');
-        a.src = url;
-        
-        return a.href;
+	var a = document.createElement('img');
+    a.src = url;
+    return a.src;
 }
 
 djConfig.modulePaths = {
