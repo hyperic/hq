@@ -86,7 +86,7 @@ public class RemoveServiceAction
         log.trace("removing resource");
 
         for (int i = 0; i < resources.length; i++) {
-            appdefBoss.removeAppdefEntity(sessionId.intValue(), AppdefEntityID.newServiceID(resources[i]));
+            appdefBoss.removeAppdefEntity(sessionId.intValue(), AppdefEntityID.newServiceID(resources[i]), false);
         }
 
         return returnSuccess(request, mapping, params);
