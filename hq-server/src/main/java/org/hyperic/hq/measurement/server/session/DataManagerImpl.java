@@ -1438,7 +1438,7 @@ public class DataManagerImpl implements DataManager {
         // 2) we only want to use the primary key for bigger queries.  Our tests show
         //    that the primary key performance is very consistent for large queries and smaller
         //    queries.  But for smaller queries the measurement_id index is more effective
-        final String hint = (dialect.getMetricDataHint().isEmpty() || mids.length < 100) ?
+        final String hint = (dialect.getMetricDataHint().isEmpty() || mids.length < 1000) ?
             "" : " " + dialect.getMetricDataHint();
         final String sql = new StringBuilder(1024 + (mids.length * 5))
             .append("SELECT count(*) as cnt, sum(value) as sumvalue, ")
