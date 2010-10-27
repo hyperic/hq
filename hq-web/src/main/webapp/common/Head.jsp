@@ -47,6 +47,24 @@ djConfig.scopeMap = [
         ["dojox", "dojox11"]
     ];
 </script>
+
+<!--[if IE]>
+<script type="text/javascript">
+function qualifyURL(url) {
+        var a = document.createElement('img');
+        a.src = url;
+        
+        return a.href;
+}
+
+djConfig.modulePaths = {
+    "dojo": qualifyURL("/js/dojo/1.1.2/dojo"),
+    "dijit":  qualifyURL("/js/dojo/1.1.2/dijit"),
+    "dojox":  qualifyURL("/js/dojo/1.1.2/dojox")
+  	};
+</script>
+<![endif]-->
+
 <script src="<html:rewrite page='/js/dojo/1.1.2/dojo/dojo.js'/>" type="text/javascript"></script>
 <script type="text/javascript">
     var imagePath = "<html:rewrite page="/images/"/>";
