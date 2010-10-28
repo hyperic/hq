@@ -96,4 +96,16 @@ class AgentHelper extends BaseHelper {
     def getAgent(Integer id) {
         aMan.getAgent(id)
     }
+    
+    /**
+     * Get an agent by agent token.  If the given agent could not be found,
+     * null is returned.
+     */
+    def getAgent(String agentToken) {
+        try {
+        	return aMan.getAgent(agentToken)
+        } catch (AgentNotFoundException e) {
+            return null
+        }
+    }
 }
