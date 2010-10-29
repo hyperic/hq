@@ -32,6 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
 import org.hyperic.hq.product.PluginException;
 import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
+import org.springframework.erlang.support.converter.ErlangConversionException;
 import org.springframework.util.exec.Os;
 
 import java.io.IOException;
@@ -102,17 +103,16 @@ public class ConfigurationValidator {
             throw new PluginConfigurationException("Plugin is not configured with the Erlang cookie. Please insure" +
                     " the Agent has permission to read the cookie");
         }
-  
+
         OtpConnection conn = null;
-        boolean isValid = false;
 
         try {
             OtpSelf self = new OtpSelf("rabbit-monitor", configuration.getAuthentication());
             OtpPeer peer = new OtpPeer(configuration.getNodename());
             conn = self.connect(peer);
-            isValid = conn != null;
-            /*conn.sendRPC("erlang", "date", new OtpErlangList());
-            response = conn.receiveRPC(); */
+            conn.sendRPC("rabbit_mnesia", "status", new OtpErlangList());
+            OtpErlangObject response = conn.receiveRPC();
+            return isNodeRunning(response, configuration.getNodename());
         }
         catch (Exception e) {
             throw new PluginConfigurationException("Can not connect to peer node.");
@@ -123,8 +123,24 @@ public class ConfigurationValidator {
                 conn = null;
             }
         }
+    }
 
-        return isValid;
+    public static boolean isNodeRunning(OtpErlangObject response, String peerNodeName) throws ErlangConversionException {
+        long items = ((OtpErlangList) response).elements().length;
+        if (items > 0 && response instanceof OtpErlangList) {
+
+            for (OtpErlangObject outerList : ((OtpErlangList) response).elements()) {
+                if (outerList instanceof OtpErlangTuple) {
+                    OtpErlangTuple entry = (OtpErlangTuple) outerList;
+                    String key = entry.elementAt(0).toString();
+                    if (key.equals("running_nodes") && entry.elementAt(1) instanceof OtpErlangList) {
+                        OtpErlangList value = (OtpErlangList) entry.elementAt(1);
+                        return value.toString().contains(peerNodeName);
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**
