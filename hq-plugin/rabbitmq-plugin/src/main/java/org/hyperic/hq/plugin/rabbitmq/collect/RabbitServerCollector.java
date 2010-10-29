@@ -27,14 +27,11 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
+import org.hyperic.hq.plugin.rabbitmq.configure.Configuration; 
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
-import org.hyperic.hq.plugin.rabbitmq.validate.PluginValidator;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
 
-import java.util.Properties;
 
 /**
  * RabbitServiceCollector
@@ -49,37 +46,27 @@ public class RabbitServerCollector extends Collector {
     protected void init() throws PluginException {
         super.init();
 
-        if (RabbitProductPlugin.getRabbitGateway() == null) {
-            Configuration configuration = Configuration.toConfiguration(getProperties());
-            logger.debug("Init " + configuration);
+        Configuration configuration = Configuration.toConfiguration(getProperties());
+        logger.debug("Init " + configuration);
 
-            RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway(configuration);
-
-            if (rabbitGateway != null) {
-                if (!rabbitGateway.isValidUsernamePassword()) {
-                    throw new PluginException("Please enter a username and password.");
-                }
-
-                if (rabbitGateway.getStatus() == null) {
-                    throw new PluginException("Please insure the Agent has permission to read the Erlang cookie.");
-                }
-            }
+        /** Throws relevant exceptions based on what is not yet configured, such as user/pass */
+        if (!RabbitProductPlugin.isInitialized()) {
+            RabbitProductPlugin.initialize(configuration);
         }
     }
 
     @Override
     public void collect() {
         logger.debug("Collect " + getProperties());
-
+        Configuration configuration = Configuration.toConfiguration(getProperties());
+        logger.debug("Checking if the node is available");
         try {
-
-            Configuration configuration = Configuration.toConfiguration(getProperties());
-            setAvailability(RabbitProductPlugin.isNodeAvailabile(configuration));
-
+            boolean isAvailable = RabbitProductPlugin.isNodeAvailabile(configuration);
+            setAvailability(isAvailable);
+            logger.debug("Node is available");
         }
-        catch (PluginException ex) {
-            setAvailability(false);
-            logger.debug(ex, ex);
+        catch (PluginException e) {
+            logger.error(e);
         }
     }
 }

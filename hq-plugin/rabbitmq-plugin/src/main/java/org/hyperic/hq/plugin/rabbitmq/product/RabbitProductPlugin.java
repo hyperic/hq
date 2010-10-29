@@ -28,10 +28,13 @@ package org.hyperic.hq.plugin.rabbitmq.product;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerGateway; 
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
-import org.hyperic.hq.plugin.rabbitmq.validate.PluginValidator;
+import org.hyperic.hq.plugin.rabbitmq.configure.ConfigurationManager;
+import org.hyperic.hq.plugin.rabbitmq.configure.RabbitConfigurationManager;
+import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
+import org.hyperic.hq.plugin.rabbitmq.validate.ConfigurationValidator;
 import org.hyperic.hq.product.*;
+
+import java.util.Map;
 
 /**
  * RabbitProductPlugin
@@ -42,39 +45,75 @@ public class RabbitProductPlugin extends ProductPlugin {
 
     private static final Log logger = LogFactory.getLog(RabbitProductPlugin.class);
 
-    private static RabbitGateway rabbitGateway;
+    private static ConfigurationManager configurationManager;
 
-    public static RabbitGateway getRabbitGateway(){
-        return rabbitGateway;
+    @Override
+    public void init(PluginManager manager) throws PluginException {
+      super.init(manager);
+      logger.debug(manager.getProperties());
     }
+    /**
+     * @param configuration
+     * @return
+     * @throws PluginException
+     */
+    public static boolean initialize(Configuration configuration) throws PluginException {
+        logger.debug("Starting initialization of plugin");
+        if (configuration != null && configuration.getVirtualHost() == null) {
+            configuration.setDefaultVirtualHost(true);
 
-    public static void initialize(Configuration configuration) throws PluginException {
-        if (configuration != null && configuration.isConfigured()) {
-            rabbitGateway = new RabbitBrokerGateway(configuration);
-        } 
-    }
-
-
-    public static RabbitGateway getRabbitGateway(Configuration configuration) throws PluginException {
-        if (rabbitGateway == null) {
-            initialize(configuration);  
+            if (configuration.isConfigured() && isValidUsernamePassword(configuration) && isValidOtpConnection(configuration)) {
+                logger.debug("Initializing ConfigurationManager");
+                if (configurationManager == null || !configurationManager.isInitialized()) {
+                    configurationManager = new RabbitConfigurationManager(configuration);
+                }
+            }
         }
-        return rabbitGateway;
+
+        boolean initialized = isInitialized();
+        logger.debug("Initialized=" + initialized);
+        
+        return initialized;
+    }
+
+    public static boolean isInitialized() {
+        return configurationManager != null && configurationManager.isInitialized();
+    }
+
+    public static HypericRabbitAdmin getVirtualHostForNode(String virtualHost, String node) {
+         return configurationManager.getVirtualHostForNode(virtualHost, node);
     }
 
     /**
-     * Determine if the node available for the ServerResource Collector
-     * @param configuration
+     * @return
+     */
+    public static Map<String, HypericRabbitAdmin> getVirtualHostsForNode() {
+        return configurationManager.getVirtualHostsForNode();
+    }
+
+    /**
+     * Determine if the node available for a Collector
+     * @param key
      * @return
      * @throws org.hyperic.hq.product.PluginException
      *
      */
-    public static boolean isNodeAvailabile(Configuration configuration) throws PluginException {
-         return getRabbitGateway(configuration).getStatus() != null;
+    public static boolean isNodeAvailabile(Configuration key) throws PluginException {
+        if (!configurationManager.isInitialized()) {
+            return isValidOtpConnection(key);
+        }
+        else {
+            HypericRabbitAdmin admin = getVirtualHostForNode(key.getDefaultVirtualHost(), key.getNodename());
+            return admin != null && admin.isNodeAvailable();     
+        }
     }
-  
+
+    public static boolean isValidOtpConnection(Configuration configuration) throws PluginException {
+        return ConfigurationValidator.isValidOtpConnection(configuration);
+    }
+
     public static boolean isValidUsernamePassword(Configuration configuration) throws PluginException {
-         return getRabbitGateway(configuration).isValidUsernamePassword();
+        return ConfigurationValidator.isValidUsernamePassword(configuration);
     }
-   
+
 }

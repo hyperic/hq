@@ -24,10 +24,37 @@
  *
  */
 package org.hyperic.hq.plugin.rabbitmq.configure;
+ 
+import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin; 
+import org.hyperic.hq.product.PluginException;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * ConfigurationManager
  * @author Helena Edelson
  */
 public interface ConfigurationManager {
+
+    boolean isInitialized();
+ 
+    void resetConfiguration() throws PluginException;
+
+    void createVirtualHostsForNode(List<String> virtualHosts, Configuration comparableKey) throws PluginException;
+
+    HypericRabbitAdmin createVirtualHostForNode(Configuration c) throws PluginException;
+
+    HypericRabbitAdmin getVirtualHostForNode(String virtualHost, String node);
+    
+    Map<String, HypericRabbitAdmin> getVirtualHostsForNode();
+
+    CachingConnectionFactory getConnectionFactory();
+
+    RabbitTemplate getRabbitTemplate();
+
+    void removeVirtualHostForNode(String key);
+
 }

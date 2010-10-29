@@ -24,112 +24,129 @@
  *
  */
 package org.hyperic.hq.plugin.rabbitmq.populate;
-import org.springframework.amqp.core.Queue;
-import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
-import org.hyperic.hq.plugin.rabbitmq.core.*;
-import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.util.config.ConfigResponse;
-import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
-import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
- 
-import java.util.List;
-import java.util.Map;
 
-import static org.junit.Assert.assertNotNull;
+import org.hyperic.hq.plugin.rabbitmq.AbstractSpringTest;
+import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
+import org.hyperic.hq.plugin.rabbitmq.configure.ConfigurationManager;
+import org.hyperic.hq.plugin.rabbitmq.configure.RabbitTestConfiguration;
+import org.springframework.amqp.core.Queue;
+import org.hyperic.hq.plugin.rabbitmq.core.*;
+import org.springframework.amqp.rabbit.admin.QueueInfo;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * PopulateData can be run to populate the QA rabbitmq servers
- * Not finished yet.
+ * PopulateData can be run to populate the QA rabbitmq servers.
+ * I set up a synchronous consumer for QA because having the
+ * async consumer up in the context for all tests is not desirable.
  * @author Helena Edelson
  */
-public class PopulateData {
+public class PopulateData extends AbstractSpringTest {
 
-    private static final String SERVER_NAME = "rabbit@server";
+    private static ConfigurationManager configurationManager;
 
-    private static final String HOST = "server";
+    private static Configuration key;
 
+    private static int numMessages = 500;
 
     public static void main(String[] args) throws Exception {
-        Configuration configuration = getConfig();
-        configuration.setVirtualHost("/");
-        RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway(configuration);
-        RabbitTemplate rabbitTemplate = rabbitGateway.getRabbitTemplate();
-        RabbitBrokerAdmin rabbitBrokerAdmin = rabbitGateway.getRabbitBrokerAdmin();
-        System.out.println(rabbitBrokerAdmin.getStatus());
+        AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+        ctx.register(RabbitTestConfiguration.class);
+        ctx.refresh();
 
-        int numMessages = 500;
+        key = ctx.getBean(Configuration.class);
+        final List<Queue> queues = ctx.getBean(List.class);
+        configurationManager = ctx.getBean(ConfigurationManager.class);
 
-        final Queue stocksQueue = new Queue("stocks.quotes");
-        rabbitBrokerAdmin.declareQueue(stocksQueue);
-        rabbitTemplate.setRoutingKey(stocksQueue.getName());
-        rabbitTemplate.setQueue(stocksQueue.getName());
-        ProducerSample producer = new ProducerSample(rabbitTemplate, numMessages);
-        producer.sendMessages();
- 
-        Queue alertsQueue = new Queue("market.alerts");
-        rabbitBrokerAdmin.declareQueue(alertsQueue);
-        rabbitTemplate.setRoutingKey(alertsQueue.getName());
-        rabbitTemplate.setQueue(alertsQueue.getName());
-        ProducerSample producer2 = new ProducerSample(rabbitTemplate, numMessages);
-        producer2.sendMessages();
+        HypericRabbitAdmin rabbitAdmin = configurationManager.getVirtualHostForNode(key.getDefaultVirtualHost(), key.getNodename());
+        final RabbitTemplate rabbitTemplate = configurationManager.getRabbitTemplate();
 
+        if (rabbitAdmin.getQueues() == null && queues != null) {
+            createQueues(rabbitAdmin, queues);
+        }
 
-        Queue trendsQueue = new Queue("market.trends");
-        rabbitBrokerAdmin.declareQueue(trendsQueue);
-        rabbitTemplate.setRoutingKey(trendsQueue.getName());
-        rabbitTemplate.setQueue(trendsQueue.getName());
-        ProducerSample producer3 = new ProducerSample(rabbitTemplate, numMessages);
-        producer3.sendMessages();
+        for (Queue q : queues) {
+            rabbitTemplate.setRoutingKey(q.getName());
+            rabbitTemplate.setQueue(q.getName());
+            ProducerSample producer = new ProducerSample(rabbitTemplate, numMessages);
+            producer.sendMessages();
+        }
 
-        refresh((CachingConnectionFactory) rabbitTemplate.getConnectionFactory(), rabbitGateway);
+        final List<QueueInfo> brokerQueues = rabbitAdmin.getQueues();
 
-        /*List<QueueInfo> queues = rabbitGateway.getQueues();
-        if (queues != null) {
-            System.out.println("queues has " + queues.size());
-            for (QueueInfo q : queues) {
-                System.out.println(q);
+        /** rerun with synchronous consumer for each */
+        List<Thread> threads = new ArrayList<Thread>();
+
+        Thread thread1 = new Thread(
+                new Runnable() {
+                    public void run() {
+                        try {
+                            simulateCollection();
+                        } catch (Exception e) {
+                            System.out.println(e);
+                        }
+                    }
+                });
+
+        Thread thread2 = new Thread(
+                new Runnable() {
+                    public void run() {
+                        for (Queue q : queues) {
+                            rabbitTemplate.setRoutingKey(q.getName());
+                            rabbitTemplate.setQueue(q.getName());
+                            ConsumerSample consumer = new ConsumerSample(rabbitTemplate, numMessages);
+                            consumer.receiveSync(brokerQueues);
+                            ProducerSample producer = new ProducerSample(rabbitTemplate, 100);
+                            producer.sendMessages();
+
+                        }
+                    }
+                });
+
+        threads.add(thread1);
+        threads.add(thread2);
+        thread1.start();
+        thread2.start();
+
+        for (Thread t : threads) {
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        }*/
+        }
 
         System.exit(0);
     }
 
+    private static void createQueues(HypericRabbitAdmin rabbitAdmin, List<Queue> queues) {
+        System.out.println("There are no queues, creating queues and declaring them in the broker...");
+        for (Queue q : queues) {
+            rabbitAdmin.declareQueue(q);
+        }
+    }
+
     /**
-     * @param scf
-     * @param rabbitGateway
      * @throws Exception
      */
-    private static void refresh(CachingConnectionFactory scf, RabbitGateway rabbitGateway) throws Exception {
-        com.rabbitmq.client.Connection conn = scf.createConnection();
-        Map<String, Object> props = conn.getServerProperties();
-        System.out.println(props);
+    private static void simulateCollection() throws Exception {
+        com.rabbitmq.client.Connection conn = configurationManager.getConnectionFactory().createConnection();
+        System.out.println("ConnectionProperties = " + conn.getServerProperties());
 
         conn.createChannel();
         conn.createChannel();
 
-        List<RabbitChannel> channels = rabbitGateway.getChannels();
-        assertNotNull(channels);
+        HypericRabbitAdmin admin = configurationManager.getVirtualHostForNode(key.getDefaultVirtualHost(), key.getNodename());
+        System.out.println("Queues = " + admin.getQueues().size());
+        System.out.println("Exchanges = " + admin.getExchanges().size());
+        System.out.println("Connections = " + admin.getConnections().size());
+        System.out.println("Channels = " + admin.getChannels().size());
+        System.out.println("Broker Info = " + admin.getStatus());
 
-        List<RabbitConnection> connections = rabbitGateway.getConnections();
-        assertNotNull(connections);
-
-        /** kept it open for a while to show some metrics */
         conn.close();
     }
 
-    private static Configuration getConfig() throws PluginException {
-        ConfigResponse conf = new ConfigResponse();
-        conf.setValue(DetectorConstants.HOST, HOST);
-        conf.setValue(DetectorConstants.USERNAME, "guest");
-        conf.setValue(DetectorConstants.PASSWORD, "guest");
-        conf.setValue(DetectorConstants.PLATFORM_TYPE, "Linux");
-        conf.setValue(DetectorConstants.SERVER_NAME, SERVER_NAME);
-
-        String value = ErlangCookieHandler.configureCookie(conf);
-        assertNotNull(value);
-        conf.setValue(DetectorConstants.AUTHENTICATION, value);
-        return Configuration.toConfiguration(conf);
-    }
 }

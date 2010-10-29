@@ -25,18 +25,9 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
 
-import com.ericsson.otp.erlang.OtpErlangObject;
-import org.springframework.erlang.support.converter.ErlangConversionException;
-import org.springframework.erlang.support.converter.ErlangConverter;
-
 /**
- * HypericErlangConverter
+ * ConfigurationManagerTest
  * @author Helena Edelson
  */
-public interface HypericErlangConverter extends ErlangConverter {
-
-    OtpErlangObject toErlang(Object o) throws ErlangConversionException;
-
-    Object fromErlangRpc(OtpErlangObject response, ErlangArgs args);
-    
+public class ConfigurationManagerTest {
 }

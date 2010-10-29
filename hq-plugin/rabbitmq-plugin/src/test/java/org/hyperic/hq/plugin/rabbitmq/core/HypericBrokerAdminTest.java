@@ -23,18 +23,11 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq.configure;
+package org.hyperic.hq.plugin.rabbitmq.core;
 
 import org.hyperic.hq.plugin.rabbitmq.AbstractSpringTest;
-import org.hyperic.hq.plugin.rabbitmq.core.ErlangCookieHandler;
-import org.hyperic.hq.plugin.rabbitmq.core.HypericBrokerAdmin;
-import org.hyperic.hq.product.PluginException;
 import org.junit.Ignore;
-import org.junit.Test;
-import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
-import org.springframework.test.annotation.ExpectedException;
 
-import static org.junit.Assert.*;
 /**
  * HypericBrokerAdminTest
  * @author Helena Edelson
@@ -42,7 +35,24 @@ import static org.junit.Assert.*;
 @Ignore("Need to mock the connection for automation")
 public class HypericBrokerAdminTest extends AbstractSpringTest {
 
-   /* @Test
+   /*
+
+    @Test
+    public void createHypericBrokerAdmin() throws IOException, OtpAuthException {
+        String erlang = configuration.getAuthentication();
+        String node = configuration.getNodename();
+        RabbitBrokerAdmin admin = new HypericRabbitAdmin(ccf, erlang, node);
+        assertNotNull(admin.getStatus());
+        ErlangTemplate template = admin.getErlangTemplate();
+        org.springframework.erlang.connection.ConnectionFactory factory = template.getConnectionFactory();
+        assertTrue(factory instanceof org.springframework.erlang.connection.SingleConnectionFactory);
+
+        org.springframework.erlang.connection.Connection conn = factory.createConnection();
+        assertNotNull(conn);
+        conn.close();
+    }
+
+    @Test
     public void testHypericAdmin() throws PluginException {
         assertNotNull(rabbitGateway.getQueues("/"));
 

@@ -6,6 +6,7 @@ import org.hyperic.util.config.ConfigResponse;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.springframework.test.annotation.ExpectedException;
 
 import static org.junit.Assert.*;
 
@@ -13,6 +14,7 @@ import static org.junit.Assert.*;
  * DynamicSpringBeanConfigurerTest
  * @author Helena Edelson
  */
+@Ignore("Until connections are mocked")
 public class DynamicSpringBeanConfigurerTest {
 
     private static final String HOSTNAME = "vm-host";
@@ -27,8 +29,17 @@ public class DynamicSpringBeanConfigurerTest {
         this.serverConfig.setValue(DetectorConstants.PLATFORM_TYPE, "Linux");
     }
 
+
     @Test
-    @Ignore("Until connections are mocked")
+    @ExpectedException(IllegalArgumentException.class)
+    public void noHost() throws PluginException {
+        serverConfig.setValue(DetectorConstants.HOST, null);
+        PluginContextCreator.createContext(Configuration.toConfiguration(serverConfig));
+        ConfigurationManager configurationManager = PluginContextCreator.getBean(ConfigurationManager.class);
+        assertNotNull(configurationManager);
+    }
+
+    @Test
     public void createDynamicBeansAssertFailSuccess() throws PluginException {
         this.serverConfig.setValue(DetectorConstants.PASSWORD, "wrongPassword");
 
@@ -48,7 +59,6 @@ public class DynamicSpringBeanConfigurerTest {
     }
 
     @Test
-    @Ignore("Until connections are mocked")
     public void createDynamicBeansAssertSuccess() throws PluginException {
         this.serverConfig.setValue(DetectorConstants.PASSWORD, "guest");
         this.serverConfig.setValue(DetectorConstants.AUTHENTICATION, ErlangCookieHandler.configureCookie(this.serverConfig));

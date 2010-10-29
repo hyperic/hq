@@ -26,7 +26,7 @@
 package org.hyperic.hq.plugin.rabbitmq.manage;
 
 import org.hyperic.hq.plugin.rabbitmq.core.AMQPStatus;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
+import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.admin.QueueInfo;
 
@@ -35,16 +35,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * RabbitManager is in development.
+ * RabbitBrokerManager is in development.
+ * ToDo idempotent, complete.
  * @author Helena Edelson
  */
 public class RabbitBrokerManager implements RabbitManager {
 
 
-    private RabbitGateway rabbitGateway;
+    private HypericRabbitAdmin rabbitAdmin;
 
-    public RabbitBrokerManager(RabbitGateway rabbitGateway) {
-        this.rabbitGateway = rabbitGateway;
+    public RabbitBrokerManager(HypericRabbitAdmin rabbitAdmin) {
+        this.rabbitAdmin = rabbitAdmin;
     }
 
      /**
@@ -53,7 +54,7 @@ public class RabbitBrokerManager implements RabbitManager {
      * @param queue
      */
     public AMQPStatus createQueue(Queue queue, String virtualHost) {
-       /* rabbitBrokerAdmin.declareQueue(new Queue(queueName));
+       /* rabbitAdmin.declareQueue(new Queue(queueName));
         if (getQueuesAsMap(virtualHost).containsKey(queueName)) {
             return AMQPStatus.RESOURCE_CREATED;
         }*/
@@ -194,12 +195,12 @@ public class RabbitBrokerManager implements RabbitManager {
     }
 
     private boolean isBrokerAppRunning() {
-        return rabbitGateway.getRunningNodes().get(0).getName().contains("rabbit");
+        return rabbitAdmin.getStatus().getRunningNodes().get(0).getName().contains("rabbit");
     }
 
     private Map<String, QueueInfo> getQueuesAsMap() {
         Map<String, QueueInfo> queues = null;
-        List<QueueInfo> queueList = rabbitGateway.getQueues();
+        List<QueueInfo> queueList = rabbitAdmin.getQueues();
         if (queueList != null) {
             queues = new HashMap<String, QueueInfo>(queueList.size());
 
@@ -212,7 +213,7 @@ public class RabbitBrokerManager implements RabbitManager {
 
     private Map<String, Exchange> getExchangesAsMap() throws Exception {
         Map<String, Exchange> exchanges = null;
-        List<Exchange> exchangeList = rabbitGateway.getExchanges();
+        List<Exchange> exchangeList = rabbitAdmin.getExchanges();
         if (exchangeList != null) {
             exchanges = new HashMap<String, Exchange>(exchangeList.size());
 
@@ -223,7 +224,3 @@ public class RabbitBrokerManager implements RabbitManager {
         return exchanges;
     }
 }
-
-/*
-*
-*/

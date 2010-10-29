@@ -27,17 +27,16 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerGateway;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
+import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
+import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
-import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.rabbit.admin.QueueInfo;
 
 import java.util.List;
+import java.util.Properties;
 
 /**
  * QueueCollector
@@ -48,38 +47,35 @@ public class QueueCollector extends Collector {
     private static final Log logger = LogFactory.getLog(QueueCollector.class);
 
     @Override
+    protected void init() throws PluginException {
+        Properties props = getProperties();
+        logger.debug("[init] props=" + props);
+        super.init();
+    }
+
     public void collect() {
-        Configuration configuration = Configuration.toConfiguration(getProperties());
-       
-        try {
-            RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway(configuration);
+        Properties props = getProperties();
+        logger.debug("[collect] props=" + props);
 
-            if (rabbitGateway != null) {
-                boolean isAvailable = RabbitProductPlugin.isNodeAvailabile(configuration);
-                List<String> virtualHosts = rabbitGateway.getVirtualHosts();
+        String queue = (String) props.get(MetricConstants.QUEUE);
+        String vhost = (String) props.get(MetricConstants.VIRTUALHOST);
+        String node = (String) props.get(MetricConstants.NODE);
 
-                if (virtualHosts != null) {
-                    for (String virtualHost : virtualHosts) {
-                        configuration.setVirtualHost(virtualHost);
-                        List<QueueInfo> queues = new RabbitBrokerGateway(configuration).getQueues();
+        if (RabbitProductPlugin.isInitialized()) {
+            HypericRabbitAdmin rabbitAdmin = RabbitProductPlugin.getVirtualHostForNode(vhost, node);
 
-                        if (queues != null) {
-                            for (QueueInfo queue : queues) { 
-                                setAvailability(isAvailable && queue != null);
-                                setValue("messages", queue.getMessages());
-                                setValue("consumers", queue.getConsumers());
-                                setValue("transactions", queue.getTransactions());
-                                setValue("memory", queue.getMemory());
-                            }
-                        }
+            List<QueueInfo> queues = rabbitAdmin.getQueues();
+            if (queues != null) {
+                for (QueueInfo q : queues) {
+                    if (q.getName().equalsIgnoreCase(queue)) {
+                        setAvailability(true);
+                        setValue("messages", q.getMessages());
+                        setValue("consumers", q.getConsumers());
+                        setValue("transactions", q.getTransactions());
+                        setValue("memory", q.getMemory());
                     }
                 }
-            } else {
-                setAvailability(false);
             }
-        }
-        catch (PluginException e) {
-
         }
     }
 

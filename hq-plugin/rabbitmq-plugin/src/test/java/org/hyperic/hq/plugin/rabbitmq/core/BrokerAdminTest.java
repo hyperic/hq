@@ -2,58 +2,48 @@ package org.hyperic.hq.plugin.rabbitmq.core;
 
 
 import org.hyperic.hq.plugin.rabbitmq.AbstractSpringTest;
-import org.hyperic.hq.product.PluginException;
 import org.junit.*;
-import org.springframework.amqp.core.*;
-import org.springframework.amqp.core.Queue;
-import org.springframework.erlang.OtpIOException;
-import org.springframework.amqp.rabbit.admin.QueueInfo;
 import org.springframework.amqp.rabbit.admin.RabbitStatus;
-
-import java.util.*;
-
+  
 import static org.junit.Assert.*;
 
 /**
  * BrokerAdminTest
- *
  * @author Helena Edelson
  */
 @Ignore("Need to mock the connection for automation")
 public class BrokerAdminTest extends AbstractSpringTest {
 
+    private HypericRabbitAdmin rabbitAdmin;
 
-    @Test
-    public void getHosts() throws PluginException {
-        String host = rabbitGateway.getRabbitTemplate().getConnectionFactory().getHost();
-        String virtualHost = rabbitGateway.getRabbitTemplate().getConnectionFactory().getVirtualHost();
-        assertNotNull(host);
-        assertNotNull(virtualHost);
+    @Before
+    public void doBefore() {
+        this.rabbitAdmin = configurationManager.getVirtualHostForNode(configuration.getDefaultVirtualHost(), configuration.getNodename());
     }
 
     @Test
     public void declareDeleteExchange() {
-        /*rabbitBrokerAdmin.declareExchange("stocks.nasdaq.*", ExchangeTypes.FANOUT, true, false);
-        rabbitBrokerAdmin.deleteExchange("stocks.nasdaq.*");*/
+        /*rabbitAdmin.declareExchange("stocks.nasdaq.*", ExchangeTypes.FANOUT, true, false);
+        rabbitAdmin.deleteExchange("stocks.nasdaq.*");*/
     }
- 
+
 
     @Test
     public void Binding() {
         /*Queue queue = new Queue(UUID.randomUUID().toString());
         TopicExchange exchange = new TopicExchange("stocks.nasdaq.*");
 
-        rabbitBrokerAdmin.declareQueue(queue);
-        rabbitBrokerAdmin.declareExchange(exchange);
+        rabbitAdmin.declareQueue(queue);
+        rabbitAdmin.declareExchange(exchange);
 
-        rabbitBrokerAdmin.declareBinding(BindingBuilder.from(queue).to(exchange).with(queue.getName()));*/
+        rabbitAdmin.declareBinding(BindingBuilder.from(queue).to(exchange).with(queue.getName()));*/
     }
 
     @Test
     public void listCreateDeletePurgeQueue() {
         /*Queue queue = new Queue(UUID.randomUUID().toString());
-        rabbitBrokerAdmin.declareQueue(queue);
-        rabbitBrokerAdmin.declareExchange(new FanoutExchange("newFanout"));
+        rabbitAdmin.declareQueue(queue);
+        rabbitAdmin.declareExchange(new FanoutExchange("newFanout"));
 
         List<QueueInfo> queues = rabbitBrokerAdmin.getQueues();
         assertNotNull(queues);
@@ -64,34 +54,34 @@ public class BrokerAdminTest extends AbstractSpringTest {
         }
         assertTrue(map.containsKey(queue.getName()));*/
         /** hangs forever */
-        //rabbitBrokerAdmin.purgeQueue(queue.getName(), true);
+        //rabbitAdmin.purgeQueue(queue.getName(), true);
     }
 
     @Test
     public void stopStartBrokerApplication() {
-        RabbitStatus status = rabbitGateway.getStatus();
+        RabbitStatus status = rabbitAdmin.getStatus();
         assertBrokerAppRunning(status);
 
-        /*   rabbitBrokerAdmin.stopBrokerApplication();
-                status = rabbitBrokerAdmin.getStatus();
+        /*   rabbitAdmin.stopBrokerApplication();
+                status = rabbitAdmin.getStatus();
                 assertEquals(0, status.getRunningNodes().size());
         */
-        /*rabbitBrokerAdmin.startBrokerApplication();
-        status = rabbitBrokerAdmin.getStatus();
+        /*rabbitAdmin.startBrokerApplication();
+        status = rabbitAdmin.getStatus();
         assertBrokerAppRunning(status);*/
     }
 
     @Test
     public void listCreateDeleteChangePwdUser() {
-        /*List<String> users = rabbitBrokerAdmin.listUsers();
+        /*List<String> users = rabbitAdmin.listUsers();
         if (users.contains("foo")) {
-            rabbitBrokerAdmin.deleteUser("foo");
+            rabbitAdmin.deleteUser("foo");
         }
-        rabbitBrokerAdmin.addUser("foo", "bar");
-        rabbitBrokerAdmin.changeUserPassword("foo", "12345");
-        users = rabbitBrokerAdmin.listUsers();
+        rabbitAdmin.addUser("foo", "bar");
+        rabbitAdmin.changeUserPassword("foo", "12345");
+        users = rabbitAdmin.listUsers();
         if (users.contains("foo")) {
-            rabbitBrokerAdmin.deleteUser("foo");
+            rabbitAdmin.deleteUser("foo");
         }*/
     }
 
@@ -99,19 +89,19 @@ public class BrokerAdminTest extends AbstractSpringTest {
     @Ignore("NEEDS RABBITMQ_HOME to be set and needs additional node running handling/timing")
     public void startStopRabbitNode() {
         /*try {
-            rabbitBrokerAdmin.stopNode();
+            rabbitAdmin.stopNode();
         } catch (OtpIOException e) {
             //assume it is not running.
         }
-        rabbitBrokerAdmin.startNode();
+        rabbitAdmin.startNode();
         assertEquals(1, 1);*/
     }
 
     @Test
     public void getCreateDeleteVirtualHost() {
         /*assertEquals("/", singleConnectionFactory.getVirtualHost());
-        int status = rabbitBrokerAdmin.addVhost("newVHost");
-        rabbitBrokerAdmin.deleteVhost("newVHost");*/
+        int status = rabbitAdmin.addVhost("newVHost");
+        rabbitAdmin.deleteVhost("newVHost");*/
     }
 
     private boolean isBrokerAppRunning(RabbitStatus status) {
@@ -122,5 +112,5 @@ public class BrokerAdminTest extends AbstractSpringTest {
         assertEquals(1, status.getRunningNodes().size());
         assertTrue(status.getRunningNodes().get(0).getName().contains("rabbit"));
     }
- 
+
 }

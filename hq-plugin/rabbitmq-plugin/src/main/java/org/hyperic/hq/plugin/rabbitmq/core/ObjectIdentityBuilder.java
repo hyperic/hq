@@ -49,6 +49,9 @@ public class ObjectIdentityBuilder implements IdentityBuilder {
         else if (obj instanceof RabbitChannel) {
            return new ChannelIdentityBuilder().buildIdentity(obj, virtualHost);
         }
+        else if (obj instanceof RabbitVirtualHost) {
+            return new VirtualHostIdentityBuilder().buildIdentity(obj, virtualHost);
+        }
         return null;
     }
 
@@ -57,6 +60,15 @@ public class ObjectIdentityBuilder implements IdentityBuilder {
         private String buildIdentity(Object obj, String virtualHost) {
             QueueInfo queue = (QueueInfo) obj;
             return new StringBuilder("queue://").append(queue.getName()).append("@").append(virtualHost).toString();
+        }
+    }
+
+    protected class VirtualHostIdentityBuilder {
+
+        private String buildIdentity(Object obj, String virtualHost) {
+            RabbitVirtualHost vh = (RabbitVirtualHost) obj;
+
+            return new StringBuilder("VirtualHost ").append(vh.getNode()).append(vh.getName()).toString();
         }
     }
 
@@ -87,15 +99,6 @@ public class ObjectIdentityBuilder implements IdentityBuilder {
     }
 
     protected class UserIdentityBuilder {
-
-        private String buildIdentity(Object obj, String virtualHost) {
-            String username = (String)obj;
-            return new StringBuilder("amqp://").append(username).append("@").append(virtualHost).toString();
-        }
-    }
-
-    /** unfinished */
-    protected class VirtualHostIdentityBuilder {
 
         private String buildIdentity(Object obj, String virtualHost) {
             String username = (String)obj;

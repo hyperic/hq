@@ -27,24 +27,40 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitChannel;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitConnection;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitVirtualHost;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
+import org.hyperic.hq.plugin.rabbitmq.volumetrics.AverageRateCumulativeHistory;
+import org.hyperic.hq.plugin.rabbitmq.volumetrics.MovingAverageCumulativeHistory;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.amqp.rabbit.admin.QueueInfo;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * ConnectionCollector
+ * VirtualHostCollector
  * @author Helena Edelson
  */
-public class ConnectionCollector extends Collector {
+public class VirtualHostCollector extends Collector {
 
-    private static final Log logger = LogFactory.getLog(ConnectionCollector.class);
+    private static final Log logger = LogFactory.getLog(QueueCollector.class);
+
+    private final AtomicLong consumerCount = new AtomicLong();
+
+    private final AtomicLong channelCount = new AtomicLong();
+
+    private final AtomicLong octetsReceivedCount = new AtomicLong();
+
+    private final AtomicLong octetsSentCount = new AtomicLong();
+
+    private final AtomicLong pendingSendsCount = new AtomicLong();
 
     @Override
     protected void init() throws PluginException {
@@ -57,24 +73,30 @@ public class ConnectionCollector extends Collector {
         Properties props = getProperties();
         logger.debug("[collect] props=" + props);
 
-        String connectionPid = (String) props.get(MetricConstants.CONNECTION);
         String vhost = (String) props.get(MetricConstants.VIRTUALHOST);
         String node = (String) props.get(MetricConstants.NODE);
 
         if (RabbitProductPlugin.isInitialized()) {
             HypericRabbitAdmin rabbitAdmin = RabbitProductPlugin.getVirtualHostForNode(vhost, node);
 
-            List<RabbitConnection> connections = rabbitAdmin.getConnections();
-            if (connections != null) {
-                for (RabbitConnection conn : connections) {
-                    if (conn.getPid().equalsIgnoreCase(connectionPid)) {
-                        setAvailability(true);
-                        setValue("packetsReceived", conn.getReceiveCount());
-                        setValue("packetsSent", conn.getSendCount());
-                        setValue("channelCount", conn.getChannels());
-                        setValue("octetsReceived", conn.getOctetsReceived());
-                        setValue("octetsSent", conn.getOctetsSent());
-                        setValue("pendingSends", conn.getPendingSends());
+            RabbitVirtualHost virtualHost = rabbitAdmin.getRabbitVirtualHost(vhost);
+            if (virtualHost != null) {
+                setAvailability(true);
+
+                if (virtualHost.getConnections() != null) {
+                    logger.debug("Connections=" + virtualHost.getConnections().size());
+                    for (RabbitConnection conn : virtualHost.getConnections()) {
+
+                        setValue("channelCount", channelCount.addAndGet(conn.getChannels()));
+                        setValue("octetsReceived", octetsReceivedCount.addAndGet(conn.getOctetsReceived()));
+                        setValue("octetsSent",  octetsSentCount.addAndGet(conn.getOctetsSent()));
+                        setValue("pendingSends",  pendingSendsCount.addAndGet(conn.getPendingSends()));
+                    }
+                }
+                if (virtualHost.getChannels() != null) {
+                    logger.debug("Channels=" + virtualHost.getChannels().size());
+                    for (RabbitChannel c : virtualHost.getChannels()) {
+                        setValue("consumerCount", this.consumerCount.addAndGet(c.getConsumerCount()));
                     }
                 }
             }
@@ -85,19 +107,24 @@ public class ConnectionCollector extends Collector {
      * Assemble custom key/value data for each object to set
      * as custom properties in the ServiceResource to display
      * in the UI.
-     * @param conn
+     * @param vh
      * @return
      */
-    public static ConfigResponse getAttributes(RabbitConnection conn) {
+    public static ConfigResponse getAttributes(RabbitVirtualHost vh) {
         ConfigResponse res = new ConfigResponse();
-        res.setValue("username", conn.getUsername());
-        res.setValue("vHost", conn.getVhost());
-        res.setValue("pid", conn.getPid());
-        res.setValue("frameMax", conn.getFrameMax());
-        res.setValue("selfNode", conn.getAddress().getHost() + ":" + conn.getAddress().getPort());
-        res.setValue("peerNode", conn.getPeerAddress().getHost() + ":" + conn.getPeerAddress().getPort());
-        res.setValue("state", conn.getState());
+        res.setValue("name", vh.getName());
+        res.setValue("node", vh.getNode());
 
+        List<RabbitConnection> connections = vh.getConnections();
+        if (connections != null) {
+            res.setValue("totalConnections", connections.size());
+        }
+
+        List<RabbitChannel> channels = vh.getChannels();
+        if (channels != null) {
+            res.setValue("totalChannels", channels.size());
+        }
         return res;
     }
+
 }

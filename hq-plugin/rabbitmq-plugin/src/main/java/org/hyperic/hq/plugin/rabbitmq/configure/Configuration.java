@@ -68,7 +68,28 @@ public class Configuration {
     }
 
     public boolean isDefaultVirtualHost() {
-        return virtualHost.equalsIgnoreCase(defaultVirtualHost);
+        return this.virtualHost.equalsIgnoreCase(defaultVirtualHost);
+    }
+
+    /**
+     * Explicitly set the virtual host as the default
+     * when we initialize for the first time in order to
+     * collect virtualHosts.
+     * @param doSet
+     */
+    public void setDefaultVirtualHost(boolean doSet) {
+        if (doSet && this.virtualHost == null) {
+            this.virtualHost = defaultVirtualHost;
+        } 
+    }
+
+    public String getDefaultVirtualHost() {
+        return defaultVirtualHost;
+    }
+
+    public boolean isMatch(Configuration comparableKey) {
+        return comparableKey != null && this.getVirtualHost().equalsIgnoreCase(comparableKey.getVirtualHost())
+                && this.getNodename().equalsIgnoreCase(comparableKey.getNodename());
     }
 
     /**
@@ -95,6 +116,7 @@ public class Configuration {
         if (hostname == null) {
             throw new PluginConfigurationException("Host name must not be null.");
         }
+
         return true;
     }
 
@@ -200,5 +222,6 @@ public class Configuration {
         }
         return conf;
     }
+
 
 }
