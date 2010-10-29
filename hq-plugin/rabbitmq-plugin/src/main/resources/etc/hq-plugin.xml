@@ -81,7 +81,7 @@
             <option name="authentication" description="erlang cookie" type="hidden"/>
 
             <option name="username" description="RabbitMQ Username for %server.name%"/>
-            <option name="password" description="RabbitMQ Password for %server.name%"/>
+            <option name="password" type="secret" description="RabbitMQ Password for %server.name%"/>
         </config>
         <!--type="secret" -->
 
