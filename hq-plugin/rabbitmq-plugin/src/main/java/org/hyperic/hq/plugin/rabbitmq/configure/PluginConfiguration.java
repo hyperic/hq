@@ -25,16 +25,12 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.configure;
 
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerGateway;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
-import org.hyperic.hq.plugin.rabbitmq.manage.RabbitBrokerManager;
-import org.hyperic.hq.plugin.rabbitmq.manage.RabbitManager;
 import org.hyperic.hq.product.PluginException;
-import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
-import org.springframework.context.annotation.Scope;
 
 /**
  * PluginConfiguration
@@ -47,23 +43,23 @@ public class PluginConfiguration {
     private Configuration configuration;
 
     @Bean
-    public com.rabbitmq.client.ConnectionFactory targetConnectionFactory() {
-        com.rabbitmq.client.ConnectionFactory cf = new com.rabbitmq.client.ConnectionFactory();
-        cf.setHost(configuration.getHostname());
-        cf.setUsername(configuration.getUsername());
-        cf.setPassword(configuration.getPassword());
-        return cf;
-    }
-    
-    @Bean 
-    public RabbitGateway rabbitGateway() throws PluginException {
-        return new RabbitBrokerGateway(configuration);
-        //return new RabbitBrokerGateway(configuration, targetConnectionFactory());
+    public ConfigurationManager configurationManager() throws PluginException {
+        configuration.setDefaultVirtualHost(true);
+        return new RabbitConfigurationManager(configuration);   
     }
 
     @Bean
-    public RabbitManager rabbitManager() throws PluginException {
-        return new RabbitBrokerManager(rabbitGateway());
+    public CachingConnectionFactory connectionFactory() {
+        CachingConnectionFactory ccf = new CachingConnectionFactory(configuration.getHostname());
+        ccf.setUsername(configuration.getUsername());
+        ccf.setPassword(configuration.getPassword());
+        ccf.setChannelCacheSize(20);
+        return ccf;
     }
 
+    @Bean
+    public RabbitTemplate rabbitTemplate() {
+        return new RabbitTemplate(connectionFactory());
+    }
+     
 }

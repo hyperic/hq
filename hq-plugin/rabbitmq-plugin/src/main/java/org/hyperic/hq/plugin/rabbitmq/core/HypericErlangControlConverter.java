@@ -30,14 +30,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.admin.QueueInfo;
-import org.springframework.erlang.ErlangBadRpcException;
-import org.springframework.erlang.core.ConnectionCallback;
-import org.springframework.erlang.core.ErlangTemplate;
 import org.springframework.erlang.support.converter.ErlangConversionException;
 import org.springframework.erlang.support.converter.SimpleErlangConverter;
 import org.springframework.util.Assert;
-
-
+ 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -46,18 +42,13 @@ import java.util.regex.Pattern;
 /**
  * HypericErlangConverter handles jinterface calls that are not currently in Spring AMQP
  * or are in Spring AMQP not working in the Hyperic Agent environment.
+ * ToDo clean up conversions
  * @author Helena Edelson
  */
-public class HypericErlangControlConverter implements HypericErlangConverter {
+public class HypericErlangControlConverter extends SimpleErlangConverter implements HypericErlangConverter {
 
     private static final Log logger = LogFactory.getLog(HypericErlangControlConverter.class);
-
-    private ErlangTemplate erlangTemplate;
-
-    public HypericErlangControlConverter(ErlangTemplate erlangTemplate) {
-        this.erlangTemplate = erlangTemplate;
-    }
-
+ 
     /**
      * Convert Java Object to Erlang
      * @param o
@@ -68,31 +59,24 @@ public class HypericErlangControlConverter implements HypericErlangConverter {
         return o instanceof String ? new OtpErlangBinary(((String) o).getBytes()) : null;
     }
 
-    public Object fromErlangRpc(final String module, final String function, String vHost, Class type) throws ErlangConversionException {
-        final OtpErlangObject[] args = vHost == null ? new OtpErlangObject[]{} : new OtpErlangObject[]{toErlang(vHost)};
+    public Object fromErlang(OtpErlangObject otpErlangObject) throws ErlangConversionException {
+        return super.fromErlang(otpErlangObject);
+    }
 
-        OtpErlangObject response = (OtpErlangObject) erlangTemplate.execute(new ConnectionCallback<Object>() {
-            public Object doInConnection(org.springframework.erlang.connection.Connection connection) throws Exception {
-                connection.sendRPC(module, function, new OtpErlangList(args));
-                return connection.receiveRPC();
-            }
-        });
-
-        if (response.toString().startsWith("{badrpc")) {
-            throw new ErlangBadRpcException(response.toString());
-        }
-
-        return this.fromErlang(response, vHost, type);
+    public Object fromErlangRpc(String s, String s1, OtpErlangObject otpErlangObject) throws ErlangConversionException {
+        return super.fromErlangRpc(s, s1, otpErlangObject);
     }
 
     /**
      * @param response
-     * @param virtualHost
-     * @param type
+     * @param args 
      * @return
      * @throws OtpErlangException
      */
-    public Object fromErlang(OtpErlangObject response, String virtualHost, Class type) {
+    public Object fromErlangRpc(OtpErlangObject response, ErlangArgs args) {
+        Class type = args.getType();
+        String virtualHost = args.getVirtualHost();
+
         if (type.isAssignableFrom(Exchange.class)) {
             return convertExchanges(response, virtualHost);
         } else if (type.isAssignableFrom(String.class)) {
@@ -146,7 +130,7 @@ public class HypericErlangControlConverter implements HypericErlangConverter {
         return converter.fromErlang(response);
     }
 
-    public class QueueConverter extends SimpleErlangConverter {
+    public class QueueConverter {
 
         public Object fromErlang(OtpErlangObject response) throws ErlangConversionException {
             List<QueueInfo> queues = null;
@@ -236,7 +220,7 @@ public class HypericErlangControlConverter implements HypericErlangConverter {
 
     }
 
-    public class BindingConverter extends SimpleErlangConverter {
+    public class BindingConverter {
 
         public Object fromErlang(OtpErlangObject response) throws ErlangConversionException {
 
@@ -254,8 +238,7 @@ public class HypericErlangControlConverter implements HypericErlangConverter {
                             OtpErlangTuple tuple = (OtpErlangTuple) item;
                             if (tuple.arity() == 2) {
                                 String key = tuple.elementAt(0).toString();
-                                OtpErlangObject value = tuple.elementAt(1);
-                                //System.out.println("key=" + key + " value=" + value);
+                                OtpErlangObject value = tuple.elementAt(1); 
                             }
                         }
                     }
@@ -265,7 +248,7 @@ public class HypericErlangControlConverter implements HypericErlangConverter {
         }
     }
 
-    public class ChannelConverter extends SimpleErlangConverter {
+    public class ChannelConverter  {
 
         public Object fromErlang(OtpErlangObject response) throws ErlangConversionException {
             List<RabbitChannel> channels = null;
@@ -321,7 +304,7 @@ public class HypericErlangControlConverter implements HypericErlangConverter {
         }
     }
 
-    public class VersionConverter extends SimpleErlangConverter {
+    public class VersionConverter {
 
         public Object fromErlang(OtpErlangObject response) throws ErlangConversionException {
             String version = null;
@@ -348,7 +331,7 @@ public class HypericErlangControlConverter implements HypericErlangConverter {
         }
     }
 
-    public class VirtualHostConverter extends SimpleErlangConverter {
+    public class VirtualHostConverter {
 
         public Object fromErlang(OtpErlangObject response) throws ErlangConversionException {
             List<String> virtualHosts = new ArrayList<String>();
@@ -366,7 +349,7 @@ public class HypericErlangControlConverter implements HypericErlangConverter {
         }
     }
 
-    public class ConnectionConverter extends SimpleErlangConverter {
+    public class ConnectionConverter {
 
         public Object fromErlang(OtpErlangObject response) throws ErlangConversionException {
             List<RabbitConnection> connections = null;
@@ -447,7 +430,7 @@ public class HypericErlangControlConverter implements HypericErlangConverter {
         }
     }
 
-    public class ExchangeConverter extends SimpleErlangConverter {
+    public class ExchangeConverter {
 
         public Object fromErlang(OtpErlangObject response, String virtualHost) throws ErlangConversionException {
             List<Exchange> exchanges = null;

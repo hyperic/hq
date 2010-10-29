@@ -23,19 +23,38 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq.collect;
-
-import org.hyperic.hq.product.Collector;
+package org.hyperic.hq.plugin.rabbitmq.core;
 
 /**
- * RabbitServiceCollector
+ * ErlangArgs
  * @author Helena Edelson
  */
-public class RabbitServiceCollector extends Collector {
+public class ErlangArgs {
 
-    @Override
-    public void collect() {
+    private String virtualHost;
 
+    private Class type;
 
+    public ErlangArgs() {}
+
+    public ErlangArgs(String v, Class t) {
+        this.virtualHost = v;
+        this.type = t;
+    }
+
+    public String getVirtualHost() {
+        return virtualHost;
+    }
+
+    public void setVirtualHost(String virtualHost) {
+        this.virtualHost = virtualHost;
+    }
+
+    public Class getType() {
+        return type;
+    }
+
+    public void setType(Class type) {
+        this.type = type;
     }
 }

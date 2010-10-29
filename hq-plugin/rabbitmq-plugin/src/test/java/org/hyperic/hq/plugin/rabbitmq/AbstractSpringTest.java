@@ -28,17 +28,21 @@ package org.hyperic.hq.plugin.rabbitmq;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
+import org.hyperic.hq.plugin.rabbitmq.configure.ConfigurationManager;
 import org.hyperic.hq.plugin.rabbitmq.configure.TestContextLoader;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.plugin.rabbitmq.manage.RabbitManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired; 
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory; 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -54,22 +58,36 @@ public abstract class AbstractSpringTest {
     protected final Log logger = LogFactory.getLog(this.getClass().getName());
 
     @Autowired
-    protected RabbitGateway rabbitGateway;
+    protected ConfigurationManager configurationManager;
 
     @Autowired
     protected Configuration configuration;
 
     @Autowired
-    protected ConfigResponse configResponse;
+    protected CachingConnectionFactory ccf;
 
     @Autowired
+    protected ConfigResponse configResponse;
+
+ /*   @Autowired
     protected RabbitManager rabbitManager;
-    
+*/
+    @Autowired
+    protected Queue stocksQueue;
+
+    @Autowired
+    protected Queue alertsQueue;
+
+    @Autowired
+    protected Queue trendsQueue;
+
+    @Autowired
+    protected List<Queue> queues;
+
     @Before
     public void before() { 
-        assertNotNull("rabbitGateway should not be null", rabbitGateway);
-        assertNotNull("configuration must not be null", configuration);
-        assertNotNull("rabbitManager should not be null", rabbitManager);
+        assertNotNull("configurationManager should not be null", configurationManager);
+        assertNotNull("configuration must not be null", configuration); 
     }
 
     @AfterClass

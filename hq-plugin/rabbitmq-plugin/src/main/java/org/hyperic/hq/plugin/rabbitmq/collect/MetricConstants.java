@@ -23,20 +23,20 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq.core;
-
-import com.ericsson.otp.erlang.OtpErlangObject;
-import org.springframework.erlang.support.converter.ErlangConversionException;
-import org.springframework.erlang.support.converter.ErlangConverter;
+package org.hyperic.hq.plugin.rabbitmq.collect;
 
 /**
- * HypericErlangConverter
+ * MetricConstants
  * @author Helena Edelson
  */
-public interface HypericErlangConverter extends ErlangConverter {
+public class MetricConstants {
 
-    OtpErlangObject toErlang(Object o) throws ErlangConversionException;
+    public static final String NODE = "node";
+    public static final String VIRTUALHOST = "virtualhost";
+    public static final String QUEUE = "queue";
+    public static final String EXCHANGE = "exchange";
+    public static final String CONNECTION = "connection";
+    public static final String CHANNEL = "channel";
+    public static final String VIRTUAL_HOST = "vhost";
 
-    Object fromErlangRpc(OtpErlangObject response, ErlangArgs args);
-    
 }

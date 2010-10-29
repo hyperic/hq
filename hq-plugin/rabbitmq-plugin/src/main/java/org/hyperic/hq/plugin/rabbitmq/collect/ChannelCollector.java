@@ -27,17 +27,14 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerGateway;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitChannel;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitConnection;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
+import org.hyperic.hq.plugin.rabbitmq.core.*;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 
 import java.util.List;
+import java.util.Properties;
 
 /**
  * ChannelCollector
@@ -48,35 +45,28 @@ public class ChannelCollector extends Collector {
     private static final Log logger = LogFactory.getLog(ConnectionCollector.class);
 
     @Override
+    protected void init() throws PluginException {
+        Properties props = getProperties();
+        logger.debug("[init] props=" + props);
+        super.init();
+    }
+
     public void collect() {
-        Configuration configuration = Configuration.toConfiguration(getProperties());
-
-        try {
-            RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway(configuration);
-
-            if (rabbitGateway != null) {
-                boolean isAvailable = RabbitProductPlugin.isNodeAvailabile(configuration);
-                List<String> virtualHosts = rabbitGateway.getVirtualHosts();
-
-                if (virtualHosts != null) {
-                    for (String virtualHost : virtualHosts) {
-                        configuration.setVirtualHost(virtualHost);
-
-                        List<RabbitChannel> channels = new RabbitBrokerGateway(configuration).getChannels();
-                        if (channels != null) {
-                            for (RabbitChannel channel : channels) {
-                                setAvailability(isAvailable && channel != null);
-                                setValue("consumerCount", channel.getConsumerCount());
-                            }
-                        }
-                    }
+        Properties props = getProperties();
+        logger.debug("[collect] props=" + props);
+        String channelPid = (String) props.get(MetricConstants.CHANNEL);
+        String vhost = (String) props.get(MetricConstants.VIRTUALHOST);
+        String node = (String) props.get(MetricConstants.NODE);
+         
+        if (RabbitProductPlugin.isInitialized()) {
+            HypericRabbitAdmin rabbitAdmin = RabbitProductPlugin.getVirtualHostForNode(vhost, node);
+            List<RabbitChannel> channels = rabbitAdmin.getChannels();
+            if (channels != null) {
+                for (RabbitChannel c : channels) {
+                    setAvailability(true);
+                    setValue("consumerCount", c.getConsumerCount());
                 }
-            } else {
-                setAvailability(false);
             }
-        }
-        catch (PluginException e) {
-
         }
     }
 

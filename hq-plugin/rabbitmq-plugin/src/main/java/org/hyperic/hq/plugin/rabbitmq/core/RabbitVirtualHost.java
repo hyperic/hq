@@ -25,17 +25,51 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
 
-import com.ericsson.otp.erlang.OtpErlangObject;
-import org.springframework.erlang.support.converter.ErlangConversionException;
+import java.util.List;
 
 /**
- * ErlangConverter
+ * RabbitVirtualHost
  * @author Helena Edelson
  */
-public interface ErlangConverter {
+public class RabbitVirtualHost {
 
-    OtpErlangObject toErlang(Object o) throws ErlangConversionException;
+    private String name;
 
-    Object fromErlangRpc(String module, String function, String virtualHost, Class type) throws ErlangConversionException;
+    private String node;
 
-}                
+    private List<RabbitConnection> connections;
+
+    private List<RabbitChannel> channels;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<RabbitConnection> getConnections() {
+        return connections;
+    }
+
+    public void setConnections(List<RabbitConnection> connections) {
+        this.connections = connections;
+    }
+
+    public List<RabbitChannel> getChannels() {
+        return channels;
+    }
+
+    public void setChannels(List<RabbitChannel> channels) {
+        this.channels = channels;
+    }
+
+    public String getNode() {
+        return node;
+    }
+
+    public void setNode(String node) {
+        this.node = node;
+    }
+}
