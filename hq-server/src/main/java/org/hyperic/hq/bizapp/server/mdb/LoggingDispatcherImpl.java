@@ -47,7 +47,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * The LoggingDispatcher Message-Drive Bean is intended to be used
  * to log Events.
  * 
- * Uses transaction manager ("Required") and is bound to topic/eventsTopic 
+ * Bound to topic/eventsTopic 
  */
 public class LoggingDispatcherImpl implements MessageListener {
     private final Log log = LogFactory.getLog(LoggingDispatcherImpl.class);
