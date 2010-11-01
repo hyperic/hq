@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Evolution : ui-Admin.HQServer</title>
+        <title>Hyperic 4.5 Documentation : ui-Admin.HQServer</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,45 +12,48 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Evolution : ui-Admin.HQServer
+                            Hyperic 4.5 Documentation : ui-Admin.HQServer
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 10, 2010 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Sep 19, 2010 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Pre-Release Documentation</b><br />This space is a staging area for Hyperic 4.5 documentation. See <a href="http://support.hyperic.com/confluence/display/DOC/HQ+Documentation" title="HQ Documentation">HQ Documentation</a> for Hyperic 4.2, 4.3, and 4.4 documentation.</td></tr></table></div> 
+
 
 <p>The <b>HQ Server Settings</b> page allows an HQ user with Super User role to configure a variety of HQ Server behaviors. Most changes take effect upon HQ Server restart.</p>
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1281565173124 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1281565173124 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1281565173124 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1284925669698 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1284925669698 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1284925669698 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1281565173124'>
+/*]]>*/</style><div class='rbtoc1284925669698'>
 <ul>
-    <li><a href='#HQServerConfiguration-HQEmailConfigurationProperties'>HQ Email Configuration Properties</a></li>
-    <li><a href='#HQServerConfiguration-HypericIQProperties'>Hyperic IQ Properties <span style="color: red">*</span></a></li>
-    <li><a href='#HQServerConfiguration-HQAnnouncementProperties'>HQ Announcement Properties</a></li>
-    <li><a href='#HQServerConfiguration-MaintenanceProperties'>Maintenance Properties</a></li>
-    <li><a href='#HQServerConfiguration-GlobalAlertProperties'>Global Alert Properties</a></li>
-    <li><a href='#HQServerConfiguration-NotificationThrottlingConfigurationProperties'>Notification Throttling Configuration Properties <span style="color: red">*</span></a></li>
-    <li><a href='#HQServerConfiguration-AutomaticBaselineConfigurationProperties'>Automatic Baseline Configuration Properties <span style="color: red">*</span></a></li>
-    <li><a href='#HQServerConfiguration-LDAPConfigurationProperties'>LDAP Configuration Properties <span style="color: red">*</span></a></li>
-    <li><a href='#HQServerConfiguration-KerberosConfigurationProperties'>Kerberos Configuration Properties <span style="color: red">*</span></a></li>
-    <li><a href='#HQServerConfiguration-SNMPServerConfigurationProperties%284.2andearlier%29'>SNMP Server Configuration Properties (4.2 and earlier) <span style="color: red">*</span></a></li>
-    <li><a href='#HQServerConfiguration-SNMPServerConfigurationProperties%284.3%29'>SNMP Server Configuration Properties (4.3) <span style="color: red">*</span></a></li>
+    <li><a href='#ui-Admin.HQServer-HQEmailConfigurationProperties'>HQ Email Configuration Properties</a></li>
+    <li><a href='#ui-Admin.HQServer-HypericIQProperties'>Hyperic IQ Properties <span style="color: red">*</span></a></li>
+    <li><a href='#ui-Admin.HQServer-HQAnnouncementProperties'>HQ Announcement Properties</a></li>
+    <li><a href='#ui-Admin.HQServer-MaintenanceProperties'>Maintenance Properties</a></li>
+    <li><a href='#ui-Admin.HQServer-GlobalAlertProperties'>Global Alert Properties</a></li>
+    <li><a href='#ui-Admin.HQServer-NotificationThrottlingConfigurationProperties'>Notification Throttling Configuration Properties <span style="color: red">*</span></a></li>
+    <li><a href='#ui-Admin.HQServer-AutomaticBaselineConfigurationProperties'>Automatic Baseline Configuration Properties <span style="color: red">*</span></a></li>
+    <li><a href='#ui-Admin.HQServer-LDAPConfigurationProperties'>LDAP Configuration Properties <span style="color: red">*</span></a></li>
+    <li><a href='#ui-Admin.HQServer-KerberosConfigurationProperties'>Kerberos Configuration Properties <span style="color: red">*</span></a></li>
+    <li><a href='#ui-Admin.HQServer-SNMPServerConfigurationProperties'>SNMP Server Configuration Properties <span style="color: red">*</span></a></li>
 <ul>
-    <li><a href='#HQServerConfiguration-ConfigureHQServerforSNMPv1'>Configure HQ Server for SNMP v1</a></li>
-    <li><a href='#HQServerConfiguration-ConfigureHQServerforSNMPv2c'>Configure HQ Server for SNMP v2c</a></li>
-    <li><a href='#HQServerConfiguration-ConfigureHQServerforSNMPv3'>Configure HQ Server for SNMP v3</a></li>
+    <li><a href='#ui-Admin.HQServer-ConfigureHQServerforSNMPv1'>Configure HQ Server for SNMP v1</a></li>
+    <li><a href='#ui-Admin.HQServer-ConfigureHQServerforSNMPv2c'>Configure HQ Server for SNMP v2c</a></li>
+    <li><a href='#ui-Admin.HQServer-ConfigureHQServerforSNMPv3'>Configure HQ Server for SNMP v3</a></li>
 </ul>
 </ul></div>
 
+
+
 <p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
+
+
 
 <div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>HQ Server settings have a fundamental and wide-ranging impact on the functionality and behavior of your HQ deployment. Edit with extreme caution.</td></tr></table></div>
 
@@ -61,14 +64,24 @@ div.rbtoc1281565173124 li {margin-left: 0px;padding-left: 0px;}
 <table class='confluenceTable'><tbody>
 <tr>
 <td class='confluenceTd'> Base URL </td>
-<td class='confluenceTd'> The address:port where HQ Server listens for web application requests. The initial value of <b>Base URL</b> is the web application listen port configured when HQ Server was installed, for example: <br class="atl-forced-newline" />  <br class="atl-forced-newline" />
-<tt><a href="http://Ms-MacBook-Pro-15.local:7080">http://Ms-MacBook-Pro-15.local:7080</a></tt>. <br class="atl-forced-newline" />  <br class="atl-forced-newline" />
-Base URL forms the prefix of an URL to any HQ appends the remainder of the URL that points to the <b>Alert Detail</b> page for the fired alert. For example: <br class="atl-forced-newline" />  <br class="atl-forced-newline" />
-<tt><a href="http://Ms-MacBook-Pro-15.local:7080/alerts/Alerts.do?mode=viewAlert&amp;eid=5:10611&amp;a=16431">http://Ms-MacBook-Pro-15.local:7080/alerts/Alerts.do?mode=viewAlert&amp;eid=5:10611&amp;a=16431</a></tt> </td>
+<td class='confluenceTd'> The address:port where HQ Server listens for web application requests. The initial value of <b>Base URL</b> is the web application listen port configured when HQ Server was installed, for example: <br class="atl-forced-newline" /> 
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>http://Ms-MacBook-Pro-15.local:7080</pre>
+</div></div>
+<p> <br class="atl-forced-newline" /> 
+Base URL forms the prefix of an URL to any HQ appends the remainder of the URL that points to the <b>Alert Detail</b> page for the fired alert. For example: <br class="atl-forced-newline" /> </p>
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>http://Ms-MacBook-Pro-15.local:7080/alerts/Alerts.do?mode=viewAlert&amp;eid=5:10611&amp;a=16431</pre>
+</div></div>
+<p> <br class="atl-forced-newline" /> </p></td>
 </tr>
 <tr>
 <td class='confluenceTd'> From Email Address </td>
-<td class='confluenceTd'> The email address listed as the sender of the alert emails. For example: <br class="atl-forced-newline" />  <br class="atl-forced-newline" />  <tt>hq@demo2.hyperic.net</tt> </td>
+<td class='confluenceTd'> The email address listed as the sender of the alert emails. For example: <br class="atl-forced-newline" />   
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>hq@demo2.hyperic.net</pre>
+</div></div>
+<p> </p></td>
 </tr>
 </tbody></table>
 </div>
@@ -238,43 +251,7 @@ As with all new users in HQ, LDAP users are not assigned to any roles by default
 </ul>
 
 
-<h1><a name="ui-Admin.HQServer-SNMPServerConfigurationProperties%284.2andearlier%29"></a>SNMP Server Configuration Properties (4.2 and earlier) <font color="red">&#42;</font></h1>
-
-<p>This section lists the properties for configuring HQ Enterprise for an SNMP server, which can be used for alert notification once SNMP traps are <a href="http://support.hyperic.com/confluence/display/EVO/SNMP+Traps" title="SNMP Traps">enabled</a>. The display of configuration properties depends on the selected <ins>SNMP Protocol Version</ins> (if any). </p>
-<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
-<td class="confluenceTd" valign="top" width="34%">
-<p><b>For version 3:</b> </p>
-<ul>
-	<li>Trap OID</li>
-	<li>Auth Protocol</li>
-	<li>Auth Passphrase</li>
-	<li>Privacy Protocol</li>
-	<li>Privacy Passphrase</li>
-	<li>Target Context Name</li>
-	<li>Security Name</li>
-	<li>Engine Id</li>
-</ul>
-</td> 
-<td class="confluenceTd" valign="top" width="33%">
-<p><b>For version 2c:</b> </p>
-<ul>
-	<li>Trap OID</li>
-	<li>Community</li>
-</ul>
-</td> 
-<td class="confluenceTd" valign="top" width="33%">
-<p><b>For version 1:</b> </p>
-<ul>
-	<li>Trap OID</li>
-	<li>Community</li>
-	<li>Generic ID</li>
-	<li>Specific ID</li>
-	<li>Enterprise ID</li>
-	<li>Agent Address</li>
-</ul>
-</td> </tr></tbody></table> 
-
-<h1><a name="ui-Admin.HQServer-SNMPServerConfigurationProperties%284.3%29"></a>SNMP Server Configuration Properties (4.3) <font color="red">&#42;</font></h1>
+<h1><a name="ui-Admin.HQServer-SNMPServerConfigurationProperties"></a>SNMP Server Configuration Properties <font color="red">&#42;</font></h1>
 
 <h3><a name="ui-Admin.HQServer-ConfigureHQServerforSNMPv1"></a>Configure HQ Server for SNMP v1</h3>
 
@@ -464,7 +441,7 @@ As with all new users in HQ, LDAP users are not assigned to any roles by default
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Sep 10, 2010 15:54</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 28, 2010 15:34</font></td>
 		    </tr>
 	    </table>
     </body>

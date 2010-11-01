@@ -26,7 +26,7 @@
 package org.hyperic.hq.plugin.rabbitmq.manage;
 
 import org.hyperic.hq.plugin.rabbitmq.core.AMQPStatus;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
+import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.admin.QueueInfo;
 
@@ -35,16 +35,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * RabbitManager is in development.
+ * RabbitBrokerManager is in development.
+ * ToDo idempotent, complete.
  * @author Helena Edelson
  */
 public class RabbitBrokerManager implements RabbitManager {
 
 
-    private RabbitGateway rabbitGateway;
+    private HypericRabbitAdmin rabbitAdmin;
 
-    public RabbitBrokerManager(RabbitGateway rabbitGateway) {
-        this.rabbitGateway = rabbitGateway;
+    public RabbitBrokerManager(HypericRabbitAdmin rabbitAdmin) {
+        this.rabbitAdmin = rabbitAdmin;
     }
 
      /**
@@ -53,7 +54,7 @@ public class RabbitBrokerManager implements RabbitManager {
      * @param queue
      */
     public AMQPStatus createQueue(Queue queue, String virtualHost) {
-       /* rabbitBrokerAdmin.declareQueue(new Queue(queueName));
+       /* rabbitAdmin.declareQueue(new Queue(queueName));
         if (getQueuesAsMap(virtualHost).containsKey(queueName)) {
             return AMQPStatus.RESOURCE_CREATED;
         }*/
@@ -65,7 +66,7 @@ public class RabbitBrokerManager implements RabbitManager {
      * @param queueName
      * @return AMQPStatus
      */
-    public AMQPStatus deleteQueue(String queueName, String virtualHost) {
+    public AMQPStatus deleteQueue(String queueName) {
         return AMQPStatus.RESOURCE_NOT_FOUND;
     }
 
@@ -75,8 +76,12 @@ public class RabbitBrokerManager implements RabbitManager {
      * @param queueName
      * @return AMQPStatus
      */
-    public AMQPStatus purgeQueue(String queueName, String virtualHost) {
+    public AMQPStatus purgeQueue(String queueName) {
         return AMQPStatus.RESOURCE_NOT_FOUND;
+    }
+
+    public AMQPStatus createQueue(Queue queue) {
+        return null;  
     }
 
     /**
@@ -84,7 +89,7 @@ public class RabbitBrokerManager implements RabbitManager {
      * @param exchangeType
      * @return
      */
-    public AMQPStatus createExchange(String exchangeName, String exchangeType, String virtualHost) {
+    public AMQPStatus createExchange(String exchangeName, String exchangeType) {
         return AMQPStatus.FAIL;
     }
 
@@ -97,7 +102,7 @@ public class RabbitBrokerManager implements RabbitManager {
      * @param autoDelete
      * @return AMQPStatus
      */
-    public AMQPStatus createExchange(final String exchangeName, final String exchangeType, final boolean durable, final boolean autoDelete, String virtualHost) {
+    public AMQPStatus createExchange(final String exchangeName, final String exchangeType, final boolean durable, final boolean autoDelete) {
         return AMQPStatus.FAIL;
     }
 
@@ -107,7 +112,7 @@ public class RabbitBrokerManager implements RabbitManager {
      * @param ifUnused
      * @return 
      */
-    public AMQPStatus deleteExchange(String exchangeName, boolean ifUnused, String virtualHost) throws Exception {
+    public AMQPStatus deleteExchange(String exchangeName, boolean ifUnused) throws Exception {
         return AMQPStatus.RESOURCE_NOT_FOUND;
     }
     /**
@@ -117,7 +122,7 @@ public class RabbitBrokerManager implements RabbitManager {
      * @param routingKey
      * @return
      */
-    private Binding getBindingByExchange(final Queue queue, Exchange exchange, final String routingKey, String virtualHost) {
+    private Binding getBindingByExchange(final Queue queue, Exchange exchange, final String routingKey) {
         Binding binding = null;
         if (exchange instanceof FanoutExchange) {
             binding = BindingBuilder.from(queue).to((FanoutExchange) exchange);
@@ -135,7 +140,7 @@ public class RabbitBrokerManager implements RabbitManager {
      * @param password
      * @return AMQPStatus
      */
-    public AMQPStatus createUser(String userName, String password, String virtualHost) {
+    public AMQPStatus createUser(String userName, String password) {
         return AMQPStatus.RESOURCE_FOUND;
     }
 
@@ -145,7 +150,7 @@ public class RabbitBrokerManager implements RabbitManager {
      * @param password
      * @return AMQPStatus
      */
-    public AMQPStatus updateUserPassword(String userName, String password, String virtualHost) {
+    public AMQPStatus updateUserPassword(String userName, String password) {
         return AMQPStatus.RESOURCE_NOT_FOUND;
     }
 
@@ -154,7 +159,7 @@ public class RabbitBrokerManager implements RabbitManager {
      * @param userName
      * @return AMQPStatus
      */
-    public AMQPStatus deleteUser(String userName, String virtualHost) {
+    public AMQPStatus deleteUser(String userName) {
         return AMQPStatus.RESOURCE_NOT_FOUND;
     }
 
@@ -190,12 +195,12 @@ public class RabbitBrokerManager implements RabbitManager {
     }
 
     private boolean isBrokerAppRunning() {
-        return rabbitGateway.getRunningNodes().get(0).getName().contains("rabbit");
+        return rabbitAdmin.getStatus().getRunningNodes().get(0).getName().contains("rabbit");
     }
 
-    private Map<String, QueueInfo> getQueuesAsMap(String virtualHost) {
+    private Map<String, QueueInfo> getQueuesAsMap() {
         Map<String, QueueInfo> queues = null;
-        List<QueueInfo> queueList = rabbitGateway.getQueues(virtualHost);
+        List<QueueInfo> queueList = rabbitAdmin.getQueues();
         if (queueList != null) {
             queues = new HashMap<String, QueueInfo>(queueList.size());
 
@@ -206,9 +211,9 @@ public class RabbitBrokerManager implements RabbitManager {
         return queues;
     }
 
-    private Map<String, Exchange> getExchangesAsMap(String virtualHost) throws Exception {
+    private Map<String, Exchange> getExchangesAsMap() throws Exception {
         Map<String, Exchange> exchanges = null;
-        List<Exchange> exchangeList = rabbitGateway.getExchanges(virtualHost);
+        List<Exchange> exchangeList = rabbitAdmin.getExchanges();
         if (exchangeList != null) {
             exchanges = new HashMap<String, Exchange>(exchangeList.size());
 
@@ -219,7 +224,3 @@ public class RabbitBrokerManager implements RabbitManager {
         return exchanges;
     }
 }
-
-/*
-*
-*/

@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Evolution : ui-Inventory.Configuration</title>
+        <title>Hyperic 4.5 Documentation : ui-Inventory.Configuration</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,117 +12,312 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Evolution : ui-Inventory.Configuration
+                            Hyperic 4.5 Documentation : ui-Inventory.Configuration
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on May 20, 2010 by <font color="#0050B2">clee</font>.
+					    This page last changed on Sep 21, 2010 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <h1><a name="ui-Inventory.Configuration-EditingaResource%27sConfigurationProperties"></a><a name="ui-Inventory.Configuration-top"></a>Editing a Resource's Configuration Properties</h1>
+				    <p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
 
-<p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
+ 
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1285109097852 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1285109097852 ul {margin-left: 0px;padding-left: 20px;}
+div.rbtoc1285109097852 li {margin-left: 0px;padding-left: 0px;}
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Pre-Release Documentation</b><br />This space is a staging area for Hyperic 4.5 documentation. See <a href="http://support.hyperic.com/confluence/display/DOC/HQ+Documentation" title="HQ Documentation">HQ Documentation</a> for Hyperic 4.2, 4.3, and 4.4 documentation.</td></tr></table></div> 
-<p>This inventory screen allows users to edit a <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resource">resource's</a> configuration properties, that is, those data that HQ needs to properly monitor and, in some cases, control the resource. Users can also enable and disable <a href="http://support.hyperic.com/confluence/display/EVO/Log+Tracking" title="Log Tracking">log</a> and <a href="http://support.hyperic.com/confluence/display/EVO/Configuration+Tracking" title="Configuration Tracking">configuration tracking</a> for the resource.</p>
-<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Product-Specific Configuration</b><br />The configuration information displayed and available for editing in each section depends entirely on the resource type (product). Product-specific information can be found through the list of <a href="http://support.hyperic.com/confluence/display/hypcomm/HyperFORGE" title="HyperFORGE">products managed by HQ</a>. These pages list what metrics are gathered for a resource type, what control actions (if any) are available for the resource type, whether log and configuration tracking are supported, and any special configuration that users must perform in order for HQ to manage the product. All of this information is ultimately defined in the plugin for that product.</td></tr></table></div>
+/*]]>*/</style><div class='rbtoc1285109097852'>
 <ul>
-	<li><a href="#ui-Inventory.Configuration-Tasks">Tasks</a> available on this screen</li>
-	<li><a href="#ui-Inventory.Configuration-Sections">Sections</a> on this screen</li>
+    <li><a href='#ui-Inventory.Configuration-NavigatetoConfigurationPropertiespage.'>Navigate to Configuration Properties page.</a></li>
+    <li><a href='#ui-Inventory.Configuration-ConfigureSharedProperties'>Configure Shared Properties</a></li>
+    <li><a href='#ui-Inventory.Configuration-ConfigureMonitoringPropertiesLogTracking'>Configure Monitoring Properties - Log Tracking</a></li>
+<ul>
+    <li><a href='#ui-Inventory.Configuration-HQResourceTypesthatSupportLogTracking'>HQ Resource Types that Support Log Tracking</a></li>
+    <li><a href='#ui-Inventory.Configuration-SupportedLogMessageTypes'>Supported Log Message Types</a></li>
+    <li><a href='#ui-Inventory.Configuration-LogTrackingConfigurationOptions'>Log Tracking Configuration Options</a></li>
 </ul>
+    <li><a href='#ui-Inventory.Configuration-ConfigureMonitoringPropertiesConfigurationTracking'>Configure Monitoring Properties - Configuration Tracking</a></li>
+<ul>
+    <li><a href='#ui-Inventory.Configuration-HQConfigurationTrackingFunctionality'>HQ Configuration Tracking Functionality</a></li>
+    <li><a href='#ui-Inventory.Configuration-SetUpConfigurationTrackingforaResource'>Set Up Configuration Tracking for a Resource</a></li>
+    <li><a href='#ui-Inventory.Configuration-ViewConfigurationEventsforaResource'>View Configuration Events for a Resource</a></li>
+    <li><a href='#ui-Inventory.Configuration-ConfigureAlertsBasedonConfigurationEvents'>Configure Alerts Based on Configuration Events</a></li>
+</ul>
+    <li><a href='#ui-Inventory.Configuration-ConfigureControlProperties'>Configure Control Properties</a></li>
+</ul></div> 
 
 
 <p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
-<p><a name="ui-Inventory.Configuration-Tasks"></a></p>
 
-<h3><a name="ui-Inventory.Configuration-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h3>
+ 
 
-<p>On this screen, users can do the following tasks:</p>
+<h1><a name="ui-Inventory.Configuration-NavigatetoConfigurationPropertiespage."></a>Navigate to Configuration Properties page. </h1>
+<p>The <b>Configuration Properties</b> section of the <b>Inventory</b> page for a resource contains the configuration options and currently selected values for the resource. Configuration properties for the resource are presented in three sections: </p>
 
-<p><b>To enable or disable auto-discovery of this resource:</b></p>
 <ul>
-	<li>Check <ins>Auto-Discover</ins> and click <span class="image-wrap" style=""><img src="attachments/71828466/71926153.gif" style="border: 0px solid black"/></span>.</li>
+	<li><b>Shared</b> &#8212; The properties in this section relate to more than one management function, for instance both monitoring and control actions.</li>
+	<li><b>Monitoring</b> &#8212; These properties set options related to log tracking, configuration tracking, and, for servers, here is where you can disable auto-discovery of child services.</li>
+	<li><b>Control</b> &#8212; If Hyperic supports control actions for the currently selected resource type, this section includes any configuration properties required to enable resource control, for example, the path of the start script to use to start aserver.</li>
 </ul>
 
 
-<p><a name="ui-Inventory.Configuration-track"></a><b>To enable and configure log tracking of this resource:</b></p>
-<ol>
-	<li>Check <ins>Enable Log Tracking</ins>.</li>
-	<li>In <ins>Track Event Log Level</ins>, select a log level. Only events of a level greater than or equal to this level will be tracked. The hierarchy of log levels, from greatest to least, is: Error, Warn, Info, Debug.<br/>
-<b>Mapping of error type to log-level:</b>
-<div class='table-wrap'>
-<table class='confluenceTable'><tbody>
-<tr>
-<th class='confluenceTh'> error type </th>
-<th class='confluenceTh'> Log Level </th>
-</tr>
-<tr>
-<td class='confluenceTd'> emerg,alert,crit,error </td>
-<td class='confluenceTd'> Error </td>
-</tr>
-<tr>
-<td class='confluenceTd'> warn </td>
-<td class='confluenceTd'> Warn </td>
-</tr>
-<tr>
-<td class='confluenceTd'> info,notice </td>
-<td class='confluenceTd'> Info </td>
-</tr>
-<tr>
-<td class='confluenceTd'> debug </td>
-<td class='confluenceTd'> Debug </td>
-</tr>
-</tbody></table>
-</div>
-</li>
-	<li>In <ins>Log Pattern Match</ins>, provide a substring or a regular expression that must be matched by a log message. For more information, see <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">java.util.regex.Pattern</a>.</li>
-	<li>In <ins>Log Pattern Exclude</ins>, provide a substring that, if found in a log message, will cause the message to be excluded.</li>
-	<li>In <ins>Log Files</ins>, specify a comma-delimited list of log files to track.<br/>
-The HQ Agent must be able to read these files, so make sure permissions are set appropriately.</li>
-	<li>Click <span class="image-wrap" style=""><img src="attachments/71828466/71926153.gif" style="border: 0px solid black"/></span>.</li>
-</ol>
+<p>Click <b>Edit</b> to open the <b>Edit Configuration Properties</b> page for the currently selected resource.</p> 
+
+<h1><a name="ui-Inventory.Configuration-ConfigureSharedProperties"></a>Configure Shared Properties </h1>
+
+<h1><a name="ui-Inventory.Configuration-ConfigureMonitoringPropertiesLogTracking"></a>Configure Monitoring Properties - Log Tracking </h1>
+
+<h2><a name="ui-Inventory.Configuration-HQResourceTypesthatSupportLogTracking"></a>HQ Resource Types that Support Log Tracking </h2>
+
+<p>HQ supports log tracking for operating system platforms, network services, and most server types. If a resource supports log tracking, its <b>Configuration Properties</b> page contains log tracking configuration options. </p>
+
+<h2><a name="ui-Inventory.Configuration-SupportedLogMessageTypes"></a>Supported Log Message Types </h2>
+
+<p>HQ can monitor and record events for: </p>
+<ul>
+	<li>Log file messages that specify log levels using log4j log levels.</li>
+	<li>Events written to Windows Event Logs.</li>
+	<li>Network request results for a variety of network services.</li>
+</ul>
 
 
-<p><a name="ui-Inventory.Configuration-config"></a><b>To enable and configure configuration tracking of this resource:</b></p>
-<ol>
-	<li>Check <ins>Enable Config Tracking</ins>.</li>
-	<li>In <ins>Configuration Files</ins>, specify a comma-delimited list of log files to track.</li>
-	<li>Click <span class="image-wrap" style=""><img src="attachments/71828466/71926153.gif" style="border: 0px solid black"/></span>.</li>
-</ol>
+<h2><a name="ui-Inventory.Configuration-LogTrackingConfigurationOptions"></a>Log Tracking Configuration Options </h2>
+
+<p>You enable and configure log tracking for a resource on its <b>Configuration Properties</b> page. Navigate to the resource's <b>Inventory</b> page, and click <b>Edit</b> in the <b>Configuration Properties</b> section to display the <b>Configuration Properties</b> page. </p>
+
+<p><b>Note:</b> Log and configuration tracking must be enabled for a resource if you wish to log events for log messages or configuration changes. Event logging is automatic for alerts and control actions. Log tracking configuration options vary somewhat by resource type. </p>
+
+<p>Log tracking options vary by resource type. See the following sections for more detail:</p>
+
+<ul>
+	<li><a href="#ui-Inventory.Configuration-LogTrackingforResourceswithLog4jLogs">Log Tracking for Resources with Log4j Logs</a></li>
+	<li><a href="#ui-Inventory.Configuration-LogTrackingforNetworkServices">Log Tracking for Network Services</a></li>
+	<li><a href="#ui-Inventory.Configuration-LogTrackingforWindowsPlatforms">Log Tracking for Windows Platforms</a></li>
+</ul>
 
 
-<p><em><a href="#ui-Inventory.Configuration-top"><em>back to top</em></a></em></p>
+<h3><a name="ui-Inventory.Configuration-LogTrackingforResourceswithLog4jLogs"></a>Log Tracking for Resources with Log4j Logs </h3>
 
-<p><a name="ui-Inventory.Configuration-Sections"></a></p>
+<p>This section describes the log tracking configuration options for resources that whose log files use logj4 levels. </p>
 
-<h3><a name="ui-Inventory.Configuration-SectionsonThisScreen"></a>Sections on This Screen</h3>
+<p><span class="image-wrap" style=""><img src="attachments/71828283/71925965.png" style="border: 0px solid black"/></span> </p>
+
+<p>An authorized user can set the values of these configuration options:</p>
+<ul>
+	<li>Enable/disable log tracking.</li>
+	<li>Specify one or more files to track, as a comma-separated list. The HQ Agent must be able to read these files, so make sure permissions are set appropriately.</li>
+	<li>Specify the highest log level to track:
+	<ul>
+		<li>Error - Messages with log level "FATAL" or "ERROR"</li>
+		<li>Warn</li>
+		<li>Info</li>
+		<li>Debug</li>
+	</ul>
+	</li>
+	<li>Specify substrings or expressions to use as include/exclude filter criteria. Enter a substring or a regular expression that a log message must contain or match in <b>Log Pattern Match</b>. For more information, see <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">java.util.regex.Pattern</a>.</li>
+</ul>
 
 
-<h4><a name="ui-Inventory.Configuration-Top"></a>Top</h4>
+<h3><a name="ui-Inventory.Configuration-LogTrackingforNetworkServices"></a>Log Tracking for Network Services </h3>
 
-<p>The top of the screen displays this message:</p>
-<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
-<pre> Please verify that this resource has been enabled for monitoring by following the directions below.
-</pre>
+<p>This section describes the log tracking configuration options for network services. </p>
+
+<p><span class="image-wrap" style=""><img src="attachments/71828283/71925963.png" style="border: 0px solid black"/></span> </p>
+
+<p>An authorized user can set the values of these configuration options:</p>
+<ul>
+	<li>Enable/disable log tracking.</li>
+	<li>Specify the highest log level to track:
+	<ul>
+		<li>Error</li>
+		<li>Warn</li>
+		<li>Info</li>
+		<li>Debug</li>
+	</ul>
+	</li>
+	<li>Specify substrings or expressions to use as include/exclude filter criteria. Enter a substring or a regular expression that a log message must contain or match in <b>Log Pattern Match</b>. For more information, see <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">java.util.regex.Pattern</a>.h3. Log Tracking for Windows Events</li>
+</ul>
+
+
+<h3><a name="ui-Inventory.Configuration-LogTrackingforWindowsPlatforms"></a>Log Tracking for Windows Platforms </h3>
+<p>This section describes the log tracking configuration options for platforms of type "win32". </p>
+
+<p><span class="image-wrap" style=""><img src="attachments/71828283/71925964.png" style="border: 0px solid black"/></span> </p>
+
+<p>An authorized user can set the values of these configuration options:</p>
+<ul>
+	<li>Enable/disable log tracking.</li>
+	<li>Specify one or more Event Log to track:
+	<ul>
+		<li>System - contains events logged by Windows system components. For example, if a driver fails to load during startup, an event is recorded in the system log. Windows predetermines the events that are logged by system components.</li>
+		<li>Application - contains events logged by programs. For example, a database program may record a file error in the application log. Events that are written to the application log are determined by the developers of the software program.</li>
+		<li>Security - contains events such as valid and invalid logon attempts, as well as events related to resource use, such as the creating, opening, or deleting of files. For example, when logon auditing is enabled, an event is recorded in the security log each time a user attempts to log on to the computer. A Windows administrator or member of the Windows Administrators group specify which events are recorded in the security log.</li>
+		<li>"*" causes all event logs to be tracked</li>
+	</ul>
+	</li>
+	<li>Specify the highest log level to track:
+	<ul>
+		<li>Error - Windows Events with level "ERROR"&nbsp;</li>
+		<li>Warn - Windows Events with level "WARNING"</li>
+		<li>Info - Windows Events with level "INFORMATION" or "SUCCESS"</li>
+		<li>Debug - No Windows Event types map to this level</li>
+	</ul>
+	</li>
+</ul>
+
+
+<h4><a name="ui-Inventory.Configuration-ContentofLoggedWindowsEvents"></a>Content of Logged Windows Events </h4>
+
+<p>When Windows log tracking is enabled, an entry of this form is logged for events that match the criteria you specified on the resource's <b>Configuration Properties</b> page:</p>
+
+<p>[Timestamp] Log Message (EventLogName):EventLogName:EventAttributes</p>
+
+<p>where:</p>
+
+<ul>
+	<li><b><em>Timestamp</em></b> &#45; is when the event occurred</li>
+	<li><b>Log Message</b> &#45; is an text string</li>
+	<li><b><em>EventLogName</em></b> &#45; is the Windows event log type, "System", "Security", or "Application".</li>
+	<li><b><em>EventAttributes</em></b> &#45; a colon delimited string made of the Windows event <b>Source</b> and <b>Message</b> attributes.</li>
+</ul>
+
+
+<p>For example, this log entry:&nbsp;</p>
+
+<p>&nbsp;04/19/2010 06:06 AM&nbsp;Log Message (SYSTEM): SYSTEM: Print: Printer HP LaserJet 6P was paused.</p>
+
+<p>is for an Windows event written to the Windows System event log at 6:06 AM on 04/19/2010. The Windows event <b>Source</b> and <b>Message</b> attributes, are "Print" and "Printer HP LaserJet 6P was paused.", respectively.</p> 
+
+<h4><a name="ui-Inventory.Configuration-TailoringtheContentandFormatofLoggedWindowsEvents"></a>Tailoring the Content and Format of Logged Windows Events </h4>
+
+<p>Tou can configure the last portion of the log data that the agent writes for a Windows event - referred to above as <b><em>EventAttributes</em></b>. You can include additional event attributes, for example <b>User</b> and <b>Computer</b>. To do so, you add the <tt>platform.log_track.eventfmt</tt> property to the <tt>agent.properties</tt> file for the HQ Agent monitoring the Windows platform.</p>
+
+<p>Usage of <tt>platform.log_track.eventfmt</tt> property is described below.</p>
+
+<h6><a name="ui-Inventory.Configuration-platform.logtrack.eventfmt"></a>platform.log_track.eventfmt</h6>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><p><b>Description</b></p>
+
+<p>Specifies the content and format of the Windows event attributes that an HQ Agent includes when logging a  Windows event as an event in  HQ. <tt>agent.properties</tt> does not contain the <tt>platform.log_track.eventfmt</tt> property, you must explicitly add it if you want to tailor the data logged for Windows events.</p>
+
+<p><b>Default Behavior</b></p>
+
+When Windows log tracking is enabled, an entry of this form is logged for events that match the criteria you specified on the resource's <b>Configuration Properties</b> page:
+
+<p>[Timestamp] Log Message (EventLogName):EventLogName:EventAttributes</p>
+
+<p>where:</p>
+
+<ul>
+	<li><b><em>Timestamp</em></b> &#45; is when the event occurred</li>
+	<li><b>Log Message</b> &#45; is an text string</li>
+	<li><b><em>EventLogName</em></b> &#45; is the Windows event log type, "System", "Security", or "Application".</li>
+	<li><b><em>EventAttributes</em></b> &#45; a colon delimited string made of the Windows event <b>Source</b> and <b>Message</b> attributes.</li>
+</ul>
+
+
+<p>For example, this log entry:&nbsp;</p>
+
+<p>&nbsp;04/19/2010 06:06 AM&nbsp;Log Message (SYSTEM): SYSTEM: Print: Printer HP LaserJet 6P was paused.</p>
+
+<p>is for an Windows event written to the Windows System event log at 6:06 AM on 04/19/2010. The Windows event <b>Source</b> and <b>Message</b> attributes, are "Print" and "Printer HP LaserJet 6P was paused.", respectively.</p>
+
+<p><b>Configuration</b></p>
+
+<p>You can use the parameters below to configure the Windows event attributes that the agent writes for a Windows event. Each parameter maps to Windows event attribute of the same name.</p>
+
+<ul>
+	<li><tt>%user%</tt> &#45;  The name of the user on whose behalf the event occurred.</li>
+	<li><tt>%computer%</tt> &#45; The name of the computer on which the event occurred.</li>
+	<li><tt>%source%</tt> &#45; The software that logged the Windows event.</li>
+	<li><tt>%event%</tt> &#45; A number identifying the particular event type.</li>
+	<li><tt>%message%</tt> &#45; The event message.</li>
+	<li><tt>%category%</tt> &#45; An application-specific value used for grouping events.</li>
+</ul>
+
+
+<p>For example, with this property setting:</p>
+
+<p><tt>platform.log_track.eventfmt=%user%@%computer% %source%:%event%:%message%</tt></p>
+
+<p>the HQ Agent will write the following data when logging Windows event:</p>
+
+<div class="panel" style="border-width: 1px;"><div class="panelContent">
+<p>04/19/2010 06:06 AM Log Message (SYSTEM): SYSTEM: HP_Admistrator@Office Print:7:Printer HP LaserJet 6P was paused.</p>
 </div></div>
-<p>if log and configuration tracking are not already enabled on the resource or if the user must do something in order for HQ to monitor the resource. For example, the message would appear on a MySQL database resource if the username and password had not been provided. Click <b>directions below</b> to be taken directly to the place on the screen where the necessary instructions are listed.</p>
 
-<h4><a name="ui-Inventory.Configuration-Shared"></a>Shared</h4>
+<p>This entry is for as for an Windows event written to the Windows System event log at 6:06 AM on 04/19/2010. The software associated with the event was running as "HP_Administrator" on the host "Office". The Windows event's <b>Source,</b>&nbsp;<b>Event,</b> and&nbsp;<b>Message</b> attributes, are "Print", "7", and "Printer HP LaserJet 6P was paused.", respectively.</p>
 
-<p>This section lists properties that apply to both "monitoring" and "control" aspects of the resource, in other words, general product configuration properties.</p>
+<p>After you configure the content of the log entry written for a Windows event, when you configure an alert definition for a Windows resource, you can create an alert condition based on the message content, including the custom fields you have configured. For more information, see <a href="http://support.hyperic.com/confluence/display/EVO/Defining+Alerts#DefiningAlerts-conditions">Define Alert Condition Set</a>.</p></td></tr></table></div>  
 
-<h4><a name="ui-Inventory.Configuration-Monitoring"></a>Monitoring</h4>
+<h1><a name="ui-Inventory.Configuration-ConfigureMonitoringPropertiesConfigurationTracking"></a>Configure Monitoring Properties - Configuration Tracking </h1>
 
-<p>This section lists all the information necessary to perform log and configuration tracking for a resource. Not all resource types support log and configuration tracking.</p>
+<p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
 
-<p>In this section, users can also enable or disable auto-discovery of the resource. HQ's strength lies largely in its auto-discovery of network resources. The <em>Auto-Discovery</em> checkbox should thereful almost always be checked. On rare occasions, however, users might want to disable auto-discovery because it is being too "aggressive" in discovering things on the network.</p>
 
-<h4><a name="ui-Inventory.Configuration-Control"></a>Control</h4>
 
-<p>This section lists the information necessary for HQ to perform <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-controlaction">control actions</a> on this resource. Not all resource types have associated control actions: <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-platform">Platforms</a>, <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-application">applications</a>, and <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-mixedgroup">mixed groups</a> do not have control actions.</p>
 
-<p><b>Example</b><br/>
-For an Apache server, HQ can perform these control actions: start, stop, restart, graceful, startssl, and configtest. In order for HQ to do that, the user must provide the following information about the Apache installation:</p>
+
+<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
+
+
+
+<h2><a name="ui-Inventory.Configuration-HQConfigurationTrackingFunctionality"></a>HQ Configuration Tracking Functionality</h2>
+
+<p>You can configure HQ to log an event when a specified file - usually a configuration artifact &#45;&nbsp; associated with a managed resource is modified.&nbsp; The agent use a cryptographic hash function to continuously compare a original version of the file with the current version to see if it has changed. You can view configuration event data on the <b>Monitor</b> page for a resource or the <b>Event Center</b>.&nbsp; You can base alert conditions on configuration events.&nbsp;</p>
+
+<ul>
+	<li>HQ can track multiple files per resource.</li>
+	<li>The HQ Agent must be able to read a file to track it - ensure that file permissions are such that the HQ Agent can read files you wish to track.</li>
+	<li>HQ is supported for most platform and server types; typically not for services.</li>
+</ul>
+
+
+<h2><a name="ui-Inventory.Configuration-SetUpConfigurationTrackingforaResource"></a>Set Up Configuration Tracking for a Resource</h2>
+
+<p>To enable and configure configuration tracking for a single resource:</p>
+<ol>
+	<li>Navigate to the resource's <b>Inventory</b> page</li>
+	<li>In the "Configuration Properties" section, click <b>Edit</b>.</li>
+	<li>On the <b>Edit Configuration Properties</b> page:
+	<ol>
+		<li>Click the <b>Enable Config Tracking</b> box to turn configuration tracking on and off for the resource.</li>
+		<li>Enter the path, relative to the resource's installation directory, to each file you wish to track.&nbsp; Separate files with a comma.</li>
+		<li>Click <b>OK</b>.</li>
+	</ol>
+	</li>
+</ol>
+
+
+<h2><a name="ui-Inventory.Configuration-ViewConfigurationEventsforaResource"></a>View Configuration Events for a Resource</h2>
+
+<p>You enable and configure log tracking for a resource on its <b>Configuration Properties</b> page. Navigate to the resource's <b>Inventory</b> page, and click <b>Edit</b> in the <b>Configuration Properties</b> section to display the <b>Configuration Properties</b> page.</p>
+
+<h2><a name="ui-Inventory.Configuration-ConfigureAlertsBasedonConfigurationEvents"></a>Configure Alerts Based on Configuration Events</h2>
+
+<ol>
+	<li>Enable and configure configuration tracking as described above.</li>
+	<li>Navigate to that resource's "Alert" screen ( <span class="image-wrap" style=""><img src="attachments/71828532/71926305.gif" style="border: 0px solid black"/></span>).<br/>
+One way to get there is from the "Browse Resources" screen: click <span class="image-wrap" style=""><img src="attachments/71828532/71926314.gif" style="border: 0px solid black"/></span> next to the resource.</li>
+	<li>Click <span class="image-wrap" style=""><img src="attachments/71828532/71926306.gif" style="border: 0px solid black"/></span> to define a new alert or click the alert name to edit an existing definition.</li>
+	<li>If defining a new alert, follow the <a href="ui-Alert.New.html" title="ui-Alert.New">instructions</a> on the "New Alert" screen for defining an alert.<br/>
+Be sure to select <ins>Config change and match file name</ins> as a triggering condition.</li>
+	<li>If editing an alert definition:
+	<ol>
+		<li>On the "<a href="ui-Alert.Edit.html" title="ui-Alert.Edit">Edit Alert</a>" screen, click <span class="image-wrap" style=""><img src="attachments/71828532/71926307.gif" style="border: 0px solid black"/></span> in the "Condition Set" section.</li>
+		<li>On the "Edit Alert Condition" screen, follow the <a href="ui-Alert.Condition.html#ui-Alert.Condition-editcondition">instructions</a> for editing the alert's condition.<br/>
+Be sure to select <ins>Config change and match file name</ins> as a triggering condition.</li>
+	</ol>
+	</li>
+</ol>
+ 
+
+<h1><a name="ui-Inventory.Configuration-ConfigureControlProperties"></a>Configure Control Properties </h1>
+
+<p>This section lists the information necessary for HQ to perform <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-controlaction">control actions</a> on this resource. Not all resource types have associated control actions: <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-platform">Platforms</a>, <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-application">applications</a>, and <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-mixedgroup">mixed groups</a> do not have control actions. </p>
+
+<p><b>Example</b> <br/>
+For an Apache server, HQ can perform these control actions: start, stop, restart, graceful, startssl, and configtest. In order for HQ to do that, the user must provide the following information about the Apache installation: </p>
 <ul>
 	<li><ins>pidfile</ins>: The Apache httpd pid file</li>
 	<li><ins>program</ins>: The apache httpd control program</li>
@@ -131,23 +326,6 @@ For an Apache server, HQ can perform these control actions: start, stop, restart
 </ul>
 
 
-<h4><a name="ui-Inventory.Configuration-TheRest"></a>The Rest</h4>
-
-<p>The rest of the screen provides resource type-specific (product-specific) configuration information (if it exists) necessary for HQ to monitor the resource. This information is also found on the product-specific pages in the <a href="http://support.hyperic.com/confluence/display/hypcomm/HyperFORGE" title="HyperFORGE">Managed Products</a> section of the help.</p>
-
-<p>Also, an explanation of the log&#45; and configuration-tracking fields, as explained above, is provided.</p>
-
-<p><em><a href="#ui-Inventory.Configuration-top"><em>back to top</em></a></em></p>
-
-<p><br class="atl-forced-newline" /></p>
-<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Related Information</b></div><div class="panelContent">
-<p><a href="http://support.hyperic.com/confluence/display/EVO/Plugin+Development+Center" title="Plugin Development Center">Learn how to understand and write product plugins</a><br/>
-<a href="http://support.hyperic.com/confluence/display/EVO/Log+Tracking" title="Log Tracking">Log Tracking</a><br/>
-<a href="http://support.hyperic.com/confluence/display/EVO/Configuration+Tracking" title="Configuration Tracking">Configuration Tracking</a></p>
-</div></div></tr></tbody></table>
-
-<h5><a name="ui-Inventory.Configuration-ReturntoUserInterfaceReference."></a>Return to <a href="User Interface Reference.html" title="User Interface Reference">User Interface Reference</a>.</h5>
 
 				    					    <br/>
                         <div class="tabletitle">
@@ -168,7 +346,7 @@ For an Apache server, HQ can perform these control actions: start, stop, restart
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Sep 10, 2010 15:54</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 28, 2010 15:34</font></td>
 		    </tr>
 	    </table>
     </body>

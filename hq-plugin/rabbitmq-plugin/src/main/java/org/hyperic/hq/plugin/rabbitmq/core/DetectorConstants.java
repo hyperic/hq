@@ -35,6 +35,8 @@ public class DetectorConstants {
 
     public static final String NODE_PATH = "node.path";
 
+    public static final String VIRTUALHOST = " virtualhost";
+
     public static final String HOST = "hostname";
 
     public static final String USERNAME = "username";

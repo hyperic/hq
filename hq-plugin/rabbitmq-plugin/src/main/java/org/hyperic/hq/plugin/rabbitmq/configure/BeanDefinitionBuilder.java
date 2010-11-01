@@ -26,11 +26,7 @@
 package org.hyperic.hq.plugin.rabbitmq.configure;
 
 import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
-import org.hyperic.hq.plugin.rabbitmq.core.HypericBrokerAdmin;
-import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
-import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.MutablePropertyValues; 
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 
 /**
@@ -39,38 +35,14 @@ import org.springframework.beans.factory.support.GenericBeanDefinition;
  */
 public class BeanDefinitionBuilder {
 
-    public GenericBeanDefinition build(Class beanType, Configuration conf, BeanDefinition beanDef) {
-
-        if (beanType.isAssignableFrom(CachingConnectionFactory.class)) {
-            return build(beanType, conf.getHostname());
-        }
-        else if (beanType.isAssignableFrom(Configuration.class)) {
-            return build(beanType, conf);
-        }
-        else if (beanType.isAssignableFrom(HypericBrokerAdmin.class) && beanDef != null) {
-            return build(beanType, conf.getAuthentication(), beanDef);
-        }
-        return null;
-    }
-
     public GenericBeanDefinition build(Class beanType) {
         GenericBeanDefinitionBuilder builder = new GenericBeanDefinitionBuilder();
         return builder.build(beanType);
     }
 
-    private GenericBeanDefinition build(Class beanType, Configuration conf) {
-        ConfigBeanDefinitionBuilder builder = new ConfigBeanDefinitionBuilder();
+    public GenericBeanDefinition build(Class beanType, Configuration conf) {
+        ConfigurationBeanDefinitionBuilder builder = new ConfigurationBeanDefinitionBuilder();
         return builder.build(beanType, conf);
-    }
-
-    private GenericBeanDefinition build(Class beanType, String host) {
-        ConnectionFactoryBeanDefinitionBuilder builder = new ConnectionFactoryBeanDefinitionBuilder();
-        return builder.build(beanType, host);
-    }
-
-    private GenericBeanDefinition build(Class beanType, String auth, BeanDefinition beanDef) {
-        BrokerAdminBeanDefinitionBuilder builder = new BrokerAdminBeanDefinitionBuilder();
-        return builder.build(beanType, auth, beanDef);
     }
 
     /**
@@ -84,47 +56,8 @@ public class BeanDefinitionBuilder {
             return beanDefinition;
         }
     }
-    
-    /**
-     * Build BeanDefinition for org.springframework.amqp.rabbit.connection.CachingConnectionFactory
-     * to pre-initialize all pending dependent beans in the plugin context.
-     * This BeanDefinition is created after host is set and before it is validated against the broker.
-     * @see org.springframework.amqp.rabbit.connection.CachingConnectionFactory
-     */
-    private class ConnectionFactoryBeanDefinitionBuilder {
 
-        private GenericBeanDefinition build(Class beanType, String hostName) {
-            GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
-            beanDefinition.setBeanClass(beanType);
-            ConstructorArgumentValues.ValueHolder vh = new ConstructorArgumentValues.ValueHolder(hostName, "java.lang.String", "hostName");
-
-            ConstructorArgumentValues constructorArgs = new ConstructorArgumentValues();
-            constructorArgs.addGenericArgumentValue(vh);
-            beanDefinition.setConstructorArgumentValues(constructorArgs);
-            return beanDefinition;
-        }
-    }
-
-    /**
-     * Build BeanDefinition for HypericBrokerAdmin is created after
-     * an erlang cookie value is set and validated against the broker.
-     */
-    private class BrokerAdminBeanDefinitionBuilder {
-
-        private GenericBeanDefinition build(Class beanType, String auth, BeanDefinition beanDef) {
-            GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
-            beanDefinition.setBeanClass(beanType);
-
-            ConstructorArgumentValues constructorArgs = new ConstructorArgumentValues();
-            constructorArgs.addIndexedArgumentValue(0, beanDef);
-            constructorArgs.addIndexedArgumentValue(1, auth);
-            beanDefinition.setConstructorArgumentValues(constructorArgs);
-
-            return beanDefinition;
-        }
-    }
-
-    private class ConfigBeanDefinitionBuilder {
+    private class ConfigurationBeanDefinitionBuilder {
 
         private GenericBeanDefinition build(Class beanType, Configuration conf) {
             GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
@@ -141,4 +74,5 @@ public class BeanDefinitionBuilder {
             return beanDefinition;
         }
     }
+
 }

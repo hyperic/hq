@@ -59,8 +59,9 @@ public class ConsumerSample {
                         Map<String, Object> headers = message.getMessageProperties().getHeaders();
                         Object objFloat = headers.get("float");
                         Object objcp = headers.get("object");
-                        System.out.println("float header type = " + objFloat.getClass());
-                        System.out.println("object header type = " + objcp.getClass());
+
+                        if (objFloat != null) System.out.println("float header type = " + objFloat.getClass());
+                        if (objcp != null) System.out.println("object header type = " + objcp.getClass());
                     }
                 }
             }

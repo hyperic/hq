@@ -27,21 +27,22 @@ package org.hyperic.hq.plugin.rabbitmq;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
+import org.hyperic.hq.plugin.rabbitmq.configure.ConfigurationManager;
 import org.hyperic.hq.plugin.rabbitmq.configure.TestContextLoader;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
 import org.hyperic.hq.plugin.rabbitmq.manage.RabbitManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.runner.RunWith;
-import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
-import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory; 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.erlang.core.ErlangTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -57,29 +58,36 @@ public abstract class AbstractSpringTest {
     protected final Log logger = LogFactory.getLog(this.getClass().getName());
 
     @Autowired
-    protected SingleConnectionFactory singleConnectionFactory;
+    protected ConfigurationManager configurationManager;
 
     @Autowired
-    protected RabbitBrokerAdmin rabbitBrokerAdmin;
+    protected Configuration configuration;
 
     @Autowired
-    protected RabbitTemplate rabbitTemplate;
+    protected CachingConnectionFactory ccf;
 
     @Autowired
-    protected RabbitGateway rabbitGateway;
+    protected ConfigResponse configResponse;
 
-    @Autowired
-    protected ConfigResponse serverConfig;
- 
-    @Autowired
+ /*   @Autowired
     protected RabbitManager rabbitManager;
-    
+*/
+    @Autowired
+    protected Queue stocksQueue;
+
+    @Autowired
+    protected Queue alertsQueue;
+
+    @Autowired
+    protected Queue trendsQueue;
+
+    @Autowired
+    protected List<Queue> queues;
+
     @Before
-    public void before() {
-        assertNotNull("singleConnectionFactory should not be null", singleConnectionFactory);
-        assertNotNull("rabbitBrokerAdmin should not be null", rabbitBrokerAdmin);
-        assertNotNull("rabbitTemplate must not be null", rabbitTemplate);
-        assertNotNull("rabbitGateway should not be null", rabbitGateway); 
+    public void before() { 
+        assertNotNull("configurationManager should not be null", configurationManager);
+        assertNotNull("configuration must not be null", configuration); 
     }
 
     @AfterClass

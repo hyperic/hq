@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Evolution : ui-Admin.Role.New</title>
+        <title>Hyperic 4.5 Documentation : ui-Admin.Role.New</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,22 +12,21 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Evolution : ui-Admin.Role.New
+                            Hyperic 4.5 Documentation : ui-Admin.Role.New
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on May 25, 2010 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Oct 28, 2010 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><b>Available only in <font color="red">HQ Enterprise</font></b></p>
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Pre-Release Documentation</b><br />This space is a staging area for Hyperic 4.5 documentation. See <a href="http://support.hyperic.com/confluence/display/DOC/HQ+Documentation" title="HQ Documentation">HQ Documentation</a> for Hyperic 4.2, 4.3, and 4.4 documentation.</td></tr></table></div> 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1281566258939 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1281566258939 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1281566258939 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1288304551109 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1288304551109 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1288304551109 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1281566258939'>
+/*]]>*/</style><div class='rbtoc1288304551109'>
 <ul>
     <li><a href='#ui-Admin.Role.New-BeforeYouStart'>Before You Start</a></li>
     <li><a href='#ui-Admin.Role.New-CreateaNewRole'>Create a New Role</a></li>
@@ -45,11 +44,15 @@ div.rbtoc1281566258939 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#ui-Admin.Role.New-HowHQValidatesPlatformServerServicePermissionLevelAssignments'>How HQ Validates Platform-Server-Service Permission Level Assignments</a></li>
 </ul>
 </ul></div>
+
+
 <p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
+
+
 
 <h1><a name="ui-Admin.Role.New-BeforeYouStart"></a>Before You Start</h1>
 
-<p>If you are new to HQ Enterprise roles, see <a href="http://support.hyperic.com/confluence/display/DOC/Understanding+Roles+in+HQ+Enterprise" title="Understanding Roles in HQ Enterprise">Understanding Roles in HQ Enterprise</a>.</p>
+<p>If you are new to HQ Enterprise roles, see <a href="http://support.hyperic.com/confluence/display/EVO/Understanding+Roles+in+HQ+Enterprise" title="Understanding Roles in HQ Enterprise">Understanding Roles in HQ Enterprise</a>.</p>
 
 <h1><a name="ui-Admin.Role.New-CreateaNewRole"></a>Create a New Role</h1>
 
@@ -57,17 +60,10 @@ div.rbtoc1281566258939 li {margin-left: 0px;padding-left: 0px;}
 
 <h2><a name="ui-Admin.Role.New-Step1DefineRolePermissionMatrix"></a>Step 1 - Define Role Permission Matrix</h2>
 
-<p>In this step you create a permissions matrix for the role.</p>
+<p>In this step you create a permissions matrix for the role. For information about permission levels, see <a href="#ui-Admin.Role.New-AboutPermissionLevels">About Permission Levels</a> below.</p>
 
 <p><b>Note:</b> If you are creating a role purely for the purpose of role-based alert notification, skip to <a href="#ui-Admin.Role.New-Step2AssignUserstotheRole">Step 2 - Assign Users to the Role</a>.</p>
 
-<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Popup Help</b><br />Click below to view helpful topics in a popup window side-by-side with these instructions. (The topics are also at the bottom of this page, in <a href="#ui-Admin.Role.New-AboutPermissionLevels">About Permission Levels</a>.)
-<ul>
-	<li><a href='/display/EVO/SnippetPermissionTips' target='_blank' onclick='if (!window.focus) return true;window.open("/display/EVO/SnippetPermissionTips", "_blank", "width=700,height=700,scrollbars=yes,toolbar=no,location=no,statusbar=no,menubar=no,resizable=yes");return false;' onkeypress='return this.click()' title='Visit location in new window'> Permission Level Tips<sup><img width="12" height="12" border="0" align="absmiddle" src="download/resources/net.customware.confluence.plugin.linking:link-to/img/newwindow.png" class="rendericon" alt=""/></sup></a></li>
-	<li><a href='/display/EVO/SnippetPermissionLevels' target='_blank' onclick='if (!window.focus) return true;window.open("/display/EVO/SnippetPermissionLevels", "_blank", "width=700,height=700,scrollbars=yes,toolbar=no,location=no,statusbar=no,menubar=no,resizable=yes");return false;' onkeypress='return this.click()' title='Visit location in new window'> Permission Level Definitions<sup><img width="12" height="12" border="0" align="absmiddle" src="download/resources/net.customware.confluence.plugin.linking:link-to/img/newwindow.png" class="rendericon" alt=""/></sup></a></li>
-	<li><a href='/display/EVO/PermissionLevelChecking' target='_blank' onclick='if (!window.focus) return true;window.open("/display/EVO/PermissionLevelChecking", "_blank", "width=700,height=700,scrollbars=yes,toolbar=no,location=no,statusbar=no,menubar=no,resizable=yes");return false;' onkeypress='return this.click()' title='Visit location in new window'> How HQ Validates Permission Level Selections<sup><img width="12" height="12" border="0" align="absmiddle" src="download/resources/net.customware.confluence.plugin.linking:link-to/img/newwindow.png" class="rendericon" alt=""/></sup></a></li>
-</ul>
-</td></tr></table></div>
 
 <ol>
 	<li>Click <b>New Role</b> on the <b>Administration</b> page (or navigate to an existing role to edit).</li>
@@ -259,7 +255,7 @@ div.rbtoc1281566258939 li {margin-left: 0px;padding-left: 0px;}
 
 <h2><a name="ui-Admin.Role.New-HowHQValidatesPlatformServerServicePermissionLevelAssignments"></a>How HQ Validates Platform-Server-Service Permission Level Assignments</h2>
 
-<p>HQ Enterprise 4.3 does a bottom-up validation of the permission levels a role grants to Platforms, Servers, and Services. </p>
+<p>HQ Enterprise does a bottom-up validation of the permission levels a role grants to Platforms, Servers, and Services. </p>
 
 <p>A role with <b>Full</b> access (which enables resource deletion) to an inventory type must have at least <b>Read-Only</b> access to the parent type (if there is one) and Full to the child type (if there is one). </p>
 
@@ -284,7 +280,7 @@ div.rbtoc1281566258939 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Sep 10, 2010 15:54</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 28, 2010 15:34</font></td>
 		    </tr>
 	    </table>
     </body>

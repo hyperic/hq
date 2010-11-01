@@ -302,6 +302,10 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
 
                     if (!measurements.isEmpty()) {
                         for (Measurement m : measurements) {
+                        	if (m == null) {
+                        		// measurement could be null if resource has not been configured
+                        		continue;
+                        	}
                             Resource r = m.getResource();
                             if (r == null || r.isInAsyncDeleteState()) {
                                 continue;

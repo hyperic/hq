@@ -233,7 +233,6 @@ public class AlertManagerImpl implements AlertManager,
      * escalation
      * The max number of records to delete is specified by maxDeletes
      */
-    @Override
     public int deleteAlerts(long before, int maxDeletes) {
         return alertDAO.deleteAlertsByCreateTime(before, maxDeletes);
     }

@@ -40,9 +40,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.util.json.JSON;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * Utility class for typesafe enums.  People implementing such enums should
@@ -63,8 +60,7 @@ import org.json.JSONObject;
  *       every class that uses an enum.  Don't have the time now.. :-(
  *           http://www.hibernate.org/203.html
  */
-public abstract class HypericEnum 
-    implements JSON, Serializable
+public abstract class HypericEnum implements Serializable
 {
     private static final Log _log = LogFactory.getLog(HypericEnum.class);
     private static final boolean DEBUG_ENUMS = false;
@@ -155,22 +151,6 @@ public abstract class HypericEnum
         return _desc;
     }
     
-    public String getJsonName() {
-        return _implClass.getName();
-    }
-
-    public JSONObject toJSON() {
-        try {
-            JSONObject res = new JSONObject()
-                .put("code", getCode())
-                .put("description", getDescription());
-
-            return res;
-        } catch(JSONException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     private static Comparator CODE_COMPARATOR = new Comparator() {
         public int compare(Object o1, Object o2) {
             HypericEnum e1, e2;

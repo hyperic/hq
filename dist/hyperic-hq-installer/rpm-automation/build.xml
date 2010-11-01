@@ -5,24 +5,24 @@
   <property file="${basedir}/build.properties"/>
   <import file="rpm-macros.xml" />
 
-  <!-- Ensure all folders we need are there. -->                                
-                                                                                
-  <target name="create-folders"                                                 
-    description="Ensure directory structure is created before RPM build." >     
-    <echo message="Creating folders prior to building RPM's..." />              
-                                                                                
-    <mkdir dir="${bundle.src.dir}" />                                           
-    <mkdir dir="${rpm.build.home}/BUILD" />                                     
-    <mkdir dir="${rpm.build.home}/RPMS/i386" />                                 
-    <mkdir dir="${rpm.build.home}/RPMS/noarch" />                               
-    <mkdir dir="${rpm.build.home}/RPMS/x86_64" />                               
-    <mkdir dir="${rpm.build.home}/SOURCES" />                                   
-    <mkdir dir="${rpm.build.home}/SPECS" />                                     
-    <mkdir dir="${rpm.build.home}/SRPMS" />                                     
-                                                                                
-  </target>                                                                     
-                                                                                
-   <!-- Clean out any leftover or old stuff. -->
+  <!-- Ensure all folders we need are there. -->
+
+  <target name="create-folders"
+    description="Ensure directory structure is created before RPM build." >
+    <echo message="Creating folders prior to building RPM's..." />
+
+    <mkdir dir="${bundle.src.dir}" />
+    <mkdir dir="${rpm.build.home}/BUILD" />
+    <mkdir dir="${rpm.build.home}/RPMS/i386" />
+    <mkdir dir="${rpm.build.home}/RPMS/noarch" />
+    <mkdir dir="${rpm.build.home}/RPMS/x86_64" />
+    <mkdir dir="${rpm.build.home}/SOURCES" />
+    <mkdir dir="${rpm.build.home}/SPECS" />
+    <mkdir dir="${rpm.build.home}/SRPMS" />
+
+  </target>
+
+  <!-- Clean out any leftover or old stuff. -->
 
   <target name="clean" depends="create-folders"
     description="Clean up directory structure before starting RPM build." >
@@ -114,7 +114,7 @@
       build.subfolder="${hq.ee.agent.subfolder}"
       tarball.name="${hq.ee.agent.nojre}"
       spec.file.name="noarch-EE.spec"
-      init.file.name="${init.files}/hyperic-hq-agent.init.rh" />
+      init.file.name="${init.files}/hyperic-hqee-agent.init.rh" />
 
   </target>
 

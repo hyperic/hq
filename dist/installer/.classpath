@@ -48,7 +48,6 @@
 	<classpathentry kind="var" path="M2_REPO/org/jdom/jdom/1.1/jdom-1.1.jar" sourcepath="M2_REPO/org/jdom/jdom/1.1/jdom-1.1-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/jline/jline/0.9.94/jline-0.9.94.jar" sourcepath="M2_REPO/jline/jline/0.9.94/jline-0.9.94-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/com/jcraft/jsch/0.1.42/jsch-0.1.42.jar" sourcepath="M2_REPO/com/jcraft/jsch/0.1.42/jsch-0.1.42-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/json/json/20090211/json-20090211.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/hibernate/jtidy/r8-20060801/jtidy-r8-20060801.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/safehaus/jug/jug/2.0.0/jug-2.0.0-asl.jar"/>
 	<classpathentry kind="var" path="M2_REPO/junit/junit/4.6/junit-4.6.jar" sourcepath="M2_REPO/junit/junit/4.6/junit-4.6-sources.jar"/>
@@ -59,7 +58,7 @@
 	<classpathentry kind="var" path="M2_REPO/org/springframework/roo/org.springframework.roo.file.monitor.polling/1.0.2.RELEASE/org.springframework.roo.file.monitor.polling-1.0.2.RELEASE.jar" sourcepath="M2_REPO/org/springframework/roo/org.springframework.roo.file.monitor.polling/1.0.2.RELEASE/org.springframework.roo.file.monitor.polling-1.0.2.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/roo/org.springframework.roo.support/1.0.2.RELEASE/org.springframework.roo.support-1.0.2.RELEASE.jar" sourcepath="M2_REPO/org/springframework/roo/org.springframework.roo.support/1.0.2.RELEASE/org.springframework.roo.support-1.0.2.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/oro/oro/2.0.8/oro-2.0.8.jar" sourcepath="M2_REPO/oro/oro/2.0.8/oro-2.0.8-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/postgresql/postgresql/8.2-505.jdbc3/postgresql-8.2-505.jdbc3.jar"/>
+	<classpathentry kind="var" path="M2_REPO/postgresql/postgresql/8.2-511-A.jdbc3/postgresql-8.2-511-A.jdbc3.jar"/>
 	<classpathentry kind="var" path="M2_REPO/xalan/serializer/2.7.1/serializer-2.7.1.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/hyperic/sigar/1.6.4/sigar-1.6.4.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-aop/3.0.1.RELEASE/spring-aop-3.0.1.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-aop/3.0.1.RELEASE/spring-aop-3.0.1.RELEASE-sources.jar"/>

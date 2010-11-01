@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Evolution : ui-Dashboard.Metric</title>
+        <title>Hyperic 4.5 Documentation : ui-Dashboard.Metric</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,70 +12,64 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Evolution : ui-Dashboard.Metric
+                            Hyperic 4.5 Documentation : ui-Dashboard.Metric
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Apr 18, 2010 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Sep 26, 2010 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <h1><a name="ui-Dashboard.Metric-HQDashboardSettings%3AMetricViewer"></a>HQ Dashboard Settings: Metric Viewer</h1>
+				    <p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
 
-<p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Pre-Release Documentation</b><br />This space is a staging area for Hyperic 4.5 documentation. See <a href="http://support.hyperic.com/confluence/display/DOC/HQ+Documentation" title="HQ Documentation">HQ Documentation</a> for Hyperic 4.2, 4.3, and 4.4 documentation.</td></tr></table></div> 
-<p>This screen allows users to change the display of <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resource">resources</a> (of a single <a href="#ui-Dashboard.Metric-resourcetype">resource type</a>) and a single associated metric in the <a href="ui-Dashboard.html#ui-Dashboard-MetricViewer">"Metric Viewer" portlet</a> in the Dashboard.</p>
+
+
+
 <p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
 
-<h3><a name="ui-Dashboard.Metric-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h3>
 
-<p>On this screen, users can do the following tasks:</p>
 
-<p><b>To change the display of resources and metrics:</b></p>
+<h1><a name="ui-Dashboard.Metric-AbouttheMetricViewerPortlet"></a>About the Metric Viewer Portlet</h1>
+
+<p>The Metric Viewer portlet displays a selected metric for selected resources of the same resource type. The example below shows the current "Load Average 5 Minutes" metric for five Linux Platforms.</p>
+
+<p><span class="image-wrap" style=""><img src="attachments/71828283/71926661.png" style="border: 0px solid black"/></span></p>
+
+<h1><a name="ui-Dashboard.Metric-ConfiguretheMetricViewerPortlet"></a>Configure the Metric Viewer Portlet</h1>
+
 <ol>
+	<li>Click <span class="image-wrap" style=""><img src="attachments/71830509/71926775.png" style="border: 0px solid black"/></span> in the upper right corner of the <b>Metric Viewer</b> portlet.</li>
+	<li>The <b>HQ Dashboard Settings: Metric Viewer</b> page appears.<br/>
+<span class="image-wrap" style=""><img src="attachments/71828283/71926644.png" width="950" style="border: 0px solid black"/></span></li>
 	<li>Specify the display settings for the portlet:
 	<ul>
-		<li><ins>Description</ins>: This description shows up at the top of the portlet</li>
-		<li><ins>Display Range</ins>: The total number of resources to display in the portlet</li>
-		<li><ins>Resource Type</ins>: This selection filters both the set of resources that users can add to the portlet and the list of metrics available for selection.</li>
-		<li><ins>Metric</ins>: The single metric that will be displayed for the user-selected set of resource in the portlet</li>
-		<li><ins>Sort Order</ins>: Determines whether the resources will be displayed in the portlet by descending or ascending metric value</li>
+		<li>Description &#8212; This description shows up at the top of the portlet.</li>
+		<li>Display Range &#8212; The total number of resources to display in the portlet.</li>
+		<li>Resource Type &#8212; This selection filters both the set of resources that users can add to the portlet and the list of metrics available for selection.</li>
+		<li>Metric &#8212; The single metric that will be displayed for the user-selected set of resource in the portlet.</li>
+		<li>Sort Order &#8212; Determines whether the resources will be displayed in the portlet by descending or ascending metric value/</li>
 	</ul>
 	</li>
-	<li>Click <span class="image-wrap" style=""><img src="attachments/71828439/71926088.gif" style="border: 0px solid black"/></span>.</li>
-</ol>
-
-
-<p><b>To add to or replace the list of resources displayed in the portlet:</b></p>
-<ol>
-	<li>Select a <ins>Resource Type</ins>.<br/>
-This selection filters the set of resources that users can add to the portlet. Changing this value wipes out the list of already selected resources, so to add to the existing list of resources, keep this value the same.</li>
-	<li>Click <span class="image-wrap" style=""><img src="attachments/71828439/71926089.gif" style="border: 0px solid black"/></span> and proceed to the "<a href="ui-Dashboard.AddResources.html" title="ui-Dashboard.AddResources">Add Resources</a>" screen.<br/>
-The screen will allow you to select from resources of the selected type.</li>
-	<li>Click <span class="image-wrap" style=""><img src="attachments/71828439/71926088.gif" style="border: 0px solid black"/></span>.</li>
-</ol>
-
-
-<p><b>To remove resources from the list displayed in the portlet:</b></p>
-<ol>
-	<li>Either:
-	<ul>
-		<li>Change the <ins>Resource Type</ins>. This wipes out the existing list of selected resources.<br/>
-OR</li>
-		<li>Check a resource and click <span class="image-wrap" style=""><img src="attachments/71828439/71926087.gif" style="border: 0px solid black"/></span>.</li>
-	</ul>
+	<li>If the <b>Selected Resources</b> section contains resources that you do not want to be included in the portlet, checkmark them and click <b>Remove From List</b>.</li>
+	<li>To add resources to the portlet:
+	<ol>
+		<li>Click <b>Add to List</b>.</li>
+		<li>The <b>Dashboard Settings: Metric Viewer: Add/Remove Resources</b> page appears.<br/>
+<span class="image-wrap" style=""><img src="attachments/71828283/71926643.png" width="950" style="border: 0px solid black"/></span></li>
+		<li>In the <b>Resources</b> column:
+		<ol>
+			<li>Enter a substring in the <b>Filter by Name</b> field to filter by resource name, as desired.</li>
+			<li>In the list of resources, checkmark desired resources, and click the right arrow between the columns to include them in the portlet.&nbsp;</li>
+		</ol>
+		</li>
+		<li>If the <b>Add Resources</b> column contains resources you do not wish to include in the portlet, checkmark those resources and click the left arrow between the panels</li>
+	</ol>
 	</li>
-	<li>Click <span class="image-wrap" style=""><img src="attachments/71828439/71926088.gif" style="border: 0px solid black"/></span>.</li>
+	<li>Click <b>OK</b>.</li>
 </ol>
 
 
-<p><br class="atl-forced-newline" /></p>
-<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Related Information</b></div><div class="panelContent">
-<p>Learn more about <a href="http://support.hyperic.com/confluence/display/EVO/HQ+Metric+Categories" title="HQ Metric Categories">managing metric data</a></p>
-</div></div></tr></tbody></table>
-
-<h5><a name="ui-Dashboard.Metric-ReturntotheDashboarduiDashboard."></a>Return to the <a href="ui-Dashboard.html" title="ui-Dashboard">Dashboard</a>.</h5>
+<div class="scroll-pagebreak"></div>
 
 				    					    <br/>
                         <div class="tabletitle">
@@ -84,13 +78,22 @@ OR</li>
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/71828439/71926621.gif">fb_ok.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/71828439/71926622.gif">tbb_addtolist.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/71828439/71926620.gif">tbb_removefromlist.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/71828439/71926087.gif">tbb_removefromlist.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
                                 <a href="attachments/71828439/71926088.gif">fb_ok.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
                                 <a href="attachments/71828439/71926089.gif">tbb_addtolist.gif</a> (image/gif)
-                                <br/>
-                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828439/71926087.gif">tbb_removefromlist.gif</a> (image/gif)
                                 <br/>
                                                     </div>
 				    
@@ -102,7 +105,7 @@ OR</li>
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Sep 10, 2010 15:54</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 28, 2010 15:33</font></td>
 		    </tr>
 	    </table>
     </body>

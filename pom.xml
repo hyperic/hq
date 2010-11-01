@@ -674,9 +674,9 @@
 					<module>hq-lather</module>
 					<module>hq-pdk</module>
 					<module>hq-agent</module>
-					<module>hq-plugin</module>
-					<module>hq-rendit</module>
 					<module>hq-server</module>
+					<module>hq-rendit</module>
+					<module>hq-plugin</module>
 					<module>hq-uiplugin</module>
 					<module>hq-installer</module>
 					<module>hq-bootstrap</module>
@@ -695,9 +695,9 @@
 					<module>hq-lather</module>
 					<module>hq-pdk</module>
 					<module>hq-agent</module>
-					<module>hq-plugin</module>
-					<module>hq-rendit</module>
 					<module>hq-server</module>
+					<module>hq-rendit</module>
+					<module>hq-plugin</module>
 					<module>hq-uiplugin</module>
 					<module>hq-installer</module>
 					<module>hq-bootstrap</module>
@@ -713,9 +713,9 @@
 					<module>hq-lather</module>
 					<module>hq-pdk</module>
 					<module>hq-agent</module>
-					<module>hq-plugin</module>
-					<module>hq-rendit</module>
 					<module>hq-server</module>
+					<module>hq-rendit</module>
+					<module>hq-plugin</module>
 					<module>hq-uiplugin</module>
 					<module>hq-installer</module>
 					<module>hq-bootstrap</module>
@@ -728,8 +728,8 @@
 					<module>hq-util</module>
 					<module>hq-common</module>
 					<module>hq-pdk</module>
-					<module>hq-rendit</module>
 					<module>hq-server</module>
+					<module>hq-rendit</module>
 					<module>hq-web</module>
 			</modules>
 		</profile>
@@ -741,9 +741,9 @@
 					<module>hq-lather</module>
 					<module>hq-pdk</module>
 					<module>hq-agent</module>
-					<module>hq-plugin</module>
-					<module>hq-rendit</module>
 					<module>hq-server</module>
+					<module>hq-rendit</module>
+					<module>hq-plugin</module>
 					<module>hq-uiplugin</module>
 					<module>hq-installer</module>
 					<module>hq-bootstrap</module>
