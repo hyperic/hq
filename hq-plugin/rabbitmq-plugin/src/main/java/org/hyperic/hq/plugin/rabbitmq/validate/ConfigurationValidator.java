@@ -51,7 +51,7 @@ public class ConfigurationValidator {
     /**
      * Validate against the broker.
      * @return true if successful connection is made, false if not.
-     * @throws PluginConfigurationException
+     * @throws PluginException
      */
     public static boolean isValidUsernamePassword(Configuration c) throws PluginException {
         SingleConnectionFactory cf = null;
@@ -94,13 +94,13 @@ public class ConfigurationValidator {
      * @param configuration
      * @return true if the test connection was successful.
      * @throws PluginException If cookie value or host are not set
-     *                         or if the test connection fails, throw a PluginException to alert the user.
+     * or if the test connection fails, throw a PluginException to alert the user.
      */
-    public static boolean isValidOtpConnection(Configuration configuration) throws PluginConfigurationException {
+    public static boolean isValidOtpConnection(Configuration configuration) throws PluginException {
         logger.debug("Validating Erlang Cookie for OtpConnection with=" + configuration);
 
         if (!configuration.isConfiguredOtpConnection()) {
-            throw new PluginConfigurationException("Plugin is not configured with the Erlang cookie. Please insure" +
+            throw new PluginException("Plugin is not configured with the Erlang cookie. Please insure" +
                     " the Agent has permission to read the cookie");
         }
 
@@ -115,7 +115,7 @@ public class ConfigurationValidator {
             return isNodeRunning(response, configuration.getNodename());
         }
         catch (Exception e) {
-            throw new PluginConfigurationException("Can not connect to peer node.");
+            throw new PluginException("Can not connect to peer node.");
         }
         finally {
             if (conn != null) {

@@ -48,9 +48,7 @@ public class Configuration {
     private String username;
 
     private String password;
-
-    private int port;
-
+ 
     private String defaultVirtualHost = "/";
     
     @Override
@@ -87,8 +85,7 @@ public class Configuration {
 
     /**
      * Call before creating ApplicationContext
-     * Log which one failed.
-     * ToDo Not yet handling port, ran out of time
+     * Log which one failed. 
      * @return
      * @throws org.hyperic.hq.product.PluginException
      *
@@ -173,14 +170,6 @@ public class Configuration {
         this.password = password != null && password.length() > 0 ? password.trim() : null;
     }
 
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
-
     public String getVirtualHost() {
         return virtualHost;
     }
@@ -198,10 +187,6 @@ public class Configuration {
         conf.setUsername(props.getProperty(DetectorConstants.USERNAME));
         conf.setPassword(props.getProperty(DetectorConstants.PASSWORD));
 
-        if (props.getProperty(DetectorConstants.PORT) != null) {
-            conf.setPort(Integer.parseInt(props.getProperty(DetectorConstants.PORT)));
-        }
-
         return conf;
     }
 
@@ -214,9 +199,6 @@ public class Configuration {
         conf.setUsername(configResponse.getValue(DetectorConstants.USERNAME));
         conf.setPassword(configResponse.getValue(DetectorConstants.PASSWORD));
 
-        if (configResponse.getValue(DetectorConstants.PORT) != null) {
-            conf.setPort(Integer.parseInt(configResponse.getValue(DetectorConstants.PORT)));
-        }
         return conf;
     }
 
