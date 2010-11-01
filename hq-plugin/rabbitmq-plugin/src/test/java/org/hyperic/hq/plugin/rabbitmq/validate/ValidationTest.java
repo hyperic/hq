@@ -25,23 +25,24 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.validate;
 
-import org.hyperic.hq.plugin.rabbitmq.configure.PluginContextCreator;
-import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
-import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
-import org.hyperic.hq.plugin.rabbitmq.core.ErlangCookieHandler;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
-import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
+import com.ericsson.otp.erlang.OtpAuthException;
+import com.ericsson.otp.erlang.OtpErlangExit;
+import org.hyperic.hq.plugin.rabbitmq.AbstractSpringTest;
+import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitConnection; 
 import org.hyperic.hq.product.PluginException;
-import org.hyperic.util.config.ConfigResponse;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.erlang.connection.Connection;
+import org.springframework.amqp.rabbit.admin.QueueInfo;
+import org.springframework.amqp.rabbit.admin.RabbitAdminAuthException;
+import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
+import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
+import org.springframework.erlang.OtpIOException;
 import org.springframework.test.annotation.ExpectedException;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
- 
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -50,34 +51,88 @@ import static org.junit.Assert.*;
  * ValidationTest
  * @author Helena Edelson
  */
-@ContextConfiguration(loader = ValidationTestContextLoader.class)
-@RunWith(SpringJUnit4ClassRunner.class)
-public class ValidationTest {
+@Ignore("Need to mock the connection for automation")
+public class ValidationTest extends AbstractSpringTest {
 
-    @Autowired
-    ConfigResponse serverConfig;
+    private String fullyQualified = ".dev.foo.com";
 
     @Test
-    @Ignore
-    @ExpectedException(IllegalArgumentException.class)
-    public void noHost() throws PluginException {
-        serverConfig.setValue(DetectorConstants.HOST, null);
-        PluginContextCreator.createContext(Configuration.toConfiguration(serverConfig));
-        RabbitGateway rabbitGateway = PluginContextCreator.getBean(RabbitGateway.class);
-        assertNotNull(rabbitGateway);
+    public void duh() throws IOException {
+        com.rabbitmq.client.Connection conn = configurationManager.getConnectionFactory().createConnection();
+        System.out.println("ConnectionProperties = " + conn.getServerProperties());
+
+        conn.createChannel();
+        conn.createChannel();
+
+        HypericRabbitAdmin admin = configurationManager.getVirtualHostForNode(configuration.getDefaultVirtualHost(), configuration.getNodename());
+        admin.getQueues();
+
+        List<RabbitConnection> conns = admin.getConnections();
+        RabbitConnection con = conns.get(0);
+
+        if (conns != null) {
+            for (RabbitConnection c : conns) {
+                if (con.getPid().equalsIgnoreCase(c.getPid())) {
+                    System.out.println("equalsIgnoreCase match on " + con + " and " + c);
+                }
+            }
+        }
+
+        conn.close();
     }
 
     @Test
-    @Ignore("Until connections are mocked")
-    public void pluginInitializationAssertSuccess() throws PluginException {
-        /** in the plugin the erlang cookie value is set during creation
-         * of the ServerResource and the value set in the productConfig.
-         */
-        serverConfig.setValue(DetectorConstants.AUTHENTICATION, ErlangCookieHandler.configureCookie(serverConfig));        
-        RabbitProductPlugin.initialize(Configuration.toConfiguration(serverConfig));
-        assertNotNull(RabbitProductPlugin.getRabbitGateway());
+    @ExpectedException(PluginException.class)
+    public void isValidUsernamePassword() throws PluginException {
+        assertTrue(ConfigurationValidator.isValidUsernamePassword(configuration));
+
+        configuration.setPassword("invalid");
+        assertFalse(ConfigurationValidator.isValidUsernamePassword(configuration));
     }
 
-    
+    @Test
+    @ExpectedException(PluginException.class)
+    public void isValidOtpConnection() throws PluginException {
+        assertTrue(ConfigurationValidator.isValidOtpConnection(configuration));
+        configuration.setNodename("rabbit@invalid");
+        assertFalse(ConfigurationValidator.isValidOtpConnection(configuration));
+    }
+
+    @Test
+    @ExpectedException(RabbitAdminAuthException.class)
+    public void createRabbitBrokerAdmin() {
+        RabbitBrokerAdmin admin = new RabbitBrokerAdmin(ccf);
+        assertNull(admin.getStatus());
+    }
+
+    @Test
+    @ExpectedException(OtpIOException.class)
+    public void failOnFullyQualifiedHostName() {
+        List<QueueInfo> queues = new ArrayList<QueueInfo>();
+        SingleConnectionFactory scf = new SingleConnectionFactory(configuration.getHostname() + fullyQualified);
+        scf.setUsername(configuration.getUsername());
+        scf.setPassword(configuration.getPassword());
+
+        RabbitBrokerAdmin admin = new RabbitBrokerAdmin(scf);
+        queues = admin.getQueues();
+    }
+
+    @Test
+    public void failOnAuthNoCookie() throws IOException, OtpAuthException, OtpErlangExit, PluginException {
+        List<QueueInfo> queues = new ArrayList<QueueInfo>();
+        SingleConnectionFactory cf = new SingleConnectionFactory(configuration.getHostname());
+        cf.setUsername(configuration.getUsername());
+        cf.setPassword(configuration.getPassword());
+
+        try {
+            logger.debug("\nTesting Spring RabbitBrokerAdmin and " + configuration.getHostname() + " as host...no cookie");
+            RabbitBrokerAdmin admin = new RabbitBrokerAdmin(cf);
+            queues = admin.getQueues();
+        }
+        catch (Exception e) {
+            assertTrue(e instanceof org.springframework.erlang.OtpAuthException);
+            logger.debug("Anticipated 'java.net.SocketException: Connection reset or java.io.IOException: expected 2 bytes, got EOF after 0 bytes\n'" + e);
+        }
+    }
 
 }

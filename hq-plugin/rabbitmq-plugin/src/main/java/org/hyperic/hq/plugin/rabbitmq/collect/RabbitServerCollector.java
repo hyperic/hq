@@ -29,11 +29,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
-import org.hyperic.hq.plugin.rabbitmq.validate.PluginValidator;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
 
-import java.util.Properties;
 
 /**
  * RabbitServiceCollector
@@ -43,35 +41,31 @@ import java.util.Properties;
 public class RabbitServerCollector extends Collector {
 
     private static final Log logger = LogFactory.getLog(RabbitServerCollector.class);
- 
+
     @Override
     protected void init() throws PluginException {
-        super.init();
-
         Configuration configuration = Configuration.toConfiguration(getProperties());
-        logger.debug("init " + configuration);
+        logger.debug("Init " + configuration);
 
-        if (RabbitProductPlugin.isNodeAvailabile(configuration)) {
-            logger.debug("Attempting to initialize plugin...");
+        /** Throws relevant exceptions based on what is not yet configured, such as user/pass */
+        if (!RabbitProductPlugin.isInitialized()) {
             RabbitProductPlugin.initialize(configuration);
-        } else {
-            throw new PluginException("Please enter a username and password and insure the Agent has permission to read the Erlang cookie.");
         }
+        super.init();
     }
 
     @Override
     public void collect() {
-        logger.debug("collect[" + getProperties() + "]");
+        logger.debug("Collect " + getProperties());
         Configuration configuration = Configuration.toConfiguration(getProperties());
-
+        logger.debug("Checking if the node is available");
         try {
-            setAvailability(RabbitProductPlugin.isNodeAvailabile(configuration));
+            boolean isAvailable = RabbitProductPlugin.isNodeAvailabile(configuration);
+            setAvailability(isAvailable);
+            logger.debug("Node is available");
         }
-        catch (PluginException ex) {
-            setAvailability(false);
-            logger.debug(ex, ex);
+        catch (PluginException e) {
+            logger.error(e);
         }
     }
-
-
 }

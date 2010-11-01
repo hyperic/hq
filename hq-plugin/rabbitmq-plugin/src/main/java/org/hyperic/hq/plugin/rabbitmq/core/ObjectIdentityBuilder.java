@@ -40,14 +40,17 @@ public class ObjectIdentityBuilder implements IdentityBuilder {
         if (obj instanceof QueueInfo) {
            return new QueueIdentityBuilder().buildIdentity(obj, virtualHost);
         }
-        else if (obj instanceof HypericConnection) {
+        else if (obj instanceof RabbitConnection) {
            return new ConnectionIdentityBuilder().buildIdentity(obj, virtualHost);
         }
         else if (obj instanceof Exchange) {
            return new ExchangeIdentityBuilder().buildIdentity(obj, virtualHost);
         }
-        else if (obj instanceof HypericChannel) {
+        else if (obj instanceof RabbitChannel) {
            return new ChannelIdentityBuilder().buildIdentity(obj, virtualHost);
+        }
+        else if (obj instanceof RabbitVirtualHost) {
+            return new VirtualHostIdentityBuilder().buildIdentity(obj, virtualHost);
         }
         return null;
     }
@@ -60,10 +63,19 @@ public class ObjectIdentityBuilder implements IdentityBuilder {
         }
     }
 
+    protected class VirtualHostIdentityBuilder {
+
+        private String buildIdentity(Object obj, String virtualHost) {
+            RabbitVirtualHost vh = (RabbitVirtualHost) obj;
+
+            return new StringBuilder("VirtualHost ").append(vh.getNode()).append(vh.getName()).toString();
+        }
+    }
+
     protected class ConnectionIdentityBuilder {
 
         private String buildIdentity(Object obj, String virtualHost) {
-            HypericConnection hc = (HypericConnection) obj;
+            RabbitConnection hc = (RabbitConnection) obj;
             com.rabbitmq.client.Address peerAddress = hc.getPeerAddress();
             return new StringBuilder("amqp://").append(hc.getUsername()).append("@").append(peerAddress.getHost())
                     .append(":").append(peerAddress.getPort()).append(hc.getVhost()).toString();
@@ -81,7 +93,7 @@ public class ObjectIdentityBuilder implements IdentityBuilder {
     protected class ChannelIdentityBuilder {
 
         private String buildIdentity(Object obj, String virtualHost) {
-            HypericChannel channel = (HypericChannel) obj;
+            RabbitChannel channel = (RabbitChannel) obj;
             return new StringBuilder("channel://").append(channel.getUser()).append("@").append(channel.getPid()).append(channel.getvHost()).toString();
         }
     }
@@ -95,19 +107,10 @@ public class ObjectIdentityBuilder implements IdentityBuilder {
     }
 
     /** unfinished */
-    protected class VirtualHostIdentityBuilder {
-
-        private String buildIdentity(Object obj, String virtualHost) {
-            String username = (String)obj;
-            return new StringBuilder("amqp://").append(username).append("@").append(virtualHost).toString();
-        }
-    }
-
-    /** unfinished */
     protected class BindingIdentityBuilder {
 
         private String buildIdentity(Object obj, String virtualHost) {
-            HypericBinding binding = (HypericBinding)obj;
+            RabbitBinding binding = (RabbitBinding)obj;
             return new StringBuilder("binding://").append("").append("@").append(virtualHost).toString();
         }
     }

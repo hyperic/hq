@@ -88,7 +88,7 @@ chkconfig --del %{HQ_Component_Name}
 %{__install} -d -m 755 $RPM_BUILD_ROOT/etc/init.d
 %{__install} -d -m 755 $RPM_BUILD_ROOT/%{prefix}/%{HQ_Component_Name}
 %{__install} -d -m 755 $RPM_BUILD_ROOT/%{prefix}/hq-plugins
-%{__install} -m 755 rcfiles/hyperic-hq-agent.init.rh $RPM_BUILD_ROOT/etc/init.d/hyperic-hq-agent
+%{__install} -m 755 rcfiles/%{name}.init.rh $RPM_BUILD_ROOT/etc/init.d/%{name}
 
 %{__rm} -rf background.bat hq-agent.exe rcfiles/ rpm.spec bundles/agent-%{HQ_Component_Version}.%{HQ_Component_Build_Type}/pdk/lib/sigar-x86-winnt.lib wrapper/sbin/wrapper-linux-ppc-64 wrapper/sbin/wrapper-hpux-parisc-64 wrapper/sbin/wrapper-solaris-sparc-32 wrapper/sbin/wrapper-solaris-sparc-64
 %{__mv} -f * $RPM_BUILD_ROOT/%{prefix}/%{HQ_Component_Name}

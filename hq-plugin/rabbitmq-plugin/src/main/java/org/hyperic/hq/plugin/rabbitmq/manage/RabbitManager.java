@@ -34,23 +34,23 @@ import org.springframework.amqp.core.Queue;
  */
 public interface RabbitManager {
 
-    AMQPStatus createQueue(Queue queue, String virtualHost);
+    AMQPStatus createQueue(Queue queue);
 
-    AMQPStatus createExchange(String exchangeName, String type, String virtualHost);
+    AMQPStatus createExchange(String exchangeName, String type);
 
-    AMQPStatus createExchange(String exchangeName, String exchangeType, boolean durable, boolean autoDelete, String virtualHost);
+    AMQPStatus createExchange(String exchangeName, String exchangeType, boolean durable, boolean autoDelete);
 
-    AMQPStatus createUser(String userName, String password, String virtualHost);
+    AMQPStatus createUser(String userName, String password);
 
-    AMQPStatus deleteQueue(String queueName, String virtualHost);
+    AMQPStatus deleteQueue(String queueNamet);
 
-    AMQPStatus deleteExchange(String exchangeName, boolean ifUnused, String virtualHost) throws Exception;
+    AMQPStatus deleteExchange(String exchangeName, boolean ifUnused) throws Exception;
 
-    AMQPStatus deleteUser(String userName, String virtualHost);
+    AMQPStatus deleteUser(String userName);
 
-    AMQPStatus purgeQueue(String queueName, String virtualHost);
+    AMQPStatus purgeQueue(String queueName);
 
-    AMQPStatus updateUserPassword(String userName, String password, String virtualHost);
+    AMQPStatus updateUserPassword(String userName, String password);
 
     AMQPStatus stopRabbitNode();
 

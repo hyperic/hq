@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Evolution : ui-Monitor.Server.MbeanBrowser</title>
+        <title>Hyperic 4.5 Documentation : ui-Monitor.Server.MbeanBrowser</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,18 +12,38 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Evolution : ui-Monitor.Server.MbeanBrowser
+                            Hyperic 4.5 Documentation : ui-Monitor.Server.MbeanBrowser
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Sep 10, 2010 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Sep 21, 2010 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <h1><a name="ui-Monitor.Server.MbeanBrowser-UsingJMXMBeanQuery"></a>Using JMX MBean Query</h1>
+				    <p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
 
-<p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Pre-Release Documentation</b><br />This space is a staging area for Hyperic 4.5 documentation. See <a href="http://support.hyperic.com/confluence/display/DOC/HQ+Documentation" title="HQ Documentation">HQ Documentation</a> for Hyperic 4.2, 4.3, and 4.4 documentation.</td></tr></table></div> 
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1285082655448 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1285082655448 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1285082655448 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1285082655448'>
+<ul>
+    <li><a href='#ui-Monitor.Server.MbeanBrowser-UsingJMXMBeanQuery'>Using JMX MBean Query</a></li>
+    <li><a href='#ui-Monitor.Server.MbeanBrowser-EnteringQueryOptions'>Entering Query Options</a></li>
+    <li><a href='#ui-Monitor.Server.MbeanBrowser-EnablingAutomaticRefresh'>Enabling Automatic Refresh</a></li>
+    <li><a href='#ui-Monitor.Server.MbeanBrowser-DefiningSavedMbeanSearches'>Defining Saved Mbean Searches</a></li>
+    <li><a href='#ui-Monitor.Server.MbeanBrowser-SchemaforJMXSearchCriteria'>Schema for JMX Search Criteria</a></li>
+</ul></div>
+
+
+<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
+
+
+
+
+
+<h1><a name="ui-Monitor.Server.MbeanBrowser-UsingJMXMBeanQuery"></a>Using JMX MBean Query</h1>
 
 <p>The JMX MBean Query tool allows you to search for MBeans, display their attributes, and invoke selected MBean operations on them.</p>
 
@@ -31,9 +51,11 @@
 
 <p>The MBean attributes displayed in the JMX MBean Query tool are read-only; the console does not support attribute editing.  In this version of HQ, support for MBean operations is limited to operations with one or no arguments of primitive or simple type.</p>
 
-<p>The JMX MBean Query tool is available on the Views tab when you have a JVM server selected in the HQ portal. These instructions assume that your JVM is in HQ inventory. Note that JVMs are not auto-discovered by HQ. For related instructions, see <a href="http://support.hyperic.com/confluence/display/hypcomm/Sun+JVM" title="Sun JVM">Configuring Sun JVM for Monitoring</a>.</p>
+<p>The JMX MBean Query tool is available on the <b>Views</b> tab when you have a JVM selected in the HQ portal. These instructions assume that your JVM is in HQ inventory. </p>
 
-<h2><a name="ui-Monitor.Server.MbeanBrowser-EnteringQueryOptions"></a>Entering Query Options</h2>
+<p>Note that JVMs are not auto-discovered by HQ. You must add a JVM to HQ inventory and configure for monitoring as described in <a href="http://support.hyperic.com/confluence/display/EVO/Monitor+a+Sun+JVM" title="Monitor a Sun JVM">Monitor a Sun JVM</a>.</p>
+
+<h1><a name="ui-Monitor.Server.MbeanBrowser-EnteringQueryOptions"></a>Entering Query Options</h1>
 
 <p>To access specific MBean attributes and operations, you enter search patterns in the these text boxes in the JMX MBean Query tool page:</p>
 
@@ -58,28 +80,33 @@
 
 <p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 1303x650" href='http://support.hyperic.com/confluence/download/attachments/71828494/jmx console.gif'><img src="attachments/thumbnails/71828494/71926218" style="border: 0px solid black"/></a></span></p>
 
-<h2><a name="ui-Monitor.Server.MbeanBrowser-EnablingAutomaticRefresh"></a>Enabling Automatic Refresh</h2>
+<h1><a name="ui-Monitor.Server.MbeanBrowser-EnablingAutomaticRefresh"></a>Enabling Automatic Refresh</h1>
 
 <p>If you wish the console to periodically refresh the attribute values, select an interval from the <b>Refresh Interval</b> pulldown.&nbsp;</p>
 
-<h2><a name="ui-Monitor.Server.MbeanBrowser-DefiningSavedMbeanSearches"></a>Defining Saved Mbean Searches</h2>
+<h1><a name="ui-Monitor.Server.MbeanBrowser-DefiningSavedMbeanSearches"></a>Defining Saved Mbean Searches</h1>
 
-<p>If you expect to perform the same search frequently, you can create an XML file that specifies the search criteria. You name the file according to a predefined convention, and store it in a specific directory in your HQ Server installation. Queries you define in this way will appear in the tool's <b>Preset Searches</b> drop-down menu.</p>
+<p>If you expect to perform the same search frequently, you can create an XML file that specifies the search criteria. You name the file according to a predefined convention, and store it in a specific directory in your HQ Server installation. Each saved search will appear in the MBean Query page's&nbsp;<b>Preset Searches</b>&nbsp;&nbsp;menu.</p>
 
+<p>When you run a saved search, the values you defined for the search Object Name Pattern, Attribute Regex Filter, and Operation Regex Filter appear in the text boxes at the top of the view.</p>
 
-<p>When you run a saved search, the Object Name Pattern, Attribute Regex Filter, and Operation Regex Filter it comprises will be displayed in the corresponding text boxes at the top of the view.</p>
+<p>Create a saved search in accordance with the schema described below in [Schema for JMX Search Criteria}, and save it with a name like this:</p>
+
 
 <p>Name the file that contains a saved search like this:</p>
 
 <p><em>SearchID</em>&#45;filter.xml</p>
 
-<p>All filters defined in this file will then appear in the <b>Preset Searches</b> drop-down menu and will be named according to the filter ID. Save the file in:</p>
+<p>where <em>SearchID</em> is a meaningful name for the search to which you append "-filter.xml" identifies the search</p>
 
-<p>$SERVER_HOME/hq-engine/hq-server/webapps/ROOT/hqu/jmx/conf</p>
+<p>The filters values defined in this file will then appear in the <b>Preset Searches</b> drop-down menu and will be named according to the filter ID. Save the file in:</p>
+
+<p><tt>ServerHome/hq-engine/hq-server/webapps/ROOT/hqu/jmx/conf</tt></p>
 
 <p>The following topics defines the XML schema for saved MBean searches.</p>
 
-<h3><a name="ui-Monitor.Server.MbeanBrowser-SchemaforJMXSearchCriteria"></a>Schema for JMX Search Criteria</h3>
+<h1><a name="ui-Monitor.Server.MbeanBrowser-SchemaforJMXSearchCriteria"></a>Schema for JMX Search Criteria</h1>
+
 
 <p>A saved MBean search criteria consists of:</p>
 
@@ -119,15 +146,7 @@
 </pre>
 </div></div>
 
-<h2><a name="ui-Monitor.Server.MbeanBrowser-ImportingaSunJVMintoInventory"></a>Importing a Sun JVM into Inventory</h2>
 
-<p>Your Sun JVM must be configured for JMX monitoring. For instructions, see <a href="http://java.sun.com/j2se/1.5.0/docs/guide/management/agent.html">Monitoring and Management Using JMX</a> on the Sun web site.</p>
-
-<p>Once your JVM is configured for JMX monitoring, define it as a server in HQ. Browse to the platform where the JVM is located view its monitoring page. Select "New Server" from the "Tools Menu" in the upper right corner. On the next page, name your JVM and select "Sun JVM 1.5" from the drop-down menu. In the "Install Path" field, enter your $JAVA_HOME.</p>
-
-<p>On the subsequent page, click the "Configuration Properties" link, highlighted in yellow. If you've set up password authentication for your JMX monitoring, you'll have to input your user and password here. Double-check the jmx.url field and set the port number accordingly. To track configuration and log files, add in the appropriate info after checking the boxes "server.log_track.enable" and "server.config_track.enable". Make sure the box for "Auto-Discover Garbage Collectors and Memory Pools?" is checked. After clicking ok, HQ Server will start receiving the default metrics for that JVM, although it will take a few minutes for them to appear.</p>
-
-<h5><a name="ui-Monitor.Server.MbeanBrowser-ReturntoHQPortalReferenceUserInterfaceReference."></a>Return to <a href="User Interface Reference.html" title="User Interface Reference">HQ Portal Reference</a>.</h5>
 
 				    					    <br/>
                         <div class="tabletitle">
@@ -148,7 +167,7 @@
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Sep 10, 2010 15:54</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Oct 28, 2010 15:34</font></td>
 		    </tr>
 	    </table>
     </body>

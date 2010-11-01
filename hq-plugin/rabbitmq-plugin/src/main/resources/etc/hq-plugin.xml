@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE plugin [
-    <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
-]>
+        <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+        ]>
 <!--
  * NOTE: This copyright does *not* cover user programs that use HQ
  * program services by normal system calls through the application
@@ -73,15 +73,11 @@
         <plugin type="log_track" class="org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerLog"/>
 
         <config type="product">
-            <option name="server.name" description="rabbit node name" type="hidden"/>
-            <option name="server.path" description="node path" type="hidden"/>
-            <option name="process.name" description="node process" type="hidden"/>
-            <option name="hostname" description="host" type="hidden"/>
-            <option name="authentication" description="erlang cookie" type="hidden"/>
-
             <option name="username" description="RabbitMQ Username for %server.name%"/>
             <option name="password" type="secret" description="RabbitMQ Password for %server.name%"/>
+            <!-- ToDo <option name="port" description="RabbitMQ Port for %server.name%"/> -->
         </config>
+
 
         <config type="measurement">
             <option name="process.query" default="State.Name.sw=beam,Args.*.eq=-sname,Args.*.eq=%process.name%"
@@ -100,19 +96,28 @@
             <option name="process.query" default="State.Name.sw=beam,Args.*.eq=-sname,Args.*.ct=%server.path%"
                     description="Node Process Query"/>
         </config>
-        <!--for the collector-->
-        <metric name="Availability" template="rabbitmq:server.name=%server.name%,hostname=%hostname%,username=%username%,password=%password%,authentication=%authentication%:Availability" indicator="true"/>
+
+        <metric name="Availability"
+                template="rabbitmq:server.name=%server.name%,hostname=%hostname%,username=%username%,password=%password%,authentication=%authentication%:Availability"
+                indicator="true"/>
 
         &process-metrics;
 
-         <!-- Next release:
-        <plugin type="control" class="org.hyperic.hq.plugin.rabbitmq.manage.RabbitBrokerManagerPlugin"/> 
-        <actions include name="startNode,stopNode,startBrokerApplication,stopBrokerApplication,createQueue,deleteQueue,
-                       purgeQueue,createExchange,deleteExchangeIfUnused,createUser,updateUserPassword,deleteUser"/>
-         -->
+        <!-- Next release:
+       <plugin type="control" class="org.hyperic.hq.plugin.rabbitmq.manage.RabbitBrokerManagerPlugin"/>
+       <actions include name="startNode,stopNode,startBrokerApplication,stopBrokerApplication,createQueue,deleteQueue,
+                      purgeQueue,createExchange,deleteExchangeIfUnused,createUser,updateUserPassword,deleteUser"/>
+        -->
 
-        <service name="Queue">
-            <property name="template" value="rabbitmq:queue=%name%,vhost=%vhost%,server=%server.name%:${alias}"/>
+         <service name="Queue">
+            <property name="template"
+                      value="rabbitmq:queue=%queue%,node=%node%,virtualhost=%virtualhost%:${alias}"/>
+
+            <config type="measurement">
+                <option name="node" description="rabbit node name"/>
+                <option name="virtualhost" description="rabbit node-virtualhost name"/>
+                <option name="queue" description="queue name"/>
+            </config>
 
             <metric name="Messages"
                     alias="messages"
@@ -167,8 +172,14 @@
             </properties>
         </service>
 
-        <service name="Channel">
-            <property name="template" value="rabbitmq:channel=%name%,vhost=%vhost%,server=%server.name%:${alias}"/>
+        <!--<service name="Channel">
+            <property name="template" value="rabbitmq:channel=%channel%,node=%node%,virtualhost=%virtualhost%:${alias}"/>
+
+            <config type="measurement">
+                <option name="node" description="rabbit node name"/>
+                <option name="virtualhost" description="rabbit node-virtualhost name"/>
+                <option name="channel" description="channel name"/>
+            </config>
 
             <metric name="Consumers"
                     alias="consumerCount"
@@ -201,7 +212,14 @@
         </service>
 
         <service name="Connection">
-            <property name="template" value="rabbitmq:connection=%name%,vhost=%vhost%,server=%server.name%:${alias}"/>
+            <property name="template"
+                      value="rabbitmq:connection=%connection%,node=%node%,virtualhost=%virtualhost%:${alias}"/>
+
+            <config type="measurement">
+                <option name="node" description="rabbit node name"/>
+                <option name="virtualhost" description="rabbit node-virtualhost name"/>
+                <option name="connection" description="connection name"/>
+            </config>
 
             <metric name="Octets Received"
                     alias="octetsReceived"
@@ -268,11 +286,17 @@
                 <property description="VHost" name="vHost"/>
                 <property description="Username" name="username"/>
             </properties>
-        </service>
+        </service>-->
 
         <service name="Exchange">
-            <property name="template" value="rabbitmq:exchange=%name%,vhost=%vhost%,server=%server.name%:${alias}"/>
+            <property name="template" value="rabbitmq:exchange=%exchange%,node=%node%,virtualhost=%virtualhost%:${alias}"/>
 
+            <config type="measurement">
+                <option name="node" description="rabbit node name"/>
+                <option name="virtualhost" description="rabbit node-virtualhost name"/>
+                <option name="exchange" description="exchange name"/>
+            </config>
+            
             <metric name="Availability"
                     category="AVAILABILITY"
                     units="percentage"
@@ -290,6 +314,74 @@
             </properties>
         </service>
 
+        <service name="VirtualHost">
+            <property name="template" value="rabbitmq:node=%node%,virtualhost=%virtualhost%:${alias}"/>
+
+            <config type="measurement">
+                <option name="node" description="rabbit node name"/>
+                <option name="virtualhost" description="rabbit node-virtualhost name"/>
+            </config>
+
+            <metric name="Availability"
+                    category="AVAILABILITY"
+                    units="percentage"
+                    indicator="true"
+                    collectionType="dynamic"/>
+            <metric name="Total Consumers"
+                    alias="consumerCount"
+                    category="UTILIZATION"
+                    units="none"
+                    indicator="true"
+                    interval="60000"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="Total Channels"
+                    alias="channelCount"
+                    category="UTILIZATION"
+                    units="none"
+                    indicator="true"
+                    interval="60000"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="Total Octets Received"
+                    alias="octetsReceived"
+                    category="THROUGHPUT"
+                    units="B"
+                    indicator="true"
+                    interval="60000"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="Total Octets Sent"
+                    alias="octetsSent"
+                    category="THROUGHPUT"
+                    units="B"
+                    indicator="true"
+                    interval="60000"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+
+            <metric name="Total Pending Sends"
+                    alias="pendingSends"
+                    category="UTILIZATION"
+                    units="none"
+                    indicator="true"
+                    interval="60000"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+
+
+            <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.VirtualHostCollector"/>
+            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="autoinventory"/>
+
+            <properties>
+                <property description="Virtual Host" name="name"/>
+                <property description="Node" name="node"/>
+                <property description="Total Connections" name="totalConnections"/>
+                <property description="Total Channels" name="totalChannels"/>
+            </properties>
+        </service>
+       
     </server>
 
 </plugin>

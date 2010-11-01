@@ -25,87 +25,128 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.populate;
 
-import com.rabbitmq.client.Channel;
+import org.hyperic.hq.plugin.rabbitmq.AbstractSpringTest;
+import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
 import org.hyperic.hq.plugin.rabbitmq.configure.ConfigurationManager;
 import org.hyperic.hq.plugin.rabbitmq.configure.RabbitTestConfiguration;
-import org.hyperic.hq.plugin.rabbitmq.core.HypericChannel;
-import org.hyperic.hq.plugin.rabbitmq.core.HypericConnection;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
-import org.hyperic.hq.plugin.rabbitmq.manage.RabbitManager;
-import org.hyperic.hq.product.PluginException;
 import org.springframework.amqp.core.Queue;
+import org.hyperic.hq.plugin.rabbitmq.core.*;
 import org.springframework.amqp.rabbit.admin.QueueInfo;
-import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
-import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.assertNotNull; 
 
 /**
- * PopulateData can be run to populate the QA rabbitmq servers
- * Not finished yet.
+ * PopulateData can be run to populate the QA rabbitmq servers.
+ * I set up a synchronous consumer for QA because having the
+ * async consumer up in the context for all tests is not desirable.
  * @author Helena Edelson
  */
-public class PopulateData {
+public class PopulateData extends AbstractSpringTest {
+
+    private static ConfigurationManager configurationManager;
+
+    private static Configuration key;
+
+    private static int numMessages = 500;
 
     public static void main(String[] args) throws Exception {
-        ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(RabbitTestConfiguration.class);
-        ConfigurationManager cf = ctx.getBean(ConfigurationManager.class);
-        RabbitGateway rabbitGateway = cf.getRabbitGateway();
-        RabbitTemplate rabbitTemplate = cf.getRabbitTemplate();
-        RabbitBrokerAdmin admin = cf.getRabbitBrokerAdmin();
+        AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+        ctx.register(RabbitTestConfiguration.class);
+        ctx.refresh();
 
-        Queue marketDataQueue = ctx.getBean("marketDataQueue", Queue.class);
-        admin.declareQueue(marketDataQueue);
+        key = ctx.getBean(Configuration.class);
+        final List<Queue> queues = ctx.getBean(List.class);
+        configurationManager = ctx.getBean(ConfigurationManager.class);
 
-        rabbitTemplate.setRoutingKey(marketDataQueue.getName());
-        rabbitTemplate.setQueue(marketDataQueue.getName());
+        HypericRabbitAdmin rabbitAdmin = configurationManager.getVirtualHostForNode(key.getDefaultVirtualHost(), key.getNodename());
+        final RabbitTemplate rabbitTemplate = configurationManager.getRabbitTemplate();
 
-        refresh(cf.getConnectionFactory(), cf.getRabbitGateway());
+        if (rabbitAdmin.getQueues() == null && queues != null) {
+            createQueues(rabbitAdmin, queues);
+        }
 
-        int numMessages = 100;
+        for (Queue q : queues) {
+            rabbitTemplate.setRoutingKey(q.getName());
+            rabbitTemplate.setQueue(q.getName());
+            ProducerSample producer = new ProducerSample(rabbitTemplate, numMessages);
+            producer.sendMessages();
+        }
 
-        ProducerSample producer = new ProducerSample(rabbitTemplate, numMessages);
-        producer.sendMessages();
+        final List<QueueInfo> brokerQueues = rabbitAdmin.getQueues();
 
-        List<QueueInfo> queues = rabbitGateway.getQueues("/");
-        if (queues != null) {
-            System.out.println("queues has " + queues.size());
-            for (QueueInfo q : queues) {
-                System.out.println(q);
+        /** rerun with synchronous consumer for each */
+        List<Thread> threads = new ArrayList<Thread>();
+
+        Thread thread1 = new Thread(
+                new Runnable() {
+                    public void run() {
+                        try {
+                            simulateCollection();
+                        } catch (Exception e) {
+                            System.out.println(e);
+                        }
+                    }
+                });
+
+        Thread thread2 = new Thread(
+                new Runnable() {
+                    public void run() {
+                        for (Queue q : queues) {
+                            rabbitTemplate.setRoutingKey(q.getName());
+                            rabbitTemplate.setQueue(q.getName());
+                            ConsumerSample consumer = new ConsumerSample(rabbitTemplate, numMessages);
+                            consumer.receiveSync(brokerQueues);
+                            ProducerSample producer = new ProducerSample(rabbitTemplate, 100);
+                            producer.sendMessages();
+
+                        }
+                    }
+                });
+
+        threads.add(thread1);
+        threads.add(thread2);
+        thread1.start();
+        thread2.start();
+
+        for (Thread t : threads) {
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
 
-        ctx.close();
         System.exit(0);
     }
 
+    private static void createQueues(HypericRabbitAdmin rabbitAdmin, List<Queue> queues) {
+        System.out.println("There are no queues, creating queues and declaring them in the broker...");
+        for (Queue q : queues) {
+            rabbitAdmin.declareQueue(q);
+        }
+    }
+
     /**
-     *
-     * @param scf
-     * @param rabbitGateway 
      * @throws Exception
      */
-    private static void refresh(SingleConnectionFactory scf, RabbitGateway rabbitGateway) throws Exception {
-        com.rabbitmq.client.Connection conn = scf.createConnection();
-        Map<String, Object> props = conn.getServerProperties();
-        System.out.println(props);
+    private static void simulateCollection() throws Exception {
+        com.rabbitmq.client.Connection conn = configurationManager.getConnectionFactory().createConnection();
+        System.out.println("ConnectionProperties = " + conn.getServerProperties());
 
         conn.createChannel();
         conn.createChannel();
 
-        List<HypericChannel> channels = rabbitGateway.getChannels("/");
-        assertNotNull(channels);
+        HypericRabbitAdmin admin = configurationManager.getVirtualHostForNode(key.getDefaultVirtualHost(), key.getNodename());
+        System.out.println("Queues = " + admin.getQueues().size());
+        System.out.println("Exchanges = " + admin.getExchanges().size());
+        System.out.println("Connections = " + admin.getConnections().size());
+        System.out.println("Channels = " + admin.getChannels().size());
+        System.out.println("Broker Info = " + admin.getStatus());
 
-        List<HypericConnection> connections = rabbitGateway.getConnections("/");
-        assertNotNull(connections);
-        
-        /** kept it open for a while to show some metrics */
         conn.close();
     }
+
 }

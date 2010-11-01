@@ -25,43 +25,9 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
 
-import org.hyperic.hq.plugin.rabbitmq.AbstractSpringTest;
-import org.hyperic.hq.plugin.rabbitmq.configure.ConfigurationManager;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.springframework.amqp.rabbit.admin.RabbitStatus;
-import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import static org.junit.Assert.*;
-
 /**
  * ConfigurationManagerTest
  * @author Helena Edelson
  */
-@Ignore("Need to mock the connection for automation")
-public class ConfigurationManagerTest extends AbstractSpringTest {
-
-    @Autowired
-    private ConfigurationManager configurationManager;
-
-    @Before
-    public void doBefore(){
-        assertNotNull(configurationManager);
-    }
-
-    @Test
-    public void test() {
-        CachingConnectionFactory ccf = configurationManager.getConnectionFactory();
-        assertNotNull(ccf);
-        assertTrue(ccf.getHost().equalsIgnoreCase(configurationManager.getConnectionFactory().getHost()));
-        RabbitStatus status = configurationManager.getRabbitGateway().getRabbitStatus();
-        assertNotNull(status);
-        assertNotNull(configurationManager.getRabbitTemplate());
-        assertNotNull(configurationManager.getRabbitBrokerAdmin());
-        assertNotNull(configurationManager.getErlangConverter());
-
-    }
-
+public class ConfigurationManagerTest {
 }

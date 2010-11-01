@@ -27,7 +27,7 @@ package org.hyperic.hq.plugin.rabbitmq.detect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
+import org.hyperic.hq.plugin.rabbitmq.configure.ConfigurationManager; 
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 import org.junit.Before;
@@ -35,7 +35,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -56,10 +55,7 @@ public class RabbitServerDetectorTest extends RabbitServerDetector {
     protected final Log logger = LogFactory.getLog(this.getClass().getName());
 
     @Autowired
-    private RabbitTemplate rabbitTemplate;
-
-    @Autowired
-    private RabbitGateway rabbitGateway;
+    private ConfigurationManager configurationManager;
 
     @Autowired
     private SingleConnectionFactory singleConnectionFactory;

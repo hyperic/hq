@@ -27,8 +27,8 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
-import org.hyperic.hq.plugin.rabbitmq.core.RabbitGateway;
+import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
+import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
@@ -36,6 +36,7 @@ import org.hyperic.util.config.ConfigResponse;
 import org.springframework.amqp.core.Exchange;
 
 import java.util.List;
+import java.util.Properties;
 
 /**
  * ExchangeCollector
@@ -46,42 +47,31 @@ public class ExchangeCollector extends Collector {
     private static final Log logger = LogFactory.getLog(ExchangeCollector.class);
 
     @Override
+    protected void init() throws PluginException {
+        Properties props = getProperties();
+        logger.debug("[init] props=" + props);
+        super.init();
+    }
+
     public void collect() {
-        Configuration configuration = Configuration.toConfiguration(getProperties());
-        boolean isAvailable = false;
+        Properties props = getProperties();
+        logger.debug("[collect] props=" + props);
 
-        try {
-            isAvailable = RabbitProductPlugin.isNodeAvailabile(configuration);
-        } catch (PluginException e) {
-            logger.error(e.getMessage());
-        }
+        String exchange = (String) props.get(MetricConstants.EXCHANGE);
+        String vhost = (String) props.get(MetricConstants.VIRTUALHOST);
+        String node = (String) props.get(MetricConstants.NODE);
+        
+        if (RabbitProductPlugin.isInitialized()) {
+            HypericRabbitAdmin rabbitAdmin = RabbitProductPlugin.getVirtualHostForNode(vhost, node);
 
-        RabbitGateway rabbitGateway = RabbitProductPlugin.getRabbitGateway();
-
-        if (rabbitGateway != null) {
-
-            try {
-                List<String> virtualHosts = rabbitGateway.getVirtualHosts();
-                if (virtualHosts != null) {
-                    for (String virtualHost : virtualHosts) {
-                        List<Exchange> exchanges = rabbitGateway.getExchanges(virtualHost);
-                        if (exchanges != null) {
-                            for (Exchange e : exchanges) {
-                                setAvailability(isAvailable);
-                            }
-                        } else {
-                            setAvailability(false);
-                        }
+            List<Exchange> exchanges = rabbitAdmin.getExchanges();
+            if (exchanges != null) {
+                for (Exchange e : exchanges) {
+                    if (e.getName().equalsIgnoreCase(exchange)) {
+                        setAvailability(true);    
                     }
                 }
             }
-            catch (PluginException ex) {
-                logger.error(ex);
-            } catch (Exception e) {
-                logger.error(e);
-            }
-        } else {
-            setAvailability(false);
         }
     }
 
