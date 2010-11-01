@@ -39,13 +39,13 @@ checksetup() {
 
 start() {
     echo -n "Starting $PROGRAM services: "
-    su - $USER -c "$AGENT_DIR/hq-agent.sh start > /dev/null 2>&1"
+    su - $USER -c "$AGENT_DIR/bin/hq-agent.sh start > /dev/null 2>&1"
     return $?
 }	
 
 stop() {
     echo -n "Shutting down $PROGRAM services: "
-    su - $USER -c "$AGENT_DIR/hq-agent.sh stop > /dev/null 2>&1"
+    su - $USER -c "$AGENT_DIR/bin/hq-agent.sh stop > /dev/null 2>&1"
     return $?
 }
 
@@ -56,7 +56,7 @@ restart() {
 
 ping() {
     echo -n "Pinging $PROGRAM"
-    su - $USER -c "$AGENT_DIR/hq-agent.sh ping > /dev/null 2>&1"
+    su - $USER -c "$AGENT_DIR/bin/hq-agent.sh ping > /dev/null 2>&1"
     return $?
 }
 
