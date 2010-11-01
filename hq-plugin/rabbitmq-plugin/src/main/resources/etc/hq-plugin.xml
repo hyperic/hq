@@ -75,7 +75,6 @@
         <config type="product">
             <option name="username" description="RabbitMQ Username for %server.name%"/>
             <option name="password" type="secret" description="RabbitMQ Password for %server.name%"/>
-            <!-- ToDo <option name="port" description="RabbitMQ Port for %server.name%"/> -->
         </config>
 
 

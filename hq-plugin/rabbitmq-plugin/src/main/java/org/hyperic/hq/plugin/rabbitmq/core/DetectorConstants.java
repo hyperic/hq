@@ -43,17 +43,11 @@ public class DetectorConstants {
 
     public static final String PASSWORD = "password";
 
-    public static final String PORT = "port";
-
     public static final String NODE_COOKIE_LOCATION = "node.cookie.location";
 
     public static final String AUTHENTICATION = "authentication";
 
     public static final String NODE_PID = "node.pid";
-
-    public static final String PROCESS_NAME = "process.name";
-
-    public static final String PROCESS_QUERY = "process.query";
 
     public static final String ERLANG_PROCESS = "erlang.process";
 
@@ -64,8 +58,6 @@ public class DetectorConstants {
     public static final String SERVICE_LOG_TRACK_FILES = "service.log_track.files";
 
     public static final String NODE = "Node";
-
-    public static final String PROCESS = "Process";
 
     public static final String VIRTUAL_HOST = "Virtual Host";
 
@@ -79,8 +71,6 @@ public class DetectorConstants {
 
     public static final String CONNECTION = "Connection";
 
-    public static final String BROKER_APP = "BrokerApplication";
-
     public static final String MNESIA = "-mnesia";
 
     public static final String DIR = "dir";
@@ -90,9 +80,7 @@ public class DetectorConstants {
     public static final String SERVER_NAME = "server.name";
 
     public static final String SERVER_PATH = "server.path";
-
-    public static final String NAME = "name";
-
+ 
     public static final String PLATFORM_TYPE = "platform.type";
 
 }
