@@ -101,13 +101,7 @@ public class RabbitProductPlugin extends ProductPlugin {
      *
      */
     public static boolean isNodeAvailabile(Configuration key) throws PluginException {
-        if (!configurationManager.isInitialized()) {
-            return isValidOtpConnection(key);
-        }
-        else {
-            HypericRabbitAdmin admin = getVirtualHostForNode(key.getDefaultVirtualHost(), key.getNodename());
-            return admin != null && admin.isNodeAvailable();
-        }
+        return isValidOtpConnection(key);
     }
 
     public static boolean isValidOtpConnection(Configuration configuration) throws PluginException {

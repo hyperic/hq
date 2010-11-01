@@ -75,42 +75,6 @@ public class HypericRabbitAdmin extends RabbitBrokerAdmin implements DisposableB
         otpConnectionFactory.destroy();
     }
 
-    /* *//**
-     * Constructor uses the Node's cookie and the node name such as:
-     * 'rabbit_1' from where 'rabbit_1' refers to 'rabbit_1@vmhost'
-     * @param connectionFactory
-     * @param erlangCookie
-     *//*
-    public HypericRabbitAdmin(ConnectionFactory connectionFactory, String erlangCookie, String peerNodeName) {
-        super(connectionFactory);
-
-        initializeDefaultErlangTemplate(new RabbitTemplate(connectionFactory), erlangCookie, peerNodeName);
-    }
-
-    */
-
-    /**
-     * Uses the Node's cookie to create ConnectionFactory
-     * Note: from Hyperic this can be rabbit_3@vmhost
-     * Before: String peerNodeName = "rabbit@" + host
-     * @param template
-     * @param erlangCookie
-     * @param peerNodeName
-     *//*
-    public void initializeDefaultErlangTemplate(RabbitTemplate template, String erlangCookie, String peerNodeName) {
-        final String validatedPeerNodeName = ConfigurationValidator.validatePeerNodeName(template.getConnectionFactory().getHost(), peerNodeName);
-        logger.debug("Using peer node name: " + validatedPeerNodeName);
-
-        SingleConnectionFactory otpCf = new SingleConnectionFactory("rabbit-monitor", erlangCookie, validatedPeerNodeName);
-        otpCf.afterPropertiesSet();
-        createErlangTemplate(otpCf);
-    }*/
-    public boolean isNodeAvailable() {
-        Object response = customErlangTemplate.executeRpc("erlang", "date");
-        logger.debug("Response=" + response);
-        return response != null;
-    }
-
     /**
      * Get a List of virtual hosts.
      * @return List of String representations of virtual hosts
