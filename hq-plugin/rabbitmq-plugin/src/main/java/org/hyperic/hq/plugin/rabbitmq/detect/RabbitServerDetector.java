@@ -124,12 +124,10 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         List<ServiceResource> rabbitResources = new ArrayList<ServiceResource>();
 
         Configuration configuration = Configuration.toConfiguration(serviceConfig);
-        logger.debug("discoverServices " + configuration);
-
-        /** If we have the user-entered user/pass or a corrected entry */
-        if (configuration.isConfigured() && !RabbitProductPlugin.isInitialized()) {
+        
+        /*if (configuration.isConfigured() && !RabbitProductPlugin.isInitialized()) {
             RabbitProductPlugin.initialize(configuration);
-        }
+        }*/
 
         if (RabbitProductPlugin.isInitialized()) {
             /** each gateway represents a unique virtual host. ToDo test per node */

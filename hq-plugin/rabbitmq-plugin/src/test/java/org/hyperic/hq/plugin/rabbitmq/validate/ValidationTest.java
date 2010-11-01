@@ -82,8 +82,8 @@ public class ValidationTest extends AbstractSpringTest {
     }
 
     @Test
-    @ExpectedException(PluginConfigurationException.class)
-    public void isValidUsernamePassword() throws PluginConfigurationException { 
+    @ExpectedException(PluginException.class)
+    public void isValidUsernamePassword() throws PluginException {
         assertTrue(ConfigurationValidator.isValidUsernamePassword(configuration));
 
         configuration.setPassword("invalid");
@@ -91,8 +91,8 @@ public class ValidationTest extends AbstractSpringTest {
     }
 
     @Test
-    @ExpectedException(PluginConfigurationException.class)
-    public void isValidOtpConnection() throws PluginConfigurationException {
+    @ExpectedException(PluginException.class)
+    public void isValidOtpConnection() throws PluginException {
         assertTrue(ConfigurationValidator.isValidOtpConnection(configuration));
         configuration.setNodename("rabbit@invalid");
         assertFalse(ConfigurationValidator.isValidOtpConnection(configuration));

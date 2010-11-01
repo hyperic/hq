@@ -73,17 +73,11 @@
         <plugin type="log_track" class="org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerLog"/>
 
         <config type="product">
-            <option name="server.name" description="rabbit node name" type="hidden"/>
-            <option name="server.path" description="node path" type="hidden"/>
-            <!--<option name="virtualhost" description="rabbit node-virtualhost name" type="hidden"/>-->
-            <option name="process.name" description="node process" type="hidden"/>
-            <option name="hostname" description="host" type="hidden"/>
-            <option name="authentication" description="erlang cookie" type="hidden"/>
-
             <option name="username" description="RabbitMQ Username for %server.name%"/>
             <option name="password" type="secret" description="RabbitMQ Password for %server.name%"/>
+            <!-- ToDo <option name="port" description="RabbitMQ Port for %server.name%"/> -->
         </config>
-        <!--type="secret" -->
+
 
         <config type="measurement">
             <option name="process.query" default="State.Name.sw=beam,Args.*.eq=-sname,Args.*.eq=%process.name%"

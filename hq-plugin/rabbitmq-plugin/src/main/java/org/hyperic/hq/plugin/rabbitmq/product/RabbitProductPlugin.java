@@ -59,8 +59,10 @@ public class RabbitProductPlugin extends ProductPlugin {
      */
     public static boolean initialize(Configuration configuration) throws PluginException {
         logger.debug("Starting initialization of plugin");
-        if (configuration != null && configuration.getVirtualHost() == null) {
-            configuration.setDefaultVirtualHost(true);
+        if (configuration != null) {
+             if (configuration.getVirtualHost() == null) {
+                configuration.setDefaultVirtualHost(true);
+             }
 
             if (configuration.isConfigured() && isValidUsernamePassword(configuration) && isValidOtpConnection(configuration)) {
                 logger.debug("Initializing ConfigurationManager");
@@ -72,7 +74,7 @@ public class RabbitProductPlugin extends ProductPlugin {
 
         boolean initialized = isInitialized();
         logger.debug("Initialized=" + initialized);
-        
+
         return initialized;
     }
 
@@ -104,7 +106,7 @@ public class RabbitProductPlugin extends ProductPlugin {
         }
         else {
             HypericRabbitAdmin admin = getVirtualHostForNode(key.getDefaultVirtualHost(), key.getNodename());
-            return admin != null && admin.isNodeAvailable();     
+            return admin != null && admin.isNodeAvailable();
         }
     }
 
