@@ -42,9 +42,6 @@
 				</amq:memoryUsage>
 			</amq:systemUsage>
 		</amq:systemUsage>
-		<amq:transportConnectors>
-			<amq:transportConnector uri="tcp://localhost:0" />
-		</amq:transportConnectors>
 	</amq:broker>
 
 	<amq:connectionFactory id="jmsFactory" brokerURL="vm://localhost?create=false" />
