@@ -39,7 +39,6 @@ import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.agent.ScheduledMeasurement;
-import org.hyperic.hq.product.MeasurementPluginManager;
 import org.hyperic.hq.product.MeasurementValueGetter;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricInvalidException;
@@ -72,12 +71,7 @@ public class ScheduleThread
     private static final long WARN_FETCH_TIME = 5 * 1000; // 5 seconds.
     private static final Log _log =
         LogFactory.getLog(ScheduleThread.class.getName());
-    
-    // We are separating the platform availability schedule to make sure
-    // it is collected first to so that we don't risk any metrics hanging 
-    // and making the agent seem unavailable
-    private ResourceSchedule _platformAvailSchedule = null;
-    
+
     private final    Object     _lock = new Object();
 
     private          Map       _schedules;   // AppdefID -> Schedule
@@ -124,16 +118,6 @@ public class ScheduleThread
                 schedule._id = meas.getEntity();
                 _schedules.put(key, schedule);
                 _log.debug("Created ResourceSchedule for: " + key);
-            
-                // Flag the platform availability measurement under the _schedules lock
-                final String platformTemplate =
-                    ("system.avail:Type=Platform:Availability").toLowerCase();
-                final String dsn = meas.getDSN().toLowerCase();
-
-                if (dsn.endsWith(platformTemplate)) {
-                    _log.debug("Scheduling Platform Availability");
-                    _platformAvailSchedule = schedule;
-                }
             }
         }
         
@@ -162,17 +146,14 @@ public class ScheduleThread
         ResourceSchedule rs = null;
         synchronized (_schedules) {
             rs = (ResourceSchedule)_schedules.remove(key);
-            if (rs != null && rs == _platformAvailSchedule) {
-                _platformAvailSchedule = null;
-                _log.debug("Unscheduling metrics for Platform Availability");
-            }
         }
 
         if (rs == null) {
             throw new UnscheduledItemException("No measurement schedule for: " + key);
         }
+
         items = rs._schedule.getScheduledItems();
-        _log.debug("Unscheduling " + items.length + " metrics for " + ent);
+        _log.debug("Un-scheduling " + items.length + " metrics for " + ent);
 
         synchronized (_lock) {
             _stat_numMetricsScheduled -= items.length;            
@@ -195,20 +176,9 @@ public class ScheduleThread
     void scheduleMeasurement(ScheduledMeasurement meas){
         ResourceSchedule rs = getSchedule(meas);
         try {
-            final String platformTemplate =
-                ("system.avail:Type=Platform:Availability").toLowerCase();
             final String dsn = meas.getDSN().toLowerCase();
             if (_log.isDebugEnabled()) {
                 _log.debug("scheduleMeasurement " + getParsedTemplate(meas).metric.toDebugString());
-            }
-            if (dsn.endsWith(platformTemplate)) {
-                _log.debug("Scheduling Platform Availability");
-                _platformAvailSchedule = new ResourceSchedule();
-                _platformAvailSchedule._id = meas.getEntity();
-                _platformAvailSchedule._schedule.scheduleItem(
-                    meas, meas.getInterval(), true, true);
-            } else {
-                rs._schedule.scheduleItem(meas, meas.getInterval(), true, true);
             }
 
             rs._schedule.scheduleItem(meas, meas.getInterval(), true, true);
@@ -220,9 +190,7 @@ public class ScheduleThread
             _log.error("Unable to schedule metric '" +
                       getParsedTemplate(meas) + "', skipping. Cause is " +
                       e.getMessage(), e);
-            return;
         }
-
         //XXX older rev would call interruptMe() if newNextTime < oldNextTime
         //but interruptMe() and run() both synchronize on _interrupter
     }
@@ -483,51 +451,33 @@ public class ScheduleThread
         long timeOfNext = 0;
         
         Map schedules = null;
-        ResourceSchedule platformAvailabilitySchedule = null;
         synchronized (_schedules) {
             if (_schedules.size() == 0) {
                 //nothing scheduled
                 timeOfNext = POLL_PERIOD + System.currentTimeMillis();
             } else {
                 schedules = new HashMap(_schedules);
-                platformAvailabilitySchedule = _platformAvailSchedule;
             }
         }
-            
-        // want to make sure and schedule the platform availability first
-        // so that we don't risk any metrics hanging and making the agent
-        // seem unavailable
-        if (platformAvailabilitySchedule != null) {
-            if (_log.isDebugEnabled()) {
-                _log.debug("Platform schedule is not null");
-            }
-            timeOfNext = collect(platformAvailabilitySchedule);
-        }
-        else {
-            if (_log.isDebugEnabled()) {
-                _log.debug("Platform schedule is null");
-            }
+
+        if (_log.isDebugEnabled()) {
+            _log.debug("Platform schedule is null");
         }
 
         if (schedules != null) {
             for (Iterator it = schedules.values().iterator();
             it.hasNext() && (_shouldDie == false);) {
 
-                ResourceSchedule rs = (ResourceSchedule)it.next();
-                // Don't double-collect for platform availability
-                if (rs != platformAvailabilitySchedule) {
-
-                    try {
-                        long next = collect(rs);
-                        if (timeOfNext == 0) {
-                            timeOfNext = next;
-                        }
-                        else {
-                            timeOfNext = Math.min(next, timeOfNext);
-                        }
-                    } catch (Throwable e) {
-                        _log.error(e.getMessage(), e);
+                ResourceSchedule rs = (ResourceSchedule) it.next();
+                try {
+                    long next = collect(rs);
+                    if (timeOfNext == 0) {
+                        timeOfNext = next;
+                    } else {
+                        timeOfNext = Math.min(next, timeOfNext);
                     }
+                } catch (Throwable e) {
+                    _log.error(e.getMessage(), e);
                 }
             }
         }

@@ -141,7 +141,7 @@ public class ScheduleThreadTest extends TestCase {
         assertEquals("Wrong number of scheduled measurements",
                      2.0, st.getNumMetricsScheduled());
         assertEquals("Wrong number of metric collections",
-                     15.0, st.getNumMetricsFetched()); // TODO: Bug here
+                     10.0, st.getNumMetricsFetched());
     }
 
     public static class NullSender implements Sender {
