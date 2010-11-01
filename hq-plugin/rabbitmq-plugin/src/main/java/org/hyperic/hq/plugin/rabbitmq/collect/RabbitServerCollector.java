@@ -27,7 +27,7 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.configure.Configuration; 
+import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
@@ -44,8 +44,6 @@ public class RabbitServerCollector extends Collector {
 
     @Override
     protected void init() throws PluginException {
-        super.init();
-
         Configuration configuration = Configuration.toConfiguration(getProperties());
         logger.debug("Init " + configuration);
 
@@ -53,6 +51,7 @@ public class RabbitServerCollector extends Collector {
         if (!RabbitProductPlugin.isInitialized()) {
             RabbitProductPlugin.initialize(configuration);
         }
+        super.init();
     }
 
     @Override

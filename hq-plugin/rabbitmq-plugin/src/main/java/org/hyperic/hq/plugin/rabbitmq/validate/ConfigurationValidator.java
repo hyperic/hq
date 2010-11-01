@@ -53,7 +53,7 @@ public class ConfigurationValidator {
      * @return true if successful connection is made, false if not.
      * @throws PluginConfigurationException
      */
-    public static boolean isValidUsernamePassword(Configuration c) throws PluginConfigurationException {
+    public static boolean isValidUsernamePassword(Configuration c) throws PluginException {
         SingleConnectionFactory cf = null;
         Connection con = null;
         boolean valid = false;
@@ -69,7 +69,7 @@ public class ConfigurationValidator {
             }
         }
         catch (Exception e) {
-            throw new PluginConfigurationException("Unable to connect to the RabbitMQ broker with username/password.", e);
+            throw new PluginException("Username/password combination were not valid to connect to the RabbitMQ broker.", e);
         }
         finally {
             if (con != null) {

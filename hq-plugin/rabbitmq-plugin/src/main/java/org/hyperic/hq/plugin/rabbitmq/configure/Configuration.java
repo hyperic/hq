@@ -25,24 +25,17 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.configure;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
-import org.hyperic.hq.plugin.rabbitmq.validate.PluginConfigurationException;
+ import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Configuration
  * @author Helena Edelson
  */
 public class Configuration {
-
-    private static final Log logger = LogFactory.getLog(Configuration.class);
 
     private String nodename;
 
@@ -102,19 +95,23 @@ public class Configuration {
      */
     public boolean isConfigured() throws PluginException {
         if (nodename == null) {
-            throw new PluginConfigurationException("This resource requires the node name of the broker.");
+            throw new PluginException("This resource requires the node name of the broker.");
         }
 
-        if (username == null || password == null) {
-            throw new PluginConfigurationException("Please configure a username and password for the broker.");
+        if (username == null) {
+            throw new PluginException("Please configure a username and password for the broker.");
+        }
+
+        if (password == null) {
+            throw new PluginException("Please configure a username and password for the broker.");
         }
 
         if (authentication == null) {
-            throw new PluginConfigurationException("Erlang cookie value is not set yet.");
+            throw new PluginException("Erlang cookie value is not set yet. Please insure the Agent has permission to read the Erlang cookie.");
         }
 
         if (hostname == null) {
-            throw new PluginConfigurationException("Host name must not be null.");
+            throw new PluginException("Host name must not be null.");
         }
 
         return true;
