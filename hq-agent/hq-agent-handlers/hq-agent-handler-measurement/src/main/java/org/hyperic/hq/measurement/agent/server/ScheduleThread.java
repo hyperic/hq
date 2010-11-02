@@ -200,7 +200,12 @@ public class ScheduleThread
      */
     void die(){
         _shouldDie = true;
-        // TODO: Shutdown executors
+        for (String s : _executors.keySet()) {
+            ExecutorService svc = _executors.get(s);
+            List<Runnable> queuedMetrics = svc.shutdownNow();
+            _log.info("Shut down executor service for domain '" + s + "'" +
+                      " with " + queuedMetrics.size() + " queued collections");
+        }
         interruptMe();
     }
 
