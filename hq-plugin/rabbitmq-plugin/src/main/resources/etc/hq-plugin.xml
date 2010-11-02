@@ -42,20 +42,23 @@
                         This version of the plugin requires that the HQ Agent that manages RabbitMQ has permission to read the Erlang cookie.
 
                         <h4>Configuration Requirements</h4>
-                        The HQ Agent on the platform where the RabbitMQ server should auto-discover the "RabbitMQ" server instance — assuming
-                        at least one RabbitMQ Node is running. — and present it as a new server on the platform in the Auto-Discovery portlet
+                        Assuming at least one RabbitMQ Node is running, the HQ Agent on the platform where the RabbitMQ server is running should
+                        auto-discover the "RabbitMQ" server instance, and present it as a new server on the platform in the Auto-Discovery portlet
                         of the HQ Dashboard. To enable metric collection and auto-discovery of RabbitMQ services:
 
                         <ol>
                            <li>Import the platform with the new RabbitMQ server to inventory</li>
                            <li>Navigate to the Rabbit MQ server, using Resources > Browse > Servers</li>
                            <li>Under the Server (Node), navigate to Tools Menu > Configure Server</li>
-                           <li>Enter the RabbitMQ username and password for the RabbitMQ server and click OK. Hyperic assumes the default</li>
+                           <li>Enter the RabbitMQ username and password and click OK. Hyperic assumes the default
                            RabbitMQ username and password have been changed for security reasons and does set them as the default</li>
                         </ol>
 
-                         This will allow enable the plugin to authenticate, auto-discover Queue, Channel, Connection, Exchanges, etc., and
+                         This will enable the plugin to authenticate and auto-discover Queues and Exchanges by Virtual Host per node and
                          proceed with metric collection. Note: Discovered services are automatically imported to HQ inventory.
+
+                         In this release, transient resources i.e. Channels and Connections, are not individually exposed as Service Resources
+                         but cumulatively as part of each Virtual Host.
                   </p>
                   <p>
                     <h3>Help Docs</h3>
