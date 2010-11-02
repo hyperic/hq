@@ -23,38 +23,29 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq.core;
+package org.hyperic.hq.plugin.rabbitmq.validate;
+  
+import org.hyperic.hq.product.PluginException;
 
 /**
- * ErlangArgs
+ * PluginConfigurationException
  * @author Helena Edelson
  */
-public class ErlangArgs {
+public class PluginConfigurationException extends PluginException {
 
-    private String virtualHost;
+    private String message;
 
-    private Class type;
-
-    public ErlangArgs() {}
-
-    public ErlangArgs(String v, Class t) {
-        this.virtualHost = v;
-        this.type = t;
+    public PluginConfigurationException(String s) {
+        super(s);
+        this.message = s;
     }
 
-    public String getVirtualHost() {
-        return virtualHost;
+    public PluginConfigurationException(String s, Throwable t) {
+        super(s, t);
+        this.message = s;
     }
 
-    public void setVirtualHost(String virtualHost) {
-        this.virtualHost = virtualHost;
-    }
-
-    public Class getType() {
-        return type;
-    }
-
-    public void setType(Class type) {
-        this.type = type;
+    @Override public String toString() {
+        return message;
     }
 }
