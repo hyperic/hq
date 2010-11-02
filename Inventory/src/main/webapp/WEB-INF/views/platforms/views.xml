@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC "-//Apache Software Foundation//DTD Tiles Configuration 2.1//EN" "http://tiles.apache.org/dtds/tiles-config_2_1.dtd">
+<tiles-definitions>
+    <definition extends="default" name="platforms/list">
+        <put-attribute name="body" value="/WEB-INF/views/platforms/list.jspx"/>
+    </definition>
+<definition extends="default" name="platforms/show">
+        <put-attribute name="body" value="/WEB-INF/views/platforms/show.jspx"/>
+    </definition>
+<definition extends="default" name="platforms/create">
+        <put-attribute name="body" value="/WEB-INF/views/platforms/create.jspx"/>
+    </definition>
+<definition extends="default" name="platforms/update">
+        <put-attribute name="body" value="/WEB-INF/views/platforms/update.jspx"/>
+    </definition>
+<definition extends="default" name="platforms/findPlatformsByFqdnEquals">
+        <put-attribute name="body" value="/WEB-INF/views/platforms/findPlatformsByFqdnEquals.jspx"/>
+    </definition>
+<definition extends="default" name="platforms/findPlatformsByFqdnLike">
+        <put-attribute name="body" value="/WEB-INF/views/platforms/findPlatformsByFqdnLike.jspx"/>
+    </definition>
+</tiles-definitions>

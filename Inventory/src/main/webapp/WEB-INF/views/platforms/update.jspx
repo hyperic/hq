@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<div xmlns:field="urn:jsptagdir:/WEB-INF/tags/form/fields" xmlns:form="urn:jsptagdir:/WEB-INF/tags/form" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+    <jsp:output omit-xml-declaration="yes"/>
+    <form:update id="fu_org_hyperic_hq_inventory_domain_Platform" modelAttribute="platform" path="/platforms" z="2bmrldF1eJ+hDegbrmBWOP35eVA=">
+        <field:input field="fqdn" id="c_org_hyperic_hq_inventory_domain_Platform_fqdn" required="true" z="ehww0O3QKypt1E5dqXNoaf0jNFk="/>
+    </form:update>
+</div>

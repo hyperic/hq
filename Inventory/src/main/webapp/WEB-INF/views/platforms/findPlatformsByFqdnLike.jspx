@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<div xmlns:field="urn:jsptagdir:/WEB-INF/tags/form/fields" xmlns:form="urn:jsptagdir:/WEB-INF/tags/form" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+    <jsp:output omit-xml-declaration="yes"/>
+    <form:find finderName="ByFqdnLike" id="ff_org_hyperic_hq_inventory_domain_Platform" path="/platforms" z="l4qU7Pv/anTO3agHtutjyAEqgaE=">
+        <field:input disableFormBinding="true" field="fqdn" id="f_org_hyperic_hq_inventory_domain_Platform_fqdn" required="true" z="zErQ+7Myd52lh+v1qw9Q/RJFniY="/>
+    </form:find>
+</div>
