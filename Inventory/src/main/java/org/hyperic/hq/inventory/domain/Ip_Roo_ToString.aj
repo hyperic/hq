@@ -5,17 +5,16 @@ package org.hyperic.hq.inventory.domain;
 
 import java.lang.String;
 
-privileged aspect Platform_Roo_ToString {
+privileged aspect Ip_Roo_ToString {
     
-    public String Platform.toString() {
+    public String Ip.toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Id: ").append(getId()).append(", ");
         sb.append("Version: ").append(getVersion()).append(", ");
-        sb.append("Fqdn: ").append(getFqdn()).append(", ");
-        sb.append("Name: ").append(getName()).append(", ");
-        sb.append("Config: ").append(getConfig()).append(", ");
-        sb.append("Agent: ").append(getAgent()).append(", ");
-        sb.append("Ips: ").append(getIps() == null ? "null" : getIps().size());
+        sb.append("Address: ").append(getAddress()).append(", ");
+        sb.append("Netmask: ").append(getNetmask()).append(", ");
+        sb.append("MacAddress: ").append(getMacAddress()).append(", ");
+        sb.append("Platform: ").append(getPlatform());
         return sb.toString();
     }
     

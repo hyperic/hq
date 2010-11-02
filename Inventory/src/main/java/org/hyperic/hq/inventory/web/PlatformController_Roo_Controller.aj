@@ -6,15 +6,20 @@ package org.hyperic.hq.inventory.web;
 import java.io.UnsupportedEncodingException;
 import java.lang.Long;
 import java.lang.String;
+import java.util.Collection;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import org.hyperic.hq.inventory.domain.Agent;
+import org.hyperic.hq.inventory.domain.Config;
+import org.hyperic.hq.inventory.domain.Ip;
 import org.hyperic.hq.inventory.domain.Platform;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -109,16 +114,49 @@ privileged aspect PlatformController_Roo_Controller {
         return "platforms/list";
     }
     
+    @ModelAttribute("agents")
+    public Collection<Agent> PlatformController.populateAgents() {
+        return Agent.findAllAgents();
+    }
+    
+    @ModelAttribute("configs")
+    public Collection<Config> PlatformController.populateConfigs() {
+        return Config.findAllConfigs();
+    }
+    
+    @ModelAttribute("ips")
+    public Collection<Ip> PlatformController.populateIps() {
+        return Ip.findAllIps();
+    }
+    
+    Converter<Agent, String> PlatformController.getAgentConverter() {
+        return new Converter<Agent, String>() {
+            public String convert(Agent agent) {
+                return new StringBuilder().append(agent.getAddress()).append(" ").append(agent.getPort()).append(" ").append(agent.getAuthToken()).toString();
+            }
+        };
+    }
+    
+    Converter<Ip, String> PlatformController.getIpConverter() {
+        return new Converter<Ip, String>() {
+            public String convert(Ip ip) {
+                return new StringBuilder().append(ip.getAddress()).append(" ").append(ip.getNetmask()).append(" ").append(ip.getMacAddress()).toString();
+            }
+        };
+    }
+    
     Converter<Platform, String> PlatformController.getPlatformConverter() {
         return new Converter<Platform, String>() {
             public String convert(Platform platform) {
-                return new StringBuilder().append(platform.getFqdn()).toString();
+                return new StringBuilder().append(platform.getFqdn()).append(" ").append(platform.getName()).toString();
             }
         };
     }
     
     @PostConstruct
     void PlatformController.registerConverters() {
+        conversionService.addConverter(getAgentConverter());
+        conversionService.addConverter(getIpConverter());
         conversionService.addConverter(getPlatformConverter());
     }
     

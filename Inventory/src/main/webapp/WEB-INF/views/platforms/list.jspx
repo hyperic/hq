@@ -4,6 +4,10 @@
     <page:list id="pl_org_hyperic_hq_inventory_domain_Platform" items="${platforms}" z="jQzRhF/4lzw+HhL23eClpL6Ijfs=">
         <table:table data="${platforms}" id="l_org_hyperic_hq_inventory_domain_Platform" path="/platforms" z="KIgMCTZXHNuAZVuf2751ZzEQVRY=">
             <table:column id="c_org_hyperic_hq_inventory_domain_Platform_fqdn" property="fqdn" z="Cf+Nq9/6XqnDcSH+jjUQZ4uP1Ks="/>
+        <table:column id="c_org_hyperic_hq_inventory_domain_Platform_name" property="name" z="42zaxNQR/ORIX2Jx34leR+rAPco="/>
+        <table:column id="c_org_hyperic_hq_inventory_domain_Platform_config" property="config" z="Z7R2yZNMchCv6Pgf9dGZkronOpg="/>
+        <table:column id="c_org_hyperic_hq_inventory_domain_Platform_agent" property="agent" z="xJONS+TdoJbchFqnR+ruf6j/Wak="/>
+        <table:column id="c_org_hyperic_hq_inventory_domain_Platform_ips" property="ips" z="uCyHR+xCaDbW4wJG1fboHAk/Zw8="/>
         </table:table>
     </page:list>
 </div>

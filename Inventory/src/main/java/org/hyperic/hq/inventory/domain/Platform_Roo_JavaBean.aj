@@ -4,6 +4,10 @@
 package org.hyperic.hq.inventory.domain;
 
 import java.lang.String;
+import java.util.Set;
+import org.hyperic.hq.inventory.domain.Agent;
+import org.hyperic.hq.inventory.domain.Config;
+import org.hyperic.hq.inventory.domain.Ip;
 
 privileged aspect Platform_Roo_JavaBean {
     
@@ -13,6 +17,38 @@ privileged aspect Platform_Roo_JavaBean {
     
     public void Platform.setFqdn(String fqdn) {
         this.fqdn = fqdn;
+    }
+    
+    public String Platform.getName() {
+        return this.name;
+    }
+    
+    public void Platform.setName(String name) {
+        this.name = name;
+    }
+    
+    public Config Platform.getConfig() {
+        return this.config;
+    }
+    
+    public void Platform.setConfig(Config config) {
+        this.config = config;
+    }
+    
+    public Agent Platform.getAgent() {
+        return this.agent;
+    }
+    
+    public void Platform.setAgent(Agent agent) {
+        this.agent = agent;
+    }
+    
+    public Set<Ip> Platform.getIps() {
+        return this.ips;
+    }
+    
+    public void Platform.setIps(Set<Ip> ips) {
+        this.ips = ips;
     }
     
 }

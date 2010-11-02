@@ -18,7 +18,10 @@ privileged aspect PlatformDataOnDemand_Roo_DataOnDemand {
     
     public Platform PlatformDataOnDemand.getNewTransientPlatform(int index) {
         org.hyperic.hq.inventory.domain.Platform obj = new org.hyperic.hq.inventory.domain.Platform();
+        obj.setAgent(null);
+        obj.setConfig(null);
         obj.setFqdn("fqdn_" + index);
+        obj.setName("name_" + index);
         return obj;
     }
     
