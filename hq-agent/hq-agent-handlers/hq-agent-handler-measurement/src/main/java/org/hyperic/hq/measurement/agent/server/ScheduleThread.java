@@ -83,7 +83,7 @@ public class ScheduleThread
     private MeasurementValueGetter   _manager;
     private Sender                   _sender;  // Guy handling the results
 
-    private final Object _lock = new Object();
+    private final Object _statsLock = new Object();
     private long _stat_numMetricsFetched = 0;
     private long _stat_numMetricsFailed  = 0;
     private long _stat_totFetchTime      = 0;
@@ -158,7 +158,7 @@ public class ScheduleThread
         items = rs._schedule.getScheduledItems();
         _log.debug("Un-scheduling " + items.length + " metrics for " + ent);
 
-        synchronized (_lock) {
+        synchronized (_statsLock) {
             _stat_numMetricsScheduled -= items.length;            
         }
 
@@ -185,7 +185,7 @@ public class ScheduleThread
 
             rs._schedule.scheduleItem(meas, meas.getInterval(), true, true);
 
-            synchronized (_lock) {
+            synchronized (_statsLock) {
                 _stat_numMetricsScheduled++;
             }
         } catch (ScheduleException e) {
@@ -358,7 +358,7 @@ public class ScheduleThread
             // Stats stuff
             timeDiff = System.currentTimeMillis() - currTime;
 
-            synchronized (_lock) {
+            synchronized (_statsLock) {
                 _stat_totFetchTime += timeDiff;
                 if(timeDiff > _stat_maxFetchTime) {
                     _stat_maxFetchTime = timeDiff;
@@ -400,11 +400,11 @@ public class ScheduleThread
                 }
                 _sender.processData(_meas.getDsnID(), data,
                                     _meas.getDerivedID());
-                synchronized (_lock) {
+                synchronized (_statsLock) {
                     _stat_numMetricsFetched++;
                 }
             } else {
-                synchronized (_lock) {
+                synchronized (_statsLock) {
                     _stat_numMetricsFailed++;
                 }
             }
@@ -546,7 +546,7 @@ public class ScheduleThread
      * @return Get the number of metrics in the schedule
      */
     public double getNumMetricsScheduled() {
-        synchronized (_lock) {
+        synchronized (_statsLock) {
             return _stat_numMetricsScheduled;            
         }
     }
@@ -555,7 +555,7 @@ public class ScheduleThread
      * @return The number of metrics which were attempted to be fetched (failed or successful)
      */
     public double getNumMetricsFetched() {
-        synchronized (_lock) {
+        synchronized (_statsLock) {
             return _stat_numMetricsFetched;
         }
     }
@@ -564,7 +564,7 @@ public class ScheduleThread
      * @return Get the number of metrics which resulted in an error when collected
      */
     public double getNumMetricsFailed() {
-        synchronized (_lock) {
+        synchronized (_statsLock) {
             return _stat_numMetricsFailed;
         }
     }
@@ -573,7 +573,7 @@ public class ScheduleThread
      * @return The total time spent fetching metrics
      */
     public double getTotFetchTime() {
-        synchronized (_lock) {
+        synchronized (_statsLock) {
             return _stat_totFetchTime;
         }
     }
@@ -582,7 +582,7 @@ public class ScheduleThread
      * @return The maximum time spent fetching a metric
      */
     public double getMaxFetchTime() {
-        synchronized (_lock) {
+        synchronized (_statsLock) {
             if(_stat_maxFetchTime == Long.MIN_VALUE) {
                 return MetricValue.VALUE_NONE;
             }
@@ -594,7 +594,7 @@ public class ScheduleThread
      * @return The minimum time spent fetching a metric
      */
     public double getMinFetchTime() {
-        synchronized (_lock) {
+        synchronized (_statsLock) {
             if(_stat_minFetchTime == Long.MAX_VALUE) {
                 return MetricValue.VALUE_NONE;
             }
