@@ -30,11 +30,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.server.AgentStartException;
-import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -69,19 +70,20 @@ public class ScheduleThread
     private static final int POLL_PERIOD = 1000;
     private static final int UNREACHABLE_EXPIRE = (60 * 1000) * 5;
     private static final long WARN_FETCH_TIME = 5 * 1000; // 5 seconds.
-    private static final Log _log =
-        LogFactory.getLog(ScheduleThread.class.getName());
 
-    private final    Object     _lock = new Object();
+    private static final Log _log = LogFactory.getLog(ScheduleThread.class.getName());
 
-    private final Map       _schedules;   // AppdefID -> Schedule
+    private final Map          _schedules;   // AppdefID -> Schedule
     private volatile boolean   _shouldDie;   // Should I shut down?
-    private final Object    _interrupter; // Interrupt object
-    private final HashMap   _errors;      // Hash of DSNs to their errors
+    private final Object       _interrupter; // Interrupt object
+    private final HashMap      _errors;      // Hash of DSNs to their errors
+
+    private final HashMap _executors;     // Domain -> ExecutorService
 
     private MeasurementValueGetter   _manager;
     private Sender                   _sender;  // Guy handling the results
 
+    private final Object _lock = new Object();
     private long _stat_numMetricsFetched = 0;
     private long _stat_numMetricsFailed  = 0;
     private long _stat_totFetchTime      = 0;
@@ -106,11 +108,12 @@ public class ScheduleThread
         _manager      = manager;
         _sender       = sender;               
         _errors       = new HashMap();
+        _executors    = new HashMap();
     }
 
     private ResourceSchedule getSchedule(ScheduledMeasurement meas) {
         String key = meas.getEntity().getAppdefKey();
-        ResourceSchedule schedule = null;
+        ResourceSchedule schedule;
         synchronized (_schedules) {
             schedule = (ResourceSchedule)_schedules.get(key);
             if (schedule == null) {
@@ -131,9 +134,9 @@ public class ScheduleThread
     }
 
     /**
-     * Unschedule a previously scheduled, repeatable measurement.  
+     * Un-schedule a previously scheduled, repeatable measurement.
      *
-     * @param ent Entity to unschedule metrics for
+     * @param ent Entity to un-schedule metrics for
      *
      * @throws UnscheduledItemException indicating the passed ID was not found
      */
@@ -141,9 +144,9 @@ public class ScheduleThread
         throws UnscheduledItemException
     {
         String key = ent.getAppdefKey();
-        ScheduledItem[] items = null;
+        ScheduledItem[] items;
 
-        ResourceSchedule rs = null;
+        ResourceSchedule rs;
         synchronized (_schedules) {
             rs = (ResourceSchedule)_schedules.remove(key);
         }
@@ -176,7 +179,6 @@ public class ScheduleThread
     void scheduleMeasurement(ScheduledMeasurement meas){
         ResourceSchedule rs = getSchedule(meas);
         try {
-            final String dsn = meas.getDSN().toLowerCase();
             if (_log.isDebugEnabled()) {
                 _log.debug("scheduleMeasurement " + getParsedTemplate(meas).metric.toDebugString());
             }
@@ -191,16 +193,14 @@ public class ScheduleThread
                       getParsedTemplate(meas) + "', skipping. Cause is " +
                       e.getMessage(), e);
         }
-        //XXX older rev would call interruptMe() if newNextTime < oldNextTime
-        //but interruptMe() and run() both synchronize on _interrupter
     }
 
     /**
      * Shut down the schedule thread.  
      */
-
     void die(){
         _shouldDie = true;
+        // TODO: Shutdown executors
         interruptMe();
     }
 
@@ -279,10 +279,154 @@ public class ScheduleThread
     }
 
     private MetricValue getValue(ParsedTemplate tmpl)
-        throws PluginException, PluginNotFoundException,
-               MetricNotFoundException, MetricUnreachableException
+        throws PluginException, MetricNotFoundException,
+               MetricUnreachableException
     {
         return _manager.getValue(tmpl.plugin, tmpl.metric);
+    }
+
+    private class MetricRunner implements Runnable {
+        ResourceSchedule _rs;
+        ScheduledMeasurement _meas;
+
+        MetricRunner(ResourceSchedule rs, ScheduledMeasurement meas) {
+            _rs = rs;
+            _meas = meas;
+        }
+
+        public void run() {
+            boolean isDebug = _log.isDebugEnabled();
+            AppdefEntityID aid = _meas.getEntity();
+            String category = _meas.getCategory();
+            ParsedTemplate dsn = toParsedTemplate(_meas);
+            MetricValue data = null;
+            long currTime, timeDiff;
+            boolean success = false;
+
+            if (_rs._lastUnreachble != 0) {
+                if (!category.equals(MeasurementConstants.CAT_AVAILABILITY)) {
+                    // Prevent stacktrace bombs if a resource is
+                    // down, but don't skip processing availability metrics.
+                    _stat_numMetricsFailed++;
+                }
+            }
+
+            currTime = System.currentTimeMillis();
+            // XXX -- We should do something with the exceptions here.
+            //        Maybe send some kind of error back to the
+            //        bizapp?
+            try {
+                int mid = _meas.getDsnID();
+                if (_rs._collected.get(mid) == Boolean.TRUE) {
+                    if (isDebug) {
+                        _log.debug("Skipping duplicate mid=" + mid +
+                                   ", aid=" + _rs._id);
+                    }
+                }
+                data = getValue(dsn);
+                if (data == null) {
+                    // Don't allow plugins to return null from getValue(),
+                    // convert these to MetricValue.NONE
+                    _log.warn("Plugin returned null value for metric: " + dsn);
+                    data = MetricValue.NONE;
+                }
+                _rs._collected.put(mid, Boolean.TRUE);
+                success = true;
+                clearLogCache(dsn);
+            } catch(PluginNotFoundException exc){
+                logCache("Plugin not found", dsn, exc);
+            } catch(PluginException exc){
+                logCache("Measurement plugin error", dsn, exc);
+            } catch(MetricInvalidException exc){
+                logCache("Invalid Metric requested", dsn, exc);
+            } catch(MetricNotFoundException exc){
+                logCache("Metric Value not found", dsn, exc);
+            } catch(MetricUnreachableException exc){
+                logCache("Metric unreachable", dsn, exc);
+                _rs._lastUnreachble = currTime;
+                _log.warn("Disabling metrics for: " + _rs._id);
+            } catch(Exception exc){
+                // Unexpected exception
+                logCache("Error getting measurement value",
+                         dsn, exc.toString(), exc, true);
+            }
+
+            // Stats stuff
+            timeDiff = System.currentTimeMillis() - currTime;
+
+            synchronized (_lock) {
+                _stat_totFetchTime += timeDiff;
+                if(timeDiff > _stat_maxFetchTime) {
+                    _stat_maxFetchTime = timeDiff;
+                }
+
+                if(timeDiff < _stat_minFetchTime) {
+                    _stat_minFetchTime = timeDiff;
+                }
+            }
+
+            if (timeDiff > WARN_FETCH_TIME) {
+                _log.warn("Collection of metric: '" + dsn +
+                          "' took: " + timeDiff + "ms");
+            }
+
+            if (success) {
+                if (isDebug) {
+                    String debugDsn = getParsedTemplate(_meas).metric.toDebugString();
+                    String msg =
+                        "[" + aid + ":" + category +
+                        "] Metric='" + debugDsn + "' -> " + data;
+
+                    _log.debug(msg + " timestamp=" + data.getTimestamp());
+                }
+                if (data.isNone()) {
+                    //wouldn't be inserted into the database anyhow
+                    //but might as well skip sending this to the server.
+                    return;
+                }
+                else if (data.isFuture()) {
+                    //for example, first time collecting an exec: metric
+                    //adding to this list will cause the metric to be
+                    //collected next time the schedule has items to consume
+                    //rather than waiting for the metric's own interval
+                    //which could take much longer to hit
+                    //(e.g. Windows Updates on an 8 hour interval)
+                    _rs._retry.add(_meas);
+                    return;
+                }
+                _sender.processData(_meas.getDsnID(), data,
+                                    _meas.getDerivedID());
+                synchronized (_lock) {
+                    _stat_numMetricsFetched++;
+                }
+            } else {
+                synchronized (_lock) {
+                    _stat_numMetricsFailed++;
+                }
+            }
+        }
+    }
+
+    private void collect(ResourceSchedule rs, List items)
+    {
+        for (int i=0; i<items.size() && (!_shouldDie); i++) {
+            ScheduledMeasurement meas =
+                (ScheduledMeasurement)items.get(i);
+            ParsedTemplate tmpl = toParsedTemplate(meas);
+
+            ExecutorService svc;
+            synchronized (_executors) {
+                svc = (ExecutorService)_executors.get(tmpl.plugin);
+                if (svc == null) {
+                    _log.info("Creating executor for domain '" + tmpl.plugin + "'");
+                    // TODO: Optional thread pool
+                    svc = Executors.newSingleThreadExecutor();
+                    _executors.put(tmpl.plugin, svc);
+                }
+            }
+
+            svc.submit(new MetricRunner(rs, meas));
+        }
     }
 
     private long collect(ResourceSchedule rs) {
@@ -294,15 +438,11 @@ public class ScheduleThread
         } catch (EmptyScheduleException e) {
             return POLL_PERIOD + now;
         }
- 
-        boolean isUnreachable = false;
+
         if (rs._lastUnreachble != 0) {
             if ((now - rs._lastUnreachble) > UNREACHABLE_EXPIRE) {
                 rs._lastUnreachble = 0;
                 _log.info("Re-enabling metrics for: " + rs._id);
-            }
-            else {
-                isUnreachable = true;
             }
         }
 
@@ -310,10 +450,9 @@ public class ScheduleThread
 
         if (rs._retry.size() != 0) {
             if (_log.isDebugEnabled()) {
-                _log.debug("Retrying " + rs._retry.size() +
-                           " items (MetricValue.FUTUREs)");
+                _log.debug("Retrying " + rs._retry.size() + " items (MetricValue.FUTUREs)");
             }
-            collect(rs, rs._retry, isUnreachable);
+            collect(rs, rs._retry);
             rs._retry.clear();
         }
 
@@ -328,124 +467,8 @@ public class ScheduleThread
         } catch (EmptyScheduleException e) {
             return POLL_PERIOD + now;
         }
-        collect(rs, items, isUnreachable);
+        collect(rs, items);
         return timeOfNext;
-    }
-
-    private void collect(ResourceSchedule rs,
-                         List items,
-                         boolean isUnreachable) {
- 
-        boolean isDebug = _log.isDebugEnabled();
-
-        for (int i=0; i<items.size() && (!_shouldDie); i++) {
-            ScheduledMeasurement meas =
-                (ScheduledMeasurement)items.get(i);
-
-            AppdefEntityID aid = meas.getEntity();
-            String category = meas.getCategory();
-            ParsedTemplate dsn = toParsedTemplate(meas);
-            MetricValue data = null;
-            long currTime, timeDiff;
-            boolean success = false;
-
-            if (isUnreachable) {
-                if (!category.equals(MeasurementConstants.CAT_AVAILABILITY)) {
-                    // Prevent stacktrace bombs if a resource is
-                    // down, but don't skip processing availability metrics.
-                    _stat_numMetricsFailed++;
-                    continue;
-                }
-            }
-
-            currTime = System.currentTimeMillis();
-            // XXX -- We should do something with the exceptions here.
-            //        Maybe send some kind of error back to the
-            //        bizapp?
-            try {
-                int mid = meas.getDsnID();
-                if (rs._collected.get(mid) == Boolean.TRUE) {
-                    if (isDebug) {
-                        _log.debug("Skipping duplicate mid=" + mid +
-                                   ", aid=" + rs._id);
-                    }
-                    continue; //avoid dups
-                }
-                data = getValue(dsn);
-                if (data == null) {
-                    // Don't allow plugins to return null from getValue(),
-                    // convert these to MetricValue.NONE
-                    _log.warn("Plugin returned null value for metric: " + dsn);
-                    data = MetricValue.NONE;
-                }
-                rs._collected.put(mid, Boolean.TRUE);
-                success = true;
-                clearLogCache(dsn);
-            } catch(PluginNotFoundException exc){
-                logCache("Plugin not found", dsn, exc);
-            } catch(PluginException exc){
-                logCache("Measurement plugin error", dsn, exc);
-            } catch(MetricInvalidException exc){
-                logCache("Invalid Metric requested", dsn, exc);
-            } catch(MetricNotFoundException exc){
-                logCache("Metric Value not found", dsn, exc);
-            } catch(MetricUnreachableException exc){
-                logCache("Metric unreachable", dsn, exc);
-                rs._lastUnreachble = currTime;
-                isUnreachable = true;
-                _log.warn("Disabling metrics for: " + rs._id);
-            } catch(Exception exc){
-                // Unexpected exception
-                logCache("Error getting measurement value",
-                         dsn, exc.toString(), exc, true);
-            }
-            
-            // Stats stuff
-            timeDiff = System.currentTimeMillis() - currTime;
-            _log.info("Time diff is " + timeDiff);
-            _stat_totFetchTime += timeDiff;
-            if(timeDiff > _stat_maxFetchTime)
-                _stat_maxFetchTime = timeDiff;
-
-            if(timeDiff < _stat_minFetchTime)
-                _stat_minFetchTime = timeDiff;
-
-            if (timeDiff > WARN_FETCH_TIME) {
-                _log.warn("Collection of metric: '" + dsn + 
-                          "' took: " + timeDiff + "ms");
-            }
-
-            if (success) {
-                if (isDebug) {
-                    String debugDsn = getParsedTemplate(meas).metric.toDebugString();
-                    String msg =
-                        "[" + aid + ":" + category +
-                        "] Metric='" + debugDsn + "' -> " + data;
-                    
-                    _log.debug(msg + " timestamp=" + data.getTimestamp());
-                }
-                if (data.isNone()) {
-                    //wouldn't be inserted into the database anyhow
-                    //but might as well skip sending this to the server.
-                    continue;
-                }
-                else if (data.isFuture()) {
-                    //for example, first time collecting an exec: metric
-                    //adding to this list will cause the metric to be
-                    //collected next time the schedule has items to consume
-                    //rather than waiting for the metric's own interval
-                    //which could take much longer to hit
-                    //(e.g. Windows Updates on an 8 hour interval)
-                    rs._retry.add(meas);
-                    continue;
-                }
-                _sender.processData(meas.getDsnID(), data, 
-                                    meas.getDerivedID());
-                _stat_numMetricsFetched++;
-            } else {
-                _stat_numMetricsFailed++;
-            }
-        }
     }
 
     private long collect() {
@@ -513,67 +536,65 @@ public class ScheduleThread
         _log.info("Schedule thread shut down");
     }
 
+    // MONITOR METHODS
+
     /**
-     * MONITOR METHOD:  Get the number of metrics in the schedule
+     * @return Get the number of metrics in the schedule
      */
-    public double getNumMetricsScheduled() 
-        throws AgentMonitorException 
-    {
+    public double getNumMetricsScheduled() {
         synchronized (_lock) {
             return _stat_numMetricsScheduled;            
         }
     }
 
     /**
-     * MONITOR METHOD:  Get the number of metrics which were attempted
-     *                  to be fetched (failed or successful)
+     * @return The number of metrics which were attempted to be fetched (failed or successful)
      */
-    public double getNumMetricsFetched() 
-        throws AgentMonitorException 
-    {
-        return _stat_numMetricsFetched;
+    public double getNumMetricsFetched() {
+        synchronized (_lock) {
+            return _stat_numMetricsFetched;
+        }
     }
 
     /**
-     * MONITOR METHOD:  Get the number of metrics which resulted in an
-     *                  error when collected
+     * @return Get the number of metrics which resulted in an error when collected
      */
-    public double getNumMetricsFailed() 
-        throws AgentMonitorException 
-    {
-        return _stat_numMetricsFailed;
+    public double getNumMetricsFailed() {
+        synchronized (_lock) {
+            return _stat_numMetricsFailed;
+        }
     }
 
     /**
-     * MONITOR METHOD:  Get the total time spent fetching metrics
+     * @return The total time spent fetching metrics
      */
-    public double getTotFetchTime() 
-        throws AgentMonitorException 
-    {
-        return _stat_totFetchTime;
+    public double getTotFetchTime() {
+        synchronized (_lock) {
+            return _stat_totFetchTime;
+        }
     }
 
     /**
-     * MONITOR METHOD:  Get the maximum time spent fetching a metric
+     * @return The maximum time spent fetching a metric
      */
-    public double getMaxFetchTime() 
-        throws AgentMonitorException 
-    {
-        if(_stat_maxFetchTime == Long.MIN_VALUE)
-            return MetricValue.VALUE_NONE;
-
-        return _stat_maxFetchTime;
+    public double getMaxFetchTime() {
+        synchronized (_lock) {
+            if(_stat_maxFetchTime == Long.MIN_VALUE) {
+                return MetricValue.VALUE_NONE;
+            }
+            return _stat_maxFetchTime;
+        }
     }
 
     /**
-     * MONITOR METHOD:  Get the minimum time spent fetching a metric
+     * @return The minimum time spent fetching a metric
      */
-    public double getMinFetchTime() 
-        throws AgentMonitorException 
-    {
-        if(_stat_minFetchTime == Long.MAX_VALUE)
-            return MetricValue.VALUE_NONE;
-
-        return _stat_minFetchTime;
+    public double getMinFetchTime() {
+        synchronized (_lock) {
+            if(_stat_minFetchTime == Long.MAX_VALUE) {
+                return MetricValue.VALUE_NONE;
+            }
+            return _stat_minFetchTime;
+        }
     }
 }
