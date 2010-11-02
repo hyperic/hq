@@ -74,10 +74,10 @@ public class ScheduleThread
 
     private final    Object     _lock = new Object();
 
-    private          Map       _schedules;   // AppdefID -> Schedule
+    private final Map       _schedules;   // AppdefID -> Schedule
     private volatile boolean   _shouldDie;   // Should I shut down?
-    private          Object    _interrupter; // Interrupt object
-    private          HashMap   _errors;      // Hash of DSNs to their errors
+    private final Object    _interrupter; // Interrupt object
+    private final HashMap   _errors;      // Hash of DSNs to their errors
 
     private MeasurementValueGetter   _manager;
     private Sender                   _sender;  // Guy handling the results
@@ -338,7 +338,7 @@ public class ScheduleThread
  
         boolean isDebug = _log.isDebugEnabled();
 
-        for (int i=0; i<items.size() && (_shouldDie == false); i++) {
+        for (int i=0; i<items.size() && (!_shouldDie); i++) {
             ScheduledMeasurement meas =
                 (ScheduledMeasurement)items.get(i);
 
@@ -402,6 +402,7 @@ public class ScheduleThread
             
             // Stats stuff
             timeDiff = System.currentTimeMillis() - currTime;
+            _log.info("Time diff is " + timeDiff);
             _stat_totFetchTime += timeDiff;
             if(timeDiff > _stat_maxFetchTime)
                 _stat_maxFetchTime = timeDiff;
@@ -466,7 +467,7 @@ public class ScheduleThread
 
         if (schedules != null) {
             for (Iterator it = schedules.values().iterator();
-            it.hasNext() && (_shouldDie == false);) {
+            it.hasNext() && (!_shouldDie);) {
 
                 ResourceSchedule rs = (ResourceSchedule) it.next();
                 try {
@@ -491,7 +492,7 @@ public class ScheduleThread
      */
     public void run(){
         boolean isDebug = _log.isDebugEnabled();
-        while (_shouldDie == false) {
+        while (!_shouldDie) {
             long timeOfNext = collect();
             long now = System.currentTimeMillis();
             if (timeOfNext > now) {
@@ -509,6 +510,7 @@ public class ScheduleThread
                 }
             }
         }
+        _log.info("Schedule thread shut down");
     }
 
     /**
