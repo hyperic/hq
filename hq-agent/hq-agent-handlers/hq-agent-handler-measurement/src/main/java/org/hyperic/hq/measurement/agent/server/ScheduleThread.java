@@ -73,12 +73,12 @@ public class ScheduleThread
 
     private static final Log _log = LogFactory.getLog(ScheduleThread.class.getName());
 
-    private final Map          _schedules;   // AppdefID -> Schedule
-    private volatile boolean   _shouldDie;   // Should I shut down?
-    private final Object       _interrupter; // Interrupt object
-    private final HashMap      _errors;      // Hash of DSNs to their errors
+    private final Map<String,ResourceSchedule>    _schedules;   // AppdefID -> Schedule
+    private volatile boolean                      _shouldDie;   // Should I shut down?
+    private final Object                          _interrupter; // Interrupt object
+    private final HashMap<String,String>          _errors;      // Hash of DSNs to their errors
 
-    private final HashMap _executors;     // Domain -> ExecutorService
+    private final HashMap<String,ExecutorService> _executors;     // Domain -> ExecutorService
 
     private MeasurementValueGetter   _manager;
     private Sender                   _sender;  // Guy handling the results
@@ -95,27 +95,27 @@ public class ScheduleThread
         private Schedule _schedule = new Schedule();
         private AppdefEntityID _id;
         private long _lastUnreachble = 0;
-        private List _retry = new ArrayList();
+        private List<ScheduledMeasurement> _retry = new ArrayList<ScheduledMeasurement>();
         private IntHashMap _collected = new IntHashMap();
     }
 
     ScheduleThread(Sender sender, MeasurementValueGetter manager)
         throws AgentStartException 
     {
-        _schedules    = new HashMap();
+        _schedules    = new HashMap<String,ResourceSchedule>();
         _shouldDie    = false;
         _interrupter  = new Object();
         _manager      = manager;
         _sender       = sender;               
-        _errors       = new HashMap();
-        _executors    = new HashMap();
+        _errors       = new HashMap<String,String>();
+        _executors    = new HashMap<String,ExecutorService>();
     }
 
     private ResourceSchedule getSchedule(ScheduledMeasurement meas) {
         String key = meas.getEntity().getAppdefKey();
         ResourceSchedule schedule;
         synchronized (_schedules) {
-            schedule = (ResourceSchedule)_schedules.get(key);
+            schedule = _schedules.get(key);
             if (schedule == null) {
                 schedule = new ResourceSchedule();
                 schedule._id = meas.getEntity();
@@ -148,7 +148,7 @@ public class ScheduleThread
 
         ResourceSchedule rs;
         synchronized (_schedules) {
-            rs = (ResourceSchedule)_schedules.remove(key);
+            rs = _schedules.remove(key);
         }
 
         if (rs == null) {
@@ -162,8 +162,8 @@ public class ScheduleThread
             _stat_numMetricsScheduled -= items.length;            
         }
 
-        for (int i=0; i<items.length; i++) {
-            ScheduledMeasurement meas = (ScheduledMeasurement)items[i].getObj();
+        for (ScheduledItem item : items) {
+            ScheduledMeasurement meas = (ScheduledMeasurement) item.getObj();
             //For plugin/Collector awareness
             ParsedTemplate tmpl = getParsedTemplate(meas);
             tmpl.metric.setInterval(-1);
@@ -210,7 +210,7 @@ public class ScheduleThread
         boolean isDebug = _log.isDebugEnabled();
 
         synchronized(_errors){
-            oldMsg = (String)_errors.get(tmpl.metric.toString());
+            oldMsg = _errors.get(tmpl.metric.toString());
         }
 
         if(!isDebug && oldMsg != null && oldMsg.equals(msg)){
@@ -234,7 +234,11 @@ public class ScheduleThread
     /**
      * A method which does the main logging for the run() method.  It
      * ensures that we don't perform excessive logging when plugins
-     * generate a lot of errors. 
+     * generate a lot of errors.
+     *
+     * @param basicMsg The basic log message
+     * @param tmpl The template causing the errors
+     * @param exc The Exception to be logged.
      */
     private void logCache(String basicMsg, ParsedTemplate tmpl, Exception exc){
         logCache(basicMsg, tmpl, exc.getMessage(), exc, false);
@@ -416,7 +420,7 @@ public class ScheduleThread
 
             ExecutorService svc;
             synchronized (_executors) {
-                svc = (ExecutorService)_executors.get(tmpl.plugin);
+                svc = _executors.get(tmpl.plugin);
                 if (svc == null) {
                     _log.info("Creating executor for domain '" + tmpl.plugin + "'");
                     // TODO: Optional thread pool
@@ -474,13 +478,13 @@ public class ScheduleThread
     private long collect() {
         long timeOfNext = 0;
         
-        Map schedules = null;
+        Map<String,ResourceSchedule> schedules = null;
         synchronized (_schedules) {
             if (_schedules.size() == 0) {
                 //nothing scheduled
                 timeOfNext = POLL_PERIOD + System.currentTimeMillis();
             } else {
-                schedules = new HashMap(_schedules);
+                schedules = new HashMap<String,ResourceSchedule>(_schedules);
             }
         }
 
