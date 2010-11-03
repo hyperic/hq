@@ -263,6 +263,9 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     @Transactional(readOnly = true)
     public Collection<PlatformType> findUnsupportedPlatformTypes() {
+        org.hyperic.hq.inventory.domain.Platform plat = new org.hyperic.hq.inventory.domain.Platform();
+        plat.setFqdn("foo");
+      
         Collection<PlatformType> platformTypes = findAllPlatformTypes();
 
         for (Iterator<PlatformType> it = platformTypes.iterator(); it.hasNext();) {

@@ -138,6 +138,8 @@ public class PlatformManagerTest
 
     @Test
     public void testFindPlatformType() {
+        org.hyperic.hq.inventory.domain.Platform platform = new org.hyperic.hq.inventory.domain.Platform();
+        platform.setFqdn("foo.bar");
         PlatformType pType = platformManager.findPlatformType(testPlatformTypes.get(0).getId());
         assertEquals("Incorrect PlatformType Found ById", pType, testPlatformTypes.get(0));
     }
