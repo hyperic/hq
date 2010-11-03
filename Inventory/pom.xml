@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.hyperic.hq.inventory</groupId>
+	<groupId>org.hyperic.hq</groupId>
 	<artifactId>Inventory</artifactId>
-	<packaging>war</packaging>
-	<version>0.1.0.BUILD-SNAPSHOT</version>
+	<packaging>jar</packaging>
+	<version>4.5.0.BUILD-SNAPSHOT</version>
 	<name>Inventory</name>
 	<properties>
 		<roo.version>1.1.0.RELEASE</roo.version>
@@ -360,14 +360,6 @@
     </dependencies>
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<version>2.1-beta-1</version>
-				<!--
-					<configuration> <webXml>target/web.xml</webXml> </configuration>
-				-->
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
