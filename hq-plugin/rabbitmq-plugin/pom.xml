@@ -63,6 +63,17 @@
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.agent</groupId>
+			<artifactId>hq-agent-core</artifactId>
+			<version>${project.version}</version>
+            <scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.hqapi</groupId>
+			<artifactId>hqapi1</artifactId>
+            <scope>compile</scope>
+		</dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
@@ -171,6 +182,30 @@
             <name>Spring Framework Maven Snapshot Repository</name>
             <url>http://maven.springframework.org/snapshot</url>
         </repository>
+		<repository>
+			<id>hqapi-snapshot</id>
+			<name>HQApi Snapshot Repository</name>
+			<url>http://maven.hyperic.org/hqapi/snapshot</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>hqapi-release</id>
+			<name>HQApi Release Repository</name>
+			<url>http://maven.hyperic.org/hqapi/release</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>hqapi-milestone</id>
+			<name>HQApi Milestone Repository</name>
+			<url>http://maven.hyperic.org/hqapi/milestone</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
     </repositories>
 
 </project>

@@ -29,6 +29,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,6 +38,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.collect.*;
 import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
 import org.hyperic.hq.plugin.rabbitmq.core.*;
+import org.hyperic.hq.plugin.rabbitmq.manage.RabbitTransientResourceManager;
+import org.hyperic.hq.plugin.rabbitmq.manage.TransientResourceManager;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.*;
 import org.hyperic.util.config.ConfigResponse;
@@ -111,9 +114,27 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         if (rabbitResources != null && rabbitResources.size() > 0) {
             serviceResources.addAll(rabbitResources);
         }
+                        
+        syncServices(serviceConfig, rabbitResources);
+
         return serviceResources;
     }
+    
+    private void syncServices(ConfigResponse serviceConfig, List<ServiceResource> rabbitResources) {
+        
+    	try {
+            Properties props = new Properties();
+            props.putAll(serviceConfig.toProperties());
+            props.putAll(getManager().getProperties());
 
+            TransientResourceManager manager = new RabbitTransientResourceManager(props);
+            manager.syncServices(rabbitResources);
+
+        } catch (Throwable e) {
+            logger.info("Could not sync transient services: " + e.getMessage(), e);
+        }
+    }
+    
     /**
      * Create RabbitMQ-specific resources to add to inventory.
      * @param serviceConfig
