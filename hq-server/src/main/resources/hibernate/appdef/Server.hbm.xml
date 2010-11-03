@@ -68,14 +68,14 @@
       <column name="LOCATION" not-null="false" length="100"/>
     </property>
 
-    <properties name="serverAiidIdx">
+    <!-- <properties name="serverAiidIdx"> -->
       <many-to-one name="platform" class="Platform">
         <column name="PLATFORM_ID" not-null="false" unique-key="EAM_SERVER_AIID_IDX"/>
       </many-to-one>
       <property name="autoinventoryIdentifier" type="string">
         <column name="AUTOINVENTORYIDENTIFIER" not-null="false" length="250" unique-key="EAM_SERVER_AIID_IDX"/>
       </property>
-    </properties>
+    <!-- </properties> -->
 
     <property name="runtimeAutodiscovery" type="boolean">
       <column name="RUNTIMEAUTODISCOVERY" not-null="false"/>

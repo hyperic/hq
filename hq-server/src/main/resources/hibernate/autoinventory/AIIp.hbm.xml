@@ -42,14 +42,14 @@
       <column name="VERSION_COL" default="0"/>
     </version>
 
-    <properties name="aIIpId" unique="true">
+    <!--  <properties name="aIIpId" unique="true">-->
       <many-to-one name="AIPlatform" class="AIPlatform">
         <column name="AIQ_PLATFORM_ID"/>
       </many-to-one>
       <property name="address" type="string">
         <column name="ADDRESS" not-null="true" length="64"/>
       </property>
-    </properties>
+    <!-- </properties> -->
 
     <property name="netmask" type="string">
       <column name="NETMASK" not-null="false" length="64"/>

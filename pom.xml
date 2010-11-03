@@ -31,7 +31,7 @@
 		<freemarker.version>2.3.4</freemarker.version>
 		<getopt.version>1.0.13</getopt.version>
 		<groovy.version>1.6.7</groovy.version>
-		<hibernate.version>3.2.6.ga</hibernate.version>
+		<hibernate.version>3.5.6-Final</hibernate.version>
 		<hibernate-tools.version>3.2.3.GA</hibernate-tools.version>
 		<hqapi.version>4.0.0</hqapi.version>
 		<httpclient.version>3.1</httpclient.version>
@@ -47,7 +47,7 @@
 		<jstl.version>1.1.2</jstl.version>
 		<jug.version>2.0.0</jug.version>
 		<junit.version>4.6</junit.version>
-		<log4j.version>1.2.14</log4j.version>
+		<log4j.version>1.2.16</log4j.version>
 		<mail.version>1.4</mail.version>
 		<mx4j.version>3.0.1</mx4j.version>
 		<mysql.connector.version>5.1.10</mysql.connector.version>
@@ -59,6 +59,7 @@
 		<roo.version>1.0.2.RELEASE</roo.version>
 		<servlet-api.version>2.4</servlet-api.version>
 		<sigar.version>1.6.4</sigar.version>
+		<slf4j.version>1.6.1</slf4j.version>
 		<snmp.version>1.11</snmp.version>
 		<spring-framework.version>3.0.5.RELEASE</spring-framework.version>
 		<spring-security.version>3.0.0.RELEASE</spring-security.version>
@@ -188,16 +189,35 @@
 				<version>${groovy.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate</artifactId>
-				<version>${hibernate.version}</version>
-				<exclusions>
-                	<exclusion>
-                		<groupId>javax.transaction</groupId>
-                   		<artifactId>jta</artifactId>
-                	</exclusion>
-				</exclusions>
-			</dependency>
+            	<groupId>org.hibernate</groupId>
+            	<artifactId>hibernate-core</artifactId>
+            	<version>${hibernate.version}</version>
+        	</dependency>
+			<dependency>
+            	<groupId>org.hibernate</groupId>
+            	<artifactId>hibernate-jmx</artifactId>
+            	<version>${hibernate.version}</version>
+        	</dependency>
+			<dependency>
+            	<groupId>org.hibernate</groupId>
+            	<artifactId>hibernate-entitymanager</artifactId>
+            	<version>${hibernate.version}</version>
+        	</dependency>
+			<dependency>
+            	<groupId>org.slf4j</groupId>
+            	<artifactId>slf4j-api</artifactId>
+            	<version>${slf4j.version}</version>
+        	</dependency>
+        	<dependency>
+            	<groupId>org.slf4j</groupId>
+            	<artifactId>jcl-over-slf4j</artifactId>
+            	<version>${slf4j.version}</version>
+        	</dependency>
+        	<dependency>
+            	<groupId>org.slf4j</groupId>
+            	<artifactId>slf4j-log4j12</artifactId>
+            	<version>${slf4j.version}</version>
+        	</dependency>
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-tools</artifactId>

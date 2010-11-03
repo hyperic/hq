@@ -46,7 +46,7 @@
       <column name="MTIME" not-null="false"/>
     </property>
 
-    <properties name="appSvcDepId" unique="true">
+    <!-- <properties name="appSvcDepId" unique="true"> -->
       <many-to-one name="appService" class="AppService">
         <column name="APPSERVICE_ID" not-null="false"/>
       </many-to-one>
@@ -54,7 +54,7 @@
       <many-to-one name="dependentService" class="AppService">
         <column name="DEPENDENT_SERVICE_ID" not-null="false" index="DEPENDENT_SVC_ID_IDX"/>
       </many-to-one>
-    </properties>
+    <!--  </properties>-->
   </class>
 
 </hibernate-mapping>

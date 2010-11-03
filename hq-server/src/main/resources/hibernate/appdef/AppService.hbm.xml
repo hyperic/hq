@@ -42,7 +42,7 @@
       <column name="VERSION_COL" default="0"/>
     </version>
 
-    <properties name="appServiceId" unique="true">
+   <!--   <properties name="appServiceId" unique="true"> -->
       <many-to-one name="service" class="org.hyperic.hq.appdef.server.session.Service">
         <column name="SERVICE_ID" not-null="false"/>
       </many-to-one>
@@ -54,7 +54,7 @@
       <many-to-one name="application" class="org.hyperic.hq.appdef.server.session.Application">
         <column name="APPLICATION_ID" not-null="false" index="APP_SVC_APP_ID_IDX"/>
       </many-to-one>
-    </properties>
+    <!--  </properties> -->
 
     <property name="isGroup" type="boolean">
       <column name="ISGROUP" not-null="true"/>

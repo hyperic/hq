@@ -44,7 +44,7 @@
       <column name="VERSION_COL" default="0"/>
     </version>
 
-    <properties name="subjNameByDsn" unique="true">
+    <!-- <properties name="subjNameByDsn" unique="true"> -->
       <property name="name" type="string">
         <column name="NAME" not-null="true" length="100"/>
       </property>
@@ -52,7 +52,7 @@
       <property name="authDsn" type="string">
         <column name="DSN" not-null="true" length="100"/>
       </property>
-    </properties>
+    <!-- </properties> -->
 
     <property name="sortName" type="string">
       <column name="SORT_NAME" not-null="false" length="100"/>

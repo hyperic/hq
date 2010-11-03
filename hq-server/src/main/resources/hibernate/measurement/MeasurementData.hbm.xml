@@ -29,7 +29,7 @@
 
 <hibernate-mapping package="org.hyperic.hq.measurement.server.session">
 
-  <class name="MeasurementData" table="HQ_METRIC_DATA_COMPAT" entity-name="MetricDataCompat">
+  <class table="HQ_METRIC_DATA_COMPAT" entity-name="MetricDataCompat">
     
     <composite-id name="id" class="MeasurementDataId">
       <key-property name="timestamp" type="long">
@@ -45,7 +45,7 @@
     </property>
   </class>
 
-  <class name="MeasurementData" table="HQ_METRIC_DATA_0D_0S" entity-name="MetricData_0D_0S">
+  <class table="HQ_METRIC_DATA_0D_0S" entity-name="MetricData_0D_0S">
     
     <composite-id name="id" class="MeasurementDataId">
       <key-property name="timestamp" type="long">
@@ -61,7 +61,7 @@
     </property>
   </class>
 
-  <class name="MeasurementData" table="HQ_METRIC_DATA_0D_1S" entity-name="MetricData_0D_1S">
+  <class table="HQ_METRIC_DATA_0D_1S" entity-name="MetricData_0D_1S">
     
     <composite-id name="id" class="MeasurementDataId">
       <key-property name="timestamp" type="long">
@@ -77,7 +77,7 @@
     </property>
   </class>
 
-  <class name="MeasurementData" table="HQ_METRIC_DATA_1D_0S" entity-name="MetricData_1D_0S">
+  <class table="HQ_METRIC_DATA_1D_0S" entity-name="MetricData_1D_0S">
     
     <composite-id name="id" class="MeasurementDataId">
       <key-property name="timestamp" type="long">
@@ -93,7 +93,7 @@
     </property>
   </class>
 
-  <class name="MeasurementData" table="HQ_METRIC_DATA_1D_1S" entity-name="MetricData_1D_1S">
+  <class table="HQ_METRIC_DATA_1D_1S" entity-name="MetricData_1D_1S">
     
     <composite-id name="id" class="MeasurementDataId">
       <key-property name="timestamp" type="long">
@@ -109,7 +109,7 @@
     </property>
   </class>
 
-  <class name="MeasurementData" table="HQ_METRIC_DATA_2D_0S" entity-name="MetricData_2D_0S">
+  <class table="HQ_METRIC_DATA_2D_0S" entity-name="MetricData_2D_0S">
     
     <composite-id name="id" class="MeasurementDataId">
       <key-property name="timestamp" type="long">
@@ -125,7 +125,7 @@
     </property>
   </class>
 
-  <class name="MeasurementData" table="HQ_METRIC_DATA_2D_1S" entity-name="MetricData_2D_1S">
+  <class table="HQ_METRIC_DATA_2D_1S" entity-name="MetricData_2D_1S">
     
     <composite-id name="id" class="MeasurementDataId">
       <key-property name="timestamp" type="long">
@@ -141,7 +141,7 @@
     </property>
   </class>
 
-  <class name="MeasurementData" table="HQ_METRIC_DATA_3D_0S" entity-name="MetricData_3D_0S">
+  <class table="HQ_METRIC_DATA_3D_0S" entity-name="MetricData_3D_0S">
     
     <composite-id name="id" class="MeasurementDataId">
       <key-property name="timestamp" type="long">
@@ -157,7 +157,7 @@
     </property>
   </class>
 
-  <class name="MeasurementData" table="HQ_METRIC_DATA_3D_1S" entity-name="MetricData_3D_1S">
+  <class table="HQ_METRIC_DATA_3D_1S" entity-name="MetricData_3D_1S">
     
     <composite-id name="id" class="MeasurementDataId">
       <key-property name="timestamp" type="long">
@@ -173,7 +173,7 @@
     </property>
   </class>
 
-  <class name="MeasurementData" table="HQ_METRIC_DATA_4D_0S" entity-name="MetricData_4D_0S">
+  <class  table="HQ_METRIC_DATA_4D_0S" entity-name="MetricData_4D_0S">
     
     <composite-id name="id" class="MeasurementDataId">
       <key-property name="timestamp" type="long">
@@ -189,7 +189,7 @@
     </property>
   </class>
 
-  <class name="MeasurementData" table="HQ_METRIC_DATA_4D_1S" entity-name="MetricData_4D_1S">
+  <class table="HQ_METRIC_DATA_4D_1S" entity-name="MetricData_4D_1S">
     
     <composite-id name="id" class="MeasurementDataId">
       <key-property name="timestamp" type="long">
@@ -205,7 +205,7 @@
     </property>
   </class>
 
-  <class name="MeasurementData" table="HQ_METRIC_DATA_5D_0S" entity-name="MetricData_5D_0S">
+  <class  table="HQ_METRIC_DATA_5D_0S" entity-name="MetricData_5D_0S">
     
     <composite-id name="id" class="MeasurementDataId">
       <key-property name="timestamp" type="long">
@@ -221,7 +221,7 @@
     </property>
   </class>
 
-  <class name="MeasurementData" table="HQ_METRIC_DATA_5D_1S" entity-name="MetricData_5D_1S">
+  <class table="HQ_METRIC_DATA_5D_1S" entity-name="MetricData_5D_1S">
     
     <composite-id name="id" class="MeasurementDataId">
       <key-property name="timestamp" type="long">
@@ -237,7 +237,7 @@
     </property>
   </class>
 
-  <class name="MeasurementData" table="HQ_METRIC_DATA_6D_0S" entity-name="MetricData_6D_0S">
+  <class  table="HQ_METRIC_DATA_6D_0S" entity-name="MetricData_6D_0S">
     
     <composite-id name="id" class="MeasurementDataId">
       <key-property name="timestamp" type="long">
@@ -253,7 +253,7 @@
     </property>
   </class>
 
-  <class name="MeasurementData" table="HQ_METRIC_DATA_6D_1S" entity-name="MetricData_6D_1S">
+  <class table="HQ_METRIC_DATA_6D_1S" entity-name="MetricData_6D_1S">
     
     <composite-id name="id" class="MeasurementDataId">
       <key-property name="timestamp" type="long">
@@ -269,7 +269,7 @@
     </property>
   </class>
 
-  <class name="MeasurementData" table="HQ_METRIC_DATA_7D_0S" entity-name="MetricData_7D_0S">
+  <class table="HQ_METRIC_DATA_7D_0S" entity-name="MetricData_7D_0S">
     
     <composite-id name="id" class="MeasurementDataId">
       <key-property name="timestamp" type="long">
@@ -285,7 +285,7 @@
     </property>
   </class>
 
-  <class name="MeasurementData" table="HQ_METRIC_DATA_7D_1S" entity-name="MetricData_7D_1S">
+  <class table="HQ_METRIC_DATA_7D_1S" entity-name="MetricData_7D_1S">
     
     <composite-id name="id" class="MeasurementDataId">
       <key-property name="timestamp" type="long">
@@ -301,7 +301,7 @@
     </property>
   </class>
 
-  <class name="MeasurementData" table="HQ_METRIC_DATA_8D_0S" entity-name="MetricData_8D_0S">
+  <class table="HQ_METRIC_DATA_8D_0S" entity-name="MetricData_8D_0S">
     
     <composite-id name="id" class="MeasurementDataId">
       <key-property name="timestamp" type="long">
@@ -317,7 +317,7 @@
     </property>
   </class>
 
-  <class name="MeasurementData" table="HQ_METRIC_DATA_8D_1S" entity-name="MetricData_8D_1S">
+  <class table="HQ_METRIC_DATA_8D_1S" entity-name="MetricData_8D_1S">
     
     <composite-id name="id" class="MeasurementDataId">
       <key-property name="timestamp" type="long">
