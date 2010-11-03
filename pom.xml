@@ -60,7 +60,7 @@
 		<servlet-api.version>2.4</servlet-api.version>
 		<sigar.version>1.6.4</sigar.version>
 		<snmp.version>1.11</snmp.version>
-		<spring-framework.version>3.0.1.RELEASE</spring-framework.version>
+		<spring-framework.version>3.0.5.RELEASE</spring-framework.version>
 		<spring-security.version>3.0.0.RELEASE</spring-security.version>
 		<struts.version>1.3.10</struts.version>
 		<tapestry.version>4.1.5</tapestry.version>
