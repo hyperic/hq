@@ -52,8 +52,6 @@
         <property name="url" value="${database.url}"/>
         <property name="username" value="${database.username}"/>
         <property name="password" value="${database.password}"/>
-        <property name="validationQuery" value="SELECT 1 FROM DUAL"/>
-        <property name="testOnBorrow" value="true"/>
     </bean>
     <bean class="org.springframework.orm.jpa.JpaTransactionManager" id="transactionManager">
         <property name="entityManagerFactory" ref="entityManagerFactory"/>
