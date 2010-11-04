@@ -115,7 +115,7 @@ public class ConfigurationValidator {
             return isNodeRunning(response, configuration.getNodename());
         }
         catch (Exception e) {
-            throw new PluginException("Can not connect to peer node.");
+            throw new PluginException("Can not connect to peer node.",e);
         }
         finally {
             if (conn != null) {
@@ -150,15 +150,15 @@ public class ConfigurationValidator {
      * @return
      */
     public static String validatePeerNodeName(String hostname, String peerNodeName) {
+        logger.debug("[validatePeerNodeName] hostname='" + hostname + "' peerNodeName='" + peerNodeName + "'");
+        String res = peerNodeName;
         if (Os.isFamily("windows")) {
             Pattern p = Pattern.compile("([^@]+)@");
             Matcher m = p.matcher(peerNodeName);
             String prefix = m.find() ? m.group(1) : null;
-            return prefix + hostname.toUpperCase();
-        } else {
-            return peerNodeName;
+            res = prefix + "@" + hostname.toUpperCase();
         }
+        logger.debug("[validatePeerNodeName] new peerNodeName='" + res + "'");
+        return res;
     }
-
-
 }
