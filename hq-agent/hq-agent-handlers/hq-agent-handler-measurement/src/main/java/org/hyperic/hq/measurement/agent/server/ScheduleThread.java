@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -78,7 +79,13 @@ public class ScheduleThread
     private final Object                          _interrupter; // Interrupt object
     private final HashMap<String,String>          _errors;      // Hash of DSNs to their errors
 
-    private final HashMap<String,ExecutorService> _executors;     // Domain -> ExecutorService
+    // Map of Executors, one per metric domain
+    private final HashMap<String,ExecutorService> _executors;
+    // Map of asynchronous MetricTasks pending confirmation
+    private final HashMap<FutureTask,MetricTask>   _metricCollections;
+    // The Thread confirming metric collections, cancelling tasks that exceed
+    // our timeouts.
+    private MetricCancelThread _metricCancelThread;
 
     private MeasurementValueGetter   _manager;
     private Sender                   _sender;  // Guy handling the results
@@ -99,6 +106,41 @@ public class ScheduleThread
         private IntHashMap _collected = new IntHashMap();
     }
 
+    private class MetricCancelThread extends Thread  {
+        public void run() {
+            while (!_shouldDie) {
+                synchronized (_metricCollections) {
+                    _log.debug(_metricCollections.size() + " metrics to validate.");
+                    for (Iterator<FutureTask> i = _metricCollections.keySet().iterator(); i.hasNext(); ) {
+                        FutureTask t = i.next();
+                        MetricTask mt = _metricCollections.get(t);
+                        if (t.isDone()) {
+                            _log.debug("Metric task done, duration: " + (System.currentTimeMillis() - mt.getExecuteStartTime()));
+                            i.remove();
+                        } else {
+                            // Not complete, check for timeout
+                            if ((System.currentTimeMillis() - mt.getExecuteStartTime()) >
+                                    WARN_FETCH_TIME) {
+                                _log.error("Metric took too long to run, attempting to cancel");
+                                t.cancel(true);
+                                // TODO: remove task?
+                            }
+                        }
+                    }
+                }
+
+                try {
+                    Thread.sleep(POLL_PERIOD);
+                } catch (InterruptedException e) {
+                    _log.info("MetricCancelThread interrupted!");
+                    // Ignore
+                }
+            }
+            _log.info("MetricCancelThread shutting down with " + _metricCollections.size() +
+                      " unprocessed MetricTasks");
+        }
+    }
+
     ScheduleThread(Sender sender, MeasurementValueGetter manager)
         throws AgentStartException 
     {
@@ -109,6 +151,10 @@ public class ScheduleThread
         _sender       = sender;               
         _errors       = new HashMap<String,String>();
         _executors    = new HashMap<String,ExecutorService>();
+        _metricCollections = new HashMap<FutureTask,MetricTask>();
+
+        _metricCancelThread = new MetricCancelThread();
+        _metricCancelThread.start();
     }
 
     private ResourceSchedule getSchedule(ScheduledMeasurement meas) {
@@ -127,10 +173,33 @@ public class ScheduleThread
         return schedule;
     }
 
+    // TODO: I don't think this works properly, hence the slow agent shutdowns..
     private void interruptMe(){
         synchronized (_interrupter) {
             _interrupter.notify();
         }
+    }
+
+    /**
+     * Shut down the schedule thread.
+     */
+    void die(){
+        _shouldDie = true;
+        for (String s : _executors.keySet()) {
+            ExecutorService svc = _executors.get(s);
+            List<Runnable> queuedMetrics = svc.shutdownNow();
+            _log.info("Shut down executor service for domain '" + s + "'" +
+                      " with " + queuedMetrics.size() + " queued collections");
+        }
+
+        try {
+            _metricCancelThread.interrupt();
+            _metricCancelThread.join();
+        } catch (InterruptedException e) {
+            // Ignore
+        }
+
+        interruptMe();
     }
 
     /**
@@ -193,20 +262,6 @@ public class ScheduleThread
                       getParsedTemplate(meas) + "', skipping. Cause is " +
                       e.getMessage(), e);
         }
-    }
-
-    /**
-     * Shut down the schedule thread.  
-     */
-    void die(){
-        _shouldDie = true;
-        for (String s : _executors.keySet()) {
-            ExecutorService svc = _executors.get(s);
-            List<Runnable> queuedMetrics = svc.shutdownNow();
-            _log.info("Shut down executor service for domain '" + s + "'" +
-                      " with " + queuedMetrics.size() + " queued collections");
-        }
-        interruptMe();
     }
 
     private void logCache(String basicMsg, ParsedTemplate tmpl, String msg,
@@ -294,13 +349,18 @@ public class ScheduleThread
         return _manager.getValue(tmpl.plugin, tmpl.metric);
     }
 
-    private class MetricRunner implements Runnable {
+    private class MetricTask implements Runnable {
         ResourceSchedule _rs;
         ScheduledMeasurement _meas;
+        long _executeStartTime = 0;
 
-        MetricRunner(ResourceSchedule rs, ScheduledMeasurement meas) {
+        MetricTask(ResourceSchedule rs, ScheduledMeasurement meas) {
             _rs = rs;
             _meas = meas;
+        }
+
+        public long getExecuteStartTime() {
+            return _executeStartTime;
         }
 
         public void run() {
@@ -309,7 +369,7 @@ public class ScheduleThread
             String category = _meas.getCategory();
             ParsedTemplate dsn = toParsedTemplate(_meas);
             MetricValue data = null;
-            long currTime, timeDiff;
+            _executeStartTime = System.currentTimeMillis();
             boolean success = false;
 
             if (_rs._lastUnreachble != 0) {
@@ -317,10 +377,10 @@ public class ScheduleThread
                     // Prevent stacktrace bombs if a resource is
                     // down, but don't skip processing availability metrics.
                     _stat_numMetricsFailed++;
+                    return;
                 }
             }
 
-            currTime = System.currentTimeMillis();
             // XXX -- We should do something with the exceptions here.
             //        Maybe send some kind of error back to the
             //        bizapp?
@@ -352,7 +412,7 @@ public class ScheduleThread
                 logCache("Metric Value not found", dsn, exc);
             } catch(MetricUnreachableException exc){
                 logCache("Metric unreachable", dsn, exc);
-                _rs._lastUnreachble = currTime;
+                _rs._lastUnreachble = _executeStartTime;
                 _log.warn("Disabling metrics for: " + _rs._id);
             } catch(Exception exc){
                 // Unexpected exception
@@ -361,7 +421,7 @@ public class ScheduleThread
             }
 
             // Stats stuff
-            timeDiff = System.currentTimeMillis() - currTime;
+            Long timeDiff = System.currentTimeMillis() - _executeStartTime;
 
             synchronized (_statsLock) {
                 _stat_totFetchTime += timeDiff;
@@ -375,8 +435,7 @@ public class ScheduleThread
             }
 
             if (timeDiff > WARN_FETCH_TIME) {
-                _log.warn("Collection of metric: '" + dsn +
-                          "' took: " + timeDiff + "ms");
+                _log.warn("Collection of metric: '" + dsn + "' took: " + timeDiff + "ms");
             }
 
             if (success) {
@@ -434,7 +493,10 @@ public class ScheduleThread
                 }
             }
 
-            svc.submit(new MetricRunner(rs, meas));
+            MetricTask metricTask = new MetricTask(rs, meas);
+            FutureTask<?> task = new FutureTask<Object>(metricTask, null);
+            svc.submit(task);
+            _metricCollections.put(task,metricTask);
         }
     }
 
@@ -493,15 +555,11 @@ public class ScheduleThread
             }
         }
 
-        if (_log.isDebugEnabled()) {
-            _log.debug("Platform schedule is null");
-        }
-
         if (schedules != null) {
-            for (Iterator it = schedules.values().iterator();
+            for (Iterator<ResourceSchedule> it = schedules.values().iterator();
             it.hasNext() && (!_shouldDie);) {
 
-                ResourceSchedule rs = (ResourceSchedule) it.next();
+                ResourceSchedule rs = it.next();
                 try {
                     long next = collect(rs);
                     if (timeOfNext == 0) {

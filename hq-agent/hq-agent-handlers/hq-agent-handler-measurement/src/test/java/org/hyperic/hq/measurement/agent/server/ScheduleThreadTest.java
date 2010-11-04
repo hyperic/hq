@@ -44,6 +44,8 @@ public class ScheduleThreadTest extends TestCase {
     private static final String DSN_PLATFORM_LOAD  = "sigar:Type=LoadAverage:1";
     private static final String DSN_PLATFORM_AVAIL = "system.avail:Type=Platform:Availability";
 
+    private static final String DSN_HANG_COLLECTION = "hang:Type=Hang:SomeMetric";
+
     private static boolean loggingSetup = false;
     protected void setUp() throws Exception {
         if (!loggingSetup) {
@@ -201,6 +203,39 @@ public class ScheduleThreadTest extends TestCase {
         }
     }
 
+    public void testCollectionMultiDomainHangCollection() throws Exception {
+
+        ScheduleThread st = new ScheduleThread(new SimpleSender(), new SimpleValueGetter());
+
+        st.scheduleMeasurement(createMeasurement(DSN_PLATFORM_LOAD, 100));
+        st.scheduleMeasurement(createMeasurement(DSN_HANG_COLLECTION, 1000));
+
+        Thread t = new Thread(st);
+        t.start();
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            // Ignore
+        }
+
+        // Verify against ScheduleThread statistics
+        assertEquals("Wrong number of scheduled measurements",
+                     2.0, st.getNumMetricsScheduled());
+        assertEquals("Wrong number of metric collections",
+                     13.0, st.getNumMetricsFetched());
+        assertTrue("Max fetch time is zero", st.getMaxFetchTime() > 0);
+        assertTrue("Min fetch time is zero", st.getMinFetchTime() > 0);
+        assertTrue("Tot fetch time is zero", st.getTotFetchTime() > 0);
+
+        st.die();
+        try {
+            t.join();
+        } catch (InterruptedException ie) {
+            fail("Thread should not be interrupted");
+        }
+    }
+
     public static class SimpleSender implements org.hyperic.hq.measurement.agent.server.Sender {
 
         public void processData(int dsnId, MetricValue data, int derivedID) {
@@ -214,7 +249,11 @@ public class ScheduleThreadTest extends TestCase {
 
             // introduce some latency to simulate contacting the managed resource
             try {
-                Thread.sleep(1);
+                if (metric.getDomainName().equals("hang")) {
+                    Thread.sleep(60000); // Anything > test run time..
+                } else {
+                    Thread.sleep(1);
+                }
             } catch (Exception e) {
                 // Ignore
             }
