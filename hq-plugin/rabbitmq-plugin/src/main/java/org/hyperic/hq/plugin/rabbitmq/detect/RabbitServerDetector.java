@@ -55,7 +55,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
 
     private static final Log logger = LogFactory.getLog(RabbitServerDetector.class);
 
-    private final static String PTQL_QUERY = "State.Name.sw=beam,Args.*.eq=-sname";
+    private final static String PTQL_QUERY = "State.Name.re=[beam|erl],Args.*.eq=-sname";
 
 
     /**
@@ -68,6 +68,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
 
         List<ServerResource> resources = new ArrayList<ServerResource>();
         long[] pids = getPids(PTQL_QUERY);
+        logger.debug("[] pids.length="+pids.length);
 
         if (pids.length > 0) {
             List<String> nodes = new ArrayList<String>();
