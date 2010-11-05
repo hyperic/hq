@@ -46,7 +46,7 @@ import org.hibernate.engine.SessionImplementor;
 import org.hibernate.engine.TransactionHelper;
 import org.hibernate.exception.JDBCExceptionHelper;
 import org.hibernate.id.Configurable;
-import org.hibernate.id.IdentifierGeneratorFactory;
+import org.hibernate.id.IdentifierGenerationException;
 import org.hibernate.id.PersistentIdentifierGenerator;
 import org.hibernate.mapping.Table;
 import org.hibernate.type.Type;
@@ -264,7 +264,7 @@ public class HQMultipleHiLoPerTableGenerator
             if (val == 0) {
                 val = executeInNewTransaction(transactionTemplate, session);
             }
-            Number num = IdentifierGeneratorFactory.createNumber(val, returnClass);
+            Number num = createNumber(val, returnClass);
             if (log.isTraceEnabled()) {
                 log.trace(this + " created seq: " + keyValue + " / " + num);
             }
@@ -275,7 +275,7 @@ public class HQMultipleHiLoPerTableGenerator
             hi = hival * (maxLo + 1);
             log.debug("new hi value: " + hival);
         }
-        Number num = IdentifierGeneratorFactory.createNumber(hi + lo++, returnClass);
+        Number num = createNumber(hi + lo++, returnClass);
         if (log.isTraceEnabled()) {
             log.trace(this + " created seq: " + keyValue + " / " + num);
         }
@@ -325,5 +325,20 @@ public class HQMultipleHiLoPerTableGenerator
         lo = maxLo + 1; // so we "clock over" on the first invocation
         returnClass = type.getReturnedClass();
 
+    }
+    
+    private Number createNumber(long value, Class clazz) throws IdentifierGenerationException {
+        if ( clazz == Long.class ) {
+            return new Long( value );
+        }
+        else if ( clazz == Integer.class ) {
+            return new Integer( ( int ) value );
+        }
+        else if ( clazz == Short.class ) {
+            return new Short( ( short ) value );
+        }
+        else {
+            throw new IdentifierGenerationException( "this id generator generates long, integer, short" );
+        }
     }
 }

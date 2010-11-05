@@ -45,16 +45,20 @@ import net.sf.ehcache.management.ManagementService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.ejb.EntityManagerFactoryImpl;
 import org.hibernate.jmx.StatisticsService;
 import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.common.DiagnosticsLogger;
 import org.hyperic.util.PrintfFormat;
 import org.hyperic.util.StringUtil;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
 import org.springframework.orm.hibernate3.SessionFactoryUtils;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
 /**
  * Extension of the {@link LocalSessionFactoryBean} that preloads the 2nd level
@@ -63,12 +67,15 @@ import org.springframework.orm.hibernate3.SessionFactoryUtils;
  * @author jhickey
  * 
  */
-public class CacheInitializingLocalSessionFactoryBean
-    extends LocalSessionFactoryBean {
+public class CacheInitializingLocalSessionFactoryBean implements FactoryBean<SessionFactory>,
+    DisposableBean {
 
     private List<String> classesForCache;
 
     private final Log log = LogFactory.getLog(CacheInitializingLocalSessionFactoryBean.class);
+
+    @Autowired
+    private LocalContainerEntityManagerFactoryBean entityManagerFactoryBean;
 
     @Autowired
     private MBeanServer mBeanServer;
@@ -83,37 +90,43 @@ public class CacheInitializingLocalSessionFactoryBean
         this.classesForCache = classesForCache;
     }
 
-    @Override
-    public void destroy() throws HibernateException {
-        super.destroy();
+    public void destroy() {
         try {
             mBeanServer.unregisterMBean(new ObjectName(HIBERNATE_STATS_OBJECT_NAME));
         } catch (Exception e) {
-            logger.warn("Error unregistering Hibernate Stats MBean", e);
+            log.warn("Error unregistering Hibernate Stats MBean", e);
         }
     }
 
-    @Override
-    protected void afterSessionFactoryCreation() throws Exception {
-        super.afterSessionFactoryCreation();
-        registerMBeans();
+    public SessionFactory getObject() throws Exception {
+        SessionFactory sessionFactory = ((EntityManagerFactoryImpl)entityManagerFactoryBean.getNativeEntityManagerFactory()).getSessionFactory();
+        registerMBeans(sessionFactory);
         initEhCacheDiagnostics();
-        preloadCache();
+        preloadCache(sessionFactory);
+        return sessionFactory;
     }
 
-    private void registerMBeans() throws MalformedObjectNameException,
+    public Class<?> getObjectType() {
+        return SessionFactory.class;
+    }
+
+    public boolean isSingleton() {
+        return true;
+    }
+
+    private void registerMBeans(SessionFactory sessionFactory) throws MalformedObjectNameException,
         InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException {
         ObjectName on = new ObjectName(HIBERNATE_STATS_OBJECT_NAME);
         StatisticsService mBean = new StatisticsService();
-        mBean.setSessionFactory(getSessionFactory());
+        mBean.setSessionFactory(sessionFactory);
         mBeanServer.registerMBean(mBean, on);
         ManagementService.registerMBeans(CacheManager.getInstance(), mBeanServer, false, false,
             false, true);
     }
 
     @SuppressWarnings("unchecked")
-    private void preloadCache() {
-        Session session = SessionFactoryUtils.getSession(getSessionFactory(), true);
+    private void preloadCache(SessionFactory sessionFactory) {
+        Session session = SessionFactoryUtils.getSession(sessionFactory, true);
         for (String className : classesForCache) {
             Class<?> clazz;
             className = className.trim();

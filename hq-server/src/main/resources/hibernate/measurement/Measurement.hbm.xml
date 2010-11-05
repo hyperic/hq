@@ -44,14 +44,14 @@
       <column name="VERSION_COL" default="0"/>
     </version>
 
-    <properties name="measurementId" unique="true">
+    <!--  <properties name="measurementId" unique="true">-->
       <property name="instanceId" type="integer">
         <column name="INSTANCE_ID" not-null="true"/>
       </property>
       <many-to-one name="template" class="MeasurementTemplate">
         <column name="TEMPLATE_ID" index="MEAS_TEMPLATE_ID" not-null="true"/>
       </many-to-one>
-    </properties>
+    <!-- </properties> -->
 
     <property name="mtime" type="long">
       <column name="MTIME" not-null="true"/>

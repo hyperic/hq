@@ -38,8 +38,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.hibernate.ObjectNotFoundException;
-import org.hibernate.SessionFactory;
+import javax.persistence.EntityNotFoundException;
+
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
@@ -52,8 +52,8 @@ import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.OperationDAO;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
+import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.RoleManager;
@@ -106,9 +106,6 @@ public class AlertManagerTest
 
     @Autowired
     private MeasurementManager measurementManager;
-
-    @Autowired
-    private SessionFactory sessionFactory;
 
     private AlertDefinition testPlatformAlertDef;
 
@@ -373,7 +370,7 @@ public class AlertManagerTest
     public void testLogActionDetail() {
         Action alertAction = Action.newNoOpAction();
         // Save transient instance of Action before flushing
-        sessionFactory.getCurrentSession().save(alertAction);
+        getCurrentSession().save(alertAction);
         long ctime = System.currentTimeMillis();
         Alert testPlatformAlert = alertManager.createAlert(this.testPlatformAlertDef, ctime);
         testPlatformAlert.createActionLog("Notified users:", alertAction, authzSubjectManager
@@ -406,19 +403,19 @@ public class AlertManagerTest
         try {
             alertManager.findAlertById(testPlatformAlert.getId());
             fail("Alert was not deleted");
-        } catch (ObjectNotFoundException e) {
+        } catch (EntityNotFoundException e) {
             // expected
         }
         try {
             alertManager.findAlertById(testServerAlert.getId());
             fail("Alert was not deleted");
-        } catch (ObjectNotFoundException e) {
+        } catch (EntityNotFoundException e) {
             // expected
         }
         try {
             alertManager.findAlertById(testServiceAlert.getId());
             fail("Alert was not deleted");
-        } catch (ObjectNotFoundException e) {
+        } catch (EntityNotFoundException e) {
             // expected
         }
     }
@@ -438,19 +435,19 @@ public class AlertManagerTest
         try {
             alertManager.findAlertById(testPlatformAlert.getId());
             fail("Alert was not deleted");
-        } catch (ObjectNotFoundException e) {
+        } catch (EntityNotFoundException e) {
             // expected
         }
         try {
             alertManager.findAlertById(testServerAlert.getId());
             fail("Alert was not deleted");
-        } catch (ObjectNotFoundException e) {
+        } catch (EntityNotFoundException e) {
             // expected
         }
         try {
             alertManager.findAlertById(testServiceAlert.getId());
             fail("Alert was not deleted");
-        } catch (ObjectNotFoundException e) {
+        } catch (EntityNotFoundException e) {
             // expected
         }
     }
@@ -484,7 +481,7 @@ public class AlertManagerTest
         try {
             alertManager.findAlertById(alert.getId());
             fail("alertId=" + alert.getId() + " was not deleted");
-        } catch (ObjectNotFoundException e) {
+        } catch (EntityNotFoundException e) {
             // expected
         }
     }
@@ -911,11 +908,11 @@ public class AlertManagerTest
         int appDefType = testPlatform.getResource().getResourceType().getAppdefType();
         MonitorableType monitor_Type = new MonitorableType("Platform monitor", appDefType, "test");
         Category cate = new Category("Test Category");
-        sessionFactory.getCurrentSession().save(monitor_Type);
-        sessionFactory.getCurrentSession().save(cate);
+        getCurrentSession().save(monitor_Type);
+        getCurrentSession().save(cate);
         MeasurementTemplate testTempl = new MeasurementTemplate("AvailabilityTemplate", "avail",
             "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
-        sessionFactory.getCurrentSession().save(testTempl);
+        getCurrentSession().save(testTempl);
         List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
             .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
             new ConfigResponse());
@@ -940,11 +937,11 @@ public class AlertManagerTest
         int appDefType = testPlatform.getResource().getResourceType().getAppdefType();
         MonitorableType monitor_Type = new MonitorableType("Platform monitor", appDefType, "test");
         Category cate = new Category("Test Category");
-        sessionFactory.getCurrentSession().save(monitor_Type);
-        sessionFactory.getCurrentSession().save(cate);
+        getCurrentSession().save(monitor_Type);
+        getCurrentSession().save(cate);
         MeasurementTemplate testTempl = new MeasurementTemplate("HeapMemoryTemplate", "avail",
             "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
-        sessionFactory.getCurrentSession().save(testTempl);
+        getCurrentSession().save(testTempl);
         List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
             .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
             new ConfigResponse());
@@ -967,11 +964,11 @@ public class AlertManagerTest
         int appDefType = testPlatform.getResource().getResourceType().getAppdefType();
         MonitorableType monitor_Type = new MonitorableType("Platform monitor", appDefType, "test");
         Category cate = new Category("Test Category");
-        sessionFactory.getCurrentSession().save(monitor_Type);
-        sessionFactory.getCurrentSession().save(cate);
+        getCurrentSession().save(monitor_Type);
+        getCurrentSession().save(cate);
         MeasurementTemplate testTempl = new MeasurementTemplate("ControlTemplate", "avail",
             "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
-        sessionFactory.getCurrentSession().save(testTempl);
+        getCurrentSession().save(testTempl);
         List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
             .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
             new ConfigResponse());
@@ -993,11 +990,11 @@ public class AlertManagerTest
         int appDefType = testPlatform.getResource().getResourceType().getAppdefType();
         MonitorableType monitor_Type = new MonitorableType("Platform monitor", appDefType, "test");
         Category cate = new Category("Test Category");
-        sessionFactory.getCurrentSession().save(monitor_Type);
-        sessionFactory.getCurrentSession().save(cate);
+        getCurrentSession().save(monitor_Type);
+        getCurrentSession().save(cate);
         MeasurementTemplate testTempl = new MeasurementTemplate("ChangeConfigemplate", "avail",
             "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
-        sessionFactory.getCurrentSession().save(testTempl);
+        getCurrentSession().save(testTempl);
         List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
             .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
             new ConfigResponse());
@@ -1020,11 +1017,11 @@ public class AlertManagerTest
         int appDefType = testPlatform.getResource().getResourceType().getAppdefType();
         MonitorableType monitor_Type = new MonitorableType("Platform monitor", appDefType, "test");
         Category cate = new Category("Test Category");
-        sessionFactory.getCurrentSession().save(monitor_Type);
-        sessionFactory.getCurrentSession().save(cate);
+        getCurrentSession().save(monitor_Type);
+        getCurrentSession().save(cate);
         MeasurementTemplate testTempl = new MeasurementTemplate("CustomPropertyTemplate", "avail",
             "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
-        sessionFactory.getCurrentSession().save(testTempl);
+        getCurrentSession().save(testTempl);
         List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
             .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
             new ConfigResponse());
@@ -1050,11 +1047,11 @@ public class AlertManagerTest
         int appDefType = testPlatform.getResource().getResourceType().getAppdefType();
         MonitorableType monitor_Type = new MonitorableType("Platform monitor", appDefType, "test");
         Category cate = new Category("Test Category");
-        sessionFactory.getCurrentSession().save(monitor_Type);
-        sessionFactory.getCurrentSession().save(cate);
+        getCurrentSession().save(monitor_Type);
+        getCurrentSession().save(cate);
         MeasurementTemplate testTempl = new MeasurementTemplate("LogTemplate", "avail",
             "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
-        sessionFactory.getCurrentSession().save(testTempl);
+        getCurrentSession().save(testTempl);
         List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
             .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
             new ConfigResponse());
@@ -1080,11 +1077,11 @@ public class AlertManagerTest
         int appDefType = testPlatform.getResource().getResourceType().getAppdefType();
         MonitorableType monitor_Type = new MonitorableType("Platform monitor", appDefType, "test");
         Category cate = new Category("Test Category");
-        sessionFactory.getCurrentSession().save(monitor_Type);
-        sessionFactory.getCurrentSession().save(cate);
+        getCurrentSession().save(monitor_Type);
+        getCurrentSession().save(cate);
         MeasurementTemplate testTempl = new MeasurementTemplate("LogTemplate", "avail",
             "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
-        sessionFactory.getCurrentSession().save(testTempl);
+        getCurrentSession().save(testTempl);
         List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
             .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
             new ConfigResponse());
@@ -1103,7 +1100,7 @@ public class AlertManagerTest
         AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
         Action alertAction = Action.newNoOpAction();
         // Save transient instance of Action before flushing
-        sessionFactory.getCurrentSession().save(alertAction);
+        getCurrentSession().save(alertAction);
         long ctime = System.currentTimeMillis();
         Alert testPlatformAlert = alertManager.createAlert(this.testPlatformAlertDef, ctime);
         testPlatformAlert.createActionLog("Notified users:", alertAction, overlord); // Flush

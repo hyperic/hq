@@ -42,14 +42,14 @@
       <column name="VERSION_COL" default="0"/>
     </version>
 
-    <properties name="aIServerId">
+    <!--  <properties name="aIServerId">-->
       <many-to-one name="AIPlatform" class="AIPlatform">
         <column name="AIQ_PLATFORM_ID" not-null="false" unique-key="AIQ_SERVER_UNIQUE_IDX"/>
       </many-to-one>
       <property name="autoinventoryIdentifier" type="string">
         <column name="AUTOINVENTORYIDENTIFIER" not-null="false" length="255" unique-key="AIQ_SERVER_UNIQUE_IDX"/>
       </property>
-    </properties>
+    <!--  </properties>-->
 
     <property name="name" type="string">
       <column name="NAME" index="AIQ_SERVER_NAME" not-null="true" length="255"/>

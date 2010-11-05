@@ -29,7 +29,7 @@
 
 <hibernate-mapping package="org.hyperic.hq.measurement.server.session">
 
-  <class name="MeasurementHistData" table="EAM_MEASUREMENT_DATA_1H" entity-name="MeasumentData1H">
+  <class table="EAM_MEASUREMENT_DATA_1H" entity-name="MeasumentData1H">
     <composite-id name="id" class="MeasurementDataId">
       <key-property name="timestamp" type="long">
         <column name="TIMESTAMP" not-null="true"/>
@@ -52,7 +52,7 @@
     </property>
   </class>
 
-  <class name="MeasurementHistData" entity-name="MeasurementData6H" table="EAM_MEASUREMENT_DATA_6H">
+  <class entity-name="MeasurementData6H" table="EAM_MEASUREMENT_DATA_6H">
     <composite-id name="id" class="MeasurementDataId">
       <key-property name="timestamp" type="long">
         <column name="TIMESTAMP" not-null="true"/>
@@ -75,7 +75,7 @@
     </property>
   </class>
 
-  <class name="MeasurementHistData" entity-name="MeasurementData1D" table="EAM_MEASUREMENT_DATA_1D">
+  <class  entity-name="MeasurementData1D" table="EAM_MEASUREMENT_DATA_1D">
     <composite-id name="id" class="MeasurementDataId">
       <key-property name="timestamp" type="long">
         <column name="TIMESTAMP" not-null="true"/>

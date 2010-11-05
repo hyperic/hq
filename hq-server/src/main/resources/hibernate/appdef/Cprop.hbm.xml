@@ -42,7 +42,7 @@
       <column name="VERSION_COL" default="0"/>
     </version>
 
-    <properties name="cpropId" unique="true">
+    <!-- <properties name="cpropId" unique="true">-->
       <property name="appdefId" type="integer">
         <column name="APPDEF_ID" not-null="true"/>
       </property>
@@ -52,7 +52,7 @@
       <property name="valueIdx" type="integer">
         <column name="VALUE_IDX" not-null="true"/>
       </property>
-    </properties>
+   <!--  </properties> -->
 
     <property name="propValue" type="string">
       <column name="PROPVALUE" not-null="true" length="1000"/>

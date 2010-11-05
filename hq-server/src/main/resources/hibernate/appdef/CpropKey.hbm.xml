@@ -42,7 +42,7 @@
       <column name="VERSION_COL" default="0"/>
     </version>
 
-    <properties name="cpropKeyId" unique="true">
+    <!--  <properties name="cpropKeyId" unique="true">-->
       <property name="appdefType" type="integer">
         <column name="APPDEF_TYPE" not-null="true"/>
       </property>		
@@ -52,7 +52,7 @@
       <property name="key" type="string">
         <column name="PROPKEY" not-null="true" length="100"/>
       </property>
-    </properties>
+    <!--  </properties>-->
 
     <property name="description" type="string">
       <column name="DESCRIPTION" not-null="true" length="200"/>

@@ -55,6 +55,7 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.inventory.domain.PlatformNG;
 import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.hyperic.util.pager.PageControl;
@@ -62,6 +63,7 @@ import org.hyperic.util.pager.PageList;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Integration test of the {@link PlatformManagerImpl}
@@ -113,7 +115,7 @@ public class PlatformManagerTest
     public void initializeTestData() throws ApplicationException, NotFoundException {
         String agentToken = "agentToken123";
         testAgent = createAgent("127.0.0.1", 2144, "authToken", agentToken, "4.5");
-
+        flushSession();
         testPlatformTypes = createTestPlatformTypes();
         // Get Linux platform type
         testPlatformType = testPlatformTypes.get(9);
@@ -138,8 +140,10 @@ public class PlatformManagerTest
 
     @Test
     public void testFindPlatformType() {
-        org.hyperic.hq.inventory.domain.Platform platform = new org.hyperic.hq.inventory.domain.Platform();
+        PlatformNG platform = new PlatformNG();
         platform.setFqdn("foo.bar");
+        platform.setName("TestPlatform");
+        platform.persist();
         PlatformType pType = platformManager.findPlatformType(testPlatformTypes.get(0).getId());
         assertEquals("Incorrect PlatformType Found ById", pType, testPlatformTypes.get(0));
     }

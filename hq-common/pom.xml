@@ -28,19 +28,15 @@
 			<artifactId>commons-logging</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>net.sf.ehcache</groupId>
-					<artifactId>ehcache</artifactId>
-				</exclusion>
-				<exclusion>
-                	<groupId>javax.transaction</groupId>
-                   	<artifactId>jta</artifactId>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+ 			<exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
                 </exclusion>
 			</exclusions>
-		</dependency>
+        </dependency>
 		<dependency>
 			<groupId>org.hyperic</groupId>
 			<artifactId>sigar</artifactId>
@@ -96,7 +92,7 @@
 		<repository>
 			<id>jboss</id>
 			<name>JBoss Repository</name>
-			<url>http://repository.jboss.com/maven2</url>
+			<url>http://repository.jboss.org/nexus/content/groups/public-jboss</url>
 		</repository>
 	</repositories>
 

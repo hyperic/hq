@@ -26,8 +26,6 @@
 
 package org.hyperic.hq.galerts.server.session;
 
-import static org.junit.Assert.assertEquals;
-
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -40,7 +38,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.escalation.server.session.Escalation;
-import org.hyperic.hq.escalation.server.session.EscalationState;
 import org.hyperic.hq.escalation.server.session.EscalationStateDAO;
 import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.AlertSeverity;
@@ -124,11 +121,11 @@ public class GalertManagerTest
         MonitorableType monitorType = new MonitorableType("Platform monitor",
             AppdefEntityConstants.APPDEF_TYPE_PLATFORM, "test");
         Category cate = new Category("Test Category");
-        sessionFactory.getCurrentSession().save(monitorType);
-        sessionFactory.getCurrentSession().save(cate);
+        getCurrentSession().save(monitorType);
+        getCurrentSession().save(cate);
         this.template = new MeasurementTemplate("HeapMemoryTemplate", "avail", "percentage", 1,
             true, 1l, true, "Availability:avail", monitorType, cate, "test");
-        sessionFactory.getCurrentSession().save(template);
+        getCurrentSession().save(template);
 
         // Instance Data
         createAgent("127.0.0.1", 2344, "authToken", "agentToken", "4.5");

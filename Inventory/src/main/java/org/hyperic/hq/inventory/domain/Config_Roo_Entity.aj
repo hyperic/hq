@@ -14,6 +14,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Version;
+
+import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.inventory.domain.Config;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +27,8 @@ privileged aspect Config_Roo_Entity {
     transient EntityManager Config.entityManager;
     
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GenericGenerator(name="id_gen",strategy="org.hyperic.hq.id.IdentifierGenerator")
+    @GeneratedValue(generator="id_gen")
     @Column(name = "id")
     private Long Config.id;
     

@@ -35,9 +35,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.EntityManagerFactory;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
+import org.hibernate.ejb.EntityManagerImpl;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AIAuditFactory;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -82,6 +85,7 @@ import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 
 public class RuntimeReportProcessor {
     private final Log log = LogFactory.getLog(RuntimeReportProcessor.class);
@@ -115,7 +119,7 @@ public class RuntimeReportProcessor {
     private String _agentToken;
     private ServiceTypeFactory serviceTypeFactory;
     private AIAuditFactory aiAuditFactory;
-    private SessionFactory sessionFactory;
+    private EntityManagerFactory entityManagerFactory;
 
     @Autowired
     public RuntimeReportProcessor(AutoinventoryManager aiMgr, PlatformManager platformMgr, ServerManager serverMgr,
@@ -123,7 +127,7 @@ public class RuntimeReportProcessor {
                                   CPropManager cpropMgr, AgentManager agentManager,
                                   ServiceTypeFactory serviceTypeFactory, AIAuditFactory aiAuditFactory, AuditManager auditManager,
                                   ResourceManager resourceManager, MeasurementProcessor measurementProcessor, ZeventEnqueuer zEventManager,
-                                  SessionFactory sessionFactory) {
+                                  EntityManagerFactory entityManagerFactory) {
         aiManager = aiMgr;
         platformManager = platformMgr;
         serverManager = serverMgr;
@@ -138,7 +142,7 @@ public class RuntimeReportProcessor {
         this.resourceManager = resourceManager;
         this.measurementProcessor = measurementProcessor;
         this.zEventManager = zEventManager;
-        this.sessionFactory = sessionFactory;
+        this.entityManagerFactory=entityManagerFactory;
     }
 
     public void processRuntimeReport(AuthzSubject subject, String agentToken, CompositeRuntimeResourceReport crrr)
@@ -267,7 +271,8 @@ public class RuntimeReportProcessor {
     
     private void flushCurrentSession()
     {
-        sessionFactory.getCurrentSession().flush();
+        ((EntityManagerImpl) EntityManagerFactoryUtils
+            .getTransactionalEntityManager(entityManagerFactory)).getSession().flush();
     }
     
     private boolean isValid(Server server) {

@@ -43,14 +43,14 @@
       <column name="VERSION_COL" default="0"/>
     </version>
 
-    <properties name="configPropertyId" unique="true">
+    <!--  <properties name="configPropertyId" unique="true"> -->
       <property name="prefix" type="string">
         <column name="PREFIX" not-null="false" length="80"/>
       </property>
       <property name="key" type="string">
         <column name="PROPKEY" not-null="false" length="80"/>
       </property>
-    </properties>
+    <!-- </properties>  -->
 
     <property name="value" type="string">
       <column name="PROPVALUE" length="300"/>

@@ -41,7 +41,6 @@
 	<classpathentry kind="var" path="M2_REPO/org/apache/geronimo/specs/geronimo-jta_1.0.1B_spec/1.0.1/geronimo-jta_1.0.1B_spec-1.0.1.jar"/>
 	<classpathentry kind="var" path="M2_REPO/gnu-getopt/getopt/1.0.13/getopt-1.0.13.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/codehaus/groovy/groovy-all/1.6.7/groovy-all-1.6.7.jar" sourcepath="M2_REPO/org/codehaus/groovy/groovy-all/1.6.7/groovy-all-1.6.7-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/hibernate/hibernate/3.2.6.ga/hibernate-3.2.6.ga.jar" sourcepath="M2_REPO/org/hibernate/hibernate/3.2.6.ga/hibernate-3.2.6.ga-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/hibernate/hibernate-tools/3.2.3.GA/hibernate-tools-3.2.3.GA.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/jasypt/jasypt/1.6/jasypt-1.6.jar" sourcepath="M2_REPO/org/jasypt/jasypt/1.6/jasypt-1.6-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/jboss/jboss-remoting/2.2.2.SP8/jboss-remoting-2.2.2.SP8.jar"/>
@@ -61,23 +60,11 @@
 	<classpathentry kind="var" path="M2_REPO/postgresql/postgresql/8.2-511-A.jdbc3/postgresql-8.2-511-A.jdbc3.jar"/>
 	<classpathentry kind="var" path="M2_REPO/xalan/serializer/2.7.1/serializer-2.7.1.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/hyperic/sigar/1.6.4/sigar-1.6.4.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-aop/3.0.1.RELEASE/spring-aop-3.0.1.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-aop/3.0.1.RELEASE/spring-aop-3.0.1.RELEASE-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-asm/3.0.1.RELEASE/spring-asm-3.0.1.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-asm/3.0.1.RELEASE/spring-asm-3.0.1.RELEASE-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-beans/3.0.1.RELEASE/spring-beans-3.0.1.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-beans/3.0.1.RELEASE/spring-beans-3.0.1.RELEASE-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-context/3.0.1.RELEASE/spring-context-3.0.1.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-context/3.0.1.RELEASE/spring-context-3.0.1.RELEASE-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-context-support/3.0.1.RELEASE/spring-context-support-3.0.1.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-context-support/3.0.1.RELEASE/spring-context-support-3.0.1.RELEASE-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-core/3.0.1.RELEASE/spring-core-3.0.1.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-core/3.0.1.RELEASE/spring-core-3.0.1.RELEASE-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-expression/3.0.1.RELEASE/spring-expression-3.0.1.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-expression/3.0.1.RELEASE/spring-expression-3.0.1.RELEASE-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-jdbc/3.0.1.RELEASE/spring-jdbc-3.0.1.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-jdbc/3.0.1.RELEASE/spring-jdbc-3.0.1.RELEASE-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-jms/3.0.1.RELEASE/spring-jms-3.0.1.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-jms/3.0.1.RELEASE/spring-jms-3.0.1.RELEASE-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-orm/3.0.1.RELEASE/spring-orm-3.0.1.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-orm/3.0.1.RELEASE/spring-orm-3.0.1.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/security/spring-security-acl/3.0.0.RELEASE/spring-security-acl-3.0.0.RELEASE.jar" sourcepath="M2_REPO/org/springframework/security/spring-security-acl/3.0.0.RELEASE/spring-security-acl-3.0.0.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/security/spring-security-config/3.0.0.RELEASE/spring-security-config-3.0.0.RELEASE.jar" sourcepath="M2_REPO/org/springframework/security/spring-security-config/3.0.0.RELEASE/spring-security-config-3.0.0.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/security/spring-security-core/3.0.0.RELEASE/spring-security-core-3.0.0.RELEASE.jar" sourcepath="M2_REPO/org/springframework/security/spring-security-core/3.0.0.RELEASE/spring-security-core-3.0.0.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/security/spring-security-taglibs/3.0.0.RELEASE/spring-security-taglibs-3.0.0.RELEASE.jar" sourcepath="M2_REPO/org/springframework/security/spring-security-taglibs/3.0.0.RELEASE/spring-security-taglibs-3.0.0.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/security/spring-security-web/3.0.0.RELEASE/spring-security-web-3.0.0.RELEASE.jar" sourcepath="M2_REPO/org/springframework/security/spring-security-web/3.0.0.RELEASE/spring-security-web-3.0.0.RELEASE-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-tx/3.0.1.RELEASE/spring-tx-3.0.1.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-tx/3.0.1.RELEASE/spring-tx-3.0.1.RELEASE-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-web/3.0.1.RELEASE/spring-web-3.0.1.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-web/3.0.1.RELEASE/spring-web-3.0.1.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/apache/tomcat-jdbc/1.0.8.5/tomcat-jdbc-1.0.8.5.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/apache/tomcat-juli/6.0.20/tomcat-juli-6.0.20.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/apache/velocity/velocity/1.6.3/velocity-1.6.3.jar" sourcepath="M2_REPO/org/apache/velocity/velocity/1.6.3/velocity-1.6.3-sources.jar"/>

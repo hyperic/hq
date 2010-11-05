@@ -346,14 +346,14 @@ public class AlertDAO
     }
 
     public Integer countAlerts(AlertDefinition def) {
-        return (Integer) createCriteria().add(Restrictions.eq("alertDefinition", def))
-            .setProjection(Projections.rowCount()).uniqueResult();
+        return ((Number) createCriteria().add(Restrictions.eq("alertDefinition", def))
+            .setProjection(Projections.rowCount()).uniqueResult()).intValue();
     }
 
     public Integer countAlerts(Resource res) {
-        return (Integer) createCriteria().createAlias("alertDefinition", "d").add(
+        return ((Number) createCriteria().createAlias("alertDefinition", "d").add(
             Restrictions.eq("d.resource", res)).setProjection(Projections.rowCount())
-            .uniqueResult();
+            .uniqueResult()).intValue();
     }
 
     public void save(Alert alert) {

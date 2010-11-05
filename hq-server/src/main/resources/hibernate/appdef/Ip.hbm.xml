@@ -42,14 +42,14 @@
       <column name="VERSION_COL" default="0"/>
     </version>
 
-    <properties name="ipId" unique="true">
+    <!-- <properties name="ipId" unique="true"> -->
       <many-to-one name="platform" class="org.hyperic.hq.appdef.server.session.Platform">
         <column name="PLATFORM_ID" not-null="true"/>
       </many-to-one>
       <property name="address" type="string">
         <column name="ADDRESS" not-null="true" length="64"/>
       </property>
-    </properties>
+    <!-- </properties> -->
 
     <property name="netmask" type="string">
       <column name="NETMASK" length="64"/>

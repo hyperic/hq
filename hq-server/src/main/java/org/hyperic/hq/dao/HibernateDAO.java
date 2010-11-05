@@ -29,16 +29,22 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
+import javax.persistence.EntityManagerFactory;
+
 import org.hibernate.Criteria;
 import org.hibernate.LockMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
+import org.hibernate.ejb.EntityManagerImpl;
 import org.hibernate.engine.SessionFactoryImplementor;
+import org.hibernate.id.IdentifierGenerator;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 
 /**
  * Hibernate Data Access Object
@@ -47,15 +53,16 @@ public abstract class HibernateDAO<T> {
     private Class<T> _persistentClass;
     protected static final int BATCH_SIZE = 1000;
 
-    protected SessionFactory sessionFactory;
+    @Autowired
+    protected EntityManagerFactory entityManagerFactory;
 
     protected HibernateDAO(Class<T> persistentClass, SessionFactory f) {
         _persistentClass = persistentClass;
-        sessionFactory = f;
     }
-    
+
     public HQDialect getHQDialect() {
-        return (HQDialect) ((SessionFactoryImplementor) sessionFactory)
+
+        return (HQDialect) ((SessionFactoryImplementor) getSession().getSessionFactory())
             .getDialect();
     }
 
@@ -64,11 +71,13 @@ public abstract class HibernateDAO<T> {
     }
 
     public Session getSession() {
-        return sessionFactory.getCurrentSession();
+        return ((EntityManagerImpl) EntityManagerFactoryUtils
+            .getTransactionalEntityManager(entityManagerFactory)).getSession();
     }
 
-    public SessionFactory getFactory() {
-        return sessionFactory;
+    public IdentifierGenerator getIdentifierGenerator(String className) {
+        return ((SessionFactoryImplementor) getSession().getSessionFactory()).getEntityPersister(
+            className).getIdentifierGenerator();
     }
 
     public void flushSession() {

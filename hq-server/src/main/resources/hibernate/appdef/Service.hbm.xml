@@ -84,14 +84,14 @@
       <column name="PARENT_SERVICE_ID" not-null="false" unique-key="EAM_SERVICE_PARENT_IDX" index="PARENT_SERVICE_ID_IDX"/>
     </many-to-one>
 
-    <properties name="serviceAiidIdx">
+    <!-- <properties name="serviceAiidIdx"> -->
       <many-to-one name="server" class="Server">
         <column name="SERVER_ID" not-null="false" index="EAM_SERVICE_AIID_IDX"/>
       </many-to-one>
       <property name="autoinventoryIdentifier" type="string">
         <column name="AUTOINVENTORYIDENTIFIER" not-null="false" length="500" index="EAM_SERVICE_AIID_IDX"/>
       </property>
-    </properties>
+   <!--   </properties>-->
 
     <many-to-one name="serviceType" class="ServiceType">
       <column name="SERVICE_TYPE_ID" not-null="true" index="SVC_TYPE_ID_IDX"/>
