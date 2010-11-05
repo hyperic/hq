@@ -69,11 +69,11 @@ public class ScheduleThread
     implements Runnable 
 {
     // Agent properties configuration
-    private static final String PROP_POOLSIZE =
+    static final String PROP_POOLSIZE =
             "scheduleThread.poolsize."; // e.g. scheduleThread.poolsize.sigar=10
-    private static final String PROP_FETCH_LOG_TIMEOUT =
+    static final String PROP_FETCH_LOG_TIMEOUT =
             "scheduleThread.fetchLogTimeout";
-    private static final String PROP_CANCEL_TIMEOUT =
+    static final String PROP_CANCEL_TIMEOUT =
             "scheduleThread.cancelTimeout";
 
     // How often we check schedules when we think they are empty.
