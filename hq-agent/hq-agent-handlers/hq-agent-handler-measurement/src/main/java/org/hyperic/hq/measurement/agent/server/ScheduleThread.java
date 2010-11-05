@@ -173,13 +173,15 @@ public class ScheduleThread
                         FutureTask t = i.next();
                         MetricTask mt = _metricCollections.get(t);
                         if (t.isDone()) {
-                            _log.debug("Metric task done, duration: " +
+                            _log.debug("Metric task '" + mt.getMetric() +
+                                       "' complete, duration: " +
                                        mt.getExecutionDuration());
                             i.remove();
                         } else {
                             // Not complete, check for timeout
                             if (mt.getExecutionDuration() > _cancelTimeout) {
-                                _log.error("Metric took too long to run, attempting to cancel");
+                                _log.error("Metric '" + mt.getMetric() +
+                                           "' took too long to run, attempting to cancel");
                                 t.cancel(true);
                                 // Task will be removed on next iteration
                             }
@@ -407,6 +409,13 @@ public class ScheduleThread
         MetricTask(ResourceSchedule rs, ScheduledMeasurement meas) {
             _rs = rs;
             _meas = meas;
+        }
+
+        /**
+         * @return The metric this task is attempting to collect.
+         */
+        public String getMetric() {
+            return _meas.getDSN();
         }
 
         /**
