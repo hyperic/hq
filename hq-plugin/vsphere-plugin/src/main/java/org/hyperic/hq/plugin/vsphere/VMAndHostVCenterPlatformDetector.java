@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2010], Hyperic, Inc.
+ * Copyright (C) [2004-2010], VMWare, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -94,8 +94,7 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
     static final String HOST_TYPE = AuthzConstants.platformPrototypeVmwareVsphereHost;
     static final String ESX_HOST = "esxHost";
 
-    private static final Log log =
-        LogFactory.getLog(VMAndHostVCenterPlatformDetector.class.getName());
+    private static final Log log = LogFactory.getLog(VMAndHostVCenterPlatformDetector.class);
     private static final boolean isDump =
         "true".equals(System.getProperty("vsphere.dump"));
 

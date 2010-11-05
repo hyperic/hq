@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2010], Hyperic, Inc.
+ * Copyright (C) [2004-2010], VMWare, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -26,9 +26,7 @@
 package org.hyperic.hq.plugin.vsphere;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
@@ -48,7 +46,6 @@ public class VSphereHostEventPlugin extends LogTrackPlugin implements Runnable {
     private static final Log _log = LogFactory.getLog(VSphereHostEventPlugin.class.getName());
     protected Properties _props;
     private long _lastCheck;
-    private VSphereUtil _vim; 
 
     private String getEventClass(Event event) {
         String name = event.getClass().getName();
@@ -67,27 +64,10 @@ public class VSphereHostEventPlugin extends LogTrackPlugin implements Runnable {
     }
 
     private void setup() throws PluginException {
-        if (_vim != null && _vim.isSessionValid()) {
-           return;
-        }
-        if (_vim != null) {
-            VSphereUtil.dispose(_vim);
-        }
         _lastCheck = System.currentTimeMillis();
-        try {
-            _vim = VSphereUtil.getInstance(_props);
-        } catch (PluginException e) {
-          _props = null;
-          throw e;
-        }
     }
     
     public void shutdown() throws PluginException {
-        if (_vim != null) {
-             getManager().removeRunnableTracker(this);
-             VSphereUtil.dispose(_vim);
-             _vim = null;
-        }
         super.shutdown();
     }
     
@@ -126,9 +106,9 @@ public class VSphereHostEventPlugin extends LogTrackPlugin implements Runnable {
     }
 
     private Event[] getEvents() throws PluginException {
-     
+        VSphereConnection conn = null;
         try {
-           
+            conn = VSphereConnection.getPooledInstance(_props);
             String hostname = getConfig("vm");
             boolean isVm = true;
             if (hostname == null) {
@@ -142,13 +122,12 @@ public class VSphereHostEventPlugin extends LogTrackPlugin implements Runnable {
             _log.debug("querying events for vm=" + hostname);
             EventFilterSpec criteria = new EventFilterSpec();
             criteria.setTime(getTimeFilter(_lastCheck, now()));
-            Event[] events = _vim.getEventManager().queryEvents(criteria);
+            Event[] events = conn.vim.getEventManager().queryEvents(criteria);
             if (events == null) {
                 return new Event[0];
             }
-            List rtn = new ArrayList(events.length);
-            for (Iterator it=Arrays.asList(events).iterator(); it.hasNext(); ) {
-                Event event = (Event) it.next();
+            List<Event> rtn = new ArrayList<Event>(events.length);
+            for (Event event : events) {
                 if (event.getVm() != null || event.getHost() != null) {
                     event.toString();
                 }
@@ -162,6 +141,8 @@ public class VSphereHostEventPlugin extends LogTrackPlugin implements Runnable {
             return (Event[]) rtn.toArray(new Event[0]);
         } catch (Exception e) {
             throw new PluginException("getEvents: " + e, e);
+        } finally {
+            if (conn != null) conn.release();
         }
     }
 
@@ -181,10 +162,6 @@ public class VSphereHostEventPlugin extends LogTrackPlugin implements Runnable {
             processEvents(events);
             _lastCheck = now;
         } catch (PluginException e) {
-            if (_vim != null && !_vim.isSessionValid()) {
-                VSphereUtil.dispose(_vim);
-                _vim = null;
-            }
             _log.error("checkForEvents: " + e, e);
         }
     }
