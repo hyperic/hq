@@ -16,94 +16,94 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Version;
 
 import org.hibernate.annotations.GenericGenerator;
-import org.hyperic.hq.inventory.domain.Config;
+import org.hyperic.hq.inventory.domain.PlatformTypeNG;
 import org.springframework.transaction.annotation.Transactional;
 
-privileged aspect Config_Roo_Entity {
+privileged aspect PlatformTypeNG_Roo_Entity {
     
-    declare @type: Config: @Entity;
+    declare @type: PlatformTypeNG: @Entity;
     
     @PersistenceContext
-    transient EntityManager Config.entityManager;
+    transient EntityManager PlatformTypeNG.entityManager;
     
     @Id
     @GenericGenerator(name="id_gen",strategy="org.hyperic.hq.id.IdentifierGenerator")
     @GeneratedValue(generator="id_gen")
     @Column(name = "id")
-    private Long Config.id;
+    private Long PlatformTypeNG.id;
     
     @Version
     @Column(name = "version")
-    private Integer Config.version;
+    private Integer PlatformTypeNG.version;
     
-    public Long Config.getId() {
+    public Long PlatformTypeNG.getId() {
         return this.id;
     }
     
-    public void Config.setId(Long id) {
+    public void PlatformTypeNG.setId(Long id) {
         this.id = id;
     }
     
-    public Integer Config.getVersion() {
+    public Integer PlatformTypeNG.getVersion() {
         return this.version;
     }
     
-    public void Config.setVersion(Integer version) {
+    public void PlatformTypeNG.setVersion(Integer version) {
         this.version = version;
     }
     
     @Transactional
-    public void Config.persist() {
+    public void PlatformTypeNG.persist() {
         if (this.entityManager == null) this.entityManager = entityManager();
         this.entityManager.persist(this);
     }
     
     @Transactional
-    public void Config.remove() {
+    public void PlatformTypeNG.remove() {
         if (this.entityManager == null) this.entityManager = entityManager();
         if (this.entityManager.contains(this)) {
             this.entityManager.remove(this);
         } else {
-            Config attached = this.entityManager.find(this.getClass(), this.id);
+            PlatformTypeNG attached = this.entityManager.find(this.getClass(), this.id);
             this.entityManager.remove(attached);
         }
     }
     
     @Transactional
-    public void Config.flush() {
+    public void PlatformTypeNG.flush() {
         if (this.entityManager == null) this.entityManager = entityManager();
         this.entityManager.flush();
     }
     
     @Transactional
-    public Config Config.merge() {
+    public PlatformTypeNG PlatformTypeNG.merge() {
         if (this.entityManager == null) this.entityManager = entityManager();
-        Config merged = this.entityManager.merge(this);
+        PlatformTypeNG merged = this.entityManager.merge(this);
         this.entityManager.flush();
         return merged;
     }
     
-    public static final EntityManager Config.entityManager() {
-        EntityManager em = new Config().entityManager;
+    public static final EntityManager PlatformTypeNG.entityManager() {
+        EntityManager em = new PlatformTypeNG().entityManager;
         if (em == null) throw new IllegalStateException("Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)");
         return em;
     }
     
-    public static long Config.countConfigs() {
-        return entityManager().createQuery("select count(o) from Config o", Long.class).getSingleResult();
+    public static long PlatformTypeNG.countPlatformTypeNGs() {
+        return entityManager().createQuery("select count(o) from PlatformTypeNG o", Long.class).getSingleResult();
     }
     
-    public static List<Config> Config.findAllConfigs() {
-        return entityManager().createQuery("select o from Config o", Config.class).getResultList();
+    public static List<PlatformTypeNG> PlatformTypeNG.findAllPlatformTypeNGs() {
+        return entityManager().createQuery("select o from PlatformTypeNG o", PlatformTypeNG.class).getResultList();
     }
     
-    public static Config Config.findConfig(Long id) {
+    public static PlatformTypeNG PlatformTypeNG.findPlatformTypeNG(Long id) {
         if (id == null) return null;
-        return entityManager().find(Config.class, id);
+        return entityManager().find(PlatformTypeNG.class, id);
     }
     
-    public static List<Config> Config.findConfigEntries(int firstResult, int maxResults) {
-        return entityManager().createQuery("select o from Config o", Config.class).setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
+    public static List<PlatformTypeNG> PlatformTypeNG.findPlatformTypeNGEntries(int firstResult, int maxResults) {
+        return entityManager().createQuery("select o from PlatformTypeNG o", PlatformTypeNG.class).setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
     }
     
 }
