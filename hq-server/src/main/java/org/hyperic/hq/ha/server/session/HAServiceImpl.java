@@ -30,10 +30,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.events.shared.HierarchicalAlertingManager;
 import org.hyperic.hq.events.shared.RegisteredTriggerManager;
 import org.hyperic.hq.ha.HAService;
 import org.hyperic.hq.measurement.server.session.AvailabilityCheckService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.MethodInvokingRunnable;
 import org.springframework.stereotype.Service;
@@ -54,6 +56,7 @@ public class HAServiceImpl implements HAService {
     private ScheduledFuture<?> backfillTask;
    
     private RegisteredTriggerManager registeredTriggerManager;
+    private HierarchicalAlertingManager hierarchicalAlertingManager;
     private final AtomicBoolean triggersHaveInitialized = new AtomicBoolean(false);
     private final Thread triggerInitThread = new Thread() {
         public void run() {
@@ -64,6 +67,7 @@ public class HAServiceImpl implements HAService {
             float elapsed = (finish-start)/1000/60;
             log.info("Trigger initialization completed in " + elapsed + " minutes");
             //Schedule backfill after triggers have been initialized
+/*
             if (backfillTask == null) {
                 MethodInvokingRunnable backfill = new MethodInvokingRunnable();
                 backfill.setTargetObject(availabilityCheckService);
@@ -75,16 +79,20 @@ public class HAServiceImpl implements HAService {
                     log.error("Unable to schedule availability backfill.", e);
                 }
             }
+*/
         }
     };
 
     @Autowired
     public HAServiceImpl(TaskScheduler scheduler,
                          AvailabilityCheckService availabilityCheckService,
+                         @Qualifier("EEHierarchicalAlertingManager")
+                         HierarchicalAlertingManager hierarchicalAlertingManager,
                          RegisteredTriggerManager registeredTriggerManager) {
         this.scheduler = scheduler;
         this.availabilityCheckService = availabilityCheckService;
         this.registeredTriggerManager = registeredTriggerManager;
+        this.hierarchicalAlertingManager = hierarchicalAlertingManager;
     }
 
     /**

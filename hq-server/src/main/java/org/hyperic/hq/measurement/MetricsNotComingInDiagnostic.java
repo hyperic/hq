@@ -53,6 +53,7 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.ha.HAUtil;
 import org.hyperic.hq.hibernate.SessionManager;
 import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MetricDataCache;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
@@ -62,6 +63,8 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component("metricsNotComingInDiagnostic")
 public class MetricsNotComingInDiagnostic implements DiagnosticObject {
@@ -97,17 +100,21 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
 
     @PostConstruct
     public void register() {
-        diagnosticsLogger.addDiagnosticObject(this);
+        diagnosticsLogger.addDiagnosticObject(
+            (DiagnosticObject)Bootstrap.getBean("metricsNotComingInDiagnostic"));
     }
 
+    @Override
     public String getName() {
         return "Enabled Metrics Not Coming In";
     }
 
+    @Override
     public String getShortName() {
         return "EnabledMetricsNotComingIn";
     }
 
+    @Override
     public String getStatus() {
         return getReport(true);
     }
@@ -201,7 +208,7 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
                                     Map<Resource, Platform> childrenToPlatform, boolean isVerbose) {
         final Map<Platform, Object> platHierarchyNotReporting = new HashMap<Platform, Object>();
         for (final List<Measurement> mList : measurementLists) {
-            for (Measurement m : mList) {
+            for (final Measurement m : mList) {
                 if (m != null && !m.getTemplate().isAvailability() &&
                     !values.containsKey(m.getId())) {
                     final Platform platform = childrenToPlatform.get(m.getResource());
@@ -230,6 +237,21 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
                 }
             }
         }
+/*
+        boolean verbose = false;
+        boolean lessVerbose = false;
+        boolean showOnlyCount = false;
+        // this sucks!  meant to show that this thread is not part of the diagnostic thread
+        if (!Thread.currentThread().getName().toLowerCase().startsWith("thread-")) {
+            verbose = true;
+        } else if (metricsNotReporting <= 20) {
+            verbose = true;
+        } else if (metricsNotReporting > 20 && metricsNotReporting <= 50) {
+            lessVerbose = true;
+        } else {
+            showOnlyCount = true;
+        }
+*/
         final StringBuilder rtn = new StringBuilder(platHierarchyNotReporting.size() * 128);
         rtn.append("\nEnabled metrics not reported in for ").append(THRESHOLD / 1000 / 60).append(
             " minutes (by platform hierarchy)\n");
@@ -249,6 +271,7 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
                 rtn.append(count.value);
                 rtn.append(" not collecting)");
             }
+            rtn.append("\n");
         }
         return rtn.append("\n");
     }
@@ -276,13 +299,12 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
             }
             resources.add(platform.getResource());
         }
-
-        final Collection<ResourceEdge> edges = resourceManager.findResourceEdges(resourceManager
-            .getContainmentRelation(), resources);
+        final Collection<ResourceEdge> edges =
+            resourceManager.findResourceEdges(resourceManager.getContainmentRelation(), resources);
         for (final ResourceEdge edge : edges) {
             try {
-                final Platform platform = platformManager.findPlatformById(edge.getFrom()
-                    .getInstanceId());
+                final Platform platform =
+                    platformManager.findPlatformById(edge.getFrom().getInstanceId());
                 final Resource child = edge.getTo();
                 if (child == null || child.isInAsyncDeleteState()) {
                     continue;
@@ -309,7 +331,6 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
      *         {@link MetricValue}
      */
     private Map<Integer, MetricValue> getLastMetricValues(Collection<List<Measurement>> measLists) {
-
         final List<Integer> mids = new ArrayList<Integer>();
         for (final List<Measurement> measList : measLists) {
             for (final Measurement m : measList) {
@@ -336,7 +357,6 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
     @SuppressWarnings("unchecked")
     private Collection<Platform> getAllPlatforms() {
         AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-
         Collection<PlatformValue> platforms;
         try {
             platforms = platformManager.getAllPlatforms(overlord, PageControl.PAGE_ALL);

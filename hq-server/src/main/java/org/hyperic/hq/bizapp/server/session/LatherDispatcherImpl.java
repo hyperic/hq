@@ -689,6 +689,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
                 Agent a = agentManager.getAgent(agentToken);
                 agentId = a.getId();
             } catch (Exception e) {
+                log.error(e,e);
             }
         }
 

@@ -180,7 +180,8 @@ public interface CPropManager {
 	/**
 	 * Remove custom properties for a given resource.
 	 */
-	public void deleteValues(int appdefType, int id);
+//	public void deleteValues(int appdefType, int id);
+    public void deleteValues(AppdefEntityID aeid);
 
 	/**
 	 * Get all Cprops values with specified key name, irregardless of type
