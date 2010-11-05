@@ -402,6 +402,7 @@ public class ScheduleThread
         ResourceSchedule _rs;
         ScheduledMeasurement _meas;
         long _executeStartTime = 0;
+        long _executeEndTime = 0;
 
         MetricTask(ResourceSchedule rs, ScheduledMeasurement meas) {
             _rs = rs;
@@ -409,15 +410,19 @@ public class ScheduleThread
         }
 
         /**
-         * Return the time in milliseconds this task has been running.  For
-         * queued tasks yet to be executed, 0 is returned.
-         * @return
+         * @return 0 if task is still queued for execution, otherwise the
+         * amount of time in milliseconds the task has been running.
          */
         public long getExecutionDuration() {
             if (_executeStartTime == 0) {
+                // Still queued for execution
                 return _executeStartTime;
-            } else {
+            } else if (_executeEndTime == 0) {
+                // Currently executing
                 return System.currentTimeMillis() - _executeStartTime;
+            } else {
+                // Completed
+                return _executeEndTime - _executeStartTime;
             }
         }
 
