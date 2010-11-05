@@ -171,11 +171,10 @@ public class CpropDAO
      *         then that's too bad ... we'll have to write another method.
      */
     private Integer generateId(String className, Object o) {
-        SessionFactoryImplementor factImpl = 
-            (SessionFactoryImplementor)sessionFactory;
-        IdentifierGenerator gen = factImpl.getIdentifierGenerator(className); 
+       
+        IdentifierGenerator gen = getIdentifierGenerator(className); 
         SessionImplementor sessImpl = (SessionImplementor)
-            factImpl.getCurrentSession();
+            getSession();
         return (Integer)gen.generate(sessImpl, o);
     }
 

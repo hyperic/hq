@@ -41,19 +41,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.hibernate.SessionFactory;
 import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.shared.AIPlatformValue;
-import org.hyperic.hq.appdef.shared.AgentManager;
-import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectManager;
-import org.hyperic.hq.authz.shared.ResourceGroupManager;
-import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
-import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.shared.MeasRangeObj;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
@@ -87,9 +78,6 @@ public class DataManagerTest
     @Autowired
     private MeasurementManager measurementManager;
     
-    @Autowired
-    private SessionFactory sessionFactory;
-
     private Platform testPlatform;
 
     private List<Measurement> measurements;
@@ -120,8 +108,8 @@ public class DataManagerTest
         int appDefType = platform.getResource().getResourceType().getAppdefType();
         MonitorableType monitor_Type = new MonitorableType("Platform monitor", appDefType, "test");
         Category cate = new Category("Test Category");
-        sessionFactory.getCurrentSession().save(monitor_Type);
-        sessionFactory.getCurrentSession().save(cate);
+        getCurrentSession().save(monitor_Type);
+        getCurrentSession().save(cate);
         MeasurementTemplate availTempl = new MeasurementTemplate("AvailabilityTemplate", "avail",
             "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
         MeasurementTemplate metric1Templ = new MeasurementTemplate("Metric1Template", "metric1",
@@ -134,12 +122,12 @@ public class DataManagerTest
             "percentage", 1, true, 60000l, true, "Metric4:metric4", monitor_Type, cate, "test");
         MeasurementTemplate metric5Templ = new MeasurementTemplate("Metric5Template", "metric5",
             "percentage", 1, true, 60000l, true, "Metric5:metric5", monitor_Type, cate, "test");
-        sessionFactory.getCurrentSession().save(availTempl);
-        sessionFactory.getCurrentSession().save(metric1Templ);
-        sessionFactory.getCurrentSession().save(metric2Templ);
-        sessionFactory.getCurrentSession().save(metric3Templ);
-        sessionFactory.getCurrentSession().save(metric4Templ);
-        sessionFactory.getCurrentSession().save(metric5Templ);
+        getCurrentSession().save(availTempl);
+        getCurrentSession().save(metric1Templ);
+        getCurrentSession().save(metric2Templ);
+        getCurrentSession().save(metric3Templ);
+        getCurrentSession().save(metric4Templ);
+        getCurrentSession().save(metric5Templ);
         Integer[] templateIds = new Integer[] { availTempl.getId(),
                                                metric1Templ.getId(),
                                                metric2Templ.getId(),

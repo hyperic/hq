@@ -149,7 +149,7 @@ public class DataManagerImpl implements DataManager {
     private MessagePublisher messagePublisher;
     private RegisteredTriggers registeredTriggers;
     private ConcurrentStatsCollector concurrentStatsCollector;
-    private int transactionTimeout;
+    private int transactionTimeout=900;
     
     @Autowired
     public DataManagerImpl(DBUtil dbUtil, MeasurementDAO measurementDAO,
@@ -158,8 +158,7 @@ public class DataManagerImpl implements DataManager {
                            AvailabilityManager availabilityManager,
                            MetricDataCache metricDataCache, ZeventEnqueuer zeventManager,
                            MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers,
-                           ConcurrentStatsCollector concurrentStatsCollector,
-                           HibernateTransactionManager transactionManager) {
+                           ConcurrentStatsCollector concurrentStatsCollector) {
         this.dbUtil = dbUtil;
         this.measurementDAO = measurementDAO;
         this.measurementManager = measurementManager;
@@ -170,7 +169,6 @@ public class DataManagerImpl implements DataManager {
         this.messagePublisher = messagePublisher;
         this.registeredTriggers = registeredTriggers;
         this.concurrentStatsCollector = concurrentStatsCollector;
-        this.transactionTimeout = transactionManager.getDefaultTimeout();
     }
 
     @PostConstruct

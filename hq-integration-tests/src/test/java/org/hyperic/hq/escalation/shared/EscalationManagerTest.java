@@ -36,9 +36,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import net.sf.ehcache.CacheManager;
-
-import org.hibernate.SessionFactory;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerType;
@@ -58,8 +55,8 @@ import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.OperationDAO;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
+import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -89,8 +86,7 @@ import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 import org.hyperic.hq.product.ServerTypeInfo;
-import org.hyperic.hq.product.ServiceTypeInfo;
-import org.junit.After;
+import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -105,12 +101,9 @@ import org.springframework.transaction.annotation.Transactional;
  * @author trader
  * 
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = IntegrationTestContextLoader.class, locations = { "classpath*:META-INF/spring/*-context.xml" })
-@Transactional
-@DirtiesContext
 
-public class EscalationManagerTest  {
+@DirtiesContext
+public class EscalationManagerTest extends BaseInfrastructureTest {
 
 	@Autowired
 	private EscalationManager eManager;
@@ -148,8 +141,7 @@ public class EscalationManagerTest  {
 	@Autowired
 	private RoleManager roleManager;
 
-    @Autowired
-    private SessionFactory sessionFactory;
+   
 
     @Autowired
     private Messenger messenger;
@@ -181,16 +173,9 @@ public class EscalationManagerTest  {
         // Manual flush is required in any method in which you are updating the
         // Hibernate session in
         // order to avoid false positive in test
-        sessionFactory.getCurrentSession().flush();
+         getCurrentSession().flush();
     }
     
-    @After
-    public void tearDown() {
-        sessionFactory.evictQueries();
-        //Clear the 2nd level cache including regions with queries
-        CacheManager.getInstance().clearAll();
-    }
-
 	@Test
 	public void testCRUDOperations() {
 		
@@ -401,15 +386,6 @@ public class EscalationManagerTest  {
 		serverTypeInfo.setVirtual(false);
 		serverTypeInfo.setValidPlatformTypes(validPlatformTypes);
 		return serverManager.createServerType(serverTypeInfo, plugin);
-	}
-
-	private ServiceType createServiceType(String serviceTypeName, String plugin,
-			ServerType serverType) throws NotFoundException {
-		ServiceTypeInfo sinfo = new ServiceTypeInfo();
-		sinfo.setDescription(serviceTypeName);
-		sinfo.setInternal(false);
-		sinfo.setName(serviceTypeName);
-		return serviceManager.createServiceType(sinfo, plugin, serverType);
 	}
 
 	private AlertDefinition createAlertDefinition(Integer appdefId, Integer appdefType,

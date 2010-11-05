@@ -39,7 +39,6 @@ import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.id.IdentifierGenerator;
-import org.hibernate.impl.SessionFactoryImpl;
 import org.hibernate.impl.SessionImpl;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.dao.HibernateDAO;
@@ -237,8 +236,7 @@ public class MeasurementTemplateDAO
 
     public void createTemplates(final String pluginName,
                                 final Map<MonitorableType,List<MonitorableMeasurementInfo>> toAdd) {
-        final IdentifierGenerator tmplIdGenerator = ((SessionFactoryImpl) sessionFactory)
-            .getEntityPersister(MeasurementTemplate.class.getName()).getIdentifierGenerator();
+        final IdentifierGenerator tmplIdGenerator = getIdentifierGenerator(MeasurementTemplate.class.getName());
 
         final String templatesql = "INSERT INTO EAM_MEASUREMENT_TEMPL "
                                    + "(id, name, alias, units, collection_type, default_on, "
@@ -264,7 +262,8 @@ public class MeasurementTemplateDAO
                     }
                     cats.put(info.getCategory(), cat);
                 }
-                Integer rawid = (Integer) tmplIdGenerator.generate((SessionImpl) getSession(),
+                //Integer rawid = measurementId++;
+                 Integer rawid = (Integer) tmplIdGenerator.generate((SessionImpl) getSession(),
                     new MeasurementTemplate());
                 stmt.setInt(1, rawid.intValue());
                 stmt.setString(2, info.getName());

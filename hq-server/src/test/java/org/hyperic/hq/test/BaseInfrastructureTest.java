@@ -29,11 +29,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import javax.persistence.EntityManagerFactory;
+
 import net.sf.ehcache.CacheManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.SessionFactory;
+import org.hibernate.Session;
+import org.hibernate.ejb.EntityManagerImpl;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -62,8 +65,8 @@ import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
+import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.GroupCreationException;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -81,6 +84,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -116,7 +120,7 @@ abstract public class BaseInfrastructureTest {
     protected AgentManager agentManager;
 
     @Autowired
-    protected SessionFactory sessionFactory;
+    protected EntityManagerFactory entityManagerFactory;
 
     @Autowired
     protected ResourceManager resourceManager;
@@ -144,9 +148,10 @@ abstract public class BaseInfrastructureTest {
 
     @After
     public void after() {
-        //Clear the query cache
-        sessionFactory.evictQueries();
-        //Clear the 2nd level cache including regions with queries
+        // Clear the query cache
+        ((EntityManagerImpl) EntityManagerFactoryUtils
+            .getTransactionalEntityManager(entityManagerFactory)).getSession().getSessionFactory().getCache().evictQueryRegions();
+        // Clear the 2nd level cache including regions with queries
         CacheManager.getInstance().clearAll();
         endTime = System.nanoTime();
         logger.debug(buildMessage());
@@ -162,9 +167,10 @@ abstract public class BaseInfrastructureTest {
      * @return
      */
     private String buildMessage() {
-        return new StringBuilder().append("****** Test executed in ").append(endTime).append(
-            " nanoseconds or ").append(TimeUnit.SECONDS.convert(endTime, TimeUnit.NANOSECONDS))
-            .append(" seconds").toString();
+        return new StringBuilder().append("****** Test executed in ").append(endTime)
+            .append(" nanoseconds or ")
+            .append(TimeUnit.SECONDS.convert(endTime, TimeUnit.NANOSECONDS)).append(" seconds")
+            .toString();
     }
 
     protected Platform createPlatform(String agentToken, String platformType, String fqdn,
@@ -240,7 +246,8 @@ abstract public class BaseInfrastructureTest {
             resources.add(platformRes);
         }
         AppdefEntityTypeID appDefEntTypeId = new AppdefEntityTypeID(
-            AppdefEntityConstants.APPDEF_TYPE_PLATFORM, platforms.iterator().next().getPlatformType().getId());
+            AppdefEntityConstants.APPDEF_TYPE_PLATFORM, platforms.iterator().next()
+                .getPlatformType().getId());
 
         return createResourceGroup(groupName, appDefEntTypeId, roles, resources);
     }
@@ -259,7 +266,8 @@ abstract public class BaseInfrastructureTest {
             resources.add(serverRes);
         }
         AppdefEntityTypeID appDefEntTypeId = new AppdefEntityTypeID(
-            AppdefEntityConstants.APPDEF_TYPE_SERVER, servers.iterator().next().getServerType().getId());
+            AppdefEntityConstants.APPDEF_TYPE_SERVER, servers.iterator().next().getServerType()
+                .getId());
 
         return createResourceGroup(groupName, appDefEntTypeId, roles, resources);
     }
@@ -278,7 +286,8 @@ abstract public class BaseInfrastructureTest {
             resources.add(serviceRes);
         }
         AppdefEntityTypeID appDefEntTypeId = new AppdefEntityTypeID(
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE, services.iterator().next().getServiceType().getId());
+            AppdefEntityConstants.APPDEF_TYPE_SERVICE, services.iterator().next().getServiceType()
+                .getId());
 
         return createResourceGroup(groupName, appDefEntTypeId, roles, resources);
     }
@@ -287,10 +296,10 @@ abstract public class BaseInfrastructureTest {
                                               List<Role> roles, List<Resource> resources)
         throws GroupDuplicateNameException, GroupCreationException {
         ResourceGroupCreateInfo gCInfo = new ResourceGroupCreateInfo(groupName, "",
-            AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS, resourceManager
-                .findResourcePrototype(appDefEntTypeId), "", 0, false, false);
-        ResourceGroup resGrp = resourceGroupManager.createResourceGroup(authzSubjectManager
-            .getOverlordPojo(), gCInfo, roles, resources);
+            AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS,
+            resourceManager.findResourcePrototype(appDefEntTypeId), "", 0, false, false);
+        ResourceGroup resGrp = resourceGroupManager.createResourceGroup(
+            authzSubjectManager.getOverlordPojo(), gCInfo, roles, resources);
         return resGrp;
     }
 
@@ -306,19 +315,25 @@ abstract public class BaseInfrastructureTest {
         app.setOpsContact("admin");
         app.setLocation("dataCenter");
         app.setApplicationType(applicationManager.findApplicationType(applicationType));
-        Application application = applicationManager.createApplication(authzSubjectManager
-            .getOverlordPojo(), app);
+        Application application = applicationManager.createApplication(
+            authzSubjectManager.getOverlordPojo(), app);
         applicationManager.setApplicationServices(authzSubjectManager.getOverlordPojo(),
             application.getId(), services);
         return application;
     }
 
     protected void flushSession() {
-        sessionFactory.getCurrentSession().flush();
+        ((EntityManagerImpl) EntityManagerFactoryUtils
+            .getTransactionalEntityManager(entityManagerFactory)).getSession().flush();
     }
 
     protected void clearSession() {
-        sessionFactory.getCurrentSession().clear();
+        ((EntityManagerImpl) EntityManagerFactoryUtils
+            .getTransactionalEntityManager(entityManagerFactory)).getSession().clear();
     }
-
+    
+    protected Session getCurrentSession() {
+        return  ((EntityManagerImpl) EntityManagerFactoryUtils
+            .getTransactionalEntityManager(entityManagerFactory)).getSession();
+    }
 }

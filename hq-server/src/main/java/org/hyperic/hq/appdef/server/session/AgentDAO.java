@@ -47,14 +47,19 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class AgentDAO
     extends HibernateDAO<Agent> {
+    
+    private final SessionFactory sessionFactory;
+    
     @Autowired
     public AgentDAO(SessionFactory f) {
         super(Agent.class, f);
+        this.sessionFactory =f;
     }
 
     @SuppressWarnings("unchecked")
     @PostConstruct
     public void preloadQueryCache() {
+        //TODO replace this
         new HibernateTemplate(sessionFactory, true).execute(new HibernateCallback() {
             public Object doInHibernate(Session session) throws HibernateException, SQLException {
                 List<String> tokens = session.createQuery("select agentToken from Agent").list();

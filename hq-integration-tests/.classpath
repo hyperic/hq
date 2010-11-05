@@ -94,7 +94,14 @@
 	<classpathentry kind="var" path="M2_REPO/org/easymock/easymock/2.4/easymock-2.4.jar" sourcepath="M2_REPO/org/easymock/easymock/2.4/easymock-2.4-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-agent-core"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-agent-handler-measurement"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/Inventory"/>
 	<classpathentry kind="var" path="M2_REPO/org/hibernate/hibernate-core/3.5.6-Final/hibernate-core-3.5.6-Final.jar"/>
+	<classpathentry kind="con" path="org.eclipse.ajdt.core.ASPECTJRT_CONTAINER"/>
+	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-aspects/3.0.5.RELEASE/spring-aspects-3.0.5.RELEASE.jar">
+		<attributes>
+			<attribute name="org.eclipse.ajdt.aspectpath" value="org.eclipse.ajdt.aspectpath"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="var" path="M2_REPO/org/hibernate/javax/persistence/hibernate-jpa-2.0-api/1.0.0.Final/hibernate-jpa-2.0-api-1.0.0.Final.jar" sourcepath="M2_REPO/org/hibernate/javax/persistence/hibernate-jpa-2.0-api/1.0.0.Final/hibernate-jpa-2.0-api-1.0.0.Final-sources.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Inventory"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
