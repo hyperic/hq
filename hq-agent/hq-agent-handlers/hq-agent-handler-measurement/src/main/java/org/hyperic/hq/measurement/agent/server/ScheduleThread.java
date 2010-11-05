@@ -174,12 +174,11 @@ public class ScheduleThread
                         MetricTask mt = _metricCollections.get(t);
                         if (t.isDone()) {
                             _log.debug("Metric task done, duration: " +
-                                       (System.currentTimeMillis() - mt.getExecuteStartTime()));
+                                       mt.getExecutionDuration());
                             i.remove();
                         } else {
                             // Not complete, check for timeout
-                            if ((System.currentTimeMillis() - mt.getExecuteStartTime()) >
-                                _cancelTimeout) {
+                            if (mt.getExecutionDuration() > _cancelTimeout) {
                                 _log.error("Metric took too long to run, attempting to cancel");
                                 t.cancel(true);
                                 // Task will be removed on next iteration
@@ -409,8 +408,17 @@ public class ScheduleThread
             _meas = meas;
         }
 
-        public long getExecuteStartTime() {
-            return _executeStartTime;
+        /**
+         * Return the time in milliseconds this task has been running.  For
+         * queued tasks yet to be executed, 0 is returned.
+         * @return
+         */
+        public long getExecutionDuration() {
+            if (_executeStartTime == 0) {
+                return _executeStartTime;
+            } else {
+                return System.currentTimeMillis() - _executeStartTime;
+            }
         }
 
         public void run() {
