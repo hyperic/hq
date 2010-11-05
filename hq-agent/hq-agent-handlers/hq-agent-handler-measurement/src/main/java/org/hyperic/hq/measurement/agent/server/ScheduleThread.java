@@ -70,7 +70,10 @@ public class ScheduleThread
     // How often we check schedules when we think they are empty.
     private static final int POLL_PERIOD = 1000;
     private static final int UNREACHABLE_EXPIRE = (60 * 1000) * 5;
-    private static final long WARN_FETCH_TIME = 5 * 1000; // 5 seconds.
+
+    // TODO: Make these configurable
+    private static final long FETCH_TIME  = 2 * 1000; // 2 seconds.
+    private static final long CANCEL_TIME = 5 * 1000; // 5 seconds.
 
     private static final Log _log = LogFactory.getLog(ScheduleThread.class.getName());
 
@@ -90,6 +93,7 @@ public class ScheduleThread
     private MeasurementValueGetter   _manager;
     private Sender                   _sender;  // Guy handling the results
 
+    // Statistics
     private final Object _statsLock = new Object();
     private long _stat_numMetricsFetched = 0;
     private long _stat_numMetricsFailed  = 0;
@@ -99,31 +103,43 @@ public class ScheduleThread
     private long _stat_minFetchTime      = Long.MAX_VALUE;
 
     private static class ResourceSchedule {
-        private Schedule _schedule = new Schedule();
-        private AppdefEntityID _id;
-        private long _lastUnreachble = 0;
-        private List<ScheduledMeasurement> _retry = new ArrayList<ScheduledMeasurement>();
-        private IntHashMap _collected = new IntHashMap();
+        private Schedule       schedule = new Schedule();
+        private AppdefEntityID id;
+        private long           lastUnreachble = 0;
+        private List<ScheduledMeasurement> retry = new ArrayList<ScheduledMeasurement>();
+        private IntHashMap collected = new IntHashMap();
     }
 
+    /**
+     * The MetricCancelThread iterates over the list of FutureTasks that
+     * have been submitted for execution.  Each task is checked for completion
+     * and then removed.  For tasks that do not complete within the timeout
+     * are cancelled, which will attempt to free up the executor running the
+     * task.
+     * NOTE: This will only work if the hung task is in an interrupt-able state
+     *       i.e. sleep() or wait()
+     */
     private class MetricCancelThread extends Thread  {
         public void run() {
             while (!_shouldDie) {
                 synchronized (_metricCollections) {
                     _log.debug(_metricCollections.size() + " metrics to validate.");
-                    for (Iterator<FutureTask> i = _metricCollections.keySet().iterator(); i.hasNext(); ) {
+                    for (Iterator<FutureTask> i = _metricCollections.keySet().iterator();
+                         i.hasNext(); )
+                    {
                         FutureTask t = i.next();
                         MetricTask mt = _metricCollections.get(t);
                         if (t.isDone()) {
-                            _log.debug("Metric task done, duration: " + (System.currentTimeMillis() - mt.getExecuteStartTime()));
+                            _log.debug("Metric task done, duration: " +
+                                       (System.currentTimeMillis() - mt.getExecuteStartTime()));
                             i.remove();
                         } else {
                             // Not complete, check for timeout
                             if ((System.currentTimeMillis() - mt.getExecuteStartTime()) >
-                                    WARN_FETCH_TIME) {
+                                CANCEL_TIME) {
                                 _log.error("Metric took too long to run, attempting to cancel");
                                 t.cancel(true);
-                                // TODO: remove task?
+                                // Task will be removed on next iteration
                             }
                         }
                     }
@@ -133,7 +149,6 @@ public class ScheduleThread
                     Thread.sleep(POLL_PERIOD);
                 } catch (InterruptedException e) {
                     _log.info("MetricCancelThread interrupted!");
-                    // Ignore
                 }
             }
             _log.info("MetricCancelThread shutting down with " + _metricCollections.size() +
@@ -164,7 +179,7 @@ public class ScheduleThread
             schedule = _schedules.get(key);
             if (schedule == null) {
                 schedule = new ResourceSchedule();
-                schedule._id = meas.getEntity();
+                schedule.id = meas.getEntity();
                 _schedules.put(key, schedule);
                 _log.debug("Created ResourceSchedule for: " + key);
             }
@@ -224,7 +239,7 @@ public class ScheduleThread
             throw new UnscheduledItemException("No measurement schedule for: " + key);
         }
 
-        items = rs._schedule.getScheduledItems();
+        items = rs.schedule.getScheduledItems();
         _log.debug("Un-scheduling " + items.length + " metrics for " + ent);
 
         synchronized (_statsLock) {
@@ -252,7 +267,7 @@ public class ScheduleThread
                 _log.debug("scheduleMeasurement " + getParsedTemplate(meas).metric.toDebugString());
             }
 
-            rs._schedule.scheduleItem(meas, meas.getInterval(), true, true);
+            rs.schedule.scheduleItem(meas, meas.getInterval(), true, true);
 
             synchronized (_statsLock) {
                 _stat_numMetricsScheduled++;
@@ -372,7 +387,7 @@ public class ScheduleThread
             _executeStartTime = System.currentTimeMillis();
             boolean success = false;
 
-            if (_rs._lastUnreachble != 0) {
+            if (_rs.lastUnreachble != 0) {
                 if (!category.equals(MeasurementConstants.CAT_AVAILABILITY)) {
                     // Prevent stacktrace bombs if a resource is
                     // down, but don't skip processing availability metrics.
@@ -386,10 +401,9 @@ public class ScheduleThread
             //        bizapp?
             try {
                 int mid = _meas.getDsnID();
-                if (_rs._collected.get(mid) == Boolean.TRUE) {
+                if (_rs.collected.get(mid) == Boolean.TRUE) {
                     if (isDebug) {
-                        _log.debug("Skipping duplicate mid=" + mid +
-                                   ", aid=" + _rs._id);
+                        _log.debug("Skipping duplicate mid=" + mid + ", aid=" + _rs.id);
                     }
                 }
                 data = getValue(dsn);
@@ -399,7 +413,7 @@ public class ScheduleThread
                     _log.warn("Plugin returned null value for metric: " + dsn);
                     data = MetricValue.NONE;
                 }
-                _rs._collected.put(mid, Boolean.TRUE);
+                _rs.collected.put(mid, Boolean.TRUE);
                 success = true;
                 clearLogCache(dsn);
             } catch(PluginNotFoundException exc){
@@ -412,8 +426,8 @@ public class ScheduleThread
                 logCache("Metric Value not found", dsn, exc);
             } catch(MetricUnreachableException exc){
                 logCache("Metric unreachable", dsn, exc);
-                _rs._lastUnreachble = _executeStartTime;
-                _log.warn("Disabling metrics for: " + _rs._id);
+                _rs.lastUnreachble = _executeStartTime;
+                _log.warn("Disabling metrics for: " + _rs.id);
             } catch(Exception exc){
                 // Unexpected exception
                 logCache("Error getting measurement value",
@@ -434,7 +448,7 @@ public class ScheduleThread
                 }
             }
 
-            if (timeDiff > WARN_FETCH_TIME) {
+            if (timeDiff > FETCH_TIME) {
                 _log.warn("Collection of metric: '" + dsn + "' took: " + timeDiff + "ms");
             }
 
@@ -459,7 +473,7 @@ public class ScheduleThread
                     //rather than waiting for the metric's own interval
                     //which could take much longer to hit
                     //(e.g. Windows Updates on an 8 hour interval)
-                    _rs._retry.add(_meas);
+                    _rs.retry.add(_meas);
                     return;
                 }
                 _sender.processData(_meas.getDsnID(), data,
@@ -505,28 +519,28 @@ public class ScheduleThread
     private long collect(ResourceSchedule rs) {
         long timeOfNext;
         long now = System.currentTimeMillis();
-        Schedule schedule = rs._schedule;
+        Schedule schedule = rs.schedule;
         try {
             timeOfNext = schedule.getTimeOfNext();
         } catch (EmptyScheduleException e) {
             return POLL_PERIOD + now;
         }
 
-        if (rs._lastUnreachble != 0) {
-            if ((now - rs._lastUnreachble) > UNREACHABLE_EXPIRE) {
-                rs._lastUnreachble = 0;
-                _log.info("Re-enabling metrics for: " + rs._id);
+        if (rs.lastUnreachble != 0) {
+            if ((now - rs.lastUnreachble) > UNREACHABLE_EXPIRE) {
+                rs.lastUnreachble = 0;
+                _log.info("Re-enabling metrics for: " + rs.id);
             }
         }
 
-        rs._collected.clear();
+        rs.collected.clear();
 
-        if (rs._retry.size() != 0) {
+        if (rs.retry.size() != 0) {
             if (_log.isDebugEnabled()) {
-                _log.debug("Retrying " + rs._retry.size() + " items (MetricValue.FUTUREs)");
+                _log.debug("Retrying " + rs.retry.size() + " items (MetricValue.FUTUREs)");
             }
-            collect(rs, rs._retry);
-            rs._retry.clear();
+            collect(rs, rs.retry);
+            rs.retry.clear();
         }
 
         if (now < timeOfNext) {
