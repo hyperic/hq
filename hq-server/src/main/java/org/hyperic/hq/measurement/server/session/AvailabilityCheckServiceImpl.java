@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.PostConstruct;
@@ -36,19 +37,28 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.stats.StatCollector;
 import org.hyperic.util.stats.StatUnreachableException;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.support.MethodInvokingRunnable;
 import org.springframework.stereotype.Service;
 
 /**
  * This job is responsible for filling in missing availabilty metric values.
  */
 @Service("availabilityCheckService")
-public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
+public class AvailabilityCheckServiceImpl
+implements AvailabilityCheckService, ApplicationListener<ContextRefreshedEvent>, ApplicationContextAware {
     private final Log log = LogFactory.getLog(AvailabilityCheckServiceImpl.class);
     private static final String AVAIL_BACKFILLER_TIME = ConcurrentStatsCollector.AVAIL_BACKFILLER_TIME;
     private static final String AVAIL_BACKFILLER_NUMPLATFORMS = ConcurrentStatsCollector.AVAIL_BACKFILLER_NUMPLATFORMS;
@@ -62,12 +72,16 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
     private AvailabilityManager availabilityManager;
     private AvailabilityCache availabilityCache;
     private BackfillPointsService backfillPointsService;
+    private ApplicationContext ctx;
+    private TaskScheduler scheduler;
 
     @Autowired
     public AvailabilityCheckServiceImpl(ConcurrentStatsCollector concurrentStatsCollector,
                                         AvailabilityManager availabilityManager,
                                         AvailabilityCache availabilityCache,
-                                        BackfillPointsService backfillPointsService) {
+                                        BackfillPointsService backfillPointsService,
+                                        TaskScheduler scheduler) {
+        this.scheduler = scheduler;
         this.concurrentStatsCollector = concurrentStatsCollector;
         this.availabilityCache = availabilityCache;
         this.availabilityManager = availabilityManager;
@@ -93,6 +107,10 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
     private void backfill(long current, boolean forceStart) {
         long start = now();
         long backfilledPts = -1;
+        if (!forceStart && !canStart(current)) {
+            log.info("not starting availability check");
+            return;
+        }
         try {
             final boolean debug = log.isDebugEnabled();
             if (debug) {
@@ -100,10 +118,6 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                 log.debug("Availability Check Service started executing: " + lDate);
             }
             // Don't start backfilling immediately
-            if (!forceStart && !canStart(current)) {
-                log.info("not starting availability check");
-                return;
-            }
 
             synchronized (IS_RUNNING_LOCK) {
                 if (isRunning) {
@@ -211,5 +225,31 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
         }
 
         return currentQueueSize;
+    }
+    
+    private ScheduledFuture<?> backfillTask;
+
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext() != this.ctx) {
+            return;
+        }
+        //Schedule backfill after triggers have been initialized
+        if (backfillTask == null) {
+            MethodInvokingRunnable backfill = new MethodInvokingRunnable();
+            backfill.setTargetObject(Bootstrap.getBean("availabilityCheckService"));
+            backfill.setTargetMethod("backfill");
+            try {
+                backfill.prepare();
+                backfillTask = scheduler.scheduleAtFixedRate(backfill, 120000);
+            } catch (Exception e) {
+                log.error("Unable to schedule availability backfill.", e);
+            }
+        }
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext ctx) throws BeansException {
+        this.ctx = ctx;
     }
 }

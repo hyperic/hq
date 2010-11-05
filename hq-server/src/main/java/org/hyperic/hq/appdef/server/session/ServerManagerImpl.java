@@ -603,7 +603,7 @@ public class ServerManagerImpl implements ServerManager {
             if (config != null) {
                 configResponseDAO.remove(config);
             }
-            cpropManager.deleteValues(aeid.getType(), aeid.getID());
+            cpropManager.deleteValues(aeid);
 
             // Remove authz resource
             resourceManager.removeAuthzResource(subject, aeid, r);

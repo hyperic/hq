@@ -33,12 +33,16 @@ import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class SRNCache {
+    
+    private static final Log log = LogFactory.getLog(SRNCache.class);
 
     // The cache name, must match the definition in ehcache.xml
     private static final String CACHENAME = "SRNCache";
@@ -96,6 +100,7 @@ public class SRNCache {
     }
 
     public boolean remove(SrnId id) {
+        log.info("removing id=" + id, new Throwable());
         return cache.remove(id);
     }
 
