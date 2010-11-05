@@ -57,7 +57,7 @@ public class ChannelCollector extends Collector {
         String channelPid = (String) props.get(MetricConstants.CHANNEL);
         String vhost = (String) props.get(MetricConstants.VIRTUALHOST);
         String node = (String) props.get(MetricConstants.NODE);
-         
+
         if (RabbitProductPlugin.isInitialized()) {
             HypericRabbitAdmin rabbitAdmin = RabbitProductPlugin.getVirtualHostForNode(vhost, node);
             List<RabbitChannel> channels = rabbitAdmin.getChannels();

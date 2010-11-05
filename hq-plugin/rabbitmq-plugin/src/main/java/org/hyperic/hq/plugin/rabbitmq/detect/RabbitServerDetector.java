@@ -196,25 +196,13 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @throws PluginException
      */
     protected List<ServiceResource> createVirtualHostResources(HypericRabbitAdmin rabbitAdmin) throws PluginException {
-        List<ServiceResource> serviceResources = null;
-        List<RabbitVirtualHost> virtualHosts = null;
+        List<RabbitVirtualHost> virtualHosts = new ArrayList<RabbitVirtualHost>();
 
-        List<String> vhs = rabbitAdmin.getVirtualHosts();
+        RabbitVirtualHost virtualHost = rabbitAdmin.buildRabbitVirtualHost();
+        virtualHosts.add(virtualHost);
 
-        if (vhs != null) {
-            virtualHosts = new ArrayList<RabbitVirtualHost>();
-            for (String v : vhs) {
-                RabbitVirtualHost virtualHost = rabbitAdmin.getRabbitVirtualHost(v);
-                virtualHosts.add(virtualHost);
-            }
-        }
-
-        if (virtualHosts != null) {
-            serviceResources = doCreateServiceResources(virtualHosts, "VirtualHost",
+        return doCreateServiceResources(virtualHosts, "VirtualHost",
                     rabbitAdmin.getPeerNodeName(), rabbitAdmin.getVirtualHost());
-        }
-
-        return serviceResources;
     }
 
     /**
@@ -264,40 +252,6 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
             serviceResources = doCreateServiceResources(exchanges, DetectorConstants.EXCHANGE,
                     rabbitAdmin.getPeerNodeName(), rabbitAdmin.getVirtualHost());
         }
-
-        return serviceResources;
-    }
-
-    private List<ServiceResource> doCreateVhostResources(List<RabbitVirtualHost> rabbitObjects, String rabbitType, String node, String vHost) {
-        List<ServiceResource> serviceResources = null;
-
-        if (rabbitObjects != null) {
-            serviceResources = new ArrayList<ServiceResource>();
-
-            IdentityBuilder builder = new ObjectIdentityBuilder();
-
-            for (RabbitVirtualHost vh : rabbitObjects) {
-                ServiceResource service = createServiceResource(rabbitType);
-                String name = builder.buildIdentity(vh, vHost); // the hq inventory name
-
-                ConfigResponse c = new ConfigResponse();
-                c.setValue(MetricConstants.NODE, node);
-                c.setValue(MetricConstants.VIRTUALHOST, vHost);
-
-                c.setValue(MetricConstants.VIRTUAL_HOST, vh.getName());
-                service.setCustomProperties(VirtualHostCollector.getAttributes(vh));
-
-                service.setName(name);
-                service.setDescription(name);
-                service.setProductConfig(c);
-                setMeasurementConfig(service, c);
-
-                if (service != null) serviceResources.add(service);
-            }
-        }
-
-        if (serviceResources != null)
-            logger.debug(new StringBuilder("Detected ").append(serviceResources.size()).append(" ").append(rabbitType).append(" resources"));
 
         return serviceResources;
     }
