@@ -25,16 +25,17 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
 
+import com.ericsson.otp.erlang.OtpErlangList;
+import org.hyperic.hq.plugin.rabbitmq.validate.ConfigurationValidator;
 import org.hyperic.hq.product.PluginException;
 import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.rabbit.admin.QueueInfo;
 import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.erlang.ErlangBadRpcException;
 import org.springframework.erlang.connection.SingleConnectionFactory;
-import org.springframework.erlang.core.Node;
-import org.springframework.util.Assert;
 
 import java.util.List;
 
@@ -72,6 +73,42 @@ public class HypericRabbitAdmin extends RabbitBrokerAdmin implements DisposableB
 
     public void destroy() throws Exception {
         otpConnectionFactory.destroy();
+    }
+
+    /* *//**
+     * Constructor uses the Node's cookie and the node name such as:
+     * 'rabbit_1' from where 'rabbit_1' refers to 'rabbit_1@vmhost'
+     * @param connectionFactory
+     * @param erlangCookie
+     *//*
+    public HypericRabbitAdmin(ConnectionFactory connectionFactory, String erlangCookie, String peerNodeName) {
+        super(connectionFactory);
+
+        initializeDefaultErlangTemplate(new RabbitTemplate(connectionFactory), erlangCookie, peerNodeName);
+    }
+
+    */
+
+    /**
+     * Uses the Node's cookie to create ConnectionFactory
+     * Note: from Hyperic this can be rabbit_3@vmhost
+     * Before: String peerNodeName = "rabbit@" + host
+     * @param template
+     * @param erlangCookie
+     * @param peerNodeName
+     *//*
+    public void initializeDefaultErlangTemplate(RabbitTemplate template, String erlangCookie, String peerNodeName) {
+        final String validatedPeerNodeName = ConfigurationValidator.validatePeerNodeName(template.getConnectionFactory().getHost(), peerNodeName);
+        logger.debug("Using peer node name: " + validatedPeerNodeName);
+
+        SingleConnectionFactory otpCf = new SingleConnectionFactory("rabbit-monitor", erlangCookie, validatedPeerNodeName);
+        otpCf.afterPropertiesSet();
+        createErlangTemplate(otpCf);
+    }*/
+    public boolean isNodeAvailable() {
+        Object response = customErlangTemplate.executeRpc("erlang", "date");
+        logger.debug("Response=" + response);
+        return response != null;
     }
 
     /**
@@ -125,52 +162,12 @@ public class HypericRabbitAdmin extends RabbitBrokerAdmin implements DisposableB
         return peerNodeName;
     }
 
-    public boolean nodeAvailable(String nodeName) {
-        Assert.notNull(nodeName, "'node' must not be null");
-        List<Node> runningNodes = getStatus().getRunningNodes();
-        if (runningNodes != null) {
-            for (Node node : runningNodes) {
-                if (node.toString().contains(nodeName)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+    public RabbitVirtualHost getRabbitVirtualHost(String vHost) {
+        RabbitVirtualHost virtualHost = new RabbitVirtualHost();
+        virtualHost.setName(vHost);
+        virtualHost.setNode(this.peerNodeName);
+        virtualHost.setConnections(getConnections());
+        virtualHost.setChannels(getChannels());
+        return virtualHost;
     }
-
-    public boolean virtualHostAvailable(String virtualHost, String node) {
-        Assert.notNull(virtualHost, "'virtualHost' must not be null");
-        Assert.notNull(node, "'node' must not be null");
-
-        List<String> vhosts = null;
-        try {
-            vhosts = getVirtualHosts();
-        } catch (PluginException e) {
-            logger.error(e);
-        }
-
-        return nodeAvailable(node) && vhosts != null && vhosts.contains(virtualHost);
-    }
-
-
-    public RabbitVirtualHost buildRabbitVirtualHost() {
-        VirtualHostBuilder builder = new VirtualHostBuilder();
-        return builder.build();
-    }
-
-    private class VirtualHostBuilder {
-
-        public RabbitVirtualHost build() {
-            RabbitVirtualHost vHost = new RabbitVirtualHost(virtualHost, peerNodeName);
-            vHost.setChannels(getChannels());
-            vHost.setConnectionCount(getConnections());
-            vHost.setAvailable(virtualHostAvailable(virtualHost, peerNodeName));
-            vHost.setQueueCount(getQueues());
-            vHost.setExchangeCount(getExchanges());
-            vHost.setUsers(listUsers());
-            return vHost;
-        }
-    }
-
 }

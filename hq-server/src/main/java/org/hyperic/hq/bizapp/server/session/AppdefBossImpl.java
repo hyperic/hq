@@ -1339,7 +1339,8 @@ public class AppdefBossImpl implements AppdefBoss {
                 removePlatform(subject, platform.getId());
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            	removeService(subject, id);
+
+                serviceManager.removeService(subject, serviceManager.findServiceById(id));
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                 resourceGroupManager.removeResourceGroup(subject, resourceGroupManager

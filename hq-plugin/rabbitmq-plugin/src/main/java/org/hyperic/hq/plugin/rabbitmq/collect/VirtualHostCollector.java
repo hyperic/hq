@@ -28,13 +28,21 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitChannel;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitConnection;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitVirtualHost;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
+import org.hyperic.hq.plugin.rabbitmq.volumetrics.AverageRateCumulativeHistory;
+import org.hyperic.hq.plugin.rabbitmq.volumetrics.MovingAverageCumulativeHistory;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.amqp.rabbit.admin.QueueInfo;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * VirtualHostCollector
@@ -43,6 +51,16 @@ import java.util.Properties;
 public class VirtualHostCollector extends Collector {
 
     private static final Log logger = LogFactory.getLog(QueueCollector.class);
+
+    private final AtomicLong consumerCount = new AtomicLong();
+
+    private final AtomicLong channelCount = new AtomicLong();
+
+    private final AtomicLong octetsReceivedCount = new AtomicLong();
+
+    private final AtomicLong octetsSentCount = new AtomicLong();
+
+    private final AtomicLong pendingSendsCount = new AtomicLong();
 
     @Override
     protected void init() throws PluginException {
@@ -61,15 +79,26 @@ public class VirtualHostCollector extends Collector {
         if (RabbitProductPlugin.isInitialized()) {
             HypericRabbitAdmin rabbitAdmin = RabbitProductPlugin.getVirtualHostForNode(vhost, node);
 
-            RabbitVirtualHost virtualHost = rabbitAdmin.buildRabbitVirtualHost();
+            RabbitVirtualHost virtualHost = rabbitAdmin.getRabbitVirtualHost(vhost);
             if (virtualHost != null) {
+                setAvailability(true);
 
-                setAvailability(virtualHost.isAvailable());
-                setValue("queueCount", virtualHost.getQueueCount());
-                setValue("exchangeCount", virtualHost.getExchangeCount());
-                setValue("connectionCount", virtualHost.getConnectionCount());
-                setValue("channelCount", virtualHost.getChannelCount());
-                setValue("consumerCount", virtualHost.getConsumerCount());
+                if (virtualHost.getConnections() != null) {
+                    logger.debug("Connections=" + virtualHost.getConnections().size());
+                    for (RabbitConnection conn : virtualHost.getConnections()) {
+
+                        setValue("channelCount", channelCount.addAndGet(conn.getChannels()));
+                        setValue("octetsReceived", octetsReceivedCount.addAndGet(conn.getOctetsReceived()));
+                        setValue("octetsSent",  octetsSentCount.addAndGet(conn.getOctetsSent()));
+                        setValue("pendingSends",  pendingSendsCount.addAndGet(conn.getPendingSends()));
+                    }
+                }
+                if (virtualHost.getChannels() != null) {
+                    logger.debug("Channels=" + virtualHost.getChannels().size());
+                    for (RabbitChannel c : virtualHost.getChannels()) {
+                        setValue("consumerCount", this.consumerCount.addAndGet(c.getConsumerCount()));
+                    }
+                }
             }
         }
     }
@@ -85,7 +114,17 @@ public class VirtualHostCollector extends Collector {
         ConfigResponse res = new ConfigResponse();
         res.setValue("name", vh.getName());
         res.setValue("node", vh.getNode());
-        res.setValue("users", vh.getUsers());
+
+        List<RabbitConnection> connections = vh.getConnections();
+        if (connections != null) {
+            res.setValue("totalConnections", connections.size());
+        }
+
+        List<RabbitChannel> channels = vh.getChannels();
+        if (channels != null) {
+            res.setValue("totalChannels", channels.size());
+        }
         return res;
     }
+
 }

@@ -42,23 +42,20 @@
                         This version of the plugin requires that the HQ Agent that manages RabbitMQ has permission to read the Erlang cookie.
 
                         <h4>Configuration Requirements</h4>
-                        Assuming at least one RabbitMQ Node is running, the HQ Agent on the platform where the RabbitMQ server is running should
-                        auto-discover the "RabbitMQ" server instance, and present it as a new server on the platform in the Auto-Discovery portlet
+                        The HQ Agent on the platform where the RabbitMQ server should auto-discover the "RabbitMQ" server instance — assuming
+                        at least one RabbitMQ Node is running. — and present it as a new server on the platform in the Auto-Discovery portlet
                         of the HQ Dashboard. To enable metric collection and auto-discovery of RabbitMQ services:
 
                         <ol>
                            <li>Import the platform with the new RabbitMQ server to inventory</li>
                            <li>Navigate to the Rabbit MQ server, using Resources > Browse > Servers</li>
                            <li>Under the Server (Node), navigate to Tools Menu > Configure Server</li>
-                           <li>Enter the RabbitMQ username and password and click OK. Hyperic assumes the default
+                           <li>Enter the RabbitMQ username and password for the RabbitMQ server and click OK. Hyperic assumes the default</li>
                            RabbitMQ username and password have been changed for security reasons and does set them as the default</li>
                         </ol>
 
-                         This will enable the plugin to authenticate and auto-discover Queues and Exchanges by Virtual Host per node and
+                         This will allow enable the plugin to authenticate, auto-discover Queue, Channel, Connection, Exchanges, etc., and
                          proceed with metric collection. Note: Discovered services are automatically imported to HQ inventory.
-
-                         In this release, transient resources i.e. Channels and Connections, are not individually exposed as Service Resources
-                         but cumulatively as part of each Virtual Host.
                   </p>
                   <p>
                     <h3>Help Docs</h3>
@@ -112,7 +109,7 @@
                       purgeQueue,createExchange,deleteExchangeIfUnused,createUser,updateUserPassword,deleteUser"/>
         -->
 
-        <service name="Queue">
+         <service name="Queue">
             <property name="template"
                       value="rabbitmq:queue=%queue%,node=%node%,virtualhost=%virtualhost%:${alias}"/>
 
@@ -292,15 +289,14 @@
         </service>-->
 
         <service name="Exchange">
-            <property name="template"
-                      value="rabbitmq:exchange=%exchange%,node=%node%,virtualhost=%virtualhost%:${alias}"/>
+            <property name="template" value="rabbitmq:exchange=%exchange%,node=%node%,virtualhost=%virtualhost%:${alias}"/>
 
             <config type="measurement">
                 <option name="node" description="rabbit node name"/>
                 <option name="virtualhost" description="rabbit node-virtualhost name"/>
                 <option name="exchange" description="exchange name"/>
             </config>
-
+            
             <metric name="Availability"
                     category="AVAILABILITY"
                     units="percentage"
@@ -331,35 +327,46 @@
                     units="percentage"
                     indicator="true"
                     collectionType="dynamic"/>
-            <metric name="Exchanges"
-                    alias="exchangeCount"
-                    category="UTILIZATION"
-                    units="none"
-                    indicator="true"
-                    collectionType="dynamic"/>
-            <metric name="Queues"
-                    alias="queueCount"
-                    category="UTILIZATION"
-                    units="none"
-                    indicator="true"
-                    collectionType="dynamic"/>
-            <metric name="Consumers"
+            <metric name="Total Consumers"
                     alias="consumerCount"
                     category="UTILIZATION"
                     units="none"
                     indicator="true"
+                    interval="60000"
+                    defaultOn="true"
                     collectionType="dynamic"/>
-            <metric name="Channels"
+            <metric name="Total Channels"
                     alias="channelCount"
                     category="UTILIZATION"
                     units="none"
                     indicator="true"
+                    interval="60000"
+                    defaultOn="true"
                     collectionType="dynamic"/>
-            <metric name="Connections"
-                    alias="connectionCount"
+            <metric name="Total Octets Received"
+                    alias="octetsReceived"
+                    category="THROUGHPUT"
+                    units="B"
+                    indicator="true"
+                    interval="60000"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="Total Octets Sent"
+                    alias="octetsSent"
+                    category="THROUGHPUT"
+                    units="B"
+                    indicator="true"
+                    interval="60000"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+
+            <metric name="Total Pending Sends"
+                    alias="pendingSends"
                     category="UTILIZATION"
                     units="none"
                     indicator="true"
+                    interval="60000"
+                    defaultOn="true"
                     collectionType="dynamic"/>
 
 
@@ -370,11 +377,11 @@
             <properties>
                 <property description="Virtual Host" name="name"/>
                 <property description="Node" name="node"/>
-                <property description="Users" name="users"/>
+                <property description="Total Connections" name="totalConnections"/>
+                <property description="Total Channels" name="totalChannels"/>
             </properties>
         </service>
-
-
+       
     </server>
 
 </plugin>

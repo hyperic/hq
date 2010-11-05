@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.hyperic.hq</groupId>
 		<artifactId>hq-parent</artifactId>
-		<version>4.6.0.BUILD-SNAPSHOT</version>
+		<version>4.5.0.BUILD-SNAPSHOT</version>
 	</parent>
 	
 	<groupId>org.hyperic.hq.plugin</groupId>
@@ -61,6 +61,7 @@
 		<module>resin-plugin</module>
 		<module>samba-plugin</module>
 		<module>sendmail-plugin</module>
+		<module>servlet-plugin</module>
 		<module>spring-plugin</module>
 		<module>sqlquery-plugin</module>
 		<module>sybase-plugin</module>
