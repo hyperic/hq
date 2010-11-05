@@ -71,14 +71,20 @@ public class ScheduleThread
     // Agent properties configuration
     private static final String PROP_POOLSIZE =
             "scheduleThread.poolsize."; // e.g. scheduleThread.poolsize.sigar=10
+    private static final String PROP_FETCH_LOG_TIMEOUT =
+            "scheduleThread.fetchLogTimeout";
+    private static final String PROP_CANCEL_TIMEOUT =
+            "scheduleThread.cancelTimeout";
 
     // How often we check schedules when we think they are empty.
     private static final int POLL_PERIOD = 1000;
     private static final int UNREACHABLE_EXPIRE = (60 * 1000) * 5;
 
-    // TODO: Make these configurable
-    private static final long FETCH_TIME  = 2 * 1000; // 2 seconds.
-    private static final long CANCEL_TIME = 5 * 1000; // 5 seconds.
+    private static final long FETCH_TIME  = 2000; // 2 seconds.
+    private static final long CANCEL_TIME = 5000; // 5 seconds.
+
+    private static long _logFetchTimeout = FETCH_TIME;
+    private static long _cancelTimeout   = CANCEL_TIME;
 
     private static final Log _log = LogFactory.getLog(ScheduleThread.class.getName());
 
@@ -123,6 +129,26 @@ public class ScheduleThread
         _executors    = new HashMap<String,ExecutorService>();
         _metricCollections = new HashMap<FutureTask,MetricTask>();
 
+        String sLogFetchTimeout = _agentConfig.getProperty(PROP_FETCH_LOG_TIMEOUT);
+        if(sLogFetchTimeout != null){
+            try {
+                _logFetchTimeout = Integer.parseInt(sLogFetchTimeout);
+            } catch(NumberFormatException exc){
+                _log.error("Invalid setting for " + PROP_FETCH_LOG_TIMEOUT + " value=" +
+                           sLogFetchTimeout + ", using defaults.");
+            }
+        }
+
+        String sCancelTimeout = _agentConfig.getProperty(PROP_CANCEL_TIMEOUT);
+        if(sCancelTimeout != null){
+            try {
+                _cancelTimeout = Integer.parseInt(sCancelTimeout);
+            } catch(NumberFormatException exc){
+                _log.error("Invalid setting for " + PROP_CANCEL_TIMEOUT + " value=" +
+                           sCancelTimeout + ", using defaults.");
+            }
+        }
+
         _metricCancelThread = new MetricCancelThread();
         _metricCancelThread.start();
     }
@@ -153,7 +179,7 @@ public class ScheduleThread
                         } else {
                             // Not complete, check for timeout
                             if ((System.currentTimeMillis() - mt.getExecuteStartTime()) >
-                                CANCEL_TIME) {
+                                _cancelTimeout) {
                                 _log.error("Metric took too long to run, attempting to cancel");
                                 t.cancel(true);
                                 // Task will be removed on next iteration
@@ -457,7 +483,7 @@ public class ScheduleThread
                 }
             }
 
-            if (timeDiff > FETCH_TIME) {
+            if (timeDiff > _logFetchTimeout) {
                 _log.warn("Collection of metric: '" + dsn + "' took: " + timeDiff + "ms");
             }
 
@@ -500,14 +526,13 @@ public class ScheduleThread
 
     private int getPoolSize(String domain) {
         String prop = PROP_POOLSIZE + domain;
-        String sQueueSize = _agentConfig.getProperty(prop);
-        if(sQueueSize != null){
+        String sPoolSize = _agentConfig.getProperty(prop);
+        if(sPoolSize != null){
             try {
-                return Integer.parseInt(sQueueSize);
+                return Integer.parseInt(sPoolSize);
             } catch(NumberFormatException exc){
                 _log.error("Invalid setting for " + prop + " value=" +
-                           sQueueSize + " using defaults.");
-                return 1;
+                           sPoolSize + " using defaults.");
             }
         }
         return 1;
