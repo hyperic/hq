@@ -114,26 +114,26 @@ public class VSphereHostCollector extends VSphereCollector {
         // HQ is configured to collect for several esx servers/vms
         // Therefore since ScehduleThread does not need to validate configOpts just return
         // Could possibly be taken out when we switch VSphereUtil to use SearchIndex.findByUuid()
-        if (Thread.currentThread().getName().toLowerCase().equals("schedulethread")) {
+        if (Thread.currentThread().getName().equalsIgnoreCase("schedulethread")) {
             return;
         }
-        VSphereUtil vim = null;
         try {
-            vim = VSphereUtil.getInstance(getProperties());
+            VSphereUtil vim = VSphereUtil.getInstance(getProperties());
             //validate config
             getManagedEntity(vim);
         } catch (Exception e) {
             throw new PluginException(e.getMessage(), e);
-        } finally {
-            VSphereUtil.dispose(vim);
         }
     }
 
     protected void setAvailability(ManagedEntity entity) {
         double avail;
+        if (entity == null) {
+            setValue(Metric.ATTR_AVAIL, Metric.AVAIL_UNKNOWN);
+            return;
+        }
         HostSystem host = (HostSystem) entity;        
         HostSystemPowerState powerState = host.getRuntime().getPowerState();
-
         if (powerState == HostSystemPowerState.poweredOn) {
             avail = Metric.AVAIL_UP;
         } else if (powerState == HostSystemPowerState.poweredOff) {
@@ -147,7 +147,6 @@ public class VSphereHostCollector extends VSphereCollector {
             // undetermined state, so mark as down
             avail = Metric.AVAIL_DOWN;
         }
-        
         setValue(Metric.ATTR_AVAIL, avail);
     }
     
@@ -159,8 +158,12 @@ public class VSphereHostCollector extends VSphereCollector {
             setAvailability(mor);
         } catch (Exception e) {
             setAvailability(false);
-            _log.error("Error setting availability for " + getName() + ": " + e.getMessage());            
+            _log.error("Error setting availability for " + getName() + ": " + e.getMessage());
             _log.debug(e,e);
+            return;
+        }
+        
+        if (mor == null) {
             return;
         }
         
