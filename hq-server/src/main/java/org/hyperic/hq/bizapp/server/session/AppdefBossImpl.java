@@ -180,7 +180,6 @@ import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.util.timer.StopWatch;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -1286,8 +1285,8 @@ public class AppdefBossImpl implements AppdefBoss {
      * @param aeid {@link AppdefEntityID} resource to be removed.
      * @return AppdefEntityID[] - an array of the resources (including children)
      *         deleted
+     * 
      */
-    @Transactional(propagation=Propagation.REQUIRES_NEW)
     public AppdefEntityID[] removeAppdefEntity(int sessionId, AppdefEntityID aeid)
     	throws SessionNotFoundException, SessionTimeoutException, ApplicationException,
     	VetoException {
@@ -1310,13 +1309,16 @@ public class AppdefBossImpl implements AppdefBoss {
         throws SessionNotFoundException, SessionTimeoutException, ApplicationException,
         VetoException {
         final StopWatch timer = new StopWatch();
+
         final AuthzSubject subject = sessionManager.getSubject(sessionId);
         final Resource res = resourceManager.findResource(aeid);
+
         if (aeid.isGroup()) {
             // HQ-1577: Do not delete group if downtime schedule exists
             try {
-                MaintenanceEvent event =
-                    getMaintenanceEventManager().getMaintenanceEvent(subject, aeid.getId());
+                MaintenanceEvent event = getMaintenanceEventManager().getMaintenanceEvent(subject,
+                    aeid.getId());
+
                 if (event != null && event.getStartTime() != 0) {
                     String msg = ResourceBundle.getBundle(BUNDLE).getString(
                         "resource.groups.remove.error.downtime.exists");
@@ -1329,8 +1331,10 @@ public class AppdefBossImpl implements AppdefBoss {
                 // until the scheduler issue is resolved
                 log.warn("Scheduler error getting the downtime schedule for group[" + aeid + "]: " +
                          se.getMessage(), se);
+
                 String msg = ResourceBundle.getBundle(BUNDLE).getString(
                     "resource.groups.remove.error.downtime.scheduler.failure");
+
                 throw new VetoException(MessageFormat.format(msg, new String[] { res.getName() }));
             }
         }

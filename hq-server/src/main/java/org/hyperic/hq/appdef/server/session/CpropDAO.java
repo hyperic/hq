@@ -25,6 +25,10 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,137 +38,46 @@ import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
+import org.hibernate.engine.SessionFactoryImplementor;
+import org.hibernate.engine.SessionImplementor;
+import org.hibernate.id.IdentifierGenerator;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class CpropDAO extends HibernateDAO<Cprop> {
+public class CpropDAO
+    extends HibernateDAO<Cprop> {
 
     private JdbcTemplate jdbcTemplate;
-//    private static final int CHUNKSIZE = 1000; // Max size for each row
+    private static final int CHUNKSIZE = 1000; // Max size for each row
     private static final String CPROP_TABLE = "EAM_CPROP";
     private static final String CPROPKEY_TABLE = "EAM_CPROP_KEY";
-//    private CpropKeyDAO cPropKeyDAO;
+    private CpropKeyDAO cPropKeyDAO;
 
     @Autowired
-//    public CpropDAO(SessionFactory f, JdbcTemplate jdbcTemplate, CpropKeyDAO cPropKeyDAO) {
-    public CpropDAO(SessionFactory f, JdbcTemplate jdbcTemplate) {
+    public CpropDAO(SessionFactory f, JdbcTemplate jdbcTemplate, CpropKeyDAO cPropKeyDAO) {
         super(Cprop.class, f);
         this.jdbcTemplate = jdbcTemplate;
-//        this.cPropKeyDAO = cPropKeyDAO;
+        this.cPropKeyDAO = cPropKeyDAO;
     }
 
-    public Cprop findById(Integer Id) {
-        return (Cprop)super.findById(Id);
-    }
-
-    public void save(Cprop entity) {
-        super.save(entity);
-    }
-
-    public void remove(Cprop entity) {
-        super.remove(entity);
-    }
-
-    /**
-     * Queries for list of Cprops by Cprop.appdefId and CpropKey.appdefTypeId
-     * @return {@link List} of {@link Cprop}
-     */
-    @SuppressWarnings("unchecked")
-    public List<Cprop> findByKeyAppdefEntity(AppdefEntityID aeid) {
-        final String hql = new StringBuilder()
-            .append("select c from Cprop c")
-            .append(" JOIN c.key k")
-            .append(" WHERE k.appdefTypeId = :appdefTypeId")
-            .append(" AND c.appdefId = :aeid")
-            .toString();
-        return getSession()
-            .createQuery(hql)
-            .setParameter("appdefTypeId", new Integer(aeid.getType()))
-            .setParameter("aeid", aeid.getId())
-            .list();
-    }
-
-    /**
-     * Queries for list of Cprops by appdefEntityId and CpropKey.
-     * Orders by Cprop.valueIdx.
-     * @return {@link List} of {@link Cprop}
-     */
-    @SuppressWarnings("unchecked")
-    public List<Cprop> findByAppDefId(AppdefEntityID aeid) {
-        final String hql = new StringBuilder()
-            .append("select c from Cprop c")
-            .append(" AND c.appdefId = :aeid")
-            .append(" ORDER BY c.valueIdx")
-            .toString();
-        return getSession()
-            .createQuery(hql)
-            .setParameter("aeid", aeid.getId())
-            .list();
-    }
-
-    /**
-     * Queries for list of Cprops by appdefEntityId and CpropKey.
-     * Orders by Cprop.valueIdx.
-     * @return {@link List} of {@link Cprop}
-     */
-    @SuppressWarnings("unchecked")
-    public List<Cprop> findByKeyAndId(CpropKey key, AppdefEntityID aeid) {
-        final String hql = new StringBuilder()
-            .append("select c from Cprop c")
-            .append(" JOIN c.key k")
-            .append(" WHERE k = :key")
-            .append(" AND c.appdefId = :aeid")
-            .append(" ORDER BY c.valueIdx")
-            .toString();
-        return getSession()
-            .createQuery(hql)
-            .setParameter("key", key)
-            .setParameter("aeid", aeid.getId())
-            .list();
-    }
-    
     @SuppressWarnings("unchecked")
     public List<Cprop> findByKeyName(CpropKey key, boolean asc) {
-        Criteria c = createCriteria()
-            .add(Expression.eq("key", key))
-            .addOrder(asc ? Order.asc("propValue") : Order.desc("propValue"));
+        Criteria c = createCriteria().add(Expression.eq("key", key)).addOrder(
+            asc ? Order.asc("propValue") : Order.desc("propValue"));
         return c.list();
     }
 
-    public Properties getEntries(AppdefEntityID aID, String column) {
-        Properties res = new Properties();
-        String sql = "SELECT A.:COLUMN, B.propvalue FROM :CPROP_KEY_TABLE A, :CPROP_TABLE B " +
-                     "WHERE B.keyid=A.id AND A.appdef_type=? AND B.appdef_id=? " +
-                     "ORDER BY B.value_idx";
-        sql = sql.replace(":COLUMN", column)
-                 .replace(":CPROP_KEY_TABLE", CPROPKEY_TABLE)
-                 .replace(":CPROP_TABLE", CPROP_TABLE);
-        List<Map<String, Object>> props = jdbcTemplate.queryForList(sql,aID.getType(),aID.getId());
-        //Props share the same value_idx when chunked, so there is no guarantee that 
-        //you don't end up with the ordered set being propA.chunk0,propB.chunk0,propA.chunk1
-        Map<String,StringBuilder> propChunks = new HashMap<String,StringBuilder>();
-        for(Map<String,Object> prop: props) {
-            String keyName = (String)prop.get(column);
-            String valChunk = (String)prop.get("propvalue");
-            StringBuilder fullVal = propChunks.get(keyName);
-            if(fullVal == null) {
-                fullVal =  new StringBuilder();
-            }
-            fullVal.append(valChunk);
-            propChunks.put(keyName, fullVal);
-        }
-        for(Map.Entry<String,StringBuilder> propChunk :propChunks.entrySet()) {
-            res.setProperty(propChunk.getKey(), propChunk.getValue().toString());
-        }
-        return res;
-    }
-}
-
-/*    
     public void deleteValues(final int appdefType, final int id) {
         jdbcTemplate.update(new PreparedStatementCreator() {
             public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
@@ -256,7 +169,7 @@ public class CpropDAO extends HibernateDAO<Cprop> {
      * 
      * @return an Integer id for the new object.  If your class uses Long IDs
      *         then that's too bad ... we'll have to write another method.
-     *
+     */
     private Integer generateId(String className, Object o) {
         SessionFactoryImplementor factImpl = 
             (SessionFactoryImplementor)sessionFactory;
@@ -305,6 +218,34 @@ public class CpropDAO extends HibernateDAO<Cprop> {
         return buf.toString();
     }
 
+    public Properties getEntries(AppdefEntityID aID, String column) {
+        Properties res = new Properties();
+       
+        List<Map<String, Object>> props = jdbcTemplate.queryForList("SELECT A." + column + ", B.propvalue FROM " + CPROPKEY_TABLE +
+            " A, " + CPROP_TABLE + " B WHERE " +
+            "B.keyid=A.id AND A.appdef_type=? " + "AND B.appdef_id=? " +
+            "ORDER BY B.value_idx",aID.getType(),aID.getId());
+  
+        //Props share the same value_idx when chunked, so there is no guarantee that 
+        //you don't end up with the ordered set being propA.chunk0,propB.chunk0,propA.chunk1
+        Map<String,StringBuilder> propChunks = new HashMap<String,StringBuilder>();
+        for(Map<String,Object> prop: props) {
+            String keyName = (String)prop.get(column);
+            String valChunk = (String)prop.get("propvalue");
+            StringBuilder fullVal = propChunks.get(keyName);
+            if(fullVal == null) {
+                fullVal =  new StringBuilder();
+            }
+            fullVal.append(valChunk);
+            propChunks.put(keyName, fullVal);
+        }
+        for(Map.Entry<String,StringBuilder> propChunk :propChunks.entrySet()) {
+            res.setProperty(propChunk.getKey(), propChunk.getValue().toString());
+        }
+
+        return res;
+    }
+
     /**
      * Split a string into a list of same sized chunks, and a chunk of
      * potentially different size at the end, which contains the remainder.
@@ -315,7 +256,7 @@ public class CpropDAO extends HibernateDAO<Cprop> {
      * @param chunkSize The max size of any chunk
      * 
      * @return an array containing the chunked string
-     *
+     */
     private String[] chunk(String src, int chunkSize) {
         String[] res;
         int strLen, nAlloc;
@@ -360,4 +301,4 @@ public class CpropDAO extends HibernateDAO<Cprop> {
 
         return res;
     }
-    */
+}

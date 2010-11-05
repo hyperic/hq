@@ -27,8 +27,6 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.util.Collection;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -38,9 +36,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class ScheduleRevNumDAO extends HibernateDAO<ScheduleRevNum> {
-    
-    private static final Log log = LogFactory.getLog(ScheduleRevNumDAO.class);
+public class ScheduleRevNumDAO
+    extends HibernateDAO<ScheduleRevNum> {
 
     @Autowired
     public ScheduleRevNumDAO(SessionFactory f) {
@@ -48,7 +45,6 @@ public class ScheduleRevNumDAO extends HibernateDAO<ScheduleRevNum> {
     }
 
     public void remove(SrnId id) {
-        log.info("removing srnId=" + id, new Throwable());
         ScheduleRevNum srn = findById(id);
         if (srn != null) {
             remove(srn);

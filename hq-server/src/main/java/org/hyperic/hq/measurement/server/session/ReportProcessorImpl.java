@@ -88,8 +88,7 @@ public class ReportProcessorImpl implements ReportProcessor {
     public ReportProcessorImpl(MeasurementManager measurementManager,
                                PlatformManager platformManager, ServerManager serverManager,
                                ServiceManager serviceManager, SRNManager srnManager,
-                               ReportStatsCollector reportStatsCollector,
-                               MeasurementInserterHolder measurementInserterManager,
+                               ReportStatsCollector reportStatsCollector, MeasurementInserterHolder measurementInserterManager,
                                AgentManager agentManager, ZeventEnqueuer zEventManager) {
         this.measurementManager = measurementManager;
         this.platformManager = platformManager;
@@ -274,12 +273,6 @@ public class ReportProcessorImpl implements ReportProcessor {
         if (debug) watch.markTimeBegin("reportAgentSRNs");
         Collection<AppdefEntityID> toReschedule = srnManager.reportAgentSRNs(report.getSRNList());
         if (debug) watch.markTimeEnd("reportAgentSRNs");
-        final Set<AppdefEntityID> potentialNonEntitiesToUnschedule = new HashSet<AppdefEntityID>();
-        final SRN[] srnList = report.getSRNList();
-        for (final SRN srn : srnList) {
-            final AppdefEntityID aeid = srn.getEntity();
-            potentialNonEntitiesToUnschedule.add(aeid);
-        }
         // remove all AppdefEntities that do not belong to the agent.  If they belong and srns are
         // out of sync, then reschedule
         for (final Iterator<AppdefEntityID> it=toReschedule.iterator(); it.hasNext(); ) {
@@ -295,10 +288,6 @@ public class ReportProcessorImpl implements ReportProcessor {
         }
         if (!toReschedule.isEmpty()) {
             zEventManager.enqueueEventAfterCommit(new AgentScheduleSyncZevent(toReschedule));
-        }
-        if (!potentialNonEntitiesToUnschedule.isEmpty()) {
-            zEventManager.enqueueEventAfterCommit(
-                new AgentUnscheduleNonEntityZevent(agentToken, potentialNonEntitiesToUnschedule));
         }
     }
 
