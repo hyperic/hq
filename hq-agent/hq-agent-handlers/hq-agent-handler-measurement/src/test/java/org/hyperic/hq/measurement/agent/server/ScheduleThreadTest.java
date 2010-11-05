@@ -39,6 +39,8 @@ import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 
+import java.util.Properties;
+
 public class ScheduleThreadTest extends TestCase {
 
     private static final String DSN_PLATFORM_LOAD  = "sigar:Type=LoadAverage:1";
@@ -67,7 +69,8 @@ public class ScheduleThreadTest extends TestCase {
 
     public void testSimpleStartKill() throws Exception {
 
-        ScheduleThread st = new ScheduleThread(new SimpleSender(), new SimpleValueGetter());
+        ScheduleThread st = new ScheduleThread(new SimpleSender(), new SimpleValueGetter(),
+                                               new Properties());
         Thread t = new Thread(st);
         t.start();
 
@@ -96,7 +99,8 @@ public class ScheduleThreadTest extends TestCase {
 
     public void testNullCollection() throws Exception {
 
-        ScheduleThread st = new ScheduleThread(new SimpleSender(), new NullValueGetter());
+        ScheduleThread st = new ScheduleThread(new SimpleSender(), new NullValueGetter(),
+                                               new Properties());
 
         ScheduledMeasurement m = createMeasurement(DSN_PLATFORM_LOAD, 100);
         st.scheduleMeasurement(m);
@@ -131,7 +135,8 @@ public class ScheduleThreadTest extends TestCase {
 
     public void testSimpleCollection() throws Exception {
 
-        ScheduleThread st = new ScheduleThread(new SimpleSender(), new SimpleValueGetter());
+        ScheduleThread st = new ScheduleThread(new SimpleSender(), new SimpleValueGetter(),
+                                               new Properties());
 
         ScheduledMeasurement m = createMeasurement(DSN_PLATFORM_LOAD, 100);
         st.scheduleMeasurement(m);
@@ -172,7 +177,8 @@ public class ScheduleThreadTest extends TestCase {
 
     public void testCollectionMultiDomain() throws Exception {
 
-        ScheduleThread st = new ScheduleThread(new SimpleSender(), new SimpleValueGetter());
+        ScheduleThread st = new ScheduleThread(new SimpleSender(), new SimpleValueGetter(),
+                                               new Properties());
 
         st.scheduleMeasurement(createMeasurement(DSN_PLATFORM_LOAD, 100));
         st.scheduleMeasurement(createMeasurement(DSN_PLATFORM_AVAIL, 100));
@@ -205,7 +211,8 @@ public class ScheduleThreadTest extends TestCase {
 
     public void testCollectionMultiDomainHangCollection() throws Exception {
 
-        ScheduleThread st = new ScheduleThread(new SimpleSender(), new SimpleValueGetter());
+        ScheduleThread st = new ScheduleThread(new SimpleSender(), new SimpleValueGetter(),
+                                               new Properties());
 
         st.scheduleMeasurement(createMeasurement(DSN_PLATFORM_LOAD, 100));
         st.scheduleMeasurement(createMeasurement(DSN_HANG_COLLECTION, 1000));

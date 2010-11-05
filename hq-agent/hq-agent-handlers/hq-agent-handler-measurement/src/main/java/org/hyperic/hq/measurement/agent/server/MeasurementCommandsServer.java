@@ -232,8 +232,9 @@ public class MeasurementCommandsServer
         this.senderObject = new SenderThread(this.bootConfig.getBootProperties(),
                                              this.storage, this.schedStorage);
         
-        this.scheduleObject = new ScheduleThread(this.senderObject, 
-                                                 this.pluginManager);
+        this.scheduleObject = new ScheduleThread(this.senderObject,
+                                                 this.pluginManager,
+                                                 this.bootConfig.getBootProperties());
         
         this.trackerObject =
             new TrackerThread(this.ctPluginManager,

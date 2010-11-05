@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
@@ -67,6 +68,10 @@ public class ScheduleThread
     extends AgentMonitorSimple
     implements Runnable 
 {
+    // Agent properties configuration
+    private static final String PROP_POOLSIZE =
+            "scheduleThread.poolsize."; // e.g. scheduleThread.poolsize.sigar=10
+
     // How often we check schedules when we think they are empty.
     private static final int POLL_PERIOD = 1000;
     private static final int UNREACHABLE_EXPIRE = (60 * 1000) * 5;
@@ -81,6 +86,8 @@ public class ScheduleThread
     private volatile boolean                      _shouldDie;   // Should I shut down?
     private final Object                          _interrupter; // Interrupt object
     private final HashMap<String,String>          _errors;      // Hash of DSNs to their errors
+
+    private final Properties _agentConfig; // agent.properties
 
     // Map of Executors, one per metric domain
     private final HashMap<String,ExecutorService> _executors;
@@ -102,12 +109,22 @@ public class ScheduleThread
     private long _stat_maxFetchTime      = Long.MIN_VALUE;
     private long _stat_minFetchTime      = Long.MAX_VALUE;
 
-    private static class ResourceSchedule {
-        private Schedule       schedule = new Schedule();
-        private AppdefEntityID id;
-        private long           lastUnreachble = 0;
-        private List<ScheduledMeasurement> retry = new ArrayList<ScheduledMeasurement>();
-        private IntHashMap collected = new IntHashMap();
+    ScheduleThread(Sender sender, MeasurementValueGetter manager,
+                   Properties config)
+        throws AgentStartException
+    {
+        _agentConfig  = config;
+        _schedules    = new HashMap<String,ResourceSchedule>();
+        _shouldDie    = false;
+        _interrupter  = new Object();
+        _manager      = manager;
+        _sender       = sender;
+        _errors       = new HashMap<String,String>();
+        _executors    = new HashMap<String,ExecutorService>();
+        _metricCollections = new HashMap<FutureTask,MetricTask>();
+
+        _metricCancelThread = new MetricCancelThread();
+        _metricCancelThread.start();
     }
 
     /**
@@ -156,20 +173,12 @@ public class ScheduleThread
         }
     }
 
-    ScheduleThread(Sender sender, MeasurementValueGetter manager)
-        throws AgentStartException 
-    {
-        _schedules    = new HashMap<String,ResourceSchedule>();
-        _shouldDie    = false;
-        _interrupter  = new Object();
-        _manager      = manager;
-        _sender       = sender;               
-        _errors       = new HashMap<String,String>();
-        _executors    = new HashMap<String,ExecutorService>();
-        _metricCollections = new HashMap<FutureTask,MetricTask>();
-
-        _metricCancelThread = new MetricCancelThread();
-        _metricCancelThread.start();
+    private static class ResourceSchedule {
+        private Schedule       schedule = new Schedule();
+        private AppdefEntityID id;
+        private long           lastUnreachble = 0;
+        private List<ScheduledMeasurement> retry = new ArrayList<ScheduledMeasurement>();
+        private IntHashMap collected = new IntHashMap();
     }
 
     private ResourceSchedule getSchedule(ScheduledMeasurement meas) {
@@ -489,6 +498,21 @@ public class ScheduleThread
         }
     }
 
+    private int getPoolSize(String domain) {
+        String prop = PROP_POOLSIZE + domain;
+        String sQueueSize = _agentConfig.getProperty(prop);
+        if(sQueueSize != null){
+            try {
+                return Integer.parseInt(sQueueSize);
+            } catch(NumberFormatException exc){
+                _log.error("Invalid setting for " + prop + " value=" +
+                           sQueueSize + " using defaults.");
+                return 1;
+            }
+        }
+        return 1;
+    }
+
     private void collect(ResourceSchedule rs, List items)
     {
         for (int i=0; i<items.size() && (!_shouldDie); i++) {
@@ -500,9 +524,10 @@ public class ScheduleThread
             synchronized (_executors) {
                 svc = _executors.get(tmpl.plugin);
                 if (svc == null) {
-                    _log.info("Creating executor for domain '" + tmpl.plugin + "'");
-                    // TODO: Optional thread pool
-                    svc = Executors.newSingleThreadExecutor();
+                    int poolSize = getPoolSize(tmpl.plugin);
+                    _log.info("Creating executor for domain '" + tmpl.plugin +
+                              "' with a pool size of " + poolSize);
+                    svc = Executors.newFixedThreadPool(poolSize);
                     _executors.put(tmpl.plugin, svc);
                 }
             }
