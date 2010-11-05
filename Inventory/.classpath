@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry including="**/*.java|**/*.aj" kind="src" output="target/test-classes" path="src/test/java"/>
-	<classpathentry kind="src" output="target/test-classes" path="src/test/resources"/>
+	<classpathentry excluding="**/*.java" kind="src" output="target/test-classes" path="src/test/resources"/>
 	<classpathentry including="**/*.java|**/*.aj" kind="src" path="src/main/java"/>
 	<classpathentry excluding="**/*.java" kind="src" path="src/main/resources"/>
 	<classpathentry kind="var" path="M2_REPO/javax/activation/activation/1.1/activation-1.1.jar" sourcepath="M2_REPO/javax/activation/activation/1.1/activation-1.1-sources.jar"/>
@@ -31,12 +31,12 @@
 	<classpathentry kind="var" path="M2_REPO/org/hibernate/hibernate-entitymanager/3.5.5-Final/hibernate-entitymanager-3.5.5-Final.jar" sourcepath="M2_REPO/org/hibernate/hibernate-entitymanager/3.5.5-Final/hibernate-entitymanager-3.5.5-Final-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/hibernate/javax/persistence/hibernate-jpa-2.0-api/1.0.0.Final/hibernate-jpa-2.0-api-1.0.0.Final.jar" sourcepath="M2_REPO/org/hibernate/javax/persistence/hibernate-jpa-2.0-api/1.0.0.Final/hibernate-jpa-2.0-api-1.0.0.Final-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/hibernate/hibernate-validator/4.1.0.Final/hibernate-validator-4.1.0.Final.jar" sourcepath="M2_REPO/org/hibernate/hibernate-validator/4.1.0.Final/hibernate-validator-4.1.0.Final-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/hsqldb/hsqldb/1.8.0.10/hsqldb-1.8.0.10.jar"/>
 	<classpathentry kind="var" path="M2_REPO/javassist/javassist/3.9.0.GA/javassist-3.9.0.GA.jar" sourcepath="M2_REPO/javassist/javassist/3.9.0.GA/javassist-3.9.0.GA-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/slf4j/jcl-over-slf4j/1.6.1/jcl-over-slf4j-1.6.1.jar" sourcepath="M2_REPO/org/slf4j/jcl-over-slf4j/1.6.1/jcl-over-slf4j-1.6.1-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/joda-time/joda-time/1.6/joda-time-1.6.jar" sourcepath="M2_REPO/joda-time/joda-time/1.6/joda-time-1.6-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/junit/junit/4.8.1/junit-4.8.1.jar" sourcepath="M2_REPO/junit/junit/4.8.1/junit-4.8.1-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/log4j/log4j/1.2.16/log4j-1.2.16.jar" sourcepath="M2_REPO/log4j/log4j/1.2.16/log4j-1.2.16-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/mysql/mysql-connector-java/5.1.13/mysql-connector-java-5.1.13.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/roo/org.springframework.roo.annotations/1.1.0.RELEASE/org.springframework.roo.annotations-1.1.0.RELEASE.jar" sourcepath="M2_REPO/org/springframework/roo/org.springframework.roo.annotations/1.1.0.RELEASE/org.springframework.roo.annotations-1.1.0.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/slf4j/slf4j-api/1.6.1/slf4j-api-1.6.1.jar" sourcepath="M2_REPO/org/slf4j/slf4j-api/1.6.1/slf4j-api-1.6.1-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/slf4j/slf4j-log4j12/1.6.1/slf4j-log4j12-1.6.1.jar" sourcepath="M2_REPO/org/slf4j/slf4j-log4j12/1.6.1/slf4j-log4j12-1.6.1-sources.jar"/>
