@@ -1531,8 +1531,7 @@ public class ServiceManagerImpl implements ServiceManager {
         }
 
         // remove custom properties
-//        cpropManager.deleteValues(aeid.getType(), aeid.getID());
-        cpropManager.deleteValues(aeid);
+        cpropManager.deleteValues(aeid.getType(), aeid.getID());
 
         // Remove authz resource.
         resourceManager.removeAuthzResource(subject, aeid, service.getResource());

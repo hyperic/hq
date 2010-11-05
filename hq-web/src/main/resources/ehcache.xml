@@ -64,13 +64,13 @@
 
   <!-- Measurement caches -->
   <cache name="org.hyperic.hq.measurement.server.session.Measurement.baselinesBag"
-         maxElementsInMemory="500000"
+         maxElementsInMemory="50000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.measurement.server.session.Measurement"
-         maxElementsInMemory="500000"
+         maxElementsInMemory="50000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -106,12 +106,12 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.measurement.server.session.Baseline"
-         maxElementsInMemory="500000"
+         maxElementsInMemory="50000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
- <cache name="Measurement.findByResource"
+  <cache name="Measurement.findByResource"
          maxElementsInMemory="10000"
          eternal="true"
          timeToIdleSeconds="0"
@@ -161,12 +161,6 @@
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="Measurement.findAllAvailIds"
          maxElementsInMemory="1"
-         eternal="true"
-         timeToIdleSeconds="0"
-         timeToLiveSeconds="0"
-         memoryStoreEvictionPolicy="LRU"/>
-   <cache name="Measurement.findAvailMeasurements"
-         maxElementsInMemory="1000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -314,7 +308,7 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.appdef.server.session.Server"
-         maxElementsInMemory="10000"
+         maxElementsInMemory="2000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -360,19 +354,19 @@
 
   <!-- Service Caches -->
   <cache name="org.hyperic.hq.appdef.server.session.ServiceType"
-         maxElementsInMemory="1000"
+         maxElementsInMemory="500"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="ServiceType.findByName"
-         maxElementsInMemory="1000"
+         maxElementsInMemory="500"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.appdef.server.session.Service"
-         maxElementsInMemory="500000"
+         maxElementsInMemory="10000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -402,7 +396,7 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="Service.findPlatformServices"
-         maxElementsInMemory="1000"
+         maxElementsInMemory="100"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -410,7 +404,7 @@
 
   <!-- Resource caches -->
   <cache name="org.hyperic.hq.authz.server.session.ResourceEdge"
-         maxElementsInMemory="200000"
+         maxElementsInMemory="10000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -481,7 +475,7 @@
 
   <!-- Permission related caches -->
   <cache name="org.hyperic.hq.authz.server.session.Resource"
-         maxElementsInMemory="100000"
+         maxElementsInMemory="10000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -610,19 +604,19 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.events.server.session.Alert.actionLogBag"
-         maxElementsInMemory="100000"
+         maxElementsInMemory="5000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.events.server.session.Alert.conditionLogBag"
-         maxElementsInMemory="100000"
+         maxElementsInMemory="5000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.events.server.session.Action"
-         maxElementsInMemory="10000"
+         maxElementsInMemory="3000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -637,13 +631,13 @@
 	   the same maxElementsInMemory setting since there is a one-to-one 
 	   relationship between these objects. -->	
   <cache name="org.hyperic.hq.events.server.session.AlertDefinition"
-         maxElementsInMemory="10000"
+         maxElementsInMemory="5000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.events.server.session.AlertDefinitionState"
-         maxElementsInMemory="10000"
+         maxElementsInMemory="5000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -655,7 +649,7 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.events.server.session.AlertDefinition.conditionsBag"
-         maxElementsInMemory="10000"
+         maxElementsInMemory="5000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -673,7 +667,7 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.events.server.session.AlertCondition"
-         maxElementsInMemory="10000"
+         maxElementsInMemory="5000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"

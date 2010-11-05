@@ -27,7 +27,6 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.util.Collection;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.hq.zevents.ZeventPayload;
@@ -51,15 +50,16 @@ public class AgentUnscheduleZevent extends Zevent {
     private static class AgentUnscheduleZeventPayload
         implements ZeventPayload
     {
-        private final Collection<AppdefEntityID> _entityIDs;
+        // List<AppdefEntityID>
+        private final Collection _entityIDs;
         private final String _agentToken;
 
-        public AgentUnscheduleZeventPayload(Collection<AppdefEntityID> ids, String agentToken) {
+        public AgentUnscheduleZeventPayload(Collection ids, String agentToken) {
             _agentToken = agentToken;
             _entityIDs = ids;
         }
 
-        public Collection<AppdefEntityID> getEntityIds() {
+        public Collection getEntityIds() {
             return _entityIDs;
         }
 
@@ -72,7 +72,7 @@ public class AgentUnscheduleZevent extends Zevent {
         return ((AgentUnscheduleZeventPayload)getPayload()).getAgentToken();
     }
 
-    public Collection<AppdefEntityID> getEntityIds() {
+    public Collection getEntityIds() {
         return ((AgentUnscheduleZeventPayload)getPayload()).getEntityIds();
     }
 
@@ -80,7 +80,7 @@ public class AgentUnscheduleZevent extends Zevent {
      * @param aeids {@link Collection} of {@link AppdefEntityID}
      * @param schedule or unschedule metrics
      */
-    public AgentUnscheduleZevent(Collection<AppdefEntityID> aeids, String agentToken) {
+    public AgentUnscheduleZevent(Collection aeids, String agentToken) {
         super(new AgentUnscheduleZeventSource(),
               new AgentUnscheduleZeventPayload(aeids, agentToken));
     }

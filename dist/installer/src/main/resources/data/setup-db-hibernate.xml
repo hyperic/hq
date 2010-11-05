@@ -110,12 +110,6 @@
           haltonerror="true"
           />
     </hibernatetool>
-    <if>
-      <equals arg1="" arg2=""/>
-      <then>
-        <sql/>
-      </then>
-    </if>
   </target>
 
   <target name="hibernate-schema-drop" depends="hibernate-prep">

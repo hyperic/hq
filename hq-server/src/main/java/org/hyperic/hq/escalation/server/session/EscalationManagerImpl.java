@@ -787,16 +787,14 @@ public class EscalationManagerImpl implements EscalationManager {
 
         boolean debugLog = log.isDebugEnabled();
 
-        try {
-            List<EscalationState> states = escalationStateDAO.findAll();
-            for (EscalationState state : states) {
-                if (debugLog) {
-                    log.debug("Loading escalation state [" + state.getId() + "]");
-                }
-                escalationRuntime.scheduleEscalation(state);
+        for (Iterator<EscalationState> i = escalationStateDAO.findAll().iterator(); i.hasNext();) {
+            EscalationState state = i.next();
+
+            if (debugLog) {
+                log.debug("Loading escalation state [" + state.getId() + "]");
             }
-        } catch (Exception e) {
-            log.error("Could not initialize EscalationManager",e);
+
+            escalationRuntime.scheduleEscalation(state);
         }
     }
 }

@@ -409,7 +409,7 @@ public class PlatformManagerImpl implements PlatformManager {
             if (config != null) {
                 configResponseDAO.remove(config);
             }
-            cpropManager.deleteValues(aeid);
+            cpropManager.deleteValues(aeid.getType(), aeid.getID());
             resourceManager.removeAuthzResource(subject, aeid, r);
             platformDAO.getSession().flush();
 

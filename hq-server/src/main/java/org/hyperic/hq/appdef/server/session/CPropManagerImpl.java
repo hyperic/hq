@@ -27,8 +27,6 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -273,6 +271,7 @@ public class CPropManagerImpl implements CPropManager {
      *        resource's associated type
      * @throw AppdefEntityNotFoundException if id for 'aVal' specifies a
      *        resource which does not exist
+     */
     public void setValue(AppdefEntityID aID, int typeId, String key, String val)
         throws CPropKeyNotFoundException, AppdefEntityNotFoundException, PermissionException {
         String oldval;
@@ -294,76 +293,6 @@ public class CPropManagerImpl implements CPropManager {
         CPropChangeEvent event = new CPropChangeEvent(aID, key, oldval, val);
         sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
     }
-     */
-    
-    private static final int CHUNKSIZE = 1000; // Max size for each row
-
-    public void setValue(AppdefEntityID aID, int typeId, String key, String val)
-    throws CPropKeyNotFoundException, AppdefEntityNotFoundException, PermissionException {
-        final CpropKey cpropKey = getKey(aID, typeId, key);
-        final List<Cprop> cprops = cPropDAO.findByKeyAndId(cpropKey, aID);
-        final String[] chunks = chunk(val, CHUNKSIZE);
-        int chunkIdx = 0;
-        final StringBuilder oldval = new StringBuilder();
-        for (final Cprop cprop : cprops) {
-            oldval.append(cprop.getPropValue());
-            if (chunkIdx >= chunks.length) {
-                chunkIdx++;
-                cPropDAO.remove(cprop);
-                continue;
-            }
-            cprop.setAppdefId(aID.getId());
-            cprop.setKey(cpropKey);
-            cprop.setPropValue(chunks[chunkIdx]);
-            cprop.setValueIdx(new Integer(chunkIdx++));
-        }
-        for (int i = chunkIdx; i < chunks.length; i++) {
-            final Cprop cprop = new Cprop();
-            cprop.setAppdefId(aID.getId());
-            cprop.setKey(cpropKey);
-            cprop.setPropValue(chunks[chunkIdx]);
-            cprop.setValueIdx(new Integer(chunkIdx++));
-            cPropDAO.save(cprop);
-        }
-        CPropChangeEvent event = new CPropChangeEvent(aID, key, oldval.toString(), val);
-        sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
-    }
-
-    /**
-     * Split a string into a list of same sized chunks, and 
-     * a chunk of potentially different size at the end, 
-     * which contains the remainder.
-     *
-     * e.g. chunk("11223", 2) -> { "11", "22", "3" }
-     *
-     * @param src       String to chunk
-     * @param chunkSize The max size of any chunk
-     *
-     * @return an array containing the chunked string
-     */
-    private static String[] chunk(String src, int chunkSize){
-        String[] res;
-        int strLen, nAlloc;
-        if(chunkSize <= 0){
-            throw new IllegalArgumentException("chunkSize must be >= 1");
-        }
-        strLen = src.length();
-        nAlloc = strLen / chunkSize;
-        if((strLen % chunkSize) != 0) {
-            nAlloc++;
-        }
-        res = new String[nAlloc];
-        for(int i=0; i<nAlloc; i++) {
-            int begIdx, endIdx;
-            begIdx = i * chunkSize;
-            endIdx = (i + 1) * chunkSize;
-            if(endIdx > strLen) {
-                endIdx = strLen;
-            }
-            res[i] = src.substring(begIdx, endIdx);
-        }
-        return res;
-    }
 
     /**
      * Get a custom property for a resource.
@@ -376,6 +305,7 @@ public class CPropManagerImpl implements CPropManager {
      * @throw CPropKeyNotFoundException if the key for the associated resource
      *        is not found
      * @throw AppdefEntityNotFoundException if the passed entity is not found
+     */
     @Transactional(readOnly = true)
     public String getValue(AppdefEntityValue aVal, String key) throws CPropKeyNotFoundException,
         AppdefEntityNotFoundException, PermissionException {
@@ -385,41 +315,6 @@ public class CPropManagerImpl implements CPropManager {
             log.error("Unable to get CPropKey values: " + e.getMessage(), e);
             throw new SystemException(e);
         }
-    }
-     */
-    
-    @Transactional(readOnly = true)
-    public String getValue(AppdefEntityValue aVal, String key)
-    throws CPropKeyNotFoundException, AppdefEntityNotFoundException, PermissionException {
-        final AppdefEntityID aID = aVal.getID();
-        final AppdefResourceType recType = aVal.getAppdefResourceType();
-        final int typeId = recType.getId().intValue();
-        final CpropKey propKey = getKey(aID, typeId, key);
-        final List<Cprop> entries = cPropDAO.findByKeyName(propKey, true);
-        Collections.sort(entries, new Comparator<Cprop>() {
-            public int compare(Cprop cprop0, Cprop cprop1) {
-                if (cprop0 == cprop1) {
-                    return 0;
-                }
-                return cprop0.getValueIdx().compareTo(cprop1.getValueIdx());
-            }
-        });
-        final StringBuilder rtn = new StringBuilder();
-        for (final Cprop cprop : entries) {
-            rtn.append(cprop.getPropValue());
-        }
-        return rtn.toString();
-    }
-    
-    private CpropKey getKey(AppdefEntityID aID, int typeId, String key)
-    throws CPropKeyNotFoundException, AppdefEntityNotFoundException, PermissionException {
-        CpropKey res = cPropKeyDAO.findByKey(aID.getType(), typeId, key);
-        if (res == null) {
-            String msg = "Key, '" + key + "', does " + "not exist for aID=" + aID +
-                         ", typeId=" + typeId;
-            throw new CPropKeyNotFoundException(msg);
-        }
-        return res;
     }
 
     /**
@@ -494,21 +389,14 @@ public class CPropManagerImpl implements CPropManager {
     /**
      * Remove custom properties for a given resource.
      */
-//    public void deleteValues(int appdefType, int id) {
-//        try {
-//            cPropDAO.deleteValues(appdefType, id);
-//        }catch(Exception e) {
-//            log.error("Unable to delete CProp values: " + e.getMessage(), e);
-//            throw new SystemException(e);
-//        }
-//    }
-    public void deleteValues(AppdefEntityID aeid) {
-        final List<Cprop> cprops = cPropDAO.findByKeyAppdefEntity(aeid);
-        for (Cprop cprop : cprops) {
-            cPropDAO.remove(cprop);
+    public void deleteValues(int appdefType, int id) {
+        try {
+            cPropDAO.deleteValues(appdefType, id);
+        }catch(Exception e) {
+            log.error("Unable to delete CProp values: " + e.getMessage(), e);
+            throw new SystemException(e);
         }
     }
-
 
     /**
      * Get all Cprops values with specified key name, regardless of type
