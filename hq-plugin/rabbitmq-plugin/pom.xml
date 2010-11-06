@@ -15,9 +15,9 @@
     <name>Hyperic HQ Plugin - RabbitMQ Plugin</name>
 
     <properties>
-        <spring.amqp.version>1.0.0.20101001.003011-82</spring.amqp.version>
-        <spring.erlang.version>1.0.0.20101001.003011-75</spring.erlang.version>
-        <spring.rabbit.version>1.0.0.20101001.003011-94</spring.rabbit.version>
+        <org.springframework.amqp.version>1.0.0.20101001.003011-82</org.springframework.amqp.version>
+        <org.springframework.amqp.erlang.version>1.0.0.20101001.003011-75</org.springframework.amqp.erlang.version>
+        <org.springframework.amqp.rabbit.version>1.0.0.20101001.003011-94</org.springframework.amqp.rabbit.version>
         <com.rabbitmq.version>1.8.1</com.rabbitmq.version>
         <commons-io.version>1.3.2</commons-io.version>
         <org.mockito.version>1.8.4</org.mockito.version>
@@ -33,22 +33,22 @@
         <dependency>
             <groupId>org.springframework.amqp</groupId>
             <artifactId>spring-amqp</artifactId>
-            <version>${spring.amqp.version}</version>
+            <version>${org.springframework.amqp.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.amqp</groupId>
             <artifactId>spring-rabbit</artifactId>
-            <version>${spring.rabbit.version}</version>
+            <version>${org.springframework.amqp.rabbit.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.amqp</groupId>
             <artifactId>spring-rabbit-admin</artifactId>
-            <version>${spring.rabbit.version}</version>
+            <version>${org.springframework.amqp.rabbit.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.amqp</groupId>
             <artifactId>spring-erlang</artifactId>
-            <version>${spring.erlang.version}</version>
+            <version>${org.springframework.amqp.erlang.version}</version>
         </dependency>
         <dependency>
             <groupId>org.hyperic.hq</groupId>
@@ -131,7 +131,7 @@
                             <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <includeGroupIds>com.rabbitmq,org.springframework.amqp,commons-io</includeGroupIds>
+                            <includeGroupIds>com.rabbitmq,org.springframework.amqp,org.erlang.otp,commons-io</includeGroupIds>
                             <outputDirectory>${project.build.directory}/classes/lib</outputDirectory>
                         </configuration>
                     </execution>
