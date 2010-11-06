@@ -365,11 +365,6 @@
 		<welcome-file>Dashboard.do</welcome-file>
 	</welcome-file-list>
 	
-	<error-page>
-		<error-code>404</error-code>
-		<location>/common/GenericError.jsp</location>
-	</error-page>
-	
 	<!-- Lather servlet -->
   <servlet>
     <servlet-name>lather</servlet-name>

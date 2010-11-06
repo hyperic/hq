@@ -52,7 +52,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- * This controller is handles all interactions relative to the dashboard.
+ * This controller handles all interactions relative to the dashboard.
  * 
  * @author David Crutchfield
  * 

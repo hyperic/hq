@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC
+	"-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
+	"http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+
+<tiles-definitions>
+	<definition name="inventory/platform/create" extends="primaryLayout">
+		<put-attribute name="title" value="Create Platform" />
+		<put-attribute name="content" value="/WEB-INF/jsp/inventory/platform/create.jsp" />
+	</definition>	
+	<definition name="inventory/platform/edit" extends="primaryLayout">
+		<put-attribute name="title" value="Edit Platform" />
+		<put-attribute name="content" value="/WEB-INF/jsp/inventory/platform/edit.jsp" />
+	</definition>	
+	<definition name="inventory/platform/view" extends="primaryLayout">
+		<put-attribute name="title" value="View Platform" />
+		<put-attribute name="content" value="/WEB-INF/jsp/inventory/platform/view.jsp" />
+	</definition>	
+	<definition name="inventory/platform/list" extends="primaryLayout">
+		<put-attribute name="title" value="List Platforms" />
+		<put-attribute name="content" value="/WEB-INF/jsp/inventory/platform/list.jsp" />
+	</definition>	
+	<definition name="inventory/platform/driver" extends="primaryLayout">
+		<put-attribute name="title" value="Platform Driver" />
+		<put-attribute name="content" value="/WEB-INF/jsp/inventory/platform/driver.jsp" />
+	</definition>
+</tiles-definitions>

@@ -6,7 +6,7 @@
          <class>org.hyperic.hq.inventory.domain.AgentNG</class>
           <class>org.hyperic.hq.inventory.domain.Config</class>
            <class>org.hyperic.hq.inventory.domain.IpNG</class>
-            <class>org.hyperic.hq.inventory.domain.PlatformTypeNG</class>
+            
         <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
         <properties>
             <property name="hibernate.dialect" value="org.hyperic.hibernate.dialect.MySQL5InnoDBDialect"/>

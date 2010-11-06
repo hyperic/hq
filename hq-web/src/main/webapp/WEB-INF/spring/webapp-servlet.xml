@@ -54,17 +54,37 @@
 		</property>
 	</bean>
 	
+	<bean id="jaxb2Marshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+		<property name="classesToBeBound" value="org.hyperic.hq.inventory.domain.PlatformNG" />
+	</bean>
+	
 	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
 		<property name="messageConverters">
   			<list>
     			<bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter" />
-  			</list>
+    			<bean class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter">
+					<constructor-arg ref="jaxb2Marshaller" />
+    				<property name="supportedMediaTypes" value="application/xml" />
+      			</bean>
+			</list>
 		</property>
 	</bean>
-    
-    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
-        <property name="prefix" value="/WEB-INF/jsp/"/>
-        <property name="suffix" value=".jsp"/>
-    </bean>
+	
+	<!-- Resolves view names to Tiles 2 definitions -->
+	<bean id="tilesViewResolver"
+		class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+		<property name="viewClass"
+			value="org.springframework.web.servlet.view.tiles2.TilesView" />
+	</bean>
+
+	<!-- Configures Tiles 2 -->
+	<bean id="tilesConfigurer"
+		class="org.springframework.web.servlet.view.tiles2.TilesConfigurer">
+		<property name="definitions">
+			<list>
+				<value>/WEB-INF/jsp/tiles.xml</value>
+				<value>/WEB-INF/jsp/inventory/platform/tiles.xml</value>
+			</list>
+		</property>
+	</bean>
 </beans>

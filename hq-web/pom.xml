@@ -17,6 +17,11 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
+			<artifactId>Inventory</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-pdk</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -97,6 +102,10 @@
 	  		<scope>runtime</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-oxm</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>taglibs</groupId>
 			<artifactId>standard</artifactId>
 		</dependency>
@@ -124,7 +133,15 @@
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-mapper-asl</artifactId>
 		</dependency>
-		
+		<dependency>
+  			<groupId>org.apache.tiles</groupId>
+  			<artifactId>tiles-jsp</artifactId>
+  		</dependency>
+		<dependency>
+  			<groupId>org.slf4j</groupId>
+  			<artifactId>slf4j-log4j12</artifactId>
+		</dependency>
+
 		<!--  UI Plugins -->
 		<dependency>
 			<groupId>org.hyperic.hq.uiplugin</groupId>
