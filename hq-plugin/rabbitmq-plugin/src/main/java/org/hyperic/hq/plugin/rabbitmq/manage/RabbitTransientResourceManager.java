@@ -45,6 +45,7 @@ import java.util.Properties;
 
 /**
  * RabbitTransientResourceManager is in development.
+ * @author Patrick Nguyen
  * 
  */
 public class RabbitTransientResourceManager implements TransientResourceManager {

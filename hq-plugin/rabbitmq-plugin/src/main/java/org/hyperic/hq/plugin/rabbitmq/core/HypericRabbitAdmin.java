@@ -25,17 +25,16 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
 
-import com.ericsson.otp.erlang.OtpErlangList;
-import org.hyperic.hq.plugin.rabbitmq.validate.ConfigurationValidator;
 import org.hyperic.hq.product.PluginException;
 import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.rabbit.admin.QueueInfo;
 import org.springframework.amqp.rabbit.admin.RabbitBrokerAdmin;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.erlang.ErlangBadRpcException;
 import org.springframework.erlang.connection.SingleConnectionFactory;
+import org.springframework.erlang.core.Node;
+import org.springframework.util.Assert;
 
 import java.util.List;
 
@@ -126,12 +125,53 @@ public class HypericRabbitAdmin extends RabbitBrokerAdmin implements DisposableB
         return peerNodeName;
     }
 
-    public RabbitVirtualHost getRabbitVirtualHost(String vHost) {
-        RabbitVirtualHost virtualHost = new RabbitVirtualHost();
-        virtualHost.setName(vHost);
-        virtualHost.setNode(this.peerNodeName);
-        virtualHost.setConnections(getConnections());
-        virtualHost.setChannels(getChannels());
-        return virtualHost;
+
+    public boolean nodeAvailable(String nodeName) {
+        Assert.notNull(nodeName, "'node' must not be null");
+        List<Node> runningNodes = getStatus().getRunningNodes();
+        if (runningNodes != null) {
+            for (Node node : runningNodes) {
+                if (node.toString().contains(nodeName)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
+
+    public boolean virtualHostAvailable(String virtualHost, String node) {
+        Assert.notNull(virtualHost, "'virtualHost' must not be null");
+        Assert.notNull(node, "'node' must not be null");
+
+        List<String> vhosts = null;
+        try {
+            vhosts = getVirtualHosts();
+        } catch (PluginException e) {
+            logger.error(e);
+        }
+
+        return nodeAvailable(node) && vhosts != null && vhosts.contains(virtualHost);
+    }
+
+
+    public RabbitVirtualHost buildRabbitVirtualHost() {
+        VirtualHostBuilder builder = new VirtualHostBuilder();
+        return builder.build();
+    }
+
+    private class VirtualHostBuilder {
+
+        public RabbitVirtualHost build() {
+            RabbitVirtualHost vHost = new RabbitVirtualHost(virtualHost, peerNodeName);
+            vHost.setChannels(getChannels());
+            vHost.setConnectionCount(getConnections());
+            vHost.setAvailable(virtualHostAvailable(virtualHost, peerNodeName));
+            vHost.setQueueCount(getQueues());
+            vHost.setExchangeCount(getExchanges());
+            vHost.setUsers(listUsers());
+            return vHost;
+        }
+    }
+
 }

@@ -43,6 +43,7 @@ import java.util.regex.Pattern;
 /**
  * PluginValidator
  * @author Helena Edelson
+ * @author German Laullon
  */
 public class ConfigurationValidator {
 

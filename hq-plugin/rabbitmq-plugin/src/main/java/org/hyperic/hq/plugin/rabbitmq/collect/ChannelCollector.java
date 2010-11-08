@@ -57,14 +57,19 @@ public class ChannelCollector extends Collector {
         String channelPid = (String) props.get(MetricConstants.CHANNEL);
         String vhost = (String) props.get(MetricConstants.VIRTUALHOST);
         String node = (String) props.get(MetricConstants.NODE);
-         
+
         if (RabbitProductPlugin.isInitialized()) {
             HypericRabbitAdmin rabbitAdmin = RabbitProductPlugin.getVirtualHostForNode(vhost, node);
             List<RabbitChannel> channels = rabbitAdmin.getChannels();
             if (channels != null) {
                 for (RabbitChannel c : channels) {
-                    setAvailability(true);
-                    setValue("consumerCount", c.getConsumerCount());
+                    if (c.getPid().equalsIgnoreCase(channelPid)) {
+                        setAvailability(true);
+                        setValue("consumerCount", c.getConsumerCount());
+                        setValue("prefetchCount", c.getPrefetchCount());
+                        setValue("acksUncommitted", c.getAcksUncommitted());
+                        setValue("messagesUnacknowledged", c.getMessagesUnacknowledged());
+                    }
                 }
             }
         }
@@ -84,9 +89,7 @@ public class ChannelCollector extends Collector {
         res.setValue("number", channel.getNumber());
         res.setValue("user", channel.getUser());
         res.setValue("transactional", channel.getTransactional());
-        res.setValue("prefetchCount", channel.getPrefetchCount());
-        res.setValue("acksUncommitted", channel.getAcksUncommitted());
-        res.setValue("messagesUnacknowledged", channel.getMessagesUnacknowledged());
+
 
         return res;
     }

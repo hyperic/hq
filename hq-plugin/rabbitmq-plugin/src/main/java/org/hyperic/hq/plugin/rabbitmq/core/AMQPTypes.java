@@ -23,26 +23,36 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.rabbitmq.collect;
+package org.hyperic.hq.plugin.rabbitmq.core;
 
 /**
- * MetricConstants
+ * AMQPTypes
  * @author Helena Edelson
  */
-public class MetricConstants {
+public class AMQPTypes {
 
-    public static final String NODE = "node";
+    public static final String QUEUE = "Queue";
 
-    public static final String VIRTUALHOST = "virtualhost";
+    public static final String EXCHANGE = "Exchange";
 
-    public static final String QUEUE = "queue";
+    public static final String CHANNEL = "Channel";
 
-    public static final String EXCHANGE = "exchange";
+    public static final String USER = "User";
 
-    public static final String CONNECTION = "connection";
+    public static final String CONNECTION = "Connection";
 
-    public static final String CHANNEL = "channel";
+    public static final String VIRTUAL_HOST = "VirtualHost";
 
-    public static final String VIRTUAL_HOST = "vhost";
+    public static final String BINDING = "Binding";
+
+    /**
+     * Hyperic requires a name for each inventory item.
+     * RabbitMQ produces several default Exchanges, one
+     * of which has no name. This is a hack so that the service
+     * does not show as grey availability. Having no name
+     * as other repurcussions in the plugin as well - around
+     * transient resource handling.
+     */
+    public static final String DEFAULT_EXCHANGE_NAME = "_";
 
 }
