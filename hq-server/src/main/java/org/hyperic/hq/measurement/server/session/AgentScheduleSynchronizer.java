@@ -46,6 +46,8 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hibernate.SessionManager;
 import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
 import org.hyperic.hq.measurement.shared.MeasurementProcessor;
@@ -55,6 +57,7 @@ import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 
 
@@ -71,18 +74,18 @@ public class AgentScheduleSynchronizer {
 
     private AgentManager agentManager;
 
-    private final Map<Integer, Collection<AppdefEntityID>> scheduleAeids = new HashMap<Integer, Collection<AppdefEntityID>>();
+    private final Map<Integer, Collection<AppdefEntityID>> scheduleAeids =
+        new HashMap<Integer, Collection<AppdefEntityID>>();
 
-    private final Map<Integer, Collection<AppdefEntityID>> unscheduleAeids = new HashMap<Integer, Collection<AppdefEntityID>>();
+    private final Map<Integer, Collection<AppdefEntityID>> unscheduleAeids =
+        new HashMap<Integer, Collection<AppdefEntityID>>();
     
     private final Set<Integer> activeAgents = Collections.synchronizedSet(new HashSet<Integer>());
     
     private ConcurrentStatsCollector concurrentStatsCollector;
     private MeasurementProcessor measurementProcessor;
     
-    
     private static final int NUM_WORKERS = 4;
-    
 
     @Autowired
     public AgentScheduleSynchronizer(ZeventEnqueuer zEventManager, AgentManager agentManager, MeasurementProcessor measurementProcessor, ConcurrentStatsCollector concurrentStatsCollector) {
@@ -94,30 +97,40 @@ public class AgentScheduleSynchronizer {
 
     @PostConstruct
     void initialize() {
-          ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(NUM_WORKERS, new ThreadFactory() {
-              private AtomicLong i = new AtomicLong(0);
-              public Thread newThread(Runnable r) {
-                  return new Thread(r, "AgentScheduler" + i.getAndIncrement());
-              }
-          });
-          for (int i=0; i<NUM_WORKERS; i++) {
-              SchedulerThread worker = new SchedulerThread("AgentScheduler" + i);
-              executor.scheduleWithFixedDelay(worker, i+1, NUM_WORKERS, TimeUnit.SECONDS);
-          }
+        ScheduledThreadPoolExecutor executor =
+            new ScheduledThreadPoolExecutor(NUM_WORKERS, new ThreadFactory() {
+            private AtomicLong i = new AtomicLong(0);
+            public Thread newThread(Runnable r) {
+                return new Thread(r, "AgentScheduler" + i.getAndIncrement());
+            }
+        });
+        for (int i=0; i<NUM_WORKERS; i++) {
+            SchedulerThread worker = new SchedulerThread("AgentScheduler" + i);
+            executor.scheduleWithFixedDelay(worker, i+1, NUM_WORKERS, TimeUnit.SECONDS);
+        }
 
-          ZeventListener<Zevent> l = new ZeventListener<Zevent>() {
+        ZeventListener<Zevent> l = getScheduleListener();
+        zEventManager.addBufferedListener(AgentScheduleSyncZevent.class, l);
+        zEventManager.addBufferedListener(AgentUnscheduleZevent.class, l);
 
+        final ZeventListener<AgentUnscheduleNonEntityZevent> l2 = getUnscheduleUnEntityZeventListener();
+        zEventManager.addBufferedListener(AgentUnscheduleNonEntityZevent.class, l2);
+        concurrentStatsCollector.register(ConcurrentStatsCollector.SCHEDULE_QUEUE_SIZE);
+        concurrentStatsCollector.register(ConcurrentStatsCollector.UNSCHEDULE_QUEUE_SIZE);
+    }
+
+    private ZeventListener<Zevent> getScheduleListener() {
+        return new ZeventListener<Zevent>() {
             public void processEvents(List<Zevent> events) {
                 final List<AppdefEntityID> toSchedule = new ArrayList<AppdefEntityID>(events.size());
-                final Map<String, Collection<AppdefEntityID>> unscheduleMap = new HashMap<String, Collection<AppdefEntityID>>(
-                    events.size());
+                final Map<String, Collection<AppdefEntityID>> unscheduleMap =
+                    new HashMap<String, Collection<AppdefEntityID>>(events.size());
                 final boolean debug = log.isDebugEnabled();
                 for (final Zevent z : events) {
                     if (z instanceof AgentScheduleSyncZevent) {
                         AgentScheduleSyncZevent event = (AgentScheduleSyncZevent) z;
                         toSchedule.addAll(event.getEntityIds());
-                        if (debug)
-                            log.debug("Schduling eids=[" + event.getEntityIds() + "]");
+                        if (debug) log.debug("Schduling eids=[" + event.getEntityIds() + "]");
                     } else if (z instanceof AgentUnscheduleZevent) {
                         AgentUnscheduleZevent event = (AgentUnscheduleZevent) z;
                         String token = event.getAgentToken();
@@ -130,16 +143,13 @@ public class AgentScheduleSynchronizer {
                             unscheduleMap.put(token, tmp);
                         }
                         tmp.addAll(event.getEntityIds());
-                        if (debug)
-                            log.debug("Unschduling eids=[" + event.getEntityIds() + "]");
+                        if (debug) log.debug("Unschduling eids=[" + event.getEntityIds() + "]");
                     }
                 }
-
-                final Map<Integer, Collection<AppdefEntityID>> agentAppdefIds = agentManager
-                    .getAgentMap(toSchedule);
+                final Map<Integer, Collection<AppdefEntityID>> agentAppdefIds =
+                    agentManager.getAgentMap(toSchedule);
                 synchronized (scheduleAeids) {
-                    for (final Map.Entry<Integer, Collection<AppdefEntityID>> entry : agentAppdefIds
-                        .entrySet()) {
+                    for (Map.Entry<Integer, Collection<AppdefEntityID>> entry : agentAppdefIds.entrySet()) {
                         final Integer agentId = entry.getKey();
                         final Collection<AppdefEntityID> eids = entry.getValue();
                         Collection<AppdefEntityID> tmp;
@@ -151,8 +161,7 @@ public class AgentScheduleSynchronizer {
                     }
                 }
                 synchronized (unscheduleAeids) {
-                    for (final Map.Entry<String, Collection<AppdefEntityID>> entry : unscheduleMap
-                        .entrySet()) {
+                    for (Map.Entry<String, Collection<AppdefEntityID>> entry : unscheduleMap.entrySet()) {
                         final String token = entry.getKey();
                         final Collection<AppdefEntityID> eids = entry.getValue();
                         Integer agentId;
@@ -172,16 +181,53 @@ public class AgentScheduleSynchronizer {
                     }
                 }
             }
-
             public String toString() {
                 return "AgentScheduleSyncListener";
             }
         };
+    }
 
-        zEventManager.addBufferedListener(AgentScheduleSyncZevent.class, l);
-        zEventManager.addBufferedListener(AgentUnscheduleZevent.class, l);
-        concurrentStatsCollector.register(ConcurrentStatsCollector.SCHEDULE_QUEUE_SIZE);
-        concurrentStatsCollector.register(ConcurrentStatsCollector.UNSCHEDULE_QUEUE_SIZE);
+    private ZeventListener<AgentUnscheduleNonEntityZevent> getUnscheduleUnEntityZeventListener() {
+        return new ZeventListener<AgentUnscheduleNonEntityZevent>() {
+            @Transactional
+            public void processEvents(List<AgentUnscheduleNonEntityZevent> events) {
+                final ResourceManager rMan = Bootstrap.getBean(ResourceManager.class);
+                final boolean debug = log.isDebugEnabled();
+                final Map<Integer, Collection<AppdefEntityID>> toUnschedule =
+                    new HashMap<Integer, Collection<AppdefEntityID>>();
+                for (final AgentUnscheduleNonEntityZevent zevent : events) {
+                    final Collection<AppdefEntityID> aeids = zevent.getAppdefEntities();
+                    Integer agentId = null;
+                    try {
+                        agentId = agentManager.getAgent(zevent.getAgentToken()).getId();
+                        if (agentId == null) {
+                            continue;
+                        }
+                    } catch (AgentNotFoundException e) {
+                        log.debug(e,e);
+                        continue;
+                    }
+                    for (final AppdefEntityID aeid : aeids) {
+                        if (null == rMan.findResource(aeid)) {
+                            Collection<AppdefEntityID> tmp = toUnschedule.get(agentId);
+                            if (tmp == null) {
+                                tmp = new ArrayList<AppdefEntityID>();
+                                toUnschedule.put(agentId, tmp);
+                            }
+                            if (debug) log.debug("unscheduling non-entity=" + aeid);
+log.info("unscheduling non-entity=" + aeid);
+                            tmp.add(aeid);
+                        }
+                    }
+                    synchronized (unscheduleAeids) {
+                        unscheduleAeids.putAll(toUnschedule);
+                    }
+                }
+            }
+            public String toString() {
+                return "AgentUnScheduleNonEntityListener";
+            }
+        };
     }
 
     private class SchedulerThread implements Runnable {
@@ -200,10 +246,12 @@ public class AgentScheduleSynchronizer {
                 boolean hasMoreToSchedule = true;
                 boolean hasMoreToUnschedule = true;
                 synchronized (scheduleAeids) {
-                	concurrentStatsCollector.addStat(scheduleAeids.size(), ConcurrentStatsCollector.SCHEDULE_QUEUE_SIZE);
+                	concurrentStatsCollector.addStat(
+                	    scheduleAeids.size(), ConcurrentStatsCollector.SCHEDULE_QUEUE_SIZE);
                 }
                 synchronized (unscheduleAeids) {
-                	concurrentStatsCollector.addStat(unscheduleAeids.size(), ConcurrentStatsCollector.UNSCHEDULE_QUEUE_SIZE);
+                	concurrentStatsCollector.addStat(
+                	    unscheduleAeids.size(), ConcurrentStatsCollector.UNSCHEDULE_QUEUE_SIZE);
                 }
                 while (hasMoreToSchedule || hasMoreToUnschedule) {
                     hasMoreToUnschedule = syncMetrics(unscheduleAeids, false);
@@ -214,7 +262,8 @@ public class AgentScheduleSynchronizer {
             }
         }
 
-        private boolean syncMetrics(Map<Integer,Collection<AppdefEntityID>> scheduleAeids, final boolean schedule) throws Exception {
+        private boolean syncMetrics(Map<Integer,Collection<AppdefEntityID>> scheduleAeids, final boolean schedule)
+        throws Exception {
             Integer agentId = null;
             Collection<AppdefEntityID> aeids = null;
             final boolean debug = log.isDebugEnabled();
