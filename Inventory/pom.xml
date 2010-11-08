@@ -4,7 +4,7 @@
 	<groupId>org.hyperic.hq</groupId>
 	<artifactId>Inventory</artifactId>
 	<packaging>jar</packaging>
-	<version>4.5.0.BUILD-SNAPSHOT</version>
+	<version>5.0.0.BUILD-SNAPSHOT</version>
 	<name>Inventory</name>
 	<properties>
 		<roo.version>1.1.0.RELEASE</roo.version>
