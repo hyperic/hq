@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -62,6 +63,7 @@ public class PlatformController {
 		links.put("view", BASE_URL_PATH + "/" + p.getId() + "/view");
 		links.put("edit", BASE_URL_PATH + "/" + p.getId() + "/edit");
 		links.put("delete", BASE_URL_PATH + "/delete");
+		links.put("list", BASE_URL_PATH + "/list");
 		model.addAttribute("links", links);
 				
 		return "redirect:" + BASE_URL_PATH + "/" + p.getId() + "/view";
@@ -77,6 +79,7 @@ public class PlatformController {
 		
 		links.put("edit", BASE_URL_PATH + "/edit");
 		links.put("delete", BASE_URL_PATH + "/delete");
+		links.put("list", BASE_URL_PATH + "/list");
 		model.addAttribute("links", links);
 		
 		return BASE_INTERNAL_PATH + "/edit";
@@ -96,6 +99,7 @@ public class PlatformController {
 		links.put("view", BASE_URL_PATH + "/" + p.getId() + "/view");
 		links.put("edit", BASE_URL_PATH + "/" + p.getId() + "/edit");
 		links.put("delete", BASE_URL_PATH + "/delete");
+		links.put("list", BASE_URL_PATH + "/list");
 		model.addAttribute("links", links);
 		
 		return "redirect:" + BASE_URL_PATH + "/" + p.getId() + "/view";
@@ -122,6 +126,7 @@ public class PlatformController {
 		links.put("view", BASE_URL_PATH + "/" + p.getId() + "/view");
 		links.put("edit", BASE_URL_PATH + "/" + p.getId() + "/edit");
 		links.put("delete", BASE_URL_PATH + "/delete");
+		links.put("list", BASE_URL_PATH + "/list");
 		model.addAttribute("links", links);
 
 		return BASE_INTERNAL_PATH + "/view";
@@ -260,6 +265,10 @@ public class PlatformController {
 		
 		int fromIndex = page * pageSize;
 		int toIndex = fromIndex + pageSize;
+		
+		if (toIndex > localStore.size() - 1) {
+			toIndex = localStore.size() - 1;
+		}
 		
 		return result.subList(fromIndex, toIndex);
 		*/
