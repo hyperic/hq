@@ -108,7 +108,7 @@
                       purgeQueue,createExchange,deleteExchangeIfUnused,createUser,updateUserPassword,deleteUser"/>
         -->
 
-         <service name="Queue">
+        <service name="Queue">
             <property name="template"
                       value="rabbitmq:queue=%queue%,node=%node%,virtualhost=%virtualhost%:${alias}"/>
 
@@ -141,6 +141,38 @@
                     indicator="true"
                     interval="60000"
                     defaultOn="true"
+                    collectionType="dynamic"/>  
+            <metric name="Acks Uncommitted"
+                    alias="acksUncommitted"
+                    category="THROUGHPUT"
+                    units="none"
+                    indicator="true"
+                    interval="60000"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="Messages Ready"
+                    alias="messagesReady"
+                    category="THROUGHPUT"
+                    units="none"
+                    indicator="true"
+                    interval="60000"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="Messages Unacknowledged"
+                    alias="messagesUnacknowledged"
+                    category="THROUGHPUT"
+                    units="none"
+                    indicator="true"
+                    interval="60000"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="Messages Uncommitted"
+                    alias="messagesUncommitted"
+                    category="THROUGHPUT"
+                    units="none"
+                    indicator="true"
+                    interval="60000"
+                    defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Availability"
                     category="AVAILABILITY"
@@ -163,15 +195,11 @@
             <properties>
                 <property description="Name" name="name"/>
                 <property description="Process ID" name="pid"/>
-                <property description="Acks Uncommitted" name="acksUncommitted"/>
-                <property description="Messages Ready" name="messagesReady"/>
-                <property description="Messages Unacknowledged" name="messagesUnacknowledged"/>
-                <property description="Messages Uncommitted" name="messagesUncommitted"/>
                 <property description="Durable" name="durable"/>
             </properties>
         </service>
 
-        <!--<service name="Channel">
+        <service name="Channel">
             <property name="template" value="rabbitmq:channel=%channel%,node=%node%,virtualhost=%virtualhost%:${alias}"/>
 
             <config type="measurement">
@@ -184,6 +212,30 @@
                     alias="consumerCount"
                     category="UTILIZATION"
                     units="none"
+                    indicator="true"
+                    interval="60000"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="Prefetch Count"
+                    alias="prefetchCount"
+                    category="THROUGHPUT"
+                    units="B"
+                    indicator="true"
+                    interval="60000"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="Acks Uncommitted"
+                    alias="acksUncommitted"
+                    category="THROUGHPUT"
+                    units="B"
+                    indicator="true"
+                    interval="60000"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="Messages Unacknowledged"
+                    alias="messagesUnacknowledged"
+                    category="THROUGHPUT"
+                    units="B"
                     indicator="true"
                     interval="60000"
                     defaultOn="true"
@@ -204,9 +256,6 @@
                 <property description="Number" name="number"/>
                 <property description="User" name="user"/>
                 <property description="Transactional" name="transactional"/>
-                <property description="Prefetch Count" name="prefetchCount"/>
-                <property description="Acks Uncommitted" name="acksUncommitted"/>
-                <property description="Messages Unacknowledged" name="messagesUnacknowledged"/>
             </properties>
         </service>
 
@@ -285,17 +334,18 @@
                 <property description="VHost" name="vHost"/>
                 <property description="Username" name="username"/>
             </properties>
-        </service>-->
+        </service>
 
         <service name="Exchange">
-            <property name="template" value="rabbitmq:exchange=%exchange%,node=%node%,virtualhost=%virtualhost%:${alias}"/>
+            <property name="template"
+                      value="rabbitmq:exchange=%exchange%,node=%node%,virtualhost=%virtualhost%:${alias}"/>
 
             <config type="measurement">
                 <option name="node" description="rabbit node name"/>
                 <option name="virtualhost" description="rabbit node-virtualhost name"/>
                 <option name="exchange" description="exchange name"/>
             </config>
-            
+
             <metric name="Availability"
                     category="AVAILABILITY"
                     units="percentage"
@@ -313,6 +363,9 @@
             </properties>
         </service>
 
+        <!-- These will hit the server enough for each query that we do not want to
+        run the collector often. Consider modifying what is queried/exposed with large-volume
+        heavily-trafficed brokers. -->
         <service name="VirtualHost">
             <property name="template" value="rabbitmq:node=%node%,virtualhost=%virtualhost%:${alias}"/>
 
@@ -326,46 +379,35 @@
                     units="percentage"
                     indicator="true"
                     collectionType="dynamic"/>
-            <metric name="Total Consumers"
+            <metric name="Exchanges"
+                    alias="exchangeCount"
+                    category="UTILIZATION"
+                    units="none"
+                    indicator="true"
+                    collectionType="dynamic"/>
+            <metric name="Queues"
+                    alias="queueCount"
+                    category="UTILIZATION"
+                    units="none"
+                    indicator="true"
+                    collectionType="dynamic"/>
+            <metric name="Consumers"
                     alias="consumerCount"
                     category="UTILIZATION"
                     units="none"
                     indicator="true"
-                    interval="60000"
-                    defaultOn="true"
                     collectionType="dynamic"/>
-            <metric name="Total Channels"
+            <metric name="Channels"
                     alias="channelCount"
                     category="UTILIZATION"
                     units="none"
                     indicator="true"
-                    interval="60000"
-                    defaultOn="true"
                     collectionType="dynamic"/>
-            <metric name="Total Octets Received"
-                    alias="octetsReceived"
-                    category="THROUGHPUT"
-                    units="B"
-                    indicator="true"
-                    interval="60000"
-                    defaultOn="true"
-                    collectionType="dynamic"/>
-            <metric name="Total Octets Sent"
-                    alias="octetsSent"
-                    category="THROUGHPUT"
-                    units="B"
-                    indicator="true"
-                    interval="60000"
-                    defaultOn="true"
-                    collectionType="dynamic"/>
-
-            <metric name="Total Pending Sends"
-                    alias="pendingSends"
+            <metric name="Connections"
+                    alias="connectionCount"
                     category="UTILIZATION"
                     units="none"
                     indicator="true"
-                    interval="60000"
-                    defaultOn="true"
                     collectionType="dynamic"/>
 
 
@@ -376,11 +418,11 @@
             <properties>
                 <property description="Virtual Host" name="name"/>
                 <property description="Node" name="node"/>
-                <property description="Total Connections" name="totalConnections"/>
-                <property description="Total Channels" name="totalChannels"/>
+                <property description="Users" name="users"/>
             </properties>
         </service>
-       
+
+
     </server>
 
 </plugin>

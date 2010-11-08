@@ -34,9 +34,7 @@ public class DetectorConstants {
     public static final String NODE_NAME = "node.name";
 
     public static final String NODE_PATH = "node.path";
-
-    public static final String VIRTUALHOST = " virtualhost";
-
+ 
     public static final String HOST = "hostname";
 
     public static final String USERNAME = "username";
@@ -58,18 +56,6 @@ public class DetectorConstants {
     public static final String SERVICE_LOG_TRACK_FILES = "service.log_track.files";
 
     public static final String NODE = "Node";
-
-    public static final String VIRTUAL_HOST = "Virtual Host";
-
-    public static final String QUEUE = "Queue";
-
-    public static final String EXCHANGE = "Exchange";
-
-    public static final String CHANNEL = "Channel";
-
-    public static final String USER = "User";
-
-    public static final String CONNECTION = "Connection";
 
     public static final String MNESIA = "-mnesia";
 

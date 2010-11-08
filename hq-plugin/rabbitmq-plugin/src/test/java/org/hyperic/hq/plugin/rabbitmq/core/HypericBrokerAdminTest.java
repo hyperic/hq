@@ -44,7 +44,7 @@ import static org.junit.Assert.*;
 @Ignore("Need to mock the connection for automation")
 public class HypericBrokerAdminTest extends AbstractSpringTest {
 
-   private SingleConnectionFactory otpConnectionFactory;
+    private SingleConnectionFactory otpConnectionFactory;
 
     @Before
     public void doBefore() throws PluginException {
@@ -53,8 +53,8 @@ public class HypericBrokerAdminTest extends AbstractSpringTest {
     }
 
     @Test
-    public void createHypericBrokerAdmin() throws Exception{
-        HypericRabbitAdmin admin =  configurationManager.getVirtualHostForNode(configuration.getDefaultVirtualHost(), configuration.getNodename());
+    public void createHypericBrokerAdmin() throws Exception {
+        HypericRabbitAdmin admin = configurationManager.getVirtualHostForNode(configuration.getDefaultVirtualHost(), configuration.getNodename());
         assertNotNull(admin.getStatus());
         admin.declareQueue(new Queue("nonDurable"));
         assertNotNull(admin.getQueues());

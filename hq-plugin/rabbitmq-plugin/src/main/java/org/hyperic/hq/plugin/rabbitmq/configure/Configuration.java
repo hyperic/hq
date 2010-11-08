@@ -25,6 +25,7 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.configure;
 
+ import org.hyperic.hq.plugin.rabbitmq.collect.MetricConstants;
  import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
@@ -181,7 +182,7 @@ public class Configuration {
     public static Configuration toConfiguration(Properties props) {
         Configuration conf = new Configuration();
         conf.setNodename(props.getProperty(DetectorConstants.SERVER_NAME));
-        conf.setVirtualHost(props.getProperty(DetectorConstants.VIRTUALHOST));
+        conf.setVirtualHost(props.getProperty(MetricConstants.VIRTUALHOST));
         conf.setAuthentication(props.getProperty(DetectorConstants.AUTHENTICATION));
         conf.setHostname(props.getProperty(DetectorConstants.HOST));
         conf.setUsername(props.getProperty(DetectorConstants.USERNAME));
@@ -193,7 +194,7 @@ public class Configuration {
     public static Configuration toConfiguration(ConfigResponse configResponse) {
         Configuration conf = new Configuration();
         conf.setNodename(configResponse.getValue(DetectorConstants.SERVER_NAME));
-        conf.setVirtualHost(configResponse.getValue(DetectorConstants.VIRTUALHOST));
+        conf.setVirtualHost(configResponse.getValue(MetricConstants.VIRTUALHOST));
         conf.setAuthentication(configResponse.getValue(DetectorConstants.AUTHENTICATION));
         conf.setHostname(configResponse.getValue(DetectorConstants.HOST));
         conf.setUsername(configResponse.getValue(DetectorConstants.USERNAME));
