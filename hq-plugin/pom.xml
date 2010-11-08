@@ -61,7 +61,6 @@
 		<module>resin-plugin</module>
 		<module>samba-plugin</module>
 		<module>sendmail-plugin</module>
-		<module>servlet-plugin</module>
 		<module>spring-plugin</module>
 		<module>sqlquery-plugin</module>
 		<module>sybase-plugin</module>
