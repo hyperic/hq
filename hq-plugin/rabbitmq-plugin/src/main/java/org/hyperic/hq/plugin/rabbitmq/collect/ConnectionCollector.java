@@ -26,8 +26,7 @@
 package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
+import org.apache.commons.logging.LogFactory; 
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitConnection;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
