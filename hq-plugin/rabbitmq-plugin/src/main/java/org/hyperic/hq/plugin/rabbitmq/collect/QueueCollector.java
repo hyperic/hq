@@ -72,6 +72,10 @@ public class QueueCollector extends Collector {
                         setValue("messages", q.getMessages());
                         setValue("consumers", q.getConsumers());
                         setValue("transactions", q.getTransactions());
+                        setValue("acksUncommitted", q.getAcksUncommitted());
+                        setValue("messagesReady", q.getMessagesReady());
+                        setValue("messagesUnacknowledged", q.getMessagesUnacknowledged());
+                        setValue("messagesUncommitted", q.getMessageUncommitted());
                         setValue("memory", q.getMemory());
                     }
                 }
@@ -90,10 +94,6 @@ public class QueueCollector extends Collector {
         String durable = queue.isDurable() ? "durable" : "not durable";
         ConfigResponse res = new ConfigResponse();
         res.setValue("durable", durable);
-        res.setValue("acksUncommitted", queue.getAcksUncommitted());
-        res.setValue("messagesReady", queue.getMessagesReady());
-        res.setValue("messagesUnacknowledged", queue.getMessagesUnacknowledged());
-        res.setValue("messagesUncommitted", queue.getMessageUncommitted());
         res.setValue("name", queue.getName());
         res.setValue("pid", queue.getPid().substring(5, queue.getPid().length() - 1));
         return res;

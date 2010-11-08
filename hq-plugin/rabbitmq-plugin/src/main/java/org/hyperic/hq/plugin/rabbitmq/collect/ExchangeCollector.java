@@ -27,7 +27,7 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
+import org.hyperic.hq.plugin.rabbitmq.core.AMQPTypes; 
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.Collector;
@@ -67,8 +67,11 @@ public class ExchangeCollector extends Collector {
             List<Exchange> exchanges = rabbitAdmin.getExchanges();
             if (exchanges != null) {
                 for (Exchange e : exchanges) {
-                    if (e.getName().equalsIgnoreCase(exchange)) {
+                    if (e.getName() != null && e.getName().equalsIgnoreCase(exchange)) {
                         setAvailability(true);    
+                    }
+                    else if (e.getName() == null && exchange.equalsIgnoreCase(AMQPTypes.DEFAULT_EXCHANGE_NAME)) {
+                        setAvailability(true);
                     }
                 }
             }
@@ -87,7 +90,7 @@ public class ExchangeCollector extends Collector {
         ConfigResponse res = new ConfigResponse();
         res.setValue("durable", durable);
         res.setValue("exchangeType", e.getType());
-        res.setValue("autoDelete", e.isAutoDelete());
+        res.setValue("autoDelete", e.isAutoDelete()); 
         return res;
     }
 

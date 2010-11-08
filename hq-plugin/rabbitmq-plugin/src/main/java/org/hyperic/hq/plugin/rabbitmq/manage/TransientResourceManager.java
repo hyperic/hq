@@ -28,6 +28,9 @@ package org.hyperic.hq.plugin.rabbitmq.manage;
 import java.util.List;
 import org.hyperic.hq.product.ServiceResource;
 
+/**
+ * @author Patrick Nguyen
+ */
 public interface TransientResourceManager {
 
 	public void syncServices(List<ServiceResource> serviceResources)
