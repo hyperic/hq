@@ -215,7 +215,6 @@ public class AgentScheduleSynchronizer {
                                 toUnschedule.put(agentId, tmp);
                             }
                             if (debug) log.debug("unscheduling non-entity=" + aeid);
-log.info("unscheduling non-entity=" + aeid);
                             tmp.add(aeid);
                         }
                     }
