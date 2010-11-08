@@ -37,7 +37,6 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
-import org.hibernate.ejb.EntityManagerImpl;
 import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.id.IdentifierGenerator;
 import org.hyperic.hibernate.dialect.HQDialect;
@@ -71,8 +70,8 @@ public abstract class HibernateDAO<T> {
     }
 
     public Session getSession() {
-        return ((EntityManagerImpl) EntityManagerFactoryUtils
-            .getTransactionalEntityManager(entityManagerFactory)).getSession();
+        return (Session)EntityManagerFactoryUtils
+            .getTransactionalEntityManager(entityManagerFactory).getDelegate();
     }
 
     public IdentifierGenerator getIdentifierGenerator(String className) {
