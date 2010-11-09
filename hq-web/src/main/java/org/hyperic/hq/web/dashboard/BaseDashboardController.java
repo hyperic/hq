@@ -29,6 +29,7 @@ package org.hyperic.hq.web.dashboard;
 import java.util.Arrays;
 import java.util.Map;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -38,6 +39,7 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.DashboardPortletBoss;
+import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.shared.DashboardManager;
@@ -45,6 +47,7 @@ import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.web.BaseController;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.ServletContextAware;
 
 /**
  * This abstract class provides base functionality used in most dashboard
@@ -53,7 +56,7 @@ import org.springframework.util.StringUtils;
  * @author David Crutchfield
  * 
  */
-public abstract class BaseDashboardController extends BaseController {
+public abstract class BaseDashboardController extends BaseController implements ServletContextAware {
 	protected final static String DELIMITER = "|";
 	protected final static String PAYLOAD = "payload";
 
@@ -61,7 +64,8 @@ public abstract class BaseDashboardController extends BaseController {
 	private DashboardManager dashboardManager;
 	private DashboardPortletBoss dashboardPortletBoss;
 	private ResourceManager resourceManager;
-
+	private ServletContext servletContext;
+	
 	public BaseDashboardController(AppdefBoss appdefBoss, AuthzBoss authzBoss,
 			ConfigurationProxy configurationProxy,
 			DashboardManager dashboardManager,
@@ -73,6 +77,10 @@ public abstract class BaseDashboardController extends BaseController {
 		this.dashboardManager = dashboardManager;
 		this.dashboardPortletBoss = dashboardPortletBoss;
 		this.resourceManager = resourceManager;
+	}
+
+	public void setServletContext(ServletContext servletContext) {
+		this.servletContext = servletContext;
 	}
 
 	// ...helper function to convert a delimited string to an
@@ -169,6 +177,13 @@ public abstract class BaseDashboardController extends BaseController {
 		}
 
 		if (updated) {
+			// ...apply defaults if available and necessary...
+			ConfigResponse defaults = (ConfigResponse) servletContext.getAttribute(Constants.DEF_USER_DASH_PREFS);
+			
+			if (defaults != null) {
+				configResponse.merge(defaults, false);
+			}
+			
 			// ...if an update is needed, update...
 			// TODO we use dashboardManager to get the portlet settings, but
 			// use configurationProxy to set them
