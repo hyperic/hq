@@ -51,6 +51,7 @@ public class ErlangCookieHandler {
      * @param conf
      * @return
      * @throws PluginException
+     * @deprecated
      */
     public static String configureCookie(ConfigResponse conf) throws PluginException {
         if (conf == null) {
@@ -74,6 +75,10 @@ public class ErlangCookieHandler {
         return getErlangCookieValue(file);
     }
 
+    public static String configureCookie(String home) throws PluginException {
+        File fCookie = new File(home, ".erlang.cookie");
+        return getErlangCookieValue(fCookie);
+    }
     /**
      * Read in the erlang cookie string from the path
      * @param file
@@ -96,7 +101,7 @@ public class ErlangCookieHandler {
                 }
             }
             catch (IOException e) {
-                throw new PluginException(e.getCause());
+                throw new PluginException(e.getMessage(),e);
             }
         }
         return null;
