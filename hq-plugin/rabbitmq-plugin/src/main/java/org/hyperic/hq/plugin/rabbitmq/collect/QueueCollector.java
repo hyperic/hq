@@ -42,42 +42,33 @@ import java.util.Properties;
  * QueueCollector
  * @author Helena Edelson
  */
-public class QueueCollector extends Collector {
+public class QueueCollector extends RabbitMQDefaultCollector {
 
     private static final Log logger = LogFactory.getLog(QueueCollector.class);
 
-    @Override
-    protected void init() throws PluginException {
-        Properties props = getProperties();
-        logger.debug("[init] props=" + props);
-        super.init();
-    }
-
     public void collect() {
         Properties props = getProperties();
-        logger.debug("[collect] props=" + props);
-
         String queue = (String) props.get(MetricConstants.QUEUE);
-        String vhost = (String) props.get(MetricConstants.VIRTUALHOST);
-        String node = (String) props.get(MetricConstants.NODE);
+        if (logger.isDebugEnabled()) {
+            String vhost = (String) props.get(MetricConstants.VIRTUALHOST);
+            String node = (String) props.get(MetricConstants.NODE);
+            logger.debug("[collect] queue=" + queue + " vhost=" + vhost + " node=" + node);
+        }
+        HypericRabbitAdmin rabbitAdmin = getAdmin();
 
-        if (RabbitProductPlugin.isInitialized()) {
-            HypericRabbitAdmin rabbitAdmin = RabbitProductPlugin.getVirtualHostForNode(vhost, node);
-
-            List<QueueInfo> queues = rabbitAdmin.getQueues();
-            if (queues != null) {
-                for (QueueInfo q : queues) {
-                    if (q.getName().equalsIgnoreCase(queue)) {
-                        setAvailability(true);
-                        setValue("messages", q.getMessages());
-                        setValue("consumers", q.getConsumers());
-                        setValue("transactions", q.getTransactions());
-                        setValue("acksUncommitted", q.getAcksUncommitted());
-                        setValue("messagesReady", q.getMessagesReady());
-                        setValue("messagesUnacknowledged", q.getMessagesUnacknowledged());
-                        setValue("messagesUncommitted", q.getMessageUncommitted());
-                        setValue("memory", q.getMemory());
-                    }
+        List<QueueInfo> queues = rabbitAdmin.getQueues();
+        if (queues != null) {
+            for (QueueInfo q : queues) {
+                if (q.getName().equalsIgnoreCase(queue)) {
+                    setAvailability(true);
+                    setValue("messages", q.getMessages());
+                    setValue("consumers", q.getConsumers());
+                    setValue("transactions", q.getTransactions());
+                    setValue("acksUncommitted", q.getAcksUncommitted());
+                    setValue("messagesReady", q.getMessagesReady());
+                    setValue("messagesUnacknowledged", q.getMessagesUnacknowledged());
+                    setValue("messagesUncommitted", q.getMessageUncommitted());
+                    setValue("memory", q.getMemory());
                 }
             }
         }
@@ -99,4 +90,8 @@ public class QueueCollector extends Collector {
         return res;
     }
 
+    @Override
+    public Log getLog() {
+        return logger;
+    }
 }

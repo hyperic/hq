@@ -55,7 +55,7 @@ public class DetectorConstants {
 
     public static final String SERVICE_LOG_TRACK_FILES = "service.log_track.files";
 
-    public static final String NODE = "Node";
+    public static final String NODE = "node";
 
     public static final String MNESIA = "-mnesia";
 
@@ -63,7 +63,7 @@ public class DetectorConstants {
 
     public static final String SNAME = "-sname";
 
-    public static final String SERVER_NAME = "server.name";
+    public static final String SERVER_NAME = "node";
 
     public static final String SERVER_PATH = "server.path";
  

@@ -40,36 +40,29 @@ import java.util.Properties;
  * ChannelCollector
  * @author Helena Edelson
  */
-public class ChannelCollector extends Collector {
+public class ChannelCollector extends RabbitMQDefaultCollector {
 
     private static final Log logger = LogFactory.getLog(ConnectionCollector.class);
 
-    @Override
-    protected void init() throws PluginException {
-        Properties props = getProperties();
-        logger.debug("[init] props=" + props);
-        super.init();
-    }
-
     public void collect() {
         Properties props = getProperties();
-        logger.debug("[collect] props=" + props);
         String channelPid = (String) props.get(MetricConstants.CHANNEL);
-        String vhost = (String) props.get(MetricConstants.VIRTUALHOST);
-        String node = (String) props.get(MetricConstants.NODE);
+        if (logger.isDebugEnabled()) {
+            String vhost = (String) props.get(MetricConstants.VIRTUALHOST);
+            String node = (String) props.get(MetricConstants.NODE);
+            logger.debug("[collect] channelPid=" + channelPid + " vhost=" + vhost + " node=" + node);
+        }
 
-        if (RabbitProductPlugin.isInitialized()) {
-            HypericRabbitAdmin rabbitAdmin = RabbitProductPlugin.getVirtualHostForNode(vhost, node);
-            List<RabbitChannel> channels = rabbitAdmin.getChannels();
-            if (channels != null) {
-                for (RabbitChannel c : channels) {
-                    if (c.getPid().equalsIgnoreCase(channelPid)) {
-                        setAvailability(true);
-                        setValue("consumerCount", c.getConsumerCount());
-                        setValue("prefetchCount", c.getPrefetchCount());
-                        setValue("acksUncommitted", c.getAcksUncommitted());
-                        setValue("messagesUnacknowledged", c.getMessagesUnacknowledged());
-                    }
+        HypericRabbitAdmin rabbitAdmin = getAdmin();
+        List<RabbitChannel> channels = rabbitAdmin.getChannels();
+        if (channels != null) {
+            for (RabbitChannel c : channels) {
+                if (c.getPid().equalsIgnoreCase(channelPid)) {
+                    setAvailability(true);
+                    setValue("consumerCount", c.getConsumerCount());
+                    setValue("prefetchCount", c.getPrefetchCount());
+                    setValue("acksUncommitted", c.getAcksUncommitted());
+                    setValue("messagesUnacknowledged", c.getMessagesUnacknowledged());
                 }
             }
         }
@@ -94,4 +87,8 @@ public class ChannelCollector extends Collector {
         return res;
     }
 
+    @Override
+    public Log getLog() {
+        return logger;
+    }
 }

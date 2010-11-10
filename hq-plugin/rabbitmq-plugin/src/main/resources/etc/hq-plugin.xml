@@ -29,6 +29,8 @@
 
 <plugin class="org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin">
 
+    <filter name="server-connection" value="username=%username%,password=%password%,hostname=%hostname%,authentication=%authentication%"/>
+
     <server name="RabbitMQ" description="RabbitMQ">
 
         <help>
@@ -73,8 +75,9 @@
         <plugin type="log_track" class="org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerLog"/>
 
         <config type="product">
-            <option name="username" description="RabbitMQ Username for %server.name%"/>
-            <option name="password" type="secret" description="RabbitMQ Password for %server.name%"/>
+            <option name="username" description="RabbitMQ Username"/>
+            <option name="password" type="secret" description="RabbitMQ Password"/>
+            <option name="hostname" default="localhost" description="RabbitMQ hostname"/>
         </config>
 
 
@@ -97,7 +100,7 @@
         </config>
 
         <metric name="Availability"
-                template="rabbitmq:server.name=%server.name%,hostname=%hostname%,username=%username%,password=%password%,authentication=%authentication%:Availability"
+                template="rabbitmq:node=%node%,hostname=%hostname%,username=%username%,password=%password%,authentication=%authentication%:Availability"
                 indicator="true"/>
 
         &process-metrics;
@@ -110,7 +113,7 @@
 
         <service name="Queue">
             <property name="template"
-                      value="rabbitmq:queue=%queue%,node=%node%,virtualhost=%virtualhost%:${alias}"/>
+                      value="rabbitmq:queue=%queue%,node=%node%,virtualhost=%virtualhost%,${server-connection}:${alias}"/>
 
             <config type="measurement">
                 <option name="node" description="rabbit node name"/>
@@ -200,7 +203,7 @@
         </service>
 
         <service name="Channel">
-            <property name="template" value="rabbitmq:channel=%channel%,node=%node%,virtualhost=%virtualhost%:${alias}"/>
+            <property name="template" value="rabbitmq:channel=%channel%,node=%node%,virtualhost=%virtualhost%,${server-connection}:${alias}"/>
 
             <config type="measurement">
                 <option name="node" description="rabbit node name"/>
@@ -261,7 +264,7 @@
 
         <service name="Connection">
             <property name="template"
-                      value="rabbitmq:connection=%connection%,node=%node%,virtualhost=%virtualhost%:${alias}"/>
+                      value="rabbitmq:connection=%connection%,node=%node%,virtualhost=%virtualhost%,${server-connection}:${alias}"/>
 
             <config type="measurement">
                 <option name="node" description="rabbit node name"/>
@@ -338,7 +341,7 @@
 
         <service name="Exchange">
             <property name="template"
-                      value="rabbitmq:exchange=%exchange%,node=%node%,virtualhost=%virtualhost%:${alias}"/>
+                      value="rabbitmq:exchange=%exchange%,node=%node%,virtualhost=%virtualhost%,${server-connection}:${alias}"/>
 
             <config type="measurement">
                 <option name="node" description="rabbit node name"/>
@@ -367,7 +370,7 @@
         run the collector often. Consider modifying what is queried/exposed with large-volume
         heavily-trafficed brokers. -->
         <service name="VirtualHost">
-            <property name="template" value="rabbitmq:node=%node%,virtualhost=%virtualhost%:${alias}"/>
+            <property name="template" value="rabbitmq:node=%node%,virtualhost=%virtualhost%,${server-connection}:${alias}"/>
 
             <config type="measurement">
                 <option name="node" description="rabbit node name"/>

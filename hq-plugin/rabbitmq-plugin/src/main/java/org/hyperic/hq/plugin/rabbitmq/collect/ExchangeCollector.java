@@ -27,7 +27,7 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.core.AMQPTypes; 
+import org.hyperic.hq.plugin.rabbitmq.core.AMQPTypes;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.Collector;
@@ -42,37 +42,28 @@ import java.util.Properties;
  * ExchangeCollector
  * @author Helena Edelson
  */
-public class ExchangeCollector extends Collector {
+public class ExchangeCollector extends RabbitMQDefaultCollector {
 
     private static final Log logger = LogFactory.getLog(ExchangeCollector.class);
 
-    @Override
-    protected void init() throws PluginException {
-        Properties props = getProperties();
-        logger.debug("[init] props=" + props);
-        super.init();
-    }
-
     public void collect() {
         Properties props = getProperties();
-        logger.debug("[collect] props=" + props);
-
         String exchange = (String) props.get(MetricConstants.EXCHANGE);
-        String vhost = (String) props.get(MetricConstants.VIRTUALHOST);
-        String node = (String) props.get(MetricConstants.NODE);
-        
-        if (RabbitProductPlugin.isInitialized()) {
-            HypericRabbitAdmin rabbitAdmin = RabbitProductPlugin.getVirtualHostForNode(vhost, node);
+        if (logger.isDebugEnabled()) {
+            String vhost = (String) props.get(MetricConstants.VIRTUALHOST);
+            String node = (String) props.get(MetricConstants.NODE);
+            logger.debug("[collect] exchange=" + exchange + " vhost=" + vhost + " node=" + node);
+        }
 
-            List<Exchange> exchanges = rabbitAdmin.getExchanges();
-            if (exchanges != null) {
-                for (Exchange e : exchanges) {
-                    if (e.getName() != null && e.getName().equalsIgnoreCase(exchange)) {
-                        setAvailability(true);    
-                    }
-                    else if (e.getName() == null && exchange.equalsIgnoreCase(AMQPTypes.DEFAULT_EXCHANGE_NAME)) {
-                        setAvailability(true);
-                    }
+        HypericRabbitAdmin rabbitAdmin = getAdmin();
+
+        List<Exchange> exchanges = rabbitAdmin.getExchanges();
+        if (exchanges != null) {
+            for (Exchange e : exchanges) {
+                if (e.getName() != null && e.getName().equalsIgnoreCase(exchange)) {
+                    setAvailability(true);
+                } else if (e.getName() == null && exchange.equalsIgnoreCase(AMQPTypes.DEFAULT_EXCHANGE_NAME)) {
+                    setAvailability(true);
                 }
             }
         }
@@ -90,9 +81,12 @@ public class ExchangeCollector extends Collector {
         ConfigResponse res = new ConfigResponse();
         res.setValue("durable", durable);
         res.setValue("exchangeType", e.getType());
-        res.setValue("autoDelete", e.isAutoDelete()); 
+        res.setValue("autoDelete", e.isAutoDelete());
         return res;
     }
 
-
+    @Override
+    public Log getLog() {
+        return logger;
+    }
 }

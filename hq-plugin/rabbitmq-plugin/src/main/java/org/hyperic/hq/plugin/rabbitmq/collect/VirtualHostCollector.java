@@ -40,37 +40,27 @@ import java.util.Properties;
  * VirtualHostCollector
  * @author Helena Edelson
  */
-public class VirtualHostCollector extends Collector {
+public class VirtualHostCollector extends RabbitMQDefaultCollector {
 
     private static final Log logger = LogFactory.getLog(QueueCollector.class);
 
-    @Override
-    protected void init() throws PluginException {
-        Properties props = getProperties();
-        logger.debug("[init] props=" + props);
-        super.init();
-    }
-
     public void collect() {
-        Properties props = getProperties();
-        logger.debug("[collect] props=" + props);
+        if (logger.isDebugEnabled()) {
+            Properties props = getProperties();
+            String vhost = (String) props.get(MetricConstants.VIRTUALHOST);
+            String node = (String) props.get(MetricConstants.NODE);
+            logger.debug("[collect] vhost=" + vhost + " node=" + node);
+        }
 
-        String vhost = (String) props.get(MetricConstants.VIRTUALHOST);
-        String node = (String) props.get(MetricConstants.NODE);
-
-        if (RabbitProductPlugin.isInitialized()) {
-            HypericRabbitAdmin rabbitAdmin = RabbitProductPlugin.getVirtualHostForNode(vhost, node);
-
-            RabbitVirtualHost virtualHost = rabbitAdmin.buildRabbitVirtualHost();
-
-            if (virtualHost != null) {
-                setAvailability(virtualHost.isAvailable());
-                setValue("queueCount", virtualHost.getQueueCount());
-                setValue("exchangeCount", virtualHost.getExchangeCount());
-                setValue("connectionCount", virtualHost.getConnectionCount());
-                setValue("channelCount", virtualHost.getChannelCount());
-                setValue("consumerCount", virtualHost.getConsumerCount());
-            }
+        HypericRabbitAdmin rabbitAdmin = getAdmin();
+        RabbitVirtualHost virtualHost = rabbitAdmin.buildRabbitVirtualHost();
+        if (virtualHost != null) {
+            setAvailability(virtualHost.isAvailable());
+            setValue("queueCount", virtualHost.getQueueCount());
+            setValue("exchangeCount", virtualHost.getExchangeCount());
+            setValue("connectionCount", virtualHost.getConnectionCount());
+            setValue("channelCount", virtualHost.getChannelCount());
+            setValue("consumerCount", virtualHost.getConsumerCount());
         }
     }
 
@@ -87,5 +77,10 @@ public class VirtualHostCollector extends Collector {
         res.setValue("node", vh.getNode());
         res.setValue("users", vh.getUsers());
         return res;
+    }
+
+    @Override
+    public Log getLog() {
+        return logger;
     }
 }

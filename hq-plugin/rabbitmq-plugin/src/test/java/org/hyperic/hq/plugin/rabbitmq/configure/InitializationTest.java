@@ -48,33 +48,33 @@ public class InitializationTest extends AbstractSpringTest {
 
     private String node = "rabbit@vm-host";
 
-    @Test @ExpectedException(PluginException.class)
-    public void initServerCollector() throws PluginException {
-        Configuration configuration = Configuration.toConfiguration(getConfigResponse());
-        if (!RabbitProductPlugin.isInitialized()) {
-            RabbitProductPlugin.initialize(configuration);
-        }
-    }
+//    @Test @ExpectedException(PluginException.class)
+//    public void initServerCollector() throws PluginException {
+//        Configuration configuration = Configuration.toConfiguration(getConfigResponse());
+//        if (!RabbitProductPlugin.isInitialized()) {
+//            RabbitProductPlugin.initialize(configuration);
+//        }
+//    }
 
-    @Test
-    public void initServerCollectorWithUP() throws PluginException {
-        Configuration configuration = Configuration.toConfiguration(getConfigResponse());
-        configuration.setUsername("guest");
-        configuration.setPassword("guest"); 
-        if (!RabbitProductPlugin.isInitialized()) {
-            assertTrue(RabbitProductPlugin.initialize(configuration)); 
-        }
-    }
-
-    @Test
-    public void discoverServicesInit() throws PluginException {
-        Configuration configuration = Configuration.toConfiguration(getConfigResponse());
-        configuration.setUsername("guest");
-        configuration.setPassword("guest");
-        if (!RabbitProductPlugin.isInitialized()) {
-            assertTrue(RabbitProductPlugin.initialize(configuration));
-        }
-    }
+//    @Test
+//    public void initServerCollectorWithUP() throws PluginException {
+//        Configuration configuration = Configuration.toConfiguration(getConfigResponse());
+//        configuration.setUsername("guest");
+//        configuration.setPassword("guest");
+//        if (!RabbitProductPlugin.isInitialized()) {
+//            assertTrue(RabbitProductPlugin.initialize(configuration));
+//        }
+//    }
+//
+//    @Test
+//    public void discoverServicesInit() throws PluginException {
+//        Configuration configuration = Configuration.toConfiguration(getConfigResponse());
+//        configuration.setUsername("guest");
+//        configuration.setPassword("guest");
+//        if (!RabbitProductPlugin.isInitialized()) {
+//            assertTrue(RabbitProductPlugin.initialize(configuration));
+//        }
+//    }
 
     @Test
     public void pluginInitializationAssertSuccess() throws PluginException {
