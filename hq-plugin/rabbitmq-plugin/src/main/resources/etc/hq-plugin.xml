@@ -79,7 +79,7 @@
 
 
         <config type="measurement">
-            <option name="process.query" default="State.Name.sw=beam,Args.*.eq=-sname,Args.*.eq=%process.name%"
+            <option name="process.query" default="State.Name.re=[beam|erl],Args.*.eq=-sname,Args.*.eq=%process.name%"
                     description="%process.name% Measurement Query"/>
         </config>
 
@@ -92,7 +92,7 @@
         </properties>
 
         <config type="measurement">
-            <option name="process.query" default="State.Name.sw=beam,Args.*.eq=-sname,Args.*.ct=%server.path%"
+            <option name="process.query" default="State.Name.re=[beam|erl],Args.*.eq=-sname,Args.*.ct=%server.path%"
                     description="Node Process Query"/>
         </config>
 
