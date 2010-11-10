@@ -50,7 +50,7 @@ import com.vmware.vim25.mo.VirtualMachine;
 
 public class VSphereUtil extends ServiceInstance {
 
-    private static final long CACHE_TIMEOUT = 600000;
+    private static final long CACHE_TIMEOUT = 300000;
     static final String HOST_SYSTEM = "HostSystem";
     static final String POOL = "ResourcePool";
     static final String VM = "VirtualMachine";
@@ -65,10 +65,9 @@ public class VSphereUtil extends ServiceInstance {
         LogFactory.getLog(VSphereUtil.class.getName());
     private InventoryNavigator _nav;
     private String _url;
-    @SuppressWarnings("unchecked")
-    private final Map<String, ObjectCache<ManagedEntity>> entitiesByUuid =
-       Collections.synchronizedMap(new HashMap());
-
+    private Map<String, ObjectCache<Map<String, ManagedEntity>>> entityCache =
+        new HashMap<String, ObjectCache<Map<String, ManagedEntity>>>();
+   
     public VSphereUtil(URL url, String username, String password, boolean ignoreCert)
         throws RemoteException, MalformedURLException {
         super(url, username, password, ignoreCert);
@@ -133,7 +132,7 @@ public class VSphereUtil extends ServiceInstance {
     }
 
     /**
-     * Find a managed entity by UUID.  This method caches the entired vm inventory every CACHE_TIMEOUT minutes.
+     * Find a managed entity by UUID.  This method caches the entired vm inventory every 5 minutes.
      * If a uuid is not found in the inventory during the cached period an Exception is thrown.
      * @throws {@link PluginException} general case exception is thrown while grabbing all the
      * entities.
