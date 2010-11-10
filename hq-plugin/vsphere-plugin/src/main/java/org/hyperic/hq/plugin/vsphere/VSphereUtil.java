@@ -50,7 +50,7 @@ import com.vmware.vim25.mo.VirtualMachine;
 
 public class VSphereUtil extends ServiceInstance {
 
-    private static final long CACHE_TIMEOUT = 300000;
+    private static final long CACHE_TIMEOUT = 600000;
     static final String HOST_SYSTEM = "HostSystem";
     static final String POOL = "ResourcePool";
     static final String VM = "VirtualMachine";
@@ -65,7 +65,7 @@ public class VSphereUtil extends ServiceInstance {
         LogFactory.getLog(VSphereUtil.class.getName());
     private InventoryNavigator _nav;
     private String _url;
-    private Map<String, ObjectCache<Map<String, ManagedEntity>>> entityCache =
+    private final Map<String, ObjectCache<Map<String, ManagedEntity>>> entityCache =
         new HashMap<String, ObjectCache<Map<String, ManagedEntity>>>();
    
     public VSphereUtil(URL url, String username, String password, boolean ignoreCert)
