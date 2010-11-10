@@ -32,12 +32,15 @@ import org.apache.log4j.BasicConfigurator;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.agent.ScheduledMeasurement;
+import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.MeasurementValueGetter;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricNotFoundException;
 import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.PluginNotFoundException;
+import org.hyperic.hq.product.ProductPlugin;
 
 import java.util.Properties;
 
@@ -254,7 +257,41 @@ public class ScheduleThreadTest extends TestCase {
         }
     }
 
+    public static class SimpleProductPlugin extends ProductPlugin {
+
+        String _name;
+
+        SimpleProductPlugin(String name) {
+            _name = name;
+        }
+
+        public String getName() {
+            return _name;
+        }
+    }
+
+    public static class SimplePlugin extends GenericPlugin {
+
+        private String _name;
+
+        SimplePlugin(String name) {
+            _name = name;
+        }
+
+        public String getName() {
+            return _name;
+        }
+
+        public ProductPlugin getProductPlugin() {
+            return new SimpleProductPlugin(_name);  
+        }
+    }
+
     public static class SimpleValueGetter implements MeasurementValueGetter {
+
+        public GenericPlugin getPlugin(String plugin) throws PluginNotFoundException {
+            return new SimplePlugin(plugin);
+        }
 
         public MetricValue getValue(String name, Metric metric)
                 throws PluginException, MetricNotFoundException, MetricUnreachableException {
@@ -274,6 +311,10 @@ public class ScheduleThreadTest extends TestCase {
     }
 
     public static class NullValueGetter implements MeasurementValueGetter {
+
+        public GenericPlugin getPlugin(String plugin) throws PluginNotFoundException {
+            return new SimplePlugin(plugin);
+        }
 
         public MetricValue getValue(String name, Metric metric)
                 throws PluginException, MetricNotFoundException, MetricUnreachableException {

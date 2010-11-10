@@ -42,6 +42,7 @@ import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.agent.ScheduledMeasurement;
+import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.MeasurementValueGetter;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricInvalidException;
@@ -166,7 +167,9 @@ public class ScheduleThread
         public void run() {
             while (!_shouldDie) {
                 synchronized (_metricCollections) {
-                    _log.debug(_metricCollections.size() + " metrics to validate.");
+                    if (_metricCollections.size() > 0) {
+                        _log.debug(_metricCollections.size() + " metrics to validate.");
+                    }
                     for (Iterator<FutureTask> i = _metricCollections.keySet().iterator();
                          i.hasNext(); )
                     {
@@ -182,7 +185,8 @@ public class ScheduleThread
                             if (mt.getExecutionDuration() > _cancelTimeout) {
                                 _log.error("Metric '" + mt.getMetric() +
                                            "' took too long to run, attempting to cancel");
-                                t.cancel(true);
+                                boolean res = t.cancel(true);
+                                _log.error("Cancel result=" + res);
                                 // Task will be removed on next iteration
                             }
                         }
@@ -569,13 +573,22 @@ public class ScheduleThread
 
             ExecutorService svc;
             synchronized (_executors) {
-                svc = _executors.get(tmpl.plugin);
+                String plugin;
+                try {
+                    GenericPlugin p = _manager.getPlugin(tmpl.plugin).getProductPlugin();
+                    plugin = p.getName();
+                } catch (PluginNotFoundException e) {
+                    // Proxied plugin?
+                    plugin = tmpl.plugin;
+                }
+
+                svc = _executors.get(plugin);
                 if (svc == null) {
-                    int poolSize = getPoolSize(tmpl.plugin);
-                    _log.info("Creating executor for domain '" + tmpl.plugin +
+                    int poolSize = getPoolSize(plugin);
+                    _log.info("Creating executor for domain '" + plugin +
                               "' with a pool size of " + poolSize);
                     svc = Executors.newFixedThreadPool(poolSize);
-                    _executors.put(tmpl.plugin, svc);
+                    _executors.put(plugin, svc);
                 }
             }
 
