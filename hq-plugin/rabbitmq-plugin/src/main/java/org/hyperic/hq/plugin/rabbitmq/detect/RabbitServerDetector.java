@@ -27,6 +27,7 @@ package org.hyperic.hq.plugin.rabbitmq.detect;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -42,6 +43,7 @@ import org.hyperic.hq.plugin.rabbitmq.manage.RabbitTransientResourceManager;
 import org.hyperic.hq.plugin.rabbitmq.manage.TransientResourceManager;
 import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
 import org.hyperic.hq.product.*;
+import org.hyperic.sigar.Sigar;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.rabbit.admin.QueueInfo;
@@ -68,9 +70,10 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
     public List getServerResources(ConfigResponse serverConfig) throws PluginException {
         configure(serverConfig);
 
+
         List<ServerResource> resources = new ArrayList<ServerResource>();
         long[] pids = getPids(PTQL_QUERY);
-        logger.debug("[] pids.length=" + pids.length);
+        logger.debug("[getServerResources] pids.length=" + pids.length);
 
         if (pids.length > 0) {
             List<String> nodes = new ArrayList<String>();
@@ -365,7 +368,8 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         conf.setValue(DetectorConstants.SERVER_PATH, nodePath);
         conf.setValue(DetectorConstants.NODE_PID, nodePid);
 
-        String auth = ErlangCookieHandler.configureCookie(conf);
+        final String home = getProcessHome(nodePid);
+        final String auth = ErlangCookieHandler.configureCookie(home);
         if (auth != null) {
             conf.setValue(DetectorConstants.AUTHENTICATION, auth);
         }
@@ -489,6 +493,35 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
             return (m.find()) ? m.group(1) : null;
         }
         return null;
+    }
+
+    /**
+     * based on https://github.com/erlang/otp/blob/dev/lib/erl_interface/src/connect/ei_connect.c
+     * @param nodePid
+     * @return
+     */
+    private String getProcessHome(long nodePid) {
+        Sigar sigar = new Sigar();
+        String home = null;
+        try {
+            if (isWin32()) {
+                String homedrive = sigar.getProcEnv(nodePid, "HOMEDRIVE");
+                String homepath = sigar.getProcEnv(nodePid, "HOMEPATH");
+                if ((homedrive != null) && (homepath != null)) {
+                    home = new File(homedrive, homepath).getAbsolutePath();
+                }
+                if (home == null) {
+                    home = sigar.getProcEnv(nodePid, "windir");
+                    logger.debug("[getProcessHome] home==null -> windir");
+                }
+            } else {
+                home = sigar.getProcEnv(nodePid, "HOME");
+            }
+            logger.debug("[getProcessHome] home=" + home);
+        } catch (Exception ex) {
+            logger.debug("[getProcessHome] error=" + ex.getMessage(), ex);
+        }
+        return home;
     }
 
 }
