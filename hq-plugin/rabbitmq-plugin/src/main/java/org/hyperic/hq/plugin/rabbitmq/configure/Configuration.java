@@ -181,7 +181,7 @@ public class Configuration {
 
     public static Configuration toConfiguration(Properties props) {
         Configuration conf = new Configuration();
-        conf.setNodename(props.getProperty(DetectorConstants.SERVER_NAME));
+        conf.setNodename(props.getProperty(DetectorConstants.NODE));
         conf.setVirtualHost(props.getProperty(MetricConstants.VIRTUALHOST));
         conf.setAuthentication(props.getProperty(DetectorConstants.AUTHENTICATION));
         conf.setHostname(props.getProperty(DetectorConstants.HOST));
@@ -192,15 +192,7 @@ public class Configuration {
     }
 
     public static Configuration toConfiguration(ConfigResponse configResponse) {
-        Configuration conf = new Configuration();
-        conf.setNodename(configResponse.getValue(DetectorConstants.SERVER_NAME));
-        conf.setVirtualHost(configResponse.getValue(MetricConstants.VIRTUALHOST));
-        conf.setAuthentication(configResponse.getValue(DetectorConstants.AUTHENTICATION));
-        conf.setHostname(configResponse.getValue(DetectorConstants.HOST));
-        conf.setUsername(configResponse.getValue(DetectorConstants.USERNAME));
-        conf.setPassword(configResponse.getValue(DetectorConstants.PASSWORD));
-
-        return conf;
+        return toConfiguration(configResponse.toProperties());
     }
 
 

@@ -97,7 +97,7 @@ public class RabbitConfigurationManager implements ConfigurationManager, Disposa
             }
         }
         catch (PluginException e) {
-            logger.error(e);
+            logger.error(e,e);
         }
     }
 

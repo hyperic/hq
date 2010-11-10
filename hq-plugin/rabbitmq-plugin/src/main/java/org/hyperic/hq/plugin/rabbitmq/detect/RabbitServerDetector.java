@@ -38,6 +38,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.collect.*;
 import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
+import org.hyperic.hq.plugin.rabbitmq.configure.RabbitConfigurationManager;
 import org.hyperic.hq.plugin.rabbitmq.core.*;
 import org.hyperic.hq.plugin.rabbitmq.manage.RabbitTransientResourceManager;
 import org.hyperic.hq.plugin.rabbitmq.manage.TransientResourceManager;
@@ -150,16 +151,15 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
     public List<ServiceResource> createRabbitResources(ConfigResponse serviceConfig) throws PluginException {
         List<ServiceResource> rabbitResources = new ArrayList<ServiceResource>();
 
-        /** TODO handle updates to username/password after initialization. */
         Configuration configuration = Configuration.toConfiguration(serviceConfig);
+        if (getLog().isDebugEnabled()) {
+            getLog().debug("[init] serviceConfig=" + serviceConfig);
+            getLog().debug("[init] configuration=" + configuration);
+        }
 
-        /*if (configuration.isConfigured() && !RabbitProductPlugin.isInitialized()) {
-            RabbitProductPlugin.initialize(configuration);
-        }*/
-
-        if (RabbitProductPlugin.isInitialized()) {
-            /** each gateway represents a unique virtual host. ToDo test per node */
-            Map<String, HypericRabbitAdmin> admins = RabbitProductPlugin.getVirtualHostsForNode();
+        if (configuration.isConfigured()) {
+            RabbitConfigurationManager cm = new RabbitConfigurationManager(configuration);
+            Map<String, HypericRabbitAdmin> admins = cm.getVirtualHostsForNode();
 
             if (admins != null) {
                 for (Map.Entry entry : admins.entrySet()) {
@@ -328,7 +328,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                     service.setCustomProperties(VirtualHostCollector.getAttributes(vh));
                 }
 
-                service.setName(name);
+                service.setName(node+" "+name);
                 service.setDescription(name);
                 service.setProductConfig(c);
                 setMeasurementConfig(service, c);
@@ -358,10 +358,8 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
 
         ServerResource node = createServerResource(nodePath);
         node.setIdentifier(nodePath);
-        node.setName(new StringBuilder(getPlatformName()).append(" ").append(getTypeInfo().getName()).append(" ")
-                .append(DetectorConstants.NODE).append(" ").append(nodeName).toString());
-        node.setDescription(new StringBuilder(getTypeInfo().getName()).append(" ").append(DetectorConstants.NODE)
-                .append(" ").append(nodePid).toString());
+        node.setName(getPlatformName()+" "+getTypeInfo().getName()+" Node "+nodeName);
+        node.setDescription(getTypeInfo().getName()+" Node "+nodePid);
 
         ConfigResponse conf = new ConfigResponse();
         conf.setValue(DetectorConstants.SERVER_NAME, nodeName);

@@ -57,41 +57,41 @@ public class RabbitProductPlugin extends ProductPlugin {
      * @return
      * @throws PluginException
      */
-    public static boolean initialize(Configuration configuration) throws PluginException {
-        logger.debug("Starting initialization of plugin");
-        if (configuration != null) {
-             if (configuration.getVirtualHost() == null) {
-                configuration.setDefaultVirtualHost(true);
-             }
-
-            if (configuration.isConfigured() && isValidUsernamePassword(configuration) && isValidOtpConnection(configuration)) {
-                logger.debug("Initializing ConfigurationManager");
-                if (configurationManager == null || !configurationManager.isInitialized()) {
-                    configurationManager = new RabbitConfigurationManager(configuration);
-                }
-            }
-        }
-
-        boolean initialized = isInitialized();
-        logger.debug("Initialized=" + initialized);
-
-        return initialized;
-    }
-
-    public static boolean isInitialized() {
-        return configurationManager != null && configurationManager.isInitialized();
-    }
-
-    public static HypericRabbitAdmin getVirtualHostForNode(String virtualHost, String node) {
-         return configurationManager.getVirtualHostForNode(virtualHost, node);
-    }
-
-    /**
-     * @return
-     */
-    public static Map<String, HypericRabbitAdmin> getVirtualHostsForNode() {
-        return configurationManager.getVirtualHostsForNode();
-    }
+//    public static boolean initialize(Configuration configuration) throws PluginException {
+//        logger.debug("Starting initialization of plugin");
+//        if (configuration != null) {
+//             if (configuration.getVirtualHost() == null) {
+//                configuration.setDefaultVirtualHost(true);
+//             }
+//
+//            if (configuration.isConfigured() && isValidUsernamePassword(configuration) && isValidOtpConnection(configuration)) {
+//                logger.debug("Initializing ConfigurationManager");
+//                if (configurationManager == null || !configurationManager.isInitialized()) {
+//                    configurationManager = new RabbitConfigurationManager(configuration);
+//                }
+//            }
+//        }
+//
+//        boolean initialized = isInitialized();
+//        logger.debug("Initialized=" + initialized);
+//
+//        return initialized;
+//    }
+//
+//    public static boolean isInitialized() {
+//        return configurationManager != null && configurationManager.isInitialized();
+//    }
+//
+//    public static HypericRabbitAdmin getVirtualHostForNode(String virtualHost, String node) {
+//         return configurationManager.getVirtualHostForNode(virtualHost, node);
+//    }
+//
+//    /**
+//     * @return
+//     */
+//    public static Map<String, HypericRabbitAdmin> getVirtualHostsForNode() {
+//        return configurationManager.getVirtualHostsForNode();
+//    }
 
     /**
      * Determine if the node available for a Collector
