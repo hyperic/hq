@@ -148,31 +148,36 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @return
      * @throws PluginException
      */
-    public List<ServiceResource> createRabbitResources(ConfigResponse serviceConfig) throws PluginException {
+    public List<ServiceResource> createRabbitResources(ConfigResponse serviceConfig) {
         List<ServiceResource> rabbitResources = new ArrayList<ServiceResource>();
 
         Configuration configuration = Configuration.toConfiguration(serviceConfig);
         if (getLog().isDebugEnabled()) {
-            getLog().debug("[init] serviceConfig=" + serviceConfig);
-            getLog().debug("[init] configuration=" + configuration);
+            getLog().debug("[createRabbitResources] serviceConfig=" + serviceConfig);
+            getLog().debug("[createRabbitResources] configuration=" + configuration);
         }
 
-        if (configuration.isConfigured()) {
-            RabbitConfigurationManager cm = new RabbitConfigurationManager(configuration);
-            Map<String, HypericRabbitAdmin> admins = cm.getVirtualHostsForNode();
+        try{
+            if (configuration.isConfigured()) {
+                RabbitConfigurationManager cm = new RabbitConfigurationManager(configuration);
+                Map<String, HypericRabbitAdmin> admins = cm.getVirtualHostsForNode();
 
-            if (admins != null) {
-                for (Map.Entry entry : admins.entrySet()) {
-                    HypericRabbitAdmin rabbitAdmin = (HypericRabbitAdmin) entry.getValue();
+                if (admins != null) {
+                    for (Map.Entry entry : admins.entrySet()) {
+                        HypericRabbitAdmin rabbitAdmin = (HypericRabbitAdmin) entry.getValue();
 
-                    List<ServiceResource> resources = createResourcesPerVirtualHost(rabbitAdmin);
-                    if (resources != null) {
-                        rabbitResources.addAll(resources);
+                        List<ServiceResource> resources = createResourcesPerVirtualHost(rabbitAdmin);
+                        if (resources != null) {
+                            rabbitResources.addAll(resources);
+                        }
                     }
                 }
             }
+        }catch (RuntimeException ex){
+            logger.debug(ex,ex);
+        }catch (PluginException ex){
+            logger.debug(ex,ex);
         }
-
         return rabbitResources;
     }
 
