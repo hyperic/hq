@@ -38,6 +38,7 @@ import java.util.concurrent.FutureTask;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.server.AgentStartException;
+import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -709,7 +710,7 @@ public class ScheduleThread
     /**
      * @return Get the number of metrics in the schedule
      */
-    public double getNumMetricsScheduled() {
+    public double getNumMetricsScheduled() throws AgentMonitorException {
         synchronized (_statsLock) {
             return _stat_numMetricsScheduled;            
         }
@@ -718,7 +719,7 @@ public class ScheduleThread
     /**
      * @return The number of metrics which were attempted to be fetched (failed or successful)
      */
-    public double getNumMetricsFetched() {
+    public double getNumMetricsFetched() throws AgentMonitorException {
         synchronized (_statsLock) {
             return _stat_numMetricsFetched;
         }
@@ -727,7 +728,7 @@ public class ScheduleThread
     /**
      * @return Get the number of metrics which resulted in an error when collected
      */
-    public double getNumMetricsFailed() {
+    public double getNumMetricsFailed() throws AgentMonitorException {
         synchronized (_statsLock) {
             return _stat_numMetricsFailed;
         }
@@ -736,7 +737,7 @@ public class ScheduleThread
     /**
      * @return The total time spent fetching metrics
      */
-    public double getTotFetchTime() {
+    public double getTotFetchTime() throws AgentMonitorException {
         synchronized (_statsLock) {
             return _stat_totFetchTime;
         }
@@ -745,7 +746,7 @@ public class ScheduleThread
     /**
      * @return The maximum time spent fetching a metric
      */
-    public double getMaxFetchTime() {
+    public double getMaxFetchTime() throws AgentMonitorException {
         synchronized (_statsLock) {
             if(_stat_maxFetchTime == Long.MIN_VALUE) {
                 return MetricValue.VALUE_NONE;
@@ -757,7 +758,7 @@ public class ScheduleThread
     /**
      * @return The minimum time spent fetching a metric
      */
-    public double getMinFetchTime() {
+    public double getMinFetchTime() throws AgentMonitorException {
         synchronized (_statsLock) {
             if(_stat_minFetchTime == Long.MAX_VALUE) {
                 return MetricValue.VALUE_NONE;
