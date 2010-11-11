@@ -1,0 +1,21 @@
+digraph Config {
+  node [
+    fontname = "Bitstream Vera Sans"
+    shape = "Mrecord"
+  ]
+  edge [
+    fontname = "Bitstream Vera Sans"
+  ]
+
+  Config [
+    
+    label = "{@NodeEntity\
+    \l@RooToString\
+    \l@RooJavaBean\
+    \l@RooEntity\
+    \lpublic class Config \{\
+    \l\}\
+    \l}"
+  ]
+
+}

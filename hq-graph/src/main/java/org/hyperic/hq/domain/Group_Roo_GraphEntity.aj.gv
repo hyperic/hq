@@ -1,0 +1,21 @@
+digraph Group {
+  node [
+    fontname = "Bitstream Vera Sans"
+    shape = "Mrecord"
+  ]
+  edge [
+    fontname = "Bitstream Vera Sans"
+  ]
+
+  Group [
+    
+    label = "{@NodeEntity\
+    \l@RooToString\
+    \l@RooJavaBean\
+    \l@RooEntity\
+    \lpublic class Group \{\
+    \l\}\
+    \l}"
+  ]
+
+}
