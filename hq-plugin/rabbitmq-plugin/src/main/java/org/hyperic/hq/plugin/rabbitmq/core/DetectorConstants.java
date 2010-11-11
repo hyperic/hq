@@ -68,5 +68,6 @@ public class DetectorConstants {
     public static final String SERVER_PATH = "server.path";
  
     public static final String PLATFORM_TYPE = "platform.type";
+    public static final String PORT="port";
 
 }

@@ -378,11 +378,6 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
             conf.setValue(DetectorConstants.AUTHENTICATION, auth);
         }
 
-        String hostName = nodeName != null ? getHostFromNode(nodeName) : null;
-        if (hostName != null) {
-            conf.setValue(DetectorConstants.HOST, hostName);
-        }
-
         logger.debug("ProductConfig[" + conf + "]");
 
         ConfigResponse custom = createCustomConfig(nodeName, nodePath, nodePid, nodeArgs);
@@ -530,7 +525,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
     
     private boolean isConfiguredAndValid(Configuration configuration) 
     	throws PluginException {
-    	
+
         return configuration.isConfigured()
         			&& RabbitProductPlugin.isValidUsernamePassword(configuration)
         			&& RabbitProductPlugin.isValidOtpConnection(configuration);
