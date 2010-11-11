@@ -36,6 +36,7 @@ import org.springframework.erlang.support.converter.ErlangConversionException;
 import org.springframework.util.exec.Os;
 
 import java.io.IOException;
+import java.net.SocketException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -68,8 +69,9 @@ public class ConfigurationValidator {
                 con = cf.createConnection();
                 valid = con != null;
             }
-        }
-        catch (Exception e) {
+        } catch (SocketException se) {
+        	throw new PluginException("Could not connect to the RabbitMQ broker", se);
+        } catch (Exception e) {
             throw new PluginException("Username/password combination were not valid to connect to the RabbitMQ broker.", e);
         }
         finally {

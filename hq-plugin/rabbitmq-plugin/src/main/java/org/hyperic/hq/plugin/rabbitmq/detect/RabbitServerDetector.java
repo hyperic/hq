@@ -149,7 +149,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @throws PluginException
      */
     public List<ServiceResource> createRabbitResources(ConfigResponse serviceConfig) throws PluginException {
-        List<ServiceResource> rabbitResources = new ArrayList<ServiceResource>();
+        List<ServiceResource> rabbitResources = null;
 
         Configuration configuration = Configuration.toConfiguration(serviceConfig);
         if (getLog().isDebugEnabled()) {
@@ -157,7 +157,8 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
             getLog().debug("[init] configuration=" + configuration);
         }
 
-        if (configuration.isConfigured()) {
+        if (isConfiguredAndValid(configuration)) {
+        	rabbitResources = new ArrayList<ServiceResource>();
             RabbitConfigurationManager cm = new RabbitConfigurationManager(configuration);
             Map<String, HypericRabbitAdmin> admins = cm.getVirtualHostsForNode();
 
@@ -520,6 +521,14 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
             logger.debug("[getProcessHome] error=" + ex.getMessage(), ex);
         }
         return home;
+    }
+    
+    private boolean isConfiguredAndValid(Configuration configuration) 
+    	throws PluginException {
+    	
+        return configuration.isConfigured()
+        			&& RabbitProductPlugin.isValidUsernamePassword(configuration)
+        			&& RabbitProductPlugin.isValidOtpConnection(configuration);
     }
 
 }
