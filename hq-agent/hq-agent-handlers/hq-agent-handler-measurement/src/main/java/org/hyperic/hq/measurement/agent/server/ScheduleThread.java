@@ -244,7 +244,7 @@ public class ScheduleThread
         for (String s : _executors.keySet()) {
             ExecutorService svc = _executors.get(s);
             List<Runnable> queuedMetrics = svc.shutdownNow();
-            _log.info("Shut down executor service for domain '" + s + "'" +
+            _log.info("Shut down executor service for plugin '" + s + "'" +
                       " with " + queuedMetrics.size() + " queued collections");
         }
 
@@ -586,7 +586,7 @@ public class ScheduleThread
                 svc = _executors.get(plugin);
                 if (svc == null) {
                     int poolSize = getPoolSize(plugin);
-                    _log.info("Creating executor for domain '" + plugin +
+                    _log.info("Creating executor for plugin '" + plugin +
                               "' with a pool size of " + poolSize);
                     svc = Executors.newFixedThreadPool(poolSize);
                     _executors.put(plugin, svc);
