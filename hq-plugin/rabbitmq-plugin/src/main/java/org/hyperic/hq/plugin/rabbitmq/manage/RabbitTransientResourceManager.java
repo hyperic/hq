@@ -44,7 +44,10 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * RabbitTransientResourceManager is in development.
+ * RabbitTransientResourceManager deletes transient RabbitMQ services
+ * from the HQ inventory. It requires HQApi to be configured in the
+ * agent.properties for this functionality to work properly.
+ * 
  * @author Patrick Nguyen
  * 
  */
@@ -73,6 +76,12 @@ public class RabbitTransientResourceManager implements TransientResourceManager 
 	public void syncServices(List<ServiceResource> rabbitResources)
 		throws Exception {
 
+		if (rabbitResources == null) {
+			return;
+		}
+		
+		int numResourcesDeleted = 0;
+		
 		try {
 			Resource rabbitMQ = getRabbitMQServer();
 
@@ -82,15 +91,32 @@ public class RabbitTransientResourceManager implements TransientResourceManager 
 				}
 				return;
 			}
+			
+			if (logger.isDebugEnabled()) {
+				for (ServiceResource s : rabbitResources) {
+					logger.debug("Discovered RabbitMQ service=" + s);
+				}
+			}
 
 			for (Resource service : rabbitMQ.getResource()) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("HQ RabbitMQ service={"
+									+ "type=" + service.getResourcePrototype().getName()
+									+ ", name=" + service.getName()
+									+ "}");
+				}
 				if (isTransientResource(service, rabbitResources)) {
 					commandsClient.deleteResource(service);
+					numResourcesDeleted++;
 				}
 			}
 		} catch (Exception e) {
 			// TODO: log here?
 			throw e;
+		} finally {
+			if (numResourcesDeleted > 0) {
+				logger.info(numResourcesDeleted + " transient RabbitMQ services deleted");
+			}
 		}
 	}
 
