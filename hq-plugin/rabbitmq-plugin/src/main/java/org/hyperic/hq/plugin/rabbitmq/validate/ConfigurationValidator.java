@@ -63,6 +63,7 @@ public class ConfigurationValidator {
         try {
             if (c.isConfigured()) {
                 cf = new SingleConnectionFactory(c.getHostname());
+                cf.setPort(c.getPort());
                 cf.setUsername(c.getUsername());
                 cf.setPassword(c.getPassword());
 

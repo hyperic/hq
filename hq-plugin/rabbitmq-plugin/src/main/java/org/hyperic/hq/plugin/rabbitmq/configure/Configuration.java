@@ -25,8 +25,8 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.configure;
 
- import org.hyperic.hq.plugin.rabbitmq.collect.MetricConstants;
- import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
+import org.hyperic.hq.plugin.rabbitmq.collect.MetricConstants;
+import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 
@@ -39,24 +39,17 @@ import java.util.Properties;
 public class Configuration {
 
     private String nodename;
-
     private String hostname;
-
     private String virtualHost;
-
     private String authentication;
-
     private String username;
-
+    private int port;
     private String password;
- 
     private String defaultVirtualHost = "/";
-    
+
     @Override
     public String toString() {
-        return new StringBuilder("[nodename=").append(nodename).append(" hostname=").append(hostname)
-                .append(" virtualHost=").append(virtualHost).append(" authentication=").append(authentication)
-                .append(" username=").append(username).append(" password=").append(password).append("]").toString();
+        return "[nodename="+nodename+" hostname="+hostname+" port="+port+" virtualHost="+virtualHost+" authentication="+authentication+" username="+username+" password="+password+"]";
     }
 
     public boolean isDefaultVirtualHost() {
@@ -72,7 +65,7 @@ public class Configuration {
     public void setDefaultVirtualHost(boolean doSet) {
         if (doSet && this.virtualHost == null) {
             this.virtualHost = defaultVirtualHost;
-        } 
+        }
     }
 
     public String getDefaultVirtualHost() {
@@ -147,6 +140,14 @@ public class Configuration {
         this.hostname = hostname != null && hostname.length() > 0 ? hostname.trim() : null;
     }
 
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port=port;
+    }
+
     public String getAuthentication() {
         return authentication;
     }
@@ -185,6 +186,7 @@ public class Configuration {
         conf.setVirtualHost(props.getProperty(MetricConstants.VIRTUALHOST));
         conf.setAuthentication(props.getProperty(DetectorConstants.AUTHENTICATION));
         conf.setHostname(props.getProperty(DetectorConstants.HOST));
+        conf.setPort(Integer.parseInt(props.getProperty(DetectorConstants.PORT)));
         conf.setUsername(props.getProperty(DetectorConstants.USERNAME));
         conf.setPassword(props.getProperty(DetectorConstants.PASSWORD));
 
@@ -194,6 +196,4 @@ public class Configuration {
     public static Configuration toConfiguration(ConfigResponse configResponse) {
         return toConfiguration(configResponse.toProperties());
     }
-
-
 }
