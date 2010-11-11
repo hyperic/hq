@@ -30,8 +30,14 @@ public abstract class RabbitMQDefaultCollector extends Collector {
             getLog().debug("[init] props=" + props);
             getLog().debug("[init] configuration=" + configuration);
         }
-        if (configuration.isConfigured()) {
-            configManager = new RabbitConfigurationManager(configuration);
+
+        try {
+            if (configuration.isConfigured()) {
+                configManager = new RabbitConfigurationManager(configuration);
+            }
+        } catch (RuntimeException ex) {
+            getLog().debug(ex.getMessage(),ex);
+            throw new PluginException(ex.getMessage(),ex);
         }
     }
 
