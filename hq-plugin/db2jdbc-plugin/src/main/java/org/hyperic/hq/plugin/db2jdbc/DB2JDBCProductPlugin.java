@@ -87,6 +87,10 @@ public class DB2JDBCProductPlugin extends ProductPlugin {
                 File jar = new File((String) paths.get(0), "java/db2jcc.jar");
                 if (jar.exists()) {
                     res = new String[]{jar.getAbsolutePath()};
+                } else {
+                    if (log.isDebugEnabled()){
+                       log.debug("Unable to locate jar file: " + jar.getAbsolutePath()); 
+                    }
                 }
             }
         }
