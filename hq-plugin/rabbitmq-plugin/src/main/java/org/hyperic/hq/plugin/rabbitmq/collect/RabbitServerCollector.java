@@ -45,14 +45,14 @@ public class RabbitServerCollector extends RabbitMQDefaultCollector {
     @Override
     public void collect() {
         Properties props = getProperties();
+        String node = (String) props.get(MetricConstants.NODE);
         if (logger.isDebugEnabled()) {
             String vhost = (String) props.get(MetricConstants.VIRTUALHOST);
-            String node = (String) props.get(MetricConstants.NODE);
             logger.debug("[collect] vhost=" + vhost + " node=" + node);
         }
 
         Configuration configuration = Configuration.toConfiguration(props);
-        logger.debug("Checking if the node is available");
+        logger.debug("Checking if the node '" + node + "' is available");
         try {
             boolean isAvailable = RabbitProductPlugin.isNodeAvailabile(configuration);
             setAvailability(isAvailable);
