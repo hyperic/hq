@@ -88,8 +88,8 @@ public class DB2JDBCProductPlugin extends ProductPlugin {
                 if (jar.exists()) {
                     res = new String[]{jar.getAbsolutePath()};
                 } else {
-                    if (log.isDebugEnabled()){
-                       log.debug("Unable to locate jar file: " + jar.getAbsolutePath()); 
+                    if (log.isWarnEnabled()){
+                       log.warn("Unable to locate DB2 jar file: " + jar.getAbsolutePath()); 
                     }
                 }
             }
