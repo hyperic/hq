@@ -1,13 +1,15 @@
 package org.hyperic.hq.domain;
 
-import org.springframework.datastore.graph.annotation.NodeEntity;
-import org.springframework.roo.addon.tostring.RooToString;
-import org.springframework.roo.addon.javabean.RooJavaBean;
-import org.springframework.roo.addon.entity.RooEntity;
+import org.springframework.datastore.graph.annotation.EndNode;
+import org.springframework.datastore.graph.annotation.RelationshipEntity;
+import org.springframework.datastore.graph.annotation.StartNode;
 
-@NodeEntity
-@RooToString
-@RooJavaBean
-@RooEntity
+@RelationshipEntity
 public class Relation {
+	@StartNode
+	private Resource from;
+	
+	@EndNode
+	private Resource to;
+	
 }

@@ -8,12 +8,13 @@ digraph Relation {
   ]
 
   Relation [
-    
-    label = "{@NodeEntity\
-    \l@RooToString\
-    \l@RooJavaBean\
-    \l@RooEntity\
+        style=dotted
+    label = "{@RelationshipEntity\
     \lpublic class Relation \{\
+    \l\	@StartNode\
+    \l\	private Resource from;\
+    \l\	@EndNode\
+    \l\	private Resource to;\
     \l\}\
     \l}"
   ]

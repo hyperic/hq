@@ -16,6 +16,9 @@ digraph Resource {
     \lpublic class Resource \{\
     \l\    @NotNull\
     \l\    private String name;\
+    \l\    public Relation relatedTo(Resource resource, String relationName) \{\
+    \l\    	return (Relation)this.relateTo(resource,Relation.class,relationName);\
+    \l\    \}\
     \l\}\
     \l}"
   ]

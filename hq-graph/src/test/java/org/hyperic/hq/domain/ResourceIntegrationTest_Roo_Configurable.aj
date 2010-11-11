@@ -3,12 +3,10 @@
 
 package org.hyperic.hq.domain;
 
-import org.neo4j.graphdb.Relationship;
+import org.springframework.beans.factory.annotation.Configurable;
 
-privileged aspect Relation_Roo_GraphEntity {
+privileged aspect ResourceIntegrationTest_Roo_Configurable {
     
-    public Relation.new(Relationship r) {
-        setUnderlyingState(r);
-    }
-
+    declare @type: ResourceIntegrationTest: @Configurable;
+    
 }
