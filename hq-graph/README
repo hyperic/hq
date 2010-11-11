@@ -1,0 +1,5 @@
+To install the NEO4J Roo Add-on do the following:
+1. Copy the 'org.springframework.datastore.neo4j.roo.addon-1.0.0-BUILD-SNAPSHOT.jar' file located in the 'roo-addon' folder.
+2. Paste it into the 'bundle' folder of your ROO installation.
+3. Start the ROO console.
+4. Type 'graph', then press CTRL+SPACE for auto completion to confirm the add-on installation.
