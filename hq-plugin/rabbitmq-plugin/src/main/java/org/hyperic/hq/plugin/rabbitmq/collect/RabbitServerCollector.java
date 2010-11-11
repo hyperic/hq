@@ -58,7 +58,8 @@ public class RabbitServerCollector extends RabbitMQDefaultCollector {
             setAvailability(isAvailable);
             logger.debug("Node is available");
         } catch (PluginException e) {
-            logger.error(e);
+            setErrorMessage("Error: " + e.getMessage(), e);
+            setAvailability(false);
         }
     }
 
