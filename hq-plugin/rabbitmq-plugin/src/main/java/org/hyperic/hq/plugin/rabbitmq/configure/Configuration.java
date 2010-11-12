@@ -39,17 +39,13 @@ import java.util.Properties;
 public class Configuration {
 
     private String nodename;
-    private String hostname;
     private String virtualHost;
     private String authentication;
-    private String username;
-    private int port;
-    private String password;
     private String defaultVirtualHost = "/";
 
     @Override
     public String toString() {
-        return "[nodename="+nodename+" hostname="+hostname+" port="+port+" virtualHost="+virtualHost+" authentication="+authentication+" username="+username+" password="+password+"]";
+        return "[nodename="+nodename+" virtualHost="+virtualHost+" authentication="+authentication+"]";
     }
 
     public boolean isDefaultVirtualHost() {
@@ -89,20 +85,8 @@ public class Configuration {
             throw new PluginException("This resource requires the node name of the broker.");
         }
 
-        if (username == null) {
-            throw new PluginException("Please configure a username and password for the broker.");
-        }
-
-        if (password == null) {
-            throw new PluginException("Please configure a username and password for the broker.");
-        }
-
         if (authentication == null) {
             throw new PluginException("Erlang cookie value is not set yet. Please insure the Agent has permission to read the Erlang cookie.");
-        }
-
-        if (hostname == null) {
-            throw new PluginException("Host name must not be null.");
         }
 
         return true;
@@ -116,14 +100,6 @@ public class Configuration {
         return authentication != null && nodename != null;
     }
 
-    /**
-     * Call before creating HypericBrokerAdmin
-     * @return true if has values
-     */
-    public boolean isConfiguredConnectionFactory() {
-        return username != null && password != null && hostname != null;
-    }
-
     public String getNodename() {
         return nodename;
     }
@@ -132,44 +108,12 @@ public class Configuration {
         this.nodename = nodename != null && nodename.length() > 0 ? nodename.trim() : null;
     }
 
-    public String getHostname() {
-        return hostname;
-    }
-
-    public void setHostname(String hostname) {
-        this.hostname = hostname != null && hostname.length() > 0 ? hostname.trim() : null;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port=port;
-    }
-
     public String getAuthentication() {
         return authentication;
     }
 
     public void setAuthentication(String authentication) {
         this.authentication = authentication != null && authentication.length() > 0 ? authentication.trim() : null;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username != null && username.length() > 0 ? username.trim() : null;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password != null && password.length() > 0 ? password.trim() : null;
     }
 
     public String getVirtualHost() {
@@ -185,10 +129,6 @@ public class Configuration {
         conf.setNodename(props.getProperty(DetectorConstants.NODE));
         conf.setVirtualHost(props.getProperty(MetricConstants.VIRTUALHOST));
         conf.setAuthentication(props.getProperty(DetectorConstants.AUTHENTICATION));
-        conf.setHostname(props.getProperty(DetectorConstants.HOST));
-        conf.setPort(Integer.parseInt(props.getProperty(DetectorConstants.PORT)));
-        conf.setUsername(props.getProperty(DetectorConstants.USERNAME));
-        conf.setPassword(props.getProperty(DetectorConstants.PASSWORD));
 
         return conf;
     }

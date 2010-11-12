@@ -51,10 +51,6 @@ public interface ConfigurationManager {
     
     Map<String, HypericRabbitAdmin> getVirtualHostsForNode();
 
-    CachingConnectionFactory getConnectionFactory();
-
-    RabbitTemplate getRabbitTemplate();
-
     void removeVirtualHostForNode(String key);
 
 }

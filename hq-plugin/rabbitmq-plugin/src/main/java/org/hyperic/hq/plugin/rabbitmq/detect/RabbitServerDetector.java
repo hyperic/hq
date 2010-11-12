@@ -69,6 +69,8 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @throws PluginException
      */
     public List getServerResources(ConfigResponse serverConfig) throws PluginException {
+        //System.setProperty("OtpConnection.trace", "99");
+
         configure(serverConfig);
 
 
@@ -527,7 +529,6 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
     	throws PluginException {
 
         return configuration.isConfigured()
-        			&& RabbitProductPlugin.isValidUsernamePassword(configuration)
         			&& RabbitProductPlugin.isValidOtpConnection(configuration);
     }
 
