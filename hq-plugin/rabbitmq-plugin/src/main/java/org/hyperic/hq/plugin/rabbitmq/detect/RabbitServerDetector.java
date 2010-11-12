@@ -160,14 +160,27 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         }
 
         try{
-           if (isConfiguredAndValid(configuration)) {
-            	rabbitResources = new ArrayList<ServiceResource>();
+            if (isConfiguredAndValid(configuration)) {
+                rabbitResources = new ArrayList<ServiceResource>();
                 RabbitConfigurationManager cm = new RabbitConfigurationManager(configuration);
                 Map<String, HypericRabbitAdmin> admins = cm.getVirtualHostsForNode();
 
                 if (admins != null) {
+                    // for Connection and Channel no vhost is need so we can use the fisrt admin.
+                    HypericRabbitAdmin rabbitAdmin = admins.values().iterator().next();
+                    List<ServiceResource> connections = createConnectionServiceResources(rabbitAdmin);
+                    if (connections != null) {
+                        rabbitResources.addAll(connections);
+                    }
+
+                    List<ServiceResource> channels = createChannelServiceResources(rabbitAdmin);
+                    if (channels != null) {
+                        rabbitResources.addAll(channels);
+                    }
+
+
                     for (Map.Entry entry : admins.entrySet()) {
-                        HypericRabbitAdmin rabbitAdmin = (HypericRabbitAdmin) entry.getValue();
+                        rabbitAdmin = (HypericRabbitAdmin) entry.getValue();
 
                         List<ServiceResource> resources = createResourcesPerVirtualHost(rabbitAdmin);
                         if (resources != null) {
@@ -200,12 +213,6 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
 
             List<ServiceResource> exchanges = createExchangeServiceResources(rabbitAdmin);
             if (exchanges != null) rabbitResources.addAll(exchanges);
-
-            List<ServiceResource> connections = createConnectionServiceResources(rabbitAdmin);
-            if (connections != null) rabbitResources.addAll(connections);
-
-            List<ServiceResource> channels = createChannelServiceResources(rabbitAdmin);
-            if (channels != null) rabbitResources.addAll(channels);
 
             List<ServiceResource> vHosts = createVirtualHostResources(rabbitAdmin);
             if (vHosts != null) rabbitResources.addAll(vHosts);
@@ -255,7 +262,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         List<RabbitConnection> connections = rabbitAdmin.getConnections();
 
         return connections != null ? doCreateServiceResources(connections, AMQPTypes.CONNECTION,
-                    rabbitAdmin.getPeerNodeName(), rabbitAdmin.getVirtualHost()) : null;
+                    rabbitAdmin.getPeerNodeName()) : null;
     }
 
     /**
@@ -268,7 +275,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         List<RabbitChannel> channels = rabbitAdmin.getChannels();
 
         return channels != null ? doCreateServiceResources(channels, AMQPTypes.CHANNEL,
-                    rabbitAdmin.getPeerNodeName(), rabbitAdmin.getVirtualHost()) : null;
+                    rabbitAdmin.getPeerNodeName()) : null;
 
     }
 
@@ -285,6 +292,9 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                     rabbitAdmin.getPeerNodeName(), rabbitAdmin.getVirtualHost()) : null;
     }
 
+    private List<ServiceResource> doCreateServiceResources(List rabbitObjects, String rabbitType, String node) {
+        return doCreateServiceResources(rabbitObjects, rabbitType, node, null);
+    }
     /**
      * For each AMQP type we auto-detect, create ServiceResources that
      * are mostly non-specific to each type. We do some handling that is
@@ -307,7 +317,9 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                 String name = builder.buildIdentity(obj, vHost); // the hq inventory name
 
                 ConfigResponse c = new ConfigResponse();
-                c.setValue(MetricConstants.VHOST, vHost);
+                if(vHost!=null){
+                    c.setValue(MetricConstants.VHOST, vHost);
+                }
 
                 if (obj instanceof QueueInfo) {
                     QueueInfo queue = (QueueInfo) obj;
@@ -321,7 +333,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                     Exchange exchange = (Exchange) obj;
                     if (exchange.getName() == null) {
                         name = AMQPTypes.DEFAULT_EXCHANGE_NAME;
-                    } 
+                    }
                     c.setValue(MetricConstants.EXCHANGE, exchange.getName() == null ?
                             AMQPTypes.DEFAULT_EXCHANGE_NAME : exchange.getName());
                     service.setCustomProperties(ExchangeCollector.getAttributes((Exchange) obj));
