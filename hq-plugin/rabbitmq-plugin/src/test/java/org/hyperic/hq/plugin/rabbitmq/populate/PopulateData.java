@@ -27,7 +27,7 @@ package org.hyperic.hq.plugin.rabbitmq.populate;
 
 import org.hyperic.hq.plugin.rabbitmq.AbstractSpringTest;
 import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
-import org.hyperic.hq.plugin.rabbitmq.configure.ConfigurationManager;
+//import org.hyperic.hq.plugin.rabbitmq.configure.ConfigurationManager;
 import org.hyperic.hq.plugin.rabbitmq.configure.RabbitTestConfiguration;
 import org.springframework.amqp.core.Queue;
 import org.hyperic.hq.plugin.rabbitmq.core.*;
@@ -46,7 +46,7 @@ import java.util.List;
  */
 public class PopulateData extends AbstractSpringTest {
 
-    private static ConfigurationManager configurationManager;
+//    private static ConfigurationManager configurationManager;
 
     private static Configuration key;
 
@@ -59,9 +59,9 @@ public class PopulateData extends AbstractSpringTest {
 
         key = ctx.getBean(Configuration.class);
         final List<Queue> queues = ctx.getBean(List.class);
-        configurationManager = ctx.getBean(ConfigurationManager.class);
-
-        HypericRabbitAdmin rabbitAdmin = configurationManager.getVirtualHostForNode(key.getDefaultVirtualHost(), key.getNodename());
+//        configurationManager = ctx.getBean(ConfigurationManager.class);
+//
+//        HypericRabbitAdmin rabbitAdmin = configurationManager.getVirtualHostForNode(key.getDefaultVirtualHost(), key.getNodename());
 //        final RabbitTemplate rabbitTemplate = configurationManager.getRabbitTemplate();
 
 //        if (rabbitAdmin.getQueues() == null && queues != null) {

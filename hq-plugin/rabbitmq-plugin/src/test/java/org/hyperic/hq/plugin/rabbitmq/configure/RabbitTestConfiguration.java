@@ -57,10 +57,10 @@ public class RabbitTestConfiguration {
         return Configuration.toConfiguration(configResponse());
     }
 
-    @Bean
-    public ConfigurationManager configurationManager() {
-        return new RabbitConfigurationManager(configuration());
-    }
+//    @Bean
+//    public ConfigurationManager configurationManager() {
+//        return new RabbitConfigurationManager(configuration());
+//    }
 
     @Bean
     public Queue stocksQueue() {
