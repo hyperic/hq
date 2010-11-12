@@ -62,18 +62,18 @@ public class PopulateData extends AbstractSpringTest {
         configurationManager = ctx.getBean(ConfigurationManager.class);
 
         HypericRabbitAdmin rabbitAdmin = configurationManager.getVirtualHostForNode(key.getDefaultVirtualHost(), key.getNodename());
-        final RabbitTemplate rabbitTemplate = configurationManager.getRabbitTemplate();
+//        final RabbitTemplate rabbitTemplate = configurationManager.getRabbitTemplate();
 
-        if (rabbitAdmin.getQueues() == null && queues != null) {
-            createQueues(rabbitAdmin, queues);
-        }
+//        if (rabbitAdmin.getQueues() == null && queues != null) {
+//            createQueues(rabbitAdmin, queues);
+//        }
 
-        for (Queue q : queues) {
-            rabbitTemplate.setRoutingKey(q.getName());
-            rabbitTemplate.setQueue(q.getName());
-            ProducerSample producer = new ProducerSample(rabbitTemplate, numMessages);
-            producer.sendMessages();
-        }
+//        for (Queue q : queues) {
+//            rabbitTemplate.setRoutingKey(q.getName());
+//            rabbitTemplate.setQueue(q.getName());
+//            ProducerSample producer = new ProducerSample(rabbitTemplate, numMessages);
+//            producer.sendMessages();
+//        }
 
         final List<QueueInfo> brokerQueues = rabbitAdmin.getQueues();
 
@@ -91,25 +91,25 @@ public class PopulateData extends AbstractSpringTest {
 //                    }
 //                });
 
-        Thread thread2 = new Thread(
-                new Runnable() {
-                    public void run() {
-                        for (Queue q : queues) {
-                            rabbitTemplate.setRoutingKey(q.getName());
-                            rabbitTemplate.setQueue(q.getName());
-                            ConsumerSample consumer = new ConsumerSample(rabbitTemplate, numMessages);
-                            consumer.receiveSync(brokerQueues);
-                            ProducerSample producer = new ProducerSample(rabbitTemplate, 100);
-                            producer.sendMessages();
-
-                        }
-                    }
-                });
+//        Thread thread2 = new Thread(
+//                new Runnable() {
+//                    public void run() {
+//                        for (Queue q : queues) {
+//                            rabbitTemplate.setRoutingKey(q.getName());
+//                            rabbitTemplate.setQueue(q.getName());
+//                            ConsumerSample consumer = new ConsumerSample(rabbitTemplate, numMessages);
+//                            consumer.receiveSync(brokerQueues);
+//                            ProducerSample producer = new ProducerSample(rabbitTemplate, 100);
+//                            producer.sendMessages();
+//
+//                        }
+//                    }
+//                });
 
 //        threads.add(thread1);
-        threads.add(thread2);
+//        threads.add(thread2);
 //        thread1.start();
-        thread2.start();
+//        thread2.start();
 
         for (Thread t : threads) {
             try {
@@ -122,12 +122,12 @@ public class PopulateData extends AbstractSpringTest {
         System.exit(0);
     }
 
-    private static void createQueues(HypericRabbitAdmin rabbitAdmin, List<Queue> queues) {
-        System.out.println("There are no queues, creating queues and declaring them in the broker...");
-        for (Queue q : queues) {
-            rabbitAdmin.declareQueue(q);
-        }
-    }
+//    private static void createQueues(HypericRabbitAdmin rabbitAdmin, List<Queue> queues) {
+//        System.out.println("There are no queues, creating queues and declaring them in the broker...");
+//        for (Queue q : queues) {
+//            rabbitAdmin.declareQueue(q);
+//        }
+//    }
 
     /**
      * @throws Exception

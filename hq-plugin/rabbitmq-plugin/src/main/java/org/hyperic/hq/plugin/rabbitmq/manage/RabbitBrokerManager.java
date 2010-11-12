@@ -195,7 +195,7 @@ public class RabbitBrokerManager implements RabbitManager {
     }
 
     private boolean isBrokerAppRunning() {
-        return rabbitAdmin.getStatus().getRunningNodes().get(0).getName().contains("rabbit");
+        return rabbitAdmin.getStatus();
     }
 
     private Map<String, QueueInfo> getQueuesAsMap() {

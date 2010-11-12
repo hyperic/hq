@@ -57,19 +57,19 @@ public class BrokerAdminTest extends AbstractSpringTest {
         //rabbitAdmin.purgeQueue(queue.getName(), true);
     }
 
-    @Test
-    public void stopStartBrokerApplication() {
-        RabbitStatus status = rabbitAdmin.getStatus();
-        assertBrokerAppRunning(status);
-
-        /*   rabbitAdmin.stopBrokerApplication();
-                status = rabbitAdmin.getStatus();
-                assertEquals(0, status.getRunningNodes().size());
-        */
-        /*rabbitAdmin.startBrokerApplication();
-        status = rabbitAdmin.getStatus();
-        assertBrokerAppRunning(status);*/
-    }
+//    @Test
+//    public void stopStartBrokerApplication() {
+//        RabbitStatus status = rabbitAdmin.getStatus();
+//        assertBrokerAppRunning(status);
+//
+//        /*   rabbitAdmin.stopBrokerApplication();
+//                status = rabbitAdmin.getStatus();
+//                assertEquals(0, status.getRunningNodes().size());
+//        */
+//        /*rabbitAdmin.startBrokerApplication();
+//        status = rabbitAdmin.getStatus();
+//        assertBrokerAppRunning(status);*/
+//    }
 
     @Test
     public void listCreateDeleteChangePwdUser() {
