@@ -30,14 +30,12 @@ import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.rabbit.admin.QueueInfo;
 import org.springframework.erlang.ErlangBadRpcException;
 import org.springframework.erlang.connection.SingleConnectionFactory;
-import org.springframework.erlang.core.Node;
 import org.springframework.util.Assert;
 
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
-import org.springframework.amqp.rabbit.admin.RabbitStatus;
 
 /**
  * A HypericRabbitAdmin is created for each node/virtualHost.
@@ -48,12 +46,12 @@ public class HypericRabbitAdmin {
 
     private static final Log logger = LogFactory.getLog(HypericRabbitAdmin.class);
     private HypericErlangTemplate customErlangTemplate;
-    private String virtualHost;
     private String peerNodeName;
 
-    public HypericRabbitAdmin(SingleConnectionFactory otpConnectionFactory, Configuration config) {
-        this.peerNodeName = config.getNodename();
-        this.virtualHost = config.getVirtualHost();
+    public HypericRabbitAdmin(String peerNodeName, String cookie) {
+        this.peerNodeName = peerNodeName;
+        SingleConnectionFactory otpConnectionFactory = new SingleConnectionFactory("rabbit-monitor", cookie, peerNodeName);
+        otpConnectionFactory.afterPropertiesSet();
         this.customErlangTemplate = new HypericErlangTemplate(otpConnectionFactory);
         this.customErlangTemplate.afterPropertiesSet();
     }
@@ -62,15 +60,15 @@ public class HypericRabbitAdmin {
         return (List<String>) customErlangTemplate.executeRpcAndConvert("rabbit_access_control", "list_vhosts", new ErlangArgs(null, String.class));
     }
 
-    public List<QueueInfo> getQueues() throws ErlangBadRpcException {
+    public List<QueueInfo> getQueues(String virtualHost) throws ErlangBadRpcException {
         return (List<QueueInfo>) customErlangTemplate.executeRpcAndConvert("rabbit_amqqueue", "info_all", new ErlangArgs(virtualHost, QueueInfo.class));
     }
 
-    public List<Exchange> getExchanges() throws ErlangBadRpcException {
+    public List<Exchange> getExchanges(String virtualHost) throws ErlangBadRpcException {
         return (List<Exchange>) customErlangTemplate.executeRpcAndConvert("rabbit_exchange", "list", new ErlangArgs(virtualHost, Exchange.class));
     }
 
-    public List<RabbitBinding> getBindings() throws ErlangBadRpcException {
+    public List<RabbitBinding> getBindings(String virtualHost) throws ErlangBadRpcException {
         return (List<RabbitBinding>) customErlangTemplate.executeRpcAndConvert("rabbit_exchange", "list_bindings", new ErlangArgs(virtualHost, RabbitBinding.class));
     }
 
@@ -87,18 +85,13 @@ public class HypericRabbitAdmin {
     }
 
     public boolean getStatus() {
-        String status=customErlangTemplate.executeRpc("rabbit_mnesia", "status").toString();
+        String status = customErlangTemplate.executeRpc("rabbit_mnesia", "status").toString();
         return status.contains(peerNodeName);
-    }
-
-    public String getVirtualHost() {
-        return virtualHost;
     }
 
     public String getPeerNodeName() {
         return peerNodeName;
     }
-
 
     public boolean virtualHostAvailable(String virtualHost, String node) {
         Assert.notNull(virtualHost, "'virtualHost' must not be null");
@@ -112,24 +105,5 @@ public class HypericRabbitAdmin {
         }
 
         return getStatus() && vhosts != null && vhosts.contains(virtualHost);
-    }
-
-    public RabbitVirtualHost buildRabbitVirtualHost() {
-        VirtualHostBuilder builder = new VirtualHostBuilder();
-        return builder.build();
-    }
-
-    private class VirtualHostBuilder {
-
-        public RabbitVirtualHost build() {
-            RabbitVirtualHost vHost = new RabbitVirtualHost(virtualHost, peerNodeName);
-            vHost.setChannels(getChannels());
-            vHost.setConnectionCount(getConnections());
-            vHost.setAvailable(virtualHostAvailable(virtualHost, peerNodeName));
-            vHost.setQueueCount(getQueues());
-            vHost.setExchangeCount(getExchanges());
-            vHost.setUsers(listUsers());
-            return vHost;
-        }
     }
 }

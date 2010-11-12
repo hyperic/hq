@@ -49,14 +49,14 @@ public class QueueCollector extends RabbitMQDefaultCollector {
     public void collect() {
         Properties props = getProperties();
         String queue = (String) props.get(MetricConstants.QUEUE);
+        String vhost = (String) props.get(MetricConstants.VHOST);
         if (logger.isDebugEnabled()) {
-            String vhost = (String) props.get(MetricConstants.VHOST);
             String node = (String) props.get(MetricConstants.NODE);
             logger.debug("[collect] queue=" + queue + " vhost=" + vhost + " node=" + node);
         }
         HypericRabbitAdmin rabbitAdmin = getAdmin();
 
-        List<QueueInfo> queues = rabbitAdmin.getQueues();
+        List<QueueInfo> queues = rabbitAdmin.getQueues(vhost);
         if (queues != null) {
             for (QueueInfo q : queues) {
                 if (q.getName().equalsIgnoreCase(queue)) {

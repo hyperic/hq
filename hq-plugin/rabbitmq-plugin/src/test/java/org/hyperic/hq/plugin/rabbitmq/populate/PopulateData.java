@@ -75,7 +75,7 @@ public class PopulateData extends AbstractSpringTest {
 //            producer.sendMessages();
 //        }
 
-        final List<QueueInfo> brokerQueues = rabbitAdmin.getQueues();
+//        final List<QueueInfo> brokerQueues = rabbitAdmin.getQueues();
 
         /** rerun with synchronous consumer for each */
         List<Thread> threads = new ArrayList<Thread>();
