@@ -88,41 +88,4 @@ public class ConfigurationValidator {
 //            }
 //        }
     }
-
-    public static boolean isNodeRunning(OtpErlangObject response, String peerNodeName) throws ErlangConversionException {
-        long items = ((OtpErlangList) response).elements().length;
-        if (items > 0 && response instanceof OtpErlangList) {
-
-            for (OtpErlangObject outerList : ((OtpErlangList) response).elements()) {
-                if (outerList instanceof OtpErlangTuple) {
-                    OtpErlangTuple entry = (OtpErlangTuple) outerList;
-                    String key = entry.elementAt(0).toString();
-                    if (key.equals("running_nodes") && entry.elementAt(1) instanceof OtpErlangList) {
-                        OtpErlangList value = (OtpErlangList) entry.elementAt(1);
-                        return value.toString().contains(peerNodeName);
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Prefix could be rabbit or something like rabbit_3 vs rabbit
-     * @param hostname
-     * @param peerNodeName
-     * @return
-     */
-    public static String validatePeerNodeName(String hostname, String peerNodeName) {
-        logger.debug("[validatePeerNodeName] hostname='" + hostname + "' peerNodeName='" + peerNodeName + "'");
-        String res = peerNodeName;
-        if (Os.isFamily("windows")) {
-            Pattern p = Pattern.compile("([^@]+)@");
-            Matcher m = p.matcher(peerNodeName);
-            String prefix = m.find() ? m.group(1) : null;
-            res = prefix + "@" + hostname.toUpperCase();
-        }
-        logger.debug("[validatePeerNodeName] new peerNodeName='" + res + "'");
-        return res;
-    }
 }
