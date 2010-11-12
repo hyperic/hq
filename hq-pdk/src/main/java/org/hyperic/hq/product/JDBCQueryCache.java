@@ -100,7 +100,7 @@ public class JDBCQueryCache {
     public Object getOnlyRow(Connection conn, String column)
         throws SQLException, JDBCQueryCacheException {
         final long now = System.currentTimeMillis();
-        if (_cache.size() == 0 || (now - _cacheTimeout) > _last) {
+        if (_cache.isEmpty() || (now - _cacheTimeout) > _last) {
             repopulateCache(conn);
         }
         final Set keys = _cache.keySet();
@@ -137,7 +137,7 @@ public class JDBCQueryCache {
     public Object get(Connection conn, String key, String column)
         throws JDBCQueryCacheException, SQLException {
         long now = System.currentTimeMillis();
-        if ((now - _cacheTimeout) > _last) {
+        if (_cache.isEmpty() || (now - _cacheTimeout) > _last) {
             repopulateCache(conn);
         }
         List list = (List) _cache.get(key);
