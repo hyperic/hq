@@ -126,8 +126,7 @@ public class RabbitConfigurationManager implements ConfigurationManager, Disposa
      */
     public HypericRabbitAdmin createVirtualHostForNode(Configuration key) throws PluginException {
         if (isCandidate(key)) {
-            HypericRabbitAdmin admin = new HypericRabbitAdmin(new DummyConnectionFactory(key.getVirtualHost()), otpConnectionFactory, key.getNodename());
-            
+            HypericRabbitAdmin admin = new HypericRabbitAdmin(otpConnectionFactory, key);
             virtualHostsByNode.put(key.getVirtualHost(), admin);
             return admin;
         }
@@ -197,29 +196,4 @@ public class RabbitConfigurationManager implements ConfigurationManager, Disposa
             throw new PluginException("Unable to reset all configuations.", t);
         }
     }
-
-    /**
-     * change it for a CachingConnectionFactory if we need access to rabbitmq with user/pass
-     */
-    private class DummyConnectionFactory implements ConnectionFactory {
-
-        private final String vh;
-
-        public DummyConnectionFactory(String vh) {
-            this.vh = vh;
-        }
-
-        public String getHost() {
-            return "";
-        }
-
-        public String getVirtualHost() {
-            return vh;
-        }
-
-        public Connection createConnection() throws IOException {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-    }
-
 }
