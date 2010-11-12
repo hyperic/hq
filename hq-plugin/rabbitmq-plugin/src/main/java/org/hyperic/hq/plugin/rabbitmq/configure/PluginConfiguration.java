@@ -48,18 +48,4 @@ public class PluginConfiguration {
         return new RabbitConfigurationManager(configuration);   
     }
 
-    @Bean
-    public CachingConnectionFactory connectionFactory() {
-        CachingConnectionFactory ccf = new CachingConnectionFactory(configuration.getHostname());
-        ccf.setUsername(configuration.getUsername());
-        ccf.setPassword(configuration.getPassword());
-        ccf.setChannelCacheSize(20);
-        return ccf;
-    }
-
-    @Bean
-    public RabbitTemplate rabbitTemplate() {
-        return new RabbitTemplate(connectionFactory());
-    }
-     
 }

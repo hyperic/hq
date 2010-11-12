@@ -29,7 +29,7 @@
 
 <plugin class="org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin">
 
-    <filter name="server-connection" value="username=%username%,password=%password%,hostname=%hostname%,port=%port%,authentication=%authentication%"/>
+    <filter name="server-connection" value="authentication=%authentication%"/>
 
     <server name="RabbitMQ" description="RabbitMQ">
 
@@ -75,10 +75,8 @@
         <plugin type="log_track" class="org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerLog"/>
 
         <config type="product">
-            <option name="username" description="RabbitMQ Username"/>
-            <option name="password" type="secret" description="RabbitMQ Password"/>
-            <option name="hostname" default="localhost" description="RabbitMQ hostname"/>
-            <option name="port" default="5672" description="RabbitMQ port"/>
+            <option name="node"  description="node"/>
+            <option name="authentication"  description=".erlang.cookie value"/>
         </config>
 
 
@@ -101,7 +99,7 @@
         </config>
 
         <metric name="Availability"
-                template="rabbitmq:node=%node%,hostname=%hostname%,port=%port%,username=%username%,password=%password%,authentication=%authentication%:Availability"
+                template="rabbitmq:node=%node%,authentication=%authentication%:Availability"
                 indicator="true"/>
 
         &process-metrics;

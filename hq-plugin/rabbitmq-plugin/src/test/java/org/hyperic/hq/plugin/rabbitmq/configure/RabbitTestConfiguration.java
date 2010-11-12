@@ -83,10 +83,10 @@ public class RabbitTestConfiguration {
         return queue;
     }
 
-    @Bean
-    public CachingConnectionFactory ccf() { 
-        return configurationManager().getConnectionFactory();
-    }
+//    @Bean
+//    public CachingConnectionFactory ccf() {
+//        return configurationManager().getConnectionFactory();
+//    }
 
     @Bean
     public List<Queue> queues() {

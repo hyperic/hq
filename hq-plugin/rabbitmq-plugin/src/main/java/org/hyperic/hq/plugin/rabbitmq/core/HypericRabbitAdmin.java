@@ -25,6 +25,8 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
 
+import com.rabbitmq.client.Connection;
+import java.io.IOException;
 import org.hyperic.hq.product.PluginException;
 import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.rabbit.admin.QueueInfo;
@@ -37,6 +39,7 @@ import org.springframework.erlang.core.Node;
 import org.springframework.util.Assert;
 
 import java.util.List;
+import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
 
 /**
  * A HypericRabbitAdmin is created for each node/virtualHost.

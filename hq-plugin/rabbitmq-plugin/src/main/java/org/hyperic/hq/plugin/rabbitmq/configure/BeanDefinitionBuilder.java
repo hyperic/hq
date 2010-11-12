@@ -64,10 +64,7 @@ public class BeanDefinitionBuilder {
             beanDefinition.setBeanClass(beanType);
 
             MutablePropertyValues props = new MutablePropertyValues();
-            props.add(DetectorConstants.HOST, conf.getHostname());
             props.add(DetectorConstants.AUTHENTICATION, conf.getAuthentication());
-            props.add(DetectorConstants.USERNAME, conf.getUsername());
-            props.add(DetectorConstants.PASSWORD, conf.getPassword());
 
             beanDefinition.setPropertyValues(props);
 

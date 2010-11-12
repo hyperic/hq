@@ -25,11 +25,14 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.configure;
 
+import com.rabbitmq.client.Connection;
+import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
 import org.hyperic.hq.plugin.rabbitmq.validate.ConfigurationValidator;
 import org.hyperic.hq.product.PluginException;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.DisposableBean;
@@ -53,33 +56,18 @@ public class RabbitConfigurationManager implements ConfigurationManager, Disposa
 
     private final Map<String, HypericRabbitAdmin> virtualHostsByNode = Collections.synchronizedMap(new HashMap<String, HypericRabbitAdmin>());
 
-    private CachingConnectionFactory connectionFactory;
-
     private SingleConnectionFactory otpConnectionFactory;
 
-    private RabbitTemplate rabbitTemplate;
-
     public RabbitConfigurationManager(Configuration key) {
-        setSharedRabbitConnectionFactory(key);
         setSharedOtpConnectionFactory(key);
         setSharedRabbitAdminsForVirtualHosts(key);
-        Assert.notNull(connectionFactory, "connectionFactory must not be null.");
-        Assert.notNull(rabbitTemplate, "rabbitTemplate must not be null.");
         Assert.notNull(otpConnectionFactory, "otpConnectionFactory must not be null.");
         Assert.notEmpty(virtualHostsByNode, "virtualHostsByNode must not be empty.");
     }
 
-    private void setSharedRabbitConnectionFactory(Configuration key) {
-        this.connectionFactory = new CachingConnectionFactory(key.getHostname());
-        this.connectionFactory.setUsername(key.getUsername());
-        this.connectionFactory.setPassword(key.getPassword());
-        this.connectionFactory.setChannelCacheSize(20);
-        this.rabbitTemplate = new RabbitTemplate(this.connectionFactory);
-    }
 
     private void setSharedOtpConnectionFactory(Configuration key) {
-        String peerNodeName = ConfigurationValidator.validatePeerNodeName(key.getHostname(), key.getNodename());
-        this.otpConnectionFactory = new SingleConnectionFactory("rabbit-monitor", key.getAuthentication(), peerNodeName);
+        this.otpConnectionFactory = new SingleConnectionFactory("rabbit-monitor", key.getAuthentication(), key.getNodename());
         this.otpConnectionFactory.afterPropertiesSet();
     }
 
@@ -102,7 +90,7 @@ public class RabbitConfigurationManager implements ConfigurationManager, Disposa
     }
 
     public boolean isInitialized() {
-        return connectionFactory != null && virtualHostsByNode.size() > 0;
+        return virtualHostsByNode.size() > 0;
     }
 
     /**
@@ -138,13 +126,9 @@ public class RabbitConfigurationManager implements ConfigurationManager, Disposa
      */
     public HypericRabbitAdmin createVirtualHostForNode(Configuration key) throws PluginException {
         if (isCandidate(key)) {
-            connectionFactory.setVirtualHost(key.getVirtualHost());
-            HypericRabbitAdmin admin = new HypericRabbitAdmin(connectionFactory, otpConnectionFactory, key.getNodename());
+            HypericRabbitAdmin admin = new HypericRabbitAdmin(new DummyConnectionFactory(key.getVirtualHost()), otpConnectionFactory, key.getNodename());
             
             virtualHostsByNode.put(key.getVirtualHost(), admin);
-            if (!key.isDefaultVirtualHost()) {
-                connectionFactory.setVirtualHost(key.getDefaultVirtualHost());
-            }
             return admin;
         }
         return null;
@@ -157,7 +141,7 @@ public class RabbitConfigurationManager implements ConfigurationManager, Disposa
      * @throws PluginException
      */
     private boolean isCandidate(Configuration key) throws PluginException {
-        return connectionFactory != null && otpConnectionFactory != null && key != null
+        return  otpConnectionFactory != null && key != null
                 && key.isConfigured() && !virtualHostsByNode.containsKey(key.getVirtualHost());
     }
 
@@ -200,17 +184,10 @@ public class RabbitConfigurationManager implements ConfigurationManager, Disposa
      */
     public void resetConfiguration() throws PluginException {
         try {
-            if (rabbitTemplate != null) {
-                rabbitTemplate = null;
-            }
             if (virtualHostsByNode != null) {
                 for(Map.Entry entry : virtualHostsByNode.entrySet()) {
                     removeVirtualHostForNode((String) entry.getKey());
                 }
-            }
-            if (connectionFactory != null) {
-                connectionFactory.destroy();
-                connectionFactory = null;
             }
             if (otpConnectionFactory != null) {
                 otpConnectionFactory.destroy();
@@ -221,12 +198,28 @@ public class RabbitConfigurationManager implements ConfigurationManager, Disposa
         }
     }
 
-    public CachingConnectionFactory getConnectionFactory() {
-        return connectionFactory;
-    }
+    /**
+     * change it for a CachingConnectionFactory if we need access to rabbitmq with user/pass
+     */
+    private class DummyConnectionFactory implements ConnectionFactory {
 
-    public RabbitTemplate getRabbitTemplate() {
-        return rabbitTemplate;
+        private final String vh;
+
+        public DummyConnectionFactory(String vh) {
+            this.vh = vh;
+        }
+
+        public String getHost() {
+            return "";
+        }
+
+        public String getVirtualHost() {
+            return vh;
+        }
+
+        public Connection createConnection() throws IOException {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
     }
 
 }

@@ -80,16 +80,16 @@ public class PopulateData extends AbstractSpringTest {
         /** rerun with synchronous consumer for each */
         List<Thread> threads = new ArrayList<Thread>();
 
-        Thread thread1 = new Thread(
-                new Runnable() {
-                    public void run() {
-                        try {
-                            simulateCollection();
-                        } catch (Exception e) {
-                            System.out.println(e);
-                        }
-                    }
-                });
+//        Thread thread1 = new Thread(
+//                new Runnable() {
+//                    public void run() {
+//                        try {
+//                            simulateCollection();
+//                        } catch (Exception e) {
+//                            System.out.println(e);
+//                        }
+//                    }
+//                });
 
         Thread thread2 = new Thread(
                 new Runnable() {
@@ -106,9 +106,9 @@ public class PopulateData extends AbstractSpringTest {
                     }
                 });
 
-        threads.add(thread1);
+//        threads.add(thread1);
         threads.add(thread2);
-        thread1.start();
+//        thread1.start();
         thread2.start();
 
         for (Thread t : threads) {
@@ -132,21 +132,21 @@ public class PopulateData extends AbstractSpringTest {
     /**
      * @throws Exception
      */
-    private static void simulateCollection() throws Exception {
-        com.rabbitmq.client.Connection conn = configurationManager.getConnectionFactory().createConnection();
-        System.out.println("ConnectionProperties = " + conn.getServerProperties());
-
-        conn.createChannel();
-        conn.createChannel();
-
-        HypericRabbitAdmin admin = configurationManager.getVirtualHostForNode(key.getDefaultVirtualHost(), key.getNodename());
-        System.out.println("Queues = " + admin.getQueues().size());
-        System.out.println("Exchanges = " + admin.getExchanges().size());
-        System.out.println("Connections = " + admin.getConnections().size());
-        System.out.println("Channels = " + admin.getChannels().size());
-        System.out.println("Broker Info = " + admin.getStatus());
-
-        conn.close();
-    }
+//    private static void simulateCollection() throws Exception {
+//        com.rabbitmq.client.Connection conn = configurationManager.getConnectionFactory().createConnection();
+//        System.out.println("ConnectionProperties = " + conn.getServerProperties());
+//
+//        conn.createChannel();
+//        conn.createChannel();
+//
+//        HypericRabbitAdmin admin = configurationManager.getVirtualHostForNode(key.getDefaultVirtualHost(), key.getNodename());
+//        System.out.println("Queues = " + admin.getQueues().size());
+//        System.out.println("Exchanges = " + admin.getExchanges().size());
+//        System.out.println("Connections = " + admin.getConnections().size());
+//        System.out.println("Channels = " + admin.getChannels().size());
+//        System.out.println("Broker Info = " + admin.getStatus());
+//
+//        conn.close();
+//    }
 
 }

@@ -107,9 +107,4 @@ public class RabbitProductPlugin extends ProductPlugin {
     public static boolean isValidOtpConnection(Configuration configuration) throws PluginException {
         return ConfigurationValidator.isValidOtpConnection(configuration);
     }
-
-    public static boolean isValidUsernamePassword(Configuration configuration) throws PluginException {
-        return ConfigurationValidator.isValidUsernamePassword(configuration);
-    }
-
 }
