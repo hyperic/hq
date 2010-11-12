@@ -307,8 +307,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                 String name = builder.buildIdentity(obj, vHost); // the hq inventory name
 
                 ConfigResponse c = new ConfigResponse();
-                c.setValue(MetricConstants.NODE, node);
-                c.setValue(MetricConstants.VIRTUALHOST, vHost);
+                c.setValue(MetricConstants.VHOST, vHost);
 
                 if (obj instanceof QueueInfo) {
                     QueueInfo queue = (QueueInfo) obj;
@@ -332,7 +331,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                     service.setCustomProperties(ChannelCollector.getAttributes(channel));
                 } else if (obj instanceof RabbitVirtualHost) {
                     RabbitVirtualHost vh = (RabbitVirtualHost) obj;
-                    c.setValue(MetricConstants.VIRTUAL_HOST, vh.getName());
+                    c.setValue(MetricConstants.VHOST, vh.getName());
                     service.setCustomProperties(VirtualHostCollector.getAttributes(vh));
                 }
 

@@ -33,8 +33,6 @@ public class MetricConstants {
 
     public static final String NODE = "node";
 
-    public static final String VIRTUALHOST = "virtualhost";
-
     public static final String QUEUE = "queue";
 
     public static final String EXCHANGE = "exchange";
@@ -43,6 +41,6 @@ public class MetricConstants {
 
     public static final String CHANNEL = "channel";
 
-    public static final String VIRTUAL_HOST = "vhost";
+    public static final String VHOST = "vhost";
 
 }

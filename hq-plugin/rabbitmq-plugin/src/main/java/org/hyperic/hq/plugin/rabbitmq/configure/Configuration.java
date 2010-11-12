@@ -127,7 +127,7 @@ public class Configuration {
     public static Configuration toConfiguration(Properties props) {
         Configuration conf = new Configuration();
         conf.setNodename(props.getProperty(DetectorConstants.NODE));
-        conf.setVirtualHost(props.getProperty(MetricConstants.VIRTUALHOST));
+        conf.setVirtualHost(props.getProperty(MetricConstants.VHOST));
         conf.setAuthentication(props.getProperty(DetectorConstants.AUTHENTICATION));
 
         return conf;
