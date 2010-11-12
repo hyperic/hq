@@ -49,7 +49,7 @@ public class ConnectionCollector extends RabbitMQDefaultCollector {
         Properties props = getProperties();
         String connectionPid = (String) props.get(MetricConstants.CONNECTION);
         if (logger.isDebugEnabled()) {
-            String vhost = (String) props.get(MetricConstants.VIRTUALHOST);
+            String vhost = (String) props.get(MetricConstants.VHOST);
             String node = (String) props.get(MetricConstants.NODE);
             logger.debug("[collect] connectionPid=" + connectionPid + " vhost=" + vhost + " node=" + node);
         }

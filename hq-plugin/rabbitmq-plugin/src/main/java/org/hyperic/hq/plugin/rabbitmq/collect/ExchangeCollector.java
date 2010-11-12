@@ -50,7 +50,7 @@ public class ExchangeCollector extends RabbitMQDefaultCollector {
         Properties props = getProperties();
         String exchange = (String) props.get(MetricConstants.EXCHANGE);
         if (logger.isDebugEnabled()) {
-            String vhost = (String) props.get(MetricConstants.VIRTUALHOST);
+            String vhost = (String) props.get(MetricConstants.VHOST);
             String node = (String) props.get(MetricConstants.NODE);
             logger.debug("[collect] exchange=" + exchange + " vhost=" + vhost + " node=" + node);
         }

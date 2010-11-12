@@ -48,7 +48,7 @@ public class ChannelCollector extends RabbitMQDefaultCollector {
         Properties props = getProperties();
         String channelPid = (String) props.get(MetricConstants.CHANNEL);
         if (logger.isDebugEnabled()) {
-            String vhost = (String) props.get(MetricConstants.VIRTUALHOST);
+            String vhost = (String) props.get(MetricConstants.VHOST);
             String node = (String) props.get(MetricConstants.NODE);
             logger.debug("[collect] channelPid=" + channelPid + " vhost=" + vhost + " node=" + node);
         }

@@ -50,7 +50,7 @@ public class QueueCollector extends RabbitMQDefaultCollector {
         Properties props = getProperties();
         String queue = (String) props.get(MetricConstants.QUEUE);
         if (logger.isDebugEnabled()) {
-            String vhost = (String) props.get(MetricConstants.VIRTUALHOST);
+            String vhost = (String) props.get(MetricConstants.VHOST);
             String node = (String) props.get(MetricConstants.NODE);
             logger.debug("[collect] queue=" + queue + " vhost=" + vhost + " node=" + node);
         }

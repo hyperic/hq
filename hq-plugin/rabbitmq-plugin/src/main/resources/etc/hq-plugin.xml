@@ -29,7 +29,7 @@
 
 <plugin class="org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin">
 
-    <filter name="server-connection" value="authentication=%authentication%"/>
+    <filter name="server-connection" value="node=%node%,authentication=%authentication%"/>
 
     <server name="RabbitMQ" description="RabbitMQ">
 
@@ -99,7 +99,7 @@
         </config>
 
         <metric name="Availability"
-                template="rabbitmq:node=%node%,authentication=%authentication%:Availability"
+                template="rabbitmq:${server-connection}:Availability"
                 indicator="true"/>
 
         &process-metrics;
@@ -112,11 +112,10 @@
 
         <service name="Queue">
             <property name="template"
-                      value="rabbitmq:queue=%queue%,node=%node%,virtualhost=%virtualhost%,${server-connection}:${alias}"/>
+                      value="rabbitmq:queue=%queue%,virtualhost=%virtualhost%,${server-connection}:${alias}"/>
 
             <config type="measurement">
-                <option name="node" description="rabbit node name"/>
-                <option name="virtualhost" description="rabbit node-virtualhost name"/>
+                <option name="vhost" description="rabbit node-virtualhost name"/>
                 <option name="queue" description="queue name"/>
             </config>
 
@@ -202,11 +201,10 @@
         </service>
 
         <service name="Channel">
-            <property name="template" value="rabbitmq:channel=%channel%,node=%node%,virtualhost=%virtualhost%,${server-connection}:${alias}"/>
+            <property name="template" value="rabbitmq:channel=%channel%,virtualhost=%virtualhost%,${server-connection}:${alias}"/>
 
             <config type="measurement">
-                <option name="node" description="rabbit node name"/>
-                <option name="virtualhost" description="rabbit node-virtualhost name"/>
+                <option name="vhost" description="rabbit node-virtualhost name"/>
                 <option name="channel" description="channel name"/>
             </config>
 
@@ -263,11 +261,10 @@
 
         <service name="Connection">
             <property name="template"
-                      value="rabbitmq:connection=%connection%,node=%node%,virtualhost=%virtualhost%,${server-connection}:${alias}"/>
+                      value="rabbitmq:connection=%connection%,virtualhost=%virtualhost%,${server-connection}:${alias}"/>
 
             <config type="measurement">
-                <option name="node" description="rabbit node name"/>
-                <option name="virtualhost" description="rabbit node-virtualhost name"/>
+                <option name="vhost" description="rabbit node-virtualhost name"/>
                 <option name="connection" description="connection name"/>
             </config>
 
@@ -340,11 +337,10 @@
 
         <service name="Exchange">
             <property name="template"
-                      value="rabbitmq:exchange=%exchange%,node=%node%,virtualhost=%virtualhost%,${server-connection}:${alias}"/>
+                      value="rabbitmq:exchange=%exchange%,virtualhost=%virtualhost%,${server-connection}:${alias}"/>
 
             <config type="measurement">
-                <option name="node" description="rabbit node name"/>
-                <option name="virtualhost" description="rabbit node-virtualhost name"/>
+                <option name="vhost" description="rabbit node-virtualhost name"/>
                 <option name="exchange" description="exchange name"/>
             </config>
 
@@ -368,12 +364,11 @@
         <!-- These will hit the server enough for each query that we do not want to
         run the collector often. Consider modifying what is queried/exposed with large-volume
         heavily-trafficed brokers. -->
-        <service name="VirtualHost">
-            <property name="template" value="rabbitmq:node=%node%,virtualhost=%virtualhost%,${server-connection}:${alias}"/>
+        <service name="vhost">
+            <property name="template" value="rabbitmq:virtualhost=%virtualhost%,${server-connection}:${alias}"/>
 
             <config type="measurement">
-                <option name="node" description="rabbit node name"/>
-                <option name="virtualhost" description="rabbit node-virtualhost name"/>
+                <option name="vhost" description="rabbit node-virtualhost name"/>
             </config>
 
             <metric name="Availability"

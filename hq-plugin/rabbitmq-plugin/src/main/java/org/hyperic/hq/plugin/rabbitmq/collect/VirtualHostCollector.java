@@ -47,7 +47,7 @@ public class VirtualHostCollector extends RabbitMQDefaultCollector {
     public void collect() {
         if (logger.isDebugEnabled()) {
             Properties props = getProperties();
-            String vhost = (String) props.get(MetricConstants.VIRTUALHOST);
+            String vhost = (String) props.get(MetricConstants.VHOST);
             String node = (String) props.get(MetricConstants.NODE);
             logger.debug("[collect] vhost=" + vhost + " node=" + node);
         }
