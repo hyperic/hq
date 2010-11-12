@@ -35,6 +35,7 @@ import org.springframework.context.annotation.ImportResource;
 /**
  * PluginConfiguration
  * @author Helena Edelson
+ * @deprecated
  */
 @ImportResource("classpath:/etc/rabbitmq-context.xml")
 public class PluginConfiguration {

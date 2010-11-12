@@ -42,6 +42,7 @@ import org.springframework.context.support.AbstractApplicationContext;
  * timing of plugin class instantiation order and what data is available when
  * in relation to that, as well as in relation to Spring AMQP api.
  * @author Helena Edelson
+ * @deprecated
  */
 public class PluginContextCreator {
 

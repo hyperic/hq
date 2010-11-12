@@ -29,9 +29,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitVirtualHost;
-import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
-import org.hyperic.hq.product.Collector;
-import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 
 import java.util.Properties;
@@ -45,15 +42,17 @@ public class VirtualHostCollector extends RabbitMQDefaultCollector {
     private static final Log logger = LogFactory.getLog(QueueCollector.class);
 
     public void collect() {
+        Properties props = getProperties();
+        String vhost = (String) props.get(MetricConstants.VHOST);
+        String node = (String) props.get(MetricConstants.NODE);
         if (logger.isDebugEnabled()) {
-            Properties props = getProperties();
-            String vhost = (String) props.get(MetricConstants.VHOST);
-            String node = (String) props.get(MetricConstants.NODE);
             logger.debug("[collect] vhost=" + vhost + " node=" + node);
         }
 
         HypericRabbitAdmin rabbitAdmin = getAdmin();
-        RabbitVirtualHost virtualHost = rabbitAdmin.buildRabbitVirtualHost();
+
+        RabbitVirtualHost virtualHost = new RabbitVirtualHost(vhost, rabbitAdmin);
+
         if (virtualHost != null) {
             setAvailability(virtualHost.isAvailable());
             setValue("queueCount", virtualHost.getQueueCount());

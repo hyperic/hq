@@ -36,6 +36,7 @@ import java.util.Map;
 /**
  * ConfigurationManager
  * @author Helena Edelson
+ * @deprecated
  */
 public interface ConfigurationManager {
 

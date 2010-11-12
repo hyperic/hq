@@ -18,9 +18,8 @@ import org.hyperic.hq.product.PluginException;
  */
 public abstract class RabbitMQDefaultCollector extends Collector {
 
-    private RabbitConfigurationManager configManager;
     private Configuration configuration;
-
+    private HypericRabbitAdmin admin;
     @Override
     protected final void init() throws PluginException {
         super.init();
@@ -33,7 +32,7 @@ public abstract class RabbitMQDefaultCollector extends Collector {
 
         try {
             if (configuration.isConfigured()) {
-                configManager = new RabbitConfigurationManager(configuration);
+                admin=new HypericRabbitAdmin(configuration.getNodename(),configuration.getAuthentication());
             }
         } catch (RuntimeException ex) {
             getLog().debug(ex.getMessage(),ex);
@@ -42,7 +41,7 @@ public abstract class RabbitMQDefaultCollector extends Collector {
     }
 
     public final HypericRabbitAdmin getAdmin() {
-        return configManager.getVirtualHostForNode(configuration.getVirtualHost(), configuration.getNodename());
+        return admin;
 
     }
 

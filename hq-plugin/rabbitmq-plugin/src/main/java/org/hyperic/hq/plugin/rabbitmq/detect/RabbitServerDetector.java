@@ -162,32 +162,29 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         try{
             if (isConfiguredAndValid(configuration)) {
                 rabbitResources = new ArrayList<ServiceResource>();
-                RabbitConfigurationManager cm = new RabbitConfigurationManager(configuration);
-                Map<String, HypericRabbitAdmin> admins = cm.getVirtualHostsForNode();
+                HypericRabbitAdmin admin = new HypericRabbitAdmin(configuration.getNodename(), configuration.getAuthentication());
+                List<ServiceResource> connections = createConnectionServiceResources(admin);
+                if (connections != null) {
+                    rabbitResources.addAll(connections);
+                }
 
-                if (admins != null) {
-                    // for Connection and Channel no vhost is need so we can use the fisrt admin.
-                    HypericRabbitAdmin rabbitAdmin = admins.values().iterator().next();
-                    List<ServiceResource> connections = createConnectionServiceResources(rabbitAdmin);
-                    if (connections != null) {
-                        rabbitResources.addAll(connections);
-                    }
+                List<ServiceResource> channels = createChannelServiceResources(admin);
+                if (channels != null) {
+                    rabbitResources.addAll(channels);
+                }
 
-                    List<ServiceResource> channels = createChannelServiceResources(rabbitAdmin);
-                    if (channels != null) {
-                        rabbitResources.addAll(channels);
-                    }
-
-
-                    for (Map.Entry entry : admins.entrySet()) {
-                        rabbitAdmin = (HypericRabbitAdmin) entry.getValue();
-
-                        List<ServiceResource> resources = createResourcesPerVirtualHost(rabbitAdmin);
-                        if (resources != null) {
-                            rabbitResources.addAll(resources);
-                        }
+                List<RabbitVirtualHost> virtualHostList=new ArrayList();
+                List<String> vhosts=admin.getVirtualHosts();
+                for (String vhost : vhosts) {
+                    virtualHostList.add(new RabbitVirtualHost(vhost, admin));
+                    List<ServiceResource> resources = createResourcesPerVirtualHost(admin,vhost);
+                    if (resources != null) {
+                        rabbitResources.addAll(resources);
                     }
                 }
+
+                rabbitResources.addAll(doCreateServiceResources(virtualHostList, AMQPTypes.VIRTUAL_HOST,configuration.getNodename()));
+
             }
         }catch (RuntimeException ex){
             logger.debug(ex,ex);
@@ -203,19 +200,17 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @return
      * @throws PluginException
      */
-    protected List<ServiceResource> createResourcesPerVirtualHost(HypericRabbitAdmin rabbitAdmin) throws PluginException {
+    protected List<ServiceResource> createResourcesPerVirtualHost(HypericRabbitAdmin rabbitAdmin,String vhost) throws PluginException {
         List<ServiceResource> rabbitResources = new ArrayList<ServiceResource>();
 
         if (rabbitAdmin != null) {
 
-            List<ServiceResource> queues = createQueueServiceResources(rabbitAdmin);
+            List<ServiceResource> queues = createQueueServiceResources(rabbitAdmin,vhost);
             if (queues != null && queues.size() > 0) rabbitResources.addAll(queues);
 
-            List<ServiceResource> exchanges = createExchangeServiceResources(rabbitAdmin);
+            List<ServiceResource> exchanges = createExchangeServiceResources(rabbitAdmin,vhost);
             if (exchanges != null) rabbitResources.addAll(exchanges);
 
-            List<ServiceResource> vHosts = createVirtualHostResources(rabbitAdmin);
-            if (vHosts != null) rabbitResources.addAll(vHosts);
         }
 
         return rabbitResources;
@@ -227,29 +222,11 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @return
      * @throws PluginException
      */
-    protected List<ServiceResource> createQueueServiceResources(HypericRabbitAdmin rabbitAdmin) throws PluginException {
-        List<QueueInfo> queues = rabbitAdmin.getQueues();
+    protected List<ServiceResource> createQueueServiceResources(HypericRabbitAdmin rabbitAdmin,String vhost) throws PluginException {
+        List<QueueInfo> queues = rabbitAdmin.getQueues(vhost);
 
         return queues != null ? doCreateServiceResources(queues, AMQPTypes.QUEUE,
-                    rabbitAdmin.getPeerNodeName(), rabbitAdmin.getVirtualHost()) : null;
-    }
-
-    /**
-     * Create ServiceResources for auto-detected Connections
-     * @param rabbitAdmin
-     * @return
-     * @throws PluginException
-     */
-    protected List<ServiceResource> createVirtualHostResources(HypericRabbitAdmin rabbitAdmin) throws PluginException {
-        RabbitVirtualHost virtualHost = rabbitAdmin.buildRabbitVirtualHost();
-        List<RabbitVirtualHost> virtualHostList = null;
-        if (virtualHost != null) {
-            virtualHostList = new ArrayList<RabbitVirtualHost>();
-            virtualHostList.add(virtualHost);
-        }
-
-        return virtualHostList != null ? doCreateServiceResources(virtualHostList, AMQPTypes.VIRTUAL_HOST,
-                rabbitAdmin.getPeerNodeName(), rabbitAdmin.getVirtualHost()) : null;
+                    rabbitAdmin.getPeerNodeName(), vhost) : null;
     }
 
     /**
@@ -285,11 +262,11 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @return
      * @throws PluginException
      */
-    protected List<ServiceResource> createExchangeServiceResources(HypericRabbitAdmin rabbitAdmin) throws PluginException {
-        List<Exchange> exchanges = rabbitAdmin.getExchanges();
+    protected List<ServiceResource> createExchangeServiceResources(HypericRabbitAdmin rabbitAdmin,String vhost) throws PluginException {
+        List<Exchange> exchanges = rabbitAdmin.getExchanges(vhost);
 
         return exchanges != null ? doCreateServiceResources(exchanges, AMQPTypes.EXCHANGE,
-                    rabbitAdmin.getPeerNodeName(), rabbitAdmin.getVirtualHost()) : null;
+                    rabbitAdmin.getPeerNodeName(),vhost) : null;
     }
 
     private List<ServiceResource> doCreateServiceResources(List rabbitObjects, String rabbitType, String node) {

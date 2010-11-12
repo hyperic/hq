@@ -49,6 +49,7 @@ import java.util.Map;
  * to remove resources from inventory when no longer existing in the broker.
  * RabbitConfigurationManager
  * @author Helena Edelson
+ * @deprecated
  */
 public class RabbitConfigurationManager implements ConfigurationManager, DisposableBean {
 
@@ -125,11 +126,11 @@ public class RabbitConfigurationManager implements ConfigurationManager, Disposa
      * @throws PluginException
      */
     public HypericRabbitAdmin createVirtualHostForNode(Configuration key) throws PluginException {
-        if (isCandidate(key)) {
-            HypericRabbitAdmin admin = new HypericRabbitAdmin(otpConnectionFactory, key);
-            virtualHostsByNode.put(key.getVirtualHost(), admin);
-            return admin;
-        }
+//        if (isCandidate(key)) {
+//            HypericRabbitAdmin admin = new HypericRabbitAdmin(otpConnectionFactory, key);
+//            virtualHostsByNode.put(key.getVirtualHost(), admin);
+//            return admin;
+//        }
         return null;
     }
 

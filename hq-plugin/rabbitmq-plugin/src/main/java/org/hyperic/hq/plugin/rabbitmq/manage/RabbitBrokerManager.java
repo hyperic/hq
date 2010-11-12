@@ -198,29 +198,29 @@ public class RabbitBrokerManager implements RabbitManager {
         return rabbitAdmin.getStatus();
     }
 
-    private Map<String, QueueInfo> getQueuesAsMap() {
-        Map<String, QueueInfo> queues = null;
-        List<QueueInfo> queueList = rabbitAdmin.getQueues();
-        if (queueList != null) {
-            queues = new HashMap<String, QueueInfo>(queueList.size());
-
-            for (QueueInfo queue : queueList) {
-                queues.put(queue.getName(), queue);
-            }
-        }
-        return queues;
-    }
-
-    private Map<String, Exchange> getExchangesAsMap() throws Exception {
-        Map<String, Exchange> exchanges = null;
-        List<Exchange> exchangeList = rabbitAdmin.getExchanges();
-        if (exchangeList != null) {
-            exchanges = new HashMap<String, Exchange>(exchangeList.size());
-
-            for (Exchange e : exchangeList) {
-                exchanges.put(e.getName(), e);
-            }
-        }
-        return exchanges;
-    }
+//    private Map<String, QueueInfo> getQueuesAsMap() {
+//        Map<String, QueueInfo> queues = null;
+//        List<QueueInfo> queueList = rabbitAdmin.getQueues();
+//        if (queueList != null) {
+//            queues = new HashMap<String, QueueInfo>(queueList.size());
+//
+//            for (QueueInfo queue : queueList) {
+//                queues.put(queue.getName(), queue);
+//            }
+//        }
+//        return queues;
+//    }
+//
+//    private Map<String, Exchange> getExchangesAsMap() throws Exception {
+//        Map<String, Exchange> exchanges = null;
+//        List<Exchange> exchangeList = rabbitAdmin.getExchanges();
+//        if (exchangeList != null) {
+//            exchanges = new HashMap<String, Exchange>(exchangeList.size());
+//
+//            for (Exchange e : exchangeList) {
+//                exchanges.put(e.getName(), e);
+//            }
+//        }
+//        return exchanges;
+//    }
 }

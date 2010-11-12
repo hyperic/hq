@@ -55,10 +55,17 @@ public class RabbitVirtualHost {
 
     private String users;
 
-    public RabbitVirtualHost(String vHostName, String nodeName) {
+    public RabbitVirtualHost(String vHostName, HypericRabbitAdmin rabbitAdmin) {
         this.name = vHostName;
-        this.node = nodeName;
+        this.node = rabbitAdmin.getPeerNodeName();
+        setChannels(rabbitAdmin.getChannels());
+        setConnectionCount(rabbitAdmin.getConnections());
+        setAvailable(rabbitAdmin.virtualHostAvailable(name, node));
+        setQueueCount(rabbitAdmin.getQueues(name));
+        setExchangeCount(rabbitAdmin.getExchanges(name));
+        setUsers(rabbitAdmin.listUsers());
     }
+
 
     @Override
     public String toString() {
@@ -73,7 +80,7 @@ public class RabbitVirtualHost {
         return queueCount;
     }
 
-    public void setQueueCount(List<QueueInfo> queues) {
+    private void setQueueCount(List<QueueInfo> queues) {
         this.queueCount = queues != null ? queues.size() : 0;
     }
 
@@ -81,7 +88,7 @@ public class RabbitVirtualHost {
         return exchangeCount;
     }
 
-    public void setExchangeCount(List<Exchange> exchanges) {
+    private void setExchangeCount(List<Exchange> exchanges) {
         this.exchangeCount = exchanges != null ? exchanges.size() : 0;
     }
 
@@ -89,7 +96,7 @@ public class RabbitVirtualHost {
         return isAvailable;
     }
 
-    public void setAvailable(boolean available) {
+    private void setAvailable(boolean available) {
         isAvailable = available;
     }
 
@@ -101,11 +108,11 @@ public class RabbitVirtualHost {
         return connectionCount;
     }
 
-    public void setConnectionCount(List<RabbitConnection> connections) {
+    private void setConnectionCount(List<RabbitConnection> connections) {
         this.connectionCount = connections != null ? connections.size() : 0;
     }
 
-    public void setChannels(List<RabbitChannel> channels) {
+    private void setChannels(List<RabbitChannel> channels) {
         if (channels != null) {
             this.channelCount = channels.size();
 
@@ -133,7 +140,7 @@ public class RabbitVirtualHost {
         return consumerCount;
     }
 
-    public void setUsers(List<String> users) {
+    private void setUsers(List<String> users) {
         if (users != null) {
             this.users = StringUtils.collectionToCommaDelimitedString(users);
         }
