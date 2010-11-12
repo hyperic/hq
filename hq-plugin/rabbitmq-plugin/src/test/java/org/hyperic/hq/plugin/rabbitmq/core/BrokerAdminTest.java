@@ -16,10 +16,10 @@ public class BrokerAdminTest extends AbstractSpringTest {
 
     private HypericRabbitAdmin rabbitAdmin;
 
-    @Before
-    public void doBefore() {
-        this.rabbitAdmin = configurationManager.getVirtualHostForNode(configuration.getDefaultVirtualHost(), configuration.getNodename());
-    }
+//    @Before
+//    public void doBefore() {
+//        this.rabbitAdmin = configurationManager.getVirtualHostForNode(configuration.getDefaultVirtualHost(), configuration.getNodename());
+//    }
 
     @Test
     public void declareDeleteExchange() {

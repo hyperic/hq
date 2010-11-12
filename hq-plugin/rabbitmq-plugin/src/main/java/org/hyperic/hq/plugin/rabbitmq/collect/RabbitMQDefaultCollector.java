@@ -7,7 +7,6 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
-import org.hyperic.hq.plugin.rabbitmq.configure.RabbitConfigurationManager;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
