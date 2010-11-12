@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
 //import org.hyperic.hq.plugin.rabbitmq.configure.ConfigurationManager;
 import org.hyperic.hq.plugin.rabbitmq.configure.TestContextLoader;
-import org.hyperic.hq.plugin.rabbitmq.manage.RabbitManager;
+//import org.hyperic.hq.plugin.rabbitmq.manage.RabbitManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.junit.AfterClass;
 import org.junit.Before;
