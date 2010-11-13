@@ -10,5 +10,7 @@ junit_results
 activemq-data
 ExecutionStrategyStates.dat
 logs
+log.roo
+
 
 
