@@ -73,7 +73,7 @@ public class ScheduleThread
 {
     // Agent properties configuration
     static final String PROP_POOLSIZE =
-            "scheduleThread.poolsize."; // e.g. scheduleThread.poolsize.sigar=10
+            "scheduleThread.poolsize."; // e.g. scheduleThread.poolsize.system=10
     static final String PROP_FETCH_LOG_TIMEOUT =
             "scheduleThread.fetchLogTimeout";
     static final String PROP_CANCEL_TIMEOUT =
@@ -101,7 +101,7 @@ public class ScheduleThread
     private final HashMap<String,String>          _errors = new HashMap<String,String>();
     private final Properties _agentConfig; // agent.properties
 
-    // Map of Executors, one per metric domain
+    // Map of Executors, one per plugin
     private final HashMap<String,ExecutorService> _executors = new HashMap<String,ExecutorService>();
     // Map of asynchronous MetricTasks pending confirmation
     private final HashMap<Future,MetricTask>   _metricCollections = new HashMap<Future,MetricTask>();
@@ -549,8 +549,8 @@ public class ScheduleThread
         }
     }
 
-    private int getPoolSize(String domain) {
-        String prop = PROP_POOLSIZE + domain;
+    private int getPoolSize(String plugin) {
+        String prop = PROP_POOLSIZE + plugin;
         String sPoolSize = _agentConfig.getProperty(prop);
         if(sPoolSize != null){
             try {
