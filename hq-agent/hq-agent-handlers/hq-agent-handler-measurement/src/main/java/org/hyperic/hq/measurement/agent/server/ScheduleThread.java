@@ -111,12 +111,12 @@ public class ScheduleThread
 
     // Statistics
     private final Object _statsLock = new Object();
-    private long _stat_numMetricsFetched = 0;
-    private long _stat_numMetricsFailed  = 0;
-    private long _stat_totFetchTime      = 0;
-    private long _stat_numMetricsScheduled = 0;
-    private long _stat_maxFetchTime      = Long.MIN_VALUE;
-    private long _stat_minFetchTime      = Long.MAX_VALUE;
+    private long _statNumMetricsFetched = 0;
+    private long _statNumMetricsFailed = 0;
+    private long _statTotFetchTime = 0;
+    private long _statNumMetricsScheduled = 0;
+    private long _statMaxFetchTime = Long.MIN_VALUE;
+    private long _statMinFetchTime = Long.MAX_VALUE;
 
     ScheduleThread(Sender sender, MeasurementValueGetter manager,
                    Properties config)
@@ -285,7 +285,7 @@ public class ScheduleThread
         _log.debug("Un-scheduling " + items.length + " metrics for " + ent);
 
         synchronized (_statsLock) {
-            _stat_numMetricsScheduled -= items.length;            
+            _statNumMetricsScheduled -= items.length;
         }
 
         for (ScheduledItem item : items) {
@@ -312,7 +312,7 @@ public class ScheduleThread
             rs.schedule.scheduleItem(meas, meas.getInterval(), true, true);
 
             synchronized (_statsLock) {
-                _stat_numMetricsScheduled++;
+                _statNumMetricsScheduled++;
             }
         } catch (ScheduleException e) {
             _log.error("Unable to schedule metric '" +
@@ -454,7 +454,7 @@ public class ScheduleThread
                 if (!category.equals(MeasurementConstants.CAT_AVAILABILITY)) {
                     // Prevent stacktrace bombs if a resource is
                     // down, but don't skip processing availability metrics.
-                    _stat_numMetricsFailed++;
+                    _statNumMetricsFailed++;
                     return;
                 }
             }
@@ -501,13 +501,13 @@ public class ScheduleThread
             Long timeDiff = System.currentTimeMillis() - _executeStartTime;
 
             synchronized (_statsLock) {
-                _stat_totFetchTime += timeDiff;
-                if(timeDiff > _stat_maxFetchTime) {
-                    _stat_maxFetchTime = timeDiff;
+                _statTotFetchTime += timeDiff;
+                if(timeDiff > _statMaxFetchTime) {
+                    _statMaxFetchTime = timeDiff;
                 }
 
-                if(timeDiff < _stat_minFetchTime) {
-                    _stat_minFetchTime = timeDiff;
+                if(timeDiff < _statMinFetchTime) {
+                    _statMinFetchTime = timeDiff;
                 }
             }
 
@@ -542,11 +542,11 @@ public class ScheduleThread
                 _sender.processData(_meas.getDsnID(), data,
                                     _meas.getDerivedID());
                 synchronized (_statsLock) {
-                    _stat_numMetricsFetched++;
+                    _statNumMetricsFetched++;
                 }
             } else {
                 synchronized (_statsLock) {
-                    _stat_numMetricsFailed++;
+                    _statNumMetricsFailed++;
                 }
             }
         }
@@ -713,7 +713,7 @@ public class ScheduleThread
      */
     public double getNumMetricsScheduled() throws AgentMonitorException {
         synchronized (_statsLock) {
-            return _stat_numMetricsScheduled;            
+            return _statNumMetricsScheduled;
         }
     }
 
@@ -722,7 +722,7 @@ public class ScheduleThread
      */
     public double getNumMetricsFetched() throws AgentMonitorException {
         synchronized (_statsLock) {
-            return _stat_numMetricsFetched;
+            return _statNumMetricsFetched;
         }
     }
 
@@ -731,7 +731,7 @@ public class ScheduleThread
      */
     public double getNumMetricsFailed() throws AgentMonitorException {
         synchronized (_statsLock) {
-            return _stat_numMetricsFailed;
+            return _statNumMetricsFailed;
         }
     }
 
@@ -740,7 +740,7 @@ public class ScheduleThread
      */
     public double getTotFetchTime() throws AgentMonitorException {
         synchronized (_statsLock) {
-            return _stat_totFetchTime;
+            return _statTotFetchTime;
         }
     }
 
@@ -749,10 +749,10 @@ public class ScheduleThread
      */
     public double getMaxFetchTime() throws AgentMonitorException {
         synchronized (_statsLock) {
-            if(_stat_maxFetchTime == Long.MIN_VALUE) {
+            if(_statMaxFetchTime == Long.MIN_VALUE) {
                 return MetricValue.VALUE_NONE;
             }
-            return _stat_maxFetchTime;
+            return _statMaxFetchTime;
         }
     }
 
@@ -761,10 +761,10 @@ public class ScheduleThread
      */
     public double getMinFetchTime() throws AgentMonitorException {
         synchronized (_statsLock) {
-            if(_stat_minFetchTime == Long.MAX_VALUE) {
+            if(_statMinFetchTime == Long.MAX_VALUE) {
                 return MetricValue.VALUE_NONE;
             }
-            return _stat_minFetchTime;
+            return _statMinFetchTime;
         }
     }
 }
