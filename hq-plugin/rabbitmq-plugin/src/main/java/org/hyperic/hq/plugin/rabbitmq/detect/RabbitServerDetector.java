@@ -323,7 +323,6 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
 
                 service.setName(node+" "+name);
                 service.setDescription(name);
-                service.setProductConfig(c);
                 setMeasurementConfig(service, c);
 
                 if (service != null) serviceResources.add(service);
