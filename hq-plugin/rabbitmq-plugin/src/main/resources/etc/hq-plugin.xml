@@ -363,7 +363,7 @@
         <!-- These will hit the server enough for each query that we do not want to
         run the collector often. Consider modifying what is queried/exposed with large-volume
         heavily-trafficed brokers. -->
-        <service name="vhost">
+        <service name="VirtualHost">
             <property name="template" value="rabbitmq:vhost=%vhost%,${server-connection}:${alias}"/>
 
             <config type="measurement">
@@ -407,7 +407,7 @@
                     collectionType="dynamic"/>
 
 
-            <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.vhostCollector"/>
+            <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.VirtualHostCollector"/>
             <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
             <plugin type="autoinventory"/>
 
