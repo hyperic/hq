@@ -35,6 +35,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -105,10 +108,11 @@ public class ScheduleThread
     private final HashMap<String,ExecutorService> _executors = new HashMap<String,ExecutorService>();
     // Map of asynchronous MetricTasks pending confirmation
     private final HashMap<Future,MetricTask>   _metricCollections = new HashMap<Future,MetricTask>();
-    // The Thread confirming metric collections, cancelling tasks that exceed
+    // The executor confirming metric collections, cancelling tasks that exceed
     // our timeouts.
-    private MetricCancelThread _metricCancelThread;
-
+    private ScheduledExecutorService _metricVerificationService;
+    private ScheduledFuture          _metricVerificationTask;
+    
     private MeasurementValueGetter   _manager;
     private Sender                   _sender;  // Guy handling the results
 
@@ -149,12 +153,15 @@ public class ScheduleThread
             }
         }
 
-        _metricCancelThread = new MetricCancelThread();
-        _metricCancelThread.start();
+        _metricVerificationService = Executors.newSingleThreadScheduledExecutor();
+        _metricVerificationTask =
+                _metricVerificationService.scheduleAtFixedRate(new MetricVerificationTask(),
+                                                               POLL_PERIOD, POLL_PERIOD,
+                                                               TimeUnit.MILLISECONDS);
     }
 
     /**
-     * The MetricCancelThread iterates over the list of FutureTasks that
+     * The MetricVerificationTask iterates over the list of FutureTasks that
      * have been submitted for execution.  Each task is checked for completion
      * and then removed.  For tasks that do not complete within the timeout
      * are cancelled, which will attempt to free up the executor running the
@@ -162,44 +169,33 @@ public class ScheduleThread
      * NOTE: This will only work if the hung task is in an interrupt-able state
      *       i.e. sleep() or wait()
      */
-    private class MetricCancelThread extends Thread  {
+    private class MetricVerificationTask implements Runnable  {
         public void run() {
-            while (!_shouldDie) {
-                synchronized (_metricCollections) {
-                    if (_metricCollections.size() > 0) {
-                        _log.debug(_metricCollections.size() + " metrics to validate.");
-                    }
-                    for (Iterator<Future> i = _metricCollections.keySet().iterator();
-                         i.hasNext(); )
-                    {
-                        Future t = i.next();
-                        MetricTask mt = _metricCollections.get(t);
-                        if (t.isDone()) {
-                            _log.debug("Metric task '" + mt.getMetric() +
-                                       "' complete, duration: " +
-                                       mt.getExecutionDuration());
-                            i.remove();
-                        } else {
-                            // Not complete, check for timeout
-                            if (mt.getExecutionDuration() > _cancelTimeout) {
-                                _log.error("Metric '" + mt.getMetric() +
-                                           "' took too long to run, attempting to cancel");
-                                boolean res = t.cancel(true);
-                                _log.error("Cancel result=" + res);
-                                // Task will be removed on next iteration
-                            }
+            synchronized (_metricCollections) {
+                if (_metricCollections.size() > 0) {
+                    _log.debug(_metricCollections.size() + " metrics to validate.");
+                }
+                for (Iterator<Future> i = _metricCollections.keySet().iterator();
+                     i.hasNext();) {
+                    Future t = i.next();
+                    MetricTask mt = _metricCollections.get(t);
+                    if (t.isDone()) {
+                        _log.debug("Metric task '" + mt.getMetric() +
+                                   "' complete, duration: " +
+                                   mt.getExecutionDuration());
+                        i.remove();
+                    } else {
+                        // Not complete, check for timeout
+                        if (mt.getExecutionDuration() > _cancelTimeout) {
+                            _log.error("Metric '" + mt.getMetric() +
+                                       "' took too long to run, attempting to cancel");
+                            boolean res = t.cancel(true);
+                            _log.error("Cancel result=" + res);
+                            // Task will be removed on next iteration
                         }
                     }
                 }
-
-                try {
-                    Thread.sleep(POLL_PERIOD);
-                } catch (InterruptedException e) {
-                    _log.info("MetricCancelThread interrupted!");
-                }
             }
-            _log.info("MetricCancelThread shutting down with " + _metricCollections.size() +
-                      " unprocessed MetricTasks");
         }
     }
 
@@ -246,13 +242,11 @@ public class ScheduleThread
                       " with " + queuedMetrics.size() + " queued collections");
         }
 
-        try {
-            _metricCancelThread.interrupt();
-            _metricCancelThread.join();
-        } catch (InterruptedException e) {
-            // Ignore
-        }
-
+        _metricVerificationTask.cancel(true);
+        List<Runnable> pending = _metricVerificationService.shutdownNow();
+        _log.info("Shutdown metric verification task with " +
+                  pending.size() + " tasks");
+        
         interruptMe();
     }
 
