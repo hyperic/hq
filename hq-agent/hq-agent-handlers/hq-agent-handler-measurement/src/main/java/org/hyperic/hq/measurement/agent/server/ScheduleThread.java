@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
 import org.apache.commons.logging.Log;
@@ -100,7 +101,7 @@ public class ScheduleThread
     // Map of Executors, one per metric domain
     private final HashMap<String,ExecutorService> _executors;
     // Map of asynchronous MetricTasks pending confirmation
-    private final HashMap<FutureTask,MetricTask>   _metricCollections;
+    private final HashMap<Future,MetricTask>   _metricCollections;
     // The Thread confirming metric collections, cancelling tasks that exceed
     // our timeouts.
     private MetricCancelThread _metricCancelThread;
@@ -129,7 +130,7 @@ public class ScheduleThread
         _sender       = sender;
         _errors       = new HashMap<String,String>();
         _executors    = new HashMap<String,ExecutorService>();
-        _metricCollections = new HashMap<FutureTask,MetricTask>();
+        _metricCollections = new HashMap<Future,MetricTask>();
 
         String sLogFetchTimeout = _agentConfig.getProperty(PROP_FETCH_LOG_TIMEOUT);
         if(sLogFetchTimeout != null){
@@ -171,10 +172,10 @@ public class ScheduleThread
                     if (_metricCollections.size() > 0) {
                         _log.debug(_metricCollections.size() + " metrics to validate.");
                     }
-                    for (Iterator<FutureTask> i = _metricCollections.keySet().iterator();
+                    for (Iterator<Future> i = _metricCollections.keySet().iterator();
                          i.hasNext(); )
                     {
-                        FutureTask t = i.next();
+                        Future t = i.next();
                         MetricTask mt = _metricCollections.get(t);
                         if (t.isDone()) {
                             _log.debug("Metric task '" + mt.getMetric() +
