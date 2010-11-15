@@ -91,17 +91,20 @@ public class ScheduleThread
 
     private static final Log _log = LogFactory.getLog(ScheduleThread.class.getName());
 
-    private final Map<String,ResourceSchedule>    _schedules;   // AppdefID -> Schedule
-    private volatile boolean                      _shouldDie;   // Should I shut down?
-    private final Object                          _interrupter; // Interrupt object
-    private final HashMap<String,String>          _errors;      // Hash of DSNs to their errors
-
+    // AppdefID -> Schedule
+    private final Map<String,ResourceSchedule>    _schedules = new HashMap<String,ResourceSchedule>();
+    // Should I shut down?
+    private volatile boolean                      _shouldDie = false;
+    // Interrupt object
+    private final Object                          _interrupter = new Object();
+    // Hash of DSNs to their errors
+    private final HashMap<String,String>          _errors = new HashMap<String,String>();
     private final Properties _agentConfig; // agent.properties
 
     // Map of Executors, one per metric domain
-    private final HashMap<String,ExecutorService> _executors;
+    private final HashMap<String,ExecutorService> _executors = new HashMap<String,ExecutorService>();
     // Map of asynchronous MetricTasks pending confirmation
-    private final HashMap<Future,MetricTask>   _metricCollections;
+    private final HashMap<Future,MetricTask>   _metricCollections = new HashMap<Future,MetricTask>();
     // The Thread confirming metric collections, cancelling tasks that exceed
     // our timeouts.
     private MetricCancelThread _metricCancelThread;
@@ -123,14 +126,8 @@ public class ScheduleThread
         throws AgentStartException
     {
         _agentConfig  = config;
-        _schedules    = new HashMap<String,ResourceSchedule>();
-        _shouldDie    = false;
-        _interrupter  = new Object();
         _manager      = manager;
         _sender       = sender;
-        _errors       = new HashMap<String,String>();
-        _executors    = new HashMap<String,ExecutorService>();
-        _metricCollections = new HashMap<Future,MetricTask>();
 
         String sLogFetchTimeout = _agentConfig.getProperty(PROP_FETCH_LOG_TIMEOUT);
         if(sLogFetchTimeout != null){
