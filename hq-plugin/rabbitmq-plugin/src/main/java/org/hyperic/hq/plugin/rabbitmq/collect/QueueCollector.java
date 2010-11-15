@@ -27,49 +27,44 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
-import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
-import org.hyperic.hq.product.Collector;
-import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.amqp.rabbit.admin.QueueInfo;
 
 import java.util.List;
 import java.util.Properties;
+import org.hyperic.hq.product.Metric;
 
 /**
  * QueueCollector
  * @author Helena Edelson
  */
-public class QueueCollector extends RabbitMQDefaultCollector {
+public class QueueCollector extends RabbitMQListCollector {
 
     private static final Log logger = LogFactory.getLog(QueueCollector.class);
 
     public void collect() {
         Properties props = getProperties();
-        String queue = (String) props.get(MetricConstants.QUEUE);
         String vhost = (String) props.get(MetricConstants.VHOST);
         if (logger.isDebugEnabled()) {
             String node = (String) props.get(MetricConstants.NODE);
-            logger.debug("[collect] queue=" + queue + " vhost=" + vhost + " node=" + node);
+            logger.debug("[collect] vhost=" + vhost + " node=" + node);
         }
         HypericRabbitAdmin rabbitAdmin = getAdmin();
 
         List<QueueInfo> queues = rabbitAdmin.getQueues(vhost);
         if (queues != null) {
             for (QueueInfo q : queues) {
-                if (q.getName().equalsIgnoreCase(queue)) {
-                    setAvailability(true);
-                    setValue("messages", q.getMessages());
-                    setValue("consumers", q.getConsumers());
-                    setValue("transactions", q.getTransactions());
-                    setValue("acksUncommitted", q.getAcksUncommitted());
-                    setValue("messagesReady", q.getMessagesReady());
-                    setValue("messagesUnacknowledged", q.getMessagesUnacknowledged());
-                    setValue("messagesUncommitted", q.getMessageUncommitted());
-                    setValue("memory", q.getMemory());
-                }
+                logger.debug("[collect] QueueInfo="+q.getName());
+                setValue(q.getName() + "." + Metric.ATTR_AVAIL, Metric.AVAIL_UP);
+                setValue(q.getName() + ".messages", q.getMessages());
+                setValue(q.getName() + ".consumers", q.getConsumers());
+                setValue(q.getName() + ".transactions", q.getTransactions());
+                setValue(q.getName() + ".acksUncommitted", q.getAcksUncommitted());
+                setValue(q.getName() + ".messagesReady", q.getMessagesReady());
+                setValue(q.getName() + ".messagesUnacknowledged", q.getMessagesUnacknowledged());
+                setValue(q.getName() + ".messagesUncommitted", q.getMessageUncommitted());
+                setValue(q.getName() + ".memory", q.getMemory());
             }
         }
     }

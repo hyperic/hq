@@ -112,7 +112,7 @@
 
         <service name="Queue">
             <property name="template"
-                      value="rabbitmq:queue=%queue%,vhost=%vhost%,${server-connection}:${alias}"/>
+                      value="rabbitmq:vhost=%vhost%,${server-connection}:%queue%.${alias}"/>
 
             <config type="measurement">
                 <option name="vhost" description="rabbit node-vhost name"/>
@@ -201,7 +201,7 @@
         </service>
 
         <service name="Channel">
-            <property name="template" value="rabbitmq:channel=%channel%,vhost=%vhost%,${server-connection}:${alias}"/>
+            <property name="template" value="rabbitmq:vhost=%vhost%,${server-connection}:%channel%.${alias}"/>
 
             <config type="measurement">
                 <option name="vhost" description="rabbit node-vhost name"/>
@@ -261,10 +261,9 @@
 
         <service name="Connection">
             <property name="template"
-                      value="rabbitmq:connection=%connection%,vhost=%vhost%,${server-connection}:${alias}"/>
+                      value="rabbitmq:${server-connection}:%connection%.${alias}"/>
 
             <config type="measurement">
-                <option name="vhost" description="rabbit node-vhost name"/>
                 <option name="connection" description="connection name"/>
             </config>
 
@@ -337,9 +336,9 @@
 
         <service name="Exchange">
             <property name="template"
-                      value="rabbitmq:exchange=%exchange%,vhost=%vhost%,${server-connection}:${alias}"/>
+                      value="rabbitmq:vhost=%vhost%,${server-connection}:%exchange%.${alias}"/>
 
-            <config type="measurement">
+            <config>
                 <option name="vhost" description="rabbit node-vhost name"/>
                 <option name="exchange" description="exchange name"/>
             </config>

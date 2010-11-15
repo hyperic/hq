@@ -28,42 +28,37 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.*;
-import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
-import org.hyperic.hq.product.Collector;
-import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 
 import java.util.List;
 import java.util.Properties;
+import org.hyperic.hq.product.Metric;
 
 /**
  * ChannelCollector
  * @author Helena Edelson
  */
-public class ChannelCollector extends RabbitMQDefaultCollector {
+public class ChannelCollector extends RabbitMQListCollector {
 
-    private static final Log logger = LogFactory.getLog(ConnectionCollector.class);
+    private static final Log logger = LogFactory.getLog(ChannelCollector.class);
 
     public void collect() {
         Properties props = getProperties();
-        String channelPid = (String) props.get(MetricConstants.CHANNEL);
         if (logger.isDebugEnabled()) {
-            String vhost = (String) props.get(MetricConstants.VHOST);
             String node = (String) props.get(MetricConstants.NODE);
-            logger.debug("[collect] channelPid=" + channelPid + " vhost=" + vhost + " node=" + node);
+            logger.debug("[collect] node=" + node);
         }
 
         HypericRabbitAdmin rabbitAdmin = getAdmin();
         List<RabbitChannel> channels = rabbitAdmin.getChannels();
         if (channels != null) {
             for (RabbitChannel c : channels) {
-                if (c.getPid().equalsIgnoreCase(channelPid)) {
-                    setAvailability(true);
-                    setValue("consumerCount", c.getConsumerCount());
-                    setValue("prefetchCount", c.getPrefetchCount());
-                    setValue("acksUncommitted", c.getAcksUncommitted());
-                    setValue("messagesUnacknowledged", c.getMessagesUnacknowledged());
-                }
+                logger.debug("[collect] RabbitChannel=" + c.getPid());
+                setValue(c.getPid() + ".Availability", Metric.AVAIL_UP);
+                setValue(c.getPid() + ".consumerCount", c.getConsumerCount());
+                setValue(c.getPid() + ".prefetchCount", c.getPrefetchCount());
+                setValue(c.getPid() + ".acksUncommitted", c.getAcksUncommitted());
+                setValue(c.getPid() + ".messagesUnacknowledged", c.getMessagesUnacknowledged());
             }
         }
     }
