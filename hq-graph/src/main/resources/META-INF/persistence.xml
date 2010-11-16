@@ -3,6 +3,7 @@
     <persistence-unit name="NEO4J" transaction-type="RESOURCE_LOCAL">
         <provider>org.springframework.datastore.graph.neo4j.jpa.Neo4jPersistenceProvider</provider>
          <class>org.hyperic.hq.inventory.domain.Resource</class>
+         <class>org.hyperic.hq.inventory.domain.ResourceGroup</class>
          <class>org.hyperic.hq.plugin.domain.ResourceType</class>
     </persistence-unit>
 </persistence>
