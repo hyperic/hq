@@ -39,17 +39,15 @@ import java.util.Properties;
  */
 public class VirtualHostCollector extends RabbitMQDefaultCollector {
 
-    private static final Log logger = LogFactory.getLog(QueueCollector.class);
+    private static final Log logger = LogFactory.getLog(VirtualHostCollector.class);
 
-    public void collect() {
+    public void collect(HypericRabbitAdmin rabbitAdmin) {
         Properties props = getProperties();
         String vhost = (String) props.get(MetricConstants.VHOST);
         String node = (String) props.get(MetricConstants.NODE);
         if (logger.isDebugEnabled()) {
             logger.debug("[collect] vhost=" + vhost + " node=" + node);
         }
-
-        HypericRabbitAdmin rabbitAdmin = getAdmin();
 
         RabbitVirtualHost virtualHost = new RabbitVirtualHost(vhost, rabbitAdmin);
 
