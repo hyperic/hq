@@ -46,6 +46,7 @@ public abstract class RabbitMQDefaultCollector extends Collector {
                 collect(admin);
             }
         } catch (Throwable ex) {
+            setAvailability(false);
             getLog().debug(ex.getMessage(), ex);
             admin = null;
         }
