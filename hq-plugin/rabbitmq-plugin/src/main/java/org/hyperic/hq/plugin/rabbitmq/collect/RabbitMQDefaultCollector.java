@@ -37,10 +37,21 @@ public abstract class RabbitMQDefaultCollector extends Collector {
         }
     }
 
-    public final HypericRabbitAdmin getAdmin() {
-        return admin;
-
+    public final void collect() {
+        if (admin == null) {
+            admin = new HypericRabbitAdmin(getProperties());
+        }
+        try {
+            if (admin != null) {
+                collect(admin);
+            }
+        } catch (Throwable ex) {
+            getLog().debug(ex.getMessage(), ex);
+            admin = null;
+        }
     }
+
+    public abstract void collect(HypericRabbitAdmin admin);
 
     public abstract Log getLog();
 }

@@ -42,14 +42,13 @@ public class ChannelCollector extends RabbitMQListCollector {
 
     private static final Log logger = LogFactory.getLog(ChannelCollector.class);
 
-    public void collect() {
+    public void collect(HypericRabbitAdmin rabbitAdmin) {
         Properties props = getProperties();
         if (logger.isDebugEnabled()) {
             String node = (String) props.get(MetricConstants.NODE);
             logger.debug("[collect] node=" + node);
         }
 
-        HypericRabbitAdmin rabbitAdmin = getAdmin();
         List<RabbitChannel> channels = rabbitAdmin.getChannels();
         if (channels != null) {
             for (RabbitChannel c : channels) {
