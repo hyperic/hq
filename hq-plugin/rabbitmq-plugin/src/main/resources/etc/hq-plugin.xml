@@ -116,7 +116,6 @@
                     category="THROUGHPUT"
                     units="none"
                     indicator="true"
-                    interval="60000"
                     defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Consumers"
@@ -124,7 +123,6 @@
                     category="UTILIZATION"
                     units="none"
                     indicator="true"
-                    interval="60000"
                     defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Transactions"
@@ -132,7 +130,6 @@
                     category="THROUGHPUT"
                     units="none"
                     indicator="true"
-                    interval="60000"
                     defaultOn="true"
                     collectionType="dynamic"/>  
             <metric name="Acks Uncommitted"
@@ -140,7 +137,6 @@
                     category="THROUGHPUT"
                     units="none"
                     indicator="true"
-                    interval="60000"
                     defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Messages Ready"
@@ -148,7 +144,6 @@
                     category="THROUGHPUT"
                     units="none"
                     indicator="true"
-                    interval="60000"
                     defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Messages Unacknowledged"
@@ -156,7 +151,6 @@
                     category="THROUGHPUT"
                     units="none"
                     indicator="true"
-                    interval="60000"
                     defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Messages Uncommitted"
@@ -164,14 +158,12 @@
                     category="THROUGHPUT"
                     units="none"
                     indicator="true"
-                    interval="60000"
                     defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Availability"
                     category="AVAILABILITY"
                     units="percentage"
                     indicator="true"
-                    interval="60000"
                     defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Memory"
@@ -205,7 +197,6 @@
                     category="UTILIZATION"
                     units="none"
                     indicator="true"
-                    interval="60000"
                     defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Prefetch Count"
@@ -213,7 +204,6 @@
                     category="THROUGHPUT"
                     units="B"
                     indicator="true"
-                    interval="60000"
                     defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Acks Uncommitted"
@@ -221,7 +211,6 @@
                     category="THROUGHPUT"
                     units="B"
                     indicator="true"
-                    interval="60000"
                     defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Messages Unacknowledged"
@@ -229,7 +218,6 @@
                     category="THROUGHPUT"
                     units="B"
                     indicator="true"
-                    interval="60000"
                     defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Availability"
@@ -264,7 +252,6 @@
                     category="THROUGHPUT"
                     units="B"
                     indicator="true"
-                    interval="60000"
                     defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Octets Sent"
@@ -272,7 +259,6 @@
                     category="THROUGHPUT"
                     units="B"
                     indicator="true"
-                    interval="60000"
                     defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Network Packets Received"
@@ -286,7 +272,6 @@
                     category="THROUGHPUT"
                     units="B"
                     indicator="true"
-                    interval="60000"
                     defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Channels"
@@ -294,7 +279,6 @@
                     category="UTILIZATION"
                     units="none"
                     indicator="true"
-                    interval="60000"
                     defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Pending Sends"
@@ -302,7 +286,6 @@
                     category="UTILIZATION"
                     units="none"
                     indicator="true"
-                    interval="60000"
                     defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Availability"
