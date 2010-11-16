@@ -2,6 +2,7 @@ package org.hyperic.hq.integration;
 
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.plugin.domain.ResourceType;
+import org.hyperic.hq.reference.RelationshipTypes;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,13 +34,6 @@ public class VSphereResourceModelPopulator {
     static final String DATACENTER_TYPE = "Datacenter";
 
     static final String VCENTER_SERVER_TYPE = "vCenter Server";
-
-    // TODO this is used for parent/child and ResourceGroup membership. Probably
-    // OK
-    static final String CONTAINS = "CONTAINS";
-
-    // TODO is the best way to represent hierarchy at the resource level?
-    static final String IS_A = "IS_A";
 
     // TODO is dependency hierarchical?
     static final String USES = "USES";
@@ -97,16 +91,16 @@ public class VSphereResourceModelPopulator {
         // A vCenterServer manages Datacenters
         vCenterType.relateTo(dataCenterType, MANAGES);
 
-        // A dataCenter contains hosts and clusters (TODO folders? Doesn't seem
+        // A dataCenter Relationship.CONTAINS hosts and clusters (TODO folders? Doesn't seem
         // relevant right now)
-        dataCenterType.relateTo(clusterType, CONTAINS);
-        dataCenterType.relateTo(hostType, CONTAINS);
+        dataCenterType.relateTo(clusterType, RelationshipTypes.CONTAINS);
+        dataCenterType.relateTo(hostType, RelationshipTypes.CONTAINS);
 
         // A cluster is a ResourceGroup of hosts
         // TODO What types of resources can be in the ResourceGroup represented
         // as
         // another ResourceTypeRelation for now. Any reason to change?
-        clusterType.relateTo(hostType, CONTAINS);
+        clusterType.relateTo(hostType, RelationshipTypes.CONTAINS);
 
         // Hosts host VMs (required for VM to have a host)
         hostType.relateTo(vmType, HOSTS);
@@ -118,12 +112,12 @@ public class VSphereResourceModelPopulator {
         // resource pools. If you add a VM to a vApp, you can't pick a diff
         // pool, but in a cluster, you can pick the cluster itself or a vApp or
         // resourcePool. Some way to enforce this in model?)
-        clusterType.relateTo(resourcePoolType, IS_A);
-        vAppType.relateTo(resourcePoolType, IS_A);
+        clusterType.relateTo(resourcePoolType, RelationshipTypes.IS_A);
+        vAppType.relateTo(resourcePoolType, RelationshipTypes.IS_A);
 
         // ResourcePools can have child ResourcePools
         // TODO Neo4J doesn't allow startNode to equal endNode
-        // resourcePoolType.relatedTo(resourcePoolType, CONTAINS);
+        // resourcePoolType.relatedTo(resourcePoolType, Relationship.CONTAINS);
 
         // ResourcePools divide resources of clusters or hosts
         clusterType.relateTo(resourcePoolType, PROVIDES_RESOURCES);
@@ -136,7 +130,7 @@ public class VSphereResourceModelPopulator {
         vmType.relateTo(nodeType, HOSTS);
 
         // A vApp is a ResourceGroup of VMs
-        vAppType.relateTo(vmType, CONTAINS);
+        vAppType.relateTo(vmType, RelationshipTypes.CONTAINS);
         // Traverse VMs to Cluster to get cluster containing vApp. TODO model
         // directly?
 

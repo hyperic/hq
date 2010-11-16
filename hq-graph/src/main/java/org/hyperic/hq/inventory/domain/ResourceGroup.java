@@ -15,7 +15,7 @@ import org.springframework.roo.addon.tostring.RooToString;
 @NodeEntity
 @RooToString
 @RooJavaBean
-@RooEntity()
+@RooEntity
 public class ResourceGroup extends Resource {
 
     @RelatedTo(type = "CONTAINS", direction = Direction.OUTGOING, elementClass = Resource.class)
@@ -26,6 +26,8 @@ public class ResourceGroup extends Resource {
         members.add(member);
     }
     
-    
+    public static ResourceGroup findResourceGroupByName(String name) {
+        return new Resource().finderFactory.getFinderForClass(ResourceGroup.class).findByPropertyValue("name", name);
+    }
 
 }

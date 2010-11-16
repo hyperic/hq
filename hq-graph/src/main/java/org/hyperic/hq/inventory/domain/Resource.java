@@ -1,12 +1,14 @@
 package org.hyperic.hq.inventory.domain;
 
+
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 import org.hyperic.hq.inventory.InvalidRelationshipException;
 import org.hyperic.hq.plugin.domain.ResourceType;
-import org.neo4j.graphdb.Direction;
+import org.hyperic.hq.reference.RelationshipTypes;
+
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.ReturnableEvaluator;
@@ -15,10 +17,14 @@ import org.neo4j.graphdb.TraversalPosition;
 import org.neo4j.graphdb.Traverser;
 import org.springframework.datastore.annotation.Indexed;
 import org.springframework.datastore.graph.annotation.NodeEntity;
+import org.springframework.datastore.graph.annotation.RelatedTo;
+import org.springframework.datastore.graph.api.Direction;
 import org.springframework.datastore.graph.neo4j.finder.FinderFactory;
 import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.addon.javabean.RooJavaBean;
 import org.springframework.roo.addon.tostring.RooToString;
+
+
 
 @NodeEntity
 @RooToString
@@ -31,17 +37,17 @@ public class Resource {
     @Indexed
     private String name;
 
-    @ManyToOne
+    @ManyToOne(targetEntity = Resource.class)
     @NotNull
-    @Indexed
+    @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.OUTGOING, elementClass = ResourceType.class)
     private ResourceType type;
     
     @javax.annotation.Resource
-    private FinderFactory finderFactory;
+    protected FinderFactory finderFactory;
 
     public ResourceRelation relateTo(Resource resource, String relationName) {
         if (type.getName().equals("System")) {
-            if (!(relationName.equals("CONTAINS"))) {
+            if (!(relationName.equals(RelationshipTypes.CONTAINS))) {
                 throw new InvalidRelationshipException();
             }
         } else if (!type.isRelatedTo(resource.getType(), relationName)) {
@@ -57,7 +63,7 @@ public class Resource {
             public boolean isStopNode(TraversalPosition currentPos) {
                 return currentPos.depth() >= 1;
             }
-        }, ReturnableEvaluator.ALL_BUT_START_NODE, DynamicRelationshipType.withName(relationName), Direction.OUTGOING);
+        }, ReturnableEvaluator.ALL_BUT_START_NODE, DynamicRelationshipType.withName(relationName), org.neo4j.graphdb.Direction.OUTGOING);
         for (Node related : relationTraverser) {
             if (related.getId() == resource.getId()) {
                 return true;

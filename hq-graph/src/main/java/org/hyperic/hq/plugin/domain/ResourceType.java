@@ -1,8 +1,13 @@
 package org.hyperic.hq.plugin.domain;
 
+import java.util.Set;
+
 import javax.annotation.Resource;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
-import org.neo4j.graphdb.Direction;
+
+import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.ReturnableEvaluator;
@@ -11,6 +16,8 @@ import org.neo4j.graphdb.TraversalPosition;
 import org.neo4j.graphdb.Traverser;
 import org.springframework.datastore.annotation.Indexed;
 import org.springframework.datastore.graph.annotation.NodeEntity;
+import org.springframework.datastore.graph.annotation.RelatedTo;
+import org.springframework.datastore.graph.api.Direction;
 import org.springframework.datastore.graph.neo4j.finder.FinderFactory;
 import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.addon.javabean.RooJavaBean;
@@ -25,6 +32,10 @@ public class ResourceType {
     @NotNull
     @Indexed
     private String name;
+    
+    @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.INCOMING, elementClass = org.hyperic.hq.inventory.domain.Resource.class)
+    @OneToMany(targetEntity = Resource.class)
+    private Set<Resource> resources;
     
     @javax.annotation.Resource
     private FinderFactory finderFactory;
@@ -43,7 +54,7 @@ public class ResourceType {
                     return currentPos.depth() >= 1;
                 }
             }, ReturnableEvaluator.ALL_BUT_START_NODE,
-            DynamicRelationshipType.withName(relationName), Direction.OUTGOING);
+            DynamicRelationshipType.withName(relationName), org.neo4j.graphdb.Direction.OUTGOING);
         for (Node related : relationTraverser) {
             if (related.getId() == resourceType.getId()) {
                 return true;
