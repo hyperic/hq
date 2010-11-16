@@ -1,8 +1,9 @@
 package org.hyperic.hq.inventory.domain;
 
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
-
 import org.hyperic.hq.inventory.InvalidRelationshipException;
 import org.hyperic.hq.plugin.domain.ResourceType;
 import org.neo4j.graphdb.Direction;
@@ -12,7 +13,9 @@ import org.neo4j.graphdb.ReturnableEvaluator;
 import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.TraversalPosition;
 import org.neo4j.graphdb.Traverser;
+import org.springframework.datastore.annotation.Indexed;
 import org.springframework.datastore.graph.annotation.NodeEntity;
+import org.springframework.datastore.graph.neo4j.finder.FinderFactory;
 import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.addon.javabean.RooJavaBean;
 import org.springframework.roo.addon.tostring.RooToString;
@@ -20,20 +23,23 @@ import org.springframework.roo.addon.tostring.RooToString;
 @NodeEntity
 @RooToString
 @RooJavaBean
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @RooEntity
 public class Resource {
 
     @NotNull
+    @Indexed
     private String name;
 
     @ManyToOne
     @NotNull
+    @Indexed
     private ResourceType type;
+    
+    @javax.annotation.Resource
+    private FinderFactory finderFactory;
 
     public ResourceRelation relateTo(Resource resource, String relationName) {
-        // TODO only allow certain relation names or RelationTypes by enum?
-        // Check the metadata to ensure these resource types can be related with
-        // this name
         if (type.getName().equals("System")) {
             if (!(relationName.equals("CONTAINS"))) {
                 throw new InvalidRelationshipException();
@@ -45,28 +51,24 @@ public class Resource {
     }
 
     public boolean isRelatedTo(Resource resource, String relationName) {
-        // TODO more efficient way to find out if one node related to other?
-        Traverser relationTraverser = getUnderlyingState().traverse(Traverser.Order.BREADTH_FIRST,
-            new StopEvaluator() {
-                @Override
-                public boolean isStopNode(TraversalPosition currentPos) {
-                    return currentPos.depth() >= 1;
-                }
-            }, ReturnableEvaluator.ALL_BUT_START_NODE,
-            DynamicRelationshipType.withName(relationName), Direction.OUTGOING);
+        Traverser relationTraverser = getUnderlyingState().traverse(Traverser.Order.BREADTH_FIRST, new StopEvaluator() {
+
+            @Override
+            public boolean isStopNode(TraversalPosition currentPos) {
+                return currentPos.depth() >= 1;
+            }
+        }, ReturnableEvaluator.ALL_BUT_START_NODE, DynamicRelationshipType.withName(relationName), Direction.OUTGOING);
         for (Node related : relationTraverser) {
-            // TODO will node IDs always be around for uniqueness?
             if (related.getId() == resource.getId()) {
                 return true;
             }
         }
-
         return false;
-        // Code below will return true if relationship in either direction
-        // if (getRelationshipTo(resource, ResourceRelation.class, relationName)
-        // != null) {
-        // return true;
-        // }
-        // return false;
     }
+    
+    
+    public static Resource findResourceByName(String name) {
+        return new Resource().finderFactory.getFinderForClass(Resource.class).findByPropertyValue("name", name);
+    }
+  
 }
