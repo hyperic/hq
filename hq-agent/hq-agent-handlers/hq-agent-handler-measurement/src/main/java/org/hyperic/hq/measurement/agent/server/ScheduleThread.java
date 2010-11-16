@@ -171,18 +171,22 @@ public class ScheduleThread
      */
     private class MetricVerificationTask implements Runnable  {
         public void run() {
+            boolean isDebugEnabled = _log.isDebugEnabled();
             synchronized (_metricCollections) {
-                if (_metricCollections.size() > 0) {
+                if (isDebugEnabled && _metricCollections.size() > 0) {
                     _log.debug(_metricCollections.size() + " metrics to validate.");
                 }
                 for (Iterator<Future> i = _metricCollections.keySet().iterator();
                      i.hasNext();) {
                     Future t = i.next();
                     MetricTask mt = _metricCollections.get(t);
-                    if (t.isDone()) {
-                        _log.debug("Metric task '" + mt.getMetric() +
+                    if (t.isDone())
+                    {
+                        if (isDebugEnabled) {
+                            _log.debug("Metric task '" + mt.getMetric() +
                                    "' complete, duration: " +
                                    mt.getExecutionDuration());
+                        }
                         i.remove();
                     } else {
                         // Not complete, check for timeout
