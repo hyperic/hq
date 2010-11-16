@@ -56,47 +56,47 @@ public class ValidationTest extends AbstractSpringTest {
 
     private String fullyQualified = ".dev.foo.com";
 
-    @Test
-    public void duh() throws IOException {
-        com.rabbitmq.client.Connection conn = configurationManager.getConnectionFactory().createConnection();
-        System.out.println("ConnectionProperties = " + conn.getServerProperties());
+//    @Test
+//    public void duh() throws IOException {
+//        com.rabbitmq.client.Connection conn = configurationManager.getConnectionFactory().createConnection();
+//        System.out.println("ConnectionProperties = " + conn.getServerProperties());
+//
+//        conn.createChannel();
+//        conn.createChannel();
+//
+//        HypericRabbitAdmin admin = configurationManager.getVirtualHostForNode(configuration.getDefaultVirtualHost(), configuration.getNodename());
+//        admin.getQueues();
+//
+//        List<RabbitConnection> conns = admin.getConnections();
+//        RabbitConnection con = conns.get(0);
+//
+//        if (conns != null) {
+//            for (RabbitConnection c : conns) {
+//                if (con.getPid().equalsIgnoreCase(c.getPid())) {
+//                    System.out.println("equalsIgnoreCase match on " + con + " and " + c);
+//                }
+//            }
+//        }
+//
+//        conn.close();
+//    }
 
-        conn.createChannel();
-        conn.createChannel();
+//    @Test
+//    @ExpectedException(PluginException.class)
+//    public void isValidUsernamePassword() throws PluginException {
+//        assertTrue(ConfigurationValidator.isValidUsernamePassword(configuration));
+//
+//        configuration.setPassword("invalid");
+//        assertFalse(ConfigurationValidator.isValidUsernamePassword(configuration));
+//    }
 
-        HypericRabbitAdmin admin = configurationManager.getVirtualHostForNode(configuration.getDefaultVirtualHost(), configuration.getNodename());
-        admin.getQueues();
-
-        List<RabbitConnection> conns = admin.getConnections();
-        RabbitConnection con = conns.get(0);
-
-        if (conns != null) {
-            for (RabbitConnection c : conns) {
-                if (con.getPid().equalsIgnoreCase(c.getPid())) {
-                    System.out.println("equalsIgnoreCase match on " + con + " and " + c);
-                }
-            }
-        }
-
-        conn.close();
-    }
-
-    @Test
-    @ExpectedException(PluginException.class)
-    public void isValidUsernamePassword() throws PluginException {
-        assertTrue(ConfigurationValidator.isValidUsernamePassword(configuration));
-
-        configuration.setPassword("invalid");
-        assertFalse(ConfigurationValidator.isValidUsernamePassword(configuration));
-    }
-
-    @Test
-    @ExpectedException(PluginException.class)
-    public void isValidOtpConnection() throws PluginException {
-        assertTrue(ConfigurationValidator.isValidOtpConnection(configuration));
-        configuration.setNodename("rabbit@invalid");
-        assertFalse(ConfigurationValidator.isValidOtpConnection(configuration));
-    }
+//    @Test
+//    @ExpectedException(PluginException.class)
+//    public void isValidOtpConnection() throws PluginException {
+//        assertTrue(ConfigurationValidator.isValidOtpConnection(configuration));
+//        configuration.setNodename("rabbit@invalid");
+//        assertFalse(ConfigurationValidator.isValidOtpConnection(configuration));
+//    }
 
     @Test
     @ExpectedException(RabbitAdminAuthException.class)
@@ -105,34 +105,34 @@ public class ValidationTest extends AbstractSpringTest {
         assertNull(admin.getStatus());
     }
 
-    @Test
-    @ExpectedException(OtpIOException.class)
-    public void failOnFullyQualifiedHostName() {
-        List<QueueInfo> queues = new ArrayList<QueueInfo>();
-        SingleConnectionFactory scf = new SingleConnectionFactory(configuration.getHostname() + fullyQualified);
-        scf.setUsername(configuration.getUsername());
-        scf.setPassword(configuration.getPassword());
+//    @Test
+//    @ExpectedException(OtpIOException.class)
+//    public void failOnFullyQualifiedHostName() {
+//        List<QueueInfo> queues = new ArrayList<QueueInfo>();
+//        SingleConnectionFactory scf = new SingleConnectionFactory(configuration.getHostname() + fullyQualified);
+//        scf.setUsername(configuration.getUsername());
+//        scf.setPassword(configuration.getPassword());
+//
+//        RabbitBrokerAdmin admin = new RabbitBrokerAdmin(scf);
+//        queues = admin.getQueues();
+//    }
 
-        RabbitBrokerAdmin admin = new RabbitBrokerAdmin(scf);
-        queues = admin.getQueues();
-    }
-
-    @Test
-    public void failOnAuthNoCookie() throws IOException, OtpAuthException, OtpErlangExit, PluginException {
-        List<QueueInfo> queues = new ArrayList<QueueInfo>();
-        SingleConnectionFactory cf = new SingleConnectionFactory(configuration.getHostname());
-        cf.setUsername(configuration.getUsername());
-        cf.setPassword(configuration.getPassword());
-
-        try {
-            logger.debug("\nTesting Spring RabbitBrokerAdmin and " + configuration.getHostname() + " as host...no cookie");
-            RabbitBrokerAdmin admin = new RabbitBrokerAdmin(cf);
-            queues = admin.getQueues();
-        }
-        catch (Exception e) {
-            assertTrue(e instanceof org.springframework.erlang.OtpAuthException);
-            logger.debug("Anticipated 'java.net.SocketException: Connection reset or java.io.IOException: expected 2 bytes, got EOF after 0 bytes\n'" + e);
-        }
-    }
+//    @Test
+//    public void failOnAuthNoCookie() throws IOException, OtpAuthException, OtpErlangExit, PluginException {
+//        List<QueueInfo> queues = new ArrayList<QueueInfo>();
+//        SingleConnectionFactory cf = new SingleConnectionFactory(configuration.getHostname());
+//        cf.setUsername(configuration.getUsername());
+//        cf.setPassword(configuration.getPassword());
+//
+//        try {
+//            logger.debug("\nTesting Spring RabbitBrokerAdmin and " + configuration.getHostname() + " as host...no cookie");
+//            RabbitBrokerAdmin admin = new RabbitBrokerAdmin(cf);
+//            queues = admin.getQueues();
+//        }
+//        catch (Exception e) {
+//            assertTrue(e instanceof org.springframework.erlang.OtpAuthException);
+//            logger.debug("Anticipated 'java.net.SocketException: Connection reset or java.io.IOException: expected 2 bytes, got EOF after 0 bytes\n'" + e);
+//        }
+//    }
 
 }

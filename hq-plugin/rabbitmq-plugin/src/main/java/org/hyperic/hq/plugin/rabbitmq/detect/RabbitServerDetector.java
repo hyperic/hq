@@ -27,9 +27,7 @@ package org.hyperic.hq.plugin.rabbitmq.detect;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,12 +35,10 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.collect.*;
-import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
-import org.hyperic.hq.plugin.rabbitmq.configure.RabbitConfigurationManager;
 import org.hyperic.hq.plugin.rabbitmq.core.*;
 import org.hyperic.hq.plugin.rabbitmq.manage.RabbitTransientResourceManager;
 import org.hyperic.hq.plugin.rabbitmq.manage.TransientResourceManager;
-import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
+import org.hyperic.hq.plugin.rabbitmq.validate.ConfigurationValidator;
 import org.hyperic.hq.product.*;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.util.config.ConfigResponse;
@@ -69,6 +65,8 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @throws PluginException
      */
     public List getServerResources(ConfigResponse serverConfig) throws PluginException {
+        //System.setProperty("OtpConnection.trace", "99");
+
         configure(serverConfig);
 
 
@@ -151,28 +149,36 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
     public List<ServiceResource> createRabbitResources(ConfigResponse serviceConfig) {
         List<ServiceResource> rabbitResources = null;
 
-        Configuration configuration = Configuration.toConfiguration(serviceConfig);
         if (getLog().isDebugEnabled()) {
             getLog().debug("[createRabbitResources] serviceConfig=" + serviceConfig);
-            getLog().debug("[createRabbitResources] configuration=" + configuration);
         }
 
         try{
-           if (isConfiguredAndValid(configuration)) {
-            	rabbitResources = new ArrayList<ServiceResource>();
-                RabbitConfigurationManager cm = new RabbitConfigurationManager(configuration);
-                Map<String, HypericRabbitAdmin> admins = cm.getVirtualHostsForNode();
+            if (ConfigurationValidator.isValidOtpConnection(serviceConfig)) {
+                rabbitResources = new ArrayList<ServiceResource>();
+                HypericRabbitAdmin admin = new HypericRabbitAdmin(serviceConfig);
+                List<ServiceResource> connections = createConnectionServiceResources(admin);
+                if (connections != null) {
+                    rabbitResources.addAll(connections);
+                }
 
-                if (admins != null) {
-                    for (Map.Entry entry : admins.entrySet()) {
-                        HypericRabbitAdmin rabbitAdmin = (HypericRabbitAdmin) entry.getValue();
+                List<ServiceResource> channels = createChannelServiceResources(admin);
+                if (channels != null) {
+                    rabbitResources.addAll(channels);
+                }
 
-                        List<ServiceResource> resources = createResourcesPerVirtualHost(rabbitAdmin);
-                        if (resources != null) {
-                            rabbitResources.addAll(resources);
-                        }
+                List<RabbitVirtualHost> virtualHostList=new ArrayList();
+                List<String> vhosts=admin.getVirtualHosts();
+                for (String vhost : vhosts) {
+                    virtualHostList.add(new RabbitVirtualHost(vhost, admin));
+                    List<ServiceResource> resources = createResourcesPerVirtualHost(admin,vhost);
+                    if (resources != null) {
+                        rabbitResources.addAll(resources);
                     }
                 }
+
+                rabbitResources.addAll(doCreateServiceResources(virtualHostList, AMQPTypes.VIRTUAL_HOST,serviceConfig.getValue(DetectorConstants.NODE)));
+
             }
         }catch (RuntimeException ex){
             logger.debug(ex,ex);
@@ -188,25 +194,17 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @return
      * @throws PluginException
      */
-    protected List<ServiceResource> createResourcesPerVirtualHost(HypericRabbitAdmin rabbitAdmin) throws PluginException {
+    protected List<ServiceResource> createResourcesPerVirtualHost(HypericRabbitAdmin rabbitAdmin,String vhost) throws PluginException {
         List<ServiceResource> rabbitResources = new ArrayList<ServiceResource>();
 
         if (rabbitAdmin != null) {
 
-            List<ServiceResource> queues = createQueueServiceResources(rabbitAdmin);
+            List<ServiceResource> queues = createQueueServiceResources(rabbitAdmin,vhost);
             if (queues != null && queues.size() > 0) rabbitResources.addAll(queues);
 
-            List<ServiceResource> exchanges = createExchangeServiceResources(rabbitAdmin);
+            List<ServiceResource> exchanges = createExchangeServiceResources(rabbitAdmin,vhost);
             if (exchanges != null) rabbitResources.addAll(exchanges);
 
-            List<ServiceResource> connections = createConnectionServiceResources(rabbitAdmin);
-            if (connections != null) rabbitResources.addAll(connections);
-
-            List<ServiceResource> channels = createChannelServiceResources(rabbitAdmin);
-            if (channels != null) rabbitResources.addAll(channels);
-
-            List<ServiceResource> vHosts = createVirtualHostResources(rabbitAdmin);
-            if (vHosts != null) rabbitResources.addAll(vHosts);
         }
 
         return rabbitResources;
@@ -218,29 +216,11 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @return
      * @throws PluginException
      */
-    protected List<ServiceResource> createQueueServiceResources(HypericRabbitAdmin rabbitAdmin) throws PluginException {
-        List<QueueInfo> queues = rabbitAdmin.getQueues();
+    protected List<ServiceResource> createQueueServiceResources(HypericRabbitAdmin rabbitAdmin,String vhost) throws PluginException {
+        List<QueueInfo> queues = rabbitAdmin.getQueues(vhost);
 
         return queues != null ? doCreateServiceResources(queues, AMQPTypes.QUEUE,
-                    rabbitAdmin.getPeerNodeName(), rabbitAdmin.getVirtualHost()) : null;
-    }
-
-    /**
-     * Create ServiceResources for auto-detected Connections
-     * @param rabbitAdmin
-     * @return
-     * @throws PluginException
-     */
-    protected List<ServiceResource> createVirtualHostResources(HypericRabbitAdmin rabbitAdmin) throws PluginException {
-        RabbitVirtualHost virtualHost = rabbitAdmin.buildRabbitVirtualHost();
-        List<RabbitVirtualHost> virtualHostList = null;
-        if (virtualHost != null) {
-            virtualHostList = new ArrayList<RabbitVirtualHost>();
-            virtualHostList.add(virtualHost);
-        }
-
-        return virtualHostList != null ? doCreateServiceResources(virtualHostList, AMQPTypes.VIRTUAL_HOST,
-                rabbitAdmin.getPeerNodeName(), rabbitAdmin.getVirtualHost()) : null;
+                    rabbitAdmin.getPeerNodeName(), vhost) : null;
     }
 
     /**
@@ -253,7 +233,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         List<RabbitConnection> connections = rabbitAdmin.getConnections();
 
         return connections != null ? doCreateServiceResources(connections, AMQPTypes.CONNECTION,
-                    rabbitAdmin.getPeerNodeName(), rabbitAdmin.getVirtualHost()) : null;
+                    rabbitAdmin.getPeerNodeName()) : null;
     }
 
     /**
@@ -266,7 +246,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         List<RabbitChannel> channels = rabbitAdmin.getChannels();
 
         return channels != null ? doCreateServiceResources(channels, AMQPTypes.CHANNEL,
-                    rabbitAdmin.getPeerNodeName(), rabbitAdmin.getVirtualHost()) : null;
+                    rabbitAdmin.getPeerNodeName()) : null;
 
     }
 
@@ -276,13 +256,16 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @return
      * @throws PluginException
      */
-    protected List<ServiceResource> createExchangeServiceResources(HypericRabbitAdmin rabbitAdmin) throws PluginException {
-        List<Exchange> exchanges = rabbitAdmin.getExchanges();
+    protected List<ServiceResource> createExchangeServiceResources(HypericRabbitAdmin rabbitAdmin,String vhost) throws PluginException {
+        List<Exchange> exchanges = rabbitAdmin.getExchanges(vhost);
 
         return exchanges != null ? doCreateServiceResources(exchanges, AMQPTypes.EXCHANGE,
-                    rabbitAdmin.getPeerNodeName(), rabbitAdmin.getVirtualHost()) : null;
+                    rabbitAdmin.getPeerNodeName(),vhost) : null;
     }
 
+    private List<ServiceResource> doCreateServiceResources(List rabbitObjects, String rabbitType, String node) {
+        return doCreateServiceResources(rabbitObjects, rabbitType, node, null);
+    }
     /**
      * For each AMQP type we auto-detect, create ServiceResources that
      * are mostly non-specific to each type. We do some handling that is
@@ -305,8 +288,9 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                 String name = builder.buildIdentity(obj, vHost); // the hq inventory name
 
                 ConfigResponse c = new ConfigResponse();
-                c.setValue(MetricConstants.NODE, node);
-                c.setValue(MetricConstants.VIRTUALHOST, vHost);
+                if(vHost!=null){
+                    c.setValue(MetricConstants.VHOST, vHost);
+                }
 
                 if (obj instanceof QueueInfo) {
                     QueueInfo queue = (QueueInfo) obj;
@@ -320,7 +304,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                     Exchange exchange = (Exchange) obj;
                     if (exchange.getName() == null) {
                         name = AMQPTypes.DEFAULT_EXCHANGE_NAME;
-                    } 
+                    }
                     c.setValue(MetricConstants.EXCHANGE, exchange.getName() == null ?
                             AMQPTypes.DEFAULT_EXCHANGE_NAME : exchange.getName());
                     service.setCustomProperties(ExchangeCollector.getAttributes((Exchange) obj));
@@ -330,14 +314,13 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                     service.setCustomProperties(ChannelCollector.getAttributes(channel));
                 } else if (obj instanceof RabbitVirtualHost) {
                     RabbitVirtualHost vh = (RabbitVirtualHost) obj;
-                    c.setValue(MetricConstants.VIRTUAL_HOST, vh.getName());
+                    c.setValue(MetricConstants.VHOST, vh.getName());
                     service.setCustomProperties(VirtualHostCollector.getAttributes(vh));
                 }
 
                 service.setName(node+" "+name);
                 service.setDescription(name);
-                service.setProductConfig(c);
-                setMeasurementConfig(service, c);
+                setProductConfig(service, c);
 
                 if (service != null) serviceResources.add(service);
             }
@@ -369,8 +352,6 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
 
         ConfigResponse conf = new ConfigResponse();
         conf.setValue(DetectorConstants.SERVER_NAME, nodeName);
-        conf.setValue(DetectorConstants.SERVER_PATH, nodePath);
-        conf.setValue(DetectorConstants.NODE_PID, nodePid);
 
         final String home = getProcessHome(nodePid);
         final String auth = ErlangCookieHandler.configureCookie(home);
@@ -522,13 +503,4 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         }
         return home;
     }
-    
-    private boolean isConfiguredAndValid(Configuration configuration) 
-    	throws PluginException {
-
-        return configuration.isConfigured()
-        			&& RabbitProductPlugin.isValidUsernamePassword(configuration)
-        			&& RabbitProductPlugin.isValidOtpConnection(configuration);
-    }
-
 }

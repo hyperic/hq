@@ -27,14 +27,8 @@ package org.hyperic.hq.plugin.rabbitmq.product;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
-import org.hyperic.hq.plugin.rabbitmq.configure.ConfigurationManager;
-import org.hyperic.hq.plugin.rabbitmq.configure.RabbitConfigurationManager;
-import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
-import org.hyperic.hq.plugin.rabbitmq.validate.ConfigurationValidator;
 import org.hyperic.hq.product.*;
 
-import java.util.Map;
 
 /**
  * RabbitProductPlugin
@@ -45,71 +39,9 @@ public class RabbitProductPlugin extends ProductPlugin {
 
     private static final Log logger = LogFactory.getLog(RabbitProductPlugin.class);
 
-    private static ConfigurationManager configurationManager;
-
     @Override
     public void init(PluginManager manager) throws PluginException {
       super.init(manager);
       logger.debug(manager.getProperties());
     }
-    /**
-     * @param configuration
-     * @return
-     * @throws PluginException
-     */
-//    public static boolean initialize(Configuration configuration) throws PluginException {
-//        logger.debug("Starting initialization of plugin");
-//        if (configuration != null) {
-//             if (configuration.getVirtualHost() == null) {
-//                configuration.setDefaultVirtualHost(true);
-//             }
-//
-//            if (configuration.isConfigured() && isValidUsernamePassword(configuration) && isValidOtpConnection(configuration)) {
-//                logger.debug("Initializing ConfigurationManager");
-//                if (configurationManager == null || !configurationManager.isInitialized()) {
-//                    configurationManager = new RabbitConfigurationManager(configuration);
-//                }
-//            }
-//        }
-//
-//        boolean initialized = isInitialized();
-//        logger.debug("Initialized=" + initialized);
-//
-//        return initialized;
-//    }
-//
-//    public static boolean isInitialized() {
-//        return configurationManager != null && configurationManager.isInitialized();
-//    }
-//
-//    public static HypericRabbitAdmin getVirtualHostForNode(String virtualHost, String node) {
-//         return configurationManager.getVirtualHostForNode(virtualHost, node);
-//    }
-//
-//    /**
-//     * @return
-//     */
-//    public static Map<String, HypericRabbitAdmin> getVirtualHostsForNode() {
-//        return configurationManager.getVirtualHostsForNode();
-//    }
-
-    /**
-     * Determine if the node available for a Collector
-     * @param key
-     * @return
-     * @throws org.hyperic.hq.product.PluginException
-     *
-     */
-    public static boolean isNodeAvailabile(Configuration key) throws PluginException {
-        return isValidOtpConnection(key);
-    }
-
-    public static boolean isValidOtpConnection(Configuration configuration) throws PluginException {
-        return ConfigurationValidator.isValidOtpConnection(configuration);
-    }
-
-    public static boolean isValidUsernamePassword(Configuration configuration) throws PluginException {
-        return ConfigurationValidator.isValidUsernamePassword(configuration);
-    }
-
 }

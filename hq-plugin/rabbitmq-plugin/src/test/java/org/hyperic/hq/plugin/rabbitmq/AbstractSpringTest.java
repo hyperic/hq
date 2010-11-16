@@ -27,10 +27,10 @@ package org.hyperic.hq.plugin.rabbitmq;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
-import org.hyperic.hq.plugin.rabbitmq.configure.ConfigurationManager;
+//import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
+//import org.hyperic.hq.plugin.rabbitmq.configure.ConfigurationManager;
 import org.hyperic.hq.plugin.rabbitmq.configure.TestContextLoader;
-import org.hyperic.hq.plugin.rabbitmq.manage.RabbitManager;
+//import org.hyperic.hq.plugin.rabbitmq.manage.RabbitManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -56,12 +56,12 @@ import static org.junit.Assert.*;
 public abstract class AbstractSpringTest {
 
     protected final Log logger = LogFactory.getLog(this.getClass().getName());
+//
+//    @Autowired
+//    protected ConfigurationManager configurationManager;
 
-    @Autowired
-    protected ConfigurationManager configurationManager;
-
-    @Autowired
-    protected Configuration configuration;
+//    @Autowired
+//    protected Configuration configuration;
 
     @Autowired
     protected CachingConnectionFactory ccf;
@@ -84,11 +84,11 @@ public abstract class AbstractSpringTest {
     @Autowired
     protected List<Queue> queues;
 
-    @Before
-    public void before() { 
-        assertNotNull("configurationManager should not be null", configurationManager);
-        assertNotNull("configuration must not be null", configuration); 
-    }
+//    @Before
+//    public void before() {
+//        assertNotNull("configurationManager should not be null", configurationManager);
+//        assertNotNull("configuration must not be null", configuration);
+//    }
 
     @AfterClass
     public static void doAfter() {

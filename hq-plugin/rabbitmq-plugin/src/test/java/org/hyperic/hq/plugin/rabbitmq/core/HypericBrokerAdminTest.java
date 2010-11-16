@@ -46,23 +46,23 @@ public class HypericBrokerAdminTest extends AbstractSpringTest {
 
     private SingleConnectionFactory otpConnectionFactory;
 
-    @Before
-    public void doBefore() throws PluginException {
-        this.otpConnectionFactory = new SingleConnectionFactory("rabbit-monitor", configuration.getAuthentication(), configuration.getNodename());
-        otpConnectionFactory.afterPropertiesSet();
-    }
+//    @Before
+//    public void doBefore() throws PluginException {
+//        this.otpConnectionFactory = new SingleConnectionFactory("rabbit-monitor", configuration.getAuthentication(), configuration.getNodename());
+//        otpConnectionFactory.afterPropertiesSet();
+//    }
 
-    @Test
-    public void createHypericBrokerAdmin() throws Exception {
-        HypericRabbitAdmin admin = configurationManager.getVirtualHostForNode(configuration.getDefaultVirtualHost(), configuration.getNodename());
-        assertNotNull(admin.getStatus());
-        admin.declareQueue(new Queue("nonDurable"));
-        assertNotNull(admin.getQueues());
-        org.springframework.erlang.connection.Connection conn = otpConnectionFactory.createConnection();
-        assertNotNull(conn);
-        conn.close();
-        admin.destroy();
-    }
+//    @Test
+//    public void createHypericBrokerAdmin() throws Exception {
+//        HypericRabbitAdmin admin = configurationManager.getVirtualHostForNode(configuration.getDefaultVirtualHost(), configuration.getNodename());
+//        assertNotNull(admin.getStatus());
+//        admin.declareQueue(new Queue("nonDurable"));
+//        assertNotNull(admin.getQueues());
+//        org.springframework.erlang.connection.Connection conn = otpConnectionFactory.createConnection();
+//        assertNotNull(conn);
+//        conn.close();
+//        admin.destroy();
+//    }
 
     @Test
     @ExpectedException(org.springframework.erlang.OtpAuthException.class)

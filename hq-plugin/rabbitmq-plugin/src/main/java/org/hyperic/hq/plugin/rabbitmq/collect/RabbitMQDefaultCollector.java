@@ -6,9 +6,8 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import java.util.Properties;
 import org.apache.commons.logging.Log;
-import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
-import org.hyperic.hq.plugin.rabbitmq.configure.RabbitConfigurationManager;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
+import org.hyperic.hq.plugin.rabbitmq.validate.ConfigurationValidator;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
 
@@ -18,31 +17,28 @@ import org.hyperic.hq.product.PluginException;
  */
 public abstract class RabbitMQDefaultCollector extends Collector {
 
-    private RabbitConfigurationManager configManager;
-    private Configuration configuration;
+    private HypericRabbitAdmin admin;
 
     @Override
     protected final void init() throws PluginException {
         super.init();
         Properties props = getProperties();
-        configuration = Configuration.toConfiguration(props);
         if (getLog().isDebugEnabled()) {
             getLog().debug("[init] props=" + props);
-            getLog().debug("[init] configuration=" + configuration);
         }
 
         try {
-            if (configuration.isConfigured()) {
-                configManager = new RabbitConfigurationManager(configuration);
+            if (ConfigurationValidator.isValidOtpConnection(props)) {
+                admin = new HypericRabbitAdmin(props);
             }
         } catch (RuntimeException ex) {
-            getLog().debug(ex.getMessage(),ex);
-            throw new PluginException(ex.getMessage(),ex);
+            getLog().debug(ex.getMessage(), ex);
+            throw new PluginException(ex.getMessage(), ex);
         }
     }
 
     public final HypericRabbitAdmin getAdmin() {
-        return configManager.getVirtualHostForNode(configuration.getVirtualHost(), configuration.getNodename());
+        return admin;
 
     }
 
