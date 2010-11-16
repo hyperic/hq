@@ -8,6 +8,13 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Creates some VSphere resources. VSphereResourceModelPopulator must be run as
+ * a prerequisite to set up the resource model (as would be done on plugin
+ * installation)
+ * @author jhickey
+ * 
+ */
 @Component
 @Transactional
 public class VSphereDataPopulator {
@@ -18,20 +25,24 @@ public class VSphereDataPopulator {
     static final String VM_NAME = "2k328VCclone9-24";
 
     public void populateData() {
-        Resource rootNode = Resource.findResourceByName(VSphereResourceModelPopulator.ROOT_NODE_NAME);
+        Resource rootNode = Resource
+            .findResourceByName(VSphereResourceModelPopulator.ROOT_NODE_NAME);
         Resource vCenterServer = new Resource();
         vCenterServer.setName("VMC-SSRC-2K328");
-        vCenterServer.setType(ResourceType.findResourceTypeByName(VSphereResourceModelPopulator.VCENTER_SERVER_TYPE));
+        vCenterServer.setType(ResourceType
+            .findResourceTypeByName(VSphereResourceModelPopulator.VCENTER_SERVER_TYPE));
 
         Resource dataCenter = new Resource();
         dataCenter.setName("Camb-HQ");
-        dataCenter.setType(ResourceType.findResourceTypeByName(VSphereResourceModelPopulator.DATACENTER_TYPE));
+        dataCenter.setType(ResourceType
+            .findResourceTypeByName(VSphereResourceModelPopulator.DATACENTER_TYPE));
         vCenterServer.relateTo(dataCenter, VSphereResourceModelPopulator.MANAGES);
         // dataCenters are containers, let's make them top level elements
         rootNode.relateTo(dataCenter, RelationshipTypes.CONTAINS);
 
         ResourceGroup cluster = new ResourceGroup();
-        cluster.setType(ResourceType.findResourceTypeByName(VSphereResourceModelPopulator.CLUSTER_TYPE));
+        cluster.setType(ResourceType
+            .findResourceTypeByName(VSphereResourceModelPopulator.CLUSTER_TYPE));
         cluster.setName(CLUSTER_NAME);
 
         dataCenter.relateTo(cluster, RelationshipTypes.CONTAINS);
@@ -47,17 +58,20 @@ public class VSphereDataPopulator {
 
         Resource vm = new Resource();
         vm.setName(VM_NAME);
-        vm.setType(ResourceType.findResourceTypeByName(VSphereResourceModelPopulator.VIRTUAL_MACHINE_TYPE));
+        vm.setType(ResourceType
+            .findResourceTypeByName(VSphereResourceModelPopulator.VIRTUAL_MACHINE_TYPE));
         host.relateTo(vm, VSphereResourceModelPopulator.HOSTS);
 
         Resource resourcePool = new Resource();
         resourcePool.setName("Test Resource Pool");
-        resourcePool.setType(ResourceType.findResourceTypeByName(VSphereResourceModelPopulator.RESOURCE_POOL_TYPE));
+        resourcePool.setType(ResourceType
+            .findResourceTypeByName(VSphereResourceModelPopulator.RESOURCE_POOL_TYPE));
         vm.relateTo(resourcePool, VSphereResourceModelPopulator.RUNS_IN);
 
         Resource dataStore = new Resource();
         dataStore.setName(DATASTORE_NAME);
-        dataStore.setType(ResourceType.findResourceTypeByName(VSphereResourceModelPopulator.DATASTORE_TYPE));
+        dataStore.setType(ResourceType
+            .findResourceTypeByName(VSphereResourceModelPopulator.DATASTORE_TYPE));
         // TODO virtual disk size and provisioning policy are properties of this
         // relationship. Need relationship props
         vm.relateTo(dataStore, VSphereResourceModelPopulator.USES);
@@ -68,15 +82,15 @@ public class VSphereDataPopulator {
         // TODO How to diff OS types like Windows, Linux, etc (are these just
         // properties of the node? probably need them at type level for metric
         // collection)
-        guestOs.setType(ResourceType.findResourceTypeByName(VSphereResourceModelPopulator.NODE_TYPE));
+        guestOs.setType(ResourceType
+            .findResourceTypeByName(VSphereResourceModelPopulator.NODE_TYPE));
         vm.relateTo(guestOs, VSphereResourceModelPopulator.HOSTS);
     }
-    
+
     public static void main(String[] args) {
         ClassPathXmlApplicationContext appContext = new ClassPathXmlApplicationContext(
             "classpath:/META-INF/spring/applicationContext.xml");
-        VSphereDataPopulator dataPopulator = appContext
-            .getBean(VSphereDataPopulator.class);
+        VSphereDataPopulator dataPopulator = appContext.getBean(VSphereDataPopulator.class);
         dataPopulator.populateData();
         System.exit(0);
     }

@@ -38,7 +38,7 @@ public class ResourceType {
     private Set<Resource> resources;
     
     @javax.annotation.Resource
-    private FinderFactory finderFactory;
+    private FinderFactory finderFactory2;
 
     public ResourceTypeRelation relateTo(ResourceType resourceType, String relationName) {
         return (ResourceTypeRelation) this.relateTo(resourceType, ResourceTypeRelation.class,
@@ -64,7 +64,7 @@ public class ResourceType {
     }
 
     public static ResourceType findResourceTypeByName(String name) {
-        return new ResourceType().finderFactory.getFinderForClass(ResourceType.class)
+        return new ResourceType().finderFactory2.getFinderForClass(ResourceType.class)
             .findByPropertyValue("name", name);
     }
 

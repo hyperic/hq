@@ -27,7 +27,7 @@ public class ResourceGroup extends Resource {
     }
     
     public static ResourceGroup findResourceGroupByName(String name) {
-        return new Resource().finderFactory.getFinderForClass(ResourceGroup.class).findByPropertyValue("name", name);
+        return new Resource().finderFactory2.getFinderForClass(ResourceGroup.class).findByPropertyValue("name", name);
     }
 
 }

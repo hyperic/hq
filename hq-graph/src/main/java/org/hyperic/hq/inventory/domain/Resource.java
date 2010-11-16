@@ -42,8 +42,9 @@ public class Resource {
     @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.OUTGOING, elementClass = ResourceType.class)
     private ResourceType type;
     
+    //TODO can't push in the finderFactory in the ITD, causes Roo to throw an error on aspect generation
     @javax.annotation.Resource
-    protected FinderFactory finderFactory;
+    protected FinderFactory finderFactory2;
 
     public ResourceRelation relateTo(Resource resource, String relationName) {
         if (type.getName().equals("System")) {
@@ -74,7 +75,7 @@ public class Resource {
     
     
     public static Resource findResourceByName(String name) {
-        return new Resource().finderFactory.getFinderForClass(Resource.class).findByPropertyValue("name", name);
+        return new Resource().finderFactory2.getFinderForClass(Resource.class).findByPropertyValue("name", name);
     }
   
 }
