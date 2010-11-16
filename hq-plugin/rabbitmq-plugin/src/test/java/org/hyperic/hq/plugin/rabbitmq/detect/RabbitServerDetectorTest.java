@@ -27,7 +27,7 @@ package org.hyperic.hq.plugin.rabbitmq.detect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.configure.ConfigurationManager; 
+//import org.hyperic.hq.plugin.rabbitmq.configure.ConfigurationManager;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 import org.junit.Before;
@@ -55,9 +55,9 @@ public class RabbitServerDetectorTest extends RabbitServerDetector {
     protected final Log logger = LogFactory.getLog(this.getClass().getName());
 
     @Autowired
-    private ConfigurationManager configurationManager;
+//    private ConfigurationManager configurationManager;
 
-    @Autowired
+//    @Autowired
     private SingleConnectionFactory singleConnectionFactory;
 
     protected static RabbitServerDetector rabbitServerDetector = new RabbitServerDetector();
