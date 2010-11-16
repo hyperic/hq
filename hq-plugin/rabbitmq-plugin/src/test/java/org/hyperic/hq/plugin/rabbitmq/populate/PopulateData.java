@@ -26,7 +26,7 @@
 package org.hyperic.hq.plugin.rabbitmq.populate;
 
 import org.hyperic.hq.plugin.rabbitmq.AbstractSpringTest;
-import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
+//import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
 //import org.hyperic.hq.plugin.rabbitmq.configure.ConfigurationManager;
 import org.hyperic.hq.plugin.rabbitmq.configure.RabbitTestConfiguration;
 import org.springframework.amqp.core.Queue;
@@ -48,7 +48,7 @@ public class PopulateData extends AbstractSpringTest {
 
 //    private static ConfigurationManager configurationManager;
 
-    private static Configuration key;
+//    private static Configuration key;
 
     private static int numMessages = 500;
 
@@ -57,7 +57,7 @@ public class PopulateData extends AbstractSpringTest {
         ctx.register(RabbitTestConfiguration.class);
         ctx.refresh();
 
-        key = ctx.getBean(Configuration.class);
+//        key = ctx.getBean(Configuration.class);
         final List<Queue> queues = ctx.getBean(List.class);
 //        configurationManager = ctx.getBean(ConfigurationManager.class);
 //

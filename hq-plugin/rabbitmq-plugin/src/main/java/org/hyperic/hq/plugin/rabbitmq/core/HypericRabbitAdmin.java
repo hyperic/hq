@@ -33,8 +33,10 @@ import org.springframework.erlang.connection.SingleConnectionFactory;
 import org.springframework.util.Assert;
 
 import java.util.List;
+import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.util.config.ConfigResponse;
 
 /**
  * A HypericRabbitAdmin is created for each node/virtualHost.
@@ -47,7 +49,15 @@ public class HypericRabbitAdmin {
     private HypericErlangTemplate customErlangTemplate;
     private String peerNodeName;
 
-    public HypericRabbitAdmin(String peerNodeName, String cookie) {
+    public HypericRabbitAdmin(Properties props) {
+        this(new ConfigResponse(props));
+    }
+
+    public HypericRabbitAdmin(ConfigResponse props) {
+        this(props.getValue(DetectorConstants.NODE), props.getValue(DetectorConstants.AUTHENTICATION));
+    }
+
+    private HypericRabbitAdmin(String peerNodeName, String cookie) {
         this.peerNodeName = peerNodeName;
         SingleConnectionFactory otpConnectionFactory = new SingleConnectionFactory("rabbit-monitor", cookie, peerNodeName);
         otpConnectionFactory.afterPropertiesSet();

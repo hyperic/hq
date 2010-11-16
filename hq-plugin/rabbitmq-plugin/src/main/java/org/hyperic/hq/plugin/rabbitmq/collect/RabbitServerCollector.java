@@ -28,9 +28,7 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
-import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
-import org.hyperic.hq.product.Collector;
+import org.hyperic.hq.plugin.rabbitmq.validate.ConfigurationValidator;
 import org.hyperic.hq.product.PluginException;
 
 /**
@@ -49,15 +47,9 @@ public class RabbitServerCollector extends RabbitMQDefaultCollector {
         if (logger.isDebugEnabled()) {
             logger.debug("[collect] node=" + node);
         }
-
-        Configuration configuration = Configuration.toConfiguration(props);
-        logger.debug("Checking if the node '" + node + "' is available");
         try {
-            boolean isAvailable = RabbitProductPlugin.isNodeAvailabile(configuration);
-            setAvailability(isAvailable);
-            logger.debug("Node is available");
-        } catch (PluginException e) {
-            setErrorMessage("Error: " + e.getMessage(), e);
+            setAvailability(ConfigurationValidator.isValidOtpConnection(props));
+        } catch (PluginException ex) {
             setAvailability(false);
         }
     }

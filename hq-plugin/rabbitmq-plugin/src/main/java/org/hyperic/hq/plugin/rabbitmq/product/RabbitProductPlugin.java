@@ -27,8 +27,6 @@ package org.hyperic.hq.plugin.rabbitmq.product;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
-import org.hyperic.hq.plugin.rabbitmq.validate.ConfigurationValidator;
 import org.hyperic.hq.product.*;
 
 
@@ -45,13 +43,5 @@ public class RabbitProductPlugin extends ProductPlugin {
     public void init(PluginManager manager) throws PluginException {
       super.init(manager);
       logger.debug(manager.getProperties());
-    }
-
-    public static boolean isNodeAvailabile(Configuration key) throws PluginException {
-        return isValidOtpConnection(key);
-    }
-
-    public static boolean isValidOtpConnection(Configuration configuration) throws PluginException {
-        return ConfigurationValidator.isValidOtpConnection(configuration);
     }
 }
