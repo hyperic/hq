@@ -35,11 +35,10 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.collect.*;
-import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
 import org.hyperic.hq.plugin.rabbitmq.core.*;
 import org.hyperic.hq.plugin.rabbitmq.manage.RabbitTransientResourceManager;
 import org.hyperic.hq.plugin.rabbitmq.manage.TransientResourceManager;
-import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
+import org.hyperic.hq.plugin.rabbitmq.validate.ConfigurationValidator;
 import org.hyperic.hq.product.*;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.util.config.ConfigResponse;
@@ -150,16 +149,14 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
     public List<ServiceResource> createRabbitResources(ConfigResponse serviceConfig) {
         List<ServiceResource> rabbitResources = null;
 
-        Configuration configuration = Configuration.toConfiguration(serviceConfig);
         if (getLog().isDebugEnabled()) {
             getLog().debug("[createRabbitResources] serviceConfig=" + serviceConfig);
-            getLog().debug("[createRabbitResources] configuration=" + configuration);
         }
 
         try{
-            if (isConfiguredAndValid(configuration)) {
+            if (ConfigurationValidator.isValidOtpConnection(serviceConfig)) {
                 rabbitResources = new ArrayList<ServiceResource>();
-                HypericRabbitAdmin admin = new HypericRabbitAdmin(configuration.getNodename(), configuration.getAuthentication());
+                HypericRabbitAdmin admin = new HypericRabbitAdmin(serviceConfig);
                 List<ServiceResource> connections = createConnectionServiceResources(admin);
                 if (connections != null) {
                     rabbitResources.addAll(connections);
@@ -180,7 +177,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                     }
                 }
 
-                rabbitResources.addAll(doCreateServiceResources(virtualHostList, AMQPTypes.VIRTUAL_HOST,configuration.getNodename()));
+                rabbitResources.addAll(doCreateServiceResources(virtualHostList, AMQPTypes.VIRTUAL_HOST,serviceConfig.getValue(DetectorConstants.NODE)));
 
             }
         }catch (RuntimeException ex){
@@ -323,7 +320,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
 
                 service.setName(node+" "+name);
                 service.setDescription(name);
-                setMeasurementConfig(service, c);
+                setProductConfig(service, c);
 
                 if (service != null) serviceResources.add(service);
             }
@@ -355,8 +352,6 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
 
         ConfigResponse conf = new ConfigResponse();
         conf.setValue(DetectorConstants.SERVER_NAME, nodeName);
-        conf.setValue(DetectorConstants.SERVER_PATH, nodePath);
-        conf.setValue(DetectorConstants.NODE_PID, nodePid);
 
         final String home = getProcessHome(nodePid);
         final String auth = ErlangCookieHandler.configureCookie(home);
@@ -508,12 +503,4 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         }
         return home;
     }
-    
-    private boolean isConfiguredAndValid(Configuration configuration) 
-    	throws PluginException {
-
-        return configuration.isConfigured()
-        			&& RabbitProductPlugin.isValidOtpConnection(configuration);
-    }
-
 }

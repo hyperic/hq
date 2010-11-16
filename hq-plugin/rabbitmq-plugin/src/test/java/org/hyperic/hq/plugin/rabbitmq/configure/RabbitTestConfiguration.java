@@ -52,10 +52,10 @@ public class RabbitTestConfiguration {
         return conf;
     }
 
-    @Bean
-    public Configuration configuration() {
-        return Configuration.toConfiguration(configResponse());
-    }
+//    @Bean
+//    public Configuration configuration() {
+//        return Configuration.toConfiguration(configResponse());
+//    }
 
 //    @Bean
 //    public ConfigurationManager configurationManager() {

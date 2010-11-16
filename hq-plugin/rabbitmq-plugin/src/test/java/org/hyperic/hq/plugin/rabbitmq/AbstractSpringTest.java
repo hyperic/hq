@@ -27,7 +27,7 @@ package org.hyperic.hq.plugin.rabbitmq;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
+//import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
 //import org.hyperic.hq.plugin.rabbitmq.configure.ConfigurationManager;
 import org.hyperic.hq.plugin.rabbitmq.configure.TestContextLoader;
 //import org.hyperic.hq.plugin.rabbitmq.manage.RabbitManager;
@@ -60,8 +60,8 @@ public abstract class AbstractSpringTest {
 //    @Autowired
 //    protected ConfigurationManager configurationManager;
 
-    @Autowired
-    protected Configuration configuration;
+//    @Autowired
+//    protected Configuration configuration;
 
     @Autowired
     protected CachingConnectionFactory ccf;

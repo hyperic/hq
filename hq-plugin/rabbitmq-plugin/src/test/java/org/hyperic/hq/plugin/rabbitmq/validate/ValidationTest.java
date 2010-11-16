@@ -90,13 +90,13 @@ public class ValidationTest extends AbstractSpringTest {
 //        assertFalse(ConfigurationValidator.isValidUsernamePassword(configuration));
 //    }
 
-    @Test
-    @ExpectedException(PluginException.class)
-    public void isValidOtpConnection() throws PluginException {
-        assertTrue(ConfigurationValidator.isValidOtpConnection(configuration));
-        configuration.setNodename("rabbit@invalid");
-        assertFalse(ConfigurationValidator.isValidOtpConnection(configuration));
-    }
+//    @Test
+//    @ExpectedException(PluginException.class)
+//    public void isValidOtpConnection() throws PluginException {
+//        assertTrue(ConfigurationValidator.isValidOtpConnection(configuration));
+//        configuration.setNodename("rabbit@invalid");
+//        assertFalse(ConfigurationValidator.isValidOtpConnection(configuration));
+//    }
 
     @Test
     @ExpectedException(RabbitAdminAuthException.class)

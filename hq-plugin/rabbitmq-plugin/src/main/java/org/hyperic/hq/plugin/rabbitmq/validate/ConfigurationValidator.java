@@ -25,21 +25,13 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.validate;
 
-import com.ericsson.otp.erlang.*;
-import com.rabbitmq.client.Connection;
+import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
 import org.hyperic.hq.product.PluginException;
-import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
-import org.springframework.erlang.support.converter.ErlangConversionException;
-import org.springframework.util.exec.Os;
 
-import java.io.IOException;
-import java.net.SocketException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
+import org.hyperic.util.config.ConfigResponse;
 
 /**
  * PluginValidator
@@ -57,35 +49,13 @@ public class ConfigurationValidator {
      * @throws PluginException If cookie value or host are not set
      * or if the test connection fails, throw a PluginException to alert the user.
      */
-    public synchronized  static boolean isValidOtpConnection(Configuration configuration) throws PluginException {
-        return true;
-//        logger.debug("Validating Erlang Cookie for OtpConnection with=" + configuration);
-//
-//        if (!configuration.isConfiguredOtpConnection()) {
-//            throw new PluginException("Plugin is not configured with the Erlang cookie. Please insure" +
-//                    " the Agent has permission to read the cookie");
-//        }
-//
-//        OtpConnection conn = null;
-//
-//        try {
-//            OtpSelf self = new OtpSelf("rabbit-monitor", configuration.getAuthentication());
-//            OtpPeer peer = new OtpPeer(configuration.getNodename());
-//            conn = self.connect(peer);
-//            conn.sendRPC("rabbit_mnesia", "status", new OtpErlangList());
-//            OtpErlangObject response = conn.receiveRPC();
-//            return isNodeRunning(response, configuration.getNodename());
-//        }
-//        catch (Exception e) {
-//            logger.debug(e.getMessage(),e);
-//            throw new PluginException("Can not connect to peer node.",e);
-//        }
-//        finally {
-//            if (conn != null) {
-//                conn.close();
-//                logger.debug("OK");
-//                conn = null;
-//            }
-//        }
+    public synchronized static boolean isValidOtpConnection(Properties configuration) throws PluginException {
+        return isValidOtpConnection(new ConfigResponse(configuration));
+    }
+
+    public synchronized static boolean isValidOtpConnection(ConfigResponse configuration) throws PluginException {
+        logger.debug("Validating Erlang Cookie for OtpConnection with=" + configuration);
+        HypericRabbitAdmin admin = new HypericRabbitAdmin(configuration);
+        return admin.getStatus();
     }
 }

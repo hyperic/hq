@@ -74,15 +74,12 @@
 
         <plugin type="log_track" class="org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerLog"/>
 
-        <config type="product">
-            <option name="node"  description="node"/>
-            <option name="authentication"  description=".erlang.cookie value"/>
-        </config>
-
-
-        <config type="measurement">
-            <option name="process.query" default="State.Name.re=[beam|erl],Args.*.eq=-sname,Args.*.eq=%process.name%"
-                    description="%process.name% Measurement Query"/>
+        <config>
+            <option name="node" description="node"/>
+            <option name="authentication" description=".erlang.cookie value"/>
+            <option name="server.path" description="server mnesia path"/>
+            <option name="process.query" default="State.Name.re=[beam|erl],Args.*.eq=-sname,Args.*.eq=%node%"
+                    description="PTQL Query"/>
         </config>
 
         <properties>
@@ -92,11 +89,6 @@
             <property description="Erlang Process" name="erlang.process"/>
             <property description="Rabbit -boot" name="rabbit.boot"/>
         </properties>
-
-        <config type="measurement">
-            <option name="process.query" default="State.Name.re=[beam|erl],Args.*.eq=-sname,Args.*.ct=%server.path%"
-                    description="Node Process Query"/>
-        </config>
 
         <metric name="Availability"
                 template="rabbitmq:${server-connection}:Availability"
