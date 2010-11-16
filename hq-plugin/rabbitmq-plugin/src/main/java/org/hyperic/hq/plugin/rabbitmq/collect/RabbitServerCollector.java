@@ -29,8 +29,6 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
-import org.hyperic.hq.plugin.rabbitmq.validate.ConfigurationValidator;
-import org.hyperic.hq.product.PluginException;
 
 /**
  * RabbitServiceCollector
@@ -48,11 +46,8 @@ public class RabbitServerCollector extends RabbitMQDefaultCollector {
         if (logger.isDebugEnabled()) {
             logger.debug("[collect] node=" + node);
         }
-        try {
-            setAvailability(rabbitAdmin.getStatus());
-        } catch (Throwable ex) {
-            setAvailability(false);
-        }
+
+        setAvailability(rabbitAdmin.getStatus());
     }
 
     @Override
