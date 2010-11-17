@@ -43,14 +43,12 @@ public class ConnectionCollector extends RabbitMQListCollector {
 
     private static final Log logger = LogFactory.getLog(ConnectionCollector.class);
 
-    public void collect() {
+    public void collect(HypericRabbitAdmin rabbitAdmin) {
         Properties props = getProperties();
         if (logger.isDebugEnabled()) {
             String node = (String) props.get(MetricConstants.NODE);
             logger.debug("[collect] node=" + node);
         }
-
-        HypericRabbitAdmin rabbitAdmin = getAdmin();
 
         List<RabbitConnection> connections = rabbitAdmin.getConnections();
         if (connections != null) {

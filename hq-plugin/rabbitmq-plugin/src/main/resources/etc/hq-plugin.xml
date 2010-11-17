@@ -77,7 +77,6 @@
         <config>
             <option name="node" description="node"/>
             <option name="authentication" description=".erlang.cookie value"/>
-            <option name="server.path" description="server mnesia path"/>
             <option name="process.query" default="State.Name.re=[beam|erl],Args.*.eq=-sname,Args.*.eq=%node%"
                     description="PTQL Query"/>
         </config>
@@ -106,7 +105,7 @@
             <property name="template"
                       value="rabbitmq:vhost=%vhost%,${server-connection}:%queue%.${alias}"/>
 
-            <config type="measurement">
+            <config>
                 <option name="vhost" description="rabbit node-vhost name"/>
                 <option name="queue" description="queue name"/>
             </config>
@@ -187,7 +186,7 @@
         <service name="Channel">
             <property name="template" value="rabbitmq:vhost=%vhost%,${server-connection}:%channel%.${alias}"/>
 
-            <config type="measurement">
+            <config>
                 <option name="vhost" description="rabbit node-vhost name"/>
                 <option name="channel" description="channel name"/>
             </config>
@@ -243,7 +242,7 @@
             <property name="template"
                       value="rabbitmq:${server-connection}:%connection%.${alias}"/>
 
-            <config type="measurement">
+            <config>
                 <option name="connection" description="connection name"/>
             </config>
 
@@ -341,7 +340,7 @@
         <service name="VirtualHost">
             <property name="template" value="rabbitmq:vhost=%vhost%,${server-connection}:${alias}"/>
 
-            <config type="measurement">
+            <config>
                 <option name="vhost" description="rabbit node-vhost name"/>
             </config>
 

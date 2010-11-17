@@ -51,9 +51,9 @@ public class DetectorConstants {
 
     public static final String RABBIT_BOOT = "rabbit.boot";
 
-    public static final String SERVICE_LOG_TRACK_ENABLE = "service.log_track.enable";
+    public static final String SERVER_LOG_TRACK_ENABLE = "server.log_track.enable";
 
-    public static final String SERVICE_LOG_TRACK_FILES = "service.log_track.files";
+    public static final String SERVER_LOG_TRACK_FILES = "server.log_track.files";
 
     public static final String NODE = "node";
 
