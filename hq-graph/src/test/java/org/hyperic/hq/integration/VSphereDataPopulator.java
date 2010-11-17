@@ -2,6 +2,7 @@ package org.hyperic.hq.integration;
 
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
+import org.hyperic.hq.inventory.domain.ResourceRelation;
 import org.hyperic.hq.plugin.domain.ResourceType;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -50,6 +51,7 @@ public class VSphereDataPopulator {
         Resource host = new Resource();
         host.setName(HOST_NAME);
         host.setType(ResourceType.findResourceTypeByName(VSphereResourceModelPopulator.HOST_TYPE));
+        host.setProperty("version", "4.1");
         cluster.addMember(host);
 
         ResourceGroup vApp = new ResourceGroup();
@@ -74,7 +76,8 @@ public class VSphereDataPopulator {
             .findResourceTypeByName(VSphereResourceModelPopulator.DATASTORE_TYPE));
         // TODO virtual disk size and provisioning policy are properties of this
         // relationship. Need relationship props
-        vm.relateTo(dataStore, VSphereResourceModelPopulator.USES);
+        ResourceRelation vmToDataStore = vm.relateTo(dataStore, VSphereResourceModelPopulator.USES);
+        vmToDataStore.setProperty("Disk Size",1234);
 
         // A Node is an OS Instance
         Resource guestOs = new Resource();

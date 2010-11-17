@@ -36,6 +36,10 @@ public class ResourceType {
     @OneToMany(targetEntity = Resource.class)
     private Set<Resource> resources;
     
+    @RelatedTo(type = RelationshipTypes.CONTAINS, direction = Direction.OUTGOING, elementClass = PropertyType.class)
+    @OneToMany
+    private Set<PropertyType> propertyTypes;
+    
     @javax.annotation.Resource
     private FinderFactory finderFactory2;
 
@@ -66,4 +70,14 @@ public class ResourceType {
         return new ResourceType().finderFactory2.getFinderForClass(ResourceType.class)
             .findByPropertyValue("name", name);
     }
+    
+    public PropertyType getPropertyType(String name) {
+        for(PropertyType propertyType: propertyTypes) {
+            if(name.equals(propertyType.getName())) {
+                return propertyType;
+            }
+        }
+        return null;
+    }
+
 }
