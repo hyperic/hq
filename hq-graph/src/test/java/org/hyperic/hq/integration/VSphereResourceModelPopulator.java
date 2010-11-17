@@ -137,6 +137,40 @@ public class VSphereResourceModelPopulator {
         vmType.relateTo(vmTemplateType, CREATED_FROM);
     }
 
+    public void populateResourceModelByApi() {
+    	RestTemplate api = new RestTemplate();
+    	List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+    	String uri = "http://localhost:8080/hq-graph/resourcetypes";
+    	HttpHeaders headers = new HttpHeaders();
+    	
+    	headers.setContentType(MediaType.APPLICATION_JSON);    	
+    	converters.add(new MappingJacksonHttpMessageConverter());
+    	api.setMessageConverters(converters);
+    	
+    	String[] names = new String[] {
+       			"__" + VCENTER_SERVER_TYPE,
+       			"__" + DATACENTER_TYPE,
+       			"__" + CLUSTER_TYPE,
+       			"__" + HOST_TYPE,
+       			"__" + VAPP_TYPE,
+       			"__" + VIRTUAL_MACHINE_TYPE,
+       			"__" + RESOURCE_POOL_TYPE,
+       			"__" + DATASTORE_TYPE,
+       			"__" + NODE_TYPE,
+       			"__" + TEMPLATE_TYPE   			
+    	};
+    	
+    	for (String name : names) {
+    		Map<String, String> payload = new HashMap<String, String>();
+    		
+    		payload.put("name", name);
+    	
+    		Map<String, String> result = api.postForObject(uri, new HttpEntity<Map<String, String>>(payload, headers), Map.class);
+    		
+    		System.out.println("Created [" + name + "] at " + result.get("uri"));
+    	}
+    }
+
     private void addRootNode() {
         // This isn't vsphere specific, but working w/idea that we'll
         // pre-install a System Node Type and a Root Node for hierarchy
