@@ -1,5 +1,8 @@
 package org.hyperic.hq.inventory.domain;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.datastore.graph.annotation.EndNode;
 import org.springframework.datastore.graph.annotation.RelationshipEntity;
 import org.springframework.datastore.graph.annotation.StartNode;
@@ -11,5 +14,28 @@ public class ResourceRelation {
 	
 	@EndNode
 	private Resource to;
+	
+	
+	public void setProperty(String key, Object value) {
+        //TODO give a way to model properties on a type relation to validate creation of properties on the relation?  What about pre-defined types?
+        getUnderlyingState().setProperty(key, value);
+    }
+    
+    public Object getProperty(String key) {
+        //TODO model default values?  See above
+        return getUnderlyingState().getProperty(key);
+    }
+    
+    public Map<String,Object> getProperties() {
+        Map<String,Object> properties = new HashMap<String,Object>();
+        for(String key:getUnderlyingState().getPropertyKeys()) {
+            try {
+                properties.put(key, getProperty(key));
+            }catch(IllegalArgumentException e) {
+              //filter out the properties we've defined at the class level, like name
+            }
+        }
+        return properties;
+    }
 	
 }

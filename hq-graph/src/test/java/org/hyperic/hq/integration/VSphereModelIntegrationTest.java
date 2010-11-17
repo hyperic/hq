@@ -1,5 +1,6 @@
 package org.hyperic.hq.integration;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -17,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
-import static org.junit.Assert.assertEquals;
 
 @Transactional
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -37,13 +37,28 @@ public class VSphereModelIntegrationTest {
 
     @Test
     public void testModel() {
-        dataPopulator.populateData();
-        assertTrue(Resource.findResourceByName(VSphereDataPopulator.VM_NAME).isRelatedTo(Resource.findResourceByName(VSphereDataPopulator.DATASTORE_NAME), VSphereResourceModelPopulator.USES));
-        Set<Resource> groupMembers = ResourceGroup.findResourceGroupByName(VSphereDataPopulator.CLUSTER_NAME).getMembers();
+       dataPopulator.populateData();
+       Resource vm = Resource.findResourceByName(VSphereDataPopulator.VM_NAME);
+       assertTrue(vm.isRelatedTo(Resource.findResourceByName(VSphereDataPopulator.DATASTORE_NAME), VSphereResourceModelPopulator.USES));
+       Set<Resource> groupMembers = ResourceGroup.findResourceGroupByName(VSphereDataPopulator.CLUSTER_NAME).getMembers();
        assertEquals(1,groupMembers.size());
        //equals ends up comparing IDs of underlying Nodes for equality (see Neo4jNodeBacking)
-       assertEquals(Resource.findResourceByName(VSphereDataPopulator.HOST_NAME),groupMembers.iterator().next());
-        
+       Resource host = Resource.findResourceByName(VSphereDataPopulator.HOST_NAME);
+       assertEquals(host,groupMembers.iterator().next());
+       //TODO Make sure a ResourceGroup comes back as a Resource
+       //Currently any variation of findAll goes into infinite recursion in strange circumstances, such as 2 instances of an extending
+       //class existing.  To make this work, have to comment out above call to findResourceGroupByName and creation of the vApp instance
+       
+       //Iterable<Resource> resources = Resource.findAllResources();
+       //assertTrue(resources.contains(ResourceGroup.findResourceGroupByName(VSphereDataPopulator.CLUSTER_NAME)));
+       
+       //TODO findAllResourceGroups and variations has same problem as above
+       //List<ResourceGroup> groups = ResourceGroup.findAllResourceGroups();
+       //assertTrue(groups.contains(ResourceGroup.findResourceGroupByName(VSphereDataPopulator.CLUSTER_NAME)));
+       
+       assertEquals("4.1",host.getProperties().get("version"));
+       assertEquals(1234,vm.getRelationshipTo(Resource.findResourceByName(VSphereDataPopulator.DATASTORE_NAME), 
+           VSphereResourceModelPopulator.USES).getProperty("Disk Size"));
     }
 
     @Test(expected = InvalidRelationshipException.class)

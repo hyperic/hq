@@ -1,6 +1,8 @@
 package org.hyperic.hq.integration;
 
+
 import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.plugin.domain.PropertyType;
 import org.hyperic.hq.plugin.domain.ResourceType;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -69,6 +71,10 @@ public class VSphereResourceModelPopulator {
 
         ResourceType hostType = new ResourceType();
         hostType.setName(HOST_TYPE);
+        PropertyType versionProp = new PropertyType();
+        versionProp.setName("version");
+        versionProp.setDescription("VMware Version");
+        versionProp.setResourceType(hostType);
 
         ResourceType vAppType = new ResourceType();
         vAppType.setName(VAPP_TYPE);

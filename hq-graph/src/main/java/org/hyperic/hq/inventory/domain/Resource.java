@@ -1,11 +1,15 @@
 package org.hyperic.hq.inventory.domain;
 
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 import org.hyperic.hq.inventory.InvalidRelationshipException;
+import org.hyperic.hq.plugin.domain.PropertyType;
 import org.hyperic.hq.plugin.domain.ResourceType;
 import org.hyperic.hq.reference.RelationshipTypes;
 
@@ -36,8 +40,8 @@ public class Resource {
     @NotNull
     @Indexed
     private String name;
-
-    @ManyToOne(targetEntity = Resource.class)
+    
+    @ManyToOne
     @NotNull
     @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.OUTGOING, elementClass = ResourceType.class)
     private ResourceType type;
@@ -56,6 +60,11 @@ public class Resource {
         }
         return (ResourceRelation) this.relateTo(resource, ResourceRelation.class, relationName);
     }
+    
+    public ResourceRelation getRelationshipTo(Resource resource, String relationName) {
+        //TODO this doesn't take direction into account
+        return (ResourceRelation) getRelationshipTo(resource,ResourceRelation.class,relationName);
+    }
 
     public boolean isRelatedTo(Resource resource, String relationName) {
         Traverser relationTraverser = getUnderlyingState().traverse(Traverser.Order.BREADTH_FIRST, new StopEvaluator() {
@@ -70,12 +79,40 @@ public class Resource {
                 return true;
             }
         }
+        
         return false;
     }
     
-    
     public static Resource findResourceByName(String name) {
         return new Resource().finderFactory2.getFinderForClass(Resource.class).findByPropertyValue("name", name);
+    }
+    
+    public void setProperty(String key, Object value) {
+        if(type.getPropertyType(key) == null) {
+            throw new IllegalArgumentException("Property " + key + " is not defined for resource of type " + type.getName());
+        }
+        //TODO check other stuff?
+        getUnderlyingState().setProperty(key, value);
+    }
+    
+    public Object getProperty(String key) {
+        PropertyType propertyType = type.getPropertyType(key);
+        if(propertyType == null) {
+            throw new IllegalArgumentException("Property " + key + " is not defined for resource of type " + type.getName());
+        }
+        return getUnderlyingState().getProperty(key,propertyType.getDefaultValue());
+    }
+    
+    public Map<String,Object> getProperties() {
+        Map<String,Object> properties = new HashMap<String,Object>();
+        for(String key:getUnderlyingState().getPropertyKeys()) {
+            try {
+                properties.put(key, getProperty(key));
+            }catch(IllegalArgumentException e) {
+              //filter out the properties we've defined at the class level, like name
+            }
+        }
+        return properties;
     }
   
 }
