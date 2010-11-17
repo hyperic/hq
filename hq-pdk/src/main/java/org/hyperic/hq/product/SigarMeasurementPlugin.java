@@ -27,6 +27,7 @@ package org.hyperic.hq.product;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarProxy;
@@ -55,6 +56,7 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
     private SigarProxy sigarProxy   = null;
     private ProcessFinder processFinder = null;
     private static final Map AVAIL_ATTRS = new HashMap();
+    private int proxyCacheExpire = SigarProxyCache.EXPIRE_DEFAULT;
 
     //Availability helpers. Assume resource is available if
     //we can collect the given attribute.
@@ -71,7 +73,7 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
         }
         try {
             this.sigar = new Sigar();
-            this.sigarProxy = SigarProxyCache.newInstance(sigar);
+            this.sigarProxy = SigarProxyCache.newInstance(sigar, proxyCacheExpire);
         } catch (UnsatisfiedLinkError le) {
             //XXX ok for now; sigar is not loaded in the server
             //getValue will fail in the agent in sigar was not properly
@@ -82,7 +84,27 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
         
         return this.sigar;
     }
-    
+
+    public void init(PluginManager manager) throws PluginException {
+        super.init(manager);
+        // find sigar expire setting
+        Properties props = manager.getProperties();
+        String expireVal =
+            props.getProperty("SigarMeasurementPlugin.SigarProxyCache.expire");
+        if(expireVal != null) {
+            try {
+                // need to be at least one second,
+                // otherwise just discard the setting
+                int val = Integer.parseInt(expireVal);
+                if(val > 0){
+                    proxyCacheExpire = val*1000;
+                }
+            } catch (NumberFormatException e) {
+                // error, just discard the setting
+            }
+        }
+    }
+
     public void shutdown() throws PluginException {
         if (this.sigar != null) {
             this.sigar.close();
