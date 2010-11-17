@@ -7,8 +7,12 @@ abstract public class RelationshipTypes  {
     // OK
     public static final String CONTAINS="CONTAINS";
     
-    // This is used for Resource->ResourceType and ResourceType->ResourceType
-    // ex "VM1.eng.vmware.com IS_A VirtualMachine", "vApp IS_A ResourcePool"
+    // This is used for Resource->ResourceType
+    // ex "VM1.eng.vmware.com IS_A VirtualMachine"
     public static final String IS_A="IS_A";
+    
+    //This is used for ResourceType->ResourceType
+    //ex. "vApp EXTENDS ResourcePool
+    public static final String EXTENDS="EXTENDS";
    
 }

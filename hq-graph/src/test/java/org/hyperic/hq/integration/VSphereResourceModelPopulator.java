@@ -118,8 +118,8 @@ public class VSphereResourceModelPopulator {
         // resource pools. If you add a VM to a vApp, you can't pick a diff
         // pool, but in a cluster, you can pick the cluster itself or a vApp or
         // resourcePool. Some way to enforce this in model?)
-        clusterType.relateTo(resourcePoolType, RelationshipTypes.IS_A);
-        vAppType.relateTo(resourcePoolType, RelationshipTypes.IS_A);
+        clusterType.relateTo(resourcePoolType, RelationshipTypes.EXTENDS);
+        vAppType.relateTo(resourcePoolType, RelationshipTypes.EXTENDS);
 
         // ResourcePools can have child ResourcePools
         // TODO Neo4J doesn't allow startNode to equal endNode

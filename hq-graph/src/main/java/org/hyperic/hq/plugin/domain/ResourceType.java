@@ -33,6 +33,8 @@ public class ResourceType {
     @Indexed
     private String name;
     
+    //TODO was using IS_A to relate ResourceTypes to ResourceTypes also, but somehow those related ResourceTypes were ending up in this Set
+    //causing ClassCastExceptions.  Switched to using EXTENDS for ResourceTypes, but still strange issue similar to Resource.findRelationships
     @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.INCOMING, elementClass = org.hyperic.hq.inventory.domain.Resource.class)
     @OneToMany
     private Set<Resource> resources;
