@@ -31,12 +31,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -88,6 +89,7 @@ public class ScheduleThread
 
     private static final long FETCH_TIME  = 2000; // 2 seconds.
     private static final long CANCEL_TIME = 5000; // 5 seconds.
+    private static final int  EXECUTOR_QUEUE_SIZE = 10000;
 
     private static long _logFetchTimeout = FETCH_TIME;
     private static long _cancelTimeout   = CANCEL_TIME;
@@ -105,13 +107,14 @@ public class ScheduleThread
     private final Properties _agentConfig; // agent.properties
 
     // Map of Executors, one per plugin
-    private final HashMap<String,ExecutorService> _executors = new HashMap<String,ExecutorService>();
+    private final HashMap<String,ThreadPoolExecutor> _executors = new HashMap<String,ThreadPoolExecutor>();
     // Map of asynchronous MetricTasks pending confirmation
     private final HashMap<Future,MetricTask>   _metricCollections = new HashMap<Future,MetricTask>();
     // The executor confirming metric collections, cancelling tasks that exceed
     // our timeouts.
     private ScheduledExecutorService _metricVerificationService;
     private ScheduledFuture          _metricVerificationTask;
+    private ScheduledFuture          _metricLoggingTask;
     
     private MeasurementValueGetter   _manager;
     private Sender                   _sender;  // Guy handling the results
@@ -158,6 +161,27 @@ public class ScheduleThread
                 _metricVerificationService.scheduleAtFixedRate(new MetricVerificationTask(),
                                                                POLL_PERIOD, POLL_PERIOD,
                                                                TimeUnit.MILLISECONDS);
+        _metricLoggingTask =
+                _metricVerificationService.scheduleAtFixedRate(new MetricLoggingTask(),
+                                                               1, 10, TimeUnit.MINUTES);
+    }
+
+    /**
+     * Task for printing Executor statistics
+     */
+    private class MetricLoggingTask implements Runnable {
+        public void run() {
+            for (String plugin : _executors.keySet()) {
+                ThreadPoolExecutor executor = _executors.get(plugin);
+                if (_log.isDebugEnabled()) {
+                    _log.debug("Plugin=" + plugin + ", " +
+                              "CompletedTaskCount=" + executor.getCompletedTaskCount() + ", " +
+                              "ActiveCount=" + executor.getActiveCount() + ", " +
+                              "TaskCount=" + executor.getTaskCount() + ", " +
+                              "PoolSize=" + executor.getPoolSize());
+                }
+            }
+        }
     }
 
     /**
@@ -240,12 +264,13 @@ public class ScheduleThread
     void die(){
         _shouldDie = true;
         for (String s : _executors.keySet()) {
-            ExecutorService svc = _executors.get(s);
-            List<Runnable> queuedMetrics = svc.shutdownNow();
+            ThreadPoolExecutor executor = _executors.get(s);
+            List<Runnable> queuedMetrics = executor.shutdownNow();
             _log.info("Shut down executor service for plugin '" + s + "'" +
                       " with " + queuedMetrics.size() + " queued collections");
         }
 
+        _metricLoggingTask.cancel(true);
         _metricVerificationTask.cancel(true);
         List<Runnable> pending = _metricVerificationService.shutdownNow();
         _log.info("Shutdown metric verification task with " +
@@ -568,7 +593,7 @@ public class ScheduleThread
                 (ScheduledMeasurement)items.get(i);
             ParsedTemplate tmpl = toParsedTemplate(meas);
 
-            ExecutorService svc;
+            ThreadPoolExecutor executor;
             synchronized (_executors) {
                 String plugin;
                 try {
@@ -579,19 +604,22 @@ public class ScheduleThread
                     plugin = tmpl.plugin;
                 }
 
-                svc = _executors.get(plugin);
-                if (svc == null) {
+                executor = _executors.get(plugin);
+                if (executor == null) {
                     int poolSize = getPoolSize(plugin);
                     _log.info("Creating executor for plugin '" + plugin +
                               "' with a pool size of " + poolSize);
-                    svc = Executors.newFixedThreadPool(poolSize);
-                    _executors.put(plugin, svc);
+                    executor = new ThreadPoolExecutor(poolSize, poolSize,
+                                                 1, TimeUnit.MINUTES,
+                                                 new LinkedBlockingQueue<Runnable>(EXECUTOR_QUEUE_SIZE),
+                                                 new ThreadPoolExecutor.AbortPolicy());
+                    _executors.put(plugin, executor);
                 }
             }
 
             MetricTask metricTask = new MetricTask(rs, meas);
             FutureTask<?> task = new FutureTask<Object>(metricTask, null);
-            svc.submit(task);
+            executor.submit(task);
             synchronized (_metricCollections) {
                 _metricCollections.put(task,metricTask);
             }
