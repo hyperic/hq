@@ -618,8 +618,7 @@ public class ScheduleThread
             }
 
             MetricTask metricTask = new MetricTask(rs, meas);
-            FutureTask<?> task = new FutureTask<Object>(metricTask, null);
-            executor.submit(task);
+            Future<?> task = executor.submit(metricTask);
             synchronized (_metricCollections) {
                 _metricCollections.put(task,metricTask);
             }
