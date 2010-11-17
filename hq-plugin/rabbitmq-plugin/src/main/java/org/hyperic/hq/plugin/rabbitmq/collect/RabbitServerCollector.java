@@ -28,8 +28,7 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.validate.ConfigurationValidator;
-import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
 
 /**
  * RabbitServiceCollector
@@ -41,17 +40,14 @@ public class RabbitServerCollector extends RabbitMQDefaultCollector {
     private static final Log logger = LogFactory.getLog(RabbitServerCollector.class);
 
     @Override
-    public void collect() {
+    public void collect(HypericRabbitAdmin rabbitAdmin) {
         Properties props = getProperties();
         String node = (String) props.get(MetricConstants.NODE);
         if (logger.isDebugEnabled()) {
             logger.debug("[collect] node=" + node);
         }
-        try {
-            setAvailability(ConfigurationValidator.isValidOtpConnection(props));
-        } catch (PluginException ex) {
-            setAvailability(false);
-        }
+
+        setAvailability(rabbitAdmin.getStatus());
     }
 
     @Override

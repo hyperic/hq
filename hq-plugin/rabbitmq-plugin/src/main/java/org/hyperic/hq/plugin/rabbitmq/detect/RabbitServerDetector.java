@@ -66,10 +66,6 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      */
     public List getServerResources(ConfigResponse serverConfig) throws PluginException {
         //System.setProperty("OtpConnection.trace", "99");
-
-        configure(serverConfig);
-
-
         List<ServerResource> resources = new ArrayList<ServerResource>();
         long[] pids = getPids(PTQL_QUERY);
         logger.debug("[getServerResources] pids.length=" + pids.length);
@@ -105,22 +101,21 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
     /**
      * Creates ServiceResources from RabbitMQ processes
      * as well as Queues, Exchanges, etc.
-     * @param serviceConfig Configuration of the parent server resource.
+     * @param config Configuration of the parent server resource.
      * @return
      * @throws PluginException
      */
     @Override
-    protected List discoverServices(ConfigResponse serviceConfig) throws PluginException {
+    protected List discoverServices(ConfigResponse config) throws PluginException {
+        logger.debug("[discoverServices] config="+config);
         List<ServiceResource> serviceResources = new ArrayList<ServiceResource>();
 
-        configure(serviceConfig);
-
-        List<ServiceResource> rabbitResources = createRabbitResources(serviceConfig);
+        List<ServiceResource> rabbitResources = createRabbitResources(config);
         if (rabbitResources != null && rabbitResources.size() > 0) {
             serviceResources.addAll(rabbitResources);
         }   
 
-        syncServices(serviceConfig, rabbitResources);
+        syncServices(config, rabbitResources);
 
         return serviceResources;
     }
@@ -321,6 +316,9 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                 service.setName(node+" "+name);
                 service.setDescription(name);
                 setProductConfig(service, c);
+                service.setMeasurementConfig();
+                service.setControlConfig();
+
 
                 if (service != null) serviceResources.add(service);
             }
@@ -391,8 +389,8 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                     File log = new File(m.group(1));
                     if (log.exists() && log.canRead()) {
                         logConfig = new ConfigResponse();
-                        logConfig.setValue(DetectorConstants.SERVICE_LOG_TRACK_ENABLE, true);
-                        logConfig.setValue(DetectorConstants.SERVICE_LOG_TRACK_FILES, log.getAbsolutePath());
+                        logConfig.setValue(DetectorConstants.SERVER_LOG_TRACK_ENABLE, true);
+                        logConfig.setValue(DetectorConstants.SERVER_LOG_TRACK_FILES, log.getAbsolutePath());
                     }
                 }
             }
