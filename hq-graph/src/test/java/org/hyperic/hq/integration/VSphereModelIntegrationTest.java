@@ -3,12 +3,17 @@ package org.hyperic.hq.integration;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.hyperic.hq.inventory.InvalidRelationshipException;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
+import org.hyperic.hq.inventory.domain.ResourceRelation;
 import org.hyperic.hq.plugin.domain.ResourceType;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.junit.Before;
@@ -55,10 +60,41 @@ public class VSphereModelIntegrationTest {
        //TODO findAllResourceGroups and variations has same problem as above
        //List<ResourceGroup> groups = ResourceGroup.findAllResourceGroups();
        //assertTrue(groups.contains(ResourceGroup.findResourceGroupByName(VSphereDataPopulator.CLUSTER_NAME)));
-       
+       Resource datastore = Resource.findResourceByName(VSphereDataPopulator.DATASTORE_NAME);
        assertEquals("4.1",host.getProperties().get("version"));
-       assertEquals(1234,vm.getRelationshipTo(Resource.findResourceByName(VSphereDataPopulator.DATASTORE_NAME), 
-           VSphereResourceModelPopulator.USES).getProperty("Disk Size"));
+       assertEquals(1234,vm.getRelationshipTo(datastore,VSphereResourceModelPopulator.USES).getProperty("Disk Size"));
+          
+       Set<ExpectedRelation> expectedRelations = new HashSet<ExpectedRelation>();
+       expectedRelations.add(new ExpectedRelation(host, vm, VSphereResourceModelPopulator.HOSTS));
+       expectedRelations.add(new ExpectedRelation(vm,Resource.findResourceByName(VSphereDataPopulator.RESOURCE_POOL_NAME),VSphereResourceModelPopulator.RUNS_IN));
+       ExpectedRelation vmToDatastore = new ExpectedRelation(vm, datastore, VSphereResourceModelPopulator.USES);
+       vmToDatastore.addProperty("Disk Size",1234);
+       expectedRelations.add(vmToDatastore);
+       expectedRelations.add(new ExpectedRelation(vm,Resource.findResourceByName(VSphereDataPopulator.GUEST_OS_NAME), VSphereResourceModelPopulator.HOSTS));
+       
+       Set<ResourceRelation> relations = vm.getRelationships();
+       assertEquals(expectedRelations.size(),relations.size());
+       
+       for(ResourceRelation relation: relations) {
+          boolean foundExpected = false;
+          for(ExpectedRelation expectedRelation: expectedRelations) {
+              if(testRelationsEqual(relation, expectedRelation)) {
+                  foundExpected=true;
+                  break;
+              }
+          }
+          if(! foundExpected) {
+              fail("Relation " + relation.getName() + " from[" + relation.getFrom() + 
+              "] to[" + relation.getTo() + "] with properties[" + relation.getProperties() + "] was not expected");
+          }
+       }
+    }
+    
+    private boolean testRelationsEqual(ResourceRelation relation1, ExpectedRelation relation2) {
+        return (relation1.getFrom().equals(relation2.getFrom())) &&
+               (relation1.getTo().equals(relation2.getTo())) &&
+               (relation1.getName().equals(relation2.getName())) &&
+               (relation1.getProperties().equals(relation2.getProperties()));
     }
 
     @Test(expected = InvalidRelationshipException.class)
@@ -120,6 +156,39 @@ public class VSphereModelIntegrationTest {
         // TODO how to represent hierarchy in return value while abstracting
         // Neo4J
 
+    }
+    
+    private class ExpectedRelation {
+        private Resource from;
+        private Resource to;
+        private String name;
+        private Map<String,Object> properties = new HashMap<String,Object>();
+        
+        public ExpectedRelation(Resource from, Resource to, String name) {
+            this.from = from;
+            this.to = to;
+            this.name = name;
+        }
+
+        public Map<String, Object> getProperties() {
+            return properties;
+        }
+
+        public void addProperty(String key, Object value) {
+            properties.put(key, value);
+        }
+
+        public Resource getFrom() {
+            return from;
+        }
+
+        public Resource getTo() {
+            return to;
+        }
+
+        public String getName() {
+            return name;
+        }
     }
 
 }

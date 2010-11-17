@@ -20,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class VSphereDataPopulator {
 
+    static final String GUEST_OS_NAME = "Microsoft Windows Server 2003";
+    static final String RESOURCE_POOL_NAME = "Test Resource Pool";
     static final String CLUSTER_NAME = "Sonoma";
     static final String HOST_NAME = "vmc-ssrc-c7k2-esx-10.eng.vmare.com";
     static final String DATASTORE_NAME = "SON-L40";
@@ -65,7 +67,7 @@ public class VSphereDataPopulator {
         host.relateTo(vm, VSphereResourceModelPopulator.HOSTS);
 
         Resource resourcePool = new Resource();
-        resourcePool.setName("Test Resource Pool");
+        resourcePool.setName(RESOURCE_POOL_NAME);
         resourcePool.setType(ResourceType
             .findResourceTypeByName(VSphereResourceModelPopulator.RESOURCE_POOL_TYPE));
         vm.relateTo(resourcePool, VSphereResourceModelPopulator.RUNS_IN);
@@ -81,7 +83,7 @@ public class VSphereDataPopulator {
 
         // A Node is an OS Instance
         Resource guestOs = new Resource();
-        guestOs.setName("Microsoft Windows Server 2003");
+        guestOs.setName(GUEST_OS_NAME);
         // TODO How to diff OS types like Windows, Linux, etc (are these just
         // properties of the node? probably need them at type level for metric
         // collection)

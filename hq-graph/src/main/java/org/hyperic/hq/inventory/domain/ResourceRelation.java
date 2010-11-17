@@ -29,13 +29,24 @@ public class ResourceRelation {
     public Map<String,Object> getProperties() {
         Map<String,Object> properties = new HashMap<String,Object>();
         for(String key:getUnderlyingState().getPropertyKeys()) {
-            try {
+            //Filter out properties that are class fields
+            if(!("from".equals(key)) && !("to".equals(key))) {
                 properties.put(key, getProperty(key));
-            }catch(IllegalArgumentException e) {
-              //filter out the properties we've defined at the class level, like name
             }
         }
         return properties;
+    }
+    
+    public String getName() {
+        return getUnderlyingState().getType().name();
+    }
+    
+    public Resource getFrom() {
+        return this.from;
+    }
+    
+    public Resource getTo() {
+        return this.to;
     }
 	
 }
