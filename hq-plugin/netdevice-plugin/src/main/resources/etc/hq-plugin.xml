@@ -430,7 +430,7 @@
             template="${snmp.template}:${cfwConnectionStatCount}.40.6"
             category="UTILIZATION"
             indicator="true"
-            units="percent"/>
+            units="none"/>
   </metrics>
 
   <config name="interface.index">
