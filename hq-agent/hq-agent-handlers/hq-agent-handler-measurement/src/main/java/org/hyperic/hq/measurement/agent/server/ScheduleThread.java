@@ -33,8 +33,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -594,8 +594,8 @@ public class ScheduleThread
             ParsedTemplate tmpl = toParsedTemplate(meas);
 
             ThreadPoolExecutor executor;
+            String plugin;
             synchronized (_executors) {
-                String plugin;
                 try {
                     GenericPlugin p = _manager.getPlugin(tmpl.plugin).getProductPlugin();
                     plugin = p.getName();
@@ -618,9 +618,13 @@ public class ScheduleThread
             }
 
             MetricTask metricTask = new MetricTask(rs, meas);
-            Future<?> task = executor.submit(metricTask);
-            synchronized (_metricCollections) {
-                _metricCollections.put(task,metricTask);
+            try {
+                Future<?> task = executor.submit(metricTask);
+                synchronized (_metricCollections) {
+                    _metricCollections.put(task,metricTask);
+                }
+            } catch (RejectedExecutionException e) {
+                _log.warn("Executor[" + plugin + "] rejected metric task " + metricTask.getMetric());
             }
         }
     }
