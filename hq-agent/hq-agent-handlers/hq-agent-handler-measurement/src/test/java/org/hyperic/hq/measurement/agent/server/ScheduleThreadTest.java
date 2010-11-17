@@ -28,7 +28,6 @@ package org.hyperic.hq.measurement.agent.server;
 
 import junit.framework.TestCase;
 
-import org.apache.log4j.BasicConfigurator;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.agent.ScheduledMeasurement;
@@ -50,15 +49,6 @@ public class ScheduleThreadTest extends TestCase {
     private static final String DSN_PLATFORM_AVAIL = "system.avail:Type=Platform:Availability";
 
     private static final String DSN_HANG_COLLECTION = "hang:Type=Hang:Hang";
-
-    private static boolean loggingSetup = false;
-    protected void setUp() throws Exception {
-        if (!loggingSetup) {
-            // Uncomment me for full logging.
-            BasicConfigurator.configure();
-            loggingSetup = true;
-        }
-    }
 
     private int derivedId = 0;
     private int dsnId = 0;
