@@ -55,7 +55,7 @@ public class ScheduleThreadTest extends TestCase {
     protected void setUp() throws Exception {
         if (!loggingSetup) {
             // Uncomment me for full logging.
-            // BasicConfigurator.configure();
+            BasicConfigurator.configure();
             loggingSetup = true;
         }
     }
@@ -239,6 +239,39 @@ public class ScheduleThreadTest extends TestCase {
         } catch (InterruptedException ie) {
             fail("Thread should not be interrupted");
         }
+    }
+
+    public void testRejectedExecution() throws Exception {
+
+        Properties p = new Properties();
+        p.put(ScheduleThread.PROP_QUEUE_SIZE + "hang", "5");
+
+        ScheduleThread st = new ScheduleThread(new SimpleSender(), new SimpleValueGetter(), p);
+
+        st.scheduleMeasurement(createMeasurement(DSN_HANG_COLLECTION, 100));
+
+        Thread t = new Thread(st);
+        t.start();
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            // Ignore
+        }
+
+        // Verify against ScheduleThread statistics
+        assertEquals("Wrong number of scheduled measurements",
+                     1.0, st.getNumMetricsScheduled());
+        assertEquals("Wrong number of metric collections",
+                     0.0, st.getNumMetricsFetched());
+
+        st.die();
+        try {
+            t.join();
+        } catch (InterruptedException ie) {
+            fail("Thread should not be interrupted");
+        }
+
     }
 
     public static class SimpleSender implements org.hyperic.hq.measurement.agent.server.Sender {

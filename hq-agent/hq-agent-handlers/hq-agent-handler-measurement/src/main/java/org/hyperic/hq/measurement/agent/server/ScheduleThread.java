@@ -82,6 +82,8 @@ public class ScheduleThread
             "scheduleThread.fetchLogTimeout";
     static final String PROP_CANCEL_TIMEOUT =
             "scheduleThread.cancelTimeout";
+    static final String PROP_QUEUE_SIZE =
+            "scheduleThread.queuesize.";
 
     // How often we check schedules when we think they are empty.
     private static final int POLL_PERIOD = 1000;
@@ -572,6 +574,20 @@ public class ScheduleThread
         }
     }
 
+    private int getQueueSize(String plugin) {
+        String prop = PROP_QUEUE_SIZE + plugin;
+        String sQueueSize = _agentConfig.getProperty(prop);
+        if(sQueueSize != null){
+            try {
+                return Integer.parseInt(sQueueSize);
+            } catch(NumberFormatException exc){
+                _log.error("Invalid setting for " + prop + " value=" +
+                           sQueueSize + " using defaults.");
+            }
+        }
+        return EXECUTOR_QUEUE_SIZE;
+    }
+
     private int getPoolSize(String plugin) {
         String prop = PROP_POOLSIZE + plugin;
         String sPoolSize = _agentConfig.getProperty(prop);
@@ -607,11 +623,12 @@ public class ScheduleThread
                 executor = _executors.get(plugin);
                 if (executor == null) {
                     int poolSize = getPoolSize(plugin);
+                    int queueSize = getQueueSize(plugin);
                     _log.info("Creating executor for plugin '" + plugin +
                               "' with a pool size of " + poolSize);
                     executor = new ThreadPoolExecutor(poolSize, poolSize,
                                                  1, TimeUnit.MINUTES,
-                                                 new LinkedBlockingQueue<Runnable>(EXECUTOR_QUEUE_SIZE),
+                                                 new LinkedBlockingQueue<Runnable>(queueSize),
                                                  new ThreadPoolExecutor.AbortPolicy());
                     _executors.put(plugin, executor);
                 }
