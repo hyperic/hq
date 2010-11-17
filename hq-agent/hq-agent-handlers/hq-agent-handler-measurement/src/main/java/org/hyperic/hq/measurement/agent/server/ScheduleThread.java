@@ -93,78 +93,78 @@ public class ScheduleThread
     private static final long CANCEL_TIME = 5000; // 5 seconds.
     private static final int  EXECUTOR_QUEUE_SIZE = 10000;
 
-    private static long _logFetchTimeout = FETCH_TIME;
-    private static long _cancelTimeout   = CANCEL_TIME;
+    private static long logFetchTimeout = FETCH_TIME;
+    private static long cancelTimeout = CANCEL_TIME;
 
-    private static final Log _log = LogFactory.getLog(ScheduleThread.class.getName());
+    private static final Log log = LogFactory.getLog(ScheduleThread.class.getName());
 
     // AppdefID -> Schedule
-    private final Map<String,ResourceSchedule>    _schedules = new HashMap<String,ResourceSchedule>();
+    private final Map<String,ResourceSchedule> schedules = new HashMap<String,ResourceSchedule>();
     // Should I shut down?
-    private volatile boolean                      _shouldDie = false;
+    private volatile boolean shouldDie = false;
     // Interrupt object
-    private final Object                          _interrupter = new Object();
+    private final Object interrupter = new Object();
     // Hash of DSNs to their errors
-    private final HashMap<String,String>          _errors = new HashMap<String,String>();
-    private final Properties _agentConfig; // agent.properties
+    private final HashMap<String,String> errors = new HashMap<String,String>();
+    private final Properties agentConfig; // agent.properties
 
     // Map of Executors, one per plugin
-    private final HashMap<String,ThreadPoolExecutor> _executors = new HashMap<String,ThreadPoolExecutor>();
+    private final HashMap<String,ThreadPoolExecutor> executors = new HashMap<String,ThreadPoolExecutor>();
     // Map of asynchronous MetricTasks pending confirmation
-    private final HashMap<Future,MetricTask>   _metricCollections = new HashMap<Future,MetricTask>();
+    private final HashMap<Future,MetricTask> metricCollections = new HashMap<Future,MetricTask>();
     // The executor confirming metric collections, cancelling tasks that exceed
     // our timeouts.
-    private ScheduledExecutorService _metricVerificationService;
-    private ScheduledFuture          _metricVerificationTask;
-    private ScheduledFuture          _metricLoggingTask;
+    private ScheduledExecutorService metricVerificationService;
+    private ScheduledFuture metricVerificationTask;
+    private ScheduledFuture metricLoggingTask;
     
-    private MeasurementValueGetter   _manager;
-    private Sender                   _sender;  // Guy handling the results
+    private MeasurementValueGetter manager;
+    private Sender sender;  // Guy handling the results
 
     // Statistics
-    private final Object _statsLock = new Object();
-    private long _statNumMetricsFetched = 0;
-    private long _statNumMetricsFailed = 0;
-    private long _statTotFetchTime = 0;
-    private long _statNumMetricsScheduled = 0;
-    private long _statMaxFetchTime = Long.MIN_VALUE;
-    private long _statMinFetchTime = Long.MAX_VALUE;
+    private final Object statsLock = new Object();
+    private long statNumMetricsFetched = 0;
+    private long statNumMetricsFailed = 0;
+    private long statTotFetchTime = 0;
+    private long statNumMetricsScheduled = 0;
+    private long statMaxFetchTime = Long.MIN_VALUE;
+    private long statMinFetchTime = Long.MAX_VALUE;
 
     ScheduleThread(Sender sender, MeasurementValueGetter manager,
                    Properties config)
         throws AgentStartException
     {
-        _agentConfig  = config;
-        _manager      = manager;
-        _sender       = sender;
+        agentConfig = config;
+        this.manager = manager;
+        this.sender = sender;
 
-        String sLogFetchTimeout = _agentConfig.getProperty(PROP_FETCH_LOG_TIMEOUT);
+        String sLogFetchTimeout = agentConfig.getProperty(PROP_FETCH_LOG_TIMEOUT);
         if(sLogFetchTimeout != null){
             try {
-                _logFetchTimeout = Integer.parseInt(sLogFetchTimeout);
+                logFetchTimeout = Integer.parseInt(sLogFetchTimeout);
             } catch(NumberFormatException exc){
-                _log.error("Invalid setting for " + PROP_FETCH_LOG_TIMEOUT + " value=" +
+                log.error("Invalid setting for " + PROP_FETCH_LOG_TIMEOUT + " value=" +
                            sLogFetchTimeout + ", using defaults.");
             }
         }
 
-        String sCancelTimeout = _agentConfig.getProperty(PROP_CANCEL_TIMEOUT);
+        String sCancelTimeout = agentConfig.getProperty(PROP_CANCEL_TIMEOUT);
         if(sCancelTimeout != null){
             try {
-                _cancelTimeout = Integer.parseInt(sCancelTimeout);
+                cancelTimeout = Integer.parseInt(sCancelTimeout);
             } catch(NumberFormatException exc){
-                _log.error("Invalid setting for " + PROP_CANCEL_TIMEOUT + " value=" +
+                log.error("Invalid setting for " + PROP_CANCEL_TIMEOUT + " value=" +
                            sCancelTimeout + ", using defaults.");
             }
         }
 
-        _metricVerificationService = Executors.newSingleThreadScheduledExecutor();
-        _metricVerificationTask =
-                _metricVerificationService.scheduleAtFixedRate(new MetricVerificationTask(),
+        metricVerificationService = Executors.newSingleThreadScheduledExecutor();
+        metricVerificationTask =
+                metricVerificationService.scheduleAtFixedRate(new MetricVerificationTask(),
                                                                POLL_PERIOD, POLL_PERIOD,
                                                                TimeUnit.MILLISECONDS);
-        _metricLoggingTask =
-                _metricVerificationService.scheduleAtFixedRate(new MetricLoggingTask(),
+        metricLoggingTask =
+                metricVerificationService.scheduleAtFixedRate(new MetricLoggingTask(),
                                                                1, 10, TimeUnit.MINUTES);
     }
 
@@ -173,10 +173,10 @@ public class ScheduleThread
      */
     private class MetricLoggingTask implements Runnable {
         public void run() {
-            for (String plugin : _executors.keySet()) {
-                ThreadPoolExecutor executor = _executors.get(plugin);
-                if (_log.isDebugEnabled()) {
-                    _log.debug("Plugin=" + plugin + ", " +
+            for (String plugin : executors.keySet()) {
+                ThreadPoolExecutor executor = executors.get(plugin);
+                if (log.isDebugEnabled()) {
+                    log.debug("Plugin=" + plugin + ", " +
                               "CompletedTaskCount=" + executor.getCompletedTaskCount() + ", " +
                               "ActiveCount=" + executor.getActiveCount() + ", " +
                               "TaskCount=" + executor.getTaskCount() + ", " +
@@ -197,30 +197,30 @@ public class ScheduleThread
      */
     private class MetricVerificationTask implements Runnable  {
         public void run() {
-            boolean isDebugEnabled = _log.isDebugEnabled();
-            synchronized (_metricCollections) {
-                if (isDebugEnabled && _metricCollections.size() > 0) {
-                    _log.debug(_metricCollections.size() + " metrics to validate.");
+            boolean isDebugEnabled = log.isDebugEnabled();
+            synchronized (metricCollections) {
+                if (isDebugEnabled && metricCollections.size() > 0) {
+                    log.debug(metricCollections.size() + " metrics to validate.");
                 }
-                for (Iterator<Future> i = _metricCollections.keySet().iterator();
+                for (Iterator<Future> i = metricCollections.keySet().iterator();
                      i.hasNext();) {
                     Future t = i.next();
-                    MetricTask mt = _metricCollections.get(t);
+                    MetricTask mt = metricCollections.get(t);
                     if (t.isDone())
                     {
                         if (isDebugEnabled) {
-                            _log.debug("Metric task '" + mt.getMetric() +
+                            log.debug("Metric task '" + mt.getMetric() +
                                    "' complete, duration: " +
                                    mt.getExecutionDuration());
                         }
                         i.remove();
                     } else {
                         // Not complete, check for timeout
-                        if (mt.getExecutionDuration() > _cancelTimeout) {
-                            _log.error("Metric '" + mt.getMetric() +
+                        if (mt.getExecutionDuration() > cancelTimeout) {
+                            log.error("Metric '" + mt.getMetric() +
                                        "' took too long to run, attempting to cancel");
                             boolean res = t.cancel(true);
-                            _log.error("Cancel result=" + res);
+                            log.error("Cancel result=" + res);
                             // Task will be removed on next iteration
                         }
                     }
@@ -240,13 +240,13 @@ public class ScheduleThread
     private ResourceSchedule getSchedule(ScheduledMeasurement meas) {
         String key = meas.getEntity().getAppdefKey();
         ResourceSchedule schedule;
-        synchronized (_schedules) {
-            schedule = _schedules.get(key);
+        synchronized (schedules) {
+            schedule = schedules.get(key);
             if (schedule == null) {
                 schedule = new ResourceSchedule();
                 schedule.id = meas.getEntity();
-                _schedules.put(key, schedule);
-                _log.debug("Created ResourceSchedule for: " + key);
+                schedules.put(key, schedule);
+                log.debug("Created ResourceSchedule for: " + key);
             }
         }
         
@@ -255,8 +255,8 @@ public class ScheduleThread
 
     // TODO: I don't think this works properly, hence the slow agent shutdowns..
     private void interruptMe(){
-        synchronized (_interrupter) {
-            _interrupter.notify();
+        synchronized (interrupter) {
+            interrupter.notify();
         }
     }
 
@@ -264,18 +264,18 @@ public class ScheduleThread
      * Shut down the schedule thread.
      */
     void die(){
-        _shouldDie = true;
-        for (String s : _executors.keySet()) {
-            ThreadPoolExecutor executor = _executors.get(s);
+        shouldDie = true;
+        for (String s : executors.keySet()) {
+            ThreadPoolExecutor executor = executors.get(s);
             List<Runnable> queuedMetrics = executor.shutdownNow();
-            _log.info("Shut down executor service for plugin '" + s + "'" +
+            log.info("Shut down executor service for plugin '" + s + "'" +
                       " with " + queuedMetrics.size() + " queued collections");
         }
 
-        _metricLoggingTask.cancel(true);
-        _metricVerificationTask.cancel(true);
-        List<Runnable> pending = _metricVerificationService.shutdownNow();
-        _log.info("Shutdown metric verification task with " +
+        metricLoggingTask.cancel(true);
+        metricVerificationTask.cancel(true);
+        List<Runnable> pending = metricVerificationService.shutdownNow();
+        log.info("Shutdown metric verification task with " +
                   pending.size() + " tasks");
         
         interruptMe();
@@ -295,8 +295,8 @@ public class ScheduleThread
         ScheduledItem[] items;
 
         ResourceSchedule rs;
-        synchronized (_schedules) {
-            rs = _schedules.remove(key);
+        synchronized (schedules) {
+            rs = schedules.remove(key);
         }
 
         if (rs == null) {
@@ -304,10 +304,10 @@ public class ScheduleThread
         }
 
         items = rs.schedule.getScheduledItems();
-        _log.debug("Un-scheduling " + items.length + " metrics for " + ent);
+        log.debug("Un-scheduling " + items.length + " metrics for " + ent);
 
-        synchronized (_statsLock) {
-            _statNumMetricsScheduled -= items.length;
+        synchronized (statsLock) {
+            statNumMetricsScheduled -= items.length;
         }
 
         for (ScheduledItem item : items) {
@@ -327,17 +327,17 @@ public class ScheduleThread
     void scheduleMeasurement(ScheduledMeasurement meas){
         ResourceSchedule rs = getSchedule(meas);
         try {
-            if (_log.isDebugEnabled()) {
-                _log.debug("scheduleMeasurement " + getParsedTemplate(meas).metric.toDebugString());
+            if (log.isDebugEnabled()) {
+                log.debug("scheduleMeasurement " + getParsedTemplate(meas).metric.toDebugString());
             }
 
             rs.schedule.scheduleItem(meas, meas.getInterval(), true, true);
 
-            synchronized (_statsLock) {
-                _statNumMetricsScheduled++;
+            synchronized (statsLock) {
+                statNumMetricsScheduled++;
             }
         } catch (ScheduleException e) {
-            _log.error("Unable to schedule metric '" +
+            log.error("Unable to schedule metric '" +
                       getParsedTemplate(meas) + "', skipping. Cause is " +
                       e.getMessage(), e);
         }
@@ -346,10 +346,10 @@ public class ScheduleThread
     private void logCache(String basicMsg, ParsedTemplate tmpl, String msg,
                           Exception exc, boolean printStack){
         String oldMsg;
-        boolean isDebug = _log.isDebugEnabled();
+        boolean isDebug = log.isDebugEnabled();
 
-        synchronized(_errors){
-            oldMsg = _errors.get(tmpl.metric.toString());
+        synchronized(errors){
+            oldMsg = errors.get(tmpl.metric.toString());
         }
 
         if(!isDebug && oldMsg != null && oldMsg.equals(msg)){
@@ -357,16 +357,16 @@ public class ScheduleThread
         }
 
         if(isDebug){
-            _log.error(basicMsg + " while processing Metric '" + tmpl + "'", exc);
+            log.error(basicMsg + " while processing Metric '" + tmpl + "'", exc);
         } else {
-            _log.error(basicMsg + ": " + msg);
+            log.error(basicMsg + ": " + msg);
             if (printStack) {
-                _log.error("Stack trace follows:", exc);
+                log.error("Stack trace follows:", exc);
             }
         }
 
-        synchronized(_errors){
-            _errors.put(tmpl.metric.toString(), msg);
+        synchronized(errors){
+            errors.put(tmpl.metric.toString(), msg);
         }
     }
 
@@ -384,8 +384,8 @@ public class ScheduleThread
     }
 
     private void clearLogCache(ParsedTemplate tmpl){
-        synchronized(_errors){
-            _errors.remove(tmpl.metric.toString());
+        synchronized(errors){
+            errors.remove(tmpl.metric.toString());
         }
     }
 
@@ -425,25 +425,25 @@ public class ScheduleThread
         throws PluginException, MetricNotFoundException,
                MetricUnreachableException
     {
-        return _manager.getValue(tmpl.plugin, tmpl.metric);
+        return manager.getValue(tmpl.plugin, tmpl.metric);
     }
 
     private class MetricTask implements Runnable {
-        ResourceSchedule _rs;
-        ScheduledMeasurement _meas;
-        long _executeStartTime = 0;
-        long _executeEndTime = 0;
+        ResourceSchedule rs;
+        ScheduledMeasurement meas;
+        long executeStartTime = 0;
+        long executeEndTime = 0;
 
         MetricTask(ResourceSchedule rs, ScheduledMeasurement meas) {
-            _rs = rs;
-            _meas = meas;
+            this.rs = rs;
+            this.meas = meas;
         }
 
         /**
          * @return The metric this task is attempting to collect.
          */
         public String getMetric() {
-            return _meas.getDSN();
+            return meas.getDSN();
         }
 
         /**
@@ -451,32 +451,32 @@ public class ScheduleThread
          * amount of time in milliseconds the task has been running.
          */
         public long getExecutionDuration() {
-            if (_executeStartTime == 0) {
+            if (executeStartTime == 0) {
                 // Still queued for execution
-                return _executeStartTime;
-            } else if (_executeEndTime == 0) {
+                return executeStartTime;
+            } else if (executeEndTime == 0) {
                 // Currently executing
-                return System.currentTimeMillis() - _executeStartTime;
+                return System.currentTimeMillis() - executeStartTime;
             } else {
                 // Completed
-                return _executeEndTime - _executeStartTime;
+                return executeEndTime - executeStartTime;
             }
         }
 
         public void run() {
-            boolean isDebug = _log.isDebugEnabled();
-            AppdefEntityID aid = _meas.getEntity();
-            String category = _meas.getCategory();
-            ParsedTemplate dsn = toParsedTemplate(_meas);
+            boolean isDebug = log.isDebugEnabled();
+            AppdefEntityID aid = meas.getEntity();
+            String category = meas.getCategory();
+            ParsedTemplate dsn = toParsedTemplate(meas);
             MetricValue data = null;
-            _executeStartTime = System.currentTimeMillis();
+            executeStartTime = System.currentTimeMillis();
             boolean success = false;
 
-            if (_rs.lastUnreachble != 0) {
+            if (rs.lastUnreachble != 0) {
                 if (!category.equals(MeasurementConstants.CAT_AVAILABILITY)) {
                     // Prevent stacktrace bombs if a resource is
                     // down, but don't skip processing availability metrics.
-                    _statNumMetricsFailed++;
+                    statNumMetricsFailed++;
                     return;
                 }
             }
@@ -485,20 +485,20 @@ public class ScheduleThread
             //        Maybe send some kind of error back to the
             //        bizapp?
             try {
-                int mid = _meas.getDsnID();
-                if (_rs.collected.get(mid) == Boolean.TRUE) {
+                int mid = meas.getDsnID();
+                if (rs.collected.get(mid) == Boolean.TRUE) {
                     if (isDebug) {
-                        _log.debug("Skipping duplicate mid=" + mid + ", aid=" + _rs.id);
+                        log.debug("Skipping duplicate mid=" + mid + ", aid=" + rs.id);
                     }
                 }
                 data = getValue(dsn);
                 if (data == null) {
                     // Don't allow plugins to return null from getValue(),
                     // convert these to MetricValue.NONE
-                    _log.warn("Plugin returned null value for metric: " + dsn);
+                    log.warn("Plugin returned null value for metric: " + dsn);
                     data = MetricValue.NONE;
                 }
-                _rs.collected.put(mid, Boolean.TRUE);
+                rs.collected.put(mid, Boolean.TRUE);
                 success = true;
                 clearLogCache(dsn);
             } catch(PluginNotFoundException exc){
@@ -511,8 +511,8 @@ public class ScheduleThread
                 logCache("Metric Value not found", dsn, exc);
             } catch(MetricUnreachableException exc){
                 logCache("Metric unreachable", dsn, exc);
-                _rs.lastUnreachble = _executeStartTime;
-                _log.warn("Disabling metrics for: " + _rs.id);
+                rs.lastUnreachble = executeStartTime;
+                log.warn("Disabling metrics for: " + rs.id);
             } catch(Exception exc){
                 // Unexpected exception
                 logCache("Error getting measurement value",
@@ -520,31 +520,31 @@ public class ScheduleThread
             }
 
             // Stats stuff
-            Long timeDiff = System.currentTimeMillis() - _executeStartTime;
+            Long timeDiff = System.currentTimeMillis() - executeStartTime;
 
-            synchronized (_statsLock) {
-                _statTotFetchTime += timeDiff;
-                if(timeDiff > _statMaxFetchTime) {
-                    _statMaxFetchTime = timeDiff;
+            synchronized (statsLock) {
+                statTotFetchTime += timeDiff;
+                if(timeDiff > statMaxFetchTime) {
+                    statMaxFetchTime = timeDiff;
                 }
 
-                if(timeDiff < _statMinFetchTime) {
-                    _statMinFetchTime = timeDiff;
+                if(timeDiff < statMinFetchTime) {
+                    statMinFetchTime = timeDiff;
                 }
             }
 
-            if (timeDiff > _logFetchTimeout) {
-                _log.warn("Collection of metric: '" + dsn + "' took: " + timeDiff + "ms");
+            if (timeDiff > logFetchTimeout) {
+                log.warn("Collection of metric: '" + dsn + "' took: " + timeDiff + "ms");
             }
 
             if (success) {
                 if (isDebug) {
-                    String debugDsn = getParsedTemplate(_meas).metric.toDebugString();
+                    String debugDsn = getParsedTemplate(meas).metric.toDebugString();
                     String msg =
                         "[" + aid + ":" + category +
                         "] Metric='" + debugDsn + "' -> " + data;
 
-                    _log.debug(msg + " timestamp=" + data.getTimestamp());
+                    log.debug(msg + " timestamp=" + data.getTimestamp());
                 }
                 if (data.isNone()) {
                     //wouldn't be inserted into the database anyhow
@@ -558,17 +558,17 @@ public class ScheduleThread
                     //rather than waiting for the metric's own interval
                     //which could take much longer to hit
                     //(e.g. Windows Updates on an 8 hour interval)
-                    _rs.retry.add(_meas);
+                    rs.retry.add(meas);
                     return;
                 }
-                _sender.processData(_meas.getDsnID(), data,
-                                    _meas.getDerivedID());
-                synchronized (_statsLock) {
-                    _statNumMetricsFetched++;
+                sender.processData(meas.getDsnID(), data,
+                                    meas.getDerivedID());
+                synchronized (statsLock) {
+                    statNumMetricsFetched++;
                 }
             } else {
-                synchronized (_statsLock) {
-                    _statNumMetricsFailed++;
+                synchronized (statsLock) {
+                    statNumMetricsFailed++;
                 }
             }
         }
@@ -576,12 +576,12 @@ public class ScheduleThread
 
     private int getQueueSize(String plugin) {
         String prop = PROP_QUEUE_SIZE + plugin;
-        String sQueueSize = _agentConfig.getProperty(prop);
+        String sQueueSize = agentConfig.getProperty(prop);
         if(sQueueSize != null){
             try {
                 return Integer.parseInt(sQueueSize);
             } catch(NumberFormatException exc){
-                _log.error("Invalid setting for " + prop + " value=" +
+                log.error("Invalid setting for " + prop + " value=" +
                            sQueueSize + " using defaults.");
             }
         }
@@ -590,12 +590,12 @@ public class ScheduleThread
 
     private int getPoolSize(String plugin) {
         String prop = PROP_POOLSIZE + plugin;
-        String sPoolSize = _agentConfig.getProperty(prop);
+        String sPoolSize = agentConfig.getProperty(prop);
         if(sPoolSize != null){
             try {
                 return Integer.parseInt(sPoolSize);
             } catch(NumberFormatException exc){
-                _log.error("Invalid setting for " + prop + " value=" +
+                log.error("Invalid setting for " + prop + " value=" +
                            sPoolSize + " using defaults.");
             }
         }
@@ -604,44 +604,44 @@ public class ScheduleThread
 
     private void collect(ResourceSchedule rs, List items)
     {
-        for (int i=0; i<items.size() && (!_shouldDie); i++) {
+        for (int i=0; i<items.size() && (!shouldDie); i++) {
             ScheduledMeasurement meas =
                 (ScheduledMeasurement)items.get(i);
             ParsedTemplate tmpl = toParsedTemplate(meas);
 
             ThreadPoolExecutor executor;
             String plugin;
-            synchronized (_executors) {
+            synchronized (executors) {
                 try {
-                    GenericPlugin p = _manager.getPlugin(tmpl.plugin).getProductPlugin();
+                    GenericPlugin p = manager.getPlugin(tmpl.plugin).getProductPlugin();
                     plugin = p.getName();
                 } catch (PluginNotFoundException e) {
                     // Proxied plugin?
                     plugin = tmpl.plugin;
                 }
 
-                executor = _executors.get(plugin);
+                executor = executors.get(plugin);
                 if (executor == null) {
                     int poolSize = getPoolSize(plugin);
                     int queueSize = getQueueSize(plugin);
-                    _log.info("Creating executor for plugin '" + plugin +
-                              "' with a pool size of " + poolSize);
+                    log.info("Creating executor for plugin '" + plugin +
+                              "' with a poolsize=" + poolSize + " queuesize=" + queueSize);
                     executor = new ThreadPoolExecutor(poolSize, poolSize,
                                                  1, TimeUnit.MINUTES,
                                                  new LinkedBlockingQueue<Runnable>(queueSize),
                                                  new ThreadPoolExecutor.AbortPolicy());
-                    _executors.put(plugin, executor);
+                    executors.put(plugin, executor);
                 }
             }
 
             MetricTask metricTask = new MetricTask(rs, meas);
             try {
                 Future<?> task = executor.submit(metricTask);
-                synchronized (_metricCollections) {
-                    _metricCollections.put(task,metricTask);
+                synchronized (metricCollections) {
+                    metricCollections.put(task,metricTask);
                 }
             } catch (RejectedExecutionException e) {
-                _log.warn("Executor[" + plugin + "] rejected metric task " + metricTask.getMetric());
+                log.warn("Executor[" + plugin + "] rejected metric task " + metricTask.getMetric());
             }
         }
     }
@@ -659,15 +659,15 @@ public class ScheduleThread
         if (rs.lastUnreachble != 0) {
             if ((now - rs.lastUnreachble) > UNREACHABLE_EXPIRE) {
                 rs.lastUnreachble = 0;
-                _log.info("Re-enabling metrics for: " + rs.id);
+                log.info("Re-enabling metrics for: " + rs.id);
             }
         }
 
         rs.collected.clear();
 
         if (rs.retry.size() != 0) {
-            if (_log.isDebugEnabled()) {
-                _log.debug("Retrying " + rs.retry.size() + " items (MetricValue.FUTUREs)");
+            if (log.isDebugEnabled()) {
+                log.debug("Retrying " + rs.retry.size() + " items (MetricValue.FUTUREs)");
             }
             collect(rs, rs.retry);
             rs.retry.clear();
@@ -692,18 +692,18 @@ public class ScheduleThread
         long timeOfNext = 0;
         
         Map<String,ResourceSchedule> schedules = null;
-        synchronized (_schedules) {
-            if (_schedules.size() == 0) {
+        synchronized (this.schedules) {
+            if (this.schedules.size() == 0) {
                 //nothing scheduled
                 timeOfNext = POLL_PERIOD + System.currentTimeMillis();
             } else {
-                schedules = new HashMap<String,ResourceSchedule>(_schedules);
+                schedules = new HashMap<String,ResourceSchedule>(this.schedules);
             }
         }
 
         if (schedules != null) {
             for (Iterator<ResourceSchedule> it = schedules.values().iterator();
-            it.hasNext() && (!_shouldDie);) {
+            it.hasNext() && (!shouldDie);) {
 
                 ResourceSchedule rs = it.next();
                 try {
@@ -714,7 +714,7 @@ public class ScheduleThread
                         timeOfNext = Math.min(next, timeOfNext);
                     }
                 } catch (Throwable e) {
-                    _log.error(e.getMessage(), e);
+                    log.error(e.getMessage(), e);
                 }
             }
         }
@@ -727,26 +727,26 @@ public class ScheduleThread
      * waits the appropriate time, and executes scheduled operations.
      */
     public void run(){
-        boolean isDebug = _log.isDebugEnabled();
-        while (!_shouldDie) {
+        boolean isDebug = log.isDebugEnabled();
+        while (!shouldDie) {
             long timeOfNext = collect();
             long now = System.currentTimeMillis();
             if (timeOfNext > now) {
                 long wait = timeOfNext - now;
                 if (isDebug) {
-                    _log.debug("Waiting " + wait + " ms until " +
+                    log.debug("Waiting " + wait + " ms until " +
                                TimeUtil.toString(now+wait));
                 }
                 try {
-                    synchronized (_interrupter) {
-                        _interrupter.wait(wait);
+                    synchronized (interrupter) {
+                        interrupter.wait(wait);
                     }
                 } catch (InterruptedException e) {
-                    _log.debug("Schedule thread kicked");
+                    log.debug("Schedule thread kicked");
                 }
             }
         }
-        _log.info("Schedule thread shut down");
+        log.info("Schedule thread shut down");
     }
 
     // MONITOR METHODS
@@ -755,8 +755,8 @@ public class ScheduleThread
      * @return Get the number of metrics in the schedule
      */
     public double getNumMetricsScheduled() throws AgentMonitorException {
-        synchronized (_statsLock) {
-            return _statNumMetricsScheduled;
+        synchronized (statsLock) {
+            return statNumMetricsScheduled;
         }
     }
 
@@ -764,8 +764,8 @@ public class ScheduleThread
      * @return The number of metrics which were attempted to be fetched (failed or successful)
      */
     public double getNumMetricsFetched() throws AgentMonitorException {
-        synchronized (_statsLock) {
-            return _statNumMetricsFetched;
+        synchronized (statsLock) {
+            return statNumMetricsFetched;
         }
     }
 
@@ -773,8 +773,8 @@ public class ScheduleThread
      * @return Get the number of metrics which resulted in an error when collected
      */
     public double getNumMetricsFailed() throws AgentMonitorException {
-        synchronized (_statsLock) {
-            return _statNumMetricsFailed;
+        synchronized (statsLock) {
+            return statNumMetricsFailed;
         }
     }
 
@@ -782,8 +782,8 @@ public class ScheduleThread
      * @return The total time spent fetching metrics
      */
     public double getTotFetchTime() throws AgentMonitorException {
-        synchronized (_statsLock) {
-            return _statTotFetchTime;
+        synchronized (statsLock) {
+            return statTotFetchTime;
         }
     }
 
@@ -791,11 +791,11 @@ public class ScheduleThread
      * @return The maximum time spent fetching a metric
      */
     public double getMaxFetchTime() throws AgentMonitorException {
-        synchronized (_statsLock) {
-            if(_statMaxFetchTime == Long.MIN_VALUE) {
+        synchronized (statsLock) {
+            if(statMaxFetchTime == Long.MIN_VALUE) {
                 return MetricValue.VALUE_NONE;
             }
-            return _statMaxFetchTime;
+            return statMaxFetchTime;
         }
     }
 
@@ -803,11 +803,11 @@ public class ScheduleThread
      * @return The minimum time spent fetching a metric
      */
     public double getMinFetchTime() throws AgentMonitorException {
-        synchronized (_statsLock) {
-            if(_statMinFetchTime == Long.MAX_VALUE) {
+        synchronized (statsLock) {
+            if(statMinFetchTime == Long.MAX_VALUE) {
                 return MetricValue.VALUE_NONE;
             }
-            return _statMinFetchTime;
+            return statMinFetchTime;
         }
     }
 }
