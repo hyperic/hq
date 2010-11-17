@@ -2,11 +2,10 @@ package org.hyperic.hq.plugin.domain;
 
 import java.util.Set;
 
-import javax.annotation.Resource;
-import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
@@ -28,7 +27,7 @@ import org.springframework.roo.addon.tostring.RooToString;
 @RooJavaBean
 @RooEntity
 public class ResourceType {
-
+	
     @NotNull
     @Indexed
     private String name;
@@ -46,7 +45,7 @@ public class ResourceType {
     @javax.annotation.Resource
     private FinderFactory finderFactory2;
 
-    public ResourceTypeRelation relateTo(ResourceType resourceType, String relationName) {
+	public ResourceTypeRelation relateTo(ResourceType resourceType, String relationName) {
         return (ResourceTypeRelation) this.relateTo(resourceType, ResourceTypeRelation.class,
             relationName);
     }
