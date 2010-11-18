@@ -70,7 +70,7 @@
 
 <tiles:insert definition=".portlet.error"/>
 
-<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<table border="0" cellspacing="0" cellpadding="0">
   <tr>
     <td width="20%" class="SmokeyLabel"><fmt:message key="resource.common.monitor.visibility.DefineRangeLabel"/></td>
 <logic:messagesPresent property="rn">
@@ -108,7 +108,7 @@
       <fmt:message key="monitoring.baseline.BlockContent.WithinRange"/>
       <br>
 
-      <table width="100%" border="0" cellspacing="0" cellpadding="2">
+      <table width="100%" border="0" cellspacing="3" cellpadding="5">
         <tr> 
           <td><html:img page="/images/spacer.gif" width="20" height="20" border="0"/></td>
           <td>
@@ -175,7 +175,7 @@
           <td>&nbsp;</td>
           <td>
             <fmt:message key="monitoring.baseline.BlockContent.To"/>&nbsp;</td>
-          <td width="100%">
+          <td width="100%" nowrap>
             <html:select property="endMonth" styleId="endMonth" onchange="toggleRadio('a', 1); changeMonitorDropDown('endMonth', 'endDay', 'endYear');"> 
               <html:option value="0">01 (Jan)</html:option>
               <html:option value="1">02 (Feb)</html:option>
@@ -255,35 +255,3 @@
     <td class="SmokeyContent"><span class="CaptionText"><fmt:message key="resource.common.monitor.visibility.TheseSettings"/></span></td>
   </tr>
 </table>
-
-<script type="text/javascript">
-  function showAdvanced() {
-    if (dojo.byId('advancedAnchor') != null) {
-      dojo.byId('advancedDisplay').style.display = "";
-         new Effect.Grow(dojo.byId('advancedAnchor'))
-    }
-
-    new Effect.Appear('advancedDisplay', {to: 0.85});
-    if (dojo.byId('simpleRn')) {
-        dojo.byId('simpleRn').style.visibility = "hidden";
-        dojo.byId('simpleRn').disabled = true;
-    }
-    if (dojo.byId('simpleRu')) {
-        dojo.byId('simpleRu').style.visibility = "hidden";
-        dojo.byId('simpleRu').disabled = true;
-    }
-  }
-
-  function cancelAdvanced() {
-    if (dojo.byId('simpleRn')) {
-        dojo.byId('simpleRn').disabled = false;
-        dojo.byId('simpleRn').style.visibility = "visible";
-    }
-    if (dojo.byId('simpleRu')) {
-        dojo.byId('simpleRu').disabled = false;
-        dojo.byId('simpleRu').style.visibility = "visible";
-    }
-    new Effect.Puff('advancedDisplay');
-  }
-
-</script>
