@@ -2638,3 +2638,7 @@ span.returnToLink {
 .bottomBorder {
 	border-bottom: 1px solid #eee;
 }
+
+#advancedContainer input[type=text] {
+    width:auto;
+}

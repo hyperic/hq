@@ -136,7 +136,7 @@
             <c:if test="${form.a != 1 || (rangeEnd - rangeBegin) > 172800000}">
               <fmt:message key="resource.common.monitor.visibility.now"/></a>&nbsp;<fmt:message key="common.label.Pipe"/>&nbsp;
           </c:if>
-          <html:link href="javascript:moveIt(dojo.byId('advancedDisplay'), '-20px', '25px');showAdvanced();"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn"/></html:link> </td>
+          <a href="#" onclick="advancedDialog.show();return false;"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn"/></a></td>
         </tr>
       </table>
     </td>
@@ -166,7 +166,7 @@
             <c:if test="${form.a != 1 || (rangeEnd - rangeBegin) > 172800000}">
               <fmt:message key="resource.common.monitor.visibility.now"/></a>&nbsp;<fmt:message key="common.label.Pipe"/>&nbsp;
             </c:if>
-			<html:link href="javascript:moveIt(dojo.byId('advancedDisplay'), '-20px', '25px');showAdvanced();"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.AdvancedSettingsBtn"/></html:link>
+			<a href="#" onclick="advancedDialog.show();return false;"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.AdvancedSettingsBtn"/></a>
           </td>
         </tr>
       </table>
@@ -181,30 +181,58 @@
 </c:choose>
   </tr>
 </table>
-  <div id="advancedAnchor" style="position: relative; visibility: hidden;"></div>
-  <div id="advancedDisplay" class="dialog" style="padding:15px;width:600px;height:150px;display:none;">
-    <tiles:insert definition=".resource.common.monitor.visibility.embeddedMetricDisplayRange">
-      <c:if test="${not empty form}">
-        <tiles:put name="form" beanName="form"/>
-        <tiles:put name="formName" beanName="formName"/>
-      </c:if>
+<div id="advancedAnchor" style="position: relative; visibility: hidden;"></div>
+<div id="advancedContainer">
+<div id="advancedDisplay" class="dialog" style="display: none;">
+	<tiles:insert definition=".resource.common.monitor.visibility.embeddedMetricDisplayRange">
+      	<c:if test="${not empty form}">
+	    	<tiles:put name="form" beanName="form"/>
+          	<tiles:put name="formName" beanName="formName"/>
+        </c:if>
     </tiles:insert>
-  </div>
-<!--  /  -->
+</div>
+</div>
+
 <script type="text/javascript">
-  function hideAdvanced() {
-    var advancedDiv = dojo.byId('advancedDisplay');
-    advancedDiv.style.display='none';
-    new Effect.MoveBy(advancedDiv.parentNode, 0, 0 );
-  }
-
-  function moveIt(obj, mvTop, mvLeft) {
-	obj.style.position = "absolute";
-	obj.style.top = mvTop;
-	obj.style.left = mvLeft;
-    obj.style.display = '';
-}
-
-onloads.push( hideAdvanced );
-
+	var advancedDialog = null;
+	
+	dojo11.addOnLoad(function(){
+		advancedDialog = new dijit11.Dialog({
+	            id: 'advancedDisplay',
+	            refocus: true,
+	            autofocus: false,
+	            opacity: 0,
+	            title: "<fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn" />"
+	    }, dojo11.byId('advancedDisplay'));
+		
+		var showHolder = advancedDialog.show;
+		var hideHolder = advancedDialog.hide;
+		var toggleControl = function (id, enabled) {
+			var obj = dojo.byId(id);
+			
+			if (obj) {
+				obj.disabled = !enabled;
+				
+				if (enabled == true) {
+					obj.style.visibility = "visible";
+				} else {
+					obj.style.visibility = "hidden";
+				}
+			}
+		}
+		
+		advancedDialog.show = function() {
+			toggleControl("simpleRn", false);
+			toggleControl("simpleRu", false);
+			showHolder.call(this);
+		}
+		
+		advancedDialog.hide = function() {
+			toggleControl("simpleRn", true);
+			toggleControl("simpleRu", true);
+			hideHolder.call(this);
+		}
+		
+	    dojo11.place(dojo11.byId('advancedDisplay'), dojo11.byId('advancedContainer'), "last");
+	});
 </script>
