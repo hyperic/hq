@@ -58,11 +58,17 @@ public class HypericRabbitAdmin {
     }
 
     private HypericRabbitAdmin(String peerNodeName, String cookie) {
+        logger.debug("[HypericRabbitAdmin] init("+peerNodeName+","+cookie+")");
         this.peerNodeName = peerNodeName;
         SingleConnectionFactory otpConnectionFactory = new SingleConnectionFactory("rabbit-monitor", cookie, peerNodeName);
         otpConnectionFactory.afterPropertiesSet();
         this.customErlangTemplate = new HypericErlangTemplate(otpConnectionFactory);
         this.customErlangTemplate.afterPropertiesSet();
+    }
+
+    public void destroy() {
+        logger.debug("[HypericRabbitAdmin] destroy()");
+        ((SingleConnectionFactory)customErlangTemplate.getConnectionFactory()).destroy();
     }
 
     public List<String> getVirtualHosts() throws PluginException {

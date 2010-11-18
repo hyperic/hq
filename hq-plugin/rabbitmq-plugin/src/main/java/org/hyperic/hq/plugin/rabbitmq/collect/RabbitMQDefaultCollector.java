@@ -29,6 +29,9 @@ public abstract class RabbitMQDefaultCollector extends Collector {
 
         try {
             if (ConfigurationValidator.isValidOtpConnection(props)) {
+                if (admin != null) {
+                    admin.destroy();
+                }
                 admin = new HypericRabbitAdmin(props);
             }
         } catch (RuntimeException ex) {
@@ -48,6 +51,7 @@ public abstract class RabbitMQDefaultCollector extends Collector {
         } catch (Throwable ex) {
             setAvailability(false);
             getLog().debug(ex.getMessage(), ex);
+            admin.destroy();
             admin = null;
         }
     }
