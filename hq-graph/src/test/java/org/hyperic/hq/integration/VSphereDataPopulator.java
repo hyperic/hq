@@ -1,5 +1,6 @@
 package org.hyperic.hq.integration;
 
+import org.hyperic.hq.alert.domain.Alert;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceRelation;
@@ -34,11 +35,13 @@ public class VSphereDataPopulator {
         vCenterServer.setName("VMC-SSRC-2K328");
         vCenterServer.setType(ResourceType
             .findResourceTypeByName(VSphereResourceModelPopulator.VCENTER_SERVER_TYPE));
+        vCenterServer.persist();
 
         Resource dataCenter = new Resource();
         dataCenter.setName("Camb-HQ");
         dataCenter.setType(ResourceType
             .findResourceTypeByName(VSphereResourceModelPopulator.DATACENTER_TYPE));
+        dataCenter.persist();
         vCenterServer.relateTo(dataCenter, VSphereResourceModelPopulator.MANAGES);
         // dataCenters are containers, let's make them top level elements
         rootNode.relateTo(dataCenter, RelationshipTypes.CONTAINS);
@@ -47,35 +50,41 @@ public class VSphereDataPopulator {
         cluster.setType(ResourceType
             .findResourceTypeByName(VSphereResourceModelPopulator.CLUSTER_TYPE));
         cluster.setName(CLUSTER_NAME);
-
+        cluster.persist();
         dataCenter.relateTo(cluster, RelationshipTypes.CONTAINS);
 
         Resource host = new Resource();
         host.setName(HOST_NAME);
         host.setType(ResourceType.findResourceTypeByName(VSphereResourceModelPopulator.HOST_TYPE));
+        host.persist();
         host.setProperty("version", "4.1");
+        host.merge();
         cluster.addMember(host);
 
         ResourceGroup vApp = new ResourceGroup();
         vApp.setType(ResourceType.findResourceTypeByName(VSphereResourceModelPopulator.VAPP_TYPE));
         vApp.setName("Sonoma Dev vApp");
-
+        vApp.persist();
+        
         Resource vm = new Resource();
         vm.setName(VM_NAME);
         vm.setType(ResourceType
             .findResourceTypeByName(VSphereResourceModelPopulator.VIRTUAL_MACHINE_TYPE));
+        vm.persist();
         host.relateTo(vm, VSphereResourceModelPopulator.HOSTS);
 
         Resource resourcePool = new Resource();
         resourcePool.setName(RESOURCE_POOL_NAME);
         resourcePool.setType(ResourceType
             .findResourceTypeByName(VSphereResourceModelPopulator.RESOURCE_POOL_TYPE));
+        resourcePool.persist();
         vm.relateTo(resourcePool, VSphereResourceModelPopulator.RUNS_IN);
 
         Resource dataStore = new Resource();
         dataStore.setName(DATASTORE_NAME);
         dataStore.setType(ResourceType
             .findResourceTypeByName(VSphereResourceModelPopulator.DATASTORE_TYPE));
+        dataStore.persist();
         // TODO virtual disk size and provisioning policy are properties of this
         // relationship. Need relationship props
         ResourceRelation vmToDataStore = vm.relateTo(dataStore, VSphereResourceModelPopulator.USES);
@@ -89,7 +98,13 @@ public class VSphereDataPopulator {
         // collection)
         guestOs.setType(ResourceType
             .findResourceTypeByName(VSphereResourceModelPopulator.NODE_TYPE));
+        guestOs.persist();
         vm.relateTo(guestOs, VSphereResourceModelPopulator.HOSTS);
+        
+        Alert alert =  new Alert();
+       
+        alert.persist();
+        alert.setResource(vm);
     }
 
     public static void main(String[] args) {

@@ -7,9 +7,11 @@ import static org.junit.Assert.fail;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.hyperic.hq.alert.domain.Alert;
 import org.hyperic.hq.inventory.InvalidRelationshipException;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
@@ -88,6 +90,8 @@ public class VSphereModelIntegrationTest {
               "] to[" + relation.getTo() + "] with properties[" + relation.getProperties() + "] was not expected");
           }
        }
+       
+      
     }
     
     private boolean testRelationsEqual(ResourceRelation relation1, ExpectedRelation relation2) {
@@ -95,6 +99,16 @@ public class VSphereModelIntegrationTest {
                (relation1.getTo().equals(relation2.getTo())) &&
                (relation1.getName().equals(relation2.getName())) &&
                (relation1.getProperties().equals(relation2.getProperties()));
+    }
+    
+    @Test
+    public void testCrossStorePersistence() {
+    	dataPopulator.populateData();
+    	Resource vm = Resource.findResourceByName(VSphereDataPopulator.VM_NAME);
+    	List<Alert> alerts = Alert.findAllAlerts();
+        assertEquals(vm.getName(),alerts.get(0).getResource().getName());
+        Set<Alert> resourceAlerts = vm.getAlerts();
+        //TODO above currently returning null
     }
 
     @Test(expected = InvalidRelationshipException.class)

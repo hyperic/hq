@@ -24,40 +24,40 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class VSphereResourceModelPopulator {
 
-    static final String SYSTEM_TYPE = "System";
+    public static final String SYSTEM_TYPE = "System";
 
-    static final String ROOT_NODE_NAME = "Root";
+    public static final String ROOT_NODE_NAME = "Root";
 
-    static final String TEMPLATE_TYPE = "Template";
+    public static final String TEMPLATE_TYPE = "Template";
 
-    static final String NODE_TYPE = "Node";
+    public static final String NODE_TYPE = "Node";
 
-    static final String DATASTORE_TYPE = "Datastore";
+    public static final String DATASTORE_TYPE = "Datastore";
 
-    static final String RESOURCE_POOL_TYPE = "Resource Pool";
+    public static final String RESOURCE_POOL_TYPE = "Resource Pool";
 
-    static final String VIRTUAL_MACHINE_TYPE = "Virtual Machine";
+    public static final String VIRTUAL_MACHINE_TYPE = "Virtual Machine";
 
-    static final String VAPP_TYPE = "vApp";
+    public static final String VAPP_TYPE = "vApp";
 
-    static final String HOST_TYPE = "Host";
+    public static final String HOST_TYPE = "Host";
 
-    static final String CLUSTER_TYPE = "Cluster";
+    public static final String CLUSTER_TYPE = "Cluster";
 
-    static final String DATACENTER_TYPE = "Datacenter";
+    public static final String DATACENTER_TYPE = "Datacenter";
 
-    static final String VCENTER_SERVER_TYPE = "vCenter Server";
+    public static final String VCENTER_SERVER_TYPE = "vCenter Server";
 
     // TODO is dependency hierarchical?
-    static final String USES = "USES";
+    public static final String USES = "USES";
 
     // Less common relationships. Would they need to extend something for
     // regular representation in our UI?
-    static final String MANAGES = "MANAGES";
-    static final String HOSTS = "HOSTS";
-    static final String RUNS_IN = "RUNS_IN";
-    static final String PROVIDES_RESOURCES = "PROVIDES_RESOURCES";
-    static final String CREATED_FROM = "CREATED_FROM";
+    public static final String MANAGES = "MANAGES";
+    public static final String HOSTS = "HOSTS";
+    public static final String RUNS_IN = "RUNS_IN";
+    public static final String PROVIDES_RESOURCES = "PROVIDES_RESOURCES";
+    public static final String CREATED_FROM = "CREATED_FROM";
 
     // TODO is relationship cardinality important in ResourceType model?
     // TODO important to enforce required relationships on model creation? (i.e.
@@ -70,40 +70,52 @@ public class VSphereResourceModelPopulator {
         // (need to prefix with VMware?)?
         ResourceType vCenterType = new ResourceType();
         vCenterType.setName(VCENTER_SERVER_TYPE);
+        vCenterType.persist();
 
         ResourceType dataCenterType = new ResourceType();
         dataCenterType.setName(DATACENTER_TYPE);
+        dataCenterType.persist();
 
         // TODO any reason to have ResourceGroupType vs ResourceType or not have
         // ResourceGroup
         // extend Resource?
         ResourceType clusterType = new ResourceType();
         clusterType.setName(CLUSTER_TYPE);
+        clusterType.persist();
 
         ResourceType hostType = new ResourceType();
         hostType.setName(HOST_TYPE);
+        hostType.persist();
+        
         PropertyType versionProp = new PropertyType();
         versionProp.setName("version");
         versionProp.setDescription("VMware Version");
         versionProp.setResourceType(hostType);
+        versionProp.persist();
 
         ResourceType vAppType = new ResourceType();
         vAppType.setName(VAPP_TYPE);
+        vAppType.persist();
 
         ResourceType vmType = new ResourceType();
         vmType.setName(VIRTUAL_MACHINE_TYPE);
+        vmType.persist();
 
         ResourceType resourcePoolType = new ResourceType();
         resourcePoolType.setName(RESOURCE_POOL_TYPE);
+        resourcePoolType.persist();
 
         ResourceType dataStoreType = new ResourceType();
         dataStoreType.setName(DATASTORE_TYPE);
+        dataStoreType.persist();
 
         ResourceType nodeType = new ResourceType();
         nodeType.setName(NODE_TYPE);
+        nodeType.persist();
 
         ResourceType vmTemplateType = new ResourceType();
         vmTemplateType.setName(TEMPLATE_TYPE);
+        vmTemplateType.persist();
 
         // A vCenterServer manages Datacenters
         vCenterType.relateTo(dataCenterType, MANAGES);
@@ -194,9 +206,11 @@ public class VSphereResourceModelPopulator {
         // traversal
         ResourceType rootType = new ResourceType();
         rootType.setName(SYSTEM_TYPE);
+        rootType.persist();
         Resource rootNode = new Resource();
         rootNode.setName(ROOT_NODE_NAME);
         rootNode.setType(rootType);
+        rootNode.persist();
     }
 
     public static void main(String[] args) {

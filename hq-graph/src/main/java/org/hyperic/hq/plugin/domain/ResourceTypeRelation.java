@@ -14,8 +14,16 @@ import org.springframework.roo.addon.tostring.RooToString;
 public class ResourceTypeRelation {
 
     @StartNode
-    private ResourceType from;
+    private transient ResourceType from;
 
     @EndNode
-    private ResourceType to;
+    private transient ResourceType to;
+
+	public ResourceType getFrom() {
+		return this.from;
+	}
+	
+	public ResourceType getTo() {
+		return this.to;
+	}
 }
