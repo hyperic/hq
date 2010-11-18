@@ -217,10 +217,9 @@ public class ScheduleThread
                     } else {
                         // Not complete, check for timeout
                         if (mt.getExecutionDuration() > cancelTimeout) {
-                            log.error("Metric '" + mt.getMetric() +
-                                       "' took too long to run, attempting to cancel");
                             boolean res = t.cancel(true);
-                            log.error("Cancel result=" + res);
+                            log.error("Metric '" + mt.getMetric() +
+                                       "' took too long to run, cancelled (result=" + res + ")");
                             // Task will be removed on next iteration
                         }
                     }
