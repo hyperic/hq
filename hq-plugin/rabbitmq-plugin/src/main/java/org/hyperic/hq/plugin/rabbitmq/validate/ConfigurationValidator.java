@@ -56,6 +56,10 @@ public class ConfigurationValidator {
     public synchronized static boolean isValidOtpConnection(ConfigResponse configuration) throws PluginException {
         logger.debug("Validating Erlang Cookie for OtpConnection with=" + configuration);
         HypericRabbitAdmin admin = new HypericRabbitAdmin(configuration);
-        return admin.getStatus();
+        try {
+            return admin.getStatus();
+        } finally {
+            admin.destroy();
+        }
     }
 }
