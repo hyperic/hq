@@ -152,28 +152,31 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
             if (ConfigurationValidator.isValidOtpConnection(serviceConfig)) {
                 rabbitResources = new ArrayList<ServiceResource>();
                 HypericRabbitAdmin admin = new HypericRabbitAdmin(serviceConfig);
-                List<ServiceResource> connections = createConnectionServiceResources(admin);
-                if (connections != null) {
-                    rabbitResources.addAll(connections);
-                }
-
-                List<ServiceResource> channels = createChannelServiceResources(admin);
-                if (channels != null) {
-                    rabbitResources.addAll(channels);
-                }
-
-                List<RabbitVirtualHost> virtualHostList=new ArrayList();
-                List<String> vhosts=admin.getVirtualHosts();
-                for (String vhost : vhosts) {
-                    virtualHostList.add(new RabbitVirtualHost(vhost, admin));
-                    List<ServiceResource> resources = createResourcesPerVirtualHost(admin,vhost);
-                    if (resources != null) {
-                        rabbitResources.addAll(resources);
+                try {
+                    List<ServiceResource> connections = createConnectionServiceResources(admin);
+                    if (connections != null) {
+                        rabbitResources.addAll(connections);
                     }
+
+                    List<ServiceResource> channels = createChannelServiceResources(admin);
+                    if (channels != null) {
+                        rabbitResources.addAll(channels);
+                    }
+
+                    List<RabbitVirtualHost> virtualHostList = new ArrayList();
+                    List<String> vhosts = admin.getVirtualHosts();
+                    for (String vhost : vhosts) {
+                        virtualHostList.add(new RabbitVirtualHost(vhost, admin));
+                        List<ServiceResource> resources = createResourcesPerVirtualHost(admin, vhost);
+                        if (resources != null) {
+                            rabbitResources.addAll(resources);
+                        }
+                    }
+
+                    rabbitResources.addAll(doCreateServiceResources(virtualHostList, AMQPTypes.VIRTUAL_HOST, serviceConfig.getValue(DetectorConstants.NODE)));
+                } finally {
+                    admin.destroy();
                 }
-
-                rabbitResources.addAll(doCreateServiceResources(virtualHostList, AMQPTypes.VIRTUAL_HOST,serviceConfig.getValue(DetectorConstants.NODE)));
-
             }
         }catch (RuntimeException ex){
             logger.debug(ex,ex);
