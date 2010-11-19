@@ -48,6 +48,7 @@ import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.util.config.ConfigResponse;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.mock.web.MockServletContext;
 
 public class DashboardControllerTest extends BaseDashboardControllerTest {
 	private AuthzBoss mockAuthzBoss;
@@ -74,6 +75,7 @@ public class DashboardControllerTest extends BaseDashboardControllerTest {
 				mockConfigurationProxy, mockDashboardManager);
 
 		controller.setMultiplePortletsList(mockMulitplePortletsList);
+		controller.setServletContext(new MockServletContext());
 	}
 
 	@Test

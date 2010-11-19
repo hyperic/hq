@@ -52,15 +52,15 @@ public class RabbitTestConfiguration {
         return conf;
     }
 
-    @Bean
-    public Configuration configuration() {
-        return Configuration.toConfiguration(configResponse());
-    }
+//    @Bean
+//    public Configuration configuration() {
+//        return Configuration.toConfiguration(configResponse());
+//    }
 
-    @Bean
-    public ConfigurationManager configurationManager() {
-        return new RabbitConfigurationManager(configuration());
-    }
+//    @Bean
+//    public ConfigurationManager configurationManager() {
+//        return new RabbitConfigurationManager(configuration());
+//    }
 
     @Bean
     public Queue stocksQueue() {
@@ -83,10 +83,10 @@ public class RabbitTestConfiguration {
         return queue;
     }
 
-    @Bean
-    public CachingConnectionFactory ccf() { 
-        return configurationManager().getConnectionFactory();
-    }
+//    @Bean
+//    public CachingConnectionFactory ccf() {
+//        return configurationManager().getConnectionFactory();
+//    }
 
     @Bean
     public List<Queue> queues() {

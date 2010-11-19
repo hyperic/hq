@@ -446,20 +446,25 @@ public abstract class ServerDetector
     }
 
     protected File findVersionFile(File dir, Pattern pattern) {
-        File[] files = dir.listFiles();
-        Set<File> subDirs = new HashSet<File>();
-        for(File file: files) {
-           if(file.isDirectory()) {
-               subDirs.add(file);
-           }else if( pattern.matcher(file.getAbsolutePath()).find()) {
-               return file; 
-           }
-        }
-        for(File subDir : subDirs) {
-            File versionFile = findVersionFile(subDir,pattern);
-            if(versionFile != null) {
-                return versionFile;
+
+        if (dir.isDirectory() && dir.canRead()) {
+            File[] files = dir.listFiles();
+            Set<File> subDirs = new HashSet<File>();
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    subDirs.add(file);
+                } else if (pattern.matcher(file.getAbsolutePath()).find()) {
+                    return file;
+                }
             }
+            for (File subDir : subDirs) {
+                File versionFile = findVersionFile(subDir, pattern);
+                if (versionFile != null) {
+                    return versionFile;
+                }
+            }
+        } else {
+            getLog().debug("[findVersionFile] Unable to acces to '" + dir + "'");
         }
         return null;
     }

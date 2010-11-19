@@ -98,6 +98,12 @@ public class VMAndHostVCenterPlatformDetectorTest {
 
     private ResourceEdgeApi resourceEdgeApi;
 
+    private static final String PROP_PROVIDER_URL = "covalent.CAMProviderURL";
+
+    private static final String PROP_AGENT_TOKEN = "covalent.CAMAgentToken";
+    
+    private static final String AGENT_TOKEN = "someAgentTokenString";
+
     private static final String VCENTER_URL = "url";
 
     private static final String VCENTER_UNAME = "uname";
@@ -122,7 +128,8 @@ public class VMAndHostVCenterPlatformDetectorTest {
 
     @Before
     public void setUp() throws Exception {
-        props.put(VMAndHostVCenterPlatformDetector.AGENT_IP, "127.0.0.1");
+        props.put(PROP_PROVIDER_URL, "http://localhost:8080/lather");
+        props.put(PROP_AGENT_TOKEN, AGENT_TOKEN);
         props.put(VSphereUtil.PROP_URL, VCENTER_URL);
         props.put(VSphereUtil.PROP_USERNAME, VCENTER_UNAME);
         props.put(VSphereUtil.PROP_PASSWORD, VCENTER_PW);
@@ -158,7 +165,7 @@ public class VMAndHostVCenterPlatformDetectorTest {
         agentResponse.setStatus(ResponseStatus.SUCCESS);
         Agent agent = new Agent();
         agentResponse.setAgent(agent);
-        EasyMock.expect(agentApi.getAgent("127.0.0.1", 2144)).andReturn(agentResponse);
+        EasyMock.expect(agentApi.getAgent(AGENT_TOKEN)).andReturn(agentResponse);
 
         ResourcePrototypeResponse hostProtoResponse = new ResourcePrototypeResponse();
         hostProtoResponse.setStatus(ResponseStatus.SUCCESS);

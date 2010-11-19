@@ -1,9 +1,9 @@
 package com.vmware.springsource.hyperic.plugin.gemfire.detectors;
 
+import com.vmware.springsource.hyperic.plugin.gemfire.GemFireLiveData;
 import java.util.HashMap;
 import java.util.Map;
 import javax.management.MBeanServerConnection;
-import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentCommand;
@@ -30,8 +30,8 @@ public class GemfirePlatformDetector extends PlatformDetector {
         try {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(config.toProperties());
             log.debug("mServer=" + mServer);
-            ObjectName mbean = new ObjectName("GemFire:type=MemberInfoWithStatsMBean");
-            String id = (String) mServer.getAttribute(mbean, "Id");
+            String id=GemFireLiveData.getSystemID(mServer);
+            log.debug("[getPlatformResource] id='"+id+"' config="+config);
             configs.put(id, config);
         } catch (Exception e) {
             throw new PluginException(e.getMessage(), e);

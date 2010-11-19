@@ -27,6 +27,7 @@
 package org.hyperic.hq.plugin.vsphere;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,8 @@ import org.hyperic.hq.agent.server.AgentDaemon;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
 import org.hyperic.hq.agent.server.ConfigStorage;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.bizapp.agent.CommandsAPIInfo;
+import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.hqapi1.HQApi;
 import org.hyperic.hq.product.DaemonDetector;
 import org.hyperic.hq.product.PluginException;
@@ -52,36 +55,35 @@ public class VCenterDetector extends DaemonDetector {
     // constants, so we need to define them again here.
     private static final String STORAGE_PREFIX  = "runtimeautodiscovery";
     private static final String STORAGE_KEYLIST = "runtimeAD-keylist";
-    static final String HQ_IP = "agent.setup.camIP";
-    static final String HQ_PORT = "agent.setup.camPort";
-    static final String HQ_SPORT = "agent.setup.camSSLPort";
-    static final String HQ_SSL = "agent.setup.camSecure";
+    
+    private static final String AGENT_TOKEN = CommandsAPIInfo.PROP_AGENT_TOKEN;
+    private static final String PROVIDER_URL = CommandsAPIInfo.PROP_PROVIDER_URL;
+    
     static final String HQ_USER = "agent.setup.camLogin";
     static final String HQ_PASS = "agent.setup.camPword";
    
 
     //XXX future HQ/pdk should provide this.
-    private HQApi getApi(Properties props) {
-        boolean isSecure;
-        String scheme;
-        String host = props.getProperty(HQ_IP, "localhost");
-        String port;
-        if ("yes".equals(props.getProperty(HQ_SSL))) {
-            isSecure = true;
-            port = props.getProperty(HQ_SPORT, "7443");
-            scheme = "https";
-        }
-        else {
-            isSecure = false;
-            port = props.getProperty(HQ_PORT, "7080");
-            scheme = "http";
-        }
-        String user = props.getProperty(HQ_USER, "hqadmin");
-        String pass =  props.getProperty(HQ_PASS, "hqadmin");
+    private HQApi getApi(Properties props) throws PluginException {
+        
+        try {
+        	String providerURL = props.getProperty(PROVIDER_URL);
+        	URI uri = new URI(providerURL);
+            String user = props.getProperty(HQ_USER, "hqadmin");
+            String pass = props.getProperty(HQ_PASS, "hqadmin");
 
-        HQApi api = new HQApi(host, Integer.parseInt(port), isSecure, user, pass);
-        _log.debug("Using HQApi at " + scheme + "://" + host + ":" + port);
-        return api;
+            HQApi api = new HQApi(uri, user, pass);
+            
+            if (_log.isDebugEnabled()) {
+                _log.debug("Using HQApi at " + uri.getScheme() + "://" 
+                			+ uri.getHost() + ":" + uri.getPort());
+            }
+            
+            return api;
+
+        } catch (Exception e) {
+            throw new PluginException("Could not get HQApi connection: " + e.getMessage(), e);        	
+        }
     }
     
     protected VCenterPlatformDetector getPlatformDetector() {
@@ -93,12 +95,22 @@ public class VCenterDetector extends DaemonDetector {
      * FIXME: This will be executed twice during a runtime scan,
      * once during getServerResources() and once during discoverServices()
      */
-    private void discoverPlatforms(ConfigResponse config)
+    private void discoverPlatforms(AgentDaemon agent, ConfigResponse config)
         throws PluginException {
 
         Properties props = new Properties();
         props.putAll(getManager().getProperties());
         props.putAll(config.toProperties());
+        
+        try {
+            ProviderInfo providerInfo = CommandsAPIInfo.getProvider(agent.getStorageProvider());
+        
+            props.put(AGENT_TOKEN, providerInfo.getAgentToken());
+            props.put(PROVIDER_URL, providerInfo.getProviderAddress());
+        } catch (Exception e) {
+            throw new PluginException(e.getMessage(), e);
+        }
+        
         VSphereUtil vim= null;
 		
         try {
@@ -128,7 +140,7 @@ public class VCenterDetector extends DaemonDetector {
 
                 if (AuthzConstants.serverPrototypeVmwareVcenter.equals(type)) {
                     ConfigResponse serverConfig = (ConfigResponse)entry.getValue();
-                    discoverPlatforms(serverConfig);
+                    discoverPlatforms(agent, serverConfig);
                 }
             }            
         } catch (Exception e) {
@@ -160,7 +172,8 @@ public class VCenterDetector extends DaemonDetector {
         //XXX this method only gets called once a day by default
         //but we won't have the vSphere sdk config until the server
         //resource is configured.
-        discoverPlatforms(config);
+    	AgentDaemon agent = AgentDaemon.getMainInstance();
+        discoverPlatforms(agent, config);
         return super.discoverServices(config);
     }
 }

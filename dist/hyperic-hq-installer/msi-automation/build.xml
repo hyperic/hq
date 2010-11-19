@@ -1,11 +1,91 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="test-replace" default="all" >
+<project name="test-replace" default="all" xmlns:ac="antlib:net.sf.antcontrib">
   <description>Builds MSI packages from HQ bundles.</description>
 
   <property file="${basedir}/build.properties" />
   <import file="msi-macros.xml" />
 
-  <target name="build-os-msi" >
+  <!-- Figure out what kind of build we have; release builds have no text at all
+       in the build type, and snapshot builds have 'SNAPSHOT' somewhere in them.
+       Milestone builds are simply neither of those two cases.  -->
+
+  <target name="determine-build-type">
+    <ac:if>
+      <equals arg1="${hq.build.type}" arg2="" />
+      <ac:then>
+        <echo message="Doing a release build...." />
+
+        <property name="hq.os.name" value="${hq.os.base.name}-${hq.version}" />
+        <property name="hq.ee.name" value="${hq.ee.base.name}-${hq.version}" />
+
+        <property name="hq.os.base.url" value="http://10.0.0.104/raid/release/shipped/hq/stagingRepo/release/org/hyperic/hq/dist/${hq.os.base.name}/${hq.version}/" />
+        <property name="hq.ee.base.url" value="http://10.0.0.104/raid/release/shipped/hq/stagingRepo/release/com/hyperic/hq/dist/${hq.ee.base.name}/${hq.version}/" />
+        <property name="hq.os.build.name" value="${hq.os.name}-win32.zip" />
+        <property name="hq.ee.build.name" value="${hq.ee.name}-win32.zip" />
+
+        <property name="hq.os.build.url" value="${hq.os.base.url}${hq.os.build.name}" />
+        <property name="hq.ee.build.url" value="${hq.ee.base.url}${hq.ee.build.name}" />
+
+        <property name="installer.os.dest.folder.name" value="${hq.os.base.name}-${hq.version}" />
+        <property name="installer.ee.dest.folder.name" value="${hq.ee.base.name}-${hq.version}" />
+
+        <property name="installer.dest.path.os" value="${installer.os.base.path}\\${hq.os.name}" />
+        <property name="installer.dest.path.ee" value="${installer.ee.base.path}\\${hq.ee.name}" />
+
+      </ac:then>
+      <ac:else>
+        <ac:if>
+          <contains string="${hq.build.type}" substring="SNAPSHOT" />
+          <ac:then>
+            <echo message="Doing a snapshot build...." />
+
+            <property name="hq.os.name" value="${hq.os.base.name}-${hq.version}.${hq.os.build}" />
+            <property name="hq.ee.name" value="${hq.ee.base.name}-${hq.version}.${hq.ee.build}" />
+
+            <property name="hq.os.base.url" value="http://maven.hyperic.org/snapshot/org/hyperic/hq/dist/${hq.os.base.name}/${hq.version}.${hq.build.type}/" />
+            <property name="hq.ee.base.url" value="http://private.maven.hyperic.com/snapshot/com/hyperic/hq/dist/${hq.ee.base.name}/${hq.version}.${hq.build.type}/" />
+
+            <property name="hq.os.build.name" value="${hq.os.name}-win32.zip" />
+            <property name="hq.ee.build.name" value="${hq.ee.name}-win32.zip" />
+
+            <property name="hq.os.build.url" value="${hq.os.base.url}${hq.os.build.name}" />
+            <property name="hq.ee.build.url" value="${hq.ee.base.url}${hq.ee.build.name}" />
+
+            <property name="installer.os.dest.folder.name" value="${hq.os.base.name}-${hq.version}.${hq.build.type}" />
+            <property name="installer.ee.dest.folder.name" value="${hq.ee.base.name}-${hq.version}.${hq.build.type}" />
+
+            <property name="installer.dest.path.os" value="${installer.os.base.path}\\${hq.os.name}" />
+            <property name="installer.dest.path.ee" value="${installer.ee.base.path}\\${hq.ee.name}" />
+
+          </ac:then>
+          <ac:else>
+            <echo message="Doing a milestone build...." />
+
+            <property name="hq.os.name" value="${hq.os.base.name}-${hq.version}.${hq.os.build}" />
+            <property name="hq.ee.name" value="${hq.ee.base.name}-${hq.version}.${hq.ee.build}" />
+
+            <property name="hq.os.base.url" value="http://10.0.0.104/raid/release/shipped/hq/stagingRepo/org/hyperic/hq/dist/${hq.os.base.name}/${hq.version}.${hq.build.type}/" />
+            <property name="hq.ee.base.url" value="http://10.0.0.104/raid/release/shipped/hq/stagingRepo/com/hyperic/hq/dist/${hq.ee.base.name}/${hq.version}.${hq.build.type}/" />
+
+            <property name="hq.os.build.name" value="${hq.os.name}-win32.zip" />
+            <property name="hq.ee.build.name" value="${hq.ee.name}-win32.zip" />
+
+            <property name="hq.os.build.url" value="${hq.os.base.url}${hq.os.build.name}" />
+            <property name="hq.ee.build.url" value="${hq.ee.base.url}${hq.ee.build.name}" />
+
+            <property name="installer.os.dest.folder.name" value="${hq.os.base.name}-${hq.version}.${hq.build.type}" />
+            <property name="installer.ee.dest.folder.name" value="${hq.ee.base.name}-${hq.version}.${hq.build.type}" />
+
+            <property name="installer.dest.path.os" value="${installer.os.base.path}\\${hq.os.name}" />
+            <property name="installer.dest.path.ee" value="${installer.ee.base.path}\\${hq.ee.name}" />
+
+          </ac:else>
+        </ac:if>
+      </ac:else>
+    </ac:if>
+  </target>
+
+  <target name="build-os-msi" depends="determine-build-type" >
     <build-one-msi
        src.url="${hq.os.build.url}"
        base.name="${hq.os.name}"
@@ -20,7 +100,7 @@
        msi.dest="${hq.msi.dest}" />
   </target>
 
-  <target name="build-ee-msi" depends="build-os-msi" >
+  <target name="build-ee-msi" depends="determine-build-type" >
     <build-one-msi
        src.url="${hq.ee.build.url}"
        base.name="${hq.ee.name}"
@@ -35,7 +115,7 @@
        msi.dest="${hq.msi.dest}" />
   </target>
 
-  <target name="all" depends="build-ee-msi" >
+  <target name="all" depends="build-os-msi,build-ee-msi" >
   </target>
 
 </project>

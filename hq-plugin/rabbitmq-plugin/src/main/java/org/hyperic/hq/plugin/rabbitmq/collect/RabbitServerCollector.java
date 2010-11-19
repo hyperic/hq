@@ -25,47 +25,33 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.collect;
 
+import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.configure.Configuration;
-import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
-import org.hyperic.hq.product.Collector;
-import org.hyperic.hq.product.PluginException;
-
+import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
 
 /**
  * RabbitServiceCollector
  * @author Helena Edelson
  * @author German Laullon
  */
-public class RabbitServerCollector extends Collector {
+public class RabbitServerCollector extends RabbitMQDefaultCollector {
 
     private static final Log logger = LogFactory.getLog(RabbitServerCollector.class);
 
     @Override
-    protected void init() throws PluginException {
-        Configuration configuration = Configuration.toConfiguration(getProperties());
-        logger.debug("Init " + configuration);
-
-        /** Throws relevant exceptions based on what is not yet configured, such as user/pass */
-        if (!RabbitProductPlugin.isInitialized()) {
-            RabbitProductPlugin.initialize(configuration);
+    public void collect(HypericRabbitAdmin rabbitAdmin) {
+        Properties props = getProperties();
+        String node = (String) props.get(MetricConstants.NODE);
+        if (logger.isDebugEnabled()) {
+            logger.debug("[collect] node=" + node);
         }
-        super.init();
+
+        setAvailability(rabbitAdmin.getStatus());
     }
 
     @Override
-    public void collect() {
-        logger.debug("Collect " + getProperties());
-        Configuration configuration = Configuration.toConfiguration(getProperties());
-        logger.debug("Checking if the node is available");
-        try {
-            boolean isAvailable = RabbitProductPlugin.isNodeAvailabile(configuration);
-            setAvailability(isAvailable);
-            logger.debug("Node is available");
-        }
-        catch (PluginException e) {
-            logger.error(e);
-        }
+    public Log getLog() {
+        return logger;
     }
 }

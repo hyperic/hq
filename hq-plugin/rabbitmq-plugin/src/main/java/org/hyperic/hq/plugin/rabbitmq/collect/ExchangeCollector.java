@@ -27,50 +27,35 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
-import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
-import org.hyperic.hq.product.Collector;
-import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.amqp.core.Exchange;
 
 import java.util.List;
 import java.util.Properties;
+import org.hyperic.hq.product.Metric;
 
 /**
  * ExchangeCollector
  * @author Helena Edelson
  */
-public class ExchangeCollector extends Collector {
+public class ExchangeCollector extends RabbitMQListCollector {
 
     private static final Log logger = LogFactory.getLog(ExchangeCollector.class);
 
-    @Override
-    protected void init() throws PluginException {
+    public void collect(HypericRabbitAdmin rabbitAdmin) {
         Properties props = getProperties();
-        logger.debug("[init] props=" + props);
-        super.init();
-    }
+        String vhost = (String) props.get(MetricConstants.VHOST);
+        if (logger.isDebugEnabled()) {
+            String node = (String) props.get(MetricConstants.NODE);
+            logger.debug("[collect] vhost=" + vhost + " node=" + node);
+        }
 
-    public void collect() {
-        Properties props = getProperties();
-        logger.debug("[collect] props=" + props);
-
-        String exchange = (String) props.get(MetricConstants.EXCHANGE);
-        String vhost = (String) props.get(MetricConstants.VIRTUALHOST);
-        String node = (String) props.get(MetricConstants.NODE);
-        
-        if (RabbitProductPlugin.isInitialized()) {
-            HypericRabbitAdmin rabbitAdmin = RabbitProductPlugin.getVirtualHostForNode(vhost, node);
-
-            List<Exchange> exchanges = rabbitAdmin.getExchanges();
-            if (exchanges != null) {
-                for (Exchange e : exchanges) {
-                    if (e.getName().equalsIgnoreCase(exchange)) {
-                        setAvailability(true);    
-                    }
-                }
+        List<Exchange> exchanges = rabbitAdmin.getExchanges(vhost);
+        if (exchanges != null) {
+            for (Exchange e : exchanges) {
+                logger.debug("[collect] Exchange="+e.getName());
+                setValue(e.getName() + "." + Metric.ATTR_AVAIL, Metric.AVAIL_UP);
             }
         }
     }
@@ -91,5 +76,8 @@ public class ExchangeCollector extends Collector {
         return res;
     }
 
-
+    @Override
+    public Log getLog() {
+        return logger;
+    }
 }

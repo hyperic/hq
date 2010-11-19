@@ -25,39 +25,15 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.manage;
 
-import org.hyperic.hq.plugin.rabbitmq.core.AMQPStatus;
-import org.springframework.amqp.core.Queue;
+import java.util.List;
+import org.hyperic.hq.product.ServiceResource;
 
 /**
- * RabbitManager
- * @author Helena Edelson
+ * @author Patrick Nguyen
  */
-public interface RabbitManager {
+public interface TransientResourceManager {
 
-    AMQPStatus createQueue(Queue queue);
+	public void syncServices(List<ServiceResource> serviceResources)
+		throws Exception;
 
-    AMQPStatus createExchange(String exchangeName, String type);
-
-    AMQPStatus createExchange(String exchangeName, String exchangeType, boolean durable, boolean autoDelete);
-
-    AMQPStatus createUser(String userName, String password);
-
-    AMQPStatus deleteQueue(String queueNamet);
-
-    AMQPStatus deleteExchange(String exchangeName, boolean ifUnused) throws Exception;
-
-    AMQPStatus deleteUser(String userName);
-
-    AMQPStatus purgeQueue(String queueName);
-
-    AMQPStatus updateUserPassword(String userName, String password);
-
-    AMQPStatus stopRabbitNode();
-
-    AMQPStatus startRabbitNode();
-
-    AMQPStatus startBrokerApplication();
-
-    AMQPStatus stopBrokerApplication();
-    
 }

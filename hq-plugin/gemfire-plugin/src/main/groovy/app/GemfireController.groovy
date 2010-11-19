@@ -84,7 +84,7 @@ class GemfireController extends BaseController {
     }
 
     def getGMFSName(){
-        def liveData=viewedResource.getLiveData(user, "connectToSystem", new ConfigResponse())
+        def liveData=viewedResource.getLiveData(user, "getSystemID", new ConfigResponse())
         def name = ":"
         if(!liveData.hasError()){
             name = liveData.objectResult

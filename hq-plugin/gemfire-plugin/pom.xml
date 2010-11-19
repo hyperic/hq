@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.hyperic.hq.plugin</groupId>
         <artifactId>hq-plugin-parent</artifactId>
-        <version>4.6.0.BUILD-SNAPSHOT</version>
+        <version>4.5.1.BUILD-SNAPSHOT</version>
     </parent>
 
     <artifactId>gemfire-plugin</artifactId>
@@ -33,8 +33,7 @@
         <dependency>
             <groupId>org.hyperic.hq.agent</groupId>
             <artifactId>hq-agent-core</artifactId>
-            <version>4.6.0.BUILD-SNAPSHOT</version>
-            <type>jar</type>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 	

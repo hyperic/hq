@@ -27,56 +27,40 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitConnection;
-import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
-import org.hyperic.hq.product.Collector;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.util.config.ConfigResponse;
 
 import java.util.List;
 import java.util.Properties;
+import org.hyperic.hq.product.Metric;
+import org.hyperic.util.config.ConfigResponse;
 
 /**
  * ConnectionCollector
  * @author Helena Edelson
  */
-public class ConnectionCollector extends Collector {
+public class ConnectionCollector extends RabbitMQListCollector {
 
     private static final Log logger = LogFactory.getLog(ConnectionCollector.class);
 
-    @Override
-    protected void init() throws PluginException {
+    public void collect(HypericRabbitAdmin rabbitAdmin) {
         Properties props = getProperties();
-        logger.debug("[init] props=" + props);
-        super.init();
-    }
+        if (logger.isDebugEnabled()) {
+            String node = (String) props.get(MetricConstants.NODE);
+            logger.debug("[collect] node=" + node);
+        }
 
-    public void collect() {
-        Properties props = getProperties();
-        logger.debug("[collect] props=" + props);
-
-        String connectionPid = (String) props.get(MetricConstants.CONNECTION);
-        String vhost = (String) props.get(MetricConstants.VIRTUALHOST);
-        String node = (String) props.get(MetricConstants.NODE);
-
-        if (RabbitProductPlugin.isInitialized()) {
-            HypericRabbitAdmin rabbitAdmin = RabbitProductPlugin.getVirtualHostForNode(vhost, node);
-
-            List<RabbitConnection> connections = rabbitAdmin.getConnections();
-            if (connections != null) {
-                for (RabbitConnection conn : connections) {
-                    if (conn.getPid().equalsIgnoreCase(connectionPid)) {
-                        setAvailability(true);
-                        setValue("packetsReceived", conn.getReceiveCount());
-                        setValue("packetsSent", conn.getSendCount());
-                        setValue("channelCount", conn.getChannels());
-                        setValue("octetsReceived", conn.getOctetsReceived());
-                        setValue("octetsSent", conn.getOctetsSent());
-                        setValue("pendingSends", conn.getPendingSends());
-                    }
-                }
+        List<RabbitConnection> connections = rabbitAdmin.getConnections();
+        if (connections != null) {
+            for (RabbitConnection conn : connections) {
+                logger.debug("[collect] RabbitConnection="+conn.getPid());
+                setValue(conn.getPid() + ".Availability", Metric.AVAIL_UP);
+                setValue(conn.getPid() + ".packetsReceived", conn.getReceiveCount());
+                setValue(conn.getPid() + ".packetsSent", conn.getSendCount());
+                setValue(conn.getPid() + ".channelCount", conn.getChannels());
+                setValue(conn.getPid() + ".octetsReceived", conn.getOctetsReceived());
+                setValue(conn.getPid() + ".octetsSent", conn.getOctetsSent());
+                setValue(conn.getPid() + ".pendingSends", conn.getPendingSends());
             }
         }
     }
@@ -99,5 +83,10 @@ public class ConnectionCollector extends Collector {
         res.setValue("state", conn.getState());
 
         return res;
+    }
+
+    @Override
+    public Log getLog() {
+        return logger;
     }
 }
