@@ -77,7 +77,7 @@ public class MySqlStatsMeasurementPlugin
     
     private static final int TIMEOUT_VALUE = Integer.parseInt(System.getProperty("mysql_stats.jdbc.timeout", "60000"));
     private int _consecutiveErrors = 0;
-    private static final int MAX_ERRORS = 3;
+    private static final int MAX_ERRORS = Integer.parseInt(System.getProperty("mysql_stats.max_errors", "3"));
     
     protected double getQueryValue(Metric metric)
         throws MetricNotFoundException,
