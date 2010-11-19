@@ -93,8 +93,8 @@ public class ScheduleThread
     private static final long CANCEL_TIME = 5000; // 5 seconds.
     private static final int  EXECUTOR_QUEUE_SIZE = 10000;
 
-    private static long logFetchTimeout = FETCH_TIME;
-    private static long cancelTimeout = CANCEL_TIME;
+    private long logFetchTimeout = FETCH_TIME;
+    private long cancelTimeout = CANCEL_TIME;
 
     private static final Log log = LogFactory.getLog(ScheduleThread.class.getName());
 
@@ -142,6 +142,7 @@ public class ScheduleThread
         if(sLogFetchTimeout != null){
             try {
                 logFetchTimeout = Integer.parseInt(sLogFetchTimeout);
+                log.info("Log fetch timeout set to " + logFetchTimeout);
             } catch(NumberFormatException exc){
                 log.error("Invalid setting for " + PROP_FETCH_LOG_TIMEOUT + " value=" +
                            sLogFetchTimeout + ", using defaults.");
@@ -152,6 +153,7 @@ public class ScheduleThread
         if(sCancelTimeout != null){
             try {
                 cancelTimeout = Integer.parseInt(sCancelTimeout);
+                log.info("Cancel timeout set to " + cancelTimeout);
             } catch(NumberFormatException exc){
                 log.error("Invalid setting for " + PROP_CANCEL_TIMEOUT + " value=" +
                            sCancelTimeout + ", using defaults.");
@@ -219,7 +221,8 @@ public class ScheduleThread
                         if (mt.getExecutionDuration() > cancelTimeout) {
                             boolean res = t.cancel(true);
                             log.error("Metric '" + mt.getMetric() +
-                                       "' took too long to run, cancelled (result=" + res + ")");
+                                       "' took too long to run (" + mt.getExecutionDuration() +
+                                       "ms), cancelled (result=" + res + ")");
                             // Task will be removed on next iteration
                         }
                     }
@@ -641,6 +644,7 @@ public class ScheduleThread
                 }
             } catch (RejectedExecutionException e) {
                 log.warn("Executor[" + plugin + "] rejected metric task " + metricTask.getMetric());
+                statNumMetricsFailed++;
             }
         }
     }
