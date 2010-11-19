@@ -252,6 +252,8 @@ public class ScheduleThreadTest extends TestCase {
         // Verify against ScheduleThread statistics
         assertEquals("Wrong number of scheduled measurements",
                      1.0, st.getNumMetricsScheduled());
+        assertTrue("Wrong number of failed collections",
+                   st.getNumMetricsFailed() > 3); // Should be 5, but could potentially vary
         assertEquals("Wrong number of metric collections",
                      0.0, st.getNumMetricsFetched());
 
@@ -316,8 +318,8 @@ public class ScheduleThreadTest extends TestCase {
                 } else {
                     Thread.sleep(1);
                 }
-            } catch (Exception e) {
-                // Ignore
+            } catch (InterruptedException e) {
+                throw new PluginException("Metric interrupted!", e);
             }
             return new MetricValue(42);
         }
@@ -335,8 +337,8 @@ public class ScheduleThreadTest extends TestCase {
             // introduce some latency to simulate contacting the managed resource
             try {
                 Thread.sleep(1);
-            } catch (Exception e) {
-                // Ignore
+            } catch (InterruptedException e) {
+                throw new PluginException("Metric interrupted!", e);
             }
             return null; // Should not be allowed
         }
