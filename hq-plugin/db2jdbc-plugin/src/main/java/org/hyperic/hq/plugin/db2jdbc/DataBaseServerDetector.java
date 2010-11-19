@@ -166,9 +166,9 @@ public class DataBaseServerDetector extends DefaultServerDetector {
             String command = getListDatabaseCommand();
             // http://www.db2ude.com/?q=node/121 for wind db2.exe
             if (command == null) {
-                File db2exe = new File(installPath + (installPath.endsWith(File.separator) ? "" : File.separator) + "bin" + File.separator + "db2" + (isWin() ? "cmd.exe" : ""));
+                File db2exe = new File(installPath + (installPath.endsWith(File.separator) ? "" : File.separator) + "bin" + File.separator + "db2" + (isWin32() ? "cmd.exe" : ""));
                 getLog().debug("[createDataBases] db2 exe = '" + db2exe.getAbsolutePath() + "' " + (db2exe.exists() ? "OK" : "KO"));
-                command = db2exe.getAbsolutePath() + (isWin() ? " /c /i /w db2 " : " ") + "list database directory";
+                command = db2exe.getAbsolutePath() + (isWin32() ? " /c /i /w db2 " : " ") + "list database directory";
             }
             getLog().debug("[createDataBases] command= '" + command + "'");
             Process cmd = Runtime.getRuntime().exec(command);
