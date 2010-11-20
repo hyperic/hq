@@ -32,6 +32,7 @@ import org.springframework.datastore.graph.neo4j.support.SubReferenceNodeTypeStr
 import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.addon.javabean.RooJavaBean;
 import org.springframework.roo.addon.tostring.RooToString;
+import org.springframework.transaction.annotation.Transactional;
 
 
 
@@ -58,6 +59,7 @@ public class Resource {
     @javax.annotation.Resource
     private GraphDatabaseContext graphDatabaseContext2;
 
+    @Transactional
     public ResourceRelation relateTo(Resource resource, String relationName) {
         if (type.getName().equals("System")) {
             if (!(relationName.equals(RelationshipTypes.CONTAINS))) {
@@ -69,13 +71,21 @@ public class Resource {
         return (ResourceRelation) this.relateTo(resource, ResourceRelation.class, relationName);
     }
     
+    @Transactional
+    public void removeRelationship(Resource resource, String relationName, boolean junk) {
+    	if (this.isRelatedTo(resource, relationName)) {
+    		this.removeRelationshipTo(resource, relationName);
+    	}
+    }
+    
     public ResourceRelation getRelationshipTo(Resource resource, String relationName) {
         //TODO this doesn't take direction into account
         return (ResourceRelation) getRelationshipTo(resource,ResourceRelation.class,relationName);
     }
     
     public Set<ResourceRelation> getRelationships() {
-        Iterable<Relationship> relationships = getUnderlyingState().getRelationships();
+    	// TODO This is hardcoded for the demo, however should be able to specify direction/relationship name via parameters
+        Iterable<Relationship> relationships = getUnderlyingState().getRelationships(org.neo4j.graphdb.Direction.OUTGOING);
         Set<ResourceRelation> resourceRelations = new HashSet<ResourceRelation>();
         for(Relationship relationship:relationships) {
             //Don't include the Neo4J relationship b/w the Node and its Java type
@@ -83,7 +93,7 @@ public class Resource {
                 //Don't include relationships that aren't b/w Resources (like Resource to ResourceType)
                 //TODO shouldn't the ResourceRelation be stricter about types?  How can I be allowed to have this?
                 Class<?> otherEndType = graphDatabaseContext2.getJavaType(relationship.getOtherNode(getUnderlyingState()));
-                if(Resource.class.equals(otherEndType)) {
+                if(Resource.class.equals(otherEndType) || ResourceGroup.class.equals(otherEndType)) {
                     resourceRelations.add(graphDatabaseContext2.createEntityFromState(relationship, ResourceRelation.class));
                 }
             }

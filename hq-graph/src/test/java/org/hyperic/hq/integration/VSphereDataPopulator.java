@@ -34,14 +34,15 @@ public class VSphereDataPopulator {
         vCenterServer.setName("VMC-SSRC-2K328");
         vCenterServer.setType(ResourceType
             .findResourceTypeByName(VSphereResourceModelPopulator.VCENTER_SERVER_TYPE));
-
+        rootNode.relateTo(vCenterServer, RelationshipTypes.CONTAINS);
+        
         Resource dataCenter = new Resource();
         dataCenter.setName("Camb-HQ");
         dataCenter.setType(ResourceType
             .findResourceTypeByName(VSphereResourceModelPopulator.DATACENTER_TYPE));
         vCenterServer.relateTo(dataCenter, VSphereResourceModelPopulator.MANAGES);
         // dataCenters are containers, let's make them top level elements
-        rootNode.relateTo(dataCenter, RelationshipTypes.CONTAINS);
+       
 
         ResourceGroup cluster = new ResourceGroup();
         cluster.setType(ResourceType
@@ -91,7 +92,7 @@ public class VSphereDataPopulator {
             .findResourceTypeByName(VSphereResourceModelPopulator.NODE_TYPE));
         vm.relateTo(guestOs, VSphereResourceModelPopulator.HOSTS);
     }
-
+  
     public static void main(String[] args) {
         ClassPathXmlApplicationContext appContext = new ClassPathXmlApplicationContext(
             "classpath:/META-INF/spring/applicationContext.xml");

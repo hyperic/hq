@@ -178,11 +178,11 @@ public class VSphereResourceModelPopulator {
     	};
     	
     	for (String name : names) {
-    		Map<String, String> payload = new HashMap<String, String>();
+    		Map<String, Object> payload = new HashMap<String, Object>();
     		
     		payload.put("name", name);
     	
-    		Map<String, String> result = api.postForObject(uri, new HttpEntity<Map<String, String>>(payload, headers), Map.class);
+    		Map<String, Object> result = api.postForObject(uri, new HttpEntity<Map<String, Object>>(payload, headers), Map.class);
     		
     		System.out.println("Created [" + name + "] at " + result.get("uri"));
     	}
