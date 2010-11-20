@@ -1,16 +1,18 @@
 package org.hyperic.hq.web;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.plugin.domain.PropertyType;
 import org.hyperic.hq.plugin.domain.ResourceType;
 import org.springframework.web.util.UriTemplate;
 
 public class ResourceTypeRepresentation {
 	private Long id;
 	private String name;
-	private Set<ResourceRepresentation> resources = new HashSet<ResourceRepresentation>();
+	private List<Map<String, Object>> propertyTypes = new ArrayList<Map<String, Object>>();
 	private UriTemplate uri;
 	
 	public ResourceTypeRepresentation() {}
@@ -18,18 +20,21 @@ public class ResourceTypeRepresentation {
 	public ResourceTypeRepresentation(ResourceType resourceType, String baseUri) {
 		this.id = resourceType.getId();
 		this.name = resourceType.getName();
-		
-		Set<Resource> resources = resourceType.getResources();
-		
-		if (resources != null) {
-			/*
-			for (Resource r : resources) {
-				this.resources.add(new ResourceRepresentation(r, "/resources"));
-			}
-			*/
-		}
-		
 		this.uri = new UriTemplate(baseUri + "/{id}");
+		
+		for (PropertyType pt : resourceType.getPropertyTypes()) {
+			Map<String, Object> item = new HashMap<String, Object>();
+			
+			item.put("id", pt.getId());
+			item.put("name", pt.getName());
+			item.put("description", pt.getDescription());
+			item.put("defaultValue", pt.getDefaultValue());
+			item.put("optional", pt.getOptional());
+			item.put("secret", pt.getSecret());
+			item.put("name", pt.getName());
+
+			this.propertyTypes.add(item);
+		}
 	}
 
 	public Long getId() {
@@ -47,13 +52,13 @@ public class ResourceTypeRepresentation {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
-	public Set<ResourceRepresentation> getResources() {
-		return resources;
+
+	public List<Map<String, Object>> getPropertyTypes() {
+		return propertyTypes;
 	}
 
-	public void setResources(Set<ResourceRepresentation> resources) {
-		this.resources = resources;
+	public void setPropertyTypes(List<Map<String, Object>> propertyTypes) {
+		this.propertyTypes = propertyTypes;
 	}
 
 	public String getUri() {
@@ -61,9 +66,14 @@ public class ResourceTypeRepresentation {
 	}
 	
 	public ResourceType toDomain() {
-		ResourceType resourceType = new ResourceType();
-
-		resourceType.setId(id);
+		ResourceType resourceType;
+		
+		if (id == null) {
+			resourceType = new ResourceType();
+		} else {
+			resourceType = ResourceType.findResourceType(id);
+		}
+		
 		resourceType.setName(name);
 
 		return resourceType;

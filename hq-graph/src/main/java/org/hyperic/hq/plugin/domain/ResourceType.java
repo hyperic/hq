@@ -1,5 +1,6 @@
 package org.hyperic.hq.plugin.domain;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.OneToMany;
@@ -54,6 +55,7 @@ public class ResourceType {
     @javax.annotation.Resource
     private transient FinderFactory finderFactory2;
 
+    @Transactional
 	public ResourceTypeRelation relateTo(ResourceType resourceType, String relationName) {
         return (ResourceTypeRelation) this.relateTo(resourceType, ResourceTypeRelation.class,
             relationName);
@@ -95,14 +97,28 @@ public class ResourceType {
     
     
     public PropertyType getPropertyType(String name) {
-        for(PropertyType propertyType: propertyTypes) {
-            if(name.equals(propertyType.getName())) {
-                return propertyType;
+        for(Object propertyType: propertyTypes) {
+            if(PropertyType.class.isInstance(propertyType)) {
+            	PropertyType pt = (PropertyType) propertyType;
+            	if (name.equals(pt.getName())) {
+            		return pt;
+            	}
             }
         }
         return null;
     }
 
+	public Set<PropertyType> getPropertyTypes() {
+		Set<PropertyType> result = new HashSet<PropertyType>();
+		//TODO is there something other than PropertyTypes in the PropertyType set?  Shouldn't be the case.  Another place we can't use same relationship name?
+		for (Object propertyType : this.propertyTypes) {
+			if (PropertyType.class.isInstance(propertyType)) {
+				result.add((PropertyType) propertyType);
+			}
+		}
+		
+        return result;
+    }
 
 	@Transactional
     public void persist() {

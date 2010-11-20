@@ -67,6 +67,7 @@ public class Resource {
     @Transient
     private Set<Alert> alerts;
 
+    @Transactional
     public ResourceRelation relateTo(Resource resource, String relationName) {
         if (type.getName().equals("System")) {
             if (!(relationName.equals(RelationshipTypes.CONTAINS))) {
@@ -77,22 +78,30 @@ public class Resource {
         }
         return (ResourceRelation) this.relateTo(resource, ResourceRelation.class, relationName);
     }
-
+    
+    @Transactional
+    public void removeRelationship(Resource resource, String relationName, boolean junk) {
+        //TODO what is the junk boolean?
+    	if (this.isRelatedTo(resource, relationName)) {
+    		this.removeRelationshipTo(resource, relationName);
+    	}
+    }
+    
     public ResourceRelation getRelationshipTo(Resource resource, String relationName) {
     	//TODO this doesn't take direction into account
         return (ResourceRelation) getRelationshipTo(resource, ResourceRelation.class, relationName);
     }
 
     public Set<ResourceRelation> getRelationships() {
-        Iterable<Relationship> relationships = getUnderlyingState().getRelationships();
+    	// TODO This is hardcoded for the demo, however should be able to specify direction/relationship name via parameters
+        Iterable<Relationship> relationships = getUnderlyingState().getRelationships(org.neo4j.graphdb.Direction.OUTGOING);
         Set<ResourceRelation> resourceRelations = new HashSet<ResourceRelation>();
         for (Relationship relationship : relationships) {
         	//Don't include Neo4J relationship b/w Node and its Java type
             if (!relationship.isType(SubReferenceNodeTypeStrategy.INSTANCE_OF_RELATIONSHIP_TYPE)) {
                 Class<?> otherEndType = graphDatabaseContext2.getJavaType(relationship.getOtherNode(getUnderlyingState()));
-                if (Resource.class.equals(otherEndType)) {
-                	//Don't include relationships that aren't b/w Resources (like Resource to ResourceType)
-                	//TODO how can this method even return the wrong types?
+                //TODO does instanceOf work here?
+                if(Resource.class.equals(otherEndType) || ResourceGroup.class.equals(otherEndType)) {
                     resourceRelations.add(graphDatabaseContext2.createEntityFromState(relationship, ResourceRelation.class));
                 }
             }
