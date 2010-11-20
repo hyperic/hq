@@ -434,9 +434,9 @@
 
     <plugin type="measurement"
             class="org.hyperic.hq.product.MeasurementPlugin"/>
+            
+    <plugin type="collector" class="org.hyperic.hq.plugin.vsphere.VCenterServerCollector"/>
 
-    <metric name="Availability"
-            template="sigar:Type=ProcState,Arg=%process.query%:State"
-            indicator="true"/>
+    <metric name="Availability" indicator="true"/>
   </server>
 </plugin>
