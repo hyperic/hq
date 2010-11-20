@@ -167,7 +167,7 @@ public class ScheduleThread
                                                                TimeUnit.MILLISECONDS);
         metricLoggingTask =
                 metricVerificationService.scheduleAtFixedRate(new MetricLoggingTask(),
-                                                               1, 10, TimeUnit.MINUTES);
+                                                               1, 600, TimeUnit.SECONDS);
     }
 
     /**
@@ -629,7 +629,7 @@ public class ScheduleThread
                     log.info("Creating executor for plugin '" + plugin +
                               "' with a poolsize=" + poolSize + " queuesize=" + queueSize);
                     executor = new ThreadPoolExecutor(poolSize, poolSize,
-                                                 1, TimeUnit.MINUTES,
+                                                 60, TimeUnit.SECONDS,
                                                  new LinkedBlockingQueue<Runnable>(queueSize),
                                                  new ThreadPoolExecutor.AbortPolicy());
                     executors.put(plugin, executor);
