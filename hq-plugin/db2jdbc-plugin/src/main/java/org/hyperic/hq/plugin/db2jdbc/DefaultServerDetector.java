@@ -54,12 +54,10 @@ import org.hyperic.util.config.ConfigResponse;
 public abstract class DefaultServerDetector extends ServerDetector implements AutoServerDetector {
 
     private final static Pattern regExpInstall = Pattern.compile("([^ ]*) *(\\d*\\.\\d*\\.\\d*\\.\\d*) *([^ ]*)");
-    private static boolean ISWin = false;
     private final static Log log = LogFactory.getLog(DefaultServerDetector.class);
 
     public void init(PluginManager manager) throws PluginException {
         super.init(manager);
-        ISWin = "win32".equalsIgnoreCase(manager.getProperties().getProperty("platform.type"));
     }
 
     public List getServerResources(ConfigResponse conf) throws PluginException {
@@ -82,8 +80,7 @@ public abstract class DefaultServerDetector extends ServerDetector implements Au
         List res = new ArrayList();
         Pattern regExpVersion = Pattern.compile(versionExp.replaceAll("[X|x]", "\\d*"));
         boolean debug = log.isDebugEnabled();
-        ISWin = "win32".equalsIgnoreCase(conf.getProperty("platform.type"));
-        if (ISWin) {
+        if (isWin32()) {
             try {
                 RegistryKey key = RegistryKey.LocalMachine.openSubKey("SOFTWARE\\IBM\\DB2\\InstalledCopies");
                 String instances[] = key.getSubKeyNames();
@@ -157,10 +154,6 @@ public abstract class DefaultServerDetector extends ServerDetector implements Au
     }
 
     protected abstract List createServers(String installPath);
-
-    protected final boolean isWin() {
-        return ISWin;
-    }
 
     static final String inputStreamAsString(InputStream stream) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(stream));

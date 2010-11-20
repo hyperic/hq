@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    NOTE: This copyright does *not* cover user programs that use HQ
+    program services by normal system calls through the application
+    program interfaces provided as part of the Hyperic Plug-in Development
+    Kit or the Hyperic Client Development Kit - this is merely considered
+    normal use of the program, and does *not* fall under the heading of
+     "derived work".
+
+     Copyright (C) [2010], VMware, Inc.
+     This file is part of HQ.
+
+     HQ is free software; you can redistribute it and/or modify
+     it under the terms version 2 of the GNU General Public License as
+     published by the Free Software Foundation. This program is distributed
+     in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+     even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+     PARTICULAR PURPOSE. See the GNU General Public License for more
+     details.
+
+     You should have received a copy of the GNU General Public License
+     along with this program; if not, write to the Free Software
+     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+     USA.
+
+
+-->
+
+<!DOCTYPE log4j:configuration PUBLIC "-//LOGGER" "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+	<!-- ============================== -->
+	<!-- Appenders -->
+	<!-- ============================== -->
+
+	<!-- Provides Console Logging -->
+	<appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+		<param name="Target" value="System.out" />
+
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d %-5p [%t] [%c@%L] %m%n" />
+		</layout>
+	</appender>
+
+
+	<!--  Provides File Logging  -->
+	<appender name="FILE" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="${server.home}/logs/server.log" />
+		<param name="Append" value="true" />
+		<param name="DatePattern" value="'.'yyyy-MM-dd" />
+
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d %-5p [%t] [%c@%L] %m%n" />
+		</layout>
+	</appender>
+
+	<!--
+		A SYSLOG Appender for use with the SyslogAction class. To enable, make
+		sure the syslogd on the box has been started with '-r' so that it
+		accepts network connections. Separately, you'll need to enable the
+		alert gui by setting the SYSLOG_ALERTS_ENABLED attribute in the HQ
+		database's EAM_CONFIG_PROPS table to 'true'.
+	-->
+
+	<!--
+		<appender name="SYSLOG" class="org.apache.log4j.net.SyslogAppender">
+		<errorHandler class="org.apache.log4j.helpers.OnlyOnceErrorHandler" />
+		<param name="Facility" value="SYSLOG" /> <param
+		name="FacilityPrinting" value="true" /> <param name="SyslogHost"
+		value="localhost" /> <layout class="org.apache.log4j.PatternLayout">
+		<param name="ConversionPattern" value="%c{1}[%r]: %m%n" /> </layout>
+		</appender> <logger
+		name="org.hyperic.hq.bizapp.server.action.log.SyslogAction"> <level
+		value="ERROR" /> <appender-ref ref="SYSLOG" /> </logger>
+	-->
+
+
+	<!-- ====================== -->
+	<!-- ASYNC Appender for all Logging -->
+	<!-- ====================== -->
+
+	<appender name="ASYNC" class="org.apache.log4j.AsyncAppender">
+		<appender-ref ref="FILE" />
+		<!--
+    <appender-ref ref="SMTP"/>
+    -->
+	</appender>
+
+	<!-- ============================== -->
+	<!-- 3rd party loggers -->
+	<!-- ============================== -->
+
+	<logger name="org.springframework">
+		<level value="warn" />
+	</logger>
+
+	<logger name="org.springframework.core">
+		<level value="info" />
+	</logger>
+
+	<logger name="org.springframework.beans">
+		<level value="info" />
+	</logger>
+
+	<logger name="org.springframework.context">
+		<level value="info" />
+	</logger>
+
+	<logger name="org.springframework.web">
+		<level value="info" />
+	</logger>
+	
+	<logger name="org.apache.tools.ant">
+		<level value="error" />
+	</logger>
+
+	<!-- Turn off form validation messages -->
+	<logger name="org.apache.commons.validator.ValidatorResources">
+		<level value="OFF" />
+	</logger>
+
+	<!-- Turn off form struts messages -->
+	<logger name="org.apache.struts">
+		<level value="OFF" />
+	</logger>
+
+
+
+	<!--
+		Subsystems. Uncomment individual subsystems to see debug messages.
+	-->
+
+	<!--<logger name="org.hyperic.hq.auth">
+		<level value="DEBUG" />
+	</logger>
+	<logger name="org.hyperic.hq.authz">
+		<level value="DEBUG" />
+	</logger>
+	<logger name="org.hyperic.hq.appdef">
+		<level value="DEBUG" />
+	</logger>
+	<logger name="org.hyperic.hq.agent">
+		<level value="DEBUG" />
+	</logger>
+	<logger name="org.hyperic.hq.control">
+		<level value="DEBUG" />
+	</logger>
+	<logger name="org.hyperic.hq.events">
+		<level value="DEBUG" />
+	</logger>
+	<logger name="org.hyperic.hq.measurement">
+		<level value="DEBUG" />
+	</logger>
+	<logger name="org.hyperic.hq.grouping">
+		<level value="DEBUG" />
+	</logger>
+	<logger name="org.hyperic.hq.autoinventory">
+		<level value="DEBUG" />
+	</logger>
+	<logger name="org.hyperic.hq.ui">
+		<level value="DEBUG" />
+	</logger>
+	<logger name="org.hyperic.hq.pdk">
+		<level value="DEBUG" />
+	</logger>
+	<logger name="org.hyperic.hq.rt">
+		<level value="DEBUG" />
+	</logger> -->
+
+
+
+	<!--
+		Use this logger to log every instance of resource counter-type alerts
+		triggering. Comment out if the log messages become unwieldy.
+	-->
+	<!--  <logger name="org.hyperic.hq.events.server.session.CounterExecutionStrategy">
+		<level value="DEBUG" />
+	</logger> -->
+
+
+	<!--
+		Use this logger to log every instance of resource alerts,
+		non-counter-type, triggering. Comment out if the log messages become
+		unwieldy.
+	-->
+	<!--  <logger
+		name="org.hyperic.hq.events.server.session.SingleAlertExecutionStrategy">
+		<level value="DEBUG" />
+	</logger> -->
+
+
+	<!--
+		Use this logger to log every instance of a resource alert firing.
+		Comment out if the log messages become unwieldy.
+	-->
+	<!-- <logger name="org.hyperic.hq.events.server.session.AlertManagerImpl">
+		<level value="DEBUG" />
+	</logger>  -->
+
+
+	<!--
+		Use this logger to log every instance of a group alert firing. Comment
+		out if the log messages become unwieldy.
+	-->
+	 <!--  <logger name="org.hyperic.hq.galerts.processor.MemGalertDef.Fired">
+		<level value="DEBUG" />
+	</logger>  -->
+
+     
+   <!-- <logger name="org.hyperic.hq.monitor">
+		<level value="DEBUG" />
+	</logger>-->
+
+	<!-- ======================= -->
+	<!-- Setup the Root logger -->
+	<!-- ======================= -->
+
+	<root>
+		<level value="INFO" />
+		<appender-ref ref="CONSOLE" />
+	</root>
+
+</log4j:configuration>
+
+
