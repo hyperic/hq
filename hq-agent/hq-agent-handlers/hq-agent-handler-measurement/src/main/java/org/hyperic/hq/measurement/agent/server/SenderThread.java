@@ -98,7 +98,8 @@ public class SenderThread
     private          int                       maxBatchSize = MAX_BATCHSIZE;
     private          Set                       metricDebug;
     private          MeasurementSchedule       schedule;
-
+    private          Object                    _interrupter;
+   
     // Current difference time between the server and agent in ns.
     // Update on each call to sendMeasurementReport().
     private long serverDiff = 0;
@@ -120,6 +121,7 @@ public class SenderThread
         this.transitionQueue = new LinkedList();
         this.metricDebug     = new HashSet();
         this.schedule        = schedule;
+        this._interrupter    = new Object();
 
         String info = bootProps.getProperty(DATA_LISTNAME);
         if (info != null) {
@@ -577,6 +579,12 @@ public class SenderThread
     {
         return this.serverDiff;
     }
+    
+    public void sendNow() {
+        synchronized (_interrupter) {
+            _interrupter.notify();
+        }
+    }
 
     public void run(){
         Long lastMetricTime;
@@ -587,25 +595,37 @@ public class SenderThread
         
         while(this.shouldDie == false){
             try {
-                try {
                     controlCal.add(Calendar.MINUTE, 1);
-                    long now = System.currentTimeMillis();
-                    cal.setTimeInMillis(now + SEND_INTERVAL);
+                    long now1 = System.currentTimeMillis();
+                    cal.setTimeInMillis(now1 + SEND_INTERVAL);
                     // want to keep some randomness for all agents to send their
                     // data.  This way an agent is not pegged to a certain
                     // second interval
                     if (cal.get(Calendar.MINUTE) != controlCal.get(Calendar.MINUTE)) {
-                        long sleeptime = controlCal.getTimeInMillis() - now;
+                        long sleeptime = controlCal.getTimeInMillis() - now1;
                         if (sleeptime > 0) {
-                            Thread.sleep(controlCal.getTimeInMillis() - now);
+                            try {
+                                synchronized (_interrupter) {
+                                    _interrupter.wait(controlCal.getTimeInMillis() - now1);
+                                }
+                            } catch (InterruptedException e) {
+                                log.debug("Wake up");
+                            }
                         }
                     } else {
-                        Thread.sleep(SEND_INTERVAL);
+                        try {
+                            synchronized (_interrupter) {
+                                _interrupter.wait(SEND_INTERVAL);
+                            }
+                        } catch (InterruptedException e) {
+                            log.debug("Wake up");
+                        }
                     }
-                } catch(InterruptedException exc){
-                    this.log.info("Measurement sender interrupted");
-                    return;
-                }
+                    
+                // if somebody changed the the flag while I was
+                // sleeping, check it and exit if needed
+                if(this.shouldDie)
+                	return;
 
                 if (log.isDebugEnabled()) {
                     log.debug("Woke up, sending batch of metrics.");

@@ -85,6 +85,7 @@ public class Metric {
     private String id = null; //for tie-in to logging
     private String category = null;
     private long interval;
+    public boolean realtime = false;
 
     private Metric() {
         synchronized (lock) {

@@ -78,6 +78,8 @@ public class MeasurementCommandsServer
     private MeasurementCommandsAPI   verAPI;         // Common API specifics
     private Thread                   scheduleThread; // Thread of scheduler
     private ScheduleThread           scheduleObject; // Our scheduler
+    private Thread                   realtimeAvailThread; // Thread for realtime
+    private RealtimeAvailabilityThread realtimeAvailObject; // Realtime handler
     private Thread                   senderThread;   // Thread of sender
     private SenderThread             senderObject;   // Our sender
     private AgentStorageProvider     storage;        // Agent storage
@@ -99,6 +101,8 @@ public class MeasurementCommandsServer
         this.verAPI         = new MeasurementCommandsAPI();
         this.scheduleThread = null;
         this.scheduleObject = null;
+        this.realtimeAvailThread = null;
+        this.realtimeAvailObject = null;
         this.senderThread   = null;
         this.senderObject   = null;
         this.storage        = null;
@@ -121,7 +125,8 @@ public class MeasurementCommandsServer
 
     private void spawnThreads(SenderThread senderObject, 
                               ScheduleThread scheduleObject, 
-                              TrackerThread trackerObject)
+                              TrackerThread trackerObject,
+                              RealtimeAvailabilityThread realtimeAvailObject)
         throws AgentStartException 
     {
         this.senderThread   = new Thread(senderObject, "SenderThread");
@@ -130,10 +135,16 @@ public class MeasurementCommandsServer
         scheduleThread.setDaemon(true);
         this.trackerThread = new Thread(trackerObject, "TrackerThread");
         this.trackerThread.setDaemon(true);
-
         this.senderThread.start();
         this.scheduleThread.start();
         this.trackerThread.start();
+        
+        if(realtimeAvailObject != null) {
+            this.realtimeAvailThread = 
+                new Thread(realtimeAvailObject,"RealtimeAvailabilityThread");
+            realtimeAvailThread.setDaemon(true);            
+            this.realtimeAvailThread.start();
+        }
     }
 
     public AgentAPIInfo getAPIInfo(){
@@ -234,7 +245,15 @@ public class MeasurementCommandsServer
         
         this.scheduleObject = new ScheduleThread(this.senderObject, 
                                                  this.pluginManager);
-        
+
+        // don't create thread if it's not enabled through agent.properties
+        String enableRT = 
+            bootConfig.getBootProperties().getProperty(RealtimeAvailabilityThread.PROP_ENABLE, "false");
+        if(Boolean.parseBoolean(enableRT)){
+            this.realtimeAvailObject =
+                new RealtimeAvailabilityThread(this.senderObject, this.pluginManager);            
+        }
+
         this.trackerObject =
             new TrackerThread(this.ctPluginManager,
                               this.ltPluginManager,
@@ -248,7 +267,8 @@ public class MeasurementCommandsServer
                                                this.pluginManager, 
                                                this.ltPluginManager,
                                                this.ctPluginManager,
-                                               this.scheduleObject);
+                                               this.scheduleObject,
+                                               this.realtimeAvailObject);
         
         AgentTransportLifecycle agentTransportLifecycle;
         
@@ -268,7 +288,7 @@ public class MeasurementCommandsServer
             throw new AgentStartException("Failed to register Measurement Commands Service.", e);
         }
 
-        spawnThreads(this.senderObject, this.scheduleObject, this.trackerObject);
+        spawnThreads(this.senderObject, this.scheduleObject, this.trackerObject, this.realtimeAvailObject);
 
         i = this.schedStorage.getMeasurementList();
         while(i.hasNext()){
@@ -360,10 +380,12 @@ public class MeasurementCommandsServer
 
         this.scheduleObject.die();
         this.senderObject.die();
-
+        if(realtimeAvailObject != null) this.realtimeAvailObject.die();
         try {
             this.interruptThread(this.senderThread);
             this.interruptThread(this.scheduleThread);
+            if(this.realtimeAvailThread != null)
+                this.interruptThread(this.realtimeAvailThread);
         } catch(InterruptedException exc){
             // Someone wants us to die badly .... ok 
             this.log.warn("shutdown interrupted");

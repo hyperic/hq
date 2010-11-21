@@ -78,6 +78,7 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
     private final LogTrackPluginManager _ltPluginManager;
     private final ConfigTrackPluginManager _ctPluginManager;
     private final ScheduleThread _scheduleObject;
+    private final RealtimeAvailabilityThread _realtimeAvailObject;
     
     
     public MeasurementCommandsService(AgentStorageProvider storage, 
@@ -86,7 +87,8 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
                                       MeasurementPluginManager pluginManager, 
                                       LogTrackPluginManager ltPluginManager, 
                                       ConfigTrackPluginManager ctPluginManager, 
-                                      ScheduleThread scheduleObject) {
+                                      ScheduleThread scheduleObject,
+                                      RealtimeAvailabilityThread realtimeAvailObject) {
         _storage = storage;
         _validProps = validProps;
         _schedStorage = schedStorage;
@@ -94,6 +96,7 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
         _ltPluginManager = ltPluginManager;
         _ctPluginManager = ctPluginManager;
         _scheduleObject = scheduleObject;
+        _realtimeAvailObject = realtimeAvailObject;
     }
     
     /**
@@ -324,6 +327,8 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
     
     void scheduleMeasurement(ScheduledMeasurement m) {
         _scheduleObject.scheduleMeasurement(m);
+        if(_realtimeAvailObject != null)
+            _realtimeAvailObject.scheduleMeasurement(m);
     }
 
     /**
@@ -394,6 +399,8 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
     private void unscheduleMeasurements(AppdefEntityID id)
         throws UnscheduledItemException {
         _scheduleObject.unscheduleMeasurements(id);
+        if(_realtimeAvailObject != null)
+            _realtimeAvailObject.unscheduleMeasurements(id);
     }
 
     public void closeConnection() {

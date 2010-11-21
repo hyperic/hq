@@ -36,12 +36,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.util.PluginLoader;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public abstract class Collector implements Runnable {
 
@@ -130,7 +129,7 @@ public abstract class Collector implements Runnable {
             compatAliases.put(aliases[i][0], aliases[i][1]);
         }
     }
-
+    
     CollectorResult result = new CollectorResult();
 
     protected void init() throws PluginException {
@@ -416,7 +415,10 @@ public abstract class Collector implements Runnable {
             return -1;
         }
         else {
-            return this.intervalMetric.getInterval();
+            if(this.intervalMetric.realtime)
+                return -2;
+            else
+                return this.intervalMetric.getInterval();
         }
     }
 
@@ -693,6 +695,10 @@ public abstract class Collector implements Runnable {
                 else {
                     shouldSkip = !result.collected;
                 }
+                
+                if(interval == -2)
+                    shouldSkip = false;
+                
                 String msg = null;
                 if (isDebug) {
                     String itv, coll;
