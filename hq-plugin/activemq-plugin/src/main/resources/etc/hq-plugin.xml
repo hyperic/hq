@@ -589,6 +589,11 @@
 
     <!-- &sun-jvm-service; -->    
   </server>
+  
+  <server name="ActiveMQ"
+          version="5.4"
+          include="5.3">
+  </server>
 
   <server name="ActiveMQ Embedded"
           version="5.0"
@@ -621,5 +626,10 @@
    <plugin type="autoinventory"
             class="org.hyperic.hq.plugin.activemq.EmbeddedActiveMQServerDetector"/>
   </server>
+  
+  <server name="ActiveMQ Embedded" 
+         version="5.4"
+         include="5.3">
+   </server>
 
 </plugin>

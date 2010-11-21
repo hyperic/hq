@@ -26,6 +26,10 @@
 package org.hyperic.hq.ui;
 
 import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -220,13 +224,36 @@ public class Configurator implements ServletContextListener {
     }
         
     private void loadBuildNumber(ServletContext ctx){
-        
-        
-        try{
-            ctx.setAttribute(Constants.APP_VERSION, ProductProperties.getVersion());            
-        } catch(Exception e){
-            error("Unable to load product version", e);
-        }
+		final String SNAPSHOT_IDENTIFIER = "BUILD-SNAPSHOT";
+		final String BUILD_DATE_FORMAT_OUTPUT = "yyyy-MM-dd";
+		final String BUILD_DATE_FORMAT_INPUT = "MMM dd, yyyy";
+		
+		try {
+			String version = ProductProperties.getVersion();
+
+			if (version.contains(SNAPSHOT_IDENTIFIER)) {
+				try {
+					// Get build date, format into Date object...
+					String date = ProductProperties.getBuildDate();
+					DateFormat format = new SimpleDateFormat(BUILD_DATE_FORMAT_INPUT);
+					Date buildDate = format.parse(date);
+
+					// Take date object and format into different format for
+					// display...
+					format = new SimpleDateFormat(BUILD_DATE_FORMAT_OUTPUT);
+
+					version += "-" + format.format(buildDate);
+				} catch (ParseException e) {
+					// Couldn't parse the date, so we fall back to using just
+					// the version string...
+					log.info("Couldn't parse the build date for display", e);
+				}
+			}
+
+			ctx.setAttribute(Constants.APP_VERSION, version);
+		} catch (Exception e) {
+			error("Unable to load product version", e);
+		}
     }
     
     

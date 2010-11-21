@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2010], Hyperic, Inc.
+ * Copyright (C) [2004-2010], VMWare, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -37,6 +37,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.bizapp.agent.CommandsAPIInfo;
 import org.hyperic.hq.hqapi1.AgentApi;
 import org.hyperic.hq.hqapi1.HQApi;
 import org.hyperic.hq.hqapi1.ResourceApi;
@@ -88,19 +89,12 @@ import com.vmware.vim25.mo.VirtualMachine;
  */
 public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector {
 
-    //duplicating these constants as our build only depends on the pdk
-   
-    static final String AGENT_IP = "agent.setup.agentIP";
-    static final String AGENT_PORT = "agent.setup.agentPort";
-    static final String AGENT_UNIDIRECTIONAL = "agent.setup.unidirectional";
-
     static final String VC_TYPE = AuthzConstants.serverPrototypeVmwareVcenter;
     static final String VM_TYPE = AuthzConstants.platformPrototypeVmwareVsphereVm;
     static final String HOST_TYPE = AuthzConstants.platformPrototypeVmwareVsphereHost;
     static final String ESX_HOST = "esxHost";
 
-    private static final Log log =
-        LogFactory.getLog(VMAndHostVCenterPlatformDetector.class.getName());
+    private static final Log log = LogFactory.getLog(VMAndHostVCenterPlatformDetector.class);
     private static final boolean isDump =
         "true".equals(System.getProperty("vsphere.dump"));
 
@@ -131,32 +125,15 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
         throws IOException, PluginException {
 
         AgentApi api = hqApi.getAgentApi();
-        String host = props.getProperty(AGENT_IP);
-        String port = props.getProperty(AGENT_PORT, "2144");
-        String unidirectional = props.getProperty(AGENT_UNIDIRECTIONAL, "NO").toUpperCase();
+        String agentToken = props.getProperty(CommandsAPIInfo.PROP_AGENT_TOKEN);
 
-        if (host != null) {
-            if (unidirectional.equals("Y")
-                    || unidirectional.equals("YES")) {
-                port = "-1";
-            }
-            String msg = "getAgent(" + host + "," + port + ")";
-            AgentResponse response = api.getAgent(host, Integer.parseInt(port));
-            assertSuccess(response, msg, true);
-            log.debug(msg + ": ok");
-            return response.getAgent();
+        String msg = "getAgent(token=" + agentToken + ")";
+        AgentResponse response = api.getAgent(agentToken);
+        assertSuccess(response, msg, true);
+        if (log.isDebugEnabled()) {
+        	log.debug(msg + ": ok");
         }
-        else { //XXX try harder to find the agent running this plugin.
-            AgentsResponse response = api.getAgents();
-            assertSuccess(response, "getAgents()", true);
-            List<Agent> agents = response.getAgent();
-            if (agents.size() == 0) {
-                throw new PluginException("No agents available");
-            }
-            Agent agent = agents.get(0);
-            log.debug("Using agent: " + agent.getAddress() + ":" + agent.getPort());
-            return agents.get(0);
-        }
+        return response.getAgent();
     }
 
     private void dump(Collection<? extends Resource> resources) {

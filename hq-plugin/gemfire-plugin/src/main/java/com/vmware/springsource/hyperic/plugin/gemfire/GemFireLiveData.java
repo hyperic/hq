@@ -15,7 +15,7 @@ import org.hyperic.util.config.ConfigResponse;
 public class GemFireLiveData extends LiveDataPlugin {
 
     private static final Log log = LogFactory.getLog(GemFireLiveData.class);
-    private static final String[] cmds = {"getMembers", "getDetails", "connectToSystem"};
+    private static final String[] cmds = {"getMembers", "getDetails", "getSystemID"};
 
     public Object getData(String command, ConfigResponse config) throws PluginException {
         Object res = null;
@@ -23,13 +23,13 @@ public class GemFireLiveData extends LiveDataPlugin {
         log.debug("[getData] command='" + command + "' config='" + config + "'");
         try {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(config.toProperties());
-            log.debug("[getData] mServer="+mServer);
+            log.debug("[getData] mServer=" + mServer);
             if ("getDetails".equals(command)) {
                 res = getDetails(mServer);
             } else if ("getMembers".equals(command)) {
                 res = getMembers(mServer);
-            } else if ("connectToSystem".equals(command)) {
-                res = connectToSystem(mServer);
+            } else if ("getSystemID".equals(command)) {
+                res = getSystemID(mServer);
             } else {
                 throw new PluginException("command '" + command + "' not found");
             }
@@ -43,12 +43,14 @@ public class GemFireLiveData extends LiveDataPlugin {
         return cmds;
     }
 
-    private static String connectToSystem(MBeanServerConnection mServer) throws Exception {
-        Object[] args = new Object[0];
-        String[] def = new String[0];
-        ObjectName sys = (ObjectName) mServer.invoke(new ObjectName("GemFire:type=Agent"), "connectToSystem", args, def);
-        log.debug("[connectToSystem] sys=" + sys);
-        return sys.getKeyProperty("id");
+    public static String getSystemID(MBeanServerConnection mServer) throws Exception {
+        ObjectName mbean = new ObjectName("GemFire:type=MemberInfoWithStatsMBean");
+        String id = (String) mServer.getAttribute(mbean, "Id");
+        if (id.equalsIgnoreCase("n/a")) {
+            getMembers(mServer);    // initialitze the id Attribute on MemberInfoWithStatsMBean
+            id = getSystemID(mServer);
+        }
+        return id;
     }
 
     private static String[] getMembers(MBeanServerConnection mServer) throws Exception {

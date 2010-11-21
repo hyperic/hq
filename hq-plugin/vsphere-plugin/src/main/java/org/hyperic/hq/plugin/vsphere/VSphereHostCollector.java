@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2010], Hyperic, Inc.
+ * Copyright (C) [2004-2010], VMWare, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -56,10 +56,10 @@ public class VSphereHostCollector extends VSphereCollector {
     private static final Log _log =
         LogFactory.getLog(VSphereHostCollector.class.getName());
 
-    private static final Set VALID_UNITS =
-        new HashSet(Arrays.asList(MeasurementConstants.VALID_UNITS));
+    private static final Set<String> VALID_UNITS =
+        new HashSet<String>(Arrays.asList(MeasurementConstants.VALID_UNITS));
 
-    private static final HashMap UNITS_MAP = new HashMap();
+    private static final HashMap<String, String> UNITS_MAP = new HashMap<String, String>();
     private static final String[][] UNITS_ALIAS = {
         { "Second", MeasurementConstants.UNITS_SECONDS },
         { "Millisecond", MeasurementConstants.UNITS_MILLIS },
@@ -107,25 +107,22 @@ public class VSphereHostCollector extends VSphereCollector {
         System.out.println("            alias=\"" + key + "\"");
         System.out.println("            units=\"" + units + "\"/>\n");
     }
-
+    
     protected void init() throws PluginException {
         super.init();
         // HPD-681, this is a BIG performance hit and will stall the ScheduleThread when
         // HQ is configured to collect for several esx servers/vms
         // Therefore since ScehduleThread does not need to validate configOpts just return
         // Could possibly be taken out when we switch VSphereUtil to use SearchIndex.findByUuid()
-        if (Thread.currentThread().getName().toLowerCase().equals("schedulethread")) {
+        if (Thread.currentThread().getName().equalsIgnoreCase("schedulethread")) {
             return;
         }
-        VSphereUtil vim = null;
         try {
-            vim = VSphereUtil.getInstance(getProperties());
+            VSphereUtil vim = VSphereUtil.getInstance(getProperties());
             //validate config
             getManagedEntity(vim);
         } catch (Exception e) {
             throw new PluginException(e.getMessage(), e);
-        } finally {
-            VSphereUtil.dispose(vim);
         }
     }
 
@@ -148,7 +145,6 @@ public class VSphereHostCollector extends VSphereCollector {
             // undetermined state, so mark as down
             avail = Metric.AVAIL_DOWN;
         }
-        
         setValue(Metric.ATTR_AVAIL, avail);
     }
     
@@ -167,6 +163,10 @@ public class VSphereHostCollector extends VSphereCollector {
             setAvailability(false);
             _log.error("Error setting availability for " + getName() + ": " + e.getMessage());           
             _log.debug(e,e);  
+            return;
+        }
+        
+        if (mor == null) {
             return;
         }
         

@@ -27,54 +27,43 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
-import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
-import org.hyperic.hq.product.Collector;
-import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.amqp.rabbit.admin.QueueInfo;
 
 import java.util.List;
 import java.util.Properties;
+import org.hyperic.hq.product.Metric;
 
 /**
  * QueueCollector
  * @author Helena Edelson
  */
-public class QueueCollector extends Collector {
+public class QueueCollector extends RabbitMQListCollector {
 
     private static final Log logger = LogFactory.getLog(QueueCollector.class);
 
-    @Override
-    protected void init() throws PluginException {
+    public void collect(HypericRabbitAdmin rabbitAdmin) {
         Properties props = getProperties();
-        logger.debug("[init] props=" + props);
-        super.init();
-    }
+        String vhost = (String) props.get(MetricConstants.VHOST);
+        if (logger.isDebugEnabled()) {
+            String node = (String) props.get(MetricConstants.NODE);
+            logger.debug("[collect] vhost=" + vhost + " node=" + node);
+        }
 
-    public void collect() {
-        Properties props = getProperties();
-        logger.debug("[collect] props=" + props);
-
-        String queue = (String) props.get(MetricConstants.QUEUE);
-        String vhost = (String) props.get(MetricConstants.VIRTUALHOST);
-        String node = (String) props.get(MetricConstants.NODE);
-
-        if (RabbitProductPlugin.isInitialized()) {
-            HypericRabbitAdmin rabbitAdmin = RabbitProductPlugin.getVirtualHostForNode(vhost, node);
-
-            List<QueueInfo> queues = rabbitAdmin.getQueues();
-            if (queues != null) {
-                for (QueueInfo q : queues) {
-                    if (q.getName().equalsIgnoreCase(queue)) {
-                        setAvailability(true);
-                        setValue("messages", q.getMessages());
-                        setValue("consumers", q.getConsumers());
-                        setValue("transactions", q.getTransactions());
-                        setValue("memory", q.getMemory());
-                    }
-                }
+        List<QueueInfo> queues = rabbitAdmin.getQueues(vhost);
+        if (queues != null) {
+            for (QueueInfo q : queues) {
+                logger.debug("[collect] QueueInfo="+q.getName());
+                setValue(q.getName() + "." + Metric.ATTR_AVAIL, Metric.AVAIL_UP);
+                setValue(q.getName() + ".messages", q.getMessages());
+                setValue(q.getName() + ".consumers", q.getConsumers());
+                setValue(q.getName() + ".transactions", q.getTransactions());
+                setValue(q.getName() + ".acksUncommitted", q.getAcksUncommitted());
+                setValue(q.getName() + ".messagesReady", q.getMessagesReady());
+                setValue(q.getName() + ".messagesUnacknowledged", q.getMessagesUnacknowledged());
+                setValue(q.getName() + ".messagesUncommitted", q.getMessageUncommitted());
+                setValue(q.getName() + ".memory", q.getMemory());
             }
         }
     }
@@ -90,13 +79,13 @@ public class QueueCollector extends Collector {
         String durable = queue.isDurable() ? "durable" : "not durable";
         ConfigResponse res = new ConfigResponse();
         res.setValue("durable", durable);
-        res.setValue("acksUncommitted", queue.getAcksUncommitted());
-        res.setValue("messagesReady", queue.getMessagesReady());
-        res.setValue("messagesUnacknowledged", queue.getMessagesUnacknowledged());
-        res.setValue("messagesUncommitted", queue.getMessageUncommitted());
         res.setValue("name", queue.getName());
         res.setValue("pid", queue.getPid().substring(5, queue.getPid().length() - 1));
         return res;
     }
 
+    @Override
+    public Log getLog() {
+        return logger;
+    }
 }

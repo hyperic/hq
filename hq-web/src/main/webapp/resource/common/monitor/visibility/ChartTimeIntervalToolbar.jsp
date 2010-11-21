@@ -72,12 +72,12 @@
   </tr>
   <tr>
     <td colspan="3" class="BlockContent" align="right">
-    <html:link href="javascript:moveIt(dojo.byId('advancedDisplay'), null,'75px');showAdvanced();"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn"/></html:link>
+    <a id="editRangeLink" href="#" onclick="advancedDialog.show();return false;"><fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn"/></a>
     </td>
     </tr>
     <tr>
-    <td class="BlockContent" colspan="3">
-      <div id="advancedDisplay" class="dialog" style="filter: alpha(opacity=0);opacity: 0;">
+    <td class="BlockContent" colspan="3" id="advancedContainer">
+      <div id="advancedDisplay" class="dialog" style="display: none;">
         <tiles:insert definition=".resource.common.monitor.visibility.embeddedMetricDisplayRange">
           <tiles:put name="form" beanName="form"/>
           <tiles:put name="formName" beanName="formName"/>
@@ -88,20 +88,17 @@
 </table>
 
 <script type="text/javascript">
-  function hideAdvanced() {
-    var advancedDiv = dojo.byId('advancedDisplay');
-    advancedDiv.style.display='none';
-    new Effect.MoveBy(advancedDiv.parentNode, 0, 0 );
-  }
-
-function moveIt(obj, mvTop, mvLeft) {
-	obj.style.position = "absolute";
-	obj.style.top = mvTop;
-	obj.style.left = mvLeft;
-    obj.style.display = '';
-}
-
-  onloads.push( hideAdvanced );
-
-    
+	var advancedDialog = null;
+	
+	dojo11.addOnLoad(function(){
+		advancedDialog = new dijit11.Dialog({
+                id: 'advancedDisplay',
+                refocus: true,
+                autofocus: false,
+                opacity: 0,
+                title: "<fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn" />"
+        }, dojo11.byId('advancedDisplay'));
+        
+        dojo11.place(dojo11.byId('advancedDisplay'), dojo11.byId('advancedContainer'), "last");
+  	});
 </script>

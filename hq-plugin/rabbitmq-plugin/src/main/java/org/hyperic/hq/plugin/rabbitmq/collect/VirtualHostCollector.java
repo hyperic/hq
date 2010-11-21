@@ -29,9 +29,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitVirtualHost;
-import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
-import org.hyperic.hq.product.Collector;
-import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 
 import java.util.Properties;
@@ -40,37 +37,27 @@ import java.util.Properties;
  * VirtualHostCollector
  * @author Helena Edelson
  */
-public class VirtualHostCollector extends Collector {
+public class VirtualHostCollector extends RabbitMQDefaultCollector {
 
-    private static final Log logger = LogFactory.getLog(QueueCollector.class);
+    private static final Log logger = LogFactory.getLog(VirtualHostCollector.class);
 
-    @Override
-    protected void init() throws PluginException {
+    public void collect(HypericRabbitAdmin rabbitAdmin) {
         Properties props = getProperties();
-        logger.debug("[init] props=" + props);
-        super.init();
-    }
-
-    public void collect() {
-        Properties props = getProperties();
-        logger.debug("[collect] props=" + props);
-
-        String vhost = (String) props.get(MetricConstants.VIRTUALHOST);
+        String vhost = (String) props.get(MetricConstants.VHOST);
         String node = (String) props.get(MetricConstants.NODE);
+        if (logger.isDebugEnabled()) {
+            logger.debug("[collect] vhost=" + vhost + " node=" + node);
+        }
 
-        if (RabbitProductPlugin.isInitialized()) {
-            HypericRabbitAdmin rabbitAdmin = RabbitProductPlugin.getVirtualHostForNode(vhost, node);
+        RabbitVirtualHost virtualHost = new RabbitVirtualHost(vhost, rabbitAdmin);
 
-            RabbitVirtualHost virtualHost = rabbitAdmin.buildRabbitVirtualHost();
-            if (virtualHost != null) {
-
-                setAvailability(virtualHost.isAvailable());
-                setValue("queueCount", virtualHost.getQueueCount());
-                setValue("exchangeCount", virtualHost.getExchangeCount());
-                setValue("connectionCount", virtualHost.getConnectionCount());
-                setValue("channelCount", virtualHost.getChannelCount());
-                setValue("consumerCount", virtualHost.getConsumerCount());
-            }
+        if (virtualHost != null) {
+            setAvailability(virtualHost.isAvailable());
+            setValue("queueCount", virtualHost.getQueueCount());
+            setValue("exchangeCount", virtualHost.getExchangeCount());
+            setValue("connectionCount", virtualHost.getConnectionCount());
+            setValue("channelCount", virtualHost.getChannelCount());
+            setValue("consumerCount", virtualHost.getConsumerCount());
         }
     }
 
@@ -87,5 +74,10 @@ public class VirtualHostCollector extends Collector {
         res.setValue("node", vh.getNode());
         res.setValue("users", vh.getUsers());
         return res;
+    }
+
+    @Override
+    public Log getLog() {
+        return logger;
     }
 }

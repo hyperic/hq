@@ -74,35 +74,6 @@ var onloads = [];
         for ( var i = 0 ; i < onloads.length ; i++ )
         	onloads[i]();
     };
-        
-    /* for Mozilla/Opera9 */
-    if (document.addEventListener) {
-        document.addEventListener("DOMContentLoaded", initOnloads, false);
-    }
-        
-    /* for Internet Explorer */
-    /*@cc_on @*/
-    /*@if (@_win32)
-        document.write("<script id=__ie_onload defer src=javascript:void(0)><\/script>");
-        var script = document.getElementById("__ie_onload");
-        script.onreadystatechange = function() {
-            if (this.readyState == "complete") {
-                initOnloads(); // call the onload handler
-            }
-        };
-    /*@end @*/
-        
-    /* for Safari */
-    /*if (/WebKit/i.test(navigator.userAgent)) { // sniff
-        var _timer = setInterval(function() {
-            if (/loaded|complete/.test(document.readyState)) {
-                initOnloads(); // call the onload handler
-            }
-        }, 10);
-    }*/
-        
-    /* for other browsers */
-    window.onload = initOnloads;
 
 	function refreshPortlets() {
 	
@@ -157,6 +128,10 @@ var onloads = [];
 	}
 	
 	onloads.push(refreshPortlets);
+
+	dojo11.addOnLoad(function() {
+		initOnloads();
+	});
 </script>
 <html:link page="/Resource.do?eid=" linkName="viewResUrl" styleId="viewResUrl" style="display:none;"></html:link>
 

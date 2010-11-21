@@ -244,7 +244,8 @@ public class MeasurementCommandsServer
                                              this.storage, this.schedStorage);
         
         this.scheduleObject = new ScheduleThread(this.senderObject, 
-                                                 this.pluginManager);
+                                                 this.pluginManager,
+                                                 this.bootConfig.getBootProperties());
 
         // don't create thread if it's not enabled through agent.properties
         String enableRT = 
@@ -253,7 +254,7 @@ public class MeasurementCommandsServer
             this.realtimeAvailObject =
                 new RealtimeAvailabilityThread(this.senderObject, this.pluginManager);            
         }
-
+        
         this.trackerObject =
             new TrackerThread(this.ctPluginManager,
                               this.ltPluginManager,

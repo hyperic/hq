@@ -29,6 +29,8 @@
 
 <plugin class="org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin">
 
+    <filter name="server-connection" value="node=%node%,authentication=%authentication%"/>
+
     <server name="RabbitMQ" description="RabbitMQ">
 
         <help>
@@ -42,23 +44,20 @@
                         This version of the plugin requires that the HQ Agent that manages RabbitMQ has permission to read the Erlang cookie.
 
                         <h4>Configuration Requirements</h4>
-                        Assuming at least one RabbitMQ Node is running, the HQ Agent on the platform where the RabbitMQ server is running should
-                        auto-discover the "RabbitMQ" server instance, and present it as a new server on the platform in the Auto-Discovery portlet
+                        The HQ Agent on the platform where the RabbitMQ server should auto-discover the "RabbitMQ" server instance — assuming
+                        at least one RabbitMQ Node is running. — and present it as a new server on the platform in the Auto-Discovery portlet
                         of the HQ Dashboard. To enable metric collection and auto-discovery of RabbitMQ services:
 
                         <ol>
                            <li>Import the platform with the new RabbitMQ server to inventory</li>
                            <li>Navigate to the Rabbit MQ server, using Resources > Browse > Servers</li>
                            <li>Under the Server (Node), navigate to Tools Menu > Configure Server</li>
-                           <li>Enter the RabbitMQ username and password and click OK. Hyperic assumes the default
+                           <li>Enter the RabbitMQ username and password for the RabbitMQ server and click OK. Hyperic assumes the default</li>
                            RabbitMQ username and password have been changed for security reasons and does set them as the default</li>
                         </ol>
 
-                         This will enable the plugin to authenticate and auto-discover Queues and Exchanges by Virtual Host per node and
+                         This will allow enable the plugin to authenticate, auto-discover Queue, Channel, Connection, Exchanges, etc., and
                          proceed with metric collection. Note: Discovered services are automatically imported to HQ inventory.
-
-                         In this release, transient resources i.e. Channels and Connections, are not individually exposed as Service Resources
-                         but cumulatively as part of each Virtual Host.
                   </p>
                   <p>
                     <h3>Help Docs</h3>
@@ -75,16 +74,11 @@
 
         <plugin type="log_track" class="org.hyperic.hq.plugin.rabbitmq.core.RabbitBrokerLog"/>
 
-        <config type="product">
-            <option name="username" description="RabbitMQ Username for %server.name%"/>
-            <option name="password" type="secret" description="RabbitMQ Password for %server.name%"/>
-            <!-- ToDo <option name="port" description="RabbitMQ Port for %server.name%"/> -->
-        </config>
-
-
-        <config type="measurement">
-            <option name="process.query" default="State.Name.sw=beam,Args.*.eq=-sname,Args.*.eq=%process.name%"
-                    description="%process.name% Measurement Query"/>
+        <config>
+            <option name="node" description="node"/>
+            <option name="authentication" description=".erlang.cookie value"/>
+            <option name="process.query" default="State.Name.re=[beam|erl],Args.*.eq=-sname,Args.*.eq=%node%"
+                    description="PTQL Query"/>
         </config>
 
         <properties>
@@ -95,13 +89,8 @@
             <property description="Rabbit -boot" name="rabbit.boot"/>
         </properties>
 
-        <config type="measurement">
-            <option name="process.query" default="State.Name.sw=beam,Args.*.eq=-sname,Args.*.ct=%server.path%"
-                    description="Node Process Query"/>
-        </config>
-
         <metric name="Availability"
-                template="rabbitmq:server.name=%server.name%,hostname=%hostname%,username=%username%,password=%password%,authentication=%authentication%:Availability"
+                template="rabbitmq:${server-connection}:Availability"
                 indicator="true"/>
 
         &process-metrics;
@@ -114,11 +103,10 @@
 
         <service name="Queue">
             <property name="template"
-                      value="rabbitmq:queue=%queue%,node=%node%,virtualhost=%virtualhost%:${alias}"/>
+                      value="rabbitmq:vhost=%vhost%,${server-connection}:%queue%.${alias}"/>
 
-            <config type="measurement">
-                <option name="node" description="rabbit node name"/>
-                <option name="virtualhost" description="rabbit node-virtualhost name"/>
+            <config>
+                <option name="vhost" description="rabbit node-vhost name"/>
                 <option name="queue" description="queue name"/>
             </config>
 
@@ -127,7 +115,6 @@
                     category="THROUGHPUT"
                     units="none"
                     indicator="true"
-                    interval="60000"
                     defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Consumers"
@@ -135,7 +122,6 @@
                     category="UTILIZATION"
                     units="none"
                     indicator="true"
-                    interval="60000"
                     defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Transactions"
@@ -143,14 +129,40 @@
                     category="THROUGHPUT"
                     units="none"
                     indicator="true"
-                    interval="60000"
+                    defaultOn="true"
+                    collectionType="dynamic"/>  
+            <metric name="Acks Uncommitted"
+                    alias="acksUncommitted"
+                    category="THROUGHPUT"
+                    units="none"
+                    indicator="true"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="Messages Ready"
+                    alias="messagesReady"
+                    category="THROUGHPUT"
+                    units="none"
+                    indicator="true"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="Messages Unacknowledged"
+                    alias="messagesUnacknowledged"
+                    category="THROUGHPUT"
+                    units="none"
+                    indicator="true"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="Messages Uncommitted"
+                    alias="messagesUncommitted"
+                    category="THROUGHPUT"
+                    units="none"
+                    indicator="true"
                     defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Availability"
                     category="AVAILABILITY"
                     units="percentage"
                     indicator="true"
-                    interval="60000"
                     defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Memory"
@@ -167,20 +179,15 @@
             <properties>
                 <property description="Name" name="name"/>
                 <property description="Process ID" name="pid"/>
-                <property description="Acks Uncommitted" name="acksUncommitted"/>
-                <property description="Messages Ready" name="messagesReady"/>
-                <property description="Messages Unacknowledged" name="messagesUnacknowledged"/>
-                <property description="Messages Uncommitted" name="messagesUncommitted"/>
                 <property description="Durable" name="durable"/>
             </properties>
         </service>
 
-        <!--<service name="Channel">
-            <property name="template" value="rabbitmq:channel=%channel%,node=%node%,virtualhost=%virtualhost%:${alias}"/>
+        <service name="Channel">
+            <property name="template" value="rabbitmq:vhost=%vhost%,${server-connection}:%channel%.${alias}"/>
 
-            <config type="measurement">
-                <option name="node" description="rabbit node name"/>
-                <option name="virtualhost" description="rabbit node-virtualhost name"/>
+            <config>
+                <option name="vhost" description="rabbit node-vhost name"/>
                 <option name="channel" description="channel name"/>
             </config>
 
@@ -189,7 +196,27 @@
                     category="UTILIZATION"
                     units="none"
                     indicator="true"
-                    interval="60000"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="Prefetch Count"
+                    alias="prefetchCount"
+                    category="THROUGHPUT"
+                    units="B"
+                    indicator="true"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="Acks Uncommitted"
+                    alias="acksUncommitted"
+                    category="THROUGHPUT"
+                    units="B"
+                    indicator="true"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="Messages Unacknowledged"
+                    alias="messagesUnacknowledged"
+                    category="THROUGHPUT"
+                    units="B"
+                    indicator="true"
                     defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Availability"
@@ -208,19 +235,14 @@
                 <property description="Number" name="number"/>
                 <property description="User" name="user"/>
                 <property description="Transactional" name="transactional"/>
-                <property description="Prefetch Count" name="prefetchCount"/>
-                <property description="Acks Uncommitted" name="acksUncommitted"/>
-                <property description="Messages Unacknowledged" name="messagesUnacknowledged"/>
             </properties>
         </service>
 
         <service name="Connection">
             <property name="template"
-                      value="rabbitmq:connection=%connection%,node=%node%,virtualhost=%virtualhost%:${alias}"/>
+                      value="rabbitmq:${server-connection}:%connection%.${alias}"/>
 
-            <config type="measurement">
-                <option name="node" description="rabbit node name"/>
-                <option name="virtualhost" description="rabbit node-virtualhost name"/>
+            <config>
                 <option name="connection" description="connection name"/>
             </config>
 
@@ -229,7 +251,6 @@
                     category="THROUGHPUT"
                     units="B"
                     indicator="true"
-                    interval="60000"
                     defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Octets Sent"
@@ -237,7 +258,6 @@
                     category="THROUGHPUT"
                     units="B"
                     indicator="true"
-                    interval="60000"
                     defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Network Packets Received"
@@ -251,7 +271,6 @@
                     category="THROUGHPUT"
                     units="B"
                     indicator="true"
-                    interval="60000"
                     defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Channels"
@@ -259,7 +278,6 @@
                     category="UTILIZATION"
                     units="none"
                     indicator="true"
-                    interval="60000"
                     defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Pending Sends"
@@ -267,7 +285,6 @@
                     category="UTILIZATION"
                     units="none"
                     indicator="true"
-                    interval="60000"
                     defaultOn="true"
                     collectionType="dynamic"/>
             <metric name="Availability"
@@ -289,15 +306,14 @@
                 <property description="VHost" name="vHost"/>
                 <property description="Username" name="username"/>
             </properties>
-        </service>-->
+        </service>
 
         <service name="Exchange">
             <property name="template"
-                      value="rabbitmq:exchange=%exchange%,node=%node%,virtualhost=%virtualhost%:${alias}"/>
+                      value="rabbitmq:vhost=%vhost%,${server-connection}:%exchange%.${alias}"/>
 
-            <config type="measurement">
-                <option name="node" description="rabbit node name"/>
-                <option name="virtualhost" description="rabbit node-virtualhost name"/>
+            <config>
+                <option name="vhost" description="rabbit node-vhost name"/>
                 <option name="exchange" description="exchange name"/>
             </config>
 
@@ -318,12 +334,14 @@
             </properties>
         </service>
 
+        <!-- These will hit the server enough for each query that we do not want to
+        run the collector often. Consider modifying what is queried/exposed with large-volume
+        heavily-trafficed brokers. -->
         <service name="VirtualHost">
-            <property name="template" value="rabbitmq:node=%node%,virtualhost=%virtualhost%:${alias}"/>
+            <property name="template" value="rabbitmq:vhost=%vhost%,${server-connection}:${alias}"/>
 
-            <config type="measurement">
-                <option name="node" description="rabbit node name"/>
-                <option name="virtualhost" description="rabbit node-virtualhost name"/>
+            <config>
+                <option name="vhost" description="rabbit node-vhost name"/>
             </config>
 
             <metric name="Availability"

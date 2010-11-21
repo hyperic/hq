@@ -34,9 +34,7 @@ public class ErlangArgs {
     private String virtualHost;
 
     private Class type;
-
-    public ErlangArgs() {}
-
+ 
     public ErlangArgs(String v, Class t) {
         this.virtualHost = v;
         this.type = t;
@@ -46,15 +44,8 @@ public class ErlangArgs {
         return virtualHost;
     }
 
-    public void setVirtualHost(String virtualHost) {
-        this.virtualHost = virtualHost;
-    }
-
     public Class getType() {
         return type;
     }
 
-    public void setType(Class type) {
-        this.type = type;
-    }
 }

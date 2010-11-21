@@ -42,9 +42,6 @@
 				</amq:memoryUsage>
 			</amq:systemUsage>
 		</amq:systemUsage>
-		<amq:transportConnectors>
-			<amq:transportConnector uri="tcp://localhost:0" />
-		</amq:transportConnectors>
 	</amq:broker>
 
 	<amq:connectionFactory id="jmsFactory" brokerURL="vm://localhost?create=false" />
@@ -59,16 +56,12 @@
 	<bean id="registeredDispatcher"
 		class="org.hyperic.hq.bizapp.server.mdb.RegisteredDispatcherImpl" />
 
-	<!-- TODO: What is the correct value of concurrency? -->
-	<jms:listener-container destination-type="topic"
-		concurrency="1" acknowledge="transacted">
-		<jms:listener destination="topic/eventsTopic" ref="loggingDispatcher" />
-		<jms:listener destination="topic/eventsTopic" ref="serverRestartHandler" />
-	</jms:listener-container>
 
 	<jms:listener-container destination-type="topic"
 		concurrency="1" acknowledge="dups-ok">
 		<jms:listener destination="topic/eventsTopic" ref="registeredDispatcher" />
+		<jms:listener destination="topic/eventsTopic" ref="loggingDispatcher" />
+		<jms:listener destination="topic/eventsTopic" ref="serverRestartHandler" />
 	</jms:listener-container>
 
 	<bean id="eventsJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
@@ -76,11 +69,5 @@
 		<property name="defaultDestinationName" value="topic/eventsTopic" />
 		<property name="pubSubDomain" value="true" />
 	</bean>
-
-	<bean id="jmsTransactionManager"
-		class="org.springframework.jms.connection.JmsTransactionManager">
-		<property name="connectionFactory" ref="connectionFactory" />
-	</bean>
-
 
 </beans>

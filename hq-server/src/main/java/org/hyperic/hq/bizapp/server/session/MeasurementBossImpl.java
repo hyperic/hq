@@ -25,8 +25,6 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -2329,21 +2327,9 @@ public class MeasurementBossImpl implements MeasurementBoss {
         }
 
         AppdefEntityID[] ids = getGroupMemberIDs(subject, gid);
+        double[] data = getAvailability(subject, ids, midMap, availCache);
 
-        double sum = 0;
-        int count = 0;
-        double[] avails = getAvailability(subject, ids, midMap, availCache);
-
-        for (int i = 0; i < avails.length; i++) {
-            if (avails[i] != MeasurementConstants.AVAIL_UNKNOWN) {
-                sum += avails[i];
-                count++;
-            }
-        }
-
-        final double r = (count == 0) ? MeasurementConstants.AVAIL_UNKNOWN : sum / count;
-        final BigDecimal b = new BigDecimal(r, new MathContext(10));
-        return b.doubleValue();
+        return getCalculatedGroupAvailability(data);
     }
 
     private List<AppdefEntityID> getAGMemberIds(AuthzSubject subject, AppdefEntityID[] aids,
@@ -2934,29 +2920,8 @@ public class MeasurementBossImpl implements MeasurementBoss {
 
         // Availability
         try {
-            boolean hasDownValues = false;
-            boolean hasUpValues = false;
-            boolean hasUnknownValues = false;
-            boolean hasOtherValues = false;
-            double[] data = getAvailability(subject, ids, midMap, null);
-            if (data.length > 0) {
-                double sum = 0;
-                for (int ii = 0; ii < data.length; ii++) {
-                    double val = data[ii];
-                    if (val == MeasurementConstants.AVAIL_DOWN) {
-                        hasDownValues = true;
-                    } else if (val == MeasurementConstants.AVAIL_UP) {
-                        hasUpValues = true;
-                    } else if (val == MeasurementConstants.AVAIL_UNKNOWN) {
-                        hasUnknownValues = true;
-                    } else {
-                        hasOtherValues = true;
-                    }
-                    sum += val;
-                }
-                summary.setAvailability(getSummaryValue(hasDownValues, hasUpValues,
-                    hasUnknownValues, hasOtherValues, sum, data.length));
-            }
+           double[] data = getAvailability(subject, ids, midMap, null);
+           summary.setAvailability(getCalculatedGroupAvailability(data));
         } catch (AppdefEntityNotFoundException e) {
             log.debug(e, e);
             summary.setAvailability(new Double(MeasurementConstants.AVAIL_UNKNOWN));
@@ -2969,38 +2934,67 @@ public class MeasurementBossImpl implements MeasurementBoss {
             log.debug("END setResourceTypeDisplaySummary -- " + watch.getElapsed() + " msec");
     }
 
+    private double getCalculatedGroupAvailability(double[] data) {
+    	 boolean hasDownValues = false;
+         boolean hasUpValues = false;
+         boolean hasUnknownValues = false;
+         double result = MeasurementConstants.AVAIL_UNKNOWN;
+         
+         if (data.length > 0) {
+            double sum = 0;
+            
+            for (int ii = 0; ii < data.length; ii++) {
+                double val = data[ii];
+            
+                if (val == MeasurementConstants.AVAIL_DOWN) {
+                    hasDownValues = true;
+                } else if (val == MeasurementConstants.AVAIL_UP) {
+                    hasUpValues = true;
+                } else if (val == MeasurementConstants.AVAIL_UNKNOWN) {
+                    hasUnknownValues = true;
+                }
+                
+                sum += val;
+            }
+            
+            result = getSummaryValue(hasDownValues, hasUpValues, hasUnknownValues);
+         }
+         
+         return result;
+    }
+    
     /**
-     * Red only (regardless of any Gray) = Red Red + Green (regardless of any
-     * Gray) = Yellow Gray only (regardless of any Green) = Gray Green only =
-     * Green
+     * Red only (regardless of any Gray) = Red 
+     * Red + Green (regardless of any Gray) = Yellow 
+     * Gray only (regardless of any Green) = Gray 
+     * Green only = Green
+     * 
+     * Other states are out of play when dealing with groups, so we don't consider them here.
+     * For example, if 2 resources out of a group of 10 are paused/powered off,
+     * the availability of the group is really based on the state of the 8 resources
+     * that are monitorable.  This technically should apply to resources that are 
+     * misconfigured/unknown, but we lack another way of signaling this to the user
+     * so for now the above rules still apply.
      */
     private Double getSummaryValue(boolean hasDownValues, boolean hasUpValues,
-                                   boolean hasUnknownValues, boolean hasOtherValues, double sum,
-                                   int length) {
-        if (!hasDownValues && hasUpValues && !hasUnknownValues && !hasOtherValues) {
-            return new Double(AVAIL_UP);
-        } else if (hasDownValues && !hasUpValues && !hasUnknownValues && !hasOtherValues ||
-                   hasDownValues && !hasUpValues && hasUnknownValues && hasOtherValues ||
-                   hasDownValues && !hasUpValues && hasUnknownValues && !hasOtherValues ||
-                   hasDownValues && !hasUpValues && !hasUnknownValues && hasOtherValues) {
-            return new Double(AVAIL_DOWN);
-        } else if (hasDownValues && hasUpValues && !hasUnknownValues && !hasOtherValues ||
-                   hasDownValues && hasUpValues && !hasUnknownValues && hasOtherValues ||
-                   hasDownValues && hasUpValues && hasUnknownValues && hasOtherValues) {
-            return new Double(AVAIL_WARN);
-        } else if (!hasDownValues && hasUpValues && hasUnknownValues && !hasOtherValues ||
-                   !hasDownValues && hasUpValues && hasUnknownValues && hasOtherValues) {
-            return new Double(AVAIL_UNKNOWN);
-        }
-        double rtn = sum / (double) length;
-        if (rtn == AVAIL_PAUSED) {
-            return new Double(AVAIL_PAUSED);
-        } else if (rtn == AVAIL_POWERED_OFF) {
-            return new Double(AVAIL_PAUSED);
-        } else if (rtn < AVAIL_DOWN) {
-            return new Double(AVAIL_WARN);
-        }
-        return new Double(rtn);
+                                   boolean hasUnknownValues) {
+    	Double result = new Double(AVAIL_UNKNOWN);
+    	
+        if (hasUpValues && !(hasDownValues || hasUnknownValues)) { 
+        	// Everything is up, no downs, no unknowns == GREEN
+        	result = new Double(AVAIL_UP);
+        } else if (hasDownValues && hasUpValues) { 
+        	// There are ups and downs, doesn't matter about unknowns == YELLOW
+        	result = new Double(AVAIL_WARN);
+        } else if (hasDownValues) { 
+        	// There's a down, at this point nothing else matters == RED
+        	result = new Double(AVAIL_DOWN);
+        } else if (hasUnknownValues) { 
+        	// If we've gotten this far and it's an unknown == GRAY
+        	result = new Double(AVAIL_UNKNOWN);
+        } 
+        
+        return result;
     }
 
     /**

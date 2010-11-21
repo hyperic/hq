@@ -98,9 +98,14 @@ public class ApplicationQuery extends ServiceQuery {
         //for later use in getScope to find children
         this.mbeanName = appName;
 
-        if (appName.startsWith(serverName)) {
+        if ((appName.startsWith(serverName)) && (appName.length() > (serverName.length() + 1))) {
             appName = appName.substring(serverName.length() + 1);
         }
+
+        if ((appName.startsWith(serverName)) && (appName.length() > serverName.length())) {
+            appName = appName.substring(serverName.length());
+        }
+        log.debug("[getAttributes] mbeanName = '" + this.mbeanName + "' => '" + appName+"'");
 
         if (server.getDiscover().isInternalApp(appName)) {
             log.debug(appName+" is a internal Application");

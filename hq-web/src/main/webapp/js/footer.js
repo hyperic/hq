@@ -29,20 +29,20 @@ var footerH = 28;
 var browserH = 88;
 
 function setFoot() {
-  if (isIE) {
-    conH = document.body.scrollHeight;
-    winH = document.body.clientHeight;
-  }
+  var WindowSize = {
+    width: window.innerWidth || (window.document.documentElement.clientWidth || window.document.body.clientWidth),
+    height: window.innerHeight || (window.document.documentElement.clientHeight || window.document.body.clientHeight)
+  };
   
-  else {
-    conH = document.height;
-    winH = window.innerHeight;
-  }
-
+  winH = WindowSize.height;
+  conH = dojo11.coords("header", false).h + dojo11.coords("migContainer", false).h;
+  
   var myHeight = winH - conH - footerH + browserH;
+  
   if (myHeight > 60) {
-    var footerSpacer = document.getElementById("footerContent");
-    footerSpacer.setAttribute('style', "margin-top:" + myHeight + "px;");
+  	var footerContent = dojo11.byId("footerContent");
+  	
+  	footerContent.style.marginTop = myHeight + "px";
   }
 }
 

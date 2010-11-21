@@ -28,44 +28,36 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.*;
-import org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin;
-import org.hyperic.hq.product.Collector;
-import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 
 import java.util.List;
 import java.util.Properties;
+import org.hyperic.hq.product.Metric;
 
 /**
  * ChannelCollector
  * @author Helena Edelson
  */
-public class ChannelCollector extends Collector {
+public class ChannelCollector extends RabbitMQListCollector {
 
-    private static final Log logger = LogFactory.getLog(ConnectionCollector.class);
+    private static final Log logger = LogFactory.getLog(ChannelCollector.class);
 
-    @Override
-    protected void init() throws PluginException {
+    public void collect(HypericRabbitAdmin rabbitAdmin) {
         Properties props = getProperties();
-        logger.debug("[init] props=" + props);
-        super.init();
-    }
+        if (logger.isDebugEnabled()) {
+            String node = (String) props.get(MetricConstants.NODE);
+            logger.debug("[collect] node=" + node);
+        }
 
-    public void collect() {
-        Properties props = getProperties();
-        logger.debug("[collect] props=" + props);
-        String channelPid = (String) props.get(MetricConstants.CHANNEL);
-        String vhost = (String) props.get(MetricConstants.VIRTUALHOST);
-        String node = (String) props.get(MetricConstants.NODE);
-
-        if (RabbitProductPlugin.isInitialized()) {
-            HypericRabbitAdmin rabbitAdmin = RabbitProductPlugin.getVirtualHostForNode(vhost, node);
-            List<RabbitChannel> channels = rabbitAdmin.getChannels();
-            if (channels != null) {
-                for (RabbitChannel c : channels) {
-                    setAvailability(true);
-                    setValue("consumerCount", c.getConsumerCount());
-                }
+        List<RabbitChannel> channels = rabbitAdmin.getChannels();
+        if (channels != null) {
+            for (RabbitChannel c : channels) {
+                logger.debug("[collect] RabbitChannel=" + c.getPid());
+                setValue(c.getPid() + ".Availability", Metric.AVAIL_UP);
+                setValue(c.getPid() + ".consumerCount", c.getConsumerCount());
+                setValue(c.getPid() + ".prefetchCount", c.getPrefetchCount());
+                setValue(c.getPid() + ".acksUncommitted", c.getAcksUncommitted());
+                setValue(c.getPid() + ".messagesUnacknowledged", c.getMessagesUnacknowledged());
             }
         }
     }
@@ -84,11 +76,13 @@ public class ChannelCollector extends Collector {
         res.setValue("number", channel.getNumber());
         res.setValue("user", channel.getUser());
         res.setValue("transactional", channel.getTransactional());
-        res.setValue("prefetchCount", channel.getPrefetchCount());
-        res.setValue("acksUncommitted", channel.getAcksUncommitted());
-        res.setValue("messagesUnacknowledged", channel.getMessagesUnacknowledged());
+
 
         return res;
     }
 
+    @Override
+    public Log getLog() {
+        return logger;
+    }
 }

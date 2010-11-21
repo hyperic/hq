@@ -33,7 +33,7 @@ import org.springframework.amqp.rabbit.admin.QueueInfo;
 import org.springframework.erlang.support.converter.ErlangConversionException;
 import org.springframework.erlang.support.converter.SimpleErlangConverter;
 import org.springframework.util.Assert;
- 
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -48,7 +48,7 @@ import java.util.regex.Pattern;
 public class HypericErlangControlConverter extends SimpleErlangConverter implements HypericErlangConverter {
 
     private static final Log logger = LogFactory.getLog(HypericErlangControlConverter.class);
- 
+
     /**
      * Convert Java Object to Erlang
      * @param o
@@ -69,7 +69,7 @@ public class HypericErlangControlConverter extends SimpleErlangConverter impleme
 
     /**
      * @param response
-     * @param args 
+     * @param args
      * @return
      * @throws OtpErlangException
      */
@@ -79,17 +79,23 @@ public class HypericErlangControlConverter extends SimpleErlangConverter impleme
 
         if (type.isAssignableFrom(Exchange.class)) {
             return convertExchanges(response, virtualHost);
-        } else if (type.isAssignableFrom(String.class)) {
+        }
+        else if (type.isAssignableFrom(String.class)) {
             return convertVirtualHosts(response);
-        } else if (type.isAssignableFrom(RabbitConnection.class)) {
+        }
+        else if (type.isAssignableFrom(RabbitConnection.class)) {
             return convertConnections(response);
-        } else if (type.isAssignableFrom(RabbitChannel.class)) {
+        }
+        else if (type.isAssignableFrom(RabbitChannel.class)) {
             return convertChannels(response);
-        } else if (type.isAssignableFrom(RabbitBinding.class)) {
+        }
+        else if (type.isAssignableFrom(RabbitBinding.class)) {
             return convertBindings(response);
-        } else if (type.isAssignableFrom(QueueInfo.class)) {
+        }
+        else if (type.isAssignableFrom(QueueInfo.class)) {
             return convertQueues(response);
-        } else {
+        }
+        else {
             return convertVersion(response);
         }
 
@@ -238,7 +244,7 @@ public class HypericErlangControlConverter extends SimpleErlangConverter impleme
                             OtpErlangTuple tuple = (OtpErlangTuple) item;
                             if (tuple.arity() == 2) {
                                 String key = tuple.elementAt(0).toString();
-                                OtpErlangObject value = tuple.elementAt(1); 
+                                OtpErlangObject value = tuple.elementAt(1);
                             }
                         }
                     }
@@ -248,7 +254,7 @@ public class HypericErlangControlConverter extends SimpleErlangConverter impleme
         }
     }
 
-    public class ChannelConverter  {
+    public class ChannelConverter {
 
         public Object fromErlang(OtpErlangObject response) throws ErlangConversionException {
             List<RabbitChannel> channels = null;
@@ -442,39 +448,38 @@ public class HypericErlangControlConverter extends SimpleErlangConverter impleme
                     exchanges = new ArrayList<Exchange>();
                     Exchange exchange = null;
                     String exchangeName = null;
-                    String type = null;
+                    Class type = null;
 
                     for (OtpErlangObject o : ((OtpErlangList) response).elements()) {
                         if (o instanceof OtpErlangTuple) {
                             for (OtpErlangObject entry : ((OtpErlangTuple) o).elements()) {
-                                if (entry instanceof OtpErlangAtom) {
-                                    OtpErlangAtom atom = ((OtpErlangAtom) entry);
-                                    String tmp = getExchangeType(atom);
-                                    if (tmp != null) {
-                                        type = getExchangeType(atom);
-                                    }
-                                } else if (entry instanceof OtpErlangTuple) {
-                                    for (OtpErlangObject innerObj : ((OtpErlangTuple) entry).elements()) {
-                                        if (innerObj instanceof OtpErlangBinary) {
-                                            OtpErlangBinary b = (OtpErlangBinary) innerObj;
-                                            exchangeName = new String(b.binaryValue());
+                                if (entry instanceof OtpErlangAtom) { 
+                                    type = getExchangeType((OtpErlangAtom) entry);
+                                }
+                                else if (entry instanceof OtpErlangTuple) {
+                                    for (OtpErlangObject item : ((OtpErlangTuple) entry).elements()) {
+                                        if (item instanceof OtpErlangBinary) {
+                                            exchangeName = new String(((OtpErlangBinary) item).binaryValue());
+
                                         }
                                     }
                                 }
-                                if (exchangeName != null && !exchangeName.startsWith(virtualHost) && type != null) {
-                                    exchange = doCreateExchange(exchangeName, virtualHost, type);
+
+                                if (exchangeName != null && type != null  && !exchangeName.equalsIgnoreCase("/")) {
+                                    exchange = doCreateExchange(exchangeName, type);
                                 }
                             }
                         }
+
                         if (exchange != null) {
                             exchanges.add(exchange);
                         }
                     }
                 }
             }
-            if (exchanges != null) {
+          /*  if (exchanges != null) {
                 Assert.isTrue(exchanges.size() == items);
-            }
+            }*/
 
             return exchanges;
         }
@@ -482,43 +487,48 @@ public class HypericErlangControlConverter extends SimpleErlangConverter impleme
         /**
          * Returns true if type if atom value matches
          * ExchangeType.topic.name().
-         * Currently only works for direct or topic types.
+         * Currently does not handle type 'system'
          * @param atom
          * @return
          */
-        private String getExchangeType(OtpErlangAtom atom) {
-            String type = null;
+        private Class getExchangeType(OtpErlangAtom atom) {
             if (atom.atomValue().equalsIgnoreCase(ExchangeTypes.TOPIC)) {
-                type = TopicExchange.class.getSimpleName();
-            } else if (atom.atomValue().equalsIgnoreCase(ExchangeTypes.DIRECT)) {
-                type = DirectExchange.class.getSimpleName();
-            } else if (atom.atomValue().equalsIgnoreCase(ExchangeTypes.FANOUT)) {
-                type = FanoutExchange.class.getSimpleName();
+                return TopicExchange.class;
+            }
+            else if (atom.atomValue().equalsIgnoreCase(ExchangeTypes.DIRECT)) {
+                return DirectExchange.class;
+            }
+            else if (atom.atomValue().equalsIgnoreCase(ExchangeTypes.FANOUT)) {
+                return FanoutExchange.class;
+            }
+            else if (atom.atomValue().equalsIgnoreCase(ExchangeTypes.HEADERS)) {
+                return HeadersExchange.class;
             }
 
-            return type;
+            return null;
         }
 
         /**
-         * ToDo change to isAssignableFrom()
          * @param exchangeName
-         * @param vHost
-         * @param type
+         * @param type of Exchange
          * @return
          */
-        private Exchange doCreateExchange(String exchangeName, String vHost, String type) {
-            Exchange exchange = null;
-            if (!exchangeName.startsWith(vHost)) {
-                if (type.equalsIgnoreCase(TopicExchange.class.getSimpleName())) {
-                    exchange = new TopicExchange(exchangeName);
-                } else if (type.equalsIgnoreCase(DirectExchange.class.getSimpleName())) {
-                    exchange = new DirectExchange(exchangeName);
-                } else if (type.equalsIgnoreCase(FanoutExchange.class.getSimpleName())) {
-                    exchange = new FanoutExchange(exchangeName);
-                }
+        private Exchange doCreateExchange(String exchangeName, Class type) {
+            if (type.isAssignableFrom(TopicExchange.class)) {
+                return new TopicExchange(exchangeName);
             }
-
-            return exchange;
+            else if (type.isAssignableFrom(DirectExchange.class)) {
+                return exchangeName.length() == 0 ? new DirectExchange(AMQPTypes.DEFAULT_EXCHANGE_NAME)
+                        : new DirectExchange(exchangeName);
+            }
+            else if (type.isAssignableFrom(FanoutExchange.class)) {
+                return new FanoutExchange(exchangeName);
+            }
+            else if (type.isAssignableFrom(HeadersExchange.class) && exchangeName.length() > 0) {
+                return new HeadersExchange(exchangeName);
+            }
+            
+            return null;
         }
     }
 
