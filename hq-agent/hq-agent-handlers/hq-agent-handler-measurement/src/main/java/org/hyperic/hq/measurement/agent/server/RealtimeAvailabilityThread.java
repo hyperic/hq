@@ -39,7 +39,6 @@ import org.hyperic.hq.agent.server.AgentDaemon;
 import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.agent.ScheduledMeasurement;
-import org.hyperic.hq.measurement.agent.server.ScheduleThread.ParsedTemplate;
 import org.hyperic.hq.product.MeasurementValueGetter;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricNotFoundException;
@@ -131,7 +130,9 @@ public class RealtimeAvailabilityThread
         private Schedule schedule = new Schedule();
         AppdefEntityID eid;
         // null, initially we know nothing hasn't been collected
-        MetricValue lastVal = null; 
+        MetricValue lastVal = null;
+        // < 0 = not set or unknown
+        private long realtimeInterval = -1;
     }
 
     /**
@@ -171,7 +172,8 @@ public class RealtimeAvailabilityThread
             long now = System.currentTimeMillis();
             if (timeOfNext > now) {
                 long wait = timeOfNext - now;
-                log.debug("Sleeping.. " + wait + " ms");
+                if(log.isDebugEnabled())
+                	log.debug("Sleeping.. " + wait + " ms");
                 try {
                     synchronized (interrupter) {
                         interrupter.wait(wait);
@@ -180,14 +182,14 @@ public class RealtimeAvailabilityThread
                 }
             }
         }
-        log.debug("I'm done baby...");
+        log.debug("Realtime thread is done after this message");
     }
 
     /**
      * Utility method to ask thread to die.
      */
     public void die() {
-        log.debug("I'm about to die...");
+        log.debug("Request to kill realtime thread");
         shouldDie = true;
         interruptMe();
     }
@@ -294,7 +296,7 @@ public class RealtimeAvailabilityThread
 
             MetricValue data = null;
 
-            ParsedTemplate dsn = toParsedTemplate(meas);
+            ParsedTemplate dsn = toParsedTemplate(meas, rs);
 
 
             try {
@@ -354,6 +356,7 @@ public class RealtimeAvailabilityThread
             // we're not interested interval found from measurement, 
             // instead use the one from configuration
             int interval = config.get(meas.getEntity().getAppdefKey());
+            rs.realtimeInterval = interval*1000;
             try {
                 log.debug("Scheduling resource " +
                           meas.getEntity().getAppdefKey() +
@@ -436,13 +439,22 @@ public class RealtimeAvailabilityThread
         
     }
 
+    static class ParsedTemplate {
+        String plugin;
+        Metric metric;
+        
+        public String toString() {
+            return plugin + ":" + metric.toDebugString();
+        }
+    }
+
     /**
      * Creates parsed templates from scheduled measurement.
      * 
      * @param meas Scheduled measurement
      * @return Parsed template
      */
-    private ParsedTemplate toParsedTemplate(ScheduledMeasurement meas) {
+    private ParsedTemplate toParsedTemplate(ScheduledMeasurement meas, RealtimeSchedule rs) {
         AppdefEntityID aid = meas.getEntity();
         int id = aid.getID();
         int type = aid.getType();
@@ -450,6 +462,7 @@ public class RealtimeAvailabilityThread
         tmpl.metric.setId(type, id);
         tmpl.metric.setCategory(meas.getCategory());
         tmpl.metric.setInterval(meas.getInterval());
+        tmpl.metric.setRealtimeInterval(rs.realtimeInterval);
         return tmpl;
     }
 
@@ -468,7 +481,6 @@ public class RealtimeAvailabilityThread
         tmpl.plugin = template.substring(0, ix);
         String metric = template.substring(ix+1, template.length());
         tmpl.metric = Metric.parse(metric);
-        tmpl.metric.realtime = true;
         return tmpl;
     }
 

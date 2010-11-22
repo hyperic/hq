@@ -415,7 +415,7 @@ public abstract class Collector implements Runnable {
             return -1;
         }
         else {
-            if(this.intervalMetric.realtime)
+            if(this.intervalMetric.getRealtimeInterval() > 0)
                 return -2;
             else
                 return this.intervalMetric.getInterval();

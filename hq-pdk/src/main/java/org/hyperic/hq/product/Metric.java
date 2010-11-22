@@ -85,11 +85,12 @@ public class Metric {
     private String id = null; //for tie-in to logging
     private String category = null;
     private long interval;
-    public boolean realtime = false;
+    private long realtimeInterval;
 
     private Metric() {
         synchronized (lock) {
             interval = -1;
+            realtimeInterval = -1;
         }
     }
 
@@ -443,6 +444,18 @@ public class Metric {
     public void setInterval(long interval) {
         synchronized (lock) {
             this.interval = interval;            
+        }
+    }
+
+    public long getRealtimeInterval() {
+        synchronized (lock) {
+            return this.realtimeInterval;            
+        }
+    }
+
+    public void setRealtimeInterval(long interval) {
+        synchronized (lock) {
+            this.realtimeInterval = interval;            
         }
     }
 
