@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.plugin.domain.ResourceType;
 import org.hyperic.hq.plugin.domain.ResourceTypeRelation;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,6 +23,16 @@ import org.springframework.web.util.UriTemplate;
 @RequestMapping("/resourcetypes")
 public class ResourceTypeController {
 	private final static String BASE_URI = "/resourcetypes";
+	
+	@RequestMapping(method = RequestMethod.GET, value = "/root-relationships")
+	public @ResponseBody ListOfResourceTypeRelationshipRepresentations getRootResourceTypeRelationships() {
+		ResourceType root = ResourceType.findResourceTypeByName("System");
+		Long id = root.getId();
+		
+		String uri = new UriTemplate(BASE_URI + "/{id}/relationships").expand(id).toASCIIString();
+		
+		return new ListOfResourceTypeRelationshipRepresentations(root.getId(), getRelatedResourceTypes(id), uri);
+	}
 	
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseStatus(value = HttpStatus.CREATED)
@@ -78,7 +89,7 @@ public class ResourceTypeController {
 		ResourceType from = ResourceType.findResourceType(fromId);
 		ResourceType to = ResourceType.findResourceType(toId);
 		ResourceTypeRelation relationship = from.relateTo(to, name);
-		ResourceTypeRelationshipRepresentation rtrr = new ResourceTypeRelationshipRepresentation(relationship, "/{fromId}/relationships/{toId}");
+		ResourceTypeRelationshipRepresentation rtrr = new ResourceTypeRelationshipRepresentation(relationship, "/" + fromId + "/relationships/{toId}");
 		
 		response.setHeader("Location", rtrr.getUri());
 		
@@ -86,15 +97,11 @@ public class ResourceTypeController {
 	}
 	
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{fromId}/relationships/{toId}")
-	public @ResponseBody void deleteResourceTypeRelationship(@PathVariable Long fromId, @PathVariable Long toId) {
-		List<ResourceTypeRelation> relationships = ResourceTypeRelation.findAllResourceTypeRelations();
-
-		for (ResourceTypeRelation r : relationships) {
-			if (r.getFrom().getId().equals(fromId) && r.getTo().getId().equals(toId)) {
-				r.remove();
-				break;
-			}
-		}
+	public @ResponseBody void deleteResourceTypeRelationship(@PathVariable Long fromId, @PathVariable Long toId, @RequestParam String name) {
+		ResourceType from = ResourceType.findResourceType(fromId);
+		ResourceType to = ResourceType.findResourceType(toId);
+		
+		from.removeRelationship(to, name);
 	}
 	
 	// Core Functions
@@ -127,16 +134,9 @@ public class ResourceTypeController {
 		}
 	}
 	
-	protected List<ResourceType> getRelatedResourceTypes(Long id) {
-		List<ResourceTypeRelation> relationships = ResourceTypeRelation.findAllResourceTypeRelations();
-		List<ResourceType> result = new ArrayList<ResourceType>();
+	protected List<ResourceTypeRelation> getRelatedResourceTypes(Long id) {
+		ResourceType resourceType = ResourceType.findResourceType(id);
 		
-		for (ResourceTypeRelation relationship : relationships) {
-			if (relationship.getFrom().getId().equals(id)) {
-				result.add(relationship.getTo());
-			}
-		}
-		
-		return result;
+		return new ArrayList<ResourceTypeRelation>(resourceType.getRelationships());
 	}
 }

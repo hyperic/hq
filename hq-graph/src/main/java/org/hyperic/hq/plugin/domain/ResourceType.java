@@ -10,15 +10,18 @@ import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.ReturnableEvaluator;
 import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.TraversalPosition;
 import org.neo4j.graphdb.Traverser;
-import org.springframework.datastore.annotation.Indexed;
+import org.springframework.data.annotation.Indexed;
 import org.springframework.datastore.graph.annotation.NodeEntity;
 import org.springframework.datastore.graph.annotation.RelatedTo;
 import org.springframework.datastore.graph.api.Direction;
 import org.springframework.datastore.graph.neo4j.finder.FinderFactory;
+import org.springframework.datastore.graph.neo4j.support.GraphDatabaseContext;
+import org.springframework.datastore.graph.neo4j.support.SubReferenceNodeTypeStrategy;
 import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.addon.javabean.RooJavaBean;
 import org.springframework.roo.addon.tostring.RooToString;
@@ -36,7 +39,7 @@ public class ResourceType {
     
     //TODO was using IS_A to relate ResourceTypes to ResourceTypes also, but somehow those related ResourceTypes were ending up in this Set
     //causing ClassCastExceptions.  Switched to using EXTENDS for ResourceTypes, but still strange issue similar to Resource.findRelationships
-    @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.INCOMING, elementClass = org.hyperic.hq.inventory.domain.Resource.class)
+    @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.INCOMING, elementClass = Resource.class)
     @OneToMany
     private Set<Resource> resources;
     
@@ -46,6 +49,9 @@ public class ResourceType {
     
     @javax.annotation.Resource
     private FinderFactory finderFactory2;
+    
+    @javax.annotation.Resource
+    private GraphDatabaseContext graphDatabaseContext2;
 
     @Transactional
 	public ResourceTypeRelation relateTo(ResourceType resourceType, String relationName) {
@@ -53,6 +59,34 @@ public class ResourceType {
             relationName);
     }
 
+    @Transactional
+    public void removeRelationship(ResourceType resourceType, String relationName) {
+    	if (this.isRelatedTo(resourceType, relationName)) {
+    		this.getRelationshipTo(resourceType, relationName);
+    	}
+    }
+    
+    public ResourceTypeRelation getRelationshipTo(ResourceType resourceType, String relationName) {
+    	return (ResourceTypeRelation) this.getRelationshipTo(resourceType, relationName);
+    }
+
+    public Set<ResourceTypeRelation> getRelationships() {
+    	Iterable<Relationship> relationships = this.getUnderlyingState().getRelationships(org.neo4j.graphdb.Direction.OUTGOING);
+    	Set<ResourceTypeRelation> resourceTypeRelations = new HashSet<ResourceTypeRelation>();
+
+    	for (Relationship relationship : relationships) {
+    		if (!relationship.isType(SubReferenceNodeTypeStrategy.INSTANCE_OF_RELATIONSHIP_TYPE)) {
+    			Class<?> otherEndType = graphDatabaseContext2.getJavaType(relationship.getOtherNode(this.getUnderlyingState()));
+    			
+    			if (ResourceType.class.equals(otherEndType)) {
+    				resourceTypeRelations.add(graphDatabaseContext2.createEntityFromState(relationship, ResourceTypeRelation.class));
+    			}
+    		}
+    	}
+    	
+    	return resourceTypeRelations;
+    }
+    
     public boolean isRelatedTo(ResourceType resourceType, String relationName) {
         Traverser relationTraverser = getUnderlyingState().traverse(Traverser.Order.BREADTH_FIRST,
             new StopEvaluator() {

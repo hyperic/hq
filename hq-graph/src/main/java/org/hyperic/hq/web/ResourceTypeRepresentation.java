@@ -1,9 +1,7 @@
 package org.hyperic.hq.web;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.hyperic.hq.plugin.domain.PropertyType;
 import org.hyperic.hq.plugin.domain.ResourceType;
@@ -12,29 +10,39 @@ import org.springframework.web.util.UriTemplate;
 public class ResourceTypeRepresentation {
 	private Long id;
 	private String name;
-	private List<Map<String, Object>> propertyTypes = new ArrayList<Map<String, Object>>();
-	private UriTemplate uri;
+	private List<PropertyTypeRepresentation> propertyTypes = new ArrayList<PropertyTypeRepresentation>();
+	private List<FormRepresentation> forms = new ArrayList<FormRepresentation>();
+	private String uri;
 	
 	public ResourceTypeRepresentation() {}
 	
 	public ResourceTypeRepresentation(ResourceType resourceType, String baseUri) {
 		this.id = resourceType.getId();
 		this.name = resourceType.getName();
-		this.uri = new UriTemplate(baseUri + "/{id}");
+		this.uri = new UriTemplate(baseUri + "/{id}").expand(this.id).toASCIIString();
 		
 		for (PropertyType pt : resourceType.getPropertyTypes()) {
-			Map<String, Object> item = new HashMap<String, Object>();
-			
-			item.put("id", pt.getId());
-			item.put("name", pt.getName());
-			item.put("description", pt.getDescription());
-			item.put("defaultValue", pt.getDefaultValue());
-			item.put("optional", pt.getOptional());
-			item.put("secret", pt.getSecret());
-			item.put("name", pt.getName());
-
-			this.propertyTypes.add(item);
+			this.propertyTypes.add(new PropertyTypeRepresentation(pt));
 		}
+		
+		FormRepresentation form = new FormRepresentation("put", this.uri);
+		
+		form.addInput("text", Boolean.TRUE, "name", "");
+		
+		FramesetRepresentation frameset = form.addFrameset("propertyTypes");
+		
+		frameset.addInput("hidden", Boolean.TRUE, "id", "");
+		frameset.addInput("text", Boolean.TRUE, "name", "");
+		frameset.addInput("text", Boolean.FALSE, "description", "");
+		frameset.addInput("text", Boolean.FALSE, "defaultValue", "");
+		frameset.addInput("checkbox", Boolean.TRUE, "optional", "");
+		frameset.addInput("checkbox", Boolean.TRUE, "secret", "");
+		
+		forms.add(form);
+		
+		form = new FormRepresentation("delete", this.uri);
+		
+		forms.add(form);
 	}
 
 	public Long getId() {
@@ -53,16 +61,20 @@ public class ResourceTypeRepresentation {
 		this.name = name;
 	}
 
-	public List<Map<String, Object>> getPropertyTypes() {
+	public List<PropertyTypeRepresentation> getPropertyTypes() {
 		return propertyTypes;
 	}
 
-	public void setPropertyTypes(List<Map<String, Object>> propertyTypes) {
+	public void setPropertyTypes(List<PropertyTypeRepresentation> propertyTypes) {
 		this.propertyTypes = propertyTypes;
 	}
 
+	public List<FormRepresentation> getForms() {
+		return forms;
+	}
+
 	public String getUri() {
-		return (uri != null) ? uri.expand(id).toASCIIString() : null;
+		return uri;
 	}
 	
 	public ResourceType toDomain() {
@@ -77,5 +89,5 @@ public class ResourceTypeRepresentation {
 		resourceType.setName(name);
 
 		return resourceType;
-	}
+	}	
 }

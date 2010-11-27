@@ -22,7 +22,7 @@ import org.neo4j.graphdb.ReturnableEvaluator;
 import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.TraversalPosition;
 import org.neo4j.graphdb.Traverser;
-import org.springframework.datastore.annotation.Indexed;
+import org.springframework.data.annotation.Indexed;
 import org.springframework.datastore.graph.annotation.NodeEntity;
 import org.springframework.datastore.graph.annotation.RelatedTo;
 import org.springframework.datastore.graph.api.Direction;
@@ -72,7 +72,7 @@ public class Resource {
     }
     
     @Transactional
-    public void removeRelationship(Resource resource, String relationName, boolean junk) {
+    public void removeRelationship(Resource resource, String relationName) {
     	if (this.isRelatedTo(resource, relationName)) {
     		this.removeRelationshipTo(resource, relationName);
     	}
@@ -80,7 +80,7 @@ public class Resource {
     
     public ResourceRelation getRelationshipTo(Resource resource, String relationName) {
         //TODO this doesn't take direction into account
-        return (ResourceRelation) getRelationshipTo(resource,ResourceRelation.class,relationName);
+        return (ResourceRelation) getRelationshipTo(resource, relationName);
     }
     
     public Set<ResourceRelation> getRelationships() {

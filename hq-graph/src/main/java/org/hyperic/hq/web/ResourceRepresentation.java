@@ -1,36 +1,63 @@
 package org.hyperic.hq.web;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.plugin.domain.PropertyType;
 import org.hyperic.hq.plugin.domain.ResourceType;
+import org.hyperic.hq.plugin.domain.ResourceTypeRelation;
 import org.springframework.web.util.UriTemplate;
 
 public class ResourceRepresentation {
 	private Long id;
 	private String name;
-	private ResourceTypeRepresentation resourceType;
-	private String resourceTypeName;
+	private String type;
+	private String uri;
 	private Map<String, Object> properties = new HashMap<String, Object>();
-	private UriTemplate uri;
+	private List<FormRepresentation> forms = new ArrayList<FormRepresentation>();
+	private List<ResourceTypeRepresentation> relatedResourceTypes = new ArrayList<ResourceTypeRepresentation>();
 	
 	public ResourceRepresentation() {}
 	
 	public ResourceRepresentation(Resource resource, String baseUri) {
 		this.id = resource.getId();
 		this.name = resource.getName();
-		
-		if (resource.getType() != null) {
-			this.resourceType = new ResourceTypeRepresentation(resource.getType(), "/resourcetypes");
-			this.resourceTypeName = this.resourceType.getName();
-		}
+		this.uri = new UriTemplate(baseUri + "/{id}").expand(resource.getId()).toASCIIString();
 		
 		if (!resource.getProperties().isEmpty()) {
 			this.properties = resource.getProperties();
+		}		
+
+		FormRepresentation form = new FormRepresentation("put", this.uri);
+		
+		form.addInput("text", Boolean.TRUE, "name", "");
+		
+		if (resource.getType() != null) {
+			this.type = resource.getType().getName();
+			
+			if (resource.getType().getPropertyTypes() != null) {
+				FramesetRepresentation frameset = form.addFrameset("properties");
+				
+				for (PropertyType propertyType : resource.getType().getPropertyTypes()) {
+					String type = "text";
+					Boolean required = Boolean.FALSE;
+					frameset.addInput(type, required, propertyType.getName(), propertyType.getDefaultValue());
+				}
+			}
+			
+			for (ResourceTypeRelation rtr : resource.getType().getRelationships()) {
+				this.relatedResourceTypes.add(new ResourceTypeRepresentation(rtr.getTo(), "/resourcetypes"));
+			}
 		}
 		
-		this.uri = new UriTemplate(baseUri + "/{id}");
+		forms.add(form);
+		
+		form = new FormRepresentation("delete", this.uri);
+		
+		forms.add(form);
 	}
 
 	public Long getId() {
@@ -49,20 +76,12 @@ public class ResourceRepresentation {
 		this.name = name;
 	}
 
-	public String getResourceTypeName() {
-		return resourceTypeName;
+	public String getType() {
+		return type;
 	}
 
-	public void setResourceTypeName(String resourceTypeName) {
-		this.resourceTypeName = resourceTypeName;
-	}
-
-	public ResourceTypeRepresentation getResourceType() {
-		return resourceType;
-	}
-
-	public void setResourceType(ResourceTypeRepresentation resourceType) {
-		this.resourceType = resourceType;
+	public void setType(String type) {
+		this.type = type;
 	}
 
 	public Map<String, Object> getProperties() {
@@ -73,8 +92,16 @@ public class ResourceRepresentation {
 		this.properties = properties;
 	}
 
+	public List<FormRepresentation> getForms() {
+		return forms;
+	}
+
+	public List<ResourceTypeRepresentation> getRelatedResourceTypes() {
+		return relatedResourceTypes;
+	}
+
 	public String getUri() {
-		return (uri != null) ? uri.expand(id).toASCIIString() : null;
+		return uri;
 	}
 	
 	public Resource toDomain() {
@@ -84,18 +111,16 @@ public class ResourceRepresentation {
 			resource = new Resource();
 		} else {
 			resource = Resource.findResource(id);
+			
+			for (Map.Entry<String, Object> p : properties.entrySet()) {
+				resource.setProperty(p.getKey(), p.getValue());
+			}
 		}
 		
 		resource.setName(name);
 		
-		if (resourceTypeName != null) {
-			resource.setType(ResourceType.findResourceTypeByName(resourceTypeName));
-		} else {
-			resource.setType(resourceType.toDomain());
-		}
-		
-		for (Map.Entry<String, Object> p : properties.entrySet()) {
-			resource.setProperty(p.getKey(), p.getValue());
+		if (type != null) {
+			resource.setType(ResourceType.findResourceTypeByName(type));
 		}
 		
 		return resource;

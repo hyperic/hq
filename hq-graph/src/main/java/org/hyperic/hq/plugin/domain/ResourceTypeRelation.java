@@ -1,16 +1,13 @@
 package org.hyperic.hq.plugin.domain;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.datastore.graph.annotation.EndNode;
 import org.springframework.datastore.graph.annotation.RelationshipEntity;
 import org.springframework.datastore.graph.annotation.StartNode;
-import org.springframework.roo.addon.entity.RooEntity;
-import org.springframework.roo.addon.javabean.RooJavaBean;
-import org.springframework.roo.addon.tostring.RooToString;
 
 @RelationshipEntity
-@RooToString
-@RooJavaBean
-@RooEntity
 public class ResourceTypeRelation {
 
     @StartNode
@@ -18,4 +15,37 @@ public class ResourceTypeRelation {
 
     @EndNode
     private ResourceType to;
+	
+	public void setProperty(String key, Object value) {
+        //TODO give a way to model properties on a type relation to validate creation of properties on the relation?  What about pre-defined types?
+        getUnderlyingState().setProperty(key, value);
+    }
+    
+    public Object getProperty(String key) {
+        //TODO model default values?  See above
+        return getUnderlyingState().getProperty(key);
+    }
+    
+    public Map<String,Object> getProperties() {
+        Map<String,Object> properties = new HashMap<String,Object>();
+        for(String key:getUnderlyingState().getPropertyKeys()) {
+            //Filter out properties that are class fields
+            if(!("from".equals(key)) && !("to".equals(key))) {
+                properties.put(key, getProperty(key));
+            }
+        }
+        return properties;
+    }
+    
+    public String getName() {
+        return getUnderlyingState().getType().name();
+    }
+    
+    public ResourceType getFrom() {
+    	return from;
+    }
+    
+    public ResourceType getTo() {
+    	return to;
+    }
 }
