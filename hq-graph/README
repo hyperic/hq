@@ -3,3 +3,6 @@ To install the NEO4J Roo Add-on do the following:
 2. Paste it into the 'bundle' folder of your ROO installation.
 3. Start the ROO console.
 4. Type 'graph', then press CTRL+SPACE for auto completion to confirm the add-on installation.
+
+To install the patched spring-datastore-neo4j jar:
+mvn install:install-file -Dfile=./patches/spring-datastore-neo4j-1.0.0.BUILD-SNAPSHOT.jar -DgroupId=org.springframework.data -DartifactId=spring-datastore-neo4j -Dversion=1.0.0.BUILD-SNAPSHOT -Dpackaging=jar
