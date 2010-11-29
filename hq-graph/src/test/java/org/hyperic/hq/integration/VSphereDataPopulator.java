@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class VSphereDataPopulator {
 
+    static final String DATA_CENTER_NAME = "Camb-HQ";
     static final String GUEST_OS_NAME = "Microsoft Windows Server 2003";
     static final String RESOURCE_POOL_NAME = "Test Resource Pool";
     static final String CLUSTER_NAME = "Sonoma";
@@ -40,7 +41,7 @@ public class VSphereDataPopulator {
         rootNode.relateTo(vCenterServer, RelationshipTypes.CONTAINS);
         
         Resource dataCenter = new Resource();
-        dataCenter.setName("Camb-HQ");
+        dataCenter.setName(DATA_CENTER_NAME);
         dataCenter.setType(ResourceType
             .findResourceTypeByName(VSphereResourceModelPopulator.DATACENTER_TYPE));
         dataCenter.persist();
@@ -104,8 +105,10 @@ public class VSphereDataPopulator {
         vm.relateTo(guestOs, VSphereResourceModelPopulator.HOSTS);
         
         Alert alert =  new Alert();
-       
+        alert.setComment("Saw this");
         alert.persist();
+       
+       
         alert.setResource(vm);
     }
   

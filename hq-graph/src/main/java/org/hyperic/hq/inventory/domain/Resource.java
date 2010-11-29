@@ -65,6 +65,7 @@ public class Resource {
 
     @OneToMany
     @Transient
+    @RelatedTo(type = "ALERTING_ELEMENT", direction = Direction.INCOMING, elementClass = Alert.class)
     private Set<Alert> alerts;
 
     @Transactional
@@ -99,8 +100,7 @@ public class Resource {
         	//Don't include Neo4J relationship b/w Node and its Java type
             if (!relationship.isType(SubReferenceNodeTypeStrategy.INSTANCE_OF_RELATIONSHIP_TYPE)) {
                 Class<?> otherEndType = graphDatabaseContext2.getJavaType(relationship.getOtherNode(getUnderlyingState()));
-                //TODO does instanceOf work here?
-                if(Resource.class.equals(otherEndType) || ResourceGroup.class.equals(otherEndType)) {
+                if(Resource.class.isAssignableFrom(otherEndType)) {
                     resourceRelations.add(graphDatabaseContext2.createEntityFromState(relationship, ResourceRelation.class));
                 }
             }

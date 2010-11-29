@@ -90,6 +90,12 @@ public class VSphereModelIntegrationTest {
           }
        }
        
+       //verify group relationships can still be obtained
+       Resource dataCenter = Resource.findResourceByName(VSphereDataPopulator.DATA_CENTER_NAME);
+       Set<ResourceRelation> datacenterRelations = dataCenter.getRelationships();
+       ExpectedRelation datacenterToCluster = new ExpectedRelation(dataCenter,ResourceGroup.findResourceGroupByName(VSphereDataPopulator.CLUSTER_NAME),RelationshipTypes.CONTAINS);
+       assertEquals(1,datacenterRelations.size());
+       assertTrue(testRelationsEqual(datacenterRelations.iterator().next(),datacenterToCluster));
       
     }
     
@@ -107,7 +113,11 @@ public class VSphereModelIntegrationTest {
     	List<Alert> alerts = Alert.findAllAlerts();
         assertEquals(vm.getName(),alerts.get(0).getResource().getName());
         Set<Alert> resourceAlerts = vm.getAlerts();
-        //TODO above currently returning null
+        assertEquals(1,resourceAlerts.size());
+        Alert actual = alerts.get(0);
+        Alert expected = resourceAlerts.iterator().next();
+        assertEquals(expected,actual);
+        assertEquals("Saw this",actual.getComment());
     }
 
     @Test(expected = InvalidRelationshipException.class)
