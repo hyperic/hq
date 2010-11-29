@@ -67,7 +67,6 @@ public class VSphereModelIntegrationTest {
        assertEquals(1234,vm.getRelationshipTo(datastore,VSphereResourceModelPopulator.USES).getProperty("Disk Size"));
           
        Set<ExpectedRelation> expectedRelations = new HashSet<ExpectedRelation>();
-       expectedRelations.add(new ExpectedRelation(host, vm, VSphereResourceModelPopulator.HOSTS));
        expectedRelations.add(new ExpectedRelation(vm,Resource.findResourceByName(VSphereDataPopulator.RESOURCE_POOL_NAME),VSphereResourceModelPopulator.RUNS_IN));
        ExpectedRelation vmToDatastore = new ExpectedRelation(vm, datastore, VSphereResourceModelPopulator.USES);
        vmToDatastore.addProperty("Disk Size",1234);
@@ -129,10 +128,12 @@ public class VSphereModelIntegrationTest {
         Resource vm = new Resource();
         vm.setName("2k328VCclone9-24");
         vm.setType(ResourceType.findResourceTypeByName(VSphereResourceModelPopulator.VIRTUAL_MACHINE_TYPE));
+        vm.persist();
 
         Resource dataStore = new Resource();
         dataStore.setName("SON-L40");
         dataStore.setType(ResourceType.findResourceTypeByName(VSphereResourceModelPopulator.DATASTORE_TYPE));
+        dataStore.persist();
 
         assertFalse(vm.isRelatedTo(dataStore, VSphereResourceModelPopulator.USES));
     }
@@ -142,10 +143,12 @@ public class VSphereModelIntegrationTest {
         Resource vm = new Resource();
         vm.setName("2k328VCclone9-24");
         vm.setType(ResourceType.findResourceTypeByName(VSphereResourceModelPopulator.VIRTUAL_MACHINE_TYPE));
+        vm.persist();
 
         Resource dataStore = new Resource();
         dataStore.setName("SON-L40");
         dataStore.setType(ResourceType.findResourceTypeByName(VSphereResourceModelPopulator.DATASTORE_TYPE));
+        dataStore.persist();
 
         vm.relateTo(dataStore, VSphereResourceModelPopulator.USES);
         assertFalse(vm.isRelatedTo(dataStore, RelationshipTypes.CONTAINS));
@@ -156,10 +159,12 @@ public class VSphereModelIntegrationTest {
         Resource vm = new Resource();
         vm.setName("2k328VCclone9-24");
         vm.setType(ResourceType.findResourceTypeByName(VSphereResourceModelPopulator.VIRTUAL_MACHINE_TYPE));
+        vm.persist();
 
         Resource dataStore = new Resource();
         dataStore.setName("SON-L40");
         dataStore.setType(ResourceType.findResourceTypeByName(VSphereResourceModelPopulator.DATASTORE_TYPE));
+        dataStore.persist();
 
         vm.relateTo(dataStore, VSphereResourceModelPopulator.USES);
         assertFalse(dataStore.isRelatedTo(vm, VSphereResourceModelPopulator.USES));

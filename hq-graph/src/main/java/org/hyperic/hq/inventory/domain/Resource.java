@@ -22,7 +22,7 @@ import org.neo4j.graphdb.ReturnableEvaluator;
 import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.TraversalPosition;
 import org.neo4j.graphdb.Traverser;
-import org.springframework.datastore.annotation.Indexed;
+import org.springframework.data.annotation.Indexed;
 import org.springframework.datastore.graph.annotation.GraphProperty;
 import org.springframework.datastore.graph.annotation.NodeEntity;
 import org.springframework.datastore.graph.annotation.RelatedTo;
@@ -118,7 +118,7 @@ public class Resource {
             }
         }, ReturnableEvaluator.ALL_BUT_START_NODE, DynamicRelationshipType.withName(relationName), org.neo4j.graphdb.Direction.OUTGOING);
         for (Node related : relationTraverser) {
-            if (related.getId() == resource.getId()) {
+            if (related.equals(resource.getUnderlyingState())) {
                 return true;
             }
         }

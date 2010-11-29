@@ -16,7 +16,7 @@ import org.neo4j.graphdb.ReturnableEvaluator;
 import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.TraversalPosition;
 import org.neo4j.graphdb.Traverser;
-import org.springframework.datastore.annotation.Indexed;
+import org.springframework.data.annotation.Indexed;
 import org.springframework.datastore.graph.annotation.GraphProperty;
 import org.springframework.datastore.graph.annotation.NodeEntity;
 import org.springframework.datastore.graph.annotation.RelatedTo;
@@ -72,14 +72,9 @@ public class ResourceType {
             }, ReturnableEvaluator.ALL_BUT_START_NODE,
             DynamicRelationshipType.withName(relationName), org.neo4j.graphdb.Direction.OUTGOING);
         for (Node related : relationTraverser) {
-        	long nodeId = related.getId();
-        	//TODO Is this still needed?
-        	//if(related.hasProperty(PartialNodeEntityStateAccessors.FOREIGN_ID)) {
-        		//nodeId = (Long)related.getProperty(PartialNodeEntityStateAccessors.FOREIGN_ID);
-        	//}
-            if (nodeId == resourceType.getId()) {
-                return true;
-            }
+        	if(related.equals(resourceType.getUnderlyingState())) {
+        	    return true;
+        	}
         }
         return false;
     }
