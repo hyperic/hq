@@ -3,17 +3,17 @@ package org.hyperic.hq.web;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hyperic.hq.plugin.domain.ResourceType;
+import org.hyperic.hq.plugin.domain.ResourceTypeRelation;
 import org.springframework.web.util.UriTemplate;
 
 public class ListOfResourceTypeRelationshipRepresentations {
 	private List<ResourceTypeRelationshipRepresentation> resourceTypeRelations = new ArrayList<ResourceTypeRelationshipRepresentation>();
 	private UriTemplate uri;
 	
-	public ListOfResourceTypeRelationshipRepresentations(Long id, List<ResourceType> resourceTypes, String baseUri) {
-		if (resourceTypes != null) {
-			for (ResourceType rt : resourceTypes) {
-				this.resourceTypeRelations.add(new ResourceTypeRelationshipRepresentation(id, rt, baseUri + "/{toId}"));
+	public ListOfResourceTypeRelationshipRepresentations(Long id, List<ResourceTypeRelation> resourceTypeRelations, String baseUri) {
+		if (resourceTypeRelations != null) {
+			for (ResourceTypeRelation rtr : resourceTypeRelations) {
+				this.resourceTypeRelations.add(new ResourceTypeRelationshipRepresentation(rtr, baseUri + "/{toId}"));
 			}
 		}
 		

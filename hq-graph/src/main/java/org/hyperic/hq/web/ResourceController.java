@@ -1,6 +1,7 @@
 package org.hyperic.hq.web;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
@@ -23,6 +24,16 @@ import org.springframework.web.util.UriTemplate;
 public class ResourceController {
 	private final static String BASE_URI = "/resources";
 	
+	@RequestMapping(method = RequestMethod.GET, value = "/root-relationships")
+	public @ResponseBody ListOfResourceRelationshipRepresentations getRootResourceRelationships() {
+		Resource root = Resource.findResourceByName("Root");
+		Long id = root.getId();
+		
+		String uri = new UriTemplate(BASE_URI + "/{id}/relationships").expand(id).toASCIIString();
+		
+		return new ListOfResourceRelationshipRepresentations(root.getId(), getRelatedResources(id), uri);
+	}
+	
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseStatus(value = HttpStatus.CREATED)
 	public @ResponseBody ResourceRepresentation createResource(@RequestBody ResourceRepresentation resource, HttpServletResponse response) {
@@ -30,6 +41,15 @@ public class ResourceController {
 		
 		createResource(r);
 
+		// TODO Figure out a way to do this, trying to do it one step results in a NPE since the underlying state is not yet set
+		/*
+		for (Map.Entry<String, Object> p : resource.getProperties().entrySet()) {
+			r.setProperty(p.getKey(), p.getValue());
+		}
+
+		updateResource(r);
+		*/
+		
 		ResourceRepresentation rr = new ResourceRepresentation(r, BASE_URI);
 		
 		response.setHeader("Location", rr.getUri());
@@ -78,8 +98,8 @@ public class ResourceController {
 		Resource from = Resource.findResource(fromId);
 		Resource to = Resource.findResource(toId);
 		ResourceRelation relationship = from.relateTo(to, name);
-		String uri = new UriTemplate(BASE_URI + "/{fromId}/relationships/{toId}").expand(from.getId(), to.getId()).toASCIIString();
-		ResourceRelationshipRepresentation rrr = new ResourceRelationshipRepresentation(relationship, uri);
+		String uri = new UriTemplate(BASE_URI + "/{fromId}/relationships").expand(from.getId()).toASCIIString();
+		ResourceRelationshipRepresentation rrr = new ResourceRelationshipRepresentation(relationship, uri + "/{toId}");
 		
 		response.setHeader("Location", rrr.getUri());
 		
@@ -91,7 +111,7 @@ public class ResourceController {
 		Resource from = Resource.findResource(fromId);
 		Resource to = Resource.findResource(toId);
 		
-		from.removeRelationship(to, name, true);
+		from.removeRelationship(to, name);
 	}
 	
 	// Core Functions

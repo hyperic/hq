@@ -80,8 +80,7 @@ public class Resource {
     }
     
     @Transactional
-    public void removeRelationship(Resource resource, String relationName, boolean junk) {
-        //TODO what is the junk boolean?
+    public void removeRelationship(Resource resource, String relationName) {
     	if (this.isRelatedTo(resource, relationName)) {
     		this.removeRelationshipTo(resource, relationName);
     	}
