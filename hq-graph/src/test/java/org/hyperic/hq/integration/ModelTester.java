@@ -16,8 +16,7 @@ public class ModelTester {
         Alert alert = Alert.findAlert(1l);
         Resource alertingElement = alert.getResource();
         Set<Alert> alerts = alertingElement.getAlerts();
-        // TODO above comes back null
-        // TODO remove didn't work so well before - retest
+        // TODO below removes Alert from RDBMS, but not Graph DB
         alert.remove();
         alertingElement.remove();
 
