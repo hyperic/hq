@@ -35,11 +35,12 @@ import org.hyperic.hq.hqapi1.types.Resource;
 import org.hyperic.hq.hqapi1.types.ResourceConfig;
 import org.hyperic.hq.hqapi1.types.ResourceProperty;
 import org.hyperic.hq.hqapi1.types.ResourcePrototype;
-import org.hyperic.hq.hqapi1.types.ResourcesResponse;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServiceResource;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -58,9 +59,8 @@ public class RabbitTransientResourceManager implements TransientResourceManager 
 	private static final String RABBITMQ_TYPE = "RabbitMQ";
 
 	private static final String NODE_PATH_PROPERTY = "node.path";
-	private static final String SERVER_PATH_PROPERTY = "server.path";
-	private static final String USERNAME_CONFIG = "username";
-	private static final String PASSWORD_CONFIG = "password";
+	private static final String NODE_CONFIG = "node";
+	private static final String AUTH_CONFIG = "authentication";
 
 	private HQApiCommandsClient commandsClient;
 	private Properties props;
@@ -91,25 +91,31 @@ public class RabbitTransientResourceManager implements TransientResourceManager 
 				}
 				return;
 			}
-			
-			if (logger.isDebugEnabled()) {
-				for (ServiceResource s : rabbitResources) {
-					logger.debug("Discovered RabbitMQ service=" + s);
-				}
-			}
 
-			for (Resource service : rabbitMQ.getResource()) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("HQ RabbitMQ service={"
-									+ "type=" + service.getResourcePrototype().getName()
-									+ ", name=" + service.getName()
-									+ "}");
-				}
-				if (isTransientResource(service, rabbitResources)) {
-					commandsClient.deleteResource(service);
-					numResourcesDeleted++;
-				}
-			}
+            List<String> resources = new ArrayList();
+            for (ServiceResource s : rabbitResources) {
+                logger.info(s.getType() + s.getName());
+                resources.add(s.getType() + s.getName());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("HQ RabbitMQ service={"
+                            + "type=" + s.getName()
+                            + ", name=" + s.getName()
+                            + "}");
+                }
+            }
+
+            Collections.sort(resources);
+            for (Resource service : rabbitMQ.getResource()) {
+                String sname = service.getResourcePrototype().getName() + service.getName();
+                if (Collections.binarySearch(resources, sname) < 0) {
+                    commandsClient.deleteResource(service);
+                    logger.debug("HQ RabbitMQ service deleted={"
+                            + "type=" + service.getResourcePrototype().getName()
+                            + ", name=" + service.getName()
+                            + "}");
+                    numResourcesDeleted++;
+                }
+            }
 		} catch (Exception e) {
 			// TODO: log here?
 			throw e;
@@ -120,29 +126,14 @@ public class RabbitTransientResourceManager implements TransientResourceManager 
 		}
 	}
 
-	private boolean isTransientResource(Resource hqResource, List<ServiceResource> rabbitResources) {
-		boolean isTransient = true;
-
-		// TODO: Need to optimize
-		for (ServiceResource s : rabbitResources) {
-			if (s.getType().equals(hqResource.getResourcePrototype().getName())
-					&& s.getName().equals(hqResource.getName())) {
-				isTransient = false;
-				break;
-			}
-		}
-
-		return isTransient;
-	}
-
 	private Resource getRabbitMQServer() 
 		throws IOException, PluginException {
 
 		Resource rabbit = null;
 		ResourcePrototype rezProto = commandsClient.getResourcePrototype(RABBITMQ_TYPE);
-		List<Resource> resources = commandsClient.getResources(rezProto, true, true);
+        List<Resource> resources = commandsClient.getResources(rezProto, true, true);
 
-		for (Resource r : resources) {
+        for (Resource r : resources) {
 			if (isResourcePropertyMatch(r.getResourceProperty(), props)
 					&& isResourceConfigMatch(r.getResourceConfig(), props)) {
 				rabbit = r;
@@ -157,13 +148,11 @@ public class RabbitTransientResourceManager implements TransientResourceManager 
 		boolean nodePathMatches = false;
 
 		for (ResourceProperty p : resourceProps) {
-			if (NODE_PATH_PROPERTY.equals(p.getKey())) {
-				if (p.getValue().equals(props.get(SERVER_PATH_PROPERTY))) {
-					nodePathMatches = true;
-					break;
-				}
-			}
-		}
+            if (NODE_PATH_PROPERTY.equals(p.getKey())) {
+                nodePathMatches = true;
+                break;
+            }
+        }
 
 		return nodePathMatches;
 	}
@@ -173,12 +162,12 @@ public class RabbitTransientResourceManager implements TransientResourceManager 
 		boolean passwordMatches = false;
 
 		for (ResourceConfig c : configs) {
-			if (USERNAME_CONFIG.equals(c.getKey())) {
-				if (c.getValue().equals(props.get(USERNAME_CONFIG))) {
+			if (NODE_CONFIG.equals(c.getKey())) {
+				if (c.getValue().equals(props.get(NODE_CONFIG))) {
 					usernameMatches = true;
 				}
-			} else if (PASSWORD_CONFIG.equals(c.getKey())) {
-				if (c.getValue().equals(props.get(PASSWORD_CONFIG))) {
+			} else if (AUTH_CONFIG.equals(c.getKey())) {
+				if (c.getValue().equals(props.get(AUTH_CONFIG))) {
 					passwordMatches = true;
 				}
 			}
