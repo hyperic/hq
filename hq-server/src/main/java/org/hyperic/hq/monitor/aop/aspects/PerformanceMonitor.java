@@ -55,9 +55,9 @@ public class PerformanceMonitor {
 
     private static final Log logger = LogFactory.getLog(PerformanceMonitor.class);
 
-    private long maximumDuration=60000;
+    private long maximumDuration;
 
-    private String warningMessage="Method exceeded acceptable duration:";
+    private String warningMessage;
 
     @PostConstruct
     public void initialize() {
