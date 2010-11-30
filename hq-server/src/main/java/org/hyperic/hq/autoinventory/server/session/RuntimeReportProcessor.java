@@ -39,6 +39,7 @@ import javax.persistence.EntityManagerFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.ejb.EntityManagerImpl;
 import org.hyperic.hq.appdef.Agent;
@@ -270,9 +271,8 @@ public class RuntimeReportProcessor {
     }
     
     private void flushCurrentSession()
-    {
-        ((EntityManagerImpl) EntityManagerFactoryUtils
-            .getTransactionalEntityManager(entityManagerFactory)).getSession().flush();
+    {   ((Session)EntityManagerFactoryUtils
+        .getTransactionalEntityManager(entityManagerFactory).getDelegate()).flush();
     }
     
     private boolean isValid(Server server) {
