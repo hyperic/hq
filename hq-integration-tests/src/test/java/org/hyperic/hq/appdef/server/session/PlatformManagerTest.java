@@ -55,7 +55,6 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.inventory.domain.PlatformNG;
 import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.hyperic.util.pager.PageControl;
@@ -63,7 +62,6 @@ import org.hyperic.util.pager.PageList;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Integration test of the {@link PlatformManagerImpl}
@@ -140,10 +138,6 @@ public class PlatformManagerTest
 
     @Test
     public void testFindPlatformType() {
-        PlatformNG platform = new PlatformNG();
-        platform.setFqdn("foo.bar");
-        platform.setName("TestPlatform");
-        platform.persist();
         PlatformType pType = platformManager.findPlatformType(testPlatformTypes.get(0).getId());
         assertEquals("Incorrect PlatformType Found ById", pType, testPlatformTypes.get(0));
     }
