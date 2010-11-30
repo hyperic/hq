@@ -258,7 +258,7 @@ public class ProductBossImpl implements ProductBoss {
         private ConfigSchema schema;
         private ConfigResponse response;
 
-        public ConfigSchemaAndBaseResponse(ConfigSchema schema, ConfigResponse resp) {
+        ConfigSchemaAndBaseResponse(ConfigSchema schema, ConfigResponse resp) {
             this.schema = schema;
             this.response = resp;
         }

@@ -378,16 +378,8 @@ class ResourceCategory {
 	 * @see ResourceConfig
 	 */
 	static void setConfig(Resource r, Map m, AuthzSubject subject) {
-		setConfig(r,m,subject,true)
+		(new ResourceConfig(r)).setProperties(m, subject)
 	}
-    
-    static void setConfig(Resource r, Map m, AuthzSubject subject, boolean setProps) {
-        if(setProps) {
-            (new ResourceConfig(r)).setProperties(m, subject)
-        } else {
-            (new ResourceConfig(r)).setConfig(m, subject)
-        }
-    }
 	
 	/**
 	 * Get all the children of a resource, viewable by the passed user.
@@ -521,141 +513,130 @@ class ResourceCategory {
 	
 	static createInstance(Resource proto, Resource parent, String name,
 	AuthzSubject subject, Map cfg, Agent agent, List ips) {
-		createInstance(proto, parent, name, subject, cfg, agent, ips, true)
+		if (!proto.isPlatformPrototype()) {
+			throw new RuntimeException("createInstance called for non-platform " +
+			"prototype, when platproto was " + 
+			"expected")
+		}
+		
+		if (!parent.isRoot())
+			throw new RuntimeException("Platforms can only be created as " + 
+			"children of root")
+		
+		cfg = cfg + [:]
+		
+		def typeRsrc = platMan.findPlatformType(proto.instanceId)
+		def platVal = new PlatformValue()
+		['fqdn'].each { 
+			if (!cfg[it]) 
+				throw new Exception("Must specify [${it}] when creating a " +
+				"platform")
+		}
+		
+		platVal.name     = name
+		platVal.description = cfg.description
+		platVal.fqdn     = cfg.fqdn
+		platVal.cpuCount = 1  // XXX:  How can we better gauge?
+		platVal.location = cfg.location
+		
+		def plat  = platMan.createPlatform(subject, proto.instanceId,
+				platVal, agent.id)
+		for (ip in ips) {
+			platMan.addIp(plat, ip.address, ip.netmask, ip.mac)
+		}
+		
+		def res = plat.resource
+		setConfig(res, cfg, subject)
+		return res
 	}
 	
-	static createInstance(Resource proto, Resource parent, String name,
-	    AuthzSubject subject, Map cfg, Agent agent, List ips, boolean setProps) {
-	    if (!proto.isPlatformPrototype()) {
-            throw new RuntimeException("createInstance called for non-platform " +
-            "prototype, when platproto was " + 
-            "expected")
-        }
-        
-        if (!parent.isRoot())
-            throw new RuntimeException("Platforms can only be created as " + 
-            "children of root")
-        
-        cfg = cfg + [:]
-        
-        def typeRsrc = platMan.findPlatformType(proto.instanceId)
-        def platVal = new PlatformValue()
-        ['fqdn'].each { 
-            if (!cfg[it]) 
-                throw new Exception("Must specify [${it}] when creating a " +
-                "platform")
-        }
-        
-        platVal.name     = name
-        platVal.description = cfg.description
-        platVal.fqdn     = cfg.fqdn
-        platVal.cpuCount = 1  // XXX:  How can we better gauge?
-        platVal.location = cfg.location
-        
-        def plat  = platMan.createPlatform(subject, proto.instanceId,
-                platVal, agent.id)
-        for (ip in ips) {
-            platMan.addIp(plat, ip.address, ip.netmask, ip.mac)
-        }
-        
-        def res = plat.resource
-        setConfig(res, cfg, subject, setProps)
-        
-        return res
-    }
-    
-    static createInstance(Resource proto, Resource parent, 
-        String name, AuthzSubject subject, Map cfg, boolean setProps) {
-        cfg = cfg + [:]  // Clone to avoid modifying someone else's cfg
-        
-        if (proto.isServicePrototype()) {
-            def serviceType = svcMan.findServiceType(proto.instanceId)
-            def serverType  = serviceType.serverType
-            
-            Server server
-            if (serverType.isVirtual() && parent.isPlatform()) {
-                // Parent points at the 'resource' version of the Platform, so
-                // we use the instanceId here, not the Resource.id
-                def servers = svrMan.getServersByPlatformServiceType(subject,
-                        parent.instanceId,
-                        proto.instanceId)
-                assert servers.size() == 1, "Cannot create any platform services of " + proto.name + " for " + parent.name + 
-                                                          ".  This is because the virtual server which relates " +
-                                                          parent.name + " to the service does not exist in the database." +
-                                                          "  To find out which virtual server is missing, find the " +
-                                                          "plugin where the platform service exists and get the server " +
-                                                          "that it should belong to.  From there either remove the agent's datadir " +
-                                                          "and re-initialize it or contact support for further options." +
-                                                          "  (instanceId=" + parent.instanceId + ")"
-                
-                server = svrMan.findServerById(servers[0].id) // value -> pojo
-            } else if (parent.isServer()) {
-                // Normal case, create service on a server
-                server = toServer(parent)
-            } else {
-                // Invalid parameters
-                throw new IllegalArgumentException("Invalid prototypes passed to " +
-                "createInstance, cannot create " +
-                proto.name + " on " + parent.name)
-            }
-            
-            if (!serverType.equals(server.getServerType())) {
-                throw new IllegalArgumentException("Cannot create resources of" +
-                " type " + serviceType.name +
-                " on " + server.getServerType().name)
-            }
-            
-            def res = svcMan.createService(subject, server,  serviceType, name,
-                    "", "", null).resource
-            setConfig(res, cfg, subject, setProps)
-            return res
-        } else if (proto.isServerPrototype() && parent.isPlatform()) {
-            Platform platform = toPlatform(parent)
-            def serverType = svrMan.findServerType(proto.instanceId)
-            def platformTypes = serverType.getPlatformTypes()
-            ServerValue sv = new ServerValue()
-            sv.name        = name
-            
-            if (!platformTypes.contains(platform.getPlatformType())) {
-                throw new IllegalArgumentException("Cannot create resources of " +
-                "type " + serverType.name +
-                " on " + platform.getPlatformType().name)
-            }
-            
-            if (cfg['installPath']) {
-                sv.installPath = cfg['installPath']
-            } else {
-                sv.installPath = ""
-            }
-            
-            if (cfg['description']) {
-                sv.description = cfg['description']
-            } else {
-                sv.description = ""
-            }
-            
-            if (cfg['autoIdentifier']) {
-                sv.autoinventoryIdentifier = cfg['autoIdentifier']
-            }
-            
-            def res = svrMan.createServer(subject, platform.id,
-                    proto.instanceId, sv).resource
-            setConfig(res, cfg, subject, setProps)
-            return res
-        } else {
-            throw new IllegalArgumentException("Cannot create resources of type " +
-            proto.name + " on resource " +
-            parent.name)
-        }
-    
-    }
-        
+	
 	/**
 	 * Create a new instance of this prototype:
 	 */
 	static createInstance(Resource proto, Resource parent, 
 	String name, AuthzSubject subject, Map cfg) {
-		createInstance(proto, parent, name, subject, cfg, true)
+		cfg = cfg + [:]  // Clone to avoid modifying someone else's cfg
+		
+		if (proto.isServicePrototype()) {
+			def serviceType = svcMan.findServiceType(proto.instanceId)
+			def serverType  = serviceType.serverType
+			
+			Server server
+			if (serverType.isVirtual() && parent.isPlatform()) {
+				// Parent points at the 'resource' version of the Platform, so
+				// we use the instanceId here, not the Resource.id
+				def servers = svrMan.getServersByPlatformServiceType(subject,
+						parent.instanceId,
+						proto.instanceId)
+				assert servers.size() == 1, "Cannot create any platform services of " + proto.name + " for " + parent.name + 
+				                                          ".  This is because the virtual server which relates " +
+		                                                  parent.name + " to the service does not exist in the database." +
+		                                                  "  To find out which virtual server is missing, find the " +
+		                                                  "plugin where the platform service exists and get the server " +
+		                                                  "that it should belong to.  From there either remove the agent's datadir " +
+		                                                  "and re-initialize it or contact support for further options." +
+		                                                  "  (instanceId=" + parent.instanceId + ")"
+				
+				server = svrMan.findServerById(servers[0].id) // value -> pojo
+			} else if (parent.isServer()) {
+				// Normal case, create service on a server
+				server = toServer(parent)
+			} else {
+				// Invalid parameters
+				throw new IllegalArgumentException("Invalid prototypes passed to " +
+				"createInstance, cannot create " +
+				proto.name + " on " + parent.name)
+			}
+			
+			if (!serverType.equals(server.getServerType())) {
+				throw new IllegalArgumentException("Cannot create resources of" +
+				" type " + serviceType.name +
+				" on " + server.getServerType().name)
+			}
+			
+			def res = svcMan.createService(subject, server,  serviceType, name,
+					"", "", null).resource
+			setConfig(res, cfg, subject)
+			return res
+		} else if (proto.isServerPrototype() && parent.isPlatform()) {
+			Platform platform = toPlatform(parent)
+			def serverType = svrMan.findServerType(proto.instanceId)
+			def platformTypes = serverType.getPlatformTypes()
+			ServerValue sv = new ServerValue()
+			sv.name        = name
+			
+			if (!platformTypes.contains(platform.getPlatformType())) {
+				throw new IllegalArgumentException("Cannot create resources of " +
+				"type " + serverType.name +
+				" on " + platform.getPlatformType().name)
+			}
+			
+			if (cfg['installPath']) {
+				sv.installPath = cfg['installPath']
+			} else {
+				sv.installPath = ""
+			}
+			
+			if (cfg['description']) {
+				sv.description = cfg['description']
+			} else {
+				sv.description = ""
+			}
+			
+			if (cfg['autoIdentifier']) {
+				sv.autoinventoryIdentifier = cfg['autoIdentifier']
+			}
+			
+			def res = svrMan.createServer(subject, platform.id,
+					proto.instanceId, sv).resource
+			setConfig(res, cfg, subject)
+			return res
+		} else {
+			throw new IllegalArgumentException("Cannot create resources of type " +
+			proto.name + " on resource " +
+			parent.name)
+		}
 	}
 	
 	/**
