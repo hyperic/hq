@@ -22,7 +22,7 @@ import org.neo4j.graphdb.ReturnableEvaluator;
 import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.TraversalPosition;
 import org.neo4j.graphdb.Traverser;
-import org.springframework.datastore.annotation.Indexed;
+import org.springframework.data.annotation.Indexed;
 import org.springframework.datastore.graph.annotation.GraphProperty;
 import org.springframework.datastore.graph.annotation.NodeEntity;
 import org.springframework.datastore.graph.annotation.RelatedTo;
@@ -62,6 +62,11 @@ public class Resource {
 
     @javax.annotation.Resource
     private transient GraphDatabaseContext graphDatabaseContext2;
+
+    @OneToMany
+    @Transient
+    @RelatedTo(type = "ALERTING_ELEMENT", direction = Direction.INCOMING, elementClass = Alert.class)
+    private Set<Alert> alerts;
 
     @Transactional
     public ResourceRelation relateTo(Resource resource, String relationName) {
