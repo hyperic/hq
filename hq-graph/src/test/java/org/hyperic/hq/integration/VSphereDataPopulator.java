@@ -4,7 +4,7 @@ import org.hyperic.hq.alert.domain.Alert;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceRelation;
-import org.hyperic.hq.plugin.domain.ResourceType;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;

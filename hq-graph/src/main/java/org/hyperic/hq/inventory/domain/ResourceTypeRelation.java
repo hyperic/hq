@@ -1,4 +1,4 @@
-package org.hyperic.hq.plugin.domain;
+package org.hyperic.hq.inventory.domain;
 
 import java.util.HashMap;
 import java.util.Map;

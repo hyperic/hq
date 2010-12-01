@@ -6,9 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.hq.plugin.domain.PropertyType;
-import org.hyperic.hq.plugin.domain.ResourceType;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.http.HttpEntity;

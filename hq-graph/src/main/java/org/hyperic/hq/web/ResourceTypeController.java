@@ -6,8 +6,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.hq.plugin.domain.ResourceType;
-import org.hyperic.hq.plugin.domain.ResourceTypeRelation;
+import org.hyperic.hq.inventory.domain.ResourceType;
+import org.hyperic.hq.inventory.domain.ResourceTypeRelation;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;

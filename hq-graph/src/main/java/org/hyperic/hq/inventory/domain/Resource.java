@@ -12,8 +12,6 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import org.hyperic.hq.alert.domain.Alert;
 import org.hyperic.hq.inventory.InvalidRelationshipException;
-import org.hyperic.hq.plugin.domain.PropertyType;
-import org.hyperic.hq.plugin.domain.ResourceType;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;

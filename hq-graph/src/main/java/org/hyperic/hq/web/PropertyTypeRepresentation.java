@@ -1,6 +1,6 @@
 package org.hyperic.hq.web;
 
-import org.hyperic.hq.plugin.domain.PropertyType;
+import org.hyperic.hq.inventory.domain.PropertyType;
 
 public class PropertyTypeRepresentation {
 	private Long id;

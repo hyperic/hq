@@ -1,4 +1,4 @@
-package org.hyperic.hq.plugin.domain;
+package org.hyperic.hq.inventory.domain;
 
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.springframework.datastore.graph.annotation.NodeEntity;

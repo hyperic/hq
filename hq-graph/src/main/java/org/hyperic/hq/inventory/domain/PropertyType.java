@@ -1,10 +1,11 @@
-package org.hyperic.hq.plugin.domain;
+package org.hyperic.hq.inventory.domain;
 
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import org.hyperic.hq.reference.RelationshipTypes;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.datastore.graph.annotation.GraphProperty;
 import org.springframework.datastore.graph.annotation.NodeEntity;
 import org.springframework.datastore.graph.annotation.RelatedTo;
@@ -14,6 +15,7 @@ import org.springframework.roo.addon.javabean.RooJavaBean;
 import org.springframework.roo.addon.tostring.RooToString;
 import org.springframework.transaction.annotation.Transactional;
 
+@Configurable
 @NodeEntity(partial=true)
 @RooToString
 @RooJavaBean

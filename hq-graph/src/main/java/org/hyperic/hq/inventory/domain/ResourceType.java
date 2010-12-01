@@ -36,7 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RooJavaBean
 @RooEntity
 public class ResourceType {
-	
+    
     @NotNull
     @Indexed
     @GraphProperty
@@ -67,37 +67,37 @@ public class ResourceType {
     private transient GraphDatabaseContext graphDatabaseContext2;
 
     @Transactional
-	public ResourceTypeRelation relateTo(ResourceType resourceType, String relationName) {
+    public ResourceTypeRelation relateTo(ResourceType resourceType, String relationName) {
         return (ResourceTypeRelation) this.relateTo(resourceType, ResourceTypeRelation.class,
             relationName);
     }
 
     @Transactional
     public void removeRelationship(ResourceType resourceType, String relationName) {
-    	if (this.isRelatedTo(resourceType, relationName)) {
-    		this.getRelationshipTo(resourceType, relationName);
-    	}
+        if (this.isRelatedTo(resourceType, relationName)) {
+            this.getRelationshipTo(resourceType, relationName);
+        }
     }
     
     public ResourceTypeRelation getRelationshipTo(ResourceType resourceType, String relationName) {
-    	return (ResourceTypeRelation) this.getRelationshipTo(resourceType, relationName);
+        return (ResourceTypeRelation) this.getRelationshipTo(resourceType, relationName);
     }
 
     public Set<ResourceTypeRelation> getRelationships() {
-    	Iterable<Relationship> relationships = this.getUnderlyingState().getRelationships(org.neo4j.graphdb.Direction.OUTGOING);
-    	Set<ResourceTypeRelation> resourceTypeRelations = new HashSet<ResourceTypeRelation>();
+        Iterable<Relationship> relationships = this.getUnderlyingState().getRelationships(org.neo4j.graphdb.Direction.OUTGOING);
+        Set<ResourceTypeRelation> resourceTypeRelations = new HashSet<ResourceTypeRelation>();
 
-    	for (Relationship relationship : relationships) {
-    		if (!relationship.isType(SubReferenceNodeTypeStrategy.INSTANCE_OF_RELATIONSHIP_TYPE)) {
-    			Class<?> otherEndType = graphDatabaseContext2.getJavaType(relationship.getOtherNode(this.getUnderlyingState()));
-    			
-    			if (ResourceType.class.equals(otherEndType)) {
-    				resourceTypeRelations.add(graphDatabaseContext2.createEntityFromState(relationship, ResourceTypeRelation.class));
-    			}
-    		}
-    	}
-    	
-    	return resourceTypeRelations;
+        for (Relationship relationship : relationships) {
+            if (!relationship.isType(SubReferenceNodeTypeStrategy.INSTANCE_OF_RELATIONSHIP_TYPE)) {
+                Class<?> otherEndType = graphDatabaseContext2.getJavaType(relationship.getOtherNode(this.getUnderlyingState()));
+                
+                if (ResourceType.class.equals(otherEndType)) {
+                    resourceTypeRelations.add(graphDatabaseContext2.createEntityFromState(relationship, ResourceTypeRelation.class));
+                }
+            }
+        }
+        
+        return resourceTypeRelations;
     }
     
     public boolean isRelatedTo(ResourceType resourceType, String relationName) {
@@ -111,19 +111,19 @@ public class ResourceType {
             }, ReturnableEvaluator.ALL_BUT_START_NODE,
             DynamicRelationshipType.withName(relationName), org.neo4j.graphdb.Direction.OUTGOING);
         for (Node related : relationTraverser) {
-        	if(related.equals(resourceType.getUnderlyingState())) {
-        	    return true;
-        	}
+            if(related.equals(resourceType.getUnderlyingState())) {
+                return true;
+            }
         }
         return false;
     }
 
     public static ResourceType findResourceTypeByName(String name) {
-    	//Can't do JPA-style queries on property values that are only in graph
+        //Can't do JPA-style queries on property values that are only in graph
        ResourceType type = new ResourceType().finderFactory2.getFinderForClass(ResourceType.class)
             .findByPropertyValue("name", name);
        if(type != null) {
-    	   type.getId();
+           type.getId();
        }
        return type;
     }
@@ -133,28 +133,28 @@ public class ResourceType {
     public PropertyType getPropertyType(String name) {
         for(Object propertyType: propertyTypes) {
             if(PropertyType.class.isInstance(propertyType)) {
-            	PropertyType pt = (PropertyType) propertyType;
-            	if (name.equals(pt.getName())) {
-            		return pt;
-            	}
+                PropertyType pt = (PropertyType) propertyType;
+                if (name.equals(pt.getName())) {
+                    return pt;
+                }
             }
         }
         return null;
     }
 
-	public Set<PropertyType> getPropertyTypes() {
-		Set<PropertyType> result = new HashSet<PropertyType>();
-		//TODO is there something other than PropertyTypes in the PropertyType set?  Shouldn't be the case.  Another place we can't use same relationship name?
-		for (Object propertyType : this.propertyTypes) {
-			if (PropertyType.class.isInstance(propertyType)) {
-				result.add((PropertyType) propertyType);
-			}
-		}
-		
+    public Set<PropertyType> getPropertyTypes() {
+        Set<PropertyType> result = new HashSet<PropertyType>();
+        //TODO is there something other than PropertyTypes in the PropertyType set?  Shouldn't be the case.  Another place we can't use same relationship name?
+        for (Object propertyType : this.propertyTypes) {
+            if (PropertyType.class.isInstance(propertyType)) {
+                result.add((PropertyType) propertyType);
+            }
+        }
+        
         return result;
     }
 
-	@Transactional
+    @Transactional
     public void persist() {
         if (this.entityManager == null) this.entityManager = entityManager();
         this.entityManager.persist(this);

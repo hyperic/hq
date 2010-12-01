@@ -3,7 +3,7 @@ package org.hyperic.hq.web;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hyperic.hq.plugin.domain.ResourceTypeRelation;
+import org.hyperic.hq.inventory.domain.ResourceTypeRelation;
 import org.springframework.web.util.UriTemplate;
 
 public class ListOfResourceTypeRelationshipRepresentations {

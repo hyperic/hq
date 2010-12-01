@@ -3,8 +3,8 @@ package org.hyperic.hq.web;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hyperic.hq.plugin.domain.PropertyType;
-import org.hyperic.hq.plugin.domain.ResourceType;
+import org.hyperic.hq.inventory.domain.PropertyType;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.springframework.web.util.UriTemplate;
 
 public class ResourceTypeRepresentation {
