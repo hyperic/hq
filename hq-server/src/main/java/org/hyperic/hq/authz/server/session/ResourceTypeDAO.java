@@ -94,7 +94,7 @@ public class ResourceTypeDAO
     }
 
     public ResourceType findByName(String name) {
-        String sql = "from ResourceType where name=?";
+        String sql = "from org.hyperic.hq.authz.server.session.ResourceType where name=?";
         return (ResourceType) getSession().createQuery(sql).setString(0, name).setCacheable(true)
             .setCacheRegion("ResourceType.findByName").uniqueResult();
     }

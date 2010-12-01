@@ -144,7 +144,7 @@ public class ResourceGroupDAO
     }
 
     ResourceGroup findResourceGroup(Resource resource) {
-        final String hql = "from ResourceGroup where resource = :resource";
+        final String hql = "from org.hyperic.hq.authz.server.session.ResourceGroup where resource = :resource";
         return (ResourceGroup) createQuery(hql).setParameter("resource", resource).uniqueResult();
     }
 
@@ -289,7 +289,7 @@ public class ResourceGroupDAO
     }
 
     public ResourceGroup findByName(String name) {
-        String sql = "from ResourceGroup g where lower(g.resource.name) = lower(?)";
+        String sql = "from org.hyperic.hq.authz.server.session.ResourceGroup g where lower(g.resource.name) = lower(?)";
         return (ResourceGroup) getSession().createQuery(sql).setString(0, name).setCacheable(true)
             .setCacheRegion("ResourceGroup.findByName").uniqueResult();
     }
@@ -297,7 +297,7 @@ public class ResourceGroupDAO
     @SuppressWarnings("unchecked")
     public Collection<ResourceGroup> findByRoleIdAndSystem_orderName(Integer roleId,
                                                                      boolean system, boolean asc) {
-        String sql = "select g from ResourceGroup g join g.roles r " +
+        String sql = "select g from org.hyperic.hq.authz.server.session.ResourceGroup g join g.roles r " +
                      "where r.id = ? and g.system = ? " + "order by g.resource.sortName " +
                      (asc ? "asc" : "desc");
         return (Collection<ResourceGroup>) getSession().createQuery(sql).setInteger(0,
@@ -306,7 +306,7 @@ public class ResourceGroupDAO
 
     @SuppressWarnings("unchecked")
     public Collection<ResourceGroup> findWithNoRoles_orderName(boolean asc) {
-        String sql = "from ResourceGroup g " + "where g.roles.size = 0 and g.system = false " +
+        String sql = "from org.hyperic.hq.authz.server.session.ResourceGroup g " + "where g.roles.size = 0 and g.system = false " +
                      "order by g.resource.sortName " + (asc ? "asc" : "desc");
         return (Collection<ResourceGroup>) getSession().createQuery(sql).list();
     }
@@ -314,14 +314,14 @@ public class ResourceGroupDAO
     @SuppressWarnings("unchecked")
     public Collection<ResourceGroup> findByNotRoleId_orderName(Integer roleId, boolean asc) {
         return (Collection<ResourceGroup>) getSession().createQuery(
-            "from ResourceGroup g " + "where ? not in (select id from g.roles) and " +
+            "from org.hyperic.hq.authz.server.session.ResourceGroup g " + "where ? not in (select id from g.roles) and " +
                 "g.system = false order by g.resource.sortName " + (asc ? "asc" : "desc"))
             .setInteger(0, roleId.intValue()).list();
     }
 
     @SuppressWarnings("unchecked")
     public Collection<ResourceGroup> findCompatible(Resource proto) {
-        String sql = "from ResourceGroup g " + "where g.resourcePrototype = ? and "
+        String sql = "from org.hyperic.hq.authz.server.session.ResourceGroup g " + "where g.resourcePrototype = ? and "
                      + "(g.groupType = ? or g.groupType = ?)";
 
         return (Collection<ResourceGroup>) getSession().createQuery(sql).setParameter(0, proto)
@@ -337,7 +337,7 @@ public class ResourceGroupDAO
                                                  Collection<ResourceGroup> excludeGroups,
                                                  PageInfo pInfo, boolean inclusive) {
         ResourceGroupSortField sort = (ResourceGroupSortField) pInfo.getSort();
-        String hql = "from ResourceGroup g where g.system = false and ";
+        String hql = "from org.hyperic.hq.authz.server.session.ResourceGroup g where g.system = false and ";
 
         if (prototype != null) {
             hql += " (g.resourcePrototype = :proto ";
@@ -410,7 +410,7 @@ public class ResourceGroupDAO
 
     @SuppressWarnings("unchecked")
     public Collection<ResourceGroup> findByGroupType_orderName(boolean isAscending, int groupType) {
-        String sql = "from ResourceGroup g where g.groupType = :type" +
+        String sql = "from org.hyperic.hq.authz.server.session.ResourceGroup g where g.groupType = :type" +
                      " ORDER BY g.resource.name " + ((isAscending) ? "asc" : "desc");
         return (Collection<ResourceGroup>) getSession().createQuery(sql).setInteger("type",
             groupType).list();
@@ -418,7 +418,7 @@ public class ResourceGroupDAO
 
     @SuppressWarnings("unchecked")
     public Collection<ResourceGroup> findDeletedGroups() {
-        String hql = "from ResourceGroup where resource.resourceType = null";
+        String hql = "from org.hyperic.hq.authz.server.session.ResourceGroup where resource.resourceType = null";
         return (Collection<ResourceGroup>) createQuery(hql).list();
     }
 }
