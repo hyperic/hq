@@ -27,13 +27,20 @@ package org.hyperic.hq.plugin.rabbitmq.detect;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.AgentCommand;
+import org.hyperic.hq.agent.AgentRemoteValue;
+import org.hyperic.hq.agent.server.AgentDaemon;
+import org.hyperic.hq.autoinventory.agent.client.AICommandsUtils;
 import org.hyperic.hq.plugin.rabbitmq.collect.*;
 import org.hyperic.hq.plugin.rabbitmq.core.*;
 import org.hyperic.hq.plugin.rabbitmq.manage.RabbitTransientResourceManager;
@@ -55,17 +62,18 @@ import org.springframework.util.Assert;
 public class RabbitServerDetector extends ServerDetector implements AutoServerDetector {
 
     private static final Log logger = LogFactory.getLog(RabbitServerDetector.class);
-
     private final static String PTQL_QUERY = "State.Name.re=[beam|erl],Args.*.eq=-sname";
-
+    private static Map<String, String> signatures = new HashMap();
 
     /**
-     * @param serverConfig
+     * @param platformConfig
      * @return
      * @throws PluginException
      */
-    public List getServerResources(ConfigResponse serverConfig) throws PluginException {
+    public List getServerResources(ConfigResponse platformConfig) throws PluginException {
+        logger.debug("[getServerResources] platformConfig=" + platformConfig);
         //System.setProperty("OtpConnection.trace", "99");
+
         List<ServerResource> resources = new ArrayList<ServerResource>();
         long[] pids = getPids(PTQL_QUERY);
         logger.debug("[getServerResources] pids.length=" + pids.length);
@@ -86,16 +94,66 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                         resources.add(server);
 
                         if (logger.isDebugEnabled()) {
-                            StringBuilder sb = new StringBuilder("Discovered ").append(server.getName()).append(" productConfig=")
-                                    .append(server.getProductConfig()).append(" customProps=").append(server.getCustomProperties());
+                            StringBuilder sb = new StringBuilder("Discovered ").append(server.getName()).append(" productConfig=").append(server.getProductConfig()).append(" customProps=").append(server.getCustomProperties());
                             logger.debug(sb.toString());
                         }
+
+                        List<String> names = new ArrayList();
+                        HypericRabbitAdmin admin = new HypericRabbitAdmin(server.getProductConfig());
+                        try {
+                            names.addAll(formatNames(admin.getChannels(), null));
+                            names.addAll(formatNames(admin.getConnections(), null));
+                            List<String> vhs = admin.getVirtualHosts();
+                            for (String vh : vhs) {
+                                names.addAll(formatNames(admin.getQueues(vh), vh));
+                                names.addAll(formatNames(admin.getExchanges(vh), vh));
+                            }
+                        } finally {
+                            admin.destroy();
+                        }
+
+                        Collections.sort(names);
+                        String node = server.getProductConfig().getValue(DetectorConstants.NODE);
+                        String new_signature = names.toString();
+                        String signature = signatures.get(node);
+                        if (!new_signature.equalsIgnoreCase(signature)) {
+                            if (signature != null) {
+                                runAutoDiscovery(server.getProductConfig());
+                            }
+                            signatures.put(node, new_signature);
+                        }
+
                     }
                 }
             }
+
         }
 
         return resources;
+    }
+
+    private static List<String> formatNames(List rabbitObjects, String vHost) {
+        List<String> res = new ArrayList();
+        if (rabbitObjects != null) {
+            IdentityBuilder builder = new ObjectIdentityBuilder();
+            for (Object obj : rabbitObjects) {
+                res.add(builder.buildIdentity(obj, vHost));
+            }
+        }
+        return res;
+    }
+
+    public void runAutoDiscovery(ConfigResponse cf) {
+        logger.debug("[runAutoDiscovery] >> start");
+        try {
+            AgentRemoteValue configARV = AICommandsUtils.createArgForRuntimeDiscoveryConfig(0, 0, "RabbitMQ", null, cf);
+            logger.info("[runAutoDiscovery] configARV=" + configARV);
+            AgentCommand ac = new AgentCommand(1, 1, "autoinv:pushRuntimeDiscoveryConfig", configARV);
+            AgentDaemon.getMainInstance().getCommandDispatcher().processRequest(ac, null, null);
+            logger.debug("[runAutoDiscovery] << OK");
+        } catch (Exception ex) {
+            logger.debug("[runAutoDiscovery]" + ex.getMessage(), ex);
+        }
     }
 
     /**
