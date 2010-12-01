@@ -19,7 +19,6 @@ import org.hyperic.hq.inventory.domain.ResourceRelation;
 import org.hyperic.hq.plugin.domain.ResourceType;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,12 +107,17 @@ public class VSphereModelIntegrationTest {
     }
     
     @Test
-    @Ignore("Temp disabled alerts for integration")
     public void testCrossStorePersistence() {
     	dataPopulator.populateData();
     	Resource vm = Resource.findResourceByName(VSphereDataPopulator.VM_NAME);
     	List<Alert> alerts = Alert.findAllAlerts();
         assertEquals(vm.getName(),alerts.get(0).getResource().getName());
+        Set<Alert> resourceAlerts = vm.getAlerts();
+        assertEquals(1,resourceAlerts.size());
+        Alert actual = alerts.get(0);
+        Alert expected = resourceAlerts.iterator().next();
+        assertEquals(expected,actual);
+        assertEquals("Saw this",actual.getComment());
     }
 
     @Test(expected = InvalidRelationshipException.class)
