@@ -23,7 +23,7 @@ public class PropertyType {
     @ManyToOne
     @NotNull
     @Transient
-    @RelatedTo(type = RelationshipTypes.CONTAINS, direction = Direction.INCOMING, elementClass = ResourceType.class)
+    @RelatedTo(type = "HAS_PROPERTIES", direction = Direction.INCOMING, elementClass = ResourceType.class)
     private ResourceType resourceType;
 
     @NotNull

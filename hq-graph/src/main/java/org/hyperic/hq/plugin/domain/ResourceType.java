@@ -17,7 +17,7 @@ import org.neo4j.graphdb.ReturnableEvaluator;
 import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.TraversalPosition;
 import org.neo4j.graphdb.Traverser;
-import org.springframework.data.annotation.Indexed;
+import org.springframework.datastore.annotation.Indexed;
 import org.springframework.datastore.graph.annotation.GraphProperty;
 import org.springframework.datastore.graph.annotation.NodeEntity;
 import org.springframework.datastore.graph.annotation.RelatedTo;
@@ -50,10 +50,15 @@ public class ResourceType {
     @Transient
     private Set<Resource> resources;
     
-    @RelatedTo(type = RelationshipTypes.CONTAINS, direction = Direction.OUTGOING, elementClass = PropertyType.class)
+    @RelatedTo(type = "HAS_PROPERTIES", direction = Direction.OUTGOING, elementClass = PropertyType.class)
     @OneToMany
     @Transient
     private Set<PropertyType> propertyTypes;
+    
+    @RelatedTo(type = "HAS_OPERATIONS", direction = Direction.OUTGOING, elementClass = OperationType.class)
+    @OneToMany
+    @Transient
+    private Set<OperationType> operationTypes;
     
     @javax.annotation.Resource
     private transient FinderFactory finderFactory2;
