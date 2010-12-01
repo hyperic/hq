@@ -9,7 +9,6 @@
 
     <?define HQ_ver="@hq.version@"?>
     <?define HQ_build="@hq.build.type@"?>
-    <?define HQ_full_ver="$(var.HQ_ver).$(var.HQ_build)"?>
     <?define HQ_ee_build="@hq.ee.build@"?>
     <?define HQ_os_build="@hq.os.build@"?>
     <?define HQ_product_code="@product.code@"?>
@@ -18,12 +17,26 @@
 
     <?if $(var.HQ_build_type) = ee ?>
         <?define HQ_name="Hyperic HQ Enterprise"?>
-        <?define HQ_full_build="$(var.HQ_ee_build)"?>
         <?define HQ_base_path="hyperic-hqee-installer-$(var.HQ_ver).$(var.HQ_build)"?>
     <?else?>
-        <?define HQ_full_build="$(var.HQ_os_build)"?>
         <?define HQ_name="Hyperic HQ"?>
         <?define HQ_base_path="hyperic-hq-installer-$(var.HQ_ver).$(var.HQ_build)"?>
+    <?endif?>
+
+    <!-- Maven doesn't tack on a ".<build type>" in the case of release builds. -->
+
+    <?if $(var.HQ_build) = "" ?>
+        <?define HQ_full_ver="$(var.HQ_ver)"?>
+        <?define HQ_full_build="$(var.HQ_ver)"?>
+    <?else?>
+        <?define HQ_full_ver="$(var.HQ_ver).$(var.HQ_build)"?>
+
+        <?if $(var.HQ_build_type) = ee ?>
+            <?define HQ_full_build="$(var.HQ_ver).$(var.HQ_ee_build)"?>
+        <?else?>
+            <?define HQ_full_build="$(var.HQ_ver).$(var.HQ_os_build)"?>
+        <?endif?>
+
     <?endif?>
 
     <?define HQ_installer_path="$(var.HQ_base_path)\installer"?>
