@@ -1,4 +1,4 @@
-package org.hyperic.hq.plugin.domain;
+package org.hyperic.hq.inventory.domain;
 
 import org.springframework.roo.addon.dod.RooDataOnDemand;
 import org.hyperic.hq.inventory.domain.OperationType;

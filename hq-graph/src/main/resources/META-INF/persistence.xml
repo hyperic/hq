@@ -5,8 +5,8 @@
         <class>org.hyperic.hq.alert.domain.Alert</class>
          <class>org.hyperic.hq.inventory.domain.Resource</class>
          <class>org.hyperic.hq.inventory.domain.ResourceGroup</class>
-         <class>org.hyperic.hq.plugin.domain.ResourceType</class>
-          <class>org.hyperic.hq.plugin.domain.PropertyType</class>
+         <class>org.hyperic.hq.inventory.domain.ResourceType</class>
+          <class>org.hyperic.hq.inventory.domain.PropertyType</class>
         <properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect"/>
             <!-- value="create" to build a new database on each run; value="update" to modify an existing database; value="create-drop" means the same as "create" but also drops tables when Hibernate closes; value="validate" makes no changes to the database -->
