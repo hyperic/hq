@@ -2,73 +2,71 @@ package org.hyperic.hq.inventory.domain;
 
 import java.util.List;
 
-import javax.annotation.Resource;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Transient;
 import javax.persistence.Version;
-import javax.validation.constraints.NotNull;
 
 import org.neo4j.graphdb.Node;
-import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.datastore.graph.annotation.GraphProperty;
 import org.springframework.datastore.graph.annotation.NodeEntity;
+import org.springframework.datastore.graph.annotation.RelatedTo;
+import org.springframework.datastore.graph.api.Direction;
 import org.springframework.datastore.graph.neo4j.finder.FinderFactory;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * ConfigSchema is not currently stored in DB. Read from plugin file and
- * initialized in-memory (PluginData) on
- * ProductPluginDeployer.registerPluginJar()
- * See ConfigOptionTag for the supported value types for Config.  May need custom Converter to make some of them
- * graph properties
- * @author administrator
- * 
- */
 @Entity
-@Configurable
 @NodeEntity(partial = true)
-public class ConfigType {
+public class Config {
 
     @PersistenceContext
     transient EntityManager entityManager;
 
-    @Resource
+    @javax.annotation.Resource
     transient FinderFactory finderFactory;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
-    private Integer id;
+    private Long id;
 
-    @NotNull
-    @GraphProperty
     @Transient
-    private String name;
+    @ManyToOne
+    @RelatedTo(type = "HAS_CONFIG", direction = Direction.OUTGOING, elementClass = Resource.class)
+    private Resource resource;
+
+    @Transient
+    @ManyToOne
+    @RelatedTo(type = "IS_CONFIG_TYPE", direction = Direction.OUTGOING, elementClass = ConfigType.class)
+    private ConfigType type;
+
+    @GraphProperty
+    private Object value;
 
     @Version
     @Column(name = "version")
     private Integer version;
 
-    public ConfigType() {
+    public Config() {
     }
 
-    public ConfigType(Node n) {
+    public Config(Node n) {
         setUnderlyingState(n);
     }
 
     public long count() {
-        return finderFactory.getFinderForClass(ConfigType.class).count();
+        return finderFactory.getFinderForClass(Config.class).count();
 
     }
 
-    public ConfigType findById(Long id) {
-        return finderFactory.getFinderForClass(ConfigType.class).findById(id);
+    public Config findById(Long id) {
+        return finderFactory.getFinderForClass(Config.class).findById(id);
 
     }
 
@@ -79,12 +77,12 @@ public class ConfigType {
         this.entityManager.flush();
     }
 
-    public Integer getId() {
+    public Long getId() {
         return this.id;
     }
 
-    public String getName() {
-        return this.name;
+    public Object getValue() {
+        return value;
     }
 
     public Integer getVersion() {
@@ -92,10 +90,10 @@ public class ConfigType {
     }
 
     @Transactional
-    public ConfigType merge() {
+    public Config merge() {
         if (this.entityManager == null)
             this.entityManager = entityManager();
-        ConfigType merged = this.entityManager.merge(this);
+        Config merged = this.entityManager.merge(this);
         this.entityManager.flush();
         return merged;
     }
@@ -114,57 +112,48 @@ public class ConfigType {
         if (this.entityManager.contains(this)) {
             this.entityManager.remove(this);
         } else {
-            ConfigType attached = this.entityManager.find(this.getClass(), this.id);
+            Config attached = this.entityManager.find(this.getClass(), this.id);
             this.entityManager.remove(attached);
         }
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setValue(Object value) {
+        this.value = value;
     }
 
     public void setVersion(Integer version) {
         this.version = version;
     }
 
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Id: ").append(getId()).append(", ");
-        sb.append("Version: ").append(getVersion()).append(", ");
-        sb.append("Name: ").append(getName());
-        return sb.toString();
-    }
-
-    public static long countConfigTypes() {
-        return entityManager().createQuery("select count(o) from ConfigType o", Long.class)
+    public static long countConfigs() {
+        return entityManager().createQuery("select count(o) from Config o", Long.class)
             .getSingleResult();
     }
 
     public static final EntityManager entityManager() {
-        EntityManager em = new ConfigType().entityManager;
+        EntityManager em = new Config().entityManager;
         if (em == null)
             throw new IllegalStateException(
                 "Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)");
         return em;
     }
 
-    public static List<ConfigType> findAllConfigTypes() {
-        return entityManager().createQuery("select o from ConfigType o", ConfigType.class)
-            .getResultList();
+    public static List<Config> findAllConfigs() {
+        return entityManager().createQuery("select o from Config o", Config.class).getResultList();
     }
 
-    public static ConfigType findConfigType(Long id) {
+    public static Config findConfig(Long id) {
         if (id == null)
             return null;
-        return entityManager().find(ConfigType.class, id);
+        return entityManager().find(Config.class, id);
     }
 
-    public static List<ConfigType> findConfigTypeEntries(int firstResult, int maxResults) {
-        return entityManager().createQuery("select o from ConfigType o", ConfigType.class)
+    public static List<Config> findConfigEntries(int firstResult, int maxResults) {
+        return entityManager().createQuery("select o from Config o", Config.class)
             .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
     }
 

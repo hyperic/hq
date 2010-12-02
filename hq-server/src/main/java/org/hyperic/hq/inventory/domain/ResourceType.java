@@ -80,7 +80,7 @@ public class ResourceType {
     @Transient
     private Set<PropertyType> propertyTypes;
 
-    @RelatedTo(type = "HAS_CONFIG", direction = Direction.OUTGOING, elementClass = ConfigType.class)
+    @RelatedTo(type = "HAS_CONFIG_TYPE", direction = Direction.OUTGOING, elementClass = ConfigType.class)
     @OneToMany
     @Transient
     private Set<ConfigType> configTypes;
@@ -285,17 +285,32 @@ public class ResourceType {
             .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
     }
 
+    //TODO other config types and setters
+    public Set<ConfigType> getMeasurementConfigTypes() {
+        Set<ConfigType> configTypes = new HashSet<ConfigType>();
+        Iterable<Relationship> relationships = this.getUnderlyingState().getRelationships(
+            DynamicRelationshipType.withName("HAS_CONFIG_TYPE"), org.neo4j.graphdb.Direction.OUTGOING);
+        for (Relationship relationship : relationships) {
+            if ("Measurement".equals(relationship.getProperty("configType"))) {
+                configTypes.add(graphDatabaseContext.createEntityFromState(
+                    relationship.getOtherNode(getUnderlyingState()), ConfigType.class));
+            }
+        }
+        return configTypes;
+    }
+
     public static ResourceType findTypeResourceType() {
         // TODO get rid of this
         return null;
     }
 
     public String getLocalizedName() {
-      //TODO get rid of this
+        // TODO get rid of this
         return null;
     }
+
     public int getAppdefType() {
-        //TODO get rid of this
+        // TODO get rid of this
         return 0;
     }
 
