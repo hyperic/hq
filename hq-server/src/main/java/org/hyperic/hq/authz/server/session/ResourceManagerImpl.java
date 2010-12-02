@@ -36,7 +36,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.ApplicationDAO;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -62,13 +61,15 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
-import org.hyperic.hq.authz.shared.ResourceEdgeCreateException;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.authz.shared.ResourceRelationCreateException;
 import org.hyperic.hq.bizapp.server.session.AppdefBossImpl;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceRelation;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
@@ -83,7 +84,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.hyperic.hq.inventory.domain.ResourceType;
 
 /**
  * Use this session bean to manipulate Resources, ResourceTypes and
@@ -100,12 +100,9 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
 
     private final Log log = LogFactory.getLog(ResourceManagerImpl.class);
     private Pager resourceTypePager = null;
-    private ResourceEdgeDAO resourceEdgeDAO;
     private PlatformDAO platformDAO;
     private AuthzSubjectManager authzSubjectManager;
     private AuthzSubjectDAO authzSubjectDAO;
-    private ResourceDAO resourceDAO;
-    private ResourceRelationDAO resourceRelationDAO;
     private ZeventEnqueuer zeventManager;
     private ServerDAO serverDAO;
     private ServiceDAO serviceDAO;
@@ -116,22 +113,18 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     private ApplicationContext applicationContext;
 
     @Autowired
-    public ResourceManagerImpl(ResourceEdgeDAO resourceEdgeDAO, PlatformDAO platformDAO,
+    public ResourceManagerImpl(PlatformDAO platformDAO,
                                ServerDAO serverDAO, ServiceDAO serviceDAO,
                                AuthzSubjectManager authzSubjectManager,
-                               AuthzSubjectDAO authzSubjectDAO, ResourceDAO resourceDAO,
-                               ResourceRelationDAO resourceRelationDAO,
+                               AuthzSubjectDAO authzSubjectDAO,
                                ZeventEnqueuer zeventManager, PlatformTypeDAO platformTypeDAO,
                                ApplicationDAO applicationDAO, PermissionManager permissionManager,
                                ResourceAuditFactory resourceAuditFactory) {
-        this.resourceEdgeDAO = resourceEdgeDAO;
         this.platformDAO = platformDAO;
         this.serverDAO = serverDAO;
         this.serviceDAO = serviceDAO;
         this.authzSubjectManager = authzSubjectManager;
         this.authzSubjectDAO = authzSubjectDAO;
-        this.resourceDAO = resourceDAO;
-        this.resourceRelationDAO = resourceRelationDAO;
         this.zeventManager = zeventManager;
         this.platformTypeDAO = platformTypeDAO;
         this.applicationDAO = applicationDAO;
@@ -859,7 +852,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      */
     public void createResourceEdges(AuthzSubject subject, ResourceRelation relation,
                                     AppdefEntityID parent, AppdefEntityID[] children)
-        throws PermissionException, ResourceEdgeCreateException {
+        throws PermissionException, ResourceRelationCreateException {
         createResourceEdges(subject, relation, parent, children, false);
     }
 
@@ -904,17 +897,17 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     public void createResourceEdges(AuthzSubject subject, ResourceRelation relation,
                                     AppdefEntityID parent, AppdefEntityID[] children,
                                     boolean deleteExisting) throws PermissionException,
-        ResourceEdgeCreateException {
+        ResourceRelationCreateException {
 
         if (relation == null) {
-            throw new ResourceEdgeCreateException("Resource relation is null");
+            throw new ResourceRelationCreateException("Resource relation is null");
         }
         if (relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
             createNetworkResourceEdges(subject, relation, parent, children, deleteExisting);
         } else if (relation.getId().equals(AuthzConstants.RELATION_VIRTUAL_ID)) {
             createVirtualResourceEdges(subject, relation, parent, children);
         } else {
-            throw new ResourceEdgeCreateException("Unsupported resource relation: " +
+            throw new ResourceRelationCreateException("Unsupported resource relation: " +
                                                   relation.getName());
         }
 
@@ -922,7 +915,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
 
     private void createVirtualResourceEdges(AuthzSubject subject, ResourceRelation relation,
                                             AppdefEntityID parent, AppdefEntityID[] children)
-        throws PermissionException, ResourceEdgeCreateException {
+        throws PermissionException, ResourceRelationCreateException {
 
         Resource parentResource = findResource(parent);
 
@@ -986,7 +979,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
                     }
                 }
             } catch (Throwable t) {
-                throw new ResourceEdgeCreateException(t);
+                throw new ResourceRelationCreateException(t);
             }
         }
     }
@@ -1043,7 +1036,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     }
 
     private boolean createVirtualResourceEdgesByMacAddress(Resource vmResource, Resource hqResource)
-        throws ResourceEdgeCreateException {
+        throws ResourceRelationCreateException {
 
         return createVirtualResourceEdgesByMacAddress(vmResource, hqResource, true);
     }
@@ -1051,7 +1044,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     private boolean createVirtualResourceEdgesByMacAddress(Resource vmResource,
                                                            Resource hqResource,
                                                            boolean createServerEdges)
-        throws ResourceEdgeCreateException {
+        throws ResourceRelationCreateException {
 
         boolean isEdgesCreated = false;
 
@@ -1062,7 +1055,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
                 //Possible (but not likely) for 2 physical platforms to have same MAC address (particularly in test scenarios)
                 return false;
             } else if (vmPrototype.equals(hqResource.getPrototype().getName())) {
-                throw new ResourceEdgeCreateException("Resource[id=" + hqResource.getId() +
+                throw new ResourceRelationCreateException("Resource[id=" + hqResource.getId() +
                                                       "] cannot be a " + vmPrototype);
             }
 
@@ -1090,7 +1083,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
                             }
                         }
                     } catch (Exception e) {
-                        throw new ResourceEdgeCreateException(e.getMessage(), e);
+                        throw new ResourceRelationCreateException(e.getMessage(), e);
                     }
                 }
 
@@ -1110,9 +1103,9 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     private void createNetworkResourceEdges(AuthzSubject subject, ResourceRelation relation,
                                             AppdefEntityID parent, AppdefEntityID[] children,
                                             boolean deleteExisting) throws PermissionException,
-        ResourceEdgeCreateException {
+        ResourceRelationCreateException {
         if (parent == null || !parent.isPlatform()) {
-            throw new ResourceEdgeCreateException("Only platforms are supported.");
+            throw new ResourceRelationCreateException("Only platforms are supported.");
         }
 
         Platform parentPlatform = null;
@@ -1121,11 +1114,11 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         try {
             parentPlatform = platMan.findPlatformById(parent.getId());
         } catch (PlatformNotFoundException pe) {
-            throw new ResourceEdgeCreateException("Platform id " + parent.getId() + " not found.");
+            throw new ResourceRelationCreateException("Platform id " + parent.getId() + " not found.");
         }
         List<PlatformType> supportedPlatformTypes = new ArrayList<PlatformType>(platMan.findSupportedPlatformTypes());
         if (supportedPlatformTypes.contains(parentPlatform.getPlatformType())) {
-            throw new ResourceEdgeCreateException(parentPlatform.getPlatformType().getName() +
+            throw new ResourceRelationCreateException(parentPlatform.getPlatformType().getName() +
                                                   " not supported as a top-level platform type.");
         }
         Resource parentResource = parentPlatform.getResource();
@@ -1139,7 +1132,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         if (config != null) {
             String validationError = config.getValidationError();
             if (validationError != null) {
-                throw new ResourceEdgeCreateException("Resource id " + parentResource.getId() +
+                throw new ResourceRelationCreateException("Resource id " + parentResource.getId() +
                                                       ": " + validationError);
             }
         }
@@ -1163,19 +1156,19 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
                 }
                 for (int i = 0; i < children.length; i++) {
                     if (!children[i].isPlatform()) {
-                        throw new ResourceEdgeCreateException("Only platforms are supported.");
+                        throw new ResourceRelationCreateException("Only platforms are supported.");
                     }
                     try {
                         childPlatform = platMan.findPlatformById(children[i].getId());
                         childResource = childPlatform.getResource();
 
                         if (!supportedPlatformTypes.contains(childPlatform.getPlatformType())) {
-                            throw new ResourceEdgeCreateException(childPlatform.getPlatformType()
+                            throw new ResourceRelationCreateException(childPlatform.getPlatformType()
                                 .getName() +
                                                                   " not supported as a dependent platform type.");
                         }
                     } catch (PlatformNotFoundException pe) {
-                        throw new ResourceEdgeCreateException("Platform id " + children[i].getId() +
+                        throw new ResourceRelationCreateException("Platform id " + children[i].getId() +
                                                               " not found.");
                     }
 
@@ -1191,14 +1184,14 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
                             continue;
                         } else {
                             // already exists with different parent
-                            throw new ResourceEdgeCreateException("Resource id " +
+                            throw new ResourceRelationCreateException("Resource id " +
                                                                   childResource.getId() +
                                                                   " already exists in another network hierarchy.");
                         }
                     } else if (existing.size() > 1) {
                         // a resource can only belong to one network hierarchy
                         // this is a data integrity issue if it happens
-                        throw new ResourceEdgeCreateException("Resource id " +
+                        throw new ResourceRelationCreateException("Resource id " +
                                                               childResource.getId() +
                                                               " exists in " + existing.size() +
                                                               " network hierarchies.");
@@ -1209,7 +1202,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
                     }
                 }
             } catch (Throwable t) {
-                throw new ResourceEdgeCreateException(t);
+                throw new ResourceRelationCreateException(t);
             }
         }
     }

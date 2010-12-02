@@ -34,14 +34,14 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceEdge;
-import org.hyperic.hq.authz.server.session.ResourceRelation;
 import org.hyperic.hq.authz.server.session.ResourceSortField;
 import org.hyperic.hq.bizapp.server.session.ResourceCleanupEventListener;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceRelation;
 import org.hyperic.hq.inventory.domain.ResourceType;
+import org.hyperic.hq.inventory.domain.ResourceTypeRelation;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -231,53 +231,53 @@ public interface ResourceManager {
      */
     public Collection<Resource> findResourceByOwner(AuthzSubject owner);
 
-    Collection<ResourceEdge> findResourceEdges(ResourceRelation relation, List<Resource> parentList);
+    Collection<ResourceRelation> findResourceEdges(ResourceTypeRelation relation, List<Resource> parentList);
 
-    public Collection<ResourceEdge> findResourceEdges(ResourceRelation relation, Resource parent);
+    public Collection<ResourceRelation> findResourceEdges(ResourceTypeRelation relation, Resource parent);
 
     public boolean isResourceChildOf(Resource parent, Resource child);
 
-    public boolean hasChildResourceEdges(Resource resource, ResourceRelation relation);
+    public boolean hasChildResourceEdges(Resource resource, ResourceTypeRelation relation);
 
-    public int getDescendantResourceEdgeCount(Resource resource, ResourceRelation relation);
+    public int getDescendantResourceEdgeCount(Resource resource, ResourceTypeRelation relation);
 
-    public Collection<ResourceEdge> findChildResourceEdges(Resource resource,
-                                                           ResourceRelation relation);
+    public Collection<ResourceRelation> findChildResourceEdges(Resource resource,
+                                                           ResourceTypeRelation relation);
 
-    public Collection<ResourceEdge> findDescendantResourceEdges(Resource resource,
-                                                                ResourceRelation relation);
+    public Collection<ResourceRelation> findDescendantResourceEdges(Resource resource,
+                                                                ResourceTypeRelation relation);
 
-    public Collection<ResourceEdge> findAncestorResourceEdges(Resource resource,
-                                                              ResourceRelation relation);
+    public Collection<ResourceRelation> findAncestorResourceEdges(Resource resource,
+                                                              ResourceTypeRelation relation);
 
-    public Collection<ResourceEdge> findResourceEdgesByName(String name, ResourceRelation relation);
+    public Collection<ResourceRelation> findResourceEdgesByName(String name, ResourceTypeRelation relation);
 
-    public ResourceEdge getParentResourceEdge(Resource resource, ResourceRelation relation);
+    public ResourceRelation getParentResourceEdge(Resource resource, ResourceTypeRelation relation);
 
-    public boolean hasResourceRelation(Resource resource, ResourceRelation relation);
+    public boolean hasResourceTypeRelation(Resource resource, ResourceTypeRelation relation);
 
-    public List<ResourceEdge> findResourceEdges(ResourceRelation relation, Integer resourceId,
+    public List<ResourceRelation> findResourceEdges(ResourceTypeRelation relation, Integer resourceId,
                                                 List<Integer> platformTypeIds, String platformName);
 
-    public void createResourceEdges(AuthzSubject subject, ResourceRelation relation,
+    public void createResourceRelations(AuthzSubject subject, ResourceTypeRelation relation,
                                     AppdefEntityID parent, AppdefEntityID[] children)
-        throws PermissionException, ResourceEdgeCreateException;
+        throws PermissionException, ResourceRelationCreateException;
 
-    public void createResourceEdges(AuthzSubject subject, ResourceRelation relation,
+    public void createResourceRelations(AuthzSubject subject, ResourceTypeRelation relation,
                                     AppdefEntityID parent, AppdefEntityID[] children,
                                     boolean deleteExisting) throws PermissionException,
-        ResourceEdgeCreateException;
+        ResourceRelationCreateException;
 
-    public void removeResourceEdges(AuthzSubject subject, ResourceRelation relation,
+    public void removeResourceRelations(AuthzSubject subject, ResourceTypeRelation relation,
                                     AppdefEntityID parent, AppdefEntityID[] children)
         throws PermissionException;
 
-    public void removeResourceEdges(AuthzSubject subject, ResourceRelation relation, Resource parent)
+    public void removeResourceRelations(AuthzSubject subject, ResourceTypeRelation relation, Resource parent)
         throws PermissionException;
 
-    public ResourceRelation getContainmentRelation();
+    public ResourceTypeRelation getContainmentRelation();
 
-    ResourceRelation getNetworkRelation();
+    ResourceTypeRelation getNetworkRelation();
 
     void removeAuthzResource(AuthzSubject subject, AppdefEntityID aeid, Resource r)
         throws PermissionException, VetoException;
@@ -292,5 +292,5 @@ public interface ResourceManager {
      */
     public int getPlatformCountMinusVsphereVmPlatforms();
     
-    ResourceRelation getVirtualRelation();
+    ResourceTypeRelation getVirtualRelation();
 }

@@ -31,26 +31,26 @@ import org.hyperic.hq.common.CreateFailedException;
  * 
  * Exception class for resource edge creation
  */
-public class ResourceEdgeCreateException extends CreateFailedException {
+public class ResourceRelationCreateException extends CreateFailedException {
 
     /**
      * 
      */
-    public ResourceEdgeCreateException() {
+    public ResourceRelationCreateException() {
         super();
     }
 
     /**
      * @param s
      */
-    public ResourceEdgeCreateException(String s) {
+    public ResourceRelationCreateException(String s) {
         super(s);
     }
 
     /**
      * @param t
      */
-    public ResourceEdgeCreateException(Throwable t) {
+    public ResourceRelationCreateException(Throwable t) {
         super(t);
     }
 
@@ -58,7 +58,7 @@ public class ResourceEdgeCreateException extends CreateFailedException {
      * @param s
      * @param t
      */
-    public ResourceEdgeCreateException(String s, Throwable t) {
+    public ResourceRelationCreateException(String s, Throwable t) {
         super(s, t);
     }
 
