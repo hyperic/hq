@@ -37,13 +37,9 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Operation;
-import org.hyperic.hq.authz.server.session.OperationDAO;
 import org.hyperic.hq.authz.server.session.PagerProcessor_operation;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
-import org.hyperic.hq.authz.server.session.ResourceType;
-import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
@@ -53,19 +49,13 @@ import org.hyperic.hq.events.shared.HierarchicalAlertingManager;
 import org.hyperic.hq.events.shared.MaintenanceEventManager;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
+import org.hyperic.hq.inventory.domain.OperationType;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.pager.PageControl;
 
 public abstract class PermissionManager {
 
     public static final String OPERATION_PAGER = PagerProcessor_operation.class.getName();
-
-    protected ResourceTypeDAO getResourceTypeDAO() {
-        return Bootstrap.getBean(ResourceTypeDAO.class);
-    }
-
-    protected OperationDAO getOperationDAO() {
-        return Bootstrap.getBean(OperationDAO.class);
-    }
 
     protected ResourceDAO getResourceDAO() {
         return Bootstrap.getBean(ResourceDAO.class);
@@ -426,8 +416,8 @@ public abstract class PermissionManager {
      */
     private Integer getOpIdByResourceType(ResourceType rtV, String opName)
         throws PermissionException {
-        Collection<Operation> ops = rtV.getOperations();
-        for (Operation op : ops) {
+        Collection<OperationType> ops = rtV.getOperationTypes();
+        for (OperationType op : ops) {
             if (op.getName().equals(opName)) {
                 return op.getId();
             }
@@ -744,7 +734,7 @@ public abstract class PermissionManager {
      * 
      * @return a list of Integers representing instance ids
      */
-    public abstract List<Operation> getAllOperations(AuthzSubject subject, PageControl pc)
+    public abstract List<OperationType> getAllOperations(AuthzSubject subject, PageControl pc)
         throws PermissionException;
 
     public abstract String getOperableGroupsHQL(AuthzSubject subject, String alias, String oper);

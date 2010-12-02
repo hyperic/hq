@@ -38,7 +38,6 @@ import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
-import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.engine.SessionImplementor;
 import org.hibernate.id.IdentifierGenerator;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -47,6 +46,8 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.inventory.domain.PropertyType;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -62,17 +63,16 @@ public class CpropDAO
     private static final int CHUNKSIZE = 1000; // Max size for each row
     private static final String CPROP_TABLE = "EAM_CPROP";
     private static final String CPROPKEY_TABLE = "EAM_CPROP_KEY";
-    private CpropKeyDAO cPropKeyDAO;
+   
 
     @Autowired
-    public CpropDAO(SessionFactory f, JdbcTemplate jdbcTemplate, CpropKeyDAO cPropKeyDAO) {
+    public CpropDAO(SessionFactory f, JdbcTemplate jdbcTemplate) {
         super(Cprop.class, f);
         this.jdbcTemplate = jdbcTemplate;
-        this.cPropKeyDAO = cPropKeyDAO;
     }
 
     @SuppressWarnings("unchecked")
-    public List<Cprop> findByKeyName(CpropKey key, boolean asc) {
+    public List<Cprop> findByKeyName(PropertyType key, boolean asc) {
         Criteria c = createCriteria().add(Expression.eq("key", key)).addOrder(
             asc ? Order.asc("propValue") : Order.desc("propValue"));
         return c.list();
@@ -96,7 +96,7 @@ public class CpropDAO
     public String setValue(final AppdefEntityID aID, int typeId, String key, String val)
         throws CPropKeyNotFoundException, AppdefEntityNotFoundException, PermissionException {
 
-        CpropKey propKey = getKey(aID, typeId, key);
+        PropertyType propKey = getKey(aID, typeId, key);
 
         Integer pk = propKey.getId();
         final int keyId = pk.intValue();
@@ -184,7 +184,7 @@ public class CpropDAO
         final AppdefEntityID aID = aVal.getID();
         AppdefResourceType recType = aVal.getAppdefResourceType();
         int typeId = recType.getId().intValue();
-        CpropKey propKey = this.getKey(aID, typeId, key);
+        PropertyType propKey = this.getKey(aID, typeId, key);
 
         Integer pk = propKey.getId();
         final int keyId = pk.intValue();
@@ -287,9 +287,9 @@ public class CpropDAO
         return res;
     }
 
-    private CpropKey getKey(AppdefEntityID aID, int typeId, String key)
+    private PropertyType getKey(AppdefEntityID aID, int typeId, String key)
         throws CPropKeyNotFoundException, AppdefEntityNotFoundException, PermissionException {
-        CpropKey res = cPropKeyDAO.findByKey(aID.getType(), typeId, key);
+        PropertyType res = ResourceType.findResourceType(typeId).getPropertyType(key);
 
         if (res == null) {
             String msg = "Key, '" + key + "', does " + "not exist for aID=" + aID + ", typeId=" +

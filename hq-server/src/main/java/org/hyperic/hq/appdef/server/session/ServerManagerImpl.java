@@ -59,9 +59,9 @@ import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Operation;
+
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceType;
+
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -74,6 +74,8 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.common.shared.AuditManager;
+import org.hyperic.hq.inventory.domain.OperationType;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
@@ -187,7 +189,7 @@ public class ServerManagerImpl implements ServerManager {
 
         List<Server> res = new ArrayList<Server>();
         ResourceType type;
-        Operation op;
+        OperationType op;
 
         try {
             type = resourceManager.findResourceTypeByName(AuthzConstants.serverResType);
@@ -367,7 +369,7 @@ public class ServerManagerImpl implements ServerManager {
             log.debug("Checking viewable servers for subject: " + whoami.getName());
         }
 
-        Operation op = getOperationByName(resourceManager.findResourceTypeByName(AuthzConstants.serverResType),
+        OperationType op = getOperationByName(resourceManager.findResourceTypeByName(AuthzConstants.serverResType),
             AuthzConstants.serverOpViewServer);
         List<Integer> idList = permissionManager.findOperationScopeBySubject(whoami, op.getId());
 
@@ -1437,15 +1439,12 @@ public class ServerManagerImpl implements ServerManager {
     /**
      * Find an operation by name inside a ResourcetypeValue object
      */
-    protected Operation getOperationByName(ResourceType rtV, String opName) throws PermissionException {
-        Collection<Operation> ops = rtV.getOperations();
-        for (Operation op : ops) {
-
-            if (op.getName().equals(opName)) {
-                return op;
-            }
+    protected OperationType getOperationByName(ResourceType rtV, String opName) throws PermissionException {
+        OperationType op = rtV.getOperationType(opName);
+        if(op == null) {
+            throw new PermissionException("Operation: " + opName + " not valid for ResourceType: " + rtV.getName());
         }
-        throw new PermissionException("Operation: " + opName + " not valid for ResourceType: " + rtV.getName());
+        return op;
     }
 
     /**

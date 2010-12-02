@@ -53,6 +53,8 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.server.session.Calendar;
 import org.hyperic.hq.common.shared.CalendarManager;
+import org.hyperic.hq.inventory.domain.OperationType;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -83,9 +85,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
     private static final String OWNEDROLE_PAGER = "org.hyperic.hq.authz.server.session.PagerProcessor_ownedRole";
     private static final String GROUP_PAGER = "org.hyperic.hq.authz.server.session.PagerProcessor_resourceGroup";
     private RoleCalendarDAO roleCalendarDAO;
-    private OperationDAO operationDAO;
     private ResourceGroupDAO resourceGroupDAO;
-    private ResourceTypeDAO resourceTypeDAO;
     private RoleDAO roleDAO;
     private AuthzSubjectDAO authzSubjectDAO;
     private ResourceDAO resourceDAO;
@@ -94,14 +94,12 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
     private ApplicationContext applicationContext;
 
     @Autowired
-    public RoleManagerImpl(RoleCalendarDAO roleCalendarDAO, OperationDAO operationDAO,
-                           ResourceGroupDAO resourceGroupDAO, ResourceTypeDAO resourceTypeDAO, RoleDAO roleDAO,
+    public RoleManagerImpl(RoleCalendarDAO roleCalendarDAO,
+                           ResourceGroupDAO resourceGroupDAO,RoleDAO roleDAO,
                            AuthzSubjectDAO authzSubjectDAO, ResourceDAO resourceDAO, CalendarManager calendarManager,
                            PermissionManager permissionManager) {
         this.roleCalendarDAO = roleCalendarDAO;
-        this.operationDAO = operationDAO;
         this.resourceGroupDAO = resourceGroupDAO;
-        this.resourceTypeDAO = resourceTypeDAO;
         this.roleDAO = roleDAO;
         this.authzSubjectDAO = authzSubjectDAO;
         this.resourceDAO = resourceDAO;
@@ -188,7 +186,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
         throws PermissionException {
         try {
 
-            permissionManager.check(who.getId(), resourceTypeDAO.findByName(AuthzConstants.roleResourceTypeName),
+            permissionManager.check(who.getId(), ResourceType.findResourceTypeByName(AuthzConstants.roleResourceTypeName),
                 AuthzConstants.rootResourceId, AuthzConstants.roleOpViewRole);
         } catch (PermissionException e) {
             return new ArrayList<Role>(0);
@@ -229,13 +227,13 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
      *         covalentAuthzRole ResourceType.
      * 
      */
-    public Integer createOwnedRole(AuthzSubject whoami, RoleValue role, Operation[] operations, Integer[] subjectIds,
+    public Integer createOwnedRole(AuthzSubject whoami, RoleValue role, OperationType[] operations, Integer[] subjectIds,
                                    Integer[] groupIds) throws  AuthzDuplicateNameException,
         PermissionException {
 
         validateRole(role);
 
-        permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType(), AuthzConstants.rootResourceId,
+        permissionManager.check(whoami.getId(), ResourceType.findTypeResourceType(), AuthzConstants.rootResourceId,
             AuthzConstants.roleOpCreateRole);
 
         Role roleLocal = roleDAO.create(whoami, role);
@@ -340,8 +338,8 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
      *         role.
      * 
      */
-    public void addOperations(AuthzSubject whoami, Role role, Operation[] operations) throws PermissionException {
-        Set<Operation> opLocals = toPojos(operations);
+    public void addOperations(AuthzSubject whoami, Role role, OperationType[] operations) throws PermissionException {
+        Set<OperationType> opLocals = toPojos(operations);
 
         // roleLocal.setWhoami(lookupSubject(whoami));
         role.getOperations().addAll(opLocals);
@@ -374,14 +372,14 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
      *         setOperations on this role.
      * 
      */
-    public void setOperations(AuthzSubject whoami, Integer id, Operation[] operations) throws PermissionException {
+    public void setOperations(AuthzSubject whoami, Integer id, OperationType[] operations) throws PermissionException {
         if (operations != null) {
             Role roleLocal = lookupRole(id);
 
             permissionManager.check(whoami.getId(), roleLocal.getResource().getResourceType(), roleLocal.getId(),
                 AuthzConstants.roleOpModifyRole);
 
-            Set<Operation> opLocals = toPojos(operations);
+            Set<OperationType> opLocals = toPojos(operations);
             roleLocal.setOperations(opLocals);
         }
     }
@@ -597,12 +595,12 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
      * 
      */
     @Transactional(readOnly=true)
-    public List<Operation> getRoleOperations(AuthzSubject subject, Integer roleId)
+    public List<OperationType> getRoleOperations(AuthzSubject subject, Integer roleId)
         throws PermissionException {
       
         // find the role by id
         Role role = roleDAO.findById(roleId);
-        return new ArrayList<Operation>(role.getOperations());
+        return new ArrayList<OperationType>(role.getOperations());
     }
 
     /**
@@ -1256,7 +1254,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
         // check whether the user can see subjects other than himself
         try {
 
-            permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType(),
+            permissionManager.check(whoami.getId(), ResourceType.findTypeResourceType(),
                 AuthzConstants.rootResourceId, AuthzConstants.subjectOpViewSubject);
         } catch (PermissionException e) {
             // if the user does not have permission to view subjects
@@ -1382,8 +1380,8 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
      * 
      */
     @Transactional(readOnly=true)
-    public Collection<Operation> findAllOperations() {
-        return operationDAO.findAllOrderByName();
+    public Collection<OperationType> findAllOperations() {
+        return OperationType.findAllOrderByName();
     }
 
     protected Set toPojos(Object[] vals) {
@@ -1392,7 +1390,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
             return ret;
         }
         for (int i = 0; i < vals.length; i++) {
-            if (vals[i] instanceof Operation) {
+            if (vals[i] instanceof OperationType) {
                 ret.add(vals[i]);
             } else if (vals[i] instanceof ResourceValue) {
                 ret.add(lookupResource((ResourceValue) vals[i]));

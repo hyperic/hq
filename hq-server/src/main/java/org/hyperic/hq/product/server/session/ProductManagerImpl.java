@@ -39,7 +39,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.alerts.AlertDefinitionXmlParser;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
-import org.hyperic.hq.appdef.server.session.CpropKey;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
@@ -56,6 +55,7 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
+import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.measurement.server.session.MonitorableMeasurementInfo;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.shared.TemplateManager;
@@ -425,7 +425,7 @@ public class ProductManagerImpl implements ProductManager {
             for (ConfigOption opt : options) {
                 if (debug)
                     watch.markTimeBegin("findByKey");
-                CpropKey c = cPropManager.findByKey(appdefType, opt.getName());
+                PropertyType c = cPropManager.findByKey(appdefType, opt.getName());
                 if (debug)
                     watch.markTimeEnd("findByKey");
                 if (c == null) {

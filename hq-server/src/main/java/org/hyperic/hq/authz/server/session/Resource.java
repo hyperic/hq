@@ -33,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.inventory.domain.ResourceType;
 
 public class Resource extends AuthzNamedBean implements Comparable {
     public static final Log _log = LogFactory.getLog(Resource.class);

@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.authz.server.session;
 
+import org.hyperic.hq.inventory.domain.OperationType;
+
 
 
 
@@ -36,7 +38,7 @@ public class RoleOperationMapId  implements java.io.Serializable {
     // Fields    
 
      private Role roleId;
-     private Operation operationId;
+     private OperationType operationId;
 
      // Constructors
 
@@ -45,7 +47,7 @@ public class RoleOperationMapId  implements java.io.Serializable {
     }
 
     /** full constructor */
-    public RoleOperationMapId(Role roleId, Operation operationId) {
+    public RoleOperationMapId(Role roleId, OperationType operationId) {
         this.roleId = roleId;
         this.operationId = operationId;
     }
@@ -59,11 +61,11 @@ public class RoleOperationMapId  implements java.io.Serializable {
     public void setRoleId(Role roleId) {
         this.roleId = roleId;
     }
-    public Operation getOperationId() {
+    public OperationType getOperationId() {
         return this.operationId;
     }
     
-    public void setOperationId(Operation operationId) {
+    public void setOperationId(OperationType operationId) {
         this.operationId = operationId;
     }
 

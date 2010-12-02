@@ -26,7 +26,8 @@
 package org.hyperic.hq.authz.shared;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.ResourceType;
+import org.hyperic.hq.inventory.domain.ResourceType;
+
 
 /**
  * Value object for Resource.

@@ -26,11 +26,11 @@
 package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.appdef.server.session.CpropKey;
+import org.hyperic.hq.inventory.domain.PropertyType;
 
 public class Cprop extends PersistedObject
 {
-    private CpropKey _key;
+    private PropertyType _key;
     private Integer _appdefId;
     private Integer _valueIdx;
     private String _propValue;
@@ -39,11 +39,11 @@ public class Cprop extends PersistedObject
         super();
     }
 
-    public CpropKey getKey() {
+    public PropertyType getKey() {
         return _key;
     }
 
-    protected void setKey(CpropKey keyId) {
+    protected void setKey(PropertyType keyId) {
         _key = keyId;
     }
 

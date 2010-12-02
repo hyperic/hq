@@ -40,10 +40,10 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Operation;
+
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
-import org.hyperic.hq.authz.server.session.ResourceType;
+
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.RoleDAO;
 import org.hyperic.hq.common.ApplicationException;
@@ -52,6 +52,8 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.shared.HierarchicalAlertingManager;
 import org.hyperic.hq.events.shared.MaintenanceEventManager;
+import org.hyperic.hq.inventory.domain.OperationType;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
@@ -134,10 +136,10 @@ public class PermissionManagerImpl
             _log.debug("Checking Scope for Operation: " + opName + " subject: " + subj);
         }
 
-        ResourceType resTypeBean = getResourceTypeDAO().findByName(resType);
+        ResourceType resTypeBean = ResourceType.findResourceTypeByName(resType);
 
         if (resTypeBean != null) {
-            Operation op = getOperationDAO().findByTypeAndName(resTypeBean, opName);
+            OperationType op = resTypeBean.getOperationType(opName);
 
             if (op != null) {
                 return findOperationScopeBySubject(subj, op.getId());
@@ -197,7 +199,7 @@ public class PermissionManagerImpl
         RoleDAO roleDao = null;
         ResourceGroupDAO resGrpDao = null;
         for (int i = 0; i < vals.length; i++) {
-            if (vals[i] instanceof Operation) {
+            if (vals[i] instanceof OperationType) {
                 ret.add(vals[i]);
             } else if (vals[i] instanceof ResourceValue) {
                 ret.add(lookupResource((ResourceValue) vals[i]));

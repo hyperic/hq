@@ -35,6 +35,7 @@ import java.util.List;
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.authz.values.OwnedRoleValue;
 import org.hyperic.hq.common.server.session.Calendar;
+import org.hyperic.hq.inventory.domain.OperationType;
 
 public class Role extends AuthzNamedBean {
     private String     _description;
@@ -95,11 +96,11 @@ public class Role extends AuthzNamedBean {
         _resourceGroups = val;
     }
 
-    void addOperation(Operation op) {
+    void addOperation(OperationType op) {
         getOperations().add(op);
     }
     
-    public Collection<Operation> getOperations() {
+    public Collection<OperationType> getOperations() {
         return _operations;
     }
     
@@ -177,7 +178,7 @@ public class Role extends AuthzNamedBean {
         _roleValue.removeAllOperationValues();
         if (getOperations() != null) {
             for (Iterator it = getOperations().iterator(); it.hasNext(); ) {
-                Operation op = (Operation) it.next();
+                OperationType op = (OperationType) it.next();
                 _roleValue.addOperationValue(op);
             }
         }

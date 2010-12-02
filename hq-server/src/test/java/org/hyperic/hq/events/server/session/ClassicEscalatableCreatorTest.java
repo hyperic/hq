@@ -31,7 +31,6 @@ import junit.framework.TestCase;
 import org.easymock.EasyMock;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.common.util.MessagePublisher;
 import org.hyperic.hq.escalation.server.session.Escalatable;
@@ -41,6 +40,7 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.MockEvent;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.shared.AlertManager;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 /**
  * Unit test of {@link ClassicEscalatableCreator}

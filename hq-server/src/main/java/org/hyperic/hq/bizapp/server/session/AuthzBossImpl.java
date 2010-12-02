@@ -44,9 +44,7 @@ import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.UserPreferencesUpdatedEvent;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -62,6 +60,8 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.inventory.domain.OperationType;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
@@ -162,7 +162,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * 
      */
     @Transactional(readOnly=true)
-    public List<Operation> getAllOperations(Integer sessionId, PageControl pc) throws 
+    public List<OperationType> getAllOperations(Integer sessionId, PageControl pc) throws 
         PermissionException, SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return permissionManager.getAllOperations(subject, pc);
@@ -176,7 +176,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * 
      */
     @Transactional(readOnly=true)
-    public List<Operation> getAllOperations(Integer sessionId) throws  PermissionException,
+    public List<OperationType> getAllOperations(Integer sessionId) throws  PermissionException,
         SessionTimeoutException, SessionNotFoundException {
         return getAllOperations(sessionId, null);
     }

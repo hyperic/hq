@@ -59,10 +59,8 @@ import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -74,6 +72,8 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
+import org.hyperic.hq.inventory.domain.OperationType;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
@@ -694,7 +694,7 @@ public class ServiceManagerImpl implements ServiceManager {
     protected List<Integer> getViewableServices(AuthzSubject whoami) throws PermissionException,
         NotFoundException {
 
-        Operation op = getOperationByName(resourceManager
+        OperationType op = getOperationByName(resourceManager
             .findResourceTypeByName(AuthzConstants.serviceResType),
             AuthzConstants.serviceOpViewService);
         List<Integer> idList = permissionManager.findOperationScopeBySubject(whoami, op.getId());
@@ -1542,17 +1542,14 @@ public class ServiceManagerImpl implements ServiceManager {
     /**
      * Find an operation by name inside a ResourcetypeValue object
      */
-    protected Operation getOperationByName(ResourceType rtV, String opName)
+    protected OperationType getOperationByName(ResourceType rtV, String opName)
         throws PermissionException {
-        Collection<Operation> ops = rtV.getOperations();
-        for (Operation op : ops) {
-
-            if (op.getName().equals(opName)) {
-                return op;
-            }
-        }
-        throw new PermissionException("Operation: " + opName + " not valid for ResourceType: " +
+        OperationType op = rtV.getOperationType(opName);
+        if(op == null) {
+            throw new PermissionException("Operation: " + opName + " not valid for ResourceType: " +
                                       rtV.getName());
+        }
+        return op;
     }
 
     public void handleResourceDelete(Resource resource) {

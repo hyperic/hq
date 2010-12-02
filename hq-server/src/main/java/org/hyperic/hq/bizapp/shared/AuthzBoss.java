@@ -36,15 +36,15 @@ import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
+import org.hyperic.hq.inventory.domain.OperationType;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
@@ -82,7 +82,7 @@ public interface AuthzBoss {
      * objects representing every resource type in the system that the user is
      * allowed to view.
      */
-    public List<Operation> getAllOperations(Integer sessionId, PageControl pc) throws 
+    public List<OperationType> getAllOperations(Integer sessionId, PageControl pc) throws 
         PermissionException, SessionTimeoutException, SessionNotFoundException;
 
     /**
@@ -90,7 +90,7 @@ public interface AuthzBoss {
      * representing every resource type in the system that the user is allowed
      * to view.
      */
-    public List<Operation> getAllOperations(Integer sessionId) throws  PermissionException,
+    public List<OperationType> getAllOperations(Integer sessionId) throws  PermissionException,
         SessionTimeoutException, SessionNotFoundException;
 
     /**

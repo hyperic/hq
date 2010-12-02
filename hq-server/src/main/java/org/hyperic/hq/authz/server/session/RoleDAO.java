@@ -37,6 +37,7 @@ import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -45,15 +46,13 @@ public class RoleDAO
     extends HibernateDAO<Role> {
 
     private ResourceDAO resourceDAO;
-    private ResourceTypeDAO resourceTypeDAO;
     private ResourceGroupDAO resourceGroupDAO;
 
     @Autowired
-    public RoleDAO(SessionFactory f, ResourceDAO resourceDAO, ResourceTypeDAO resourceTypeDAO,
+    public RoleDAO(SessionFactory f, ResourceDAO resourceDAO, 
                    ResourceGroupDAO resourceGroupDAO) {
         super(Role.class, f);
         this.resourceDAO = resourceDAO;
-        this.resourceTypeDAO = resourceTypeDAO;
         this.resourceGroupDAO = resourceGroupDAO;
     }
 
@@ -63,7 +62,7 @@ public class RoleDAO
         // Save it at this point to get an ID
         save(role);
 
-        ResourceType resType = resourceTypeDAO.findByName(AuthzConstants.roleResourceTypeName);
+        ResourceType resType = ResourceType.findResourceTypeByName(AuthzConstants.roleResourceTypeName);
         if (resType == null) {
             throw new IllegalArgumentException("resource type not found " +
                                                AuthzConstants.roleResourceTypeName);

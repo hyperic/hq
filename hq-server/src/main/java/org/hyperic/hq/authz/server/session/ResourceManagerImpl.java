@@ -69,6 +69,7 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.pager.PageControl;
@@ -82,6 +83,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.hyperic.hq.inventory.domain.ResourceType;
 
 /**
  * Use this session bean to manipulate Resources, ResourceTypes and
@@ -103,7 +105,6 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     private AuthzSubjectManager authzSubjectManager;
     private AuthzSubjectDAO authzSubjectDAO;
     private ResourceDAO resourceDAO;
-    private ResourceTypeDAO resourceTypeDAO;
     private ResourceRelationDAO resourceRelationDAO;
     private ZeventEnqueuer zeventManager;
     private ServerDAO serverDAO;
@@ -119,7 +120,6 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
                                ServerDAO serverDAO, ServiceDAO serviceDAO,
                                AuthzSubjectManager authzSubjectManager,
                                AuthzSubjectDAO authzSubjectDAO, ResourceDAO resourceDAO,
-                               ResourceTypeDAO resourceTypeDAO,
                                ResourceRelationDAO resourceRelationDAO,
                                ZeventEnqueuer zeventManager, PlatformTypeDAO platformTypeDAO,
                                ApplicationDAO applicationDAO, PermissionManager permissionManager,
@@ -131,7 +131,6 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         this.authzSubjectManager = authzSubjectManager;
         this.authzSubjectDAO = authzSubjectDAO;
         this.resourceDAO = resourceDAO;
-        this.resourceTypeDAO = resourceTypeDAO;
         this.resourceRelationDAO = resourceRelationDAO;
         this.zeventManager = zeventManager;
         this.platformTypeDAO = platformTypeDAO;
@@ -150,7 +149,8 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      */
     @Transactional(readOnly = true)
     public ResourceType findResourceTypeByName(String name) throws NotFoundException {
-        ResourceType rt = resourceTypeDAO.findByName(name);
+       
+        ResourceType rt = ResourceType.findResourceTypeByName(name);
 
         if (rt == null) {
             throw new NotFoundException("ResourceType " + name + " not found");
@@ -260,18 +260,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      */
     @Transactional(readOnly = true)
     public Number getResourceTypeCount() {
-        return new Integer(resourceTypeDAO.size());
-    }
-
-    /**
-     * Get the Resource entity associated with this ResourceType.
-     * @param type This ResourceType.
-     * 
-     */
-    @Transactional(readOnly = true)
-    public Resource getResourceTypeResource(Integer typeId) {
-        ResourceType resourceType = resourceTypeDAO.findById(typeId);
-        return resourceType.getResource();
+        return (int) ResourceType.countResourceTypes();
     }
 
     /**
@@ -326,7 +315,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      */
     @Transactional(readOnly = true)
     public Resource findResourceByTypeAndInstanceId(String type, Integer instanceId) {
-        ResourceType resType = resourceTypeDAO.findByName(type);
+        ResourceType resType = ResourceType.findResourceTypeByName(type);
         return resourceDAO.findByInstanceId(resType.getId(), instanceId);
     }
 
@@ -568,10 +557,9 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      * @param pc Paging information for the request
      * 
      */
-    // TODO: G
     @Transactional(readOnly = true)
     public List<ResourceType> getAllResourceTypes(AuthzSubject subject, PageControl pc) {
-        Collection<ResourceType> resTypes = resourceTypeDAO.findAll();
+        Collection<ResourceType> resTypes = ResourceType.findAllResourceTypes();
         pc = PageControl.initDefaults(pc, SortAttribute.RESTYPE_NAME);
         return resourceTypePager.seek(resTypes, pc.getPagenum(), pc.getPagesize());
     }
@@ -634,7 +622,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         // First get all resource types
         Map<String, List<Integer>> resourceMap = new HashMap<String, List<Integer>>();
 
-        Collection<ResourceType> resTypes = resourceTypeDAO.findAll();
+        Collection<ResourceType> resTypes = ResourceType.findAllResourceTypes();
         for (ResourceType type : resTypes) {
             String typeName = type.getName();
 

@@ -27,7 +27,7 @@ package org.hyperic.hq.authz.shared;
 
 import java.util.Set;
 
-import org.hyperic.hq.authz.server.session.Operation;
+import org.hyperic.hq.inventory.domain.OperationType;
 
 /**
  * Value object for Role.
@@ -166,19 +166,19 @@ public class RoleValue
    public Set getRemovedOperationValues() { return removedOperationValues; }
    public Set getUpdatedOperationValues() { return updatedOperationValues; }
 
-   public Operation[] getOperationValues()
+   public OperationType[] getOperationValues()
    {
-	  return (Operation[])this.OperationValues.toArray(new Operation[OperationValues.size()]);
+	  return (OperationType[])this.OperationValues.toArray(new OperationType[OperationValues.size()]);
    }
 
-   public void addOperationValue(Operation added)
+   public void addOperationValue(OperationType added)
    {
 	  this.OperationValues.add(added);
 	  if ( ! this.addedOperationValues.contains(added))
 		 this.addedOperationValues.add(added);
    }
 
-   public void removeOperationValue(Operation removed)
+   public void removeOperationValue(OperationType removed)
    {
 	  this.OperationValues.remove(removed);
 	  this.removedOperationValues.add(removed);
@@ -194,7 +194,7 @@ public class RoleValue
         this.OperationValues.clear();
    }
 
-   public void updateOperationValue(Operation updated)
+   public void updateOperationValue(OperationType updated)
    {
 	  if ( ! this.updatedOperationValues.contains(updated))
 		 this.updatedOperationValues.add(updated);

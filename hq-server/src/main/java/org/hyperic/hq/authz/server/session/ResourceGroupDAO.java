@@ -47,6 +47,7 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -59,9 +60,6 @@ public class ResourceGroupDAO
 
     @Autowired
     private ResourceDAO rDao;
-
-    @Autowired
-    private ResourceTypeDAO resourceTypeDAO;
 
     @Autowired
     public ResourceGroupDAO(SessionFactory sessionFactory) {
@@ -113,7 +111,7 @@ public class ResourceGroupDAO
 
         ResourceGroup resGrp = new ResourceGroup(cInfo, creator);
 
-        ResourceType resType = resourceTypeDAO.findById(AuthzConstants.authzGroup);
+        ResourceType resType = ResourceType.findResourceType(AuthzConstants.authzGroup);
 
         assert resType != null;
 

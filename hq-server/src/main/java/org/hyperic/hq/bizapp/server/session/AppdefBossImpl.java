@@ -51,7 +51,6 @@ import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.ApplicationType;
-import org.hyperic.hq.appdef.server.session.CpropKey;
 import org.hyperic.hq.appdef.server.session.DownResSortField;
 import org.hyperic.hq.appdef.server.session.DownResource;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -122,9 +121,9 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
-import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -162,6 +161,7 @@ import org.hyperic.hq.grouping.critters.ProtoCritterType;
 import org.hyperic.hq.grouping.critters.ResourceNameCritterType;
 import org.hyperic.hq.grouping.critters.ResourceTypeCritterType;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
+import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.AvailabilityType;
@@ -2924,7 +2924,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     @Transactional(readOnly = true)
-    public List<CpropKey> getCPropKeys(int sessionId, int appdefType, int appdefTypeId)
+    public List<PropertyType> getCPropKeys(int sessionId, int appdefType, int appdefTypeId)
         throws SessionNotFoundException, SessionTimeoutException {
         sessionManager.authenticate(sessionId);
         return cPropManager.getKeys(appdefType, appdefTypeId);
@@ -2939,7 +2939,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     @Transactional(readOnly = true)
-    public List<CpropKey> getCPropKeys(int sessionId, AppdefEntityID aeid)
+    public List<PropertyType> getCPropKeys(int sessionId, AppdefEntityID aeid)
         throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException,
         PermissionException {
         AuthzSubject who = sessionManager.getSubject(sessionId);

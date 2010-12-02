@@ -46,6 +46,8 @@ import org.hyperic.hq.authz.shared.EdgePermCheck;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.inventory.domain.OperationType;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -209,9 +211,9 @@ public class ResourceDAO
 
     @SuppressWarnings("unchecked")
     public Collection<Resource> findViewableSvcRes_orderName(Integer user, Boolean fSystem) {
-        ResourceType serviceType = Bootstrap.getBean(ResourceTypeDAO.class).findByName(
+        ResourceType serviceType = ResourceType.findResourceTypeByName(
             AuthzConstants.serviceResType);
-        Operation op = Bootstrap.getBean(OperationDAO.class).findByTypeAndName(serviceType,
+        OperationType op = serviceType.getOperationType(
             AuthzConstants.serviceOpViewService);
         final String sql = new StringBuilder(1024).append("SELECT {res.*} ").append(
             "FROM EAM_SUBJECT subject ").append(
@@ -284,7 +286,7 @@ public class ResourceDAO
     }
 
     public Collection findScopeByOperationBatch(AuthzSubject subjLoc, Resource[] resLocArr,
-                                                Operation[] opLocArr) {
+                                                OperationType[] opLocArr) {
         StringBuffer sb = new StringBuffer();
 
         sb.append("SELECT DISTINCT r ").append("FROM org.hyperic.hq.authz.server.session.Resource r ").append(

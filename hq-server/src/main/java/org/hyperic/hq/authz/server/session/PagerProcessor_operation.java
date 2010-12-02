@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.authz.server.session;
 
+import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.util.pager.PagerProcessor;
 
 public class PagerProcessor_operation implements PagerProcessor {
@@ -34,7 +35,7 @@ public class PagerProcessor_operation implements PagerProcessor {
     public Object processElement(Object o) {
         if (o == null) return null;
         try {
-            if ( o  instanceof Operation ) {
+            if ( o  instanceof OperationType ) {
                 return o;
             }
         } catch (Exception e) {

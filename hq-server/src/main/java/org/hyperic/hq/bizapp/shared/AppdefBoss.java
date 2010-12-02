@@ -30,13 +30,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-
-
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.ApplicationType;
-import org.hyperic.hq.appdef.server.session.CpropKey;
 import org.hyperic.hq.appdef.server.session.DownResource;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
@@ -715,25 +712,6 @@ public interface AppdefBoss {
      */
     public Properties getCPropDescEntries(int sessionId, AppdefEntityID id) throws SessionNotFoundException,
         SessionTimeoutException, PermissionException, AppdefEntityNotFoundException;
-
-    /**
-     * Get all the keys associated with an appdef resource type.
-     * @param appdefType One of AppdefEntityConstants.APPDEF_TYPE_*
-     * @param appdefTypeId The ID of the appdef resource type
-     * @return a List of CPropKeyValue objects
-     */
-    public List<CpropKey> getCPropKeys(int sessionId, int appdefType, int appdefTypeId)
-        throws SessionNotFoundException, SessionTimeoutException;
-
-    /**
-     * Get all the keys associated with an appdef type of a resource.
-     * @param aeid The ID of the appdef resource
-     * @return a List of CPropKeyValue objects
-     * @throws PermissionException
-     * @throws AppdefEntityNotFoundException
-     */
-    public List<CpropKey> getCPropKeys(int sessionId, AppdefEntityID aeid) throws SessionNotFoundException,
-        SessionTimeoutException, AppdefEntityNotFoundException, PermissionException;
 
     /**
      * Get the appdef inventory summary visible to a user
