@@ -31,8 +31,8 @@ import java.util.Map;
 
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.inventory.domain.ResourceType;
 
 /** AppdefUtil - utility methods for appdef entities and
 * brethren.

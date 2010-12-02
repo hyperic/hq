@@ -32,8 +32,8 @@ import java.util.Properties;
 
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.Cprop;
-import org.hyperic.hq.appdef.server.session.CpropKey;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.product.TypeInfo;
 
 /**
@@ -49,7 +49,7 @@ public interface CPropManager {
 	 *            The ID of the appdef resource type
 	 * @return a List of CPropKey objects
 	 */
-	public List<CpropKey> getKeys(int appdefType, int appdefTypeId);
+	public List<PropertyType> getKeys(int appdefType, int appdefTypeId);
 
 	/**
 	 * find appdef resource type
@@ -59,7 +59,7 @@ public interface CPropManager {
 	/**
 	 * find Cprop by key to a resource type based on a TypeInfo object.
 	 */
-	public CpropKey findByKey(AppdefResourceType appdefType, String key);
+	public PropertyType findByKey(AppdefResourceType appdefType, String key);
 
 	/**
 	 * Add a key to a resource type based on a TypeInfo object.
@@ -82,7 +82,7 @@ public interface CPropManager {
 	 *        key references could not be found
 	 * @throw CPropKeyExistsException if the key already exists
 	 */
-	public void addKey(CpropKey key) throws AppdefEntityNotFoundException,
+	public void addKey(PropertyType key) throws AppdefEntityNotFoundException,
 			CPropKeyExistsException;
 
 	/**

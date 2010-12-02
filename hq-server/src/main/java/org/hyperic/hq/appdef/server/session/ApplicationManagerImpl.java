@@ -50,16 +50,13 @@ import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.appdef.shared.ServiceManager;
-import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.GroupDeleteRequestedEvent;
-import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -70,6 +67,8 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
+import org.hyperic.hq.inventory.domain.OperationType;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -425,10 +424,10 @@ public class ApplicationManagerImpl implements ApplicationManager,
     /**
      * Find an operation by name inside a ResourcetypeValue object
      */
-    protected Operation getOperationByName(ResourceType rtV, String opName)
+    protected OperationType getOperationByName(ResourceType rtV, String opName)
         throws PermissionException {
-        Collection<Operation> ops = rtV.getOperations();
-        for (Operation op : ops) {
+        Collection<OperationType> ops = rtV.getOperationTypes();
+        for (OperationType op : ops) {
 
             if (op.getName().equals(opName)) {
                 return op;
@@ -447,7 +446,7 @@ public class ApplicationManagerImpl implements ApplicationManager,
     protected List<Integer> getViewableApplications(AuthzSubject whoami)
         throws PermissionException, NotFoundException {
 
-        Operation op = getOperationByName(resourceManager
+        OperationType op = getOperationByName(resourceManager
             .findResourceTypeByName(AuthzConstants.applicationResType),
             AuthzConstants.appOpViewApplication);
         List<Integer> idList = permissionManager.findOperationScopeBySubject(whoami, op.getId());

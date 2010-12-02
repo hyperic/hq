@@ -38,10 +38,10 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceEdge;
 import org.hyperic.hq.authz.server.session.ResourceRelation;
 import org.hyperic.hq.authz.server.session.ResourceSortField;
-import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.bizapp.server.session.ResourceCleanupEventListener;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -97,12 +97,6 @@ public interface ResourceManager {
      * Get the # of resource types within HQ inventory
      */
     public Number getResourceTypeCount();
-
-    /**
-     * Get the Resource entity associated with this ResourceType.
-     * @param type This ResourceType.
-     */
-    public Resource getResourceTypeResource(Integer typeId);
 
     /**
      * Find the Resource that has the given instance ID and ResourceType.
