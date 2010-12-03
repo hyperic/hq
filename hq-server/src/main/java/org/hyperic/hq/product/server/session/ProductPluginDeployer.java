@@ -271,9 +271,9 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         }
     }
 
-    private void unpackJar(URL url, File destDir, String prefix) throws Exception {
+    private void unpackJar(File pluginJarFile, File destDir, String prefix) throws Exception {
 
-        JarFile jar = new JarFile(url.getFile());
+        JarFile jar = new JarFile(pluginJarFile);
         try {
             for (Enumeration<JarEntry> e = jar.entries(); e.hasMoreElements();) {
                 JarEntry entry = e.nextElement();
@@ -297,8 +297,8 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         }
     }
 
-    private void deployHqu(String plugin, URL pluginFile, boolean initializing) throws Exception {
-        URLClassLoader pluginClassloader = new URLClassLoader(new URL[] { pluginFile });
+    private void deployHqu(String plugin, File pluginFile, boolean initializing) throws Exception {
+        URLClassLoader pluginClassloader = new URLClassLoader(new URL[] { pluginFile.toURI().toURL() });
         final String prefix = HQU + "/";
         URL hqu = pluginClassloader.getResource(prefix);
         if (hqu == null) {
@@ -337,7 +337,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
     private String loadPlugin(File pluginFile, boolean initializing) throws Exception {
         String plugin = registerPluginJar(pluginFile.toString());
         if (plugin != null) {
-            deployHqu(plugin, pluginFile.toURI().toURL(), initializing);
+            deployHqu(plugin, pluginFile, initializing);
             return plugin;
         }
         return null;
