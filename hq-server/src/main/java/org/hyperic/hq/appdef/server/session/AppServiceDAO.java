@@ -35,11 +35,9 @@ import java.util.List;
 import org.hibernate.SessionFactory;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.AppSvcDependency;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -48,17 +46,16 @@ public class AppServiceDAO
     extends HibernateDAO<AppService> {
 
    
-    private ResourceGroupDAO resourceGroupDAO;
+   
     private ServiceDAO serviceDAO;
     private ServiceTypeDAO serviceTypeDAO;
     private AppSvcDependencyDAO appSvcDependencyDAO;
 
     @Autowired
-    public AppServiceDAO(SessionFactory f, ResourceGroupDAO resourceGroupDAO,
+    public AppServiceDAO(SessionFactory f, 
                          ServiceDAO serviceDAO, ServiceTypeDAO serviceTypeDAO,
                          AppSvcDependencyDAO appSvcDependencyDAO) {
         super(AppService.class, f);
-        this.resourceGroupDAO = resourceGroupDAO;
         this.serviceDAO = serviceDAO;
         this.serviceTypeDAO = serviceTypeDAO;
         this.appSvcDependencyDAO = appSvcDependencyDAO;
@@ -90,9 +87,9 @@ public class AppServiceDAO
 
     public AppService create(Integer cpk, Application ap) {
         // reassociate service cluster
-        ResourceGroup gr = resourceGroupDAO.findById(cpk);
+        ResourceGroup gr = ResourceGroup.findResourceGroup(cpk);
 
-        ServiceType type = serviceTypeDAO.findById(gr.getResourcePrototype().getInstanceId());
+        ServiceType type = serviceTypeDAO.findById(gr.getPrototype().getInstanceId());
         AppService a = new AppService();
         a.setIsGroup(true);
         a.setResourceGroup(gr);
@@ -161,7 +158,7 @@ public class AppServiceDAO
                 if (name != null) {
                     return name;
                 }
-                Resource res = (app.isIsGroup()) ? app.getResourceGroup().getResource() :
+                Resource res = (app.isIsGroup()) ? app.getResourceGroup() :
                     app.getService().getResource();
                 name = (res == null || res.isInAsyncDeleteState()) ? "" : res.getName();
                         return name;

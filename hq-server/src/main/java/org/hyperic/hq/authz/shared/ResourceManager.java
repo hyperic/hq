@@ -259,20 +259,20 @@ public interface ResourceManager {
     public List<ResourceRelation> findResourceEdges(ResourceTypeRelation relation, Integer resourceId,
                                                 List<Integer> platformTypeIds, String platformName);
 
-    public void createResourceRelations(AuthzSubject subject, ResourceTypeRelation relation,
+    public void createResourceEdges(AuthzSubject subject, ResourceTypeRelation relation,
                                     AppdefEntityID parent, AppdefEntityID[] children)
         throws PermissionException, ResourceRelationCreateException;
 
-    public void createResourceRelations(AuthzSubject subject, ResourceTypeRelation relation,
+    public void createResourceEdges(AuthzSubject subject, ResourceTypeRelation relation,
                                     AppdefEntityID parent, AppdefEntityID[] children,
                                     boolean deleteExisting) throws PermissionException,
         ResourceRelationCreateException;
 
-    public void removeResourceRelations(AuthzSubject subject, ResourceTypeRelation relation,
+    public void removeResourceEdges(AuthzSubject subject, ResourceTypeRelation relation,
                                     AppdefEntityID parent, AppdefEntityID[] children)
         throws PermissionException;
 
-    public void removeResourceRelations(AuthzSubject subject, ResourceTypeRelation relation, Resource parent)
+    public void removeResourceEdges(AuthzSubject subject, ResourceTypeRelation relation, Resource parent)
         throws PermissionException;
 
     public ResourceTypeRelation getContainmentRelation();

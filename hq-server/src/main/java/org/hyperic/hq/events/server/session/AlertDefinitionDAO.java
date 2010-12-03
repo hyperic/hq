@@ -37,8 +37,6 @@ import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.EdgePermCheck;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -51,6 +49,8 @@ import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -65,18 +65,16 @@ public class AlertDefinitionDAO
 
     private AlertConditionDAO alertConditionDAO;
 
-    private ResourceDAO rDao;
 
     @Autowired
     public AlertDefinitionDAO(SessionFactory f, PermissionManager permissionManager,
                               ActionDAO actDAO, TriggerDAO tDAO,
-                              AlertConditionDAO alertConditionDAO, ResourceDAO rDao) {
+                              AlertConditionDAO alertConditionDAO) {
         super(AlertDefinition.class, f);
         this.permissionManager = permissionManager;
         this.actDAO = actDAO;
         this.tDAO = tDAO;
         this.alertConditionDAO = alertConditionDAO;
-        this.rDao = rDao;
     }
 
   
@@ -311,7 +309,8 @@ public class AlertDefinitionDAO
             AppdefEntityID aeid = new AppdefEntityID(val.getAppdefType(), val.getAppdefId());
             authzTypeId = aeid.getAuthzTypeId();
         }
-        def.setResource(rDao.findByInstanceId(authzTypeId, val.getAppdefId(), true));
+       
+        def.setResource(Resource.findByInstanceId(authzTypeId,val.getAppdefId()));
 
         for (RegisteredTriggerValue tVal : val.getAddedTriggers()) {
             def.addTrigger(tDAO.findById(tVal.getId()));

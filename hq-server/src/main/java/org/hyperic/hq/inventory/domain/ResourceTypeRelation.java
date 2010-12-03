@@ -55,4 +55,9 @@ public class ResourceTypeRelation {
 	public ResourceTypeRelation(Relationship r) {
         setUnderlyingState(r);
     }
+
+    public ResourceTypeRelation() {
+        
+    }
+	
 }

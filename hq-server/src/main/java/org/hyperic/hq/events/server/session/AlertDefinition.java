@@ -27,7 +27,6 @@ import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
@@ -35,11 +34,10 @@ import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.events.TriggerFiredEvent;
-import org.hyperic.hq.events.TriggerNotFiredEvent;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertValue;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.MeasurementConstants;
 
 public class AlertDefinition
@@ -217,7 +215,7 @@ public class AlertDefinition
     }
 
     public int getAppdefType() {
-        String rtName = getResource().getResourceType().getName();
+        String rtName = getResource().getType().getName();
         if (rtName.equals(AuthzConstants.platformResType)) {
             return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
         } else if (rtName.equals(AuthzConstants.serverResType)) {

@@ -31,7 +31,6 @@ import java.util.SortedMap;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.events.ActionCreateException;
@@ -39,6 +38,7 @@ import org.hyperic.hq.events.AlertConditionCreateException;
 import org.hyperic.hq.events.AlertDefinitionCreateException;
 import org.hyperic.hq.events.server.session.AlertDefSortField;
 import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.util.pager.PageList;
 
@@ -247,7 +247,7 @@ public interface AlertDefinitionManager {
      * Get list of alert definitions for a resource
      */
     public List<AlertDefinition> findAlertDefinitions(AuthzSubject subject,
-                                                      org.hyperic.hq.authz.server.session.Resource prototype)
+                                                      Resource prototype)
         throws PermissionException;
 
     /**
@@ -265,7 +265,7 @@ public interface AlertDefinitionManager {
      * @return a list of alert definitions
      */
     public List<AlertDefinition> findRelatedAlertDefinitions(AuthzSubject subj,
-                                                             org.hyperic.hq.authz.server.session.Resource res);
+                                                             Resource res);
 
     /**
      * Get a list of all alert definitions with an availability metric condition

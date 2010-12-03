@@ -1,5 +1,6 @@
 package org.hyperic.hq.inventory.domain;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -15,12 +16,14 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
-
+import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.inventory.InvalidRelationshipException;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.DynamicRelationshipType;
@@ -58,7 +61,7 @@ public class Resource {
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE)
     @Column(name = "id")
-    private Long id;
+    private Integer id;
 
     // TODO do I need Indexed and GraphProperty?
     @NotNull
@@ -75,22 +78,22 @@ public class Resource {
     @Version
     @Column(name = "version")
     private Integer version;
+    
+    @RelatedTo(type = "HAS_MEMBER", direction = Direction.INCOMING, elementClass = ResourceGroup.class)
+    @OneToMany
+    @Transient
+    private Set<ResourceGroup> resourceGroups;
+    
+    @OneToMany
+    @Transient
+    @RelatedTo(type = "OWNS", direction = Direction.INCOMING, elementClass = AuthzSubject.class)
+    private AuthzSubject owner;
 
     public Resource() {
     }
 
     public Resource(Node n) {
         setUnderlyingState(n);
-    }
-
-    public long count() {
-        return finderFactory.getFinderForClass(Resource.class).count();
-
-    }
-
-    public Resource findById(Long id) {
-        return finderFactory.getFinderForClass(Resource.class).findById(id);
-
     }
 
     @Transactional
@@ -100,12 +103,16 @@ public class Resource {
         this.entityManager.flush();
     }
 
-    public Long getId() {
+    public Integer getId() {
         return this.id;
     }
 
     public String getName() {
         return name;
+    }
+
+    public Set<ResourceGroup> getResourceGroups() {
+        return resourceGroups;
     }
 
     public Map<String, Object> getProperties() {
@@ -149,6 +156,49 @@ public class Resource {
             }
         }
         return resourceRelations;
+    }
+    
+    public Set<ResourceRelation> getRelationshipsFrom(String relationName) {
+        return getRelationships(relationName,org.neo4j.graphdb.Direction.OUTGOING);
+    }
+    
+    public Set<ResourceRelation> getRelationshipsTo(String relationName) {
+        return getRelationships(relationName,org.neo4j.graphdb.Direction.INCOMING);
+    }
+    
+    private Set<ResourceRelation> getRelationships(String relationName,org.neo4j.graphdb.Direction direction) {
+        Set<ResourceRelation> resourceRelations = new HashSet<ResourceRelation>();
+        Iterable<Relationship> relationships = getUnderlyingState().getRelationships(DynamicRelationshipType.withName(relationName),
+            direction);
+        for(Relationship relationship : relationships) {
+            resourceRelations.add(graphDatabaseContext.createEntityFromState(relationship,
+                        ResourceRelation.class));
+        }
+        return resourceRelations;
+    }
+    
+    public Set<Resource> getResourcesFrom(String relationName) {
+       return getRelatedResources(relationName, org.neo4j.graphdb.Direction.OUTGOING);
+    }
+    
+    public Set<Resource> getResourcesTo(String relationName) {
+        return getRelatedResources(relationName, org.neo4j.graphdb.Direction.INCOMING);
+     }
+    
+    private Set<Resource> getRelatedResources(String relationName, org.neo4j.graphdb.Direction direction) {
+        Set<Resource> resources = new HashSet<Resource>();
+        Traverser relationTraverser = getUnderlyingState().traverse(Traverser.Order.BREADTH_FIRST,
+            new StopEvaluator() {
+                public boolean isStopNode(TraversalPosition currentPos) {
+                    return currentPos.depth() >= 1;
+                }
+            }, ReturnableEvaluator.ALL_BUT_START_NODE,
+            DynamicRelationshipType.withName(relationName), direction);
+        for (Node related : relationTraverser) {
+            resources.add(graphDatabaseContext.createEntityFromState(related,
+                        Resource.class));
+        }
+        return resources;
     }
 
     public ResourceRelation getRelationshipTo(Resource resource, String relationName) {
@@ -231,8 +281,23 @@ public class Resource {
             this.removeRelationshipTo(resource, relationName);
         }
     }
+    
+    public void removeRelationships() {
+        //TODO getRelationships only does one direction
+        for(ResourceRelation relation: getRelationships()) {
+           relation.getUnderlyingState().delete();
+        }
+    }
+    
+    public void removeRelationships(String relationName) {
+        Iterable<Relationship> relationships = getUnderlyingState().getRelationships(DynamicRelationshipType.withName(relationName),
+            org.neo4j.graphdb.Direction.BOTH);
+        for(Relationship relationship: relationships) {
+            relationship.delete();
+        }
+    }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -258,6 +323,14 @@ public class Resource {
         this.version = version;
     }
     
+    public AuthzSubject getOwner() {
+        return owner;
+    }
+
+    public void setOwner(AuthzSubject owner) {
+        this.owner = owner;
+    }
+
     //TODO other config types and setters
     public Set<Config> getMeasurementConfig() {
         Set<Config> config = new HashSet<Config>();
@@ -272,8 +345,8 @@ public class Resource {
         return config;
     }
 
-    public static long countResources() {
-        return entityManager().createQuery("select count(o) from Resource o", Long.class)
+    public static int countResources() {
+        return entityManager().createQuery("select count(o) from Resource o", Integer.class)
             .getSingleResult();
     }
 
@@ -290,7 +363,7 @@ public class Resource {
             .getResultList();
     }
 
-    public static Resource findResource(Long id) {
+    public static Resource findResource(Integer id) {
         if (id == null)
             return null;
         return entityManager().find(Resource.class, id);
@@ -304,6 +377,69 @@ public class Resource {
     public static List<Resource> findResourceEntries(int firstResult, int maxResults) {
         return entityManager().createQuery("select o from Resource o", Resource.class)
             .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
+    }
+    
+    public static Resource findResourcePrototypeByName(String name) {
+        //TODO remove
+        return null;
+    }
+    
+    public static Resource findRootResource() {
+       //TODO AuthzConstants.RootResourceId.  We may need a root resource.  Check concept of Neo4J ref node
+        return null;
+    }
+    
+    public boolean isOwner(Integer subjectId) {
+        //TODO some overlord checking, then check owner's ID
+        return true;
+    }
+    
+    public static List<Resource> findResourcesOfPrototype(Resource proto, PageInfo pInfo) {
+        //TODO get rid of this
+        return null;
+    }
+    
+    public static List<Resource> findAppdefPrototypes() {
+        //TODO get rid of this
+        return null;
+    }
+    
+    public static List<Resource> findAllAppdefPrototypes() {
+        //TODO get rid of this
+        return null;
+    }
+    
+    public boolean isInAsyncDeleteState() {
+        //TODO get rid of this
+        return false;
+    }
+    
+    public static Collection<Resource> findByOwner(AuthzSubject owner) {
+       //TODO best way to implement cutting across to AuthzSubject
+        return null;
+    }
+    
+    public Resource getPrototype() {
+        //TODO remove
+        return null;
+    }
+    
+    public void setPrototype(Resource resource) {
+        //TODO remove
+    }
+    
+    public Integer getInstanceId() {
+        //TODO remove this
+        return id;
+    }
+    
+    public void setInstanceId(Integer instanceId) {
+        //TODO remove this
+    }
+    
+    public static Resource findByInstanceId(Integer typeId, Integer instanceId) {
+        //TODO remove this
+        return Resource.findResource(instanceId);
     }
 
 }

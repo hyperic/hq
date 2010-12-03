@@ -40,21 +40,17 @@ import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplateSortField;
-import org.hyperic.hq.measurement.server.session.TemplateManagerImpl;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.types.AlertCondition;
@@ -112,7 +108,7 @@ public class AlertDefinitionXmlParser {
     }
 
     private int getAppdefType(Resource resource) {
-        Integer typeId = resource.getResourceType().getId();
+        Integer typeId = resource.getType().getId();
         if (AuthzConstants.authzPlatformProto.equals(typeId)) {
             return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
         } else if (AuthzConstants.authzServerProto.equals(typeId)) {
@@ -209,6 +205,7 @@ public class AlertDefinitionXmlParser {
                                                         definition.getName());
         }
 
+      
         AppdefEntityTypeID aeid = new AppdefEntityTypeID(getAppdefType(resource), resource.getInstanceId());
         AlertDefinitionValue alertDefValue = new AlertDefinitionValue();
         alertDefValue.setName(definition.getName());

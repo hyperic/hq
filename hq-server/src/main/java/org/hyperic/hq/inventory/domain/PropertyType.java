@@ -80,16 +80,6 @@ public class PropertyType {
         setUnderlyingState(n);
     }
 
-    public long count() {
-        return finderFactory.getFinderForClass(PropertyType.class).count();
-
-    }
-
-    public PropertyType findById(Long id) {
-        return finderFactory.getFinderForClass(PropertyType.class).findById(id);
-
-    }
-
     @Transactional
     public void flush() {
         if (this.entityManager == null)
@@ -205,8 +195,8 @@ public class PropertyType {
         return sb.toString();
     }
 
-    public static long countPropertyTypes() {
-        return entityManager().createQuery("select count(o) from PropertyType o", Long.class)
+    public static int countPropertyTypes() {
+        return entityManager().createQuery("select count(o) from PropertyType o", Integer.class)
             .getSingleResult();
     }
 

@@ -62,16 +62,6 @@ public class OperationType {
         setUnderlyingState(n);
     }
 
-    public long count() {
-        return finderFactory.getFinderForClass(OperationType.class).count();
-
-    }
-
-    public OperationType findById(Long id) {
-        return finderFactory.getFinderForClass(OperationType.class).findById(id);
-
-    }
-
     @Transactional
     public void flush() {
         if (this.entityManager == null)
@@ -148,8 +138,8 @@ public class OperationType {
         return sb.toString();
     }
 
-    public static long countOperationTypes() {
-        return entityManager().createQuery("select count(o) from OperationType o", Long.class)
+    public static int countOperationTypes() {
+        return entityManager().createQuery("select count(o) from OperationType o", Integer.class)
             .getSingleResult();
     }
 

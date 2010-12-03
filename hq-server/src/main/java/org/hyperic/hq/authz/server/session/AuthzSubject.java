@@ -31,7 +31,10 @@ import java.util.HashSet;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.common.server.session.Crispo;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.springframework.datastore.graph.annotation.NodeEntity;
 
+@NodeEntity(partial=true)
 public class AuthzSubject extends AuthzNamedBean {
     private String     _dsn;
     private String     _firstName;
@@ -233,27 +236,5 @@ public class AuthzSubject extends AuthzNamedBean {
         return getId().equals(AuthzConstants.rootSubjectId);
     }
 
-    public boolean equals(Object obj) {
-        if (obj == this)
-            return true;
-        
-        if (obj == null)
-            return false;
-        
-        if (!(obj instanceof AuthzSubject) || !super.equals(obj)) {
-            return false;
-        }
-        AuthzSubject o = (AuthzSubject) obj;
-        return ((_dsn == o.getAuthDsn()) ||
-                 (_dsn != null && o.getAuthDsn() != null &&
-                  _dsn.equals(o.getAuthDsn())));
-    }
-
-    public int hashCode() {
-        int result = super.hashCode();
-
-        result = 37 * result + (_dsn != null ? _dsn.hashCode() : 0);
-
-        return result;
-    }
+    //TODO had to remove equals and hashCode b/c can't override in NodeBacked
 }

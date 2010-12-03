@@ -46,7 +46,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.Application;
@@ -119,9 +118,6 @@ import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
@@ -162,6 +158,8 @@ import org.hyperic.hq.grouping.critters.ResourceNameCritterType;
 import org.hyperic.hq.grouping.critters.ResourceTypeCritterType;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.inventory.domain.PropertyType;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.AvailabilityType;
@@ -849,7 +847,8 @@ public class AppdefBossImpl implements AppdefBoss {
                     appdefList.add(res);
                 }
             }
-            Collections.sort(appdefList);
+            //TODO Resource used to impl Comparable?
+            //Collections.sort(appdefList);
             if (pc.getSortorder() == PageControl.SORT_DESC) {
                 Collections.reverse(appdefList);
             }

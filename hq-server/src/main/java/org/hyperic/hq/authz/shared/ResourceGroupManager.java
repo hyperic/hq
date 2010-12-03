@@ -33,17 +33,16 @@ import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
 import org.hyperic.hq.authz.server.session.Role;
-import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.grouping.CritterList;
 import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -59,7 +58,7 @@ public interface ResourceGroupManager
      * @param resources List of {@link Resource}s
      */
     public ResourceGroup createResourceGroup(AuthzSubject whoami,
-                                             ResourceGroup.ResourceGroupCreateInfo cInfo,
+                                             ResourceGroupCreateInfo cInfo,
                                              Collection<Role> roles, Collection<Resource> resources)
         throws GroupCreationException, GroupDuplicateNameException;
     

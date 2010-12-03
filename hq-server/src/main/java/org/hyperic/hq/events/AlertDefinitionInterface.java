@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.events;
 
-import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.inventory.domain.Resource;
 
 public interface AlertDefinitionInterface {
     public Integer getId();

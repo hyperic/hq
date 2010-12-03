@@ -33,9 +33,8 @@ import org.hyperic.hq.appdef.server.session.ServiceDAO;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.server.session.ServiceTypeDAO;
 import org.hyperic.hq.appdef.shared.AppServiceValue;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 
 public class AppService
     extends AppdefBean {
@@ -179,7 +178,7 @@ public class AppService
 
         if (value.getServiceCluster() != null) {
             Integer i = value.getServiceCluster().getId();
-            ResourceGroup gr = Bootstrap.getBean(ResourceGroupDAO.class).findById(i);
+            ResourceGroup gr = ResourceGroup.findResourceGroup(i);
             setResourceGroup(gr);
         }
 

@@ -1,10 +1,7 @@
 package org.hyperic.hq.inventory.domain;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -19,7 +16,7 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
-import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -46,11 +43,10 @@ public class ResourceType {
     @PersistenceContext
     transient EntityManager entityManager;
 
-    // @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.INCOMING,
-    // elementClass = Resource.class)
-    // @OneToMany
-    // @Transient
-    // private Set<Resource> resources;
+    @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.INCOMING, elementClass = Resource.class)
+    @OneToMany
+    @Transient
+    private Set<Resource> resources;
 
     @javax.annotation.Resource
     transient FinderFactory finderFactory;
@@ -61,7 +57,6 @@ public class ResourceType {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
-    // TODO does this need to be Long as ROO generates?
     private Integer id;
 
     @NotNull
@@ -94,16 +89,6 @@ public class ResourceType {
 
     public ResourceType(Node n) {
         setUnderlyingState(n);
-    }
-
-    public long count() {
-        return finderFactory.getFinderForClass(ResourceType.class).count();
-
-    }
-
-    public ResourceType findById(int id) {
-        return finderFactory.getFinderForClass(ResourceType.class).findById(id);
-
     }
 
     @Transactional
@@ -246,8 +231,16 @@ public class ResourceType {
         this.version = version;
     }
 
-    public static long countResourceTypes() {
-        return entityManager().createQuery("select count(o) from ResourceType o", Long.class)
+    public Set<Resource> getResources() {
+        return resources;
+    }
+    
+    public boolean hasResources() {
+        return resources.size() > 0;
+    }
+
+    public static int countResourceTypes() {
+        return entityManager().createQuery("select count(o) from ResourceType o", Integer.class)
             .getSingleResult();
     }
 
@@ -285,11 +278,12 @@ public class ResourceType {
             .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
     }
 
-    //TODO other config types and setters
+    // TODO other config types and setters
     public Set<ConfigType> getMeasurementConfigTypes() {
         Set<ConfigType> configTypes = new HashSet<ConfigType>();
         Iterable<Relationship> relationships = this.getUnderlyingState().getRelationships(
-            DynamicRelationshipType.withName("HAS_CONFIG_TYPE"), org.neo4j.graphdb.Direction.OUTGOING);
+            DynamicRelationshipType.withName("HAS_CONFIG_TYPE"),
+            org.neo4j.graphdb.Direction.OUTGOING);
         for (Relationship relationship : relationships) {
             if ("Measurement".equals(relationship.getProperty("configType"))) {
                 configTypes.add(graphDatabaseContext.createEntityFromState(

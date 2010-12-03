@@ -62,16 +62,6 @@ public class ConfigType {
         setUnderlyingState(n);
     }
 
-    public long count() {
-        return finderFactory.getFinderForClass(ConfigType.class).count();
-
-    }
-
-    public ConfigType findById(Long id) {
-        return finderFactory.getFinderForClass(ConfigType.class).findById(id);
-
-    }
-
     @Transactional
     public void flush() {
         if (this.entityManager == null)
@@ -139,8 +129,8 @@ public class ConfigType {
         return sb.toString();
     }
 
-    public static long countConfigTypes() {
-        return entityManager().createQuery("select count(o) from ConfigType o", Long.class)
+    public static int countConfigTypes() {
+        return entityManager().createQuery("select count(o) from ConfigType o", Integer.class)
             .getSingleResult();
     }
 

@@ -1,7 +1,7 @@
 package org.hyperic.hq.inventory.domain;
 
 import java.util.List;
-
+import javax.annotation.Resource;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -13,16 +13,19 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
+import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.Node;
-import org.springframework.datastore.graph.annotation.GraphProperty;
 import org.springframework.datastore.graph.annotation.NodeEntity;
 import org.springframework.datastore.graph.annotation.RelatedTo;
 import org.springframework.datastore.graph.api.Direction;
 import org.springframework.datastore.graph.neo4j.finder.FinderFactory;
+import org.springframework.roo.addon.tostring.RooToString;
+import org.springframework.roo.addon.javabean.RooJavaBean;
+import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.transaction.annotation.Transactional;
 
 @Entity
-@NodeEntity(partial = true)
+@NodeEntity(partial=true)
 public class Config {
 
     @PersistenceContext
@@ -34,20 +37,12 @@ public class Config {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
-    private Integer id;
+    private Long id;
 
     @Transient
     @ManyToOne
     @RelatedTo(type = "HAS_CONFIG", direction = Direction.OUTGOING, elementClass = Resource.class)
     private Resource resource;
-
-    @Transient
-    @ManyToOne
-    @RelatedTo(type = "IS_CONFIG_TYPE", direction = Direction.OUTGOING, elementClass = ConfigType.class)
-    private ConfigType type;
-
-    @GraphProperty
-    private Object value;
 
     @Version
     @Column(name = "version")
@@ -60,6 +55,16 @@ public class Config {
         setUnderlyingState(n);
     }
 
+    public long count() {
+        return finderFactory.getFinderForClass(Config.class).count();
+
+    }
+
+    public Config findById(Long id) {
+        return finderFactory.getFinderForClass(Config.class).findById(id);
+
+    }
+
     @Transactional
     public void flush() {
         if (this.entityManager == null)
@@ -67,12 +72,8 @@ public class Config {
         this.entityManager.flush();
     }
 
-    public Integer getId() {
+    public Long getId() {
         return this.id;
-    }
-
-    public Object getValue() {
-        return value;
     }
 
     public Integer getVersion() {
@@ -107,20 +108,16 @@ public class Config {
         }
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
-    }
-
-    public void setValue(Object value) {
-        this.value = value;
     }
 
     public void setVersion(Integer version) {
         this.version = version;
     }
 
-    public static int countConfigs() {
-        return entityManager().createQuery("select count(o) from Config o", Integer.class)
+    public static long countConfigs() {
+        return entityManager().createQuery("select count(o) from Config o", Long.class)
             .getSingleResult();
     }
 
