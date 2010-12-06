@@ -52,11 +52,9 @@ public class LegacyMeasurementCommandsClientImpl implements MeasurementCommandsC
     private AgentConnection        agentConn;
     private MeasurementCommandsAPI verAPI;
     
-/* XXX don't think this is needed
     public void closeConnection() throws AgentRemoteException {
         agentConn.closeSocket();
     }
-*/
 
     /**
      * Creates a new MeasurementCommandsClient object which should communicate

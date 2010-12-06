@@ -396,10 +396,8 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
         _scheduleObject.unscheduleMeasurements(id);
     }
 
-/* XXX don't think this is needed
     public void closeConnection() {
         // nothing to close here
     }
-*/
 
 }

@@ -37,8 +37,6 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.StaleStateException;
-import org.hibernate.exception.GenericJDBCException;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.Agent;
@@ -50,7 +48,6 @@ import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.shared.AIAppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
-import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AIServerValue;
@@ -105,7 +102,6 @@ import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -688,36 +684,11 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
             List<Integer> servers = buildAIResourceIds(aiPlatform.getAIServerValues());
             List<Integer> platforms = Collections.singletonList(aiPlatform.getId());
 
-            int retries = 0;
-            int MAX_RETRIES = 10;
-            Exception ex = null;
             try {
-                while (retries++ < MAX_RETRIES) {
-                    try {
-                        aiQueueManager.processQueue(
-                            subject, platforms, servers, ips, AIQueueConstants.Q_DECISION_APPROVE);
-                        return;
-                    } catch (AIQApprovalException e) {
-                        ex = e;
-                    } catch (GenericJDBCException e) {
-                        ex = e;
-                    } catch (StaleStateException e) {
-                        ex = e;
-                    } catch (HibernateOptimisticLockingFailureException e) {
-                        ex = e;
-                    }
-                    try {
-                        Thread.sleep(3000);
-                    } catch (InterruptedException e) {
-                    }
-                }
+                aiQueueManager.processQueue(subject, platforms, servers,
+                    ips, AIQueueConstants.Q_DECISION_APPROVE);
             } catch (Exception e) {
-log.error(e,e);
                 throw new SystemException(e);
-            }
-            if (ex != null) {
-log.error(ex + " retried " + retries + " times",ex);
-                throw new SystemException(ex);
             }
         }
     }
