@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.hibernate.Query;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -717,9 +718,12 @@ public abstract class PermissionManager {
      * 
      * @return a list of Integers representing instance ids
      */
-    public abstract List<Integer> findViewableResources(AuthzSubject subj, String resType,
-                                                        String resName, String appdefTypeStr,
-                                                        Integer typeId, PageControl pc);
+    public abstract Set<Integer> findViewableResources(AuthzSubject subj, String resType,
+                                                       String resName, String appdefTypeStr,
+                                                       Integer typeId, PageControl pc);
+
+    // XXX need to add javadocs!
+    public abstract Set<Integer> findViewableResources(AuthzSubject subj, ResourceType resourceType);
 
     /**
      * Search viewable resources of any type

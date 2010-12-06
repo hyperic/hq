@@ -282,6 +282,7 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
             }
         } finally {
             if (debug) log.debug(debugBuf);
+/* XXX don't think i need this
             if (client != null) {
                 try {
                     client.closeConnection();
@@ -289,6 +290,7 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
                     log.error(e);
                 }
             }
+*/
         }
     }
 

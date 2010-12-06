@@ -42,6 +42,7 @@ import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.Role;
@@ -220,9 +221,10 @@ public class PermissionManagerImpl
         return ret;
     }
 
-    public List<Integer> findViewableResources(AuthzSubject subj, String resType, String resName,
-                                               String appdefTypeStr, Integer typeId, PageControl pc) {
-        List<Integer> viewableInstances = new ArrayList<Integer>();
+    public Set<Integer> findViewableResources(AuthzSubject subj, String resType,
+                                              String resName, String appdefTypeStr,
+                                              Integer typeId, PageControl pc) {
+        Set<Integer> viewableInstances = new HashSet<Integer>();
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -495,5 +497,22 @@ public class PermissionManagerImpl
 
     public HierarchicalAlertingManager getHierarchicalAlertingManager() {
         return (HierarchicalAlertingManager) Bootstrap.getBean("HierarchicalAlertingManager");
+    }
+
+    public Set<Integer> findViewableResources(AuthzSubject subj, ResourceType resourceType) {
+final ResourceDAO resourceDAO = Bootstrap.getBean(ResourceDAO.class);
+        final Collection<Resource> resources = (subj.getId().equals(1)) ?
+            resourceDAO.findAll() : resourceDAO.findByOwner(subj);
+        final Set<Integer> rtn = new HashSet<Integer>();
+        final int typeId = resourceType != null ? resourceType.getId() : Integer.MIN_VALUE;
+        for (final Resource r : resources) {
+            if (r.isSystem()) {
+                continue;
+            }
+            if (typeId == r.getResourceType().getId().intValue()) {
+                rtn.add(r.getId());
+            }
+        }
+        return rtn;
     }
 }
