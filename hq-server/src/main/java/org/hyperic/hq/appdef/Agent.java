@@ -28,8 +28,6 @@ package org.hyperic.hq.appdef;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.Platform;
 
 public class Agent extends AppdefBean {
@@ -173,9 +171,4 @@ public class Agent extends AppdefBean {
            .append("authToken=").append(getAuthToken()).append(" ");
         return(str.toString());
     }
-    
-    public boolean allowContainerManagedLastModifiedTime() {
-        return false;
-    }
-
 }

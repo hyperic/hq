@@ -37,6 +37,7 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
 
+import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.client.AgentConnection;
 import org.hyperic.hq.bizapp.agent.CommonSSL;
 import org.hyperic.util.JDK;
@@ -101,7 +102,7 @@ public class SecureAgentConnection
     }
     
     protected Socket getSocket()
-        throws IOException
+        throws AgentConnectionException
     {
         SSLSocketFactory factory;
         SSLContext context;
@@ -110,7 +111,8 @@ public class SecureAgentConnection
         try {
             context = CommonSSL.getSSLContext();
         } catch(NoSuchAlgorithmException exc){
-            throw new IOException("Unable to get SSL context: " + exc.getMessage(), exc);
+            throw new AgentConnectionException("Unable to get SSL context: " +
+                                               exc.getMessage());
         }
 
         // Initialize the SSL context with the bogus trust manager so that
@@ -125,7 +127,8 @@ public class SecureAgentConnection
             trustMan = new BogusTrustManager();
             context.init(null, new X509TrustManager[] { trustMan }, null);
         } catch(KeyManagementException exc){
-            throw new IOException("Unable to initialize trust manager: " + exc.getMessage(), exc);
+            throw new AgentConnectionException("Unable to initialize trust " +
+                                               "manager: " + exc.getMessage());
         }
 
         try {
@@ -153,10 +156,10 @@ public class SecureAgentConnection
             sock = getSSLSocket(factory, this.agentAddress,
                                 this.agentPort, readTimeout, postHandshakeTimeout);
         } catch(IOException exc){
-            throw new IOException("Unable to connect to " +
-                                  this.agentAddress + ":" +
-                                  this.agentPort + ": " +
-                                  exc.getMessage(), exc);
+            throw new AgentConnectionException("Unable to connect to " +
+                                               this.agentAddress + ":" +
+                                               this.agentPort + ": " +
+                                               exc.getMessage(), exc);
         }
 
         // Write our security settings
@@ -166,7 +169,8 @@ public class SecureAgentConnection
             dOs = new DataOutputStream(sock.getOutputStream());
             dOs.writeUTF(this.authToken);
         } catch(IOException exc){
-            throw new IOException("Unable to write auth params to server");
+            throw new AgentConnectionException("Unable to write auth params " +
+                                               "to server");
         }
 
         return sock;
