@@ -211,7 +211,7 @@ public class ScheduleThread
                     if (t.isDone())
                     {
                         if (isDebugEnabled) {
-                            log.debug("Metric task '" + mt.getMetric() +
+                            log.debug("Metric task '" + mt +
                                    "' complete, duration: " +
                                    mt.getExecutionDuration());
                         }
@@ -220,7 +220,7 @@ public class ScheduleThread
                         // Not complete, check for timeout
                         if (mt.getExecutionDuration() > cancelTimeout) {
                             boolean res = t.cancel(true);
-                            log.error("Metric '" + mt.getMetric() +
+                            log.error("Metric '" + mt +
                                        "' took too long to run (" + mt.getExecutionDuration() +
                                        "ms), cancelled (result=" + res + ")");
                             // Task will be removed on next iteration
@@ -442,10 +442,10 @@ public class ScheduleThread
         }
 
         /**
-         * @return The metric this task is attempting to collect.
+         * @return The string representing this metric.
          */
-        public String getMetric() {
-            return meas.getDSN();
+        public String toString() {
+            return getParsedTemplate(meas).metric.toDebugString();
         }
 
         /**
@@ -643,7 +643,7 @@ public class ScheduleThread
                     metricCollections.put(task,metricTask);
                 }
             } catch (RejectedExecutionException e) {
-                log.warn("Executor[" + plugin + "] rejected metric task " + metricTask.getMetric());
+                log.warn("Executor[" + plugin + "] rejected metric task " + metricTask);
                 statNumMetricsFailed++;
             }
         }
