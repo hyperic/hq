@@ -928,7 +928,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
 
             try {
 
-                if (!hasResourceRelation(parentResource, relation)) {
+                if (!hasResourceTypeRelation(parentResource, relation)) {
                     // create self-edge for parent of virtual hierarchy
                     //TODO?
                     //resourceEdgeDAO.create(parentResource, parentResource, 0, relation);
@@ -979,7 +979,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
 
                     if (childResource != null && !childResource.isInAsyncDeleteState()) {
                         createResourceEdges(parentResource, childResource, relation,
-                            !hasResourceRelation(childResource, relation));
+                            !hasResourceTypeRelation(childResource, relation));
 
                         createVirtualResourceEdgesByMacAddress(subject, childResource);
                     }

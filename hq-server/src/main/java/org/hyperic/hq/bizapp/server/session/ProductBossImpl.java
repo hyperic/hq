@@ -34,7 +34,6 @@ import java.util.Map;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 
-import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
@@ -48,8 +47,6 @@ import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
@@ -60,6 +57,8 @@ import org.hyperic.hq.hqu.server.session.AttachType;
 import org.hyperic.hq.hqu.server.session.View;
 import org.hyperic.hq.hqu.server.session.ViewResourceCategory;
 import org.hyperic.hq.hqu.shared.UIPluginManager;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
@@ -207,16 +206,6 @@ public class ProductBossImpl implements ProductBoss {
         PermissionException, ConfigFetchException, EncodingException {
         // Get the merged config
         return configManager.getMergedConfigResponse(subject, productType, id, required);
-    }
-
-    /**
-     */
-    @Transactional(readOnly=true)
-    
-    public ConfigResponseDB getConfigResponse(int sessionId, AppdefEntityID id) throws AppdefEntityNotFoundException,
-        SessionNotFoundException, SessionTimeoutException {
-        sessionManager.authenticate(sessionId);
-        return configManager.getConfigResponse(id);
     }
 
     /**

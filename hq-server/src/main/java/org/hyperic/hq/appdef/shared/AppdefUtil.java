@@ -30,8 +30,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
 
 /** AppdefUtil - utility methods for appdef entities and
@@ -109,7 +109,7 @@ public class AppdefUtil {
     
     public static AppdefEntityID newAppdefEntityId(Resource rv) {
       
-            ResourceType resType = rv.getResourceType();
+            ResourceType resType = rv.getType();
          
             if (resType == null) {
                 throw new IllegalArgumentException(rv.getName() + 

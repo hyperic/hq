@@ -38,8 +38,6 @@ import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.PagerProcessor_operation;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
@@ -50,16 +48,13 @@ import org.hyperic.hq.events.shared.MaintenanceEventManager;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.inventory.domain.OperationType;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.pager.PageControl;
 
 public abstract class PermissionManager {
 
     public static final String OPERATION_PAGER = PagerProcessor_operation.class.getName();
-
-    protected ResourceDAO getResourceDAO() {
-        return Bootstrap.getBean(ResourceDAO.class);
-    }
     
     protected AlertPermissionManager getAlertPermissionManager() {
         return Bootstrap.getBean(AlertPermissionManager.class);

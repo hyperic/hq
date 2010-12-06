@@ -76,8 +76,6 @@ import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
@@ -104,6 +102,8 @@ import org.hyperic.hq.grouping.CritterTranslator;
 import org.hyperic.hq.grouping.critters.DescendantProtoCritterType;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
@@ -1557,7 +1557,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
                     .getId());
                 final Map<Integer, List<Measurement>> mmap = measurementManager
                     .getAvailMeasurements(Collections.singleton(group));
-                List<Measurement> metrics = mmap.get(group.getResource().getId());
+                List<Measurement> metrics = mmap.get(group.getId());
                 for (Iterator<Measurement> it = metrics.iterator(); it.hasNext();) {
                     Measurement m = it.next();
                     if (!m.getTemplate().equals(tmpl)) {
@@ -1955,7 +1955,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
                 aeid = AppdefUtil.newAppdefEntityId(resource);
             } else if (o instanceof ResourceGroup) {
                 final ResourceGroup grp = (ResourceGroup) o;
-                final Resource resource = grp.getResource();
+                final Resource resource = grp;
                 aeid = AppdefUtil.newAppdefEntityId(resource);
             } else {
                 final AppdefResourceValue r = (AppdefResourceValue) o;
@@ -2308,7 +2308,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         if (group == null) {
             return MeasurementConstants.AVAIL_UNKNOWN;
         }
-        final Resource resource = group.getResource();
+        final Resource resource = group;
         if (resource == null || resource.isInAsyncDeleteState()) {
             return MeasurementConstants.AVAIL_UNKNOWN;
         }
@@ -3139,7 +3139,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         watch.markTimeEnd("getAvailMeasurements");
 
         // Remap from list to map of metrics
-        List<Measurement> metrics = measCache.remove(group.getResource().getId());
+        List<Measurement> metrics = measCache.remove(group.getId());
         for (Measurement meas : metrics) {
 
             measCache.put(meas.getResource().getId(), Collections.singletonList(meas));

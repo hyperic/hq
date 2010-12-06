@@ -38,27 +38,24 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Expression;
 import org.hibernate.type.IntegerType;
 import org.hyperic.hibernate.dialect.HQDialect;
-import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.Virtual;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class ServerDAO
     extends HibernateDAO<Server> {
-    private ConfigResponseDAO configResponseDAO;
     private ServerTypeDAO serverTypeDAO;
     private VirtualDAO virtualDAO;
 
     @Autowired
-    public ServerDAO(SessionFactory f, ConfigResponseDAO configResponseDAO,
+    public ServerDAO(SessionFactory f, 
                      ServerTypeDAO serverTypeDAO, VirtualDAO virtualDAO) {
         super(Server.class, f);
-        this.configResponseDAO = configResponseDAO;
         this.serverTypeDAO = serverTypeDAO;
         this.virtualDAO = virtualDAO;
     }
@@ -84,7 +81,7 @@ public class ServerDAO
     }
 
     public Server create(ServerValue sv, Platform p) {
-        ConfigResponseDB configResponse = configResponseDAO.create();
+        //ConfigResponseDB configResponse = configResponseDAO.create();
 
         Server s = new Server();
         s.setName(sv.getName());
@@ -106,7 +103,8 @@ public class ServerDAO
         s.setAutodiscoveryZombie(false);
         s.setLocation(sv.getLocation());
         s.setModifiedBy(sv.getModifiedBy());
-        s.setConfigResponse(configResponse);
+        //TODO
+        //s.setConfigResponse(configResponse);
         s.setPlatform(p);
 
         Integer stid = sv.getServerType().getId();

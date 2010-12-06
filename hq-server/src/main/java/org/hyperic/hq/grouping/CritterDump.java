@@ -27,7 +27,7 @@ package org.hyperic.hq.grouping;
 
 import java.math.BigDecimal;
 
-import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.inventory.domain.Resource;
 
 /**
  * A CritterDump represents state which a Critter can store into (or be

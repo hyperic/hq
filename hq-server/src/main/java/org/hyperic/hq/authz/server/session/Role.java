@@ -36,8 +36,12 @@ import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.authz.values.OwnedRoleValue;
 import org.hyperic.hq.common.server.session.Calendar;
 import org.hyperic.hq.inventory.domain.OperationType;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
+import org.springframework.datastore.graph.annotation.NodeEntity;
 
-public class Role extends AuthzNamedBean {
+@NodeEntity(partial=true)
+public class Role  {
     private String     _description;
     private boolean    _system = false;
     private Resource   _resource;
@@ -46,11 +50,50 @@ public class Role extends AuthzNamedBean {
     private Collection _subjects = new ArrayList();
     private Collection _calendars = new ArrayList();
     private RoleValue  _roleValue = new RoleValue();
+    private String _name;
+    private String _sortName;
+    private Integer _id;
+
+    // for hibernate optimistic locks -- don't mess with this.
+    // Named ugly-style since we already use VERSION in some of our tables.
+    // really need to use Long instead of primitive value
+    // because the database column can allow null version values.
+    // The version column IS NULLABLE for migrated schemas. e.g. HQ upgrade
+    // from 2.7.5.
+    private Long    _version_;
+
 
     public Role() {
         super();
     }
 
+    public void setId(Integer id) {
+        _id = id;
+    }
+
+    public Integer getId() {
+        return _id;
+    }
+    
+    public String getName() {
+        return _name;
+    }
+
+    public void setName(String name) {
+        if (name == null)
+            name = "";
+        _name = name;
+        setSortName(name);
+    }
+
+    public String getSortName() {
+        return _sortName;
+    }
+
+    public void setSortName(String sortName) {
+        _sortName = sortName != null ? sortName.toUpperCase() : null;
+    }
+    
     public String getDescription() {
         return _description;
     }
@@ -191,10 +234,6 @@ public class Role extends AuthzNamedBean {
         setName(val.getName());
         setDescription(val.getDescription());
         setSystem(val.getSystem());
-    }
-
-    public boolean equals(Object obj) {
-        return (obj instanceof Role) && super.equals(obj);
     }
 
     public OwnedRoleValue getOwnedRoleValue() {

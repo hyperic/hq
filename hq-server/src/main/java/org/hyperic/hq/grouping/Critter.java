@@ -28,8 +28,8 @@ package org.hyperic.hq.grouping;
 import java.util.List;
 
 import org.hibernate.Query;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.grouping.prop.CritterProp;
+import org.hyperic.hq.inventory.domain.Resource;
 
 /**
  * A {@link Critter} is a criteria, able to aid in composing complex SQL.

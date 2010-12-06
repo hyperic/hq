@@ -127,6 +127,7 @@ import org.hyperic.hq.authz.shared.GroupCreationException;
 import org.hyperic.hq.authz.shared.MixedGroupType;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.authz.shared.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
@@ -1821,10 +1822,7 @@ public class AppdefBossImpl implements AppdefBoss {
         throws GroupCreationException, GroupDuplicateNameException, SessionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         ResourceGroupCreateInfo cInfo = new ResourceGroupCreateInfo(name, description,
-            AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS, null, // prototype
-            location, 0, // clusterId
-            false, // system?
-            privGrp);
+            location,privGrp);
 
         // No roles or resources
         return resourceGroupManager.createResourceGroup(subject, cInfo, Collections.EMPTY_LIST,
@@ -1862,11 +1860,8 @@ public class AppdefBossImpl implements AppdefBoss {
                                                + "group or application");
         }
 
-        ResourceGroupCreateInfo cInfo = new ResourceGroupCreateInfo(name, description, groupType,
-            null, // prototype
-            location, 0, // clusterId
-            false, // system?
-            privGrp);
+        ResourceGroupCreateInfo cInfo = new ResourceGroupCreateInfo(name, description, 
+            location, privGrp);
 
         // No roles or resources
         return resourceGroupManager.createResourceGroup(subject, cInfo, Collections.EMPTY_LIST,
@@ -1911,9 +1906,7 @@ public class AppdefBossImpl implements AppdefBoss {
         Resource prototype = resourceManager.findResourcePrototype(new AppdefEntityTypeID(adType,
             adResType));
 
-        ResourceGroupCreateInfo cInfo = new ResourceGroupCreateInfo(name, description, groupType,
-            prototype, location, 0, // clusterId
-            false, // system?
+        ResourceGroupCreateInfo cInfo = new ResourceGroupCreateInfo(name, description,location, 
             privGrp);
 
         // No roles or resources
@@ -3036,11 +3029,11 @@ public class AppdefBossImpl implements AppdefBoss {
         PermissionException, ConfigFetchException, PluginException, ApplicationException {
         AppdefEntityID entityId = allConfigs.getResource();
         Set<AppdefEntityID> ids = new HashSet<AppdefEntityID>();
-        ConfigResponseDB existingConfig;
+       
         Service svc = null;
         try {
-            existingConfig = configManager.getConfigResponse(entityId);
-            boolean wasUpdated = configManager.configureResponse(subject, existingConfig, entityId,
+           
+            boolean wasUpdated = configManager.configureResponse(subject, entityId,
                 ConfigResponse.safeEncode(allConfigs.getProductConfig()), ConfigResponse
                     .safeEncode(allConfigs.getMetricConfig()), ConfigResponse.safeEncode(allConfigs
                     .getControlConfig()), ConfigResponse.safeEncode(allConfigs.getRtConfig()),
@@ -3337,6 +3330,6 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     public boolean hasVirtualResourceRelation(Resource resource) {
-        return resourceManager.hasResourceRelation(resource, resourceManager.getVirtualRelation());
+        return resourceManager.hasResourceTypeRelation(resource, resourceManager.getVirtualRelation());
     }
 }

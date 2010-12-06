@@ -25,9 +25,9 @@
  */
 package org.hyperic.hq.appdef.shared;
 
-import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.inventory.domain.Config;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 
@@ -36,14 +36,9 @@ import org.hyperic.util.config.EncodingException;
  */
 public interface ConfigManager {
 
-    public ConfigResponseDB createConfigResponse(byte[] productResponse, byte[] measResponse, byte[] controlResponse,
+    public void createConfigResponse(int resoruceId, byte[] productResponse, byte[] measResponse, byte[] controlResponse,
                                                  byte[] rtResponse);
 
-    /**
-     * Get the ConfigResponse for the given ID, creating it if it does not
-     * already exist.
-     */
-    public ConfigResponseDB getConfigResponse(AppdefEntityID id);
 
     public String getPluginName(AppdefEntityID id) throws AppdefEntityNotFoundException;
 
@@ -101,10 +96,11 @@ public interface ConfigManager {
                                             String type, boolean sendConfigEvent) throws ConfigFetchException,
         AppdefEntityNotFoundException, PermissionException, EncodingException;
 
-    public boolean configureResponse(AuthzSubject subject, ConfigResponseDB existingConfig,
+    public boolean configureResponse(AuthzSubject subject, 
                                      AppdefEntityID appdefID, byte[] productConfig, byte[] measurementConfig,
                                      byte[] controlConfig, byte[] rtConfig, Boolean userManaged,
                                      boolean force);
-
-
+    
+    public byte[] toConfigResponse(Config config);
+    
 }

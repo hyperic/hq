@@ -31,7 +31,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -41,6 +40,7 @@ import org.hyperic.hq.control.GroupControlActionResult;
 import org.hyperic.hq.control.shared.ControlActionTimeoutException;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlScheduleManager;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
@@ -170,18 +170,7 @@ public class ControlActionResultsCollectorImpl implements ControlActionResultsCo
 
     private ConfigResponse getConfigResponse(AuthzSubject subject, AppdefEntityID id)
         throws PluginException {
-        ConfigResponseDB config;
-        try {
-            config = configManager.getConfigResponse(id);
-        } catch (Exception e) {
-            throw new PluginException(e);
-        }
-
-        if (config == null || config.getControlResponse() == null) {
-            throw new PluginException("Control not " + "configured for " + id);
-        }
-
-        byte[] controlResponse = config.getControlResponse();
+        byte[] controlResponse = configManager.toConfigResponse(Resource.findResource(id.getId()).getControlConfig());
         ConfigResponse configResponse;
         try {
             configResponse = ConfigResponse.decode(controlResponse);

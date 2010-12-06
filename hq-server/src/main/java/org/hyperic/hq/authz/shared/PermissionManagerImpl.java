@@ -40,10 +40,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
-
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.RoleDAO;
 import org.hyperic.hq.common.ApplicationException;
@@ -53,6 +49,8 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.shared.HierarchicalAlertingManager;
 import org.hyperic.hq.events.shared.MaintenanceEventManager;
 import org.hyperic.hq.inventory.domain.OperationType;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
@@ -178,16 +176,14 @@ public class PermissionManagerImpl
         return Bootstrap.getBean(RoleDAO.class);
     }
 
-    protected ResourceGroupDAO getResourceGroupDAO() {
-        return Bootstrap.getBean(ResourceGroupDAO.class);
-    }
+   
 
     private Resource lookupResource(ResourceValue resource) {
         if (resource.getId() == null) {
             ResourceType type = resource.getResourceType();
-            return getResourceDAO().findByInstanceId(type, resource.getInstanceId());
+            return Resource.findByInstanceId(type.getId(), resource.getInstanceId());
         }
-        return getResourceDAO().findById(resource.getId());
+        return Resource.findResource(resource.getId());
     }
 
     private Set toPojos(Object[] vals) {
@@ -197,7 +193,7 @@ public class PermissionManagerImpl
         }
 
         RoleDAO roleDao = null;
-        ResourceGroupDAO resGrpDao = null;
+       
         for (int i = 0; i < vals.length; i++) {
             if (vals[i] instanceof OperationType) {
                 ret.add(vals[i]);
@@ -209,10 +205,8 @@ public class PermissionManagerImpl
                 }
                 ret.add(roleDao.findById(((RoleValue) vals[i]).getId()));
             } else if (vals[i] instanceof ResourceGroupValue) {
-                if (resGrpDao == null) {
-                    resGrpDao = getResourceGroupDAO();
-                }
-                ret.add(resGrpDao.findById(((ResourceGroupValue) vals[i]).getId()));
+                
+                ret.add(ResourceGroup.findResourceGroup(((ResourceGroupValue) vals[i]).getId()));
             } else {
                 _log.error("Invalid type.");
             }
@@ -376,11 +370,11 @@ public class PermissionManagerImpl
 
     public Collection<Resource> getGroupResources(Integer subjectId, Integer groupId,
                                                   Boolean fsystem) {
-        return getResourceDAO().findInGroup_orderName(groupId, fsystem);
+        return ResourceGroup.findResourceGroup(groupId).findInGroup_orderName(fsystem);
     }
 
     public Collection<Resource> findServiceResources(AuthzSubject subj, Boolean fsystem) {
-        return getResourceDAO().findSvcRes_orderName(fsystem);
+        return Resource.findSvcRes_orderName(fsystem);
     }
 
     public RolePermNativeSQL getRolePermissionNativeSQL(String resourceVar, String eventLogVar, String subjectParam,

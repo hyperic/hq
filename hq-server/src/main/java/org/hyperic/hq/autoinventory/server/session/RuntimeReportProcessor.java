@@ -40,8 +40,6 @@ import javax.persistence.EntityManagerFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.ejb.EntityManagerImpl;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AIAuditFactory;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -67,7 +65,6 @@ import org.hyperic.hq.appdef.shared.ServiceTypeFactory;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
@@ -78,6 +75,7 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.shared.AuditManager;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
 import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.product.RuntimeResourceReport;
@@ -508,7 +506,7 @@ public class RuntimeReportProcessor {
             try {
                 // Configure resource, telling the config manager to send
                 // an update event if this resource has been updated.
-                boolean wasUpdated = configManager.configureResponse(subject, server.getConfigResponse(), server.getEntityId(), aiserver
+                boolean wasUpdated = configManager.configureResponse(subject, server.getEntityId(), aiserver
                     .getProductConfig(), aiserver.getMeasurementConfig(), aiserver.getControlConfig(), null, // RT
                     // config
                     null, false);

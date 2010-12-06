@@ -28,20 +28,18 @@ package org.hyperic.hq.appdef.server.session;
 import java.util.Collection;
 
 import org.hibernate.SessionFactory;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.server.session.Virtual;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 @Repository
 public class VirtualDAO extends HibernateDAO {
-    private ResourceDAO resourceDAO;
+   
 
     @Autowired
-    public VirtualDAO(SessionFactory f, ResourceDAO resourceDAO) {
+    public VirtualDAO(SessionFactory f) {
         super(Virtual.class, f);
-        this.resourceDAO = resourceDAO;
     }
 
     public void save(Virtual entity) {
@@ -53,8 +51,8 @@ public class VirtualDAO extends HibernateDAO {
     }
 
     public void createVirtual(Resource res, Integer processId) {
-        Resource resource =resourceDAO
-            .findById(res.getId());
+        Resource resource =Resource
+            .findResource(res.getId());
         Virtual virt = new Virtual();
         virt.setResource(resource);
         virt.setProcessId(processId);

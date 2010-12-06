@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.inventory.domain.Resource;
 
 public class ResourceOperationsHelper {
     // This number should be equal to the max number of operation codes per resource
@@ -185,11 +185,11 @@ public class ResourceOperationsHelper {
    
     public static String getResourceType(Resource resource)
     throws IllegalArgumentException, UnsupportedOperationException {
-        if (resource == null || resource.getResourceType() == null) {
+        if (resource == null || resource.getType() == null) {
             throw new IllegalArgumentException("resource must be not be null and must have a valid resource type.");
         }
         
-        int resourceTypeId = resource.getResourceType().getId().intValue();
+        int resourceTypeId = resource.getType().getId().intValue();
         
         return getResourceType(resourceTypeId);
     }
@@ -212,7 +212,7 @@ public class ResourceOperationsHelper {
     
     private static String getOperation(Resource resource, int operationCode) 
     throws IllegalArgumentException {
-        int resourceTypeId = resource.getResourceType().getId().intValue();
+        int resourceTypeId = resource.getType().getId().intValue();
         
         return getOperation(resourceTypeId, operationCode);
     }

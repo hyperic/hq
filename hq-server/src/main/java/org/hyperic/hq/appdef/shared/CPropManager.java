@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
-import org.hyperic.hq.appdef.server.session.Cprop;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.product.TypeInfo;
@@ -185,7 +184,7 @@ public interface CPropManager {
 	/**
 	 * Get all Cprops values with specified key name, irregardless of type
 	 */
-	public List<Cprop> getCPropValues(AppdefResourceTypeValue appdefType,
+	public List<String> getCPropValues(AppdefResourceTypeValue appdefType,
 			String key, boolean asc);
 
     /**

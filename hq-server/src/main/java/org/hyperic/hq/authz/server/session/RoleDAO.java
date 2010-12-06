@@ -30,13 +30,15 @@ import java.util.Collections;
 import java.util.HashSet;
 
 import org.hibernate.SessionFactory;
-import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.GroupCreationException;
+import org.hyperic.hq.authz.shared.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -45,15 +47,11 @@ import org.springframework.stereotype.Repository;
 public class RoleDAO
     extends HibernateDAO<Role> {
 
-    private ResourceDAO resourceDAO;
-    private ResourceGroupDAO resourceGroupDAO;
+   
 
     @Autowired
-    public RoleDAO(SessionFactory f, ResourceDAO resourceDAO, 
-                   ResourceGroupDAO resourceGroupDAO) {
+    public RoleDAO(SessionFactory f) {
         super(Role.class, f);
-        this.resourceDAO = resourceDAO;
-        this.resourceGroupDAO = resourceGroupDAO;
     }
 
     Role create(AuthzSubject creator, RoleValue createInfo) {
@@ -68,14 +66,15 @@ public class RoleDAO
                                                AuthzConstants.roleResourceTypeName);
         }
 
-        Resource proto = resourceDAO.findRootResource();
-        Resource myResource = resourceDAO.create(resType, proto, null /*
-                                                                       * No
-                                                                       * name?
-                                                                       */, creator, role.getId(),
-            false);
+        //TODO resource for Role?
+        //Resource proto = resourceDAO.findRootResource();
+        //Resource myResource = resourceDAO.create(resType, proto, null /*
+          //                                                             * No
+            //                                                           * name?
+             //                                                          */, creator, role.getId(),
+            //false);
 
-        role.setResource(myResource);
+        //role.setResource(myResource);
 
         HashSet groups = new HashSet(2);
 
@@ -84,8 +83,8 @@ public class RoleDAO
          * the roles are always able to operate on root types such as Subjects,
          * Roles, and Groups
          **/
-        ResourceGroup authzGroup = resourceGroupDAO
-            .findByName(AuthzConstants.authzResourceGroupName);
+        ResourceGroup authzGroup = ResourceGroup
+            .findResourceGroupByName(AuthzConstants.authzResourceGroupName);
         if (authzGroup == null) {
             throw new IllegalArgumentException("resource group not found " +
                                                AuthzConstants.authzResourceGroupName);
@@ -100,25 +99,26 @@ public class RoleDAO
         ResourceGroupValue grpVal = new ResourceGroupValue();
         String groupName = AuthzConstants.privateRoleGroupName + role.getId();
         grpVal.setSystem(true);
-        ResourceGroupCreateInfo cInfo = new ResourceGroupCreateInfo(groupName, "", // Description
-            0, // Group type
-            null, // The Resource prototype
-            null, // Location
-            0, // clusterId
-            true, false);// system
-
-        ResourceGroup group;
-        try {
-            group = resourceGroupDAO.create(creator, cInfo, Collections.EMPTY_LIST,
-                Collections.EMPTY_LIST);
-        } catch (GroupCreationException e) {
-            throw new SystemException("Should always be able to create a "
-                                      + "group for roles, but got exceptin", e);
-        }
-
-        resourceGroupDAO.addMembers(group, Collections.singleton(myResource));
-
-        role.setResourceGroups(groups);
+        //TODO
+//        ResourceGroupCreateInfo cInfo = new ResourceGroupCreateInfo(groupName, "", // Description
+//            0, // Group type
+//            null, // The Resource prototype
+//            null, // Location
+//            0, // clusterId
+//            true, false);// system
+//
+//        ResourceGroup group;
+//        try {
+//            group = resourceGroupDAO.create(creator, cInfo, Collections.EMPTY_LIST,
+//                Collections.EMPTY_LIST);
+//        } catch (GroupCreationException e) {
+//            throw new SystemException("Should always be able to create a "
+//                                      + "group for roles, but got exceptin", e);
+//        }
+//
+//        resourceGroupDAO.addMembers(group, Collections.singleton(myResource));
+//
+//        role.setResourceGroups(groups);
 
         return role;
     }

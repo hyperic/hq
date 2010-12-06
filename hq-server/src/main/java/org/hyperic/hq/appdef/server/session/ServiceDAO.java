@@ -37,28 +37,26 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.type.IntegerType;
 import org.hyperic.hibernate.dialect.HQDialect;
-import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.Virtual;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class ServiceDAO
     extends HibernateDAO<Service> {
-    private ConfigResponseDAO configResponseDAO;
+   
     private ServiceTypeDAO serviceTypeDAO;
     private VirtualDAO virtualDAO;
 
     @Autowired
-    public ServiceDAO(SessionFactory f, ConfigResponseDAO configResponseDAO,
+    public ServiceDAO(SessionFactory f, 
                       ServiceTypeDAO serviceTypeDAO, VirtualDAO virtualDAO) {
         super(Service.class, f);
-        this.configResponseDAO = configResponseDAO;
         this.serviceTypeDAO = serviceTypeDAO;
         this.virtualDAO = virtualDAO;
     }
@@ -84,7 +82,9 @@ public class ServiceDAO
      */
     public Service create(ServiceType type, Server server, String name, String desc,
                           String modifiedBy, String location, String owner, Service parent) {
-        ConfigResponseDB configResponse = configResponseDAO.create();
+        
+        //TODO createconfig?
+        //ConfigResponseDB configResponse = configResponseDAO.create();
 
         Service s = new Service();
         s.setName(name);
@@ -98,7 +98,6 @@ public class ServiceDAO
         s.setParentService(parent);
         s.setServiceType(type);
         s.setServer(server);
-        s.setConfigResponse(configResponse);
         save(s);
 
         server.addService(s);
@@ -107,7 +106,8 @@ public class ServiceDAO
     }
 
     public Service create(ServiceValue sv, Server parent) {
-        ConfigResponseDB configResponse = configResponseDAO.create();
+        //TODO createConfig?
+        //ConfigResponseDB configResponse = configResponseDAO.create();
 
         Service s = new Service();
         s.setName(sv.getName());
@@ -126,7 +126,7 @@ public class ServiceDAO
         }
 
         s.setServer(parent);
-        s.setConfigResponse(configResponse);
+        //s.setConfigResponse(configResponse);
         save(s);
         return s;
     }

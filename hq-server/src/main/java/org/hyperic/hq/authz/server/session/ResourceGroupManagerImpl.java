@@ -165,7 +165,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     private ResourceGroup createGroup(AuthzSubject whoami, ResourceGroupCreateInfo cInfo,
                                       Collection<Role> roles, Collection<Resource> resources)
         throws GroupDuplicateNameException, GroupCreationException {
-        ResourceGroup existing = ResourceGroup.findByName(cInfo.getName());
+        ResourceGroup existing = ResourceGroup.findResourceGroupByName(cInfo.getName());
 
         if (existing != null) {
             throw new GroupDuplicateNameException("Group by the name [" + cInfo.getName() +
@@ -173,8 +173,11 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         }
 
         ResourceGroup res = new ResourceGroup();
+        res.setName(cInfo.getName());
+        res.setLocation(cInfo.getLocation());
+        res.setPrivateGroup(cInfo.isPrivateGroup());
+        res.setDescription(cInfo.getDescription());
         res.persist();
-        //TODO other res stuff
         
         //TODO why?
         //resourceEdgeDAO.create(res.getResource(), res.getResource(), 0, resourceRelationDAO.findById(AuthzConstants.RELATION_CONTAINMENT_ID)); // Self-edge

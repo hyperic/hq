@@ -34,7 +34,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.ServerBase;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ServerLightValue;
@@ -66,7 +65,6 @@ public class Server extends ServerBase
     private boolean _wasAutodiscovered;
     private boolean _autodiscoveryZombie;
     private ServerType _serverType;
-    private ConfigResponseDB _configResponse;
     private Collection _services = new ArrayList();
     public Server() {
         super();
@@ -117,14 +115,6 @@ public class Server extends ServerBase
         _serverType = serverType;
     }
 
-    public ConfigResponseDB getConfigResponse() {
-        return _configResponse;
-    }
-
-    void setConfigResponse(ConfigResponseDB configResponse) {
-        _configResponse = configResponse;
-    }
-
     public Collection<Service> getServices() {
         return _services;
     }
@@ -150,8 +140,6 @@ public class Server extends ServerBase
         _serverLightValue.setRuntimeAutodiscovery(isRuntimeAutodiscovery());
         _serverLightValue.setWasAutodiscovered(isWasAutodiscovered());
         _serverLightValue.setAutodiscoveryZombie(isAutodiscoveryZombie());
-        _serverLightValue.setConfigResponseId(_configResponse != null ?
-                                              _configResponse.getId() : null);
         _serverLightValue.setModifiedBy(getModifiedBy());
         _serverLightValue.setOwner(getResource().getOwner().getName());
         _serverLightValue.setLocation(getLocation());
@@ -183,8 +171,6 @@ public class Server extends ServerBase
         _serverValue.setRuntimeAutodiscovery(isRuntimeAutodiscovery());
         _serverValue.setWasAutodiscovered(isWasAutodiscovered());
         _serverValue.setAutodiscoveryZombie(isAutodiscoveryZombie());
-        _serverValue.setConfigResponseId(_configResponse != null ?
-                                         _configResponse.getId() : null);
         _serverValue.setModifiedBy(getModifiedBy());
         _serverValue.setOwner(getOwner());
         _serverValue.setLocation(getLocation());

@@ -52,6 +52,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.inventory.domain.PropertyType;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.util.config.ConfigResponse;
@@ -67,7 +68,7 @@ public class CPropManagerImpl implements CPropManager {
     private static Log log = LogFactory.getLog(CPropManagerImpl.class.getName());
 
     private Messenger sender;
-    private CpropDAO cPropDAO;
+    
    
     private ApplicationTypeDAO applicationTypeDAO;
     private PlatformTypeDAO platformTypeDAO;
@@ -75,11 +76,10 @@ public class CPropManagerImpl implements CPropManager {
     private ServiceTypeDAO serviceTypeDAO;
 
     @Autowired
-    public CPropManagerImpl(Messenger sender, CpropDAO cPropDAO, 
+    public CPropManagerImpl(Messenger sender, 
                             ApplicationTypeDAO applicationTypeDAO, PlatformTypeDAO platformTypeDAO,
                             ServerTypeDAO serverTypeDAO, ServiceTypeDAO serviceTypeDAO) {
         this.sender = sender;
-        this.cPropDAO = cPropDAO;
         this.applicationTypeDAO = applicationTypeDAO;
         this.platformTypeDAO = platformTypeDAO;
         this.serverTypeDAO = serverTypeDAO;
@@ -285,7 +285,7 @@ public class CPropManagerImpl implements CPropManager {
         throws CPropKeyNotFoundException, AppdefEntityNotFoundException, PermissionException {
         String oldval;
         try {
-           oldval = cPropDAO.setValue(aID, typeId, key, val);
+           oldval = (String) Resource.findResource(aID.getId()).setProperty(key, val);
         }catch(Exception e) {
             log.error("Unable to update CPropKey values: " + e.getMessage(), e);
             throw new SystemException(e);
@@ -319,7 +319,8 @@ public class CPropManagerImpl implements CPropManager {
     public String getValue(AppdefEntityValue aVal, String key) throws CPropKeyNotFoundException,
         AppdefEntityNotFoundException, PermissionException {
         try {
-            return cPropDAO.getValue(aVal, key);
+            //TODO use correct ID
+            return (String)Resource.findResource(aVal.getID().getId()).getProperty(key);            
         }catch(Exception e) {
             log.error("Unable to get CPropKey values: " + e.getMessage(), e);
             throw new SystemException(e);
@@ -339,7 +340,13 @@ public class CPropManagerImpl implements CPropManager {
     @Transactional(readOnly = true)
     public Properties getEntries(AppdefEntityID aID) throws PermissionException,
         AppdefEntityNotFoundException {
-        return cPropDAO.getEntries(aID, "propkey");
+        //TODO
+        Properties properties = new Properties();
+        Map<String,Object> propValues = Resource.findResource(aID.getId()).getProperties();
+        for(Map.Entry<String, Object> propValue:propValues.entrySet()) {
+            properties.setProperty(propValue.getKey(), (String)propValue.getValue());
+        }
+        return properties;
     }
 
     /**
@@ -353,7 +360,8 @@ public class CPropManagerImpl implements CPropManager {
     @Transactional(readOnly = true)
     public Properties getDescEntries(AppdefEntityID aID) throws PermissionException,
         AppdefEntityNotFoundException {
-        return cPropDAO.getEntries(aID, "description");
+        //TODO
+        return new Properties();
     }
 
     /**
@@ -400,7 +408,7 @@ public class CPropManagerImpl implements CPropManager {
      */
     public void deleteValues(int appdefType, int id) {
         try {
-            cPropDAO.deleteValues(appdefType, id);
+            Resource.findResource(id).removeProperties();
         }catch(Exception e) {
             log.error("Unable to delete CProp values: " + e.getMessage(), e);
             throw new SystemException(e);
@@ -411,13 +419,17 @@ public class CPropManagerImpl implements CPropManager {
      * Get all Cprops values with specified key name, regardless of type
      */
     @Transactional(readOnly = true)
-    public List<Cprop> getCPropValues(AppdefResourceTypeValue appdefType, String key, boolean asc) {
+    public List<String> getCPropValues(AppdefResourceTypeValue appdefType, String key, boolean asc) {
         int type = appdefType.getAppdefType();
         int instanceId = appdefType.getId().intValue();
         //TODO appdefTypeId is likely not resourceId
         ResourceType resourceType = ResourceType.findResourceType(instanceId);
         PropertyType pkey  = resourceType.getPropertyType(key);
-
-        return cPropDAO.findByKeyName(pkey, asc);
+        //TODO this can't possibly be what you'd expect from this method
+        List<String> values = new ArrayList<String>();
+        for(Resource resource: resourceType.getResources()) {
+            values.add((String)resource.getProperty(key));
+        }
+        return values;
     }
 }

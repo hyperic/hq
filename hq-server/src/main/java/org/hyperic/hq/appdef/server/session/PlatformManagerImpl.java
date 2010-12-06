@@ -47,7 +47,6 @@ import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AppService;
-import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
@@ -74,10 +73,6 @@ import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
-
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -94,6 +89,8 @@ import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.common.shared.AuditManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.inventory.domain.OperationType;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
 import org.hyperic.hq.product.PlatformDetector;
@@ -142,8 +139,6 @@ public class PlatformManagerImpl implements PlatformManager {
 
     private ApplicationDAO applicationDAO;
 
-    private ConfigResponseDAO configResponseDAO;
-
     private PlatformDAO platformDAO;
 
     private ServerDAO serverDAO;
@@ -166,7 +161,7 @@ public class PlatformManagerImpl implements PlatformManager {
                                ResourceGroupManager resourceGroupManager,
                                AuthzSubjectManager authzSubjectManager,
                                ServiceManager serviceManager, ApplicationDAO applicationDAO,
-                               ConfigResponseDAO configResponseDAO, PlatformDAO platformDAO,
+                               PlatformDAO platformDAO,
                                ServerDAO serverDAO, ServiceDAO serviceDAO,
                                AuditManager auditManager, AgentManager agentManager,
                                ZeventEnqueuer zeventManager,
@@ -181,7 +176,6 @@ public class PlatformManagerImpl implements PlatformManager {
         this.authzSubjectManager = authzSubjectManager;
         this.serviceManager = serviceManager;
         this.applicationDAO = applicationDAO;
-        this.configResponseDAO = configResponseDAO;
         this.platformDAO = platformDAO;
         this.serverDAO = serverDAO;
         this.serviceDAO = serviceDAO;
@@ -398,7 +392,7 @@ public class PlatformManagerImpl implements PlatformManager {
             pushed = true;
             permissionManager.checkRemovePermission(subject, platform.getEntityId());
             // keep the configresponseId so we can remove it later
-            ConfigResponseDB config = platform.getConfigResponse();
+           
             removeServerReferences(platform);
 
             // this flush ensures that the server's platform_id is set to null
@@ -408,9 +402,10 @@ public class PlatformManagerImpl implements PlatformManager {
             cleanupAgent(platform);
             platform.getIps().clear();
             platformDAO.remove(platform);
-            if (config != null) {
-                configResponseDAO.remove(config);
-            }
+            //TODO
+            //if (config != null) {
+              //  configResponseDAO.remove(config);
+            //}
             cpropManager.deleteValues(aeid.getType(), aeid.getID());
             resourceManager.removeAuthzResource(subject, aeid, r);
             platformDAO.getSession().flush();
@@ -499,18 +494,20 @@ public class PlatformManagerImpl implements PlatformManager {
 
         try {
 
-            ConfigResponseDB config;
+           
             Platform platform;
             Agent agent = null;
 
             if (agentPK != null) {
                 agent = agentDAO.findById(agentPK);
             }
-            if (pValue.getConfigResponseId() == null) {
-                config = configResponseDAO.createPlatform();
-            } else {
-                config = configResponseDAO.findById(pValue.getConfigResponseId());
-            }
+            //TODO
+            //ConfigResponseDB config;
+           // if (pValue.getConfigResponseId() == null) {
+             //   config = configResponseDAO.createPlatform();
+            //} else {
+            //    config = configResponseDAO.findById(pValue.getConfigResponseId());
+            //}
 
             trimStrings(pValue);
             getCounter().addCPUs(pValue.getCpuCount().intValue());
@@ -520,7 +517,7 @@ public class PlatformManagerImpl implements PlatformManager {
             pValue.setOwner(subject.getName());
             pValue.setModifiedBy(subject.getName());
 
-            platform = pType.create(pValue, agent, config);
+            platform = pType.create(pValue, agent);
             platformDAO.save(platform); // To setup its ID
             // AUTHZ CHECK
             // in order to succeed subject has to be in a role
@@ -581,9 +578,10 @@ public class PlatformManagerImpl implements PlatformManager {
         if (agent == null) {
             throw new ApplicationException("Unable to find agent: " + aipValue.getAgentToken());
         }
-        ConfigResponseDB config = configResponseDAO.createPlatform();
+        //TODO
+        //ConfigResponseDB config = configResponseDAO.createPlatform();
 
-        Platform platform = platType.create(aipValue, subject.getName(), config, agent);
+        Platform platform = platType.create(aipValue, subject.getName(),  agent);
         platformDAO.save(platform);
 
         // AUTHZ CHECK
@@ -1007,7 +1005,7 @@ public class PlatformManagerImpl implements PlatformManager {
         throws PermissionException, PlatformNotFoundException {
         // TODO: Add permission check
 
-        ResourceType rt = r.getResourceType();
+        ResourceType rt = r.getType();
         if (rt != null && !rt.getId().equals(AuthzConstants.authzPlatform)) {
             throw new PlatformNotFoundException("Invalid resource type = " + rt.getName());
         }

@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.inventory.domain.Resource;
 
 /**
  * abstract base class for all appdef resources

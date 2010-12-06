@@ -29,13 +29,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.authz.HasAuthzOperations;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 
 public class Service extends AppdefResource
     implements HasAuthzOperations
@@ -61,7 +60,6 @@ public class Service extends AppdefResource
     private Server _server;
     private ServiceType _serviceType;
     private ResourceGroup _resourceGroup;
-    private ConfigResponseDB _configResponse;
     private Collection _appServices;
     public Service() {
     }
@@ -140,14 +138,6 @@ public class Service extends AppdefResource
         _resourceGroup = resourceGroup;
     }
 
-    public ConfigResponseDB getConfigResponse() {
-        return _configResponse;
-    }
-
-    void setConfigResponse(ConfigResponseDB configResponse) {
-        _configResponse = configResponse;
-    }
-
     public Collection getAppServices() {
         return _appServices;
     }
@@ -171,8 +161,7 @@ public class Service extends AppdefResource
         _serviceValue.setModifiedBy(getModifiedBy());
         _serviceValue.setOwner(getOwner());
         _serviceValue.setLocation(getLocation());
-        _serviceValue.setConfigResponseId(_configResponse != null ?
-                                          _configResponse.getId() : null);
+       
         _serviceValue.setParentId(_parentService != null ?
                                   _parentService.getId() : null);
         _serviceValue.setName(getName());

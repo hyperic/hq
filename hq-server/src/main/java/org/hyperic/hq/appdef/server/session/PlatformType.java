@@ -31,7 +31,6 @@ import java.util.Collections;
 import java.util.Iterator;
 
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
@@ -127,20 +126,19 @@ public class PlatformType extends AppdefResourceType {
     /**
      * Create a new platform based on the AI platform value.
      */
-    protected Platform create(AIPlatformValue aip, String initialOwner,
-                              ConfigResponseDB config, Agent agent) 
+    protected Platform create(AIPlatformValue aip, String initialOwner,Agent agent) 
     {
         Platform p = copyAIPlatformValue(aip);
         p.setPlatformType(this);
-        p.setConfigResponse(config);
+        //TODO set config
+        //p.setConfigResponse(config);
         p.setModifiedBy(initialOwner);
         p.setAgent(agent);
         registerNewPlatform(p);
         return p;
     }
 
-    protected Platform create(PlatformValue pv, Agent agent, 
-                              ConfigResponseDB config) 
+    protected Platform create(PlatformValue pv, Agent agent) 
     {
         Platform p = new Platform();
         
@@ -154,7 +152,8 @@ public class PlatformType extends AppdefResourceType {
         p.setModifiedBy(pv.getModifiedBy());
         p.setPlatformType(this);
         p.setAgent(agent);
-        p.setConfigResponse(config);
+        //TODO setConfig
+        //p.setConfigResponse(config);
         
         for (Iterator i=pv.getAddedIpValues().iterator(); i.hasNext();) {
             IpValue ipv = (IpValue)i.next();

@@ -42,7 +42,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.AppService;
-import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -59,8 +58,6 @@ import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -73,6 +70,8 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.inventory.domain.OperationType;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.ServiceTypeInfo;
@@ -103,7 +102,6 @@ public class ServiceManagerImpl implements ServiceManager {
     private PermissionManager permissionManager;
     private ServiceDAO serviceDAO;
     private ApplicationDAO applicationDAO;
-    private ConfigResponseDAO configResponseDAO;
     private ResourceManager resourceManager;
     private ServerDAO serverDAO;
     private ServerTypeDAO serverTypeDAO;
@@ -117,7 +115,7 @@ public class ServiceManagerImpl implements ServiceManager {
     @Autowired
     public ServiceManagerImpl(AppServiceDAO appServiceDAO, PermissionManager permissionManager,
                               ServiceDAO serviceDAO, ApplicationDAO applicationDAO,
-                              ConfigResponseDAO configResponseDAO, ResourceManager resourceManager,
+                              ResourceManager resourceManager,
                               ServerDAO serverDAO, ServerTypeDAO serverTypeDAO,
                               ServiceTypeDAO serviceTypeDAO,
                               ResourceGroupManager resourceGroupManager, CPropManager cpropManager,
@@ -127,7 +125,6 @@ public class ServiceManagerImpl implements ServiceManager {
         this.permissionManager = permissionManager;
         this.serviceDAO = serviceDAO;
         this.applicationDAO = applicationDAO;
-        this.configResponseDAO = configResponseDAO;
         this.resourceManager = resourceManager;
         this.serverDAO = serverDAO;
         this.serverTypeDAO = serverTypeDAO;
@@ -1478,7 +1475,7 @@ public class ServiceManagerImpl implements ServiceManager {
         for (Resource resource : resources) {
 
             // this should not be the case
-            if (!resource.getResourceType().getId().equals(AuthzConstants.authzService)) {
+            if (!resource.getType().getId().equals(AuthzConstants.authzService)) {
                 continue;
             }
             Service service = serviceDAO.findById(resource.getInstanceId());
@@ -1519,16 +1516,16 @@ public class ServiceManagerImpl implements ServiceManager {
         // Remove from ServiceType collection
         service.getServiceType().getServices().remove(service);
 
-        final ConfigResponseDB config = service.getConfigResponse();
+        //final ConfigResponseDB config = service.getConfigResponse();
 
         // remove from appdef
 
         serviceDAO.remove(service);
 
-        // remove the config response
-        if (config != null) {
-            configResponseDAO.remove(config);
-        }
+        // TODO remove the config response?
+        //if (config != null) {
+        //    configResponseDAO.remove(config);
+        //}
 
         // remove custom properties
         cpropManager.deleteValues(aeid.getType(), aeid.getID());

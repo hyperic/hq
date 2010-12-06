@@ -26,6 +26,7 @@
 package org.hyperic.hq.authz.server.session;
 
 import org.hyperic.hibernate.PersistedObject;
+import org.hyperic.hq.inventory.domain.Resource;
 
 /**
  *

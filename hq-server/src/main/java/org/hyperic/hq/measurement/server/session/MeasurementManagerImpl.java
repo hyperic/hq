@@ -63,9 +63,7 @@ import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDeleteRequestedEvent;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -74,6 +72,8 @@ import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.MaintenanceEvent;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
@@ -543,7 +543,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             Integer[] tids = templs.toArray(new Integer[0]);
             Resource resource = resourceManager.findResourceById(resId);
             // checkModifyPermission(subject.getId(), appId);
-            Integer resTypeId = resource.getResourceType().getId();
+            Integer resTypeId = resource.getType().getId();
             if (resTypeId.equals(AuthzConstants.authzGroup)) {
                 ResourceGroup grp = resourceGroupManager.findResourceGroupById(subject, resource
                     .getInstanceId());
@@ -835,7 +835,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 resource = (Resource) o;
             } else if (o instanceof ResourceGroup) {
                 ResourceGroup grp = (ResourceGroup) o;
-                resource = grp.getResource();
+                resource = grp;
                 rtn.put(resource.getId(), measurementDAO.findAvailMeasurements(grp));
                 continue;
             } else if (o instanceof AppdefResourceValue) {
@@ -852,7 +852,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             } catch (ObjectNotFoundException e) {
                 continue;
             }
-            final ResourceType type = resource.getResourceType();
+            final ResourceType type = resource.getType();
             if (type.getId().equals(AuthzConstants.authzGroup)) {
                 ResourceGroup grp = resourceGroupManager.getResourceGroupByResource(resource);
                 rtn.put(resource.getId(), measurementDAO.findAvailMeasurements(grp));
@@ -886,7 +886,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     }
 
     private final Map<Integer, List<Measurement>> getAvailMeas(Resource application) {
-        final Integer typeId = application.getResourceType().getId();
+        final Integer typeId = application.getType().getId();
         if (!typeId.equals(AuthzConstants.authzApplication)) {
             return Collections.emptyMap();
         }
@@ -917,7 +917,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             return Collections.singletonList(service.getResource());
         }
         final ResourceGroup group = appService.getResourceGroup();
-        final Resource resource = group.getResource();
+        final Resource resource = group;
         if (resource == null || resource.isInAsyncDeleteState()) {
             return Collections.emptyList();
         }

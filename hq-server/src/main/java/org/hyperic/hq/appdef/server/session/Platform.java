@@ -33,14 +33,13 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.authz.HasAuthzOperations;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.inventory.domain.Resource;
 
 public class Platform extends PlatformBase
     implements HasAuthzOperations
@@ -61,7 +60,6 @@ public class Platform extends PlatformBase
     
     private String _commentText;
     private PlatformType _platformType;
-    private ConfigResponseDB _configResponse;
     private Agent _agent;
     private Collection _ips = new ArrayList();
     private Collection _servers =  new ArrayList();
@@ -85,13 +83,7 @@ public class Platform extends PlatformBase
         _platformType = platformType;
     }
 
-    public ConfigResponseDB getConfigResponse() {
-        return _configResponse;
-    }
-
-    void setConfigResponse(ConfigResponseDB configResponse) {
-        _configResponse = configResponse;
-    }
+   
 
     public Agent getAgent() {
         return _agent;
@@ -246,7 +238,6 @@ public class Platform extends PlatformBase
         _platformValue.setCommentText(getCommentText());
         _platformValue.setModifiedBy(getModifiedBy());
         _platformValue.setOwner(getOwner());
-        _platformValue.setConfigResponseId(getConfigResponse().getId());
         _platformValue.setCertdn(getCertdn());
         _platformValue.setFqdn(getFqdn());
         _platformValue.setName(getName());

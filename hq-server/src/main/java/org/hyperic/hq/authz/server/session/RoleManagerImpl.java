@@ -54,6 +54,8 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.server.session.Calendar;
 import org.hyperic.hq.common.shared.CalendarManager;
 import org.hyperic.hq.inventory.domain.OperationType;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -85,24 +87,20 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
     private static final String OWNEDROLE_PAGER = "org.hyperic.hq.authz.server.session.PagerProcessor_ownedRole";
     private static final String GROUP_PAGER = "org.hyperic.hq.authz.server.session.PagerProcessor_resourceGroup";
     private RoleCalendarDAO roleCalendarDAO;
-    private ResourceGroupDAO resourceGroupDAO;
     private RoleDAO roleDAO;
     private AuthzSubjectDAO authzSubjectDAO;
-    private ResourceDAO resourceDAO;
     private CalendarManager calendarManager;
     private PermissionManager permissionManager;
     private ApplicationContext applicationContext;
 
     @Autowired
     public RoleManagerImpl(RoleCalendarDAO roleCalendarDAO,
-                           ResourceGroupDAO resourceGroupDAO,RoleDAO roleDAO,
-                           AuthzSubjectDAO authzSubjectDAO, ResourceDAO resourceDAO, CalendarManager calendarManager,
+                           RoleDAO roleDAO,
+                           AuthzSubjectDAO authzSubjectDAO, CalendarManager calendarManager,
                            PermissionManager permissionManager) {
         this.roleCalendarDAO = roleCalendarDAO;
-        this.resourceGroupDAO = resourceGroupDAO;
         this.roleDAO = roleDAO;
         this.authzSubjectDAO = authzSubjectDAO;
-        this.resourceDAO = resourceDAO;
         this.calendarManager = calendarManager;
         this.permissionManager = permissionManager;
     }
@@ -138,7 +136,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
     }
 
     private ResourceGroup lookupGroup(Integer id) {
-        return resourceGroupDAO.findById(id);
+        return ResourceGroup.findResourceGroup(id);
     }
 
     /**
@@ -278,7 +276,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
 
         Role role = roleDAO.findById(rolePk);
 
-        permissionManager.check(whoami.getId(), role.getResource().getResourceType(), role.getId(),
+        permissionManager.check(whoami.getId(), role.getResource().getType(), role.getId(),
             AuthzConstants.roleOpRemoveRole);
         applicationContext.publishEvent(new RoleDeleteRequestedEvent(role));
         for (RoleCalendar c : role.getCalendars()) {
@@ -303,7 +301,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
             validateRole(role);
         }
 
-        permissionManager.check(whoami.getId(), roleLocal.getResource().getResourceType(), roleLocal.getId(),
+        permissionManager.check(whoami.getId(), roleLocal.getResource().getType(), roleLocal.getId(),
             AuthzConstants.roleOpModifyRole);
         roleLocal.setRoleValue(role);
     }
@@ -321,7 +319,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
     public void changeOwner(AuthzSubject whoami, Integer id, AuthzSubject owner) throws PermissionException {
         Role roleLocal = lookupRole(id);
 
-        permissionManager.check(whoami.getId(), roleLocal.getResource().getResourceType(), roleLocal.getId(),
+        permissionManager.check(whoami.getId(), roleLocal.getResource().getType(), roleLocal.getId(),
             AuthzConstants.roleOpModifyRole);
 
         roleLocal.getResource().setOwner(owner);
@@ -376,7 +374,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
         if (operations != null) {
             Role roleLocal = lookupRole(id);
 
-            permissionManager.check(whoami.getId(), roleLocal.getResource().getResourceType(), roleLocal.getId(),
+            permissionManager.check(whoami.getId(), roleLocal.getResource().getType(), roleLocal.getId(),
                 AuthzConstants.roleOpModifyRole);
 
             Set<OperationType> opLocals = toPojos(operations);
@@ -436,7 +434,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
     public void removeResourceGroups(AuthzSubject whoami, Integer id, Integer[] gids) throws PermissionException {
         Role roleLocal = lookupRole(id);
 
-        permissionManager.check(whoami.getId(), roleLocal.getResource().getResourceType(), roleLocal.getId(),
+        permissionManager.check(whoami.getId(), roleLocal.getResource().getType(), roleLocal.getId(),
             AuthzConstants.roleOpModifyRole);
 
         for (int i = 0; i < gids.length; i++) {
@@ -461,7 +459,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
         for (int i = 0; i < ids.length; i++) {
             Role roleLocal = lookupRole(ids[i]);
 
-            permissionManager.check(whoami.getId(), roleLocal.getResource().getResourceType(), roleLocal.getId(),
+            permissionManager.check(whoami.getId(), roleLocal.getResource().getType(), roleLocal.getId(),
                 AuthzConstants.roleOpModifyRole);
 
             roleLocal.removeResourceGroup(group);
@@ -481,7 +479,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
      */
     public void removeAllResourceGroups(AuthzSubject whoami, Role role) throws PermissionException {
 
-        permissionManager.check(whoami.getId(), role.getResource().getResourceType(), role.getId(),
+        permissionManager.check(whoami.getId(), role.getResource().getType(), role.getId(),
             AuthzConstants.roleOpModifyRole);
         role.clearResourceGroups();
     }
@@ -543,7 +541,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
     public RoleCalendar createCalendar(AuthzSubject whoami, Role r, String calendarName, RoleCalendarType type)
         throws PermissionException {
 
-        permissionManager.check(whoami.getId(), r.getResource().getResourceType(), r.getId(),
+        permissionManager.check(whoami.getId(), r.getResource().getType(), r.getId(),
             AuthzConstants.roleOpModifyRole);
 
         Calendar cal = calendarManager.createCalendar(calendarName);
@@ -576,7 +574,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
 
         int numSubjects = authzSubjectDAO.size(local.getSubjects());
 
-        permissionManager.check(whoami.getId(), local.getResource().getResourceType(), id,
+        permissionManager.check(whoami.getId(), local.getResource().getType(), id,
             AuthzConstants.roleOpViewRole);
 
         OwnedRoleValue value = new OwnedRoleValue(local);
@@ -1053,7 +1051,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
     public Collection<ResourceGroup> getResourceGroupsByRole(AuthzSubject subject,Role role)
         throws PermissionException, NotFoundException {
            Collection<ResourceGroup> groups =
-                   resourceGroupDAO.findByRoleIdAndSystem_orderName(role.getId(), false, true);
+                   ResourceGroup.findByRoleIdAndSystem_orderName(role.getId(), false, true);
             
            // now get viewable group pks
            return filterViewableGroups(subject, groups);
@@ -1078,7 +1076,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
 
         switch (attr) {
             case SortAttribute.RESGROUP_NAME:
-                groups = resourceGroupDAO.findByRoleIdAndSystem_orderName(roleId, system, pc.isAscending());
+                groups = ResourceGroup.findByRoleIdAndSystem_orderName(roleId, system, pc.isAscending());
                 break;
 
             default:
@@ -1104,7 +1102,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
     @Transactional(readOnly=true)
     public PageList<RoleValue> getResourceGroupRoles(AuthzSubject whoami, Integer groupId, PageControl pc)
         throws PermissionException {
-        ResourceGroup resGrp = resourceGroupDAO.findById(groupId);
+        ResourceGroup resGrp = ResourceGroup.findResourceGroup(groupId);
 
         permissionManager.check(whoami.getId(), AuthzConstants.authzGroup, resGrp.getId(),
             AuthzConstants.perm_viewResourceGroup);
@@ -1178,8 +1176,8 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
 
         switch (attr) {
             case SortAttribute.RESGROUP_NAME:
-                noRoles = resourceGroupDAO.findWithNoRoles_orderName(pc.isAscending());
-                otherRoles = resourceGroupDAO.findByNotRoleId_orderName(role.getId(), pc.isAscending());
+                noRoles = ResourceGroup.findWithNoRoles_orderName(pc.isAscending());
+                otherRoles = ResourceGroup.findByNotRoleId_orderName(role.getId(), pc.isAscending());
                 break;
 
             default:
@@ -1204,7 +1202,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
         }
 
         // Add the groups that the role already owns
-        Collection<ResourceGroup> belongs = resourceGroupDAO.findByRoleIdAndSystem_orderName(roleId, false, true);
+        Collection<ResourceGroup> belongs = ResourceGroup.findByRoleIdAndSystem_orderName(roleId, false, true);
         for (ResourceGroup s : belongs) {
             index.add(s.getId());
         }
@@ -1375,7 +1373,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
     }
 
     /**
-     * Find all {@link Operation} objects
+     * Find all {@link OperationType} objects
      * 
      * 
      */
@@ -1397,7 +1395,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
             } else if (vals[i] instanceof RoleValue) {
                 ret.add(roleDAO.findById(((RoleValue) vals[i]).getId()));
             } else if (vals[i] instanceof ResourceGroupValue) {
-                ret.add(resourceGroupDAO.findById(((ResourceGroupValue) vals[i]).getId()));
+                ret.add(ResourceGroup.findResourceGroup(((ResourceGroupValue) vals[i]).getId()));
             } else {
                 log.error("Invalid type.");
             }
@@ -1409,9 +1407,9 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
     private Resource lookupResource(ResourceValue resource) {
         if (resource.getId() == null) {
             ResourceType type = resource.getResourceType();
-            return resourceDAO.findByInstanceId(type, resource.getInstanceId());
+            return Resource.findByInstanceId(type.getId(), resource.getInstanceId());
         }
-        return resourceDAO.findById(resource.getId());
+        return Resource.findResource(resource.getId());
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {

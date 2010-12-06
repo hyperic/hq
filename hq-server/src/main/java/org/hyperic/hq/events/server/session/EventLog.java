@@ -26,7 +26,7 @@
 package org.hyperic.hq.events.server.session;
 
 import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.util.data.IEventPoint;
 
 public class EventLog extends PersistedObject implements IEventPoint {

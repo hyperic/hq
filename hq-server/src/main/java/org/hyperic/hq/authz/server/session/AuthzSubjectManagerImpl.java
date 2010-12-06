@@ -69,7 +69,6 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
     private static final String SUBJECT_PAGER = PagerProcessor_subject.class.getName();
     private Pager subjectPager;
     private AuthzSubjectDAO authzSubjectDAO;
-    private ResourceDAO resourceDAO;
     private CrispoManager crispoManager;
     private PermissionManager permissionManager;
     private UserAuditFactory userAuditFactory;
@@ -77,12 +76,10 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
 
     @Autowired
     public AuthzSubjectManagerImpl(AuthzSubjectDAO authzSubjectDAO,
-                                   ResourceDAO resourceDAO,
                                    CrispoManager crispoManager,
                                    PermissionManager permissionManager,
                                    UserAuditFactory userAuditFactory) {
         this.authzSubjectDAO = authzSubjectDAO;
-        this.resourceDAO = resourceDAO;
         this.crispoManager = crispoManager;
         this.permissionManager = permissionManager;
         this.userAuditFactory = userAuditFactory;
@@ -252,7 +249,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
         }
 
         // Reassign all resources to the root user before deleting
-        resourceDAO.reassignResources(subject.intValue(), AuthzConstants.rootSubjectId.intValue());
+        authzSubjectDAO.reassignResources(subject.intValue(), AuthzConstants.rootSubjectId.intValue());
 
         applicationContext.publishEvent(new SubjectDeleteRequestedEvent(toDelete));
      

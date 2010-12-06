@@ -36,8 +36,6 @@ import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.bizapp.shared.GalertBoss;
@@ -56,6 +54,8 @@ import org.hyperic.hq.galerts.server.session.GtriggerType;
 import org.hyperic.hq.galerts.server.session.GtriggerTypeInfo;
 import org.hyperic.hq.galerts.shared.GalertManager;
 import org.hyperic.hq.galerts.shared.GtriggerManager;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
@@ -180,7 +180,7 @@ public class GalertBossImpl implements GalertBoss {
         PageList<GalertDef> defList = null;
         try {
             // ...check that user can view alert definitions...
-            alertPermissionManager.canViewAlertDefinition(subj, AppdefUtil.newAppdefEntityId(g.getResource()));
+            alertPermissionManager.canViewAlertDefinition(subj, AppdefUtil.newAppdefEntityId(g));
             defList = galertManager.findAlertDefs(g, pc);
         } catch (PermissionException e) {
             // user does not have sufficient permissions, so display no
@@ -277,7 +277,7 @@ public class GalertBossImpl implements GalertBoss {
             AuthzSubject subj = sessionManager.getSubject(sessionId);
             ResourceGroup g = resourceGroupManager.findResourceGroupById(subj, gid);
             // ...check that user can view alert definitions...
-            alertPermissionManager.canViewAlertDefinition(subj, AppdefUtil.newAppdefEntityId(g.getResource()));
+            alertPermissionManager.canViewAlertDefinition(subj, AppdefUtil.newAppdefEntityId(g));
 
             // Don't need to have any results
             PageControl pc = new PageControl();
@@ -313,7 +313,7 @@ public class GalertBossImpl implements GalertBoss {
         JSONArray jarr = new JSONArray();
 
         try {
-            AppdefEntityID entityId = AppdefUtil.newAppdefEntityId(g.getResource());
+            AppdefEntityID entityId = AppdefUtil.newAppdefEntityId(g);
             // ...check that user can view alert definitions...
             alertPermissionManager.canViewAlertDefinition(subj, entityId);
             alertLogs =

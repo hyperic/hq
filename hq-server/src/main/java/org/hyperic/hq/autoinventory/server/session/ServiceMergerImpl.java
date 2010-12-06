@@ -44,12 +44,12 @@ import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.autoinventory.server.session.RuntimeReportProcessor.ServiceMergeInfo;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventManager;
@@ -156,8 +156,7 @@ public class ServiceMergerImpl implements ServiceMerger {
             }
 
             // CONFIGURE SERVICE
-            final boolean wasUpdated = configManager.configureResponse(sInfo.subject, service
-                .getConfigResponse(), service.getEntityId(), aiservice.getProductConfig(),
+            final boolean wasUpdated = configManager.configureResponse(sInfo.subject,service.getEntityId(), aiservice.getProductConfig(),
                 aiservice.getMeasurementConfig(), aiservice.getControlConfig(), aiservice
                     .getResponseTimeConfig(), null, false);
             if (update && wasUpdated) {

@@ -1,6 +1,8 @@
 package org.hyperic.hq.inventory.domain;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -41,14 +43,6 @@ public class Config {
     @RelatedTo(type = "HAS_CONFIG", direction = Direction.OUTGOING, elementClass = Resource.class)
     private Resource resource;
 
-    @Transient
-    @ManyToOne
-    @RelatedTo(type = "IS_CONFIG_TYPE", direction = Direction.OUTGOING, elementClass = ConfigType.class)
-    private ConfigType type;
-
-    @GraphProperty
-    private Object value;
-
     @Version
     @Column(name = "version")
     private Integer version;
@@ -71,12 +65,33 @@ public class Config {
         return this.id;
     }
 
-    public Object getValue() {
-        return value;
-    }
-
     public Integer getVersion() {
         return this.version;
+    }
+    
+    public Map<String,Object> getValues() {
+        Map<String, Object> properties = new HashMap<String, Object>();
+        for (String key : getUnderlyingState().getPropertyKeys()) {
+            try {
+                properties.put(key, getValue(key));
+            } catch (IllegalArgumentException e) {
+                // filter out the properties we've defined at class-level, like
+                // name
+            }
+        }
+        return properties;
+    }
+    
+    public Object getValue(String key) {
+         //TODO default values
+        return getUnderlyingState().getProperty(key);
+    }
+    
+    public void setValue(String key, Object value) {
+        //TODO type validation?
+        
+        // TODO check other stuff?
+        getUnderlyingState().setProperty(key, value);
     }
 
     @Transactional
@@ -109,10 +124,6 @@ public class Config {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public void setValue(Object value) {
-        this.value = value;
     }
 
     public void setVersion(Integer version) {

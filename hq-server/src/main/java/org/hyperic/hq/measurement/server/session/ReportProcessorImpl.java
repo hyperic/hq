@@ -49,9 +49,9 @@ import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.DSNList;
@@ -298,7 +298,7 @@ public class ReportProcessorImpl implements ReportProcessor {
         if (resource == null || resource.isInAsyncDeleteState()) {
             return false;
         }
-        final Integer resType = resource.getResourceType().getId();
+        final Integer resType = resource.getType().getId();
         final Integer aeid = resource.getInstanceId();
         try {
             if (resType.equals(AuthzConstants.authzPlatform)) {

@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.authz.server.shared;
 
-import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.inventory.domain.Resource;
 
 public class ResourceDeletedException extends Exception {
     public ResourceDeletedException(String m, Throwable t) {

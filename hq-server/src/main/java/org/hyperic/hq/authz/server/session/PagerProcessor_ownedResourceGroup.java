@@ -27,10 +27,12 @@ package org.hyperic.hq.authz.server.session;
 
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.values.OwnedResourceGroupValue;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.util.pager.PagerProcessor;
 
 public class PagerProcessor_ownedResourceGroup implements PagerProcessor {
-    private ResourceDAO dao = null;
+   
 
     public PagerProcessor_ownedResourceGroup () {}
 
@@ -42,7 +44,7 @@ public class PagerProcessor_ownedResourceGroup implements PagerProcessor {
 
                 ResourceGroup group = (ResourceGroup) o;
                 Resource resource =
-                    dao.findByInstanceId(AuthzConstants.authzGroup,
+                    Resource.findByInstanceId(AuthzConstants.authzGroup,
                                          group.getId());
 
                 return new OwnedResourceGroupValue(group.getResourceGroupValue(),

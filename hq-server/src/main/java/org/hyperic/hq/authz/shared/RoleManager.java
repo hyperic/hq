@@ -29,8 +29,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.RoleCalendar;
 import org.hyperic.hq.authz.server.session.RoleCalendarType;
@@ -38,6 +36,7 @@ import org.hyperic.hq.authz.values.OwnedRoleValue;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.inventory.domain.OperationType;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -457,7 +456,7 @@ public interface RoleManager {
     public void removeSubjects(AuthzSubject whoami, Integer id, java.lang.Integer[] ids) throws PermissionException;
 
     /**
-     * Find all {@link Operation} objects
+     * Find all {@link OperationType} objects
      */
     public Collection<OperationType> findAllOperations();
 

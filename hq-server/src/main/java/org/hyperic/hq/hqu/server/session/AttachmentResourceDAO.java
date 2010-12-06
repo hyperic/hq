@@ -28,9 +28,9 @@ package org.hyperic.hq.hqu.server.session;
 import java.util.Collection;
 
 import org.hibernate.SessionFactory;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -52,7 +52,7 @@ public class AttachmentResourceDAO
     }
 
     Collection findFor(Resource r, ViewResourceCategory cat) {
-        if (resourceIsPrototype(r.getResourceType())) {
+        if (resourceIsPrototype(r.getType())) {
             String sql = "select a from AttachmentResource a " +
                 "join a.resource r " +
                 "where r = :resource and " +

@@ -30,7 +30,6 @@ import junit.framework.TestCase;
 
 import org.easymock.EasyMock;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.common.util.MessagePublisher;
 import org.hyperic.hq.escalation.server.session.Escalatable;
@@ -40,6 +39,7 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.MockEvent;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.shared.AlertManager;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 /**
@@ -91,7 +91,9 @@ public class ClassicEscalatableCreatorTest
                                                                           messagePublisher,
                                                                           alertManager);
 
-        Resource resource = new Resource(new ResourceType(), null, null, null, null, true);
+        //TODO this was setting system to true.  Did it matter?
+        Resource resource = new Resource();
+        resource.setType(new ResourceType());
         alertDef.setResource(resource);
         Alert alert = new Alert();
         alert.setId(alertId);

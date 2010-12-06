@@ -44,7 +44,6 @@ import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.UserPreferencesUpdatedEvent;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -61,6 +60,7 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.inventory.domain.OperationType;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.ConfigPropertyException;
@@ -332,7 +332,7 @@ public class AuthzBossImpl implements AuthzBoss {
         // first look up the resources by owner
         Collection<Resource> resources = resourceManager.findResourceByOwner(currentOwner);
         for (Resource aRes : resources) {
-            String resType = aRes.getResourceType().getName();
+            String resType = aRes.getType().getName();
             if (resType.equals(AuthzConstants.roleResourceTypeName)) {
                 resourceManager.setResourceOwner(authzSubjectManager.getOverlordPojo(), aRes, authzSubjectManager
                     .getOverlordPojo());

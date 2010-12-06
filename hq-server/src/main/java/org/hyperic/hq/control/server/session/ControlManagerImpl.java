@@ -37,7 +37,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -49,7 +48,6 @@ import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -70,6 +68,8 @@ import org.hyperic.hq.control.shared.ControlScheduleManager;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
+import org.hyperic.hq.inventory.domain.Config;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.product.ControlPluginManager;
 import org.hyperic.hq.product.PluginException;
@@ -437,17 +437,8 @@ public class ControlManagerImpl implements ControlManager {
      */
     @Transactional(readOnly=true)
     public void checkControlEnabled(AuthzSubject subject, AppdefEntityID id) throws PluginException {
-        ConfigResponseDB config;
-
-        try {
-            config = configManager.getConfigResponse(id);
-        } catch (IllegalArgumentException iae) {
-            throw new PluginException(iae);
-        } catch (Exception e) {
-            throw new PluginException(e);
-        }
-
-        if (config == null || config.getControlResponse() == null) {
+        Config config = Resource.findResource(id.getId()).getControlConfig();
+        if (config == null) {
             throw new PluginException("Control not " + "configured for " + id);
         }
     }

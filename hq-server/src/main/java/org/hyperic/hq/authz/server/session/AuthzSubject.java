@@ -35,7 +35,7 @@ import org.hyperic.hq.inventory.domain.Resource;
 import org.springframework.datastore.graph.annotation.NodeEntity;
 
 @NodeEntity(partial=true)
-public class AuthzSubject extends AuthzNamedBean {
+public class AuthzSubject  {
     private String     _dsn;
     private String     _firstName;
     private String     _lastName;
@@ -49,6 +49,17 @@ public class AuthzSubject extends AuthzNamedBean {
     private Resource   _resource;
     private Collection _roles = new HashSet();
     private Crispo     _prefs;
+    private String _name;
+    private String _sortName;
+    private Integer _id;
+
+    // for hibernate optimistic locks -- don't mess with this.
+    // Named ugly-style since we already use VERSION in some of our tables.
+    // really need to use Long instead of primitive value
+    // because the database column can allow null version values.
+    // The version column IS NULLABLE for migrated schemas. e.g. HQ upgrade
+    // from 2.7.5.
+    private Long    _version_;
     
     private AuthzSubjectValue _valueObj;
 
@@ -71,6 +82,33 @@ public class AuthzSubject extends AuthzNamedBean {
         setPhoneNumber(phone);
         setSMSAddress(sms);
         setSystem(system);
+    }
+    
+    public void setId(Integer id) {
+        _id = id;
+    }
+
+    public Integer getId() {
+        return _id;
+    }
+    
+    public String getName() {
+        return _name;
+    }
+
+    public void setName(String name) {
+        if (name == null)
+            name = "";
+        _name = name;
+        setSortName(name);
+    }
+
+    public String getSortName() {
+        return _sortName;
+    }
+
+    public void setSortName(String sortName) {
+        _sortName = sortName != null ? sortName.toUpperCase() : null;
     }
 
     public String getAuthDsn() {

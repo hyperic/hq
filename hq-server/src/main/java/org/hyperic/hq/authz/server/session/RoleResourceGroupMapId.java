@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.authz.server.session;
 
+import org.hyperic.hq.inventory.domain.ResourceGroup;
+
 // Generated Oct 17, 2006 12:45:08 PM by Hibernate Tools 3.1.0.beta4
 
 

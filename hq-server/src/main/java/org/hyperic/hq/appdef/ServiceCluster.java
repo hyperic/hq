@@ -33,8 +33,8 @@ import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.server.session.ServiceTypeDAO;
 import org.hyperic.hq.appdef.shared.AppSvcClustIncompatSvcException;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 
 public class ServiceCluster extends AppdefBean
 {

@@ -42,7 +42,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.AppService;
-import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
@@ -59,9 +58,6 @@ import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-
-import org.hyperic.hq.authz.server.session.Resource;
-
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -75,6 +71,7 @@ import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.common.shared.AuditManager;
 import org.hyperic.hq.inventory.domain.OperationType;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.ServerTypeInfo;
@@ -104,7 +101,6 @@ public class ServerManagerImpl implements ServerManager {
 
     private PermissionManager permissionManager;
     private ApplicationDAO applicationDAO;
-    private ConfigResponseDAO configResponseDAO;
     private PlatformDAO platformDAO;
     private ServerDAO serverDAO;
     private PlatformTypeDAO platformTypeDAO;
@@ -124,7 +120,7 @@ public class ServerManagerImpl implements ServerManager {
 
     @Autowired
     public ServerManagerImpl(PermissionManager permissionManager, ApplicationDAO applicationDAO,
-                             ConfigResponseDAO configResponseDAO, PlatformDAO platformDAO, ServerDAO serverDAO,
+                              PlatformDAO platformDAO, ServerDAO serverDAO,
                              PlatformTypeDAO platformTypeDAO, ResourceManager resourceManager,
                              ServerTypeDAO serverTypeDAO, ServiceDAO serviceDAO, ServiceTypeDAO serviceTypeDAO,
                              ServiceManager serviceManager, CPropManager cpropManager, ConfigManager configManager,
@@ -134,7 +130,6 @@ public class ServerManagerImpl implements ServerManager {
 
         this.permissionManager = permissionManager;
         this.applicationDAO = applicationDAO;
-        this.configResponseDAO = configResponseDAO;
         this.platformDAO = platformDAO;
         this.serverDAO = serverDAO;
         this.platformTypeDAO = platformTypeDAO;
@@ -289,15 +284,14 @@ public class ServerManagerImpl implements ServerManager {
                 }
             }
         }
-        ConfigResponseDB cr = serverToClone.getConfigResponse();
-        byte[] productResponse = cr.getProductResponse();
-        byte[] measResponse = cr.getMeasurementResponse();
-        byte[] controlResponse = cr.getControlResponse();
-        byte[] rtResponse = cr.getResponseTimeResponse();
+        Resource resource = serverToClone.getResource();
+        byte[] productResponse = configManager.toConfigResponse(resource.getProductConfig());
+        byte[] measResponse = configManager.toConfigResponse(resource.getMeasurementConfig());
+        byte[] controlResponse = configManager.toConfigResponse(resource.getControlConfig());
+        byte[] rtResponse = configManager.toConfigResponse(resource.getResponseTimeConfig());
 
         if (s == null) {
-            ConfigResponseDB configResponse = configManager.createConfigResponse(productResponse, measResponse,
-                controlResponse, rtResponse);
+            
             s = new Server();
             s.setName(getTargetServerName(targetPlatform, serverToClone));
             s.setDescription(serverToClone.getDescription());
@@ -319,7 +313,8 @@ public class ServerManagerImpl implements ServerManager {
             s.setAutodiscoveryZombie(false);
             s.setLocation(serverToClone.getLocation());
             s.setModifiedBy(serverToClone.getModifiedBy());
-            s.setConfigResponse(configResponse);
+            configManager.createConfigResponse(s.getId(),productResponse, measResponse,
+                controlResponse, rtResponse);
             s.setPlatform(targetPlatform);
 
             Integer stid = serverToClone.getServerType().getId();
@@ -337,7 +332,7 @@ public class ServerManagerImpl implements ServerManager {
             ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, s.getEntityId());
             zeventManager.enqueueEventAfterCommit(zevent);
         } else {
-            boolean wasUpdated = configManager.configureResponse(subject, cr, s.getEntityId(),
+            boolean wasUpdated = configManager.configureResponse(subject, s.getEntityId(),
                 productResponse, measResponse,controlResponse, rtResponse,
                 null, true);
             if (wasUpdated) {
@@ -597,14 +592,15 @@ public class ServerManagerImpl implements ServerManager {
             server.getServerType().getServers().remove(server);
 
             // Keep config response ID so it can be deleted later.
-            final ConfigResponseDB config = server.getConfigResponse();
+            //final ConfigResponseDB config = server.getConfigResponse();
 
             serverDAO.remove(server);
 
+            //TODO?
             // Remove the config response
-            if (config != null) {
-                configResponseDAO.remove(config);
-            }
+            //if (config != null) {
+              //  configResponseDAO.remove(config);
+           // }
             cpropManager.deleteValues(aeid.getType(), aeid.getID());
 
             // Remove authz resource
