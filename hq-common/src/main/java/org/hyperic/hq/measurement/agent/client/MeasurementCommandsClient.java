@@ -37,7 +37,8 @@ import org.hyperic.util.config.ConfigResponse;
 
 public interface MeasurementCommandsClient {
     
-    void closeConnection() throws AgentRemoteException;
+// XXX don't think this is needed
+//    void closeConnection() throws AgentRemoteException;
 
     /**
      * Schedule a group of measurements on the agent.  This routine cannot

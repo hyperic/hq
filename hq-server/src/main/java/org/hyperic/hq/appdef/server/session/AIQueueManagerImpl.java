@@ -27,6 +27,7 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -77,6 +78,7 @@ import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -379,7 +381,11 @@ public class AIQueueManagerImpl implements AIQueueManager {
         if (aiPlat == null) {
             return;
         }
-        aiPlatformDAO.remove(aiPlat);
+        try {
+            aiPlatformDAO.remove(aiPlat);
+        } catch (ObjectNotFoundException e) {
+            log.debug(e,e);
+        }
     }
 
     /**
@@ -455,7 +461,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * 
      * 
      */
-    @Transactional
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
     public List<AppdefResource> processQueue(AuthzSubject subject, List<Integer> platformList,
                                              List<Integer> serverList, List<Integer> ipList,
                                              int action) throws PermissionException,
@@ -508,7 +514,8 @@ public class AIQueueManagerImpl implements AIQueueManager {
                     if (isPurgeAction) {
                         continue;
                     } else {
-                        throw new ObjectNotFoundException(id, AIPlatform.class.getName());
+//                        throw new ObjectNotFoundException(id, AIPlatform.class.getName());
+                        return Collections.emptyList();
                     }
                 }
 
@@ -680,7 +687,11 @@ public class AIQueueManagerImpl implements AIQueueManager {
     @Transactional(readOnly = true)
     public AIPlatformValue getAIPlatformByPlatformID(AuthzSubject subject, Integer platformID) {
         AIPlatform aip = getAIPlatformByPlatformID(platformID);
-        return (aip == null) ? null : aip.getAIPlatformValue();
+        try {
+            return (aip == null) ? null : aip.getAIPlatformValue();
+        } catch (ObjectNotFoundException e) {
+            return null;
+        }
     }
 
     private AIPlatform getAIPlatformByPlatformID(Integer platformID) {

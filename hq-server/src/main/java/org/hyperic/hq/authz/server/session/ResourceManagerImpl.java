@@ -600,7 +600,6 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      * @param subject
      * @return Map of resource values
      * 
-     */
     @Transactional(readOnly = true)
     public List<Integer> findViewableInstances(AuthzSubject subject, String typeName,
                                                String resName, String appdefTypeStr,
@@ -612,8 +611,10 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         }
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        return pm.findViewableResources(subject, typeName, resName, appdefTypeStr, typeId, pc);
+    pm.findViewableResources(subject));
+        pm.findViewableResources(subject, typeName, resName, appdefTypeStr, typeId, pc));
     }
+     */
 
     /**
      * Get viewable resources by "type" OR "resource name"
@@ -647,22 +648,41 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      * 
      */
     @Transactional(readOnly = true)
-    public Map<String, List<Integer>> findAllViewableInstances(AuthzSubject subject) {
+    public Map<String, Collection<Integer>> findAllViewableInstances(AuthzSubject subject,
+                                                                     ResourceType resourceType) {
+        final Map<String, Collection<Integer>> rtn = new HashMap<String, Collection<Integer>>();
+        final PermissionManager pm = PermissionManagerFactory.getInstance();
+        final Set<Integer> resources = pm.findViewableResources(subject, resourceType);
+        for (final Integer resId : resources) {
+            final Resource res = findResourceById(resId);
+            if (res == null || res.isInAsyncDeleteState() || res.isSystem()) {
+                continue;
+            }
+            final String type = res.getResourceType().getName();
+            Collection<Integer> tmp;
+            if (null == (tmp = rtn.get(type))) {
+                tmp = new ArrayList<Integer>();
+                rtn.put(type, tmp);
+            }
+            tmp.add(res.getInstanceId());
+        }
+        return rtn;
+/*
         // First get all resource types
-        Map<String, List<Integer>> resourceMap = new HashMap<String, List<Integer>>();
-
         Collection<ResourceType> resTypes = resourceTypeDAO.findAll();
         for (ResourceType type : resTypes) {
             String typeName = type.getName();
-
             // Now fetch list by the type
-            List<Integer> ids = findViewableInstances(subject, typeName, null, null, null,
-                PageControl.PAGE_ALL);
+// XXX fix this!
+            List<Integer> ids =
+                new ArrayList(
+                    findViewableInstances(subject, typeName, null, null, null, PageControl.PAGE_ALL));
             if (ids.size() > 0) {
                 resourceMap.put(typeName, ids);
             }
         }
         return resourceMap;
+*/
     }
 
     /**
@@ -1361,6 +1381,10 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
+    }
+
+    public ResourceType findResourceTypeById(Integer id) {
+        return resourceTypeDAO.findById(id);
     }
 
 }

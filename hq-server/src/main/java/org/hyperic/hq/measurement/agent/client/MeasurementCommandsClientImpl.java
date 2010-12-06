@@ -164,9 +164,11 @@ public class MeasurementCommandsClientImpl
         }
     }
 
+/* XXX don't think this is needed
     public void closeConnection() throws AgentRemoteException {
         // nothing to do here since it is all handled through jboss remoting
         // via safeDestroyService()
     }
+*/
 
 }

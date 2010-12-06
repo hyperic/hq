@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -122,9 +123,10 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
-import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
+import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -2217,34 +2219,34 @@ public class AppdefBossImpl implements AppdefBoss {
         List<AppdefEntityID> appentResources = new ArrayList<AppdefEntityID>();
 
         if (appdefTypeId != APPDEF_TYPE_UNDEFINED) {
-            String authzResType = AppdefUtil.appdefTypeIdToAuthzTypeStr(appdefTypeId);
-
-            String appdefTypeStr;
+            ResourceType resourceType = null;
             if (filterType != null) {
                 switch (appdefTypeId) {
                     case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                        resourceType = resourceManager.findResourceTypeById(AuthzConstants.authzPlatform);
+                        break;
                     case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                        resourceType = resourceManager.findResourceTypeById(AuthzConstants.authzServer);
+                        break;
                     case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                        appdefTypeStr = AppdefEntityConstants.typeToString(appdefTypeId);
+                        resourceType = resourceManager.findResourceTypeById(AuthzConstants.authzService);
                         break;
                     default:
-                        appdefTypeStr = null;
                         break;
                 }
-            } else {
-                appdefTypeStr = null;
             }
+            Map<String, Collection<Integer>> instanceIds =
+                resourceManager.findAllViewableInstances(subject, resourceType);
 
-            List<Integer> instanceIds = resourceManager.findViewableInstances(subject,
-                authzResType, rName, appdefTypeStr, filterType, pc);
-
-            for (Integer instanceId : instanceIds) {
-                appentResources.add(new AppdefEntityID(appdefTypeId, instanceId));
+            for (final Entry<String, Collection<Integer>> entry : instanceIds.entrySet()) {
+                for (final Integer instanceId : entry.getValue()) {
+                    appentResources.add(new AppdefEntityID(appdefTypeId, instanceId));
+                }
             }
         } else {
-            Map<String, List<Integer>> authzResources = resourceManager
-                .findAllViewableInstances(subject);
-            for (Map.Entry<String, List<Integer>> entry : authzResources.entrySet()) {
+            Map<String, Collection<Integer>> authzResources =
+                resourceManager.findAllViewableInstances(subject, null);
+            for (Map.Entry<String, Collection<Integer>> entry : authzResources.entrySet()) {
 
                 int appdefType;
                 try {
@@ -2255,7 +2257,7 @@ public class AppdefBossImpl implements AppdefBoss {
                     continue;
                 }
 
-                List<Integer> instIds = entry.getValue();
+                Collection<Integer> instIds = entry.getValue();
 
                 for (Integer instId : instIds) {
                     appentResources.add(new AppdefEntityID(appdefType, instId));
