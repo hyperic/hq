@@ -43,21 +43,16 @@
 
                         This version of the plugin requires that the HQ Agent that manages RabbitMQ has permission to read the Erlang cookie.
 
-                        <h4>Configuration Requirements</h4>
+                        <h3>Configuration Requirements</h3>
                         The HQ Agent on the platform where the RabbitMQ server should auto-discover the "RabbitMQ" server instance — assuming
                         at least one RabbitMQ Node is running. — and present it as a new server on the platform in the Auto-Discovery portlet
-                        of the HQ Dashboard. To enable metric collection and auto-discovery of RabbitMQ services:
-
+                        of the HQ Dashboard.
+                        <h3>Config properties</h3>
                         <ol>
-                           <li>Import the platform with the new RabbitMQ server to inventory</li>
-                           <li>Navigate to the Rabbit MQ server, using Resources > Browse > Servers</li>
-                           <li>Under the Server (Node), navigate to Tools Menu > Configure Server</li>
-                           <li>Enter the RabbitMQ username and password for the RabbitMQ server and click OK. Hyperic assumes the default</li>
-                           RabbitMQ username and password have been changed for security reasons and does set them as the default</li>
+                            <li><b>node</b>: RabbitMQ node name (rabbit_X@servername)</li>
+                            <li><b>authentication</b>: Content of .erlang.cookie file</li>
+                            <li><b>process.query</b>: Sigar PTQL Query for RaabitMQ process (default='State.Name.re=[beam|erl],Args.*.eq=-sname,Args.*.eq=%node%')</li>
                         </ol>
-
-                         This will allow enable the plugin to authenticate, auto-discover Queue, Channel, Connection, Exchanges, etc., and
-                         proceed with metric collection. Note: Discovered services are automatically imported to HQ inventory.
                   </p>
                   <p>
                     <h3>Help Docs</h3>

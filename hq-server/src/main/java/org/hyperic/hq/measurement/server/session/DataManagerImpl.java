@@ -1472,7 +1472,15 @@ public class DataManagerImpl implements DataManager {
                                              final long start, final long finish,
                                              final long windowSize, final boolean returnNulls,
                                              final AtomicLong publishedInterval) {
-        final MeasRange[] ranges = MeasTabManagerUtil.getMetricRanges(start, finish);
+        final String[] tables = getDataTables(start, finish, false);
+        if (tables.length <= 0) {
+            throw new SystemException(
+                "ERROR: no data tables represent range " + TimeUtil.toString(start) +
+                " - " + TimeUtil.toString(finish));
+        }
+        final MeasRange[] ranges = (tables.length > 1) ?
+            MeasTabManagerUtil.getMetricRanges(start, finish) :
+            new MeasRange[] {new MeasRange(tables[0], start, finish)};
         final String threadName = Thread.currentThread().getName();
         final List<Thread> threads = new ArrayList<Thread>(ranges.length);
         final Collection<AggMetricValue[]> data = new ArrayList<AggMetricValue[]>(ranges.length);
