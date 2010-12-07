@@ -40,7 +40,8 @@ public class VSphereConnection {
     private static final Log _log = LogFactory.getLog(VSphereConnection.class);
     private static final Map<String, List<VSphereConnection>> _conns =
         new HashMap<String, List<VSphereConnection>>();
-    private static final int POOL_SIZE = 2;
+    private static final int POOL_SIZE =
+        Integer.valueOf(System.getProperty("vsphere.pool.size", "2"));
 
     final Object LOCK = new Object();
     VSphereUtil vim;
