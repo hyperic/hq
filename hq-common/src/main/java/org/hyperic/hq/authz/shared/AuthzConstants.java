@@ -29,26 +29,6 @@ package org.hyperic.hq.authz.shared;
 
 public final class AuthzConstants {
 
-    // Root Resource Type
-    public static final String rootResType = "covalentAuthzRootResourceType";
-
-    // This assumes that the root resource is always initialized
-    // with the first id available in a sequence that starts at 0
-    public static final Integer rootResourceId = new Integer(0);
-    public static final Integer rootSubjectId = new Integer(1);
-    public static final String groupResourceTypeName =
-        "covalentAuthzResourceGroup";
-    public static final String rootResourceGroupName = "ROOT_RESOURCE_GROUP";
-    public static final Integer rootResourceGroupId = new Integer(1);
-    public static final Integer authzResourceGroupId = new Integer(0);
-
-    // Appdef Resource Types
-    public static final String platformResType = "covalentEAMPlatform";
-    public static final String serverResType = "covalentEAMServer";
-    public static final String serviceResType = "covalentEAMService";
-    public static final String applicationResType = "covalentEAMApplication";
-    public static final String groupResType = "covalentAuthzResourceGroup";
-
     // Appdef Operations
 
     // Platform Operations
@@ -129,21 +109,15 @@ public final class AuthzConstants {
     public static final Integer rootRoleId = new Integer(0);
     public static final String creatorRoleName = "RESOURCE_CREATOR_ROLE";
     public static final String subjectResourceTypeName = "covalentAuthzSubject";
-    public static final String typeResourceTypeName =
-        "covalentAuthzRootResourceType";
+   
     public static final String roleResourceTypeName = "covalentAuthzRole";
     public static final Integer overlordId = new Integer(0);
     public static final String overlordName = "admin";
     public static final String overlordDsn = "covalentAuthzInternalDsn";
     public static final Integer guestId = new Integer(2);
-    public static final String authzResourceGroupName =
-        "covalentAuthzResourceGroup";
+   
     public static final String escalationResourceTypeName = "EscalationScheme";
     public static final String hqSystemResourceTypeName = "HQSystem";
-    public static final String platformPrototypeTypeName = "PlatformPrototype";
-    public static final String serverPrototypeTypeName = "ServerPrototype";
-    public static final String servicePrototypeTypeName = "ServicePrototype";
-    public static final String appPrototypeTypeName = "ApplicationPrototype";
     
     public static final String platformPrototypeVmwareVsphereVm = "VMware vSphere VM";
     public static final String platformPrototypeVmwareVsphereHost = "VMware vSphere Host";
@@ -176,23 +150,11 @@ public final class AuthzConstants {
 
     public static final Integer     authzSubject        =  new Integer(1);
     public static final Integer     authzRole           =  new Integer(2);
-    public static final Integer     authzGroup          =  new Integer(3);
-    public static final Integer     authzPlatform       =  new Integer(301);
-    public static final Integer     authzServer         =  new Integer(303);
-    public static final Integer     authzService        =  new Integer(305);
-    public static final Integer     authzApplication    =  new Integer(308);
     public static final Integer     authzEscalation     =  new Integer(401);
     public static final Integer     authzHQSystem       =  new Integer(501);
     public static final Integer     authzLocation       =  new Integer(309);
-    public static final Integer     authzPlatformProto  =  new Integer(601);
-    public static final Integer     authzServerProto    =  new Integer(602);
-    public static final Integer     authzServiceProto   =  new Integer(603);
-    public static final Integer     authzApplicationProto  =  new Integer(604);
  
     // Resource Relation constants
-    public static final Integer RELATION_CONTAINMENT_ID = new Integer(1);
-    public static final Integer RELATION_NETWORK_ID = new Integer(2);
-    public static final Integer RELATION_VIRTUAL_ID = new Integer(3);
     public static final String ResourceEdgeContainmentRelation = "containment";
     public static final String ResourceEdgeNetworkRelation = "network";
     public static final String ResourceEdgeVirtualRelation = "virtual";

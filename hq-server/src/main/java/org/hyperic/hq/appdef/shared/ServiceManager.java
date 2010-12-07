@@ -29,12 +29,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.hyperic.hq.appdef.ServiceCluster;
-import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.ServerType;
-import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
@@ -43,6 +37,7 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -52,8 +47,8 @@ import org.hyperic.util.pager.PageList;
  */
 public interface ServiceManager {
 
-    public Service createService(AuthzSubject subject, Server server, ServiceType type, String name, String desc,
-                                 String location, Service parent) throws PermissionException;
+    public Resource createService(AuthzSubject subject, Resource server, ResourceType type, String name, String desc,
+                                 String location, Resource parent) throws PermissionException;
 
     /**
      * Move a Service from one Platform to another.
@@ -65,7 +60,7 @@ public interface ServiceManager {
      * @throws VetoException If the operation canot be performed due to
      *         incompatible types.
      */
-    public void moveService(AuthzSubject subject, Service target, Platform destination) throws VetoException,
+    public void moveServiceFromPlatform(AuthzSubject subject, Resource target, Resource destination) throws VetoException,
         PermissionException;
 
     /**
@@ -78,14 +73,14 @@ public interface ServiceManager {
      * @throws VetoException If the operation canot be performed due to
      *         incompatible types.
      */
-    public void moveService(AuthzSubject subject, Service target, Server destination) throws VetoException,
+    public void moveServiceFromServer(AuthzSubject subject, Resource target, Resource destination) throws VetoException,
         PermissionException;
 
     /**
      * Create a Service which runs on a given server
      * @return The service id.
      */
-    public Service createService(AuthzSubject subject, Integer serverId, Integer serviceTypeId, String name,
+    public Resource createService(AuthzSubject subject, Integer serverId, Integer serviceTypeId, String name,
                                  String desc, String location) throws ValidationException, PermissionException,
         ServerNotFoundException, AppdefDuplicateNameException;
 
@@ -103,38 +98,38 @@ public interface ServiceManager {
     /**
      * Find Service by Id.
      */
-    public Service findServiceById(Integer id) throws ServiceNotFoundException;
+    public Resource findServiceById(Integer id) throws ServiceNotFoundException;
 
     /**
      * Get Service by Id.
      * @return The Service identified by this id, or null if it does not exist.
      */
-    public Service getServiceById(Integer id);
+    public Resource getServiceById(Integer id);
 
     /**
      * Get Service by Id and perform permission check.
      * @return The Service identified by this id.
      */
-    public Service getServiceById(AuthzSubject subject, Integer id) throws ServiceNotFoundException,
+    public Resource getServiceById(AuthzSubject subject, Integer id) throws ServiceNotFoundException,
         PermissionException;
 
-    public List<Service> getServicesByAIID(Server server, String aiid);
+    public List<Resource> getServicesByAIID(Resource server, String aiid);
 
-    public Service getServiceByName(Server server, String name);
+    public Resource getServiceByNameAndServer(Resource server, String name);
 
-    public Service getServiceByName(Platform platform, String name);
+    public Resource getServiceByNameAndPlatform(Resource platform, String name);
 
     /**
      * Find a ServiceType by id
      */
-    public ServiceType findServiceType(Integer id) throws org.hibernate.ObjectNotFoundException;
+    public ResourceType findServiceType(Integer id) throws org.hibernate.ObjectNotFoundException;
 
     /**
      * Find service type by name
      */
-    public ServiceType findServiceTypeByName(String name);
+    public ResourceType findServiceTypeByName(String name);
 
-    public Collection<Service> findDeletedServices();
+    public Collection<Resource> findDeletedServices();
     
     public PageList<ServiceTypeValue> getAllServiceTypes(AuthzSubject subject, PageControl pc);
 
@@ -169,7 +164,7 @@ public interface ServiceManager {
     /**
      * Get service POJOs by server and type.
      */
-    public List getServicesByServer(AuthzSubject subject, Server server) throws PermissionException,
+    public List getServicesByServer(AuthzSubject subject, Resource server) throws PermissionException,
         ServiceNotFoundException;
 
     public Integer[] getServiceIdsByServer(AuthzSubject subject, Integer serverId, Integer svcTypeId)
@@ -211,15 +206,15 @@ public interface ServiceManager {
         throws org.hyperic.hq.appdef.shared.PlatformNotFoundException, PermissionException, ServiceNotFoundException;
 
     /**
-     * Get {@link Service}s which are children of the server, and of the
+     * Get {@link Resource}s which are children of the server, and of the
      * specified type.
      */
-    public List<Service> findServicesByType(Server server, ServiceType st);
+    public List<Resource> findServicesByType(Resource server, ResourceType st);
 
     /**
      * Get platform service POJOs
      */
-    public List<Service> findPlatformServicesByType(Platform p, ServiceType st);
+    public List<Resource> findPlatformServicesByType(Resource p, ResourceType st);
 
     /**
      * Get platform service POJOs
@@ -277,23 +272,23 @@ public interface ServiceManager {
     public Integer[] getFlattenedServiceIdsByApplication(AuthzSubject subject, Integer appId)
         throws ServiceNotFoundException, PermissionException, org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 
-    public void updateServiceZombieStatus(AuthzSubject subject, Service svc, boolean zombieStatus)
+    public void updateServiceZombieStatus(AuthzSubject subject, Resource svc, boolean zombieStatus)
         throws PermissionException;
 
-    public Service updateService(AuthzSubject subject, ServiceValue existing) throws PermissionException,
+    public Resource updateService(AuthzSubject subject, ServiceValue existing) throws PermissionException,
         org.hyperic.hq.appdef.shared.UpdateException, org.hyperic.hq.appdef.shared.AppdefDuplicateNameException,
         ServiceNotFoundException;
 
     public void updateServiceTypes(String plugin, org.hyperic.hq.product.ServiceTypeInfo[] infos) throws VetoException, NotFoundException;
 
-    public void deleteServiceType(ServiceType serviceType, AuthzSubject overlord, ResourceGroupManager resGroupMan,
+    public void deleteServiceType(ResourceType serviceType, AuthzSubject overlord, ResourceGroupManager resGroupMan,
                                   ResourceManager resMan) throws VetoException;
 
     /**
      * A removeService method that takes a ServiceLocal. This is called by
      * ServerManager.removeServer when cascading a delete onto services.
      */
-    public void removeService(AuthzSubject subject, Service service) throws PermissionException, VetoException;
+    public void removeService(AuthzSubject subject, Resource service) throws PermissionException, VetoException;
 
     public void handleResourceDelete(Resource resource);
 
@@ -309,9 +304,7 @@ public interface ServiceManager {
      */
     public Number getServiceCount();
 
-    ServiceCluster getServiceCluster(ResourceGroup group);
-
-    ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin, ServerType servType)
+    ResourceType createServiceType(ServiceTypeInfo sinfo, String plugin, ResourceType servType)
     throws NotFoundException;
 
 }

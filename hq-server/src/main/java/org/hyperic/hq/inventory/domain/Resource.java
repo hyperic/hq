@@ -23,6 +23,7 @@ import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.inventory.InvalidRelationshipException;
 import org.hyperic.hq.reference.RelationshipTypes;
@@ -87,6 +88,11 @@ public class Resource {
     @Transient
     @RelatedTo(type = "OWNS", direction = Direction.INCOMING, elementClass = AuthzSubject.class)
     private AuthzSubject owner;
+    
+    @Transient
+    @ManyToOne
+    @RelatedTo(type = "MANAGED_BY", direction = Direction.OUTGOING, elementClass = Agent.class)
+    private Agent agent;
 
     public Resource() {
     }
@@ -190,6 +196,16 @@ public class Resource {
     public Set<Resource> getResourcesTo(String relationName) {
         return getRelatedResources(relationName, org.neo4j.graphdb.Direction.INCOMING);
     }
+    
+    public Resource getResourceFrom(String relationName) {
+        //TODO enforce only one?
+        return getRelatedResources(relationName, org.neo4j.graphdb.Direction.OUTGOING).iterator().next();
+    }
+
+    public Resource getResourceTo(String relationName) {
+        //TODO enforce only one?
+        return getRelatedResources(relationName, org.neo4j.graphdb.Direction.INCOMING).iterator().next();
+    }
 
     private Set<Resource> getRelatedResources(String relationName,
                                               org.neo4j.graphdb.Direction direction) {
@@ -258,11 +274,13 @@ public class Resource {
 
     @Transactional
     public ResourceRelation relateTo(Resource resource, String relationName) {
-        if (type.getName().equals("System")) {
-            if (!(relationName.equals(RelationshipTypes.CONTAINS))) {
-                throw new InvalidRelationshipException();
-            }
-        } else if (!type.isRelatedTo(resource.getType(), relationName)) {
+        //TODO pre-populate System type (root resource type) can relate to other Resource Types via Platform relation or Contains relation
+        //if (type.getName().equals("System")) {
+            //if (!(relationName.equals(RelationshipTypes.CONTAINS))) {
+              //  throw new InvalidRelationshipException();
+            //}
+        //}else  
+    if (!type.isRelatedTo(resource.getType(), relationName)) {
             throw new InvalidRelationshipException();
         }
         return (ResourceRelation) this.relateTo(resource, ResourceRelation.class, relationName);
@@ -336,6 +354,14 @@ public class Resource {
 
     public void setOwner(AuthzSubject owner) {
         this.owner = owner;
+    }
+    
+    public Agent getAgent() {
+        return agent;
+    }
+
+    public void setAgent(Agent agent) {
+        this.agent = agent;
     }
 
     public Config getMeasurementConfig() {
@@ -516,6 +542,11 @@ public class Resource {
     public boolean isConfigUserManaged() {
         // TODO from ConfigResponseDB. remove?
         return true;
+    }
+    
+    public static Collection<Resource> findByCTime(long ctime) {
+        //TODO impl?
+        return null;
     }
 
 }

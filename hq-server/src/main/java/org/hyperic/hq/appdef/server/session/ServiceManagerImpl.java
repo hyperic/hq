@@ -75,6 +75,7 @@ import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.ServiceTypeInfo;
+import org.hyperic.hq.reference.RelationshipTypes;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.MapUtil;
 import org.hyperic.util.pager.PageControl;
@@ -82,6 +83,7 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.util.timer.StopWatch;
+import org.neo4j.graphdb.RelationshipType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -97,15 +99,9 @@ public class ServiceManagerImpl implements ServiceManager {
 
     private static final String VALUE_PROCESSOR = "org.hyperic.hq.appdef.server.session.PagerProcessor_service";
     private Pager valuePager;
-    private static final Integer APPDEF_RES_TYPE_UNDEFINED = new Integer(-1);
-    private AppServiceDAO appServiceDAO;
+  
     private PermissionManager permissionManager;
-    private ServiceDAO serviceDAO;
-    private ApplicationDAO applicationDAO;
     private ResourceManager resourceManager;
-    private ServerDAO serverDAO;
-    private ServerTypeDAO serverTypeDAO;
-    private ServiceTypeDAO serviceTypeDAO;
     private ResourceGroupManager resourceGroupManager;
     private CPropManager cpropManager;
     private MeasurementManager measurementManager;
@@ -113,22 +109,14 @@ public class ServiceManagerImpl implements ServiceManager {
     private ZeventEnqueuer zeventManager;
 
     @Autowired
-    public ServiceManagerImpl(AppServiceDAO appServiceDAO, PermissionManager permissionManager,
-                              ServiceDAO serviceDAO, ApplicationDAO applicationDAO,
+    public ServiceManagerImpl(PermissionManager permissionManager,
                               ResourceManager resourceManager,
-                              ServerDAO serverDAO, ServerTypeDAO serverTypeDAO,
-                              ServiceTypeDAO serviceTypeDAO,
                               ResourceGroupManager resourceGroupManager, CPropManager cpropManager,
                               MeasurementManager measurementManager,
                               AuthzSubjectManager authzSubjectManager, ZeventEnqueuer zeventManager) {
-        this.appServiceDAO = appServiceDAO;
+     
         this.permissionManager = permissionManager;
-        this.serviceDAO = serviceDAO;
-        this.applicationDAO = applicationDAO;
         this.resourceManager = resourceManager;
-        this.serverDAO = serverDAO;
-        this.serverTypeDAO = serverTypeDAO;
-        this.serviceTypeDAO = serviceTypeDAO;
         this.resourceGroupManager = resourceGroupManager;
         this.cpropManager = cpropManager;
         this.measurementManager = measurementManager;
@@ -136,25 +124,60 @@ public class ServiceManagerImpl implements ServiceManager {
         this.zeventManager = zeventManager;
     }
 
-    public Service createService(AuthzSubject subject, Server server, ServiceType type,
-                                 String name, String desc, String location, Service parent)
+    public Resource createService(AuthzSubject subject, Resource server, ResourceType type,
+                                 String name, String desc, String location, Resource parent)
         throws PermissionException {
         name = name.trim();
         desc = desc == null ? "" : desc.trim();
         location = location == null ? "" : location.trim();
 
-        Service service = serviceDAO.create(type, server, name, desc, subject.getName(), location,
+        Resource service = create(subject,type, server, name, desc, subject.getName(), location,
             subject.getName(), parent);
-        // Create the authz resource type. This also does permission checking
-        createAuthzService(subject, service);
+       
 
-        // Add Service to parent collection
-        server.getServices().add(service);
+      
 
-        ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, service.getEntityId());
+        ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, service.getId());
         zeventManager.enqueueEventAfterCommit(zevent);
         return service;
     }
+    
+    private Resource create(AuthzSubject subject,ResourceType type, Resource server, String name, String desc,
+                                            String modifiedBy, String location, String owner, Resource parent) {
+      
+        //TODO remove virtual server notion
+        if (server.getType().isVirtual()) {
+            // to the server in question
+            permissionManager.checkPermission(subject, resourceManager
+                .findResourceTypeByName(AuthzConstants.platformResType), server.getPlatform()
+                .getId(), AuthzConstants.platformOpAddServer);
+        } else {
+            // to the platform in question
+            permissionManager.checkPermission(subject, resourceManager
+                .findResourceTypeByName(AuthzConstants.serverResType), server.getId(),
+                AuthzConstants.serverOpAddService);
+        }
+
+                          
+                          //TODO createconfig?
+                          //ConfigResponseDB configResponse = configResponseDAO.create();
+                         
+                          Resource s = new Resource();
+                          s.setName(name);
+                          s.setAutoinventoryIdentifier(name);
+                          s.setAutodiscoveryZombie(false);
+                          s.setServiceRt(false);
+                          s.setEndUserRt(false);
+                          s.setDescription(desc);
+                          s.setModifiedBy(modifiedBy);
+                          s.setLocation(location);
+                          s.setParentService(parent);
+                          s.persist();
+                          s.setType(type);
+                          server.relateTo(s, RelationshipTypes.SERVICE);
+                        
+                       return s;
+   }
 
     /**
      * Move a Service from one Platform to another.
@@ -169,14 +192,14 @@ public class ServiceManagerImpl implements ServiceManager {
      *         performed due to incompatible types.
      */
 
-    public void moveService(AuthzSubject subject, Service target, Platform destination)
+    public void moveServiceFromPlatform(AuthzSubject subject, Resource target, Resource destination)
         throws VetoException, PermissionException {
-        ServerType targetType = target.getServer().getServerType();
+        ResourceType targetType = target.getResourceTo(RelationshipTypes.SERVER).getType();
 
-        Server destinationServer = null;
-        for (Server s : destination.getServers()) {
+        Resource destinationServer = null;
+        for (Resource s : destination.getResourcesFrom(RelationshipTypes.SERVER)) {
 
-            if (s.getServerType().equals(targetType)) {
+            if (s.getType().equals(targetType)) {
                 destinationServer = s;
                 break;
             }
@@ -204,7 +227,7 @@ public class ServiceManagerImpl implements ServiceManager {
      *         performed due to incompatible types.
      */
 
-    public void moveService(AuthzSubject subject, Service target, Server destination)
+    public void moveService(AuthzSubject subject, Resource target, Resource destination)
         throws VetoException, PermissionException {
         try {
             // Permission checking on destination
@@ -228,32 +251,28 @@ public class ServiceManagerImpl implements ServiceManager {
         }
 
         // Check arguments
-        if (!target.getServiceType().getServerType().equals(destination.getServerType())) {
+        if (!target.getResourceTo(RelationshipTypes.SERVER).getType().equals(destination.getType())) {
             throw new VetoException("Incompatible resources passed to move(), " +
                                     "cannot move service of type " +
-                                    target.getServiceType().getName() + " to " +
-                                    destination.getServerType().getName());
+                                    target.getType().getName() + " to " +
+                                    destination.getType().getName());
 
         }
 
         // Unschedule measurements
-        measurementManager.disableMeasurements(subject, target.getResource());
+        measurementManager.disableMeasurements(subject, target);
 
         // Reset Service parent id
-        target.setServer(destination);
+        destination.removeRelationship(destination.getResourceTo(RelationshipTypes.SERVICE), RelationshipTypes.SERVICE);
+        destination.relateTo(target, RelationshipTypes.SERVICE);
+        
 
-        // Add/Remove Server from Server collections
-        target.getServer().getServices().remove(target);
-        destination.addService(target);
 
-        // Move Authz resource.
-        resourceManager.moveResource(subject, target.getResource(), destination.getResource());
-
-        // Flush to ensure the reschedule of metrics occurs
-        serviceDAO.getSession().flush();
+        // Move Authz resource. TODO is this call still necessary?
+        resourceManager.moveResource(subject, target, destination);
 
         // Reschedule metrics
-        ResourceUpdatedZevent zevent = new ResourceUpdatedZevent(subject, target.getEntityId());
+        ResourceUpdatedZevent zevent = new ResourceUpdatedZevent(subject, target.getId());
         zeventManager.enqueueEventAfterCommit(zevent);
     }
 
@@ -262,53 +281,24 @@ public class ServiceManagerImpl implements ServiceManager {
      * @return The service id.
      */
 
-    public Service createService(AuthzSubject subject, Integer serverId, Integer serviceTypeId,
+    public Resource createService(AuthzSubject subject, Integer serverId, Integer serviceTypeId,
                                  String name, String desc, String location)
         throws ValidationException, PermissionException, ServerNotFoundException,
         AppdefDuplicateNameException {
-        Server server = serverDAO.findById(serverId);
-        ServiceType serviceType = serviceTypeDAO.findById(serviceTypeId);
+        Resource server = Resource.findResource(serverId);
+        ResourceType serviceType = ResourceType.findResourceType(serviceTypeId);
         return createService(subject, server, serviceType, name, desc, location, null);
     }
 
-    /**
-     * Create the Authz service resource
-     */
-    private void createAuthzService(AuthzSubject subject, Service service)
-        throws PermissionException {
-        log.debug("Begin Authz CreateService");
-        try {
-            // check to see that the user has permission to addServices
-            Server server = service.getServer();
-            if (server.getServerType().isVirtual()) {
-                // to the server in question
-                permissionManager.checkPermission(subject, resourceManager
-                    .findResourceTypeByName(AuthzConstants.platformResType), server.getPlatform()
-                    .getId(), AuthzConstants.platformOpAddServer);
-            } else {
-                // to the platform in question
-                permissionManager.checkPermission(subject, resourceManager
-                    .findResourceTypeByName(AuthzConstants.serverResType), server.getId(),
-                    AuthzConstants.serverOpAddService);
-            }
-
-            ResourceType serviceProto = resourceManager
-                .findResourceTypeByName(AuthzConstants.servicePrototypeTypeName);
-            Resource prototype = resourceManager.findResourceByInstanceId(serviceProto, service
-                .getServiceType().getId());
-
-            Resource parent = resourceManager.findResource(server.getEntityId());
-            if (parent == null) {
-                throw new SystemException("Unable to find parent server [id=" +
-                                          server.getEntityId() + "]");
-            }
-            Resource resource = resourceManager.createResource(subject, resourceManager
-                .findResourceTypeByName(AuthzConstants.serviceResType), prototype, service.getId(),
-                service.getName(), false, parent);
-            service.setResource(resource);
-        } catch (NotFoundException e) {
-            throw new SystemException("Unable to find authz resource type", e);
+   
+    private Collection<Resource> findByServerType(Integer serverTypeId, boolean asc) {
+        Set<Resource> services = new HashSet<Resource>();
+        //TODO sort
+        Collection<ResourceType> relatedServiceTypes = ResourceType.findResourceType(serverTypeId).getResourceTypesFrom(RelationshipTypes.SERVICE_TYPE);
+        for(ResourceType serviceType:relatedServiceTypes) {
+            services.addAll(serviceType.getResources());
         }
+        return services;
     }
 
     /**
@@ -324,7 +314,7 @@ public class ServiceManagerImpl implements ServiceManager {
 
         try {
 
-            Collection<Service> services = serviceDAO.findByType(servTypeId, true);
+            Collection<Resource> services = findByServerType(servTypeId, true);
             if (services.size() == 0) {
                 return new Integer[0];
             }
@@ -335,8 +325,8 @@ public class ServiceManagerImpl implements ServiceManager {
             // and iterate over the List to remove any item not in the
             // viewable list
             int i = 0;
-            for (Iterator<Service> it = services.iterator(); it.hasNext(); i++) {
-                Service service = it.next();
+            for (Iterator<Resource> it = services.iterator(); it.hasNext(); i++) {
+                Resource service = it.next();
                 if (viewable.contains(service.getId())) {
                     // add the item, user can see it
                     serviceIds.add(service.getId());
@@ -349,6 +339,11 @@ public class ServiceManagerImpl implements ServiceManager {
             return new Integer[0];
         }
     }
+    
+    private ServiceValue getServiceValue(Resource service) {
+        //TODO
+        return null;
+    }
 
     /**
      * @return List of ServiceValue objects
@@ -358,9 +353,9 @@ public class ServiceManagerImpl implements ServiceManager {
         throws ServiceNotFoundException, PermissionException {
         List<ServiceValue> serviceList = new ArrayList<ServiceValue>(serviceIds.length);
         for (int i = 0; i < serviceIds.length; i++) {
-            Service s = findServiceById(serviceIds[i]);
-            permissionManager.checkViewPermission(subject, s.getEntityId());
-            serviceList.add(s.getServiceValue());
+            Resource s = findServiceById(serviceIds[i]);
+            permissionManager.checkViewPermission(subject, s.getId());
+            serviceList.add(getServiceValue(s));
         }
         return serviceList;
     }
@@ -369,8 +364,8 @@ public class ServiceManagerImpl implements ServiceManager {
      * Find Service by Id.
      */
     @Transactional(readOnly = true)
-    public Service findServiceById(Integer id) throws ServiceNotFoundException {
-        Service service = getServiceById(id);
+    public Resource findServiceById(Integer id) throws ServiceNotFoundException {
+        Resource service = getServiceById(id);
 
         if (service == null) {
             throw new ServiceNotFoundException(id);
@@ -385,8 +380,8 @@ public class ServiceManagerImpl implements ServiceManager {
      * @return The Service identified by this id, or null if it does not exist.
      */
     @Transactional(readOnly = true)
-    public Service getServiceById(Integer id) {
-        return serviceDAO.get(id);
+    public Resource getServiceById(Integer id) {
+        return Resource.findResource(id);
     }
 
     /**
@@ -395,12 +390,17 @@ public class ServiceManagerImpl implements ServiceManager {
      * @return The Service identified by this id.
      */
     @Transactional(readOnly = true)
-    public Service getServiceById(AuthzSubject subject, Integer id)
+    public Resource getServiceById(AuthzSubject subject, Integer id)
         throws ServiceNotFoundException, PermissionException {
 
-        Service service = findServiceById(id);
-        permissionManager.checkViewPermission(subject, service.getEntityId());
+        Resource service = findServiceById(id);
+        permissionManager.checkViewPermission(subject, service.getId());
         return service;
+    }
+    
+    private List<Resource> getByAIID(Resource server, String aiid) {
+        //TODO
+        return null;
     }
 
     /**
@@ -409,8 +409,8 @@ public class ServiceManagerImpl implements ServiceManager {
      * @return {@link List} of {@link Service}
      */
     @Transactional(readOnly = true)
-    public List<Service> getServicesByAIID(Server server, String aiid) {
-        return serviceDAO.getByAIID(server, aiid);
+    public List<Resource> getServicesByAIID(Resource server, String aiid) {
+        return getByAIID(server, aiid);
     }
 
     /**
@@ -418,34 +418,49 @@ public class ServiceManagerImpl implements ServiceManager {
      * @param name corresponds to the EAM_RESOURCE.sort_name column
      */
     @Transactional(readOnly = true)
-    public Service getServiceByName(Server server, String name) {
-        return serviceDAO.findByName(server, name);
+    public Resource getServiceByServerAndName(Resource server, String name) {
+        Collection<Resource> services = server.getResourcesFrom(RelationshipTypes.SERVICE);
+        for(Resource service: services) {
+            if(service.getName().equals(name)) {
+                return service;
+            }
+        }
+        return null;
     }
 
     @Transactional(readOnly = true)
-    public Service getServiceByName(Platform platform, String name) {
-        return serviceDAO.findByName(platform, name);
+    public Resource getServiceByPlatformAndName(Resource platform, String name) {
+        //We now allow services directly under platform
+        Collection<Resource> services = platform.getResourcesFrom(RelationshipTypes.SERVICE);
+        for(Resource service: services) {
+            if(service.getName().equals(name)) {
+                return service;
+            }
+        }
+        Collection<Resource> servers = platform.getResourcesFrom(RelationshipTypes.SERVER);
+        for(Resource server: servers) {
+            Resource service = getServiceByServerAndName(server,name);
+            if( service != null) {
+                return service;
+            }
+        }
+        return null;
     }
 
     /**
      * Find a ServiceType by id
      */
     @Transactional(readOnly = true)
-    public ServiceType findServiceType(Integer id) throws ObjectNotFoundException {
-        return serviceTypeDAO.findById(id);
+    public ResourceType findServiceType(Integer id) throws ObjectNotFoundException {
+        return ResourceType.findResourceType(id);
     }
 
     /**
      * Find service type by name
      */
     @Transactional(readOnly = true)
-    public ServiceType findServiceTypeByName(String name) {
-        return serviceTypeDAO.findByName(name);
-    }
-
-    @Transactional(readOnly = true)
-    public Collection<Service> findDeletedServices() {
-        return serviceDAO.findDeletedServices();
+    public ResourceType findServiceTypeByName(String name) {
+        return ResourceType.findResourceTypeByName(name);
     }
 
     /**
@@ -453,10 +468,30 @@ public class ServiceManagerImpl implements ServiceManager {
      */
     @Transactional(readOnly = true)
     public PageList<ServiceTypeValue> getAllServiceTypes(AuthzSubject subject, PageControl pc) {
-        Collection<ServiceType> serviceTypes = serviceTypeDAO.findAll();
+        Set<ResourceType> serviceTypes = new HashSet<ResourceType>();
+        Collection<ResourceType> platformTypes = ResourceType.findRootResourceType().getResourceTypesFrom(RelationshipTypes.PLATFORM_TYPE);
+        for(ResourceType platformType: platformTypes) {
+            Collection<ResourceType> serverTypes = platformType.getResourceTypesFrom(RelationshipTypes.SERVER_TYPE);
+            for(ResourceType serverType: serverTypes) {
+                serviceTypes.addAll(serverType.getResourceTypesFrom(RelationshipTypes.SERVICE_TYPE));
+            }
+        }
+        for(ResourceType platformType: platformTypes) {
+            serviceTypes.addAll(platformType.getResourceTypesFrom(RelationshipTypes.SERVICE_TYPE));
+        }
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
         return valuePager.seek(serviceTypes, pc);
+    }
+    
+    private Collection<ResourceType> getServiceTypes(List<Integer> authzPks,boolean asc) {
+        //TODO from ServiceDAO
+        return null;
+    }
+    
+    private Collection<ResourceType> findByServerTypeOrderName(Integer serverTypeId, boolean asc) {
+        //TODO from ServiceDAO
+        return null; 
     }
 
     /**
@@ -467,7 +502,7 @@ public class ServiceManagerImpl implements ServiceManager {
         throws PermissionException, NotFoundException {
         // build the server types from the visible list of servers
         final List<Integer> authzPks = getViewableServices(subject);
-        final Collection<ServiceType> serviceTypes = serviceDAO.getServiceTypes(authzPks, true);
+        final Collection<ResourceType> serviceTypes = getServiceTypes(authzPks, true);
 
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
@@ -477,19 +512,8 @@ public class ServiceManagerImpl implements ServiceManager {
     @Transactional(readOnly = true)
     public PageList<ServiceTypeValue> getServiceTypesByServerType(AuthzSubject subject,
                                                                   int serverTypeId) {
-        Collection<ServiceType> serviceTypes = serviceTypeDAO.findByServerType_orderName(
+        Collection<ResourceType> serviceTypes = findByServerTypeOrderName(
             serverTypeId, true);
-        if (serviceTypes.size() == 0) {
-            return new PageList<ServiceTypeValue>();
-        }
-        return valuePager.seek(serviceTypes, PageControl.PAGE_ALL);
-    }
-
-    @Transactional(readOnly = true)
-    public PageList<ServiceTypeValue> findVirtualServiceTypesByPlatform(AuthzSubject subject,
-                                                                        Integer platformId) {
-        Collection<ServiceType> serviceTypes = serviceTypeDAO
-            .findVirtualServiceTypesByPlatform(platformId.intValue());
         if (serviceTypes.size() == 0) {
             return new PageList<ServiceTypeValue>();
         }
@@ -513,11 +537,11 @@ public class ServiceManagerImpl implements ServiceManager {
      * @return List of ServiceLocals for which subject has
      *         AuthzConstants.serviceOpViewService
      */
-    private Collection<Service> getViewableServices(AuthzSubject subject, PageControl pc)
+    private Collection<Resource> getViewableServices(AuthzSubject subject, PageControl pc)
         throws PermissionException, NotFoundException {
         // get list of pks user can view
         final Collection<Integer> authzPks = getViewableServices(subject);
-        List<Service> services;
+        List<Resource> services;
         pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
         switch (pc.getSortattribute()) {
             case SortAttribute.RESOURCE_NAME:
@@ -544,9 +568,9 @@ public class ServiceManagerImpl implements ServiceManager {
      * should be faster than pulling everything from the DB since they are in
      * memory.
      */
-    private List<Service> getServices(Collection<Integer> authzPks, PageControl pc) {
+    private List<Resource> getServices(Collection<Integer> authzPks, PageControl pc) {
         final List<Integer> aeids = new ArrayList<Integer>(authzPks);
-        final List<Service> rtn = new ArrayList<Service>(authzPks.size());
+        final List<Resource> rtn = new ArrayList<Resource>(authzPks.size());
         final int start = pc.getPageEntityIndex();
         final int end = (pc.getPagesize() == PageControl.SIZE_UNLIMITED) ? authzPks.size() : pc
             .getPagesize() +
@@ -554,9 +578,9 @@ public class ServiceManagerImpl implements ServiceManager {
         for (int i = start; i < end; i++) {
             final Integer aeid = aeids.get(i);
             try {
-                final Service s = findServiceById(aeid);
-                final Resource r = s.getResource();
-                if (r == null || r.isInAsyncDeleteState()) {
+                final Resource s = findServiceById(aeid);
+                
+                if (s == null) {
                     continue;
                 }
                 rtn.add(s);
@@ -582,48 +606,7 @@ public class ServiceManagerImpl implements ServiceManager {
         }
     }
 
-    /**
-     * Fetch all services that haven't been assigned to a cluster and that
-     * haven't been assigned to any applications.
-     * @return A List of ServiceValue objects representing all of the unassigned
-     *         services that the given subject is allowed to view.
-     */
-    @Transactional(readOnly = true)
-    public PageList<ServiceValue> getAllClusterAppUnassignedServices(AuthzSubject subject,
-                                                                     PageControl pc)
-        throws PermissionException, NotFoundException {
-        // get list of pks user can view
-        Set<Integer> authzPks = new HashSet<Integer>(getViewableServices(subject));
-        Collection<Service> services = null;
-        Collection<Service> toBePaged = new ArrayList<Service>();
-        pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
-
-        switch (pc.getSortattribute()) {
-            case SortAttribute.RESOURCE_NAME:
-                if (pc != null) {
-                    services = serviceDAO.findAllClusterAppUnassigned_orderName(pc.isAscending());
-                }
-                break;
-            case SortAttribute.SERVICE_NAME:
-                if (pc != null) {
-                    services = serviceDAO.findAllClusterAppUnassigned_orderName(pc.isAscending());
-                }
-                break;
-            default:
-                services = serviceDAO.findAllClusterAppUnassigned_orderName(true);
-                break;
-        }
-        for (Service aService : services) {
-
-            // remove service if its not viewable
-            if (authzPks.contains(aService.getId())) {
-                toBePaged.add(aService);
-            }
-        }
-        // valuePager converts local/remote interfaces to value objects
-        // as it pages through them.
-        return valuePager.seek(toBePaged, pc);
-    }
+    
 
     private PageList filterAndPage(Collection svcCol, AuthzSubject subject, Integer svcTypeId,
                                    PageControl pc) throws ServiceNotFoundException,
@@ -761,7 +744,7 @@ public class ServiceManagerImpl implements ServiceManager {
             svcTypeId = APPDEF_RES_TYPE_UNDEFINED;
         }
 
-        List<Service> services;
+        List<Resource> services;
 
         switch (pc.getSortattribute()) {
             case SortAttribute.SERVICE_TYPE:
@@ -788,7 +771,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * Get service POJOs by server and type.
      */
     @Transactional(readOnly = true)
-    public List getServicesByServer(AuthzSubject subject, Server server)
+    public List getServicesByServer(AuthzSubject subject, Resource server)
         throws PermissionException, ServiceNotFoundException {
         return filterUnviewable(subject, server.getServices());
     }
@@ -799,7 +782,7 @@ public class ServiceManagerImpl implements ServiceManager {
         if (svcTypeId == null)
             svcTypeId = APPDEF_RES_TYPE_UNDEFINED;
 
-        List<Service> services;
+        List<Resource> services;
 
         if (svcTypeId == APPDEF_RES_TYPE_UNDEFINED) {
             services = serviceDAO.findByServer_orderType(serverId);
@@ -808,7 +791,7 @@ public class ServiceManagerImpl implements ServiceManager {
         }
 
         // Filter the unviewables
-        List<Service> viewables = filterUnviewable(subject, services);
+        List<Resource> viewables = filterUnviewable(subject, services);
 
         Integer[] ids = new Integer[viewables.size()];
         Iterator<Service> it = viewables.iterator();
@@ -913,7 +896,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * specified type.
      */
     @Transactional(readOnly = true)
-    public List<Service> findServicesByType(Server server, ServiceType st) {
+    public List<Resource> findServicesByType(Resource server, ResourceType st) {
         return serviceDAO.findByServerAndType_orderName(server.getId(), st.getId());
     }
 
@@ -921,7 +904,7 @@ public class ServiceManagerImpl implements ServiceManager {
      * Get platform service POJOs
      */
     @Transactional(readOnly = true)
-    public List<Service> findPlatformServicesByType(Platform p, ServiceType st) {
+    public List<Resource> findPlatformServicesByType(Resource p, ResourceType st) {
         return serviceDAO.findPlatformServicesByType(p, st);
     }
 
@@ -1290,14 +1273,14 @@ public class ServiceManagerImpl implements ServiceManager {
         return services;
     }
 
-    public void updateServiceZombieStatus(AuthzSubject subject, Service svc, boolean zombieStatus)
+    public void updateServiceZombieStatus(AuthzSubject subject, Resource svc, boolean zombieStatus)
         throws PermissionException {
         permissionManager.checkModifyPermission(subject, svc.getEntityId());
         svc.setModifiedBy(subject.getName());
         svc.setAutodiscoveryZombie(zombieStatus);
     }
 
-    public Service updateService(AuthzSubject subject, ServiceValue existing)
+    public Resource updateService(AuthzSubject subject, ServiceValue existing)
         throws PermissionException, UpdateException, AppdefDuplicateNameException,
         ServiceNotFoundException {
         permissionManager.checkModifyPermission(subject, existing.getEntityId());
@@ -1410,7 +1393,7 @@ public class ServiceManagerImpl implements ServiceManager {
         }
     }
 
-    public ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin, ServerType servType)
+    public ResourceType createServiceType(ServiceTypeInfo sinfo, String plugin, ResourceType servType)
         throws NotFoundException {
         Resource rootResource = resourceManager.findRootResource();
         return createServiceType(sinfo, plugin, servType, rootResource, resourceManager
@@ -1418,7 +1401,7 @@ public class ServiceManagerImpl implements ServiceManager {
     }
 
     private ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin,
-                                          ServerType servType, Resource rootResource,
+                                          ResourceType servType, Resource rootResource,
                                           ResourceType serviceType) throws NotFoundException {
         ServiceType stype = serviceTypeDAO.create(sinfo.getName(), plugin, sinfo.getDescription(),
             sinfo.getInternal());
@@ -1428,7 +1411,7 @@ public class ServiceManagerImpl implements ServiceManager {
         return stype;
     }
 
-    public void deleteServiceType(ServiceType serviceType, AuthzSubject overlord,
+    public void deleteServiceType(ResourceType serviceType, AuthzSubject overlord,
                                   ResourceGroupManager resGroupMan, ResourceManager resMan)
         throws VetoException {
         Resource proto = resMan.findResourceByInstanceId(AuthzConstants.authzServiceProto,
@@ -1453,56 +1436,14 @@ public class ServiceManagerImpl implements ServiceManager {
         resMan.removeResource(overlord, proto);
     }
 
-    /**
-     * Map a ResourceGroup to ServiceCluster, just temporary, should be able to
-     * remove when done with the ServiceCluster to ResourceGroup Migration
-     */
-    @Transactional(readOnly = true)
-    public ServiceCluster getServiceCluster(ResourceGroup group) {
-        if (group == null) {
-            return null;
-        }
-        ServiceCluster sc = new ServiceCluster();
-        sc.setName(group.getName());
-        sc.setDescription(group.getDescription());
-        sc.setGroup(group);
-
-        Collection<Resource> resources = resourceGroupManager.getMembers(group);
-
-        Set<Service> services = new HashSet<Service>(resources.size());
-
-        ServiceType st = null;
-        for (Resource resource : resources) {
-
-            // this should not be the case
-            if (!resource.getType().getId().equals(AuthzConstants.authzService)) {
-                continue;
-            }
-            Service service = serviceDAO.findById(resource.getInstanceId());
-            if (st == null) {
-                st = service.getServiceType();
-            }
-            services.add(service);
-            service.setResourceGroup(sc.getGroup());
-        }
-        sc.setServices(services);
-
-        if (st == null && group.getResourcePrototype() != null) {
-            st = serviceTypeDAO.findById(group.getResourcePrototype().getInstanceId());
-        }
-
-        if (st != null) {
-            sc.setServiceType(st);
-        }
-        return sc;
-    }
+   
 
     /**
      * A removeService method that takes a ServiceLocal. This is called by
      * ServerManager.removeServer when cascading a delete onto services.
      */
 
-    public void removeService(AuthzSubject subject, Service service) throws PermissionException,
+    public void removeService(AuthzSubject subject, Resource service) throws PermissionException,
         VetoException {
         AppdefEntityID aeid = service.getEntityId();
         permissionManager.checkRemovePermission(subject, aeid);
@@ -1547,10 +1488,6 @@ public class ServiceManagerImpl implements ServiceManager {
                                       rtV.getName());
         }
         return op;
-    }
-
-    public void handleResourceDelete(Resource resource) {
-        serviceDAO.clearResource(resource);
     }
 
     /**

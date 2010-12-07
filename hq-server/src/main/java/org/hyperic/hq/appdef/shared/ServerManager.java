@@ -28,9 +28,6 @@ package org.hyperic.hq.appdef.shared;
 import java.util.Collection;
 import java.util.List;
 
-import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
@@ -38,6 +35,7 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -49,7 +47,7 @@ public interface ServerManager {
     /**
      * Clone a Server to a target Platform
      */
-    public Server cloneServer(AuthzSubject subject, Platform targetPlatform, Server serverToClone)
+    public Resource cloneServer(AuthzSubject subject, Resource targetPlatform, Resource serverToClone)
         throws ValidationException, PermissionException,  VetoException, NotFoundException;
 
     /**
@@ -63,7 +61,7 @@ public interface ServerManager {
      * @throws VetoException If the operation canot be performed due to
      *         incompatible types.
      */
-    public void moveServer(AuthzSubject subject, Server target, Platform destination) throws VetoException,
+    public void moveServer(AuthzSubject subject, Resource target, Resource destination) throws VetoException,
         PermissionException;
 
     /**
@@ -71,29 +69,20 @@ public interface ServerManager {
      * @return ServerValue - the saved value object
      * 
      */
-    public Server createServer(AuthzSubject subject, Integer platformId, Integer serverTypeId, ServerValue sValue)
+    public Resource createServer(AuthzSubject subject, Integer platformId, Integer serverTypeId, ServerValue sValue)
         throws ValidationException, PermissionException, PlatformNotFoundException,
         org.hyperic.hq.appdef.shared.AppdefDuplicateNameException, NotFoundException;
-
-    /**
-     * Create a virtual server
-     * @throws NotFoundException
-     *
-     * @throws PermissionException
-     */
-    public Server createVirtualServer(AuthzSubject subject, Platform platform, ServerType st)
-        throws PermissionException, NotFoundException;
 
     /**
      * A removeServer method that takes a ServerLocal. Used by
      * PlatformManager.removePlatform when cascading removal to servers.
      */
-    public void removeServer(AuthzSubject subject, Server server) throws  PermissionException,
+    public void removeServer(AuthzSubject subject, Resource server) throws  PermissionException,
         VetoException;
 
     public void handleResourceDelete(Resource resource);
     
-    ServerType createServerType(ServerTypeInfo sinfo, String plugin) throws NotFoundException;
+    ResourceType createServerType(ServerTypeInfo sinfo, String plugin) throws NotFoundException;
 
     /**
      * Find all server types
@@ -101,7 +90,7 @@ public interface ServerManager {
      */
     public PageList<ServerTypeValue> getAllServerTypes(AuthzSubject subject, PageControl pc);
 
-    public Server getServerByName(Platform host, String name);
+    public Resource getServerByName(Resource host, String name);
 
     /**
      * Find viewable server types
@@ -111,7 +100,7 @@ public interface ServerManager {
         throws  PermissionException, NotFoundException;
 
     /**
-     * Find viewable server non-virtual types for a platform
+     * Find viewable server non-virtual types for a Resource
      * @return list of serverTypeValues
      */
     public PageList<ServerTypeValue> getServerTypesByPlatform(AuthzSubject subject, Integer platId, PageControl pc)
@@ -133,39 +122,37 @@ public interface ServerManager {
     public PageList<ServerTypeValue> getServerTypesByPlatformType(AuthzSubject subject, Integer platformTypeId,
                                                                   PageControl pc) throws PlatformNotFoundException;
 
-    public Server findServerByAIID(AuthzSubject subject, Platform platform, String aiid) throws PermissionException;
+    public Resource findServerByAIID(AuthzSubject subject, Resource platform, String aiid) throws PermissionException;
 
     /**
      * Find a Server by Id.
      */
-    public Server findServerById(Integer id) throws ServerNotFoundException;
+    public Resource findServerById(Integer id) throws ServerNotFoundException;
 
     /**
      * Get a Server by Id.
      * @return The Server with the given id, or null if not found.
      */
-    public Server getServerById(Integer id);
+    public Resource getServerById(Integer id);
 
     /**
      * Find a ServerType by id
      */
-    public ServerType findServerType(Integer id);
+    public ResourceType findServerType(Integer id);
 
     /**
      * Find a server type by name
      * @param name - the name of the server
      * @return ServerTypeValue
      */
-    public ServerType findServerTypeByName(String name) throws NotFoundException;
+    public ResourceType findServerTypeByName(String name) throws NotFoundException;
 
-    public List<Server> findServersByType(Platform p, ServerType st);
-
-    public Collection<Server> findDeletedServers();
+    public List<Resource> findServersByType(Resource p, ResourceType st);
 
     /**
      * Get server lite value by id. Does not check permission.
      */
-    public Server getServerById(AuthzSubject subject, Integer id) throws ServerNotFoundException, PermissionException;
+    public Resource getServerById(AuthzSubject subject, Integer id) throws ServerNotFoundException, PermissionException;
 
     /**
      * Get server IDs by server type.
@@ -197,7 +184,7 @@ public interface ServerManager {
     public PageList<ServerValue> getAllServers(AuthzSubject subject, PageControl pc) throws 
         PermissionException, NotFoundException;
 
-    public Collection<Server> getViewableServers(AuthzSubject subject, Platform platform);
+    public Collection<Resource> getViewableServers(AuthzSubject subject, Resource platform);
 
     /**
      * Get servers by platform.
@@ -315,7 +302,7 @@ public interface ServerManager {
      * Update a server
      * @param existing
      */
-    public Server updateServer(AuthzSubject subject, ServerValue existing) throws PermissionException, UpdateException,
+    public Resource updateServer(AuthzSubject subject, ServerValue existing) throws PermissionException, UpdateException,
         AppdefDuplicateNameException, ServerNotFoundException;
 
     /**
@@ -324,10 +311,10 @@ public interface ServerManager {
     public void updateServerTypes(String plugin, org.hyperic.hq.product.ServerTypeInfo[] infos) throws 
           VetoException, NotFoundException;
 
-    public void deleteServerType(ServerType serverType, AuthzSubject overlord, ResourceGroupManager resGroupMan,
+    public void deleteServerType(ResourceType serverType, AuthzSubject overlord, ResourceGroupManager resGroupMan,
                                  ResourceManager resMan) throws VetoException;
 
-    public void setAutodiscoveryZombie(Server server, boolean zombie);
+    public void setAutodiscoveryZombie(Resource server, boolean zombie);
 
     /**
      * Returns a list of 2 element arrays. The first element is the name of the

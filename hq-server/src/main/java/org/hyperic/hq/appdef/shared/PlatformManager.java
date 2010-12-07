@@ -29,15 +29,13 @@ import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.ObjectNotFoundException;
-import org.hyperic.hq.appdef.Ip;
-import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -53,27 +51,25 @@ public interface PlatformManager {
      * @return
      * @throws NotFoundException
      */
-    PlatformType createPlatformType(String name, String plugin) throws NotFoundException;
+    ResourceType createPlatformType(String name, String plugin) throws NotFoundException;
 
     /**
      * Find a PlatformType by id
      */
-    public PlatformType findPlatformType(Integer id) throws ObjectNotFoundException;
+    public ResourceType findPlatformType(Integer id) throws ObjectNotFoundException;
 
     /**
      * Find a platform type by name
      * @param type - name of the platform type
      * @return platformTypeValue
      */
-    public PlatformType findPlatformTypeByName(String type) throws PlatformNotFoundException;
+    public ResourceType findPlatformTypeByName(String type) throws PlatformNotFoundException;
 
-    public Collection<PlatformType> findAllPlatformTypes();
+    public Collection<ResourceType> findAllPlatformTypes();
 
-    public Collection<PlatformType> findSupportedPlatformTypes();
+    public Collection<ResourceType> findSupportedPlatformTypes();
 
-    public Collection<PlatformType> findUnsupportedPlatformTypes();
-
-    public Resource findResource(PlatformType pt);
+    public Collection<ResourceType> findUnsupportedPlatformTypes();
 
     /**
      * Find all platform types
@@ -102,7 +98,7 @@ public interface PlatformManager {
      * @param subject The user performing the delete operation.
      * @param id - The id of the Platform
      */
-    public void removePlatform(AuthzSubject subject, Platform platform)
+    public void removePlatform(AuthzSubject subject, Resource platform)
         throws PlatformNotFoundException, PermissionException, VetoException;
 
     public void handleResourceDelete(Resource resource);
@@ -110,7 +106,7 @@ public interface PlatformManager {
     /**
      * Create a Platform of a specified type
      */
-    public Platform createPlatform(AuthzSubject subject, Integer platformTypeId,
+    public Resource createPlatform(AuthzSubject subject, Integer platformTypeId,
                                    PlatformValue pValue, Integer agentPK)
         throws ValidationException, PermissionException, AppdefDuplicateNameException,
         AppdefDuplicateFQDNException, ApplicationException;
@@ -119,7 +115,7 @@ public interface PlatformManager {
      * Create a Platform from an AIPlatform
      * @param aipValue the AIPlatform to create as a regular appdef platform.
      */
-    public Platform createPlatform(AuthzSubject subject, AIPlatformValue aipValue)
+    public Resource createPlatform(AuthzSubject subject, AIPlatformValue aipValue)
         throws ApplicationException;
 
     /**
@@ -148,7 +144,7 @@ public interface PlatformManager {
     /**
      * Get platform light value by id. Does not check permission.
      */
-    public Platform getPlatformById(AuthzSubject subject, Integer id)
+    public Resource getPlatformById(AuthzSubject subject, Integer id)
         throws PlatformNotFoundException, PermissionException;
 
     /**
@@ -157,7 +153,7 @@ public interface PlatformManager {
      * @return A Platform object representing this Platform.
      * @throws PlatformNotFoundException If the given Platform is not found.
      */
-    public Platform findPlatformById(Integer id) throws PlatformNotFoundException;
+    public Resource findPlatformById(Integer id) throws PlatformNotFoundException;
 
     /**
      * Finds platform by AI platform when it is EXPECTED to be there (when the
@@ -171,7 +167,7 @@ public interface PlatformManager {
      * @throws PlatformNotFoundException If a Platform that matches IP addresses
      *         or FQDN cannot be found
      */
-    Platform findPlatformByAIPlatform(AuthzSubject subject, AIPlatformValue aiPlatform)
+    Resource findPlatformByAIPlatform(AuthzSubject subject, AIPlatformValue aiPlatform)
         throws PermissionException, PlatformNotFoundException;
 
     /**
@@ -179,10 +175,10 @@ public interface PlatformManager {
      * CertDN, then checks to see if all IP addresses match. If all of these
      * checks fail null is returned.
      */
-    public Platform getPlatformByAIPlatform(AuthzSubject subject, AIPlatformValue aiPlatform)
+    public Resource getPlatformByAIPlatform(AuthzSubject subject, AIPlatformValue aiPlatform)
         throws PermissionException;
 
-    public Platform getPhysPlatformByAgentToken(String agentToken);
+    public Resource getPhysPlatformByAgentToken(String agentToken);
 
     /**
      * Find a platform by name
@@ -192,18 +188,18 @@ public interface PlatformManager {
     public PlatformValue getPlatformByName(AuthzSubject subject, String name)
         throws PlatformNotFoundException, PermissionException;
 
-    public Platform getPlatformByName(String name);
+    public Resource getPlatformByName(String name);
 
     /**
      * Get the Platform that has the specified Fqdn
      */
-    public Platform findPlatformByFqdn(AuthzSubject subject, String fqdn)
+    public Resource findPlatformByFqdn(AuthzSubject subject, String fqdn)
         throws PlatformNotFoundException, PermissionException;
 
     /**
      * Get the Collection of platforms that have the specified Ip address
      */
-    public Collection<Platform> getPlatformByIpAddr(AuthzSubject subject, String address)
+    public Collection<Resource> getPlatformByIpAddr(AuthzSubject subject, String address)
         throws PermissionException;
 
     /**
@@ -211,7 +207,7 @@ public interface PlatformManager {
      * 
      * 
      */
-    Collection<Platform> getPlatformByMacAddr(AuthzSubject subject, String address)
+    Collection<Resource> getPlatformByMacAddr(AuthzSubject subject, String address)
         throws PermissionException;
 
     /**
@@ -220,7 +216,7 @@ public interface PlatformManager {
      * 
      * 
      */
-    Platform getAssociatedPlatformByMacAddress(AuthzSubject subject, Resource r)
+    Resource getAssociatedPlatformByMacAddress(AuthzSubject subject, Resource r)
         throws PermissionException, PlatformNotFoundException;
 
     /**
@@ -297,7 +293,7 @@ public interface PlatformManager {
      * @return A PageList of ServerValue objects representing servers on the
      *         specified platform that the subject is allowed to view.
      */
-    public List<Platform> getPlatformsByType(AuthzSubject subject, String type)
+    public List<Resource> getPlatformsByType(AuthzSubject subject, String type)
         throws PermissionException, InvalidAppdefTypeException;
 
     /**
@@ -308,32 +304,32 @@ public interface PlatformManager {
     public PageList<PlatformValue> findPlatformsByIpAddr(AuthzSubject subject, String addr,
                                                          PageControl pc) throws PermissionException;
 
-    public List<Platform> findPlatformPojosByTypeAndName(AuthzSubject subj, Integer pType,
+    public List<Resource> findPlatformPojosByTypeAndName(AuthzSubject subj, Integer pType,
                                                          String regEx);
 
-    public List<Platform> findParentPlatformPojosByNetworkRelation(AuthzSubject subj,
+    public List<Resource> findParentPlatformPojosByNetworkRelation(AuthzSubject subj,
                                                                    List<Integer> platformTypeIds,
                                                                    String platformName,
                                                                    Boolean hasChildren);
 
-    public List<Platform> findPlatformPojosByNoNetworkRelation(AuthzSubject subj,
+    public List<Resource> findPlatformPojosByNoNetworkRelation(AuthzSubject subj,
                                                                List<Integer> platformTypeIds,
                                                                String platformName);
 
     /**
      * Get the platforms that have an IP with the specified address.
-     * @return a list of {@link Platform}s
+     * @return a list of {@link Resource}s
      */
-    public Collection<Platform> findPlatformPojosByIpAddr(String addr);
+    public Collection<Resource> findPlatformPojosByIpAddr(String addr);
 
-    public Collection<Platform> findDeletedPlatforms();
+    public Collection<Resource> findDeletedPlatforms();
 
     /**
      * Update an existing Platform. Requires all Ip's to have been re-added via
      * the platformValue.addIpValue(IpValue) method due to bug 4924
      * @param existing - the value object for the platform you want to save
      */
-    public Platform updatePlatformImpl(AuthzSubject subject, PlatformValue existing)
+    public Resource updatePlatformImpl(AuthzSubject subject, PlatformValue existing)
         throws UpdateException, PermissionException, AppdefDuplicateNameException,
         PlatformNotFoundException, AppdefDuplicateFQDNException, ApplicationException;
 
@@ -342,7 +338,7 @@ public interface PlatformManager {
      * the platformValue.addIpValue(IpValue) method due to bug 4924
      * @param existing - the value object for the platform you want to save
      */
-    public Platform updatePlatform(AuthzSubject subject, PlatformValue existing)
+    public Resource updatePlatform(AuthzSubject subject, PlatformValue existing)
         throws UpdateException, PermissionException, AppdefDuplicateNameException,
         PlatformNotFoundException, AppdefDuplicateFQDNException, ApplicationException;
 
@@ -350,7 +346,7 @@ public interface PlatformManager {
      * DevNote: This method was refactored out of updatePlatformTypes. It does
      * not work.
      */
-    public void deletePlatformType(PlatformType pt) throws org.hyperic.hq.common.VetoException;
+    public void deletePlatformType(ResourceType pt) throws org.hyperic.hq.common.VetoException;
 
     /**
      * Update platform types
@@ -368,17 +364,17 @@ public interface PlatformManager {
     /**
      * Add an IP to a platform
      */
-    public Ip addIp(Platform platform, String address, String netmask, String macAddress);
+    public void addIp(Resource platform, String address, String netmask, String macAddress);
 
     /**
      * Update an IP on a platform
      */
-    public Ip updateIp(Platform platform, String address, String netmask, String macAddress);
+    public void updateIp(Resource platform, String address, String netmask, String macAddress);
 
     /**
      * Remove an IP on a platform
      */
-    public void removeIp(Platform platform, String address, String netmask, String macAddress);
+    public void removeIp(Resource platform, String address, String netmask, String macAddress);
 
     /**
      * Returns a list of 2 element arrays. The first element is the name of the

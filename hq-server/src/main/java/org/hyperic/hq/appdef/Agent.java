@@ -25,11 +25,9 @@
 
 package org.hyperic.hq.appdef;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import org.springframework.datastore.graph.annotation.NodeEntity;
 
-import org.hyperic.hq.appdef.server.session.Platform;
-
+@NodeEntity(partial=true)
 public class Agent extends AppdefBean {
     private String _address;
     private Integer _port;
@@ -38,7 +36,6 @@ public class Agent extends AppdefBean {
     private String _version;
     private boolean _unidirectional;
     private AgentType _agentType;
-    private Collection _platforms;
 
     public Agent() {
     }
@@ -54,7 +51,6 @@ public class Agent extends AppdefBean {
         _authToken  = authToken;
         _agentToken = agentToken;
         _version    = version;
-        _platforms  = new ArrayList();
     }
     
     public String getAddress() {
@@ -125,38 +121,6 @@ public class Agent extends AppdefBean {
 
     public void setAgentType(AgentType agentType) {
         _agentType = agentType;
-    }
-
-    public Collection<Platform> getPlatforms() {
-        return _platforms;
-    }
-
-    public void setPlatforms(Collection platforms) {
-        _platforms = platforms;
-    }
-
-    public boolean equals(Object obj)
-    {
-        if (!(obj instanceof Agent) || !super.equals(obj)) {
-            return false;
-        }
-        Agent o = (Agent)obj;
-        return (_address == o.getAddress() ||
-                (_address!=null && o.getAddress()!=null &&
-                 _address.equals(o.getAddress())))
-               &&
-               (_port == o.getPort() || (_port!=null && o.getPort()!=null &&
-                                        _port.equals(o.getPort())));
-    }
-
-    public int hashCode()
-    {
-        int result = super.hashCode();
-
-        result = 37*result + (_address!=null ? _address.hashCode() : 0);
-        result = 37*result + (_port!=null ? _port.hashCode() : 0);
-
-        return result;
     }
     
     public String connectionString() {

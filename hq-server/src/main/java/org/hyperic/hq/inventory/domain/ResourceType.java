@@ -1,5 +1,6 @@
 package org.hyperic.hq.inventory.domain;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -10,12 +11,14 @@ import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
+import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
@@ -79,6 +82,11 @@ public class ResourceType {
     @OneToMany
     @Transient
     private Set<ConfigType> configTypes;
+
+    @Transient
+    @ManyToOne
+    @RelatedTo(type = "DEFINED_BY", direction = Direction.OUTGOING, elementClass = Plugin.class)
+    private Plugin plugin;
 
     @Version
     @Column(name = "version")
@@ -202,6 +210,7 @@ public class ResourceType {
 
     @Transactional
     public void remove() {
+        //TODO remove all Resources as well
         if (this.entityManager == null)
             this.entityManager = entityManager();
         if (this.entityManager.contains(this)) {
@@ -234,9 +243,43 @@ public class ResourceType {
     public Set<Resource> getResources() {
         return resources;
     }
-    
+
     public boolean hasResources() {
         return resources.size() > 0;
+    }
+
+    public Set<ResourceType> getResourceTypesFrom(String relationName) {
+        return getRelatedResourceTypes(relationName, org.neo4j.graphdb.Direction.OUTGOING);
+    }
+
+    public Set<ResourceType> getResourceTypesTo(String relationName) {
+        return getRelatedResourceTypes(relationName, org.neo4j.graphdb.Direction.INCOMING);
+    }
+    
+    public ResourceType getResourceTypeFrom(String relationName) {
+        //TODO validate only one
+        return getRelatedResourceTypes(relationName, org.neo4j.graphdb.Direction.OUTGOING).iterator().next();
+    }
+
+    public ResourceType getResourceTypeTo(String relationName) {
+        //TODO validate only one
+        return getRelatedResourceTypes(relationName, org.neo4j.graphdb.Direction.INCOMING).iterator().next();
+    }
+
+    private Set<ResourceType> getRelatedResourceTypes(String relationName,
+                                              org.neo4j.graphdb.Direction direction) {
+        Set<ResourceType> resourceTypes = new HashSet<ResourceType>();
+        Traverser relationTraverser = getUnderlyingState().traverse(Traverser.Order.BREADTH_FIRST,
+            new StopEvaluator() {
+                public boolean isStopNode(TraversalPosition currentPos) {
+                    return currentPos.depth() >= 1;
+                }
+            }, ReturnableEvaluator.ALL_BUT_START_NODE,
+            DynamicRelationshipType.withName(relationName), direction);
+        for (Node related : relationTraverser) {
+            resourceTypes.add(graphDatabaseContext.createEntityFromState(related, ResourceType.class));
+        }
+        return resourceTypes;
     }
 
     public static int countResourceTypes() {
@@ -306,6 +349,17 @@ public class ResourceType {
     public int getAppdefType() {
         // TODO get rid of this
         return 0;
+    }
+
+    public static ResourceType findRootResourceType() {
+        // TODO AuthzConstants.RootResourceId. We may need a root resource.
+        // Check concept of Neo4J ref node
+        return null;
+    }
+    
+    public static Set<ResourceType> findByPlugin(String plugin) {
+        //TODO
+        return null;
     }
 
 }
