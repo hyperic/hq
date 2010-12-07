@@ -33,9 +33,11 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.HibernateException;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
@@ -74,7 +76,29 @@ public class MeasurementEnabler
             log.debug("handling refresh event list size=" + e.size());
         }
         
-        measurementManager.handleCreateRefreshEvents(e);
+        int tries = 0;
+        int MAX_RETRIES = 5;
+        Exception exc = null;
+        while (tries++ < MAX_RETRIES) {
+            try {
+                measurementManager.handleCreateRefreshEvents(e);
+                exc = null;
+                break;
+            } catch (HibernateException ex) {
+                exc = ex;
+                log.debug("(retrying cmd, may be fine) " + ex,ex);
+            }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException ex) {
+                exc = ex;
+                break;
+            }
+        }
+        if (exc != null) {
+            throw new SystemException(
+                exc.getMessage() + ", retried " + MAX_RETRIES + " times", exc);
+        }
     }
     
     public String toString() {
