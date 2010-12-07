@@ -282,13 +282,6 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
             }
         } finally {
             if (debug) log.debug(debugBuf);
-            if (client != null) {
-                try {
-                    client.closeConnection();
-                } catch (AgentRemoteException e) {
-                    log.error(e);
-                }
-            }
         }
     }
 
