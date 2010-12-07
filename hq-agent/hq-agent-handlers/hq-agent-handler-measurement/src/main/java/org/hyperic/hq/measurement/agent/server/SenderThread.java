@@ -588,43 +588,18 @@ public class SenderThread
 
     public void run(){
         Long lastMetricTime;
-        Calendar controlCal = Calendar.getInstance();
-        controlCal.setTimeInMillis(System.currentTimeMillis());
-        Calendar cal = Calendar.getInstance();
-        controlCal.set(Calendar.SECOND, 5);
         
         while(this.shouldDie == false){
             try {
-                    controlCal.add(Calendar.MINUTE, 1);
-                    long now1 = System.currentTimeMillis();
-                    cal.setTimeInMillis(now1 + SEND_INTERVAL);
-                    // want to keep some randomness for all agents to send their
-                    // data.  This way an agent is not pegged to a certain
-                    // second interval
-                    if (cal.get(Calendar.MINUTE) != controlCal.get(Calendar.MINUTE)) {
-                        long sleeptime = controlCal.getTimeInMillis() - now1;
-                        if (sleeptime > 0) {
-                            try {
-                                synchronized (_interrupter) {
-                                	if(log.isDebugEnabled())
-                                		log.debug("Entering to wait state using randomized period: " + sleeptime);
-                                    _interrupter.wait(sleeptime);
-                                }
-                            } catch (InterruptedException e) {
-                                log.debug("Thread interrupted from random time period");
-                            }
-                        }
-                    } else {
-                        try {
-                            synchronized (_interrupter) {
-                            	if(log.isDebugEnabled())
-                            		log.debug("Entering to wait state using default period");
-                                _interrupter.wait(SEND_INTERVAL);
-                            }
-                        } catch (InterruptedException e) {
-                            log.debug("Thread interrupted from default time period");
-                        }
-                    }
+            	try {
+            		synchronized (_interrupter) {
+            			if(log.isDebugEnabled())
+            				log.debug("Entering to wait state using default period");
+            			_interrupter.wait(SEND_INTERVAL);
+            		}
+            	} catch (InterruptedException e) {
+            		log.debug("Thread interrupted from default time period");
+            	}
                     
                 // if somebody changed the the flag while I was
                 // sleeping, check it and exit if needed
