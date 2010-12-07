@@ -225,7 +225,7 @@ public class RealtimeAvailabilityThread
         
         if (schedulesCopy != null) {
             
-            Iterator<RealtimeSchedule> it = schedules.values().iterator();
+            Iterator<RealtimeSchedule> it = schedulesCopy.values().iterator();
 
             while(it.hasNext() && !shouldDie) {
                 RealtimeSchedule rs = it.next();
