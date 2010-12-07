@@ -608,7 +608,7 @@ public class SenderThread
                                 synchronized (_interrupter) {
                                 	if(log.isDebugEnabled())
                                 		log.debug("Entering to wait state using randomized period: " + sleeptime);
-                                    _interrupter.wait(controlCal.getTimeInMillis() - now1);
+                                    _interrupter.wait(sleeptime);
                                 }
                             } catch (InterruptedException e) {
                                 log.debug("Thread interrupted from random time period");
