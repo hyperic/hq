@@ -606,19 +606,23 @@ public class SenderThread
                         if (sleeptime > 0) {
                             try {
                                 synchronized (_interrupter) {
+                                	if(log.isDebugEnabled())
+                                		log.debug("Entering to wait state using randomized period: " + sleeptime);
                                     _interrupter.wait(controlCal.getTimeInMillis() - now1);
                                 }
                             } catch (InterruptedException e) {
-                                log.debug("Wake up");
+                                log.debug("Thread interrupted from random time period");
                             }
                         }
                     } else {
                         try {
                             synchronized (_interrupter) {
+                            	if(log.isDebugEnabled())
+                            		log.debug("Entering to wait state using default period");
                                 _interrupter.wait(SEND_INTERVAL);
                             }
                         } catch (InterruptedException e) {
-                            log.debug("Wake up");
+                            log.debug("Thread interrupted from default time period");
                         }
                     }
                     
@@ -632,7 +636,13 @@ public class SenderThread
                 }
                 
                 lastMetricTime = this.sendBatch();
-                if(lastMetricTime != null){
+                
+                // While transition queue was flushed to storage and processed
+                // from there, we need to check if somebody gave us new metrics.
+                // If queue is not empty, lets go to loop and try to empty it.
+                // Probably we got a burst of metrics we were too fast to process those.
+                // Doing same check in inner loop.
+                if(lastMetricTime != null || !transitionQueue.isEmpty()){
                     String backlogNum = "";
                     int numConsec = 0;
     
@@ -640,7 +650,7 @@ public class SenderThread
     
                     // Give it a single shot to catch up before starting to
                     // squawk
-                    while((lastMetricTime = this.sendBatch()) != null) {
+                    while(((lastMetricTime = this.sendBatch()) != null) || !transitionQueue.isEmpty()) {
                         long now = System.currentTimeMillis(),
                             tDiff = now - lastMetricTime.longValue();
                         String backlog;
