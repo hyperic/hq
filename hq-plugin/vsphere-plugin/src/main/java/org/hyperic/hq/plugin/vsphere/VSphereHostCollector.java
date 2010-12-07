@@ -58,6 +58,8 @@ public class VSphereHostCollector extends VSphereCollector {
 
     private static final Set<String> VALID_UNITS =
         new HashSet<String>(Arrays.asList(MeasurementConstants.VALID_UNITS));
+    
+    private static final ThreadLocal<VSphereUtil> vim = new ThreadLocal<VSphereUtil>();
 
     private static final HashMap<String, String> UNITS_MAP = new HashMap<String, String>();
     private static final String[][] UNITS_ALIAS = {
@@ -118,9 +120,14 @@ public class VSphereHostCollector extends VSphereCollector {
             return;
         }
         try {
-            VSphereUtil vim = VSphereUtil.getInstance(getProperties());
+            if (vim.get() == null) {
+                vim.set(VSphereUtil.getInstance(getProperties()));
+            } else if (!vim.get().isSessionValid()) {
+                VSphereUtil.dispose(vim.get());
+                vim.set(VSphereUtil.getInstance(getProperties()));
+            }
             //validate config
-            getManagedEntity(vim);
+            getManagedEntity(vim.get());
         } catch (Exception e) {
             throw new PluginException(e.getMessage(), e);
         }
