@@ -1,13 +1,18 @@
 package org.hyperic.hq.web;
 
+import java.io.EOFException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.plugin.domain.ResourceType;
 import org.hyperic.hq.plugin.domain.ResourceTypeRelation;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,6 +28,24 @@ import org.springframework.web.util.UriTemplate;
 @RequestMapping("/resourcetypes")
 public class ResourceTypeController {
 	private final static String BASE_URI = "/resourcetypes";
+
+	@ExceptionHandler({HttpMediaTypeNotSupportedException.class, HttpMediaTypeNotAcceptableException.class})
+	@ResponseStatus(value = HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+	public @ResponseBody Map<String, String> handleUnsupportedMediaTypeException(Exception e) {
+		Map<String, String> result = new HashMap<String, String>();
+		return result;
+	}
+		
+	@ExceptionHandler(EOFException.class)
+	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
+	public @ResponseBody Map<String, String> handleNoRequestBodyException(Exception e) {
+		Map<String, String> result = new HashMap<String, String>();
+		
+		result.put("exeception", e.getClass().getName());
+		result.put("message", e.getMessage());
+		
+		return result;
+	}
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/root-relationships")
 	public @ResponseBody ListOfResourceTypeRelationshipRepresentations getRootResourceTypeRelationships() {
