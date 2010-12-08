@@ -39,7 +39,7 @@
 
     <!-- ========================== WEB DEFINITIONS ======================= -->
 
-    <context:component-scan base-package="org.hyperic.hq.web"/>
+    <context:component-scan base-package="org.hyperic.hq.web,org.hyperic.hq.api"/>
     <context:annotation-config />
 	<mvc:annotation-driven/>
 	
@@ -51,22 +51,6 @@
 				<value>.dashContent.criticalAlerts</value>
 				<value>.dashContent.metricViewer</value>
 			</util:list>		
-		</property>
-	</bean>
-	
-	<bean id="jaxb2Marshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
-		<property name="classesToBeBound" value="org.hyperic.hq.inventory.domain.PlatformNG" />
-	</bean>
-	
-	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
-		<property name="messageConverters">
-  			<list>
-    			<bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter" />
-    			<bean class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter">
-					<constructor-arg ref="jaxb2Marshaller" />
-    				<property name="supportedMediaTypes" value="application/xml" />
-      			</bean>
-			</list>
 		</property>
 	</bean>
 	

@@ -26,11 +26,9 @@
 
 package org.hyperic.hq.web;
 
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -40,8 +38,6 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.WebUser;
-import org.springframework.web.util.UriUtils;
-import org.springframework.web.util.WebUtils;
 
 /**
  * This abstract class provides base functionality used indirectly (via
