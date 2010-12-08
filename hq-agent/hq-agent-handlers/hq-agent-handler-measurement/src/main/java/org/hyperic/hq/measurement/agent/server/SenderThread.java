@@ -626,8 +626,7 @@ public class SenderThread
                     // Give it a single shot to catch up before starting to
                     // squawk
                     while(((lastMetricTime = this.sendBatch()) != null) || !transitionQueue.isEmpty()) {
-                        long now = System.currentTimeMillis(),
-                            tDiff = now - lastMetricTime.longValue();
+                        long now = System.currentTimeMillis();
                         String backlog;
     
                         numConsec++;
@@ -642,14 +641,20 @@ public class SenderThread
                                           "interval.");
                         }
     
-                        backlog = Long.toString(tDiff / (60 * 1000));
-                        if(tDiff / (60 * 1000) > 1 &&
-                           backlog.equals(backlogNum) == false)
-                        {
-                            backlogNum = backlog;
-                            this.log.warn(backlog + 
-                                          " minute(s) of metrics backlogged");
+                        // there's no backlog but queue if filling up
+                        // faster than we can process it
+                        if(lastMetricTime != null) {
+                        	long tDiff = now - lastMetricTime.longValue();
+                            backlog = Long.toString(tDiff / (60 * 1000));
+                            if(tDiff / (60 * 1000) > 1 &&
+                               backlog.equals(backlogNum) == false)
+                            {
+                                backlogNum = backlog;
+                                this.log.warn(backlog + 
+                                              " minute(s) of metrics backlogged");
+                            }
                         }
+                        	
     
                         if(this.shouldDie == true){
                             this.log.info("Dying with measurements backlogged");
