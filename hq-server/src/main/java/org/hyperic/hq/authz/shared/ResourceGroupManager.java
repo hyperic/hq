@@ -36,14 +36,10 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.common.DuplicateObjectException;
-import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.grouping.CritterList;
-import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
-import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
 /**
@@ -62,17 +58,6 @@ public interface ResourceGroupManager
                                              Collection<Role> roles, Collection<Resource> resources)
         throws GroupCreationException, GroupDuplicateNameException;
     
-    
-    /**
-     * Create a resource group and set its Criteria. Currently no permission checking.
-     * @param roles List of {@link Role}s
-     * @param resources List of {@link Resource}s
-     * @param criteriaList List of criteria for automatic addition of resources to the group
-     */
-    public ResourceGroup createResourceGroup(AuthzSubject whoami, ResourceGroupCreateInfo cInfo,
-                                             Collection<Role> roles,
-                                             Collection<Resource> resources,
-                                             CritterList criteriaList) throws GroupCreationException, GroupDuplicateNameException ;
 
     /**
      * Find the group that has the given ID. Performs authz checking
@@ -88,18 +73,6 @@ public interface ResourceGroupManager
      */
     public ResourceGroup findResourceGroupById(Integer id);
 
-    /**
-     * Find the role that has the given name.
-     * @param whoami user requesting to find the group
-     * @param name The name of the role you're looking for.
-     * @return The value-object of the role of the given name.
-     * @throws PermissionException whoami does not have viewResourceGroup on the
-     *         requested group
-     */
-    public ResourceGroup findResourceGroupByName(AuthzSubject whoami, String name)
-        throws PermissionException;
-
-    public Collection<ResourceGroup> findDeletedGroups();
 
     /**
      * Update some of the fundamentals of groups (name, description, location).
@@ -113,13 +86,6 @@ public interface ResourceGroupManager
         GroupDuplicateNameException;
 
     /**
-     * Remove all groups compatible with the specified resource prototype.
-     * @throws VetoException if another subsystem cannot allow it (for
-     *         constraint reasons)
-     */
-    public void removeGroupsCompatibleWith(Resource proto) throws VetoException;
-
-    /**
      * Delete the specified ResourceGroup.
      * @param whoami The current running user.
      * @param group The group to delete.
@@ -129,9 +95,6 @@ public interface ResourceGroupManager
     
     public void removeResourceGroup(AuthzSubject whoami, Integer groupId)
     throws PermissionException, VetoException;
-
-    public void addResources(AuthzSubject subj, ResourceGroup group, List<Resource> resources)
-        throws PermissionException, VetoException;
 
     /**
      * Add a resource to a group by resource id and resource type
@@ -152,15 +115,6 @@ public interface ResourceGroupManager
         throws PermissionException, VetoException;
 
     /**
-     * RemoveResources from a group.
-     * @param whoami The current running user.
-     * @param group The group .
-     */
-    public void removeResources(AuthzSubject whoami, ResourceGroup group,
-                                Collection<Resource> resources) throws PermissionException,
-        VetoException;
-
-    /**
      * Remove a resource from a collection of groups
      * 
      * @param whoami The current running user.
@@ -173,41 +127,7 @@ public interface ResourceGroupManager
                                Collection<ResourceGroup> groups) throws PermissionException,
         VetoException;
 
-    /**
-     * Sets the criteria list for this group and updates the groups members based on the criteria
-     * @param whoami The current running user.
-     * @param group This group.
-     * @param critters List of critters to associate with this resource group.
-     * @throws PermissionException whoami does not own the resource.
-     * @throws GroupException critters is not a valid list of criteria.
-     * 
-     */
-    public void setCriteria(AuthzSubject whoami, ResourceGroup group, CritterList critters)
-        throws PermissionException, GroupException;
-
-    /**
-     * Change the resource contents of a group to the specified list of
-     * resources.
-     * @param resources A list of {@link Resource}s to be in the group
-     */
-    public void setResources(AuthzSubject whoami, ResourceGroup group,
-                             Collection<Resource> resources) throws PermissionException,
-        VetoException;
-
-    /**
-     * List the resources in this group that the caller is authorized to see.
-     * @param whoami The current running user.
-     * @param groupValue This group.
-     * @param pc Paging information for the request
-     * @return list of authorized resources in this group.
-     */
-    public Collection<Resource> getResources(AuthzSubject whoami, Integer id);
-
-    /**
-     * Get all the resource groups including the root resource group.
-     */
-    public List<ResourceGroupValue> getAllResourceGroups(AuthzSubject subject, PageControl pc)
-        throws PermissionException;
+  
 
     /**
      * Get all the members of a group.
@@ -219,22 +139,6 @@ public interface ResourceGroupManager
      * Get the member type counts of a group
      */
     public Map<String, Number> getMemberTypes(ResourceGroup g);
-
-    /**
-     * Get all the groups a resource belongs to
-     * @return {@link ResourceGroup}s
-     */
-    public Collection<ResourceGroup> getGroups(Resource r);
-
-    /**
-     * Get the # of groups within HQ inventory
-     */
-    public Number getGroupCount();
-
-    /**
-     * Returns true if the passed resource is a member of the given group.
-     */
-    public boolean isMember(ResourceGroup group, Resource resource);
 
     /**
      * Get the # of members in a group
@@ -278,29 +182,7 @@ public interface ResourceGroupManager
     /**
      * Get all the resource groups excluding the root resource group.
      */
-    public Collection<ResourceGroup> getAllResourceGroups(AuthzSubject subject, boolean excludeRoot)
-        throws PermissionException;
-
-    /**
-     * Get all {@link ResourceGroup}s
-     */
-    public Collection<ResourceGroup> getAllResourceGroups();
-
-    /**
-     * Get all compatible resource groups of the given entity type and resource
-     * type.
-     */
-    public Collection<ResourceGroup> getCompatibleResourceGroups(AuthzSubject subject,
-                                                                 Resource resProto)
-        throws PermissionException, NotFoundException;
-
-    /**
-     * Get the resource groups with the specified ids
-     * @param ids the resource group ids
-     * @param pc Paging information for the request
-     */
-    public PageList<ResourceGroupValue> getResourceGroupsById(AuthzSubject whoami, Integer[] ids,
-                                                              PageControl pc)
+    public Collection<ResourceGroup> getAllResourceGroups(AuthzSubject subject)
         throws PermissionException;
 
     /**
@@ -308,26 +190,6 @@ public interface ResourceGroupManager
      */
     public void changeGroupOwner(AuthzSubject subject, ResourceGroup group, AuthzSubject newOwner)
         throws PermissionException;
-
-    /**
-     * Get a ResourceGroup owner's AuthzSubjectValue
-     * @param gid The group id
-     * @exception NotFoundException Unable to find a group by id
-     */
-    public AuthzSubject getResourceGroupOwner(Integer gid) throws NotFoundException;
-
-    public ResourceGroup getResourceGroupByResource(Resource resource);
-
-    /**
-     * Set a ResourceGroup modifiedBy attribute
-     * @param whoami user requesting to find the group
-     * @param id The ID of the role you're looking for.
-     */
-    public void setGroupModifiedBy(AuthzSubject whoami, Integer id);
-
-    public void updateGroupType(AuthzSubject subject, ResourceGroup g, int groupType,
-                                int groupEntType, int groupEntResType) throws PermissionException;
-
     
     /**
      * Adds new resources to any groups whose criteria match the resources

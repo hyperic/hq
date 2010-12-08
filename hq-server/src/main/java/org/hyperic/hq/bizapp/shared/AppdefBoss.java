@@ -291,10 +291,6 @@ public interface AppdefBoss {
     public PageList<AppdefResourceTypeValue> findAllResourceTypes(int sessionId, int entType, PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException;
 
-    public Platform createPlatform(int sessionID, PlatformValue platformVal, Integer platTypePK, Integer agent)
-        throws ValidationException, SessionTimeoutException, SessionNotFoundException, PermissionException,
-        AppdefDuplicateNameException, AppdefDuplicateFQDNException, ApplicationException;
-
     public AppdefResourceTypeValue findResourceTypeById(int sessionID, AppdefEntityTypeID id)
         throws SessionTimeoutException, SessionNotFoundException;
 
@@ -770,11 +766,5 @@ public interface AppdefBoss {
      */
     public Map<String, List<AppdefResourceType>> getUnavailableResourcesCount(AuthzSubject user)
         throws AppdefEntityNotFoundException, PermissionException;
-    
-    /**
-     * Check whether or not a given resource exists in the virtual hierarchy
-     * 
-     */
-    public boolean hasVirtualResourceRelation(Resource resource);
     
 }

@@ -53,33 +53,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class AppdefManagerImpl implements AppdefManager {
 
-    private PlatformDAO platformDAO;
-
-    private PlatformTypeDAO platformTypeDAO;
-
-    private ServerDAO serverDAO;
-
-    private ServerTypeDAO serverTypeDAO;
-
-    private ServiceDAO serviceDAO;
-
-    private ServiceTypeDAO serviceTypeDAO;
+    
 
     private PermissionManager permissionManager;
 
     private ResourceManager resourceManager;
 
     @Autowired
-    public AppdefManagerImpl(PlatformDAO platformDAO, PlatformTypeDAO platformTypeDAO, ServerDAO serverDAO,
-                             ServerTypeDAO serverTypeDAO, ServiceDAO serviceDAO, ServiceTypeDAO serviceTypeDAO,
+    public AppdefManagerImpl(
                              PermissionManager permissionManager, ResourceManager resourceManager) {
 
-        this.platformDAO = platformDAO;
-        this.platformTypeDAO = platformTypeDAO;
-        this.serverDAO = serverDAO;
-        this.serverTypeDAO = serverTypeDAO;
-        this.serviceDAO = serviceDAO;
-        this.serviceTypeDAO = serviceTypeDAO;
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
     }

@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventPayload;
 import org.hyperic.hq.zevents.ZeventSourceId;
@@ -35,7 +34,7 @@ import org.hyperic.hq.zevents.ZeventSourceId;
  */
 public abstract class ResourceZevent extends Zevent {
 
-    public ResourceZevent(Integer subject, AppdefEntityID id) {
+    public ResourceZevent(Integer subject, Integer id) {
         super(new ResourceZeventSource(id),
               new ResourceZeventPayload(subject, id));
     }
@@ -45,9 +44,9 @@ public abstract class ResourceZevent extends Zevent {
         super(source, payload);
     }
 
-    public AppdefEntityID getAppdefEntityID() {
+    public Integer getId() {
         return ((ResourceZeventPayload)getPayload()).
-            getAppdefEntityID();
+            getId();
     }
 
     public Integer getAuthzSubjectId() {
@@ -60,9 +59,9 @@ public abstract class ResourceZevent extends Zevent {
     {
         private static final long serialVersionUID = -2799620967593343325L;
         
-        private AppdefEntityID _id;
+        private Integer _id;
 
-        public ResourceZeventSource(AppdefEntityID id) {
+        public ResourceZeventSource(Integer id) {
             _id = id;
         }
 
@@ -87,10 +86,10 @@ public abstract class ResourceZevent extends Zevent {
     protected static class ResourceZeventPayload
         implements ZeventPayload
     {
-        private AppdefEntityID _id;
+        private Integer _id;
         private Integer _subject;
 
-        public ResourceZeventPayload(Integer subject, AppdefEntityID id) {
+        public ResourceZeventPayload(Integer subject, Integer id) {
             _subject = subject;
             _id = id;
         }
@@ -99,7 +98,7 @@ public abstract class ResourceZevent extends Zevent {
             return _subject;
         }
 
-        public AppdefEntityID getAppdefEntityID() {
+        public Integer getId() {
             return _id;
         }
     }

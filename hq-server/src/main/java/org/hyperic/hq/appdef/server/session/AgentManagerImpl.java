@@ -93,26 +93,20 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     private final Log log = LogFactory.getLog(AgentManagerImpl.class.getName());
     private AgentTypeDAO agentTypeDao;
     private AgentDAO agentDao;
-    private ServiceDAO serviceDao;
-    private ServerDAO serverDao;
     private PermissionManager permissionManager;
-    private PlatformDAO platformDao;
     private ServerConfigManager serverConfigManager;
     private AgentCommandsClientFactory agentCommandsClientFactory;
     private ApplicationContext applicationContext;
 
     @Autowired
     public AgentManagerImpl(AgentTypeDAO agentTypeDao,
-                            AgentDAO agentDao, ServiceDAO serviceDao, ServerDAO serverDao,
-                            PermissionManager permissionManager, PlatformDAO platformDao,
+                            AgentDAO agentDao, 
+                            PermissionManager permissionManager, 
                             ServerConfigManager serverConfigManager,
                             AgentCommandsClientFactory agentCommandsClientFactory) {
         this.agentTypeDao = agentTypeDao;
         this.agentDao = agentDao;
-        this.serviceDao = serviceDao;
-        this.serverDao = serverDao;
         this.permissionManager = permissionManager;
-        this.platformDao = platformDao;
         this.serverConfigManager = serverConfigManager;
         this.agentCommandsClientFactory = agentCommandsClientFactory;
     }

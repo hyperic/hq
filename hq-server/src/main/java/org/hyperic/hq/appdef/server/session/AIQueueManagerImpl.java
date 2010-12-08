@@ -98,7 +98,6 @@ public class AIQueueManagerImpl implements AIQueueManager {
     private AIPlatformDAO aiPlatformDAO;
     private ConfigManager configManager;
     private CPropManager cPropManager;
-    private PlatformDAO platformDAO;
     private PlatformManager platformManager;
     private PermissionManager permissionManager;
     private AuditManager auditManager;
@@ -113,7 +112,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
     @Autowired
     public AIQueueManagerImpl(AIServerDAO aIServerDAO, AIIpDAO aiIpDAO,
                               AIPlatformDAO aiPlatformDAO, ConfigManager configManager,
-                              CPropManager cPropManager, PlatformDAO platformDAO,
+                              CPropManager cPropManager, 
                               PlatformManager platformManager, PermissionManager permissionManager,
                               AuditManager auditManager, AuthzSubjectManager authzSubjectManager,
                               AgentCommandsClientFactory agentCommandsClientFactory,
@@ -125,7 +124,6 @@ public class AIQueueManagerImpl implements AIQueueManager {
         this.aiPlatformDAO = aiPlatformDAO;
         this.configManager = configManager;
         this.cPropManager = cPropManager;
-        this.platformDAO = platformDAO;
         this.platformManager = platformManager;
         this.permissionManager = permissionManager;
         this.auditManager = auditManager;
@@ -684,7 +682,13 @@ public class AIQueueManagerImpl implements AIQueueManager {
     }
 
     private AIPlatform getAIPlatformByPlatformID(Integer platformID) {
-        return getAIPlatformByPlatform(platformDAO.findById(platformID));
+        try {
+            return getAIPlatformByPlatform(platformManager.findPlatformById(platformID));
+        } catch (PlatformNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**

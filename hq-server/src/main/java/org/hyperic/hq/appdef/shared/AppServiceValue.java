@@ -30,7 +30,7 @@
 package org.hyperic.hq.appdef.shared;
 
 import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.hq.appdef.server.session.ServiceType;
+import org.hyperic.hq.product.ServiceType;
 
 /**
  * Value object for AppService.

@@ -41,19 +41,14 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
-import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
-import org.hyperic.hq.appdef.shared.CPropManager;
-import org.hyperic.hq.appdef.shared.ConfigManager;
-import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
@@ -70,21 +65,16 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.common.shared.AuditManager;
-import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
-import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.ArrayUtil;
-import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
-import org.hyperic.util.pager.SortAttribute;
-import org.neo4j.graphdb.RelationshipType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -95,6 +85,8 @@ import org.springframework.transaction.annotation.Transactional;
 @org.springframework.stereotype.Service
 @Transactional
 public class ServerManagerImpl implements ServerManager {
+
+    private static final String AUTODISCOVERY_ZOMBIE = "autodiscoveryZombie";
 
     private static final String AUTO_INVENTORY_IDENTIFIER = "autoInventoryIdentifier";
 
@@ -108,10 +100,6 @@ public class ServerManagerImpl implements ServerManager {
 
     private PermissionManager permissionManager;
     private ResourceManager resourceManager;
-    private ServiceManager serviceManager;
-    private CPropManager cpropManager;
-    private ConfigManager configManager;
-    private MeasurementManager measurementManager;
     private AuditManager auditManager;
     private AuthzSubjectManager authzSubjectManager;
     private ResourceGroupManager resourceGroupManager;
@@ -120,17 +108,12 @@ public class ServerManagerImpl implements ServerManager {
 
     @Autowired
     public ServerManagerImpl(PermissionManager permissionManager,  ResourceManager resourceManager,
-                             ServiceManager serviceManager, CPropManager cpropManager, ConfigManager configManager,
-                             MeasurementManager measurementManager, AuditManager auditManager,
+                              AuditManager auditManager,
                              AuthzSubjectManager authzSubjectManager, ResourceGroupManager resourceGroupManager,
                              ZeventEnqueuer zeventManager, ResourceAuditFactory resourceAuditFactory) {
 
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
-        this.serviceManager = serviceManager;
-        this.cpropManager = cpropManager;
-        this.configManager = configManager;
-        this.measurementManager = measurementManager;
         this.auditManager = auditManager;
         this.authzSubjectManager = authzSubjectManager;
         this.resourceGroupManager = resourceGroupManager;
@@ -138,64 +121,29 @@ public class ServerManagerImpl implements ServerManager {
         this.resourceAuditFactory = resourceAuditFactory;
     }
 
-   
-    /**
-     * Validate a server value object which is to be created on this platform.
-     * This method will check IP conflicts and any other special constraint
-     * required to succesfully add a server instance to a platform
-     */
-    private void validateNewServer(Resource p, Resource server) throws ValidationException {
-        //TODO this more or less gets done when creating the relationship b/w Resources
-        // ensure the server value has a server type
-        String msg = null;
-        if (server.getType() == null) {
-            msg = "Server has no ServerType";
-        } else if (server.getId() != null) {
-            msg = "This server is not new, it has ID:" + server.getId();
-        }
-        if (msg == null) {
-            Integer id = server.getType().getId();
-            Collection<ResourceType> stypes = p.getType().getResourceTypesFrom(RelationshipTypes.SERVER_TYPE);
-            for (ResourceType sVal : stypes) {
-
-                if (sVal.getId().equals(id))
-                    return;
-            }
-            msg = "Servers of type '" + server.getType().getName() +
-                  "' cannot be created on platforms of type '" + p.getType().getName() + "'";
-        }
-        if (msg != null) {
-            throw new ValidationException(msg);
-        }
-    }
-
     /**
      * Filter a list of {@link Server}s by their viewability by the subject
      */
-    protected List<Resource> filterViewableServers(Collection<Resource> servers, AuthzSubject who) {
-
-        List<Resource> res = new ArrayList<Resource>();
-        ResourceType type;
-        OperationType op;
+    protected List<Server> filterViewableServers(Collection<Resource> servers, AuthzSubject who) {
+        List<Server> res = new ArrayList<Server>();
+       
 
         try {
-            //TODO model op?
+           
             //type = resourceManager.findResourceTypeByName(AuthzConstants.serverResType);
             //op = getOperationByName(type, AuthzConstants.serverOpViewServer);
         } catch (Exception e) {
             throw new SystemException("Internal error", e);
         }
-
-        Integer typeId = type.getId();
-
         for (Resource s : servers) {
 
-            try {
-                permissionManager.check(who.getId(), typeId, s.getId(), op.getId());
-                res.add(s);
-            } catch (PermissionException e) {
+            //try {
+                //TODO perm check
+                //permissionManager.check(who.getId(), typeId, s.getId(), op.getId());
+                res.add(toServer(s));
+            //} catch (PermissionException e) {
                 // Ok
-            }
+            //}
         }
         return res;
     }
@@ -232,123 +180,6 @@ public class ServerManagerImpl implements ServerManager {
     }
 
     /**
-     * Construct the new name of the server to be cloned to the target platform
-     */
-    private String getTargetServerName(Resource targetPlatform, Resource serverToClone) {
-
-        String prefix = serverToClone.getResourceTo(RelationshipTypes.PLATFORM).getName();
-        String oldServerName = serverToClone.getName();
-        String newServerName = StringUtil.removePrefix(oldServerName, prefix);
-
-        if (newServerName.equals(oldServerName)) {
-            // old server name may not contain the canonical host name
-            // of the platform. try to get just the host name
-            int dotIndex = prefix.indexOf(".");
-            if (dotIndex > 0) {
-                prefix = prefix.substring(0, dotIndex);
-                newServerName = StringUtil.removePrefix(oldServerName, prefix);
-            }
-        }
-
-        newServerName = targetPlatform.getName() + " " + newServerName;
-
-        return newServerName;
-    }
-
-    /**
-     * Clone a Server to a target Platform
-     * 
-     */
-    public Resource cloneServer(AuthzSubject subject, Resource targetPlatform, Resource serverToClone)
-        throws ValidationException, PermissionException, VetoException, NotFoundException {
-        Resource s = null;
-        // See if we already have this server type
-        for (Resource server : targetPlatform.getResourcesTo(RelationshipTypes.SERVER)) {
-
-            if (server.getType().equals(serverToClone.getType())) {
-                // Do nothing if it's a Network server
-                if (server.getType().getName().equals("NetworkServer")) {
-                    return null;
-                }
-                // HQ-1657: virtual servers are not deleted. clone all other
-                // servers
-                //TODO seriously what is a virtual server?
-                //if (server.getType().isVirtual()) {
-                   // s = server;
-                    //break;
-                //}
-            }
-        }
-        Resource resource = serverToClone;
-        byte[] productResponse = configManager.toConfigResponse(resource.getProductConfig());
-        byte[] measResponse = configManager.toConfigResponse(resource.getMeasurementConfig());
-        byte[] controlResponse = configManager.toConfigResponse(resource.getControlConfig());
-        byte[] rtResponse = configManager.toConfigResponse(resource.getResponseTimeConfig());
-
-        if (s == null) {
-            
-            s = new Resource();
-            s.setName(getTargetServerName(targetPlatform, serverToClone));
-            s.setDescription(serverToClone.getDescription());
-            s.setProperty(INSTALL_PATH,serverToClone.getProperty(INSTALL_PATH));
-            String aiid = (String)serverToClone.getProperty(AUTO_INVENTORY_IDENTIFIER);
-            if (aiid != null) {
-                s.setProperty(AUTO_INVENTORY_IDENTIFIER,serverToClone.getProperty(AUTO_INVENTORY_IDENTIFIER));
-            } else {
-                // Server was created by hand, use a generated AIID. (This
-                // matches
-                // the behaviour in 2.7 and prior)
-                aiid = serverToClone.getProperty(INSTALL_PATH) + "_" + System.currentTimeMillis() + "_" +
-                       serverToClone.getName();
-                s.setProperty(AUTO_INVENTORY_IDENTIFIER,aiid);
-            }
-            s.setServicesAutomanaged(serverToClone.isServicesAutomanaged());
-            s.setRuntimeAutodiscovery(serverToClone.isRuntimeAutodiscovery());
-            s.setWasAutodiscovered(serverToClone.isWasAutodiscovered());
-            s.setAutodiscoveryZombie(false);
-            s.setLocation(serverToClone.getLocation());
-            s.setModifiedBy(serverToClone.getModifiedBy());
-            configManager.createConfigResponse(s.getId(),productResponse, measResponse,
-                controlResponse, rtResponse);
-            
-
-            Integer stid = serverToClone.getType().getId();
-
-            ResourceType st = ResourceType.findResourceType(stid);
-            s.setType(st);
-            validateNewServer(targetPlatform, s);
-            s.persist();
-            // Add server to parent collection
-            targetPlatform.relateTo(s,RelationshipTypes.SERVER);
-
-            createAuthzServer(subject, s);
-
-            // Send resource create event
-            ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, s.getId());
-            zeventManager.enqueueEventAfterCommit(zevent);
-        } else {
-            boolean wasUpdated = configManager.configureResponse(subject, s.getEntityId(),
-                productResponse, measResponse,controlResponse, rtResponse,
-                null, true);
-            if (wasUpdated) {
-                resourceManager.resourceHierarchyUpdated(subject, Collections.singletonList(s));
-            }
-
-            // Scrub the services
-            Resource[] services = (Resource[]) s.getResourcesFrom(RelationshipTypes.SERVICE).toArray(new Resource[0]);
-            for (int i = 0; i < services.length; i++) {
-                Resource svc = services[i];
-
-                if (!svc.getType().getName().equals("CPU")) {
-                    serviceManager.removeService(subject, svc);
-                }
-            }
-        }
-
-        return s;
-    }
-
-    /**
      * Get the scope of viewable servers for a given user
      * @param whoami - the user
      * @return List of ServerPK's for which subject has
@@ -359,123 +190,53 @@ public class ServerManagerImpl implements ServerManager {
             log.debug("Checking viewable servers for subject: " + whoami.getName());
         }
 
-        OperationType op = getOperationByName(resourceManager.findResourceTypeByName(AuthzConstants.serverResType),
-            AuthzConstants.serverOpViewServer);
-        List<Integer> idList = permissionManager.findOperationScopeBySubject(whoami, op.getId());
+        //OperationType op = getOperationByName(resourceManager.findResourceTypeByName(AuthzConstants.serverResType),
+          //  AuthzConstants.serverOpViewServer);
+       // List<Integer> idList = permissionManager.findOperationScopeBySubject(whoami, op.getId());
+        
+        Collection<Resource> servers = getAllServers();
 
         if (log.isDebugEnabled()) {
-            log.debug("There are: " + idList.size() + " viewable servers");
+            log.debug("There are: " + servers.size() + " viewable servers");
         }
-        List<Integer> keyList = new ArrayList<Integer>(idList.size());
-        for (int i = 0; i < idList.size(); i++) {
-            keyList.add(idList.get(i));
+        List<Integer> keyList = new ArrayList<Integer>(servers.size());
+        for (Resource server: servers) {
+            keyList.add(server.getId());
         }
         return keyList;
     }
-
-    /**
-     * Move a Server to the given Platform
-     * 
-     * @param subject The user initiating the move.
-     * @param target The target
-     *        {@link org.hyperic.hq.appdef.server.session.Server} to move.
-     * @param destination The destination {@link Platform}.
-     * 
-     * @throws org.hyperic.hq.authz.shared.PermissionException If the passed
-     *         user does not have permission to move the Server.
-     * @throws org.hyperic.hq.common.VetoException If the operation canot be
-     *         performed due to incompatible types.
-     * 
-     * 
-     */
-    public void moveServer(AuthzSubject subject, Resource target, Resource destination) throws VetoException,
-        PermissionException {
-
-        try {
-            // Permission checking on destination
-
-            permissionManager.checkPermission(subject, resourceManager
-                .findResourceTypeByName(AuthzConstants.platformResType), destination.getId(),
-                AuthzConstants.platformOpAddServer);
-
-            // Permission check on target
-            permissionManager.checkPermission(subject, resourceManager
-                .findResourceTypeByName(AuthzConstants.serverResType), target.getId(),
-                AuthzConstants.serverOpRemoveServer);
-        } catch (NotFoundException e) {
-            throw new VetoException("Caught NotFoundException checking permission: " + e.getMessage()); // notgonnahappen
+ 
+    private Collection<Resource> getAllServers() {
+        Set<Resource> servers = new HashSet<Resource>();
+        Collection<Resource> platforms = Resource.findRootResource().getResourcesFrom(RelationshipTypes.PLATFORM);
+        for(Resource platform: platforms) {
+            servers.addAll(platform.getResourcesFrom(RelationshipTypes.SERVER));
         }
-
-        // Ensure target can be moved to the destination
-        if (!destination.getType().getResourceTypesFrom(RelationshipTypes.SERVER_TYPE).contains(target.getType())) {
-            throw new VetoException("Incompatible resources passed to move(), " + "cannot move server of type " +
-                                    target.getType().getName() + " to " + destination.getType().getName());
-
-        }
-
-        // Unschedule measurements
-        measurementManager.disableMeasurements(subject, target);
-
-        // Reset Server parent id
-        target.removeRelationship(target.getResourceTo(RelationshipTypes.SERVER),RelationshipTypes.SERVER);
-        destination.relateTo(target, RelationshipTypes.SERVER);
-
-        // Move Authz resource.
-        resourceManager.moveResource(subject, target, destination);
-
-      
-
-        // Reschedule metrics
-        ResourceUpdatedZevent zevent = new ResourceUpdatedZevent(subject, target.getId());
-        zeventManager.enqueueEventAfterCommit(zevent);
-
-        // Must also move all dependent services so that ancestor edges are
-        // rebuilt and that service metrics are re-scheduled
-        ArrayList<Resource> services = new ArrayList<Resource>(); // copy list
-        // since the
-        // move will
-        // modify the
-        // server
-        // collection.
-        services.addAll(target.getResourcesFrom(RelationshipTypes.SERVICE));
-
-        for (Resource s : services) {
-
-            serviceManager.moveService(subject, s, target);
-        }
-    }
-    
-    private ServerTypeValue getServerTypeValue(ResourceType serverType) {
-        //TODO
-        return null;
+        return servers;
     }
     
     private Resource create(ServerValue sv, Resource p) {
-        //ConfigResponseDB configResponse = configResponseDAO.create();
-        
         Resource s = new Resource();
         s.setName(sv.getName());
         s.setDescription(sv.getDescription());
-        s.setInstallPath(sv.getInstallPath());
+        s.setProperty(INSTALL_PATH,sv.getInstallPath());
         String aiid = sv.getAutoinventoryIdentifier();
         if (aiid != null) {
-            s.setAutoinventoryIdentifier(sv.getAutoinventoryIdentifier());
+            s.setProperty(AUTO_INVENTORY_IDENTIFIER,sv.getAutoinventoryIdentifier());
         } else {
             // Server was created by hand, use a generated AIID. (This matches
             // the behaviour in 2.7 and prior)
             aiid = sv.getInstallPath() + "_" + System.currentTimeMillis() + "_" + sv.getName();
-            s.setAutoinventoryIdentifier(aiid);
+            s.setProperty(AUTO_INVENTORY_IDENTIFIER,aiid);
         }
       
-        s.setServicesAutomanaged(sv.getServicesAutomanaged());
-        s.setRuntimeAutodiscovery(sv.getRuntimeAutodiscovery());
-        s.setWasAutodiscovered(sv.getWasAutodiscovered());
-        s.setAutodiscoveryZombie(false);
+        s.setProperty("servicesAutoManaged",sv.getServicesAutomanaged());
+        s.setProperty("runtimeAutodiscovery",sv.getRuntimeAutodiscovery());
+        s.setProperty("wasAutodiscovered",sv.getWasAutodiscovered());
+        s.setProperty(AUTODISCOVERY_ZOMBIE,false);
         s.setLocation(sv.getLocation());
         s.setModifiedBy(sv.getModifiedBy());
         s.persist();
-        //TODO
-        //s.setConfigResponse(configResponse);
         p.relateTo(s,RelationshipTypes.SERVER);
        
         Integer stid = sv.getServerType().getId();
@@ -483,6 +244,16 @@ public class ServerManagerImpl implements ServerManager {
         s.setType(st);
         return s;
    }
+    
+    private Server toServer(Resource server) {
+        //TODO
+        return new Server(server.getId());
+    }
+    
+    private ServerType toServerType(ResourceType serverType) {
+        //TODO
+        return new ServerType();
+    }
 
     /**
      * Create a Server on the given platform.
@@ -491,20 +262,21 @@ public class ServerManagerImpl implements ServerManager {
      * 
      * 
      */
-    public Resource createServer(AuthzSubject subject, Integer platformId, Integer serverTypeId, ServerValue sValue)
+    public Server createServer(AuthzSubject subject, Integer platformId, Integer serverTypeId, ServerValue sValue)
         throws ValidationException, PermissionException, PlatformNotFoundException, AppdefDuplicateNameException,
         NotFoundException {
-        try {
+        //try {
             trimStrings(sValue);
             
-            permissionManager
-            .checkPermission(subject, resourceManager.findResourceTypeByName(AuthzConstants.platformResType), platformId, 
-                AuthzConstants.platformOpAddServer);
+            //TODO perm checking
+            //permissionManager
+            //.checkPermission(subject, resourceManager.findResourceTypeByName(AuthzConstants.platformResType), platformId, 
+              //  AuthzConstants.platformOpAddServer);
 
             Resource platform = Resource.findResource(platformId);
             ResourceType serverType = ResourceType.findResourceType(serverTypeId);
 
-            sValue.setServerType(getServerTypeValue(serverType));
+            sValue.setServerType(toServerType(serverType).getServerTypeValue());
             sValue.setOwner(subject.getName());
             sValue.setModifiedBy(subject.getName());
 
@@ -518,13 +290,13 @@ public class ServerManagerImpl implements ServerManager {
             ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, server.getId());
             zeventManager.enqueueEventAfterCommit(zevent);
 
-            return server;
+            return toServer(server);
             // } catch (CreateException e) {
             // throw e;
-        } catch (NotFoundException e) {
-            throw new NotFoundException("Unable to find platform=" + platformId + " or server type=" + serverTypeId +
-                                        ":" + e.getMessage());
-        }
+        //} catch (NotFoundException e) {
+        //    throw new NotFoundException("Unable to find platform=" + platformId + " or server type=" + serverTypeId +
+         //                               ":" + e.getMessage());
+        //}
     }
 
   
@@ -533,8 +305,7 @@ public class ServerManagerImpl implements ServerManager {
      * PlatformManager.removePlatform when cascading removal to servers.
      * 
      */
-    public void removeServer(AuthzSubject subject, Resource server) throws PermissionException, VetoException {
-        final Resource r = server;
+    public void removeServer(AuthzSubject subject, Server server) throws PermissionException, VetoException {
         final Audit audit = resourceAuditFactory.deleteResource(resourceManager
             .findResourceById(AuthzConstants.authzHQSystem), subject, 0, 0);
         boolean pushed = false;
@@ -547,42 +318,9 @@ public class ServerManagerImpl implements ServerManager {
               //  permissionManager.checkRemovePermission(subject, server.getEntityId());
             //}
 
-            // Service manager will update the collection, so we need to copy
-
-            Collection<Resource> services = server.getResourcesFrom(RelationshipTypes.SERVICE);
-            synchronized (services) {
-                for (final Iterator<Resource> i = services.iterator(); i.hasNext();) {
-                    try {
-                        Resource service = i.next();
-                        final String currAiid = (String)service.getProperty(AUTO_INVENTORY_IDENTIFIER);
-                        final Integer id = service.getId();
-                        // ensure aiid remains unique
-                        service.setProperty(AUTO_INVENTORY_IDENTIFIER,id + currAiid);
-                        //TODO double check removing the service will remove relationship to server and ResourceType.resources()
-                        service.remove();
-                    } catch (ServiceNotFoundException e) {
-                        log.warn(e);
-                    }
-                }
-            }
-
-           
-
-            // Keep config response ID so it can be deleted later.
-            //final ConfigResponseDB config = server.getConfigResponse();
-            //TODO double check removing the service will remove relationship to server and ResourceType.resources()
-            server.remove();
-
-            //TODO?
-            // Remove the config response
-            //if (config != null) {
-              //  configResponseDAO.remove(config);
-           // }
-            //cpropManager.deleteValues(aeid.getType(), aeid.getID());
-
-            // TODO the below is only thing we need to do?Remove authz resource
-            resourceManager.removeAuthzResource(subject, aeid, r);
-
+            //TODO remove services         
+            //config, cprops, and relationships will get cleaned up by removal here
+            resourceManager.removeResource(subject, Resource.findResource(server.getId()));
            
         } finally {
             if (pushed) {
@@ -606,30 +344,24 @@ public class ServerManagerImpl implements ServerManager {
         return valuePager.seek(getAllServerTypes(), pc);
     }
     
-    private Set<ResourceType> getAllServerTypes() {
-        Set<ResourceType> serverTypes = new HashSet<ResourceType>();
-        Collection<ResourceType> platformTypes = ResourceType.findRootResourceType().getResourceTypesFrom(RelationshipTypes.PLATFORM_TYPE);
-        for(ResourceType platformType:platformTypes) {
-            serverTypes.addAll(platformType.getResourceTypesFrom(RelationshipTypes.SERVER_TYPE));
+    private Set<ServerType> getAllServerTypes() {
+        Set<ServerType> serverTypes = new HashSet<ServerType>();
+        Set<ResourceType> resourceTypes = getAllServerResourceTypes();
+        for(ResourceType serverType: resourceTypes) {
+            serverTypes.add(toServerType(serverType));
         }
         return serverTypes;
     }
-
-    /**
-     * 
-     */
-    @Transactional(readOnly=true)
-    public Resource getServerByName(Resource host, String name) {
-         Collection<Resource> servers = host.getResourcesFrom(RelationshipTypes.SERVER);
-         for(Resource server: servers) {
-             if(server.getName().equals(name)) {
-                 return server;
-             }
-         }
-         return null;
+    private Set<ResourceType> getAllServerResourceTypes() {
+        Set<ResourceType> resourceTypes = new HashSet<ResourceType>();
+        Collection<ResourceType> platformTypes = ResourceType.findRootResourceType().getResourceTypesFrom(RelationshipTypes.PLATFORM_TYPE);
+        for(ResourceType platformType:platformTypes) {
+            resourceTypes.addAll(platformType.getResourceTypesFrom(RelationshipTypes.SERVER_TYPE));
+        }
+        return resourceTypes;
     }
     
-    private Collection<ResourceType> getServerTypes(final List serverIds, final boolean asc) {
+    private Collection<ServerType> getServerTypes(final List<Integer> serverIds, final boolean asc) {
         //TODO from ServerDAO
         return null;
     }
@@ -644,21 +376,10 @@ public class ServerManagerImpl implements ServerManager {
         throws PermissionException, NotFoundException {
         // build the server types from the visible list of servers
         final List<Integer> authzPks = getViewableServers(subject);
-        final Collection<ResourceType> serverTypes =getServerTypes(authzPks, true);
+        final Collection<ServerType> serverTypes =getServerTypes(authzPks, true);
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
         return valuePager.seek(serverTypes, pc);
-    }
-
-    /**
-     * Find viewable server non-virtual types for a platform
-     * @return list of serverTypeValues
-     * 
-     */
-    @Transactional(readOnly=true)
-    public PageList<ServerTypeValue> getServerTypesByPlatform(AuthzSubject subject, Integer platId, PageControl pc)
-        throws PermissionException, PlatformNotFoundException, ServerNotFoundException {
-        return getServerTypesByPlatform(subject, platId, true, pc);
     }
 
     /**
@@ -668,14 +389,14 @@ public class ServerManagerImpl implements ServerManager {
      */
     @Transactional(readOnly=true)
     public PageList<ServerTypeValue> getServerTypesByPlatform(AuthzSubject subject, Integer platId,
-                                                              boolean excludeVirtual, PageControl pc)
+                                                              PageControl pc)
         throws PermissionException, PlatformNotFoundException, ServerNotFoundException {
 
         // build the server types from the visible list of servers
-        Collection<Resource> servers = getServersByPlatformImpl(subject, platId, APPDEF_RES_TYPE_UNDEFINED,
-            excludeVirtual, pc);
+        Collection<Server> servers = getServersByPlatformImpl(subject, platId, null,
+             pc);
 
-        Collection<AppdefResourceType> serverTypes = filterResourceTypes(servers);
+        Collection<ServerType> serverTypes = filterResourceTypes(servers);
 
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
@@ -695,7 +416,11 @@ public class ServerManagerImpl implements ServerManager {
                                                                   PageControl pc) throws PlatformNotFoundException {
         ResourceType platType = ResourceType.findResourceType(platformTypeId);
 
-        Collection<ResourceType> serverTypes = platType.getResourceTypesFrom(RelationshipTypes.SERVER_TYPE);
+        Collection<ResourceType> resourceTypes = platType.getResourceTypesFrom(RelationshipTypes.SERVER_TYPE);
+        Set<ServerType> serverTypes = new HashSet<ServerType>();
+        for(ResourceType resourceType: resourceTypes) {
+            serverTypes.add(toServerType(resourceType));
+        }
 
         return valuePager.seek(serverTypes, pc);
     }
@@ -714,9 +439,10 @@ public class ServerManagerImpl implements ServerManager {
      * 
      */
     @Transactional(readOnly=true)
-    public Resource findServerByAIID(AuthzSubject subject, Resource platform, String aiid) throws PermissionException {
-        permissionManager.checkViewPermission(subject, platform.getId());
-        return findServerByAIID(platform, aiid);
+    public Server findServerByAIID(AuthzSubject subject, Platform platform, String aiid) throws PermissionException {
+        //TODO perm check
+        //permissionManager.checkViewPermission(subject, platform.getId());
+        return toServer(findServerByAIID(Resource.findResource(platform.getId()), aiid));
     }
 
     /**
@@ -724,8 +450,8 @@ public class ServerManagerImpl implements ServerManager {
      * 
      */
     @Transactional(readOnly=true)
-    public Resource findServerById(Integer id) throws ServerNotFoundException {
-        Resource server = getServerById(id);
+    public Server findServerById(Integer id) throws ServerNotFoundException {
+        Server server = getServerById(id);
 
         if (server == null) {
             throw new ServerNotFoundException(id);
@@ -740,8 +466,8 @@ public class ServerManagerImpl implements ServerManager {
      * @return The Server with the given id, or null if not found.
      */
     @Transactional(readOnly=true)
-    public Resource getServerById(Integer id) {
-        return Resource.findResource(id);
+    public Server getServerById(Integer id) {
+        return toServer(Resource.findResource(id));
     }
 
     /**
@@ -749,8 +475,8 @@ public class ServerManagerImpl implements ServerManager {
      * 
      */
     @Transactional(readOnly=true)
-    public ResourceType findServerType(Integer id) {
-        return ResourceType.findResourceType(id);
+    public ServerType findServerType(Integer id) {
+        return toServerType(ResourceType.findResourceType(id));
     }
 
     /**
@@ -760,41 +486,56 @@ public class ServerManagerImpl implements ServerManager {
      * 
      */
     @Transactional(readOnly=true)
-    public ResourceType findServerTypeByName(String name) throws NotFoundException {
+    public ServerType findServerTypeByName(String name) throws NotFoundException {
         ResourceType type = ResourceType.findResourceTypeByName(name);
         if (type == null) {
             throw new NotFoundException("name not found: " + name);
         }
-        return type;
+        return toServerType(type);
     }
     
-    private List<Resource> findByPlatformAndTypeOrderName(Resource platform, ResourceType st) {
-        List<Resource> servers = new ArrayList<Resource>();
-        Collection<Resource> relatedServers = platform.getResourcesFrom(RelationshipTypes.SERVER);
+    @Transactional(readOnly=true)
+    public List<Server> findServersByType(Platform p, ServerType st) {
+        List<Server> servers = new ArrayList<Server>();
+        Resource platResource = Resource.findResource(p.getId());
+        Collection<Resource> relatedServers = platResource.getResourcesFrom(RelationshipTypes.SERVER);
         for(Resource server: relatedServers) {
             if(st.equals(server.getType())) {
-                servers.add(server);
+                servers.add(toServer(server));
             }
         }
         return servers;
     }
-
-    /**
-     * 
-     */
-    @Transactional(readOnly=true)
-    public List<Resource> findServersByType(Resource p, ResourceType st) {
-        return findByPlatformAndTypeOrderName(p, st);
+    
+    private List<Server> findServersByType(Resource platform, ResourceType serverType) {
+        List<Server> servers = new ArrayList<Server>();
+        Collection<Resource> relatedServers = platform.getResourcesFrom(RelationshipTypes.SERVER);
+        for(Resource server: relatedServers) {
+            if(serverType.equals(server.getType())) {
+                servers.add(toServer(server));
+            }
+        }
+        return servers;
     }
-
+    
+    private List<Server> findByPlatformOrderName(Resource platform) {
+        List<Server> servers = new ArrayList<Server>();
+        Collection<Resource> relatedServers = platform.getResourcesFrom(RelationshipTypes.SERVER);
+        for(Resource server: relatedServers) {
+                servers.add(toServer(server));
+        }
+        //TODO order
+        return servers;
+    }
+    
 
     /**
      * Get server lite value by id. Does not check permission.
      * 
      */
     @Transactional(readOnly=true)
-    public Resource getServerById(AuthzSubject subject, Integer id) throws ServerNotFoundException, PermissionException {
-        Resource server = findServerById(id);
+    public Server getServerById(AuthzSubject subject, Integer id) throws ServerNotFoundException, PermissionException {
+        Server server = findServerById(id);
         permissionManager.checkViewPermission(subject, server.getId());
         return server;
     }
@@ -837,12 +578,7 @@ public class ServerManagerImpl implements ServerManager {
             return new Integer[0];
         }
     }
-    
-    private ServerValue getServerValue(Resource server) {
-        //TODO
-        return null;
-    }
-
+ 
     /**
      * Get server by service.
      * 
@@ -853,7 +589,7 @@ public class ServerManagerImpl implements ServerManager {
         Resource svc = Resource.findResource(sID);
         Resource s = svc.getResourceTo(RelationshipTypes.SERVICE);
         permissionManager.checkViewPermission(subject, s.getId());
-        return getServerValue(s);
+        return toServer(s).getServerValue();
     }
 
     /**
@@ -876,83 +612,16 @@ public class ServerManagerImpl implements ServerManager {
     }
 
     /**
-     * Get all servers.
-     * 
-     * 
-     * @param subject The subject trying to list servers.
-     * @return A List of ServerValue objects representing all of the servers
-     *         that the given subject is allowed to view.
-     */
-    @Transactional(readOnly=true)
-    public PageList<ServerValue> getAllServers(AuthzSubject subject, PageControl pc) throws PermissionException,
-        NotFoundException {
-        Collection<Resource> servers = getViewableServers(subject, pc);
-
-        // valuePager converts local/remote interfaces to value objects
-        // as it pages through them.
-        return valuePager.seek(servers, pc);
-    }
-
-    /**
-     * Get the scope of viewable servers for a given user
-     * @param subject - the user
-     * @return List of ServerLocals for which subject has
-     *         AuthzConstants.serverOpViewServer
-     */
-    @Transactional(readOnly=true)
-    private Collection<Resource> getViewableServers(AuthzSubject subject, PageControl pc) throws PermissionException,
-        NotFoundException {
-        Collection<Resource> servers;
-        List<Integer> authzPks = getViewableServers(subject);
-        int attr = -1;
-        if (pc != null) {
-            attr = pc.getSortattribute();
-        }
-        switch (attr) {
-            case SortAttribute.RESOURCE_NAME:
-                servers = getServersFromIds(authzPks, pc.isAscending());
-                break;
-            default:
-                servers = getServersFromIds(authzPks, true);
-                break;
-        }
-        return servers;
-    }
-
-    /**
-     * @param serverIds {@link Collection} of {@link Server.getId}
-     * @return {@link Collection} of {@link Server}
-     */
-    @Transactional(readOnly=true)
-    private Collection<Resource> getServersFromIds(Collection<Integer> serverIds, boolean asc) {
-        final List<Resource> rtn = new ArrayList<Resource>(serverIds.size());
-        for (Integer id : serverIds) {
-
-            try {
-                final Resource server = findServerById(id);
-                final Resource r = server;
-                if (r == null) {
-                    continue;
-                }
-                rtn.add(server);
-            } catch (ServerNotFoundException e) {
-                log.debug(e.getMessage(), e);
-            }
-        }
-        Collections.sort(rtn, new AppdefNameComparator(asc));
-        return rtn;
-    }
-
-    /**
      * 
      */
     @Transactional(readOnly=true)
-    public Collection<Resource> getViewableServers(AuthzSubject subject, Resource platform) {
-        return filterViewableServers(platform.getResourcesFrom(RelationshipTypes.SERVER), subject);
+    public Collection<Server> getViewableServers(AuthzSubject subject, Platform platform) {
+        Resource platformRes = Resource.findResource(platform.getId());
+        return filterViewableServers(platformRes.getResourcesFrom(RelationshipTypes.SERVER), subject);
     }
 
-    private Collection<Resource> getServersByPlatformImpl(AuthzSubject subject, Integer platId, Integer servTypeId,
-                                                        boolean excludeVirtual, PageControl pc)
+    private Collection<Server> getServersByPlatformImpl(AuthzSubject subject, Integer platId, Integer servTypeId,
+                                                        PageControl pc)
         throws PermissionException, ServerNotFoundException, PlatformNotFoundException {
         List<Integer> authzPks;
         try {
@@ -961,30 +630,17 @@ public class ServerManagerImpl implements ServerManager {
             throw new ServerNotFoundException("No (viewable) servers associated with platform " + platId);
         }
 
-        List<Resource> servers;
+        List<Server> servers;
         // first, if they specified a server type, then filter on it
-        if (!servTypeId.equals(APPDEF_RES_TYPE_UNDEFINED)) {
-            if (!excludeVirtual) {
-                servers = findByPlatformAndTypeOrderName(platId, servTypeId);
-            } else {
-                servers = findByPlatformAndTypeOrderName(platId, servTypeId, Boolean.FALSE);
-            }
+        if (servTypeId != null) {
+            servers = findServersByType(Resource.findResource(platId), ResourceType.findResourceType(servTypeId));
+            
         } else {
-            if (!excludeVirtual) {
-                servers = findByPlatformOrderName(platId);
-            } else {
-                servers = findByPlatformOrderName(platId, Boolean.FALSE);
-            }
+            servers = findByPlatformOrderName(Resource.findResource(platId));
+            
         }
-        for (Iterator<Resource> i = servers.iterator(); i.hasNext();) {
-            Resource aServer = i.next();
-
-            // Keep the virtual ones, we need them so that child services can be
-            // added. Otherwise, no one except the super user will have access
-            // to the virtual services
-            //TODO virtual?
-            //if (aServer.getType().isVirtual())
-              //  continue;
+        for (Iterator<Server> i = servers.iterator(); i.hasNext();) {
+            Server aServer = i.next();
 
             // Remove the server if its not viewable
             if (!authzPks.contains(aServer.getId())) {
@@ -1013,10 +669,10 @@ public class ServerManagerImpl implements ServerManager {
      *         specified platform that the subject is allowed to view.
      */
     @Transactional(readOnly=true)
-    public PageList<ServerValue> getServersByPlatform(AuthzSubject subject, Integer platId, boolean excludeVirtual,
+    public PageList<ServerValue> getServersByPlatform(AuthzSubject subject, Integer platId, 
                                                       PageControl pc) throws ServerNotFoundException,
         PlatformNotFoundException, PermissionException {
-        return getServersByPlatform(subject, platId, APPDEF_RES_TYPE_UNDEFINED, excludeVirtual, pc);
+        return getServersByPlatform(subject, platId, null,  pc);
     }
 
     /**
@@ -1033,9 +689,9 @@ public class ServerManagerImpl implements ServerManager {
      */
     @Transactional(readOnly=true)
     public PageList<ServerValue> getServersByPlatform(AuthzSubject subject, Integer platId, Integer servTypeId,
-                                                      boolean excludeVirtual, PageControl pc)
+                                                       PageControl pc)
         throws ServerNotFoundException, PlatformNotFoundException, PermissionException {
-        Collection<Resource> servers = getServersByPlatformImpl(subject, platId, servTypeId, excludeVirtual, pc);
+        Collection<Server> servers = getServersByPlatformImpl(subject, platId, servTypeId,  pc);
 
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
@@ -1063,79 +719,14 @@ public class ServerManagerImpl implements ServerManager {
             throw new ServerNotFoundException("Service Type not found", e);
         }
 
-        Collection<Resource> servers = getServersByPlatformImpl(subject, platId, servTypeId, false, pc);
+        Collection<Server> servers = getServersByPlatformImpl(subject, platId, servTypeId,  pc);
 
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
         return valuePager.seek(servers, pc);
     }
-
-    /**
-     * Get servers by server type and platform.
-     * 
-     * @param subject The subject trying to list servers.
-     * @param typeId server type id.
-     * 
-     * @return A PageList of ServerValue objects representing servers on the
-     *         specified platform that the subject is allowed to view.
-     */
-    @Transactional(readOnly=true)
-    public List<ServerValue> getServersByType(AuthzSubject subject, String name) throws PermissionException,
-        InvalidAppdefTypeException {
-        try {
-            ResourceType serverType = ResourceType.findResourceTypeByName(name);
-            if (serverType == null) {
-                return new PageList<ServerValue>();
-            }
-
-            Collection<Resource> servers = serverType.getResources();
-
-            List<Integer> authzPks = getViewableServers(subject);
-            for (Iterator<Resource> i = servers.iterator(); i.hasNext();) {
-                Integer sPK = i.next().getId();
-                // remove server if its not viewable
-                if (!authzPks.contains(sPK))
-                    i.remove();
-            }
-
-            // valuePager converts local/remote interfaces to value objects
-            // as it pages through them.
-            return valuePager.seek(servers, PageControl.PAGE_ALL);
-        } catch (NotFoundException e) {
-            return new ArrayList<ServerValue>(0);
-        }
-    }
-
-    /**
-     * Get non-virtual server IDs by server type and platform.
-     * 
-     * 
-     * @param subject The subject trying to list servers.
-     * @param platId platform id.
-     * @return An array of Integer[] which represent the ServerIds specified
-     *         platform that the subject is allowed to view.
-     */
-    @Transactional(readOnly=true)
-    public Integer[] getServerIdsByPlatform(AuthzSubject subject, Integer platId) throws ServerNotFoundException,
-        PlatformNotFoundException, PermissionException {
-        return getServerIdsByPlatform(subject, platId, APPDEF_RES_TYPE_UNDEFINED, true);
-    }
-
-    /**
-     * Get non-virtual server IDs by server type and platform.
-     * 
-     * 
-     * @param subject The subject trying to list servers.
-     * @param servTypeId server type id.
-     * @param platId platform id.
-     * @return An array of Integer[] which represent the ServerIds
-     */
-    @Transactional(readOnly=true)
-    public Integer[] getServerIdsByPlatform(AuthzSubject subject, Integer platId, Integer servTypeId)
-        throws ServerNotFoundException, PlatformNotFoundException, PermissionException {
-        return getServerIdsByPlatform(subject, platId, servTypeId, true);
-    }
-
+    
+    
     /**
      * Get server IDs by server type and platform.
      * 
@@ -1147,15 +738,14 @@ public class ServerManagerImpl implements ServerManager {
      *         specified platform that the subject is allowed to view.
      */
     @Transactional(readOnly=true)
-    public Integer[] getServerIdsByPlatform(AuthzSubject subject, Integer platId, Integer servTypeId,
-                                            boolean excludeVirtual) throws ServerNotFoundException,
+    public Integer[] getServerIdsByPlatform(AuthzSubject subject, Integer platId, Integer servTypeId) throws ServerNotFoundException,
         PlatformNotFoundException, PermissionException {
-        Collection<Resource> servers = getServersByPlatformImpl(subject, platId, servTypeId, excludeVirtual, null);
+        Collection<Server> servers = getServersByPlatformImpl(subject, platId, servTypeId, null);
 
         Integer[] ids = new Integer[servers.size()];
-        Iterator<Resource> it = servers.iterator();
+        Iterator<Server> it = servers.iterator();
         for (int i = 0; it.hasNext(); i++) {
-            Resource server = it.next();
+            Server server = it.next();
             ids[i] = server.getId();
         }
 
@@ -1171,7 +761,7 @@ public class ServerManagerImpl implements ServerManager {
      *         the given application that the subject is allowed to view.
      */
     @Transactional(readOnly=true)
-    private Collection<Resource> getServersByApplicationImpl(AuthzSubject subject, Integer appId, Integer servTypeId)
+    private Collection<Server> getServersByApplicationImpl(AuthzSubject subject, Integer appId, Integer servTypeId)
         throws ServerNotFoundException, ApplicationNotFoundException, PermissionException {
 
         List<Integer> authzPks;
@@ -1189,7 +779,7 @@ public class ServerManagerImpl implements ServerManager {
             throw new ServerNotFoundException("No (viewable) servers " + "associated with " + "application " + appId, e);
         }
 
-        HashMap<Integer, Resource> serverCollection = new HashMap<Integer, Resource>();
+        HashMap<Integer, Server> serverCollection = new HashMap<Integer, Server>();
 
         // XXX - a better solution is to control the viewable set returned by
         // ql finders. This will be forthcoming.
@@ -1200,48 +790,50 @@ public class ServerManagerImpl implements ServerManager {
         while (it.hasNext()) {
 
             Resource appService = it.next();
+            //TODO
 
-            if (appService.isIsGroup()) {
-                Collection<Service> services = serviceManager.getServiceCluster(appService.getResourceGroup())
-                    .getServices();
-
-                Iterator<Service> serviceIterator = services.iterator();
-                while (serviceIterator.hasNext()) {
-                    Service service = serviceIterator.next();
-                    Server server = service.getServer();
-
-                    // Don't bother with entire cluster if type is platform svc
-                    if (server.getServerType().isVirtual()) {
-                        break;
-                    }
-
-                    Integer serverId = server.getId();
-
-                    if (serverCollection.containsKey(serverId)) {
-                        continue;
-                    }
-
-                    serverCollection.put(serverId, server);
-                }
-            } else {
-                Server server = appService.getService().getServer();
-                if (!server.getServerType().isVirtual()) {
+//            if (appService.isIsGroup()) {
+//                Collection<Service> services = serviceManager.getServiceCluster(appService.getResourceGroup())
+//                    .getServices();
+//
+//                Iterator<Service> serviceIterator = services.iterator();
+//                while (serviceIterator.hasNext()) {
+//                    Service service = serviceIterator.next();
+//                    Server server = service.getServer();
+//
+//                    // Don't bother with entire cluster if type is platform svc
+//                    if (server.getServerType().isVirtual()) {
+//                        break;
+//                    }
+//
+//                    Integer serverId = server.getId();
+//
+//                    if (serverCollection.containsKey(serverId)) {
+//                        continue;
+//                    }
+//
+//                    serverCollection.put(serverId, server);
+//                }
+//            } else {
+            //TODO making assumption that all group members are services here
+                Server server = toServer(appService.getResourceTo(RelationshipTypes.SERVICE));
+                
                     Integer serverId = server.getId();
 
                     if (serverCollection.containsKey(serverId))
                         continue;
 
                     serverCollection.put(serverId, server);
-                }
-            }
+                
+            //}
         }
 
-        for (Iterator<Map.Entry<Integer, Resource>> i = serverCollection.entrySet().iterator(); i.hasNext();) {
-            Map.Entry<Integer, Resource> entry = i.next();
-            Resource aServer = entry.getValue();
+        for (Iterator<Map.Entry<Integer, Server>> i = serverCollection.entrySet().iterator(); i.hasNext();) {
+            Map.Entry<Integer, Server> entry = i.next();
+            Server aServer = entry.getValue();
 
             // first, if they specified a server type, then filter on it
-            if (servTypeId != APPDEF_RES_TYPE_UNDEFINED && !(aServer.getType().getId().equals(servTypeId))) {
+            if (servTypeId != null && !(aServer.getServerType().getId().equals(servTypeId))) {
                 i.remove();
             }
             // otherwise, remove the server if its not viewable
@@ -1266,7 +858,7 @@ public class ServerManagerImpl implements ServerManager {
     @Transactional(readOnly=true)
     public PageList<ServerValue> getServersByApplication(AuthzSubject subject, Integer appId, PageControl pc)
         throws ServerNotFoundException, ApplicationNotFoundException, PermissionException {
-        return getServersByApplication(subject, appId, APPDEF_RES_TYPE_UNDEFINED, pc);
+        return getServersByApplication(subject, appId, null, pc);
     }
 
     /**
@@ -1283,7 +875,7 @@ public class ServerManagerImpl implements ServerManager {
     public PageList<ServerValue> getServersByApplication(AuthzSubject subject, Integer appId, Integer servTypeId,
                                                          PageControl pc) throws ServerNotFoundException,
         ApplicationNotFoundException, PermissionException {
-        Collection<Resource> serverCollection = getServersByApplicationImpl(subject, appId, servTypeId);
+        Collection<Server> serverCollection = getServersByApplicationImpl(subject, appId, servTypeId);
 
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
@@ -1302,12 +894,12 @@ public class ServerManagerImpl implements ServerManager {
     @Transactional(readOnly=true)
     public Integer[] getServerIdsByApplication(AuthzSubject subject, Integer appId, Integer servTypeId)
         throws ServerNotFoundException, ApplicationNotFoundException, PermissionException {
-        Collection<Resource> servers = getServersByApplicationImpl(subject, appId, servTypeId);
+        Collection<Server> servers = getServersByApplicationImpl(subject, appId, servTypeId);
 
         Integer[] ids = new Integer[servers.size()];
-        Iterator<Resource> it = servers.iterator();
+        Iterator<Server> it = servers.iterator();
         for (int i = 0; it.hasNext(); i++) {
-            Resource server = it.next();
+            Server server = it.next();
             ids[i] = server.getId();
         }
 
@@ -1328,11 +920,12 @@ public class ServerManagerImpl implements ServerManager {
      * @param existing
      * 
      */
-    public Resource updateServer(AuthzSubject subject, ServerValue existing) throws PermissionException, UpdateException,
+    public Server updateServer(AuthzSubject subject, ServerValue existing) throws PermissionException, UpdateException,
         AppdefDuplicateNameException, ServerNotFoundException {
         try {
             Resource server = Resource.findResource(existing.getId());
-            permissionManager.checkModifyPermission(subject, server.getId());
+            //TODO perm check
+            //permissionManager.checkModifyPermission(subject, server.getId());
             existing.setModifiedBy(subject.getName());
             existing.setMTime(new Long(System.currentTimeMillis()));
             trimStrings(existing);
@@ -1347,7 +940,7 @@ public class ServerManagerImpl implements ServerManager {
 
                 updateServer(existing,server);
             }
-            return server;
+            return toServer(server);
         } catch (ObjectNotFoundException e) {
             throw new ServerNotFoundException(existing.getId(), e);
         }
@@ -1435,29 +1028,18 @@ public class ServerManagerImpl implements ServerManager {
         }
     }
     
-    public ResourceType createServerType(ServerTypeInfo sinfo, String plugin) throws NotFoundException {
+    public ServerType createServerType(ServerTypeInfo sinfo, String plugin) throws NotFoundException {
         ResourceType stype = new ResourceType();
         log.debug("Creating new ServerType: " + sinfo.getName());
-        stype.setPlugin(plugin);
+        //TODO get plugin
+        //stype.setPlugin(plugin);
         stype.setName(sinfo.getName());
         stype.setDescription(sinfo.getDescription());
-        stype.setVirtual(sinfo.isVirtual());
         String newPlats[] = sinfo.getValidPlatformTypes();
         findAndSetPlatformType(newPlats, stype);
 
         stype.persist();
-        return stype;
-    }
-
-    /**
-     * Find an operation by name inside a ResourcetypeValue object
-     */
-    protected OperationType getOperationByName(ResourceType rtV, String opName) throws PermissionException {
-        OperationType op = rtV.getOperationType(opName);
-        if(op == null) {
-            throw new PermissionException("Operation: " + opName + " not valid for ResourceType: " + rtV.getName());
-        }
-        return op;
+        return toServerType(stype);
     }
 
     /**
@@ -1465,28 +1047,22 @@ public class ServerManagerImpl implements ServerManager {
      * @param resources - {@link Collection} of {@link AppdefResource}
      * @param {@link Collection} of {@link AppdefResourceType}
      */
-    protected Collection<AppdefResourceType> filterResourceTypes(Collection<? extends AppdefResource> resources) {
-        final Set<AppdefResourceType> resTypes = new HashSet<AppdefResourceType>();
-        for (AppdefResource o : resources) {
-
-            if (o == null) {
-                continue;
-            }
-            final AppdefResourceType rt = o.getAppdefResourceType();
-            if (rt != null) {
-                resTypes.add(rt);
-            }
+    private Collection<ServerType> filterResourceTypes(Collection<Server> resources) {
+        final Set<ServerType> resTypes = new HashSet<ServerType>();
+        for (Server o : resources) {
+            resTypes.add(o.getServerType());
         }
-        final List<AppdefResourceType> rtn = new ArrayList<AppdefResourceType>(resTypes);
-        Collections.sort(rtn, new Comparator<AppdefResourceType>() {
+        final List<ServerType> rtn = new ArrayList<ServerType>(resTypes);
+        Collections.sort(rtn, new Comparator<ServerType>() {
             private String getName(Object obj) {
-                if (obj instanceof AppdefResourceType) {
-                    return ((AppdefResourceType) obj).getSortName();
+                if (obj instanceof ServerType) {
+                    //TODO was sortName
+                    return ((ServerType) obj).getName();
                 }
                 return "";
             }
 
-            public int compare(AppdefResourceType o1, AppdefResourceType o2) {
+            public int compare(ServerType o1, ServerType o2) {
                 return getName(o1).compareTo(getName(o2));
             }
         });
@@ -1500,24 +1076,24 @@ public class ServerManagerImpl implements ServerManager {
                                  ResourceManager resMan) throws VetoException {
         // Need to remove all service types
 
-        ResourceType[] types = (ResourceType[]) serverType.getResourceTypesFrom(RelationshipTypes.SERVICE_TYPE).toArray(new ResourceType[0]);
-        for (int i = 0; i < types.length; i++) {
-            serviceManager.deleteServiceType(types[i], overlord, resGroupMan, resMan);
+        ResourceType[] serviceTypes = (ResourceType[]) serverType.getResourceTypesFrom(RelationshipTypes.SERVICE_TYPE).toArray(new ResourceType[0]);
+        for (ResourceType serviceType : serviceTypes) {
+            serviceType.remove();
         }
 
         log.debug("Removing ServerType: " + serverType.getName());
         //Integer typeId = AuthzConstants.authzServerProto;
         //Resource proto = resMan.findResourceByInstanceId(typeId, serverType.getId());
 
-        try {
+        //try {
             //TODO remove compat groups?
             //resGroupMan.removeGroupsCompatibleWith(proto);
 
             // Remove all servers done by removing server type
             
-        } catch (PermissionException e) {
-            assert false : "Overlord should not run into PermissionException";
-        }
+       // } catch (PermissionException e) {
+         //    assert false : "Overlord should not run into PermissionException";
+        //}
 
         serverType.remove();
     }
@@ -1525,8 +1101,8 @@ public class ServerManagerImpl implements ServerManager {
     /**
      * 
      */
-    public void setAutodiscoveryZombie(Resource server, boolean zombie) {
-        server.setAutodiscoveryZombie(zombie);
+    public void setAutodiscoveryZombie(Server server, boolean zombie) {
+        Resource.findResource(server.getId()).setProperty(AUTODISCOVERY_ZOMBIE,zombie);
     }
 
     /**
@@ -1571,17 +1147,12 @@ public class ServerManagerImpl implements ServerManager {
      */
     @Transactional(readOnly=true)
     public List<Object[]> getServerTypeCounts() {
-        return serverDAO.getServerTypeCounts();
-    }
-
-    /**
-     * Get the # of servers within HQ inventory. This method ingores virtual
-     * server types.
-     * 
-     */
-    @Transactional(readOnly=true)
-    public Number getServerCount() {
-        return serverDAO.getServerCount();
+        Collection<ResourceType> serverTypes = getAllServerResourceTypes();
+        List<Object[]> counts = new ArrayList<Object[]>();
+        for(ResourceType serverType: serverTypes) {
+            counts.add(new Object[]{serverType.getName(),serverType.getResources().size()});
+        }
+        return counts;
     }
 
     @PostConstruct

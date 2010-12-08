@@ -118,10 +118,6 @@ public final class AuthzConstants {
    
     public static final String escalationResourceTypeName = "EscalationScheme";
     public static final String hqSystemResourceTypeName = "HQSystem";
-    
-    public static final String platformPrototypeVmwareVsphereVm = "VMware vSphere VM";
-    public static final String platformPrototypeVmwareVsphereHost = "VMware vSphere Host";
-    public static final String serverPrototypeVmwareVcenter = "VMware vCenter";
         
     public static final String rootOpCAMAdmin = "administerCAM";
 
@@ -153,11 +149,11 @@ public final class AuthzConstants {
     public static final Integer     authzEscalation     =  new Integer(401);
     public static final Integer     authzHQSystem       =  new Integer(501);
     public static final Integer     authzLocation       =  new Integer(309);
+    
+    public static final Integer rootSubjectId = new Integer(1);
  
     // Resource Relation constants
     public static final String ResourceEdgeContainmentRelation = "containment";
-    public static final String ResourceEdgeNetworkRelation = "network";
-    public static final String ResourceEdgeVirtualRelation = "virtual";
     
     // List of alert operations
     public static final String[] VIEW_ALERTS_OPS =

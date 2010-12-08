@@ -66,6 +66,10 @@ public class ResourceType {
     @GraphProperty
     @Transient
     private String name;
+    
+    @GraphProperty
+    @Transient
+    private String description;
 
     @RelatedTo(type = "HAS_OPERATIONS", direction = Direction.OUTGOING, elementClass = OperationType.class)
     @OneToMany
@@ -268,6 +272,14 @@ public class ResourceType {
 
     public Set<Resource> getResources() {
         return resources;
+    }
+    
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public boolean hasResources() {

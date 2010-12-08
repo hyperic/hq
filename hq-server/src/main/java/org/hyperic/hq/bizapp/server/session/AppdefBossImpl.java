@@ -1046,36 +1046,6 @@ public class AppdefBossImpl implements AppdefBoss {
     }
 
     /**
-     * @param platTypePK - the type of platform
-     * @return PlatformValue - the saved Value object
-     * 
-     */
-    public Platform createPlatform(int sessionID, PlatformValue platformVal, Integer platTypePK,
-                                   Integer agent) throws ValidationException,
-        SessionTimeoutException, SessionNotFoundException, PermissionException,
-        AppdefDuplicateNameException, AppdefDuplicateFQDNException, ApplicationException {
-        try {
-            // Get the AuthzSubject for the user's session
-            AuthzSubject subject = sessionManager.getSubject(sessionID);
-            Platform platform = platformManager.createPlatform(subject, platTypePK, platformVal,
-                agent);
-            return platform;
-        } catch (AppdefDuplicateNameException e) {
-            log.error("Unable to create platform. Rolling back", e);
-            throw e;
-        } catch (AppdefDuplicateFQDNException e) {
-            log.error("Unable to create platform. Rolling back", e);
-            throw e;
-        } catch (PlatformNotFoundException e) {
-            log.error("Unable to create platform. Rolling back", e);
-            throw new SystemException("Error occurred creating platform:" + e.getMessage());
-        } catch (ApplicationException e) {
-            log.error("Unable to create platform. Rolling back", e);
-            throw e;
-        }
-    }
-
-    /**
      * 
      */
     @Transactional(readOnly = true)
@@ -3323,13 +3293,5 @@ public class AppdefBossImpl implements AppdefBoss {
             Collections.sort(list);
         }
         return ret;
-    }
-
-    /**
-     * Check whether or not a given resource exists in the virtual hierarchy
-     * 
-     */
-    public boolean hasVirtualResourceRelation(Resource resource) {
-        return resourceManager.hasResourceTypeRelation(resource, resourceManager.getVirtualRelation());
     }
 }

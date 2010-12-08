@@ -43,7 +43,6 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.Application;
-import org.hyperic.hq.appdef.server.session.ApplicationDAO;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
@@ -117,7 +116,6 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
     private ResourceManager resourceManager;
     private ResourceGroupManager resourceGroupManager;
-    private ApplicationDAO applicationDAO;
     private PermissionManager permissionManager;
     private AuthzSubjectManager authzSubjectManager;
     private ConfigManager configManager;
@@ -131,7 +129,6 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     @Autowired
     public MeasurementManagerImpl(ResourceManager resourceManager,
                                   ResourceGroupManager resourceGroupManager,
-                                  ApplicationDAO applicationDAO,
                                   PermissionManager permissionManager,
                                   AuthzSubjectManager authzSubjectManager,
                                   ConfigManager configManager, MetricDataCache metricDataCache,
@@ -140,7 +137,6 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                                   AgentManager agentManager, AgentMonitor agentMonitor) {
         this.resourceManager = resourceManager;
         this.resourceGroupManager = resourceGroupManager;
-        this.applicationDAO = applicationDAO;
         this.permissionManager = permissionManager;
         this.authzSubjectManager = authzSubjectManager;
         this.configManager = configManager;

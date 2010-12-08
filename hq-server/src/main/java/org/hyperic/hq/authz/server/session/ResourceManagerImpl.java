@@ -22,66 +22,38 @@
 package org.hyperic.hq.authz.server.session;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.appdef.server.session.Application;
-import org.hyperic.hq.appdef.server.session.ApplicationDAO;
-import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.PlatformDAO;
-import org.hyperic.hq.appdef.server.session.PlatformType;
-import org.hyperic.hq.appdef.server.session.PlatformTypeDAO;
-import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
-import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.ServerDAO;
-import org.hyperic.hq.appdef.server.session.ServerType;
-import org.hyperic.hq.appdef.server.session.ServiceDAO;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
-import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformManager;
-import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.authz.shared.ResourceRelationCreateException;
-import org.hyperic.hq.bizapp.server.session.AppdefBossImpl;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceRelation;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.inventory.domain.ResourceTypeRelation;
-import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
-import org.hyperic.util.timer.StopWatch;
-import org.neo4j.graphdb.RelationshipType;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -104,34 +76,23 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
 
     private final Log log = LogFactory.getLog(ResourceManagerImpl.class);
     private Pager resourceTypePager = null;
-    private PlatformDAO platformDAO;
+   
     private AuthzSubjectManager authzSubjectManager;
     private AuthzSubjectDAO authzSubjectDAO;
     private ZeventEnqueuer zeventManager;
-    private ServerDAO serverDAO;
-    private ServiceDAO serviceDAO;
-    private PlatformTypeDAO platformTypeDAO;
-    private ApplicationDAO applicationDAO;
+   
     private PermissionManager permissionManager;
     private ResourceAuditFactory resourceAuditFactory;
     private ApplicationContext applicationContext;
 
     @Autowired
-    public ResourceManagerImpl(PlatformDAO platformDAO,
-                               ServerDAO serverDAO, ServiceDAO serviceDAO,
-                               AuthzSubjectManager authzSubjectManager,
+    public ResourceManagerImpl(AuthzSubjectManager authzSubjectManager,
                                AuthzSubjectDAO authzSubjectDAO,
-                               ZeventEnqueuer zeventManager, PlatformTypeDAO platformTypeDAO,
-                               ApplicationDAO applicationDAO, PermissionManager permissionManager,
+                               ZeventEnqueuer zeventManager, PermissionManager permissionManager,
                                ResourceAuditFactory resourceAuditFactory) {
-        this.platformDAO = platformDAO;
-        this.serverDAO = serverDAO;
-        this.serviceDAO = serviceDAO;
         this.authzSubjectManager = authzSubjectManager;
         this.authzSubjectDAO = authzSubjectDAO;
         this.zeventManager = zeventManager;
-        this.platformTypeDAO = platformTypeDAO;
-        this.applicationDAO = applicationDAO;
         this.permissionManager = permissionManager;
         resourceTypePager = Pager.getDefaultPager();
         this.resourceAuditFactory = resourceAuditFactory;
@@ -157,31 +118,6 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     }
 
     /**
-     * remove the authz resource entry
-     */
-    public void removeAuthzResource(AuthzSubject subject, AppdefEntityID aeid, Resource r)
-        throws PermissionException, VetoException {
-        if (log.isDebugEnabled())
-            log.debug("Removing authz resource: " + aeid);
-
-        AuthzSubject s = authzSubjectManager.findSubjectById(subject.getId());
-        removeResource(s, r);
-
-        // Send resource delete event
-        ResourceDeletedZevent zevent = new ResourceDeletedZevent(subject, aeid);
-        zeventManager.enqueueEventAfterCommit(zevent);
-    }
-
-    /**
-     * Find a resource, acting as a resource prototype.
-     * 
-     */
-    @Transactional(readOnly = true)
-    public Resource findResourcePrototypeByName(String name) {
-        return Resource.findResourcePrototypeByName(name);
-    }
-
-    /**
      * Check if there are any resources of a given type
      * 
      * 
@@ -196,8 +132,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      * 
      * 
      */
-    public Resource createResource(AuthzSubject owner, ResourceType rt, Resource prototype,
-                                   Integer instanceId, String name, boolean system, Resource parent) {
+    public Resource createResource(AuthzSubject owner, ResourceType rt, String name, boolean system, Resource parent) {
         long start = System.currentTimeMillis();
 
         Resource res = new Resource();
@@ -212,10 +147,6 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         if (parent != null) {
             parent.relateTo(res, RelationshipTypes.CONTAINS);
             createResourceEdges(parent, res, relation, false);
-
-            // TODO: Explore calling this when ResourceCreatedZevent
-            // is processed instead
-            createVirtualResourceEdges(owner, parent, res, system);
         }
 
         resourceAuditFactory.createResource(res, owner, start, System.currentTimeMillis());
@@ -265,32 +196,6 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     }
 
     /**
-     * Find the Resource that has the given instance ID and ResourceType.
-     * @param type The ResourceType of the Resource you're looking for.
-     * @param instanceId Your ID for the resource you're looking for.
-     * @return The value-object of the Resource of the given ID.
-     * 
-     */
-    @Transactional(readOnly = true)
-    public Resource findResourceByInstanceId(ResourceType type, Integer instanceId) {
-        Resource resource = findResourceByInstanceId(type.getId(), instanceId);
-
-        if (resource == null) {
-            throw new RuntimeException("Unable to find resourceType=" + type.getId() +
-                                       " instanceId=" + instanceId);
-        }
-        return resource;
-    }
-
-    /**
-     * 
-     */
-    @Transactional(readOnly = true)
-    public Resource findResourceByInstanceId(Integer typeId, Integer instanceId) {
-        return Resource.findByInstanceId(typeId, instanceId);
-    }
-
-    /**
      * Find's the root (id=0) resource
      * 
      */
@@ -305,220 +210,6 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     @Transactional(readOnly = true)
     public Resource findResourceById(Integer id) {
         return Resource.findResource(id);
-    }
-
-    /**
-     * Find the Resource that has the given instance ID and ResourceType name.
-     * @param type The ResourceType of the Resource you're looking for.
-     * @param instanceId Your ID for the resource you're looking for.
-     * @return The value-object of the Resource of the given ID.
-     * 
-     */
-    @Transactional(readOnly = true)
-    public Resource findResourceByTypeAndInstanceId(String type, Integer instanceId) {
-        ResourceType resType = ResourceType.findResourceTypeByName(type);
-        return Resource.findByInstanceId(resType.getId(), instanceId);
-    }
-
-    private Platform findPlatformById(Integer id) throws PlatformNotFoundException {
-        Platform platform = platformDAO.get(id);
-
-        if (platform == null)
-            throw new PlatformNotFoundException(id);
-
-        // Make sure that resource is loaded as to not get
-        // LazyInitializationException
-        platform.getName();
-
-        return platform;
-    }
-
-    /**
-     * 
-     */
-    @Transactional(readOnly = true)
-    public Resource findResource(AppdefEntityID aeid) {
-        try {
-            final Integer id = aeid.getId();
-            switch (aeid.getType()) {
-                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                    Server server = serverDAO.get(id);
-                    if (server == null) {
-                        return null;
-                    }
-                    return server.getResource();
-                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                    return findPlatformById(id).getResource();
-                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                    org.hyperic.hq.appdef.server.session.Service service = serviceDAO.get(id);
-                    if (service == null) {
-                        return null;
-                    }
-                    return service.getResource();
-                case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                    return Resource.findByInstanceId(aeid.getAuthzTypeId(), id);
-                case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                    AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-                    return findApplicationById(overlord, id).getResource();
-                default:
-                    return Resource.findByInstanceId(aeid.getAuthzTypeId(), id);
-            }
-        } catch (ApplicationNotFoundException e) {
-        } catch (PermissionException e) {
-        } catch (PlatformNotFoundException e) {
-        }
-        return null;
-    }
-
-    private Application findApplicationById(AuthzSubject subject, Integer id)
-        throws ApplicationNotFoundException, PermissionException {
-        try {
-            Application app = applicationDAO.findById(id);
-            permissionManager.checkViewPermission(subject, app.getEntityId());
-            return app;
-        } catch (ObjectNotFoundException e) {
-            throw new ApplicationNotFoundException(id, e);
-        }
-    }
-
-    /**
-     * 
-     */
-    @Transactional(readOnly = true)
-    public Resource findResourcePrototype(AppdefEntityTypeID id) {
-        return findPrototype(id);
-    }
-
-    private Resource findPrototype(AppdefEntityTypeID id) {
-        Integer authzType;
-
-        switch (id.getType()) {
-            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                authzType = AuthzConstants.authzPlatformProto;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                authzType = AuthzConstants.authzServerProto;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                authzType = AuthzConstants.authzServiceProto;
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported prototype type: " + id.getType());
-        }
-        return Resource.findByInstanceId(authzType,id.getId());
-    }
-
-    /**
-     * Removes the specified resource by nulling out its resourceType. Will not
-     * null the resourceType of the resource which is passed in. These resources
-     * need to be cleaned up eventually by
-     * {@link AppdefBossImpl.removeDeletedResources}. This may be done in the
-     * background via zevent by issuing a {@link ResourcesCleanupZevent}.
-     * @see {@link AppdefBossImpl.removeDeletedResources}
-     * @see {@link ResourcesCleanupZevent}
-     * @param r {@link Resource} resource to be removed.
-     * @param nullResourceType tells the method to null out the resourceType
-     * @return AppdefEntityID[] - an array of the resources (including children)
-     *         deleted
-     * 
-     */
-    public AppdefEntityID[] removeResourcePerms(AuthzSubject subj, Resource r,
-                                                boolean nullResourceType) throws VetoException,
-        PermissionException {
-        final ResourceType resourceType = r.getType();
-
-        // Possible this resource has already been marked for deletion
-        if (resourceType == null) {
-            return new AppdefEntityID[0];
-        }
-
-        // Make sure user has permission to remove this resource
-        final PermissionManager pm = PermissionManagerFactory.getInstance();
-        String opName = null;
-
-        if (resourceType.getId().equals(AuthzConstants.authzPlatform)) {
-            opName = AuthzConstants.platformOpRemovePlatform;
-        } else if (resourceType.getId().equals(AuthzConstants.authzServer)) {
-            opName = AuthzConstants.serverOpRemoveServer;
-        } else if (resourceType.getId().equals(AuthzConstants.authzService)) {
-            opName = AuthzConstants.serviceOpRemoveService;
-        } else if (resourceType.getId().equals(AuthzConstants.authzApplication)) {
-            opName = AuthzConstants.appOpRemoveApplication;
-        } else if (resourceType.getId().equals(AuthzConstants.authzGroup)) {
-            opName = AuthzConstants.groupOpRemoveResourceGroup;
-        }
-
-        final boolean debug = log.isDebugEnabled();
-        final StopWatch watch = new StopWatch();
-        if (debug)
-            watch.markTimeBegin("removeResourcePerms.pmCheck");
-       
-        pm.check(subj.getId(), resourceType, r.getInstanceId(), opName);
-        if (debug) {
-            watch.markTimeEnd("removeResourcePerms.pmCheck");
-        }
-
-       
-        if (debug) {
-            watch.markTimeBegin("removeResourcePerms.findEdges");
-        }
-        //TODO this was findDescEdges before, so I guess it returned relationships all the way down.  Find out why
-        Collection<ResourceRelation> edges = r.getRelationshipsFrom(getContainmentRelation().getName());
-        Collection<ResourceRelation> virtEdges = r.getRelationshipsFrom(getVirtualRelation().getName());
-        if (debug) {
-            watch.markTimeEnd("removeResourcePerms.findEdges");
-        }
-        Set<AppdefEntityID> removed = new HashSet<AppdefEntityID>();
-        for (ResourceRelation edge : edges) {
-            // Remove descendants' permissions
-            removed.addAll(Arrays.asList(removeResourcePerms(subj, edge.getTo(), true)));
-        }
-        
-        for (ResourceRelation edge : virtEdges ) {
-           _removeResource(subj, edge.getTo(), true);
-        }
-
-        removed.add(AppdefUtil.newAppdefEntityId(r));
-        if (debug) {
-            watch.markTimeBegin("removeResource");
-        }
-        _removeResource(subj, r, nullResourceType);
-        if (debug) {
-            watch.markTimeBegin("removeResource");
-            log.debug(watch);
-        }
-        return removed.toArray(new AppdefEntityID[0]);
-    }
-
-    /**
-     * 
-     */
-    public void _removeResource(AuthzSubject subj, Resource r, boolean nullResourceType) {
-        final boolean debug = log.isDebugEnabled();
-       
-        final StopWatch watch = new StopWatch();
-        if (debug) {
-            watch.markTimeBegin("removeResourcePerms.removeEdges");
-        }
-        
-        // Delete the edges and resource groups
-        r.removeRelationships();
-        if (debug) {
-            watch.markTimeEnd("removeResourcePerms.removeEdges");
-        }
-        if (nullResourceType) {
-            r.setType(null);
-        }
-        final long now = System.currentTimeMillis();
-        if (debug) {
-            watch.markTimeBegin("removeResourcePerms.audit");
-        }
-        resourceAuditFactory.deleteResource(findResourceById(AuthzConstants.authzHQSystem), subj,
-            now, now);
-        if (debug) {
-            watch.markTimeEnd("removeResourcePerms.audit");
-            log.debug(watch);
-        }
     }
 
     /**
@@ -664,79 +355,6 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     }
 
     /**
-     * Find all the resources which have the specified prototype
-     * @return a list of {@link Resource}s
-     * 
-     */
-    @Transactional(readOnly = true)
-    public List<Resource> findResourcesOfPrototype(Resource proto, PageInfo pInfo) {
-        return Resource.findResourcesOfPrototype(proto, pInfo);
-    }
-
-    /**
-     * Get all resources which are prototypes of platforms, servers, and
-     * services and have a resource of that type in the inventory.
-     * 
-     * 
-     */
-    @Transactional(readOnly = true)
-    public List<Resource> findAppdefPrototypes() {
-        return Resource.findAppdefPrototypes();
-    }
-
-    /**
-     * Get all resources which are prototypes of platforms, servers, and
-     * services.
-     * 
-     * 
-     */
-    @Transactional(readOnly = true)
-    public List<Resource> findAllAppdefPrototypes() {
-        return Resource.findAllAppdefPrototypes();
-    }
-
-    /**
-     * Get viewable service resources. Service resources include individual
-     * cluster unassigned services as well as service clusters.
-     * 
-     * @param subject
-     * @param pc control
-     * @return PageList of resource values
-     * 
-     */
-    @Transactional(readOnly = true)
-    public PageList<Resource> findViewableSvcResources(AuthzSubject subject, String nameFilter,
-                                                       PageControl pc) {
-
-        AuthzSubject subj = authzSubjectDAO.findById(subject.getId());
-
-        pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
-
-        PermissionManager pm = PermissionManagerFactory.getInstance();
-
-        // returns a sorted Collection by resourceName
-        Collection<Resource> resources = pm.findServiceResources(subj, Boolean.FALSE);
-
-        if (nameFilter != null) {
-            for (Iterator<Resource> it = resources.iterator(); it.hasNext();) {
-                Resource r = it.next();
-                if (r == null || r.isInAsyncDeleteState() ||
-                    !r.getName().toLowerCase().contains(nameFilter.toLowerCase())) {
-                    it.remove();
-                }
-            }
-        }
-
-        Collection<Resource> ordResources = resources;
-        if (pc.isDescending()) {
-            ordResources = new ArrayList<Resource>(resources);
-            Collections.reverse((List<Resource>) ordResources);
-        }
-
-        return new PageList<Resource>(ordResources, ordResources.size());
-    }
-
-    /**
      * Gets all the Resources owned by the given Subject.
      * @param subject The owner.
      * @return Array of resources owned by the given subject.
@@ -773,10 +391,6 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         return parent.getRelationshipsFrom(relation.getName());
     }
 
-    /**
-     * 
-     * 
-     */
     @Transactional(readOnly = true)
     public boolean isResourceChildOf(Resource parent, Resource child) {
         //TODO isResourceChildOf before sometimes when 2 levels deep in case of plaform/server
@@ -832,23 +446,6 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         return resource.getRelationshipsFrom(relation.getName()).isEmpty();
     }
 
-    /**
-     * 
-     * @return {@link Collection} of {@link ResourceEdge}s
-     */
-    @Transactional(readOnly = true)
-    public List<ResourceRelation> findResourceEdges(ResourceTypeRelation relation, Integer resourceId,
-                                                List<Integer> platformTypeIds, String platformName) {
-        if (relation == null || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
-            throw new IllegalArgumentException("Only " +
-                                               AuthzConstants.ResourceEdgeNetworkRelation +
-                                               " resource relationships are supported.");
-        }
-        //TODO get rid of this method with platform stuff in it
-        //return resourceEdgeDAO.findDescendantEdgesByNetworkRelation(resourceId, platformTypeIds,
-          //  platformName);
-        return null;
-    }
 
     private void createResourceEdges(Resource parent, Resource child, ResourceTypeRelation relation,
                                      boolean createSelfEdge) {
@@ -872,408 +469,17 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
 //        }
     }
 
-    /**
-     *
-     * 
-     */
-    public void createResourceEdges(AuthzSubject subject, ResourceTypeRelation relation,
-                                    AppdefEntityID parent, AppdefEntityID[] children)
-        throws PermissionException, ResourceRelationCreateException {
-        createResourceEdges(subject, relation, parent, children, false);
-    }
-
-    private Collection<PlatformType> findSupportedPlatformTypes() {
-        Collection<PlatformType> platformTypes = platformTypeDAO.findAll();
-
-        for (Iterator<PlatformType> it = platformTypes.iterator(); it.hasNext();) {
-            PlatformType pType = it.next();
-            if (!PlatformDetector.isSupportedPlatform(pType.getName())) {
-                it.remove();
-            }
-        }
-        return platformTypes;
-    }
-
-    /**
-     *
-     * 
-     */
-    public void createResourceEdges(AuthzSubject subject, ResourceTypeRelation relation,
-                                    AppdefEntityID parent, AppdefEntityID[] children,
-                                    boolean deleteExisting) throws PermissionException,
-        ResourceRelationCreateException {
-
-        if (relation == null) {
-            throw new ResourceRelationCreateException("Resource relation is null");
-        }
-        if (relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
-            createNetworkResourceEdges(subject, relation, parent, children, deleteExisting);
-        } else if (relation.getId().equals(AuthzConstants.RELATION_VIRTUAL_ID)) {
-            createVirtualResourceEdges(subject, relation, parent, children);
-        } else {
-            throw new ResourceRelationCreateException("Unsupported resource relation: " +
-                                                  relation.getName());
-        }
-
-    }
-
-    private void createVirtualResourceEdges(AuthzSubject subject, ResourceTypeRelation relation,
-                                            AppdefEntityID parent, AppdefEntityID[] children)
-        throws PermissionException, ResourceRelationCreateException {
-
-        Resource parentResource = findResource(parent);
-
-        if (parentResource != null && !parentResource.isInAsyncDeleteState() && children != null &&
-            children.length > 0) {
-
-            try {
-
-                if (!hasResourceTypeRelation(parentResource, relation)) {
-                    // create self-edge for parent of virtual hierarchy
-                    //TODO?
-                    //resourceEdgeDAO.create(parentResource, parentResource, 0, relation);
-                }
-                for (int i = 0; i < children.length; i++) {
-                    Resource childResource = findResource(children[i]);
-
-                    // Check if child resource already exists in VM hierarchy
-                    ResourceRelation existing = getParentResourceEdge(childResource, relation);
-
-                    if (existing != null) {
-                        Resource existingParent = existing.getTo();
-                        if (existingParent.getId().equals(parentResource.getId())) {
-                            createVirtualResourceEdgesByMacAddress(subject, childResource);
-
-                            // already exists with same parent, so skip
-                            if (log.isDebugEnabled()) {
-                                log
-                                    .debug("Skipping. Virtual resource edge already exists: from id=" +
-                                           parentResource.getId() +
-                                           ", to id=" +
-                                           childResource.getId());
-                            }
-                            continue;
-                        } else {
-                            // already exists with different parent, assume
-                            // vMotion occurred
-                            if (log.isDebugEnabled()) {
-                                log
-                                    .debug("Virtual resource edge exists with another resource: fromId=" +
-                                           existingParent.getId() +
-                                           ", toId=" +
-                                           childResource.getId() +
-                                           ". Moving to target fromId=" +
-                                           parentResource.getId());
-                            }
-
-                            // Clean out edges for the current target
-                            Collection<ResourceRelation> edges = findDescendantResourceEdges(
-                                childResource, relation);
-                            for (ResourceRelation re : edges) {
-                                re.remove();
-                            }
-                            childResource.removeRelationships(relation.getName());
-                          
-                        }
-                    }
-
-                    if (childResource != null && !childResource.isInAsyncDeleteState()) {
-                        createResourceEdges(parentResource, childResource, relation,
-                            !hasResourceTypeRelation(childResource, relation));
-
-                        createVirtualResourceEdgesByMacAddress(subject, childResource);
-                    }
-                }
-            } catch (Throwable t) {
-                throw new ResourceRelationCreateException(t);
-            }
-        }
-    }
-
-    /**
-     * Create virtual resource edges when a resource is created
-     */
-    private void createVirtualResourceEdges(AuthzSubject owner, Resource parent, Resource res,
-                                            boolean system) {
-
-        // do not add virtual servers
-
-        if (!system && res.getType().getId().equals(AuthzConstants.authzServer)) {
-            // TODO: this is a hack because the mac address is not available
-            // yet when the platform is created. associate platform to a vm
-            // if necessary when the server is created
-            createVirtualResourceEdgesByMacAddress(owner, parent);
-
-            // virtual resource edges are needed for servers to improve
-            // performance of vCenter resource searches
-            ResourceTypeRelation virtual = getVirtualRelation();
-            // see if parent platform is associated with a vm
-            Collection edges = findAncestorResourceEdges(parent, virtual);
-            if (!edges.isEmpty()) {
-                createResourceEdges(parent, res, virtual, true);
-            }
-        }
-    }
-
-    private boolean createVirtualResourceEdgesByMacAddress(AuthzSubject subject, Resource resource) {
-        boolean isEdgesCreated = false;
-
-        try {
-            // TODO resolve circular dependency
-            Platform associatedPlatform = Bootstrap.getBean(PlatformManager.class)
-                .getAssociatedPlatformByMacAddress(subject, resource);
-
-            if (associatedPlatform != null) {
-                String vmPrototype = AuthzConstants.platformPrototypeVmwareVsphereVm;
-                if (vmPrototype.equals(resource.getPrototype().getName())) {
-                    isEdgesCreated = createVirtualResourceEdgesByMacAddress(resource,
-                        associatedPlatform.getResource());
-                } else {
-                    isEdgesCreated = createVirtualResourceEdgesByMacAddress(associatedPlatform
-                        .getResource(), resource, false);
-                }
-            }
-        } catch (Exception e) {
-            log.error("Could not create virtual resource edge by MAC address" +
-                      " for resource[id=" + resource.getId() + "]: " + e.getMessage(), e);
-        }
-
-        return isEdgesCreated;
-    }
-
-    private boolean createVirtualResourceEdgesByMacAddress(Resource vmResource, Resource hqResource)
-        throws ResourceRelationCreateException {
-
-        return createVirtualResourceEdgesByMacAddress(vmResource, hqResource, true);
-    }
-
-    private boolean createVirtualResourceEdgesByMacAddress(Resource vmResource,
-                                                           Resource hqResource,
-                                                           boolean createServerEdges)
-        throws ResourceRelationCreateException {
-
-        boolean isEdgesCreated = false;
-
-        try {
-            String vmPrototype = AuthzConstants.platformPrototypeVmwareVsphereVm;
-
-            if (!vmPrototype.equals(vmResource.getPrototype().getName())) {
-                //Possible (but not likely) for 2 physical platforms to have same MAC address (particularly in test scenarios)
-                return false;
-            } else if (vmPrototype.equals(hqResource.getPrototype().getName())) {
-                throw new ResourceRelationCreateException("Resource[id=" + hqResource.getId() +
-                                                      "] cannot be a " + vmPrototype);
-            }
-
-            ResourceTypeRelation relation = getVirtualRelation();
-
-            if (getParentResourceEdge(hqResource, relation) == null) {
-                createResourceEdges(vmResource, hqResource, relation, true);
-
-                if (createServerEdges) {
-                    // create virtual resource edges for the servers for the
-                    // platform.
-                    // data is redundant with the containtment resource edges,
-                    // but is needed to improve search speed
-                    try {
-                        // TODO resolve circular dependency
-                        Platform hqPlatform = Bootstrap.getBean(PlatformManager.class)
-                            .findPlatformById(hqResource.getInstanceId());
-
-                        for (Server s : hqPlatform.getServers()) {
-                            ServerType st = s.getServerType();
-                            // do not add virtual servers or vCenter server
-                            if (!AuthzConstants.serverPrototypeVmwareVcenter.equals(st.getName())
-                               && !st.isVirtual()) {
-                                createResourceEdges(hqResource, s.getResource(), relation, true);
-                            }
-                        }
-                    } catch (Exception e) {
-                        throw new ResourceRelationCreateException(e.getMessage(), e);
-                    }
-                }
-
-                isEdgesCreated = true;
-            }
-        } finally {
-            if (log.isDebugEnabled()) {
-                log.debug("createVirtualResourceEdgesByMacAddress: vmResourceId=" +
-                          vmResource.getId() + ", hqResourceId=" + hqResource.getId() +
-                          ", isEdgesCreated=" + isEdgesCreated);
-            }
-        }
-
-        return isEdgesCreated;
-    }
-
-    private void createNetworkResourceEdges(AuthzSubject subject, ResourceTypeRelation relation,
-                                            AppdefEntityID parent, AppdefEntityID[] children,
-                                            boolean deleteExisting) throws PermissionException,
-        ResourceRelationCreateException {
-        if (parent == null || !parent.isPlatform()) {
-            throw new ResourceRelationCreateException("Only platforms are supported.");
-        }
-
-        Platform parentPlatform = null;
-        //TODO resolve circular dependency
-        PlatformManager platMan = Bootstrap.getBean(PlatformManager.class);
-        try {
-            parentPlatform = platMan.findPlatformById(parent.getId());
-        } catch (PlatformNotFoundException pe) {
-            throw new ResourceRelationCreateException("Platform id " + parent.getId() + " not found.");
-        }
-        List<PlatformType> supportedPlatformTypes = new ArrayList<PlatformType>(platMan.findSupportedPlatformTypes());
-        if (supportedPlatformTypes.contains(parentPlatform.getPlatformType())) {
-            throw new ResourceRelationCreateException(parentPlatform.getPlatformType().getName() +
-                                                  " not supported as a top-level platform type.");
-        }
-        Resource parentResource = parentPlatform.getResource();
-        // Make sure user has permission to modify resource edges
-        permissionManager.check(subject.getId(), parentResource.getType(), parentResource
-            .getInstanceId(), AuthzConstants.platformOpModifyPlatform);
-
-        // HQ-1670: Should not be able to add a parent resource to
-        // a network hierarchy if it has not been configured yet
-        //TODO implement check of configuration?
-//        ConfigResponseDB config = getConfigResponse(parent);
-//        if (config != null) {
-//            String validationError = config.getValidationError();
-//            if (validationError != null) {
-//                throw new ResourceRelationCreateException("Resource id " + parentResource.getId() +
-//                                                      ": " + validationError);
-//            }
-//        }
-        if (parentResource != null && !parentResource.isInAsyncDeleteState() && children != null &&
-            children.length > 0) {
-
-            try {
-                if (deleteExisting) {
-                    removeResourceEdges(subject, relation, parentResource);
-                }
-
-                
-                Collection<ResourceRelation> edges = findResourceEdges(relation, parentResource);
-                List<ResourceRelation> existing = null;
-                Platform childPlatform = null;
-                Resource childResource = null;
-
-                if (edges.isEmpty()) {
-                    // create self-edge for parent of network hierarchy
-                    //TODO self edge
-                    //resourceEdgeDAO.create(parentResource, parentResource, 0, relation);
-                }
-                for (int i = 0; i < children.length; i++) {
-                    if (!children[i].isPlatform()) {
-                        throw new ResourceRelationCreateException("Only platforms are supported.");
-                    }
-                    try {
-                        childPlatform = platMan.findPlatformById(children[i].getId());
-                        childResource = childPlatform.getResource();
-
-                        if (!supportedPlatformTypes.contains(childPlatform.getPlatformType())) {
-                            throw new ResourceRelationCreateException(childPlatform.getPlatformType()
-                                .getName() +
-                                                                  " not supported as a dependent platform type.");
-                        }
-                    } catch (PlatformNotFoundException pe) {
-                        throw new ResourceRelationCreateException("Platform id " + children[i].getId() +
-                                                              " not found.");
-                    }
-
-                    // Check if child resource already exists in a network
-                    // hierarchy
-                    // TODO: This needs to be optimized
-                    existing = findResourceEdges(relation, childResource.getId(), null, null);
-                    if (existing.size() == 1) {
-                        ResourceRelation existingChildEdge = (ResourceRelation) existing.get(0);
-                        Resource existingParent = existingChildEdge.getFrom();
-                        if (existingParent.getId().equals(parentResource.getId())) {
-                            // already exists with same parent, so skip
-                            continue;
-                        } else {
-                            // already exists with different parent
-                            throw new ResourceRelationCreateException("Resource id " +
-                                                                  childResource.getId() +
-                                                                  " already exists in another network hierarchy.");
-                        }
-                    } else if (existing.size() > 1) {
-                        // a resource can only belong to one network hierarchy
-                        // this is a data integrity issue if it happens
-                        throw new ResourceRelationCreateException("Resource id " +
-                                                              childResource.getId() +
-                                                              " exists in " + existing.size() +
-                                                              " network hierarchies.");
-                    }
-                    if (childResource != null && !childResource.isInAsyncDeleteState()) {
-                        parentResource.relateTo(childResource, relation.getName());
-                    }
-                }
-            } catch (Throwable t) {
-                throw new ResourceRelationCreateException(t);
-            }
-        }
-    }
-
-    /**
-     *
-     * 
-     */
-    public void removeResourceEdges(AuthzSubject subject, ResourceTypeRelation relation,
-                                    AppdefEntityID parent, AppdefEntityID[] children)
-        throws PermissionException {
-
-        if (relation == null || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
-            throw new IllegalArgumentException("Only " +
-                                               AuthzConstants.ResourceEdgeNetworkRelation +
-                                               " resource relationships are supported.");
-        }
-
-        Resource parentResource = findResource(parent);
-        Resource childResource = null;
-
-        // Make sure user has permission to modify resource edges
-        final PermissionManager pm = PermissionManagerFactory.getInstance();
-
-        pm.check(subject.getId(), parentResource.getType(), parentResource.getInstanceId(),
-            AuthzConstants.platformOpModifyPlatform);
-
-        if (parentResource != null && !parentResource.isInAsyncDeleteState()) {
-            
-
-            for (int i = 0; i < children.length; i++) {
-                childResource = findResource(children[i]);
-
-                if (childResource != null && !childResource.isInAsyncDeleteState()) {
-                    parentResource.removeRelationship(childResource, relation.getName());
-                }
-            }
-            Collection<ResourceRelation> edges = findResourceEdges(relation, parentResource);
-            if (edges.isEmpty()) {
-                // remove self-edge for parent of network hierarchy
-                parentResource.removeRelationships(relation.getName());
-            }
-        }
-    }
-
-    /**
-     *
-     * 
-     */
     public void removeResourceEdges(AuthzSubject subject, ResourceTypeRelation relation, Resource parent)
         throws PermissionException {
 
-        if (relation == null || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
-            throw new IllegalArgumentException("Only " +
-                                               AuthzConstants.ResourceEdgeNetworkRelation +
-                                               " resource relationships are supported.");
-        }
+     
 
-        // Make sure user has permission to modify resource edges
-        final PermissionManager pm = PermissionManagerFactory.getInstance();
+        // TODO Make sure user has permission to modify resource edges
+        //final PermissionManager pm = PermissionManagerFactory.getInstance();
 
        
-        pm.check(subject.getId(), parent.getType(), parent.getInstanceId(),
-            AuthzConstants.platformOpModifyPlatform);
+        //pm.check(subject.getId(), parent.getType(), parent.getInstanceId(),
+          //  AuthzConstants.platformOpModifyPlatform);
 
         parent.removeRelationships(relation.getName());
     }
@@ -1291,12 +497,12 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
 
         final ResourceTypeRelation relation = getContainmentRelation();
         for (final Resource resource : resources) {
-            events.add(new ResourceUpdatedZevent(subj, AppdefUtil.newAppdefEntityId(resource)));
+            events.add(new ResourceUpdatedZevent(subj, resource.getId()));
             final Collection<ResourceRelation> descendants = resource.getRelationshipsFrom(relation.getName());
           //TODO this was findDescEdges before, so I guess it returned relationships all the way down.  Find out why
             for (ResourceRelation edge : descendants) {
                 final Resource r = edge.getTo();
-                events.add(new ResourceUpdatedZevent(subj, AppdefUtil.newAppdefEntityId(r)));
+                events.add(new ResourceUpdatedZevent(subj, r.getId()));
             }
         }
         zeventManager.enqueueEventsAfterCommit(events);
@@ -1306,32 +512,6 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     public ResourceTypeRelation getContainmentRelation() {
         //TODO how to create relationships applicable for any resource being modeled?
         return new ResourceTypeRelation();
-    }
-
-    @Transactional(readOnly = true)
-    public ResourceTypeRelation getNetworkRelation() {
-        //TODO how to create relationships applicable for any resource being modeled?
-        return new ResourceTypeRelation();
-    }
-
-    @Transactional(readOnly = true)
-    public String getAppdefEntityName(AppdefEntityID appEnt) {
-        Resource res = findResource(appEnt);
-        if (res != null) {
-            return res.getName();
-        }
-        return appEnt.getAppdefKey();
-    }
-    
-    public ResourceTypeRelation getVirtualRelation() {
-        //TODO how to create relationships applicable for any resource being modeled?
-        return new ResourceTypeRelation();
-    }
-
-    @Transactional(readOnly = true)
-    public int getPlatformCountMinusVsphereVmPlatforms() {
-        //TODO this really doesn't belong here
-        return 0;
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {

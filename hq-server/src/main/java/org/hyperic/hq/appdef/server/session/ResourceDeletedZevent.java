@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.zevents.ZeventManager;
 
@@ -38,7 +37,7 @@ public class ResourceDeletedZevent extends ResourceZevent {
             .registerEventClass(ResourceDeletedZevent.class);
     }
 
-    public ResourceDeletedZevent(AuthzSubject subject, AppdefEntityID id) {
+    public ResourceDeletedZevent(AuthzSubject subject, Integer id) {
         super(subject.getId(), id);
     }
 }

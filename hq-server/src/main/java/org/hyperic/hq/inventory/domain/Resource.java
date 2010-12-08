@@ -501,6 +501,11 @@ public class Resource {
         return entityManager().createQuery("select o from Resource o", Resource.class)
             .getResultList();
     }
+    
+    public static List<Integer> findAllResourceIds() {
+        return entityManager().createQuery("select o.id from Resource o", Integer.class)
+        .getResultList();
+    }
 
     public static Collection<Resource> findByCTime(long ctime) {
         // TODO impl?

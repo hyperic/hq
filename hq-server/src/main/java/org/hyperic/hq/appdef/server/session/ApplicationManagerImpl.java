@@ -92,12 +92,6 @@ public class ApplicationManagerImpl implements ApplicationManager,
     protected static final String VALUE_PROCESSOR = "org.hyperic.hq.appdef.server.session.PagerProcessor_app";
     private Pager valuePager;
 
-    private ApplicationTypeDAO applicationTypeDAO;
-
-    private AppServiceDAO appServiceDAO;
-
-    private ApplicationDAO applicationDAO;
-
     private ServiceManager serviceManager;
 
     private ResourceManager resourceManager;
@@ -288,12 +282,7 @@ public class ApplicationManagerImpl implements ApplicationManager,
         }
     }
 
-    /**
-     * 
-     */
-    public void handleResourceDelete(Resource resource) {
-        applicationDAO.clearResource(resource);
-    }
+  
 
     /**
      * Get the service dependency map for an application
@@ -313,15 +302,6 @@ public class ApplicationManagerImpl implements ApplicationManager,
         } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(pk);
         }
-    }
-
-    /**
-     * Get the # of applications within HQ inventory
-     * 
-     */
-    @Transactional(readOnly = true)
-    public Number getApplicationCount() {
-        return new Integer(applicationDAO.size());
     }
 
     /**
@@ -349,7 +329,7 @@ public class ApplicationManagerImpl implements ApplicationManager,
      * @param subject - who
      * @param name - name of app
      */
-    public Application findApplicationByName(AuthzSubject subject, String name)
+    private Application findApplicationByName(AuthzSubject subject, String name)
         throws ApplicationNotFoundException, PermissionException {
         Application app = applicationDAO.findByName(name);
         if (app == null) {
@@ -374,51 +354,6 @@ public class ApplicationManagerImpl implements ApplicationManager,
         } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(id, e);
         }
-    }
-
-    /**
-     * 
-     */
-    @Transactional(readOnly = true)
-    public Collection<Application> findDeletedApplications() {
-        return applicationDAO.findDeletedApplications();
-    }
-
-    /**
-     * Get all applications.
-     * 
-     * 
-     * @param subject The subject trying to list applications.
-     * @return A List of ApplicationValue objects representing all of the
-     *         applications that the given subject is allowed to view.
-     */
-    @Transactional(readOnly = true)
-    public PageList<ApplicationValue> getAllApplications(AuthzSubject subject, PageControl pc)
-        throws PermissionException, NotFoundException {
-        Collection<Integer> authzPks = getViewableApplications(subject);
-        Collection<Application> apps = null;
-        int attr = -1;
-        if (pc != null) {
-            attr = pc.getSortattribute();
-        }
-
-        switch (attr) {
-            case SortAttribute.RESOURCE_NAME:
-                if (pc != null) {
-                    apps = applicationDAO.findAll_orderName(!pc.isDescending());
-                }
-                break;
-            default:
-                apps = applicationDAO.findAll();
-                break;
-        }
-        for (Iterator<Application> i = apps.iterator(); i.hasNext();) {
-            Integer appPk = i.next().getId();
-            if (!authzPks.contains(appPk)) {
-                i.remove();
-            }
-        }
-        return valuePager.seek(apps, pc);
     }
 
     /**
@@ -456,26 +391,7 @@ public class ApplicationManagerImpl implements ApplicationManager,
         }
         return keyList;
     }
-    
-    /**
-     * @return {@link List} of {@link Resource}
-     *
-     */
-    @Transactional(readOnly=true)
-    public List<Resource> getApplicationResources(AuthzSubject subject, Integer appId) 
-        throws ApplicationNotFoundException, PermissionException {
-        List<AppServiceValue> services = getApplicationServices(subject, appId);
-        List<Resource> rtn = new ArrayList<Resource>(services.size());
-        for (AppServiceValue val : services ) {
-            if (val == null || val.getService() == null ||
-                val.getService().getResource() == null ||
-                val.getService().getResource().isInAsyncDeleteState()) {
-                continue;
-            }
-            rtn.add(val.getService().getResource());
-        }
-        return rtn;
-    }
+   
 
     /**
      * Get all the application services for this application
@@ -484,8 +400,7 @@ public class ApplicationManagerImpl implements ApplicationManager,
      * @retur list of AppServiceValue objects
      * 
      */
-    @Transactional(readOnly = true)
-    public List<AppServiceValue> getApplicationServices(AuthzSubject subject, Integer appId)
+    private List<AppServiceValue> getApplicationServices(AuthzSubject subject, Integer appId)
         throws ApplicationNotFoundException, PermissionException {
         // find the application
         Application app;
@@ -720,54 +635,12 @@ public class ApplicationManagerImpl implements ApplicationManager,
     }
 
     /**
-     * Get all application IDs that use the specified resource.
-     * 
-     * 
-     * @param subject The subject trying to get the app list
-     * @param resource Server ID.
-     * @param pagenum The page number to start listing. First page is zero.
-     * @param pagesize The size of the page (the number of items to return).
-     * @param sort The sort order.
-     * 
-     * @return A List of ApplicationValue objects which use the specified
-     *         resource.
-     */
-    @Transactional(readOnly = true)
-    public Integer[] getApplicationIDsByResource(AppdefEntityID resource)
-        throws ApplicationNotFoundException {
-        Collection<Application> apps = getApplicationsByResource(resource, PageControl.PAGE_ALL);
-
-        Integer[] ids = new Integer[apps.size()];
-        int ind = 0;
-        for (Iterator<Application> i = apps.iterator(); i.hasNext(); ind++) {
-            Application app = i.next();
-            ids[ind] = app.getId();
-        }
-        return ids;
-    }
-
-    /**
      * 
      */
     @Transactional(readOnly = true)
     public boolean isApplicationMember(AppdefEntityID application, AppdefEntityID service) {
         return applicationDAO.isApplicationService(application.getId().intValue(), service.getId()
             .intValue());
-    }
-
-    /**
-     * Generate a resource tree based on the root resources and the traversal
-     * (one of ResourceTreeGenerator.TRAVERSE_*)
-     * 
-     * 
-     */
-    @Transactional(readOnly = true)
-    public ResourceTree getResourceTree(AuthzSubject subject, AppdefEntityID[] resources,
-                                        int traversal) throws AppdefEntityNotFoundException,
-        PermissionException {
-        ResourceTreeGenerator generator = Bootstrap.getBean(ResourceTreeGenerator.class);
-        generator.setSubject(subject);
-        return generator.generate(resources, traversal);
     }
 
     /**

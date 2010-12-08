@@ -27,18 +27,14 @@ package org.hyperic.hq.appdef.shared;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
+import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.Service;
+import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceGroupManager;
-import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.hq.inventory.domain.ResourceGroup;
-import org.hyperic.hq.inventory.domain.ResourceType;
-import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -47,40 +43,11 @@ import org.hyperic.util.pager.PageList;
  */
 public interface ServiceManager {
 
-    public Resource createService(AuthzSubject subject, Resource server, ResourceType type, String name, String desc,
-                                 String location, Resource parent) throws PermissionException;
-
-    /**
-     * Move a Service from one Platform to another.
-     * @param subject The user initiating the move.
-     * @param target The target Service to move.
-     * @param destination The destination Platform to move this Service to.
-     * @throws PermissionException If the passed user does not have permission
-     *         to move the Service.
-     * @throws VetoException If the operation canot be performed due to
-     *         incompatible types.
-     */
-    public void moveServiceFromPlatform(AuthzSubject subject, Resource target, Resource destination) throws VetoException,
-        PermissionException;
-
-    /**
-     * Move a Service from one Server to another.
-     * @param subject The user initiating the move.
-     * @param target The target Service to move.
-     * @param destination The destination Server to move this Service to.
-     * @throws PermissionException If the passed user does not have permission
-     *         to move the Service.
-     * @throws VetoException If the operation canot be performed due to
-     *         incompatible types.
-     */
-    public void moveServiceFromServer(AuthzSubject subject, Resource target, Resource destination) throws VetoException,
-        PermissionException;
-
     /**
      * Create a Service which runs on a given server
      * @return The service id.
      */
-    public Resource createService(AuthzSubject subject, Integer serverId, Integer serviceTypeId, String name,
+    public Service createService(AuthzSubject subject, Integer serverId, Integer serviceTypeId, String name,
                                  String desc, String location) throws ValidationException, PermissionException,
         ServerNotFoundException, AppdefDuplicateNameException;
 
@@ -92,44 +59,35 @@ public interface ServiceManager {
      */
     public java.lang.Integer[] getServiceIds(AuthzSubject subject, Integer servTypeId) throws PermissionException;
 
-    public List<ServiceValue> findServicesById(AuthzSubject subject, java.lang.Integer[] serviceIds)
-        throws ServiceNotFoundException, PermissionException;
-
     /**
      * Find Service by Id.
      */
-    public Resource findServiceById(Integer id) throws ServiceNotFoundException;
+    public Service findServiceById(Integer id) throws ServiceNotFoundException;
 
     /**
      * Get Service by Id.
      * @return The Service identified by this id, or null if it does not exist.
      */
-    public Resource getServiceById(Integer id);
+    public Service getServiceById(Integer id);
 
     /**
      * Get Service by Id and perform permission check.
      * @return The Service identified by this id.
      */
-    public Resource getServiceById(AuthzSubject subject, Integer id) throws ServiceNotFoundException,
+    public Service getServiceById(AuthzSubject subject, Integer id) throws ServiceNotFoundException,
         PermissionException;
 
-    public List<Resource> getServicesByAIID(Resource server, String aiid);
-
-    public Resource getServiceByNameAndServer(Resource server, String name);
-
-    public Resource getServiceByNameAndPlatform(Resource platform, String name);
+    public List<Service> getServicesByAIID(Server server, String aiid);
 
     /**
      * Find a ServiceType by id
      */
-    public ResourceType findServiceType(Integer id) throws org.hibernate.ObjectNotFoundException;
+    public ServiceType findServiceType(Integer id) throws org.hibernate.ObjectNotFoundException;
 
     /**
      * Find service type by name
      */
-    public ResourceType findServiceTypeByName(String name);
-
-    public Collection<Resource> findDeletedServices();
+    public ServiceType findServiceTypeByName(String name);
     
     public PageList<ServiceTypeValue> getAllServiceTypes(AuthzSubject subject, PageControl pc);
 
@@ -138,23 +96,10 @@ public interface ServiceManager {
 
     public PageList<ServiceTypeValue> getServiceTypesByServerType(AuthzSubject subject, int serverTypeId);
 
-    public PageList<ServiceTypeValue> findVirtualServiceTypesByPlatform(AuthzSubject subject, Integer platformId);
-
-    public PageList<ServiceValue> getAllServices(AuthzSubject subject, PageControl pc) throws PermissionException, NotFoundException;
-
-    /**
-     * Fetch all services that haven't been assigned to a cluster and that
-     * haven't been assigned to any applications.
-     * @return A List of ServiceValue objects representing all of the unassigned
-     *         services that the given subject is allowed to view.
-     */
-    public PageList<ServiceValue> getAllClusterAppUnassignedServices(AuthzSubject subject, PageControl pc)
-        throws PermissionException, NotFoundException;
-
     /**
      * Get services by server and type.
      */
-    public PageList getServicesByServer(AuthzSubject subject, Integer serverId, PageControl pc)
+    public PageList<ServiceValue> getServicesByServer(AuthzSubject subject, Integer serverId, PageControl pc)
         throws ServiceNotFoundException, ServerNotFoundException, PermissionException;
 
     public PageList<ServiceValue> getServicesByServer(AuthzSubject subject, Integer serverId, Integer svcTypeId,
@@ -164,33 +109,11 @@ public interface ServiceManager {
     /**
      * Get service POJOs by server and type.
      */
-    public List getServicesByServer(AuthzSubject subject, Resource server) throws PermissionException,
+    public List<Service> getServicesByServer(AuthzSubject subject, Server server) throws PermissionException,
         ServiceNotFoundException;
 
     public Integer[] getServiceIdsByServer(AuthzSubject subject, Integer serverId, Integer svcTypeId)
         throws ServiceNotFoundException, PermissionException;
-
-    public List<ServiceValue> getServicesByType(AuthzSubject subject, String svcName, boolean asc)
-        throws PermissionException, org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
-
-    public PageList getServicesByService(AuthzSubject subject, Integer serviceId, PageControl pc)
-        throws ServiceNotFoundException, PermissionException;
-
-    /**
-     * Get services by server.
-     */
-    public PageList<ServiceValue> getServicesByService(AuthzSubject subject, Integer serviceId, Integer svcTypeId,
-                                                       PageControl pc) throws ServiceNotFoundException,
-        PermissionException;
-
-    /**
-     * Get service IDs by service.
-     */
-    public java.lang.Integer[] getServiceIdsByService(AuthzSubject subject, Integer serviceId, Integer svcTypeId)
-        throws ServiceNotFoundException, PermissionException;
-
-    public PageList getServicesByPlatform(AuthzSubject subject, Integer platId, PageControl pc)
-        throws ServiceNotFoundException, org.hyperic.hq.appdef.shared.PlatformNotFoundException, PermissionException;
 
     /**
      * Get platform services (children of virtual servers)
@@ -203,94 +126,48 @@ public interface ServiceManager {
      */
     public PageList<ServiceValue> getPlatformServices(AuthzSubject subject, Integer platId, Integer typeId,
                                                       PageControl pc)
-        throws org.hyperic.hq.appdef.shared.PlatformNotFoundException, PermissionException, ServiceNotFoundException;
-
-    /**
-     * Get {@link Resource}s which are children of the server, and of the
-     * specified type.
-     */
-    public List<Resource> findServicesByType(Resource server, ResourceType st);
+        throws org.hyperic.hq.appdef.shared.PlatformNotFoundException, PermissionException, ServiceNotFoundException;   
 
     /**
      * Get platform service POJOs
      */
-    public List<Resource> findPlatformServicesByType(Resource p, ResourceType st);
-
-    /**
-     * Get platform service POJOs
-     */
-    public Collection getPlatformServices(AuthzSubject subject, Integer platId) throws ServiceNotFoundException,
+    public Collection<Service> getPlatformServices(AuthzSubject subject, Integer platId) throws ServiceNotFoundException,
         PermissionException;
 
-    /**
-     * Get platform services (children of virtual servers), mapped by type id of
-     * a specified type
-     */
-    public Map getMappedPlatformServices(AuthzSubject subject, Integer platId, PageControl pc)
-        throws org.hyperic.hq.appdef.shared.PlatformNotFoundException, PermissionException, ServiceNotFoundException;
 
-    /**
-     * Get services by platform.
-     */
-    public PageList<ServiceValue> getServicesByPlatform(AuthzSubject subject, Integer platId, Integer svcTypeId,
-                                                        PageControl pc) throws ServiceNotFoundException,
-        org.hyperic.hq.appdef.shared.PlatformNotFoundException, PermissionException;
-
-    public PageList<AppdefResourceValue> getServicesByApplication(AuthzSubject subject, Integer appId, PageControl pc)
+    public PageList<ServiceValue> getServicesByApplication(AuthzSubject subject, Integer appId, PageControl pc)
         throws org.hyperic.hq.appdef.shared.ApplicationNotFoundException, ServiceNotFoundException, PermissionException;
 
-    public PageList getServicesByApplication(AuthzSubject subject, Integer appId, Integer svcTypeId, PageControl pc)
-        throws PermissionException, org.hyperic.hq.appdef.shared.ApplicationNotFoundException, ServiceNotFoundException;
-
-    public List getServicesByApplication(AuthzSubject subject, Integer appId) throws PermissionException,
+    
+    public List<Service> getServicesByApplication(AuthzSubject subject, Integer appId) throws PermissionException,
         org.hyperic.hq.appdef.shared.ApplicationNotFoundException, ServiceNotFoundException;
 
-    public PageList<AppdefResourceValue> getServiceInventoryByApplication(AuthzSubject subject, Integer appId,
+    public PageList<ServiceValue> getServiceInventoryByApplication(AuthzSubject subject, Integer appId,
                                                                           PageControl pc)
         throws org.hyperic.hq.appdef.shared.ApplicationNotFoundException, ServiceNotFoundException, PermissionException;
 
-    /**
-     * Get all services by application. This is to only be used for the Evident
-     * API.
-     */
-    public PageList getFlattenedServicesByApplication(AuthzSubject subject, Integer appId, Integer typeId,
-                                                      PageControl pc)
-        throws org.hyperic.hq.appdef.shared.ApplicationNotFoundException, ServiceNotFoundException, PermissionException;
 
-    public PageList getServiceInventoryByApplication(AuthzSubject subject, Integer appId, Integer svcTypeId,
+    public PageList<ServiceValue> getServiceInventoryByApplication(AuthzSubject subject, Integer appId, Integer svcTypeId,
                                                      PageControl pc)
         throws org.hyperic.hq.appdef.shared.ApplicationNotFoundException, ServiceNotFoundException, PermissionException;
 
-    /**
-     * Get all service inventory by application, including those inside an
-     * associated cluster
-     * @param subject The subject trying to list services.
-     * @param appId Application id.
-     * @return A List of ServiceValue objects representing all of the services
-     *         that the given subject is allowed to view.
-     */
-    public Integer[] getFlattenedServiceIdsByApplication(AuthzSubject subject, Integer appId)
-        throws ServiceNotFoundException, PermissionException, org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 
-    public void updateServiceZombieStatus(AuthzSubject subject, Resource svc, boolean zombieStatus)
+    public void updateServiceZombieStatus(AuthzSubject subject, Service svc, boolean zombieStatus)
         throws PermissionException;
 
-    public Resource updateService(AuthzSubject subject, ServiceValue existing) throws PermissionException,
+    public Service updateService(AuthzSubject subject, ServiceValue existing) throws PermissionException,
         org.hyperic.hq.appdef.shared.UpdateException, org.hyperic.hq.appdef.shared.AppdefDuplicateNameException,
         ServiceNotFoundException;
 
     public void updateServiceTypes(String plugin, org.hyperic.hq.product.ServiceTypeInfo[] infos) throws VetoException, NotFoundException;
 
-    public void deleteServiceType(ResourceType serviceType, AuthzSubject overlord, ResourceGroupManager resGroupMan,
-                                  ResourceManager resMan) throws VetoException;
+    public void deleteServiceType(ServiceType serviceType, AuthzSubject overlord) throws VetoException;
 
     /**
      * A removeService method that takes a ServiceLocal. This is called by
      * ServerManager.removeServer when cascading a delete onto services.
      */
-    public void removeService(AuthzSubject subject, Resource service) throws PermissionException, VetoException;
-
-    public void handleResourceDelete(Resource resource);
+    public void removeService(AuthzSubject subject, Service service) throws PermissionException, VetoException;
 
     /**
      * Returns a list of 2 element arrays. The first element is the name of the
@@ -298,13 +175,5 @@ public interface ServiceManager {
      * inventory.
      */
     public List<Object[]> getServiceTypeCounts();
-
-    /**
-     * Get the # of services within HQ inventory
-     */
-    public Number getServiceCount();
-
-    ResourceType createServiceType(ServiceTypeInfo sinfo, String plugin, ResourceType servType)
-    throws NotFoundException;
 
 }

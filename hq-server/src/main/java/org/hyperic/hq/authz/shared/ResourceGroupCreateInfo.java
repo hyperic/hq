@@ -9,13 +9,16 @@ public class ResourceGroupCreateInfo {
     private boolean privateGroup;
 
     private String description;
+    
+    private int groupTypeId;
 
     public ResourceGroupCreateInfo(String name, String description, String location,
-                                   boolean privateGroup) {
+                                   boolean privateGroup, int groupTypeId) {
         this.name = name;
         this.description = description;
         this.location = location;
         this.privateGroup = privateGroup;
+        this.groupTypeId = groupTypeId;
     }
 
     public String getName() {
@@ -32,6 +35,10 @@ public class ResourceGroupCreateInfo {
 
     public String getDescription() {
         return description;
+    }
+
+    public int getGroupTypeId() {
+        return groupTypeId;
     }
 
 }
