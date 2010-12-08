@@ -1,6 +1,5 @@
 package org.hyperic.hq.inventory.domain;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -210,7 +209,10 @@ public class ResourceType {
 
     @Transactional
     public void remove() {
-        //TODO remove all Resources as well
+        removeResources();
+        removePropertyTypes();
+        removeOperationTypes();
+        removeConfigTypes();
         if (this.entityManager == null)
             this.entityManager = entityManager();
         if (this.entityManager.contains(this)) {
@@ -218,6 +220,30 @@ public class ResourceType {
         } else {
             ResourceType attached = this.entityManager.find(this.getClass(), this.id);
             this.entityManager.remove(attached);
+        }
+    }
+
+    private void removeResources() {
+        for (Resource resource : resources) {
+            resource.remove();
+        }
+    }
+
+    private void removePropertyTypes() {
+        for (PropertyType propertyType : propertyTypes) {
+            propertyType.remove();
+        }
+    }
+
+    private void removeOperationTypes() {
+        for (OperationType operationType : operationTypes) {
+            operationType.remove();
+        }
+    }
+
+    private void removeConfigTypes() {
+        for (ConfigType configType : configTypes) {
+            configType.remove();
         }
     }
 
@@ -255,19 +281,21 @@ public class ResourceType {
     public Set<ResourceType> getResourceTypesTo(String relationName) {
         return getRelatedResourceTypes(relationName, org.neo4j.graphdb.Direction.INCOMING);
     }
-    
+
     public ResourceType getResourceTypeFrom(String relationName) {
-        //TODO validate only one
-        return getRelatedResourceTypes(relationName, org.neo4j.graphdb.Direction.OUTGOING).iterator().next();
+        // TODO validate only one
+        return getRelatedResourceTypes(relationName, org.neo4j.graphdb.Direction.OUTGOING)
+            .iterator().next();
     }
 
     public ResourceType getResourceTypeTo(String relationName) {
-        //TODO validate only one
-        return getRelatedResourceTypes(relationName, org.neo4j.graphdb.Direction.INCOMING).iterator().next();
+        // TODO validate only one
+        return getRelatedResourceTypes(relationName, org.neo4j.graphdb.Direction.INCOMING)
+            .iterator().next();
     }
 
     private Set<ResourceType> getRelatedResourceTypes(String relationName,
-                                              org.neo4j.graphdb.Direction direction) {
+                                                      org.neo4j.graphdb.Direction direction) {
         Set<ResourceType> resourceTypes = new HashSet<ResourceType>();
         Traverser relationTraverser = getUnderlyingState().traverse(Traverser.Order.BREADTH_FIRST,
             new StopEvaluator() {
@@ -277,7 +305,8 @@ public class ResourceType {
             }, ReturnableEvaluator.ALL_BUT_START_NODE,
             DynamicRelationshipType.withName(relationName), direction);
         for (Node related : relationTraverser) {
-            resourceTypes.add(graphDatabaseContext.createEntityFromState(related, ResourceType.class));
+            resourceTypes.add(graphDatabaseContext.createEntityFromState(related,
+                ResourceType.class));
         }
         return resourceTypes;
     }
@@ -336,19 +365,8 @@ public class ResourceType {
         return configTypes;
     }
 
-    public static ResourceType findTypeResourceType() {
-        // TODO get rid of this
-        return null;
-    }
-
-    public String getLocalizedName() {
-        // TODO get rid of this
-        return null;
-    }
-
-    public int getAppdefType() {
-        // TODO get rid of this
-        return 0;
+    public Plugin getPlugin() {
+        return plugin;
     }
 
     public static ResourceType findRootResourceType() {
@@ -356,9 +374,9 @@ public class ResourceType {
         // Check concept of Neo4J ref node
         return null;
     }
-    
+
     public static Set<ResourceType> findByPlugin(String plugin) {
-        //TODO
+        // TODO
         return null;
     }
 

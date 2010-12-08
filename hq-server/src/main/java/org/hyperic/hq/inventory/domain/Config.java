@@ -10,16 +10,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import org.neo4j.graphdb.Node;
-import org.springframework.datastore.graph.annotation.GraphProperty;
 import org.springframework.datastore.graph.annotation.NodeEntity;
-import org.springframework.datastore.graph.annotation.RelatedTo;
-import org.springframework.datastore.graph.api.Direction;
 import org.springframework.datastore.graph.neo4j.finder.FinderFactory;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,11 +32,6 @@ public class Config {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
     private Integer id;
-
-    @Transient
-    @ManyToOne
-    @RelatedTo(type = "HAS_CONFIG", direction = Direction.OUTGOING, elementClass = Resource.class)
-    private Resource resource;
 
     @Version
     @Column(name = "version")
@@ -65,8 +55,9 @@ public class Config {
         return this.id;
     }
 
-    public Integer getVersion() {
-        return this.version;
+    public Object getValue(String key) {
+         //TODO default values
+        return getUnderlyingState().getProperty(key);
     }
     
     public Map<String,Object> getValues() {
@@ -82,18 +73,10 @@ public class Config {
         return properties;
     }
     
-    public Object getValue(String key) {
-         //TODO default values
-        return getUnderlyingState().getProperty(key);
+    public Integer getVersion() {
+        return this.version;
     }
     
-    public void setValue(String key, Object value) {
-        //TODO type validation?
-        
-        // TODO check other stuff?
-        getUnderlyingState().setProperty(key, value);
-    }
-
     @Transactional
     public Config merge() {
         if (this.entityManager == null)
@@ -124,6 +107,13 @@ public class Config {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public void setValue(String key, Object value) {
+        //TODO type validation?
+        
+        // TODO check other stuff?
+        getUnderlyingState().setProperty(key, value);
     }
 
     public void setVersion(Integer version) {

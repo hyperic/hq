@@ -22,7 +22,6 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
-import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.inventory.InvalidRelationshipException;
@@ -49,6 +48,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class Resource {
 
+    @Transient
+    @ManyToOne
+    @RelatedTo(type = "MANAGED_BY", direction = Direction.OUTGOING, elementClass = Agent.class)
+    private Agent agent;
+
+    @GraphProperty
+    @Transient
+    private String description;
+
     @PersistenceContext
     transient EntityManager entityManager;
 
@@ -63,12 +71,30 @@ public class Resource {
     @Column(name = "id")
     private Integer id;
 
+    @GraphProperty
+    @Transient
+    private String location;
+
+    @GraphProperty
+    @Transient
+    private String modifiedBy;
+
     // TODO do I need Indexed and GraphProperty?
     @NotNull
     @Indexed
     @GraphProperty
     @Transient
     private String name;
+
+    @OneToMany
+    @Transient
+    @RelatedTo(type = "OWNS", direction = Direction.INCOMING, elementClass = AuthzSubject.class)
+    private AuthzSubject owner;
+
+    @RelatedTo(type = "HAS_MEMBER", direction = Direction.INCOMING, elementClass = ResourceGroup.class)
+    @OneToMany
+    @Transient
+    private Set<ResourceGroup> resourceGroups;
 
     @Transient
     @ManyToOne
@@ -78,21 +104,6 @@ public class Resource {
     @Version
     @Column(name = "version")
     private Integer version;
-
-    @RelatedTo(type = "HAS_MEMBER", direction = Direction.INCOMING, elementClass = ResourceGroup.class)
-    @OneToMany
-    @Transient
-    private Set<ResourceGroup> resourceGroups;
-
-    @OneToMany
-    @Transient
-    @RelatedTo(type = "OWNS", direction = Direction.INCOMING, elementClass = AuthzSubject.class)
-    private AuthzSubject owner;
-    
-    @Transient
-    @ManyToOne
-    @RelatedTo(type = "MANAGED_BY", direction = Direction.OUTGOING, elementClass = Agent.class)
-    private Agent agent;
 
     public Resource() {
     }
@@ -108,16 +119,61 @@ public class Resource {
         this.entityManager.flush();
     }
 
+    public Agent getAgent() {
+        return agent;
+    }
+
+    public Config getAutoInventoryConfig() {
+        return getConfig("AutoInventory");
+    }
+
+    private Config getConfig(String type) {
+        Iterable<Relationship> relationships = this.getUnderlyingState().getRelationships(
+            DynamicRelationshipType.withName("HAS_CONFIG"), org.neo4j.graphdb.Direction.OUTGOING);
+        for (Relationship relationship : relationships) {
+            if (type.equals(relationship.getProperty("configType"))) {
+                // TODO enforce no more than one?
+                return graphDatabaseContext.createEntityFromState(
+                    relationship.getOtherNode(getUnderlyingState()), Config.class);
+            }
+        }
+        return null;
+    }
+
+    public Config getControlConfig() {
+        return getConfig("Control");
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
     public Integer getId() {
         return this.id;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public Config getMeasurementConfig() {
+        return getConfig("Measurement");
+    }
+
+    public String getModifiedBy() {
+        return modifiedBy;
     }
 
     public String getName() {
         return name;
     }
 
-    public Set<ResourceGroup> getResourceGroups() {
-        return resourceGroups;
+    public AuthzSubject getOwner() {
+        return owner;
+    }
+
+    public Config getProductConfig() {
+        return getConfig("Product");
     }
 
     public Map<String, Object> getProperties() {
@@ -143,10 +199,20 @@ public class Resource {
         return getUnderlyingState().getProperty(key, propertyType.getDefaultValue());
     }
 
-    public void removeProperties() {
-        for (String key : getUnderlyingState().getPropertyKeys()) {
-            getUnderlyingState().removeProperty(key);
+    private Set<Resource> getRelatedResources(String relationName,
+                                              org.neo4j.graphdb.Direction direction) {
+        Set<Resource> resources = new HashSet<Resource>();
+        Traverser relationTraverser = getUnderlyingState().traverse(Traverser.Order.BREADTH_FIRST,
+            new StopEvaluator() {
+                public boolean isStopNode(TraversalPosition currentPos) {
+                    return currentPos.depth() >= 1;
+                }
+            }, ReturnableEvaluator.ALL_BUT_START_NODE,
+            DynamicRelationshipType.withName(relationName), direction);
+        for (Node related : relationTraverser) {
+            resources.add(graphDatabaseContext.createEntityFromState(related, Resource.class));
         }
+        return resources;
     }
 
     public Set<ResourceRelation> getRelationships() {
@@ -169,14 +235,6 @@ public class Resource {
         return resourceRelations;
     }
 
-    public Set<ResourceRelation> getRelationshipsFrom(String relationName) {
-        return getRelationships(relationName, org.neo4j.graphdb.Direction.OUTGOING);
-    }
-
-    public Set<ResourceRelation> getRelationshipsTo(String relationName) {
-        return getRelationships(relationName, org.neo4j.graphdb.Direction.INCOMING);
-    }
-
     private Set<ResourceRelation> getRelationships(String relationName,
                                                    org.neo4j.graphdb.Direction direction) {
         Set<ResourceRelation> resourceRelations = new HashSet<ResourceRelation>();
@@ -189,6 +247,29 @@ public class Resource {
         return resourceRelations;
     }
 
+    public Set<ResourceRelation> getRelationshipsFrom(String relationName) {
+        return getRelationships(relationName, org.neo4j.graphdb.Direction.OUTGOING);
+    }
+
+    public Set<ResourceRelation> getRelationshipsTo(String relationName) {
+        return getRelationships(relationName, org.neo4j.graphdb.Direction.INCOMING);
+    }
+
+    public ResourceRelation getRelationshipTo(Resource resource, String relationName) {
+        // TODO this doesn't take direction into account
+        return (ResourceRelation) getRelationshipTo(resource, ResourceRelation.class, relationName);
+    }
+
+    public Resource getResourceFrom(String relationName) {
+        // TODO enforce only one?
+        return getRelatedResources(relationName, org.neo4j.graphdb.Direction.OUTGOING).iterator()
+            .next();
+    }
+
+    public Set<ResourceGroup> getResourceGroups() {
+        return resourceGroups;
+    }
+
     public Set<Resource> getResourcesFrom(String relationName) {
         return getRelatedResources(relationName, org.neo4j.graphdb.Direction.OUTGOING);
     }
@@ -196,36 +277,15 @@ public class Resource {
     public Set<Resource> getResourcesTo(String relationName) {
         return getRelatedResources(relationName, org.neo4j.graphdb.Direction.INCOMING);
     }
-    
-    public Resource getResourceFrom(String relationName) {
-        //TODO enforce only one?
-        return getRelatedResources(relationName, org.neo4j.graphdb.Direction.OUTGOING).iterator().next();
-    }
 
     public Resource getResourceTo(String relationName) {
-        //TODO enforce only one?
-        return getRelatedResources(relationName, org.neo4j.graphdb.Direction.INCOMING).iterator().next();
+        // TODO enforce only one?
+        return getRelatedResources(relationName, org.neo4j.graphdb.Direction.INCOMING).iterator()
+            .next();
     }
 
-    private Set<Resource> getRelatedResources(String relationName,
-                                              org.neo4j.graphdb.Direction direction) {
-        Set<Resource> resources = new HashSet<Resource>();
-        Traverser relationTraverser = getUnderlyingState().traverse(Traverser.Order.BREADTH_FIRST,
-            new StopEvaluator() {
-                public boolean isStopNode(TraversalPosition currentPos) {
-                    return currentPos.depth() >= 1;
-                }
-            }, ReturnableEvaluator.ALL_BUT_START_NODE,
-            DynamicRelationshipType.withName(relationName), direction);
-        for (Node related : relationTraverser) {
-            resources.add(graphDatabaseContext.createEntityFromState(related, Resource.class));
-        }
-        return resources;
-    }
-
-    public ResourceRelation getRelationshipTo(Resource resource, String relationName) {
-        // TODO this doesn't take direction into account
-        return (ResourceRelation) getRelationshipTo(resource, ResourceRelation.class, relationName);
+    public Config getResponseTimeConfig() {
+        return getConfig("ResponseTime");
     }
 
     public ResourceType getType() {
@@ -234,6 +294,16 @@ public class Resource {
 
     public Integer getVersion() {
         return this.version;
+    }
+
+    public boolean isConfigUserManaged() {
+        // TODO from ConfigResponseDB. remove?
+        return true;
+    }
+
+    public boolean isOwner(Integer subjectId) {
+        // TODO some overlord checking, then check owner's ID
+        return true;
     }
 
     public boolean isRelatedTo(Resource resource, String relationName) {
@@ -274,13 +344,14 @@ public class Resource {
 
     @Transactional
     public ResourceRelation relateTo(Resource resource, String relationName) {
-        //TODO pre-populate System type (root resource type) can relate to other Resource Types via Platform relation or Contains relation
-        //if (type.getName().equals("System")) {
-            //if (!(relationName.equals(RelationshipTypes.CONTAINS))) {
-              //  throw new InvalidRelationshipException();
-            //}
-        //}else  
-    if (!type.isRelatedTo(resource.getType(), relationName)) {
+        // TODO pre-populate System type (root resource type) can relate to
+        // other Resource Types via Platform relation or Contains relation
+        // if (type.getName().equals("System")) {
+        // if (!(relationName.equals(RelationshipTypes.CONTAINS))) {
+        // throw new InvalidRelationshipException();
+        // }
+        // }else
+        if (!type.isRelatedTo(resource.getType(), relationName)) {
             throw new InvalidRelationshipException();
         }
         return (ResourceRelation) this.relateTo(resource, ResourceRelation.class, relationName);
@@ -288,6 +359,7 @@ public class Resource {
 
     @Transactional
     public void remove() {
+        removeConfig();
         if (this.entityManager == null)
             this.entityManager = entityManager();
         if (this.entityManager.contains(this)) {
@@ -295,6 +367,20 @@ public class Resource {
         } else {
             Resource attached = this.entityManager.find(this.getClass(), this.id);
             this.entityManager.remove(attached);
+        }
+    }
+
+    private void removeConfig() {
+        getMeasurementConfig().remove();
+        getProductConfig().remove();
+        getAutoInventoryConfig().remove();
+        getControlConfig().remove();
+        getResponseTimeConfig().remove();
+    }
+
+    public void removeProperties() {
+        for (String key : getUnderlyingState().getPropertyKeys()) {
+            getUnderlyingState().removeProperty(key);
         }
     }
 
@@ -320,12 +406,58 @@ public class Resource {
         }
     }
 
+    public void setAgent(Agent agent) {
+        this.agent = agent;
+    }
+
+    private void setConfig(Config config, String type) {
+        Relationship rel = this.getUnderlyingState().createRelationshipTo(
+            config.getUnderlyingState(), DynamicRelationshipType.withName("HAS_CONFIG"));
+        rel.setProperty("configType", type);
+    }
+
+    public void setConfigUserManaged(boolean userManaged) {
+        // TODO from ConfigResponseDB. remove?
+    }
+
+    public void setConfigValidationError(String error) {
+        // TODO from ConfigResponseDB. remove?
+    }
+
+    public void setControlConfig(Config config) {
+        setConfig(config, "Control");
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public void setId(Integer id) {
         this.id = id;
     }
 
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public void setMeasurementConfig(Config config) {
+        setConfig(config, "Measurement");
+    }
+
+    public void setModifiedBy(String modifiedBy) {
+        this.modifiedBy = modifiedBy;
+    }
+
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setOwner(AuthzSubject owner) {
+        this.owner = owner;
+    }
+
+    public void setProductConfig(Config config) {
+        setConfig(config, "Product");
     }
 
     public Object setProperty(String key, Object value) {
@@ -340,83 +472,16 @@ public class Resource {
         return oldValue;
     }
 
+    public void setResponseTimeConfig(Config config) {
+        setConfig(config, "ResponseTime");
+    }
+
     public void setType(ResourceType type) {
         this.type = type;
     }
 
     public void setVersion(Integer version) {
         this.version = version;
-    }
-
-    public AuthzSubject getOwner() {
-        return owner;
-    }
-
-    public void setOwner(AuthzSubject owner) {
-        this.owner = owner;
-    }
-    
-    public Agent getAgent() {
-        return agent;
-    }
-
-    public void setAgent(Agent agent) {
-        this.agent = agent;
-    }
-
-    public Config getMeasurementConfig() {
-        return getConfig("Measurement");
-    }
-
-    public Config getControlConfig() {
-        return getConfig("Control");
-    }
-
-    public Config getProductConfig() {
-        return getConfig("Product");
-    }
-
-    public Config getAutoInventoryConfig() {
-        return getConfig("AutoInventory");
-    }
-
-    public Config getResponseTimeConfig() {
-        return getConfig("ResponseTime");
-    }
-
-    private Config getConfig(String type) {
-        Iterable<Relationship> relationships = this.getUnderlyingState().getRelationships(
-            DynamicRelationshipType.withName("HAS_CONFIG"), org.neo4j.graphdb.Direction.OUTGOING);
-        for (Relationship relationship : relationships) {
-            if (type.equals(relationship.getProperty("configType"))) {
-                // TODO enforce no more than one?
-                return graphDatabaseContext.createEntityFromState(
-                    relationship.getOtherNode(getUnderlyingState()), Config.class);
-            }
-        }
-        return null;
-    }
-
-    public void setMeasurementConfig(Config config) {
-        setConfig(config, "Measurement");
-    }
-
-    public void setProductConfig(Config config) {
-        setConfig(config, "Product");
-    }
-
-    public void setControlConfig(Config config) {
-        setConfig(config, "Control");
-    }
-
-    public void setResponseTimeConfig(Config config) {
-        setConfig(config, "ResponseTime");
-    }
-
-    private void setConfig(Config config, String type) {
-        Relationship rel = this.getUnderlyingState().createRelationshipTo(
-            config.getUnderlyingState(), DynamicRelationshipType.withName("HAS_CONFIG"));
-        rel.setProperty("configType", type);
     }
 
     public static int countResources() {
@@ -437,6 +502,16 @@ public class Resource {
             .getResultList();
     }
 
+    public static Collection<Resource> findByCTime(long ctime) {
+        // TODO impl?
+        return null;
+    }
+
+    public static Collection<Resource> findByOwner(AuthzSubject owner) {
+        // TODO best way to implement cutting across to AuthzSubject
+        return null;
+    }
+
     public static Resource findResource(Integer id) {
         if (id == null)
             return null;
@@ -453,100 +528,9 @@ public class Resource {
             .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
     }
 
-    public static Resource findResourcePrototypeByName(String name) {
-        // TODO remove
-        return null;
-    }
-
     public static Resource findRootResource() {
         // TODO AuthzConstants.RootResourceId. We may need a root resource.
         // Check concept of Neo4J ref node
         return null;
     }
-
-    public boolean isOwner(Integer subjectId) {
-        // TODO some overlord checking, then check owner's ID
-        return true;
-    }
-
-    public static List<Resource> findResourcesOfPrototype(Resource proto, PageInfo pInfo) {
-        // TODO get rid of this
-        return null;
-    }
-
-    public static List<Resource> findAppdefPrototypes() {
-        // TODO get rid of this
-        return null;
-    }
-
-    public static List<Resource> findAllAppdefPrototypes() {
-        // TODO get rid of this
-        return null;
-    }
-
-    public boolean isInAsyncDeleteState() {
-        // TODO get rid of this
-        return false;
-    }
-
-    public static Collection<Resource> findByOwner(AuthzSubject owner) {
-        // TODO best way to implement cutting across to AuthzSubject
-        return null;
-    }
-
-    public Resource getPrototype() {
-        // TODO remove
-        return null;
-    }
-
-    public void setPrototype(Resource resource) {
-        // TODO remove
-    }
-
-    public Integer getInstanceId() {
-        // TODO remove this
-        return id;
-    }
-
-    public void setInstanceId(Integer instanceId) {
-        // TODO remove this
-    }
-
-    public static Resource findByInstanceId(Integer typeId, Integer instanceId) {
-        // TODO remove this
-        return Resource.findResource(instanceId);
-    }
-
-    public String getSortName() {
-        // TODO remove
-        return null;
-    }
-
-    public void setSortName(String sortName) {
-        // TODO remove
-    }
-
-    public static Collection findSvcRes_orderName(Boolean fSystem) {
-        // TODO remove
-        return null;
-    }
-
-    public void setConfigValidationError(String error) {
-        // TODO from ConfigResponseDB. remove?
-    }
-
-    public void setConfigUserManaged(boolean userManaged) {
-        // TODO from ConfigResponseDB. remove?
-    }
-
-    public boolean isConfigUserManaged() {
-        // TODO from ConfigResponseDB. remove?
-        return true;
-    }
-    
-    public static Collection<Resource> findByCTime(long ctime) {
-        //TODO impl?
-        return null;
-    }
-
 }

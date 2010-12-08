@@ -15,9 +15,9 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
-import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.neo4j.graphdb.Node;
 import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.datastore.graph.annotation.GraphProperty;
 import org.springframework.datastore.graph.annotation.NodeEntity;
 import org.springframework.datastore.graph.annotation.RelatedTo;
 import org.springframework.datastore.graph.api.Direction;
@@ -42,6 +42,7 @@ public class OperationType {
 
     @NotNull
     @Transient
+    @GraphProperty
     private String name;
 
     @ManyToOne
@@ -156,28 +157,20 @@ public class OperationType {
             .getResultList();
     }
 
+    public static List<OperationType> findAllOrderByName() {
+        //TODO implement sorting somewhere
+        return null;
+    }
+
     public static OperationType findOperationType(Long id) {
         if (id == null)
             return null;
         return entityManager().find(OperationType.class, id);
     }
-
+    
     public static List<OperationType> findOperationTypeEntries(int firstResult, int maxResults) {
         return entityManager().createQuery("select o from OperationType o", OperationType.class)
             .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
-    }
-
-    public static List<Integer> findOperableResourceIds(final AuthzSubject subj,
-                                                 final String resourceTable,
-                                                 final String resourceColumn, final String resType,
-                                                 final String operation, final String addCond) {
-        //TODO Extracted from OperationDAO
-        return null;
-    }
-    
-    public static List<OperationType> findAllOrderByName() {
-        //TODO implement sorting somewhere
-        return null;
     }
 
 }
