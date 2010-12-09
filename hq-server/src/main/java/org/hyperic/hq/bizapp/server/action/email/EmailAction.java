@@ -373,8 +373,7 @@ public class EmailAction extends EmailActionConfig
 
         AppdefEntityID appEnt = getResource(defInfo);
 
-        Resource resource = Resource.findByInstanceId(appEnt.getAuthzTypeId(),
-                                                  appEnt.getId());
+        Resource resource = Resource.findResource(appEnt.getId());
        
         final String subject = createSubject(
             defInfo, alert.getAlertInfo(), resource, null, change.getDescription());

@@ -26,7 +26,7 @@
 
 package org.hyperic.hq.hqu.rendit.metaclass
 
-import org.hyperic.hq.authz.server.session.Resource
+import org.hyperic.hq.inventory.domain.Resource
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.appdef.server.session.AppdefResource

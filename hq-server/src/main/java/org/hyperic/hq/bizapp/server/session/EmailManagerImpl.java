@@ -189,7 +189,7 @@ public class EmailManagerImpl implements EmailManager {
         }
 
         AppdefEntityID platEntId = AppdefEntityID.newPlatformID(pid);
-        String platName = resourceManager.getAppdefEntityName(platEntId);
+        String platName = resourceManager.findResource(platEntId).getName();
 
         // The cache is organized by addresses
         for (Iterator i = cache.entrySet().iterator(); i.hasNext();) {

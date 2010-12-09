@@ -34,7 +34,7 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.RoleManager;
 import org.hyperic.hq.authz.shared.RoleValue
-import org.hyperic.hq.authz.server.session.Operation
+import org.hyperic.hq.inventory.domain.OperationType
 
 class RoleHelper extends BaseHelper {
     def subMan = Bootstrap.getBean(AuthzSubjectManager.class)
@@ -100,7 +100,7 @@ class RoleHelper extends BaseHelper {
             ops += allOps[operation]
         }
 
-        Integer roleId = roleMan.createOwnedRole(user, role, ops as Operation[],
+        Integer roleId = roleMan.createOwnedRole(user, role, ops as OperationType[],
                                                  subjectIds, groupIds)
         getRoleById(roleId)
     }

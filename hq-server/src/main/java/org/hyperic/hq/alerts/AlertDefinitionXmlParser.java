@@ -38,7 +38,9 @@ import javax.xml.bind.JAXBException;
 
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -108,12 +110,12 @@ public class AlertDefinitionXmlParser {
     }
 
     private int getAppdefType(Resource resource) {
-        Integer typeId = resource.getType().getId();
-        if (AuthzConstants.authzPlatformProto.equals(typeId)) {
+        AppdefEntityID id = AppdefUtil.newAppdefEntityId(resource);
+        if (id.isPlatform()) {
             return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
-        } else if (AuthzConstants.authzServerProto.equals(typeId)) {
+        } else if (id.isServer()) {
             return AppdefEntityConstants.APPDEF_TYPE_SERVER;
-        } else if (AuthzConstants.authzServiceProto.equals(typeId)) {
+        } else if (id.isService()) {
             return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
         } else {
             throw new AlertDefinitionXmlParserException("Resource [" + resource + "] is not an appdef " +
@@ -180,7 +182,9 @@ public class AlertDefinitionXmlParser {
             throw new AlertDefinitionXmlParserException("Required attribute name not found for definition");
         }
         String name = definition.getResourcePrototype().getName();
-        Resource resource = resourceManager.findResourcePrototypeByName(name);
+        //TODO how to implement type-based alerts?
+        Resource resource = null;
+        //Resource resource = resourceManager.findResourcePrototypeByName(name);
         if (resource == null) {
             throw new AlertDefinitionXmlParserException("Cannot find resource type " + name + " for definition " +
                                                         definition.getName());
@@ -206,7 +210,7 @@ public class AlertDefinitionXmlParser {
         }
 
       
-        AppdefEntityTypeID aeid = new AppdefEntityTypeID(getAppdefType(resource), resource.getInstanceId());
+        AppdefEntityTypeID aeid = new AppdefEntityTypeID(getAppdefType(resource), resource.getId());
         AlertDefinitionValue alertDefValue = new AlertDefinitionValue();
         alertDefValue.setName(definition.getName());
         alertDefValue.setDescription(definition.getDescription());

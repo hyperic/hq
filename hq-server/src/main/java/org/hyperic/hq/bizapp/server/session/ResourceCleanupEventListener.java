@@ -168,32 +168,33 @@ public class ResourceCleanupEventListener implements ZeventListener<ResourcesCle
         watch.markTimeBegin("unscheduleMeasurementsForAsyncDelete");
         unscheduleMeasurementsForAsyncDelete(agentCache);
         watch.markTimeEnd("unscheduleMeasurementsForAsyncDelete");
+        //TODO remove all this after verifying sync deletion is cool
         
-        // Look through services, servers, platforms, applications, and groups
-        watch.markTimeBegin("removeApplications");
-        Collection<Application> applications = applicationManager.findDeletedApplications();
-        removeApplications(subject, applications);
-        watch.markTimeEnd("removeApplications");
-
-        watch.markTimeBegin("removeResourceGroups");
-        Collection<ResourceGroup> groups = resourceGroupManager.findDeletedGroups();
-        removeResourceGroups(subject, groups);
-
-        watch.markTimeEnd("removeResourceGroups");
-
-        Collection<Service> services = serviceManager.findDeletedServices();
-        removeServices(subject, services);
-
-        Collection<Server> servers = serverManager.findDeletedServers();
-        removeServers(subject, servers);
-
-        watch.markTimeBegin("removePlatforms");
-        Collection<Platform> platforms = platformManager.findDeletedPlatforms();
-        removePlatforms(subject, platforms);
-        watch.markTimeEnd("removePlatforms");
-        if (log.isDebugEnabled()) {
-            log.debug("removeDeletedResources: " + watch);
-        }
+//        // Look through services, servers, platforms, applications, and groups
+//        watch.markTimeBegin("removeApplications");
+//        Collection<Application> applications = applicationManager.findDeletedApplications();
+//        removeApplications(subject, applications);
+//        watch.markTimeEnd("removeApplications");
+//
+//        watch.markTimeBegin("removeResourceGroups");
+//        Collection<ResourceGroup> groups = resourceGroupManager.findDeletedGroups();
+//        removeResourceGroups(subject, groups);
+//
+//        watch.markTimeEnd("removeResourceGroups");
+//
+//        Collection<Service> services = serviceManager.findDeletedServices();
+//        removeServices(subject, services);
+//
+//        Collection<Server> servers = serverManager.findDeletedServers();
+//        removeServers(subject, servers);
+//
+//        watch.markTimeBegin("removePlatforms");
+//        Collection<Platform> platforms = platformManager.findDeletedPlatforms();
+//        removePlatforms(subject, platforms);
+//        watch.markTimeEnd("removePlatforms");
+//        if (log.isDebugEnabled()) {
+//            log.debug("removeDeletedResources: " + watch);
+//        }
     }
     
     /**

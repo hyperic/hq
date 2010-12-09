@@ -223,34 +223,6 @@ public class AuthzBossImpl implements AuthzBoss {
     }
 
     /**
-     * Return a sorted, paged <code>List</code> of
-     * <code>ResourceGroupValue</code> objects representing every resource type
-     * in the system that the user is allowed to view.
-     * 
-     * 
-     */
-    @Transactional(readOnly=true)
-    public List<ResourceGroupValue> getAllResourceGroups(Integer sessionId, PageControl pc) throws 
-        PermissionException, SessionTimeoutException, SessionNotFoundException {
-        AuthzSubject subject = sessionManager.getSubject(sessionId);
-        return resourceGroupManager.getAllResourceGroups(subject, pc);
-    }
-
-    /**
-     * Return a sorted, paged <code>List</code> of
-     * <code>ResourceGroupValue</code> objects corresponding to the specified id
-     * values.
-     * 
-     * 
-     */
-    @Transactional(readOnly=true)
-    public PageList<ResourceGroupValue> getResourceGroupsById(Integer sessionId, Integer[] ids, PageControl pc)
-        throws  PermissionException, SessionTimeoutException, SessionNotFoundException {
-        AuthzSubject subject = sessionManager.getSubject(sessionId);
-        return resourceGroupManager.getResourceGroupsById(subject, ids, pc);
-    }
-
-    /**
      * 
      */
     @Transactional(readOnly=true)

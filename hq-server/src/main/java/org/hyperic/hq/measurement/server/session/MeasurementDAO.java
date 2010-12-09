@@ -98,7 +98,7 @@ public class MeasurementDAO
     }
 
     Measurement create(Resource resource, MeasurementTemplate mt, String dsn, long interval) {
-        Measurement m = new Measurement(resource.getInstanceId(), mt, interval);
+        Measurement m = new Measurement(resource.getId(), mt, interval);
 
         m.setEnabled(interval != 0);
         m.setDsn(dsn);

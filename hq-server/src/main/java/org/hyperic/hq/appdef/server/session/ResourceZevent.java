@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventPayload;
 import org.hyperic.hq.zevents.ZeventSourceId;
@@ -34,9 +35,12 @@ import org.hyperic.hq.zevents.ZeventSourceId;
  */
 public abstract class ResourceZevent extends Zevent {
 
-    public ResourceZevent(Integer subject, Integer id) {
-        super(new ResourceZeventSource(id),
-              new ResourceZeventPayload(subject, id));
+    protected AppdefEntityID appdefEntityID;
+    
+    public ResourceZevent(Integer subject, AppdefEntityID id) {
+        super(new ResourceZeventSource(id.getId()),
+              new ResourceZeventPayload(subject, id.getId()));
+        this.appdefEntityID = id;
     }
 
     public ResourceZevent(ResourceZeventSource source,
@@ -52,6 +56,10 @@ public abstract class ResourceZevent extends Zevent {
     public Integer getAuthzSubjectId() {
         return ((ResourceZeventPayload)getPayload()).
             getAuthzSubjectId();
+    }
+    
+    public AppdefEntityID getAppdefEntityID() {
+        return appdefEntityID;
     }
 
     protected static class ResourceZeventSource

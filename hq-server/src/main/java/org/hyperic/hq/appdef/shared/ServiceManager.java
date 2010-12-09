@@ -29,12 +29,14 @@ import java.util.Collection;
 import java.util.List;
 
 import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -175,5 +177,8 @@ public interface ServiceManager {
      * inventory.
      */
     public List<Object[]> getServiceTypeCounts();
+    
+    ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin,
+                                  ServerType servType) throws NotFoundException;
 
 }

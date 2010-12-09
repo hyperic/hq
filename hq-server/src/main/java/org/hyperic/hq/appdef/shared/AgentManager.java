@@ -51,12 +51,6 @@ public interface AgentManager {
     public void removeAgent(Agent agent);
 
     /**
-     * Get a list of all the entities which can be serviced by an Agent.
-     */
-    public ResourceTree getEntitiesForAgent(AuthzSubject subject, String agentToken) throws AgentNotFoundException,
-        PermissionException;
-
-    /**
      * Get a paged list of agents in the system.
      * @param pInfo a pager object, with an {@link AgentSortField} sort field
      * @return a list of {@link Agent}s

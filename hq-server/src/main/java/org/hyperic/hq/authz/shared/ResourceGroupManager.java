@@ -196,5 +196,14 @@ public interface ResourceGroupManager
      * @param resourceEvents Events representing resource creations
      */
     public void updateGroupMembers(List<ResourceCreatedZevent> resourceEvents);
+    
+    Collection<ResourceGroup> getGroups(Resource r);
+    
+    //TODO remove legacy support
+    public boolean isMixed(ResourceGroup group);
+    
+    public int getGroupEntType(ResourceGroup group);
+    
+    public int getGroupEntResType(ResourceGroup group);
 
 }

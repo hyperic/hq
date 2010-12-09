@@ -5,21 +5,16 @@ import java.util.HashSet;
 
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.Ip;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 
-public class Platform {
-
-    private Integer id;
+public class Platform
+    extends AppdefResource {
 
     private Integer cpuCount;
 
-    private String description;
-
     private String fqdn;
-
-    private String name;
-
-    private Long creationTime;
 
     private PlatformType platformType;
 
@@ -27,21 +22,11 @@ public class Platform {
 
     private String certdn;
 
-    private String location;
-
     private String commentText;
 
     private Collection<Ip> ips = new HashSet<Ip>();
 
     private Collection<Server> servers = new HashSet<Server>();
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
 
     public Integer getCpuCount() {
         return cpuCount;
@@ -51,28 +36,12 @@ public class Platform {
         this.cpuCount = cpuCount;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public String getFqdn() {
         return fqdn;
     }
 
     public void setFqdn(String fqdn) {
         this.fqdn = fqdn;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public Collection<Ip> getIps() {
@@ -99,14 +68,6 @@ public class Platform {
         this.agent = agent;
     }
 
-    public Long getCreationTime() {
-        return creationTime;
-    }
-
-    public void setCreationTime(Long creationTime) {
-        this.creationTime = creationTime;
-    }
-
     public String getCertdn() {
         return certdn;
     }
@@ -115,20 +76,33 @@ public class Platform {
         this.certdn = certdn;
     }
 
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
     public String getCommentText() {
         return commentText;
     }
 
     public void setCommentText(String commentText) {
         this.commentText = commentText;
+    }
+
+    @Override
+    public AppdefResourceType getAppdefResourceType() {
+        return platformType;
+    }
+
+    @Override
+    public AppdefResourceValue getAppdefResourceValue() {
+        return getPlatformValue();
+    }
+
+    @Override
+    protected String _getAuthzOp(String op) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public AppdefEntityID getEntityId() { // TODO remove this - entity ID has no
+                                          // place in new Resource model
+        return AppdefEntityID.newPlatformID(getId());
     }
 
     public PlatformValue getPlatformValue() {

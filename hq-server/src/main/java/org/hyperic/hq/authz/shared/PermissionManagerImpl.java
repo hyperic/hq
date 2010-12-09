@@ -179,10 +179,6 @@ public class PermissionManagerImpl
    
 
     private Resource lookupResource(ResourceValue resource) {
-        if (resource.getId() == null) {
-            ResourceType type = resource.getResourceType();
-            return Resource.findByInstanceId(type.getId(), resource.getInstanceId());
-        }
         return Resource.findResource(resource.getId());
     }
 
@@ -370,11 +366,13 @@ public class PermissionManagerImpl
 
     public Collection<Resource> getGroupResources(Integer subjectId, Integer groupId,
                                                   Boolean fsystem) {
-        return ResourceGroup.findResourceGroup(groupId).findInGroup_orderName(fsystem);
+       //TODO
+        return null;
     }
 
     public Collection<Resource> findServiceResources(AuthzSubject subj, Boolean fsystem) {
-        return Resource.findSvcRes_orderName(fsystem);
+       //TODO
+        return null;
     }
 
     public RolePermNativeSQL getRolePermissionNativeSQL(String resourceVar, String eventLogVar, String subjectParam,
@@ -438,7 +436,9 @@ public class PermissionManagerImpl
     public EdgePermCheck makePermCheckSql(String subjectParam, String resVar, String resParam,
                                           String distanceParam, String opsParam,
                                           boolean includeDescendants) {
-        final Integer cId = AuthzConstants.RELATION_CONTAINMENT_ID;
+        //TODO
+        //final Integer cId = AuthzConstants.RELATION_CONTAINMENT_ID;
+        Integer cId = 1;
         final String oper = (includeDescendants) ? ">=" : "=";
         final String sql = new StringBuilder().append(" JOIN EAM_RESOURCE_EDGE edge")
             .append(" ON ").append(resVar).append(".id = edge.TO_ID").append(" AND ")
@@ -459,7 +459,9 @@ public class PermissionManagerImpl
     public EdgePermCheck makePermCheckHql(String subjectParam, String resourceVar,
                                           String resourceParam, String distanceParam,
                                           String opsParam, boolean includeDescendants) {
-        final Integer cId = AuthzConstants.RELATION_CONTAINMENT_ID;
+        //TODO
+        //final Integer cId = AuthzConstants.RELATION_CONTAINMENT_ID;
+        Integer cId = 1;
         final String oper = (includeDescendants) ? ">=" : "=";
         final String sql = new StringBuilder().append("join ").append(resourceVar).append(
             ".toEdges _e ").append("join _e.from _fromResource ").append("where ").append(

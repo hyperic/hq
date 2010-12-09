@@ -27,7 +27,7 @@
 package org.hyperic.hq.hqu.rendit.metaclass
 
 import org.hyperic.hq.authz.server.session.AuthzSubject
-import org.hyperic.hq.authz.server.session.Operation
+import org.hyperic.hq.inventory.domain.OperationType
 import org.hyperic.hq.authz.server.session.Role
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.authz.shared.RoleManager;
@@ -70,7 +70,7 @@ class RoleCategory {
      * Set the operations for a Role.
      */
     static void setOperations(Role role, AuthzSubject user, Collection ops) {
-        roleMan.setOperations(user, role.id, ops as Operation[])
+        roleMan.setOperations(user, role.id, ops as OperationType[])
     }
 
     /**

@@ -133,8 +133,8 @@ public class ServiceMergerImpl implements ServiceMerger {
 
                 String typeName = aiservice.getServiceTypeName();
                 ServiceType serviceType = serviceManager.findServiceTypeByName(typeName);
-                service = serviceManager.createService(sInfo.subject, server, serviceType,
-                    aiservice.getName(), aiservice.getDescription(), "", null);
+                service = serviceManager.createService(sInfo.subject, server.getId(), serviceType.getId(),
+                    aiservice.getName(), aiservice.getDescription(), "");
 
                 log.debug("New service created: " + service);
             } else {

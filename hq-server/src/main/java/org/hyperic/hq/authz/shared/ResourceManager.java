@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceSortField;
 import org.hyperic.hq.common.NotFoundException;
@@ -146,8 +147,9 @@ public interface ResourceManager {
      * @return a list of {@link Resource}s
      */
     public List<Resource> findResourcesOfType(int resourceType, PageInfo pInfo);
-
-
+    
+    //TODO remove this method - ResourceManager (if kept) should have not knowledge of AppdefEntityIDs
+    Resource findResource(AppdefEntityID entityID);
 
     /**
      * Gets all the Resources owned by the given Subject.

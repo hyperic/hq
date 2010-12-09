@@ -298,75 +298,8 @@ public class ReportProcessorImpl implements ReportProcessor {
         if (resource == null || resource.isInAsyncDeleteState()) {
             return false;
         }
-        final Integer resType = resource.getType().getId();
-        final Integer aeid = resource.getInstanceId();
-        try {
-            if (resType.equals(AuthzConstants.authzPlatform)) {
-                Platform p = platformManager.findPlatformById(aeid);
-                Resource r = p.getResource();
-                if (r == null || r.isInAsyncDeleteState()) {
-                    return false;
-                }
-                Agent a = p.getAgent();
-                if (a == null) {
-                    return false;
-                }
-                return a.getAgentToken().equals(agentToken);
-            } else if (resType.equals(AuthzConstants.authzServer)) {
-                Server server = serverManager.findServerById(aeid);
-                Resource r = server.getResource();
-                if (r == null || r.isInAsyncDeleteState()) {
-                    return false;
-                }
-                Platform p = server.getPlatform();
-                if (p == null) {
-                    return false;
-                }
-                r = p.getResource();
-                if (r == null || r.isInAsyncDeleteState()) {
-                    return false;
-                }
-                Agent a = p.getAgent();
-                if (a == null) {
-                    return false;
-                }
-                return a.getAgentToken().equals(agentToken);
-            } else if (resType.equals(AuthzConstants.authzService)) {
-               Service service =serviceManager.findServiceById(aeid);
-               Resource r = service.getResource();
-               if (r == null || r.isInAsyncDeleteState()) {
-                   return false;
-               }
-               Server server = service.getServer();
-               if (server == null) {
-                   return false;
-               }
-               r = server.getResource();
-               if (r == null || r.isInAsyncDeleteState()) {
-                   return false;
-               }
-               Platform p = server.getPlatform();
-               if (p == null) {
-                   return false;
-               }
-               r = p.getResource();
-               if (r == null || r.isInAsyncDeleteState()) {
-                   return false;
-               }
-               Agent a = p.getAgent();
-               if (a == null) {
-                   return false;
-               }
-               return a.getAgentToken().equals(agentToken);
-            }
-        } catch (PlatformNotFoundException e) {
-            log.warn("Platform not found Id=" + aeid);
-        } catch (ServerNotFoundException e) {
-            log.warn("Server not found Id=" + aeid);
-        } catch (ServiceNotFoundException e) {
-            log.warn("Service not found Id=" + aeid);
-        }
-        return false;
+        return resource.getAgent().getAgentToken().equals(agentToken);
+            
     }
 
     /**

@@ -1,8 +1,10 @@
 package org.hyperic.hq.appdef.server.session;
 
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 
-public class ServiceType {
+public class ServiceType extends AppdefResourceType {
 
     private String name;
 
@@ -32,6 +34,22 @@ public class ServiceType {
 
     public void setPlugin(String plugin) {
         this.plugin = plugin;
+    }
+    
+    @Override
+    public int getAppdefType() {
+        return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
+    }
+
+    @Override
+    public int getAuthzType() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public AppdefResourceTypeValue getAppdefResourceTypeValue() {
+       return getServiceTypeValue();
     }
 
     public ServiceTypeValue getServiceTypeValue() {

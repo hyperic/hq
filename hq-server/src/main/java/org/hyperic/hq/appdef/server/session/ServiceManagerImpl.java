@@ -232,7 +232,8 @@ public class ServiceManagerImpl implements ServiceManager {
         throws ServiceNotFoundException, PermissionException {
 
         Service service = findServiceById(id);
-        permissionManager.checkViewPermission(subject, service.getId());
+        //TODO
+        //permissionManager.checkViewPermission(subject, service.getId());
         return service;
     }
     
@@ -787,6 +788,11 @@ public class ServiceManagerImpl implements ServiceManager {
         }
     }
 
+    public ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin,
+                                          ServerType servType) throws NotFoundException {
+        return createServiceType(sinfo, plugin, ResourceType.findResourceType(servType.getId()));
+    }
+    
     private ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin,
                                           ResourceType servType) throws NotFoundException {
         ResourceType serviceType = new ResourceType();

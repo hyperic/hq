@@ -26,6 +26,7 @@
 package org.hyperic.hq.authz.server.session;
 
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.values.OwnedResourceGroupValue;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
@@ -43,16 +44,32 @@ public class PagerProcessor_ownedResourceGroup implements PagerProcessor {
 
 
                 ResourceGroup group = (ResourceGroup) o;
-                Resource resource =
-                    Resource.findByInstanceId(AuthzConstants.authzGroup,
-                                         group.getId());
+               
 
-                return new OwnedResourceGroupValue(group.getResourceGroupValue(),
-                                                   resource.getOwner());
+                return new OwnedResourceGroupValue(getResourceGroupValue(group),
+                                                   group.getOwner());
             }
         } catch (Exception e) {
             throw new IllegalStateException("Error converting to OwnedResourceGroupValue: " + e);
         }
         return o;
+    }
+    
+    private ResourceGroupValue getResourceGroupValue(ResourceGroup group) {
+        ResourceGroupValue resourceGroupValue =  new ResourceGroupValue();
+        //resourceGroupValue.setClusterId(group.getClusterId().intValue());
+        //resourceGroupValue.setCTime(new Long(group.getCreationTime()));
+        resourceGroupValue.setDescription(group.getDescription());
+        //resourceGroupValue.setGroupEntResType(getGroupEntResType().intValue());
+        //resourceGroupValue.setGroupEntType(getGroupEntType().intValue());
+        resourceGroupValue.setGroupType(group.getGroupType());
+        resourceGroupValue.setId(group.getId());
+        resourceGroupValue.setLocation(group.getLocation());
+        resourceGroupValue.setModifiedBy(group.getModifiedBy());
+        //resourceGroupValue.setMTime(new Long(getMtime()));
+        resourceGroupValue.setName(group.getName());
+        //resourceGroupValue.setSortName(getSortName());
+        //resourceGroupValue.setSystem(isSystem());
+        return resourceGroupValue;
     }
 }

@@ -38,6 +38,7 @@ import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 
@@ -203,17 +204,17 @@ public abstract class AppdefResourceValue
      * 
      */
     public static AppdefResourceType getAppdefResourceType(AuthzSubject subject, ResourceGroup group) {
-        if (group.isMixed())
+        if (Bootstrap.getBean(ResourceGroupManager.class).isMixed(group))
             throw new IllegalArgumentException("Group " + group.getId() +
                                                " is a mixed group");
-        return getResourceTypeById(group.getGroupEntType().intValue(),
-                                   group.getGroupEntResType().intValue());
+        return getResourceTypeById(Bootstrap.getBean(ResourceGroupManager.class).getGroupEntType(group),
+            Bootstrap.getBean(ResourceGroupManager.class).getGroupEntResType(group));
     }
 
     public AppdefResourceTypeValue getAppdefResourceTypeValue(AuthzSubject subject, ResourceGroup group) {
-        if (group.isMixed()) {
+        if (Bootstrap.getBean(ResourceGroupManager.class).isMixed(group)) {
             AppdefResourceTypeValue res = new GroupTypeValue();
-            int iGrpType = group.getGroupType().intValue();
+            int iGrpType = group.getGroupType();
             res.setId(group.getGroupType());
             res.setName(AppdefEntityConstants.getAppdefGroupTypeName(iGrpType));
             return res;

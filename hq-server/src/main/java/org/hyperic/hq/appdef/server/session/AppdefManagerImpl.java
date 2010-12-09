@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -34,13 +35,17 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefManager;
+import org.hyperic.hq.appdef.shared.PlatformManager;
+import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
+import org.hyperic.hq.appdef.shared.ServiceManager;
+import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,13 +63,23 @@ public class AppdefManagerImpl implements AppdefManager {
     private PermissionManager permissionManager;
 
     private ResourceManager resourceManager;
+    
+    private PlatformManager platformManager;
+    
+    private ServerManager serverManager;
+    
+    private ServiceManager serviceManager;
 
     @Autowired
     public AppdefManagerImpl(
-                             PermissionManager permissionManager, ResourceManager resourceManager) {
+                             PermissionManager permissionManager, ResourceManager resourceManager, PlatformManager platformManager,
+                             ServerManager serverManager, ServiceManager serviceManager) {
 
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
+        this.platformManager = platformManager;
+        this.serverManager = serverManager;
+        this.serviceManager = serviceManager;
     }
 
     
@@ -78,13 +93,13 @@ public class AppdefManagerImpl implements AppdefManager {
      */
     @Transactional(readOnly=true)
     public Map<String, AppdefEntityID> getControllablePlatformTypes(AuthzSubject subject) throws PermissionException {
-        List<Integer> typeIds = OperationType.findOperableResourceIds(subject, "EAM_PLATFORM", "platform_type_id",
+        List<Integer> typeIds = findOperableResourceIds(subject, "EAM_PLATFORM", "platform_type_id",
             AuthzConstants.platformResType, AuthzConstants.platformOpControlPlatform, null);
 
         TreeMap<String, AppdefEntityID> platformTypes = new TreeMap<String, AppdefEntityID>();
         for (Integer typeId : typeIds) {
             try {
-                PlatformType pt = platformTypeDAO.findById(typeId);
+                PlatformType pt = platformManager.findPlatformType(typeId);
                 platformTypes.put(pt.getName(), AppdefEntityTypeID.newPlatformID(typeId));
             } catch (ObjectNotFoundException e) {
                 continue;
@@ -104,16 +119,16 @@ public class AppdefManagerImpl implements AppdefManager {
     @Transactional(readOnly=true)
     public Map<String, AppdefEntityID> getControllablePlatformNames(AuthzSubject subject, int tid)
         throws PermissionException {
-        List<Integer> ids = OperationType.findOperableResourceIds(subject, "EAM_PLATFORM", "id", AuthzConstants.platformResType,
+        List<Integer> ids = findOperableResourceIds(subject, "EAM_PLATFORM", "id", AuthzConstants.platformResType,
             AuthzConstants.platformOpControlPlatform, "platform_type_id=" + tid);
 
         TreeMap<String, AppdefEntityID> platformNames = new TreeMap<String, AppdefEntityID>();
         for (Integer id : ids) {
 
             try {
-                Platform plat = platformDAO.findById(id);
+                Platform plat = platformManager.findPlatformById(id);
                 platformNames.put(plat.getName(), AppdefEntityID.newPlatformID(id));
-            } catch (ObjectNotFoundException e) {
+            } catch (PlatformNotFoundException e) {
                 continue;
             }
         }
@@ -130,15 +145,15 @@ public class AppdefManagerImpl implements AppdefManager {
      */
     @Transactional(readOnly=true)
     public Map<String, AppdefEntityTypeID> getControllableServerTypes(AuthzSubject subject) throws PermissionException {
-        List<Integer> typeIds = OperationType.findOperableResourceIds(subject, "EAM_SERVER", "server_type_id",
+        List<Integer> typeIds = findOperableResourceIds(subject, "EAM_SERVER", "server_type_id",
             AuthzConstants.serverResType, AuthzConstants.serverOpControlServer, null);
 
         TreeMap<String, AppdefEntityTypeID> serverTypes = new TreeMap<String, AppdefEntityTypeID>();
         for (Integer typeId : typeIds) {
 
             try {
-                ServerType st = serverTypeDAO.findById(typeId);
-                if (!st.isVirtual())
+                ServerType st = serverManager.findServerType(typeId);
+                
                     serverTypes.put(st.getName(), new AppdefEntityTypeID(AppdefEntityConstants.APPDEF_TYPE_SERVER,
                         typeId));
             } catch (ObjectNotFoundException e) {
@@ -159,16 +174,16 @@ public class AppdefManagerImpl implements AppdefManager {
     @Transactional(readOnly=true)
     public Map<String, AppdefEntityID> getControllableServerNames(AuthzSubject subject, int tid)
         throws PermissionException {
-        List<Integer> ids = OperationType.findOperableResourceIds(subject, "EAM_SERVER", "id", AuthzConstants.serverResType,
+        List<Integer> ids = findOperableResourceIds(subject, "EAM_SERVER", "id", AuthzConstants.serverResType,
             AuthzConstants.serverOpControlServer, "server_type_id=" + tid);
 
         TreeMap<String, AppdefEntityID> serverNames = new TreeMap<String, AppdefEntityID>();
         for (Integer id : ids) {
 
             try {
-                Server svr = serverDAO.findById(id);
+                Server svr = serverManager.findServerById(id);
                 serverNames.put(svr.getName(), AppdefEntityID.newServerID(id));
-            } catch (ObjectNotFoundException e) {
+            } catch (ServerNotFoundException e) {
                 continue;
             }
         }
@@ -185,14 +200,14 @@ public class AppdefManagerImpl implements AppdefManager {
      */
     @Transactional(readOnly=true)
     public Map<String, AppdefEntityTypeID> getControllableServiceTypes(AuthzSubject subject) throws PermissionException {
-        List<Integer> typeIds = OperationType.findOperableResourceIds(subject, "EAM_SERVICE", "service_type_id",
+        List<Integer> typeIds = findOperableResourceIds(subject, "EAM_SERVICE", "service_type_id",
             AuthzConstants.serviceResType, AuthzConstants.serviceOpControlService, null);
 
         TreeMap<String, AppdefEntityTypeID> serviceTypes = new TreeMap<String, AppdefEntityTypeID>();
         for (Integer typeId : typeIds) {
 
             try {
-                ServiceType st = serviceTypeDAO.findById(typeId);
+                ServiceType st = serviceManager.findServiceType(typeId);
                 serviceTypes.put(st.getName(),
                     new AppdefEntityTypeID(AppdefEntityConstants.APPDEF_TYPE_SERVICE, typeId));
             } catch (ObjectNotFoundException e) {
@@ -213,21 +228,27 @@ public class AppdefManagerImpl implements AppdefManager {
     @Transactional(readOnly=true)
     public Map<String, AppdefEntityID> getControllableServiceNames(AuthzSubject subject, int tid)
         throws PermissionException {
-        List<Integer> ids = OperationType.findOperableResourceIds(subject, "EAM_SERVICE", "id", AuthzConstants.serviceResType,
+        List<Integer> ids = findOperableResourceIds(subject, "EAM_SERVICE", "id", AuthzConstants.serviceResType,
             AuthzConstants.serviceOpControlService, "service_type_id=" + tid);
 
         TreeMap<String, AppdefEntityID> serviceNames = new TreeMap<String, AppdefEntityID>();
         for (Integer id : ids) {
 
             try {
-                Service svc = serviceDAO.findById(id);
+                Service svc = serviceManager.findServiceById(id);
                 serviceNames.put(svc.getName(), AppdefEntityID.newServiceID(id));
-            } catch (ObjectNotFoundException e) {
+            } catch (ServiceNotFoundException e) {
                 continue;
             }
         }
 
         return serviceNames;
+    }
+    
+    private List<Integer> findOperableResourceIds(AuthzSubject subject, String tableName, 
+        String fieldName, String resType, String opType, String sumthn) {
+        //TODO from OperationDAO
+        return new ArrayList<Integer>();
     }
 
     /**

@@ -127,6 +127,7 @@ import org.hyperic.hq.authz.shared.GroupCreationException;
 import org.hyperic.hq.authz.shared.MixedGroupType;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
@@ -454,7 +455,9 @@ public class AppdefBossImpl implements AppdefBoss {
     public PageList<ServiceTypeValue> findViewablePlatformServiceTypes(int sessionID, Integer platId)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
-        return serviceManager.findVirtualServiceTypesByPlatform(subject, platId);
+        //TODO
+        return new PageList<ServiceTypeValue>();
+        //return serviceManager.findVirtualServiceTypesByPlatform(subject, platId);
     }
 
     /**
@@ -571,7 +574,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     @Transactional(readOnly = true)
-    public PageList<AppdefResourceValue> findServiceInventoryByApplication(int sessionID,
+    public PageList<ServiceValue> findServiceInventoryByApplication(int sessionID,
                                                                            Integer appId,
                                                                            PageControl pc)
         throws AppdefEntityNotFoundException, SessionException, PermissionException {
@@ -587,17 +590,17 @@ public class AppdefBossImpl implements AppdefBoss {
      * 
      */
     @Transactional(readOnly = true)
-    public PageList<AppdefResourceValue> findServicesByServer(int sessionID, Integer serverId,
+    public PageList<ServiceValue> findServicesByServer(int sessionID, Integer serverId,
                                                               PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException, SessionException {
         AppdefEntityID aeid = AppdefEntityID.newServerID(serverId);
         return findServices(sessionID, aeid, false, pc);
     }
 
-    private PageList<AppdefResourceValue> findServices(int sessionID, AppdefEntityID aeid,
+    private PageList<ServiceValue> findServices(int sessionID, AppdefEntityID aeid,
                                                        boolean allServiceInventory, PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException, SessionException {
-        PageList<AppdefResourceValue> res = null;
+        PageList<ServiceValue> res = null;
 
         if (pc == null) {
             pc = PageControl.PAGE_ALL;
@@ -618,16 +621,6 @@ public class AppdefBossImpl implements AppdefBoss {
                 if (allServiceInventory) {
                     res = serviceManager
                         .getServiceInventoryByApplication(subject, aeid.getId(), pc);
-                    // app services will include service clusters which need
-                    // to be converted to their service group counterpart.
-                    for (int i = 0; i < res.size(); i++) {
-                        Object o = res.get(i);
-                        if (o instanceof ServiceClusterValue) {
-                            res
-                                .set(i,
-                                    findGroup(sessionID, ((ServiceClusterValue) o).getGroupId()));
-                        }
-                    }
                 } else {
                     res = serviceManager.getServicesByApplication(subject, aeid.getId(), pc);
                 }
@@ -721,7 +714,7 @@ public class AppdefBossImpl implements AppdefBoss {
         throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException,
         SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
-        return serverManager.getServersByPlatform(subject, platformId, true, pc);
+        return serverManager.getServersByPlatform(subject, platformId,  pc);
     }
 
     /**
@@ -733,7 +726,7 @@ public class AppdefBossImpl implements AppdefBoss {
         throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException,
         SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
-        return serverManager.getServerTypesByPlatform(subject, platformId, true, pc);
+        return serverManager.getServerTypesByPlatform(subject, platformId, pc);
     }
 
     /**
@@ -766,11 +759,11 @@ public class AppdefBossImpl implements AppdefBoss {
         switch (aeid.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                 if (servTypeId == APPDEF_RES_TYPE_UNDEFINED) {
-                    res = serverManager.getServersByPlatform(subject, aeid.getId(), false, pc);
+                    res = serverManager.getServersByPlatform(subject, aeid.getId(),  pc);
                 } else {
                     // exclude virtual servers
                     res = serverManager.getServersByPlatform(subject, aeid.getId(), new Integer(
-                        servTypeId), true, pc);
+                        servTypeId),  pc);
                 }
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
@@ -843,8 +836,8 @@ public class AppdefBossImpl implements AppdefBoss {
         if (pc != null) {
             List<Resource> appdefList = new ArrayList<Resource>();
             for (int i = 0; i < entities.length; i++) {
-                Resource res = resourceManager.findResource(entities[i]);
-                if (res != null && !res.isInAsyncDeleteState()) {
+                Resource res = resourceManager.findResourceById(entities[i].getId());
+                if (res != null) {
                     appdefList.add(res);
                 }
             }
@@ -1262,7 +1255,7 @@ public class AppdefBossImpl implements AppdefBoss {
         final StopWatch timer = new StopWatch();
 
         final AuthzSubject subject = sessionManager.getSubject(sessionId);
-        final Resource res = resourceManager.findResource(aeid);
+        final Resource res = resourceManager.findResourceById(aeid.getId());
 
         if (aeid.isGroup()) {
             // HQ-1577: Do not delete group if downtime schedule exists
@@ -1293,7 +1286,9 @@ public class AppdefBossImpl implements AppdefBoss {
             log.warn("AppdefEntityId=" + aeid + " is not associated with a Resource");
             return new AppdefEntityID[0];
         }
-        AppdefEntityID[] removed = resourceManager.removeResourcePerms(subject, res, false);
+        //TODO removed used to have every ID but not used.  Just add 1 for RemoveResourcesAction
+        AppdefEntityID[] removed=new AppdefEntityID[] {aeid};
+        resourceManager.removeResource(subject, res);
         Map<Integer, List<AppdefEntityID>> agentCache = null;
 
         final Integer id = aeid.getId();
@@ -1378,7 +1373,7 @@ public class AppdefBossImpl implements AppdefBoss {
             // Disable all measurements for this platform. We don't actually
             // remove the measurements here to avoid delays in deleting
             // resources.
-            disableMeasurements(subject, platform.getResource());
+            disableMeasurements(subject, Resource.findResource(platformId));
 
             // Remove from AI queue
             try {
@@ -1444,9 +1439,7 @@ public class AppdefBossImpl implements AppdefBoss {
             List<AppdefEntityID> resources = new ArrayList<AppdefEntityID>();
 
             for (Server s : platform.getServers()) {
-                if (!s.getServerType().isVirtual()) {
-                    resources.add(s.getEntityId());
-                }
+                resources.add(s.getEntityId());
                 List<AppdefEntityID> services = buildAsyncDeleteAgentCache(s).get(agent.getId());
                 resources.addAll(services);
             }
@@ -1792,7 +1785,7 @@ public class AppdefBossImpl implements AppdefBoss {
         throws GroupCreationException, GroupDuplicateNameException, SessionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         ResourceGroupCreateInfo cInfo = new ResourceGroupCreateInfo(name, description,
-            location,privGrp);
+            location,privGrp,AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS);
 
         // No roles or resources
         return resourceGroupManager.createResourceGroup(subject, cInfo, Collections.EMPTY_LIST,
@@ -1831,7 +1824,7 @@ public class AppdefBossImpl implements AppdefBoss {
         }
 
         ResourceGroupCreateInfo cInfo = new ResourceGroupCreateInfo(name, description, 
-            location, privGrp);
+            location, privGrp, groupType);
 
         // No roles or resources
         return resourceGroupManager.createResourceGroup(subject, cInfo, Collections.EMPTY_LIST,
@@ -1873,31 +1866,15 @@ public class AppdefBossImpl implements AppdefBoss {
                                                    + "type specified");
         }
 
-        Resource prototype = resourceManager.findResourcePrototype(new AppdefEntityTypeID(adType,
-            adResType));
-
         ResourceGroupCreateInfo cInfo = new ResourceGroupCreateInfo(name, description,location, 
-            privGrp);
+            privGrp, groupType);
 
         // No roles or resources
         return resourceGroupManager.createResourceGroup(subject, cInfo, Collections.EMPTY_LIST,
             getResources(resources));
     }
 
-    /**
-     * Remove resources from the group's contents.
-     * 
-     * 
-     */
-    public void removeResourcesFromGroup(int sessionId, ResourceGroup group,
-                                         Collection<Resource> resources) throws SessionException,
-        PermissionException, VetoException {
-        AuthzSubject subject = sessionManager.getSubject(sessionId);
-
-        resourceGroupManager.removeResources(subject, group, resources);
-    }
-
-    /**
+   /**
      * 
      */
     @Transactional(readOnly = true)
@@ -2085,8 +2062,9 @@ public class AppdefBossImpl implements AppdefBoss {
         for (int i = 0; i < entities.length; i++) {
             AppdefEntityID eid = entities[i];
             Resource resource = resourceManager.findResource(eid);
+            //TODO below used resource.getPrototype()
             List<AppdefGroupValue> result = findAllGroupsMemberExclusive(sessionId, pc, eid,
-                new Integer[] {}, resource.getPrototype());
+                new Integer[] {}, resource);
 
             if (i == 0) {
                 commonList.addAll(result);
@@ -2114,15 +2092,8 @@ public class AppdefBossImpl implements AppdefBoss {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
 
         Collection<ResourceGroup> resGrps = resourceGroupManager
-            .getAllResourceGroups(subject, true);
-
-        // We only want the appdef resource groups
-        for (Iterator<ResourceGroup> it = resGrps.iterator(); it.hasNext();) {
-            ResourceGroup resGrp = it.next();
-            if (resGrp.isSystem()) {
-                it.remove();
-            }
-        }
+            .getAllResourceGroups(subject);
+        
         return resGrps;
     }
 
@@ -2135,7 +2106,7 @@ public class AppdefBossImpl implements AppdefBoss {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         for (AppdefEntityID aeid : aeids) {
-            Resource resource = resourceManager.findResource(aeid);
+            Resource resource = resourceManager.findResourceById(aeid.getId());
             resourceGroupManager.addResource(subject, group, resource);
         }
     }
@@ -2493,45 +2464,36 @@ public class AppdefBossImpl implements AppdefBoss {
                                        int appdefTypeId, boolean matchOwn, boolean matchUnavail)
         throws PatternSyntaxException {
         Critter tmp;
-        Resource proto = (appdefResType != null) ? resourceManager
-            .findResourcePrototype(appdefResType) : null;
-        boolean isGroup = (groupTypes == null) ? false : true;
+        //TODO impl?
+//        Resource proto = (appdefResType != null) ? resourceManager
+//            .findResourcePrototype(appdefResType) : null;
+//        boolean isGroup = (groupTypes == null) ? false : true;
         List<Critter> critters = new ArrayList<Critter>();
-        if (isGroup) {
-            critters.add(getGrpTypeCritter(groupTypes, proto));
-            if (null != (tmp = getResourceTypeCritter(grpEntId, null))) {
-                critters.add(tmp);
-            } else if (null != (tmp = getResourceTypeCritter(appdefTypeId, null))) {
-                critters.add(tmp);
-            }
-        } else {
-            if (null != (tmp = getProtoCritter(appdefResType, proto))) {
-                critters.add(tmp);
-            }
-            // HPD-476 want to hide vm images from browse resources when viewing
-            // all
-            Resource protoToExclude = resourceManager
-                .findResourcePrototypeByName(AuthzConstants.platformPrototypeVmwareVsphereVm);
-            Integer excludeId = (protoToExclude == null) ? null : protoToExclude.getId();
-            if (proto != null && excludeId != null && excludeId.equals(proto.getId())) {
-                excludeId = null;
-            }
-            if (null != (tmp = getResourceTypeCritter(appdefTypeId, excludeId))) {
-                critters.add(tmp);
-            }
-        }
-        if (null != (tmp = getResourceNameCritter(resourceName))) {
-            critters.add(tmp);
-        }
-        if (null != (tmp = getGrpMemCritter(grpId))) {
-            critters.add(tmp);
-        }
-        if (matchOwn) {
-            critters.add(getOwnCritter(subj));
-        }
-        if (matchUnavail) {
-            critters.add(getUnavailCritter());
-        }
+//        if (isGroup) {
+//            critters.add(getGrpTypeCritter(groupTypes, proto));
+//            if (null != (tmp = getResourceTypeCritter(grpEntId, null))) {
+//                critters.add(tmp);
+//            } else if (null != (tmp = getResourceTypeCritter(appdefTypeId, null))) {
+//                critters.add(tmp);
+//            }
+//        } else {
+//            if (null != (tmp = getProtoCritter(appdefResType, proto))) {
+//                critters.add(tmp);
+//            }
+//          
+//        }
+//        if (null != (tmp = getResourceNameCritter(resourceName))) {
+//            critters.add(tmp);
+//        }
+//        if (null != (tmp = getGrpMemCritter(grpId))) {
+//            critters.add(tmp);
+//        }
+//        if (matchOwn) {
+//            critters.add(getOwnCritter(subj));
+//        }
+//        if (matchUnavail) {
+//            critters.add(getUnavailCritter());
+//        }
         return new CritterList(critters, matchAny);
     }
 
@@ -2654,8 +2616,10 @@ public class AppdefBossImpl implements AppdefBoss {
         pc.setPagesize(PageControl.SIZE_UNLIMITED);
         if (debug)
             watch.markTimeBegin("findViewableSvcResources");
-        Set<Resource> authzResources = new TreeSet<Resource>(resourceManager
-            .findViewableSvcResources(subject, nameFilter, pc));
+        //TODO the method below used to do sorting, etc
+        //Set<Resource> authzResources = new TreeSet<Resource>(resourceManager
+          //  .findViewableSvcResources(subject, nameFilter, pc));
+        Set<Resource> authzResources = new TreeSet<Resource>(PermissionManagerFactory.getInstance().findServiceResources(subject, Boolean.FALSE));
         if (debug)
             watch.markTimeEnd("findViewableSvcResources");
 
@@ -2666,7 +2630,7 @@ public class AppdefBossImpl implements AppdefBoss {
         // Remove existing application assigned inventory
         if (debug)
             watch.markTimeBegin("findServiceInventoryByApplication");
-        List<AppdefResourceValue> assigned = findServiceInventoryByApplication(sessionId, appId,
+        List<ServiceValue> assigned = findServiceInventoryByApplication(sessionId, appId,
             PageControl.PAGE_ALL);
         if (debug)
             watch.markTimeEnd("findServiceInventoryByApplication");
@@ -2772,7 +2736,7 @@ public class AppdefBossImpl implements AppdefBoss {
 
             if (aeid.isGroup()) {
                 ResourceGroup g = resourceGroupManager.findResourceGroupById(overlord, aRes
-                    .getInstanceId());
+                    .getId());
                 resourceGroupManager.changeGroupOwner(overlord, g, overlord);
             } else {
                 resourceManager.setResourceOwner(overlord, aRes, overlord);
@@ -3067,15 +3031,7 @@ public class AppdefBossImpl implements AppdefBoss {
                 List<Server> servers = new ArrayList<Server>();
                 if (entityId.isServer()) {
                     servers.add(serverManager.findServerById(entityId.getId()));
-                } else if (entityId.isPlatform()) {
-                    // Get the virtual servers
-                    Platform plat = platformManager.findPlatformById(entityId.getId());
-                    for (Server server : plat.getServers()) {
-                        if (server.getServerType().isVirtual()) {
-                            servers.add(server);
-                        }
-                    }
-                }
+                } 
 
                 for (Server server : servers) {
                     // Look up the server's services

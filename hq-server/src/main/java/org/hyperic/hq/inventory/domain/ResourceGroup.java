@@ -87,6 +87,12 @@ public class ResourceGroup
     public void setPrivateGroup(boolean privateGroup) {
         this.privateGroup = privateGroup;
     }
+    
+    public int getGroupType() {
+        //TODO replace with calls to group.getType().getId()
+       //Doing this just in case we can't pre-populate ResourceTypes with IDs as expected in AppdefEntityConstants.getAppdefGroupTypeName
+        return getType().getId();
+    }
 
     public static int countResourceGroups() {
         return entityManager().createQuery("select count(o) from ResourceGroup o", Integer.class)

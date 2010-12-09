@@ -66,6 +66,7 @@ import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
+import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -345,7 +346,8 @@ public class PlatformManagerImpl implements PlatformManager {
         try {
             auditManager.pushContainer(audit);
             pushed = true;
-            permissionManager.checkRemovePermission(subject, platform.getId());
+            //TODO
+            //permissionManager.checkRemovePermission(subject, platform.getId());
             
             //remove server
             removeServers(platform);
@@ -357,9 +359,9 @@ public class PlatformManagerImpl implements PlatformManager {
              //config, cprops, and relationships will get cleaned up by removal here
             resourceManager.removeResource(subject, Resource.findResource(platform.getId()));
 
-        } catch (PermissionException e) {
-            log.debug("Error while removing Platform");
-            throw e;
+        //} catch (PermissionException e) {
+          //  log.debug("Error while removing Platform");
+            //throw e;
         } finally {
             if (pushed)
                 auditManager.popContainer(false);
@@ -449,11 +451,12 @@ public class PlatformManagerImpl implements PlatformManager {
         Resource platform = create(aipValue, subject.getName(),agent,platType);     
         platform.persist();
 
-        // Send resource create event
-        ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, platform.getId());
+        // Send resource create event.  TODO abstract to ResourceManager when we don't need to use entity ID
+        Platform plat = toPlatform(platform);
+        ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, plat.getEntityId());
         zeventManager.enqueueEventAfterCommit(zevent);
 
-        return toPlatform(platform);
+        return plat;
     }
 
     /**
@@ -521,7 +524,8 @@ public class PlatformManagerImpl implements PlatformManager {
     public Platform getPlatformById(AuthzSubject subject, Integer id)
         throws PlatformNotFoundException, PermissionException {
         Platform platform = findPlatformById(id);
-        permissionManager.checkViewPermission(subject, platform.getId());
+        //TODO
+        //permissionManager.checkViewPermission(subject, platform.getId());
         return platform;
     }
 
@@ -630,9 +634,10 @@ public class PlatformManagerImpl implements PlatformManager {
         if (p == null) {
             p = getPhysPlatformByAgentToken(aiPlatform.getAgentToken());
         }
-        if (p != null) {
-            permissionManager.checkViewPermission(subject, p.getId());
-        }
+        //TODO
+        //if (p != null) {
+          //  permissionManager.checkViewPermission(subject, p.getId());
+        //}
         if(p == null) {
             throw new PlatformNotFoundException("platform not found for ai " + "platform: " +
                 aiPlatform.getId());
@@ -736,7 +741,8 @@ public class PlatformManagerImpl implements PlatformManager {
         }
 
         if (p != null) {
-            permissionManager.checkViewPermission(subject, p.getId());
+            //TODO
+            //permissionManager.checkViewPermission(subject, p.getId());
             if (porker && // Let agent porker
                 // create new platforms
                 !(p.getProperty(FQDN).equals(fqdn) || p.getProperty(CERT_DN).equals(certdn) || p.getAgent().getAgentToken().equals(agentToken))) {
@@ -828,8 +834,8 @@ public class PlatformManagerImpl implements PlatformManager {
         if (p == null) {
             throw new PlatformNotFoundException("Platform with fqdn " + fqdn + " not found");
         }
-        // now check if the user can see this at all
-        permissionManager.checkViewPermission(subject, p.getId());
+        // TODO now check if the user can see this at all
+        //permissionManager.checkViewPermission(subject, p.getId());
         return toPlatform(p);
     }
 
@@ -882,8 +888,8 @@ public class PlatformManagerImpl implements PlatformManager {
         if (p == null) {
             throw new PlatformNotFoundException("platform for service " + serviceId + " not found");
         }
-        // now check if the user can see this at all
-        permissionManager.checkViewPermission(subject, p.getId());
+        // TODO now check if the user can see this at all
+        //permissionManager.checkViewPermission(subject, p.getId());
         return toPlatform(p).getPlatformValue();
     }
     
@@ -945,7 +951,8 @@ public class PlatformManagerImpl implements PlatformManager {
         }
 
         Resource p = server.getResourceTo(RelationshipTypes.PLATFORM);
-        permissionManager.checkViewPermission(subject, p.getId());
+        //TODO
+        //permissionManager.checkViewPermission(subject, p.getId());
         return toPlatform(p).getPlatformValue();
     }
 
@@ -1088,8 +1095,8 @@ public class PlatformManagerImpl implements PlatformManager {
 
     private List<Integer> getViewablePlatformPKs(AuthzSubject who) throws PermissionException,
         NotFoundException {
-        // now get a list of all the viewable items
-        return Resource.findAllResourceIds();
+        // TODO get a list of all the viewable items
+        return new ArrayList<Integer>();
         //TODO
         //OperationType op = getOperationByName(resourceManager
           //  .findResourceTypeByName(AuthzConstants.platformResType),
@@ -1208,7 +1215,7 @@ public class PlatformManagerImpl implements PlatformManager {
             matches = (platform.getId() == null);
         }
         if (obj.getCTime() != null) {
-            matches = (obj.getCTime().floatValue() == platform.getCreationTime().floatValue());
+            matches = (obj.getCTime().floatValue() == (float)platform.getCreationTime());
         } else {
             matches = (platform.getCreationTime() == 0);
         }
@@ -1324,14 +1331,14 @@ public class PlatformManagerImpl implements PlatformManager {
                     // Need to enqueue the ResourceUpdatedZevent if the
                     // agent changed to get the metrics scheduled
                     List<ResourceUpdatedZevent> events = new ArrayList<ResourceUpdatedZevent>();
-                    events.add(new ResourceUpdatedZevent(subject, plat.getId()));
+                    events.add(new ResourceUpdatedZevent(subject, platform.getEntityId()));
                     for (Resource svr : plat.getResourcesFrom(RelationshipTypes.SERVER)) {
 
-                        events.add(new ResourceUpdatedZevent(subject, svr.getId()));
+                        events.add(new ResourceUpdatedZevent(subject, AppdefEntityID.newServerID(svr.getId())));
 
                         for (Resource svc : svr.getResourcesFrom(RelationshipTypes.SERVICE)) {
 
-                            events.add(new ResourceUpdatedZevent(subject, svc.getId()));
+                            events.add(new ResourceUpdatedZevent(subject, AppdefEntityID.newServiceID(svc.getId())));
                         }
                     }
 
@@ -1777,6 +1784,52 @@ public class PlatformManagerImpl implements PlatformManager {
     @Transactional(readOnly = true)
     public Number getPlatformCount() {
         return getAllPlatforms().size();
+    }
+    
+    
+
+    public List<Platform> getPlatformsByType(AuthzSubject subject, String platformTypeName) {
+        // TODO perm checking?
+        ResourceType platType = ResourceType.findResourceTypeByName(platformTypeName);
+        Collection<Resource> platforms = platType.getResources();
+        List<Platform> platList = new ArrayList<Platform>(platforms.size());
+        for(Resource platform: platforms) {
+            platList.add(toPlatform(platform));
+        }
+        return platList;
+    }
+    
+    /**
+     * Get a list of all the entities which can be serviced by an Agent.
+     */
+    @Transactional(readOnly = true)
+    public ResourceTree getEntitiesForAgent(AuthzSubject subject, Agent agt)
+        throws AgentNotFoundException, PermissionException {
+
+        Collection<Platform> plats  = new HashSet<Platform>();
+        Collection<Resource> resources = getAllPlatforms();
+        for(Resource resource: resources) {
+            if(resource.getAgent().equals(agt)) {
+                plats.add(toPlatform(resource));
+            }
+        }
+        if (plats.size() == 0) {
+            return new ResourceTree();
+        }
+        AppdefEntityID[] platIds = new AppdefEntityID[plats.size()];
+        int i = 0;
+        for (Platform plat : plats) {
+            platIds[i] = AppdefEntityID.newPlatformID(plat.getId());
+            i++;
+        }
+
+        ResourceTreeGenerator generator = Bootstrap.getBean(ResourceTreeGenerator.class);
+        generator.setSubject(subject);
+        try {
+            return generator.generate(platIds, ResourceTreeGenerator.TRAVERSE_UP);
+        } catch (AppdefEntityNotFoundException exc) {
+            throw new SystemException("Internal inconsistancy finding " + "resources for agent");
+        }
     }
 
     @PostConstruct

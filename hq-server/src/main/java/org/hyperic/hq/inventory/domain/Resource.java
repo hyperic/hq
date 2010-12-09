@@ -483,6 +483,11 @@ public class Resource {
     public void setVersion(Integer version) {
         this.version = version;
     }
+    
+    public boolean isInAsyncDeleteState() {
+        //TODO remove
+        return false;
+    }
 
     public static int countResources() {
         return entityManager().createQuery("select count(o) from Resource o", Integer.class)
@@ -501,12 +506,7 @@ public class Resource {
         return entityManager().createQuery("select o from Resource o", Resource.class)
             .getResultList();
     }
-    
-    public static List<Integer> findAllResourceIds() {
-        return entityManager().createQuery("select o.id from Resource o", Integer.class)
-        .getResultList();
-    }
-
+ 
     public static Collection<Resource> findByCTime(long ctime) {
         // TODO impl?
         return null;

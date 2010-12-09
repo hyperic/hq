@@ -37,8 +37,11 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
+import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -58,17 +61,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class ConfigManagerImpl implements ConfigManager {
     private static final int MAX_VALIDATION_ERR_LEN = 512;
     protected final Log log = LogFactory.getLog(ConfigManagerImpl.class.getName());
-    private ServiceDAO serviceDAO;
-    private ServerDAO serverDAO;
-    private PlatformDAO platformDAO;
+    private ServiceManager serviceManager;
+    private ServerManager serverManager;
+    private PlatformManager platformManager;
     private ResourceManager resourceManager;
 
     @Autowired
-    public ConfigManagerImpl(ServiceDAO serviceDAO,
-                             ServerDAO serverDAO, PlatformDAO platformDAO, ResourceManager resourceManager) {
-        this.serviceDAO = serviceDAO;
-        this.serverDAO = serverDAO;
-        this.platformDAO = platformDAO;
+    public ConfigManagerImpl(ServiceManager serviceManager,
+                             ServerManager serverManager, PlatformManager platformManager, ResourceManager resourceManager) {
+        this.serviceManager = serviceManager;
+        this.serverManager = serverManager;
+        this.platformManager = platformManager;
         this.resourceManager = resourceManager;
     }
 
@@ -102,7 +105,7 @@ public class ConfigManagerImpl implements ConfigManager {
     }
 
     private Platform findPlatformById(Integer id) throws PlatformNotFoundException {
-        Platform platform = platformDAO.get(id);
+        Platform platform = platformManager.findPlatformById(id);
 
         if (platform == null) {
             throw new PlatformNotFoundException(id);
@@ -130,7 +133,7 @@ public class ConfigManagerImpl implements ConfigManager {
                 break;
 
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                Server serv = serverDAO.get(intID);
+                Server serv = serverManager.findServerById(intID);
                 if (serv == null) {
                     throw new ServerNotFoundException(intID);
                 }
@@ -138,7 +141,7 @@ public class ConfigManagerImpl implements ConfigManager {
                 break;
 
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                org.hyperic.hq.appdef.server.session.Service service = serviceDAO.get(intID);
+                org.hyperic.hq.appdef.server.session.Service service = serviceManager.findServiceById(intID);
                 if (service == null) {
                     throw new ServiceNotFoundException(intID);
                 }
@@ -435,7 +438,7 @@ public class ConfigManagerImpl implements ConfigManager {
         boolean wasUpdated = configureResponse(subject,  id, productBytes, measurementBytes, controlBytes, rtBytes,
             null, false);
         if (sendConfigEvent) {
-            Resource r = resourceManager.findResource(id);
+            Resource r = resourceManager.findResourceById(id.getId());
             resourceManager.resourceHierarchyUpdated(subject, Collections.singletonList(r));
         }
         return wasUpdated ? id : null;
@@ -539,7 +542,7 @@ public class ConfigManagerImpl implements ConfigManager {
 
     private ServerConfigStuff getServerStuffForService(Integer id) throws AppdefEntityNotFoundException {
 
-        org.hyperic.hq.appdef.server.session.Service service = serviceDAO.findById(id);
+        org.hyperic.hq.appdef.server.session.Service service = serviceManager.findServiceById(id);
         Server server = service.getServer();
         if (server == null) {
             return null;
@@ -549,14 +552,14 @@ public class ConfigManagerImpl implements ConfigManager {
 
     private ServerConfigStuff getServerStuffForServer(Integer id) throws AppdefEntityNotFoundException {
 
-        Server server = serverDAO.findById(id);
+        Server server = serverManager.findServerById(id);
 
         return new ServerConfigStuff(server.getId().intValue(), server.getInstallPath());
     }
 
     private PlatformConfigStuff getPlatformStuffForServer(Integer id) throws AppdefEntityNotFoundException {
 
-        Server server = serverDAO.findById(id);
+        Server server = serverManager.findServerById(id);
         Platform platform = server.getPlatform();
         if (platform == null) {
             return null;
@@ -570,7 +573,7 @@ public class ConfigManagerImpl implements ConfigManager {
 
     private PlatformConfigStuff getPlatformStuffForPlatform(Integer id) throws AppdefEntityNotFoundException {
 
-        Platform platform = platformDAO.findById(id);
+        Platform platform = platformManager.findPlatformById(id);
 
         PlatformConfigStuff pConfig = new PlatformConfigStuff(platform.getId().intValue(), platform.getName(), platform
             .getFqdn(), platform.getPlatformType().getName());

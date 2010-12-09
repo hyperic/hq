@@ -70,20 +70,11 @@ public class CPropManagerImpl implements CPropManager {
     private Messenger sender;
     
    
-    private ApplicationTypeDAO applicationTypeDAO;
-    private PlatformTypeDAO platformTypeDAO;
-    private ServerTypeDAO serverTypeDAO;
-    private ServiceTypeDAO serviceTypeDAO;
+   
 
     @Autowired
-    public CPropManagerImpl(Messenger sender, 
-                            ApplicationTypeDAO applicationTypeDAO, PlatformTypeDAO platformTypeDAO,
-                            ServerTypeDAO serverTypeDAO, ServiceTypeDAO serviceTypeDAO) {
+    public CPropManagerImpl(Messenger sender) {
         this.sender = sender;
-        this.applicationTypeDAO = applicationTypeDAO;
-        this.platformTypeDAO = platformTypeDAO;
-        this.serverTypeDAO = serverTypeDAO;
-        this.serviceTypeDAO = serviceTypeDAO;
     }
 
     /**
@@ -99,95 +90,12 @@ public class CPropManagerImpl implements CPropManager {
         return new ArrayList<PropertyType>(ResourceType.findResourceType(appdefTypeId).getPropertyTypes());
     }
 
-    private AppdefResourceType findResourceType(int appdefType, int appdefTypeId)
-        throws AppdefEntityNotFoundException {
-        Integer id = new Integer(appdefTypeId);
-
-        if (appdefType == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
-            return platformTypeDAO.findById(id);
-        } else if (appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
-            try {
-                return serverTypeDAO.findById(id);
-            } catch (ObjectNotFoundException exc) {
-                throw new ServerNotFoundException("Server type id=" + appdefTypeId + " not found");
-            }
-        } else if (appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
-            try {
-                return serviceTypeDAO.findById(id);
-            } catch (ObjectNotFoundException exc) {
-                throw new ServiceNotFoundException("Service type id=" + appdefTypeId + " not found");
-            }
-        } else if (appdefType == AppdefEntityConstants.APPDEF_TYPE_APPLICATION) {
-            return applicationTypeDAO.findById(id);
-        } else {
-            throw new IllegalArgumentException("Unrecognized appdef type:" + " " + appdefType);
-        }
-    }
-
-    /**
-     * find appdef resource type
-     */
-    @Transactional(readOnly = true)
-    public AppdefResourceType findResourceType(TypeInfo info) {
-        int type = info.getType();
-
-        if (type == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
-            return platformTypeDAO.findByName(info.getName());
-        } else if (type == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
-            return serverTypeDAO.findByName(info.getName());
-        } else if (type == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
-            return serviceTypeDAO.findByName(info.getName());
-        } else {
-            throw new IllegalArgumentException("Unrecognized appdef type: " + info);
-        }
-    }
-
-    /**
-     * @return {@link Map} of {@link String} to {@link AppdefResourceType}s
-     */
-    @Transactional(readOnly = true)
-    public Map<String, AppdefResourceType> findResourceType(Collection<TypeInfo> typeInfos) {
-        List<String> platformTypeInfos = new ArrayList<String>();
-        List<String> serverTypeInfos = new ArrayList<String>();
-        List<String> serviceTypeInfos = new ArrayList<String>();
-        for (final TypeInfo info : typeInfos) {
-            int type = info.getType();
-            if (type == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
-                platformTypeInfos.add(info.getName());
-            } else if (type == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
-                serverTypeInfos.add(info.getName());
-            } else if (type == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
-                serviceTypeInfos.add(info.getName());
-            } else {
-                throw new IllegalArgumentException("Unrecognized appdef type: " + info);
-            }
-        }
-        List<AppdefResourceType> resTypes = new ArrayList<AppdefResourceType>(typeInfos.size());
-        Map<String, AppdefResourceType> rtn = new HashMap<String, AppdefResourceType>(typeInfos
-            .size());
-        if (platformTypeInfos.size() > 0) {
-            resTypes.addAll(platformTypeDAO.findByName(platformTypeInfos));
-        }
-        if (serverTypeInfos.size() > 0) {
-            resTypes.addAll(serverTypeDAO.findByName(serverTypeInfos));
-        }
-        if (serviceTypeInfos.size() > 0) {
-            resTypes.addAll(serviceTypeDAO.findByName(serviceTypeInfos));
-        }
-        for (AppdefResourceType type : resTypes) {
-            rtn.put(type.getName(), type);
-        }
-        return rtn;
-    }
-
     /**
      * find Cprop by key to a resource type based on a TypeInfo object.
      */
     @Transactional(readOnly = true)
-    public PropertyType findByKey(AppdefResourceType appdefType, String key) {
-        int type = appdefType.getAppdefType();
-        int instanceId = appdefType.getId().intValue();
-        return ResourceType.findResourceType(instanceId).getPropertyType(key);
+    public PropertyType findByKey(ResourceType appdefType, String key) {
+        return appdefType.getPropertyType(key);
     }
 
     /**
@@ -197,17 +105,14 @@ public class CPropManagerImpl implements CPropManager {
      *        key references could not be found
      * @throw CPropKeyExistsException if the key already exists
      */
-    public void addKey(AppdefResourceType appdefType, String key, String description) {
-        int type = appdefType.getAppdefType();
-        int instanceId = appdefType.getId().intValue();
+    public void addKey(ResourceType appdefType, String key, String description) {
+        
         PropertyType propertyType = new PropertyType();
         propertyType.setName(key);
         propertyType.setDescription(description);
         propertyType.persist();
-        //TODO use proper instance id?
-        ResourceType resourceType = ResourceType.findResourceType(instanceId);
-        resourceType.getPropertyTypes().add(propertyType);
-        resourceType.merge();
+        appdefType.getPropertyTypes().add(propertyType);
+        appdefType.merge();
     }
 
     /**

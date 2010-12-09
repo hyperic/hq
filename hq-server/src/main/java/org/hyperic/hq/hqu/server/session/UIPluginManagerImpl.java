@@ -256,10 +256,10 @@ public class UIPluginManagerImpl implements UIPluginManager {
 
             attachments = attachmentResourceDAO.findFor(resourceManager.findRootResource(), cat);
 
-            if (!group.isMixed()) {
+            if (!resourceGroupManager.isMixed(group)) {
                 // For compatible groups add in attachments specific to that
                 // resource type.
-                Collection<Attachment> compatAttachments = attachmentResourceDAO.findFor(group.getResourcePrototype(),
+                Collection<Attachment> compatAttachments = attachmentResourceDAO.findFor(group,
                     cat);
 
                 attachments.addAll(compatAttachments);

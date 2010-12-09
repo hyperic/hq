@@ -4,36 +4,48 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.hyperic.hq.appdef.AppService;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 
-public class Application {
+public class Application
+    extends AppdefResource {
 
-    private Integer id;
-
-    private String name;
-    
     private Collection<AppService> appServices = new HashSet<AppService>();
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-    
-    
+    private ApplicationType applicationType;
 
     public Collection<AppService> getAppServices() {
         return appServices;
+    }
+
+    public ApplicationType getApplicationType() {
+        return applicationType;
+    }
+
+    public void setApplicationType(ApplicationType applicationType) {
+        this.applicationType = applicationType;
+    }
+
+    @Override
+    public AppdefEntityID getEntityId() {
+        return AppdefEntityID.newAppID(getId());
+    }
+
+    @Override
+    public AppdefResourceType getAppdefResourceType() {
+       return applicationType;
+    }
+
+    @Override
+    public AppdefResourceValue getAppdefResourceValue() {
+        return getApplicationValue();
+    }
+
+    @Override
+    protected String _getAuthzOp(String op) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     public ApplicationValue getApplicationValue() {

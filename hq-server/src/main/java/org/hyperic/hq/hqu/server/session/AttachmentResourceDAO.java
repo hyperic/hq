@@ -43,27 +43,28 @@ public class AttachmentResourceDAO
         super(AttachmentResource.class, f);
     }
 
-    private boolean resourceIsPrototype(ResourceType rt) {
-        String name = rt.getName();
-
-        return name.equals(AuthzConstants.platformPrototypeTypeName) ||
-            name.equals(AuthzConstants.serverPrototypeTypeName) ||
-            name.equals(AuthzConstants.servicePrototypeTypeName);
-    }
+//    private boolean resourceIsPrototype(ResourceType rt) {
+//        String name = rt.getName();
+//
+//        return name.equals(AuthzConstants.platformPrototypeTypeName) ||
+//            name.equals(AuthzConstants.serverPrototypeTypeName) ||
+//            name.equals(AuthzConstants.servicePrototypeTypeName);
+//    }
 
     Collection findFor(Resource r, ViewResourceCategory cat) {
-        if (resourceIsPrototype(r.getType())) {
-            String sql = "select a from AttachmentResource a " +
-                "join a.resource r " +
-                "where r = :resource and " +
-                "a.categoryEnum = :cat";
-
-            return getSession()
-                .createQuery(sql)
-                .setParameter("resource", r)
-                .setParameter("cat", cat.getDescription())
-                .list();
-        }
+        //TODO
+//        if (resourceIsPrototype(r.getType())) {
+//            String sql = "select a from AttachmentResource a " +
+//                "join a.resource r " +
+//                "where r = :resource and " +
+//                "a.categoryEnum = :cat";
+//
+//            return getSession()
+//                .createQuery(sql)
+//                .setParameter("resource", r)
+//                .setParameter("cat", cat.getDescription())
+//                .list();
+//        }
 
         String sql = "select a from AttachmentResource a " +
             "where (a.resource = :resource or a.resource = :proto) and " +
@@ -72,7 +73,7 @@ public class AttachmentResourceDAO
         return getSession()
             .createQuery(sql)
             .setParameter("resource", r)
-            .setParameter("proto", r.getPrototype())
+            //.setParameter("proto", r.getPrototype())
             .setParameter("cat", cat.getDescription())
             .list();
     }

@@ -151,13 +151,14 @@ public abstract class PermissionManager {
      * 
      */
     public void checkCreatePlatformPermission(AuthzSubject subject) throws PermissionException {
-        try {
-            checkPermission(subject, getResourceType(AuthzConstants.rootResType),
-                AuthzConstants.rootResourceId, AuthzConstants.platformOpCreatePlatform);
-        } catch (NotFoundException e) {
-            // seed data error if this is not there
-            throw new SystemException(e);
-        }
+        //TODO
+//        try {
+//            checkPermission(subject, getResourceType(AuthzConstants.rootResType),
+//                AuthzConstants.rootResourceId, AuthzConstants.platformOpCreatePlatform);
+//        } catch (NotFoundException e) {
+//            // seed data error if this is not there
+//            throw new SystemException(e);
+//        }
 
     }
 
@@ -258,7 +259,7 @@ public abstract class PermissionManager {
      * 
      * 
      */
-    public void checkRemovePermission(AuthzSubject subject, Integer id)
+    public void checkRemovePermission(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException {
        //TODO
     }
@@ -534,7 +535,7 @@ public abstract class PermissionManager {
      * @return ResourceTypeValue
      */
     public ResourceType getGroupResourceType() throws NotFoundException {
-        return getResourceType(AuthzConstants.groupResourceTypeName);
+        return getResourceType(AuthzConstants.groupResType);
     }
 
     /**
@@ -551,7 +552,7 @@ public abstract class PermissionManager {
      * 
      * 
      */
-    public void checkViewPermission(AuthzSubject subject, Integer id)
+    public void checkViewPermission(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException {
       //TODO
     }

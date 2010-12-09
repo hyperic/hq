@@ -38,10 +38,10 @@ import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl
-import org.hyperic.hq.authz.server.session.ResourceRelation;
+import org.hyperic.hq.inventory.domain.ResourceRelation;
 import org.hyperic.hq.authz.server.session.ResourceSortField
-import org.hyperic.hq.authz.server.session.Resource
-import org.hyperic.hq.authz.server.session.ResourceGroup
+import org.hyperic.hq.inventory.domain.Resource
+import org.hyperic.hq.inventory.domain.ResourceGroup
 import org.hyperic.hq.bizapp.server.session.AppdefBossImpl as AppdefBoss
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.appdef.shared.ApplicationManager;
@@ -49,7 +49,7 @@ import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.pager.PageControl
-import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo
+import org.hyperic.hq.authz.shared.ResourceGroupCreateInfo
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.grouping.CritterList;

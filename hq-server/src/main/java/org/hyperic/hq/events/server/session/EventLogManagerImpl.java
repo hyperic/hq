@@ -230,7 +230,7 @@ public class EventLogManagerImpl implements EventLogManager {
         } else {
             eTypes = Arrays.asList(eventTypes);
         }
-        if (r.getType().getId().equals(AuthzConstants.authzGroup)) {
+        if (r instanceof ResourceGroup) {
             return eventLogDAO.findByGroup(r, begin, end, eTypes);
         } else {
             return eventLogDAO.findByEntity(user, r, begin, end, eTypes);

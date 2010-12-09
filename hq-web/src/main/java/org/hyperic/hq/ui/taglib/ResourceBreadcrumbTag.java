@@ -40,7 +40,6 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
 
 import org.apache.commons.lang.StringEscapeUtils;
-import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -50,15 +49,13 @@ import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.hub.BreadcrumbUtil;
 import org.hyperic.hq.ui.action.resource.hub.ResourceHubForm;
@@ -441,7 +438,7 @@ public class ResourceBreadcrumbTag extends TagSupport {
             AppdefResourceTypeValue autoGroupResourceType = appdefBoss.findResourceTypeById(sessionId, (AppdefEntityTypeID) group.getAppdefEntityId());
             Resource memberResource = resourceManager.findResource(member.getAppdefEntityId());
 
-            if (autoGroupResourceType.getAppdefType() == memberResource.getResourceType().getAppdefType()) {
+            if (autoGroupResourceType.getAppdefType() == memberResource.getType().getAppdefType()) {
                 // ...resource types are the same, now check if parents are the same,
                 // luckily resourceId represents the parent...
                 AppdefEntityID parentAppdef = new AppdefEntityID(group.getResourceId());

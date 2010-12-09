@@ -29,16 +29,20 @@ package org.hyperic.hq.authz.server.session;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.GroupCreationException;
@@ -249,7 +253,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
 
 
         // Send resource delete event
-        ResourceDeletedZevent zevent = new ResourceDeletedZevent(whoami, group.getId());
+        ResourceDeletedZevent zevent = new ResourceDeletedZevent(whoami, AppdefUtil.newAppdefEntityId(group));
         ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
     }
     
@@ -528,6 +532,52 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
                           ".  The groups' members may not be updated.");
             }
         }
+    }
+    
+    
+    
+   public Collection<ResourceGroup> getGroups(Resource r) {
+       Set<ResourceGroup> groups = new HashSet<ResourceGroup>();
+       Collection<ResourceGroup> allGroups = getAllResourceGroups();
+       for(ResourceGroup group: allGroups) {
+           if(group.isMember(r)) {
+               groups.add(group);
+           }
+       }
+       return groups;
+    }
+
+    //TODO remove legacy support
+    public boolean isMixed(ResourceGroup group) {
+      if(group.getGroupType() == AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS || 
+          group.getGroupType() == AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC) {
+          return false;
+      }
+      return true;
+    }
+
+    public int getGroupEntType(ResourceGroup group) {
+        //TODO let's say we used a prop to set this on create
+//        if (_resourcePrototype == null) {
+//            -            return new Integer(-1);
+//            -        }
+//            -
+//            -        Integer type = _resourcePrototype.getResourceType().getId();
+//            -        if (type.equals(AuthzConstants.authzPlatformProto)) {
+//            -            return new Integer(AppdefEntityConstants.APPDEF_TYPE_PLATFORM);
+//            -        } else if (type.equals(AuthzConstants.authzServerProto)) {
+//            -            return new Integer(AppdefEntityConstants.APPDEF_TYPE_SERVER);
+//            -        } else if (type.equals(AuthzConstants.authzServiceProto)) {
+//            -            return new Integer(AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+//            -        } else {
+//            -            return new Integer(-1); // Backwards compat.
+//            -        }
+        return 1;
+    }
+
+    public int getGroupEntResType(ResourceGroup group) {
+       //TODO return id of ResourceType for Platform, Server, or Service
+        return 1;
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {

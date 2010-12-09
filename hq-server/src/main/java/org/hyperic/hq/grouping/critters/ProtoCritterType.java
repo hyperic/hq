@@ -161,7 +161,9 @@ public class ProtoCritterType extends BaseCritterType {
         }
         
         public boolean meets(Resource resource) {
-            return _proto.equals(resource.getPrototype());
+            //TODO?
+            //return _proto.equals(resource.getPrototype());
+            return true;
         }
     }
 

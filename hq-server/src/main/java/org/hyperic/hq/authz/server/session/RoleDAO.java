@@ -83,13 +83,14 @@ public class RoleDAO
          * the roles are always able to operate on root types such as Subjects,
          * Roles, and Groups
          **/
-        ResourceGroup authzGroup = ResourceGroup
-            .findResourceGroupByName(AuthzConstants.authzResourceGroupName);
-        if (authzGroup == null) {
-            throw new IllegalArgumentException("resource group not found " +
-                                               AuthzConstants.authzResourceGroupName);
-        }
-        groups.add(authzGroup);
+        //TODO
+//        ResourceGroup authzGroup = ResourceGroup
+//            .findResourceGroupByName(AuthzConstants.authzResourceGroupName);
+//        if (authzGroup == null) {
+//            throw new IllegalArgumentException("resource group not found " +
+//                                               AuthzConstants.authzResourceGroupName);
+//        }
+//        groups.add(authzGroup);
 
         /**
          * Create a group which will contain only the resource for the Role

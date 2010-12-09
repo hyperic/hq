@@ -182,13 +182,14 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
      */
     private Collection<Role> filterViewableRoles(AuthzSubject who, Collection<Role> roles, Integer[] excludeIds)
         throws PermissionException {
-        try {
-
-            permissionManager.check(who.getId(), ResourceType.findResourceTypeByName(AuthzConstants.roleResourceTypeName),
-                AuthzConstants.rootResourceId, AuthzConstants.roleOpViewRole);
-        } catch (PermissionException e) {
-            return new ArrayList<Role>(0);
-        }
+        //TODO
+//        try {
+//
+//            permissionManager.check(who.getId(), ResourceType.findResourceTypeByName(AuthzConstants.roleResourceTypeName),
+//                AuthzConstants.rootResourceId, AuthzConstants.roleOpViewRole);
+//        } catch (PermissionException e) {
+//            return new ArrayList<Role>(0);
+//        }
 
         List<Integer> excludeList = null;
         boolean hasExclude = (excludeIds != null && excludeIds.length > 0);
@@ -231,8 +232,9 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
 
         validateRole(role);
 
-        permissionManager.check(whoami.getId(), ResourceType.findTypeResourceType(), AuthzConstants.rootResourceId,
-            AuthzConstants.roleOpCreateRole);
+        //TODO
+        //permissionManager.check(whoami.getId(), ResourceType.findTypeResourceType(), AuthzConstants.rootResourceId,
+          //  AuthzConstants.roleOpCreateRole);
 
         Role roleLocal = roleDAO.create(whoami, role);
 
@@ -714,9 +716,9 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
     }
 
     private List<Role> getRolesByIds(AuthzSubject whoami, Integer[] ids, PageControl pc) throws PermissionException {
-
-        permissionManager.check(whoami.getId(), AuthzConstants.roleResourceTypeName, AuthzConstants.rootResourceId,
-            AuthzConstants.roleOpViewRole);
+        //TODO
+       // permissionManager.check(whoami.getId(), AuthzConstants.roleResourceTypeName, AuthzConstants.rootResourceId,
+         //   AuthzConstants.roleOpViewRole);
 
         Collection<Role> all = getAllRoles(whoami, pc.getSortattribute(), pc.isAscending());
 
@@ -1051,7 +1053,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
     public Collection<ResourceGroup> getResourceGroupsByRole(AuthzSubject subject,Role role)
         throws PermissionException, NotFoundException {
            Collection<ResourceGroup> groups =
-                   ResourceGroup.findByRoleIdAndSystem_orderName(role.getId(), false, true);
+                   findByRoleIdAndSystemOrderName(role.getId(), false, true);
             
            // now get viewable group pks
            return filterViewableGroups(subject, groups);
@@ -1076,7 +1078,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
 
         switch (attr) {
             case SortAttribute.RESGROUP_NAME:
-                groups = ResourceGroup.findByRoleIdAndSystem_orderName(roleId, system, pc.isAscending());
+                groups = findByRoleIdAndSystemOrderName(roleId, system, pc.isAscending());
                 break;
 
             default:
@@ -1104,8 +1106,9 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
         throws PermissionException {
         ResourceGroup resGrp = ResourceGroup.findResourceGroup(groupId);
 
-        permissionManager.check(whoami.getId(), AuthzConstants.authzGroup, resGrp.getId(),
-            AuthzConstants.perm_viewResourceGroup);
+        //TODO
+        //permissionManager.check(whoami.getId(), AuthzConstants.authzGroup, resGrp.getId(),
+          //  AuthzConstants.perm_viewResourceGroup);
 
         Collection<Role> roles = resGrp.getRoles();
 
@@ -1140,7 +1143,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
         // finally scope down to only the ones the user can see
 
         List<Integer> viewable = permissionManager.findOperationScopeBySubject(who,
-            AuthzConstants.groupOpViewResourceGroup, AuthzConstants.groupResourceTypeName);
+            AuthzConstants.groupOpViewResourceGroup, AuthzConstants.groupResType);
 
         for (Iterator<ResourceGroup> i = groups.iterator(); i.hasNext();) {
             ResourceGroup resGrp = i.next();
@@ -1150,6 +1153,21 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
             }
         }
         return groups;
+    }
+    
+    private Collection<ResourceGroup> findWithNoRolesOrderName(boolean asc) {
+        //TODO extracted from ResourceGroupDAO
+        return null;
+    }
+    
+    private Collection<ResourceGroup> findByNotRoleIdOrderName(Integer id,boolean asc) {
+        //TODO extracted from ResourceGroupDAO
+        return null;
+    }
+    
+    private Collection<ResourceGroup> findByRoleIdAndSystemOrderName(Integer id,boolean sumthn,boolean sumthnElse) {
+        //TODO extracted from ResourceGroupDAO
+        return null;
     }
 
     /**
@@ -1176,8 +1194,8 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
 
         switch (attr) {
             case SortAttribute.RESGROUP_NAME:
-                noRoles = ResourceGroup.findWithNoRoles_orderName(pc.isAscending());
-                otherRoles = ResourceGroup.findByNotRoleId_orderName(role.getId(), pc.isAscending());
+                noRoles = findWithNoRolesOrderName(pc.isAscending());
+                otherRoles = findByNotRoleIdOrderName(role.getId(), pc.isAscending());
                 break;
 
             default:
@@ -1202,7 +1220,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
         }
 
         // Add the groups that the role already owns
-        Collection<ResourceGroup> belongs = ResourceGroup.findByRoleIdAndSystem_orderName(roleId, false, true);
+        Collection<ResourceGroup> belongs = findByRoleIdAndSystemOrderName(roleId, false, true);
         for (ResourceGroup s : belongs) {
             index.add(s.getId());
         }
@@ -1250,25 +1268,26 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
         // check if this user is a member of this role
         boolean roleHasUser = roleLocal.getSubjects().contains(whoami);
         // check whether the user can see subjects other than himself
-        try {
-
-            permissionManager.check(whoami.getId(), ResourceType.findTypeResourceType(),
-                AuthzConstants.rootResourceId, AuthzConstants.subjectOpViewSubject);
-        } catch (PermissionException e) {
-            // if the user does not have permission to view subjects
-            // but he is in the role, return a collection with only one
-            // item... himself.
-            if (roleHasUser) {
-                PageList<AuthzSubjectValue> subjects = new PageList<AuthzSubjectValue>();
-                subjects.add(whoami.getAuthzSubjectValue());
-                subjects.setTotalSize(1);
-                return subjects;
-            }
-            // otherwise return an empty list
-            // fixes 5628 - user viewing role lacking view subjects
-            // causes permissionexception
-            return new PageList<AuthzSubjectValue>();
-        }
+        //TODO
+//        try {
+//
+//            permissionManager.check(whoami.getId(), ResourceType.findTypeResourceType(),
+//                AuthzConstants.rootResourceId, AuthzConstants.subjectOpViewSubject);
+//        } catch (PermissionException e) {
+//            // if the user does not have permission to view subjects
+//            // but he is in the role, return a collection with only one
+//            // item... himself.
+//            if (roleHasUser) {
+//                PageList<AuthzSubjectValue> subjects = new PageList<AuthzSubjectValue>();
+//                subjects.add(whoami.getAuthzSubjectValue());
+//                subjects.setTotalSize(1);
+//                return subjects;
+//            }
+//            // otherwise return an empty list
+//            // fixes 5628 - user viewing role lacking view subjects
+//            // causes permissionexception
+//            return new PageList<AuthzSubjectValue>();
+//        }
         Collection<AuthzSubject> subjects;
         pc = PageControl.initDefaults(pc, SortAttribute.SUBJECT_NAME);
 
@@ -1405,10 +1424,6 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
     }
 
     private Resource lookupResource(ResourceValue resource) {
-        if (resource.getId() == null) {
-            ResourceType type = resource.getResourceType();
-            return Resource.findByInstanceId(type.getId(), resource.getInstanceId());
-        }
         return Resource.findResource(resource.getId());
     }
 

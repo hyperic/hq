@@ -25,8 +25,8 @@
  */
 
 package org.hyperic.hq.hqu.rendit.metaclass
-import org.hyperic.hq.authz.server.session.Operation;
-import org.hyperic.hq.authz.server.session.OperationDAO;
+import org.hyperic.hq.inventory.domain.OperationType;
+
 
 import org.hyperic.hq.auth.shared.AuthManager;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
@@ -42,7 +42,7 @@ class AuthzSubjectCategory {
     static subMan = Bootstrap.getBean(AuthzSubjectManager.class)
     static authMan = Bootstrap.getBean(AuthManager.class)
     static authzBoss = Bootstrap.getBean(AuthzBoss.class)
-    static operationDao = Bootstrap.getBean(OperationDAO.class)
+    
 
     /**
      * Check if the current user has administration permission

@@ -517,7 +517,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
 
         AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
         try {
-            tree = agentManager.getEntitiesForAgent(overlord, args.getAgentToken());
+            tree = platformManager.getEntitiesForAgent(overlord, agentManager.getAgent(args.getAgentToken()));
         } catch (PermissionException exc) {
             throw new SystemException("Overlord unable to get resource " + "tree list");
         } catch (AgentNotFoundException exc) {

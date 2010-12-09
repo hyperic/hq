@@ -34,6 +34,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.util.pager.PageControl;
 
 /**
@@ -131,5 +132,8 @@ public interface ApplicationManager {
 
 
     public boolean isApplicationMember(AppdefEntityID application, AppdefEntityID service);
+    
+    //TODO legacy support
+    boolean isApplication(ResourceGroup group);
 
 }

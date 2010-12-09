@@ -286,11 +286,12 @@ public class ServerManagerImpl implements ServerManager {
             // create it
             Resource server = create(sValue, platform);
 
-            // Send resource create event
-            ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, server.getId());
+            //TODO abstract to ResourceManager when we can send events w/out AppdefEntityIDs
+            Server serv = toServer(server);
+            ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, serv.getEntityId());
             zeventManager.enqueueEventAfterCommit(zevent);
 
-            return toServer(server);
+            return serv;
             // } catch (CreateException e) {
             // throw e;
         //} catch (NotFoundException e) {
@@ -536,7 +537,8 @@ public class ServerManagerImpl implements ServerManager {
     @Transactional(readOnly=true)
     public Server getServerById(AuthzSubject subject, Integer id) throws ServerNotFoundException, PermissionException {
         Server server = findServerById(id);
-        permissionManager.checkViewPermission(subject, server.getId());
+        //TODO
+        //permissionManager.checkViewPermission(subject, server.getId());
         return server;
     }
 
@@ -588,7 +590,8 @@ public class ServerManagerImpl implements ServerManager {
         ServiceNotFoundException, PermissionException {
         Resource svc = Resource.findResource(sID);
         Resource s = svc.getResourceTo(RelationshipTypes.SERVICE);
-        permissionManager.checkViewPermission(subject, s.getId());
+        //TODO
+        //permissionManager.checkViewPermission(subject, s.getId());
         return toServer(s).getServerValue();
     }
 

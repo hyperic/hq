@@ -56,6 +56,7 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.inventory.domain.PropertyType;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.server.session.MonitorableMeasurementInfo;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.shared.TemplateManager;
@@ -410,8 +411,7 @@ public class ProductManagerImpl implements ProductManager {
         // Add any custom properties.
         if (debug)
             watch.markTimeBegin("findResourceType");
-        Map<String, AppdefResourceType> rTypes = cPropManager.findResourceType(Arrays
-            .asList(entities));
+       
         if (debug)
             watch.markTimeEnd("findResourceType");
 
@@ -421,7 +421,7 @@ public class ProductManagerImpl implements ProductManager {
             TypeInfo info = entities[i];
             ConfigSchema schema = pplugin.getCustomPropertiesSchema(info);
             List<ConfigOption> options = schema.getOptions();
-            AppdefResourceType appdefType = rTypes.get(info.getName());
+            ResourceType appdefType = ResourceType.findResourceTypeByName(info.getName());
             for (ConfigOption opt : options) {
                 if (debug)
                     watch.markTimeBegin("findByKey");

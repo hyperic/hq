@@ -174,26 +174,6 @@ public class AppdefEntityID
     }
 
     /**
-     * Return the ID of this entity id object's authz resource type.
-     */
-    public Integer getAuthzTypeId() {
-        switch (getType()) {
-        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            return AuthzConstants.authzPlatform;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            return AuthzConstants.authzServer;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            return AuthzConstants.authzService;
-        case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-            return AuthzConstants.authzApplication;
-        case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-            return AuthzConstants.authzGroup;
-        default:
-            throw new IllegalArgumentException("Unknown type: " + getType());
-        }
-    }
-
-    /**
      * Convenience method to check if this is a platform
      * 
      * @return true if this entity refers to a platform, false otherwise.

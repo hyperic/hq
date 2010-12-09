@@ -25,10 +25,8 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.util.pager.PagerProcessor;
-
 import org.hyperic.hq.appdef.AppService;
-import org.hyperic.hq.appdef.ServiceCluster;
+import org.hyperic.util.pager.PagerProcessor;
 
 public class PagerProcessor_service implements PagerProcessor {
 
@@ -43,9 +41,9 @@ public class PagerProcessor_service implements PagerProcessor {
             if (o instanceof AppService) {
                 return ((AppService) o).getAppServiceValue();
             }
-            if (o instanceof ServiceCluster) {
-                return ((ServiceCluster) o).getServiceClusterValue();
-            }
+            //if (o instanceof ServiceCluster) {
+              //  return ((ServiceCluster) o).getServiceClusterValue();
+            //}
             if (o instanceof ServiceType) {
                 return ((ServiceType)o).getServiceTypeValue();
             }

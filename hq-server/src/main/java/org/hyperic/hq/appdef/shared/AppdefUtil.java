@@ -32,7 +32,9 @@ import java.util.Map;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
+import org.hyperic.hq.reference.RelationshipTypes;
 
 /** AppdefUtil - utility methods for appdef entities and
 * brethren.
@@ -61,7 +63,7 @@ public class AppdefUtil {
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             return AuthzConstants.applicationResType;
         case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-            return AuthzConstants.groupResourceTypeName;
+            return AuthzConstants.groupResType;
         default:
             throw new InvalidAppdefTypeException("No authz resource type "
                     + "String provisioned for appdef type argument.");
@@ -84,7 +86,7 @@ public class AppdefUtil {
             return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
         if ( resName.equals(AuthzConstants.applicationResType))
             return AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
-        if ( resName.equals(AuthzConstants.groupResourceTypeName))
+        if ( resName.equals(AuthzConstants.groupResType))
             return AppdefEntityConstants.APPDEF_TYPE_GROUP;
 
         throw new InvalidAppdefTypeException("No appdef entity type "+
@@ -115,21 +117,21 @@ public class AppdefUtil {
                 throw new IllegalArgumentException(rv.getName() + 
                     " does not have a Resource Type");
             }
-            int entityID = rv.getInstanceId().intValue();
+            int entityID = rv.getId();
             int entityType;
-            if(resType.getId().equals(AuthzConstants.authzPlatform)) {
+            if(rv.getResourceTo(RelationshipTypes.PLATFORM) !=null) {
                 entityType = AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
             }
-            else if(resType.getId().equals(AuthzConstants.authzServer)) {
+            else if(rv.getResourceTo(RelationshipTypes.SERVER) !=null) {
                 entityType = AppdefEntityConstants.APPDEF_TYPE_SERVER;
             }
-            else if(resType.getId().equals(AuthzConstants.authzService)) {
+            else if(rv.getResourceTo(RelationshipTypes.SERVICE) !=null) {
                 entityType = AppdefEntityConstants.APPDEF_TYPE_SERVICE;
             }
-            else if(resType.getId().equals(AuthzConstants.authzApplication)) {
+            else if(rv instanceof ResourceGroup && ((ResourceGroup)rv).getGroupType() ==  AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP){
                 entityType = AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
             }
-            else if(resType.getId().equals(AuthzConstants.authzGroup)) {
+            else if(rv instanceof ResourceGroup) {
                 entityType = AppdefEntityConstants.APPDEF_TYPE_GROUP;
             } 
             else {

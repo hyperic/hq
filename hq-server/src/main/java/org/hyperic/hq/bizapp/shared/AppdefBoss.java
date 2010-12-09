@@ -184,14 +184,14 @@ public interface AppdefBoss {
     /**
      * Find service inventory by application - including services and clusters
      */
-    public PageList<AppdefResourceValue> findServiceInventoryByApplication(int sessionID, Integer appId, PageControl pc)
+    public PageList<ServiceValue> findServiceInventoryByApplication(int sessionID, Integer appId, PageControl pc)
         throws AppdefEntityNotFoundException, SessionException, PermissionException;
 
     /**
      * Find all services on a server
      * @return A list of ServiceValue objects.
      */
-    public PageList<AppdefResourceValue> findServicesByServer(int sessionID, Integer serverId, PageControl pc)
+    public PageList<ServiceValue> findServicesByServer(int sessionID, Integer serverId, PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException, SessionException;
 
     /**
@@ -480,11 +480,6 @@ public interface AppdefBoss {
                                      String location, java.lang.String[] resources, boolean privGrp)
         throws GroupCreationException, org.hyperic.hq.grouping.shared.GroupDuplicateNameException, SessionException;
 
-    /**
-     * Remove resources from the group's contents.
-     */
-    public void removeResourcesFromGroup(int sessionId, ResourceGroup group, Collection<Resource> resources)
-        throws SessionException, PermissionException, VetoException;
 
     public ResourceGroup findGroupById(int sessionId, Integer groupId) throws PermissionException, SessionException;
 

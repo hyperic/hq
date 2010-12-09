@@ -282,7 +282,7 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
         for (final ResourceRelation edge : edges) {
             try {
                 final Platform platform = platformManager.findPlatformById(edge.getFrom()
-                    .getInstanceId());
+                    .getId());
                 final Resource child = edge.getTo();
                 if (child == null || child.isInAsyncDeleteState()) {
                     continue;

@@ -173,9 +173,9 @@ abstract public class BaseInfrastructureTest {
     }
 
     protected Platform createPlatform(String agentToken, String platformType, String fqdn,
-                                      String name) throws ApplicationException {
+                                      String name, int cpuCount) throws ApplicationException {
         AIPlatformValue aiPlatform = new AIPlatformValue();
-        aiPlatform.setCpuCount(2);
+        aiPlatform.setCpuCount(cpuCount);
         aiPlatform.setPlatformTypeName(platformType);
         aiPlatform.setAgentToken(agentToken);
         aiPlatform.setFqdn(fqdn);
@@ -295,7 +295,7 @@ abstract public class BaseInfrastructureTest {
                                               List<Role> roles, List<Resource> resources)
         throws GroupDuplicateNameException, GroupCreationException {
         ResourceGroupCreateInfo gCInfo = new ResourceGroupCreateInfo(groupName, "",
-            "", false);
+            "", false,AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS);
         ResourceGroup resGrp = resourceGroupManager.createResourceGroup(
             authzSubjectManager.getOverlordPojo(), gCInfo, roles, resources);
         return resGrp;

@@ -32,8 +32,15 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.ResourceTreeGenerator;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
+import org.hyperic.hq.appdef.shared.AgentNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
+import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -41,8 +48,10 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.NotFoundException;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceRelation;
@@ -497,12 +506,12 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
 
         final ResourceTypeRelation relation = getContainmentRelation();
         for (final Resource resource : resources) {
-            events.add(new ResourceUpdatedZevent(subj, resource.getId()));
+            events.add(new ResourceUpdatedZevent(subj, AppdefUtil.newAppdefEntityId(resource)));
             final Collection<ResourceRelation> descendants = resource.getRelationshipsFrom(relation.getName());
           //TODO this was findDescEdges before, so I guess it returned relationships all the way down.  Find out why
             for (ResourceRelation edge : descendants) {
                 final Resource r = edge.getTo();
-                events.add(new ResourceUpdatedZevent(subj, r.getId()));
+                events.add(new ResourceUpdatedZevent(subj, AppdefUtil.newAppdefEntityId(r)));
             }
         }
         zeventManager.enqueueEventsAfterCommit(events);
@@ -513,7 +522,12 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         //TODO how to create relationships applicable for any resource being modeled?
         return new ResourceTypeRelation();
     }
-
+    
+    //TODO remove this method - ResourceManager (if kept) should have not knowledge of AppdefEntityIDs
+    public Resource findResource(AppdefEntityID entityID) {
+        return Resource.findResource(entityID.getId());
+    }
+    
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }

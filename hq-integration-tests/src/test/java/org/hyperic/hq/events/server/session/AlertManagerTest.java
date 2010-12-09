@@ -48,14 +48,10 @@ import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Operation;
-import org.hyperic.hq.authz.server.session.OperationDAO;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.RoleManager;
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.common.ApplicationException;
@@ -69,6 +65,9 @@ import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertManager;
+import org.hyperic.hq.inventory.domain.OperationType;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 import org.hyperic.hq.measurement.server.session.Category;
 import org.hyperic.hq.measurement.server.session.Measurement;
@@ -153,10 +152,10 @@ public class AlertManagerTest
         return testPlatform;
     }
 
-    private List<Operation> getMappedOperations(String[] operationNames) {
-        List<Operation> operations = Bootstrap.getBean(OperationDAO.class).findAll();
-        List<Operation> mappedOps = new ArrayList<Operation>();
-        for (Operation op : operations) {
+    private List<OperationType> getMappedOperations(String[] operationNames) {
+        List<OperationType> operations = OperationType.findAllOperationTypes();
+        List<OperationType> mappedOps = new ArrayList<OperationType>();
+        for (OperationType op : operations) {
             for (String operName : operationNames) {
                 if (operName.equalsIgnoreCase(op.getName())) {
                     mappedOps.add(op);
@@ -166,8 +165,8 @@ public class AlertManagerTest
         return mappedOps;
     }
 
-    private List<Operation> getAllOperations() {
-        return Bootstrap.getBean(OperationDAO.class).findAll();
+    private List<OperationType> getAllOperations() {
+        return OperationType.findAllOperationTypes();
 
     }
 
@@ -180,8 +179,8 @@ public class AlertManagerTest
         String[] viewOperations = { AuthzConstants.platformOpViewPlatform,
                                    AuthzConstants.serverOpViewServer,
                                    AuthzConstants.serviceOpViewService };
-        List<Operation> viewOnlyOps = getMappedOperations(viewOperations);
-        Operation[] ops = viewOnlyOps.toArray(new Operation[] {});
+        List<OperationType> viewOnlyOps = getMappedOperations(viewOperations);
+        OperationType[] ops = viewOnlyOps.toArray(new OperationType[] {});
         return roleManager.createOwnedRole(overlord, rValue, ops, viewSubjects, null);
 
     }
@@ -192,8 +191,8 @@ public class AlertManagerTest
         // Create Roles
         RoleValue rValue = new RoleValue();
         rValue.setName("fullAccess");
-        List<Operation> fullAccessOps = getAllOperations();
-        Operation[] ops = fullAccessOps.toArray(new Operation[] {});
+        List<OperationType> fullAccessOps = getAllOperations();
+        OperationType[] ops = fullAccessOps.toArray(new OperationType[] {});
         return roleManager.createOwnedRole(overlord, rValue, ops, fullAccessSubjects, null);
 
     }
@@ -204,7 +203,7 @@ public class AlertManagerTest
         // Create Roles
         RoleValue rValue = new RoleValue();
         rValue.setName("NoPermission");
-        return roleManager.createOwnedRole(overlord, rValue, new Operation[] {}, noPermSubjects,
+        return roleManager.createOwnedRole(overlord, rValue, new OperationType[] {}, noPermSubjects,
             null);
     }
 
@@ -253,7 +252,7 @@ public class AlertManagerTest
         resources.add(serverRes);
         resources.add(serviceRes);
         ResourceGroupCreateInfo gCInfo = new ResourceGroupCreateInfo("AllResourcesGroup", "",
-            AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP, null, "", 0, false, false);
+             "", false,AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP);
         ResourceGroup resGrp = resourceGroupManager.createResourceGroup(overlord, gCInfo,
             new ArrayList<Role>(0), resources);
         return resGrp;
@@ -905,7 +904,7 @@ public class AlertManagerTest
         cond.setType(EventConstants.TYPE_THRESHOLD);
         cond.setComparator("<");
         cond.setThreshold(1);
-        int appDefType = testPlatform.getResource().getResourceType().getAppdefType();
+        int appDefType = testPlatform.getResource().getType().getAppdefType();
         MonitorableType monitor_Type = new MonitorableType("Platform monitor", appDefType, "test");
         Category cate = new Category("Test Category");
         getCurrentSession().save(monitor_Type);
@@ -934,7 +933,7 @@ public class AlertManagerTest
         cond.setType(EventConstants.TYPE_BASELINE);
         cond.setComparator("<");
         cond.setThreshold(75);
-        int appDefType = testPlatform.getResource().getResourceType().getAppdefType();
+        int appDefType = testPlatform.getResource().getType().getAppdefType();
         MonitorableType monitor_Type = new MonitorableType("Platform monitor", appDefType, "test");
         Category cate = new Category("Test Category");
         getCurrentSession().save(monitor_Type);
@@ -961,7 +960,7 @@ public class AlertManagerTest
         AlertCondition cond = new AlertCondition();
         cond.setName("Control Type Reason");
         cond.setType(EventConstants.TYPE_CONTROL);
-        int appDefType = testPlatform.getResource().getResourceType().getAppdefType();
+        int appDefType = testPlatform.getResource().getType().getAppdefType();
         MonitorableType monitor_Type = new MonitorableType("Platform monitor", appDefType, "test");
         Category cate = new Category("Test Category");
         getCurrentSession().save(monitor_Type);
@@ -987,7 +986,7 @@ public class AlertManagerTest
         AlertCondition cond = new AlertCondition();
         cond.setName("Change Config");
         cond.setType(EventConstants.TYPE_CHANGE);
-        int appDefType = testPlatform.getResource().getResourceType().getAppdefType();
+        int appDefType = testPlatform.getResource().getType().getAppdefType();
         MonitorableType monitor_Type = new MonitorableType("Platform monitor", appDefType, "test");
         Category cate = new Category("Test Category");
         getCurrentSession().save(monitor_Type);
@@ -1014,7 +1013,7 @@ public class AlertManagerTest
         AlertCondition cond = new AlertCondition();
         cond.setName("Custom Property");
         cond.setType(EventConstants.TYPE_CUST_PROP);
-        int appDefType = testPlatform.getResource().getResourceType().getAppdefType();
+        int appDefType = testPlatform.getResource().getType().getAppdefType();
         MonitorableType monitor_Type = new MonitorableType("Platform monitor", appDefType, "test");
         Category cate = new Category("Test Category");
         getCurrentSession().save(monitor_Type);
@@ -1044,7 +1043,7 @@ public class AlertManagerTest
         cond.setType(EventConstants.TYPE_LOG);
         // Set matching substring
         cond.setOptionStatus("server startup");
-        int appDefType = testPlatform.getResource().getResourceType().getAppdefType();
+        int appDefType = testPlatform.getResource().getType().getAppdefType();
         MonitorableType monitor_Type = new MonitorableType("Platform monitor", appDefType, "test");
         Category cate = new Category("Test Category");
         getCurrentSession().save(monitor_Type);
@@ -1074,7 +1073,7 @@ public class AlertManagerTest
         cond.setName("Config Change");
         cond.setType(EventConstants.TYPE_CFG_CHG);
         cond.setOptionStatus("platform.properties");
-        int appDefType = testPlatform.getResource().getResourceType().getAppdefType();
+        int appDefType = testPlatform.getResource().getType().getAppdefType();
         MonitorableType monitor_Type = new MonitorableType("Platform monitor", appDefType, "test");
         Category cate = new Category("Test Category");
         getCurrentSession().save(monitor_Type);

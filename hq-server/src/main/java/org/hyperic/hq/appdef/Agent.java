@@ -27,32 +27,41 @@ package org.hyperic.hq.appdef;
 
 import org.springframework.datastore.graph.annotation.NodeEntity;
 
-@NodeEntity(partial=true)
-public class Agent extends AppdefBean {
+@NodeEntity(partial = true)
+public class Agent {
     private String _address;
     private Integer _port;
     private String _authToken;
     private String _agentToken;
     private String _version;
     private boolean _unidirectional;
+    private Integer id;
     private AgentType _agentType;
+    private Long creationTime;
+    private Long modifiedTime;
 
     public Agent() {
     }
 
-    public Agent(AgentType type, String address, Integer port,
-                 boolean unidirectional, String authToken,
-                 String agentToken, String version)
-    {
-        _agentType  = type;
-        _address    = address;
-        _port       = port;
+    public Agent(AgentType type, String address, Integer port, boolean unidirectional,
+                 String authToken, String agentToken, String version) {
+        _agentType = type;
+        _address = address;
+        _port = port;
         _unidirectional = unidirectional;
-        _authToken  = authToken;
+        _authToken = authToken;
         _agentToken = agentToken;
-        _version    = version;
+        _version = version;
     }
-    
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     public String getAddress() {
         return _address;
     }
@@ -66,7 +75,7 @@ public class Agent extends AppdefBean {
     }
 
     public void setPort(Integer port) {
-        _port = port; 
+        _port = port;
     }
 
     public void setPort(int port) {
@@ -104,14 +113,14 @@ public class Agent extends AppdefBean {
     public void setUnidirectional(boolean unidirectional) {
         _unidirectional = unidirectional;
     }
-    
+
     public boolean isNewTransportAgent() {
         AgentType type = getAgentType();
-        
+
         if (type != null) {
             return type.isNewTransportType();
         }
-        
+
         return false;
     }
 
@@ -122,17 +131,32 @@ public class Agent extends AppdefBean {
     public void setAgentType(AgentType agentType) {
         _agentType = agentType;
     }
-    
+
     public String connectionString() {
-        return getAddress()+":"+getPort();
+        return getAddress() + ":" + getPort();
+    }
+
+    public long getCreationTime() {
+        return creationTime != null ? creationTime.longValue() : 0;
+    }
+
+    public void setCreationTime(Long creationTime) {
+        this.creationTime = creationTime;
+    }
+
+    public long getModifiedTime() {
+        return modifiedTime != null ? modifiedTime.longValue() : 0;
+    }
+
+    public void setModifiedTime(Long modifiedTime) {
+        this.modifiedTime = modifiedTime;
     }
 
     public String toString() {
         StringBuffer str = new StringBuffer("{");
 
-        str.append("address=").append(getAddress()).append(" ")
-           .append("port=").append(getPort()).append(" ")
-           .append("authToken=").append(getAuthToken()).append(" ");
-        return(str.toString());
+        str.append("address=").append(getAddress()).append(" ").append("port=").append(getPort())
+            .append(" ").append("authToken=").append(getAuthToken()).append(" ");
+        return (str.toString());
     }
 }

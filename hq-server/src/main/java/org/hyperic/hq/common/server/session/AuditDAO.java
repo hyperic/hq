@@ -46,11 +46,12 @@ public class AuditDAO
     }
 
     void handleResourceDelete(Resource r) {
-        String sql = "update Audit a set " + "a.resource.id = :rootResource, "
-                     + "a.original = false " + "where resource = :resource";
-
-        getSession().createQuery(sql).setParameter("rootResource", AuthzConstants.rootResourceId)
-            .setParameter("resource", r).executeUpdate();
+        //TODO
+//        String sql = "update Audit a set " + "a.resource.id = :rootResource, "
+//                     + "a.original = false " + "where resource = :resource";
+//
+//        getSession().createQuery(sql).setParameter("rootResource", AuthzConstants.rootResourceId)
+//            .setParameter("resource", r).executeUpdate();
     }
 
     void handleSubjectDelete(AuthzSubject s) {

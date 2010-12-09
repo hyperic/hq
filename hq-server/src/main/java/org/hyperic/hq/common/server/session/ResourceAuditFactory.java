@@ -60,7 +60,8 @@ public class ResourceAuditFactory {
     }
 
     public ResourceAudit createResource(Resource r, AuthzSubject creator, long start, long end) {
-        String msg = MSGS.format("auditMsg.resource.create", r.getType().getLocalizedName());
+        //TODO below used to be type.getLocalizedName()
+        String msg = MSGS.format("auditMsg.resource.create", r.getType().getName());
         ResourceAudit res = new ResourceAudit(r, creator, RESOURCE_CREATE, AuditImportance.MEDIUM, AuditNature.CREATE,
             msg, start, end);
 

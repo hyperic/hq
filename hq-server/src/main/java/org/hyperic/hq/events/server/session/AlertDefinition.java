@@ -27,6 +27,7 @@ import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
@@ -211,27 +212,30 @@ public class AlertDefinition
     }
 
     public Integer getAppdefId() {
-        return getResource().getInstanceId();
+        return getResource().getId();
     }
 
     public int getAppdefType() {
         String rtName = getResource().getType().getName();
-        if (rtName.equals(AuthzConstants.platformResType)) {
+        AppdefEntityID resourceId = AppdefUtil.newAppdefEntityId(getResource());
+        
+        if (resourceId.isPlatform()) {
             return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
-        } else if (rtName.equals(AuthzConstants.serverResType)) {
+        } else if (resourceId.isServer()) {
             return AppdefEntityConstants.APPDEF_TYPE_SERVER;
-        } else if (rtName.equals(AuthzConstants.serviceResType)) {
+        } else if (resourceId.isService()) {
             return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
-        } else if (rtName.equals(AuthzConstants.applicationResType)) {
+        } else if (resourceId.isApplication()) {
             return AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
-        } else if (rtName.equals(AuthzConstants.groupResType)) {
+        } else if (resourceId.isGroup()) {
             return AppdefEntityConstants.APPDEF_TYPE_GROUP;
-        } else if (rtName.equals(AuthzConstants.platformPrototypeTypeName)) {
-            return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
-        } else if (rtName.equals(AuthzConstants.serverPrototypeTypeName)) {
-            return AppdefEntityConstants.APPDEF_TYPE_SERVER;
-        } else if (rtName.equals(AuthzConstants.servicePrototypeTypeName)) {
-            return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
+            //TODO Type based alerts need to be handled in a new way
+//        } else if (rtName.equals(AuthzConstants.platformPrototypeTypeName)) {
+//            return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
+//        } else if (rtName.equals(AuthzConstants.serverPrototypeTypeName)) {
+//            return AppdefEntityConstants.APPDEF_TYPE_SERVER;
+//        } else if (rtName.equals(AuthzConstants.servicePrototypeTypeName)) {
+//            return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
         } else {
             throw new IllegalArgumentException(rtName + " is not a valid Appdef Resource Type");
         }

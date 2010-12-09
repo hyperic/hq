@@ -116,22 +116,6 @@ public interface AuthzBoss {
     public PageList<AuthzSubject> getSubjectsByName(Integer sessionId, String name, PageControl pc)
         throws PermissionException, SessionTimeoutException, SessionNotFoundException;
 
-    /**
-     * Return a sorted, paged <code>List</code> of
-     * <code>ResourceGroupValue</code> objects representing every resource type
-     * in the system that the user is allowed to view.
-     */
-    public List<ResourceGroupValue> getAllResourceGroups(Integer sessionId, PageControl pc) throws 
-        PermissionException, SessionTimeoutException, SessionNotFoundException;
-
-    /**
-     * Return a sorted, paged <code>List</code> of
-     * <code>ResourceGroupValue</code> objects corresponding to the specified id
-     * values.
-     */
-    public PageList<ResourceGroupValue> getResourceGroupsById(Integer sessionId, Integer[] ids, PageControl pc)
-        throws  PermissionException, SessionTimeoutException, SessionNotFoundException;
-
     public Map<AppdefEntityID, Resource> findResourcesByIds(Integer sessionId, AppdefEntityID[] entities)
         throws SessionNotFoundException, SessionTimeoutException;
 

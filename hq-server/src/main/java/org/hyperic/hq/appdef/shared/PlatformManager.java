@@ -29,15 +29,16 @@ import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
+import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -288,5 +289,10 @@ public interface PlatformManager {
     public List<Object[]> getPlatformTypeCounts();
 
     public Number getPlatformCount();
+    
+    List<Platform> getPlatformsByType(AuthzSubject subject,String platformTypeName);
+    
+    ResourceTree getEntitiesForAgent(AuthzSubject subject, Agent agt)
+        throws AgentNotFoundException, PermissionException;
 
 }

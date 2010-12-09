@@ -28,6 +28,13 @@ package org.hyperic.hq.authz.shared;
 
 
 public final class AuthzConstants {
+    
+    // Appdef Resource Types
+    public static final String platformResType = "covalentEAMPlatform";
+    public static final String serverResType = "covalentEAMServer";
+    public static final String serviceResType = "covalentEAMService";
+    public static final String applicationResType = "covalentEAMApplication";
+    public static final String groupResType = "covalentAuthzResourceGroup";
 
     // Appdef Operations
 

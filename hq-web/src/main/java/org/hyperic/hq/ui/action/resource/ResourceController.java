@@ -43,8 +43,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceEdge;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
@@ -56,6 +54,8 @@ import org.hyperic.hq.common.ProductProperties;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.AttachType;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceRelation;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseDispatchAction;
@@ -181,7 +181,7 @@ public abstract class ResourceController
                         
                         if (descriptor.getAttachment().getView().getPlugin().getName().equals("vsphere")) {
                           
-                            ResourceEdge parent = Bootstrap.getBean(ResourceManager.class).getParentResourceEdge(resourceObj, Bootstrap.getBean(ResourceManager.class).getVirtualRelation());
+                            ResourceRelation parent = Bootstrap.getBean(ResourceManager.class).getParentResourceEdge(resourceObj, Bootstrap.getBean(ResourceManager.class).getVirtualRelation());
                 
                             // TODO This is ugly and I hate putting it in, but there's no easy way to link into a 
                             // plugin right now...

@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.zevents.ZeventManager;
 
@@ -38,7 +39,7 @@ public class ResourceRefreshZevent extends ResourceZevent {
             .registerEventClass(ResourceRefreshZevent.class);
     }
 
-    public ResourceRefreshZevent(AuthzSubject subject, Integer id) {
+    public ResourceRefreshZevent(AuthzSubject subject, AppdefEntityID id) {
         super(subject.getId(), id);
     }
 }

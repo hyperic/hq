@@ -57,6 +57,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
+import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
@@ -73,7 +74,6 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
-import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
@@ -124,6 +124,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     private MeasurementTemplateDAO measurementTemplateDAO;
     private AgentManager agentManager;
     private AgentMonitor agentMonitor;
+    private ApplicationManager applicationManager;
     private ApplicationContext applicationContext;
 
     @Autowired
@@ -134,7 +135,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                                   ConfigManager configManager, MetricDataCache metricDataCache,
                                   MeasurementDAO measurementDAO,
                                   MeasurementTemplateDAO measurementTemplateDAO,
-                                  AgentManager agentManager, AgentMonitor agentMonitor) {
+                                  AgentManager agentManager, AgentMonitor agentMonitor, 
+                                  ApplicationManager applicationManager) {
         this.resourceManager = resourceManager;
         this.resourceGroupManager = resourceGroupManager;
         this.permissionManager = permissionManager;
@@ -145,6 +147,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         this.measurementTemplateDAO = measurementTemplateDAO;
         this.agentManager = agentManager;
         this.agentMonitor = agentMonitor;
+        this.applicationManager = applicationManager;
     }
 
     // TODO: Resolve circular dependency
@@ -539,10 +542,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             Integer[] tids = templs.toArray(new Integer[0]);
             Resource resource = resourceManager.findResourceById(resId);
             // checkModifyPermission(subject.getId(), appId);
-            Integer resTypeId = resource.getType().getId();
-            if (resTypeId.equals(AuthzConstants.authzGroup)) {
-                ResourceGroup grp = resourceGroupManager.findResourceGroupById(subject, resource
-                    .getInstanceId());
+            if (resource instanceof ResourceGroup) {
+                ResourceGroup grp = (ResourceGroup) resource;
                 Collection<Resource> mems = resourceGroupManager.getMembers(grp);
                 for (Resource res : mems) {
                     rtn.put(res, measurementDAO.findByTemplatesForInstance(tids, res));
@@ -848,12 +849,12 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             } catch (ObjectNotFoundException e) {
                 continue;
             }
-            final ResourceType type = resource.getType();
-            if (type.getId().equals(AuthzConstants.authzGroup)) {
-                ResourceGroup grp = resourceGroupManager.getResourceGroupByResource(resource);
+          
+            if (resource instanceof ResourceGroup && !(applicationManager.isApplication((ResourceGroup)resource))) {
+                ResourceGroup grp = (ResourceGroup)resource;
                 rtn.put(resource.getId(), measurementDAO.findAvailMeasurements(grp));
                 continue;
-            } else if (type.getId().equals(AuthzConstants.authzApplication)) {
+            } else if (resource instanceof ResourceGroup && (applicationManager.isApplication((ResourceGroup)resource))) {
                 rtn.putAll(getAvailMeas(resource));
                 continue;
             }
@@ -873,7 +874,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     private Application findApplicationById(AuthzSubject subject, Integer id)
         throws ApplicationNotFoundException, PermissionException {
         try {
-            Application app = applicationDAO.findById(id);
+            
+            Application app = applicationManager.findApplicationById(subject,id);
             permissionManager.checkViewPermission(subject, app.getEntityId());
             return app;
         } catch (ObjectNotFoundException e) {
@@ -882,13 +884,12 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     }
 
     private final Map<Integer, List<Measurement>> getAvailMeas(Resource application) {
-        final Integer typeId = application.getType().getId();
-        if (!typeId.equals(AuthzConstants.authzApplication)) {
+        if (! (application instanceof ResourceGroup) || !(applicationManager.isApplication((ResourceGroup)application))) {
             return Collections.emptyMap();
         }
         final AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
         try {
-            final Application app = findApplicationById(overlord, application.getInstanceId());
+            final Application app = findApplicationById(overlord, application.getId());
             final Collection<AppService> appServices = app.getAppServices();
             final List<Resource> resources = new ArrayList<Resource>(appServices.size());
             for (AppService appService : appServices) {
@@ -896,7 +897,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             }
             return getAvailMeasurements(resources);
         } catch (ApplicationNotFoundException e) {
-            log.warn("cannot find Application by id = " + application.getInstanceId());
+            log.warn("cannot find Application by id = " + application.getId());
         } catch (PermissionException e) {
             log.error("error finding application using overlord", e);
         }
