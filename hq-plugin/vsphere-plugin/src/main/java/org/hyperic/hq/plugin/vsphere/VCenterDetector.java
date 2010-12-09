@@ -156,11 +156,8 @@ public class VCenterDetector extends DaemonDetector {
     public List getServerResources(ConfigResponse platformConfig) 
         throws PluginException {
     
-        // only discover ESX hosts and VMs if a vCenter process exists
-        if (!getProcessResources(platformConfig).isEmpty()) {
-            AgentDaemon agent = AgentDaemon.getMainInstance();
-            discoverPlatforms(agent);
-        }
+        AgentDaemon agent = AgentDaemon.getMainInstance();
+        discoverPlatforms(agent);
         
         // discover new vCenter servers
         return super.getServerResources(platformConfig);
