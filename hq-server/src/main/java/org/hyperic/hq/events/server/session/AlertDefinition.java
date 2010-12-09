@@ -476,8 +476,8 @@ public class AlertDefinition
             for (Iterator cit = _conditions.iterator(); cit.hasNext();) {
                 AlertCondition cond = (AlertCondition) cit.next();
 
-                if (cond != null
-                    && MeasurementConstants.CAT_AVAILABILITY.equalsIgnoreCase(cond.getName())) {
+                if (cond != null && cond.getName() != null &&
+                    cond.getName().toUpperCase().contains(MeasurementConstants.CAT_AVAILABILITY.toUpperCase())) {
 
                     if ("=".equals(cond.getComparator())) {
                         if (up) {
