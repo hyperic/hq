@@ -1,5 +1,9 @@
 package org.hyperic.hq.api;
 
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
+import org.hyperic.hq.inventory.domain.ResourceType;
+
 public enum Domain {
 	RESOURCES("resources", Resource.class),
 	RESOURCE_TYPES("resourcetypes", ResourceType.class),
@@ -22,23 +26,29 @@ public enum Domain {
 		return this.id;
 	}
 	
-	public static Domain getValue(String id) {
+	public static Domain getValue(String id) throws NoDomainMappingException {
 		for (Domain domain : values()) {
 			if (domain.id.equals(id)) {
 				return domain;
 			}
 		}
 		
-		throw new IllegalArgumentException("No matching domain for [" + id + "]");		
+		throw new NoDomainMappingException("No matching domain for [" + id + "]");		
 	}
 	
-	public static Domain getValue(Class<?> javaType) {
+	public static Domain getValue(Class<?> javaType) throws NoDomainMappingException {
 		for (Domain domain : values()) {
 			if (domain.javaType.equals(javaType)) {
 				return domain;
 			}
 		}
 		
-		throw new IllegalArgumentException("No matching domain for [" + javaType.getName() + "]");
+		throw new NoDomainMappingException("No matching domain for [" + javaType.getName() + "]");
+	}
+	
+	public static class NoDomainMappingException extends Exception {
+		public NoDomainMappingException(String msg) {
+			super(msg);
+		}
 	}
 }

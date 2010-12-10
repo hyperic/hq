@@ -352,6 +352,10 @@
 							<groupId>org.springframework</groupId>
 							<artifactId>spring-aspects</artifactId>
 						</aspectLibrary>
+						 <aspectLibrary>
+                        	<groupId>org.springframework.data</groupId>
+                        	<artifactId>spring-datastore-neo4j</artifactId>
+                    	</aspectLibrary>
 					</aspectLibraries>
 					<source>1.5</source>
 					<target>1.5</target>
