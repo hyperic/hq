@@ -67,7 +67,7 @@
       <column name="DSN" not-null="true" length="2048"/>
     </property>
 
-    <many-to-one name="resource" class="org.hyperic.hq.authz.server.session.Resource" index="MEAS_RES_IDX">
+    <many-to-one name="resource" class="org.hyperic.hq.inventory.domain.Resource" index="MEAS_RES_IDX">
       <column name="RESOURCE_ID"/>
     </many-to-one>
 

@@ -43,13 +43,13 @@ import org.springframework.datastore.graph.annotation.NodeEntity;
 @NodeEntity(partial=true)
 public class Role  {
     private String     _description;
-    private boolean    _system = false;
+    private boolean    _system;
     private Resource   _resource;
-    private Collection _resourceGroups = new ArrayList();
-    private Collection _operations = new HashSet();
-    private Collection _subjects = new ArrayList();
-    private Collection _calendars = new ArrayList();
-    private RoleValue  _roleValue = new RoleValue();
+    private Collection _resourceGroups;
+    private Collection _operations;
+    private Collection _subjects;
+    private Collection _calendars;
+    private RoleValue  _roleValue;
     private String _name;
     private String _sortName;
     private Integer _id;
@@ -212,6 +212,7 @@ public class Role  {
      * @deprecated use (this) Role instead
      */
     public RoleValue getRoleValue() {
+        _roleValue = new RoleValue();
         _roleValue.setDescription(getDescription());
         _roleValue.setId(getId());
         _roleValue.setName(getName());
@@ -239,6 +240,14 @@ public class Role  {
     public OwnedRoleValue getOwnedRoleValue() {
         OwnedRoleValue orv = new OwnedRoleValue(this);
         return orv;
+    }
+    
+    public long get_version_() {
+        return _version_ != null ? _version_.longValue() : 0;
+    }
+
+    protected void set_version_(Long newVer) {
+        _version_ = newVer;
     }
 }
 

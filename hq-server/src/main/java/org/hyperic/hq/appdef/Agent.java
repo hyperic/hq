@@ -25,6 +25,9 @@
 
 package org.hyperic.hq.appdef;
 
+import java.util.Collection;
+
+import org.hyperic.hq.inventory.domain.Resource;
 import org.springframework.datastore.graph.annotation.NodeEntity;
 
 @NodeEntity(partial = true)
@@ -39,6 +42,8 @@ public class Agent {
     private AgentType _agentType;
     private Long creationTime;
     private Long modifiedTime;
+    private Long    _version_;
+    private Collection<Resource> resources;
 
     public Agent() {
     }
@@ -150,6 +155,22 @@ public class Agent {
 
     public void setModifiedTime(Long modifiedTime) {
         this.modifiedTime = modifiedTime;
+    }
+    
+    public Collection<Resource> getResources() {
+        return resources;
+    }
+
+    public void setResources(Collection<Resource> resources) {
+        this.resources = resources;
+    }
+    
+    public long get_version_() {
+        return _version_ != null ? _version_.longValue() : 0;
+    }
+
+    protected void set_version_(Long newVer) {
+        _version_ = newVer;
     }
 
     public String toString() {

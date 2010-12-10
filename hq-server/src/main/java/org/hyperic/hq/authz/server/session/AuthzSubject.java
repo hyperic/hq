@@ -43,11 +43,11 @@ public class AuthzSubject  {
     private String     _smsAddress;
     private String     _phoneNumber;
     private String     _department;
-    private boolean    _active = true;
-    private boolean    _system = false;
-    private boolean    _htmlEmail = false;
+    private boolean    _active;
+    private boolean    _system;
+    private boolean    _htmlEmail;
     private Resource   _resource;
-    private Collection _roles = new HashSet();
+    private Collection _roles;
     private Crispo     _prefs;
     private String _name;
     private String _sortName;
@@ -241,6 +241,14 @@ public class AuthzSubject  {
     
     protected void setPrefs(Crispo c) {
         _prefs = c;
+    }
+    
+    public long get_version_() {
+        return _version_ != null ? _version_.longValue() : 0;
+    }
+
+    protected void set_version_(Long newVer) {
+        _version_ = newVer;
     }
     
     /**

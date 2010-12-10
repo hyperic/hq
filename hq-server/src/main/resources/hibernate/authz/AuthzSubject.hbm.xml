@@ -94,7 +94,7 @@
       <column name="HTML_EMAIL" not-null="true"/>
     </property>
 
-    <many-to-one name="resource" class="Resource">
+    <many-to-one name="resource" class="org.hyperic.hq.inventory.domain.Resource">
       <column name="RESOURCE_ID" index="EAM_SUBJECT_RESOURCE_IDX"/>
     </many-to-one>
 

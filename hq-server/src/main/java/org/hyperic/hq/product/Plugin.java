@@ -151,8 +151,16 @@ public class Plugin  implements ContainerManagedTimestampTrackable
     {
         setCreationTime(cTime);
     }
+    
+    public long get_version_() {
+        return _version_ != null ? _version_.longValue() : 0;
+    }
 
-    private PluginValue pluginValue = new PluginValue();
+    protected void set_version_(Long newVer) {
+        _version_ = newVer;
+    }
+
+    private PluginValue pluginValue;
     /**
      * @deprecated use (this) Plugin object
      * @return

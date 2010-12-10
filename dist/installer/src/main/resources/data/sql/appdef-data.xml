@@ -5,10 +5,6 @@
         <data ID="1" NAME="covalent-eam"/>
         <data ID="2" NAME="hyperic-hq-remoting"/>
     </table>
-<!-- Application Types -->
-    <table name="EAM_APPLICATION_TYPE">
-        <data ID="1" CID="1" NAME="Generic Application"/>
-        <data ID="2" CID="2" NAME="J2EE Application" />
-    </table>
+
     
 </Covalent.DBSetup> 
