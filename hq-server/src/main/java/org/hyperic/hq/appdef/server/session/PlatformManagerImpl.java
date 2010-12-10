@@ -66,6 +66,7 @@ import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
+import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -384,6 +385,31 @@ public class PlatformManagerImpl implements PlatformManager {
         return p;
     }
     
+    private Resource create(PlatformValue pv, Agent agent, 
+                              ResourceType type) 
+    {
+        Resource p = new Resource();
+        
+        p.setName(pv.getName());
+        p.setDescription(pv.getDescription());
+        p.setProperty(CERT_DN,pv.getCertdn());
+        p.setProperty(COMMENT_TEXT,pv.getCommentText());
+        p.setProperty(CPU_COUNT,pv.getCpuCount());
+        p.setProperty(FQDN,pv.getFqdn());
+        p.setLocation(pv.getLocation());
+        p.setModifiedBy(pv.getModifiedBy());
+        p.persist();
+        p.setType(type);
+        p.setAgent(agent);
+        
+        for (Iterator i=pv.getAddedIpValues().iterator(); i.hasNext();) {
+            IpValue ipv = (IpValue)i.next();
+            addIp(toPlatform(p), ipv.getAddress(), ipv.getNetmask(), ipv.getMACAddress());
+        }
+        return p;
+    }
+
+    
     private Resource copyAIPlatformValue(AIPlatformValue aip) {
         Resource p = new Resource();
         p.setProperty(CERT_DN,aip.getCertdn());
@@ -411,6 +437,71 @@ public class PlatformManagerImpl implements PlatformManager {
         throw new NonUniqueObjectException(id, "Duplicate platform found " + "with name: " +
                                                platName);
     }
+    
+    /**
+     * Private method to validate a new PlatformValue object
+     * 
+     * @throws ValidationException
+     */
+    private void validateNewPlatform(PlatformValue pv) throws ValidationException {
+        String msg = null;
+        // first check if its new
+        if (pv.idHasBeenSet()) {
+            msg = "This platform is not new. It has id: " + pv.getId();
+        }
+        // else if(someotherthing) ...
+
+        // Now check if there's a msg set and throw accordingly
+        if (msg != null) {
+            throw new ValidationException(msg);
+        }
+    }
+
+    
+    public Platform createPlatform(AuthzSubject subject, Integer platformTypeId,
+                                   PlatformValue pValue, Integer agentPK)
+        throws ValidationException, PermissionException, AppdefDuplicateNameException,
+        AppdefDuplicateFQDNException, ApplicationException {
+        // check if the object already exists
+
+        if (Resource.findResourceByName(pValue.getName()) != null) {
+            // duplicate found, throw a duplicate object exception
+            throw new AppdefDuplicateNameException();
+        }
+        if (findByFQDN(pValue.getFqdn()) != null) {
+            // duplicate found, throw a duplicate object exception
+            throw new AppdefDuplicateFQDNException();
+        }
+        Agent agent = null;
+
+            if (agentPK != null) {
+                agent = agentDAO.findById(agentPK);
+            }
+
+            trimStrings(pValue);
+            getCounter().addCPUs(pValue.getCpuCount().intValue());
+            validateNewPlatform(pValue);
+            
+            pValue.setOwner(subject.getName());
+            pValue.setModifiedBy(subject.getName());
+
+            // AUTHZ CHECK
+            try {
+                permissionManager.checkCreatePlatformPermission(subject);
+            } catch (Exception e) {
+                throw new SystemException(e);
+            }
+            ResourceType platType = ResourceType.findResourceType(platformTypeId);
+            Resource platform = create(pValue, agent, platType);
+            Platform plat = toPlatform(platform);
+
+            // Send resource create event
+            ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, plat.getEntityId());
+            zeventManager.enqueueEventAfterCommit(zevent);
+
+            return plat;
+    }
+
 
     /**
      * Create a Platform from an AIPlatform

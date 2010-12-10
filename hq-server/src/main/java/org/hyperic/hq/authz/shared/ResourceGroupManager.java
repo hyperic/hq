@@ -126,8 +126,8 @@ public interface ResourceGroupManager
     public void removeResource(AuthzSubject whoami, Resource resource,
                                Collection<ResourceGroup> groups) throws PermissionException,
         VetoException;
-
-  
+    
+    void removeResources(AuthzSubject whoami, ResourceGroup group, Collection<Resource> resources);
 
     /**
      * Get all the members of a group.

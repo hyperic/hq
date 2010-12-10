@@ -39,6 +39,7 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
+import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
@@ -218,7 +219,7 @@ public class ServerInventoryPortalAction
 
         request.setAttribute(Constants.RESOURCE_REMOVE_FORM_ATTR, rmServicesForm);
 
-        List<AppdefResourceValue> serviceList = appdefBoss
+        List<ServiceValue> serviceList = appdefBoss
             .findServicesByServer(sessionId.intValue(), aeid.getId(), pcs);
         request.setAttribute(Constants.SERVICES_ATTR, serviceList);
 

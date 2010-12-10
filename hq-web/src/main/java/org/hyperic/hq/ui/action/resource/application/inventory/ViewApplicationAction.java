@@ -46,6 +46,7 @@ import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.DependencyNode;
 import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
+import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.common.inventory.RemoveResourceGroupsForm;
@@ -97,7 +98,7 @@ public class ViewApplicationAction
         log.trace("getting services for appId " + appId);
         PageControl pcs = RequestUtils.getPageControl(request, "pss", "pns", "sos", "scs");
         PageControl pc = new PageControl(0, -1, 1, SortAttribute.SERVICE_NAME);
-        PageList<AppdefResourceValue> services = appdefBoss.findServiceInventoryByApplication(sessionId.intValue(),
+        PageList<ServiceValue> services = appdefBoss.findServiceInventoryByApplication(sessionId.intValue(),
             appId, pc);
 
         log.debug("AppdefBoss returning " + services.toString());
@@ -164,7 +165,7 @@ public class ViewApplicationAction
         return null;
     }
 
-    private List<AppServiceNodeBean> getAppServiceNodes(DependencyTree tree, List<AppdefResourceValue> services) {
+    private List<AppServiceNodeBean> getAppServiceNodes(DependencyTree tree, List<ServiceValue> services) {
         List<AppServiceNodeBean> returnList = new ArrayList<AppServiceNodeBean>();
         /*
          * We need to iterate over the service list (not the tree). This is so

@@ -122,8 +122,8 @@ public class AddGroupResourcesAction
 
                 AppdefEntityID entity = new AppdefEntityID(id);
                 Resource r = resourceManager.findResource(entity);
-
-                if (!resourceGroupManager.isMember(group, r)) {
+              
+                if (!group.isMember(r)) {
                     newIds.add(entity);
                 }
             }

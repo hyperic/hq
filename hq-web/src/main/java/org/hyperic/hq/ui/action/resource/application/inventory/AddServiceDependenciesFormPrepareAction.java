@@ -47,6 +47,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.DependencyNode;
 import org.hyperic.hq.appdef.shared.DependencyTree;
+import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -106,7 +107,7 @@ public class AddServiceDependenciesFormPrepareAction
         // get the dependency tree
         DependencyTree tree = appdefBoss.getAppDependencyTree(sessionId.intValue(), resource.getId());
         DependencyNode appSvcNode = DependencyTree.findAppServiceById(tree, appSvcId);
-        List<AppdefResourceValue> services = appdefBoss.findServiceInventoryByApplication(sessionId.intValue(),
+        List<ServiceValue> services = appdefBoss.findServiceInventoryByApplication(sessionId.intValue(),
             resource.getId(), PageControl.PAGE_ALL);
         Map<AppdefEntityID, AppdefResourceValue> serviceMap = DependencyTree.mapServices(services);
         log.debug("Map contains " + serviceMap.toString());

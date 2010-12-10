@@ -35,16 +35,18 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.appdef.shared.ServerValue;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
@@ -71,12 +73,16 @@ public class EditConfigPropertiesAction
     private final Log log = LogFactory.getLog(EditConfigPropertiesAction.class.getName());
     private AppdefBoss appdefBoss;
     private ProductBoss productBoss;
+    private ResourceManager resourceManager;
+    private ConfigManager configManager;
 
     @Autowired
-    public EditConfigPropertiesAction(AppdefBoss appdefBoss, ProductBoss productBoss) {
+    public EditConfigPropertiesAction(AppdefBoss appdefBoss, ProductBoss productBoss, ConfigManager configManager, ResourceManager resourceManager) {
         super();
         this.appdefBoss = appdefBoss;
         this.productBoss = productBoss;
+        this.configManager = configManager;
+        this.resourceManager = resourceManager;
     }
 
     /**
@@ -132,20 +138,22 @@ public class EditConfigPropertiesAction
             allConfigs.setResource(aeid);
             allConfigsRollback.setResource(aeid);
 
-            ConfigResponseDB oldConfig = productBoss.getConfigResponse(sessionInt, aeid);
+            //ConfigResponseDB oldConfig = productBoss.getConfigResponse(sessionInt, aeid);
+            Resource resource = resourceManager.findResourceById(aeid.getId());
+          
 
             // get the configSchemas and existing configs
             for (i = 0; i < numConfigs; i++) {
                 try {
                     byte[] oldCfgBytes = null;
                     if (cfgTypes[i].equals(ProductPlugin.TYPE_PRODUCT)) {
-                        oldCfgBytes = oldConfig.getProductResponse();
+                        oldCfgBytes = configManager.toConfigResponse(resource.getProductConfig());
                     } else if (cfgTypes[i].equals(ProductPlugin.TYPE_MEASUREMENT)) {
-                        oldCfgBytes = oldConfig.getMeasurementResponse();
+                        oldCfgBytes = configManager.toConfigResponse(resource.getMeasurementConfig());
                     } else if (cfgTypes[i].equals(ProductPlugin.TYPE_CONTROL)) {
-                        oldCfgBytes = oldConfig.getControlResponse();
+                        oldCfgBytes =configManager.toConfigResponse(resource.getControlConfig());
                     } else if (cfgTypes[i].equals(ProductPlugin.TYPE_RESPONSE_TIME)) {
-                        oldCfgBytes = oldConfig.getResponseTimeResponse();
+                        oldCfgBytes =configManager.toConfigResponse(resource.getResponseTimeConfig());
                     }
 
                     if (oldCfgBytes == null) {

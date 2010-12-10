@@ -90,7 +90,7 @@ public class RemoveAction
 
                 resources.add(resourceManager.findResource(entity));
             }
-
+          
             appdefBoss.removeResourcesFromGroup(sessionId.intValue(), group, resources);
             RequestUtils.setConfirmation(request,"resource.group.inventory.confirm.RemoveResources");
 

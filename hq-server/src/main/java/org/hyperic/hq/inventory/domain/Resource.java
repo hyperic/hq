@@ -423,6 +423,11 @@ public class Resource {
     public void setConfigValidationError(String error) {
         // TODO from ConfigResponseDB. remove?
     }
+    
+    public String getConfigValidationError() {
+        // TODO from ConfigResponseDB. remove?
+        return null;
+    }
 
     public void setControlConfig(Config config) {
         setConfig(config, "Control");

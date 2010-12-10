@@ -43,6 +43,7 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.DependencyTree;
+import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
@@ -114,7 +115,7 @@ public class AddApplicationServiceAction
 
         // first, get the existing ones
         PageControl nullPc = new PageControl(-1, -1);
-        List<AppdefResourceValue> existingServices = appdefBoss.findServiceInventoryByApplication(sessionId.intValue(),
+        List<ServiceValue> existingServices = appdefBoss.findServiceInventoryByApplication(sessionId.intValue(),
             aeid.getId(), nullPc);
         DependencyTree tree = appdefBoss.getAppDependencyTree(sessionId.intValue(), aeid.getId());
         for (AppdefResourceValue service : existingServices) {

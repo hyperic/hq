@@ -105,7 +105,7 @@ public class EditGeneralAction
             Collection<ResourceGroup> groups = appdefBoss.getGroupsForResource(sessionId, group);
             for (Iterator<ResourceGroup> it = groups.iterator(); it.hasNext();) {
                 ResourceGroup g = it.next();
-                isPrivate = !g.getId().equals(AuthzConstants.rootResourceGroupId);
+                isPrivate = g.isPrivateGroup();
                 if (!isPrivate)
                     break;
             }

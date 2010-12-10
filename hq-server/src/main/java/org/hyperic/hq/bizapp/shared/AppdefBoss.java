@@ -80,6 +80,7 @@ import org.hyperic.hq.bizapp.shared.uibeans.SearchResult;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.util.config.ConfigResponse;
@@ -694,6 +695,13 @@ public interface AppdefBoss {
     public void setCPropValue(int sessionId, AppdefEntityID id, String key, String val)
         throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException, PermissionException,
         CPropKeyNotFoundException;
+    
+    
+    List<PropertyType> getCPropKeys(int sessionId, int appdefType, int appdefTypeId) throws SessionNotFoundException, SessionTimeoutException;
+    
+    List<PropertyType> getCPropKeys(int sessionId, AppdefEntityID aeid)
+    throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException,
+    PermissionException;
 
     /**
      * Get a map which holds the descriptions & their associated values for an
@@ -761,5 +769,14 @@ public interface AppdefBoss {
      */
     public Map<String, List<AppdefResourceType>> getUnavailableResourcesCount(AuthzSubject user)
         throws AppdefEntityNotFoundException, PermissionException;
+    
+    public void removeResourcesFromGroup(int sessionId, ResourceGroup group,
+                                         Collection<Resource> resources) throws SessionException,
+        PermissionException, VetoException;
+    
+    public Platform createPlatform(int sessionID, PlatformValue platformVal, Integer platTypePK,
+                                   Integer agent) throws ValidationException,
+        SessionTimeoutException, SessionNotFoundException, PermissionException,
+        AppdefDuplicateNameException, AppdefDuplicateFQDNException, ApplicationException;
     
 }

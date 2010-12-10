@@ -47,6 +47,7 @@ import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ServerValue;
+import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.common.ApplicationException;
@@ -103,7 +104,7 @@ public class ViewServerAction
             AppdefEntityID entityId = server.getEntityId();
             log.trace("getting service count for server");
             PageControl pc = new PageControl(0, -1, 1, SortAttribute.SERVICE_TYPE);
-            Collection<AppdefResourceValue> services = appdefBoss.findServicesByServer(sessionId, server.getId(), pc);
+            Collection<ServiceValue> services = appdefBoss.findServicesByServer(sessionId, server.getId(), pc);
             request.setAttribute(Constants.NUM_CHILD_RESOURCES_ATTR, new Integer(services.size()));
 
             log.trace("getting service type map for server");

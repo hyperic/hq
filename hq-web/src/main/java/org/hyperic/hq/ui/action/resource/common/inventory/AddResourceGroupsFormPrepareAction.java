@@ -119,7 +119,7 @@ public class AddResourceGroupsFormPrepareAction
 
         Resource r = resourceManager.findResource(resource.getEntityId());
         PageList<AppdefGroupValue> availableGroups = appdefBoss.findAllGroupsMemberExclusive(sessionId.intValue(), pca,
-            entityId, pendingGroupIds, r.getPrototype());
+            entityId, pendingGroupIds);
 
         if (log.isTraceEnabled())
             log.trace("findAllGroups(...) returned these " + "AppdefGroupValues " + availableGroups);

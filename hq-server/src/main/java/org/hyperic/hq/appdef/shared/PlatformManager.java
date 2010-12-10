@@ -108,6 +108,11 @@ public interface PlatformManager {
      */
     public Platform createPlatform(AuthzSubject subject, AIPlatformValue aipValue)
         throws ApplicationException;
+    
+    Platform createPlatform(AuthzSubject subject, Integer platformTypeId,
+                            PlatformValue pValue, Integer agentPK)
+        throws ValidationException, PermissionException, AppdefDuplicateNameException,
+        AppdefDuplicateFQDNException, ApplicationException;
 
     /**
      * Get all platforms.

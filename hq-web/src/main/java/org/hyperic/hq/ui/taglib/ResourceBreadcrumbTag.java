@@ -407,12 +407,12 @@ public class ResourceBreadcrumbTag extends TagSupport {
         
         if (group.isGroup()) {
             ResourceManager resourceManager =Bootstrap.getBean(ResourceManager.class);
-            Resource groupResource = resourceManager.findResource(group.getAppdefEntityId());
+         
             Resource memberResource = resourceManager.findResource(member.getAppdefEntityId());
             ResourceGroupManager resourceGroupManager = Bootstrap.getBean(ResourceGroupManager.class);
-            ResourceGroup resourceGroup = resourceGroupManager.getResourceGroupByResource(groupResource);
+            ResourceGroup resourceGroup = resourceGroupManager.findResourceGroupById(group.getAppdefEntityId().getId());
             
-            result = resourceGroupManager.isMember(resourceGroup, memberResource);
+            result = resourceGroup.isMember(memberResource);
         }
         
         return result;
@@ -438,7 +438,8 @@ public class ResourceBreadcrumbTag extends TagSupport {
             AppdefResourceTypeValue autoGroupResourceType = appdefBoss.findResourceTypeById(sessionId, (AppdefEntityTypeID) group.getAppdefEntityId());
             Resource memberResource = resourceManager.findResource(member.getAppdefEntityId());
 
-            if (autoGroupResourceType.getAppdefType() == memberResource.getType().getAppdefType()) {
+           //TODO
+            //if (autoGroupResourceType.getAppdefType() == memberResource.getType().getAppdefType()) {
                 // ...resource types are the same, now check if parents are the same,
                 // luckily resourceId represents the parent...
                 AppdefEntityID parentAppdef = new AppdefEntityID(group.getResourceId());
@@ -454,7 +455,7 @@ public class ResourceBreadcrumbTag extends TagSupport {
                     
                     result = resourceManager.isResourceChildOf(parentResource, memberResource);
                 }
-            }
+            //}
         }
         
         return result;

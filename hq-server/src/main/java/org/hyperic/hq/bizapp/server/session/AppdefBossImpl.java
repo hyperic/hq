@@ -3250,4 +3250,49 @@ public class AppdefBossImpl implements AppdefBoss {
         }
         return ret;
     }
+    
+    /**
+    * Remove resources from the group's contents.
+    * 
+    * 
+    */
+    public void removeResourcesFromGroup(int sessionId, ResourceGroup group,
+                                        Collection<Resource> resources) throws SessionException,
+       PermissionException, VetoException {
+       AuthzSubject subject = sessionManager.getSubject(sessionId);
+    
+       resourceGroupManager.removeResources(subject, group, resources);
+    }
+    
+    /**
+    * @param platTypePK - the type of platform
+    * @return PlatformValue - the saved Value object
+    * 
+    */
+    public Platform createPlatform(int sessionID, PlatformValue platformVal, Integer platTypePK,
+                                  Integer agent) throws ValidationException,
+       SessionTimeoutException, SessionNotFoundException, PermissionException,
+       AppdefDuplicateNameException, AppdefDuplicateFQDNException, ApplicationException {
+       try {
+           // Get the AuthzSubject for the user's session
+           AuthzSubject subject = sessionManager.getSubject(sessionID);
+          
+           Platform platform = platformManager.createPlatform(subject, platTypePK, platformVal,
+               agent);
+           return platform;
+       } catch (AppdefDuplicateNameException e) {
+           log.error("Unable to create platform. Rolling back", e);
+           throw e;
+       } catch (AppdefDuplicateFQDNException e) {
+           log.error("Unable to create platform. Rolling back", e);
+           throw e;
+       } catch (PlatformNotFoundException e) {
+           log.error("Unable to create platform. Rolling back", e);
+           throw new SystemException("Error occurred creating platform:" + e.getMessage());
+       } catch (ApplicationException e) {
+           log.error("Unable to create platform. Rolling back", e);
+           throw e;
+       }
+   }
+    
 }

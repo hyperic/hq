@@ -313,13 +313,13 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         }
 
         for (ResourceGroup g : groups) {
-            removeResources(g, Collections.singletonList(resource));
+            removeResources(whoami,g, Collections.singletonList(resource));
         }
     }
 
     
 
-    private void removeResources(ResourceGroup group, Collection<Resource> resources) {
+    public void removeResources(AuthzSubject whoami, ResourceGroup group, Collection<Resource> resources) {
         for(Resource resource: resources) {
             group.removeMember(resource);
         }
