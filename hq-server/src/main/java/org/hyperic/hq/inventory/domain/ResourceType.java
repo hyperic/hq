@@ -57,7 +57,7 @@ public class ResourceType {
     private transient GraphDatabaseContext graphDatabaseContext;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
 
@@ -388,8 +388,20 @@ public class ResourceType {
     }
 
     public static Set<ResourceType> findByPlugin(String plugin) {
-        // TODO
-        return null;
+        Set<ResourceType> pluginTypes = new HashSet<ResourceType>();
+        //TODO can we do a JPA-style query that is quicker here?
+        List<ResourceType> types = findAllResourceTypes();
+        for(ResourceType type: types) {
+            if(type.getPlugin().getName().equals(plugin)) {
+                pluginTypes.add(type);
+            }
+        }
+        return pluginTypes;
+    }
+    
+    public void setPlugin(Plugin plugin) {
+        //TODO verify this actually creates the relationship
+        this.plugin = plugin;
     }
 
 }

@@ -307,12 +307,13 @@ public class ServerManagerImpl implements ServerManager {
      * 
      */
     public void removeServer(AuthzSubject subject, Server server) throws PermissionException, VetoException {
-        final Audit audit = resourceAuditFactory.deleteResource(resourceManager
-            .findResourceById(AuthzConstants.authzHQSystem), subject, 0, 0);
+        //TODO authzHQSystem resource doesn't exist now
+        //        final Audit audit = resourceAuditFactory.deleteResource(resourceManager
+//            .findResourceById(AuthzConstants.authzHQSystem), subject, 0, 0);
         boolean pushed = false;
 
         try {
-            auditManager.pushContainer(audit);
+            //auditManager.pushContainer(audit);
             pushed = true;
             //TODO virtual?
             //if (!server.getType().isVirtual()) {

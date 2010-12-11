@@ -259,7 +259,7 @@ public class ProductManagerImpl implements ProductManager {
         return ((ServerTypeInfo) type).isVirtual();
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void deploymentNotify(String pluginName) throws PluginNotFoundException, VetoException,
         NotFoundException {
         ProductPlugin pplugin = (ProductPlugin) getProductPluginManager().getPlugin(pluginName);
@@ -347,6 +347,9 @@ public class ProductManagerImpl implements ProductManager {
         ProductPlugin pplugin = (ProductPlugin) ppm.getPlugin(pluginName);
 
         PluginInfo pInfo = getProductPluginManager().getPluginInfo(pluginName);
+        
+        //TODO moved this up from bottom.  Any issues w/that?
+        updatePlugin(pluginDao, pInfo);
 
         TypeInfo[] entities = pplugin.getTypes();
 
@@ -399,7 +402,8 @@ public class ProductManagerImpl implements ProductManager {
         }
         if (debug)
             watch.markTimeEnd("loop0");
-        pluginDao.getSession().flush();
+        //TODO?
+        //pluginDao.getSession().flush();
 
         // For performance reasons, we add all the new measurements at once.
         if (debug)
@@ -438,7 +442,7 @@ public class ProductManagerImpl implements ProductManager {
 
         createAlertDefinitions(pInfo);
         pluginDeployed(pInfo);
-        updatePlugin(pluginDao, pInfo);
+       
         if (debug)
             log.debug(watch);
     }

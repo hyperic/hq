@@ -72,7 +72,8 @@ public class PluginAuditFactory {
         PluginAudit res = new PluginAudit(resourceManager.findResourceById(AuthzConstants.authzHQSystem), overlord,
             PLUGIN_DEPLOYED, AuditImportance.HIGH, AuditNature.CREATE, msg, start, end);
 
-        auditManager.saveAudit(res);
+        //TODO authzHQSystem resource doesn't exist now
+        //auditManager.saveAudit(res);
         return res;
     }
 
@@ -81,8 +82,8 @@ public class PluginAuditFactory {
         String msg = MSGS.format("auditMsg.plugin.update", pluginName);
         PluginAudit res = new PluginAudit(resourceManager.findResourceById(AuthzConstants.authzHQSystem), overlord,
             PLUGIN_UPDATED, AuditImportance.HIGH, AuditNature.UPDATE, msg, start, end);
-
-        auditManager.saveAudit(res);
+        //TODO authzHQSystem resource doesn't exist now
+        //auditManager.saveAudit(res);
         return res;
     }
 }

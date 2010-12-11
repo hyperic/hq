@@ -231,8 +231,9 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         applicationContext.publishEvent(new ResourceDeleteRequestedEvent(r));
 
         final long now = System.currentTimeMillis();
-        resourceAuditFactory.deleteResource(findResourceById(AuthzConstants.authzHQSystem),
-            subject, now, now);
+        //TODO authzHQSystem resource doesn't exist now
+        //resourceAuditFactory.deleteResource(findResourceById(AuthzConstants.authzHQSystem),
+          //  subject, now, now);
         Collection<ResourceGroup> groups = r.getResourceGroups();
         for(ResourceGroup group:groups) {
             group.removeMember(r);

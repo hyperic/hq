@@ -71,8 +71,8 @@ public class AIAuditFactory {
     public AIAudit newImportAudit(AuthzSubject user) {
         AIAudit res = new AIAudit(user, resourceManager.findResourceById(AuthzConstants.authzHQSystem), IMPORT_APPROVE,
             AuditImportance.HIGH, AuditNature.CREATE, MSGS.format("auditMsg.import.approve"));
-
-        auditManager.saveAudit(res);
+        //TODO authzHQSystem resource doesn't exist now
+        //auditManager.saveAudit(res);
         return res;
     }
 
@@ -82,7 +82,8 @@ public class AIAuditFactory {
             IMPORT_RUNTIME, AuditImportance.MEDIUM, AuditNature.CREATE, MSGS.format("auditMsg.import.runtime", reporter
                 .getAddress()));
 
-        auditManager.saveAudit(res);
+        //TODO authzHQSystem resource doesn't exist now
+        //auditManager.saveAudit(res);
         return res;
     }
 }

@@ -90,6 +90,7 @@ import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformTypeInfo;
+import org.hyperic.hq.product.server.session.PluginDAO;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.sigar.NetFlags;
@@ -144,6 +145,8 @@ public class PlatformManagerImpl implements PlatformManager {
     private ZeventEnqueuer zeventManager;
 
     private ResourceAuditFactory resourceAuditFactory;
+    
+    private PluginDAO pluginDAO;
 
     @Autowired
     public PlatformManagerImpl(
@@ -152,7 +155,7 @@ public class PlatformManagerImpl implements PlatformManager {
                                ResourceGroupManager resourceGroupManager,
                                AuditManager auditManager, AgentManager agentManager,
                                ZeventEnqueuer zeventManager,
-                               ResourceAuditFactory resourceAuditFactory) {
+                               ResourceAuditFactory resourceAuditFactory, PluginDAO pluginDAO) {
         this.permissionManager = permissionManager;
         this.agentDAO = agentDAO;
         this.resourceManager = resourceManager;
@@ -161,6 +164,7 @@ public class PlatformManagerImpl implements PlatformManager {
         this.agentManager = agentManager;
         this.zeventManager = zeventManager;
         this.resourceAuditFactory = resourceAuditFactory;
+        this.pluginDAO = pluginDAO;
     }
 
     // TODO resolve circular dependency
@@ -340,13 +344,13 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     public void removePlatform(AuthzSubject subject, Platform platform)
         throws PlatformNotFoundException, PermissionException, VetoException {
-        //TODO what's up with this deleteResource audit thingy?
-        final Audit audit = resourceAuditFactory.deleteResource(resourceManager
-            .findResourceById(AuthzConstants.authzHQSystem), subject, 0, 0);
+        //TODO authzHQSystem resource doesn't exist now
+        //final Audit audit = resourceAuditFactory.deleteResource(resourceManager
+          //  .findResourceById(AuthzConstants.authzHQSystem), subject, 0, 0);
         boolean pushed = false;
         try {
-            auditManager.pushContainer(audit);
-            pushed = true;
+            //auditManager.pushContainer(audit);
+            //pushed = true;
             //TODO
             //permissionManager.checkRemovePermission(subject, platform.getId());
             
@@ -1577,6 +1581,8 @@ public class PlatformManagerImpl implements PlatformManager {
         ResourceType pt = new ResourceType();
         pt.setName(name);
         pt.persist();
+        pt.setPlugin(pluginDAO.findByName(plugin));
+       
         //TODO relate ResourceType to plugin
         return toPlatformType(pt);
     }

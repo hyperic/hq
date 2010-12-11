@@ -68,7 +68,8 @@ public class ServerConfigAuditFactory {
         res.setFieldName(propKey);
         res.setOldFieldValue(old);
         res.setNewFieldValue(newVal);
-        auditManager.saveAudit(res);
+        //TODO authzHQSystem resource doesn't exist now
+        //auditManager.saveAudit(res);
         return res;
     }
 

@@ -38,12 +38,6 @@
 		<property name="dataSource" ref="dataSource" />
 	</bean>
 
-	<!--  <bean
-		class="org.springframework.transaction.aspectj.AnnotationTransactionAspect"
-		factory-method="aspectOf">
-		<property name="transactionManager" ref="transactionManager" />
-	</bean>-->
-
 	<bean id="transactionManager"
 		class="org.springframework.persistence.transaction.NaiveDoubleTransactionManager">
 		<constructor-arg>
