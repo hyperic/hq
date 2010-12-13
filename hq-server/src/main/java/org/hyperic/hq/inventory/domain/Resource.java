@@ -340,8 +340,6 @@ public class Resource {
         if (this.entityManager == null)
             this.entityManager = entityManager();
         this.entityManager.persist(this);
-        // TODO this call appears to be necessary to get Java obj populated with
-        // its underlying node
         getId();
     }
 
