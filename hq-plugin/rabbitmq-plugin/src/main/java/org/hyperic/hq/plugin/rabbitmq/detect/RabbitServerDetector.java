@@ -556,10 +556,12 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
             } else {
                 home = sigar.getProcEnv(nodePid, "HOME");
             }
-            logger.debug("[getProcessHome] home=" + home);
         } catch (Exception ex) {
-            logger.debug("[getProcessHome] error=" + ex.getMessage(), ex);
+            logger.debug("[getProcessHome] Error gatting process home: " + ex.getMessage());
+            home=System.getProperty("user.home");
+            logger.debug("[getProcessHome] Using user '"+System.getProperty("user.name")+"' home: " + home);
         }
+        logger.debug("[getProcessHome] home=" + home);
         return home;
     }
 }
