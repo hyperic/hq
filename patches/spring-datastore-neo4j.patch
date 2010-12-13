@@ -1,0 +1,54 @@
+From 7e65076678360951d82871df49d09622c52aa725 Mon Sep 17 00:00:00 2001
+From: Jennifer Hickey <jennifer.hickey@springsource.com>
+Date: Mon, 13 Dec 2010 15:40:14 -0800
+Subject: [PATCH 1/2] Made introduced properties transient so JPA entities wouldn't attempt to persist them
+
+---
+ .../spi/relationship/Neo4jRelationshipBacking.aj   |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/spring-datastore-neo4j/src/main/java/org/springframework/datastore/graph/neo4j/spi/relationship/Neo4jRelationshipBacking.aj b/spring-datastore-neo4j/src/main/java/org/springframework/datastore/graph/neo4j/spi/relationship/Neo4jRelationshipBacking.aj
+index a1b3197..af3b5b8 100644
+--- a/spring-datastore-neo4j/src/main/java/org/springframework/datastore/graph/neo4j/spi/relationship/Neo4jRelationshipBacking.aj
++++ b/spring-datastore-neo4j/src/main/java/org/springframework/datastore/graph/neo4j/spi/relationship/Neo4jRelationshipBacking.aj
+@@ -56,8 +56,8 @@ public aspect Neo4jRelationshipBacking extends AbstractTypeAnnotatingMixinFields
+     }
+ 	
+ 	// Introduced fields
+-	private Relationship RelationshipBacked.underlyingRelationship;
+-    private EntityStateAccessors<RelationshipBacked,Relationship> RelationshipBacked.stateAccessors;
++	private transient Relationship RelationshipBacked.underlyingRelationship;
++    private transient EntityStateAccessors<RelationshipBacked,Relationship> RelationshipBacked.stateAccessors;
+ 
+ 	public void RelationshipBacked.setUnderlyingState(Relationship r) {
+         this.underlyingRelationship = r;
+-- 
+1.6.4.4
+
+
+From ff54b429dc309a4962471975ff1f05e72a11cd83 Mon Sep 17 00:00:00 2001
+From: Jennifer Hickey <jennifer.hickey@springsource.com>
+Date: Mon, 13 Dec 2010 15:40:26 -0800
+Subject: [PATCH 2/2] Added null check for cases where Hibernate invokes getters before dependencies have been autowired (during instantiation of the EntityManager, which the EntityInstantiator depends on).  Getters are invoked when loading Hibernate classes from HBM files (when using annotations, direct field access is used instead)
+
+---
+ .../graph/neo4j/spi/node/Neo4jNodeBacking.aj       |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+diff --git a/spring-datastore-neo4j/src/main/java/org/springframework/datastore/graph/neo4j/spi/node/Neo4jNodeBacking.aj b/spring-datastore-neo4j/src/main/java/org/springframework/datastore/graph/neo4j/spi/node/Neo4jNodeBacking.aj
+index a2f9b30..18a88d1 100644
+--- a/spring-datastore-neo4j/src/main/java/org/springframework/datastore/graph/neo4j/spi/node/Neo4jNodeBacking.aj
++++ b/spring-datastore-neo4j/src/main/java/org/springframework/datastore/graph/neo4j/spi/node/Neo4jNodeBacking.aj
+@@ -186,6 +186,9 @@ public aspect Neo4jNodeBacking extends AbstractTypeAnnotatingMixinFields<NodeEnt
+ 	}
+ 
+     Object around(NodeBacked entity): entityFieldGet(entity) {
++ 		if(entity.stateAccessors == null) {
++            return proceed(entity);
++        }
+         Object result=entity.stateAccessors.getValue(field(thisJoinPoint));
+         if (result instanceof DoReturn) return unwrap(result);
+         return proceed(entity);
+-- 
+1.6.4.4
+

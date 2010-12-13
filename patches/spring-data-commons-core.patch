@@ -1,0 +1,53 @@
+From 76167e272219562217f5c2957f1a6c109d7cd094 Mon Sep 17 00:00:00 2001
+From: Jennifer Hickey <jennifer.hickey@springsource.com>
+Date: Mon, 13 Dec 2010 15:43:47 -0800
+Subject: [PATCH] Added commit only if new tx (to support nested @Transactional)
+
+---
+ .../transaction/NaiveDoubleTransactionManager.java |   30 ++++++++++---------
+ 1 files changed, 16 insertions(+), 14 deletions(-)
+
+diff --git a/spring-data-commons-core/src/main/java/org/springframework/persistence/transaction/NaiveDoubleTransactionManager.java b/spring-data-commons-core/src/main/java/org/springframework/persistence/transaction/NaiveDoubleTransactionManager.java
+index 60bd3c2..f18d251 100644
+--- a/spring-data-commons-core/src/main/java/org/springframework/persistence/transaction/NaiveDoubleTransactionManager.java
++++ b/spring-data-commons-core/src/main/java/org/springframework/persistence/transaction/NaiveDoubleTransactionManager.java
+@@ -23,20 +23,22 @@ public class NaiveDoubleTransactionManager implements PlatformTransactionManager
+ 
+ 	public void commit(TransactionStatus ts) throws TransactionException {
+ 		try {
+-		final TransactionStatus tsb = copyTransactionStatus(status.get(ts));
+-		try {
+-			a.commit(ts);
+-		}
+-		catch (Throwable t) {
+-			System.err.println("Continuing to commit tx despite this:" + t);
+-		}
+-		try {
+-			b.commit(tsb);
+-		}
+-		catch (Throwable t) {
+-			System.err.println("Can't commit tx" + t);
+-			throw new TransactionException(t.getMessage(), t) {}; 
+-		}
++    		if(ts.isNewTransaction()) {
++    		    final TransactionStatus tsb = copyTransactionStatus(status.get(ts));
++        		try {
++        			a.commit(ts);
++        		}
++        		catch (Throwable t) {
++        			System.err.println("Continuing to commit tx despite this:" + t);
++        		}
++        		try {
++        			b.commit(tsb);
++        		}
++        		catch (Throwable t) {
++        			System.err.println("Can't commit tx" + t);
++        			throw new TransactionException(t.getMessage(), t) {}; 
++        		}
++    		}
+ 		} finally {
+ 			status.remove(ts);
+ 		}
+-- 
+1.6.4.4
+
