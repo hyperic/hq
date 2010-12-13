@@ -87,7 +87,10 @@ public class AgentConnection {
         } catch(IOException exc){
             String msg = "Error connecting to agent @ ("+ _agentAddress+ 
                          ":"+ _agentPort+"): " + exc.getMessage();
-            throw new IOException(msg, exc);
+            IOException toThrow = new IOException(msg);
+            // call initCause instead of constructor to be java 1.5 compat
+            toThrow.initCause(exc);
+            throw toThrow;
         }
         return s;
     }
@@ -173,7 +176,11 @@ public class AgentConnection {
             }
         }
         if (ex != null) {
-            throw new IOException(ex.getMessage()+ ", retried " + MAX_RETRIES + " times", ex);
+            IOException toThrow =
+                new IOException(ex.getMessage()+ ", retried " + MAX_RETRIES + " times");
+            // call initCause instead of constructor to be java 1.5 compat
+            toThrow.initCause(ex);
+            throw toThrow;
         }
         return streamPair;
     }
