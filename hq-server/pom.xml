@@ -12,6 +12,11 @@
 	<artifactId>hq-server</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ - Server</name>
+	
+	<properties>
+		<neo4j.version>1.1</neo4j.version>
+		<datastore-graph.version>1.0.0.BUILD-SNAPSHOT</datastore-graph.version>
+	</properties>
 
 
 	<dependencies>
@@ -84,16 +89,36 @@
             <artifactId>jta</artifactId>
             <version>1.1</version>
         </dependency>
+	<dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-datastore-neo4j</artifactId>
+            <version>${datastore-graph.version}</version>
+        </dependency>
+		<dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-datastore-neo4j-roo</artifactId>
+            <version>${datastore-graph.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.neo4j</groupId>
+            <artifactId>neo4j-kernel</artifactId>
+            <version>${neo4j.version}</version>
+        </dependency>
+	    <dependency>
+            <groupId>org.neo4j</groupId>
+            <artifactId>neo4j-utils</artifactId>
+            <version>${neo4j.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-common</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq</groupId>
-			<artifactId>Inventory</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+		 <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aspects</artifactId>
+            <version>${spring-framework.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-lather</artifactId>
@@ -327,6 +352,10 @@
 							<groupId>org.springframework</groupId>
 							<artifactId>spring-aspects</artifactId>
 						</aspectLibrary>
+						 <aspectLibrary>
+                        	<groupId>org.springframework.data</groupId>
+                        	<artifactId>spring-datastore-neo4j</artifactId>
+                    	</aspectLibrary>
 					</aspectLibraries>
 					<source>1.5</source>
 					<target>1.5</target>

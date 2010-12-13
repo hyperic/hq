@@ -125,7 +125,7 @@ public class ResourceDAO
 
     @SuppressWarnings("unchecked")
     List<Resource> findResourcesOfType(int typeId, PageInfo pInfo) {
-        String sql = "from Resource r where resourceType.id = :typeId ";
+        String sql = "from org.hyperic.hq.authz.server.session.Resource r where resourceType.id = :typeId ";
         ResourceSortField sort = (ResourceSortField) pInfo.getSort();
 
         sql += " order by " + sort.getSortString("r") + (pInfo.isAscending() ? "" : " DESC");
@@ -145,7 +145,7 @@ public class ResourceDAO
             Integer rid = (Integer) e.getObjectValue();
             return get(rid);
         } else {
-            String sql = "from Resource where instanceId = ? and " + "resourceType.id = ?";
+            String sql = "from org.hyperic.hq.authz.server.session.Resource where instanceId = ? and " + "resourceType.id = ?";
             Resource r = (Resource) getSession().createQuery(sql).setInteger(0, id.intValue())
                 .setInteger(1, typeId.intValue()).uniqueResult();
 
@@ -188,7 +188,7 @@ public class ResourceDAO
                                                     AuthzConstants.serviceOpViewService, };
 
         EdgePermCheck wherePermCheck = permissionManager.makePermCheckHql("rez", true);
-        String hql = "select rez from Resource rez " + wherePermCheck;
+        String hql = "select rez from org.hyperic.hq.authz.server.session.Resource rez " + wherePermCheck;
 
         Query q = createQuery(hql);
         return wherePermCheck.addQueryParameters(q, subject, r, 0, Arrays.asList(VIEW_APPDEFS))
@@ -197,12 +197,12 @@ public class ResourceDAO
 
     @SuppressWarnings("unchecked")
     public Collection<Resource> findByOwner(AuthzSubject owner) {
-        String sql = "from Resource where owner.id = ?";
+        String sql = "from org.hyperic.hq.authz.server.session.Resource where owner.id = ?";
         return getSession().createQuery(sql).setInteger(0, owner.getId().intValue()).list();
     }
 
     public Collection findByOwnerAndType(AuthzSubject owner, ResourceType type) {
-        String sql = "from Resource where owner.id = ? and resourceType.id = ?";
+        String sql = "from org.hyperic.hq.authz.server.session.Resource where owner.id = ? and resourceType.id = ?";
         return getSession().createQuery(sql).setInteger(0, owner.getId().intValue()).setInteger(1,
             type.getId().intValue()).list();
     }
@@ -240,9 +240,9 @@ public class ResourceDAO
     }
 
     public Collection findSvcRes_orderName(Boolean fSystem) {
-        String sql = "select r from Resource r join r.resourceType rt "
+        String sql = "select r from org.hyperic.hq.authz.server.session.Resource r join r.resourceType rt "
                      + "where r.system = :system and " + "(rt.name = :resSvcType or "
-                     + "exists (select rg from ResourceGroup rg " + "join rg.resource r2 "
+                     + "exists (select rg from org.hyperic.hq.authz.server.session.ResourceGroup rg " + "join rg.resource r2 "
                      + "where r = r2 and rg.groupType = 15)) " + "order by r.sortName ";
 
         List resources = getSession().createQuery(sql).setBoolean("system", fSystem.booleanValue())
@@ -252,7 +252,7 @@ public class ResourceDAO
     }
 
     public Collection findInGroupAuthz_orderName(Integer userId, Integer groupId, Boolean fSystem) {
-        String sql = "select distinct r from Resource r " + " join r.resourceGroups rgg"
+        String sql = "select distinct r from org.hyperic.hq.authz.server.session.Resource r " + " join r.resourceGroups rgg"
                      + " join r.resourceGroups rg " + " join rg.roles role "
                      + " join role.subjects subj " + " join role.operations op " + "where "
                      + " r.system = :system and " + " rgg.id = :groupId and "
@@ -268,7 +268,7 @@ public class ResourceDAO
     }
 
     public Collection findInGroup_orderName(Integer groupId, Boolean fSystem) {
-        String sql = "select distinct r from Resource r " + " join r.resourceGroups rgg"
+        String sql = "select distinct r from org.hyperic.hq.authz.server.session.Resource r " + " join r.resourceGroups rgg"
                      + " join r.resourceGroups rg " + " join rg.roles role "
                      + " join role.subjects subj " + " join role.operations op " + "where "
                      + " r.system = :system and " + " rgg.id = :groupId and "
@@ -287,7 +287,7 @@ public class ResourceDAO
                                                 Operation[] opLocArr) {
         StringBuffer sb = new StringBuffer();
 
-        sb.append("SELECT DISTINCT r ").append("FROM Resource r ").append(
+        sb.append("SELECT DISTINCT r ").append("FROM org.hyperic.hq.authz.server.session.Resource r ").append(
             " join r.resourceGroups g ").append(" join g.roles e ").append(" join e.operations o ")
             .append(" join e.subjects s ").append(" WHERE s.id = ? ").append(" AND ( ");
 
@@ -306,7 +306,7 @@ public class ResourceDAO
      * Returns an ordered list of instance IDs for a given operation.
      */
     public List findAllResourcesInstancesForOperation(int opId) {
-        final String sql = "SELECT r.instanceId FROM Resource r, Operation o "
+        final String sql = "SELECT r.instanceId FROM org.hyperic.hq.authz.server.session.Resource r, Operation o "
                            + "WHERE     o.resourceType = r.resourceType" + "      AND o.id = :opId";
 
         return getSession().createQuery(sql).setInteger("opId", opId).list();
@@ -314,12 +314,12 @@ public class ResourceDAO
 
     int reassignResources(int oldOwner, int newOwner) {
         return getSession().createQuery(
-            "UPDATE Resource " + "SET owner.id = :newOwner " + "WHERE owner.id = :oldOwner")
+            "UPDATE org.hyperic.hq.authz.server.session.Resource " + "SET owner.id = :newOwner " + "WHERE owner.id = :oldOwner")
             .setInteger("oldOwner", oldOwner).setInteger("newOwner", newOwner).executeUpdate();
     }
 
     boolean resourcesExistOfType(String typeName) {
-        String sql = "select r from Resource r " + "join r.prototype p "
+        String sql = "select r from org.hyperic.hq.authz.server.session.Resource r " + "join r.prototype p "
                      + "where p.name = :protoName";
 
         return getSession().createQuery(sql).setParameter("protoName", typeName).setMaxResults(1)
@@ -328,13 +328,13 @@ public class ResourceDAO
 
     @SuppressWarnings("unchecked")
     List<Resource> findResourcesOfPrototype(Resource proto, PageInfo pInfo) {
-        String sql = "select r from Resource r where r.prototype = :proto";
+        String sql = "select r from org.hyperic.hq.authz.server.session.Resource r where r.prototype = :proto";
 
         return pInfo.pageResults(getSession().createQuery(sql).setParameter("proto", proto)).list();
     }
 
     Resource findResourcePrototypeByName(String name) {
-        String sql = "select r from Resource r " + "where r.name = :name "
+        String sql = "select r from org.hyperic.hq.authz.server.session.Resource r " + "where r.name = :name "
                      + " AND r.resourceType.id in (:platProto, :svrProto, :svcProto)";
 
         return (Resource) getSession().createQuery(sql).setParameter("name", name).setParameter(
@@ -345,7 +345,7 @@ public class ResourceDAO
 
     @SuppressWarnings("unchecked")
     List<Resource> findAllAppdefPrototypes() {
-        String sql = "select r from Resource r "
+        String sql = "select r from org.hyperic.hq.authz.server.session.Resource r "
                      + "where r.resourceType.id in (:platProto, :svrProto, :svcProto)";
 
         return (List) getSession().createQuery(sql).setParameter("platProto",
@@ -356,7 +356,7 @@ public class ResourceDAO
 
     @SuppressWarnings("unchecked")
     List<Resource> findAppdefPrototypes() {
-        String sql = "select distinct r.prototype from Resource r "
+        String sql = "select distinct r.prototype from org.hyperic.hq.authz.server.session.Resource r "
                      + "where r.resourceType.id in (:platProto, :svrProto, :svcProto) ";
 
         return getSession().createQuery(sql)
@@ -366,7 +366,7 @@ public class ResourceDAO
     }
 
     public int getPlatformCountMinusVsphereVmPlatforms() {
-        String sql = "select count(*) from Resource r " + "where r.resourceType.id = :platProto "
+        String sql = "select count(*) from org.hyperic.hq.authz.server.session.Resource r " + "where r.resourceType.id = :platProto "
                      + "and r.prototype.name != :vspherevm";
         return ((Number) getSession().createQuery(sql).setInteger("platProto",
             AuthzConstants.authzPlatform.intValue()).setString("vspherevm",

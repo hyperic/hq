@@ -36,7 +36,6 @@ import net.sf.ehcache.CacheManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
-import org.hibernate.ejb.EntityManagerImpl;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -149,8 +148,8 @@ abstract public class BaseInfrastructureTest {
     @After
     public void after() {
         // Clear the query cache
-        ((EntityManagerImpl) EntityManagerFactoryUtils
-            .getTransactionalEntityManager(entityManagerFactory)).getSession().getSessionFactory().getCache().evictQueryRegions();
+        ((Session)EntityManagerFactoryUtils
+            .getTransactionalEntityManager(entityManagerFactory).getDelegate()).getSessionFactory().getCache().evictQueryRegions();
         // Clear the 2nd level cache including regions with queries
         CacheManager.getInstance().clearAll();
         endTime = System.nanoTime();
@@ -323,17 +322,17 @@ abstract public class BaseInfrastructureTest {
     }
 
     protected void flushSession() {
-        ((EntityManagerImpl) EntityManagerFactoryUtils
-            .getTransactionalEntityManager(entityManagerFactory)).getSession().flush();
+        ((Session)EntityManagerFactoryUtils
+            .getTransactionalEntityManager(entityManagerFactory).getDelegate()).flush();
     }
 
     protected void clearSession() {
-        ((EntityManagerImpl) EntityManagerFactoryUtils
-            .getTransactionalEntityManager(entityManagerFactory)).getSession().clear();
+        ((Session)EntityManagerFactoryUtils
+            .getTransactionalEntityManager(entityManagerFactory).getDelegate()).clear();
     }
     
     protected Session getCurrentSession() {
-        return  ((EntityManagerImpl) EntityManagerFactoryUtils
-            .getTransactionalEntityManager(entityManagerFactory)).getSession();
+        return  (Session)EntityManagerFactoryUtils
+            .getTransactionalEntityManager(entityManagerFactory).getDelegate();
     }
 }

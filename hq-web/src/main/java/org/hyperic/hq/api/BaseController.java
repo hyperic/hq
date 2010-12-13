@@ -7,6 +7,10 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.inventory.domain.IdentityAware;
+import org.hyperic.hq.inventory.domain.PersistenceAware;
+import org.hyperic.hq.inventory.domain.RelationshipAware;
+import org.hyperic.hq.reference.RelationshipDirection;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -68,42 +72,111 @@ public abstract class BaseController {
 		return new ErrorRepresentation(e);
 	}
 	
-	protected Representation executeRead(String domainName, String methodName, Object... parameters) throws Exception {
-		Domain domain = Domain.getValue(domainName);
-		Class<?> clazz = domain.javaType();
+	protected Representation readSingleEntity(String domainName, Integer id) throws Exception {
+		return executeRead(domainName, "findById", id);
+	}
+	
+	protected Representation readMultipleEntities(String domainName, ListSettings listSettings) throws Exception {
+		return executeRead(domainName, "find", listSettings.getPage(), listSettings.getSize());
+	}
+	
+	protected Representation readRelationships(String domainName, Integer id, ListSettings listSettings) throws Exception {
+		return readRelationships(domainName, id, null, null, listSettings);
+	}
+	
+	protected Representation readRelationships(String domainName, Integer id, String relationshipName, String direction, ListSettings listSettings) throws Exception {
+		Method method = findMethod(domainName, "findById", Integer.class);
+		Object target = method.invoke(null, id);
+		
+		if (target == null) {
+			throw new Exception("not found");
+		}
+		
+		if (!(target instanceof RelationshipAware<?>)) {
+			throw new Exception("not relationship aware");
+		}
+		
+		RelationshipDirection dir = RelationshipDirection.ALL;
+		
+		if (RelationshipDirection.INCOMING.toString().equalsIgnoreCase(direction)) {
+			dir = RelationshipDirection.INCOMING;
+		} else if (RelationshipDirection.OUTGOING.toString().equalsIgnoreCase(direction)) {
+			dir = RelationshipDirection.OUTGOING;
+		} else if (RelationshipDirection.BOTH_WAYS.toString().equalsIgnoreCase(direction)) {
+			dir = RelationshipDirection.BOTH_WAYS;
+		}
+		
+		Object data = ((RelationshipAware<?>) target).getRelationships(null, relationshipName, dir);
+		
+		return new Representation(data, domainName);
+	}
+	
+	private Representation executeRead(String domainName, String methodName, Object... parameters) throws Exception {
 		Class<?>[] paramTypes = new Class<?>[parameters.length];
 		
 		for (int x = 0; x < parameters.length; x++) {
 			paramTypes[x] = parameters[x].getClass();
 		}
-
+		
+		Method method = findMethod(domainName, methodName, paramTypes);
+		Object data = method.invoke(null, parameters);
+		
+		return new Representation(data, domainName);
+	}
+	
+	private Method findMethod(String domainName, String methodName, Class<?>... paramTypes) throws Exception {
+		Class<?> clazz = Domain.getValue(domainName).javaType();
 		Method method = ReflectionUtils.findMethod(clazz, methodName, paramTypes);
 		
 		if (method == null) {
 			throw new NoSuchMethodException("Method '" + methodName + "(" + StringUtils.arrayToCommaDelimitedString(paramTypes) + ")' not found for class [" + clazz.getName() + "]");
 		}
 		
-		Object data = method.invoke(null, parameters);
-		
-		return new Representation(data, domainName);
+		return method;
 	}
 	
-	protected Representation executeCreate(String domainName, HttpServletRequest request) throws Exception {
+	protected Representation createSingleEntity(String domainName, HttpServletRequest request) throws Exception {
 		return executeWrite(domainName, null, request, Operation.CREATE);
 	}
 	
-	protected Representation executeUpdate(String domainName, Long id, HttpServletRequest request) throws Exception {
+	protected Representation updateSingleEntity(String domainName, Integer id, HttpServletRequest request) throws Exception {
 		return executeWrite(domainName, id, request, Operation.UPDATE);
 	}
 	
-	protected void executeDelete(String domainName, Long id) throws Exception {
+	protected void deleteSingleEntity(String domainName, Integer id) throws Exception {
 		executeWrite(domainName, id, null, Operation.DELETE);
 	}
 
-	private Representation executeWrite(String domainName, Long id, final HttpServletRequest request, Operation operation) throws Exception {
-		Domain domain = Domain.getValue(domainName);
+	protected Representation createRelationship(String domainName, Integer fromId, Integer toId, String relationshipName) throws Exception {
+		return null;
+	}
+	
+	protected void deleteRelationship(String domainName, Integer fromId, Integer toId, String direction, String relationshipName) throws Exception {
+		Class<?> clazz = Domain.getValue(domainName).javaType();
+		Method findById = findMethod(domainName, "findById", Integer.class);
+		Object from = findById.invoke(null, fromId);
+		
+		if (from instanceof RelationshipAware) {
+			Object to = findById.invoke(null, toId);
+			RelationshipDirection dir = RelationshipDirection.ALL;
+			
+			if (RelationshipDirection.INCOMING.toString().equalsIgnoreCase(direction)) {
+				dir = RelationshipDirection.INCOMING;
+			} else if (RelationshipDirection.OUTGOING.toString().equalsIgnoreCase(direction)) {
+				dir = RelationshipDirection.OUTGOING;
+			} else if (RelationshipDirection.BOTH_WAYS.toString().equalsIgnoreCase(direction)) {
+				dir = RelationshipDirection.BOTH_WAYS;
+			}
+		
+			Method remove = ReflectionUtils.findMethod(RelationshipAware.class, "removeRelationships", clazz, String.class, RelationshipDirection.class);
+			
+			remove.invoke(from, to, relationshipName, dir);
+		}
+	}
+	
+	private Representation executeWrite(String domainName, Integer id, final HttpServletRequest request, Operation operation) throws Exception {
 		Representation result = null;
-		Class<?> clazz = domain.javaType();
+		Class<?> clazz = Domain.getValue(domainName).javaType();
 		MappingJacksonHttpMessageConverter converter = new MappingJacksonHttpMessageConverter();
 		Object target = clazz.newInstance();
 		
@@ -117,23 +190,20 @@ public abstract class BaseController {
 			target = converter.read(clazz, wrappedRequest);
 		}
 		
-		Entity entity = (Entity) target;
-			
-		entity.setId(id);
+		((IdentityAware) target).setId(id);
+		PersistenceAware<?> entity = (PersistenceAware<?>) target;
 			
 		switch (operation) {
 			case CREATE:
-				entity.create();
-				
+				entity.persist();
 				result = new Representation(target, domainName);
 				break;
 			case UPDATE:
-				entity.update();
-					
+				target = entity.merge();
 				result = new Representation(target, domainName);
 				break;
 			case DELETE:
-				entity.delete();
+				entity.remove();
 		}
 		
 		return result;
