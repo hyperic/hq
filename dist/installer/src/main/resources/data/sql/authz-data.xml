@@ -12,10 +12,10 @@
     </table>
 
   
-
-    <table name="EAM_SUBJECT">
+<!-- TODO referencing resource w/ID 4-->
+    <!--  <table name="EAM_SUBJECT">
         <data ID="0" RESOURCE_ID="%EAM_RESOURCE.ID:4"/>
-    </table>
+    </table>-->
 
    
   
@@ -38,10 +38,10 @@
 
  
 
-    <!-- update the subject table to have a reference back to its resource -->
+    <!-- TODO update the subject table to have a reference back to its resource
     <table name="EAM_SUBJECT">
         <data id="1" RESOURCE_ID="%EAM_RESOURCE.ID:6"/>
-    </table>
+    </table> -->
 
     <!-- Define a role which includes our Admin User and
         has all the operations availble on the authz resource group -->
@@ -50,10 +50,10 @@
     </table>
 
    
-
+	<!-- TODO 
     <table name="EAM_ROLE">
         <data ID="0" RESOURCE_ID="%EAM_RESOURCE.ID:8"/>
-    </table>
+    </table>-->
 
    
 
@@ -78,14 +78,16 @@
   
 
     <!-- sigh... set the foreign key resource id on the role entry -->
+    <!-- TODO
     <table name="EAM_ROLE">
         <data ID="1" RESOURCE_ID="%EAM_RESOURCE.ID:9"/>
-    </table>
+    </table> -->
 
     <!-- add the authz resource group to the role -->
+     <!-- TODO
     <table name="EAM_ROLE_RESOURCE_GROUP_MAP">
         <data ROLE_ID="%EAM_ROLE.ID:1" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"/>
-    </table>
+    </table> -->
 
     <!-- add the root user to the creator role -->
     <table name="EAM_SUBJECT_ROLE_MAP">
@@ -110,10 +112,10 @@
     </table>
 
   
-
+ <!-- TODO
     <table name="EAM_SUBJECT">
         <data ID="2" RESOURCE_ID="%EAM_RESOURCE.ID:10"/>
-    </table>
+    </table>-->
 
     <!-- set the default dashboard for view only role -->
     <table name="EAM_CRISPO_OPT">
@@ -127,10 +129,10 @@
     </table>
 
    
-
+	<!-- TODO 
     <table name="EAM_ROLE">
         <data ID="2" RESOURCE_ID="%EAM_RESOURCE.ID:11"/>
-    </table>
+    </table>-->
 
     <table name="EAM_DASH_CONFIG">
         <data ID="0" CONFIG_TYPE="ROLE" NAME="Super User Role" CRISPO_ID="0"
