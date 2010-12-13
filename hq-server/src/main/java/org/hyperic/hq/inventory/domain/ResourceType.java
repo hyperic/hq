@@ -17,6 +17,7 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.DynamicRelationshipType;
@@ -57,7 +58,8 @@ public class ResourceType {
     private transient GraphDatabaseContext graphDatabaseContext;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1") 
     @Column(name = "id")
     private Integer id;
 
@@ -344,7 +346,11 @@ public class ResourceType {
     public static ResourceType findResourceType(Integer id) {
         if (id == null)
             return null;
-        return entityManager().find(ResourceType.class, id);
+        ResourceType resourceType = entityManager().find(ResourceType.class, id);
+        if(resourceType !=null) {
+            resourceType.getId();
+        }
+        return resourceType;
     }
 
     public static ResourceType findResourceTypeByName(String name) {
@@ -360,6 +366,12 @@ public class ResourceType {
     public static List<ResourceType> findResourceTypeEntries(int firstResult, int maxResults) {
         return entityManager().createQuery("select o from ResourceType o", ResourceType.class)
             .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
+    }
+    
+    
+
+    public void setPropertyTypes(Set<PropertyType> propertyTypes) {
+        this.propertyTypes = propertyTypes;
     }
 
     // TODO other config types and setters
@@ -382,9 +394,7 @@ public class ResourceType {
     }
 
     public static ResourceType findRootResourceType() {
-        // TODO AuthzConstants.RootResourceId. We may need a root resource.
-        // Check concept of Neo4J ref node
-        return null;
+       return findResourceType(1);
     }
 
     public static Set<ResourceType> findByPlugin(String plugin) {
@@ -392,7 +402,7 @@ public class ResourceType {
         //TODO can we do a JPA-style query that is quicker here?
         List<ResourceType> types = findAllResourceTypes();
         for(ResourceType type: types) {
-            if(type.getPlugin().getName().equals(plugin)) {
+            if(type.getPlugin() != null && type.getPlugin().getName().equals(plugin)) {
                 pluginTypes.add(type);
             }
         }
@@ -400,7 +410,6 @@ public class ResourceType {
     }
     
     public void setPlugin(Plugin plugin) {
-        //TODO verify this actually creates the relationship
         this.plugin = plugin;
     }
 

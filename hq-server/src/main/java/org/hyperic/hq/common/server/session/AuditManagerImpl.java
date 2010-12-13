@@ -77,7 +77,8 @@ public class AuditManagerImpl implements AuditManager, ApplicationListener<Appli
     }
 
     private void saveRecursively(Audit a) {
-        auditDao.save(a);
+        //TODO
+        //auditDao.save(a);
 
         if (log.isDebugEnabled()) {
             log.debug("Audit: " + a);

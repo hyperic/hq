@@ -104,9 +104,9 @@ public class PlatformManagerTest
         String platformType;
         for (int i = 1; i < 10; i++) {
             platformType = "pType" + i;
-            pTypes.add(i - 1, createPlatformType(platformType, "Test Plugin" + i));
+            pTypes.add(i - 1, createPlatformType(platformType, "test"));
         }
-        pTypes.add(9, createPlatformType("Linux", "Test Plugin"));
+        pTypes.add(9, createPlatformType("Linux", "test"));
         return pTypes;
     }
 

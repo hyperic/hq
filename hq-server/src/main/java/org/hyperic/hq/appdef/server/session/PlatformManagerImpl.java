@@ -84,6 +84,7 @@ import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.common.shared.AuditManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.inventory.domain.OperationType;
+import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
@@ -192,8 +193,19 @@ public class PlatformManagerImpl implements PlatformManager {
     }
     
     private Platform toPlatform(Resource resource) {
-        //TODO
-        return new Platform();
+        Platform platform = new Platform();
+        platform.setAgent(resource.getAgent());
+        platform.setCertdn((String)resource.getProperty(CERT_DN));
+        platform.setCommentText((String)resource.getProperty(COMMENT_TEXT));
+        platform.setCpuCount((Integer)resource.getProperty(CPU_COUNT));
+        platform.setDescription(resource.getDescription());
+        platform.setFqdn((String)resource.getProperty(FQDN));
+        platform.setModifiedBy(resource.getModifiedBy());
+        platform.setLocation(resource.getLocation());
+        platform.setName(resource.getName());
+        platform.setPlatformType(toPlatformType(resource.getType()));
+        platform.setId(resource.getId());
+        return platform;
     }
 
     /**
@@ -382,8 +394,7 @@ public class PlatformManagerImpl implements PlatformManager {
     
     private Resource create(AIPlatformValue aip, String initialOwner,Agent agent, ResourceType type) 
     {
-        Resource p = copyAIPlatformValue(aip);
-        p.setType(type);
+        Resource p = copyAIPlatformValue(aip,type);
         p.setModifiedBy(initialOwner);
         p.setAgent(agent);
         return p;
@@ -414,17 +425,20 @@ public class PlatformManagerImpl implements PlatformManager {
     }
 
     
-    private Resource copyAIPlatformValue(AIPlatformValue aip) {
+    private Resource copyAIPlatformValue(AIPlatformValue aip, ResourceType platformType) {
         Resource p = new Resource();
-        p.setProperty(CERT_DN,aip.getCertdn());
-        p.setProperty(FQDN,aip.getFqdn());
+        //TODO have to set properties after persistence for type check  
         p.setName(aip.getName());
         p.setDescription(aip.getDescription());
-        p.setProperty(COMMENT_TEXT,"");
         p.setLocation("");
-        p.setProperty(CPU_COUNT,aip.getCpuCount());
         //TODO set owner?
         fixName(p);
+        p.persist();
+        p.setType(platformType);
+        p.setProperty(CERT_DN,aip.getCertdn());
+        p.setProperty(FQDN,aip.getFqdn());
+        p.setProperty(COMMENT_TEXT,"");
+        p.setProperty(CPU_COUNT,aip.getCpuCount());
         return p;
     }
     
@@ -544,7 +558,7 @@ public class PlatformManagerImpl implements PlatformManager {
         }
 
         Resource platform = create(aipValue, subject.getName(),agent,platType);     
-        platform.persist();
+        
 
         // Send resource create event.  TODO abstract to ResourceManager when we don't need to use entity ID
         Platform plat = toPlatform(platform);
@@ -1582,9 +1596,22 @@ public class PlatformManagerImpl implements PlatformManager {
         pt.setName(name);
         pt.persist();
         pt.setPlugin(pluginDAO.findByName(plugin));
-       
-        //TODO relate ResourceType to plugin
+        Set<PropertyType> propTypes = new HashSet<PropertyType>();
+        propTypes.add(createPlatformPropertyType(CERT_DN, pt));
+        propTypes.add(createPlatformPropertyType(FQDN, pt));
+        propTypes.add(createPlatformPropertyType(COMMENT_TEXT, pt));
+        propTypes.add(createPlatformPropertyType(CPU_COUNT, pt));
+        //TODO add method?
+        pt.setPropertyTypes(propTypes);
+        ResourceType.findRootResourceType().relateTo(pt, RelationshipTypes.PLATFORM_TYPE);
         return toPlatformType(pt);
+    }
+    
+    private PropertyType createPlatformPropertyType(String propName, ResourceType platformType) {
+        PropertyType propType = new PropertyType();
+        propType.setName(propName);
+        propType.persist();
+        return propType;
     }
     
     private void updateWithAI(Platform platform, AIPlatformValue aiplatform,String owner) {

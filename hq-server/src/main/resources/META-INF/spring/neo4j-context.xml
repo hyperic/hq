@@ -11,7 +11,8 @@
 
 	<bean
 		class="org.springframework.datastore.graph.neo4j.spi.relationship.Neo4jRelationshipBacking"
-		factory-method="aspectOf" depends-on="nodeEntityStateAccessorsFactory" />
+		factory-method="aspectOf" depends-on="nodeEntityStateAccessorsFactory" id="neo4jRelationshipBacking"/>
+		
 	<bean id="graphDbService" class="org.neo4j.kernel.EmbeddedGraphDatabase"
 		destroy-method="shutdown" scope="singleton">
 		<constructor-arg index="0" value="${neo4j.location}" />

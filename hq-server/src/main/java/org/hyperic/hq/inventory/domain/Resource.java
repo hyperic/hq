@@ -22,12 +22,14 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.inventory.InvalidRelationshipException;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.ReturnableEvaluator;
 import org.neo4j.graphdb.StopEvaluator;
@@ -67,7 +69,8 @@ public class Resource {
     private transient GraphDatabaseContext graphDatabaseContext;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1") 
     @Column(name = "id")
     private Integer id;
 
@@ -337,7 +340,7 @@ public class Resource {
         if (this.entityManager == null)
             this.entityManager = entityManager();
         this.entityManager.persist(this);
-        // TODO this call appears to be necessary to get Alert populated with
+        // TODO this call appears to be necessary to get Java obj populated with
         // its underlying node
         getId();
     }
@@ -471,8 +474,15 @@ public class Resource {
                                                " is not defined for resource of type " +
                                                type.getName());
         }
-        // TODO check other stuff?
-        Object oldValue = getUnderlyingState().getProperty(key);
+        // TODO check other stuff?  Should def check optional param and maybe disregard nulls, below throws Exception
+        //with null values
+        Object oldValue = null;
+        try {
+            oldValue = getUnderlyingState().getProperty(key);
+        }catch(NotFoundException e) {
+            //could be first time
+        }
+         
         getUnderlyingState().setProperty(key, value);
         return oldValue;
     }
@@ -539,8 +549,6 @@ public class Resource {
     }
 
     public static Resource findRootResource() {
-        // TODO AuthzConstants.RootResourceId. We may need a root resource.
-        // Check concept of Neo4J ref node
-        return null;
+       return findResource(1);
     }
 }

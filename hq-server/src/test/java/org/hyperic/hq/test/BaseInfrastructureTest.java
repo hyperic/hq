@@ -180,6 +180,7 @@ abstract public class BaseInfrastructureTest {
         aiPlatform.setAgentToken(agentToken);
         aiPlatform.setFqdn(fqdn);
         aiPlatform.setName(name);
+        aiPlatform.setCertdn("SomethingOrOther");
         return platformManager.createPlatform(authzSubjectManager.getOverlordPojo(), aiPlatform);
     }
 

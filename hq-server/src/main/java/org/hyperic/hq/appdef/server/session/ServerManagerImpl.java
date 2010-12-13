@@ -69,6 +69,7 @@ import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.product.ServerTypeInfo;
+import org.hyperic.hq.product.server.session.PluginDAO;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.ArrayUtil;
@@ -96,7 +97,7 @@ public class ServerManagerImpl implements ServerManager {
 
     private static final String VALUE_PROCESSOR = "org.hyperic.hq.appdef.server.session.PagerProcessor_server";
     private Pager valuePager;
-    
+    private PluginDAO pluginDAO;
 
     private PermissionManager permissionManager;
     private ResourceManager resourceManager;
@@ -110,7 +111,8 @@ public class ServerManagerImpl implements ServerManager {
     public ServerManagerImpl(PermissionManager permissionManager,  ResourceManager resourceManager,
                               AuditManager auditManager,
                              AuthzSubjectManager authzSubjectManager, ResourceGroupManager resourceGroupManager,
-                             ZeventEnqueuer zeventManager, ResourceAuditFactory resourceAuditFactory) {
+                             ZeventEnqueuer zeventManager, ResourceAuditFactory resourceAuditFactory,
+                             PluginDAO pluginDAO) {
 
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
@@ -119,6 +121,7 @@ public class ServerManagerImpl implements ServerManager {
         this.resourceGroupManager = resourceGroupManager;
         this.zeventManager = zeventManager;
         this.resourceAuditFactory = resourceAuditFactory;
+        this.pluginDAO = pluginDAO;
     }
 
     /**
@@ -975,7 +978,13 @@ public class ServerManagerImpl implements ServerManager {
             }
         }
 
-        Collection<ResourceType> curServers = ResourceType.findByPlugin(plugin);
+        Collection<ResourceType> serverTypes = getAllServerResourceTypes();
+        Set<ResourceType> curServers = new HashSet<ResourceType>();
+        for(ResourceType curResourceType: serverTypes) {
+            if(curResourceType.getPlugin().getName().equals(plugin)) {
+                curServers.add(curResourceType);
+            }
+        }
 
         AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
 
@@ -1035,14 +1044,12 @@ public class ServerManagerImpl implements ServerManager {
     public ServerType createServerType(ServerTypeInfo sinfo, String plugin) throws NotFoundException {
         ResourceType stype = new ResourceType();
         log.debug("Creating new ServerType: " + sinfo.getName());
-        //TODO get plugin
-        //stype.setPlugin(plugin);
+        stype.setPlugin(pluginDAO.findByName(plugin));
         stype.setName(sinfo.getName());
         stype.setDescription(sinfo.getDescription());
+        stype.persist();
         String newPlats[] = sinfo.getValidPlatformTypes();
         findAndSetPlatformType(newPlats, stype);
-
-        stype.persist();
         return toServerType(stype);
     }
 

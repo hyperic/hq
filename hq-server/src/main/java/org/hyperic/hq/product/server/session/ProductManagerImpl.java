@@ -38,7 +38,6 @@ import java.util.SortedMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.alerts.AlertDefinitionXmlParser;
-import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
@@ -56,6 +55,7 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.inventory.domain.PropertyType;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.server.session.MonitorableMeasurementInfo;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
@@ -83,7 +83,6 @@ import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -262,6 +261,16 @@ public class ProductManagerImpl implements ProductManager {
     @Transactional
     public void deploymentNotify(String pluginName) throws PluginNotFoundException, VetoException,
         NotFoundException {
+        //TODO this is not the place for this
+        if(ResourceType.findRootResourceType() == null) {
+            ResourceType system=new ResourceType();
+            system.setName("System");
+            system.persist();
+            Resource root = new Resource();
+            root.setName("Root");
+            root.persist();
+            root.setType(system);
+        }
         ProductPlugin pplugin = (ProductPlugin) getProductPluginManager().getPlugin(pluginName);
         PluginValue pluginVal;
         PluginInfo pInfo;
@@ -402,8 +411,8 @@ public class ProductManagerImpl implements ProductManager {
         }
         if (debug)
             watch.markTimeEnd("loop0");
-        //TODO?
-        //pluginDao.getSession().flush();
+        
+        pluginDao.getEntityManager().flush();
 
         // For performance reasons, we add all the new measurements at once.
         if (debug)

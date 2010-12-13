@@ -56,7 +56,7 @@
 
 	<bean
 		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
-		id="entityManagerFactory" depends-on="neo4jNodeBacking">
+		id="entityManagerFactory" depends-on="neo4jNodeBacking,neo4jRelationshipBacking">
 		<property name="dataSource" ref="dataSource" />
 		<!--  HibernateJpaDialect necessary for RequiresNew txs created by our id generator, HQMultipleHiLoPerTableGenerator -->
 		<property name="jpaDialect">

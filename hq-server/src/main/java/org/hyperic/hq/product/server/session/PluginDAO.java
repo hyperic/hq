@@ -73,4 +73,8 @@ public class PluginDAO {
         } 
         return null;
     }
+    
+    public EntityManager getEntityManager() {
+        return entityManager;
+    }
 }

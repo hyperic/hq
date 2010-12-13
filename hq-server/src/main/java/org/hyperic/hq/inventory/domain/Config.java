@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.GenericGenerator;
 import org.neo4j.graphdb.Node;
 import org.springframework.datastore.graph.annotation.NodeEntity;
 import org.springframework.datastore.graph.neo4j.finder.FinderFactory;
@@ -29,7 +30,8 @@ public class Config {
     transient FinderFactory finderFactory;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1") 
     @Column(name = "id")
     private Integer id;
 
