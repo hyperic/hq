@@ -1610,6 +1610,7 @@ public class PlatformManagerImpl implements PlatformManager {
     private PropertyType createPlatformPropertyType(String propName, ResourceType platformType) {
         PropertyType propType = new PropertyType();
         propType.setName(propName);
+        propType.setDescription(propName);
         propType.persist();
         return propType;
     }
