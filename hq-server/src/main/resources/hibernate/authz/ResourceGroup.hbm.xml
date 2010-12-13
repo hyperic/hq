@@ -27,7 +27,7 @@
 
 -->
 
-<hibernate-mapping package="org.hyperic.hq.authz.server.session">
+<hibernate-mapping package="org.hyperic.hq.authz.server.session" auto-import="false">
 
   <class name="ResourceGroup" table="EAM_RESOURCE_GROUP" lazy="true">
     <cache usage="read-write"/>
