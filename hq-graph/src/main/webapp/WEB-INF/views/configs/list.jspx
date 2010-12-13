@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<div xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:page="urn:jsptagdir:/WEB-INF/tags/form" xmlns:table="urn:jsptagdir:/WEB-INF/tags/form/fields" version="2.0">
-    <jsp:output omit-xml-declaration="yes"/>
-    <page:list id="pl_org_hyperic_hq_inventory_domain_Config" items="${configs}" z="eCwftMNc1uqwzrKPj2iLO9LFGrc=">
-        <table:table data="${configs}" id="l_org_hyperic_hq_inventory_domain_Config" path="/configs" z="xMze9IP2mA26Jj7TUB3rEcfUYcI="/>
-    </page:list>
-</div>
