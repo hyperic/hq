@@ -86,9 +86,9 @@ public class ErlangCookieHandler {
      * @throws PluginException
      */
     private static String getErlangCookieValue(File file) throws PluginException {
-        logger.debug("Attempting to read file " + file);
+        logger.debug("Attempting to read file " + file.getAbsolutePath());
 
-        if (isValidFile(file)) {
+        if (file!=null) {
             try {
 
                 BufferedReader in = new BufferedReader(new FileReader(file));
@@ -101,8 +101,8 @@ public class ErlangCookieHandler {
                 }
             }
             catch (IOException e) {
-                throw new PluginException(e.getMessage(),e);
-            }
+                throw new PluginException("The Hyperic Agent can't read the Erlang Cookie file => '"+file.getAbsolutePath()+"'.",e);
+        }
         }
         return null;
     }
@@ -169,22 +169,5 @@ public class ErlangCookieHandler {
                 return c.exists() ? c : null;
             }
         }
-    }
-
-    /**
-     * @param file
-     * @return
-     * @throws PluginException
-     */
-    private static boolean isValidFile(File file) throws PluginException {
-        if (file != null) {
-            if (file.exists() && file.canRead()) {
-                return true;
-            } else {
-                throw new PluginException("The Hyperic Agent does not have permission to read the Erlang Cookie at "
-                        + file.getAbsolutePath());
-            }
-        }
-        return false;
     }
 }
