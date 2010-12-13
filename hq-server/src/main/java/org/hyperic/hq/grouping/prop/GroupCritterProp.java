@@ -24,7 +24,7 @@
  */
 package org.hyperic.hq.grouping.prop;
 
-import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 
 public class GroupCritterProp
     implements CritterProp

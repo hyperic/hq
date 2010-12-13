@@ -85,8 +85,6 @@
 			type="regex" />
 	</context:component-scan>
 
-	<context:spring-configured />
-
 	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
 		<property name="dataSource" ref="dataSource" />
 		<property name="quartzProperties">

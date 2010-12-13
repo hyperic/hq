@@ -45,10 +45,10 @@ import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceEdge;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceRelation;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.agent.client.AgentMonitor;
 import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
@@ -131,11 +131,11 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
             if (resource == null || resource.isInAsyncDeleteState()) {
                 continue;
             }
-            final Collection<ResourceEdge> edges =
+            final Collection<ResourceRelation> edges =
                 resourceManager.findResourceEdges(resourceManager.getContainmentRelation(), resource);
             aeids.ensureCapacity(aeids.size()+edges.size()+1);
             aeids.add(AppdefUtil.newAppdefEntityId(resource));
-            for (final ResourceEdge e : edges ) {
+            for (final ResourceRelation e : edges ) {
                 final Resource r = e.getTo();
                 if (r == null || r.isInAsyncDeleteState()) {
                     continue;

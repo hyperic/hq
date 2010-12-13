@@ -26,8 +26,8 @@
 
 package org.hyperic.hq.hqu.rendit.metaclass
 
-import org.hyperic.hq.authz.server.session.ResourceGroup
-import org.hyperic.hq.authz.server.session.Resource
+import org.hyperic.hq.inventory.domain.ResourceGroup
+import org.hyperic.hq.inventory.domain.Resource
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.context.Bootstrap;

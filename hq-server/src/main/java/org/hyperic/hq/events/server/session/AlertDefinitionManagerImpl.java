@@ -44,7 +44,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDeleteRequestedEvent;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -68,6 +67,7 @@ import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerManager;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.action.MetricAlertAction;
 import org.hyperic.hq.measurement.server.session.Measurement;
@@ -1281,13 +1281,15 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
     @Transactional(readOnly=true)
     public PageList<AlertDefinitionValue> findAlertDefinitions(AuthzSubject subj, AppdefEntityTypeID aetid,
                                                                PageControl pc) throws PermissionException {
-        Resource res = resourceManager.findResourcePrototype(aetid);
-        Collection<AlertDefinition> adefs;
-        if (pc.getSortattribute() == SortAttribute.CTIME) {
-            adefs = alertDefDao.findByResourceSortByCtime(res, pc.isAscending());
-        } else {
-            adefs = alertDefDao.findByResource(res, pc.isAscending());
-        }
+        //TODO no longer accounting for type-based alerts
+        
+        //Resource res = resourceManager.findResourcePrototype(aetid);
+        Collection<AlertDefinition> adefs = new ArrayList<AlertDefinition>();
+        //if (pc.getSortattribute() == SortAttribute.CTIME) {
+          //  adefs = alertDefDao.findByResourceSortByCtime(res, pc.isAscending());
+        //} else {
+          //  adefs = alertDefDao.findByResource(res, pc.isAscending());
+        //}
         // TODO:G
         return _valuePager.seek(adefs, pc.getPagenum(), pc.getPagesize());
     }
@@ -1356,13 +1358,14 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
     public SortedMap<String, Integer> findAlertDefinitionNames(AppdefEntityID id, Integer parentId) {
         AlertDefinitionDAO aDao = alertDefDao;
         TreeMap<String, Integer> ret = new TreeMap<String, Integer>();
-        Collection<AlertDefinition> adefs;
+        Collection<AlertDefinition> adefs = new ArrayList<AlertDefinition>();
 
         if (parentId != null) {
             if (EventConstants.TYPE_ALERT_DEF_ID.equals(parentId)) {
-                AppdefEntityTypeID aetid = new AppdefEntityTypeID(id.getType(), id.getId());
-                Resource res = resourceManager.findResourcePrototype(aetid);
-                adefs = aDao.findByResource(res);
+                //TODO deal with type-based alerts
+//                AppdefEntityTypeID aetid = new AppdefEntityTypeID(id.getType(), id.getId());
+//                Resource res = resourceManager.findResourcePrototype(aetid);
+//                adefs = aDao.findByResource(res);
             } else {
                 AlertDefinition def = alertDefDao.findById(parentId);
                 adefs = def.getChildren();

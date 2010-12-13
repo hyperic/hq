@@ -35,21 +35,65 @@ import java.util.List;
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.authz.values.OwnedRoleValue;
 import org.hyperic.hq.common.server.session.Calendar;
+import org.hyperic.hq.inventory.domain.OperationType;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
+import org.springframework.datastore.graph.annotation.NodeEntity;
 
-public class Role extends AuthzNamedBean {
+@NodeEntity(partial=true)
+public class Role  {
     private String     _description;
-    private boolean    _system = false;
+    private boolean    _system;
     private Resource   _resource;
-    private Collection _resourceGroups = new ArrayList();
-    private Collection _operations = new HashSet();
-    private Collection _subjects = new ArrayList();
-    private Collection _calendars = new ArrayList();
-    private RoleValue  _roleValue = new RoleValue();
+    private Collection _resourceGroups;
+    private Collection _operations;
+    private Collection _subjects;
+    private Collection _calendars;
+    private RoleValue  _roleValue;
+    private String _name;
+    private String _sortName;
+    private Integer _id;
+
+    // for hibernate optimistic locks -- don't mess with this.
+    // Named ugly-style since we already use VERSION in some of our tables.
+    // really need to use Long instead of primitive value
+    // because the database column can allow null version values.
+    // The version column IS NULLABLE for migrated schemas. e.g. HQ upgrade
+    // from 2.7.5.
+    private Long    _version_;
+
 
     public Role() {
         super();
     }
 
+    public void setId(Integer id) {
+        _id = id;
+    }
+
+    public Integer getId() {
+        return _id;
+    }
+    
+    public String getName() {
+        return _name;
+    }
+
+    public void setName(String name) {
+        if (name == null)
+            name = "";
+        _name = name;
+        setSortName(name);
+    }
+
+    public String getSortName() {
+        return _sortName;
+    }
+
+    public void setSortName(String sortName) {
+        _sortName = sortName != null ? sortName.toUpperCase() : null;
+    }
+    
     public String getDescription() {
         return _description;
     }
@@ -95,11 +139,11 @@ public class Role extends AuthzNamedBean {
         _resourceGroups = val;
     }
 
-    void addOperation(Operation op) {
+    void addOperation(OperationType op) {
         getOperations().add(op);
     }
     
-    public Collection<Operation> getOperations() {
+    public Collection<OperationType> getOperations() {
         return _operations;
     }
     
@@ -168,6 +212,7 @@ public class Role extends AuthzNamedBean {
      * @deprecated use (this) Role instead
      */
     public RoleValue getRoleValue() {
+        _roleValue = new RoleValue();
         _roleValue.setDescription(getDescription());
         _roleValue.setId(getId());
         _roleValue.setName(getName());
@@ -177,7 +222,7 @@ public class Role extends AuthzNamedBean {
         _roleValue.removeAllOperationValues();
         if (getOperations() != null) {
             for (Iterator it = getOperations().iterator(); it.hasNext(); ) {
-                Operation op = (Operation) it.next();
+                OperationType op = (OperationType) it.next();
                 _roleValue.addOperationValue(op);
             }
         }
@@ -192,13 +237,17 @@ public class Role extends AuthzNamedBean {
         setSystem(val.getSystem());
     }
 
-    public boolean equals(Object obj) {
-        return (obj instanceof Role) && super.equals(obj);
-    }
-
     public OwnedRoleValue getOwnedRoleValue() {
         OwnedRoleValue orv = new OwnedRoleValue(this);
         return orv;
+    }
+    
+    public long get_version_() {
+        return _version_ != null ? _version_.longValue() : 0;
+    }
+
+    protected void set_version_(Long newVer) {
+        _version_ = newVer;
     }
 }
 

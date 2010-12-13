@@ -38,12 +38,6 @@
 		<property name="dataSource" ref="dataSource" />
 	</bean>
 
-	<!--  <bean
-		class="org.springframework.transaction.aspectj.AnnotationTransactionAspect"
-		factory-method="aspectOf">
-		<property name="transactionManager" ref="transactionManager" />
-	</bean>-->
-
 	<bean id="transactionManager"
 		class="org.springframework.persistence.transaction.NaiveDoubleTransactionManager">
 		<constructor-arg>
@@ -62,7 +56,7 @@
 
 	<bean
 		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
-		id="entityManagerFactory" depends-on="neo4jNodeBacking">
+		id="entityManagerFactory" depends-on="neo4jNodeBacking,neo4jRelationshipBacking">
 		<property name="dataSource" ref="dataSource" />
 		<!--  HibernateJpaDialect necessary for RequiresNew txs created by our id generator, HQMultipleHiLoPerTableGenerator -->
 		<property name="jpaDialect">
@@ -80,17 +74,8 @@
 	</bean>
 
 	<util:list id="preloadCaches">
-		<value>org.hyperic.hq.authz.server.session.Resource</value>
-		<value>org.hyperic.hq.authz.server.session.ResourceType</value>
-		<value>org.hyperic.hq.authz.server.session.ResourceGroup</value>
 		<value>org.hyperic.hq.appdef.AgentType</value>
 		<value>org.hyperic.hq.appdef.Agent</value>
-		<value>org.hyperic.hq.appdef.server.session.PlatformType</value>
-		<value>org.hyperic.hq.appdef.server.session.ServerType</value>
-		<value>org.hyperic.hq.appdef.server.session.ServiceType</value>
-		<value>org.hyperic.hq.appdef.server.session.Platform</value>
-		<value>org.hyperic.hq.appdef.server.session.Server</value>
-		<value>org.hyperic.hq.appdef.server.session.Service</value>
 		<value>org.hyperic.hq.measurement.server.session.Category</value>
 		<value>org.hyperic.hq.measurement.server.session.MonitorableType
 		</value>

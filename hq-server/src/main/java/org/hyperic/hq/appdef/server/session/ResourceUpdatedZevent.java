@@ -45,8 +45,8 @@ public class ResourceUpdatedZevent extends ResourceZevent {
     
     public ResourceUpdatedZevent(AuthzSubject subject, AppdefEntityID id,
                                  AllConfigResponses allConfgs) {
-        super(new ResourceZeventSource(id),
-              new ResourceConfigZeventPayload(subject.getId(), id, allConfgs));
+        super(new ResourceZeventSource(id.getId()),
+              new ResourceConfigZeventPayload(subject.getId(), id.getId(), allConfgs));
     }
     
     public AllConfigResponses getAllConfigs() {
@@ -61,7 +61,7 @@ public class ResourceUpdatedZevent extends ResourceZevent {
         extends ResourceZeventPayload {
         private AllConfigResponses _allConfigs;
         
-        public ResourceConfigZeventPayload(Integer subject, AppdefEntityID id,
+        public ResourceConfigZeventPayload(Integer subject, Integer id,
                                            AllConfigResponses allConfgs) {
             super(subject, id);
             _allConfigs = allConfgs;

@@ -30,8 +30,8 @@ import java.util.List;
 
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 

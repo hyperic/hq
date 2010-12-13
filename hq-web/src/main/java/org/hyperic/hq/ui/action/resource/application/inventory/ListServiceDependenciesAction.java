@@ -39,6 +39,7 @@ import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.DependencyNode;
 import org.hyperic.hq.appdef.shared.DependencyTree;
+import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -81,7 +82,7 @@ public class ListServiceDependenciesAction
 
         Integer sessionId = RequestUtils.getSessionId(request);
 
-        List<AppdefResourceValue> services = appdefBoss.findServiceInventoryByApplication(sessionId.intValue(), appId,
+        List<ServiceValue> services = appdefBoss.findServiceInventoryByApplication(sessionId.intValue(), appId,
             PageControl.PAGE_ALL);
 
         // get the dependency tree

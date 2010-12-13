@@ -27,12 +27,11 @@ package org.hyperic.hq.galerts.server.session;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.common.server.session.Crispo;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.util.config.ConfigResponse;
 
 public class ExecutionStrategyInfo 

@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.inventory.domain.Resource;
 
 /**
  * abstract base class for all appdef resources
@@ -73,8 +73,9 @@ public abstract class AppdefResource extends AppdefNamedBean
      * @see org.hyperic.hq.appdef.server.session.AppdefNamedBean#getSortName()
      */
     public String getSortName() {
-        if (_resource != null)
-            return _resource.getSortName();
+        //TODO?
+        //if (_resource != null)
+          //  return _resource.getSortName();
         return super.getSortName();
     }
 
@@ -82,9 +83,10 @@ public abstract class AppdefResource extends AppdefNamedBean
      * @see org.hyperic.hq.appdef.server.session.AppdefNamedBean#setSortName(java.lang.String)
      */
     public void setSortName(String sortName) {
-        if (_resource != null)
-            _resource.setSortName(sortName);
-        else
+        //TODO?
+        //if (_resource != null)
+          //  _resource.setSortName(sortName);
+        //else
             super.setSortName(sortName);
     }
 }

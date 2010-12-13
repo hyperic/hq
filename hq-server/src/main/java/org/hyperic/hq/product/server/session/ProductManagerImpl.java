@@ -38,8 +38,6 @@ import java.util.SortedMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.alerts.AlertDefinitionXmlParser;
-import org.hyperic.hq.appdef.server.session.AppdefResourceType;
-import org.hyperic.hq.appdef.server.session.CpropKey;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
@@ -56,6 +54,9 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
+import org.hyperic.hq.inventory.domain.PropertyType;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.server.session.MonitorableMeasurementInfo;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.shared.TemplateManager;
@@ -82,7 +83,6 @@ import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -258,9 +258,19 @@ public class ProductManagerImpl implements ProductManager {
         return ((ServerTypeInfo) type).isVirtual();
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void deploymentNotify(String pluginName) throws PluginNotFoundException, VetoException,
         NotFoundException {
+        //TODO this is not the place for this
+        if(ResourceType.findRootResourceType() == null) {
+            ResourceType system=new ResourceType();
+            system.setName("System");
+            system.persist();
+            Resource root = new Resource();
+            root.setName("Root");
+            root.persist();
+            root.setType(system);
+        }
         ProductPlugin pplugin = (ProductPlugin) getProductPluginManager().getPlugin(pluginName);
         PluginValue pluginVal;
         PluginInfo pInfo;
@@ -346,6 +356,9 @@ public class ProductManagerImpl implements ProductManager {
         ProductPlugin pplugin = (ProductPlugin) ppm.getPlugin(pluginName);
 
         PluginInfo pInfo = getProductPluginManager().getPluginInfo(pluginName);
+        
+        //TODO moved this up from bottom.  Any issues w/that?
+        updatePlugin(pluginDao, pInfo);
 
         TypeInfo[] entities = pplugin.getTypes();
 
@@ -398,7 +411,8 @@ public class ProductManagerImpl implements ProductManager {
         }
         if (debug)
             watch.markTimeEnd("loop0");
-        pluginDao.getSession().flush();
+        
+        pluginDao.getEntityManager().flush();
 
         // For performance reasons, we add all the new measurements at once.
         if (debug)
@@ -410,8 +424,7 @@ public class ProductManagerImpl implements ProductManager {
         // Add any custom properties.
         if (debug)
             watch.markTimeBegin("findResourceType");
-        Map<String, AppdefResourceType> rTypes = cPropManager.findResourceType(Arrays
-            .asList(entities));
+       
         if (debug)
             watch.markTimeEnd("findResourceType");
 
@@ -421,11 +434,11 @@ public class ProductManagerImpl implements ProductManager {
             TypeInfo info = entities[i];
             ConfigSchema schema = pplugin.getCustomPropertiesSchema(info);
             List<ConfigOption> options = schema.getOptions();
-            AppdefResourceType appdefType = rTypes.get(info.getName());
+            ResourceType appdefType = ResourceType.findResourceTypeByName(info.getName());
             for (ConfigOption opt : options) {
                 if (debug)
                     watch.markTimeBegin("findByKey");
-                CpropKey c = cPropManager.findByKey(appdefType, opt.getName());
+                PropertyType c = cPropManager.findByKey(appdefType, opt.getName());
                 if (debug)
                     watch.markTimeEnd("findByKey");
                 if (c == null) {
@@ -438,7 +451,7 @@ public class ProductManagerImpl implements ProductManager {
 
         createAlertDefinitions(pInfo);
         pluginDeployed(pInfo);
-        updatePlugin(pluginDao, pInfo);
+       
         if (debug)
             log.debug(watch);
     }

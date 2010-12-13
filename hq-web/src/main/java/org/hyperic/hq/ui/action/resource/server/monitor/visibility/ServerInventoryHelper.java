@@ -39,6 +39,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -77,7 +78,7 @@ public class ServerInventoryHelper
       
 
         log.trace("finding services for resource [" + entityId + "]");
-        List<AppdefResourceValue> services = appdefBoss.findServicesByServer(sessionId, entityId.getId(),
+        List<ServiceValue> services = appdefBoss.findServicesByServer(sessionId, entityId.getId(),
             PageControl.PAGE_ALL);
         return MonitorUtils.findServiceTypes(services, null);
     }
@@ -111,7 +112,7 @@ public class ServerInventoryHelper
         int sessionId = RequestUtils.getSessionId(request).intValue();
 
        
-        Collection<AppdefResourceValue> services = appdefBoss.findServicesByServer(sessionId, resource.getId(),
+        Collection<ServiceValue> services = appdefBoss.findServicesByServer(sessionId, resource.getId(),
             PageControl.PAGE_ALL);
         return AppdefResourceValue.getServiceTypeCountMap(services);
     }

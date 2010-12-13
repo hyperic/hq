@@ -28,10 +28,9 @@ import java.io.File;
 import java.util.Properties;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.Attachment;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
+import org.hyperic.hq.inventory.domain.Resource;
 
 /**
  * Implementors of this interface (notably, HQUPlugin) are able to be 

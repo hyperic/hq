@@ -25,41 +25,25 @@
  */
 package org.hyperic.hq.appdef.shared;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
-import org.hyperic.hq.appdef.server.session.AppdefResourceType;
-import org.hyperic.hq.appdef.server.session.Cprop;
-import org.hyperic.hq.appdef.server.session.CpropKey;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.product.TypeInfo;
+import org.hyperic.hq.inventory.domain.PropertyType;
+import org.hyperic.hq.inventory.domain.ResourceType;
 
 /**
  * Local interface for CPropManager.
  */
 public interface CPropManager {
-	/**
-	 * Get all the keys associated with an appdef resource type.
-	 * 
-	 * @param appdefType
-	 *            One of AppdefEntityConstants.APPDEF_TYPE_*
-	 * @param appdefTypeId
-	 *            The ID of the appdef resource type
-	 * @return a List of CPropKey objects
-	 */
-	public List<CpropKey> getKeys(int appdefType, int appdefTypeId);
-
-	/**
-	 * find appdef resource type
-	 */
-	public AppdefResourceType findResourceType(TypeInfo info);
+	
+    List<PropertyType> getKeys(int appdefType, int appdefTypeId);
+	
 
 	/**
 	 * find Cprop by key to a resource type based on a TypeInfo object.
 	 */
-	public CpropKey findByKey(AppdefResourceType appdefType, String key);
+	public PropertyType findByKey(ResourceType appdefType, String key);
 
 	/**
 	 * Add a key to a resource type based on a TypeInfo object.
@@ -68,22 +52,9 @@ public interface CPropManager {
 	 *        key references could not be found
 	 * @throw CPropKeyExistsException if the key already exists
 	 */
-	public void addKey(AppdefResourceType appdefType, String key,
+	public void addKey(ResourceType appdefType, String key,
 			String description);
 
-	/**
-	 * Add a key to a resource type. The key's 'appdefType' and 'appdefTypeId'
-	 * fields are used to locate the resource -- if that resource does not
-	 * exist, an AppdefEntityNotFoundException will be thrown.
-	 * 
-	 * @param key
-	 *            Key to create
-	 * @throw AppdefEntityNotFoundException if the appdef resource type that the
-	 *        key references could not be found
-	 * @throw CPropKeyExistsException if the key already exists
-	 */
-	public void addKey(CpropKey key) throws AppdefEntityNotFoundException,
-			CPropKeyExistsException;
 
 	/**
 	 * Remove a key from a resource type.
@@ -185,11 +156,7 @@ public interface CPropManager {
 	/**
 	 * Get all Cprops values with specified key name, irregardless of type
 	 */
-	public List<Cprop> getCPropValues(AppdefResourceTypeValue appdefType,
+	public List<String> getCPropValues(AppdefResourceTypeValue appdefType,
 			String key, boolean asc);
 
-    /**
-     * @return {@link Map} of {@link String} to {@link AppdefResourceType}s
-     */
-    public Map<String, AppdefResourceType> findResourceType(Collection<TypeInfo> typeInfos);
 }

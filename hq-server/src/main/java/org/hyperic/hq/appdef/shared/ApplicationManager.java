@@ -25,20 +25,17 @@
  */
 package org.hyperic.hq.appdef.shared;
 
-import java.util.Collection;
 import java.util.List;
 
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.ApplicationType;
-import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
 
 /**
  * Local interface for ApplicationManager.
@@ -92,7 +89,7 @@ public interface ApplicationManager {
     public void removeAppService(AuthzSubject caller, Integer appId, Integer appServiceId) throws ApplicationException,
         ApplicationNotFoundException, PermissionException;
 
-    public void handleResourceDelete(Resource resource);
+    
 
     /**
      * Get the service dependency map for an application
@@ -103,11 +100,6 @@ public interface ApplicationManager {
         throws org.hyperic.hq.appdef.shared.ApplicationNotFoundException, PermissionException;
 
     /**
-     * Get the # of applications within HQ inventory
-     */
-    public Number getApplicationCount();
-
-    /**
      * Set the dependency map for an application
      * @param depTree
      * @param subject
@@ -116,45 +108,10 @@ public interface ApplicationManager {
         PermissionException;
     
     /**
-     * Find application by name
-     * @param subject - who
-     * @param name - name of app
-     */
-    public Application findApplicationByName(AuthzSubject subject, String name)
-        throws ApplicationNotFoundException, PermissionException;
-
-    /**
      * Get application pojo by id.
      */
     public Application findApplicationById(AuthzSubject subject, Integer id) throws ApplicationNotFoundException,
         PermissionException;
-
-    public java.util.Collection<Application> findDeletedApplications();
-
-    /**
-     * Get all applications.
-     * @param subject The subject trying to list applications.
-     * @return A List of ApplicationValue objects representing all of the
-     *         applications that the given subject is allowed to view.
-     */
-    public PageList<ApplicationValue> getAllApplications(AuthzSubject subject, PageControl pc)
-        throws PermissionException, NotFoundException;
-    
-    /**
-     * @return {@link List} of {@link Resource}
-     *
-     */
-    List<Resource> getApplicationResources(AuthzSubject subject, Integer appId) 
-    throws ApplicationNotFoundException, PermissionException;
-
-    /**
-     * Get all the application services for this application
-     * @param subject
-     * @param appId
-     * @retur list of AppServiceValue objects
-     */
-    public List<AppServiceValue> getApplicationServices(AuthzSubject subject, Integer appId)
-        throws org.hyperic.hq.appdef.shared.ApplicationNotFoundException, PermissionException;
 
     /**
      * Set the application services for this application
@@ -173,25 +130,10 @@ public interface ApplicationManager {
                                                                                        PageControl pc)
         throws ApplicationNotFoundException, PermissionException;
 
-    /**
-     * Get all application IDs that use the specified resource.
-     * @param subject The subject trying to get the app list
-     * @param resource Server ID.
-     * @param pagenum The page number to start listing. First page is zero.
-     * @param pagesize The size of the page (the number of items to return).
-     * @param sort The sort order.
-     * @return A List of ApplicationValue objects which use the specified
-     *         resource.
-     */
-    public java.lang.Integer[] getApplicationIDsByResource(AppdefEntityID resource) throws ApplicationNotFoundException;
 
     public boolean isApplicationMember(AppdefEntityID application, AppdefEntityID service);
-
-    /**
-     * Generate a resource tree based on the root resources and the traversal
-     * (one of ResourceTreeGenerator.TRAVERSE_*)
-     */
-    public ResourceTree getResourceTree(AuthzSubject subject, AppdefEntityID[] resources, int traversal)
-        throws AppdefEntityNotFoundException, PermissionException;
+    
+    //TODO legacy support
+    boolean isApplication(ResourceGroup group);
 
 }

@@ -29,7 +29,7 @@ package org.hyperic.hq.hqu.rendit
 import java.text.SimpleDateFormat
 
 import org.hyperic.hq.authz.server.session.AuthzSubject
-import org.hyperic.hq.authz.server.session.Resource
+import org.hyperic.hq.inventory.domain.Resource
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl

@@ -25,38 +25,48 @@
 
 package org.hyperic.hq.appdef;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
-import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.springframework.datastore.graph.annotation.NodeEntity;
 
-public class Agent extends AppdefBean {
+@NodeEntity(partial = true)
+public class Agent {
     private String _address;
     private Integer _port;
     private String _authToken;
     private String _agentToken;
     private String _version;
     private boolean _unidirectional;
+    private Integer id;
     private AgentType _agentType;
-    private Collection _platforms;
+    private Long creationTime;
+    private Long modifiedTime;
+    private Long    _version_;
+    private Collection<Resource> resources;
 
     public Agent() {
     }
 
-    public Agent(AgentType type, String address, Integer port,
-                 boolean unidirectional, String authToken,
-                 String agentToken, String version)
-    {
-        _agentType  = type;
-        _address    = address;
-        _port       = port;
+    public Agent(AgentType type, String address, Integer port, boolean unidirectional,
+                 String authToken, String agentToken, String version) {
+        _agentType = type;
+        _address = address;
+        _port = port;
         _unidirectional = unidirectional;
-        _authToken  = authToken;
+        _authToken = authToken;
         _agentToken = agentToken;
-        _version    = version;
-        _platforms  = new ArrayList();
+        _version = version;
     }
-    
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     public String getAddress() {
         return _address;
     }
@@ -70,7 +80,7 @@ public class Agent extends AppdefBean {
     }
 
     public void setPort(Integer port) {
-        _port = port; 
+        _port = port;
     }
 
     public void setPort(int port) {
@@ -108,14 +118,14 @@ public class Agent extends AppdefBean {
     public void setUnidirectional(boolean unidirectional) {
         _unidirectional = unidirectional;
     }
-    
+
     public boolean isNewTransportAgent() {
         AgentType type = getAgentType();
-        
+
         if (type != null) {
             return type.isNewTransportType();
         }
-        
+
         return false;
     }
 
@@ -127,48 +137,47 @@ public class Agent extends AppdefBean {
         _agentType = agentType;
     }
 
-    public Collection<Platform> getPlatforms() {
-        return _platforms;
+    public String connectionString() {
+        return getAddress() + ":" + getPort();
     }
 
-    public void setPlatforms(Collection platforms) {
-        _platforms = platforms;
+    public long getCreationTime() {
+        return creationTime != null ? creationTime.longValue() : 0;
     }
 
-    public boolean equals(Object obj)
-    {
-        if (!(obj instanceof Agent) || !super.equals(obj)) {
-            return false;
-        }
-        Agent o = (Agent)obj;
-        return (_address == o.getAddress() ||
-                (_address!=null && o.getAddress()!=null &&
-                 _address.equals(o.getAddress())))
-               &&
-               (_port == o.getPort() || (_port!=null && o.getPort()!=null &&
-                                        _port.equals(o.getPort())));
+    public void setCreationTime(Long creationTime) {
+        this.creationTime = creationTime;
     }
 
-    public int hashCode()
-    {
-        int result = super.hashCode();
+    public long getModifiedTime() {
+        return modifiedTime != null ? modifiedTime.longValue() : 0;
+    }
 
-        result = 37*result + (_address!=null ? _address.hashCode() : 0);
-        result = 37*result + (_port!=null ? _port.hashCode() : 0);
-
-        return result;
+    public void setModifiedTime(Long modifiedTime) {
+        this.modifiedTime = modifiedTime;
     }
     
-    public String connectionString() {
-        return getAddress()+":"+getPort();
+    public Collection<Resource> getResources() {
+        return resources;
+    }
+
+    public void setResources(Collection<Resource> resources) {
+        this.resources = resources;
+    }
+    
+    public long get_version_() {
+        return _version_ != null ? _version_.longValue() : 0;
+    }
+
+    protected void set_version_(Long newVer) {
+        _version_ = newVer;
     }
 
     public String toString() {
         StringBuffer str = new StringBuffer("{");
 
-        str.append("address=").append(getAddress()).append(" ")
-           .append("port=").append(getPort()).append(" ")
-           .append("authToken=").append(getAuthToken()).append(" ");
-        return(str.toString());
+        str.append("address=").append(getAddress()).append(" ").append("port=").append(getPort())
+            .append(" ").append("authToken=").append(getAuthToken()).append(" ");
+        return (str.toString());
     }
 }

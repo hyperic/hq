@@ -31,9 +31,9 @@ import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -46,11 +46,12 @@ public class AuditDAO
     }
 
     void handleResourceDelete(Resource r) {
-        String sql = "update Audit a set " + "a.resource.id = :rootResource, "
-                     + "a.original = false " + "where resource = :resource";
-
-        getSession().createQuery(sql).setParameter("rootResource", AuthzConstants.rootResourceId)
-            .setParameter("resource", r).executeUpdate();
+        //TODO
+//        String sql = "update Audit a set " + "a.resource.id = :rootResource, "
+//                     + "a.original = false " + "where resource = :resource";
+//
+//        getSession().createQuery(sql).setParameter("rootResource", AuthzConstants.rootResourceId)
+//            .setParameter("resource", r).executeUpdate();
     }
 
     void handleSubjectDelete(AuthzSubject s) {

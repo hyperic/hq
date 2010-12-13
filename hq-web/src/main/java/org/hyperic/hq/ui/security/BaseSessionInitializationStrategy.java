@@ -44,7 +44,6 @@ import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -52,6 +51,7 @@ import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.util.config.ConfigResponse;
@@ -168,10 +168,10 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
     throws SessionTimeoutException, SessionNotFoundException, PermissionException {
         // look up the user's permissions
         Map<String, Boolean> userOperationsMap = new HashMap<String, Boolean>();
-        List<Operation> userOperations = authzBoss.getAllOperations(sessionId);
+        List<OperationType> userOperations = authzBoss.getAllOperations(sessionId);
         
-        for (Iterator<Operation> it = userOperations.iterator(); it.hasNext();) {
-            Operation operation = it.next();
+        for (Iterator<OperationType> it = userOperations.iterator(); it.hasNext();) {
+            OperationType operation = it.next();
             
             userOperationsMap.put(operation.getName(), Boolean.TRUE);
         }

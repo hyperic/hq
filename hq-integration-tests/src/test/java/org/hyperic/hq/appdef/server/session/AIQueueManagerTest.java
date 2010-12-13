@@ -32,6 +32,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -61,7 +62,8 @@ public class AIQueueManagerTest
     public void setUp() throws Exception {
         createAgent("127.0.0.1", 2144, "hqadmin", "agentToken", "4.5");
         PlatformType platformType = createPlatformType("JenOS", "testit");
-        cPropManager.addKey(platformType, "numCpus", "Number of CPUs");
+        
+        cPropManager.addKey(ResourceType.findResourceType(platformType.getId()), "numCpus", "Number of CPUs");
 
         // Add the platform to AI Queue with custom prop value of 4 CPUs
         AIPlatformValue aiPlatform = new AIPlatformValue();

@@ -37,6 +37,7 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.hq.common.server.session.CrispoDAO;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -47,17 +48,14 @@ import org.springframework.stereotype.Repository;
 public class AuthzSubjectDAO
     extends HibernateDAO<AuthzSubject> {
     private CrispoDAO crispoDao;
-    private ResourceTypeDAO resourceTypeDAO;
     private RoleDAO roleDAO;
-    private ResourceDAO resourceDAO;
+   
 
     @Autowired
-    public AuthzSubjectDAO(SessionFactory f, CrispoDAO crispoDAO, ResourceTypeDAO resourceTypeDAO,
-                           ResourceDAO resourceDAO, RoleDAO roleDAO) {
+    public AuthzSubjectDAO(SessionFactory f, CrispoDAO crispoDAO, 
+                           RoleDAO roleDAO) {
         super(AuthzSubject.class, f);
         this.crispoDao = crispoDAO;
-        this.resourceDAO = resourceDAO;
-        this.resourceTypeDAO = resourceTypeDAO;
         this.roleDAO = roleDAO;
     }
 
@@ -70,17 +68,17 @@ public class AuthzSubjectDAO
 
         // XXX create resource for owner
       
-        ResourceType rt = resourceTypeDAO.findByName(AuthzConstants.subjectResourceTypeName);
+        ResourceType rt = ResourceType.findResourceTypeByName(AuthzConstants.subjectResourceTypeName);
         if (rt == null) {
             throw new IllegalArgumentException("resource type not found " +
                                                AuthzConstants.subjectResourceTypeName);
         }
 
-        
-        Resource r = resourceDAO.create(rt, resourceDAO.findRootResource(), null, /* No Name? */
-        creator, subject.getId(), false);
+        //TODO
+        //Resource r = resourceDAO.create(rt, resourceDAO.findRootResource(), null, /* No Name? */
+        //creator, subject.getId(), false);
 
-        subject.setResource(r);
+        //subject.setResource(r);
         Role role = roleDAO.findByName(AuthzConstants.creatorRoleName);
         if (role == null) {
             throw new IllegalArgumentException("role not found " + AuthzConstants.creatorRoleName);
@@ -210,5 +208,13 @@ public class AuthzSubjectDAO
             "select distinct s from AuthzSubject s, Role r " + "where r.id = ? and s.id not in " +
                 "(select id from r.subjects) and " + "s.system = false order by s.sortName " +
                 (asc ? "asc" : "desc")).setInteger(0, roleId.intValue()).list();
+    }
+    
+    //TODO was taken from ResourceDAO.  Implement properly
+    public int reassignResources(int oldOwner, int newOwner) {
+        //return getSession().createQuery(
+          //         "UPDATE org.hyperic.hq.authz.server.session.Resource " + "SET owner.id = :newOwner " + "WHERE owner.id = :oldOwner")
+            //        .setInteger("oldOwner", oldOwner).setInteger("newOwner", newOwner).executeUpdate();
+        return 1;
     }
 }

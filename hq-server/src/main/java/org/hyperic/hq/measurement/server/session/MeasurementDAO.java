@@ -43,9 +43,9 @@ import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -98,7 +98,7 @@ public class MeasurementDAO
     }
 
     Measurement create(Resource resource, MeasurementTemplate mt, String dsn, long interval) {
-        Measurement m = new Measurement(resource.getInstanceId(), mt, interval);
+        Measurement m = new Measurement(resource.getId(), mt, interval);
 
         m.setEnabled(interval != 0);
         m.setDsn(dsn);

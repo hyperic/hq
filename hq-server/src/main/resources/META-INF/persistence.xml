@@ -4,6 +4,7 @@
         <provider>org.hibernate.ejb.HibernatePersistence</provider>
         <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
         <properties>
+            <property name="hibernate.hbm2ddl.auto" value="create"/>
             <property name="hibernate.dialect" value="org.hyperic.hibernate.dialect.MySQL5InnoDBDialect"/>
             <property name="hibernate.ejb.interceptor" value="org.hyperic.hibernate.HypericInterceptor" />
             <property name="hibernate.ejb.naming_strategy" value="org.hibernate.cfg.ImprovedNamingStrategy"/>
@@ -18,6 +19,7 @@
 			<property name="hibernate.jdbc.use_get_generated_keys" value="true"/>
 			<property name="hibernate.jdbc.batch_size" value="200"/>
 			<property name="hibernate.archive.autodetection" value="class, hbm"/>
+			<property name="hibernate.show_sql" value="true"/>
         </properties>
     </persistence-unit>
 </persistence>

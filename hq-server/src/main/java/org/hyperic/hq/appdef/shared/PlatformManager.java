@@ -29,11 +29,12 @@ import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
+import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
@@ -67,13 +68,9 @@ public interface PlatformManager {
      */
     public PlatformType findPlatformTypeByName(String type) throws PlatformNotFoundException;
 
-    public Collection<PlatformType> findAllPlatformTypes();
 
     public Collection<PlatformType> findSupportedPlatformTypes();
 
-    public Collection<PlatformType> findUnsupportedPlatformTypes();
-
-    public Resource findResource(PlatformType pt);
 
     /**
      * Find all platform types
@@ -105,22 +102,17 @@ public interface PlatformManager {
     public void removePlatform(AuthzSubject subject, Platform platform)
         throws PlatformNotFoundException, PermissionException, VetoException;
 
-    public void handleResourceDelete(Resource resource);
-
-    /**
-     * Create a Platform of a specified type
-     */
-    public Platform createPlatform(AuthzSubject subject, Integer platformTypeId,
-                                   PlatformValue pValue, Integer agentPK)
-        throws ValidationException, PermissionException, AppdefDuplicateNameException,
-        AppdefDuplicateFQDNException, ApplicationException;
-
     /**
      * Create a Platform from an AIPlatform
      * @param aipValue the AIPlatform to create as a regular appdef platform.
      */
     public Platform createPlatform(AuthzSubject subject, AIPlatformValue aipValue)
         throws ApplicationException;
+    
+    Platform createPlatform(AuthzSubject subject, Integer platformTypeId,
+                            PlatformValue pValue, Integer agentPK)
+        throws ValidationException, PermissionException, AppdefDuplicateNameException,
+        AppdefDuplicateFQDNException, ApplicationException;
 
     /**
      * Get all platforms.
@@ -182,46 +174,12 @@ public interface PlatformManager {
     public Platform getPlatformByAIPlatform(AuthzSubject subject, AIPlatformValue aiPlatform)
         throws PermissionException;
 
-    public Platform getPhysPlatformByAgentToken(String agentToken);
-
-    /**
-     * Find a platform by name
-     * @param subject - who is trying this
-     * @param name - the name of the platform
-     */
-    public PlatformValue getPlatformByName(AuthzSubject subject, String name)
-        throws PlatformNotFoundException, PermissionException;
-
-    public Platform getPlatformByName(String name);
 
     /**
      * Get the Platform that has the specified Fqdn
      */
     public Platform findPlatformByFqdn(AuthzSubject subject, String fqdn)
         throws PlatformNotFoundException, PermissionException;
-
-    /**
-     * Get the Collection of platforms that have the specified Ip address
-     */
-    public Collection<Platform> getPlatformByIpAddr(AuthzSubject subject, String address)
-        throws PermissionException;
-
-    /**
-     * Get the Collection of platforms that have the specified MAC address
-     * 
-     * 
-     */
-    Collection<Platform> getPlatformByMacAddr(AuthzSubject subject, String address)
-        throws PermissionException;
-
-    /**
-     * Get the associated platform that has the same MAC address as the given
-     * resource
-     * 
-     * 
-     */
-    Platform getAssociatedPlatformByMacAddress(AuthzSubject subject, Resource r)
-        throws PermissionException, PlatformNotFoundException;
 
     /**
      * Get the platform by agent token
@@ -291,53 +249,6 @@ public interface PlatformManager {
         throws PermissionException;
 
     /**
-     * Get server IDs by server type and platform.
-     * @param subject The subject trying to list servers.
-     * @param pc The page control.
-     * @return A PageList of ServerValue objects representing servers on the
-     *         specified platform that the subject is allowed to view.
-     */
-    public List<Platform> getPlatformsByType(AuthzSubject subject, String type)
-        throws PermissionException, InvalidAppdefTypeException;
-
-    /**
-     * Get the platforms that have an IP with the specified address. If no
-     * matches are found, this method DOES NOT throw a
-     * PlatformNotFoundException, rather it returns an empty PageList.
-     */
-    public PageList<PlatformValue> findPlatformsByIpAddr(AuthzSubject subject, String addr,
-                                                         PageControl pc) throws PermissionException;
-
-    public List<Platform> findPlatformPojosByTypeAndName(AuthzSubject subj, Integer pType,
-                                                         String regEx);
-
-    public List<Platform> findParentPlatformPojosByNetworkRelation(AuthzSubject subj,
-                                                                   List<Integer> platformTypeIds,
-                                                                   String platformName,
-                                                                   Boolean hasChildren);
-
-    public List<Platform> findPlatformPojosByNoNetworkRelation(AuthzSubject subj,
-                                                               List<Integer> platformTypeIds,
-                                                               String platformName);
-
-    /**
-     * Get the platforms that have an IP with the specified address.
-     * @return a list of {@link Platform}s
-     */
-    public Collection<Platform> findPlatformPojosByIpAddr(String addr);
-
-    public Collection<Platform> findDeletedPlatforms();
-
-    /**
-     * Update an existing Platform. Requires all Ip's to have been re-added via
-     * the platformValue.addIpValue(IpValue) method due to bug 4924
-     * @param existing - the value object for the platform you want to save
-     */
-    public Platform updatePlatformImpl(AuthzSubject subject, PlatformValue existing)
-        throws UpdateException, PermissionException, AppdefDuplicateNameException,
-        PlatformNotFoundException, AppdefDuplicateFQDNException, ApplicationException;
-
-    /**
      * Update an existing Platform. Requires all Ip's to have been re-added via
      * the platformValue.addIpValue(IpValue) method due to bug 4924
      * @param existing - the value object for the platform you want to save
@@ -346,11 +257,6 @@ public interface PlatformManager {
         throws UpdateException, PermissionException, AppdefDuplicateNameException,
         PlatformNotFoundException, AppdefDuplicateFQDNException, ApplicationException;
 
-    /**
-     * DevNote: This method was refactored out of updatePlatformTypes. It does
-     * not work.
-     */
-    public void deletePlatformType(PlatformType pt) throws org.hyperic.hq.common.VetoException;
 
     /**
      * Update platform types
@@ -388,7 +294,10 @@ public interface PlatformManager {
     public List<Object[]> getPlatformTypeCounts();
 
     public Number getPlatformCount();
-
-    public Number getCpuCount();
+    
+    List<Platform> getPlatformsByType(AuthzSubject subject,String platformTypeName);
+    
+    ResourceTree getEntitiesForAgent(AuthzSubject subject, Agent agt)
+        throws AgentNotFoundException, PermissionException;
 
 }

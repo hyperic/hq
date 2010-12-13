@@ -34,15 +34,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.RenditServer;
 import org.hyperic.hq.hqu.ViewDescriptor;
 import org.hyperic.hq.hqu.shared.UIPluginManager;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -257,10 +256,10 @@ public class UIPluginManagerImpl implements UIPluginManager {
 
             attachments = attachmentResourceDAO.findFor(resourceManager.findRootResource(), cat);
 
-            if (!group.isMixed()) {
+            if (!resourceGroupManager.isMixed(group)) {
                 // For compatible groups add in attachments specific to that
                 // resource type.
-                Collection<Attachment> compatAttachments = attachmentResourceDAO.findFor(group.getResourcePrototype(),
+                Collection<Attachment> compatAttachments = attachmentResourceDAO.findFor(group,
                     cat);
 
                 attachments.addAll(compatAttachments);

@@ -27,8 +27,8 @@
 package org.hyperic.hq.common.server.session;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.common.shared.AuditManager;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.util.i18n.MessageBundle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -60,7 +60,8 @@ public class ResourceAuditFactory {
     }
 
     public ResourceAudit createResource(Resource r, AuthzSubject creator, long start, long end) {
-        String msg = MSGS.format("auditMsg.resource.create", r.getResourceType().getLocalizedName());
+        //TODO below used to be type.getLocalizedName()
+        String msg = MSGS.format("auditMsg.resource.create", r.getType().getName());
         ResourceAudit res = new ResourceAudit(r, creator, RESOURCE_CREATE, AuditImportance.MEDIUM, AuditNature.CREATE,
             msg, start, end);
 

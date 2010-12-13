@@ -47,7 +47,7 @@
       <column name="LIST_INDEX" not-null="true"/>
     </property>
     
-    <many-to-one name="resourceGroup" class="ResourceGroup">
+    <many-to-one name="resourceGroup" class="org.hyperic.hq.inventory.domain.ResourceGroup">
       <column name="RESOURCE_GROUP_ID" not-null="true" index="CRITERIA_RES_GRP_ID_IDX"/>
     </many-to-one>    
     
@@ -63,7 +63,7 @@
       <column name="DATE_PROP" not-null="false"/>
     </property>
 
-    <many-to-one name="resourceProp" class="Resource">
+    <many-to-one name="resourceProp" class="org.hyperic.hq.inventory.domain.Resource">
       <column name="RESOURCE_ID_PROP" index="CRITERIA_RESOURCE_ID_PROP_IDX"/>
     </many-to-one>
     

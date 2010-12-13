@@ -96,7 +96,7 @@ public class SyslogAction extends SyslogActionConfig
         AlertDefinitionInterface alertDef =
             alert.getAlertDefinitionInterface();
         AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(alertDef.getResource());
-        String resName =Bootstrap.getBean(ResourceManager.class).getAppdefEntityName(aeid);
+        String resName =Bootstrap.getBean(ResourceManager.class).findResource(aeid).getName();
         resName = hackDBString(resName);
 
         _log.info("DB_1 " + convertToDBPriority(alertDef.getPriority()) +

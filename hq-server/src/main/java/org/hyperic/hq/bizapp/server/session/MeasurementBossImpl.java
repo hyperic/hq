@@ -70,14 +70,11 @@ import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.ServiceManager;
-import org.hyperic.hq.appdef.shared.VirtualManager;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
@@ -104,6 +101,8 @@ import org.hyperic.hq.grouping.CritterTranslator;
 import org.hyperic.hq.grouping.critters.DescendantProtoCritterType;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
@@ -158,7 +157,6 @@ public class MeasurementBossImpl implements MeasurementBoss {
     private ResourceGroupManager resourceGroupManager;
     private ServerManager serverManager;
     private ServiceManager serviceManager;
-    private VirtualManager virtualManager;
     private ApplicationManager applicationManager;
     private CritterTranslator critterTranslator;
     private ProblemMetricManager problemMetricManager;
@@ -172,7 +170,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
                                ResourceManager resourceManager,
                                ResourceGroupManager resourceGroupManager,
                                ServerManager serverManager, ServiceManager serviceManager,
-                               VirtualManager virtualManager, ApplicationManager applicationManager, 
+                               ApplicationManager applicationManager, 
                                CritterTranslator critterTranslator,
                                ProblemMetricManager problemMetricManager) {
         this.sessionManager = sessionManager;
@@ -187,7 +185,6 @@ public class MeasurementBossImpl implements MeasurementBoss {
         this.resourceGroupManager = resourceGroupManager;
         this.serverManager = serverManager;
         this.serviceManager = serviceManager;
-        this.virtualManager = virtualManager;
         this.applicationManager = applicationManager;
         this.critterTranslator = critterTranslator;
         this.problemMetricManager = problemMetricManager;
@@ -1557,7 +1554,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
                     .getId());
                 final Map<Integer, List<Measurement>> mmap = measurementManager
                     .getAvailMeasurements(Collections.singleton(group));
-                List<Measurement> metrics = mmap.get(group.getResource().getId());
+                List<Measurement> metrics = mmap.get(group.getId());
                 for (Iterator<Measurement> it = metrics.iterator(); it.hasNext();) {
                     Measurement m = it.next();
                     if (!m.getTemplate().equals(tmpl)) {
@@ -1955,7 +1952,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
                 aeid = AppdefUtil.newAppdefEntityId(resource);
             } else if (o instanceof ResourceGroup) {
                 final ResourceGroup grp = (ResourceGroup) o;
-                final Resource resource = grp.getResource();
+                final Resource resource = grp;
                 aeid = AppdefUtil.newAppdefEntityId(resource);
             } else {
                 final AppdefResourceValue r = (AppdefResourceValue) o;
@@ -2308,7 +2305,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         if (group == null) {
             return MeasurementConstants.AVAIL_UNKNOWN;
         }
-        final Resource resource = group.getResource();
+        final Resource resource = group;
         if (resource == null || resource.isInAsyncDeleteState()) {
             return MeasurementConstants.AVAIL_UNKNOWN;
         }
@@ -2351,39 +2348,40 @@ public class MeasurementBossImpl implements MeasurementBoss {
         throws AppdefEntityNotFoundException, PermissionException {
         List<AppdefEntityID> res = new ArrayList<AppdefEntityID>();
 
-        Resource proto = resourceManager.findResourcePrototype(ctype);
-
-        if (proto == null) {
-            log.warn("Unable to find prototype for ctype=[" + ctype + "]");
-            return res;
-        }
-
-        DescendantProtoCritterType descType = new DescendantProtoCritterType();
-      
-        CritterTranslationContext ctx = new CritterTranslationContext(subject);
-
-        for (int i = 0; i < aids.length; i++) {
-            if (aids[i].isApplication()) {
-                AppdefEntityValue rv = new AppdefEntityValue(aids[i], subject);
-                Collection<AppdefResourceValue> services = rv.getAssociatedServices(ctype.getId(),
-                    PageControl.PAGE_ALL);
-                for (AppdefResourceValue r : services) {
-
-                    res.add(r.getEntityId());
-                }
-            } else {
-                Resource r = resourceManager.findResource(aids[i]);
-                List critters = new ArrayList(1);
-                critters.add(descType.newInstance(r, proto));
-                CritterList cList = new CritterList(critters, false);
-
-                List<Resource> children = critterTranslator.translate(ctx, cList).list();
-                for (Resource child : children) {
-
-                    res.add(AppdefUtil.newAppdefEntityId(child));
-                }
-            }
-        }
+        //TODO
+//        Resource proto = resourceManager.findResourcePrototype(ctype);
+//
+//        if (proto == null) {
+//            log.warn("Unable to find prototype for ctype=[" + ctype + "]");
+//            return res;
+//        }
+//
+//        DescendantProtoCritterType descType = new DescendantProtoCritterType();
+//      
+//        CritterTranslationContext ctx = new CritterTranslationContext(subject);
+//
+//        for (int i = 0; i < aids.length; i++) {
+//            if (aids[i].isApplication()) {
+//                AppdefEntityValue rv = new AppdefEntityValue(aids[i], subject);
+//                Collection<AppdefResourceValue> services = rv.getAssociatedServices(ctype.getId(),
+//                    PageControl.PAGE_ALL);
+//                for (AppdefResourceValue r : services) {
+//
+//                    res.add(r.getEntityId());
+//                }
+//            } else {
+//                Resource r = resourceManager.findResource(aids[i]);
+//                List critters = new ArrayList(1);
+//                critters.add(descType.newInstance(r, proto));
+//                CritterList cList = new CritterList(critters, false);
+//
+//                List<Resource> children = critterTranslator.translate(ctx, cList).list();
+//                for (Resource child : children) {
+//
+//                    res.add(AppdefUtil.newAppdefEntityId(child));
+//                }
+//            }
+//        }
         return res;
     }
 
@@ -3060,7 +3058,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         AppdefEntityNotFoundException {
         final AuthzSubject subject = sessionManager.getSubject(sessionId);
 
-        Collection<AppdefResource> services = serviceManager.getPlatformServices(subject, entId
+        Collection services = serviceManager.getPlatformServices(subject, entId
             .getId());
         return getSummarizedResourceCurrentHealth(subject, services);
     }
@@ -3139,7 +3137,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         watch.markTimeEnd("getAvailMeasurements");
 
         // Remap from list to map of metrics
-        List<Measurement> metrics = measCache.remove(group.getResource().getId());
+        List<Measurement> metrics = measCache.remove(group.getId());
         for (Measurement meas : metrics) {
 
             measCache.put(meas.getResource().getId(), Collections.singletonList(meas));
@@ -3219,13 +3217,14 @@ public class MeasurementBossImpl implements MeasurementBoss {
                                                                   AppdefEntityID entId)
         throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException,
         GroupNotCompatibleException, PermissionException {
+        return new ArrayList<ResourceDisplaySummary>();
 
-        final AuthzSubject subject = sessionManager.getSubject(sessionId);
-
-        List<AppdefResourceValue> resources = virtualManager.findVirtualResourcesByPhysical(
-            subject, entId);
-        PageList resPageList = new PageList(resources, resources.size());
-        return getResourcesCurrentHealth(subject, resPageList);
+//        final AuthzSubject subject = sessionManager.getSubject(sessionId);
+//
+//        List<AppdefResourceValue> resources = virtualManager.findVirtualResourcesByPhysical(
+//            subject, entId);
+//        PageList resPageList = new PageList(resources, resources.size());
+//        return getResourcesCurrentHealth(subject, resPageList);
 
     }
 
@@ -3252,7 +3251,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         rds.setEntityId(aeid);
         rds.setResourceName(resource.getName());
         rds.setResourceEntityTypeName(aeid.getTypeName());
-        rds.setResourceTypeName(resource.getPrototype().getName());
+        rds.setResourceTypeName(resource.getType().getName());
         if (parentResource == null) {
             rds.setHasParentResource(Boolean.FALSE);
         } else {
@@ -3832,7 +3831,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
             .getAvailMeasurements(Collections.singleton(id));
         Map<Integer, MetricValue> availCache = null;
         if (id.isApplication()) {
-            List<Resource> members = applicationManager.getApplicationResources(subj, id.getId());
+            List<Resource> members = new ArrayList<Resource>(resourceGroupManager.getMembers(resourceGroupManager.findResourceGroupById(id.getId())));
             availCache = availabilityManager.getLastAvail(members, measCache);
         }
         return getAvailability(subj, id, measCache, availCache);

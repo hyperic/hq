@@ -102,5 +102,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="var" path="M2_REPO/org/hibernate/javax/persistence/hibernate-jpa-2.0-api/1.0.0.Final/hibernate-jpa-2.0-api-1.0.0.Final.jar" sourcepath="M2_REPO/org/hibernate/javax/persistence/hibernate-jpa-2.0-api/1.0.0.Final/hibernate-jpa-2.0-api-1.0.0.Final-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-datastore-neo4j/1.0.0.BUILD-SNAPSHOT/spring-datastore-neo4j-1.0.0.BUILD-SNAPSHOT.jar" sourcepath="M2_REPO/org/springframework/data/spring-datastore-neo4j/1.0.0.BUILD-SNAPSHOT/spring-datastore-neo4j-1.0.0.BUILD-SNAPSHOT-sources.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

@@ -30,13 +30,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-
-
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.ApplicationType;
-import org.hyperic.hq.appdef.server.session.CpropKey;
 import org.hyperic.hq.appdef.server.session.DownResource;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
@@ -76,8 +73,6 @@ import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.shared.GroupCreationException;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -85,6 +80,9 @@ import org.hyperic.hq.bizapp.shared.uibeans.SearchResult;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.inventory.domain.PropertyType;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
@@ -187,14 +185,14 @@ public interface AppdefBoss {
     /**
      * Find service inventory by application - including services and clusters
      */
-    public PageList<AppdefResourceValue> findServiceInventoryByApplication(int sessionID, Integer appId, PageControl pc)
+    public PageList<ServiceValue> findServiceInventoryByApplication(int sessionID, Integer appId, PageControl pc)
         throws AppdefEntityNotFoundException, SessionException, PermissionException;
 
     /**
      * Find all services on a server
      * @return A list of ServiceValue objects.
      */
-    public PageList<AppdefResourceValue> findServicesByServer(int sessionID, Integer serverId, PageControl pc)
+    public PageList<ServiceValue> findServicesByServer(int sessionID, Integer serverId, PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException, SessionException;
 
     /**
@@ -293,10 +291,6 @@ public interface AppdefBoss {
 
     public PageList<AppdefResourceTypeValue> findAllResourceTypes(int sessionId, int entType, PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException, PermissionException;
-
-    public Platform createPlatform(int sessionID, PlatformValue platformVal, Integer platTypePK, Integer agent)
-        throws ValidationException, SessionTimeoutException, SessionNotFoundException, PermissionException,
-        AppdefDuplicateNameException, AppdefDuplicateFQDNException, ApplicationException;
 
     public AppdefResourceTypeValue findResourceTypeById(int sessionID, AppdefEntityTypeID id)
         throws SessionTimeoutException, SessionNotFoundException;
@@ -487,11 +481,6 @@ public interface AppdefBoss {
                                      String location, java.lang.String[] resources, boolean privGrp)
         throws GroupCreationException, org.hyperic.hq.grouping.shared.GroupDuplicateNameException, SessionException;
 
-    /**
-     * Remove resources from the group's contents.
-     */
-    public void removeResourcesFromGroup(int sessionId, ResourceGroup group, Collection<Resource> resources)
-        throws SessionException, PermissionException, VetoException;
 
     public ResourceGroup findGroupById(int sessionId, Integer groupId) throws PermissionException, SessionException;
 
@@ -706,6 +695,13 @@ public interface AppdefBoss {
     public void setCPropValue(int sessionId, AppdefEntityID id, String key, String val)
         throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException, PermissionException,
         CPropKeyNotFoundException;
+    
+    
+    List<PropertyType> getCPropKeys(int sessionId, int appdefType, int appdefTypeId) throws SessionNotFoundException, SessionTimeoutException;
+    
+    List<PropertyType> getCPropKeys(int sessionId, AppdefEntityID aeid)
+    throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException,
+    PermissionException;
 
     /**
      * Get a map which holds the descriptions & their associated values for an
@@ -715,25 +711,6 @@ public interface AppdefBoss {
      */
     public Properties getCPropDescEntries(int sessionId, AppdefEntityID id) throws SessionNotFoundException,
         SessionTimeoutException, PermissionException, AppdefEntityNotFoundException;
-
-    /**
-     * Get all the keys associated with an appdef resource type.
-     * @param appdefType One of AppdefEntityConstants.APPDEF_TYPE_*
-     * @param appdefTypeId The ID of the appdef resource type
-     * @return a List of CPropKeyValue objects
-     */
-    public List<CpropKey> getCPropKeys(int sessionId, int appdefType, int appdefTypeId)
-        throws SessionNotFoundException, SessionTimeoutException;
-
-    /**
-     * Get all the keys associated with an appdef type of a resource.
-     * @param aeid The ID of the appdef resource
-     * @return a List of CPropKeyValue objects
-     * @throws PermissionException
-     * @throws AppdefEntityNotFoundException
-     */
-    public List<CpropKey> getCPropKeys(int sessionId, AppdefEntityID aeid) throws SessionNotFoundException,
-        SessionTimeoutException, AppdefEntityNotFoundException, PermissionException;
 
     /**
      * Get the appdef inventory summary visible to a user
@@ -793,10 +770,13 @@ public interface AppdefBoss {
     public Map<String, List<AppdefResourceType>> getUnavailableResourcesCount(AuthzSubject user)
         throws AppdefEntityNotFoundException, PermissionException;
     
-    /**
-     * Check whether or not a given resource exists in the virtual hierarchy
-     * 
-     */
-    public boolean hasVirtualResourceRelation(Resource resource);
+    public void removeResourcesFromGroup(int sessionId, ResourceGroup group,
+                                         Collection<Resource> resources) throws SessionException,
+        PermissionException, VetoException;
+    
+    public Platform createPlatform(int sessionID, PlatformValue platformVal, Integer platTypePK,
+                                   Integer agent) throws ValidationException,
+        SessionTimeoutException, SessionNotFoundException, PermissionException,
+        AppdefDuplicateNameException, AppdefDuplicateFQDNException, ApplicationException;
     
 }

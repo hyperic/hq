@@ -30,6 +30,10 @@
 		and PerfMonitor their required dependencies before any auto-scanned services are
 		initialized. Currently the only thing enforcing that these get created first is 
 		that app context files happen to be processed in alpha order -->
+		
+
+     <context:spring-configured />
+
 	<tx:annotation-driven mode="aspectj"
 		transaction-manager="transactionManager" />
 

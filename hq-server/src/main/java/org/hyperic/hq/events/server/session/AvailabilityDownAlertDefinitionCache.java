@@ -30,7 +30,7 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.springframework.stereotype.Repository;
 
 /**

@@ -36,10 +36,10 @@ import org.hyperic.hq.control.shared.ControlManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.control.shared.ControlScheduleManager;
-import org.hyperic.hq.authz.server.session.Resource
-import org.hyperic.hq.authz.server.session.ResourceGroup
+import org.hyperic.hq.inventory.domain.Resource
+import org.hyperic.hq.inventory.domain.ResourceGroup
 import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
-import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo
+import org.hyperic.hq.authz.shared.ResourceGroupCreateInfo
 import org.hyperic.hq.appdef.Agent
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants

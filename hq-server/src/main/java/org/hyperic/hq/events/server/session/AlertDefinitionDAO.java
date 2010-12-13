@@ -34,11 +34,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.EdgePermCheck;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -46,11 +42,11 @@ import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.events.AlertSeverity;
-import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -65,18 +61,16 @@ public class AlertDefinitionDAO
 
     private AlertConditionDAO alertConditionDAO;
 
-    private ResourceDAO rDao;
 
     @Autowired
     public AlertDefinitionDAO(SessionFactory f, PermissionManager permissionManager,
                               ActionDAO actDAO, TriggerDAO tDAO,
-                              AlertConditionDAO alertConditionDAO, ResourceDAO rDao) {
+                              AlertConditionDAO alertConditionDAO) {
         super(AlertDefinition.class, f);
         this.permissionManager = permissionManager;
         this.actDAO = actDAO;
         this.tDAO = tDAO;
         this.alertConditionDAO = alertConditionDAO;
-        this.rDao = rDao;
     }
 
   
@@ -289,29 +283,7 @@ public class AlertDefinitionDAO
 
         // def.set the resource based on the entity ID
 
-        // Don't need to synch the Resource with the db since changes
-        // to the Resource aren't cascaded on saving the AlertDefinition.
-        Integer authzTypeId;
-        if (EventConstants.TYPE_ALERT_DEF_ID.equals(val.getParentId())) {
-            switch (val.getAppdefType()) {
-                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                    authzTypeId = AuthzConstants.authzPlatformProto;
-                    break;
-                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                    authzTypeId = AuthzConstants.authzServerProto;
-                    break;
-                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                    authzTypeId = AuthzConstants.authzServiceProto;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Type " + val.getAppdefType() +
-                                                       " is not a valid type");
-            }
-        } else {
-            AppdefEntityID aeid = new AppdefEntityID(val.getAppdefType(), val.getAppdefId());
-            authzTypeId = aeid.getAuthzTypeId();
-        }
-        def.setResource(rDao.findByInstanceId(authzTypeId, val.getAppdefId(), true));
+        def.setResource(Resource.findResource(val.getAppdefId()));
 
         for (RegisteredTriggerValue tVal : val.getAddedTriggers()) {
             def.addTrigger(tDAO.findById(tVal.getId()));

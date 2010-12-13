@@ -25,11 +25,11 @@
 package org.hyperic.hq.product.server.session;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditImportance;
 import org.hyperic.hq.common.server.session.AuditNature;
 import org.hyperic.hq.common.server.session.AuditPurpose;
+import org.hyperic.hq.inventory.domain.Resource;
 
 public class PluginAudit
     extends Audit {

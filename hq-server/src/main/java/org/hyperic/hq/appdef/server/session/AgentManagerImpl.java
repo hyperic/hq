@@ -93,26 +93,20 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     private final Log log = LogFactory.getLog(AgentManagerImpl.class.getName());
     private AgentTypeDAO agentTypeDao;
     private AgentDAO agentDao;
-    private ServiceDAO serviceDao;
-    private ServerDAO serverDao;
     private PermissionManager permissionManager;
-    private PlatformDAO platformDao;
     private ServerConfigManager serverConfigManager;
     private AgentCommandsClientFactory agentCommandsClientFactory;
     private ApplicationContext applicationContext;
 
     @Autowired
     public AgentManagerImpl(AgentTypeDAO agentTypeDao,
-                            AgentDAO agentDao, ServiceDAO serviceDao, ServerDAO serverDao,
-                            PermissionManager permissionManager, PlatformDAO platformDao,
+                            AgentDAO agentDao, 
+                            PermissionManager permissionManager, 
                             ServerConfigManager serverConfigManager,
                             AgentCommandsClientFactory agentCommandsClientFactory) {
         this.agentTypeDao = agentTypeDao;
         this.agentDao = agentDao;
-        this.serviceDao = serviceDao;
-        this.serverDao = serverDao;
         this.permissionManager = permissionManager;
-        this.platformDao = platformDao;
         this.serverConfigManager = serverConfigManager;
         this.agentCommandsClientFactory = agentCommandsClientFactory;
     }
@@ -145,34 +139,6 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      */
     public void removeAgent(Agent agent) {
         agentDao.remove(agent);
-    }
-
-    /**
-     * Get a list of all the entities which can be serviced by an Agent.
-     */
-    @Transactional(readOnly = true)
-    public ResourceTree getEntitiesForAgent(AuthzSubject subject, String agentToken)
-        throws AgentNotFoundException, PermissionException {
-
-        Agent agt = getAgentInternal(agentToken);
-        Collection<Platform> plats = platformDao.findByAgent(agt);
-        if (plats.size() == 0) {
-            return new ResourceTree();
-        }
-        AppdefEntityID[] platIds = new AppdefEntityID[plats.size()];
-        int i = 0;
-        for (Platform plat : plats) {
-            platIds[i] = AppdefEntityID.newPlatformID(plat.getId());
-            i++;
-        }
-
-        ResourceTreeGenerator generator = Bootstrap.getBean(ResourceTreeGenerator.class);
-        generator.setSubject(subject);
-        try {
-            return generator.generate(platIds, ResourceTreeGenerator.TRAVERSE_UP);
-        } catch (AppdefEntityNotFoundException exc) {
-            throw new SystemException("Internal inconsistancy finding " + "resources for agent");
-        }
     }
 
     /**
@@ -532,34 +498,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     @Transactional(readOnly = true)
     public Agent getAgent(AppdefEntityID aID) throws AgentNotFoundException {
         try {
-            Platform platform = null;
-            switch (aID.getType()) {
-                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                    Service service = serviceDao.findById(aID.getId());
-                    Server server = service.getServer();
-                    // server may be null due to async delete
-                    if (server == null) {
-                        break;
-                    }
-                    platform = server.getPlatform();
-                    break;
-                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                    server = serverDao.findById(aID.getId());
-                    platform = server.getPlatform();
-                    break;
-                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                    platform = platformDao.findById(aID.getId());
-                    break;
-                default:
-                    throw new AgentNotFoundException("Request for agent from an "
-                                                     + "entity which can return "
-                                                     + "multiple agents");
-            }
-            if (platform == null) {
-                throw new AgentNotFoundException("No agent found for " + aID);
-            }
-            return platform.getAgent();
-
+            return org.hyperic.hq.inventory.domain.Resource.findResource(aID.getId()).getAgent();
         } catch (ObjectNotFoundException exc) {
             throw new AgentNotFoundException("No agent found for " + aID);
         }

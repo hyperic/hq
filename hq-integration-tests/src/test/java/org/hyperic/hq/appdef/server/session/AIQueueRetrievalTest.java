@@ -58,9 +58,6 @@ public class AIQueueRetrievalTest {
     @Autowired
     private AuthzSubjectManager authzSubjectManager;
 
-    @Autowired
-    private PlatformDAO platformDAO;
-
     // =902 in perf test env
     private static final int NUM_AGENTS = 4;
 
@@ -93,7 +90,6 @@ public class AIQueueRetrievalTest {
                     "/foo/some" + j);
             }
         }
-        platformDAO.getSession().flush();
     }
 
     private void setUpChangeTestEnv() throws Exception {
@@ -144,7 +140,6 @@ public class AIQueueRetrievalTest {
     @Test
     public void testGetQueueWithChangesMatchingFQDN() throws Exception {
         setUpChangeTestEnv();
-        platformDAO.getSession().flush();
         PageControl page = new PageControl();
         page.setPagesize(5);
         StopWatch watch = new StopWatch();
@@ -180,7 +175,7 @@ public class AIQueueRetrievalTest {
         aiPlatform.setQueueStatus(2);
 
         aiQueueManager.queue(authzSubjectManager.getOverlordPojo(), aiPlatform, true, false, false);
-        platformDAO.getSession().flush();
+        
         PageControl page = new PageControl();
         page.setPagesize(5);
         PageList<AIPlatformValue> queue = aiQueueManager.getQueue(
@@ -195,7 +190,7 @@ public class AIQueueRetrievalTest {
         agentManager.createLegacyAgent("127.0.0.1", 2144, "hqadmin", "theToken", "4.5");
         createPlatform(platformType, "PlatformFoo", "PlatformFoo", "10.0.0.175",
             agentManager.getAgent("theToken"));
-        platformDAO.getSession().flush();
+       
 
         AIPlatformValue aiPlatform = new AIPlatformValue();
         aiPlatform.setFqdn("PlatformFooBar");
@@ -216,7 +211,7 @@ public class AIQueueRetrievalTest {
         aiPlatform.setQueueStatus(2);
 
         aiQueueManager.queue(authzSubjectManager.getOverlordPojo(), aiPlatform, true, false, false);
-        platformDAO.getSession().flush();
+       
         PageControl page = new PageControl();
         page.setPagesize(5);
         PageList<AIPlatformValue> queue = aiQueueManager.getQueue(
@@ -242,9 +237,6 @@ public class AIQueueRetrievalTest {
         Ip ip1 = platformManager.addIp(newPlatform, "127.0.0.1", "255.0.0.0", "00:00:00:00:00:00");
         Ip ip2 = platformManager.addIp(newPlatform, remoteIp, "255.0.0.0", "00:00:00:00:00:00");
 
-        // Not sure why addIp doesn't flush the IP to DB...
-        platformDAO.getSession().save(ip1);
-        platformDAO.getSession().save(ip2);
         return newPlatform;
     }
 

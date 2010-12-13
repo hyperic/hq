@@ -127,7 +127,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                 }
 
                 try {
-                    configMgr.configureResponse(subject, platform.getConfigResponse(), aid,
+                    configMgr.configureResponse(subject, aid,
                         aiplatform.getProductConfig(), aiplatform.getMeasurementConfig(),
                         aiplatform.getControlConfig(), null, null, false);
                 } catch (Exception e) {
@@ -154,7 +154,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
 
                 if (aiplatformValue.isPlatformDevice()) {
                     try {
-                        configMgr.configureResponse(subject, existingPlatform.getConfigResponse(),
+                        configMgr.configureResponse(subject, 
                             existingPlatform.getEntityId(), aiplatform.getProductConfig(),
                             aiplatform.getMeasurementConfig(), aiplatform.getControlConfig(), null,
                             null, false);
@@ -310,7 +310,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
             serverValue = AIConversionUtil.mergeAIServerIntoServer(aiserverValue, serverValue);
             Server updated = serverManager.updateServer(subject, serverValue);
             try {
-                configMgr.configureResponse(subject, server.getConfigResponse(), serverValue
+                configMgr.configureResponse(subject,  serverValue
                     .getEntityId(), aiserver.getProductConfig(), aiserver.getMeasurementConfig(),
                     aiserver.getControlConfig(), null, null, false);
                 resourceManager.resourceHierarchyUpdated(
@@ -359,7 +359,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                 serverValue);
 
             try {
-                configMgr.configureResponse(subject, server.getConfigResponse(), server
+                configMgr.configureResponse(subject,  server
                     .getEntityId(), aiserver.getProductConfig(), aiserver.getMeasurementConfig(),
                     aiserver.getControlConfig(), null, /* RT config */
                     null, false);
@@ -394,20 +394,6 @@ public class AIQRV_approve implements AIQResourceVisitor {
             .getAutoinventoryIdentifier());
         if (server != null || aiserver.getAIPlatform().isPlatformDevice()) {
             return server;
-        }
-        ServerType serverType = serverManager.findServerTypeByName(aiserver.getServerTypeName());
-        // if (virtual == true) for this server type that means that there may
-        // only be one server per platform of this type
-        if (false == serverType.isVirtual()) {
-            return null;
-        }
-        List servers = serverManager.findServersByType(platform, serverType);
-        // servers.size() > 1 must be false if
-        // serverType.isVirtual() == true
-        // Unfortunately this is not enforced anywhere so we should do something
-        // to handle it just in case
-        if (servers.size() > 0) {
-            return (Server) servers.get(0);
         }
         return null;
     }

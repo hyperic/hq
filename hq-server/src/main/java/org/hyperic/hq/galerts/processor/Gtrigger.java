@@ -27,8 +27,8 @@ package org.hyperic.hq.galerts.processor;
 
 import java.util.Set;
 
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategy;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.zevents.Zevent;
 
 

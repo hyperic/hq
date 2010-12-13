@@ -37,8 +37,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceManager;
@@ -48,6 +46,8 @@ import org.hyperic.hq.events.EventLogStatus;
 import org.hyperic.hq.events.ResourceEventInterface;
 import org.hyperic.hq.events.server.session.EventLogDAO.ResourceEventLog;
 import org.hyperic.hq.events.shared.EventLogManager;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.TrackEvent;
 import org.hyperic.util.timer.StopWatch;
@@ -230,7 +230,7 @@ public class EventLogManagerImpl implements EventLogManager {
         } else {
             eTypes = Arrays.asList(eventTypes);
         }
-        if (r.getResourceType().getId().equals(AuthzConstants.authzGroup)) {
+        if (r instanceof ResourceGroup) {
             return eventLogDAO.findByGroup(r, begin, end, eTypes);
         } else {
             return eventLogDAO.findByEntity(user, r, begin, end, eTypes);

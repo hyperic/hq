@@ -32,12 +32,12 @@ import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.events.AlertSeverity;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -78,7 +78,6 @@ public class GalertDefDAO
     public List<GalertDef> findAll() {
     	String sql = "from GalertDef d "
     		+ "where d.deleted = false "
-    		+ "and d.group.resource.resourceType is not null "
     		+ "order by d.name";
 
         return (List<GalertDef>) getSession().createQuery(sql).list();

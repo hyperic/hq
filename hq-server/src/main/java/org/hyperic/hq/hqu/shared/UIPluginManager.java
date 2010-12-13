@@ -29,7 +29,6 @@ import java.util.Collection;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.ViewDescriptor;
 import org.hyperic.hq.hqu.server.session.AttachType;
@@ -42,6 +41,7 @@ import org.hyperic.hq.hqu.server.session.ViewMasthead;
 import org.hyperic.hq.hqu.server.session.ViewMastheadCategory;
 import org.hyperic.hq.hqu.server.session.ViewResource;
 import org.hyperic.hq.hqu.server.session.ViewResourceCategory;
+import org.hyperic.hq.inventory.domain.Resource;
 
 /**
  * Local interface for UIPluginManager.

@@ -1,0 +1,334 @@
+<class-diagram version="0.9.86" automaticImage="GIF" icons="true" always-add-relationships="false" 
+  generalizations="true" realizations="true" associations="true" dependencies="false" nesting-relationships="true">  
+  <class corner="BOTTOM_RIGHT" language="java" name="org.hyperic.hq.inventory.domain.Resource" project="hq-server" 
+    file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/Resource.java" binary="false">    
+    <position x="236" y="401" width="-1" height="-1"/>    
+    <display autosize="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <class corner="BOTTOM_RIGHT" language="java" name="org.hyperic.hq.authz.server.session.AuthzSubject" 
+    project="hq-server" file="/hq-server/src/main/java/org/hyperic/hq/authz/server/session/AuthzSubject.java" 
+    binary="false">    
+    <position x="683" y="415" width="-1" height="-1"/>    
+    <display autosize="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <class corner="BOTTOM_RIGHT" language="java" name="org.hyperic.hq.inventory.domain.ResourceGroup" project="hq-server" 
+    file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/ResourceGroup.java" binary="false">    
+    <position x="243" y="107" width="-1" height="-1"/>    
+    <display autosize="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <class corner="BOTTOM_RIGHT" language="java" name="org.hyperic.hq.authz.server.session.Role" project="hq-server" 
+    file="/hq-server/src/main/java/org/hyperic/hq/authz/server/session/Role.java" binary="false">    
+    <position x="686" y="108" width="-1" height="-1"/>    
+    <display autosize="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <class corner="BOTTOM_RIGHT" language="java" name="org.hyperic.hq.appdef.Agent" project="hq-server" 
+    file="/hq-server/src/main/java/org/hyperic/hq/appdef/Agent.java" binary="false">    
+    <position x="683" y="723" width="-1" height="-1"/>    
+    <display autosize="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <class corner="BOTTOM_RIGHT" language="java" name="org.hyperic.hq.inventory.domain.ResourceType" project="hq-server" 
+    file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/ResourceType.java" binary="false">    
+    <position x="226" y="684" width="-1" height="-1"/>    
+    <display autosize="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <class corner="BOTTOM_RIGHT" language="java" name="org.hyperic.hq.inventory.domain.ConfigType" project="hq-server" 
+    file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/ConfigType.java" binary="false">    
+    <position x="416" y="933" width="-1" height="-1"/>    
+    <display autosize="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <class corner="BOTTOM_RIGHT" language="java" name="org.hyperic.hq.inventory.domain.OperationType" project="hq-server" 
+    file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/OperationType.java" binary="false">    
+    <position x="250" y="930" width="-1" height="-1"/>    
+    <display autosize="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <class corner="BOTTOM_RIGHT" language="java" name="org.hyperic.hq.inventory.domain.PropertyType" project="hq-server" 
+    file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/PropertyType.java" binary="false">    
+    <position x="78" y="946" width="-1" height="-1"/>    
+    <display autosize="true" package="true" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <class corner="BOTTOM_RIGHT" language="java" name="org.hyperic.hq.product.Plugin" project="hq-server" 
+    file="/hq-server/src/main/java/org/hyperic/hq/product/Plugin.java" binary="false">    
+    <position x="680" y="927" width="-1" height="-1"/>    
+    <display autosize="true" package="false" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <class corner="BOTTOM_RIGHT" language="java" name="org.hyperic.hq.inventory.domain.Config" project="hq-server" 
+    file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/Config.java" binary="false">    
+    <position x="21" y="516" width="-1" height="-1"/>    
+    <display autosize="true" package="false" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <class corner="BOTTOM_RIGHT" language="java" name="org.hyperic.hq.inventory.domain.ResourceTypeRelation" 
+    project="hq-server" file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/ResourceTypeRelation.java" 
+    binary="false">    
+    <position x="13" y="646" width="-1" height="-1"/>    
+    <display autosize="true" package="false" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <class corner="BOTTOM_RIGHT" language="java" name="org.hyperic.hq.inventory.domain.ResourceRelation" 
+    project="hq-server" file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/ResourceRelation.java" 
+    binary="false">    
+    <position x="17" y="374" width="-1" height="-1"/>    
+    <display autosize="true" package="false" initial-value="false" signature="true" visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <association>    
+    <source project="hq-server" name="org.hyperic.hq.inventory.domain.ResourceTypeRelation" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/ResourceTypeRelation.java" binary="false" 
+      navigable="false">      
+      <attribute name="from"/>      
+      <multiplicity minimum="0" maximum="1"/>    
+    </source>    
+    <target project="hq-server" name="org.hyperic.hq.inventory.domain.ResourceType" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/ResourceType.java" binary="false" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association>    
+    <source project="hq-server" name="org.hyperic.hq.inventory.domain.ResourceType" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/ResourceType.java" binary="false" navigable="false">      
+      <attribute name="propertyTypes"/>      
+      <multiplicity minimum="0" maximum="2147483647"/>    
+    </source>    
+    <target project="hq-server" name="org.hyperic.hq.inventory.domain.PropertyType" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/PropertyType.java" binary="false" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association>    
+    <source project="hq-server" name="org.hyperic.hq.inventory.domain.Resource" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/Resource.java" binary="false" navigable="false">      
+      <attribute name="agent"/>      
+      <multiplicity minimum="0" maximum="1"/>    
+    </source>    
+    <target project="hq-server" name="org.hyperic.hq.appdef.Agent" 
+      file="/hq-server/src/main/java/org/hyperic/hq/appdef/Agent.java" binary="false" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association>    
+    <source project="hq-server" name="org.hyperic.hq.inventory.domain.Resource" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/Resource.java" binary="false" navigable="false">      
+      <attribute name="owner"/>      
+      <multiplicity minimum="0" maximum="1"/>    
+    </source>    
+    <target project="hq-server" name="org.hyperic.hq.authz.server.session.AuthzSubject" 
+      file="/hq-server/src/main/java/org/hyperic/hq/authz/server/session/AuthzSubject.java" binary="false" 
+      navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association>    
+    <source project="hq-server" name="org.hyperic.hq.inventory.domain.ResourceType" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/ResourceType.java" binary="false" navigable="false">      
+      <attribute name="operationTypes"/>      
+      <multiplicity minimum="0" maximum="2147483647"/>    
+    </source>    
+    <target project="hq-server" name="org.hyperic.hq.inventory.domain.OperationType" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/OperationType.java" binary="false" 
+      navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association>    
+    <source project="hq-server" name="org.hyperic.hq.inventory.domain.PropertyType" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/PropertyType.java" binary="false" navigable="false">      
+      <attribute name="resourceType"/>      
+      <multiplicity minimum="0" maximum="1"/>    
+    </source>    
+    <target project="hq-server" name="org.hyperic.hq.inventory.domain.ResourceType" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/ResourceType.java" binary="false" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association>    
+    <source project="hq-server" name="org.hyperic.hq.authz.server.session.AuthzSubject" 
+      file="/hq-server/src/main/java/org/hyperic/hq/authz/server/session/AuthzSubject.java" binary="false" 
+      navigable="false">      
+      <attribute name="_resource"/>      
+      <multiplicity minimum="0" maximum="1"/>    
+    </source>    
+    <target project="hq-server" name="org.hyperic.hq.inventory.domain.Resource" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/Resource.java" binary="false" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association>    
+    <source project="hq-server" name="org.hyperic.hq.inventory.domain.ResourceType" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/ResourceType.java" binary="false" navigable="false">      
+      <attribute name="configTypes"/>      
+      <multiplicity minimum="0" maximum="2147483647"/>    
+    </source>    
+    <target project="hq-server" name="org.hyperic.hq.inventory.domain.ConfigType" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/ConfigType.java" binary="false" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association>    
+    <bendpoint x="236" y="209"/>    
+    <source project="hq-server" name="org.hyperic.hq.inventory.domain.ResourceGroup" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/ResourceGroup.java" binary="false" 
+      navigable="false">      
+      <attribute name="members"/>      
+      <multiplicity minimum="0" maximum="2147483647"/>    
+    </source>    
+    <target project="hq-server" name="org.hyperic.hq.inventory.domain.Resource" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/Resource.java" binary="false" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association>    
+    <source project="hq-server" name="org.hyperic.hq.inventory.domain.ResourceTypeRelation" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/ResourceTypeRelation.java" binary="false" 
+      navigable="false">      
+      <attribute name="to"/>      
+      <multiplicity minimum="0" maximum="1"/>    
+    </source>    
+    <target project="hq-server" name="org.hyperic.hq.inventory.domain.ResourceType" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/ResourceType.java" binary="false" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association>    
+    <source project="hq-server" name="org.hyperic.hq.inventory.domain.ResourceType" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/ResourceType.java" binary="false" navigable="false">      
+      <attribute name="resources"/>      
+      <multiplicity minimum="0" maximum="2147483647"/>    
+    </source>    
+    <target project="hq-server" name="org.hyperic.hq.inventory.domain.Resource" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/Resource.java" binary="false" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association>    
+    <source project="hq-server" name="org.hyperic.hq.authz.server.session.Role" 
+      file="/hq-server/src/main/java/org/hyperic/hq/authz/server/session/Role.java" binary="false" navigable="false">      
+      <attribute name="_resource"/>      
+      <multiplicity minimum="0" maximum="1"/>    
+    </source>    
+    <target project="hq-server" name="org.hyperic.hq.inventory.domain.Resource" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/Resource.java" binary="false" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association>    
+    <source project="hq-server" name="org.hyperic.hq.inventory.domain.OperationType" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/OperationType.java" binary="false" 
+      navigable="false">      
+      <attribute name="resourceType"/>      
+      <multiplicity minimum="0" maximum="1"/>    
+    </source>    
+    <target project="hq-server" name="org.hyperic.hq.inventory.domain.ResourceType" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/ResourceType.java" binary="false" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association>    
+    <source project="hq-server" name="org.hyperic.hq.inventory.domain.ResourceGroup" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/ResourceGroup.java" binary="false" 
+      navigable="false">      
+      <attribute name="roles"/>      
+      <multiplicity minimum="0" maximum="2147483647"/>    
+    </source>    
+    <target project="hq-server" name="org.hyperic.hq.authz.server.session.Role" 
+      file="/hq-server/src/main/java/org/hyperic/hq/authz/server/session/Role.java" binary="false" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association>    
+    <source project="hq-server" name="org.hyperic.hq.appdef.Agent" 
+      file="/hq-server/src/main/java/org/hyperic/hq/appdef/Agent.java" binary="false" navigable="false">      
+      <attribute name="resources"/>      
+      <multiplicity minimum="0" maximum="2147483647"/>    
+    </source>    
+    <target project="hq-server" name="org.hyperic.hq.inventory.domain.Resource" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/Resource.java" binary="false" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association>    
+    <source project="hq-server" name="org.hyperic.hq.inventory.domain.Resource" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/Resource.java" binary="false" navigable="false">      
+      <attribute name="resourceGroups"/>      
+      <multiplicity minimum="0" maximum="2147483647"/>    
+    </source>    
+    <target project="hq-server" name="org.hyperic.hq.inventory.domain.ResourceGroup" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/ResourceGroup.java" binary="false" 
+      navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <generalization>    
+    <bendpoint x="156" y="211"/>    
+    <source project="hq-server" name="org.hyperic.hq.inventory.domain.ResourceGroup" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/ResourceGroup.java" binary="false"/>    
+    <target project="hq-server" name="org.hyperic.hq.inventory.domain.Resource" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/Resource.java" binary="false"/>  
+  </generalization>  
+  <association>    
+    <source project="hq-server" name="org.hyperic.hq.inventory.domain.Resource" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/Resource.java" binary="false" navigable="false">      
+      <attribute name="type"/>      
+      <multiplicity minimum="0" maximum="1"/>    
+    </source>    
+    <target project="hq-server" name="org.hyperic.hq.inventory.domain.ResourceType" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/ResourceType.java" binary="false" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association>    
+    <source project="hq-server" name="org.hyperic.hq.inventory.domain.ResourceRelation" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/ResourceRelation.java" binary="false" 
+      navigable="false">      
+      <attribute name="from"/>      
+      <multiplicity minimum="0" maximum="1"/>    
+    </source>    
+    <target project="hq-server" name="org.hyperic.hq.inventory.domain.Resource" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/Resource.java" binary="false" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association>    
+    <source project="hq-server" name="org.hyperic.hq.inventory.domain.ResourceType" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/ResourceType.java" binary="false" navigable="false">      
+      <attribute name="plugin"/>      
+      <multiplicity minimum="0" maximum="1"/>    
+    </source>    
+    <target project="hq-server" name="org.hyperic.hq.product.Plugin" 
+      file="/hq-server/src/main/java/org/hyperic/hq/product/Plugin.java" binary="false" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association>    
+    <source project="hq-server" name="org.hyperic.hq.inventory.domain.ResourceRelation" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/ResourceRelation.java" binary="false" 
+      navigable="false">      
+      <attribute name="to"/>      
+      <multiplicity minimum="0" maximum="1"/>    
+    </source>    
+    <target project="hq-server" name="org.hyperic.hq.inventory.domain.Resource" 
+      file="/hq-server/src/main/java/org/hyperic/hq/inventory/domain/Resource.java" binary="false" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <classifier-display autosize="true" package="false" initial-value="false" signature="true" visibility="true">    
+    <attributes public="true" package="true" protected="true" private="true"/>    
+    <operations public="true" package="true" protected="true" private="true"/>  
+  </classifier-display>  
+  <association-display labels="true" multiplicity="true"/>
+</class-diagram>

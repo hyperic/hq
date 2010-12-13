@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.authz.server.session;
 
+import org.hyperic.hq.authz.shared.ResourceGroupValue;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.util.pager.PagerProcessor;
 
 public class PagerProcessor_resourceGroup implements PagerProcessor {
@@ -35,12 +37,30 @@ public class PagerProcessor_resourceGroup implements PagerProcessor {
         if (o == null) return null;
         try {
             if ( o instanceof ResourceGroup ) {
-                return ((ResourceGroup) o).getResourceGroupValue();
+                return getResourceGroupValue((ResourceGroup) o);
             }
         } catch (Exception e) {
             throw new IllegalStateException("Error converting to ResourceGroupValue: "
                 + e);
         }
         return o;
+    }
+    
+    private ResourceGroupValue getResourceGroupValue(ResourceGroup group) {
+        ResourceGroupValue resourceGroupValue =  new ResourceGroupValue();
+        //resourceGroupValue.setClusterId(group.getClusterId().intValue());
+        //resourceGroupValue.setCTime(new Long(group.getCreationTime()));
+        resourceGroupValue.setDescription(group.getDescription());
+        //resourceGroupValue.setGroupEntResType(getGroupEntResType().intValue());
+        //resourceGroupValue.setGroupEntType(getGroupEntType().intValue());
+        resourceGroupValue.setGroupType(group.getGroupType());
+        resourceGroupValue.setId(group.getId());
+        resourceGroupValue.setLocation(group.getLocation());
+        resourceGroupValue.setModifiedBy(group.getModifiedBy());
+        //resourceGroupValue.setMTime(new Long(getMtime()));
+        resourceGroupValue.setName(group.getName());
+        //resourceGroupValue.setSortName(getSortName());
+        //resourceGroupValue.setSystem(isSystem());
+        return resourceGroupValue;
     }
 }

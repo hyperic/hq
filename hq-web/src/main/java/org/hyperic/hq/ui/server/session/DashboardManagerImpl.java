@@ -107,7 +107,7 @@ public class DashboardManagerImpl implements DashboardManager, ApplicationListen
     public RoleDashboardConfig getRoleDashboard(AuthzSubject me, Role r) throws PermissionException {
         PermissionManager permMan = PermissionManagerFactory.getInstance();
 
-        permMan.check(me.getId(), r.getResource().getResourceType(), r.getId(), AuthzConstants.roleOpModifyRole);
+        permMan.check(me.getId(), r.getResource().getType(), r.getId(), AuthzConstants.roleOpModifyRole);
 
         return dashDao.findDashboard(r);
     }
@@ -137,7 +137,7 @@ public class DashboardManagerImpl implements DashboardManager, ApplicationListen
     public RoleDashboardConfig createRoleDashboard(AuthzSubject me, Role r, String name) throws PermissionException {
         PermissionManager permMan = PermissionManagerFactory.getInstance();
 
-        permMan.check(me.getId(), r.getResource().getResourceType(), r.getId(), AuthzConstants.roleOpModifyRole);
+        permMan.check(me.getId(), r.getResource().getType(), r.getId(), AuthzConstants.roleOpModifyRole);
 
         Crispo cfg = crispoManager.create(getDefaultConfig());
         RoleDashboardConfig dash = new RoleDashboardConfig(r, name, cfg);

@@ -42,8 +42,6 @@ import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceEdge;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
@@ -53,6 +51,8 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.ha.HAUtil;
 import org.hyperic.hq.hibernate.SessionManager;
 import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceRelation;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MetricDataCache;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
@@ -277,12 +277,12 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
             resources.add(platform.getResource());
         }
 
-        final Collection<ResourceEdge> edges = resourceManager.findResourceEdges(resourceManager
+        final Collection<ResourceRelation> edges = resourceManager.findResourceEdges(resourceManager
             .getContainmentRelation(), resources);
-        for (final ResourceEdge edge : edges) {
+        for (final ResourceRelation edge : edges) {
             try {
                 final Platform platform = platformManager.findPlatformById(edge.getFrom()
-                    .getInstanceId());
+                    .getId());
                 final Resource child = edge.getTo();
                 if (child == null || child.isInAsyncDeleteState()) {
                     continue;

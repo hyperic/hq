@@ -30,6 +30,8 @@ import java.math.BigDecimal;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.grouping.CritterDump;
 import org.hyperic.hq.grouping.CritterType;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 
 public class PersistedCritter extends PersistedObject implements CritterDump {
 

@@ -37,7 +37,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -49,8 +48,6 @@ import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -71,6 +68,9 @@ import org.hyperic.hq.control.shared.ControlScheduleManager;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
+import org.hyperic.hq.inventory.domain.Config;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.product.ControlPluginManager;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
@@ -99,7 +99,7 @@ public class ControlManagerImpl implements ControlManager {
     private ProductManager productManager;
     private ControlScheduleManager controlScheduleManager;
     private ControlHistoryDAO controlHistoryDao;
-    private ResourceTypeDAO resourceTypeDao;
+    
 
     private ConfigManager configManager;
     private PlatformManager platformManager;
@@ -119,7 +119,7 @@ public class ControlManagerImpl implements ControlManager {
 
     @Autowired
     public ControlManagerImpl(ProductManager productManager, ControlScheduleManager controlScheduleManager,
-                              ControlHistoryDAO controlHistoryDao, ResourceTypeDAO resourceTypeDao,
+                              ControlHistoryDAO controlHistoryDao, 
                               ConfigManager configManager, PlatformManager platformManager,
                               AuthzSubjectManager authzSubjectManager, PermissionManager permissionManager,
                               MessagePublisher messagePublisher,
@@ -131,7 +131,6 @@ public class ControlManagerImpl implements ControlManager {
         this.productManager = productManager;
         this.controlScheduleManager = controlScheduleManager;
         this.controlHistoryDao = controlHistoryDao;
-        this.resourceTypeDao = resourceTypeDao;
         this.configManager = configManager;
         this.platformManager = platformManager;
         this.authzSubjectManager = authzSubjectManager;
@@ -438,17 +437,8 @@ public class ControlManagerImpl implements ControlManager {
      */
     @Transactional(readOnly=true)
     public void checkControlEnabled(AuthzSubject subject, AppdefEntityID id) throws PluginException {
-        ConfigResponseDB config;
-
-        try {
-            config = configManager.getConfigResponse(id);
-        } catch (IllegalArgumentException iae) {
-            throw new PluginException(iae);
-        } catch (Exception e) {
-            throw new PluginException(e);
-        }
-
-        if (config == null || config.getControlResponse() == null) {
+        Config config = Resource.findResource(id.getId()).getControlConfig();
+        if (config == null) {
             throw new PluginException("Control not " + "configured for " + id);
         }
     }
@@ -566,7 +556,7 @@ public class ControlManagerImpl implements ControlManager {
             opList.add(getControlPermissionByType(entity));
             ResourceValue rv = new ResourceValue();
             rv.setInstanceId(entity.getId());
-            rv.setResourceType(resourceTypeDao.findByName(AppdefUtil.appdefTypeIdToAuthzTypeStr(entity.getType())));
+            rv.setResourceType(ResourceType.findResourceTypeByName(AppdefUtil.appdefTypeIdToAuthzTypeStr(entity.getType())));
             resList.add(rv);
         }
         if (resList.size() > 0) {

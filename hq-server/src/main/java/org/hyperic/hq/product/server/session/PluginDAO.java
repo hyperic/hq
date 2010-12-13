@@ -26,19 +26,26 @@
 
 package org.hyperic.hq.product.server.session;
 
-import org.hibernate.SessionFactory;
-import org.hyperic.hq.dao.HibernateDAO;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+
 import org.hyperic.hq.product.Plugin;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 
+
 @Repository
-public class PluginDAO
-    extends HibernateDAO<Plugin> {
-    @Autowired
-    public PluginDAO(SessionFactory f) {
-        super(Plugin.class, f);
+public class PluginDAO {
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    
+    public PluginDAO() {
+       
     }
 
     public Plugin create(String name, String path, String md5) {
@@ -46,12 +53,28 @@ public class PluginDAO
         p.setName(name);
         p.setPath(path);
         p.setMD5(md5);
-        save(p);
+        entityManager.persist(p);
         return p;
     }
 
     public Plugin findByName(String name) {
-        String sql = "from Plugin where name=?";
-        return (Plugin) getSession().createQuery(sql).setString(0, name).uniqueResult();
+        if (name == null) return null;       
+        Query q = entityManager.createQuery("SELECT p FROM Plugin p WHERE p.name = :name",Plugin.class);
+        q.setParameter("name", name);
+        
+        List<Plugin> resultList = q.getResultList();
+        if (resultList.size() > 0)
+        {
+            final Plugin plugin = (Plugin) resultList.get(0);
+            if (plugin != null) {
+                plugin.getId();
+            }
+            return plugin;
+        } 
+        return null;
+    }
+    
+    public EntityManager getEntityManager() {
+        return entityManager;
     }
 }

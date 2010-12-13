@@ -48,13 +48,13 @@ import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
@@ -168,32 +168,33 @@ public class ResourceCleanupEventListener implements ZeventListener<ResourcesCle
         watch.markTimeBegin("unscheduleMeasurementsForAsyncDelete");
         unscheduleMeasurementsForAsyncDelete(agentCache);
         watch.markTimeEnd("unscheduleMeasurementsForAsyncDelete");
+        //TODO remove all this after verifying sync deletion is cool
         
-        // Look through services, servers, platforms, applications, and groups
-        watch.markTimeBegin("removeApplications");
-        Collection<Application> applications = applicationManager.findDeletedApplications();
-        removeApplications(subject, applications);
-        watch.markTimeEnd("removeApplications");
-
-        watch.markTimeBegin("removeResourceGroups");
-        Collection<ResourceGroup> groups = resourceGroupManager.findDeletedGroups();
-        removeResourceGroups(subject, groups);
-
-        watch.markTimeEnd("removeResourceGroups");
-
-        Collection<Service> services = serviceManager.findDeletedServices();
-        removeServices(subject, services);
-
-        Collection<Server> servers = serverManager.findDeletedServers();
-        removeServers(subject, servers);
-
-        watch.markTimeBegin("removePlatforms");
-        Collection<Platform> platforms = platformManager.findDeletedPlatforms();
-        removePlatforms(subject, platforms);
-        watch.markTimeEnd("removePlatforms");
-        if (log.isDebugEnabled()) {
-            log.debug("removeDeletedResources: " + watch);
-        }
+//        // Look through services, servers, platforms, applications, and groups
+//        watch.markTimeBegin("removeApplications");
+//        Collection<Application> applications = applicationManager.findDeletedApplications();
+//        removeApplications(subject, applications);
+//        watch.markTimeEnd("removeApplications");
+//
+//        watch.markTimeBegin("removeResourceGroups");
+//        Collection<ResourceGroup> groups = resourceGroupManager.findDeletedGroups();
+//        removeResourceGroups(subject, groups);
+//
+//        watch.markTimeEnd("removeResourceGroups");
+//
+//        Collection<Service> services = serviceManager.findDeletedServices();
+//        removeServices(subject, services);
+//
+//        Collection<Server> servers = serverManager.findDeletedServers();
+//        removeServers(subject, servers);
+//
+//        watch.markTimeBegin("removePlatforms");
+//        Collection<Platform> platforms = platformManager.findDeletedPlatforms();
+//        removePlatforms(subject, platforms);
+//        watch.markTimeEnd("removePlatforms");
+//        if (log.isDebugEnabled()) {
+//            log.debug("removeDeletedResources: " + watch);
+//        }
     }
     
     /**

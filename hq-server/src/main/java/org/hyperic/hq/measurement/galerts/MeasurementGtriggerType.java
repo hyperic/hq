@@ -25,9 +25,9 @@
 
 package org.hyperic.hq.measurement.galerts;
 
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.galerts.processor.Gtrigger;
 import org.hyperic.hq.galerts.server.session.GtriggerType;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 

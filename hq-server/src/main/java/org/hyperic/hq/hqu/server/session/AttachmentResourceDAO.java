@@ -28,10 +28,10 @@ package org.hyperic.hq.hqu.server.session;
 import java.util.Collection;
 
 import org.hibernate.SessionFactory;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 @Repository
@@ -43,27 +43,28 @@ public class AttachmentResourceDAO
         super(AttachmentResource.class, f);
     }
 
-    private boolean resourceIsPrototype(ResourceType rt) {
-        String name = rt.getName();
-
-        return name.equals(AuthzConstants.platformPrototypeTypeName) ||
-            name.equals(AuthzConstants.serverPrototypeTypeName) ||
-            name.equals(AuthzConstants.servicePrototypeTypeName);
-    }
+//    private boolean resourceIsPrototype(ResourceType rt) {
+//        String name = rt.getName();
+//
+//        return name.equals(AuthzConstants.platformPrototypeTypeName) ||
+//            name.equals(AuthzConstants.serverPrototypeTypeName) ||
+//            name.equals(AuthzConstants.servicePrototypeTypeName);
+//    }
 
     Collection findFor(Resource r, ViewResourceCategory cat) {
-        if (resourceIsPrototype(r.getResourceType())) {
-            String sql = "select a from AttachmentResource a " +
-                "join a.resource r " +
-                "where r = :resource and " +
-                "a.categoryEnum = :cat";
-
-            return getSession()
-                .createQuery(sql)
-                .setParameter("resource", r)
-                .setParameter("cat", cat.getDescription())
-                .list();
-        }
+        //TODO
+//        if (resourceIsPrototype(r.getType())) {
+//            String sql = "select a from AttachmentResource a " +
+//                "join a.resource r " +
+//                "where r = :resource and " +
+//                "a.categoryEnum = :cat";
+//
+//            return getSession()
+//                .createQuery(sql)
+//                .setParameter("resource", r)
+//                .setParameter("cat", cat.getDescription())
+//                .list();
+//        }
 
         String sql = "select a from AttachmentResource a " +
             "where (a.resource = :resource or a.resource = :proto) and " +
@@ -72,7 +73,7 @@ public class AttachmentResourceDAO
         return getSession()
             .createQuery(sql)
             .setParameter("resource", r)
-            .setParameter("proto", r.getPrototype())
+            //.setParameter("proto", r.getPrototype())
             .setParameter("cat", cat.getDescription())
             .list();
     }

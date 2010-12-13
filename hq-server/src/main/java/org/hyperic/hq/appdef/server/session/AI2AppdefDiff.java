@@ -33,7 +33,6 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
@@ -47,6 +46,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AICompare;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -108,27 +108,26 @@ public class AI2AppdefDiff {
                 revisedAIplatform.setCpuCount(appdefPlatform.getCpuCount());
             }
             
-            ConfigResponseDB config =
-                cmLocal.getConfigResponse(appdefPlatform.getEntityId());
+            Resource resource = Resource.findResource(appdefPlatform.getEntityId().getId());
             
             //if the plugin did not set a config, apply the existing config.
             if (revisedAIplatform.getProductConfig() == null) {
-                revisedAIplatform.setProductConfig(config.getProductResponse());
+                revisedAIplatform.setProductConfig(cmLocal.toConfigResponse(resource.getProductConfig()));
             }
             if (revisedAIplatform.getControlConfig() == null) {
-                revisedAIplatform.setControlConfig(config.getControlResponse());
+                revisedAIplatform.setControlConfig(cmLocal.toConfigResponse(resource.getControlConfig()));
             }
             if (revisedAIplatform.getMeasurementConfig() == null) {
-                revisedAIplatform.setMeasurementConfig(config.getMeasurementResponse());
+                revisedAIplatform.setMeasurementConfig(cmLocal.toConfigResponse(resource.getMeasurementConfig()));
             }
 
             //XXX might want to do this for all platforms, just checking devices for now.
             if (!configsEqual(revisedAIplatform.getProductConfig(),
-                              config.getProductResponse()) ||
+                cmLocal.toConfigResponse(resource.getProductConfig())) ||
                 !configsEqual(revisedAIplatform.getControlConfig(),
-                              config.getControlResponse()) ||
+                    cmLocal.toConfigResponse(resource.getControlConfig())) ||
                 !configsEqual(revisedAIplatform.getMeasurementConfig(),
-                              config.getMeasurementResponse()))
+                    cmLocal.toConfigResponse(resource.getMeasurementConfig())))
             {
                 revisedAIplatform.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
                 addDiff(revisedAIplatform,
@@ -398,13 +397,13 @@ public class AI2AppdefDiff {
                 boolean configChanged = false;
                 
                 // Look at configs
-                ConfigResponseDB config = cmLocal.getConfigResponse(aID);
+               Resource resource = Resource.findResource(aID.getId());
                 
-                if (!config.getUserManaged() && (
-                    !configsEqual(scannedServer.getProductConfig(), config.getProductResponse()) ||
-                    !configsEqual(scannedServer.getControlConfig(), config.getControlResponse()) ||
-                    !configsEqual(scannedServer.getMeasurementConfig(), config.getMeasurementResponse()) ||
-                    !configsEqual(scannedServer.getResponseTimeConfig(), config.getResponseTimeResponse())))
+                if (!resource.isConfigUserManaged() && (
+                    !configsEqual(scannedServer.getProductConfig(), cmLocal.toConfigResponse(resource.getProductConfig())) ||
+                    !configsEqual(scannedServer.getControlConfig(), cmLocal.toConfigResponse(resource.getControlConfig())) ||
+                    !configsEqual(scannedServer.getMeasurementConfig(), cmLocal.toConfigResponse(resource.getMeasurementConfig())) ||
+                    !configsEqual(scannedServer.getResponseTimeConfig(), cmLocal.toConfigResponse(resource.getResponseTimeConfig()))))
                 {
                     // config was changed (and is NOT user-managed)
                     configChanged = true;

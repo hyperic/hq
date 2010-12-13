@@ -35,8 +35,6 @@ import org.easymock.EasyMock;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -45,6 +43,8 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.product.LogTrackPlugin;
@@ -114,9 +114,11 @@ public class AlertDefinitionXmlParserTest
 
         ResourceType type = new ResourceType();
         type.setId(-99);
-        Resource expectedResource = new Resource(type, null, "SpringSource tc Server 6.0", null, serverId, false);
-        EasyMock.expect(resourceManager.findResourcePrototypeByName("SpringSource tc Server 6.0"))
-                .andReturn(expectedResource);
+        Resource expectedResource = new Resource();
+        expectedResource.setName("SpringSource tc Server 6.0");
+        expectedResource.setType(type);
+        expectedResource.setId(serverId);
+       
 
         AlertCondition metricChange = new AlertCondition();
         metricChange.setType(EventConstants.TYPE_CHANGE);
@@ -148,10 +150,11 @@ public class AlertDefinitionXmlParserTest
         definition.setResourcePrototype(resource);
 
         ResourceType type = new ResourceType();
-        type.setId(AuthzConstants.authzServerProto);
-        Resource expectedResource = new Resource(type, null, "SpringSource tc Server 6.0", null, serverId, false);
-        EasyMock.expect(resourceManager.findResourcePrototypeByName("SpringSource tc Server 6.0"))
-                .andReturn(expectedResource);
+        //type.setId(AuthzConstants.authzServerProto);
+        Resource expectedResource = new Resource();
+        expectedResource.setName("SpringSource tc Server 6.0");
+        expectedResource.setType(type);
+       
 
         EasyMock.expect(authSubjectManager.getOverlordPojo()).andReturn(SUBJECT);
         List templates = new ArrayList();
@@ -193,10 +196,12 @@ public class AlertDefinitionXmlParserTest
         definition.setResourcePrototype(resource);
 
         ResourceType type = new ResourceType();
-        type.setId(AuthzConstants.authzServerProto);
-        Resource expectedResource = new Resource(type, null, "SpringSource tc Server 6.0", null, serverId, false);
-        EasyMock.expect(resourceManager.findResourcePrototypeByName("SpringSource tc Server 6.0"))
-                .andReturn(expectedResource);
+        //type.setId(AuthzConstants.authzServerProto);
+        Resource expectedResource = new Resource();
+        expectedResource.setName("SpringSource tc Server 6.0");
+        expectedResource.setType(type);
+        expectedResource.setId(serverId);
+       
 
         replay();
         try {
@@ -223,10 +228,12 @@ public class AlertDefinitionXmlParserTest
         definition.setResourcePrototype(resource);
 
         ResourceType type = new ResourceType();
-        type.setId(AuthzConstants.authzServerProto);
-        Resource expectedResource = new Resource(type, null, "SpringSource tc Server 6.0", null, serverId, false);
-        EasyMock.expect(resourceManager.findResourcePrototypeByName("SpringSource tc Server 6.0"))
-                .andReturn(expectedResource);
+        //type.setId(AuthzConstants.authzServerProto);
+        Resource expectedResource = new Resource();
+        expectedResource.setName("SpringSource tc Server 6.0");
+        expectedResource.setType(type);
+        expectedResource.setId(serverId);
+       
 
         replay();
         try {
@@ -258,10 +265,12 @@ public class AlertDefinitionXmlParserTest
         definition.getAlertCondition().add(metricChange);
 
         ResourceType type = new ResourceType();
-        type.setId(AuthzConstants.authzServerProto);
-        Resource expectedResource = new Resource(type, null, "SpringSource tc Server 6.0", null, serverId, false);
-        EasyMock.expect(resourceManager.findResourcePrototypeByName("SpringSource tc Server 6.0"))
-                .andReturn(expectedResource);
+        //type.setId(AuthzConstants.authzServerProto);
+        Resource expectedResource = new Resource();
+        expectedResource.setName("SpringSource tc Server 6.0");
+        expectedResource.setType(type);
+        expectedResource.setId(serverId);
+       
         EasyMock.expect(authSubjectManager.getOverlordPojo()).andReturn(SUBJECT);
         List templates = new ArrayList();
 
@@ -297,10 +306,12 @@ public class AlertDefinitionXmlParserTest
         definition.setResourcePrototype(resource);
 
         ResourceType type = new ResourceType();
-        type.setId(AuthzConstants.authzServerProto);
-        Resource expectedResource = new Resource(type, null, "SpringSource tc Server 6.0", null, serverId, false);
-        EasyMock.expect(resourceManager.findResourcePrototypeByName("SpringSource tc Server 6.0"))
-                .andReturn(expectedResource);
+        //type.setId(AuthzConstants.authzServerProto);
+        Resource expectedResource = new Resource();
+        expectedResource.setName("SpringSource tc Server 6.0");
+        expectedResource.setType(type);
+        expectedResource.setId(serverId);
+     
 
         replay();
         try {
@@ -346,8 +357,6 @@ public class AlertDefinitionXmlParserTest
         ResourcePrototype resource = new ResourcePrototype();
         resource.setName("SpringSource tc Server 6.0");
         definition.setResourcePrototype(resource);
-
-        EasyMock.expect(resourceManager.findResourcePrototypeByName("SpringSource tc Server 6.0")).andReturn(null);
 
         replay();
         try {
@@ -412,10 +421,12 @@ public class AlertDefinitionXmlParserTest
         definition.getAlertCondition().add(baselineCondition);
 
         ResourceType type = new ResourceType();
-        type.setId(AuthzConstants.authzServiceProto);
-        Resource expectedResource = new Resource(type, null, "SpringSource tc Server 6.0", null, serverId, false);
-        EasyMock.expect(resourceManager.findResourcePrototypeByName("SpringSource tc Server 6.0"))
-                .andReturn(expectedResource);
+        //type.setId(AuthzConstants.authzServiceProto);
+        Resource expectedResource = new Resource();
+        expectedResource.setName("SpringSource tc Server 6.0");
+        expectedResource.setType(type);
+        expectedResource.setId(serverId);
+        
         EasyMock.expect(authSubjectManager.getOverlordPojo()).andReturn(SUBJECT);
         List templates = new ArrayList();
         MeasurementTemplate template = new MeasurementTemplate();
@@ -491,10 +502,12 @@ public class AlertDefinitionXmlParserTest
         definition.getAlertCondition().add(condition);
 
         ResourceType type = new ResourceType();
-        type.setId(AuthzConstants.authzPlatformProto);
-        Resource expectedResource = new Resource(type, null, "SpringSource tc Server 6.0", null, serverId, false);
-        EasyMock.expect(resourceManager.findResourcePrototypeByName("SpringSource tc Server 6.0"))
-                .andReturn(expectedResource);
+        //type.setId(AuthzConstants.authzPlatformProto);
+        Resource expectedResource = new Resource();
+        expectedResource.setName("SpringSource tc Server 6.0");
+        expectedResource.setType(type);
+        expectedResource.setId(serverId);
+        
         EasyMock.expect(authSubjectManager.getOverlordPojo()).andReturn(SUBJECT);
         List templates = new ArrayList();
         Boolean expectedDefaultOn = null;
@@ -547,10 +560,12 @@ public class AlertDefinitionXmlParserTest
         definition.getAlertCondition().add(condition);
 
         ResourceType type = new ResourceType();
-        type.setId(AuthzConstants.authzServerProto);
-        Resource expectedResource = new Resource(type, null, "SpringSource tc Server 6.0", null, serverId, false);
-        EasyMock.expect(resourceManager.findResourcePrototypeByName("SpringSource tc Server 6.0"))
-                .andReturn(expectedResource);
+        //type.setId(AuthzConstants.authzServerProto);
+        Resource expectedResource = new Resource();
+        expectedResource.setName("SpringSource tc Server 6.0");
+        expectedResource.setType(type);
+        expectedResource.setId(serverId);
+       
         EasyMock.expect(authSubjectManager.getOverlordPojo()).andReturn(SUBJECT);
         List templates = new ArrayList();
         MeasurementTemplate template = new MeasurementTemplate();

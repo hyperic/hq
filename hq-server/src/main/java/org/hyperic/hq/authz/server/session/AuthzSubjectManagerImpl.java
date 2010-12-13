@@ -43,6 +43,7 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.hq.common.shared.CrispoManager;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -68,8 +69,6 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
     private static final String SUBJECT_PAGER = PagerProcessor_subject.class.getName();
     private Pager subjectPager;
     private AuthzSubjectDAO authzSubjectDAO;
-    private ResourceTypeDAO resourceTypeDAO;
-    private ResourceDAO resourceDAO;
     private CrispoManager crispoManager;
     private PermissionManager permissionManager;
     private UserAuditFactory userAuditFactory;
@@ -77,13 +76,10 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
 
     @Autowired
     public AuthzSubjectManagerImpl(AuthzSubjectDAO authzSubjectDAO,
-                                   ResourceTypeDAO resourceTypeDAO, ResourceDAO resourceDAO,
                                    CrispoManager crispoManager,
                                    PermissionManager permissionManager,
                                    UserAuditFactory userAuditFactory) {
         this.authzSubjectDAO = authzSubjectDAO;
-        this.resourceTypeDAO = resourceTypeDAO;
-        this.resourceDAO = resourceDAO;
         this.crispoManager = crispoManager;
         this.permissionManager = permissionManager;
         this.userAuditFactory = userAuditFactory;
@@ -124,8 +120,9 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
                                       String phone, String sms, boolean html)
         throws PermissionException, ApplicationException {
 
-        permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType(),
-            AuthzConstants.rootResourceId, AuthzConstants.subjectOpCreateSubject);
+        //TODO perm check
+        //permissionManager.check(whoami.getId(), ResourceType.findTypeResourceType(),
+          //  AuthzConstants.rootResourceId, AuthzConstants.subjectOpCreateSubject);
 
         AuthzSubject existing = authzSubjectDAO.findByName(name);
         if (existing != null) {
@@ -153,10 +150,11 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
                               String dept, String email, String firstName, String lastName,
                               String phone, String sms, Boolean useHtml) throws PermissionException {
 
-        if (!whoami.getId().equals(target.getId())) {   
-            permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType(),
-                AuthzConstants.rootResourceId, AuthzConstants.subjectOpModifySubject);
-        }
+//TODO perm check
+        //        if (!whoami.getId().equals(target.getId())) {   
+//            permissionManager.check(whoami.getId(), ResourceType.findTypeResourceType(),
+//                AuthzConstants.rootResourceId, AuthzConstants.subjectOpModifySubject);
+//        }
 
         if (active != null && target.getActive() != active.booleanValue()) {
             // Root user can not be disabled
@@ -224,9 +222,9 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
      */
     @Transactional(readOnly = true)
     public void checkModifyUsers(AuthzSubject caller) throws PermissionException {
-
-        permissionManager.check(caller.getId(), resourceTypeDAO.findTypeResourceType(),
-            AuthzConstants.rootResourceId, AuthzConstants.subjectOpModifySubject);
+        //TODO
+        //permissionManager.check(caller.getId(), ResourceType.findTypeResourceType(),
+          //  AuthzConstants.rootResourceId, AuthzConstants.subjectOpModifySubject);
     }
 
     /**
@@ -246,14 +244,15 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
 
         // XXX Should we do anything special for the "suicide" case?
         // Perhaps a _log message?
-        if (!whoami.getId().equals(subject)) {
-
-            permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType().getId(),
-                AuthzConstants.rootResourceId, AuthzConstants.perm_removeSubject);
-        }
+        //TODO
+//        if (!whoami.getId().equals(subject)) {
+//
+//            permissionManager.check(whoami.getId(), ResourceType.findTypeResourceType().getId(),
+//                AuthzConstants.rootResourceId, AuthzConstants.perm_removeSubject);
+//        }
 
         // Reassign all resources to the root user before deleting
-        resourceDAO.reassignResources(subject.intValue(), AuthzConstants.rootSubjectId.intValue());
+        authzSubjectDAO.reassignResources(subject.intValue(), AuthzConstants.rootSubjectId.intValue());
 
         applicationContext.publishEvent(new SubjectDeleteRequestedEvent(toDelete));
      
@@ -273,12 +272,12 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
      */
     @Transactional(readOnly = true)
     public AuthzSubject findSubjectById(AuthzSubject whoami, Integer id) throws PermissionException {
-
+//TODO
         // users can see their own entries without requiring special permission
-        if (!whoami.getId().equals(id)) {
-            permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType().getId(),
-                AuthzConstants.rootResourceId, AuthzConstants.perm_viewSubject);
-        }
+//        if (!whoami.getId().equals(id)) {
+//            permissionManager.check(whoami.getId(), ResourceType.findTypeResourceType().getId(),
+//                AuthzConstants.rootResourceId, AuthzConstants.perm_viewSubject);
+//        }
         return findSubjectById(id);
     }
 
@@ -341,10 +340,10 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
         // all they can see is their own entry.
         AuthzSubject who = authzSubjectDAO.findById(whoami.getId());
         Collection<AuthzSubject> subjects;
-        try {
-
-            permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType(),
-                AuthzConstants.rootResourceId, AuthzConstants.subjectOpViewSubject);
+        //try {
+            //TODO
+            //permissionManager.check(whoami.getId(), ResourceType.findTypeResourceType(),
+              //  AuthzConstants.rootResourceId, AuthzConstants.subjectOpViewSubject);
 
             if (!permissionManager.hasGuestRole()) {
                 if (excludes == null) {
@@ -352,14 +351,14 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
                 }
                 excludes.add(AuthzConstants.guestId);
             }
-        } catch (PermissionException e) {
-            PageList<AuthzSubjectValue> plist = new PageList<AuthzSubjectValue>();
-
-            // return a list with only the one entry.
-            plist.add(who.getAuthzSubjectValue());
-            plist.setTotalSize(1);
-            return plist;
-        }
+//        } catch (PermissionException e) {
+//            PageList<AuthzSubjectValue> plist = new PageList<AuthzSubjectValue>();
+//
+//            // return a list with only the one entry.
+//            plist.add(who.getAuthzSubjectValue());
+//            plist.setTotalSize(1);
+//            return plist;
+//        }
 
         switch (pc.getSortattribute()) {
             case SortAttribute.SUBJECT_NAME:
@@ -420,8 +419,8 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
         if (subjects.size() > 0) {
             log.debug("Checking if Subject: " + subject.getName() + " can list subjects.");
 
-            permissionManager.check(subject.getId(), resourceTypeDAO.findTypeResourceType(),
-                AuthzConstants.rootResourceId, AuthzConstants.subjectOpViewSubject);
+            //permissionManager.check(subject.getId(), ResourceType.findTypeResourceType(),
+              //  AuthzConstants.rootResourceId, AuthzConstants.subjectOpViewSubject);
         }
 
         // Need to convert to value objects
@@ -462,8 +461,9 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
         // users can always see their own prefs.
         if (!who.getId().equals(subjId)) {
             // check that the caller can see users
-            permissionManager.check(who.getId(), resourceTypeDAO.findTypeResourceType(),
-                AuthzConstants.rootResourceId, AuthzConstants.subjectOpViewSubject);
+            //TODO
+            //permissionManager.check(who.getId(), ResourceType.findTypeResourceType(),
+              //  AuthzConstants.rootResourceId, AuthzConstants.subjectOpViewSubject);
         }
 
         AuthzSubject targ = authzSubjectDAO.findById(subjId);
@@ -482,9 +482,9 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
         // check to see if the user attempting the modification
         // is the same as the one being modified
         if (!(who.getId().intValue() == subjId.intValue())) {
-
-            permissionManager.check(who.getId(), resourceTypeDAO.findTypeResourceType(),
-                AuthzConstants.rootResourceId, AuthzConstants.subjectOpModifySubject);
+            //TODO
+            //permissionManager.check(who.getId(), ResourceType.findTypeResourceType(),
+              //  AuthzConstants.rootResourceId, AuthzConstants.subjectOpModifySubject);
         }
 
         AuthzSubject targ = authzSubjectDAO.findById(subjId);

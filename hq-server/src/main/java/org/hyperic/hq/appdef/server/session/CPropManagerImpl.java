@@ -51,6 +51,9 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.inventory.domain.PropertyType;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -65,24 +68,13 @@ public class CPropManagerImpl implements CPropManager {
     private static Log log = LogFactory.getLog(CPropManagerImpl.class.getName());
 
     private Messenger sender;
-    private CpropDAO cPropDAO;
-    private CpropKeyDAO cPropKeyDAO;
-    private ApplicationTypeDAO applicationTypeDAO;
-    private PlatformTypeDAO platformTypeDAO;
-    private ServerTypeDAO serverTypeDAO;
-    private ServiceTypeDAO serviceTypeDAO;
+    
+   
+   
 
     @Autowired
-    public CPropManagerImpl(Messenger sender, CpropDAO cPropDAO, CpropKeyDAO cPropKeyDAO,
-                            ApplicationTypeDAO applicationTypeDAO, PlatformTypeDAO platformTypeDAO,
-                            ServerTypeDAO serverTypeDAO, ServiceTypeDAO serviceTypeDAO) {
+    public CPropManagerImpl(Messenger sender) {
         this.sender = sender;
-        this.cPropDAO = cPropDAO;
-        this.cPropKeyDAO = cPropKeyDAO;
-        this.applicationTypeDAO = applicationTypeDAO;
-        this.platformTypeDAO = platformTypeDAO;
-        this.serverTypeDAO = serverTypeDAO;
-        this.serviceTypeDAO = serviceTypeDAO;
     }
 
     /**
@@ -94,100 +86,16 @@ public class CPropManagerImpl implements CPropManager {
      * @return a List of CPropKeyValue objects
      */
     @Transactional(readOnly = true)
-    public List<CpropKey> getKeys(int appdefType, int appdefTypeId) {
-        return cPropKeyDAO.findByAppdefType(appdefType, appdefTypeId);
-    }
-
-    private AppdefResourceType findResourceType(int appdefType, int appdefTypeId)
-        throws AppdefEntityNotFoundException {
-        Integer id = new Integer(appdefTypeId);
-
-        if (appdefType == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
-            return platformTypeDAO.findById(id);
-        } else if (appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
-            try {
-                return serverTypeDAO.findById(id);
-            } catch (ObjectNotFoundException exc) {
-                throw new ServerNotFoundException("Server type id=" + appdefTypeId + " not found");
-            }
-        } else if (appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
-            try {
-                return serviceTypeDAO.findById(id);
-            } catch (ObjectNotFoundException exc) {
-                throw new ServiceNotFoundException("Service type id=" + appdefTypeId + " not found");
-            }
-        } else if (appdefType == AppdefEntityConstants.APPDEF_TYPE_APPLICATION) {
-            return applicationTypeDAO.findById(id);
-        } else {
-            throw new IllegalArgumentException("Unrecognized appdef type:" + " " + appdefType);
-        }
-    }
-
-    /**
-     * find appdef resource type
-     */
-    @Transactional(readOnly = true)
-    public AppdefResourceType findResourceType(TypeInfo info) {
-        int type = info.getType();
-
-        if (type == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
-            return platformTypeDAO.findByName(info.getName());
-        } else if (type == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
-            return serverTypeDAO.findByName(info.getName());
-        } else if (type == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
-            return serviceTypeDAO.findByName(info.getName());
-        } else {
-            throw new IllegalArgumentException("Unrecognized appdef type: " + info);
-        }
-    }
-
-    /**
-     * @return {@link Map} of {@link String} to {@link AppdefResourceType}s
-     */
-    @Transactional(readOnly = true)
-    public Map<String, AppdefResourceType> findResourceType(Collection<TypeInfo> typeInfos) {
-        List<String> platformTypeInfos = new ArrayList<String>();
-        List<String> serverTypeInfos = new ArrayList<String>();
-        List<String> serviceTypeInfos = new ArrayList<String>();
-        for (final TypeInfo info : typeInfos) {
-            int type = info.getType();
-            if (type == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
-                platformTypeInfos.add(info.getName());
-            } else if (type == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
-                serverTypeInfos.add(info.getName());
-            } else if (type == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
-                serviceTypeInfos.add(info.getName());
-            } else {
-                throw new IllegalArgumentException("Unrecognized appdef type: " + info);
-            }
-        }
-        List<AppdefResourceType> resTypes = new ArrayList<AppdefResourceType>(typeInfos.size());
-        Map<String, AppdefResourceType> rtn = new HashMap<String, AppdefResourceType>(typeInfos
-            .size());
-        if (platformTypeInfos.size() > 0) {
-            resTypes.addAll(platformTypeDAO.findByName(platformTypeInfos));
-        }
-        if (serverTypeInfos.size() > 0) {
-            resTypes.addAll(serverTypeDAO.findByName(serverTypeInfos));
-        }
-        if (serviceTypeInfos.size() > 0) {
-            resTypes.addAll(serviceTypeDAO.findByName(serviceTypeInfos));
-        }
-        for (AppdefResourceType type : resTypes) {
-            rtn.put(type.getName(), type);
-        }
-        return rtn;
+    public List<PropertyType> getKeys(int appdefType, int appdefTypeId) {
+        return new ArrayList<PropertyType>(ResourceType.findResourceType(appdefTypeId).getPropertyTypes());
     }
 
     /**
      * find Cprop by key to a resource type based on a TypeInfo object.
      */
     @Transactional(readOnly = true)
-    public CpropKey findByKey(AppdefResourceType appdefType, String key) {
-        int type = appdefType.getAppdefType();
-        int instanceId = appdefType.getId().intValue();
-
-        return cPropKeyDAO.findByKey(type, instanceId, key);
+    public PropertyType findByKey(ResourceType appdefType, String key) {
+        return appdefType.getPropertyType(key);
     }
 
     /**
@@ -197,11 +105,14 @@ public class CPropManagerImpl implements CPropManager {
      *        key references could not be found
      * @throw CPropKeyExistsException if the key already exists
      */
-    public void addKey(AppdefResourceType appdefType, String key, String description) {
-        int type = appdefType.getAppdefType();
-        int instanceId = appdefType.getId().intValue();
-
-        cPropKeyDAO.create(type, instanceId, key, description);
+    public void addKey(ResourceType appdefType, String key, String description) {
+        
+        PropertyType propertyType = new PropertyType();
+        propertyType.setName(key);
+        propertyType.setDescription(description);
+        propertyType.persist();
+        appdefType.getPropertyTypes().add(propertyType);
+        appdefType.merge();
     }
 
     /**
@@ -214,24 +125,23 @@ public class CPropManagerImpl implements CPropManager {
      *        key references could not be found
      * @throw CPropKeyExistsException if the key already exists
      */
-    public void addKey(CpropKey key) throws AppdefEntityNotFoundException, CPropKeyExistsException {
-        // Insure that the resource type exists
-        AppdefResourceType recValue = findResourceType(key.getAppdefType(), key.getAppdefTypeId());
-        CpropKey cpKey = cPropKeyDAO.findByKey(key.getAppdefType(), key.getAppdefTypeId(), key
-            .getKey());
-
-        if (cpKey != null) {
-            throw new CPropKeyExistsException("Key, '" +
-                                              key.getKey() +
-                                              "', " +
-                                              "already exists for " +
-                                              AppdefEntityConstants.typeToString(recValue
-                                                  .getAppdefType()) + " type, '" +
-                                              recValue.getName() + "'");
-        }
-
-        cPropKeyDAO.create(key.getAppdefType(), key.getAppdefTypeId(), key.getKey(), key
-            .getDescription());
+    public void addKey(PropertyType key) throws AppdefEntityNotFoundException, CPropKeyExistsException {
+//TODO
+//        CpropKey cpKey = PropertyType.findByKey(key.getAppdefType(), key.getAppdefTypeId(), key
+//          //  .getKey());
+//
+//        if (cpKey != null) {
+//            throw new CPropKeyExistsException("Key, '" +
+//                                              key.getKey() +
+//                                              "', " +
+//                                              "already exists for " +
+//                                              AppdefEntityConstants.typeToString(recValue
+//                                                  .getAppdefType()) + " type, '" +
+//                                              recValue.getName() + "'");
+//        }
+//
+//        cPropKeyDAO.create(key.getAppdefType(), key.getAppdefTypeId(), key.getKey(), key
+//            .getDescription());
     }
 
     /**
@@ -245,7 +155,11 @@ public class CPropManagerImpl implements CPropManager {
      */
     public void deleteKey(int appdefType, int appdefTypeId, String key)
         throws CPropKeyNotFoundException {
-        CpropKey cpKey = cPropKeyDAO.findByKey(appdefType, appdefTypeId, key);
+        
+        //TODO appdefTypeId is likely not resourceId
+        ResourceType resourceType = ResourceType.findResourceType(appdefTypeId);
+        PropertyType cpKey  = resourceType.getPropertyType(key);
+     
 
         if (cpKey == null) {
             throw new CPropKeyNotFoundException("Key, '" + key + "', does not" + " exist for " +
@@ -254,7 +168,7 @@ public class CPropManagerImpl implements CPropManager {
         }
 
         // cascade on delete to remove Cprop as well
-        cPropKeyDAO.remove(cpKey);
+        cpKey.remove();
     }
 
     /**
@@ -276,7 +190,7 @@ public class CPropManagerImpl implements CPropManager {
         throws CPropKeyNotFoundException, AppdefEntityNotFoundException, PermissionException {
         String oldval;
         try {
-           oldval = cPropDAO.setValue(aID, typeId, key, val);
+           oldval = (String) Resource.findResource(aID.getId()).setProperty(key, val);
         }catch(Exception e) {
             log.error("Unable to update CPropKey values: " + e.getMessage(), e);
             throw new SystemException(e);
@@ -310,7 +224,8 @@ public class CPropManagerImpl implements CPropManager {
     public String getValue(AppdefEntityValue aVal, String key) throws CPropKeyNotFoundException,
         AppdefEntityNotFoundException, PermissionException {
         try {
-            return cPropDAO.getValue(aVal, key);
+            //TODO use correct ID
+            return (String)Resource.findResource(aVal.getID().getId()).getProperty(key);            
         }catch(Exception e) {
             log.error("Unable to get CPropKey values: " + e.getMessage(), e);
             throw new SystemException(e);
@@ -330,7 +245,13 @@ public class CPropManagerImpl implements CPropManager {
     @Transactional(readOnly = true)
     public Properties getEntries(AppdefEntityID aID) throws PermissionException,
         AppdefEntityNotFoundException {
-        return cPropDAO.getEntries(aID, "propkey");
+        //TODO
+        Properties properties = new Properties();
+        Map<String,Object> propValues = Resource.findResource(aID.getId()).getProperties();
+        for(Map.Entry<String, Object> propValue:propValues.entrySet()) {
+            properties.setProperty(propValue.getKey(), (String)propValue.getValue());
+        }
+        return properties;
     }
 
     /**
@@ -344,7 +265,8 @@ public class CPropManagerImpl implements CPropManager {
     @Transactional(readOnly = true)
     public Properties getDescEntries(AppdefEntityID aID) throws PermissionException,
         AppdefEntityNotFoundException {
-        return cPropDAO.getEntries(aID, "description");
+        //TODO
+        return new Properties();
     }
 
     /**
@@ -391,7 +313,7 @@ public class CPropManagerImpl implements CPropManager {
      */
     public void deleteValues(int appdefType, int id) {
         try {
-            cPropDAO.deleteValues(appdefType, id);
+            Resource.findResource(id).removeProperties();
         }catch(Exception e) {
             log.error("Unable to delete CProp values: " + e.getMessage(), e);
             throw new SystemException(e);
@@ -402,12 +324,17 @@ public class CPropManagerImpl implements CPropManager {
      * Get all Cprops values with specified key name, regardless of type
      */
     @Transactional(readOnly = true)
-    public List<Cprop> getCPropValues(AppdefResourceTypeValue appdefType, String key, boolean asc) {
+    public List<String> getCPropValues(AppdefResourceTypeValue appdefType, String key, boolean asc) {
         int type = appdefType.getAppdefType();
         int instanceId = appdefType.getId().intValue();
-
-        CpropKey pkey = cPropKeyDAO.findByKey(type, instanceId, key);
-
-        return cPropDAO.findByKeyName(pkey, asc);
+        //TODO appdefTypeId is likely not resourceId
+        ResourceType resourceType = ResourceType.findResourceType(instanceId);
+        PropertyType pkey  = resourceType.getPropertyType(key);
+        //TODO this can't possibly be what you'd expect from this method
+        List<String> values = new ArrayList<String>();
+        for(Resource resource: resourceType.getResources()) {
+            values.add((String)resource.getProperty(key));
+        }
+        return values;
     }
 }

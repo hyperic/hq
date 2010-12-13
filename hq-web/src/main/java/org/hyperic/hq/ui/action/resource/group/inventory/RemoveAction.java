@@ -41,11 +41,11 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
@@ -90,7 +90,7 @@ public class RemoveAction
 
                 resources.add(resourceManager.findResource(entity));
             }
-
+          
             appdefBoss.removeResourcesFromGroup(sessionId.intValue(), group, resources);
             RequestUtils.setConfirmation(request,"resource.group.inventory.confirm.RemoveResources");
 

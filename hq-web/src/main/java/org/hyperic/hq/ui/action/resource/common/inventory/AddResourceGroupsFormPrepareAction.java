@@ -39,9 +39,9 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
@@ -119,7 +119,7 @@ public class AddResourceGroupsFormPrepareAction
 
         Resource r = resourceManager.findResource(resource.getEntityId());
         PageList<AppdefGroupValue> availableGroups = appdefBoss.findAllGroupsMemberExclusive(sessionId.intValue(), pca,
-            entityId, pendingGroupIds, r.getPrototype());
+            entityId, pendingGroupIds);
 
         if (log.isTraceEnabled())
             log.trace("findAllGroups(...) returned these " + "AppdefGroupValues " + availableGroups);

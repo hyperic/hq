@@ -27,10 +27,10 @@ package org.hyperic.hq.autoinventory;
 
 import org.hyperic.hq.appdef.server.session.AppdefNamedBean;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
-import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.inventory.domain.Resource;
 
 public class AIService extends AppdefNamedBean
 {
@@ -43,7 +43,7 @@ public class AIService extends AppdefNamedBean
     private byte[] controlConfig;
     private byte[] measurementConfig;
     private byte[] responseTimeConfig;
-    private Server server;
+    private Resource server;
 
     /**
      * default constructor
@@ -154,12 +154,12 @@ public class AIService extends AppdefNamedBean
         this.responseTimeConfig = responseTimeConfig;
     }
 
-    public Server getServer()
+    public Resource getServer()
     {
         return server;
     }
 
-    public void setServer(Server server)
+    public void setServer(Resource server)
     {
         this.server = server;
     }
@@ -207,11 +207,7 @@ public class AIService extends AppdefNamedBean
             getServer().getId().intValue() : 0;
     }
 
-    public void setServerId(int server)
-    {
-        setServer(new Server(new Integer(server)));
-    }
-
+ 
     public boolean equals(Object obj)
     {
         if (!(obj instanceof AIService) || !super.equals(obj)) {

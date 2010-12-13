@@ -38,23 +38,21 @@ import javax.xml.bind.JAXBException;
 
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplateSortField;
-import org.hyperic.hq.measurement.server.session.TemplateManagerImpl;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.types.AlertCondition;
@@ -112,12 +110,12 @@ public class AlertDefinitionXmlParser {
     }
 
     private int getAppdefType(Resource resource) {
-        Integer typeId = resource.getResourceType().getId();
-        if (AuthzConstants.authzPlatformProto.equals(typeId)) {
+        AppdefEntityID id = AppdefUtil.newAppdefEntityId(resource);
+        if (id.isPlatform()) {
             return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
-        } else if (AuthzConstants.authzServerProto.equals(typeId)) {
+        } else if (id.isServer()) {
             return AppdefEntityConstants.APPDEF_TYPE_SERVER;
-        } else if (AuthzConstants.authzServiceProto.equals(typeId)) {
+        } else if (id.isService()) {
             return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
         } else {
             throw new AlertDefinitionXmlParserException("Resource [" + resource + "] is not an appdef " +
@@ -184,7 +182,9 @@ public class AlertDefinitionXmlParser {
             throw new AlertDefinitionXmlParserException("Required attribute name not found for definition");
         }
         String name = definition.getResourcePrototype().getName();
-        Resource resource = resourceManager.findResourcePrototypeByName(name);
+        //TODO how to implement type-based alerts?
+        Resource resource = null;
+        //Resource resource = resourceManager.findResourcePrototypeByName(name);
         if (resource == null) {
             throw new AlertDefinitionXmlParserException("Cannot find resource type " + name + " for definition " +
                                                         definition.getName());
@@ -209,7 +209,8 @@ public class AlertDefinitionXmlParser {
                                                         definition.getName());
         }
 
-        AppdefEntityTypeID aeid = new AppdefEntityTypeID(getAppdefType(resource), resource.getInstanceId());
+      
+        AppdefEntityTypeID aeid = new AppdefEntityTypeID(getAppdefType(resource), resource.getId());
         AlertDefinitionValue alertDefValue = new AlertDefinitionValue();
         alertDefValue.setName(definition.getName());
         alertDefValue.setDescription(definition.getDescription());

@@ -35,9 +35,12 @@ import org.hyperic.hq.zevents.ZeventSourceId;
  */
 public abstract class ResourceZevent extends Zevent {
 
+    protected AppdefEntityID appdefEntityID;
+    
     public ResourceZevent(Integer subject, AppdefEntityID id) {
-        super(new ResourceZeventSource(id),
-              new ResourceZeventPayload(subject, id));
+        super(new ResourceZeventSource(id.getId()),
+              new ResourceZeventPayload(subject, id.getId()));
+        this.appdefEntityID = id;
     }
 
     public ResourceZevent(ResourceZeventSource source,
@@ -45,14 +48,18 @@ public abstract class ResourceZevent extends Zevent {
         super(source, payload);
     }
 
-    public AppdefEntityID getAppdefEntityID() {
+    public Integer getId() {
         return ((ResourceZeventPayload)getPayload()).
-            getAppdefEntityID();
+            getId();
     }
 
     public Integer getAuthzSubjectId() {
         return ((ResourceZeventPayload)getPayload()).
             getAuthzSubjectId();
+    }
+    
+    public AppdefEntityID getAppdefEntityID() {
+        return appdefEntityID;
     }
 
     protected static class ResourceZeventSource
@@ -60,9 +67,9 @@ public abstract class ResourceZevent extends Zevent {
     {
         private static final long serialVersionUID = -2799620967593343325L;
         
-        private AppdefEntityID _id;
+        private Integer _id;
 
-        public ResourceZeventSource(AppdefEntityID id) {
+        public ResourceZeventSource(Integer id) {
             _id = id;
         }
 
@@ -87,10 +94,10 @@ public abstract class ResourceZevent extends Zevent {
     protected static class ResourceZeventPayload
         implements ZeventPayload
     {
-        private AppdefEntityID _id;
+        private Integer _id;
         private Integer _subject;
 
-        public ResourceZeventPayload(Integer subject, AppdefEntityID id) {
+        public ResourceZeventPayload(Integer subject, Integer id) {
             _subject = subject;
             _id = id;
         }
@@ -99,7 +106,7 @@ public abstract class ResourceZevent extends Zevent {
             return _subject;
         }
 
-        public AppdefEntityID getAppdefEntityID() {
+        public Integer getId() {
             return _id;
         }
     }

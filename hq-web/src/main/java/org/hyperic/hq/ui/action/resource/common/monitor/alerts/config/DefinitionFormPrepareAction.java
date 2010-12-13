@@ -41,7 +41,6 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.apache.struts.util.LabelValueBean;
-import org.hyperic.hq.appdef.server.session.CpropKey;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -52,6 +51,7 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.common.monitor.alerts.AlertDefUtil;
@@ -170,18 +170,19 @@ public abstract class DefinitionFormPrepareAction
     protected List<LabelValueBean> getCustomProperties(int sessionID, AppdefEntityID adeId)
         throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException, PermissionException,
         RemoteException {
-        List<CpropKey> custProps;
+        List<PropertyType> custProps;
 
         if (adeId instanceof AppdefEntityTypeID) {
+            
             custProps = appdefBoss.getCPropKeys(sessionID, adeId.getType(), adeId.getID());
         } else {
             custProps = appdefBoss.getCPropKeys(sessionID, adeId);
         }
 
         ArrayList<LabelValueBean> custPropStrs = new ArrayList<LabelValueBean>(custProps.size());
-        for (CpropKey custProp : custProps) {
+        for (PropertyType custProp : custProps) {
 
-            custPropStrs.add(new LabelValueBean(custProp.getDescription(), custProp.getKey()));
+            custPropStrs.add(new LabelValueBean(custProp.getDescription(), custProp.getName()));
         }
 
         return custPropStrs;

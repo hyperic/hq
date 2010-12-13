@@ -25,11 +25,11 @@
 
 package org.hyperic.hq.events.server.session;
 
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.shared.AlertValue;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.util.pager.PagerEventHandler;
 import org.hyperic.util.pager.PagerProcessorExt;
 

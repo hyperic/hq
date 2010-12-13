@@ -40,10 +40,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Operation;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
-import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.RoleDAO;
 import org.hyperic.hq.common.ApplicationException;
@@ -52,6 +48,10 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.shared.HierarchicalAlertingManager;
 import org.hyperic.hq.events.shared.MaintenanceEventManager;
+import org.hyperic.hq.inventory.domain.OperationType;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
@@ -134,10 +134,10 @@ public class PermissionManagerImpl
             _log.debug("Checking Scope for Operation: " + opName + " subject: " + subj);
         }
 
-        ResourceType resTypeBean = getResourceTypeDAO().findByName(resType);
+        ResourceType resTypeBean = ResourceType.findResourceTypeByName(resType);
 
         if (resTypeBean != null) {
-            Operation op = getOperationDAO().findByTypeAndName(resTypeBean, opName);
+            OperationType op = resTypeBean.getOperationType(opName);
 
             if (op != null) {
                 return findOperationScopeBySubject(subj, op.getId());
@@ -176,16 +176,10 @@ public class PermissionManagerImpl
         return Bootstrap.getBean(RoleDAO.class);
     }
 
-    protected ResourceGroupDAO getResourceGroupDAO() {
-        return Bootstrap.getBean(ResourceGroupDAO.class);
-    }
+   
 
     private Resource lookupResource(ResourceValue resource) {
-        if (resource.getId() == null) {
-            ResourceType type = resource.getResourceType();
-            return getResourceDAO().findByInstanceId(type, resource.getInstanceId());
-        }
-        return getResourceDAO().findById(resource.getId());
+        return Resource.findResource(resource.getId());
     }
 
     private Set toPojos(Object[] vals) {
@@ -195,9 +189,9 @@ public class PermissionManagerImpl
         }
 
         RoleDAO roleDao = null;
-        ResourceGroupDAO resGrpDao = null;
+       
         for (int i = 0; i < vals.length; i++) {
-            if (vals[i] instanceof Operation) {
+            if (vals[i] instanceof OperationType) {
                 ret.add(vals[i]);
             } else if (vals[i] instanceof ResourceValue) {
                 ret.add(lookupResource((ResourceValue) vals[i]));
@@ -207,10 +201,8 @@ public class PermissionManagerImpl
                 }
                 ret.add(roleDao.findById(((RoleValue) vals[i]).getId()));
             } else if (vals[i] instanceof ResourceGroupValue) {
-                if (resGrpDao == null) {
-                    resGrpDao = getResourceGroupDAO();
-                }
-                ret.add(resGrpDao.findById(((ResourceGroupValue) vals[i]).getId()));
+                
+                ret.add(ResourceGroup.findResourceGroup(((ResourceGroupValue) vals[i]).getId()));
             } else {
                 _log.error("Invalid type.");
             }
@@ -374,11 +366,13 @@ public class PermissionManagerImpl
 
     public Collection<Resource> getGroupResources(Integer subjectId, Integer groupId,
                                                   Boolean fsystem) {
-        return getResourceDAO().findInGroup_orderName(groupId, fsystem);
+       //TODO
+        return null;
     }
 
     public Collection<Resource> findServiceResources(AuthzSubject subj, Boolean fsystem) {
-        return getResourceDAO().findSvcRes_orderName(fsystem);
+       //TODO
+        return null;
     }
 
     public RolePermNativeSQL getRolePermissionNativeSQL(String resourceVar, String eventLogVar, String subjectParam,
@@ -442,7 +436,9 @@ public class PermissionManagerImpl
     public EdgePermCheck makePermCheckSql(String subjectParam, String resVar, String resParam,
                                           String distanceParam, String opsParam,
                                           boolean includeDescendants) {
-        final Integer cId = AuthzConstants.RELATION_CONTAINMENT_ID;
+        //TODO
+        //final Integer cId = AuthzConstants.RELATION_CONTAINMENT_ID;
+        Integer cId = 1;
         final String oper = (includeDescendants) ? ">=" : "=";
         final String sql = new StringBuilder().append(" JOIN EAM_RESOURCE_EDGE edge")
             .append(" ON ").append(resVar).append(".id = edge.TO_ID").append(" AND ")
@@ -463,7 +459,9 @@ public class PermissionManagerImpl
     public EdgePermCheck makePermCheckHql(String subjectParam, String resourceVar,
                                           String resourceParam, String distanceParam,
                                           String opsParam, boolean includeDescendants) {
-        final Integer cId = AuthzConstants.RELATION_CONTAINMENT_ID;
+        //TODO
+        //final Integer cId = AuthzConstants.RELATION_CONTAINMENT_ID;
+        Integer cId = 1;
         final String oper = (includeDescendants) ? ">=" : "=";
         final String sql = new StringBuilder().append("join ").append(resourceVar).append(
             ".toEdges _e ").append("join _e.from _fromResource ").append("where ").append(

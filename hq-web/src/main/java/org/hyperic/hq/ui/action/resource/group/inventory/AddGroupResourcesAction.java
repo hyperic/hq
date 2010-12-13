@@ -43,12 +43,12 @@ import org.hyperic.hq.appdef.shared.AppSvcClustDuplicateAssignException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.BaseValidatorForm;
@@ -122,8 +122,8 @@ public class AddGroupResourcesAction
 
                 AppdefEntityID entity = new AppdefEntityID(id);
                 Resource r = resourceManager.findResource(entity);
-
-                if (!resourceGroupManager.isMember(group, r)) {
+              
+                if (!group.isMember(r)) {
                     newIds.add(entity);
                 }
             }

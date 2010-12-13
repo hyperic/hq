@@ -48,8 +48,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.application.Scheduler;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.bizapp.shared.EmailManager;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
@@ -68,6 +66,7 @@ import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.AlertRegulator;
 import org.hyperic.hq.hqu.RenditServer;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.ConfigPropertyException;
@@ -99,7 +98,7 @@ public class EmailAction extends EmailActionConfig
     private static final String BUNDLE = "org.hyperic.hq.bizapp.Resources";
 
     
-    private ResourceDAO resourceDAO = Bootstrap.getBean(ResourceDAO.class);
+   
 
     static {
         ServerConfigManager sConf = Bootstrap.getBean(ServerConfigManager.class);
@@ -374,9 +373,8 @@ public class EmailAction extends EmailActionConfig
 
         AppdefEntityID appEnt = getResource(defInfo);
 
-        Resource resource = resourceDAO.findByInstanceId(appEnt.getAuthzTypeId(),
-                                                  appEnt.getId());
-
+        Resource resource = Resource.findResource(appEnt.getId());
+       
         final String subject = createSubject(
             defInfo, alert.getAlertInfo(), resource, null, change.getDescription());
         sendAlert(getResource(defInfo), to, subject, messages, messages,

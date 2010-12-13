@@ -49,6 +49,7 @@ import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.context.Bootstrap;
@@ -256,7 +257,8 @@ public abstract class InventoryHelper {
         }
 
         // only check where the config is invalid
-        String validationError = productBoss.getConfigResponse(sessionId, entityId).getValidationError();
+        
+        String validationError = Bootstrap.getBean(ResourceManager.class).findResourceById(entityId.getId()).getConfigValidationError();
 
         if (validationError == null) {
             request.setAttribute(CONFIG_ATTR, Boolean.FALSE);

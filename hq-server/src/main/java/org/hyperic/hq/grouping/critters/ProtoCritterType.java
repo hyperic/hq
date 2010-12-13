@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.Query;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterDump;
 import org.hyperic.hq.grouping.CritterTranslationContext;
@@ -40,6 +39,7 @@ import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.prop.CritterPropType;
 import org.hyperic.hq.grouping.prop.ProtoCritterProp;
 import org.hyperic.hq.grouping.prop.ResourceCritterProp;
+import org.hyperic.hq.inventory.domain.Resource;
 
 /**
  * Metadata for ProtoCritter which matches all Prototypes in EAM_RESOURCE
@@ -161,7 +161,9 @@ public class ProtoCritterType extends BaseCritterType {
         }
         
         public boolean meets(Resource resource) {
-            return _proto.equals(resource.getPrototype());
+            //TODO?
+            //return _proto.equals(resource.getPrototype());
+            return true;
         }
     }
 

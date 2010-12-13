@@ -42,6 +42,7 @@ import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
@@ -62,6 +63,7 @@ public class NewPlatformAction
     private final Log log = LogFactory.getLog(NewPlatformAction.class.getName());
     private AppdefBoss appdefBoss;
     private AIBoss aiBoss;
+    private PlatformManager platformManager;
 
     @Autowired
     public NewPlatformAction(AppdefBoss appdefBoss, AIBoss aiBoss) {
@@ -101,6 +103,8 @@ public class NewPlatformAction
             log.trace("creating platform [" + platform.getName() + "]" + " with attributes " + newForm);
 
             Agent agent = BizappUtils.getAgentConnection(sessionId.intValue(), appdefBoss, request, newForm);
+
+           
 
             Platform newPlatform = appdefBoss.createPlatform(sessionId.intValue(), platform, platformType.getId(),
                 agent.getId());

@@ -39,10 +39,10 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.resource.ResourceForm;
@@ -102,17 +102,17 @@ public class EditGeneralAction
 
             // See if this is a private group
             boolean isPrivate = true;
-            Collection<ResourceGroup> groups = appdefBoss.getGroupsForResource(sessionId, group.getResource());
+            Collection<ResourceGroup> groups = appdefBoss.getGroupsForResource(sessionId, group);
             for (Iterator<ResourceGroup> it = groups.iterator(); it.hasNext();) {
                 ResourceGroup g = it.next();
-                isPrivate = !g.getId().equals(AuthzConstants.rootResourceGroupId);
+                isPrivate = g.isPrivateGroup();
                 if (!isPrivate)
                     break;
             }
 
             if (isPrivate) {
                 // Make sure the username appears in the name
-                final String owner = group.getResource().getOwner().getName();
+                final String owner = group.getOwner().getName();
                 if (rForm.getName().indexOf(owner) < 0) {
                     final String privateName = RequestUtils.message(request, "resource.group.name.private",
                         new Object[] { owner });

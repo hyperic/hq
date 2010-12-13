@@ -29,14 +29,14 @@ import java.util.Collection;
 import java.util.List;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Operation;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.RoleCalendar;
 import org.hyperic.hq.authz.server.session.RoleCalendarType;
 import org.hyperic.hq.authz.values.OwnedRoleValue;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
+import org.hyperic.hq.inventory.domain.OperationType;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -62,7 +62,7 @@ public interface RoleManager {
      *         covalentAuthzRole ResourceType.
      */
     public Integer createOwnedRole(AuthzSubject whoami, RoleValue role,
-                                   org.hyperic.hq.authz.server.session.Operation[] operations,
+                                   OperationType[] operations,
                                    java.lang.Integer[] subjectIds, java.lang.Integer[] groupIds)
         throws AuthzDuplicateNameException, PermissionException;
 
@@ -102,7 +102,7 @@ public interface RoleManager {
      * @throws PermissionException whoami may not perform addOperation on this
      *         role.
      */
-    public void addOperations(AuthzSubject whoami, Role role, org.hyperic.hq.authz.server.session.Operation[] operations)
+    public void addOperations(AuthzSubject whoami, Role role, OperationType[] operations)
         throws PermissionException;
 
     /**
@@ -125,7 +125,7 @@ public interface RoleManager {
      *         setOperations on this role.
      */
     public void setOperations(AuthzSubject whoami, Integer id,
-                              org.hyperic.hq.authz.server.session.Operation[] operations) throws PermissionException;
+                              OperationType[] operations) throws PermissionException;
 
     /**
      * Associate ResourceGroups with this role.
@@ -233,7 +233,7 @@ public interface RoleManager {
      * @return list - values are lists of operation
      * 
      */
-    public List<Operation> getRoleOperations(AuthzSubject subject, Integer roleId)
+    public List<OperationType> getRoleOperations(AuthzSubject subject, Integer roleId)
         throws PermissionException;
 
     public Collection<Role> getAllRoles();
@@ -456,8 +456,8 @@ public interface RoleManager {
     public void removeSubjects(AuthzSubject whoami, Integer id, java.lang.Integer[] ids) throws PermissionException;
 
     /**
-     * Find all {@link Operation} objects
+     * Find all {@link OperationType} objects
      */
-    public Collection<Operation> findAllOperations();
+    public Collection<OperationType> findAllOperations();
 
 }

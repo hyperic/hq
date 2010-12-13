@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.inventory.domain.Resource;
 
 public class ResourceDataPoint extends DataPoint {
     private Resource _resource;

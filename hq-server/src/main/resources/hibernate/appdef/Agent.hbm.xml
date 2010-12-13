@@ -79,9 +79,9 @@
       <column name="AGENT_TYPE_ID" not-null="false" index="AGENT_TYPE_ID_IDX"/>
     </many-to-one>
 
-    <bag inverse="true" cascade="save-update" name="platforms" table="EAM_PLATFORM">
+    <bag inverse="true" cascade="save-update" name="resources" table="Resource">
       <key column="AGENT_ID"/>
-      <one-to-many class="org.hyperic.hq.appdef.server.session.Platform"/>
+      <one-to-many class="org.hyperic.hq.inventory.domain.Resource"/>
     </bag>
   </class>
 

@@ -46,8 +46,6 @@ import org.hibernate.NonUniqueResultException;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.AppService;
-import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
@@ -60,26 +58,18 @@ import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
-import org.hyperic.hq.appdef.shared.CPropManager;
-import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
-import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
+import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Operation;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
@@ -93,9 +83,16 @@ import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.common.shared.AuditManager;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.inventory.domain.OperationType;
+import org.hyperic.hq.inventory.domain.PropertyType;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformTypeInfo;
+import org.hyperic.hq.product.server.session.PluginDAO;
+import org.hyperic.hq.reference.RelationshipTypes;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.sigar.NetFlags;
 import org.hyperic.util.pager.PageControl;
@@ -114,39 +111,33 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class PlatformManagerImpl implements PlatformManager {
 
+    private static final String COMMENT_TEXT = "commentText";
+
+    private static final String NETMASK = "netmask";
+
+    private static final String CPU_COUNT = "cpuCount";
+
+    private static final String MAC_ADDRESS = "macAddress";
+
+    private static final String IP_ADDRESS = "address";
+
+    private static final String CERT_DN = "certDN";
+
+    private static final String FQDN = "FQDN";
+
     private final Log log = LogFactory.getLog(PlatformManagerImpl.class.getName());
 
     private static final String VALUE_PROCESSOR = PagerProcessor_platform.class.getName();
 
     private Pager valuePager;
 
-    private PlatformTypeDAO platformTypeDAO;
-
     private PermissionManager permissionManager;
 
     private AgentDAO agentDAO;
 
-    private ServerManager serverManager;
-
-    private CPropManager cpropManager;
-
     private ResourceManager resourceManager;
 
     private ResourceGroupManager resourceGroupManager;
-
-    private AuthzSubjectManager authzSubjectManager;
-
-    private ServiceManager serviceManager;
-
-    private ApplicationDAO applicationDAO;
-
-    private ConfigResponseDAO configResponseDAO;
-
-    private PlatformDAO platformDAO;
-
-    private ServerDAO serverDAO;
-
-    private ServiceDAO serviceDAO;
 
     private AuditManager auditManager;
 
@@ -155,38 +146,26 @@ public class PlatformManagerImpl implements PlatformManager {
     private ZeventEnqueuer zeventManager;
 
     private ResourceAuditFactory resourceAuditFactory;
+    
+    private PluginDAO pluginDAO;
 
     @Autowired
-    public PlatformManagerImpl(PlatformTypeDAO platformTypeDAO,
+    public PlatformManagerImpl(
                                PermissionManager permissionManager, AgentDAO agentDAO,
-                               ServerManager serverManager, CPropManager cpropManager,
                                ResourceManager resourceManager,
                                ResourceGroupManager resourceGroupManager,
-                               AuthzSubjectManager authzSubjectManager,
-                               ServiceManager serviceManager, ApplicationDAO applicationDAO,
-                               ConfigResponseDAO configResponseDAO, PlatformDAO platformDAO,
-                               ServerDAO serverDAO, ServiceDAO serviceDAO,
                                AuditManager auditManager, AgentManager agentManager,
                                ZeventEnqueuer zeventManager,
-                               ResourceAuditFactory resourceAuditFactory) {
-        this.platformTypeDAO = platformTypeDAO;
+                               ResourceAuditFactory resourceAuditFactory, PluginDAO pluginDAO) {
         this.permissionManager = permissionManager;
         this.agentDAO = agentDAO;
-        this.serverManager = serverManager;
-        this.cpropManager = cpropManager;
         this.resourceManager = resourceManager;
         this.resourceGroupManager = resourceGroupManager;
-        this.authzSubjectManager = authzSubjectManager;
-        this.serviceManager = serviceManager;
-        this.applicationDAO = applicationDAO;
-        this.configResponseDAO = configResponseDAO;
-        this.platformDAO = platformDAO;
-        this.serverDAO = serverDAO;
-        this.serviceDAO = serviceDAO;
         this.auditManager = auditManager;
         this.agentManager = agentManager;
         this.zeventManager = zeventManager;
         this.resourceAuditFactory = resourceAuditFactory;
+        this.pluginDAO = pluginDAO;
     }
 
     // TODO resolve circular dependency
@@ -204,6 +183,30 @@ public class PlatformManagerImpl implements PlatformManager {
         }
         return counter;
     }
+    
+    private PlatformType toPlatformType(ResourceType resourceType) {
+        PlatformType platformType = new PlatformType();
+        platformType.setId(resourceType.getId());
+        platformType.setName(resourceType.getName());
+        platformType.setPlugin(resourceType.getPlugin().getName());
+        return platformType;
+    }
+    
+    private Platform toPlatform(Resource resource) {
+        Platform platform = new Platform();
+        platform.setAgent(resource.getAgent());
+        platform.setCertdn((String)resource.getProperty(CERT_DN));
+        platform.setCommentText((String)resource.getProperty(COMMENT_TEXT));
+        platform.setCpuCount((Integer)resource.getProperty(CPU_COUNT));
+        platform.setDescription(resource.getDescription());
+        platform.setFqdn((String)resource.getProperty(FQDN));
+        platform.setModifiedBy(resource.getModifiedBy());
+        platform.setLocation(resource.getLocation());
+        platform.setName(resource.getName());
+        platform.setPlatformType(toPlatformType(resource.getType()));
+        platform.setId(resource.getId());
+        return platform;
+    }
 
     /**
      * Find a PlatformType by id
@@ -212,7 +215,7 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     @Transactional(readOnly = true)
     public PlatformType findPlatformType(Integer id) throws ObjectNotFoundException {
-        return platformTypeDAO.findById(id);
+        return toPlatformType(ResourceType.findResourceType(id));
     }
 
     /**
@@ -224,20 +227,25 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     @Transactional(readOnly = true)
     public PlatformType findPlatformTypeByName(String type) throws PlatformNotFoundException {
-        PlatformType ptype = platformTypeDAO.findByName(type);
+        ResourceType ptype = ResourceType.findResourceTypeByName(type);
         if (ptype == null) {
             throw new PlatformNotFoundException(type);
         }
-        return ptype;
+        return toPlatformType(ptype);
     }
 
-    /**
-     * @return {@link PlatformType}s
-     * 
-     */
-    @Transactional(readOnly = true)
-    public Collection<PlatformType> findAllPlatformTypes() {
-        return platformTypeDAO.findAll();
+  
+    private Collection<PlatformType> findAllPlatformTypes() {
+        Set<PlatformType> platformTypes = new HashSet<PlatformType>();
+        Collection<ResourceType> resourceTypes = findAllPlatformResourceTypes();
+        for(ResourceType resourceType: resourceTypes) {
+            platformTypes.add(toPlatformType(resourceType));
+        }
+        return platformTypes;
+    }
+    
+    private Collection<ResourceType> findAllPlatformResourceTypes() {
+        return ResourceType.findRootResourceType().getResourceTypesFrom(RelationshipTypes.PLATFORM_TYPE);
     }
 
     /**
@@ -256,41 +264,7 @@ public class PlatformManagerImpl implements PlatformManager {
         }
         return platformTypes;
     }
-
-    /**
-     * @return {@link PlatformType}s
-     * 
-     */
-    @Transactional(readOnly = true)
-    public Collection<PlatformType> findUnsupportedPlatformTypes() {
-        Collection<PlatformType> platformTypes = findAllPlatformTypes();
-
-        for (Iterator<PlatformType> it = platformTypes.iterator(); it.hasNext();) {
-            PlatformType pType = it.next();
-            if (PlatformDetector.isSupportedPlatform(pType.getName())) {
-                it.remove();
-            }
-        }
-        return platformTypes;
-    }
-
-    /**
-     * 
-     */
-    @Transactional(readOnly = true)
-    public Resource findResource(PlatformType pt) {
-
-        ResourceType rType;
-
-        String typeName = AuthzConstants.platformPrototypeTypeName;
-        try {
-            rType = resourceManager.findResourceTypeByName(typeName);
-        } catch (NotFoundException e) {
-            throw new SystemException(e);
-        }
-        return resourceManager.findResourceByInstanceId(rType, pt.getId());
-    }
-
+    
     /**
      * Find all platform types
      * 
@@ -299,7 +273,8 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     @Transactional(readOnly = true)
     public PageList<PlatformTypeValue> getAllPlatformTypes(AuthzSubject subject, PageControl pc) {
-        Collection<PlatformType> platTypes = platformTypeDAO.findAllOrderByName();
+        Collection<PlatformType> platTypes = findAllPlatformTypes();
+        //TODO above query was supposed to order by name
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
         return valuePager.seek(platTypes, pc);
@@ -316,11 +291,9 @@ public class PlatformManagerImpl implements PlatformManager {
         throws PermissionException, NotFoundException {
 
         // build the platform types from the visible list of platforms
-        Collection platforms;
+        Collection<Platform> platforms = getViewablePlatforms(subject, pc);
 
-        platforms = getViewablePlatforms(subject, pc);
-
-        Collection<AppdefResourceType> platTypes = filterResourceTypes(platforms);
+        Collection<PlatformType> platTypes = filterResourceTypes(platforms);
 
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
@@ -338,43 +311,40 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     @Transactional(readOnly = true)
     public String getPlatformPluginName(AppdefEntityID id) throws AppdefEntityNotFoundException {
-        Platform p;
+        Resource p;
         String typeName;
 
         if (id.isService()) {
             // look up the service
-            Service service = serviceDAO.get(id.getId());
+            Resource service = Resource.findResource(id.getId());
 
             if (service == null) {
                 throw new ServiceNotFoundException(id);
             }
-
-            p = service.getServer().getPlatform();
-            typeName = service.getServiceType().getName();
+            p=service.getResourceTo(RelationshipTypes.SERVICE).getResourceTo(RelationshipTypes.SERVER);
+          
+            typeName = service.getType().getName();
         } else if (id.isServer()) {
             // look up the server
-            Server server = serverDAO.get(id.getId());
+            Resource server = Resource.findResource(id.getId());
 
             if (server == null) {
                 throw new ServerNotFoundException(id);
             }
-            p = server.getPlatform();
-            typeName = server.getServerType().getName();
+            p = server.getResourceTo(RelationshipTypes.SERVER);
+            typeName = server.getType().getName();
         } else if (id.isPlatform()) {
-            p = findPlatformById(id.getId());
-            typeName = p.getPlatformType().getName();
+            Platform platform = findPlatformById(id.getId());
+            return platform.getPlatformType().getName();
         } else if (id.isGroup()) {
             ResourceGroup g = resourceGroupManager.findResourceGroupById(id.getId());
-            return g.getResourcePrototype().getName();
+            return g.getType().getName();
         } else {
             throw new IllegalArgumentException("Unsupported entity type: " + id);
         }
 
-        if (id.isPlatform()) {
-            return typeName;
-        } else {
-            return typeName + " " + p.getPlatformType().getName();
-        }
+        return typeName + " " + p.getType().getName();
+        
     }
 
     /**
@@ -386,171 +356,170 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     public void removePlatform(AuthzSubject subject, Platform platform)
         throws PlatformNotFoundException, PermissionException, VetoException {
-        final AppdefEntityID aeid = platform.getEntityId();
-        final Resource r = platform.getResource();
-        final Audit audit = resourceAuditFactory.deleteResource(resourceManager
-            .findResourceById(AuthzConstants.authzHQSystem), subject, 0, 0);
+        //TODO authzHQSystem resource doesn't exist now
+        //final Audit audit = resourceAuditFactory.deleteResource(resourceManager
+          //  .findResourceById(AuthzConstants.authzHQSystem), subject, 0, 0);
         boolean pushed = false;
         try {
-            auditManager.pushContainer(audit);
-            pushed = true;
-            permissionManager.checkRemovePermission(subject, platform.getEntityId());
-            // keep the configresponseId so we can remove it later
-            ConfigResponseDB config = platform.getConfigResponse();
-            removeServerReferences(platform);
+            //auditManager.pushContainer(audit);
+            //pushed = true;
+            //TODO
+            //permissionManager.checkRemovePermission(subject, platform.getId());
+            
+            //remove server
+            removeServers(platform);
 
-            // this flush ensures that the server's platform_id is set to null
-            // before the platform is deleted and the servers cascaded
-            platformDAO.getSession().flush();
+            
             getAIQueueManager().removeAssociatedAIPlatform(platform);
-            cleanupAgent(platform);
-            platform.getIps().clear();
-            platformDAO.remove(platform);
-            if (config != null) {
-                configResponseDAO.remove(config);
-            }
-            cpropManager.deleteValues(aeid.getType(), aeid.getID());
-            resourceManager.removeAuthzResource(subject, aeid, r);
-            platformDAO.getSession().flush();
+           
+           
+             //config, cprops, and relationships will get cleaned up by removal here
+            resourceManager.removeResource(subject, Resource.findResource(platform.getId()));
 
-        } catch (PermissionException e) {
-            log.debug("Error while removing Platform");
-
-            throw e;
+        //} catch (PermissionException e) {
+          //  log.debug("Error while removing Platform");
+            //throw e;
         } finally {
             if (pushed)
                 auditManager.popContainer(false);
         }
     }
 
-    private void cleanupAgent(Platform platform) {
-        final Agent agent = platform.getAgent();
-        if (agent == null) {
-            return;
-        }
-        final Collection<Platform> platforms = agent.getPlatforms();
+  
+   private void removeServers(Platform platform) {
+       //TODO delete services and servers
+   }
+    
+   
+    
+    private Resource create(AIPlatformValue aip, String initialOwner,Agent agent, ResourceType type) 
+    {
+        Resource p = copyAIPlatformValue(aip,type);
+        p.setModifiedBy(initialOwner);
+        p.setAgent(agent);
+        return p;
+    }
+    
+    private Resource create(PlatformValue pv, Agent agent, 
+                              ResourceType type) 
+    {
+        Resource p = new Resource();
         
-        for (final Iterator<Platform> it = platforms.iterator(); it.hasNext();) {
-            final Platform p = it.next();
-            if (p == null) {
-                continue;
+        p.setName(pv.getName());
+        p.setDescription(pv.getDescription());
+        p.setProperty(CERT_DN,pv.getCertdn());
+        p.setProperty(COMMENT_TEXT,pv.getCommentText());
+        p.setProperty(CPU_COUNT,pv.getCpuCount());
+        p.setProperty(FQDN,pv.getFqdn());
+        p.setLocation(pv.getLocation());
+        p.setModifiedBy(pv.getModifiedBy());
+        p.persist();
+        p.setType(type);
+        p.setAgent(agent);
+        
+        for (Iterator i=pv.getAddedIpValues().iterator(); i.hasNext();) {
+            IpValue ipv = (IpValue)i.next();
+            addIp(toPlatform(p), ipv.getAddress(), ipv.getNetmask(), ipv.getMACAddress());
+        }
+        return p;
+    }
+
+    
+    private Resource copyAIPlatformValue(AIPlatformValue aip, ResourceType platformType) {
+        Resource p = new Resource();
+        //TODO have to set properties after persistence for type check  
+        p.setName(aip.getName());
+        p.setDescription(aip.getDescription());
+        p.setLocation("");
+        //TODO set owner?
+        fixName(p);
+        p.persist();
+        p.setType(platformType);
+        p.setProperty(CERT_DN,aip.getCertdn());
+        p.setProperty(FQDN,aip.getFqdn());
+        p.setProperty(COMMENT_TEXT,"");
+        p.setProperty(CPU_COUNT,aip.getCpuCount());
+        return p;
+    }
+    
+    private void fixName(Resource p) {
+            // if name is not set then set it to fqdn (assuming it is set of course)
+            String name = p.getName();
+            if (name == null || "".equals(name.trim())) {
+                p.setName((String)p.getProperty(FQDN));
             }
-         
-            if (p.getId().equals(platform.getId())) {
-                it.remove();
-            }
+    }
+  
+
+    private void throwDupPlatform(Serializable id, String platName) {
+        throw new NonUniqueObjectException(id, "Duplicate platform found " + "with name: " +
+                                               platName);
+    }
+    
+    /**
+     * Private method to validate a new PlatformValue object
+     * 
+     * @throws ValidationException
+     */
+    private void validateNewPlatform(PlatformValue pv) throws ValidationException {
+        String msg = null;
+        // first check if its new
+        if (pv.idHasBeenSet()) {
+            msg = "This platform is not new. It has id: " + pv.getId();
+        }
+        // else if(someotherthing) ...
+
+        // Now check if there's a msg set and throw accordingly
+        if (msg != null) {
+            throw new ValidationException(msg);
         }
     }
 
-    private void removeServerReferences(Platform platform) {
-
-        final Collection<Server> servers = platform.getServersBag();
-        // since we are using the hibernate collection
-        // we need to synchronize
-        synchronized (servers) {
-            for (final Iterator<Server> i = servers.iterator(); i.hasNext();) {
-                try {
-                    // this looks funky but the idea is to pull the server
-                    // obj into the session so that it is updated when flushed
-                    final Server server = serverManager.findServerById(i.next().getId());
-                    // there are instances where we may have a duplicate
-                    // autoinventory identifier btwn platforms
-                    // (sendmail, ntpd, CAM Agent Server, etc...)
-                    final String uniqAiid = server.getPlatform().getId() +
-                                            server.getAutoinventoryIdentifier();
-                    server.setAutoinventoryIdentifier(uniqAiid);
-                    server.setPlatform(null);
-                    i.remove();
-                } catch (ServerNotFoundException e) {
-                    log.warn(e.getMessage());
-                }
-            }
-        }
-    }
-
-    /**
-     * 
-     */
-    public void handleResourceDelete(Resource resource) {
-        platformDAO.clearResource(resource);
-    }
-
-    /**
-     * Create a Platform of a specified type
-     * 
-     * 
-     */
+    
     public Platform createPlatform(AuthzSubject subject, Integer platformTypeId,
                                    PlatformValue pValue, Integer agentPK)
         throws ValidationException, PermissionException, AppdefDuplicateNameException,
         AppdefDuplicateFQDNException, ApplicationException {
         // check if the object already exists
 
-        if (platformDAO.findByName(pValue.getName()) != null) {
+        if (Resource.findResourceByName(pValue.getName()) != null) {
             // duplicate found, throw a duplicate object exception
             throw new AppdefDuplicateNameException();
         }
-        if (platformDAO.findByFQDN(pValue.getFqdn()) != null) {
+        if (findByFQDN(pValue.getFqdn()) != null) {
             // duplicate found, throw a duplicate object exception
             throw new AppdefDuplicateFQDNException();
         }
-
-        try {
-
-            ConfigResponseDB config;
-            Platform platform;
-            Agent agent = null;
+        Agent agent = null;
 
             if (agentPK != null) {
                 agent = agentDAO.findById(agentPK);
-            }
-            if (pValue.getConfigResponseId() == null) {
-                config = configResponseDAO.createPlatform();
-            } else {
-                config = configResponseDAO.findById(pValue.getConfigResponseId());
             }
 
             trimStrings(pValue);
             getCounter().addCPUs(pValue.getCpuCount().intValue());
             validateNewPlatform(pValue);
-            PlatformType pType = findPlatformType(platformTypeId);
-
+            
             pValue.setOwner(subject.getName());
             pValue.setModifiedBy(subject.getName());
 
-            platform = pType.create(pValue, agent, config);
-            platformDAO.save(platform); // To setup its ID
             // AUTHZ CHECK
-            // in order to succeed subject has to be in a role
-            // which allows creating of authz resources
-            createAuthzPlatform(subject, platform);
-
-            // Create the virtual server types
-            for (ServerType st : pType.getServerTypes()) {
-
-                if (st.isVirtual()) {
-                    serverManager.createVirtualServer(subject, platform, st);
-                }
+            try {
+                permissionManager.checkCreatePlatformPermission(subject);
+            } catch (Exception e) {
+                throw new SystemException(e);
             }
-
-            platformDAO.getSession().flush();
+            ResourceType platType = ResourceType.findResourceType(platformTypeId);
+            Resource platform = create(pValue, agent, platType);
+            Platform plat = toPlatform(platform);
 
             // Send resource create event
-            ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, platform
-                .getEntityId());
+            ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, plat.getEntityId());
             zeventManager.enqueueEventAfterCommit(zevent);
 
-            return platform;
-        } catch (NotFoundException e) {
-            throw new ApplicationException("Unable to find PlatformType: " + platformTypeId +
-                                           " : " + e.getMessage());
-        }
+            return plat;
     }
 
-    private void throwDupPlatform(Serializable id, String platName) {
-        throw new NonUniqueObjectException(id, "Duplicate platform found " + "with name: " +
-                                               platName);
-    }
 
     /**
      * Create a Platform from an AIPlatform
@@ -562,14 +531,14 @@ public class PlatformManagerImpl implements PlatformManager {
         throws ApplicationException {
         getCounter().addCPUs(aipValue.getCpuCount().intValue());
 
-        PlatformType platType = platformTypeDAO.findByName(aipValue.getPlatformTypeName());
+        ResourceType platType = ResourceType.findResourceTypeByName(aipValue.getPlatformTypeName());
 
         if (platType == null) {
             throw new SystemException("Unable to find PlatformType [" +
                                       aipValue.getPlatformTypeName() + "]");
         }
 
-        Platform checkP = platformDAO.findByName(aipValue.getName());
+        Resource checkP = Resource.findResourceByName(aipValue.getName());
         if (checkP != null) {
             throwDupPlatform(checkP.getId(), aipValue.getName());
         }
@@ -579,23 +548,24 @@ public class PlatformManagerImpl implements PlatformManager {
         if (agent == null) {
             throw new ApplicationException("Unable to find agent: " + aipValue.getAgentToken());
         }
-        ConfigResponseDB config = configResponseDAO.createPlatform();
-
-        Platform platform = platType.create(aipValue, subject.getName(), config, agent);
-        platformDAO.save(platform);
-
+     
+        
         // AUTHZ CHECK
         try {
-            createAuthzPlatform(subject, platform);
+            permissionManager.checkCreatePlatformPermission(subject);
         } catch (Exception e) {
             throw new SystemException(e);
         }
 
-        // Send resource create event
-        ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, platform.getEntityId());
+        Resource platform = create(aipValue, subject.getName(),agent,platType);     
+        
+
+        // Send resource create event.  TODO abstract to ResourceManager when we don't need to use entity ID
+        Platform plat = toPlatform(platform);
+        ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, plat.getEntityId());
         zeventManager.enqueueEventAfterCommit(zevent);
 
-        return platform;
+        return plat;
     }
 
     /**
@@ -612,9 +582,7 @@ public class PlatformManagerImpl implements PlatformManager {
     public PageList<PlatformValue> getAllPlatforms(AuthzSubject subject, PageControl pc)
         throws PermissionException, NotFoundException {
 
-        Collection<Platform> platforms;
-
-        platforms = getViewablePlatforms(subject, pc);
+        Collection<Platform> platforms = getViewablePlatforms(subject, pc);
 
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
@@ -637,14 +605,14 @@ public class PlatformManagerImpl implements PlatformManager {
         throws PermissionException, NotFoundException {
         PageControl pc = new PageControl(0, size);
 
-        Collection<Platform> platforms = platformDAO
+        Collection<Resource> platforms = Resource
             .findByCTime(System.currentTimeMillis() - range);
 
         // now get the list of PKs
         List<Integer> viewable = getViewablePlatformPKs(subject);
         // and iterate over the list to remove any item not viewable
-        for (Iterator<Platform> i = platforms.iterator(); i.hasNext();) {
-            Platform platform = i.next();
+        for (Iterator<Resource> i = platforms.iterator(); i.hasNext();) {
+            Resource platform = i.next();
             if (!viewable.contains(platform.getId())) {
                 // remove the item, user cant see it
                 i.remove();
@@ -665,10 +633,8 @@ public class PlatformManagerImpl implements PlatformManager {
     public Platform getPlatformById(AuthzSubject subject, Integer id)
         throws PlatformNotFoundException, PermissionException {
         Platform platform = findPlatformById(id);
-        permissionManager.checkViewPermission(subject, platform.getEntityId());
-        // Make sure that resource is loaded as to not get
-        // LazyInitializationException
-        platform.getName();
+        //TODO
+        //permissionManager.checkViewPermission(subject, platform.getId());
         return platform;
     }
 
@@ -682,23 +648,50 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     @Transactional(readOnly = true)
     public Platform findPlatformById(Integer id) throws PlatformNotFoundException {
-        Platform platform = platformDAO.get(id);
-
+        Resource platform = Resource.findResource(id);
         if (platform == null) {
             throw new PlatformNotFoundException(id);
         }
 
-        // Make sure that resource is loaded as to not get
-        // LazyInitializationException
-        platform.getName();
-
-        return platform;
+        return toPlatform(platform);
+    }
+    
+    private Collection<Resource> getAllPlatforms() {
+        return Resource.findRootResource().getResourcesFrom(RelationshipTypes.PLATFORM);
+        
+    }
+    
+    private Resource findByFQDN(String fqdn) {
+        Collection<Resource> platforms = getAllPlatforms();
+        for(Resource platform: platforms) {
+            if(fqdn.equals(platform.getProperty(FQDN))) {
+                return platform;
+            }
+        }
+        return null;
+    }
+    
+    private Collection<Resource> findByIpAddr(String address) {
+        Set<Resource> platforms = new HashSet<Resource>();
+        for(Resource platform: getAllPlatforms()) {
+            Set<Resource> ips = platform.getResourcesFrom(RelationshipTypes.IP);
+            for(Resource ip:ips) {
+                if(address.equals(ip.getProperty(IP_ADDRESS))) {
+                    platforms.add(platform);
+                }
+            }
+        }
+        return platforms;
+    }
+    
+    private Collection<Resource> getIps(Resource platform) {
+        return platform.getResourcesFrom(RelationshipTypes.IP);
     }
     
     @Transactional(readOnly = true)
     public Platform findPlatformByAIPlatform(AuthzSubject subject, AIPlatformValue aiPlatform) 
         throws PermissionException, PlatformNotFoundException {
-        Platform p =  platformDAO.findByFQDN(aiPlatform.getFqdn());
+        Resource p =  findByFQDN(aiPlatform.getFqdn());
         if(p == null) {
             final AIIpValue[] ipvals = aiPlatform.getAIIpValues();
             // Find by IP address. For now, if we get one IP address
@@ -720,13 +713,14 @@ public class PlatformManagerImpl implements PlatformManager {
                     continue;
                 }
     
-                Collection<Platform> platforms = platformDAO.findByIpAddr(address);
+                
+                Collection<Resource> platforms = findByIpAddr(address);
     
-                Set<Platform> platformsMatchingIp = new HashSet<Platform>();
+                Set<Resource> platformsMatchingIp = new HashSet<Resource>();
                 if (!platforms.isEmpty()) {               
-                    for (Platform plat : platforms) {
+                    for (Resource plat : platforms) {
                         // Make sure the types match
-                        if (!plat.getPlatformType().getName().equals(
+                        if (!plat.getType().getName().equals(
                             aiPlatform.getPlatformTypeName())) {
                             continue;
                         }
@@ -749,14 +743,15 @@ public class PlatformManagerImpl implements PlatformManager {
         if (p == null) {
             p = getPhysPlatformByAgentToken(aiPlatform.getAgentToken());
         }
-        if (p != null) {
-            permissionManager.checkViewPermission(subject, p.getEntityId());
-        }
+        //TODO
+        //if (p != null) {
+          //  permissionManager.checkViewPermission(subject, p.getId());
+        //}
         if(p == null) {
             throw new PlatformNotFoundException("platform not found for ai " + "platform: " +
                 aiPlatform.getId());
         }
-        return p;
+        return toPlatform(p);
     }
 
     /**
@@ -769,7 +764,7 @@ public class PlatformManagerImpl implements PlatformManager {
     @Transactional(readOnly = true)
     public Platform getPlatformByAIPlatform(AuthzSubject subject, AIPlatformValue aiPlatform)
         throws PermissionException {
-        Platform p = null;
+        Resource p = null;
 
         String fqdn = aiPlatform.getFqdn();
         String certdn = aiPlatform.getCertdn();
@@ -798,15 +793,15 @@ public class PlatformManagerImpl implements PlatformManager {
                     continue;
                 }
 
-                Collection<Platform> platforms = platformDAO.findByIpAddr(address);
+                Collection<Resource> platforms = findByIpAddr(address);
 
                 if (!platforms.isEmpty()) {
-                    Platform ipMatch = null;
+                    Resource ipMatch = null;
 
-                    for (Platform plat : platforms) {
+                    for (Resource plat : platforms) {
 
                         // Make sure the types match
-                        if (!plat.getPlatformType().getName().equals(
+                        if (!plat.getType().getName().equals(
                             aiPlatform.getPlatformTypeName())) {
                             continue;
                         }
@@ -822,7 +817,7 @@ public class PlatformManagerImpl implements PlatformManager {
                         // which
                         // should be a rarity.
 
-                        if (plat.getFqdn().equals(fqdn)) { // Perfect
+                        if (plat.getProperty(FQDN).equals(fqdn)) { // Perfect
                             p = plat;
                             break;
                         }
@@ -846,7 +841,7 @@ public class PlatformManagerImpl implements PlatformManager {
 
         // One more try
         if (p == null) {
-            p = platformDAO.findByFQDN(fqdn);
+            p = findByFQDN(fqdn);
         }
 
         String agentToken = aiPlatform.getAgentToken();
@@ -855,16 +850,16 @@ public class PlatformManagerImpl implements PlatformManager {
         }
 
         if (p != null) {
-            permissionManager.checkViewPermission(subject, p.getEntityId());
+            //TODO
+            //permissionManager.checkViewPermission(subject, p.getId());
             if (porker && // Let agent porker
                 // create new platforms
-                !(p.getFqdn().equals(fqdn) || p.getCertdn().equals(certdn) || p.getAgent()
-                    .getAgentToken().equals(agentToken))) {
+                !(p.getProperty(FQDN).equals(fqdn) || p.getProperty(CERT_DN).equals(certdn) || p.getAgent().getAgentToken().equals(agentToken))) {
                 p = null;
             }
         }
 
-        return p;
+        return toPlatform(p);
     }
 
     /**
@@ -872,21 +867,20 @@ public class PlatformManagerImpl implements PlatformManager {
      *         agentToken or null if one does not exist.
      * 
      */
-    @Transactional(readOnly = true)
-    public Platform getPhysPlatformByAgentToken(String agentToken) {
+    private Resource getPhysPlatformByAgentToken(String agentToken) {
         try {
-
             Agent agent = agentManager.getAgent(agentToken);
-            Collection<Platform> platforms = agent.getPlatforms();
-            for (Platform platform : platforms) {
-
-                String platType = platform.getPlatformType().getName();
-                // need to check if the platform is not a platform device
-                if (PlatformDetector.isSupportedPlatform(platType)) {
-                    return platform;
+            Collection<Resource> platforms = getAllPlatforms();
+            for (Resource platform : platforms) {
+                if(agent.equals(platform.getAgent())) {
+                    String platType = platform.getType().getName();
+                    // need to check if the platform is not a platform device
+                    if (PlatformDetector.isSupportedPlatform(platType)) {
+                        return platform;
+                    }
                 }
             }
-        } catch (AgentNotFoundException e) {
+        }catch(AgentNotFoundException e) {
             return null;
         }
         return null;
@@ -913,8 +907,8 @@ public class PlatformManagerImpl implements PlatformManager {
         
     }
 
-    private boolean platformMatchesAllIps(Platform p, List<AIIpValue> ips) {
-        Collection<Ip> platIps = p.getIps();
+    private boolean platformMatchesAllIps(Resource p, List<AIIpValue> ips) {
+        Collection<Resource> platIps = getIps(p);
         if (platIps.size() != ips.size()) {
             return false;
         }
@@ -923,41 +917,14 @@ public class PlatformManagerImpl implements PlatformManager {
 
             ipSet.add(ip.getAddress());
         }
-        for (Ip ip : platIps) {
-            if (!ipSet.contains(ip.getAddress())) {
+        for (Resource ip : platIps) {
+            if (!ipSet.contains(ip.getProperty(IP_ADDRESS))) {
                 return false;
             }
         }
         return true;
     }
-
-    /**
-     * Find a platform by name
-     * 
-     * 
-     * @param subject - who is trying this
-     * @param name - the name of the platform
-     */
-    @Transactional(readOnly = true)
-    public PlatformValue getPlatformByName(AuthzSubject subject, String name)
-        throws PlatformNotFoundException, PermissionException {
-        Platform p = platformDAO.findByName(name);
-        if (p == null) {
-            throw new PlatformNotFoundException("platform " + name + " not found");
-        }
-        // now check if the user can see this at all
-        permissionManager.checkViewPermission(subject, p.getEntityId());
-        return p.getPlatformValue();
-    }
-
-    /**
-     * 
-     */
-    @Transactional(readOnly = true)
-    public Platform getPlatformByName(String name) {
-        return platformDAO.findBySortName(name);
-    }
-
+    
     /**
      * Get the Platform that has the specified Fqdn
      * 
@@ -966,86 +933,19 @@ public class PlatformManagerImpl implements PlatformManager {
     @Transactional(readOnly = true)
     public Platform findPlatformByFqdn(AuthzSubject subject, String fqdn)
         throws PlatformNotFoundException, PermissionException {
-        Platform p;
+        Resource p;
         try {
-            p = platformDAO.findByFQDN(fqdn);
+            p = findByFQDN(fqdn);
         } catch (NonUniqueResultException e) {
+            //TODO this isn't going to get thrown
             p = null;
         }
         if (p == null) {
             throw new PlatformNotFoundException("Platform with fqdn " + fqdn + " not found");
         }
-        // now check if the user can see this at all
-        permissionManager.checkViewPermission(subject, p.getEntityId());
-        return p;
-    }
-
-    /**
-     * Get the Collection of platforms that have the specified Ip address
-     * 
-     * 
-     */
-    @Transactional(readOnly = true)
-    public Collection<Platform> getPlatformByIpAddr(AuthzSubject subject, String address)
-        throws PermissionException {
-        return platformDAO.findByIpAddr(address);
-    }
-
-    @Transactional(readOnly = true)
-    public Collection<Platform> getPlatformByMacAddr(AuthzSubject subject, String address)
-        throws PermissionException {
-
-        // TODO: Add permission check
-
-        return platformDAO.findByMacAddr(address);
-    }
-
-    @Transactional(readOnly = true)
-    public Platform getAssociatedPlatformByMacAddress(AuthzSubject subject, Resource r)
-        throws PermissionException, PlatformNotFoundException {
-        // TODO: Add permission check
-
-        ResourceType rt = r.getResourceType();
-        if (rt != null && !rt.getId().equals(AuthzConstants.authzPlatform)) {
-            throw new PlatformNotFoundException("Invalid resource type = " + rt.getName());
-        }
-
-        Platform platform = findPlatformById(r.getInstanceId());
-        String macAddr = getPlatformMacAddress(platform);
-        Collection<Platform> platforms = getPlatformByMacAddr(subject, macAddr);
-        Platform associatedPlatform = null;
-
-        for (Platform p : platforms) {
-            if (!p.getId().equals(platform.getId())) {
-                // TODO: Add additional logic if there are more than 2 platforms
-                associatedPlatform = p;
-                break;
-            }
-        }
-
-        if (associatedPlatform == null) {
-            if (log.isDebugEnabled()) {
-                log.debug("No matching platform found from " + platforms.size() + " platforms" +
-                           " for resource[id=" + r.getId() + ", macAddress=" + macAddr + "].");
-            }
-        }
-
-        return associatedPlatform;
-    }
-
-    private String getPlatformMacAddress(Platform platform) {
-        // TODO: Should this method be part of the Platform object?
-
-        String macAddress = null;
-
-        for (Ip ip : platform.getIps()) {
-            if (!"00:00:00:00:00:00".equals(ip.getMacAddress())) {
-                macAddress = ip.getMacAddress();
-                break;
-            }
-        }
-
-        return macAddress;
+        // TODO now check if the user can see this at all
+        //permissionManager.checkViewPermission(subject, p.getId());
+        return toPlatform(p);
     }
 
     /**
@@ -1056,18 +956,30 @@ public class PlatformManagerImpl implements PlatformManager {
     @Transactional(readOnly = true)
     public Collection<Integer> getPlatformPksByAgentToken(AuthzSubject subject, String agentToken)
         throws PlatformNotFoundException {
-        Collection<Platform> platforms = platformDAO.findByAgentToken(agentToken);
+        Collection<Resource> platforms = findByAgentToken(agentToken);
         if (platforms == null || platforms.size() == 0) {
             throw new PlatformNotFoundException("Platform with agent token " + agentToken +
                                                 " not found");
         }
 
         List<Integer> pks = new ArrayList<Integer>();
-        for (Platform plat : platforms) {
+        for (Resource plat : platforms) {
             pks.add(plat.getId());
         }
         return pks;
     }
+    
+    private Collection<Resource> findByAgentToken(String agentToken) {
+        Set<Resource> agentPlatforms = new HashSet<Resource>();
+        Collection<Resource> platforms = getAllPlatforms();
+        for (Resource platform : platforms) {
+            if(agentToken.equals(platform.getAgent().getAgentToken())) {
+                agentPlatforms.add(platform);
+            }
+        }
+        return agentPlatforms;
+    }
+
 
     /**
      * Get the platform that hosts the server that provides the specified
@@ -1081,13 +993,35 @@ public class PlatformManagerImpl implements PlatformManager {
     @Transactional(readOnly = true)
     public PlatformValue getPlatformByService(AuthzSubject subject, Integer serviceId)
         throws PlatformNotFoundException, PermissionException {
-        Platform p = platformDAO.findByServiceId(serviceId);
+        Resource p = findByServiceId(serviceId);
         if (p == null) {
             throw new PlatformNotFoundException("platform for service " + serviceId + " not found");
         }
-        // now check if the user can see this at all
-        permissionManager.checkViewPermission(subject, p.getEntityId());
-        return p.getPlatformValue();
+        // TODO now check if the user can see this at all
+        //permissionManager.checkViewPermission(subject, p.getId());
+        return toPlatform(p).getPlatformValue();
+    }
+    
+    private Resource findByServiceId(Integer serviceId) {
+        Set<Resource> servers = Resource.findRootResource().getResourcesFrom(RelationshipTypes.SERVER);
+        for(Resource server: servers) {
+            Set<Resource> services = server.getResourcesFrom(RelationshipTypes.SERVICE);
+            for(Resource service : services) {
+                if(serviceId.equals(service.getId())) {
+                    return service;
+                }
+            }
+        }
+        return null;
+    }
+    
+    private List<Resource> findByServers(Integer[] ids) {
+        List<Resource> platforms = new ArrayList<Resource>();
+        for(Integer id: ids) {
+            Resource server = Resource.findResource(id);
+            platforms.add(server.getResourceTo(RelationshipTypes.PLATFORM));
+        }
+        return platforms;
     }
 
     /**
@@ -1100,7 +1034,7 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     @Transactional(readOnly = true)
     public Integer getPlatformIdByService(Integer serviceId) throws PlatformNotFoundException {
-        Platform p = platformDAO.findByServiceId(serviceId);
+        Resource p = findByServiceId(serviceId);
         if (p == null) {
             throw new PlatformNotFoundException("platform for service " + serviceId + " not found");
         }
@@ -1117,17 +1051,18 @@ public class PlatformManagerImpl implements PlatformManager {
     @Transactional(readOnly = true)
     public PlatformValue getPlatformByServer(AuthzSubject subject, Integer serverId)
         throws PlatformNotFoundException, PermissionException {
-        Server server = serverDAO.get(serverId);
+        Resource server = Resource.findResource(serverId);
 
-        if (server == null || server.getPlatform() == null) {
+        if (server == null || server.getResourceTo(RelationshipTypes.PLATFORM) == null) {
             // This should throw server not found. Servers always have
             // platforms..
             throw new PlatformNotFoundException("platform for server " + serverId + " not found");
         }
 
-        Platform p = server.getPlatform();
-        permissionManager.checkViewPermission(subject, p.getEntityId());
-        return p.getPlatformValue();
+        Resource p = server.getResourceTo(RelationshipTypes.PLATFORM);
+        //TODO
+        //permissionManager.checkViewPermission(subject, p.getId());
+        return toPlatform(p).getPlatformValue();
     }
 
     /**
@@ -1138,12 +1073,12 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     @Transactional(readOnly = true)
     public Integer getPlatformIdByServer(Integer serverId) throws PlatformNotFoundException {
-        Server server = serverDAO.get(serverId);
+        Resource server = Resource.findResource(serverId);
 
         if (server == null)
             throw new PlatformNotFoundException("platform for server " + serverId + " not found");
 
-        return server.getPlatform().getId();
+        return server.getResourceTo(RelationshipTypes.PLATFORM).getId();
     }
 
     /**
@@ -1170,10 +1105,10 @@ public class PlatformManagerImpl implements PlatformManager {
             ids[i] = svrId.getId();
         }
 
-        List<Platform> foundPlats = platformDAO.findByServers(ids);
+        List<Resource> foundPlats = findByServers(ids);
 
-        ArrayList<Platform> platforms = new ArrayList<Platform>();
-        for (Platform platform : foundPlats) {
+        ArrayList<Resource> platforms = new ArrayList<Resource>();
+        for (Resource platform : foundPlats) {
             if (authzPks.contains(platform.getId())) {
                 platforms.add(platform);
             }
@@ -1198,7 +1133,7 @@ public class PlatformManagerImpl implements PlatformManager {
                                                              PageControl pc)
         throws ApplicationNotFoundException, PlatformNotFoundException, PermissionException {
 
-        Application appLocal = applicationDAO.get(appId);
+        ResourceGroup appLocal = ResourceGroup.findResourceGroup(appId);
         if (appLocal == null) {
             throw new ApplicationNotFoundException(appId);
         }
@@ -1210,30 +1145,30 @@ public class PlatformManagerImpl implements PlatformManager {
         // to authz in batches to find out which ones we are
         // allowed to return.
 
-        Collection<AppService> serviceCollection = appLocal.getAppServices();
-        Iterator<AppService> it = serviceCollection.iterator();
+        Collection<Resource> serviceCollection = appLocal.getMembers();
+        Iterator<Resource> it = serviceCollection.iterator();
         while (it != null && it.hasNext()) {
-            AppService appService = it.next();
-
-            if (appService.isIsGroup()) {
-                Collection<Service> services = serviceManager.getServiceCluster(
-                    appService.getResourceGroup()).getServices();
-
-                for (Service service : services) {
-
-                    PlatformValue pValue = getPlatformByService(subject, service.getId());
-                    if (!platCollection.contains(pValue)) {
-                        platCollection.add(pValue);
-                    }
-                }
-            } else {
-                Integer serviceId = appService.getService().getId();
+            Resource appService = it.next();
+//TODO how to handle this AppService as a group?
+//            if (appService.isIsGroup()) {
+//                Collection<Service> services = serviceManager.getServiceCluster(
+//                    appService.getResourceGroup()).getServices();
+//
+//                for (Service service : services) {
+//
+//                    PlatformValue pValue = getPlatformByService(subject, service.getId());
+//                    if (!platCollection.contains(pValue)) {
+//                        platCollection.add(pValue);
+//                    }
+//                }
+//            } else {
+                Integer serviceId = appService.getId();
                 PlatformValue pValue = getPlatformByService(subject, serviceId);
                 // Fold duplicate platforms
                 if (!platCollection.contains(pValue)) {
                     platCollection.add(pValue);
                 }
-            }
+            //}
         }
 
         // valuePager converts local/remote interfaces to value objects
@@ -1246,56 +1181,49 @@ public class PlatformManagerImpl implements PlatformManager {
      * @param resources - {@link Collection} of {@link AppdefResource}
      * @param {@link Collection} of {@link AppdefResourceType}
      */
-    private Collection<AppdefResourceType> filterResourceTypes(Collection<AppdefResource> resources) {
-        final Set<AppdefResourceType> resTypes = new HashSet<AppdefResourceType>();
-        for (final AppdefResource o : resources) {
-
-            if (o == null) {
-                continue;
-            }
-            final AppdefResourceType rt = o.getAppdefResourceType();
-            if (rt != null) {
-                resTypes.add(rt);
-            }
+    private Collection<PlatformType> filterResourceTypes(Collection<Platform> resources) {
+        final Set<PlatformType> resTypes = new HashSet<PlatformType>();
+        for (final Platform o : resources) {
+            resTypes.add(o.getPlatformType());
+            
         }
-        final List<AppdefResourceType> rtn = new ArrayList<AppdefResourceType>(resTypes);
-        Collections.sort(rtn, new Comparator<AppdefResourceType>() {
-            private String getName(AppdefResourceType obj) {
-
-                return ((AppdefResourceType) obj).getSortName();
+        final List<PlatformType> rtn = new ArrayList<PlatformType>(resTypes);
+        Collections.sort(rtn, new Comparator<PlatformType>() {
+            private String getName(PlatformType obj) {
+                //TODO sortName?
+                return obj.getName();
+                //return ((AppdefResourceType) obj).getSortName();
 
             }
-
-            public int compare(AppdefResourceType o1, AppdefResourceType o2) {
+            public int compare(PlatformType o1, PlatformType o2) {
                 return getName(o1).compareTo(getName(o2));
             }
         });
         return rtn;
     }
 
-    protected List<Integer> getViewablePlatformPKs(AuthzSubject who) throws PermissionException,
+    private List<Integer> getViewablePlatformPKs(AuthzSubject who) throws PermissionException,
         NotFoundException {
-        // now get a list of all the viewable items
-
-        Operation op = getOperationByName(resourceManager
-            .findResourceTypeByName(AuthzConstants.platformResType),
-            AuthzConstants.platformOpViewPlatform);
-        return permissionManager.findOperationScopeBySubject(who, op.getId());
+        // TODO get a list of all the viewable items
+        return new ArrayList<Integer>();
+        //TODO
+        //OperationType op = getOperationByName(resourceManager
+          //  .findResourceTypeByName(AuthzConstants.platformResType),
+            //AuthzConstants.platformOpViewPlatform);
+        //return permissionManager.findOperationScopeBySubject(who, op.getId());
     }
 
     /**
      * Find an operation by name inside a ResourcetypeValue object
      */
-    protected Operation getOperationByName(ResourceType rtV, String opName)
+    protected OperationType getOperationByName(org.hyperic.hq.inventory.domain.ResourceType rtV, String opName)
         throws PermissionException {
-        Collection<Operation> ops = rtV.getOperations();
-        for (Operation op : ops) {
-            if (op.getName().equals(opName)) {
-                return op;
-            }
-        }
-        throw new PermissionException("Operation: " + opName + " not valid for ResourceType: " +
+        OperationType op = rtV.getOperationType(opName);
+        if(op == null) {
+            throw new PermissionException("Operation: " + opName + " not valid for ResourceType: " +
                                       rtV.getName());
+        }
+        return op;
     }
 
     /**
@@ -1313,14 +1241,14 @@ public class PlatformManagerImpl implements PlatformManager {
 
         try {
 
-            Collection<Platform> platforms = platformDAO.findByType(platTypeId);
+            Collection<Resource> platforms = ResourceType.findResourceType(platTypeId).getResources();
             Collection<Integer> platIds = new ArrayList<Integer>();
 
             // now get the list of PKs
             Collection<Integer> viewable = getViewablePlatformPKs(subject);
             // and iterate over the list to remove any item not in the
             // viewable list
-            for (Platform platform : platforms) {
+            for (Resource platform : platforms) {
 
                 if (viewable.contains(platform.getId())) {
                     // remove the item, user cant see it
@@ -1335,49 +1263,7 @@ public class PlatformManagerImpl implements PlatformManager {
         }
     }
 
-    /**
-     * Get server IDs by server type and platform.
-     * 
-     * 
-     * 
-     * @param subject The subject trying to list servers.
-     * @param pc The page control.
-     * @return A PageList of ServerValue objects representing servers on the
-     *         specified platform that the subject is allowed to view.
-     */
-    @Transactional(readOnly = true)
-    public List<Platform> getPlatformsByType(AuthzSubject subject, String type)
-        throws PermissionException, InvalidAppdefTypeException {
-        try {
-            PlatformType ptype = platformTypeDAO.findByName(type);
-            if (ptype == null) {
-                return new PageList<Platform>();
-            }
-
-            List<Platform> platforms = platformDAO.findByType(ptype.getId());
-            if (platforms.size() == 0) {
-                // There are no viewable platforms
-                return platforms;
-            }
-            // now get the list of PKs
-            Collection<Integer> viewable = getViewablePlatformPKs(subject);
-            // and iterate over the List to remove any item not in the
-            // viewable list
-            for (Iterator<Platform> it = platforms.iterator(); it.hasNext();) {
-                Platform platform = it.next();
-                if (!viewable.contains(platform.getId())) {
-                    // remove the item, user can't see it
-                    it.remove();
-                }
-            }
-
-            return platforms;
-        } catch (NotFoundException e) {
-            // There are no viewable platforms
-            return new PageList<Platform>();
-        }
-    }
-
+   
     /**
      * Get the scope of viewable platforms for a given user
      * @param whoami - the user
@@ -1394,19 +1280,23 @@ public class PlatformManagerImpl implements PlatformManager {
         throws PermissionException, NotFoundException {
         // first find all, based on the sorting attribute passed in, or
         // with no sorting if the page control is null
-        Collection<Platform> platforms;
+        Collection<Resource> platforms;
         // if page control is null, find all platforms
         if (pc == null) {
-            platforms = platformDAO.findAll();
+            platforms = getAllPlatforms();
         } else {
             pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
             int attr = pc.getSortattribute();
             switch (attr) {
                 case SortAttribute.RESOURCE_NAME:
-                    platforms = platformDAO.findAll_orderName(pc.isAscending());
+                    //TODO sorting
+                    //platforms = findAllOrderName(pc.isAscending());
+                    platforms = getAllPlatforms();
                     break;
                 case SortAttribute.CTIME:
-                    platforms = platformDAO.findAll_orderCTime(pc.isAscending());
+                    //TODO sorting
+                    //platforms = findAllOrderCTime(pc.isAscending());
+                    platforms = getAllPlatforms();
                     break;
                 default:
                     throw new NotFoundException("Invalid sort attribute: " + attr);
@@ -1416,141 +1306,67 @@ public class PlatformManagerImpl implements PlatformManager {
         Set<Integer> viewable = new HashSet<Integer>(getViewablePlatformPKs(whoami));
         // and iterate over the List to remove any item not in the
         // viewable list
-        for (Iterator<Platform> i = platforms.iterator(); i.hasNext();) {
-            Platform platform = i.next();
-            if (!viewable.contains(platform.getId())) {
-                // remove the item, user cant see it
-                i.remove();
+        Set<Platform> viewablePlatforms = new HashSet<Platform>();
+        for (Iterator<Resource> i = platforms.iterator(); i.hasNext();) {
+            Resource platform = i.next();
+            if (viewable.contains(platform.getId())) {
+                viewablePlatforms.add(toPlatform(platform));
             }
         }
-        return platforms;
+        return viewablePlatforms;
     }
-
-    /**
-     * Get the platforms that have an IP with the specified address. If no
-     * matches are found, this method DOES NOT throw a
-     * PlatformNotFoundException, rather it returns an empty PageList.
-     * 
-     * 
-     */
-    @Transactional(readOnly = true)
-    public PageList<PlatformValue> findPlatformsByIpAddr(AuthzSubject subject, String addr,
-                                                         PageControl pc) throws PermissionException {
-        Collection<Platform> platforms = platformDAO.findByIpAddr(addr);
-        if (platforms.size() == 0) {
-            return new PageList<PlatformValue>();
-        }
-        return valuePager.seek(platforms, pc);
-    }
-
-    /**
-     * @param subj
-     * @param pType platform type
-     * @param nameRegEx regex which matches either the platform fqdn or the
-     *        resource sortname XXX scottmf need to add permission checking
-     * 
-     */
-    @Transactional(readOnly = true)
-    public List<Platform> findPlatformPojosByTypeAndName(AuthzSubject subj, Integer pType,
-                                                         String regEx) {
-        return platformDAO.findByTypeAndRegEx(pType, regEx);
-    }
-
-    /**
-     * @param subj
-     * @param platformTypeIds List<Integer> of platform type ids
-     * @param hasChildren indicates whether the platform is the parent of a
-     *        network hierarchy
-     * @return a list of {@link Platform}s
-     * 
-     */
-    @Transactional(readOnly = true)
-    @SuppressWarnings("unchecked")
-    public List<Platform> findParentPlatformPojosByNetworkRelation(AuthzSubject subj,
-                                                                   List<Integer> platformTypeIds,
-                                                                   String platformName,
-                                                                   Boolean hasChildren) {
-        List<PlatformType> unsupportedPlatformTypes = new ArrayList<PlatformType>(
-            findUnsupportedPlatformTypes());
-        List<Integer> pTypeIds = new ArrayList<Integer>();
-
-        if (platformTypeIds != null && !platformTypeIds.isEmpty()) {
-            for (Integer pTypeId : platformTypeIds) {
-
-                PlatformType pType = findPlatformType(pTypeId);
-                if (unsupportedPlatformTypes.contains(pType)) {
-                    pTypeIds.add(pTypeId);
-                }
-            }
-            if (pTypeIds.isEmpty()) {
-                return Collections.EMPTY_LIST;
-            }
+    
+    private boolean matchesValueObject(PlatformValue obj, Platform platform) {
+        boolean matches;
+        if (obj.getId() != null) {
+            matches = (obj.getId().intValue() == platform.getId().intValue());
         } else {
-            // default values
-            for (PlatformType pType : unsupportedPlatformTypes) {
-
-                pTypeIds.add(pType.getId());
-            }
+            matches = (platform.getId() == null);
         }
-
-        return platformDAO.findParentByNetworkRelation(pTypeIds, platformName, hasChildren);
-    }
-
-    /**
-     * @param subj
-     * @param platformTypeIds List<Integer> of platform type ids
-     * @return a list of {@link Platform}s
-     * 
-     */
-    @Transactional(readOnly = true)
-    @SuppressWarnings("unchecked")
-    public List<Platform> findPlatformPojosByNoNetworkRelation(AuthzSubject subj,
-                                                               List<Integer> platformTypeIds,
-                                                               String platformName) {
-        List<PlatformType> supportedPlatformTypes = new ArrayList<PlatformType>(
-            findSupportedPlatformTypes());
-        List<Integer> pTypeIds = new ArrayList<Integer>();
-
-        if (platformTypeIds != null && !platformTypeIds.isEmpty()) {
-            for (Integer pTypeId : platformTypeIds) {
-
-                PlatformType pType = findPlatformType(pTypeId);
-                if (supportedPlatformTypes.contains(pType)) {
-                    pTypeIds.add(pTypeId);
-                }
-            }
-            if (pTypeIds.isEmpty()) {
-                return Collections.EMPTY_LIST;
-            }
+        if (obj.getCTime() != null) {
+            matches = (obj.getCTime().floatValue() == (float)platform.getCreationTime());
         } else {
-            // default values
-            for (PlatformType pType : supportedPlatformTypes) {
-
-                pTypeIds.add(pType.getId());
-            }
+            matches = (platform.getCreationTime() == 0);
+        }
+        matches &=
+            (platform.getName() != null ? platform.getName().equals(obj.getName())
+                : (obj.getName() == null)) ;
+        matches &=
+            (platform.getDescription() != null ?
+                platform.getDescription().equals(obj.getDescription())
+                : (obj.getDescription() == null)) ;
+        matches &=
+            (platform.getCertdn() != null ? platform.getCertdn().equals(obj.getCertdn())
+                : (obj.getCertdn() == null)) ;
+        matches &=
+            (platform.getCommentText() != null ?
+                platform.getCommentText().equals(obj.getCommentText())
+                : (obj.getCommentText() == null)) ;
+        matches &=
+            (platform.getCpuCount() != null ?
+                platform.getCpuCount().equals(obj.getCpuCount())
+                : (obj.getCpuCount() == null)) ;
+        matches &=
+            (platform.getFqdn() != null ? platform.getFqdn().equals(obj.getFqdn())
+                : (obj.getFqdn() == null)) ;
+        matches &=
+            (platform.getLocation() != null ?
+                platform.getLocation().equals(obj.getLocation())
+                : (obj.getLocation() == null)) ;
+        // now for the IP's
+        // if there's any in the addedIp's collection, it was messed with
+        // which means the match fails
+        matches &=
+            (obj.getAddedIpValues().size() == 0) ;
+        matches &=
+            (obj.getRemovedIpValues().size() == 0) ;
+        // check to see if we have changed the agent
+        matches &=
+            (platform.getAgent() != null ? platform.getAgent().equals(obj.getAgent())
+                : (obj.getAgent() == null));
+        return matches;
         }
 
-        return platformDAO.findByNoNetworkRelation(pTypeIds, platformName);
-    }
-
-    /**
-     * Get the platforms that have an IP with the specified address.
-     * 
-     * @return a list of {@link Platform}s
-     * 
-     */
-    @Transactional(readOnly = true)
-    public Collection<Platform> findPlatformPojosByIpAddr(String addr) {
-        return platformDAO.findByIpAddr(addr);
-    }
-
-    /**
-     * 
-     */
-    @Transactional(readOnly = true)
-    public Collection<Platform> findDeletedPlatforms() {
-        return platformDAO.findDeletedPlatforms();
-    }
 
     /**
      * Update an existing Platform. Requires all Ip's to have been re-added via
@@ -1559,7 +1375,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * @param existing - the value object for the platform you want to save
      * 
      */
-    public Platform updatePlatformImpl(AuthzSubject subject, PlatformValue existing)
+    private Platform updatePlatformImpl(AuthzSubject subject, PlatformValue existing)
         throws UpdateException, PermissionException, AppdefDuplicateNameException,
         PlatformNotFoundException, AppdefDuplicateFQDNException, ApplicationException {
         permissionManager.checkPermission(subject, existing.getEntityId(),
@@ -1568,31 +1384,31 @@ public class PlatformManagerImpl implements PlatformManager {
         existing.setMTime(new Long(System.currentTimeMillis()));
         trimStrings(existing);
 
-        Platform plat = platformDAO.findById(existing.getId());
-
+        Resource plat = Resource.findResource(existing.getId());
+        Platform platform = toPlatform(plat);
         if (existing.getCpuCount() == null) {
             // cpu count is no longer an option in the UI
-            existing.setCpuCount(plat.getCpuCount());
+            existing.setCpuCount((Integer)plat.getProperty(CPU_COUNT));
         }
 
-        if (plat.matchesValueObject(existing)) {
+        if (matchesValueObject(existing,platform)) {
             log.debug("No changes found between value object and entity");
-            return plat;
+            return platform;
         } else {
             int newCount = existing.getCpuCount().intValue();
-            int prevCpuCount = plat.getCpuCount().intValue();
+            int prevCpuCount = ((Integer)plat.getProperty(CPU_COUNT)).intValue();
             if (newCount > prevCpuCount) {
                 getCounter().addCPUs(newCount - prevCpuCount);
             }
 
             if (!(existing.getName().equals(plat.getName()))) {
-                if (platformDAO.findByName(existing.getName()) != null)
+                if (Resource.findResourceByName(existing.getName()) != null)
                     // duplicate found, throw a duplicate object exception
                     throw new AppdefDuplicateNameException();
             }
 
-            if (!(existing.getFqdn().equals(plat.getFqdn()))) {
-                if (platformDAO.findByFQDN(existing.getFqdn()) != null)
+            if (!(existing.getFqdn().equals(plat.getProperty(FQDN)))) {
+                if (findByFQDN(existing.getFqdn()) != null)
                     // duplicate found, throw a duplicate object exception
                     throw new AppdefDuplicateFQDNException();
             }
@@ -1624,23 +1440,90 @@ public class PlatformManagerImpl implements PlatformManager {
                     // Need to enqueue the ResourceUpdatedZevent if the
                     // agent changed to get the metrics scheduled
                     List<ResourceUpdatedZevent> events = new ArrayList<ResourceUpdatedZevent>();
-                    events.add(new ResourceUpdatedZevent(subject, plat.getEntityId()));
-                    for (Server svr : plat.getServers()) {
+                    events.add(new ResourceUpdatedZevent(subject, platform.getEntityId()));
+                    for (Resource svr : plat.getResourcesFrom(RelationshipTypes.SERVER)) {
 
-                        events.add(new ResourceUpdatedZevent(subject, svr.getEntityId()));
+                        events.add(new ResourceUpdatedZevent(subject, AppdefEntityID.newServerID(svr.getId())));
 
-                        for (Service svc : svr.getServices()) {
+                        for (Resource svc : svr.getResourcesFrom(RelationshipTypes.SERVICE)) {
 
-                            events.add(new ResourceUpdatedZevent(subject, svc.getEntityId()));
+                            events.add(new ResourceUpdatedZevent(subject, AppdefEntityID.newServiceID(svc.getId())));
                         }
                     }
 
                     zeventManager.enqueueEventsAfterCommit(events);
                 }
             }
-            platformDAO.updatePlatform(plat, existing);
-            return plat;
+            updatePlatform(plat, existing);
+            return platform;
         }
+    }
+    
+    private void removeAIp(Collection<Resource> coll, IpValue ipv) {
+        for (Iterator<Resource> i = coll.iterator(); i.hasNext();) {
+            Resource ip = i.next();
+            if (ip.getId().equals(ipv.getId())) {
+                i.remove();
+                ip.remove();
+                return;
+            }
+        }
+    }
+    
+    private void updateAIp(Collection<Resource> coll, IpValue ipv) {
+        for (Iterator<Resource> i = coll.iterator(); i.hasNext();) {
+            Resource ip = i.next();
+            if (ip.getId().equals(ipv.getId())) {
+                updateIp(ip,ipv.getNetmask(),ipv.getMACAddress());
+                return;
+            }
+        }
+    }
+    
+    private void updatePlatform(Resource platform, PlatformValue existing) {
+        // retrieve current list of ips
+        Collection<Resource> curips = getIps(platform);
+      
+        // first remove any which were in the removedIp collection
+        for (Iterator i = existing.getRemovedIpValues().iterator(); i.hasNext();) {
+            IpValue aIp = (IpValue) i.next();
+            if (aIp.idHasBeenSet()) {
+                removeAIp(curips, aIp);
+            }
+        }
+        Collection ips = existing.getAddedIpValues();
+        // now get any ips which were in the ipValues array
+        for (int i = 0; i < existing.getIpValues().length; i++) {
+            IpValue aIp = existing.getIpValues()[i];
+            if (!(ips.contains(aIp))) {
+                ips.add(aIp);
+            }
+        }
+        for (Iterator i = ips.iterator(); i.hasNext();) {
+            IpValue aIp = (IpValue) i.next();
+            if (aIp.idHasBeenSet()) {
+                updateAIp(curips, aIp);
+            } else {
+                // looks like its a new one
+                addIp(toPlatform(platform), aIp.getAddress(), aIp.getNetmask(), aIp.getMACAddress());
+            }
+        }
+        // finally update the platform
+        platform.setDescription(existing.getDescription());
+        platform.setProperty(COMMENT_TEXT,existing.getCommentText());
+        platform.setModifiedBy(existing.getModifiedBy());
+        platform.setLocation(existing.getLocation());
+        platform.setProperty(CPU_COUNT,existing.getCpuCount());
+        platform.setProperty(CERT_DN,existing.getCertdn());
+        platform.setProperty(FQDN,existing.getFqdn());
+        platform.setName(existing.getName());
+        
+        // if there is a agent
+        if (existing.getAgent() != null) {
+            // get the agent token and set the agent to the platform
+            platform.setAgent(existing.getAgent());
+        }
+        platform.merge();
     }
 
     /**
@@ -1656,92 +1539,15 @@ public class PlatformManagerImpl implements PlatformManager {
         return updatePlatformImpl(subject, existing);
     }
 
-    /**
-     * Private method to validate a new PlatformValue object
-     * 
-     * @throws ValidationException
-     */
-    private void validateNewPlatform(PlatformValue pv) throws ValidationException {
-        String msg = null;
-        // first check if its new
-        if (pv.idHasBeenSet()) {
-            msg = "This platform is not new. It has id: " + pv.getId();
-        }
-        // else if(someotherthing) ...
-
-        // Now check if there's a msg set and throw accordingly
-        if (msg != null) {
-            throw new ValidationException(msg);
-        }
-    }
-
-    /**
-     * Create the Authz resource and verify that the subject has the
-     * createPlatform permission.
-     * 
-     * @param subject - the user creating
-     */
-    private void createAuthzPlatform(AuthzSubject subject, Platform platform)
-        throws PermissionException, NotFoundException {
-        log.debug("Begin Authz CreatePlatform");
-        // check to make sure the user has createPlatform permission
-        // on the root resource type
-        permissionManager.checkCreatePlatformPermission(subject);
-
-        ResourceType platProtoType = resourceManager
-            .findResourceTypeByName(AuthzConstants.platformPrototypeTypeName);
-        Resource proto = resourceManager.findResourceByInstanceId(platProtoType, platform
-            .getPlatformType().getId());
-        log.debug("User has permission to create platform. " + "Adding AuthzResource");
-        Resource resource = resourceManager.createResource(subject, resourceManager
-            .findResourceTypeByName(AuthzConstants.platformResType), proto, platform.getId(),
-            platform.getName(), false, null);
-        platform.setResource(resource);
-    }
-
-    /**
-     * DevNote: This method was refactored out of updatePlatformTypes. It does
-     * not work.
-     * 
-     * 
-     */
-    public void deletePlatformType(PlatformType pt) throws VetoException {
-
-        Resource proto = resourceManager.findResourceByInstanceId(
-            AuthzConstants.authzPlatformProto, pt.getId());
-        AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-
-        try {
-            log.debug("Removing PlatformType: " + pt.getName());
-
-            resourceGroupManager.removeGroupsCompatibleWith(proto);
-
-            // Remove all platforms
-            for (Platform platform : pt.getPlatforms()) {
-
-                try {
-                    removePlatform(overlord, platform);
-                } catch (PlatformNotFoundException e) {
-                    assert false : "Delete based on a platform should not "
-                                   + "result in PlatformNotFoundException";
-                }
-            }
-        } catch (PermissionException e) {
-            assert false : "Overlord should not run into PermissionException";
-        }
-
+   
+    private void deletePlatformType(ResourceType pt) throws VetoException {
         // Need to remove all server types, too
-
-        for (ServerType st : pt.getServerTypes()) {
-            serverManager.deleteServerType(st, overlord, resourceGroupManager, resourceManager);
+        for (ResourceType st : pt.getResourceTypesFrom(RelationshipTypes.SERVER_TYPE)) {
+            st.remove();
         }
-
-        // TODO: Need to remove the Resource prototype associated with this
-        // platform.
-        platformTypeDAO.remove(pt);
-
-        resourceManager.removeResource(overlord, proto);
+        pt.remove();
     }
+    
 
     /**
      * Update platform types
@@ -1756,9 +1562,9 @@ public class PlatformManagerImpl implements PlatformManager {
             infoMap.put(infos[i].getName(), infos[i]);
         }
 
-        Collection<PlatformType> curPlatforms = platformTypeDAO.findByPlugin(plugin);
+        Collection<ResourceType> curPlatforms = ResourceType.findByPlugin(plugin);
 
-        for (PlatformType ptlocal : curPlatforms) {
+        for (ResourceType ptlocal : curPlatforms) {
 
             String localName = ptlocal.getName();
             PlatformTypeInfo pinfo = (PlatformTypeInfo) infoMap.remove(localName);
@@ -1786,13 +1592,47 @@ public class PlatformManagerImpl implements PlatformManager {
 
     public PlatformType createPlatformType(String name, String plugin) throws NotFoundException {
         log.debug("Creating new PlatformType: " + name);
-        Resource prototype = resourceManager.findRootResource();
-        AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-        PlatformType pt = platformTypeDAO.create(name, plugin);
-        resourceManager.createResource(overlord, resourceManager
-            .findResourceTypeByName(AuthzConstants.platformPrototypeTypeName), prototype, pt
-            .getId(), pt.getName(), false, null);
-        return pt;
+        ResourceType pt = new ResourceType();
+        pt.setName(name);
+        pt.persist();
+        pt.setPlugin(pluginDAO.findByName(plugin));
+        Set<PropertyType> propTypes = new HashSet<PropertyType>();
+        propTypes.add(createPlatformPropertyType(CERT_DN, pt));
+        propTypes.add(createPlatformPropertyType(FQDN, pt));
+        propTypes.add(createPlatformPropertyType(COMMENT_TEXT, pt));
+        propTypes.add(createPlatformPropertyType(CPU_COUNT, pt));
+        //TODO add method?
+        pt.setPropertyTypes(propTypes);
+        ResourceType.findRootResourceType().relateTo(pt, RelationshipTypes.PLATFORM_TYPE);
+        return toPlatformType(pt);
+    }
+    
+    private PropertyType createPlatformPropertyType(String propName, ResourceType platformType) {
+        PropertyType propType = new PropertyType();
+        propType.setName(propName);
+        propType.setDescription(propName);
+        propType.persist();
+        return propType;
+    }
+    
+    private void updateWithAI(Platform platform, AIPlatformValue aiplatform,String owner) {
+        Resource resource = Resource.findResource(platform.getId());
+        if (aiplatform.getName() != null
+            && !aiplatform.getName().equals(platform.getName())) {
+            resource.setName(aiplatform.getName());
+                 // if the fqdn and the name are currently equal 
+                    // but only fqdn is changing,
+                  // then the name should change as well
+         } else if (!platform.getFqdn().equals(aiplatform.getFqdn())
+                   && platform.getName().equals(platform.getFqdn())) {
+             resource.setName(aiplatform.getFqdn());
+         }
+         resource.setProperty(CERT_DN,aiplatform.getCertdn());
+         resource.setProperty(FQDN,aiplatform.getFqdn());
+         resource.setModifiedBy(owner);
+         resource.setProperty(CPU_COUNT,aiplatform.getCpuCount());
+         resource.setDescription(aiplatform.getDescription());
+         resource.merge();
     }
 
     /**
@@ -1812,7 +1652,7 @@ public class PlatformManagerImpl implements PlatformManager {
             throw new PlatformNotFoundException("Platform not found with either FQDN: " + fqdn +
                                                 " nor CertDN: " + certdn);
         }
-        int prevCpuCount = platform.getCpuCount().intValue();
+        int prevCpuCount = platform.getCpuCount();
         Integer count = aiplatform.getCpuCount();
         if ((count != null) && (count.intValue() > prevCpuCount)) {
             getCounter().addCPUs(aiplatform.getCpuCount().intValue() - prevCpuCount);
@@ -1821,7 +1661,7 @@ public class PlatformManagerImpl implements PlatformManager {
         // Get the FQDN before we update
         String prevFqdn = platform.getFqdn();
 
-        platform.updateWithAI(aiplatform, subj.getName(), platform.getResource());
+        updateWithAI(platform,aiplatform, subj.getName());
 
         // If FQDN has changed, we need to update servers' auto-inventory tokens
         if (!prevFqdn.equals(platform.getFqdn())) {
@@ -1835,11 +1675,11 @@ public class PlatformManagerImpl implements PlatformManager {
         }
 
         // need to check if IPs have changed, if so update Agent
-        updateAgentIps(subj, aiplatform, platform);
+        updateAgentIps(subj, aiplatform, Resource.findResource(platform.getId()));
 
     }
 
-    private void updateAgentIps(AuthzSubject subj, AIPlatformValue aiplatform, Platform platform) {
+    private void updateAgentIps(AuthzSubject subj, AIPlatformValue aiplatform, Resource platform) {
         List<AIIpValue> ips = Arrays.asList(aiplatform.getAIIpValues());
 
         Agent agent;
@@ -1909,18 +1749,27 @@ public class PlatformManagerImpl implements PlatformManager {
         }
 
     }
+    
+    private Collection<Resource> getServers(Resource platform) {
+        return platform.getResourcesFrom(RelationshipTypes.SERVER);
+    }
+    
+    private Collection<Resource> getServices(Resource server) {
+        return server.getResourcesFrom(RelationshipTypes.SERVICE);
+    }
 
-    private void enableMeasurements(AuthzSubject subj, Platform platform) {
-        List<AppdefEntityID> eids = new ArrayList<AppdefEntityID>();
-        eids.add(platform.getEntityId());
-        Collection<Server> servers = platform.getServers();
-        for (Server server : servers) {
 
-            eids.add(server.getEntityId());
-            Collection<Service> services = server.getServices();
-            for (Service service : services) {
+    private void enableMeasurements(AuthzSubject subj, Resource platform) {
+        List<Integer> eids = new ArrayList<Integer>();
+        eids.add(platform.getId());
+        Collection<Resource> servers = getServers(platform);
+        for (Resource server : servers) {
 
-                eids.add(service.getEntityId());
+            eids.add(server.getId());
+            Collection<Resource> services = getServices(server);
+            for (Resource service : services) {
+
+                eids.add(service.getId());
             }
         }
         AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
@@ -1974,6 +1823,14 @@ public class PlatformManagerImpl implements PlatformManager {
             }
         }
     }
+    
+    private Ip toIp(Resource resource) {
+        Ip ip = new Ip();
+        ip.setAddress((String)resource.getProperty(IP_ADDRESS));
+        ip.setMacAddress((String)resource.getProperty(MAC_ADDRESS));
+        ip.setNetmask((String)resource.getProperty(NETMASK));
+        return ip;
+    }
 
     /**
      * Add an IP to a platform
@@ -1981,7 +1838,13 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      */
     public Ip addIp(Platform platform, String address, String netmask, String macAddress) {
-        return platform.addIp(address, netmask, macAddress);
+        Resource ip = new Resource();
+        ip.setProperty(IP_ADDRESS,address);
+        ip.setProperty(NETMASK,netmask);
+        ip.setProperty(MAC_ADDRESS,macAddress);
+        ip.persist();
+        Resource.findResource(platform.getId()).relateTo(ip, RelationshipTypes.IP);
+        return toIp(ip);  
     }
 
     /**
@@ -1990,7 +1853,21 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      */
     public Ip updateIp(Platform platform, String address, String netmask, String macAddress) {
-        return platform.updateIp(address, netmask, macAddress);
+        Resource resource = Resource.findResource(platform.getId());
+        Collection<Resource> ips = resource.getResourcesFrom(RelationshipTypes.IP);
+        for(Resource ip: ips) {
+            if(ip.getProperty(IP_ADDRESS).equals(address)) {
+                updateIp(ip,netmask,macAddress);
+                return toIp(ip);
+            }
+        }
+        return null;
+    }
+    
+    private void updateIp(Resource ip, String netmask, String macAddress) {
+        ip.setProperty(NETMASK,netmask);
+        ip.setProperty(MAC_ADDRESS,macAddress);
+        ip.merge();
     }
 
     /**
@@ -1999,9 +1876,13 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      */
     public void removeIp(Platform platform, String address, String netmask, String macAddress) {
-        Ip ip = platform.removeIp(address, netmask, macAddress);
-        if (ip != null) {
-            platformDAO.remove(ip);
+        Resource resource = Resource.findResource(platform.getId());
+        Collection<Resource> ips = resource.getResourcesFrom(RelationshipTypes.IP);
+        for(Resource ip: ips) {
+            if(ip.getProperty(IP_ADDRESS).equals(address) && ip.getProperty(NETMASK).equals(netmask) && 
+                ip.getProperty(MAC_ADDRESS).equals(macAddress)) {
+                ip.remove();
+            }
         }
     }
 
@@ -2014,7 +1895,12 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     @Transactional(readOnly = true)
     public List<Object[]> getPlatformTypeCounts() {
-        return platformDAO.getPlatformTypeCounts();
+        Collection<ResourceType> platformTypes = findAllPlatformResourceTypes();
+        List<Object[]> counts = new ArrayList<Object[]>();
+        for(ResourceType platformType: platformTypes) {
+            counts.add(new Object[]{platformType.getName(),platformType.getResources().size()});
+        }
+        return counts;
     }
 
     /**
@@ -2022,15 +1908,53 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     @Transactional(readOnly = true)
     public Number getPlatformCount() {
-        return platformDAO.getPlatformCount();
+        return getAllPlatforms().size();
     }
+    
+    
 
+    public List<Platform> getPlatformsByType(AuthzSubject subject, String platformTypeName) {
+        // TODO perm checking?
+        ResourceType platType = ResourceType.findResourceTypeByName(platformTypeName);
+        Collection<Resource> platforms = platType.getResources();
+        List<Platform> platList = new ArrayList<Platform>(platforms.size());
+        for(Resource platform: platforms) {
+            platList.add(toPlatform(platform));
+        }
+        return platList;
+    }
+    
     /**
-     * 
+     * Get a list of all the entities which can be serviced by an Agent.
      */
     @Transactional(readOnly = true)
-    public Number getCpuCount() {
-        return platformDAO.getCpuCount();
+    public ResourceTree getEntitiesForAgent(AuthzSubject subject, Agent agt)
+        throws AgentNotFoundException, PermissionException {
+
+        Collection<Platform> plats  = new HashSet<Platform>();
+        Collection<Resource> resources = getAllPlatforms();
+        for(Resource resource: resources) {
+            if(resource.getAgent().equals(agt)) {
+                plats.add(toPlatform(resource));
+            }
+        }
+        if (plats.size() == 0) {
+            return new ResourceTree();
+        }
+        AppdefEntityID[] platIds = new AppdefEntityID[plats.size()];
+        int i = 0;
+        for (Platform plat : plats) {
+            platIds[i] = AppdefEntityID.newPlatformID(plat.getId());
+            i++;
+        }
+
+        ResourceTreeGenerator generator = Bootstrap.getBean(ResourceTreeGenerator.class);
+        generator.setSubject(subject);
+        try {
+            return generator.generate(platIds, ResourceTreeGenerator.TRAVERSE_UP);
+        } catch (AppdefEntityNotFoundException exc) {
+            throw new SystemException("Internal inconsistancy finding " + "resources for agent");
+        }
     }
 
     @PostConstruct

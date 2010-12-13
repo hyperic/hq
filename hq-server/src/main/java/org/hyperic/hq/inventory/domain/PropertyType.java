@@ -1,22 +1,92 @@
 package org.hyperic.hq.inventory.domain;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class PropertyType implements IdentityAware, PersistenceAware<PropertyType> {
+import javax.annotation.Resource;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Transient;
+import javax.persistence.Version;
+import javax.validation.constraints.NotNull;
+
+import org.hibernate.annotations.GenericGenerator;
+import org.neo4j.graphdb.Node;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.datastore.graph.annotation.GraphProperty;
+import org.springframework.datastore.graph.annotation.NodeEntity;
+import org.springframework.datastore.graph.annotation.RelatedTo;
+import org.springframework.datastore.graph.api.Direction;
+import org.springframework.datastore.graph.neo4j.finder.FinderFactory;
+import org.springframework.transaction.annotation.Transactional;
+
+@Entity
+@Configurable
+@NodeEntity(partial = true)
+public class PropertyType {
+
+    @GraphProperty
+    @Transient
     private String defaultValue;
+
+    @NotNull
+    @GraphProperty
+    @Transient
     private String description;
+
+    @PersistenceContext
+    transient EntityManager entityManager;
+
+    @Resource
+    transient FinderFactory finderFactory;
+
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1") 
+    @Column(name = "id")
     private Integer id;
+
+    @NotNull
+    @GraphProperty
+    @Transient
     private String name;
+
+    @GraphProperty
+    @Transient
     private Boolean optional;
+
+    @ManyToOne
+    @NotNull
+    @Transient
+    @RelatedTo(type = "HAS_PROPERTIES", direction = Direction.INCOMING, elementClass = ResourceType.class)
     private ResourceType resourceType;
+
+    @GraphProperty
+    @Transient
     private Boolean secret;
+
+    @Version
+    @Column(name = "version")
     private Integer version;
 
     public PropertyType() {
+
     }
-    
+
+    public PropertyType(Node n) {
+        setUnderlyingState(n);
+    }
+
+    @Transactional
     public void flush() {
+        if (this.entityManager == null)
+            this.entityManager = entityManager();
+        this.entityManager.flush();
     }
 
     public String getDefaultValue() {
@@ -51,14 +121,35 @@ public class PropertyType implements IdentityAware, PersistenceAware<PropertyTyp
         return this.version;
     }
 
+    @Transactional
     public PropertyType merge() {
-    	return this;
+        if (this.entityManager == null)
+            this.entityManager = entityManager();
+        PropertyType merged = this.entityManager.merge(this);
+        this.entityManager.flush();
+        return merged;
     }
 
+    @Transactional
     public void persist() {
+        if (this.entityManager == null)
+            this.entityManager = entityManager();
+        this.entityManager.persist(this);
+        // TODO this call appears to be necessary to get PropertyType populated
+        // with its underlying node
+        getId();
     }
 
+    @Transactional
     public void remove() {
+        if (this.entityManager == null)
+            this.entityManager = entityManager();
+        if (this.entityManager.contains(this)) {
+            this.entityManager.remove(this);
+        } else {
+            PropertyType attached = this.entityManager.find(this.getClass(), this.id);
+            this.entityManager.remove(attached);
+        }
     }
 
     public void setDefaultValue(String defaultValue) {
@@ -106,19 +197,32 @@ public class PropertyType implements IdentityAware, PersistenceAware<PropertyTyp
         return sb.toString();
     }
 
-    public static int count() {
-    	return 0;
+    public static int countPropertyTypes() {
+        return entityManager().createQuery("select count(o) from PropertyType o", Integer.class)
+            .getSingleResult();
     }
-    
+
+    public static final EntityManager entityManager() {
+        EntityManager em = new PropertyType().entityManager;
+        if (em == null)
+            throw new IllegalStateException(
+                "Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)");
+        return em;
+    }
+
     public static List<PropertyType> findAllPropertyTypes() {
-    	return new ArrayList<PropertyType>();
+        return entityManager().createQuery("select o from PropertyType o", PropertyType.class)
+            .getResultList();
     }
 
     public static PropertyType findPropertyType(Integer id) {
-    	return new PropertyType();
+        if (id == null)
+            return null;
+        return entityManager().find(PropertyType.class, id);
     }
 
-    public static List<PropertyType> find(Integer firstResult, Integer maxResults) {
-    	return new ArrayList<PropertyType>();
+    public static List<PropertyType> findPropertyTypeEntries(int firstResult, int maxResults) {
+        return entityManager().createQuery("select o from PropertyType o", PropertyType.class)
+            .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
     }
 }

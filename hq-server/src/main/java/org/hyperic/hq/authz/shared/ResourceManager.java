@@ -31,17 +31,14 @@ import java.util.Map;
 
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceEdge;
-import org.hyperic.hq.authz.server.session.ResourceRelation;
 import org.hyperic.hq.authz.server.session.ResourceSortField;
-import org.hyperic.hq.authz.server.session.ResourceType;
-import org.hyperic.hq.bizapp.server.session.ResourceCleanupEventListener;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceRelation;
+import org.hyperic.hq.inventory.domain.ResourceType;
+import org.hyperic.hq.inventory.domain.ResourceTypeRelation;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -58,11 +55,6 @@ public interface ResourceManager {
     public ResourceType findResourceTypeByName(String name) throws NotFoundException;
 
     /**
-     * Find a resource, acting as a resource prototype.
-     */
-    public Resource findResourcePrototypeByName(String name);
-
-    /**
      * Check if there are any resources of a given type
      */
     public boolean resourcesExistOfType(String typeName);
@@ -76,8 +68,7 @@ public interface ResourceManager {
     /**
      * Create a resource.
      */
-    public Resource createResource(AuthzSubject owner, ResourceType rt, Resource prototype,
-                                   Integer instanceId, String name, boolean system, Resource parent);
+    public Resource createResource(AuthzSubject owner, ResourceType rt, String name, boolean system, Resource parent);
 
     /**
      * Move a resource. It is the responsibility of the caller (AppdefManager)
@@ -98,21 +89,6 @@ public interface ResourceManager {
      */
     public Number getResourceTypeCount();
 
-    /**
-     * Get the Resource entity associated with this ResourceType.
-     * @param type This ResourceType.
-     */
-    public Resource getResourceTypeResource(Integer typeId);
-
-    /**
-     * Find the Resource that has the given instance ID and ResourceType.
-     * @param type The ResourceType of the Resource you're looking for.
-     * @param instanceId Your ID for the resource you're looking for.
-     * @return The value-object of the Resource of the given ID.
-     */
-    public Resource findResourceByInstanceId(ResourceType type, Integer instanceId);
-
-    public Resource findResourceByInstanceId(Integer typeId, Integer instanceId);
 
     /**
      * Find's the root (id=0) resource
@@ -121,36 +97,6 @@ public interface ResourceManager {
 
     public Resource findResourceById(Integer id);
 
-    /**
-     * Find the Resource that has the given instance ID and ResourceType name.
-     * @param type The ResourceType of the Resource you're looking for.
-     * @param instanceId Your ID for the resource you're looking for.
-     * @return The value-object of the Resource of the given ID.
-     */
-    public Resource findResourceByTypeAndInstanceId(String type, Integer instanceId);
-
-    public Resource findResource(AppdefEntityID aeid);
-
-    public Resource findResourcePrototype(AppdefEntityTypeID id);
-
-    /**
-     * Removes the specified resource by nulling out its resourceType. Will not
-     * null the resourceType of the resource which is passed in. These resources
-     * need to be cleaned up eventually by
-     * {@link ResourceCleanupEventListener.removeDeletedResources}. This may be done in the
-     * background via zevent by issuing a {@link ResourcesCleanupZevent}.
-     * @see {@link ResourceCleanupEventListener.removeDeletedResources}
-     * @see {@link ResourcesCleanupZevent}
-     * @param r {@link Resource} resource to be removed.
-     * @param nullResourceType tells the method to null out the resourceType
-     * @return AppdefEntityID[] - an array of the resources (including children)
-     *         deleted
-     */
-    public AppdefEntityID[] removeResourcePerms(AuthzSubject subj, Resource r,
-                                                boolean nullResourceType) throws VetoException,
-        PermissionException;
-
-    public void _removeResource(AuthzSubject subj, Resource r, boolean nullResourceType);
 
     public void removeResource(AuthzSubject subject, Resource r) throws VetoException;
 
@@ -201,34 +147,9 @@ public interface ResourceManager {
      * @return a list of {@link Resource}s
      */
     public List<Resource> findResourcesOfType(int resourceType, PageInfo pInfo);
-
-    /**
-     * Find all the resources which have the specified prototype
-     * @return a list of {@link Resource}s
-     */
-    public List<Resource> findResourcesOfPrototype(Resource proto, PageInfo pInfo);
-
-    /**
-     * Get all resources which are prototypes of platforms, servers, and
-     * services and have a resource of that type in the inventory.
-     */
-    public List<Resource> findAppdefPrototypes();
-
-    /**
-     * Get all resources which are prototypes of platforms, servers, and
-     * services.
-     */
-    public List<Resource> findAllAppdefPrototypes();
-
-    /**
-     * Get viewable service resources. Service resources include individual
-     * cluster unassigned services as well as service clusters.
-     * @param subject
-     * @param pc control
-     * @return PageList of resource values
-     */
-    public PageList<Resource> findViewableSvcResources(AuthzSubject subject, String resourceName,
-                                                       PageControl pc);
+    
+    //TODO remove this method - ResourceManager (if kept) should have not knowledge of AppdefEntityIDs
+    Resource findResource(AppdefEntityID entityID);
 
     /**
      * Gets all the Resources owned by the given Subject.
@@ -237,66 +158,36 @@ public interface ResourceManager {
      */
     public Collection<Resource> findResourceByOwner(AuthzSubject owner);
 
-    Collection<ResourceEdge> findResourceEdges(ResourceRelation relation, List<Resource> parentList);
+    Collection<ResourceRelation> findResourceEdges(ResourceTypeRelation relation, List<Resource> parentList);
 
-    public Collection<ResourceEdge> findResourceEdges(ResourceRelation relation, Resource parent);
+    public Collection<ResourceRelation> findResourceEdges(ResourceTypeRelation relation, Resource parent);
 
     public boolean isResourceChildOf(Resource parent, Resource child);
 
-    public boolean hasChildResourceEdges(Resource resource, ResourceRelation relation);
+    public boolean hasChildResourceEdges(Resource resource, ResourceTypeRelation relation);
 
-    public int getDescendantResourceEdgeCount(Resource resource, ResourceRelation relation);
+    public int getDescendantResourceEdgeCount(Resource resource, ResourceTypeRelation relation);
 
-    public Collection<ResourceEdge> findChildResourceEdges(Resource resource,
-                                                           ResourceRelation relation);
+    public Collection<ResourceRelation> findChildResourceEdges(Resource resource,
+                                                           ResourceTypeRelation relation);
 
-    public Collection<ResourceEdge> findDescendantResourceEdges(Resource resource,
-                                                                ResourceRelation relation);
+    public Collection<ResourceRelation> findDescendantResourceEdges(Resource resource,
+                                                                ResourceTypeRelation relation);
 
-    public Collection<ResourceEdge> findAncestorResourceEdges(Resource resource,
-                                                              ResourceRelation relation);
+    public Collection<ResourceRelation> findAncestorResourceEdges(Resource resource,
+                                                              ResourceTypeRelation relation);
 
-    public Collection<ResourceEdge> findResourceEdgesByName(String name, ResourceRelation relation);
+    public Collection<ResourceRelation> findResourceEdgesByName(String name, ResourceTypeRelation relation);
 
-    public ResourceEdge getParentResourceEdge(Resource resource, ResourceRelation relation);
+    public ResourceRelation getParentResourceEdge(Resource resource, ResourceTypeRelation relation);
 
-    public boolean hasResourceRelation(Resource resource, ResourceRelation relation);
+    public boolean hasResourceTypeRelation(Resource resource, ResourceTypeRelation relation);
 
-    public List<ResourceEdge> findResourceEdges(ResourceRelation relation, Integer resourceId,
-                                                List<Integer> platformTypeIds, String platformName);
 
-    public void createResourceEdges(AuthzSubject subject, ResourceRelation relation,
-                                    AppdefEntityID parent, AppdefEntityID[] children)
-        throws PermissionException, ResourceEdgeCreateException;
-
-    public void createResourceEdges(AuthzSubject subject, ResourceRelation relation,
-                                    AppdefEntityID parent, AppdefEntityID[] children,
-                                    boolean deleteExisting) throws PermissionException,
-        ResourceEdgeCreateException;
-
-    public void removeResourceEdges(AuthzSubject subject, ResourceRelation relation,
-                                    AppdefEntityID parent, AppdefEntityID[] children)
+    public void removeResourceEdges(AuthzSubject subject, ResourceTypeRelation relation, Resource parent)
         throws PermissionException;
 
-    public void removeResourceEdges(AuthzSubject subject, ResourceRelation relation, Resource parent)
-        throws PermissionException;
+    public ResourceTypeRelation getContainmentRelation();
 
-    public ResourceRelation getContainmentRelation();
 
-    ResourceRelation getNetworkRelation();
-
-    void removeAuthzResource(AuthzSubject subject, AppdefEntityID aeid, Resource r)
-        throws PermissionException, VetoException;
-
-    public String getAppdefEntityName(AppdefEntityID appEnt);
-    
-    /**
-     * @return the resource count with prototype of
-     *         {@link AuthzConstants.authzPlatform} minus resources with the
-     *         prototype of
-     *         {@link AuthConstants.platformPrototypeVmwareVsphereVm}
-     */
-    public int getPlatformCountMinusVsphereVmPlatforms();
-    
-    ResourceRelation getVirtualRelation();
 }

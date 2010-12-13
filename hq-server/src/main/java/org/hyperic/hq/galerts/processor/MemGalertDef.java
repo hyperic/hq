@@ -36,12 +36,12 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.galerts.server.session.ExecutionReason;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategy;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GtriggerInfo;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 
 
 /**

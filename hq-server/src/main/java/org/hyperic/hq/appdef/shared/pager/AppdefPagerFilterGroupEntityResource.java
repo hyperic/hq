@@ -32,11 +32,10 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 
 /** Pager Processor filter that filters object instances of
 *   AppdefEntityID based on three contextual criteria: group type
@@ -244,7 +243,7 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                 ResourceGroup group =  Bootstrap.getBean(ResourceGroupManager.class)
                     .findResourceGroupById(_subject, id.getId()); 
-                return _resourceType == group.getGroupEntResType().intValue();
+                return _resourceType == Bootstrap.getBean(ResourceGroupManager.class).getGroupEntResType(group);
             default:
                 return false;
         }

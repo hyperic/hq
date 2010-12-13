@@ -43,7 +43,6 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.Application;
-import org.hyperic.hq.appdef.server.session.ApplicationDAO;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
@@ -58,15 +57,13 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
+import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDeleteRequestedEvent;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -75,6 +72,8 @@ import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.MaintenanceEvent;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
@@ -117,7 +116,6 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
     private ResourceManager resourceManager;
     private ResourceGroupManager resourceGroupManager;
-    private ApplicationDAO applicationDAO;
     private PermissionManager permissionManager;
     private AuthzSubjectManager authzSubjectManager;
     private ConfigManager configManager;
@@ -126,21 +124,21 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     private MeasurementTemplateDAO measurementTemplateDAO;
     private AgentManager agentManager;
     private AgentMonitor agentMonitor;
+    private ApplicationManager applicationManager;
     private ApplicationContext applicationContext;
 
     @Autowired
     public MeasurementManagerImpl(ResourceManager resourceManager,
                                   ResourceGroupManager resourceGroupManager,
-                                  ApplicationDAO applicationDAO,
                                   PermissionManager permissionManager,
                                   AuthzSubjectManager authzSubjectManager,
                                   ConfigManager configManager, MetricDataCache metricDataCache,
                                   MeasurementDAO measurementDAO,
                                   MeasurementTemplateDAO measurementTemplateDAO,
-                                  AgentManager agentManager, AgentMonitor agentMonitor) {
+                                  AgentManager agentManager, AgentMonitor agentMonitor, 
+                                  ApplicationManager applicationManager) {
         this.resourceManager = resourceManager;
         this.resourceGroupManager = resourceGroupManager;
-        this.applicationDAO = applicationDAO;
         this.permissionManager = permissionManager;
         this.authzSubjectManager = authzSubjectManager;
         this.configManager = configManager;
@@ -149,6 +147,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         this.measurementTemplateDAO = measurementTemplateDAO;
         this.agentManager = agentManager;
         this.agentMonitor = agentMonitor;
+        this.applicationManager = applicationManager;
     }
 
     // TODO: Resolve circular dependency
@@ -543,10 +542,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             Integer[] tids = templs.toArray(new Integer[0]);
             Resource resource = resourceManager.findResourceById(resId);
             // checkModifyPermission(subject.getId(), appId);
-            Integer resTypeId = resource.getResourceType().getId();
-            if (resTypeId.equals(AuthzConstants.authzGroup)) {
-                ResourceGroup grp = resourceGroupManager.findResourceGroupById(subject, resource
-                    .getInstanceId());
+            if (resource instanceof ResourceGroup) {
+                ResourceGroup grp = (ResourceGroup) resource;
                 Collection<Resource> mems = resourceGroupManager.getMembers(grp);
                 for (Resource res : mems) {
                     rtn.put(res, measurementDAO.findByTemplatesForInstance(tids, res));
@@ -835,7 +832,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 resource = (Resource) o;
             } else if (o instanceof ResourceGroup) {
                 ResourceGroup grp = (ResourceGroup) o;
-                resource = grp.getResource();
+                resource = grp;
                 rtn.put(resource.getId(), measurementDAO.findAvailMeasurements(grp));
                 continue;
             } else if (o instanceof AppdefResourceValue) {
@@ -852,12 +849,12 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             } catch (ObjectNotFoundException e) {
                 continue;
             }
-            final ResourceType type = resource.getResourceType();
-            if (type.getId().equals(AuthzConstants.authzGroup)) {
-                ResourceGroup grp = resourceGroupManager.getResourceGroupByResource(resource);
+          
+            if (resource instanceof ResourceGroup && !(applicationManager.isApplication((ResourceGroup)resource))) {
+                ResourceGroup grp = (ResourceGroup)resource;
                 rtn.put(resource.getId(), measurementDAO.findAvailMeasurements(grp));
                 continue;
-            } else if (type.getId().equals(AuthzConstants.authzApplication)) {
+            } else if (resource instanceof ResourceGroup && (applicationManager.isApplication((ResourceGroup)resource))) {
                 rtn.putAll(getAvailMeas(resource));
                 continue;
             }
@@ -877,7 +874,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     private Application findApplicationById(AuthzSubject subject, Integer id)
         throws ApplicationNotFoundException, PermissionException {
         try {
-            Application app = applicationDAO.findById(id);
+            
+            Application app = applicationManager.findApplicationById(subject,id);
             permissionManager.checkViewPermission(subject, app.getEntityId());
             return app;
         } catch (ObjectNotFoundException e) {
@@ -886,13 +884,12 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     }
 
     private final Map<Integer, List<Measurement>> getAvailMeas(Resource application) {
-        final Integer typeId = application.getResourceType().getId();
-        if (!typeId.equals(AuthzConstants.authzApplication)) {
+        if (! (application instanceof ResourceGroup) || !(applicationManager.isApplication((ResourceGroup)application))) {
             return Collections.emptyMap();
         }
         final AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
         try {
-            final Application app = findApplicationById(overlord, application.getInstanceId());
+            final Application app = findApplicationById(overlord, application.getId());
             final Collection<AppService> appServices = app.getAppServices();
             final List<Resource> resources = new ArrayList<Resource>(appServices.size());
             for (AppService appService : appServices) {
@@ -900,7 +897,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             }
             return getAvailMeasurements(resources);
         } catch (ApplicationNotFoundException e) {
-            log.warn("cannot find Application by id = " + application.getInstanceId());
+            log.warn("cannot find Application by id = " + application.getId());
         } catch (PermissionException e) {
             log.error("error finding application using overlord", e);
         }
@@ -917,7 +914,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             return Collections.singletonList(service.getResource());
         }
         final ResourceGroup group = appService.getResourceGroup();
-        final Resource resource = group.getResource();
+        final Resource resource = group;
         if (resource == null || resource.isInAsyncDeleteState()) {
             return Collections.emptyList();
         }

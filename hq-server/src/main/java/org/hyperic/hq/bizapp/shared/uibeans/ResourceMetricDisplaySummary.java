@@ -27,7 +27,7 @@ package org.hyperic.hq.bizapp.shared.uibeans;
 
 import java.io.Serializable;
 
-import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.inventory.domain.Resource;
 
 /**
  * This bean used when resources are selected to have their metrics compared

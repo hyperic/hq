@@ -58,7 +58,7 @@ public class RoleDashboardConfig
         PermissionManager pMan = PermissionManagerFactory.getInstance();
         
         try {
-            pMan.check(by.getId(), _role.getResource().getResourceType(), 
+            pMan.check(by.getId(), _role.getResource().getType(), 
                        _role.getId(), AuthzConstants.roleOpModifyRole);
             return true;
         } catch (PermissionException e) {
