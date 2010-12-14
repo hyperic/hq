@@ -141,7 +141,7 @@ public class Config {
         return entityManager().createQuery("select o from Config o", Config.class).getResultList();
     }
 
-    public static Config findById(Long id) {
+    public static Config findById(Integer id) {
         if (id == null)
             return null;
         return entityManager().find(Config.class, id);

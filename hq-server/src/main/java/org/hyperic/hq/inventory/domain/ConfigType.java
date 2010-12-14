@@ -150,7 +150,7 @@ public class ConfigType implements IdentityAware, PersistenceAware<ConfigType> {
             .getResultList();
     }
 
-    public static ConfigType findById(Long id) {
+    public static ConfigType findById(Integer id) {
         if (id == null)
             return null;
         return entityManager().find(ConfigType.class, id);

@@ -105,10 +105,10 @@ public class ResourceGroup
     }
 
     public static ResourceGroup findResourceGroup(Integer id) {
-    	return findById(Long.valueOf(id));
+    	return findById(id);
     }
     
-    public static ResourceGroup findById(Long id) {
+    public static ResourceGroup findById(Integer id) {
         if (id == null)
             return null;
         return entityManager().find(ResourceGroup.class, id);

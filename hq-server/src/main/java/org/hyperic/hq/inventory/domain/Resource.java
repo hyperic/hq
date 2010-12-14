@@ -575,10 +575,10 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     }
 
     public static Resource findResource(Integer id) {
-    	return findById(Long.valueOf(id));
+    	return findById(id);
     }
 
-    public static Resource findById(Long id) {
+    public static Resource findById(Integer id) {
         if (id == null)
             return null;
         return entityManager().find(Resource.class, id);

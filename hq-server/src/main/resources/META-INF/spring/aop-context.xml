@@ -32,7 +32,7 @@
 		that app context files happen to be processed in alpha order -->
 		
 
-     <context:spring-configured />
+   	<context:spring-configured />
 
 	<tx:annotation-driven mode="aspectj"
 		transaction-manager="transactionManager" />
@@ -44,5 +44,12 @@
 		<property name="maximumDuration" value="${hq.methodWarn.time}" />
 		<property name="warningMessage" value="Method exceeded acceptable duration: " />
 	</bean>
+
+	<bean
+		class="org.springframework.datastore.graph.neo4j.spi.node.Neo4jNodeBacking"
+		factory-method="aspectOf" id="neo4jNodeBacking" />
+	<bean
+		class="org.springframework.datastore.graph.neo4j.spi.relationship.Neo4jRelationshipBacking"
+		factory-method="aspectOf" depends-on="nodeEntityStateAccessorsFactory" id="neo4jRelationshipBacking"/>
 
 </beans>

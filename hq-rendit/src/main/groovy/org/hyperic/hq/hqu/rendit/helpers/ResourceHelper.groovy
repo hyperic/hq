@@ -38,10 +38,10 @@ import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl
-import org.hyperic.hq.inventory.domain.ResourceRelation;
 import org.hyperic.hq.authz.server.session.ResourceSortField
 import org.hyperic.hq.inventory.domain.Resource
 import org.hyperic.hq.inventory.domain.ResourceGroup
+import org.hyperic.hq.inventory.domain.Relationship
 import org.hyperic.hq.bizapp.server.session.AppdefBossImpl as AppdefBoss
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.appdef.shared.ApplicationManager;
@@ -310,9 +310,13 @@ class ResourceHelper extends BaseHelper {
      */
     Collection findResourceEdges(String resourceRelation, Resource parent) {
         def edges = []
+        // TODO handle the network relation case
+        /*
         if (resourceRelation.equals(AuthzConstants.ResourceEdgeNetworkRelation)) {
             edges = rman.findResourceEdges(rman.getNetworkRelation(), parent)
-        } else if (resourceRelation.equals(AuthzConstants.ResourceEdgeContainmentRelation)) {
+        } else */
+        
+        if (resourceRelation.equals(AuthzConstants.ResourceEdgeContainmentRelation)) {
             edges = rman.findResourceEdges(rman.getContainmentRelation(), parent)
         }
         return edges
@@ -364,9 +368,10 @@ class ResourceHelper extends BaseHelper {
      * @return a List of {@link Resource}s
      */
     Collection findChildResourcesByVirtualRelation(Resource resource) {
-        def resourceEdges = rman.findChildResourceEdges(resource, rman.getVirtualRelation())
+		// TODO Handle the virtual relation case
+        // def resourceEdges = rman.findChildResourceEdges(resource, rman.getVirtualRelation())
         
-        return resourceEdges.collect { edge -> edge.to }
+        return [] //resourceEdges.collect { edge -> edge.to }
     }
     
     /**
@@ -495,7 +500,8 @@ class ResourceHelper extends BaseHelper {
     }
     
     void createResourceEdges(String resourceRelation, AppdefEntityID parent, AppdefEntityID[] children, boolean deleteExisting) {
-        ResourceRelation relation = null;
+        Relationship<Resource> relation = null;
+        /*
         if (AuthzConstants.ResourceEdgeNetworkRelation.equals(resourceRelation)) {
             relation = rman.getNetworkRelation()
         } else if (AuthzConstants.ResourceEdgeVirtualRelation.equals(resourceRelation)) {
@@ -506,6 +512,9 @@ class ResourceHelper extends BaseHelper {
         }
         
         rman.createResourceEdges(user, relation, parent, children, deleteExisting)
+        */
+        
+        relation
     }
     
     void removeResourceEdges(String resourceRelation, Resource resource) {

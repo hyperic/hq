@@ -30,7 +30,7 @@ import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.TraversalPosition;
 import org.neo4j.graphdb.Traverser;
 import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.data.annotation.Indexed;
+import org.springframework.datastore.annotation.Indexed;
 import org.springframework.datastore.graph.annotation.GraphProperty;
 import org.springframework.datastore.graph.annotation.NodeEntity;
 import org.springframework.datastore.graph.annotation.RelatedTo;
@@ -412,10 +412,10 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
     }
 
     public static ResourceType findResourceType(Integer id) {
-    	return findById(Long.valueOf(id));
+    	return findById(id);
     }
     
-    public static ResourceType findById(Long id) {
+    public static ResourceType findById(Integer id) {
         if (id == null)
             return null;
         ResourceType resourceType = entityManager().find(ResourceType.class, id);
@@ -466,7 +466,8 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
     }
 
     public static ResourceType findRootResourceType() {
-       return findById(1l);
+    	// TODO Should this be hardcoded?
+    	return findById(1);
     }
 
     public static Set<ResourceType> findByPlugin(String plugin) {

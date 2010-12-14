@@ -161,7 +161,7 @@ public class OperationType implements IdentityAware, PersistenceAware<OperationT
             .getResultList();
     }
 
-    public static OperationType findById(Long id) {
+    public static OperationType findById(Integer id) {
         if (id == null)
             return null;
         return entityManager().find(OperationType.class, id);

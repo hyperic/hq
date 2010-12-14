@@ -216,7 +216,7 @@ public class PropertyType implements IdentityAware, PersistenceAware<PropertyTyp
             .getResultList();
     }
 
-    public static PropertyType findById(Long id) {
+    public static PropertyType findById(Integer id) {
         if (id == null)
             return null;
         return entityManager().find(PropertyType.class, id);
