@@ -261,16 +261,7 @@ public class ProductManagerImpl implements ProductManager {
     @Transactional
     public void deploymentNotify(String pluginName) throws PluginNotFoundException, VetoException,
         NotFoundException {
-        //TODO this is not the place for this
-        if(ResourceType.findRootResourceType() == null) {
-            ResourceType system=new ResourceType();
-            system.setName("System");
-            system.persist();
-            Resource root = new Resource();
-            root.setName("Root");
-            root.persist();
-            root.setType(system);
-        }
+      
         ProductPlugin pplugin = (ProductPlugin) getProductPluginManager().getPlugin(pluginName);
         PluginValue pluginVal;
         PluginInfo pInfo;

@@ -1960,6 +1960,16 @@ public class PlatformManagerImpl implements PlatformManager {
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
         valuePager = Pager.getPager(VALUE_PROCESSOR);
+        //TODO this is not the place for this
+        if(ResourceType.findRootResourceType() == null) {
+            ResourceType system=new ResourceType();
+            system.setName("System");
+            system.persist();
+            Resource root = new Resource();
+            root.setName("Root");
+            root.persist();
+            root.setType(system);
+        }
     }
 
 }
