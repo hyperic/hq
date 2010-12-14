@@ -37,9 +37,7 @@
 
     <id name="id" type="integer">
       <column name="ID" not-null="true" />
-      <generator class="org.hyperic.hibernate.id.ComboGenerator">
-        <param name="sequence">EAM_AUDIT_ID_SEQ</param>
-      </generator>
+      <generator class="increment"/>
     </id>
 
     <discriminator column="KLAZZ" type="string"/>

@@ -32,9 +32,7 @@
   <class name="RtStatError" table="EAM_STAT_ERRORS">
     <id name="id" type="integer">
       <column name="ID" not-null="true"/>
-      <generator class="org.hyperic.hibernate.id.ComboGenerator">
-        <param name="sequence">EAM_STAT_ERRORS_ID_SEQ</param>
-      </generator>
+       <generator class="increment"/>
     </id>
 
     <version name="_version_" type="long">

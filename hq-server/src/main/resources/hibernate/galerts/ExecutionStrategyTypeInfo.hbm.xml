@@ -37,9 +37,7 @@
     <cache usage="read-write" />
     <id name="id" type="integer">
       <column name="ID" not-null="true" />
-      <generator class="org.hyperic.hibernate.id.ComboGenerator">
-        <param name="sequence">EAM_EXEC_STRATEGY_TYPES_ID_SEQ</param>
-      </generator>
+       <generator class="increment"/>
     </id>
 
     <version name="_version_" type="long">
