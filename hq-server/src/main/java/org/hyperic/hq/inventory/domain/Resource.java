@@ -22,10 +22,12 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.inventory.InvalidRelationshipException;
+import org.hyperic.hq.reference.RelationshipDirection;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
@@ -48,7 +50,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Entity
 @NodeEntity(partial = true)
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-public class Resource {
+@JsonIgnoreProperties(ignoreUnknown = true, value = {"underlyingState", "stateAccessors"})
+public class Resource implements IdentityAware, RelationshipAware<Resource> {
 
     @Transient
     @ManyToOne
@@ -72,7 +75,7 @@ public class Resource {
     @GenericGenerator(name = "mygen1", strategy = "increment")  
     @GeneratedValue(generator = "mygen1") 
     @Column(name = "id")
-    private Integer id;
+    private Long id;
 
     @GraphProperty
     @Transient

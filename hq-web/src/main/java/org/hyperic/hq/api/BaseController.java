@@ -11,6 +11,7 @@ import org.hyperic.hq.inventory.domain.IdentityAware;
 import org.hyperic.hq.inventory.domain.PersistenceAware;
 import org.hyperic.hq.inventory.domain.RelationshipAware;
 import org.hyperic.hq.reference.RelationshipDirection;
+import org.neo4j.graphdb.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -27,6 +28,15 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public abstract class BaseController {
 	// log available to subclasses
 	protected final Log log = LogFactory.getLog(this.getClass().getName());
+	
+	// handle case where object is not found
+	@ExceptionHandler(NotFoundException.class)
+	@ResponseStatus(value = HttpStatus.NOT_FOUND)
+	public void handleObjectNotFound(Exception e) {
+		if (log.isDebugEnabled()) {
+			log.debug("Requested object not found.");
+		}
+	}
 	
 	// handle case where content-type header value is not supported
 	@ExceptionHandler(HttpMediaTypeNotSupportedException.class)
@@ -72,7 +82,7 @@ public abstract class BaseController {
 		return new ErrorRepresentation(e);
 	}
 	
-	protected Representation readSingleEntity(String domainName, Integer id) throws Exception {
+	protected Representation readSingleEntity(String domainName, Long id) throws Exception {
 		return executeRead(domainName, "findById", id);
 	}
 	
@@ -80,12 +90,12 @@ public abstract class BaseController {
 		return executeRead(domainName, "find", listSettings.getPage(), listSettings.getSize());
 	}
 	
-	protected Representation readRelationships(String domainName, Integer id, ListSettings listSettings) throws Exception {
+	protected Representation readRelationships(String domainName, Long id, ListSettings listSettings) throws Exception {
 		return readRelationships(domainName, id, null, null, listSettings);
 	}
 	
-	protected Representation readRelationships(String domainName, Integer id, String relationshipName, String direction, ListSettings listSettings) throws Exception {
-		Method method = findMethod(domainName, "findById", Integer.class);
+	protected Representation readRelationships(String domainName, Long id, String relationshipName, String direction, ListSettings listSettings) throws Exception {
+		Method method = findMethod(domainName, "findById", Long.class);
 		Object target = method.invoke(null, id);
 		
 		if (target == null) {
@@ -139,21 +149,21 @@ public abstract class BaseController {
 		return executeWrite(domainName, null, request, Operation.CREATE);
 	}
 	
-	protected Representation updateSingleEntity(String domainName, Integer id, HttpServletRequest request) throws Exception {
+	protected Representation updateSingleEntity(String domainName, Long id, HttpServletRequest request) throws Exception {
 		return executeWrite(domainName, id, request, Operation.UPDATE);
 	}
 	
-	protected void deleteSingleEntity(String domainName, Integer id) throws Exception {
+	protected void deleteSingleEntity(String domainName, Long id) throws Exception {
 		executeWrite(domainName, id, null, Operation.DELETE);
 	}
 
-	protected Representation createRelationship(String domainName, Integer fromId, Integer toId, String relationshipName) throws Exception {
+	protected Representation createRelationship(String domainName, Long fromId, Long toId, String relationshipName) throws Exception {
 		return null;
 	}
 	
-	protected void deleteRelationship(String domainName, Integer fromId, Integer toId, String direction, String relationshipName) throws Exception {
+	protected void deleteRelationship(String domainName, Long fromId, Long toId, String direction, String relationshipName) throws Exception {
 		Class<?> clazz = Domain.getValue(domainName).javaType();
-		Method findById = findMethod(domainName, "findById", Integer.class);
+		Method findById = findMethod(domainName, "findById", Long.class);
 		Object from = findById.invoke(null, fromId);
 		
 		if (from instanceof RelationshipAware) {
@@ -174,7 +184,7 @@ public abstract class BaseController {
 		}
 	}
 	
-	private Representation executeWrite(String domainName, Integer id, final HttpServletRequest request, Operation operation) throws Exception {
+	private Representation executeWrite(String domainName, Long id, final HttpServletRequest request, Operation operation) throws Exception {
 		Representation result = null;
 		Class<?> clazz = Domain.getValue(domainName).javaType();
 		MappingJacksonHttpMessageConverter converter = new MappingJacksonHttpMessageConverter();

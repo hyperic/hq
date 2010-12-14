@@ -15,6 +15,7 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.hibernate.annotations.GenericGenerator;
 import org.neo4j.graphdb.Node;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -28,7 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Entity
 @Configurable
 @NodeEntity(partial = true)
-public class PropertyType {
+@JsonIgnoreProperties(ignoreUnknown = true, value = {"underlyingState", "stateAccessors"})
+public class PropertyType implements IdentityAware, PersistenceAware<PropertyType> {
 
     @GraphProperty
     @Transient
@@ -49,7 +51,7 @@ public class PropertyType {
     @GenericGenerator(name = "mygen1", strategy = "increment")  
     @GeneratedValue(generator = "mygen1") 
     @Column(name = "id")
-    private Integer id;
+    private Long id;
 
     @NotNull
     @GraphProperty
@@ -96,7 +98,7 @@ public class PropertyType {
         return this.description;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return this.id;
     }
 
@@ -159,7 +161,7 @@ public class PropertyType {
         this.description = description;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -214,13 +216,13 @@ public class PropertyType {
             .getResultList();
     }
 
-    public static PropertyType findPropertyType(Integer id) {
+    public static PropertyType findById(Long id) {
         if (id == null)
             return null;
         return entityManager().find(PropertyType.class, id);
     }
 
-    public static List<PropertyType> findPropertyTypeEntries(int firstResult, int maxResults) {
+    public static List<PropertyType> find(Integer firstResult, Integer maxResults) {
         return entityManager().createQuery("select o from PropertyType o", PropertyType.class)
             .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
     }

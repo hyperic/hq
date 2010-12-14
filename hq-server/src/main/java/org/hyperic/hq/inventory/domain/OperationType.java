@@ -15,6 +15,7 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.hibernate.annotations.GenericGenerator;
 import org.neo4j.graphdb.Node;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -28,7 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Entity
 @Configurable
 @NodeEntity(partial = true)
-public class OperationType {
+@JsonIgnoreProperties(ignoreUnknown = true, value = {"underlyingState", "stateAccessors"})
+public class OperationType implements IdentityAware, PersistenceAware<OperationType> {
 
     @PersistenceContext
     transient EntityManager entityManager;
@@ -40,7 +42,7 @@ public class OperationType {
     @GenericGenerator(name = "mygen1", strategy = "increment")  
     @GeneratedValue(generator = "mygen1") 
     @Column(name = "id")
-    private Integer id;
+    private Long id;
 
     @NotNull
     @Transient
@@ -72,7 +74,7 @@ public class OperationType {
         this.entityManager.flush();
     }
 
-    public Integer getId() {
+    public Long getId() {
         return this.id;
     }
 
@@ -116,7 +118,7 @@ public class OperationType {
         }
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -159,20 +161,14 @@ public class OperationType {
             .getResultList();
     }
 
-    public static List<OperationType> findAllOrderByName() {
-        //TODO implement sorting somewhere
-        return null;
-    }
-
-    public static OperationType findOperationType(Long id) {
+    public static OperationType findById(Long id) {
         if (id == null)
             return null;
         return entityManager().find(OperationType.class, id);
     }
-    
-    public static List<OperationType> findOperationTypeEntries(int firstResult, int maxResults) {
+
+    public static List<OperationType> find(Integer firstResult, Integer maxResults) {
         return entityManager().createQuery("select o from OperationType o", OperationType.class)
             .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
     }
-
 }

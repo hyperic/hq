@@ -14,6 +14,7 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.hibernate.annotations.GenericGenerator;
 import org.neo4j.graphdb.Node;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -33,10 +34,10 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Entity
 @Configurable
-@NodeEntity(partial = true)
-public class ConfigType {
-
-    @PersistenceContext
+@NodeEntity
+@JsonIgnoreProperties(ignoreUnknown = true, value = {"underlyingState", "stateAccessors"})
+public class ConfigType implements IdentityAware, PersistenceAware<ConfigType> {
+	@PersistenceContext
     transient EntityManager entityManager;
 
     @Resource
@@ -46,7 +47,7 @@ public class ConfigType {
     @GenericGenerator(name = "mygen1", strategy = "increment")  
     @GeneratedValue(generator = "mygen1") 
     @Column(name = "id")
-    private Integer id;
+    private Long id;
 
     @NotNull
     @GraphProperty
@@ -71,7 +72,7 @@ public class ConfigType {
         this.entityManager.flush();
     }
 
-    public Integer getId() {
+    public Long getId() {
         return this.id;
     }
 
@@ -111,7 +112,7 @@ public class ConfigType {
         }
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -149,15 +150,14 @@ public class ConfigType {
             .getResultList();
     }
 
-    public static ConfigType findConfigType(Long id) {
+    public static ConfigType findById(Long id) {
         if (id == null)
             return null;
         return entityManager().find(ConfigType.class, id);
     }
 
-    public static List<ConfigType> findConfigTypeEntries(int firstResult, int maxResults) {
+    public static List<ConfigType> find(Integer firstResult, Integer maxResults) {
         return entityManager().createQuery("select o from ConfigType o", ConfigType.class)
             .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
     }
-
 }

@@ -49,7 +49,7 @@ public class Representation {
 			this.data = data;
 			
 			if (data instanceof IdentityAware) {
-				Integer id = ((IdentityAware) data).getId();
+				Long id = ((IdentityAware) data).getId();
 				
 				this.links.put("self", instanceUri.expand(domain.toString(), id).toASCIIString());
 

@@ -1,12 +1,13 @@
 package org.hyperic.hq.inventory.domain;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
-import javax.persistence.Transient;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.hyperic.hq.authz.server.session.Role;
 import org.neo4j.graphdb.Node;
 import org.springframework.datastore.graph.annotation.GraphProperty;
@@ -104,7 +105,7 @@ public class ResourceGroup
             .getResultList();
     }
 
-    public static ResourceGroup findResourceGroup(Integer id) {
+    public static ResourceGroup findById(Long id) {
         if (id == null)
             return null;
         return entityManager().find(ResourceGroup.class, id);

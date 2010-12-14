@@ -17,6 +17,8 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.reference.RelationshipTypes;
@@ -41,7 +43,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Entity
 @Configurable
 @NodeEntity(partial = true)
-public class ResourceType {
+@JsonIgnoreProperties(ignoreUnknown = true, value = {"underlyingState", "stateAccessors"})
+public class ResourceType implements IdentityAware, RelationshipAware<ResourceType> {
 
     @PersistenceContext
     transient EntityManager entityManager;
@@ -61,7 +64,7 @@ public class ResourceType {
     @GenericGenerator(name = "mygen1", strategy = "increment")  
     @GeneratedValue(generator = "mygen1") 
     @Column(name = "id")
-    private Integer id;
+    private Long id;
 
     @NotNull
     @Indexed

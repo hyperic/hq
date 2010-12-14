@@ -36,37 +36,37 @@ public class ApiController extends BaseController {
 	}
 	
 	@RequestMapping(method = {RequestMethod.GET, RequestMethod.HEAD}, value = "/{domainName}/{id}")
-	public @ResponseBody Representation getById(@PathVariable String domainName, @PathVariable Integer id) throws Exception {
+	public @ResponseBody Representation getById(@PathVariable String domainName, @PathVariable Long id) throws Exception {
 		return readSingleEntity(domainName, id);
 	}
 
 	@RequestMapping(method = RequestMethod.PUT, value = "/{domainName}/{id}")
-	public @ResponseBody Representation update(@PathVariable String domainName, @PathVariable Integer id, HttpServletRequest request) throws Exception {
+	public @ResponseBody Representation update(@PathVariable String domainName, @PathVariable Long id, HttpServletRequest request) throws Exception {
 		return updateSingleEntity(domainName, id, request);
 	}
 	
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{domainName}/{id}")
-	public @ResponseBody void delete(@PathVariable String domainName, @PathVariable Integer id) throws Exception {
+	public @ResponseBody void delete(@PathVariable String domainName, @PathVariable Long id) throws Exception {
 		deleteSingleEntity(domainName, id);
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/{domainName}/{id}/relationships")
-	public @ResponseBody Representation listRelationships(@PathVariable String domainName, @PathVariable Integer id, ListSettings listSettings) throws Exception {
+	public @ResponseBody Representation listRelationships(@PathVariable String domainName, @PathVariable Long id, ListSettings listSettings) throws Exception {
 		return readRelationships(domainName, id, listSettings);
 	}
 	
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{domainName}/{fromId}/relationships/{toId}")
-	public void deleteRelationship(@PathVariable String domainName, @PathVariable Integer fromId, @PathVariable Integer toId) throws Exception {
+	public void deleteRelationship(@PathVariable String domainName, @PathVariable Long fromId, @PathVariable Long toId) throws Exception {
 		deleteRelationship(domainName, fromId, toId, null, null);
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/{domainName}/{id}/relationships/{relationshipName}")
-	public @ResponseBody Representation listRelationshipsByName(@PathVariable String domainName, @PathVariable Integer id, @PathVariable String relationshipName, @RequestParam(required = false) String direction, ListSettings listSettings) throws Exception {
+	public @ResponseBody Representation listRelationshipsByName(@PathVariable String domainName, @PathVariable Long id, @PathVariable String relationshipName, @RequestParam(required = false) String direction, ListSettings listSettings) throws Exception {
 		return readRelationships(domainName, id, relationshipName, direction, listSettings);
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, value = "/{domainName}/{id}/relationships/{relationshipName}")
-	public @ResponseBody Representation createRelationship(@PathVariable String domainName, @PathVariable Integer id, @PathVariable String relationshipName, @RequestParam Integer toId) throws Exception {
+	public @ResponseBody Representation createRelationship(@PathVariable String domainName, @PathVariable Long id, @PathVariable String relationshipName, @RequestParam Long toId) throws Exception {
 		return createRelationship(domainName, id, toId, relationshipName);
 	}
 }

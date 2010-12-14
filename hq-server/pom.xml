@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -12,7 +13,7 @@
 	<artifactId>hq-server</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ - Server</name>
-	
+
 	<properties>
 		<neo4j.version>1.1</neo4j.version>
 		<datastore-graph.version>1.0.0.BUILD-SNAPSHOT</datastore-graph.version>
@@ -20,105 +21,109 @@
 
 
 	<dependencies>
-	 	<dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-        </dependency>
 		<dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
-        </dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-mapper-asl</artifactId>
+		</dependency>
 		<dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-jmx</artifactId>
-        </dependency>
-    	<dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-entitymanager</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>cglib</groupId>
-                    <artifactId>cglib</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>dom4j</groupId>
-                    <artifactId>dom4j</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
- <dependency>
-            <groupId>org.hibernate.javax.persistence</groupId>
-            <artifactId>hibernate-jpa-2.0-api</artifactId>
-            <version>1.0.0.Final</version>
-        </dependency>
-    <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-validator</artifactId>
-            <version>4.1.0.Final</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>javax.xml.bind</groupId>
-                    <artifactId>jaxb-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.sun.xml.bind</groupId>
-                    <artifactId>jaxb-impl</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-    <dependency>
-            <groupId>javax.validation</groupId>
-            <artifactId>validation-api</artifactId>
-            <version>1.0.0.GA</version>
-        </dependency>
-    <dependency>
-            <groupId>cglib</groupId>
-            <artifactId>cglib-nodep</artifactId>
-            <version>2.2</version>
-        </dependency>
-    <dependency>
-            <groupId>javax.transaction</groupId>
-            <artifactId>jta</artifactId>
-            <version>1.1</version>
-        </dependency>
-	<dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-datastore-neo4j</artifactId>
-            <version>${datastore-graph.version}</version>
-        </dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
 		<dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-datastore-neo4j-roo</artifactId>
-            <version>${datastore-graph.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.neo4j</groupId>
-            <artifactId>neo4j-kernel</artifactId>
-            <version>${neo4j.version}</version>
-        </dependency>
-	    <dependency>
-            <groupId>org.neo4j</groupId>
-            <artifactId>neo4j-utils</artifactId>
-            <version>${neo4j.version}</version>
-        </dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-jmx</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>cglib</groupId>
+					<artifactId>cglib</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>dom4j</groupId>
+					<artifactId>dom4j</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate.javax.persistence</groupId>
+			<artifactId>hibernate-jpa-2.0-api</artifactId>
+			<version>1.0.0.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>4.1.0.Final</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.xml.bind</groupId>
+					<artifactId>jaxb-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.sun.xml.bind</groupId>
+					<artifactId>jaxb-impl</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+			<version>1.0.0.GA</version>
+		</dependency>
+		<dependency>
+			<groupId>cglib</groupId>
+			<artifactId>cglib-nodep</artifactId>
+			<version>2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.transaction</groupId>
+			<artifactId>jta</artifactId>
+			<version>1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-datastore-neo4j</artifactId>
+			<version>${datastore-graph.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-datastore-neo4j-roo</artifactId>
+			<version>${datastore-graph.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.neo4j</groupId>
+			<artifactId>neo4j-kernel</artifactId>
+			<version>${neo4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.neo4j</groupId>
+			<artifactId>neo4j-utils</artifactId>
+			<version>${neo4j.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-common</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		 <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-aspects</artifactId>
-            <version>${spring-framework.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-aspects</artifactId>
+			<version>${spring-framework.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-lather</artifactId>
@@ -134,47 +139,47 @@
 			<artifactId>hq-pdk</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		 <dependency>
-    		<groupId>org.aspectj</groupId>
-    		<artifactId>aspectjrt</artifactId>
- 		</dependency>
-        <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjweaver</artifactId>
-            <version>${aspectj.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjrt</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<version>${aspectj.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.jasypt</groupId>
 			<artifactId>jasypt</artifactId>
-  			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-  			<groupId>org.quartz-scheduler</groupId>
-  			<artifactId>quartz</artifactId>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.quartz-scheduler</groupId>
-            <artifactId>quartz-oracle</artifactId>
-            <scope>runtime</scope>  
+			<artifactId>quartz</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz-oracle</artifactId>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
 		</dependency>
 		<dependency>
-  			<groupId>commons-httpclient</groupId>
-  			<artifactId>commons-httpclient</artifactId>
+			<groupId>commons-httpclient</groupId>
+			<artifactId>commons-httpclient</artifactId>
 		</dependency>
 		<dependency>
-  			<groupId>commons-pool</groupId>
-  			<artifactId>commons-pool</artifactId>
-  			<scope>runtime</scope>
+			<groupId>commons-pool</groupId>
+			<artifactId>commons-pool</artifactId>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-  			<groupId>org.springframework.security</groupId>
-  			<artifactId>spring-security-core</artifactId>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-core</artifactId>
 		</dependency>
-		<!--  We maintain a patched version of ehcache -->
+		<!-- We maintain a patched version of ehcache -->
 		<dependency>
 			<groupId>org.hyperic</groupId>
 			<artifactId>ehcache</artifactId>
@@ -204,8 +209,8 @@
 			<artifactId>mail</artifactId>
 		</dependency>
 		<dependency>
-		  	<groupId>org.safehaus.jug</groupId>
-		  	<artifactId>jug</artifactId>
+			<groupId>org.safehaus.jug</groupId>
+			<artifactId>jug</artifactId>
 			<classifier>asl</classifier>
 		</dependency>
 		<dependency>
@@ -227,14 +232,14 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-		  <groupId>org.apache.xbean</groupId>
-		  <artifactId>xbean-spring</artifactId>
-		  <scope>runtime</scope>
+			<groupId>org.apache.xbean</groupId>
+			<artifactId>xbean-spring</artifactId>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-  			<groupId>org.springframework.security</groupId>
-  			<artifactId>spring-security-config</artifactId>
-  		 	<scope>runtime</scope>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache</groupId>
@@ -247,13 +252,13 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-  			<groupId>mysql</groupId>
-  			<artifactId>mysql-connector-java</artifactId>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-  			<groupId>postgresql</groupId>
-  			<artifactId>postgresql</artifactId>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
 			<version>${postgresql.server.driver.version}</version>
 		</dependency>
@@ -264,16 +269,16 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-  			<groupId>org.easymock</groupId>
-  			<artifactId>easymock</artifactId>
+			<groupId>org.easymock</groupId>
+			<artifactId>easymock</artifactId>
 		</dependency>
 		<dependency>
-  			<groupId>org.easymock</groupId>
-  			<artifactId>easymockclassextension</artifactId>
+			<groupId>org.easymock</groupId>
+			<artifactId>easymockclassextension</artifactId>
 		</dependency>
 		<dependency>
-  			<groupId>junit</groupId>
-  			<artifactId>junit</artifactId>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>jmock</groupId>
@@ -283,12 +288,12 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
 		</dependency>
-		
-		<!--  We use a version of dbunit that we patched -->
+
+		<!-- We use a version of dbunit that we patched -->
 		<dependency>
 			<groupId>org.hyperic</groupId>
 			<artifactId>dbunit</artifactId>
-		</dependency> 
+		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-util</artifactId>
@@ -297,11 +302,11 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	
+
 	<build>
 		<plugins>
 			<plugin>
-			 	<artifactId>maven-jar-plugin</artifactId>
+				<artifactId>maven-jar-plugin</artifactId>
 				<executions>
 					<execution>
 						<goals>
@@ -352,25 +357,25 @@
 							<groupId>org.springframework</groupId>
 							<artifactId>spring-aspects</artifactId>
 						</aspectLibrary>
-						 <aspectLibrary>
-                        	<groupId>org.springframework.data</groupId>
-                        	<artifactId>spring-datastore-neo4j</artifactId>
-                    	</aspectLibrary>
+						<aspectLibrary>
+							<groupId>org.springframework.data</groupId>
+							<artifactId>spring-datastore-neo4j</artifactId>
+						</aspectLibrary>
 					</aspectLibraries>
 					<source>1.5</source>
 					<target>1.5</target>
 				</configuration>
 			</plugin>
-		</plugins>	
-    	<resources>
-      		<resource>
-        		<directory>src/main/resources</directory>
-        		<filtering>true</filtering>
-      		</resource>
-    	</resources>
-  </build>
+		</plugins>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+	</build>
 
- <repositories>
+	<repositories>
 		<repository>
 			<id>jboss</id>
 			<name>JBoss Repository</name>
