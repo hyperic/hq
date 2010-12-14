@@ -200,7 +200,7 @@ public abstract class BaseController {
 			target = converter.read(clazz, wrappedRequest);
 		}
 		
-		((IdentityAware) target).setId(id);
+		((IdentityAware) target).setId(id.intValue());
 		PersistenceAware<?> entity = (PersistenceAware<?>) target;
 			
 		switch (operation) {

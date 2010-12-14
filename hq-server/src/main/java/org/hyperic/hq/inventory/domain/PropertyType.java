@@ -51,7 +51,7 @@ public class PropertyType implements IdentityAware, PersistenceAware<PropertyTyp
     @GenericGenerator(name = "mygen1", strategy = "increment")  
     @GeneratedValue(generator = "mygen1") 
     @Column(name = "id")
-    private Long id;
+    private Integer id;
 
     @NotNull
     @GraphProperty
@@ -98,7 +98,7 @@ public class PropertyType implements IdentityAware, PersistenceAware<PropertyTyp
         return this.description;
     }
 
-    public Long getId() {
+    public Integer getId() {
         return this.id;
     }
 
@@ -161,7 +161,7 @@ public class PropertyType implements IdentityAware, PersistenceAware<PropertyTyp
         this.description = description;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

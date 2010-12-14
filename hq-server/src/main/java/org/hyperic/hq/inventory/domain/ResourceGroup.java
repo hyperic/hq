@@ -88,7 +88,7 @@ public class ResourceGroup
         this.privateGroup = privateGroup;
     }
     
-    public Long getGroupType() {
+    public Integer getGroupType() {
         //TODO replace with calls to group.getType().getId()
        //Doing this just in case we can't pre-populate ResourceTypes with IDs as expected in AppdefEntityConstants.getAppdefGroupTypeName
         return getType().getId();

@@ -1398,7 +1398,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
      */
     @Transactional(readOnly=true)
     public Collection<OperationType> findAllOperations() {
-        return OperationType.findAllOrderByName();
+        return OperationType.findAllOperationTypes();
     }
 
     protected Set toPojos(Object[] vals) {

@@ -64,7 +64,7 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
     @GenericGenerator(name = "mygen1", strategy = "increment")  
     @GeneratedValue(generator = "mygen1") 
     @Column(name = "id")
-    private Long id;
+    private Integer id;
 
     @NotNull
     @Indexed
@@ -114,7 +114,7 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
         this.entityManager.flush();
     }
 
-    public Long getId() {
+    public Integer getId() {
         return this.id;
     }
 
@@ -328,7 +328,7 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
         }
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

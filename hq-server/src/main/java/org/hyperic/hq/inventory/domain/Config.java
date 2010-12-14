@@ -35,7 +35,7 @@ public class Config {
     @GenericGenerator(name = "mygen1", strategy = "increment")  
     @GeneratedValue(generator = "mygen1") 
     @Column(name = "id")
-    private Long id;
+    private Integer id;
 
     @Version
     @Column(name = "version")
@@ -55,7 +55,7 @@ public class Config {
         this.entityManager.flush();
     }
 
-    public Long getId() {
+    public Integer getId() {
         return this.id;
     }
 
@@ -109,7 +109,7 @@ public class Config {
         }
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

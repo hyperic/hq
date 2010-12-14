@@ -47,7 +47,7 @@ public class ConfigType implements IdentityAware, PersistenceAware<ConfigType> {
     @GenericGenerator(name = "mygen1", strategy = "increment")  
     @GeneratedValue(generator = "mygen1") 
     @Column(name = "id")
-    private Long id;
+    private Integer id;
 
     @NotNull
     @GraphProperty
@@ -72,7 +72,7 @@ public class ConfigType implements IdentityAware, PersistenceAware<ConfigType> {
         this.entityManager.flush();
     }
 
-    public Long getId() {
+    public Integer getId() {
         return this.id;
     }
 
@@ -112,7 +112,7 @@ public class ConfigType implements IdentityAware, PersistenceAware<ConfigType> {
         }
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
