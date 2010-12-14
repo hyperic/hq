@@ -88,12 +88,13 @@ public class PerformanceMonitor {
         }
 
         long duration = timer.getTotalTimeMillis();
+        //TODO
 
-        if (duration > maximumDuration) { 
-            logger.warn(new StringBuilder(warningMessage)
-                .append(pjp.getSignature()).append(" executed in ").
-                append(timer.getTotalTimeMillis()).append(":ms").toString());
-        }
+//        if (duration > maximumDuration) { 
+//            logger.warn(new StringBuilder(warningMessage)
+//                .append(pjp.getSignature()).append(" executed in ").
+//                append(timer.getTotalTimeMillis()).append(":ms").toString());
+//        }
 
         return invocation;
     }
