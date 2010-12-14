@@ -253,9 +253,13 @@ public class ServerManagerImpl implements ServerManager {
         return new Server(server.getId());
     }
     
-    private ServerType toServerType(ResourceType serverType) {
-        //TODO
-        return new ServerType();
+    private ServerType toServerType(ResourceType serverResType) {
+        ServerType serverType = new ServerType();
+        serverType.setDescription(serverResType.getDescription());
+        serverType.setId(serverResType.getId());
+        serverType.setName(serverResType.getName());
+        serverType.setPlugin(serverResType.getPlugin().getName());
+        return serverType;
     }
 
     /**
@@ -1042,12 +1046,12 @@ public class ServerManagerImpl implements ServerManager {
     }
     
     public ServerType createServerType(ServerTypeInfo sinfo, String plugin) throws NotFoundException {
-        ResourceType stype = new ResourceType();
         log.debug("Creating new ServerType: " + sinfo.getName());
-        stype.setPlugin(pluginDAO.findByName(plugin));
+        ResourceType stype = new ResourceType();
         stype.setName(sinfo.getName());
         stype.setDescription(sinfo.getDescription());
         stype.persist();
+        stype.setPlugin(pluginDAO.findByName(plugin));
         String newPlats[] = sinfo.getValidPlatformTypes();
         findAndSetPlatformType(newPlats, stype);
         return toServerType(stype);
@@ -1121,7 +1125,6 @@ public class ServerManagerImpl implements ServerManager {
      * the argument.
      */
     private void findAndSetPlatformType(String[] platNames, ResourceType stype) throws NotFoundException {
-
         for (int i = 0; i < platNames.length; i++) {
             ResourceType pType = ResourceType.findResourceTypeByName(platNames[i]);
             if (pType == null) {

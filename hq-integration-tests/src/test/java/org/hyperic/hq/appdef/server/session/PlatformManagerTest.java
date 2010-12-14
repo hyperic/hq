@@ -123,7 +123,7 @@ public class PlatformManagerTest
         testPlatform = testPlatforms.get(9);
         // Create ServerType
         ServerType testServerType = createServerType("Tomcat", "6.0", new String[] { "Linux" },
-            "Test Server Plugin", false);
+            "test");
         // Create test server
         testServer = createServer(testPlatform, testServerType, "My Tomcat");
         // Create ServiceType

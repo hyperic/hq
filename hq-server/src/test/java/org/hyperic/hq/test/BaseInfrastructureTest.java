@@ -194,13 +194,11 @@ abstract public class BaseInfrastructureTest {
     }
 
     protected ServerType createServerType(String serverTypeName, String serverVersion,
-                                          String[] validPlatformTypes, String plugin,
-                                          boolean virtual) throws NotFoundException {
+                                          String[] validPlatformTypes, String plugin) throws NotFoundException {
         ServerTypeInfo serverTypeInfo = new ServerTypeInfo();
         serverTypeInfo.setDescription(serverTypeName);
         serverTypeInfo.setName(serverTypeName);
         serverTypeInfo.setVersion(serverVersion);
-        serverTypeInfo.setVirtual(virtual);
         serverTypeInfo.setValidPlatformTypes(validPlatformTypes);
         return serverManager.createServerType(serverTypeInfo, plugin);
     }
