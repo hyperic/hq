@@ -7,7 +7,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.PersistenceContext;
@@ -128,6 +127,7 @@ public class PropertyType implements IdentityAware, PersistenceAware<PropertyTyp
             this.entityManager = entityManager();
         PropertyType merged = this.entityManager.merge(this);
         this.entityManager.flush();
+        merged.getId();
         return merged;
     }
 
@@ -212,18 +212,30 @@ public class PropertyType implements IdentityAware, PersistenceAware<PropertyTyp
     }
 
     public static List<PropertyType> findAllPropertyTypes() {
-        return entityManager().createQuery("select o from PropertyType o", PropertyType.class)
+        List<PropertyType> propertyTypes = entityManager().createQuery("select o from PropertyType o", PropertyType.class)
             .getResultList();
+        for(PropertyType propertyType: propertyTypes) {
+            propertyType.getId();
+        }
+        return propertyTypes;
     }
 
     public static PropertyType findById(Integer id) {
         if (id == null)
             return null;
-        return entityManager().find(PropertyType.class, id);
+        PropertyType propertyType = entityManager().find(PropertyType.class, id);
+        if(propertyType != null) {
+            propertyType.getId();
+        }
+        return propertyType;
     }
 
     public static List<PropertyType> find(Integer firstResult, Integer maxResults) {
-        return entityManager().createQuery("select o from PropertyType o", PropertyType.class)
+        List<PropertyType> propertyTypes = entityManager().createQuery("select o from PropertyType o", PropertyType.class)
             .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
+        for(PropertyType propertyType: propertyTypes) {
+            propertyType.getId();
+        }
+        return propertyTypes;
     }
 }

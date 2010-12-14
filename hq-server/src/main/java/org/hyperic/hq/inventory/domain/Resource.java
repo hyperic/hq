@@ -84,7 +84,6 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     @Transient
     private String modifiedBy;
 
-    // TODO do I need Indexed and GraphProperty?
     @NotNull
     @Indexed
     @GraphProperty
@@ -204,6 +203,7 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
         return getUnderlyingState().getProperty(key, propertyType.getDefaultValue());
     }
 
+    @SuppressWarnings("unchecked")
     public Set<Relationship<Resource>> getRelationships(Resource entity, String name, RelationshipDirection direction) {
     	Set<Relationship<Resource>> relations = new HashSet<Relationship<Resource>>();
     	Iterable<org.neo4j.graphdb.Relationship> relationships;
@@ -268,13 +268,10 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     @Transactional
 	public Relationship<Resource> relateTo(Resource resource, String relationName) {
-        if (type.getName().equals("System")) {
-            if (!(relationName.equals(RelationshipTypes.CONTAINS))) {
-                throw new InvalidRelationshipException();
-            }
-        } else if (!type.isRelatedTo(resource.getType(), relationName)) {
+        if (!type.isRelatedTo(resource.getType(), relationName)) {
             throw new InvalidRelationshipException();
         }
         return (Relationship<Resource>) this.relateTo(resource, Relationship.class, relationName);
@@ -413,6 +410,7 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
             this.entityManager = entityManager();
         Resource merged = this.entityManager.merge(this);
         this.entityManager.flush();
+        merged.getId();
         return merged;
     }
 
@@ -560,8 +558,12 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     }
 
     public static List<Resource> findAllResources() {
-        return entityManager().createQuery("select o from Resource o", Resource.class)
+        List<Resource> resources = entityManager().createQuery("select o from Resource o", Resource.class)
             .getResultList();
+        for(Resource resource: resources) {
+            resource.getId();
+        }
+        return resources;
     }
  
     public static Collection<Resource> findByCTime(long ctime) {
@@ -589,13 +591,21 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     }
 
     public static Resource findResourceByName(String name) {
-        return new Resource().finderFactory.getFinderForClass(Resource.class).findByPropertyValue(
+        Resource resource = new Resource().finderFactory.getFinderForClass(Resource.class).findByPropertyValue(
             "name", name);
+        if(resource != null) {
+            resource.getId();
+        }
+        return resource;
     }
 
     public static List<Resource> findResourceEntries(int firstResult, int maxResults) {
-        return entityManager().createQuery("select o from Resource o", Resource.class)
+        List<Resource> resources = entityManager().createQuery("select o from Resource o", Resource.class)
             .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
+        for(Resource resource: resources) {
+            resource.getId();
+        }
+        return resources;
     }
 
     public static Resource findRootResource() {

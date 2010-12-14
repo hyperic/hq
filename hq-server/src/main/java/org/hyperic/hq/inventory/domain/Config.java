@@ -8,7 +8,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Version;
@@ -87,6 +86,7 @@ public class Config {
             this.entityManager = entityManager();
         Config merged = this.entityManager.merge(this);
         this.entityManager.flush();
+        merged.getId();
         return merged;
     }
 
@@ -95,6 +95,7 @@ public class Config {
         if (this.entityManager == null)
             this.entityManager = entityManager();
         this.entityManager.persist(this);
+        getId();
     }
 
     @Transactional
@@ -138,17 +139,29 @@ public class Config {
     }
 
     public static List<Config> findAllConfigs() {
-        return entityManager().createQuery("select o from Config o", Config.class).getResultList();
+        List<Config> configs = entityManager().createQuery("select o from Config o", Config.class).getResultList();
+        for(Config config: configs) {
+            config.getId();
+        }
+        return configs;
     }
 
     public static Config findById(Integer id) {
         if (id == null)
             return null;
-        return entityManager().find(Config.class, id);
+        Config config  = entityManager().find(Config.class, id);
+        if(config != null) {
+            config.getId();
+        }
+        return config;
     }
 
     public static List<Config> find(Integer firstResult, Integer maxResults) {
-        return entityManager().createQuery("select o from Config o", Config.class)
+        List<Config> configs = entityManager().createQuery("select o from Config o", Config.class)
             .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
+        for(Config config: configs) {
+            config.getId();
+        }
+        return configs;
     }
 }

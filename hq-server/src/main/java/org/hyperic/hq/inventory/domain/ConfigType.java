@@ -7,7 +7,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Transient;
@@ -90,6 +89,7 @@ public class ConfigType implements IdentityAware, PersistenceAware<ConfigType> {
             this.entityManager = entityManager();
         ConfigType merged = this.entityManager.merge(this);
         this.entityManager.flush();
+        merged.getId();
         return merged;
     }
 
@@ -98,6 +98,7 @@ public class ConfigType implements IdentityAware, PersistenceAware<ConfigType> {
         if (this.entityManager == null)
             this.entityManager = entityManager();
         this.entityManager.persist(this);
+        getId();
     }
 
     @Transactional
@@ -146,18 +147,30 @@ public class ConfigType implements IdentityAware, PersistenceAware<ConfigType> {
     }
 
     public static List<ConfigType> findAllConfigTypes() {
-        return entityManager().createQuery("select o from ConfigType o", ConfigType.class)
+        List<ConfigType> configTypes = entityManager().createQuery("select o from ConfigType o", ConfigType.class)
             .getResultList();
+        for(ConfigType configType: configTypes) {
+            configType.getId();
+        }
+        return configTypes;
     }
 
     public static ConfigType findById(Integer id) {
         if (id == null)
             return null;
-        return entityManager().find(ConfigType.class, id);
+        ConfigType configType = entityManager().find(ConfigType.class, id);
+        if(configType != null) {
+            configType.getId();
+        }
+        return configType;
     }
 
     public static List<ConfigType> find(Integer firstResult, Integer maxResults) {
-        return entityManager().createQuery("select o from ConfigType o", ConfigType.class)
+        List<ConfigType> configTypes = entityManager().createQuery("select o from ConfigType o", ConfigType.class)
             .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
+        for(ConfigType configType: configTypes) {
+            configType.getId();
+        }
+        return configTypes;
     }
 }

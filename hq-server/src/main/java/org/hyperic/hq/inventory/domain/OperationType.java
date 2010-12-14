@@ -7,7 +7,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.PersistenceContext;
@@ -96,6 +95,7 @@ public class OperationType implements IdentityAware, PersistenceAware<OperationT
             this.entityManager = entityManager();
         OperationType merged = this.entityManager.merge(this);
         this.entityManager.flush();
+        merged.getId();
         return merged;
     }
 
@@ -104,6 +104,7 @@ public class OperationType implements IdentityAware, PersistenceAware<OperationT
         if (this.entityManager == null)
             this.entityManager = entityManager();
         this.entityManager.persist(this);
+        getId();
     }
 
     @Transactional
@@ -157,18 +158,30 @@ public class OperationType implements IdentityAware, PersistenceAware<OperationT
     }
 
     public static List<OperationType> findAllOperationTypes() {
-        return entityManager().createQuery("select o from OperationType o", OperationType.class)
+        List<OperationType> operationTypes = entityManager().createQuery("select o from OperationType o", OperationType.class)
             .getResultList();
+        for(OperationType operationType : operationTypes) {
+            operationType.getId();
+        }
+        return operationTypes;
     }
 
     public static OperationType findById(Integer id) {
         if (id == null)
             return null;
-        return entityManager().find(OperationType.class, id);
+        OperationType operationType = entityManager().find(OperationType.class, id);
+        if(operationType != null) {
+            operationType.getId();
+        }
+        return operationType;
     }
 
     public static List<OperationType> find(Integer firstResult, Integer maxResults) {
-        return entityManager().createQuery("select o from OperationType o", OperationType.class)
+        List<OperationType> operationTypes = entityManager().createQuery("select o from OperationType o", OperationType.class)
             .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
+        for(OperationType operationType : operationTypes) {
+            operationType.getId();
+        }
+        return operationTypes;
     }
 }

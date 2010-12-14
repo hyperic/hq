@@ -148,6 +148,7 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
         return operationTypes;
     }
 
+    @SuppressWarnings("unchecked")
     public Set<Relationship<ResourceType>> getRelationships(ResourceType entity, String name, RelationshipDirection direction) {
     	Set<Relationship<ResourceType>> relations = new HashSet<Relationship<ResourceType>>();
     	Iterable<org.neo4j.graphdb.Relationship> relationships;
@@ -216,6 +217,7 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
 		return false;
 	}
 
+    @SuppressWarnings("unchecked")
     @Transactional
 	public Relationship<ResourceType> relateTo(ResourceType entity, String relationName) {
         return (Relationship<ResourceType>) this.relateTo(entity, Relationship.class, relationName);
@@ -277,6 +279,7 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
             this.entityManager = entityManager();
         ResourceType merged = this.entityManager.merge(this);
         this.entityManager.flush();
+        merged.getId();
         return merged;
     }
 
@@ -387,8 +390,10 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
             }, ReturnableEvaluator.ALL_BUT_START_NODE,
             DynamicRelationshipType.withName(relationName), direction);
         for (Node related : relationTraverser) {
-            resourceTypes.add(graphDatabaseContext.createEntityFromState(related,
-                ResourceType.class));
+            ResourceType type = graphDatabaseContext.createEntityFromState(related,
+                ResourceType.class);
+            type.getId();
+            resourceTypes.add(type);
         }
         return resourceTypes;
     }
@@ -407,8 +412,12 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
     }
 
     public static List<ResourceType> findAllResourceTypes() {
-        return entityManager().createQuery("select o from ResourceType o", ResourceType.class)
+        List<ResourceType> types = entityManager().createQuery("select o from ResourceType o", ResourceType.class)
             .getResultList();
+        for(ResourceType type: types) {
+            type.getId();
+        }
+        return types;
     }
 
     public static ResourceType findResourceType(Integer id) {
@@ -436,12 +445,14 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
     }
 
     public static List<ResourceType> find(Integer firstResult, Integer maxResults) {
-        return entityManager().createQuery("select o from ResourceType o", ResourceType.class)
+        List<ResourceType> types = entityManager().createQuery("select o from ResourceType o", ResourceType.class)
             .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
+        for(ResourceType type: types) {
+            type.getId();
+        }
+        return types;
     }
     
-    
-
     public void setPropertyTypes(Set<PropertyType> propertyTypes) {
         this.propertyTypes = propertyTypes;
     }
