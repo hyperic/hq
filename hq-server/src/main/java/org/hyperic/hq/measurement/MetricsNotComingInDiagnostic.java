@@ -51,6 +51,7 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.ha.HAUtil;
 import org.hyperic.hq.hibernate.SessionManager;
 import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
+import org.hyperic.hq.inventory.domain.Relationship;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceRelation;
 import org.hyperic.hq.measurement.server.session.Measurement;
@@ -277,9 +278,9 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
             resources.add(platform.getResource());
         }
 
-        final Collection<ResourceRelation> edges = resourceManager.findResourceEdges(resourceManager
+        final Collection<Relationship<Resource>> edges = resourceManager.findResourceEdges(resourceManager
             .getContainmentRelation(), resources);
-        for (final ResourceRelation edge : edges) {
+        for (final Relationship<Resource> edge : edges) {
             try {
                 final Platform platform = platformManager.findPlatformById(edge.getFrom()
                     .getId());

@@ -52,6 +52,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.inventory.domain.Relationship;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceRelation;
@@ -149,7 +150,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         res.setOwner(owner);
         res.persist();
 
-        ResourceTypeRelation relation = getContainmentRelation();
+        Relationship<ResourceType> relation = getContainmentRelation();
 
         //TODO what did we need the self-edge for?
         //resourceEdgeDAO.create(res, res, 0, relation); // Self-edge
@@ -176,7 +177,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     public void moveResource(AuthzSubject owner, Resource target, Resource destination) {
         long start = System.currentTimeMillis();
 
-        ResourceTypeRelation relation = getContainmentRelation();
+        Relationship<ResourceType> relation = getContainmentRelation();
 
         target.removeRelationships();
 
@@ -381,10 +382,10 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      * @return {@link Collection} of {@link ResourceEdge}s
      */
     @Transactional(readOnly = true)
-    public Collection<ResourceRelation> findResourceEdges(ResourceTypeRelation relation,
+    public Collection<Relationship<Resource>> findResourceEdges(Relationship<ResourceType> relation,
                                                       List<Resource> parentList) {
       //TODO this was findDescEdges before, so I guess it returned relationships all the way down.  Find out why
-        Set<ResourceRelation> edges = new HashSet<ResourceRelation>();
+        Set<Relationship<Resource>> edges = new HashSet<Relationship<Resource>>();
         for(Resource parent: parentList) {
             edges.addAll(parent.getRelationshipsFrom(relation.getName()));
         }
@@ -396,7 +397,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      * @return {@link Collection} of {@link ResourceEdge}s
      */
     @Transactional(readOnly = true)
-    public Collection<ResourceRelation> findResourceEdges(ResourceTypeRelation relation, Resource parent) {
+    public Collection<Relationship<Resource>> findResourceEdges(Relationship<ResourceType> relation, Resource parent) {
       //TODO this was findDescEdges before, so I guess it returned relationships all the way down.  Find out why
         return parent.getRelationshipsFrom(relation.getName());
     }
@@ -408,56 +409,56 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     }
 
     @Transactional(readOnly = true)
-    public boolean hasChildResourceEdges(Resource resource, ResourceTypeRelation relation) {
+    public boolean hasChildResourceEdges(Resource resource, Relationship<ResourceType> relation) {
         return resource.getResourcesFrom(getContainmentRelation().getName()).isEmpty();
     }
 
     @Transactional(readOnly = true)
-    public int getDescendantResourceEdgeCount(Resource resource, ResourceTypeRelation relation) {
+    public int getDescendantResourceEdgeCount(Resource resource, Relationship<ResourceType> relation) {
         //TODO this traversed all distances before
         return resource.getResourcesFrom(getContainmentRelation().getName()).size();
     }
 
     @Transactional(readOnly = true)
-    public Collection<ResourceRelation> findChildResourceEdges(Resource resource,
-                                                           ResourceTypeRelation relation) {
+    public Collection<Relationship<Resource>> findChildResourceEdges(Resource resource,
+    		Relationship<ResourceType> relation) {
         return resource.getRelationshipsFrom(relation.getName());
     }
 
     @Transactional(readOnly = true)
-    public Collection<ResourceRelation> findDescendantResourceEdges(Resource resource,
-                                                                ResourceTypeRelation relation) {
+    public Collection<Relationship<Resource>> findDescendantResourceEdges(Resource resource,
+    		Relationship<ResourceType> relation) {
       //TODO this was findDescEdges before, so I guess it returned relationships all the way down.  Find out why
         return resource.getRelationshipsFrom(relation.getName());
     }
 
     @Transactional(readOnly = true)
-    public Collection<ResourceRelation> findAncestorResourceEdges(Resource resource,
-                                                              ResourceTypeRelation relation) {
+    public Collection<Relationship<Resource>> findAncestorResourceEdges(Resource resource,
+    		Relationship<ResourceType> relation) {
       //TODO this was findAncestoryEdges before, so I guess it returned relationships all the way up.  Find out why
         return resource.getRelationshipsTo(relation.getName());
     }
 
     @Transactional(readOnly = true)
-    public Collection<ResourceRelation> findResourceEdgesByName(String name, ResourceTypeRelation relation) {
+    public Collection<Relationship<Resource>> findResourceEdgesByName(String name, Relationship<ResourceType> relation) {
         //TODO guard against NPE and this is a terrible method name
         return Resource.findResourceByName(name).getRelationshipsFrom(relation.getName());
         
     }
 
     @Transactional(readOnly = true)
-    public ResourceRelation getParentResourceEdge(Resource resource, ResourceTypeRelation relation) {
+    public Relationship<Resource> getParentResourceEdge(Resource resource, Relationship<ResourceType> relation) {
         //TODO not really enforcing only one relationship of a certain type..
         return resource.getRelationshipsTo(relation.getName()).iterator().next();
     }
 
     @Transactional(readOnly = true)
-    public boolean hasResourceTypeRelation(Resource resource, ResourceTypeRelation relation) {
+    public boolean hasResourceTypeRelation(Resource resource, Relationship<ResourceType> relation) {
         return resource.getRelationshipsFrom(relation.getName()).isEmpty();
     }
 
 
-    private void createResourceEdges(Resource parent, Resource child, ResourceTypeRelation relation,
+    private void createResourceEdges(Resource parent, Resource child, Relationship<ResourceType> relation,
                                      boolean createSelfEdge) {
 
         // Self-edge
@@ -479,7 +480,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
 //        }
     }
 
-    public void removeResourceEdges(AuthzSubject subject, ResourceTypeRelation relation, Resource parent)
+    public void removeResourceEdges(AuthzSubject subject, Relationship<ResourceType> relation, Resource parent)
         throws PermissionException {
 
      
@@ -505,12 +506,12 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         }
         final List<ResourceUpdatedZevent> events = new ArrayList<ResourceUpdatedZevent>();
 
-        final ResourceTypeRelation relation = getContainmentRelation();
+        final Relationship<ResourceType> relation = getContainmentRelation();
         for (final Resource resource : resources) {
             events.add(new ResourceUpdatedZevent(subj, AppdefUtil.newAppdefEntityId(resource)));
-            final Collection<ResourceRelation> descendants = resource.getRelationshipsFrom(relation.getName());
+            final Collection<Relationship<Resource>> descendants = resource.getRelationshipsFrom(relation.getName());
           //TODO this was findDescEdges before, so I guess it returned relationships all the way down.  Find out why
-            for (ResourceRelation edge : descendants) {
+            for (Relationship<Resource> edge : descendants) {
                 final Resource r = edge.getTo();
                 events.add(new ResourceUpdatedZevent(subj, AppdefUtil.newAppdefEntityId(r)));
             }
@@ -519,9 +520,9 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     }
 
     @Transactional(readOnly = true)
-    public ResourceTypeRelation getContainmentRelation() {
+    public Relationship<ResourceType> getContainmentRelation() {
         //TODO how to create relationships applicable for any resource being modeled?
-        return new ResourceTypeRelation();
+        return new Relationship<ResourceType>();
     }
     
     //TODO remove this method - ResourceManager (if kept) should have not knowledge of AppdefEntityIDs

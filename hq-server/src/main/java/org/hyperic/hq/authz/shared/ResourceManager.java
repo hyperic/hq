@@ -35,10 +35,9 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceSortField;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.inventory.domain.Relationship;
 import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.hq.inventory.domain.ResourceRelation;
 import org.hyperic.hq.inventory.domain.ResourceType;
-import org.hyperic.hq.inventory.domain.ResourceTypeRelation;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -158,36 +157,36 @@ public interface ResourceManager {
      */
     public Collection<Resource> findResourceByOwner(AuthzSubject owner);
 
-    Collection<ResourceRelation> findResourceEdges(ResourceTypeRelation relation, List<Resource> parentList);
+    Collection<Relationship<Resource>> findResourceEdges(Relationship<ResourceType> relation, List<Resource> parentList);
 
-    public Collection<ResourceRelation> findResourceEdges(ResourceTypeRelation relation, Resource parent);
+    public Collection<Relationship<Resource>> findResourceEdges(Relationship<ResourceType> relation, Resource parent);
 
     public boolean isResourceChildOf(Resource parent, Resource child);
 
-    public boolean hasChildResourceEdges(Resource resource, ResourceTypeRelation relation);
+    public boolean hasChildResourceEdges(Resource resource, Relationship<ResourceType> relation);
 
-    public int getDescendantResourceEdgeCount(Resource resource, ResourceTypeRelation relation);
+    public int getDescendantResourceEdgeCount(Resource resource, Relationship<ResourceType> relation);
 
-    public Collection<ResourceRelation> findChildResourceEdges(Resource resource,
-                                                           ResourceTypeRelation relation);
+    public Collection<Relationship<Resource>> findChildResourceEdges(Resource resource,
+    		Relationship<ResourceType> relation);
 
-    public Collection<ResourceRelation> findDescendantResourceEdges(Resource resource,
-                                                                ResourceTypeRelation relation);
+    public Collection<Relationship<Resource>> findDescendantResourceEdges(Resource resource,
+    		Relationship<ResourceType> relation);
 
-    public Collection<ResourceRelation> findAncestorResourceEdges(Resource resource,
-                                                              ResourceTypeRelation relation);
+    public Collection<Relationship<Resource>> findAncestorResourceEdges(Resource resource,
+    		Relationship<ResourceType> relation);
 
-    public Collection<ResourceRelation> findResourceEdgesByName(String name, ResourceTypeRelation relation);
+    public Collection<Relationship<Resource>> findResourceEdgesByName(String name, Relationship<ResourceType> relation);
 
-    public ResourceRelation getParentResourceEdge(Resource resource, ResourceTypeRelation relation);
+    public Relationship<Resource> getParentResourceEdge(Resource resource, Relationship<ResourceType> relation);
 
-    public boolean hasResourceTypeRelation(Resource resource, ResourceTypeRelation relation);
+    public boolean hasResourceTypeRelation(Resource resource, Relationship<ResourceType> relation);
 
 
-    public void removeResourceEdges(AuthzSubject subject, ResourceTypeRelation relation, Resource parent)
+    public void removeResourceEdges(AuthzSubject subject, Relationship<ResourceType> relation, Resource parent)
         throws PermissionException;
 
-    public ResourceTypeRelation getContainmentRelation();
+    public Relationship<ResourceType> getContainmentRelation();
 
 
 }

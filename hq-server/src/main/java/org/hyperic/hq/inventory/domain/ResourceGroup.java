@@ -1,13 +1,12 @@
 package org.hyperic.hq.inventory.domain;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
+import javax.persistence.Transient;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.hyperic.hq.authz.server.session.Role;
 import org.neo4j.graphdb.Node;
 import org.springframework.datastore.graph.annotation.GraphProperty;
@@ -89,7 +88,7 @@ public class ResourceGroup
         this.privateGroup = privateGroup;
     }
     
-    public int getGroupType() {
+    public Long getGroupType() {
         //TODO replace with calls to group.getType().getId()
        //Doing this just in case we can't pre-populate ResourceTypes with IDs as expected in AppdefEntityConstants.getAppdefGroupTypeName
         return getType().getId();
@@ -105,6 +104,10 @@ public class ResourceGroup
             .getResultList();
     }
 
+    public static ResourceGroup findResourceGroup(Integer id) {
+    	return findById(Long.valueOf(id));
+    }
+    
     public static ResourceGroup findById(Long id) {
         if (id == null)
             return null;

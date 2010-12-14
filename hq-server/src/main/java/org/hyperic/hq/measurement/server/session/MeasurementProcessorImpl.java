@@ -47,6 +47,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.inventory.domain.Relationship;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceRelation;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
@@ -131,11 +132,11 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
             if (resource == null || resource.isInAsyncDeleteState()) {
                 continue;
             }
-            final Collection<ResourceRelation> edges =
+            final Collection<Relationship<Resource>> edges =
                 resourceManager.findResourceEdges(resourceManager.getContainmentRelation(), resource);
             aeids.ensureCapacity(aeids.size()+edges.size()+1);
             aeids.add(AppdefUtil.newAppdefEntityId(resource));
-            for (final ResourceRelation e : edges ) {
+            for (final Relationship<Resource> e : edges ) {
                 final Resource r = e.getTo();
                 if (r == null || r.isInAsyncDeleteState()) {
                     continue;
