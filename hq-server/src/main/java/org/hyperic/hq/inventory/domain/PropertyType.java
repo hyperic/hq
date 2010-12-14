@@ -16,6 +16,7 @@ import javax.validation.constraints.NotNull;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.hibernate.annotations.GenericGenerator;
+import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.Node;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.datastore.graph.annotation.GraphProperty;
@@ -59,7 +60,7 @@ public class PropertyType implements IdentityAware, PersistenceAware<PropertyTyp
 
     @ManyToOne
     @Transient
-    @RelatedTo(type = "HAS_PROPERTIES", direction = Direction.INCOMING, elementClass = ResourceType.class)
+    @RelatedTo(type = RelationshipTypes.HAS_PROPERTY_TYPE, direction = Direction.INCOMING, elementClass = ResourceType.class)
     private ResourceType resourceType;
 
     @GraphProperty
@@ -132,8 +133,6 @@ public class PropertyType implements IdentityAware, PersistenceAware<PropertyTyp
         if (this.entityManager == null)
             this.entityManager = entityManager();
         this.entityManager.persist(this);
-        // TODO this call appears to be necessary to get PropertyType populated
-        // with its underlying node
         getId();
     }
 

@@ -13,6 +13,24 @@ abstract public class RelationshipTypes {
     // This is used for ResourceType->ResourceType
     // ex. "vApp EXTENDS ResourcePool
     public static final String EXTENDS = "EXTENDS";
+    
+    public static final String DEFINED_BY ="DEFINED_BY";
+    
+    public static final String HAS_OPERATION_TYPE ="HAS_OPERATION_TYPE";
+    
+    public static final String HAS_PROPERTY_TYPE ="HAS_PROPERTY_TYPE";
+    
+    public static final String OWNS ="OWNS";
+    
+    public static final String HAS_MEMBER="HAS_MEMBER";
+    
+    public static final String HAS_CONFIG="HAS_CONFIG";
+    
+    public static final String HAS_CONFIG_TYPE="HAS_CONFIG_TYPE";
+    
+    public static final String HAS_ROLE="HAS_ROLE";
+    
+    //The relationship types below will eventually be removed
 
     public static final String PLATFORM = "PLATFORM";
 

@@ -89,10 +89,10 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
 
     @OneToMany
     @Transient
-    @RelatedTo(type = "OWNS", direction = Direction.INCOMING, elementClass = AuthzSubject.class)
+    @RelatedTo(type = RelationshipTypes.OWNS, direction = Direction.INCOMING, elementClass = AuthzSubject.class)
     private AuthzSubject owner;
 
-    @RelatedTo(type = "HAS_MEMBER", direction = Direction.INCOMING, elementClass = ResourceGroup.class)
+    @RelatedTo(type = RelationshipTypes.HAS_MEMBER, direction = Direction.INCOMING, elementClass = ResourceGroup.class)
     @OneToMany
     @Transient
     private Set<ResourceGroup> resourceGroups;
@@ -130,7 +130,7 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
 
     private Config getConfig(String type) {
         Iterable<org.neo4j.graphdb.Relationship> relationships = this.getUnderlyingState().getRelationships(
-            DynamicRelationshipType.withName("HAS_CONFIG"), org.neo4j.graphdb.Direction.OUTGOING);
+            DynamicRelationshipType.withName(RelationshipTypes.HAS_CONFIG), org.neo4j.graphdb.Direction.OUTGOING);
         for (org.neo4j.graphdb.Relationship relationship : relationships) {
             if (type.equals(relationship.getProperty("configType"))) {
                 // TODO enforce no more than one?
@@ -452,7 +452,7 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
 
     private void setConfig(Config config, String type) {
         org.neo4j.graphdb.Relationship rel = this.getUnderlyingState().createRelationshipTo(
-            config.getUnderlyingState(), DynamicRelationshipType.withName("HAS_CONFIG"));
+            config.getUnderlyingState(), DynamicRelationshipType.withName(RelationshipTypes.HAS_CONFIG));
         rel.setProperty("configType", type);
     }
 

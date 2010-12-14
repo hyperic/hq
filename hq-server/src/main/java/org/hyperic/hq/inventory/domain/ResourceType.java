@@ -68,24 +68,24 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
     @Transient
     private String description;
 
-    @RelatedTo(type = "HAS_OPERATIONS", direction = Direction.OUTGOING, elementClass = OperationType.class)
+    @RelatedTo(type = RelationshipTypes.HAS_OPERATION_TYPE, direction = Direction.OUTGOING, elementClass = OperationType.class)
     @OneToMany
     @Transient
     private Set<OperationType> operationTypes;
 
-    @RelatedTo(type = "HAS_PROPERTIES", direction = Direction.OUTGOING, elementClass = PropertyType.class)
+    @RelatedTo(type = RelationshipTypes.HAS_PROPERTY_TYPE, direction = Direction.OUTGOING, elementClass = PropertyType.class)
     @OneToMany
     @Transient
     private Set<PropertyType> propertyTypes;
 
-    @RelatedTo(type = "HAS_CONFIG_TYPE", direction = Direction.OUTGOING, elementClass = ConfigType.class)
+    @RelatedTo(type = RelationshipTypes.HAS_CONFIG_TYPE, direction = Direction.OUTGOING, elementClass = ConfigType.class)
     @OneToMany
     @Transient
     private Set<ConfigType> configTypes;
 
     @Transient
     @ManyToOne
-    @RelatedTo(type = "DEFINED_BY", direction = Direction.OUTGOING, elementClass = Plugin.class)
+    @RelatedTo(type = RelationshipTypes.DEFINED_BY, direction = Direction.OUTGOING, elementClass = Plugin.class)
     private Plugin plugin;
 
     @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.INCOMING, elementClass = Resource.class)
@@ -411,7 +411,7 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
     public Set<ConfigType> getMeasurementConfigTypes() {
         Set<ConfigType> configTypes = new HashSet<ConfigType>();
         Iterable<org.neo4j.graphdb.Relationship> relationships = this.getUnderlyingState().getRelationships(
-            DynamicRelationshipType.withName("HAS_CONFIG_TYPE"),
+            DynamicRelationshipType.withName(RelationshipTypes.HAS_CONFIG_TYPE),
             org.neo4j.graphdb.Direction.OUTGOING);
         for (org.neo4j.graphdb.Relationship relationship : relationships) {
             if ("Measurement".equals(relationship.getProperty("configType"))) {

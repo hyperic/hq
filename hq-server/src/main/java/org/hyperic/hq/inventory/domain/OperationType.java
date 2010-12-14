@@ -16,6 +16,7 @@ import javax.validation.constraints.NotNull;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.hibernate.annotations.GenericGenerator;
+import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.Node;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.datastore.graph.annotation.GraphProperty;
@@ -47,7 +48,7 @@ public class OperationType implements IdentityAware, PersistenceAware<OperationT
     @ManyToOne
     @NotNull
     @Transient
-    @RelatedTo(type = "HAS_OPERATIONS", direction = Direction.INCOMING, elementClass = ResourceType.class)
+    @RelatedTo(type = RelationshipTypes.HAS_OPERATION_TYPE, direction = Direction.INCOMING, elementClass = ResourceType.class)
     private ResourceType resourceType;
 
     @Version
