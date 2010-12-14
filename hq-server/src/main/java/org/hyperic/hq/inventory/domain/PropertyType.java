@@ -61,7 +61,6 @@ public class PropertyType {
     private Boolean optional;
 
     @ManyToOne
-    @NotNull
     @Transient
     @RelatedTo(type = "HAS_PROPERTIES", direction = Direction.INCOMING, elementClass = ResourceType.class)
     private ResourceType resourceType;
