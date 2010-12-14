@@ -213,7 +213,9 @@ public class Resource {
             }, ReturnableEvaluator.ALL_BUT_START_NODE,
             DynamicRelationshipType.withName(relationName), direction);
         for (Node related : relationTraverser) {
-            resources.add(graphDatabaseContext.createEntityFromState(related, Resource.class));
+            Resource resource = graphDatabaseContext.createEntityFromState(related, Resource.class);
+            resource.getId();
+            resources.add(resource);
         }
         return resources;
     }
