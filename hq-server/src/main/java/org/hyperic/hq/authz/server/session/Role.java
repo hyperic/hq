@@ -29,9 +29,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.authz.values.OwnedRoleValue;
 import org.hyperic.hq.common.server.session.Calendar;
@@ -41,26 +52,40 @@ import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.springframework.datastore.graph.annotation.NodeEntity;
 
 @NodeEntity(partial=true)
+@Entity
+@Table(name="EAM_ROLE")
 public class Role  {
-    private String     _description;
-    private boolean    _system;
-    private Resource   _resource;
-    private Collection _resourceGroups;
-    private Collection _operations;
-    private Collection _subjects;
-    private Collection _calendars;
-    private RoleValue  _roleValue;
-    private String _name;
-    private String _sortName;
-    private Integer _id;
-
-    // for hibernate optimistic locks -- don't mess with this.
-    // Named ugly-style since we already use VERSION in some of our tables.
-    // really need to use Long instead of primitive value
-    // because the database column can allow null version values.
-    // The version column IS NULLABLE for migrated schemas. e.g. HQ upgrade
-    // from 2.7.5.
-    private Long    _version_;
+    
+    @Column(name="DESCRIPTION",length=100)
+    private String     description;
+    
+    @Column(name="FSYSTEM")
+    private boolean    system;
+    
+    @ManyToOne
+    private Resource   resource;
+    
+    @ManyToMany(mappedBy="roles")
+    private Collection<AuthzSubject> subjects;
+    
+    @OneToMany(cascade=CascadeType.ALL)
+    private Collection<RoleCalendar> calendars;
+      
+    @Column(name="NAME",length=100,nullable=false,unique=true)
+    private String name;
+    
+    @Column(name="SORT_NAME",length=100)
+    private String sortName;
+    
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+    
+    @Column(name="VERSION_COL")
+    @Version
+    private Long   version;
 
 
     public Role() {
@@ -68,58 +93,59 @@ public class Role  {
     }
 
     public void setId(Integer id) {
-        _id = id;
+        this.id = id;
     }
 
     public Integer getId() {
-        return _id;
+        return id;
     }
     
     public String getName() {
-        return _name;
+        return name;
     }
 
     public void setName(String name) {
         if (name == null)
             name = "";
-        _name = name;
+        this.name = name;
         setSortName(name);
     }
 
     public String getSortName() {
-        return _sortName;
+        return sortName;
     }
 
     public void setSortName(String sortName) {
-        _sortName = sortName != null ? sortName.toUpperCase() : null;
+        this.sortName = sortName != null ? sortName.toUpperCase() : null;
     }
     
     public String getDescription() {
-        return _description;
+        return description;
     }
     
     void setDescription(String val) {
-        _description = val;
+        this.description = val;
     }
 
     public boolean isSystem() {
-        return _system;
+        return system;
     }
     
     void setSystem(boolean fsystem) {
-        _system = fsystem;
+        this.system = fsystem;
     }
 
     public Resource getResource() {
-        return _resource;
+        return resource;
     }
     
     void setResource(Resource resourceId) {
-        _resource = resourceId;
+        this.resource = resourceId;
     }
 
-    public Collection getResourceGroups() {
-        return _resourceGroups;
+    public Collection<ResourceGroup> getResourceGroups() {
+        //TODO graph access
+        return new HashSet<ResourceGroup>();
     }
     
     void removeResourceGroup(ResourceGroup group) {
@@ -128,15 +154,14 @@ public class Role  {
     }
     
     void clearResourceGroups() {
-        for (Iterator i=getResourceGroups().iterator(); i.hasNext(); ) {
-            ResourceGroup grp = (ResourceGroup)i.next();
+        for (ResourceGroup grp:getResourceGroups() ) {
             grp.removeRole(this);
         }
         getResourceGroups().clear();
     }
     
-    void setResourceGroups(Collection val) {
-        _resourceGroups = val;
+    void setResourceGroups(Collection<ResourceGroup> val) {
+        //TODO graph access
     }
 
     void addOperation(OperationType op) {
@@ -144,39 +169,38 @@ public class Role  {
     }
     
     public Collection<OperationType> getOperations() {
-        return _operations;
+        //TODO graph access
+        return new HashSet<OperationType>();
     }
     
-    void setOperations(Collection val) {
-        _operations = val;
+    void setOperations(Collection<OperationType> val) {
+        //TODO graph access
     }
 
     public Collection<AuthzSubject> getSubjects() {
-        return _subjects;
+        return subjects;
     }
     
-    void setSubjects(Collection val) {
-        _subjects = val;
+    void setSubjects(Collection<AuthzSubject> val) {
+        this.subjects = val;
     }
     
-    Collection getCalendarBag() {
-        return _calendars;
+    Collection<RoleCalendar> getCalendarBag() {
+        return calendars;
     }
     
-    void setCalendarBag(Collection c) {
-        _calendars = c;
+    void setCalendarBag(Collection<RoleCalendar> c) {
+        this.calendars = c;
     }
     
     /**
      * Get a collection of {@link Calendar}s of the specified type for the
      * role.  
      */
-    public Collection getCalendars(RoleCalendarType type) {
-        List res = new ArrayList();
+    public Collection<Calendar> getCalendars(RoleCalendarType type) {
+        List<Calendar> res = new ArrayList<Calendar>();
         
-        for (Iterator i=getCalendars().iterator(); i.hasNext(); ) {
-            RoleCalendar c = (RoleCalendar)i.next();
-            
+        for (RoleCalendar c : getCalendars()) {
             if (c.getType().equals(type))
                 res.add(c.getCalendar());
         }
@@ -184,7 +208,7 @@ public class Role  {
     }
     
     public Collection<RoleCalendar> getCalendars() {
-        return Collections.unmodifiableCollection(_calendars);
+        return Collections.unmodifiableCollection(calendars);
     }
     
     void addCalendar(RoleCalendar c) {
@@ -200,9 +224,7 @@ public class Role  {
     }
 
     void clearSubjects() {
-        for (Iterator i=getSubjects().iterator(); i.hasNext(); ) {
-            AuthzSubject s = (AuthzSubject)i.next();
-            
+        for (AuthzSubject s : getSubjects() ) { 
             s.removeRole(this);
         }
         getSubjects().clear();
@@ -212,22 +234,22 @@ public class Role  {
      * @deprecated use (this) Role instead
      */
     public RoleValue getRoleValue() {
-        _roleValue = new RoleValue();
-        _roleValue.setDescription(getDescription());
-        _roleValue.setId(getId());
-        _roleValue.setName(getName());
-        _roleValue.setSortName(getSortName());
-        _roleValue.setSystem(isSystem());
+        RoleValue roleValue = new RoleValue();
+        roleValue = new RoleValue();
+        roleValue.setDescription(getDescription());
+        roleValue.setId(getId());
+        roleValue.setName(getName());
+        roleValue.setSortName(getSortName());
+        roleValue.setSystem(isSystem());
         
-        _roleValue.removeAllOperationValues();
+        roleValue.removeAllOperationValues();
         if (getOperations() != null) {
-            for (Iterator it = getOperations().iterator(); it.hasNext(); ) {
-                OperationType op = (OperationType) it.next();
-                _roleValue.addOperationValue(op);
+            for (OperationType op : getOperations() ) {
+                roleValue.addOperationValue(op);
             }
         }
 
-        return _roleValue;
+        return roleValue;
     }
 
     void setRoleValue(RoleValue val) {
@@ -242,12 +264,12 @@ public class Role  {
         return orv;
     }
     
-    public long get_version_() {
-        return _version_ != null ? _version_.longValue() : 0;
+    public long getVersion() {
+        return version != null ? version.longValue() : 0;
     }
 
-    protected void set_version_(Long newVer) {
-        _version_ = newVer;
+    protected void setVersion(Long newVer) {
+        version = newVer;
     }
 }
 

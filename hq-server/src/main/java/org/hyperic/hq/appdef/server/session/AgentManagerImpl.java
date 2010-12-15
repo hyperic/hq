@@ -266,7 +266,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         agent.setAddress(ip);
         agent.setPort(port);
         agent.setAuthToken(authToken);
-        agent.setVersion(version);
+        agent.setAgentVersion(version);
         agent.setAgentType(type);
         agent.setUnidirectional(unidirectional);
         agent.setModifiedTime(new Long(System.currentTimeMillis()));
@@ -292,7 +292,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         agent.setAddress(ip);
         agent.setPort(port);
         agent.setAuthToken(authToken);
-        agent.setVersion(version);
+        agent.setAgentVersion(version);
         agent.setAgentType(type);
         agent.setUnidirectional(false);
         agent.setModifiedTime(new Long(System.currentTimeMillis()));
@@ -318,7 +318,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         logAgentWarning(ip, port, unidirectional);
         agent.setAuthToken(authToken);
         agent.setAgentToken(agentToken);
-        agent.setVersion(version);
+        agent.setAgentVersion(version);
         agent.setAgentType(type);
         agent.setUnidirectional(unidirectional);
         agent.setModifiedTime(new Long(System.currentTimeMillis()));
@@ -342,7 +342,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         logAgentWarning(ip, port, false);
         agent.setAuthToken(authToken);
         agent.setAgentToken(agentToken);
-        agent.setVersion(version);
+        agent.setAgentVersion(version);
         agent.setAgentType(type);
         agent.setUnidirectional(false);
         agent.setModifiedTime(new Long(System.currentTimeMillis()));
@@ -844,9 +844,9 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             Agent agent = getAgent(aid);
             String updatedVersion = (String) updatedAgentInfo.get(AgentUpgrade_result.VERSION);
 
-            if (!agent.getVersion().equals(updatedVersion) && updatedVersion != null) {
+            if (!agent.getAgentVersion().equals(updatedVersion) && updatedVersion != null) {
                 // Only update if different
-                agent.setVersion(updatedVersion);
+                agent.setAgentVersion(updatedVersion);
             }
         }
     }

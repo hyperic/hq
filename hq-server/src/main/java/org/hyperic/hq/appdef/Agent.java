@@ -25,38 +25,71 @@
 
 package org.hyperic.hq.appdef;
 
-import java.util.Collection;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Version;
 
-import org.hyperic.hq.inventory.domain.Resource;
+import org.hibernate.annotations.GenericGenerator;
 import org.springframework.datastore.graph.annotation.NodeEntity;
 
+@Entity
+@Table(name="EAM_AGENT")
 @NodeEntity(partial = true)
 public class Agent {
-    private String _address;
-    private Integer _port;
-    private String _authToken;
-    private String _agentToken;
-    private String _version;
-    private boolean _unidirectional;
+    
+    @Column(name="ADDRESS",length=255,nullable=false)
+    private String address;
+    
+    @Column(name="PORT", nullable=false)
+    private Integer port;
+    
+    @Column(name="AUTHTOKEN",length=100,nullable=false)
+    private String authToken;
+    
+    @Column(name="AGENTTOKEN",length=100,nullable=false,unique=true)
+    private String agentToken;
+    
+    @Column(name="VERSION",length=20)
+    private String agentVersion;
+    
+    @Column(name="UNIDIRECTIONAL",nullable=false)
+    private boolean unidirectional;
+    
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
     private Integer id;
-    private AgentType _agentType;
+    
+    @ManyToOne
+    private AgentType agentType;
+    
+    @Column(name="CTIME")
     private Long creationTime;
+    
+    @Column(name="MTIME")
     private Long modifiedTime;
-    private Long    _version_;
-    private Collection<Resource> resources;
+    
+    @Column(name="VERSION_COL")
+    @Version
+    private Long    version;
 
     public Agent() {
     }
 
     public Agent(AgentType type, String address, Integer port, boolean unidirectional,
                  String authToken, String agentToken, String version) {
-        _agentType = type;
-        _address = address;
-        _port = port;
-        _unidirectional = unidirectional;
-        _authToken = authToken;
-        _agentToken = agentToken;
-        _version = version;
+        this.agentType = type;
+        this.address = address;
+        this.port = port;
+        this.unidirectional = unidirectional;
+        this.authToken = authToken;
+        this.agentToken = agentToken;
+        this.agentVersion = version;
     }
 
     public Integer getId() {
@@ -68,55 +101,51 @@ public class Agent {
     }
 
     public String getAddress() {
-        return _address;
+        return address;
     }
 
     public void setAddress(String address) {
-        _address = address;
+        this.address = address;
     }
 
     public Integer getPort() {
-        return _port;
+        return port;
     }
 
     public void setPort(Integer port) {
-        _port = port;
+        this.port = port;
     }
-
-    public void setPort(int port) {
-        _port = new Integer(port);
-    }
-
+    
     public String getAuthToken() {
-        return _authToken;
+        return authToken;
     }
 
     public void setAuthToken(String authToken) {
-        _authToken = authToken;
+        this.authToken = authToken;
     }
 
     public String getAgentToken() {
-        return _agentToken;
+        return agentToken;
     }
 
     public void setAgentToken(String agentToken) {
-        _agentToken = agentToken;
+        this.agentToken = agentToken;
     }
 
-    public String getVersion() {
-        return _version;
+    public String getAgentVersion() {
+        return agentVersion;
     }
 
-    public void setVersion(String version) {
-        _version = version;
+    public void setAgentVersion(String version) {
+        this.agentVersion = version;
     }
 
     public boolean isUnidirectional() {
-        return _unidirectional;
+        return unidirectional;
     }
 
     public void setUnidirectional(boolean unidirectional) {
-        _unidirectional = unidirectional;
+        this.unidirectional = unidirectional;
     }
 
     public boolean isNewTransportAgent() {
@@ -130,11 +159,11 @@ public class Agent {
     }
 
     public AgentType getAgentType() {
-        return _agentType;
+        return agentType;
     }
 
     public void setAgentType(AgentType agentType) {
-        _agentType = agentType;
+        this.agentType = agentType;
     }
 
     public String connectionString() {
@@ -156,21 +185,13 @@ public class Agent {
     public void setModifiedTime(Long modifiedTime) {
         this.modifiedTime = modifiedTime;
     }
-    
-    public Collection<Resource> getResources() {
-        return resources;
+      
+    public long getVersion() {
+        return version != null ? version.longValue() : 0;
     }
 
-    public void setResources(Collection<Resource> resources) {
-        this.resources = resources;
-    }
-    
-    public long get_version_() {
-        return _version_ != null ? _version_.longValue() : 0;
-    }
-
-    protected void set_version_(Long newVer) {
-        _version_ = newVer;
+    protected void setVersion(Long newVer) {
+        version = newVer;
     }
 
     public String toString() {

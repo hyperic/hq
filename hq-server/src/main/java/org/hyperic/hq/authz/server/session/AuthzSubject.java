@@ -26,42 +26,87 @@
 package org.hyperic.hq.authz.server.session;
 
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Set;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.OptimisticLock;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.springframework.datastore.graph.annotation.NodeEntity;
 
+@Entity
+@Table(name="EAM_SUBJECT")
 @NodeEntity(partial=true)
 public class AuthzSubject  {
-    private String     _dsn;
-    private String     _firstName;
-    private String     _lastName;
-    private String     _emailAddress;
-    private String     _smsAddress;
-    private String     _phoneNumber;
-    private String     _department;
-    private boolean    _active;
-    private boolean    _system;
-    private boolean    _htmlEmail;
-    private Resource   _resource;
-    private Collection _roles;
-    private Crispo     _prefs;
-    private String _name;
-    private String _sortName;
-    private Integer _id;
-
-    // for hibernate optimistic locks -- don't mess with this.
-    // Named ugly-style since we already use VERSION in some of our tables.
-    // really need to use Long instead of primitive value
-    // because the database column can allow null version values.
-    // The version column IS NULLABLE for migrated schemas. e.g. HQ upgrade
-    // from 2.7.5.
-    private Long    _version_;
     
-    private AuthzSubjectValue _valueObj;
+    @Column(name="DSN",length=100,nullable=false)
+    private String     dsn;
+    
+    @Column(name="FIRST_NAME",length=100)
+    private String     firstName;
+    
+    @Column(name="LAST_NAME",length=100)
+    private String     lastName;
+    
+    @Column(name="EMAIL_ADDRESS",length=100)
+    private String     emailAddress;
+    
+    @Column(name="SMS_ADDRESS",length=100)
+    private String     smsAddress;
+    
+    @Column(name="PHONE_NUMBER",length=100)
+    private String     phoneNumber;
+    
+    @Column(name="DEPARTMENT",length=100)
+    private String  department;
+    
+    @Column(name="FACTIVE",nullable=false)
+    private boolean    active;
+    
+    @Column(name="FSYSTEM",nullable=false)
+    private boolean    system;
+    
+    @Column(name="HTML_EMAIL",nullable=false)
+    private boolean    htmlEmail;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    private Resource   resource;
+    
+    @ManyToMany(fetch=FetchType.LAZY)
+    @OptimisticLock(excluded = true)
+    private Set<Role> roles;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    private Crispo     prefs;
+    
+    @Column(name="NAME",length=100,nullable=false)
+    private String name;
+    
+    @Column(name="SORT_NAME",length=100)
+    private String sortName;
+    
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name="VERSION_COL")
+    @Version
+    private Long version;
+    
 
     protected AuthzSubject() {
     }
@@ -85,54 +130,54 @@ public class AuthzSubject  {
     }
     
     public void setId(Integer id) {
-        _id = id;
+        this.id = id;
     }
 
     public Integer getId() {
-        return _id;
+        return id;
     }
     
     public String getName() {
-        return _name;
+        return name;
     }
 
     public void setName(String name) {
         if (name == null)
             name = "";
-        _name = name;
+        this.name = name;
         setSortName(name);
     }
 
     public String getSortName() {
-        return _sortName;
+        return sortName;
     }
 
     public void setSortName(String sortName) {
-        _sortName = sortName != null ? sortName.toUpperCase() : null;
+        this.sortName = sortName != null ? sortName.toUpperCase() : null;
     }
 
     public String getAuthDsn() {
-        return _dsn;
+        return dsn;
     }
 
     protected void setAuthDsn(String val) {
-        _dsn = val;
+        dsn = val;
     }
 
     public String getFirstName() {
-        return _firstName;
+        return firstName;
     }
 
     protected void setFirstName(String val) {
-        _firstName = val;
+        firstName = val;
     }
 
     public String getLastName() {
-        return _lastName;
+        return lastName;
     }
 
     protected void setLastName(String val) {
-        _lastName = val;
+        lastName = val;
     }
 
     public String getFullName() {
@@ -140,39 +185,39 @@ public class AuthzSubject  {
     }
     
     public String getEmailAddress() {
-        return _emailAddress;
+        return emailAddress;
     }
 
     protected void setEmailAddress(String val) {
-        _emailAddress = val;
+        emailAddress = val;
     }
 
     public String getSMSAddress() {
-        return _smsAddress;
+        return smsAddress;
     }
 
     protected void setSMSAddress(String val) {
-        _smsAddress = val;
+        smsAddress = val;
     }
 
     public String getPhoneNumber() {
-        return _phoneNumber;
+        return phoneNumber;
     }
 
     protected void setPhoneNumber(String val) {
-        _phoneNumber = val;
+        phoneNumber = val;
     }
 
     public String getDepartment() {
-        return _department;
+        return department;
     }
 
     protected void setDepartment(String val) {
-        _department = val;
+        department = val;
     }
 
     public boolean isActive() {
-        return _active;
+        return active;
     }
 
     public boolean getActive() {
@@ -180,11 +225,11 @@ public class AuthzSubject  {
     }
 
     protected void setActive(boolean val) {
-        _active = val;
+        active = val;
     }
 
     public boolean isSystem() {
-        return _system;
+        return system;
     }
 
     public boolean getSystem() {
@@ -192,7 +237,7 @@ public class AuthzSubject  {
     }
     
     public boolean isHtmlEmail() {
-        return _htmlEmail;
+        return htmlEmail;
     }
     
     public boolean getHtmlEmail() {
@@ -200,64 +245,62 @@ public class AuthzSubject  {
     }
 
     protected void setHtmlEmail(boolean useHtml) {
-        _htmlEmail = useHtml;
+        htmlEmail = useHtml;
     }
 
     protected void setSystem(boolean val) {
-        _system = val;
+        system = val;
     }
 
     public Resource getResource() {
-        return _resource;
+        return resource;
     }
 
     protected void setResource(Resource val) {
-        _resource = val;
+        resource = val;
     }
 
     public Collection<Role> getRoles() {
-        return _roles;
+        return roles;
     }
 
-    protected void setRoles(Collection val) {
-        _roles = val;
+    protected void setRoles(Set<Role> val) {
+        roles = val;
     }
 
     public void addRole(Role role) {
-        _roles.add(role);
+        roles.add(role);
     }
 
     public void removeRole(Role role) {
-        _roles.remove(role);
+        roles.remove(role);
     }
 
     public void removeAllRoles() {
-        _roles.clear();
+        roles.clear();
     }
 
     public Crispo getPrefs() {
-        return _prefs;
+        return prefs;
     }
     
     protected void setPrefs(Crispo c) {
-        _prefs = c;
+        prefs = c;
     }
     
-    public long get_version_() {
-        return _version_ != null ? _version_.longValue() : 0;
+    public long getVersion() {
+        return version != null ? version.longValue() : 0;
     }
 
-    protected void set_version_(Long newVer) {
-        _version_ = newVer;
+    protected void setVersion_(Long newVer) {
+        version = newVer;
     }
     
     /**
      * @deprecated use (this) AuthzSubject instead
      */
     public AuthzSubjectValue getAuthzSubjectValue() {
-        if (_valueObj == null) 
-            _valueObj = new AuthzSubjectValue();
-
+         AuthzSubjectValue _valueObj = new AuthzSubjectValue();
         _valueObj.setSortName(getSortName());
         _valueObj.setActive(getActive());
         _valueObj.setSystem(getSystem());
