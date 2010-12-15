@@ -971,8 +971,7 @@
 
   <server name="Weblogic"
           version="6.1"
-          description="Application Server Node"
-          platforms="Unix,Win32">
+          description="Application Server Node">
 
     <config include="node"/>
 
@@ -1201,9 +1200,6 @@
             platform="Win32"
             class="WeblogicControlWin32Plugin"/>
 
-    <scan>
-      <include name="/**/.wlstaging/console.war"/>
-    </scan>
   </server>
 
   <server name="Weblogic NodeManager"
@@ -1243,9 +1239,6 @@
 
     <property name="PRODUCT_DIR" value="weblogic700"/>
 
-    <scan>
-      <include name="/**/.internal/console.war"/>
-    </scan>
   </server>
 
   <server name="Weblogic NodeManager"
@@ -1264,9 +1257,6 @@
 
     <property name="PRODUCT_DIR" value="weblogic81"/>
 
-    <scan>
-      <include name="/**/.internal/console.war"/>
-    </scan>
   </server>
 
   <server name="Weblogic NodeManager"
