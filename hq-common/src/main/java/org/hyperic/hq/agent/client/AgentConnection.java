@@ -30,6 +30,7 @@ import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.agent.AgentStreamPair;
+import org.hyperic.util.timer.StopWatch;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -49,7 +50,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class AgentConnection {
     private static final Log log = LogFactory.getLog(AgentConnection.class);
-    private static final int MAX_RETRIES = 10;
+    private static final int MAX_RETRIES = 20;
     private static final long SLEEP_TIME = 3000;
     private String   _agentAddress;
     private int      _agentPort;
@@ -139,11 +140,17 @@ public class AgentConnection {
      */
     public AgentStreamPair sendCommandHeaders(String cmdName, int cmdVersion, AgentRemoteValue arg)
     throws AgentConnectionException {
+        final StopWatch watch = new StopWatch();
+        final boolean debug = log.isDebugEnabled();
         try {
+            if (debug) watch.markTimeBegin("cmdName=" + cmdName);
             return sendCommandHeadersWithRetries(cmdName, cmdVersion, arg);
         } catch(IOException exc){
             throw new AgentConnectionException(
                 "Error sending argument: " + exc.getMessage() + ", cmd=" + cmdName, exc);
+        } finally {
+            if (debug) watch.markTimeEnd("cmdName=" + cmdName);
+            if (debug) log.debug(watch);
         }
     }
         
