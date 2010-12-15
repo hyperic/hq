@@ -440,6 +440,7 @@
     <metric name="Availability"
             indicator="true"/>
     <metric name="Connection Validation Time"
+            units="ms"
             indicator="true"/>
   </server>
 </plugin>
