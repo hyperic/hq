@@ -81,9 +81,7 @@ public class AppServiceNodeBean extends ServiceValue implements java.io.Serializ
             .getAppdefResourceTypeValue());
         this.setEntityId(service.getEntityId()); 
         if (service instanceof ServiceValue) {
-            this.setParentId(((ServiceValue)service).getParentId());
-            this.setServer(((ServiceValue)service).getServer());
-            this.setResourceGroup(((ServiceValue)service).getResourceGroup());
+            this.setParent(((ServiceValue)service).getParent());
         } else if (service instanceof AppdefGroupValue) {
             AppdefGroupValue group = (AppdefGroupValue)service;        
             switch (group.getGroupType()) {
@@ -93,9 +91,7 @@ public class AppServiceNodeBean extends ServiceValue implements java.io.Serializ
                     throw new IllegalStateException("dependency nodes that are groups " +
                         "must be compatible groups of services, not " + group.getGroupType());
             }        
-            this.setCluster(Boolean.TRUE); // sets the parent id
-            this.setServer(new ServerLightValue());
-            this.setResourceGroup(new ResourceGroupValue());
+            this.setParent(new ServerValue());
         } else {
             // you really really really suck
             throw new IllegalStateException("dependency nodes must be services " +
@@ -167,31 +163,13 @@ public class AppServiceNodeBean extends ServiceValue implements java.io.Serializ
         entityId = entityID;
     }
 
-    /**
-     * Indicator whether or not the resource backing up the app-service
-     * relationship is a cluster or not
-     * 
-     * @return Boolean
-     */
-    public Boolean getCluster() {
-        return new Boolean(CLUSTER_PARENT_ID.equals(getParentId()));
-    }
 
-    /**
-     * Sets the cluster flag.
-     * @param cluster The cluster flag to set
-     */
-    public void setCluster(Boolean compatibleGroup) {
-        if (compatibleGroup.booleanValue())
-            setParentId(CLUSTER_PARENT_ID);
-    }
 
     public String toString() {
         StringBuffer sb = new StringBuffer(this.getClass().getName());
         sb.append("[").append(super.toString()).append("]");
         sb.append("[appServiceId = ").append(appServiceId);
         sb.append(",entryPoint = ").append(entryPoint);
-        sb.append(",parentId = ").append(getParentId());
         sb.append("]");
         
         return sb.toString();

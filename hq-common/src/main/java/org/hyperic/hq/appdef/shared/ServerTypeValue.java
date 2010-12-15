@@ -37,9 +37,7 @@ public class ServerTypeValue
    implements java.io.Serializable
 {
    private java.lang.String name;
-   private boolean nameHasBeenSet = false;
-   private boolean virtual;
-   private boolean virtualHasBeenSet = false;
+   private boolean nameHasBeenSet = false; 
    private java.lang.String sortName;
    private boolean sortNameHasBeenSet = false;
    private java.lang.String description;
@@ -57,12 +55,10 @@ public class ServerTypeValue
    {
    }
 
-   public ServerTypeValue( java.lang.String name,boolean virtual,java.lang.String sortName,java.lang.String description,java.lang.String plugin,java.lang.Integer id,java.lang.Long mTime,java.lang.Long cTime )
+   public ServerTypeValue( java.lang.String name,java.lang.String sortName,java.lang.String description,java.lang.String plugin,java.lang.Integer id,java.lang.Long mTime,java.lang.Long cTime )
    {
 	  this.name = name;
 	  nameHasBeenSet = true;
-	  this.virtual = virtual;
-	  virtualHasBeenSet = true;
 	  this.sortName = sortName;
 	  sortNameHasBeenSet = true;
 	  this.description = description;
@@ -82,8 +78,6 @@ public class ServerTypeValue
    {
 	  this.name = otherValue.name;
 	  nameHasBeenSet = true;
-	  this.virtual = otherValue.virtual;
-	  virtualHasBeenSet = true;
 	  this.sortName = otherValue.sortName;
 	  sortNameHasBeenSet = true;
 	  this.description = otherValue.description;
@@ -113,21 +107,7 @@ public class ServerTypeValue
    public boolean nameHasBeenSet(){
 	  return nameHasBeenSet;
    }
-   public boolean getVirtual()
-   {
-	  return this.virtual;
-   }
-
-   public void setVirtual( boolean virtual )
-   {
-	  this.virtual = virtual;
-	  virtualHasBeenSet = true;
-
-   }
-
-   public boolean virtualHasBeenSet(){
-	  return virtualHasBeenSet;
-   }
+  
    public java.lang.String getSortName()
    {
 	  return this.sortName;
@@ -222,7 +202,7 @@ public class ServerTypeValue
    {
 	  StringBuffer str = new StringBuffer("{");
 
-	  str.append("name=" + getName() + " " + "virtual=" + getVirtual() + " " + "sortName=" + getSortName() + " " + "description=" + getDescription() + " " + "plugin=" + getPlugin() + " " + "id=" + getId() + " " + "mTime=" + getMTime() + " " + "cTime=" + getCTime());
+	  str.append("name=" + getName() + " "  + "sortName=" + getSortName() + " " + "description=" + getDescription() + " " + "plugin=" + getPlugin() + " " + "id=" + getId() + " " + "mTime=" + getMTime() + " " + "cTime=" + getCTime());
 	  str.append('}');
 
 	  return(str.toString());
@@ -283,7 +263,7 @@ public class ServerTypeValue
 		 {
 			lEquals = lEquals && this.name.equals( that.name );
 		 }
-		 lEquals = lEquals && this.virtual == that.virtual;
+		
 		 if( this.sortName == null )
 		 {
 			lEquals = lEquals && ( that.sortName == null );
@@ -336,8 +316,6 @@ public class ServerTypeValue
    public int hashCode(){
 	  int result = 17;
       result = 37*result + ((this.name != null) ? this.name.hashCode() : 0);
-
-      result = 37*result + (virtual ? 0 : 1);
 
       result = 37*result + ((this.sortName != null) ? this.sortName.hashCode() : 0);
 

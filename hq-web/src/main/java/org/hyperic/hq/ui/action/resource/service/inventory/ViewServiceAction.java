@@ -95,28 +95,28 @@ public class ViewServiceAction
 
             List<AppdefGroupValue> groups = appdefBoss.findAllGroupsMemberInclusive(sessionId.intValue(), pcg, service
                 .getEntityId());
-            // check to see if this thing is a platform service
-            if (service.getServer().getServerType().getVirtual()) {
-                // find the platform resource and add it to the request scope
-                try {
-                    PlatformValue pv = appdefBoss.findPlatformByDependentID(sessionId.intValue(), entityId);
-                    request.setAttribute(Constants.PARENT_RESOURCE_ATTR, pv);
-                } catch (PermissionException pe) {
-                    // TODO Would like to able to fall back and grab the name
-                    // through other means
-                    // which isn't easily done right now. Only thing we should
-                    // prevent
-                    // in the case of an error is plain text instead of a link.
-                    log.error("insufficient permissions for parent platform ", pe);
-
-                    RequestUtils.setError(request, "resource.service.inventory.error.ViewParentPlatformPermission");
-                    request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS, new ArrayList());
-                    request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS_COUNT, new Integer(0));
-                    request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS, new ArrayList());
-                    request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS_COUNT, new Integer(0));
-                    return null;
-                }
-            }
+            // TODO check to see if this thing is a platform service
+//            if (service.getServer().getServerType().getVirtual()) {
+//                // find the platform resource and add it to the request scope
+//                try {
+//                    PlatformValue pv = appdefBoss.findPlatformByDependentID(sessionId.intValue(), entityId);
+//                    request.setAttribute(Constants.PARENT_RESOURCE_ATTR, pv);
+//                } catch (PermissionException pe) {
+//                    // TODO Would like to able to fall back and grab the name
+//                    // through other means
+//                    // which isn't easily done right now. Only thing we should
+//                    // prevent
+//                    // in the case of an error is plain text instead of a link.
+//                    log.error("insufficient permissions for parent platform ", pe);
+//
+//                    RequestUtils.setError(request, "resource.service.inventory.error.ViewParentPlatformPermission");
+//                    request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS, new ArrayList());
+//                    request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS_COUNT, new Integer(0));
+//                    request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS, new ArrayList());
+//                    request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS_COUNT, new Integer(0));
+//                    return null;
+//                }
+//            }
             request.setAttribute(Constants.ALL_RESGRPS_ATTR, groups);
             if (service == null) {
                 RequestUtils.setError(request, "resource.service.error.ServiceNotFound");

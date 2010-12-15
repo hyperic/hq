@@ -110,6 +110,10 @@ import org.springframework.transaction.annotation.Transactional;
 @org.springframework.stereotype.Service
 @Transactional
 public class PlatformManagerImpl implements PlatformManager {
+    
+    private static final String MODIFIED_TIME = "ModifiedTime";
+
+    private static final String CREATION_TIME = "CreationTime";
 
     private static final String COMMENT_TEXT = "commentText";
 
@@ -186,25 +190,34 @@ public class PlatformManagerImpl implements PlatformManager {
     
     private PlatformType toPlatformType(ResourceType resourceType) {
         PlatformType platformType = new PlatformType();
+        platformType.setDescription(resourceType.getDescription());
+        //TODO?
+        //platformType.setCreationTime(creationTime)
+        //platformType.setModifiedTime(modifiedTime)
         platformType.setId(resourceType.getId());
         platformType.setName(resourceType.getName());
         platformType.setPlugin(resourceType.getPlugin().getName());
+        //TODO for types, we just fake out sort name for now.  Can't do setProperty on ResourceType
+        platformType.setSortName(resourceType.getName().toUpperCase());
         return platformType;
     }
     
-    private Platform toPlatform(Resource resource) {
+    public Platform toPlatform(Resource resource) {
         Platform platform = new Platform();
         platform.setAgent(resource.getAgent());
         platform.setCertdn((String)resource.getProperty(CERT_DN));
         platform.setCommentText((String)resource.getProperty(COMMENT_TEXT));
         platform.setCpuCount((Integer)resource.getProperty(CPU_COUNT));
+        platform.setCreationTime((Long)resource.getProperty(CREATION_TIME));
         platform.setDescription(resource.getDescription());
         platform.setFqdn((String)resource.getProperty(FQDN));
+        platform.setId(resource.getId());
+        platform.setModifiedTime((Long)resource.getProperty(MODIFIED_TIME));
         platform.setModifiedBy(resource.getModifiedBy());
         platform.setLocation(resource.getLocation());
         platform.setName(resource.getName());
+        platform.setResource(resource);
         platform.setPlatformType(toPlatformType(resource.getType()));
-        platform.setId(resource.getId());
         return platform;
     }
 
@@ -245,7 +258,7 @@ public class PlatformManagerImpl implements PlatformManager {
     }
     
     private Collection<ResourceType> findAllPlatformResourceTypes() {
-        return ResourceType.findRootResourceType().getResourceTypesFrom(RelationshipTypes.PLATFORM_TYPE);
+        return ResourceType.findRootResourceType().getResourceTypesFrom(RelationshipTypes.PLATFORM);
     }
 
     /**
@@ -392,56 +405,56 @@ public class PlatformManagerImpl implements PlatformManager {
     
    
     
-    private Resource create(AIPlatformValue aip, String initialOwner,Agent agent, ResourceType type) 
+    private Resource create(AuthzSubject subject,AIPlatformValue aip, String initialOwner,Agent agent, ResourceType type) 
     {
-        Resource p = copyAIPlatformValue(aip,type);
+        Resource p = new Resource();  
+        p.setName(aip.getName());
+        p.setDescription(aip.getDescription());
+        p.setLocation("");
+        fixName(p);
+        p.persist();
+        p.setType(type);
+        //TODO abstract creationTime, modifiedTime, and sortName?
+        p.setProperty(CREATION_TIME, System.currentTimeMillis());
+        p.setProperty(MODIFIED_TIME,System.currentTimeMillis());
+        p.setProperty(AppdefResource.SORT_NAME, aip.getName().toUpperCase());
+        p.setProperty(CERT_DN,aip.getCertdn());
+        p.setProperty(FQDN,aip.getFqdn());
+        p.setProperty(COMMENT_TEXT,"");
+        p.setProperty(CPU_COUNT,aip.getCpuCount());
         p.setModifiedBy(initialOwner);
         p.setAgent(agent);
+        p.setOwner(subject);
         return p;
     }
     
-    private Resource create(PlatformValue pv, Agent agent, 
+    private Resource create(AuthzSubject owner, PlatformValue pv, Agent agent, 
                               ResourceType type) 
     {
         Resource p = new Resource();
-        
         p.setName(pv.getName());
         p.setDescription(pv.getDescription());
-        p.setProperty(CERT_DN,pv.getCertdn());
-        p.setProperty(COMMENT_TEXT,pv.getCommentText());
-        p.setProperty(CPU_COUNT,pv.getCpuCount());
-        p.setProperty(FQDN,pv.getFqdn());
         p.setLocation(pv.getLocation());
         p.setModifiedBy(pv.getModifiedBy());
         p.persist();
         p.setType(type);
+        p.setProperty(CERT_DN,pv.getCertdn());
+        p.setProperty(COMMENT_TEXT,pv.getCommentText());
+        p.setProperty(CPU_COUNT,pv.getCpuCount());
+        p.setProperty(FQDN,pv.getFqdn());
+        //TODO abstract creationTime, modifiedTime, and sortName?
+        p.setProperty(CREATION_TIME, System.currentTimeMillis());
+        p.setProperty(MODIFIED_TIME,System.currentTimeMillis());
+        p.setProperty(AppdefResource.SORT_NAME, pv.getName().toUpperCase());
         p.setAgent(agent);
-        
+        p.setOwner(owner);
         for (Iterator i=pv.getAddedIpValues().iterator(); i.hasNext();) {
             IpValue ipv = (IpValue)i.next();
             addIp(toPlatform(p), ipv.getAddress(), ipv.getNetmask(), ipv.getMACAddress());
         }
         return p;
     }
-
-    
-    private Resource copyAIPlatformValue(AIPlatformValue aip, ResourceType platformType) {
-        Resource p = new Resource();
-        //TODO have to set properties after persistence for type check  
-        p.setName(aip.getName());
-        p.setDescription(aip.getDescription());
-        p.setLocation("");
-        //TODO set owner?
-        fixName(p);
-        p.persist();
-        p.setType(platformType);
-        p.setProperty(CERT_DN,aip.getCertdn());
-        p.setProperty(FQDN,aip.getFqdn());
-        p.setProperty(COMMENT_TEXT,"");
-        p.setProperty(CPU_COUNT,aip.getCpuCount());
-        return p;
-    }
-    
+  
     private void fixName(Resource p) {
             // if name is not set then set it to fqdn (assuming it is set of course)
             String name = p.getName();
@@ -510,7 +523,7 @@ public class PlatformManagerImpl implements PlatformManager {
                 throw new SystemException(e);
             }
             ResourceType platType = ResourceType.findResourceType(platformTypeId);
-            Resource platform = create(pValue, agent, platType);
+            Resource platform = create(subject,pValue, agent, platType);
             Platform plat = toPlatform(platform);
 
             // Send resource create event
@@ -557,7 +570,7 @@ public class PlatformManagerImpl implements PlatformManager {
             throw new SystemException(e);
         }
 
-        Resource platform = create(aipValue, subject.getName(),agent,platType);     
+        Resource platform = create(subject,aipValue, subject.getName(),agent,platType);     
         
 
         // Send resource create event.  TODO abstract to ResourceManager when we don't need to use entity ID
@@ -1316,56 +1329,7 @@ public class PlatformManagerImpl implements PlatformManager {
         return viewablePlatforms;
     }
     
-    private boolean matchesValueObject(PlatformValue obj, Platform platform) {
-        boolean matches;
-        if (obj.getId() != null) {
-            matches = (obj.getId().intValue() == platform.getId().intValue());
-        } else {
-            matches = (platform.getId() == null);
-        }
-        if (obj.getCTime() != null) {
-            matches = (obj.getCTime().floatValue() == (float)platform.getCreationTime());
-        } else {
-            matches = (platform.getCreationTime() == 0);
-        }
-        matches &=
-            (platform.getName() != null ? platform.getName().equals(obj.getName())
-                : (obj.getName() == null)) ;
-        matches &=
-            (platform.getDescription() != null ?
-                platform.getDescription().equals(obj.getDescription())
-                : (obj.getDescription() == null)) ;
-        matches &=
-            (platform.getCertdn() != null ? platform.getCertdn().equals(obj.getCertdn())
-                : (obj.getCertdn() == null)) ;
-        matches &=
-            (platform.getCommentText() != null ?
-                platform.getCommentText().equals(obj.getCommentText())
-                : (obj.getCommentText() == null)) ;
-        matches &=
-            (platform.getCpuCount() != null ?
-                platform.getCpuCount().equals(obj.getCpuCount())
-                : (obj.getCpuCount() == null)) ;
-        matches &=
-            (platform.getFqdn() != null ? platform.getFqdn().equals(obj.getFqdn())
-                : (obj.getFqdn() == null)) ;
-        matches &=
-            (platform.getLocation() != null ?
-                platform.getLocation().equals(obj.getLocation())
-                : (obj.getLocation() == null)) ;
-        // now for the IP's
-        // if there's any in the addedIp's collection, it was messed with
-        // which means the match fails
-        matches &=
-            (obj.getAddedIpValues().size() == 0) ;
-        matches &=
-            (obj.getRemovedIpValues().size() == 0) ;
-        // check to see if we have changed the agent
-        matches &=
-            (platform.getAgent() != null ? platform.getAgent().equals(obj.getAgent())
-                : (obj.getAgent() == null));
-        return matches;
-        }
+   
 
 
     /**
@@ -1391,7 +1355,7 @@ public class PlatformManagerImpl implements PlatformManager {
             existing.setCpuCount((Integer)plat.getProperty(CPU_COUNT));
         }
 
-        if (matchesValueObject(existing,platform)) {
+        if (platform.matchesValueObject(existing)) {
             log.debug("No changes found between value object and entity");
             return platform;
         } else {
@@ -1542,7 +1506,7 @@ public class PlatformManagerImpl implements PlatformManager {
    
     private void deletePlatformType(ResourceType pt) throws VetoException {
         // Need to remove all server types, too
-        for (ResourceType st : pt.getResourceTypesFrom(RelationshipTypes.SERVER_TYPE)) {
+        for (ResourceType st : pt.getResourceTypesFrom(RelationshipTypes.SERVER)) {
             st.remove();
         }
         pt.remove();
@@ -1597,17 +1561,20 @@ public class PlatformManagerImpl implements PlatformManager {
         pt.persist();
         pt.setPlugin(pluginDAO.findByName(plugin));
         Set<PropertyType> propTypes = new HashSet<PropertyType>();
-        propTypes.add(createPlatformPropertyType(CERT_DN, pt));
-        propTypes.add(createPlatformPropertyType(FQDN, pt));
-        propTypes.add(createPlatformPropertyType(COMMENT_TEXT, pt));
-        propTypes.add(createPlatformPropertyType(CPU_COUNT, pt));
+        propTypes.add(createPlatformPropertyType(CERT_DN));
+        propTypes.add(createPlatformPropertyType(FQDN));
+        propTypes.add(createPlatformPropertyType(COMMENT_TEXT));
+        propTypes.add(createPlatformPropertyType(CPU_COUNT));
+        propTypes.add(createPlatformPropertyType(CREATION_TIME));
+        propTypes.add(createPlatformPropertyType(MODIFIED_TIME));
+        propTypes.add(createPlatformPropertyType(AppdefResource.SORT_NAME));
         //TODO add method?
         pt.setPropertyTypes(propTypes);
-        ResourceType.findRootResourceType().relateTo(pt, RelationshipTypes.PLATFORM_TYPE);
+        ResourceType.findRootResourceType().relateTo(pt, RelationshipTypes.PLATFORM);
         return toPlatformType(pt);
     }
     
-    private PropertyType createPlatformPropertyType(String propName, ResourceType platformType) {
+    private PropertyType createPlatformPropertyType(String propName) {
         PropertyType propType = new PropertyType();
         propType.setName(propName);
         propType.setDescription(propName);
@@ -1829,6 +1796,9 @@ public class PlatformManagerImpl implements PlatformManager {
         ip.setAddress((String)resource.getProperty(IP_ADDRESS));
         ip.setMacAddress((String)resource.getProperty(MAC_ADDRESS));
         ip.setNetmask((String)resource.getProperty(NETMASK));
+        ip.setCreationTime((Long)resource.getProperty(CREATION_TIME));
+        ip.setId(resource.getId());
+        ip.setModifiedTime((Long)resource.getProperty(MODIFIED_TIME));
         return ip;
     }
 
@@ -1839,10 +1809,14 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     public Ip addIp(Platform platform, String address, String netmask, String macAddress) {
         Resource ip = new Resource();
+        //TODO unique name for IP?
+        ip.setName(address);
+        ip.persist();
         ip.setProperty(IP_ADDRESS,address);
         ip.setProperty(NETMASK,netmask);
         ip.setProperty(MAC_ADDRESS,macAddress);
-        ip.persist();
+        ip.setProperty(CREATION_TIME, System.currentTimeMillis());
+        ip.setProperty(MODIFIED_TIME,System.currentTimeMillis());
         Resource.findResource(platform.getId()).relateTo(ip, RelationshipTypes.IP);
         return toIp(ip);  
     }

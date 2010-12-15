@@ -917,7 +917,7 @@ public class AppdefBossImpl implements AppdefBoss {
             retVal.setHostName(server.getPlatform().getName());
         } else if (entityId.isService()) {
             ServiceValue service = (ServiceValue) retVal;
-            retVal.setHostName(service.getServer().getName());
+            retVal.setHostName(service.getParent().getName());
         }
 
         return retVal;
@@ -2252,7 +2252,7 @@ public class AppdefBossImpl implements AppdefBoss {
 
                 } else {
                     Service service = serviceManager.findServiceById(res.getId());
-                    res.setHostName(service.getServer().getName());
+                    res.setHostName(service.getParent().getName());
                 }
             }
         }

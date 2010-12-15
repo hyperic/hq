@@ -37,14 +37,13 @@ public class ServerType extends AppdefResourceType {
 
     public ServerTypeValue getServerTypeValue() {
         ServerTypeValue serverTypeValue = new ServerTypeValue();
-        // _serverTypeValue.setName(getName());
-        // _serverTypeValue.setVirtual(isVirtual());
-        // _serverTypeValue.setSortName(getSortName());
-        // _serverTypeValue.setDescription(getDescription());
-        // _serverTypeValue.setPlugin(getPlugin());
-        // _serverTypeValue.setId(getId());
-        // _serverTypeValue.setMTime(getMTime());
-        // _serverTypeValue.setCTime(getCTime());
+        serverTypeValue.setName(getName());
+        serverTypeValue.setSortName(getSortName());
+        serverTypeValue.setDescription(getDescription());
+        serverTypeValue.setPlugin(getPlugin());
+        serverTypeValue.setId(getId());
+        serverTypeValue.setMTime(getMTime());
+        serverTypeValue.setCTime(getCTime());
         return serverTypeValue;
     }
 

@@ -25,16 +25,7 @@
 		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
-	<bean id="webProperties"
-        class="org.springframework.beans.factory.config.PropertiesFactoryBean">
-        <property name="locations">
-            <list>
-                <value>classpath:/hq.properties</value>
-                <value>classpath:/hq-version.properties</value>
-                <value>file://#{ systemProperties['user.home'] }/.hq/build.properties</value>
-            </list>
-        </property> 
-	</bean>
+
 	<bean id="jasyptConfiguration"
 		class="org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig">
 		<property name="algorithm" value="PBEWithMD5AndDES" />

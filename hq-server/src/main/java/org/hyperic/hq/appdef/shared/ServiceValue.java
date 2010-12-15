@@ -54,8 +54,6 @@ public class ServiceValue extends AppdefResourceValue
     private boolean locationHasBeenSet = false;
     private Integer configResponseId;
     private boolean configResponseIdHasBeenSet = false;
-    private Integer parentId;
-    private boolean parentIdHasBeenSet = false;
     private String name;
     private boolean nameHasBeenSet = false;
     private String description;
@@ -68,10 +66,8 @@ public class ServiceValue extends AppdefResourceValue
     private boolean mTimeHasBeenSet = false;
     private Long cTime;
     private boolean cTimeHasBeenSet = false;
-    private ServerLightValue Server;
-    private boolean ServerHasBeenSet = false;
-    private ResourceGroupValue ResourceGroup;
-    private boolean ResourceGroupHasBeenSet = false;
+    private AppdefResourceValue parent;
+    private boolean parentHasBeenSet = false;
     private ServiceTypeValue ServiceType;
     private boolean ServiceTypeHasBeenSet = false;
     private String _autoinventoryIdentifier;
@@ -98,8 +94,6 @@ public class ServiceValue extends AppdefResourceValue
         locationHasBeenSet = true;
         this.configResponseId = configResponseId;
         configResponseIdHasBeenSet = true;
-        this.parentId = parentId;
-        parentIdHasBeenSet = true;
         this.name = name;
         nameHasBeenSet = true;
         this.description = description;
@@ -131,8 +125,6 @@ public class ServiceValue extends AppdefResourceValue
         locationHasBeenSet = true;
         this.configResponseId = otherValue.configResponseId;
         configResponseIdHasBeenSet = true;
-        this.parentId = otherValue.parentId;
-        parentIdHasBeenSet = true;
         this.resourceId = otherValue.resourceId;
         resourceIdHasBeenSet = true;
         this.name = otherValue.name;
@@ -146,11 +138,8 @@ public class ServiceValue extends AppdefResourceValue
         this.cTime = otherValue.cTime;
         cTimeHasBeenSet = true;
         // TODO Clone is better no ?
-        this.Server = otherValue.Server;
-        ServerHasBeenSet = true;
-        // TODO Clone is better no ?
-        this.ResourceGroup = otherValue.ResourceGroup;
-        ResourceGroupHasBeenSet = true;
+        this.parent = otherValue.parent;
+        parentHasBeenSet = true;
         // TODO Clone is better no ?
         this.ServiceType = otherValue.ServiceType;
         ServiceTypeHasBeenSet = true;
@@ -276,21 +265,7 @@ public class ServiceValue extends AppdefResourceValue
     public boolean configResponseIdHasBeenSet(){
         return configResponseIdHasBeenSet;
     }
-    public Integer getParentId()
-    {
-        return this.parentId;
-    }
-
-    public void setParentId( Integer parentId )
-    {
-        this.parentId = parentId;
-        parentIdHasBeenSet = true;
-
-    }
-
-    public boolean parentIdHasBeenSet(){
-        return parentIdHasBeenSet;
-    }
+  
     
     public Integer getResourceId() {
         return this.resourceId;
@@ -379,29 +354,15 @@ public class ServiceValue extends AppdefResourceValue
     public boolean cTimeHasBeenSet(){
         return cTimeHasBeenSet;
     }
+  
+    public AppdefResourceValue getParent() {
+        return parent;
+    }
 
-    public ServerLightValue getServer()
-    {
-        return this.Server;
+    public void setParent(AppdefResourceValue parent) {
+        this.parent = parent;
     }
-    
-    public void setServer( ServerLightValue Server )
-    {
-        this.Server = Server;
-        ServerHasBeenSet = true;
-    }
-    
-    public ResourceGroupValue getResourceGroup()
-    {
-        return this.ResourceGroup;
-    }
-    
-    public void setResourceGroup( ResourceGroupValue ResourceGroup )
-    {
-        this.ResourceGroup = ResourceGroup;
-        ResourceGroupHasBeenSet = true;
-    }
-    
+
     public ServiceTypeValue getServiceType()
     {
         return this.ServiceType;
@@ -429,7 +390,7 @@ public class ServiceValue extends AppdefResourceValue
                 + " endUserRt=" + getEndUserRt() + " modifiedBy="
                 + getModifiedBy() + " owner=" + getOwner() + " location="
                 + getLocation() + " configResponseId=" + getConfigResponseId()
-                + " parentId=" + getParentId() + " name=" + getName()
+                + " name=" + getName()
                 + " description=" + getDescription() + " id=" + getId()
                 + " mTime=" + getMTime() + " cTime=" + getCTime());
         str.append('}');
@@ -527,14 +488,6 @@ public class ServiceValue extends AppdefResourceValue
             {
                 lEquals = lEquals && this.configResponseId.equals( that.configResponseId );
             }
-            if( this.parentId == null )
-            {
-                lEquals = lEquals && ( that.parentId == null );
-            }
-            else
-            {
-                lEquals = lEquals && this.parentId.equals( that.parentId );
-            }
             if( this.name == null )
             {
                 lEquals = lEquals && ( that.name == null );
@@ -567,21 +520,13 @@ public class ServiceValue extends AppdefResourceValue
             {
                 lEquals = lEquals && this.cTime.equals( that.cTime );
             }
-            if( this.Server == null )
+            if( this.parent == null )
             {
-                lEquals = lEquals && ( that.Server == null );
+                lEquals = lEquals && ( that.parent == null );
             }
             else
             {
-                lEquals = lEquals && this.Server.equals( that.Server );
-            }
-            if( this.ResourceGroup == null )
-            {
-                lEquals = lEquals && ( that.ResourceGroup == null );
-            }
-            else
-            {
-                lEquals = lEquals && this.ResourceGroup.equals( that.ResourceGroup );
+                lEquals = lEquals && this.parent.equals( that.parent );
             }
             if( this.ServiceType == null )
             {
@@ -618,8 +563,6 @@ public class ServiceValue extends AppdefResourceValue
 
         result = 37*result + ((this.configResponseId != null) ? this.configResponseId.hashCode() : 0);
 
-        result = 37*result + ((this.parentId != null) ? this.parentId.hashCode() : 0);
-
         result = 37*result + ((this.name != null) ? this.name.hashCode() : 0);
 
         result = 37*result + ((this.description != null) ? this.description.hashCode() : 0);
@@ -630,8 +573,7 @@ public class ServiceValue extends AppdefResourceValue
 
         result = 37*result + ((this.cTime != null) ? this.cTime.hashCode() : 0);
 
-        result = 37*result + ((this.Server != null) ? this.Server.hashCode() : 0);
-        result = 37*result + ((this.ResourceGroup != null) ? this.ResourceGroup.hashCode() : 0);
+        result = 37*result + ((this.parent != null) ? this.parent.hashCode() : 0);
         result = 37*result + ((this.ServiceType != null) ? this.ServiceType.hashCode() : 0);
         return result;
     }

@@ -44,9 +44,6 @@ public abstract class AppdefBean
     protected Long creationTime;
     protected Long modifiedTime;
 
-    // legacy stuff, do we really need this?
-    protected Integer cid;
-
     protected AppdefBean() {
         super();
     }
@@ -110,17 +107,7 @@ public abstract class AppdefBean
     {
         return modifiedTime;
     }
-    // end legacy assessors
-    public Integer getCid()
-    {
-        return cid;
-    }
-
-    public void setCid(Integer cid)
-    {
-        this.cid = cid;
-    }
-
+   
     /**
      * legacy entity bean code
      * @param obj

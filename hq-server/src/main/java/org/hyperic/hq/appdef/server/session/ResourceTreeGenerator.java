@@ -281,10 +281,11 @@ public class ResourceTreeGenerator {
             ServerNode serverNode;
 
             try {
-                serverNode = traverseServer(service.getServer(), GO_DOWN, tree);
+                //TODO service parent may be a Platform
+                serverNode = traverseServer((Server)service.getParent(), GO_DOWN, tree);
             } catch(PermissionException exc){
-                throw new PermissionException("Failed to get server " +
-                                              service.getServer().getId() +
+                throw new PermissionException("Failed to get parent " +
+                                              service.getParent().getId() +
                                               " on which service " +  serviceID
                                               + " resides: Permission denied");
             }

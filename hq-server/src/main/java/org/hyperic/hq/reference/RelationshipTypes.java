@@ -37,12 +37,6 @@ abstract public class RelationshipTypes {
     public static final String SERVER = "SERVER";
 
     public static final String SERVICE = "SERVICE";
-
-    public static final String PLATFORM_TYPE = "PLATFORM_TYPE";
-
-    public static final String SERVER_TYPE = "SERVER_TYPE";
-
-    public static final String SERVICE_TYPE = "SERVICE_TYPE";
     
     public static final String IP="IP";
 

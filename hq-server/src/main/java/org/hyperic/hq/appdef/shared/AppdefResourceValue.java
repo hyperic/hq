@@ -130,10 +130,7 @@ public abstract class AppdefResourceValue
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                 return ((PlatformValue)this).getPlatformType();
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                if (this instanceof ServerValue)
-                    return ((ServerValue)this).getServerType();
-                else
-                    return ((ServerLightValue)this).getServerType();
+                 return ((ServerValue)this).getServerType();
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                 return ((ServiceValue)this).getServiceType();
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
@@ -175,9 +172,9 @@ public abstract class AppdefResourceValue
         for (AppdefResourceValue av : serverColl) {
             ServerTypeValue st =
                 (ServerTypeValue) av.getAppdefResourceTypeValue();
-            if (!st.getVirtual()) {
+           
                 nonVirtual.add(av);
-            }
+           
         }
 
         return getResourceTypeCountMap(nonVirtual);

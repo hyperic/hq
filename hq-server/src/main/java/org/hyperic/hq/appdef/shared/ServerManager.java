@@ -35,6 +35,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -249,5 +250,7 @@ public interface ServerManager {
      * inventory.
      */
     public List<Object[]> getServerTypeCounts();
+    
+    Server toServer(Resource resource);
 
 }

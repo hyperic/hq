@@ -28,7 +28,6 @@ package org.hyperic.hq.appdef.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -42,7 +41,9 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
@@ -57,11 +58,11 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.product.ServiceTypeInfo;
+import org.hyperic.hq.product.server.session.PluginDAO;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -79,6 +80,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ServiceManagerImpl implements ServiceManager {
 
+    private static final String SERVICE_RT = "ServiceRt";
+
+    private static final String MODIFIED_TIME = "ModifiedTime";
+
+    private static final String END_USER_RT = "EndUserRt";
+
+    private static final String CREATION_TIME = "CreationTime";
+
+    private static final String AUTO_INVENTORY_IDENTIFIER = "AutoInventoryIdentifier";
+
     private static final String AUTO_DISCOVERY_ZOMBIE = "autoDiscoveryZombie";
 
     private final Log log = LogFactory.getLog(ServiceManagerImpl.class);
@@ -89,25 +100,62 @@ public class ServiceManagerImpl implements ServiceManager {
     private PermissionManager permissionManager;
     private ResourceManager resourceManager;
     private AuthzSubjectManager authzSubjectManager;
+    private PluginDAO pluginDAO;
+    private ServerManager serverManager;
+    private PlatformManager platformManager;
 
     @Autowired
     public ServiceManagerImpl(PermissionManager permissionManager,
                               ResourceManager resourceManager,
-                              AuthzSubjectManager authzSubjectManager) {
+                              AuthzSubjectManager authzSubjectManager, PluginDAO pluginDAO,
+                              ServerManager serverManager, PlatformManager platformManager) {
      
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
         this.authzSubjectManager = authzSubjectManager;
+        this.pluginDAO = pluginDAO;
+        this.serverManager = serverManager;
+        this.platformManager = platformManager;
     }
     
     private Service toService(Resource resource) {
-        //TODO
-        return new Service();
+        Service service = new Service();
+        service.setAutodiscoveryZombie((Boolean)resource.getProperty(AUTO_DISCOVERY_ZOMBIE));
+        service.setAutoinventoryIdentifier((String)resource.getProperty(AUTO_INVENTORY_IDENTIFIER));
+        service.setCreationTime((Long)resource.getProperty(CREATION_TIME));
+        service.setDescription(resource.getDescription());
+        service.setEndUserRt((Boolean)resource.getProperty(END_USER_RT));
+        service.setId(resource.getId());
+        service.setLocation(resource.getLocation());
+        service.setModifiedBy(resource.getModifiedBy());
+        service.setModifiedTime((Long)resource.getProperty(MODIFIED_TIME));
+        service.setName(resource.getName());
+        service.setResource(resource);
+        Resource parent = resource.getResourceTo(RelationshipTypes.SERVER);
+        if(parent != null) {
+            service.setParent(serverManager.toServer(parent));
+        }else {
+            parent = resource.getResourceTo(RelationshipTypes.PLATFORM);
+            service.setParent(platformManager.toPlatform(parent));
+        }
+        service.setServiceRt((Boolean)resource.getProperty(SERVICE_RT));
+        service.setServiceType(toServiceType(resource.getType()));
+        service.setSortName((String)resource.getProperty(AppdefResource.SORT_NAME));
+        return service;
     }
     
     private ServiceType toServiceType(ResourceType resourceType) {
+        ServiceType serviceType = new ServiceType();
         //TODO
-        return new ServiceType();
+        //serviceType.setCreationTime(creationTime);
+        //serviceType.setModifiedTime(modifiedTime);
+        serviceType.setDescription(resourceType.getDescription());
+        serviceType.setId(resourceType.getId());
+        serviceType.setName(resourceType.getName());
+        serviceType.setPlugin(resourceType.getPlugin().getName());
+        //TODO for types, we just fake out sort name for now.  Can't do setProperty on ResourceType
+        serviceType.setSortName(resourceType.getName().toUpperCase());
+        return serviceType;
     }
     
     private Resource create(AuthzSubject subject,ResourceType type, Resource server, String name, String desc,
@@ -117,18 +165,22 @@ public class ServiceManagerImpl implements ServiceManager {
         //permissionManager.checkPermission(subject, resourceManager
         //  .findResourceTypeByName(AuthzConstants.serverResType), server.getId(),
         //AuthzConstants.serverOpAddService);
-     
         Resource s = new Resource();
         s.setName(name);
-        s.setProperty("autoInventoryIdentifier",name);
-        s.setProperty(AUTO_DISCOVERY_ZOMBIE,false);
-        s.setProperty("serviceRT",false);
-        s.setProperty("endUserRT",false);
         s.setDescription(desc);
         s.setModifiedBy(subject.getName());
         s.setLocation(location);
         s.persist();
         s.setType(type);
+        s.setProperty(AUTO_INVENTORY_IDENTIFIER,name);
+        s.setProperty(AUTO_DISCOVERY_ZOMBIE,false);
+        s.setProperty(SERVICE_RT,false);
+        s.setProperty(END_USER_RT,false);
+        //TODO abstract creationTime, modifiedTime, and sortName?
+        s.setProperty(CREATION_TIME, System.currentTimeMillis());
+        s.setProperty(MODIFIED_TIME,System.currentTimeMillis());
+        s.setProperty(AppdefResource.SORT_NAME, name.toUpperCase());
+        s.setOwner(subject);
         server.relateTo(s, RelationshipTypes.SERVICE);
         return s;
    }
@@ -142,6 +194,7 @@ public class ServiceManagerImpl implements ServiceManager {
                                  String name, String desc, String location)
         throws ValidationException, PermissionException, ServerNotFoundException,
         AppdefDuplicateNameException {
+        //TODO need a method that creates a service directly under a Platform
         Resource server = Resource.findResource(serverId);
         ResourceType serviceType = ResourceType.findResourceType(serviceTypeId);
         return toService(create(subject, serviceType, server,name, desc, location));
@@ -151,7 +204,7 @@ public class ServiceManagerImpl implements ServiceManager {
     private Collection<Resource> findByServerType(Integer serverTypeId, boolean asc) {
         Set<Resource> services = new HashSet<Resource>();
         //TODO sort
-        Collection<ResourceType> relatedServiceTypes = ResourceType.findResourceType(serverTypeId).getResourceTypesFrom(RelationshipTypes.SERVICE_TYPE);
+        Collection<ResourceType> relatedServiceTypes = ResourceType.findResourceType(serverTypeId).getResourceTypesFrom(RelationshipTypes.SERVICE);
         for(ResourceType serviceType:relatedServiceTypes) {
             services.addAll(serviceType.getResources());
         }
@@ -285,15 +338,15 @@ public class ServiceManagerImpl implements ServiceManager {
     
     private Set<ResourceType> getAllServiceResourceTypes() {
         Set<ResourceType> resourceTypes = new HashSet<ResourceType>();
-        Collection<ResourceType> platformTypes = ResourceType.findRootResourceType().getResourceTypesFrom(RelationshipTypes.PLATFORM_TYPE);
+        Collection<ResourceType> platformTypes = ResourceType.findRootResourceType().getResourceTypesFrom(RelationshipTypes.PLATFORM);
         for(ResourceType platformType: platformTypes) {
-            Collection<ResourceType> serverTypes = platformType.getResourceTypesFrom(RelationshipTypes.SERVER_TYPE);
+            Collection<ResourceType> serverTypes = platformType.getResourceTypesFrom(RelationshipTypes.SERVER);
             for(ResourceType serverType: serverTypes) {
-                resourceTypes.addAll(serverType.getResourceTypesFrom(RelationshipTypes.SERVICE_TYPE));
+                resourceTypes.addAll(serverType.getResourceTypesFrom(RelationshipTypes.SERVICE));
             }
         }
         for(ResourceType platformType: platformTypes) {
-            resourceTypes.addAll(platformType.getResourceTypesFrom(RelationshipTypes.SERVICE_TYPE));
+            resourceTypes.addAll(platformType.getResourceTypesFrom(RelationshipTypes.SERVICE));
         }
         return resourceTypes;
     }
@@ -665,11 +718,6 @@ public class ServiceManagerImpl implements ServiceManager {
         resource.merge();
     }
     
-    private boolean matchesValueObject(ServiceValue existing, Resource service) {
-        //TODO from Service
-        return true;
-    }
-    
     private void updateService(ServiceValue existing, Resource service) {
         //TODO from Service
     }
@@ -687,13 +735,14 @@ public class ServiceManagerImpl implements ServiceManager {
             existing.setLocation(existing.getLocation().trim());
         if (existing.getName() != null)
             existing.setName(existing.getName().trim());
-
-        if (matchesValueObject(existing,service)) {
+        
+        Service svc = toService(service);
+        if (svc.matchesValueObject(existing)) {
             log.debug("No changes found between value object and entity");
         } else {
             updateService(existing,service);
         }
-        return toService(service);
+        return svc;
     }
 
     public void updateServiceTypes(String plugin, ServiceTypeInfo[] infos)
@@ -745,7 +794,7 @@ public class ServiceManagerImpl implements ServiceManager {
 //                        serviceType.setIsInternal(sinfo.getInternal());
 
                     // Could be null if servertype was deleted/updated by plugin
-                    ResourceType svrtype = serviceType.getResourceTypeTo(RelationshipTypes.SERVICE_TYPE);
+                    ResourceType svrtype = serviceType.getResourceTypeTo(RelationshipTypes.SERVICE);
 
                     // TODO Check server type
 //                    if (!sinfo.getServerName().equals(svrtype.getName())) {
@@ -798,12 +847,13 @@ public class ServiceManagerImpl implements ServiceManager {
         ResourceType serviceType = new ResourceType();
         serviceType.setName(sinfo.getName());
         serviceType.setDescription(sinfo.getDescription());
-        //TODO set plugin, isInternal?
         serviceType.persist();
-        servType.relateTo(serviceType, RelationshipTypes.SERVICE_TYPE);
+        //TODO property types
+        serviceType.setPlugin(pluginDAO.findByName(plugin));
+        servType.relateTo(serviceType, RelationshipTypes.SERVICE);
         return toServiceType(serviceType);
     }
-
+    
     public void deleteServiceType(ServiceType serviceType, AuthzSubject overlord)
         throws VetoException {
         ResourceType.findResourceType(serviceType.getId()).remove();

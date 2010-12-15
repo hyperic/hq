@@ -39,6 +39,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -299,5 +300,7 @@ public interface PlatformManager {
     
     ResourceTree getEntitiesForAgent(AuthzSubject subject, Agent agt)
         throws AgentNotFoundException, PermissionException;
+    
+    Platform toPlatform(Resource platformResource);
 
 }

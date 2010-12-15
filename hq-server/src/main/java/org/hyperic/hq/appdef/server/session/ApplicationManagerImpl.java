@@ -98,12 +98,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
         ApplicationType generic = new ApplicationType();
         generic.setName("Generic Application");
         generic.setId(1);
-        generic.setCid(1);
+        
         
         ApplicationType jEE = new ApplicationType();
         jEE.setName("J2EE Application");
         jEE.setId(2);
-        jEE.setCid(2);
+      
         
         APPLICATION_TYPES.add(generic);
         APPLICATION_TYPES.add(jEE);

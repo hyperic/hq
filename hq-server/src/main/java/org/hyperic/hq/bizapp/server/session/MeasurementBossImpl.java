@@ -3606,13 +3606,14 @@ public class MeasurementBossImpl implements MeasurementBoss {
                 ArrayList<AppdefEntityID> virtIds = new ArrayList<AppdefEntityID>(hosts.size());
                 for (Iterator<ServerValue> it = hosts.iterator(); it.hasNext();) {
                     ServerValue sv = it.next();
-                    if (!sv.getServerType().getVirtual()) {
+                    //if (!sv.getServerType().getVirtual()) {
                         break;
-                    }
+                    //}
 
-                    virtIds.add(sv.getEntityId());
+                    //virtIds.add(sv.getEntityId());
                 }
 
+                //TODO need services by platform
                 if (virtIds.size() > 0) {
                     hosts = platformManager.getPlatformsByServers(subject, virtIds);
                 }

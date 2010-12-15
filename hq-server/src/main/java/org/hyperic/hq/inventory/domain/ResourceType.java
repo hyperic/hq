@@ -365,15 +365,21 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
     }
 
     public ResourceType getResourceTypeFrom(String relationName) {
+        Set<ResourceType> resourceTypes = getRelatedResourceTypes(relationName, org.neo4j.graphdb.Direction.OUTGOING);
+        if(resourceTypes.isEmpty()) {
+            return null;
+        }
         // TODO validate only one
-        return getRelatedResourceTypes(relationName, org.neo4j.graphdb.Direction.OUTGOING)
-            .iterator().next();
+        return resourceTypes.iterator().next();
     }
 
     public ResourceType getResourceTypeTo(String relationName) {
+        Set<ResourceType> resourceTypes =getRelatedResourceTypes(relationName, org.neo4j.graphdb.Direction.INCOMING);
+        if(resourceTypes.isEmpty()) {
+            return null;
+        }
         // TODO validate only one
-        return getRelatedResourceTypes(relationName, org.neo4j.graphdb.Direction.INCOMING)
-            .iterator().next();
+        return resourceTypes.iterator().next();
     }
 
     private Set<ResourceType> getRelatedResourceTypes(String relationName,

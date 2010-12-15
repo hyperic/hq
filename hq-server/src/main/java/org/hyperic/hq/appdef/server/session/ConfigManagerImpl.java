@@ -543,11 +543,12 @@ public class ConfigManagerImpl implements ConfigManager {
     private ServerConfigStuff getServerStuffForService(Integer id) throws AppdefEntityNotFoundException {
 
         org.hyperic.hq.appdef.server.session.Service service = serviceManager.findServiceById(id);
-        Server server = service.getServer();
-        if (server == null) {
+        //TODO handle parent platforms
+        AppdefResource server = service.getParent();
+        if (server == null || !(server instanceof Server)) {
             return null;
         }
-        return new ServerConfigStuff(server.getId().intValue(), server.getInstallPath());
+        return new ServerConfigStuff(server.getId().intValue(), ((Server)server).getInstallPath());
     }
 
     private ServerConfigStuff getServerStuffForServer(Integer id) throws AppdefEntityNotFoundException {

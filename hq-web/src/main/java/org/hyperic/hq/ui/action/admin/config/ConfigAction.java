@@ -140,15 +140,16 @@ public class ConfigAction
             ServerTypeValue stv = serverTypes.get(i);
             List<ServiceTypeValue> serviceTypes = appdefBoss.findServiceTypesByServerType(session, stv.getId()
                 .intValue());
-            if (stv.getVirtual()) {
-                if (stv.getName().startsWith("Win")) {
-                    winServices.addAll(serviceTypes);
-                } else {
-                    platServices.addAll(serviceTypes);
-                }
-            } else {
+            //TODO get platform services another way
+//            if (stv.getVirtual()) {
+//                if (stv.getName().startsWith("Win")) {
+//                    winServices.addAll(serviceTypes);
+//                } else {
+//                    platServices.addAll(serviceTypes);
+//                }
+//            } else {
                 serverTypesMap.put(stv, serviceTypes);
-            }
+            //}
         }
         request.setAttribute(Constants.ALL_SERVER_TYPES_ATTR, serverTypesMap);
         request.setAttribute(Constants.ALL_PLATFORM_SERVICE_TYPES_ATTR, platServices);

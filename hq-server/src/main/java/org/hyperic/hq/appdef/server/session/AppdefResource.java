@@ -32,6 +32,7 @@ import org.hyperic.hq.inventory.domain.Resource;
  */
 public abstract class AppdefResource extends AppdefNamedBean
 {
+    static final String SORT_NAME = "SortName";
     private Resource _resource;
     
     /**
@@ -73,9 +74,10 @@ public abstract class AppdefResource extends AppdefNamedBean
      * @see org.hyperic.hq.appdef.server.session.AppdefNamedBean#getSortName()
      */
     public String getSortName() {
-        //TODO?
-        //if (_resource != null)
-          //  return _resource.getSortName();
+        //I believe Resource is only set for Platform, Server, Service
+      if (_resource != null && _resource.getProperty(SORT_NAME) != null) {
+          return (String)_resource.getProperty(SORT_NAME);
+      }
         return super.getSortName();
     }
 
@@ -83,10 +85,10 @@ public abstract class AppdefResource extends AppdefNamedBean
      * @see org.hyperic.hq.appdef.server.session.AppdefNamedBean#setSortName(java.lang.String)
      */
     public void setSortName(String sortName) {
-        //TODO?
-        //if (_resource != null)
-          //  _resource.setSortName(sortName);
-        //else
+        //I believe Resource is only set for Platform, Server, Service
+        if (_resource != null)
+            _resource.setProperty(SORT_NAME,sortName);
+        else
             super.setSortName(sortName);
     }
 }

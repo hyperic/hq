@@ -364,9 +364,12 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     }
 
     public Resource getResourceFrom(String relationName) {
-        // TODO enforce only one?
-        return getRelatedResources(relationName, org.neo4j.graphdb.Direction.OUTGOING).iterator()
-            .next();
+        Set<Resource> resources = getRelatedResources(relationName, org.neo4j.graphdb.Direction.OUTGOING);
+        if(resources.isEmpty()) {
+            return null;
+        }
+        //TODO enforce only one?
+        return resources.iterator().next();
     }
 
     public Set<ResourceGroup> getResourceGroups() {
@@ -374,9 +377,12 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     }
 
     public Resource getResourceTo(String relationName) {
-        // TODO enforce only one?
-        return getRelatedResources(relationName, org.neo4j.graphdb.Direction.INCOMING).iterator()
-            .next();
+        Set<Resource> resources = getRelatedResources(relationName, org.neo4j.graphdb.Direction.INCOMING);
+        if(resources.isEmpty()) {
+            return null;
+        }
+        //TODO enforce only one?
+        return resources.iterator().next();
     }
 
     public Config getResponseTimeConfig() {
@@ -511,6 +517,11 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
                                                " is not defined for resource of type " +
                                                type.getName());
         }
+        if(value == null) {
+            //TODO log a warning?
+            //Neo4J doesn't accept null values 
+            return null;
+        }
         // TODO check other stuff?  Should def check optional param and maybe disregard nulls, below throws Exception
         //with null values
         Object oldValue = null;
@@ -519,7 +530,6 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
         }catch(NotFoundException e) {
             //could be first time
         }
-         
         getUnderlyingState().setProperty(key, value);
         return oldValue;
     }

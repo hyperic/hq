@@ -34,13 +34,13 @@ public class PlatformType extends AppdefResourceType{
 
     public PlatformTypeValue getPlatformTypeValue() {
         PlatformTypeValue platformTypeValue = new PlatformTypeValue();
-//        _platformTypeValue.setSortName(getSortName());
-//        _platformTypeValue.setName(getName());
-//        _platformTypeValue.setDescription(getDescription());
-//        _platformTypeValue.setPlugin(getPlugin());
-//        _platformTypeValue.setId(getId());
-//        _platformTypeValue.setMTime(getMTime());
-//        _platformTypeValue.setCTime(getCTime());
+        platformTypeValue.setSortName(getSortName());
+        platformTypeValue.setName(getName());
+        platformTypeValue.setDescription(getDescription());
+        platformTypeValue.setPlugin(getPlugin());
+        platformTypeValue.setId(getId());
+        platformTypeValue.setMTime(getMTime());
+        platformTypeValue.setCTime(getCTime());
         return platformTypeValue;
     }
 

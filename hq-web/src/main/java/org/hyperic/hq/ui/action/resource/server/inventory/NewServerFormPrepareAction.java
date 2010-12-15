@@ -81,9 +81,9 @@ public class NewServerFormPrepareAction
             TreeMap<String, ServerTypeValue> returnMap = new TreeMap<String, ServerTypeValue>();
             for (ServerTypeValue stv : stValues) {
 
-                if (!stv.getVirtual()) {
+                
                     returnMap.put(stv.getSortName(), stv);
-                }
+                
             }
             newForm.setResourceTypes(new ArrayList<ServerTypeValue>(returnMap.values()));
             request.setAttribute(Constants.PARENT_RESOURCE_ATTR, pValue);

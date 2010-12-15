@@ -4,29 +4,11 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 
-public class ServiceType extends AppdefResourceType {
-
-    private String name;
-
-    private Integer id;
+public class ServiceType
+    extends AppdefResourceType {
 
     private String plugin;
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
+   
 
     public String getPlugin() {
         return plugin;
@@ -35,7 +17,7 @@ public class ServiceType extends AppdefResourceType {
     public void setPlugin(String plugin) {
         this.plugin = plugin;
     }
-    
+
     @Override
     public int getAppdefType() {
         return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
@@ -49,20 +31,25 @@ public class ServiceType extends AppdefResourceType {
 
     @Override
     public AppdefResourceTypeValue getAppdefResourceTypeValue() {
-       return getServiceTypeValue();
+        return getServiceTypeValue();
     }
 
+    /**
+     * legacy DTO pattern
+     * @deprecated use (this) ServiceType object instead
+     * @return
+     */
     public ServiceTypeValue getServiceTypeValue() {
         ServiceTypeValue serviceTypeValue = new ServiceTypeValue();
-        // _serviceTypeValue = new ServiceTypeValue();
-        // _serviceTypeValue.setName(getName());
-        // _serviceTypeValue.setSortName(getSortName());
-        // _serviceTypeValue.setDescription(getDescription());
-        // _serviceTypeValue.setPlugin(getPlugin());
-        // _serviceTypeValue.setIsInternal(isIsInternal());
-        // _serviceTypeValue.setId(getId());
-        // _serviceTypeValue.setMTime(getMTime());
-        // _serviceTypeValue.setCTime(getCTime());
+        serviceTypeValue.setName(getName());
+        serviceTypeValue.setSortName(getSortName());
+        serviceTypeValue.setDescription(getDescription());
+        serviceTypeValue.setPlugin(getPlugin());
+        //TODO remove isInternal?
+        serviceTypeValue.setIsInternal(false);
+        serviceTypeValue.setId(getId());
+        serviceTypeValue.setMTime(getMTime());
+        serviceTypeValue.setCTime(getCTime());
         return serviceTypeValue;
     }
 

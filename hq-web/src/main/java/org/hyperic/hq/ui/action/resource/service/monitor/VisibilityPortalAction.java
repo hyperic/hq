@@ -124,16 +124,17 @@ public class VisibilityPortalAction
             ServiceValue sv = appdefBoss.findServiceById(sessionId, entityId.getId());
             // check for platform services
             List<ResourceDisplaySummary> healths = null;
-            if (sv.getServer().getServerType().getVirtual()) {
-                request.setAttribute(Constants.PLATFORM_SERVICE_ATTR, "true");
-                AppdefEntityID platId = appdefBoss.findPlatformByDependentID(sessionId, entityId).getEntityId();
-                healths = measurementBoss.findPlatformsCurrentHealth(sessionId, platId, pc);
-            } else {
+            //TODO
+//            if (sv.getServer().getServerType().getVirtual()) {
+//                request.setAttribute(Constants.PLATFORM_SERVICE_ATTR, "true");
+//                AppdefEntityID platId = appdefBoss.findPlatformByDependentID(sessionId, entityId).getEntityId();
+//                healths = measurementBoss.findPlatformsCurrentHealth(sessionId, platId, pc);
+//            } else {
                 // for a "clustered services" there'd be many... does
                 // that get handled here or the group monitoring?
                 healths = measurementBoss.findServersCurrentHealth(sessionId, entityId, pc);
 
-            }
+            //}
             request.setAttribute(Constants.HOST_HEALTH_SUMMARIES_ATTR, healths);
         } catch (AppdefEntityNotFoundException e) {
             thrown = e;

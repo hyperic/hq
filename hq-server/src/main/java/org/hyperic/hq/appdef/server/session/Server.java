@@ -23,6 +23,8 @@ public class Server
     private boolean wasAutodiscovered;
 
     private boolean servicesAutomanaged;
+    
+    private boolean autodiscoveryZombie;
 
     private Collection<Service> services = new HashSet<Service>();
 
@@ -97,6 +99,14 @@ public class Server
     public void addService(Service service) {
         services.add(service);
     }
+    
+    public boolean isAutodiscoveryZombie() {
+        return autodiscoveryZombie;
+    }
+
+    public void setAutodiscoveryZombie(boolean autodiscoveryZombie) {
+        this.autodiscoveryZombie = autodiscoveryZombie;
+    }
 
     @Override
     public AppdefResourceType getAppdefResourceType() {
@@ -117,35 +127,99 @@ public class Server
     public AppdefEntityID getEntityId() { // TODO remove this method
         return AppdefEntityID.newServerID(getId());
     }
-
+    
+    private String getOwner() {
+        return getResource() != null && getResource().getOwner() != null ? getResource().getOwner().getName() : "";
+    }
+    
     public ServerValue getServerValue() {
         ServerValue serverValue = new ServerValue();
-        // _serverValue.setSortName(getSortName());
-        // _serverValue.setRuntimeAutodiscovery(isRuntimeAutodiscovery());
-        // _serverValue.setWasAutodiscovered(isWasAutodiscovered());
-        // _serverValue.setAutodiscoveryZombie(isAutodiscoveryZombie());
-        // _serverValue.setModifiedBy(getModifiedBy());
-        // _serverValue.setOwner(getOwner());
-        // _serverValue.setLocation(getLocation());
-        // _serverValue.setName(getName());
-        // _serverValue.setAutoinventoryIdentifier(getAutoinventoryIdentifier());
-        // _serverValue.setInstallPath(getInstallPath());
-        // _serverValue.setDescription(getDescription());
-        // _serverValue.setServicesAutomanaged(isServicesAutomanaged());
-        // _serverValue.setId(getId());
-        // _serverValue.setMTime(getMTime());
-        // _serverValue.setCTime(getCTime());
-        // if ( getServerType() != null ) {
-        // _serverValue.setServerType(getServerType().getServerTypeValue());
-        // }
-        // else
-        // _serverValue.setServerType(null);
-        // if ( getPlatform() != null ) {
-        // _serverValue.setPlatform(getPlatform());
-        // }
-        // else
-        // _serverValue.setPlatform(null);
+        serverValue.setSortName(getSortName());
+        serverValue.setRuntimeAutodiscovery(isRuntimeAutodiscovery());
+        serverValue.setWasAutodiscovered(isWasAutodiscovered());
+        serverValue.setAutodiscoveryZombie(isAutodiscoveryZombie());
+        serverValue.setModifiedBy(getModifiedBy());
+        serverValue.setOwner(getOwner());
+        serverValue.setLocation(getLocation());
+        serverValue.setName(getName());
+        serverValue.setAutoinventoryIdentifier(getAutoinventoryIdentifier());
+        serverValue.setInstallPath(getInstallPath());
+        serverValue.setDescription(getDescription());
+        serverValue.setServicesAutomanaged(isServicesAutomanaged());
+        serverValue.setId(getId());
+        serverValue.setMTime(getMTime());
+        serverValue.setCTime(getCTime());
+         if ( getServerType() != null ) {
+             serverValue.setServerType(getServerType().getServerTypeValue());
+         }
+         else
+             serverValue.setServerType(null);
+         if ( getPlatform() != null ) {
+             serverValue.setPlatform(getPlatform());
+         }
+         else
+             serverValue.setPlatform(null);
         return serverValue;
     }
-
+    
+    public boolean matchesValueObject(ServerValue obj)
+    {
+        return super.matchesValueObject(obj) &&
+            nameMatches(obj) &&
+            descriptionMatches(obj) &&
+            locationMatches(obj) &&
+            runtimeAutoDiscoveryMatches(obj) &&
+            installPathMatches(obj) &&
+            autoInventoryIdentifierMatches(obj);
+    }
+    
+    private boolean nameMatches(ServerValue obj)
+    {
+        if (getName() == null) {
+            return obj.getName() == null;
+        } else {
+            return getName().equals(obj.getName());
+        }
+    }
+    
+    private boolean descriptionMatches(ServerValue obj)
+    {
+        if (getDescription() == null) {
+            return obj.getDescription() == null;
+        } else {
+            return getDescription().equals(obj.getDescription());
+        }
+    }
+    
+    private boolean locationMatches(ServerValue obj)
+    {
+        if (getLocation() == null) {
+            return obj.getLocation() == null;
+        } else {
+            return getLocation().equals(obj.getLocation());
+        }
+    }
+    
+    private boolean runtimeAutoDiscoveryMatches(ServerValue obj)
+    {
+        return isRuntimeAutodiscovery() == obj.getRuntimeAutodiscovery();
+    }
+    
+    private boolean installPathMatches(ServerValue obj)
+    {
+        if (getInstallPath() == null) {
+            return obj.getInstallPath() == null;
+        } else {
+            return getInstallPath().equals(obj.getInstallPath());
+        }
+    }
+    
+    private boolean autoInventoryIdentifierMatches(ServerValue obj)
+    {
+        if (getAutoinventoryIdentifier() == null) {
+            return obj.getAutoinventoryIdentifier() == null;
+        } else {
+            return getAutoinventoryIdentifier().equals(obj.getAutoinventoryIdentifier());
+        }
+    }
 }

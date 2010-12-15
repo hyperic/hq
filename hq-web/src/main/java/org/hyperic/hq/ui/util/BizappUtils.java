@@ -312,11 +312,6 @@ public class BizappUtils {
         List serverTypeVals = new ArrayList();
         for (Iterator i = serverTypes.iterator(); i.hasNext(); ) {
             ServerTypeValue stv = (ServerTypeValue)i.next();
-            //XXX NewServerFormPrepareAction does similar, should there
-            //be a generic method?
-            if (stv.getVirtual()) {
-                continue;
-            }
             serverTypeVals.add(stv);
         }
 
@@ -1101,11 +1096,8 @@ public class BizappUtils {
         for (int i=0; i<types.size(); i++) {
             stValue = (ServerTypeValue) types.get(i);
             name = stValue.getName();
-            if (stValue.getVirtual()) {
-                serverTypeCache.put(name, Boolean.TRUE);
-            } else {
-                serverTypeCache.put(name, Boolean.FALSE);
-            }
+            serverTypeCache.put(name, Boolean.FALSE);
+            
         }
     }
     

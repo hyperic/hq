@@ -1,6 +1,8 @@
 package org.hyperic.hq.appdef;
 
-public class Ip {
+import org.hyperic.hq.appdef.shared.IpValue;
+
+public class Ip extends AppdefBean {
 
     private String address;
 
@@ -31,5 +33,21 @@ public class Ip {
     public void setNetmask(String netmask) {
         this.netmask = netmask;
     }
+    
+    /**
+     * legacy DTO pattern
+     * @deprecated use (this) Ip Object instead
+     */
+    public IpValue getIpValue()
+    {   IpValue ipValue = new IpValue();
+        ipValue.setAddress(getAddress());
+        ipValue.setNetmask(getNetmask());
+        ipValue.setMACAddress(getMacAddress());
+        ipValue.setId(getId());
+        ipValue.setMTime(getMTime());
+        ipValue.setCTime(getCTime());
+        return ipValue;
+    }
+
 
 }
