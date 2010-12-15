@@ -59,8 +59,6 @@ public class VSphereHostCollector extends VSphereCollector {
     private static final Set<String> VALID_UNITS =
         new HashSet<String>(Arrays.asList(MeasurementConstants.VALID_UNITS));
     
-    private static final ThreadLocal<VSphereUtil> vim = new ThreadLocal<VSphereUtil>();
-
     private static final HashMap<String, String> UNITS_MAP = new HashMap<String, String>();
     private static final String[][] UNITS_ALIAS = {
         { "Second", MeasurementConstants.UNITS_SECONDS },
@@ -112,25 +110,6 @@ public class VSphereHostCollector extends VSphereCollector {
     
     protected void init() throws PluginException {
         super.init();
-        // HPD-681, this is a BIG performance hit and will stall the ScheduleThread when
-        // HQ is configured to collect for several esx servers/vms
-        // Therefore since ScehduleThread does not need to validate configOpts just return
-        // Could possibly be taken out when we switch VSphereUtil to use SearchIndex.findByUuid()
-        if (Thread.currentThread().getName().equalsIgnoreCase("schedulethread")) {
-            return;
-        }
-        try {
-            if (vim.get() == null) {
-                vim.set(VSphereUtil.getInstance(getProperties()));
-            } else if (!vim.get().isSessionValid()) {
-                VSphereUtil.dispose(vim.get());
-                vim.set(VSphereUtil.getInstance(getProperties()));
-            }
-            //validate config
-            getManagedEntity(vim.get());
-        } catch (Exception e) {
-            throw new PluginException(e.getMessage(), e);
-        }
     }
 
     protected void setAvailability(ManagedEntity entity) {
