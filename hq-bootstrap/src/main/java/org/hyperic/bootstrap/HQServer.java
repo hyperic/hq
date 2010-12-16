@@ -116,7 +116,14 @@ public class HQServer {
             log.debug("startBuiltinDB completed");
         }
         log.info("Verifying HQ database schema...");
-        upgradeDB();
+
+        try {
+            upgradeDB();
+        } catch (Exception e) {
+            log.error("Error running database upgrade routine: " + e.getMessage());
+            return;
+        }
+        
         if (!(verifySchema())) {
             // Schema is not valid. Something went wrong with the DB upgrade.
             return;

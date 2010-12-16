@@ -188,7 +188,9 @@ public class DBUpgrader extends Task {
             // version is LATEST but the actual latest SchemaSpec is
             // earlier than the current database's schema version, we
             // consider that a downgrade as well.
-            if ( _targetSchemaVersion.compareTo(_startSchemaVersion) < 0 ) {
+            SchemaVersion realTargetSchemaVersionSchemaSpec =
+                    new SchemaVersion(realTargetSchemaVersion);
+            if ( realTargetSchemaVersionSchemaSpec.compareTo(_startSchemaVersion) < 0 ) {
                 throw new BuildException("SchemaSpec: cannot downgrade from "
                                          + _startSchemaVersion + " -> "
                                          + realTargetSchemaVersion);
