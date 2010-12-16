@@ -274,7 +274,7 @@ public class ServerManagerImpl implements ServerManager {
         server.setModifiedBy(serverResource.getModifiedBy());
         server.setModifiedTime((Long)serverResource.getProperty(MODIFIED_TIME));
         server.setName(serverResource.getName());
-        server.setPlatform(platformManager.toPlatform(serverResource.getResourceTo(RelationshipTypes.PLATFORM)));
+        server.setPlatform(platformManager.toPlatform(serverResource.getResourceTo(RelationshipTypes.SERVER)));
         server.setResource(serverResource);
         server.setRuntimeAutodiscovery((Boolean)serverResource.getProperty(RUNTIME_AUTODISCOVERY));
         server.setServerType(toServerType(serverResource.getType()));

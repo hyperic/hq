@@ -59,6 +59,7 @@ import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
@@ -135,11 +136,11 @@ public class ServiceManagerImpl implements ServiceManager {
         service.setModifiedTime((Long)resource.getProperty(MODIFIED_TIME));
         service.setName(resource.getName());
         service.setResource(resource);
-        Resource parent = resource.getResourceTo(RelationshipTypes.SERVER);
-        if(parent != null) {
+        Resource parent = resource.getResourceTo(RelationshipTypes.SERVICE);
+        Resource grandParent = parent.getResourceTo(RelationshipTypes.SERVER);
+        if(grandParent != null) {
             service.setParent(serverManager.toServer(parent));
         }else {
-            parent = resource.getResourceTo(RelationshipTypes.PLATFORM);
             service.setParent(platformManager.toPlatform(parent));
         }
         service.setServiceRt((Boolean)resource.getProperty(SERVICE_RT));
@@ -858,10 +859,27 @@ public class ServiceManagerImpl implements ServiceManager {
         serviceType.setName(sinfo.getName());
         serviceType.setDescription(sinfo.getDescription());
         serviceType.persist();
-        //TODO property types
+        Set<PropertyType> propTypes = new HashSet<PropertyType>();
+        propTypes.add(createServicePropertyType(AUTO_INVENTORY_IDENTIFIER));
+        propTypes.add(createServicePropertyType(CREATION_TIME));
+        propTypes.add(createServicePropertyType(MODIFIED_TIME));
+        propTypes.add(createServicePropertyType(AppdefResource.SORT_NAME));
+        propTypes.add(createServicePropertyType(AUTO_DISCOVERY_ZOMBIE));
+        propTypes.add(createServicePropertyType(END_USER_RT));
+        propTypes.add(createServicePropertyType(SERVICE_RT));
+        //TODO add method?
+        serviceType.setPropertyTypes(propTypes);
         serviceType.setPlugin(pluginDAO.findByName(plugin));
         servType.relateTo(serviceType, RelationshipTypes.SERVICE);
         return toServiceType(serviceType);
+    }
+    
+    private PropertyType createServicePropertyType(String propName) {
+        PropertyType propType = new PropertyType();
+        propType.setName(propName);
+        propType.setDescription(propName);
+        propType.persist();
+        return propType;
     }
     
     public void deleteServiceType(ServiceType serviceType, AuthzSubject overlord)
