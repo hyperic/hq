@@ -133,6 +133,9 @@ abstract public class BaseInfrastructureTest {
     protected static final int GENERIC_APPLICATION_TYPE = 1;
 
     protected static final int J2EE_APPLICATION_TYPE = 2;
+    
+    //The test plugin is automatically deployed when the integration test starts
+    protected static final String TEST_PLUGIN_NAME="test";
 
     @BeforeClass
     public static void initialize() {
@@ -194,22 +197,22 @@ abstract public class BaseInfrastructureTest {
     }
 
     protected ServerType createServerType(String serverTypeName, String serverVersion,
-                                          String[] validPlatformTypes, String plugin) throws NotFoundException {
+                                          String[] validPlatformTypes) throws NotFoundException {
         ServerTypeInfo serverTypeInfo = new ServerTypeInfo();
         serverTypeInfo.setDescription(serverTypeName);
         serverTypeInfo.setName(serverTypeName);
         serverTypeInfo.setVersion(serverVersion);
         serverTypeInfo.setValidPlatformTypes(validPlatformTypes);
-        return serverManager.createServerType(serverTypeInfo, plugin);
+        return serverManager.createServerType(serverTypeInfo, TEST_PLUGIN_NAME);
     }
 
-    protected ServiceType createServiceType(String serviceTypeName, String plugin,
+    protected ServiceType createServiceType(String serviceTypeName,
                                             ServerType serverType) throws NotFoundException {
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription(serviceTypeName);
         sinfo.setInternal(false);
         sinfo.setName(serviceTypeName);
-        return serviceManager.createServiceType(sinfo, plugin, serverType);
+        return serviceManager.createServiceType(sinfo, TEST_PLUGIN_NAME, serverType);
     }
 
     protected Service createService(Server server, ServiceType serviceType, String serviceName,
@@ -225,9 +228,9 @@ abstract public class BaseInfrastructureTest {
         return agentManager.createLegacyAgent(address, port, authToken, agentToken, version);
     }
 
-    protected PlatformType createPlatformType(String typeName, String plugin)
+    protected PlatformType createPlatformType(String typeName)
         throws NotFoundException {
-        return platformManager.createPlatformType(typeName, plugin);
+        return platformManager.createPlatformType(typeName, TEST_PLUGIN_NAME);
     }
 
     protected ResourceGroup createPlatformResourceGroup(Set<Platform> platforms, String groupName)

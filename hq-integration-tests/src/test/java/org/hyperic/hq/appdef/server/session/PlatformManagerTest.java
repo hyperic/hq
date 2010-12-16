@@ -28,7 +28,6 @@ package org.hyperic.hq.appdef.server.session;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
@@ -46,16 +45,12 @@ import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.hyperic.util.pager.PageControl;
@@ -104,9 +99,9 @@ public class PlatformManagerTest
         String platformType;
         for (int i = 1; i < 10; i++) {
             platformType = "pType" + i;
-            pTypes.add(i - 1, createPlatformType(platformType, "test"));
+            pTypes.add(i - 1, createPlatformType(platformType));
         }
-        pTypes.add(9, createPlatformType("Linux", "test"));
+        pTypes.add(9, createPlatformType("Linux"));
         return pTypes;
     }
 
@@ -122,13 +117,11 @@ public class PlatformManagerTest
         // Get Linux platform
         testPlatform = testPlatforms.get(9);
         // Create ServerType
-        ServerType testServerType = createServerType("Tomcat", "6.0", new String[] { "Linux" },
-            "test");
+        ServerType testServerType = createServerType("Tomcat", "6.0", new String[] { "Linux" });
         // Create test server
         testServer = createServer(testPlatform, testServerType, "My Tomcat");
         // Create ServiceType
-        ServiceType serviceType = createServiceType("Spring JDBC Template", "Test Server Plugin",
-            testServerType);
+        ServiceType serviceType = createServiceType("Spring JDBC Template", testServerType);
         // Create test service
         testService = createService(testServer, serviceType, "platformService jdbcTemplate",
             "Spring JDBC Template", "my computer");
@@ -554,7 +547,7 @@ public class PlatformManagerTest
         assertEquals(pType.getName(), platformTypeName);
         assertEquals(pType.getPlugin(), plugin);
         
-        assertEquals(ResourceType.findResourceType(pType.getId()).getName(), platformTypeName);
+        assertEquals(resourceManager.findResourceTypeById(pType.getId()).getName(), platformTypeName);
     }
 
     @Test
