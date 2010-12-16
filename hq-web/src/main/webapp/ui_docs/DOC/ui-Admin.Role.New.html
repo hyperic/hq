@@ -16,57 +16,17 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Oct 28, 2010 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Dec 15, 2010 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <p><b>Available only in <font color="red">HQ Enterprise</font></b></p>
-
-<style type='text/css'>/*<![CDATA[*/
-div.rbtoc1288304551109 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1288304551109 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1288304551109 li {margin-left: 0px;padding-left: 0px;}
-
-/*]]>*/</style><div class='rbtoc1288304551109'>
-<ul>
-    <li><a href='#ui-Admin.Role.New-BeforeYouStart'>Before You Start</a></li>
-    <li><a href='#ui-Admin.Role.New-CreateaNewRole'>Create a New Role</a></li>
-<ul>
-    <li><a href='#ui-Admin.Role.New-Step1DefineRolePermissionMatrix'>Step 1 - Define Role Permission Matrix</a></li>
-    <li><a href='#ui-Admin.Role.New-Step2AssignUserstotheRole'>Step 2 - Assign Users to the Role</a></li>
-    <li><a href='#ui-Admin.Role.New-Step3AssignGroupstotheRole'>Step 3 - Assign Groups to the Role</a></li>
-    <li><a href='#ui-Admin.Role.New-Step4DefineAlertCalendar%28forFollowtheSunRolebasedNotifications%29'>Step 4 - Define Alert Calendar (for Follow-the-Sun Role-based Notifications)</a></li>
-    <li><a href='#ui-Admin.Role.New-Step5%3A%28Optionally%29CustomizeRoleSpecificDashboard'>Step 5: (Optionally) Customize Role-Specific Dashboard</a></li>
+				    <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Learn About Roles</b><br /><ul>
+	<li>For an introduction to roles in vFabric Hyperic, see <a href="http://support.hyperic.com/confluence/display/EVO/Understanding+Roles+in+HQ+Enterprise" title="Understanding Roles in HQ Enterprise">Understanding Roles in HQ Enterprise</a>.</li>
+	<li>For information about permission levels, see <a href="http://support.hyperic.com/confluence/display/EVO/Create+and+Manage+Roles+in+vFabric+Hyperic#CreateandManageRolesinvFabricHyperic-AboutPermissionLevels">About Permission Levels</a>.</li>
 </ul>
-    <li><a href='#ui-Admin.Role.New-AboutPermissionLevels'>About Permission Levels</a></li>
-<ul>
-    <li><a href='#ui-Admin.Role.New-PermissionTips'>Permission Tips</a></li>
-    <li><a href='#ui-Admin.Role.New-PermissionLevelDefinitions'>Permission Level Definitions</a></li>
-    <li><a href='#ui-Admin.Role.New-HowHQValidatesPlatformServerServicePermissionLevelAssignments'>How HQ Validates Platform-Server-Service Permission Level Assignments</a></li>
-</ul>
-</ul></div>
-
-
-<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
-
-
-
-<h1><a name="ui-Admin.Role.New-BeforeYouStart"></a>Before You Start</h1>
-
-<p>If you are new to HQ Enterprise roles, see <a href="http://support.hyperic.com/confluence/display/EVO/Understanding+Roles+in+HQ+Enterprise" title="Understanding Roles in HQ Enterprise">Understanding Roles in HQ Enterprise</a>.</p>
-
-<h1><a name="ui-Admin.Role.New-CreateaNewRole"></a>Create a New Role</h1>
-
-<p>The sections below provide instructions for creating and editing roles.</p>
-
-<h2><a name="ui-Admin.Role.New-Step1DefineRolePermissionMatrix"></a>Step 1 - Define Role Permission Matrix</h2>
-
-<p>In this step you create a permissions matrix for the role. For information about permission levels, see <a href="#ui-Admin.Role.New-AboutPermissionLevels">About Permission Levels</a> below.</p>
-
-<p><b>Note:</b> If you are creating a role purely for the purpose of role-based alert notification, skip to <a href="#ui-Admin.Role.New-Step2AssignUserstotheRole">Step 2 - Assign Users to the Role</a>.</p>
-
-
+</td></tr></table></div>
 <ol>
-	<li>Click <b>New Role</b> on the <b>Administration</b> page (or navigate to an existing role to edit).</li>
+	<li>Click <b>New Role</b> on the <b>Administration</b> page.<br/>
+<span class="image-wrap" style=""><img src="attachments/71828283/72646775.png" width="800px" style="border: 0px solid black"/></span> </li>
 	<li>In the "Properties" section of the <b>New Role</b> page, enter:
 	<ul>
 		<li><b>Name</b></li>
@@ -98,7 +58,7 @@ div.rbtoc1288304551109 li {margin-left: 0px;padding-left: 0px;}
 			<li>If you select <b>Full,</b> which enables role users to delete platforms and their child resources, HQ will require that the role's permission level to Servers and Services is also <b>Full</b>.</li>
 			<li>If you select <b>Full</b> or <b>Read-Write</b>, HQ will automatically checkmark the <b>Can Fix/Ack Alerts?</b> and <b>Can Control?</b> capabilities.</li>
 			<li>If you select <b>Read-Only</b>, you have the option to grant alert management or resource control capabilities by clicking <b>Can Fix/Ack Alerts?</b> or <b>Can Control?</b> respectively.</li>
-			<li>If you select <b>None</b>, you cannot grant alert management or resource  control permissions.</li>
+			<li>If you select <b>None</b>, you cannot grant alert management or resource control permissions.</li>
 		</ul>
 		</li>
 		<li><b>Servers</b>
@@ -131,135 +91,10 @@ div.rbtoc1288304551109 li {margin-left: 0px;padding-left: 0px;}
 		</ul>
 		</li>
 		<li>The role is saved, and the refreshed role page will have three new sections: "Assigned Users", "Assigned Groups", and "Alert Calendar".</li>
-		<li>Proceed to <a href="#ui-Admin.Role.New-Step2AssignUserstotheRole">Step 2 - Assign Users to the Role</a>.</li>
 	</ol>
 	</li>
 </ol>
 
-
-<h2><a name="ui-Admin.Role.New-Step2AssignUserstotheRole"></a>Step 2 - Assign Users to the Role</h2>
-
-<ol>
-	<li>Click <b>Add to List</b> in the "Assigned Users" section.</li>
-	<li>On the "Users" panel on the left side of the  &#42;Assign Users to Role" page, checkmark each HQ user you wish to add to the role, and click the blue arrow to move the users to the "Assign To Role" panel.</li>
-	<li>Click <b>OK</b> when you are done adding users to the role.</li>
-	<li>If you are creating a role purely for the purpose of role-based alert notification, skip to <a href="#ui-Admin.Role.New-Step4DefineAlertCalendarforRole">Step 4 - Define Alert Calendar for Role</a>. Otherwise proceed to <a href="#ui-Admin.Role.New-Step2AssignGroupstotheRole">Step 2 - Assign Groups to the Role</a>.</li>
-</ol>
-
-
-<h2><a name="ui-Admin.Role.New-Step3AssignGroupstotheRole"></a>Step 3 - Assign Groups to the Role</h2>
-
-<p>In this step, you assign resource groups to the role. A resource in a group assigned to the role will be available to role users, to the extent that the permission matrix enables. (For example, if the role's permission level to Platforms is <b>None</b>, role users will not have access to platforms in groups assigned to the role.</p>
-
-<ol>
-	<li>Click <b>Add to List</b> in the "Assigned Groups" section.</li>
-	<li>On the "Groups" panel on the left side of the &#42;Assign Groups to Role" page, checkmark each resource group you wish to add to the role, and click the blue arrow to move the groups to the "Assign To Role" panel.</li>
-	<li>Click <b>OK</b> when you are done adding groups to the role.</li>
-	<li>Proceed to <a href="#ui-Admin.Role.New-Step4DefineAlertCalendar">Step 4 - Define Alert Calendar</a>, as desired.</li>
-</ol>
-
-
-<h2><a name="ui-Admin.Role.New-Step4DefineAlertCalendar%28forFollowtheSunRolebasedNotifications%29"></a>Step 4 - Define Alert Calendar (for Follow-the-Sun Role-based Notifications)</h2>
-
-<p>An alert calendar defines the availability calendar during which role users are available for alert notfications. You should define an alert calendar if:</p>
-
-<ul>
-	<li>You are creating a role that will be a recipient of alert notifications, and</li>
-	<li>The users assigned to the role users are available only during specific intervals only.</li>
-</ul>
-
-
-<p>By default, a role's alert calendar settings specify that role users are available for notifications 24 hours a day, 7 days a week, with no exceptions. To define a narrower availability calendar:</p>
-
-<ol>
-	<li>For each day in the week,
-	<ol>
-		<li>Use the first set of <b>From</b> and <b>To</b> pull-downs to specify a start time and an end time that role users are availability for notifications.</li>
-		<li>If there is a period of time  within the availability period specified in the previous step, during which role users should <em>not</em> receive notifications, click <b>Except</b>, and use the <b>From</b> and <b>To</b> pull-downs on the right to specify that period of time.</li>
-	</ol>
-	</li>
-	<li>Click <b>Save</b> after defining the alert calendar.</li>
-</ol>
-
-
-<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>You must define additional role or roles with complementary alert calendars to ensure that there is a role whose users are available during periods of time that the current role's alert calendar does not include.</td></tr></table></div>
-
-<h2><a name="ui-Admin.Role.New-Step5%3A%28Optionally%29CustomizeRoleSpecificDashboard"></a>Step 5: (Optionally) Customize Role-Specific Dashboard</h2>
-
-<p>When you create a role, HQ Enterprise creates a Dashboard with the same name as the role, which is HQ users that have been added to the role can select from the <b>Select a Dashboard</b> pull-down in the upper left corner of the HQ Dashboard.</p>
-
-<p>As desired, you can add, remove, or reconfigure the portlets on the role dashboard to meet the needs of role users. For more information see <a href="http://support.hyperic.com/confluence/display/EVO/Role-Based+Dashboards+in+HQ+Enterprise" title="Role-Based Dashboards in HQ Enterprise">Role&#45;Based Dashboards in HQ Enterprise</a>.</p>
-
-<h1><a name="ui-Admin.Role.New-AboutPermissionLevels"></a>About Permission Levels</h1>
-
-<p>The following sections summarize tips and facts about permission levels.</p>
-
-<h2><a name="ui-Admin.Role.New-PermissionTips"></a>Permission Tips</h2>
-
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Defining a Role's Permission Matrix</b><br />For roles that:
-<ul>
-	<li><b>Add resources to inventory and create alert definitions</b> &#45; use <b>Full</b> or <b>Read-Write</b> permission levels. These permission levels enable a role to also process fired alerts and control resources.</li>
-</ul>
-
-
-<ul>
-	<li><b>Monitor resources, respond to alerts and control resources</b> &#45; use the <b>Read</b> permission level, and then grant <b>Fix/Ack</b> and <b>Control</b> capability, or both. This allows operations staff to respond to alerts, see the details of alert definitions, and perform routine or as-needed resource control tasks but <b>not</b> create/modify/delete resources and alert definitions.</li>
-</ul>
-
-
-<ul>
-	<li><b>Need visibility only</b> &#45; Use <b>Read</b> permission level for roles that view and monitor resources, but do not (1) create/modify/delete resources and alert definitions, or (2) response to alerts.</li>
-</ul>
-</td></tr></table></div>
-
-<h2><a name="ui-Admin.Role.New-PermissionLevelDefinitions"></a>Permission Level Definitions</h2>
-
-<ul>
-	<li><b>None</b> &#45; No access at all to instances of the type.</li>
-</ul>
-
-
-<ul>
-	<li><b>Read-Only</b> &#45; Allows role users to view instances of the type, but not create, edit, or delete them. For <b>Platforms</b>, <b>Servers</b>, <b>Services</b>, <b>Groups</b>, also enables:
-	<ul>
-		<li><b>Read-Only</b> access to alert definitions for the inventory type.</li>
-	</ul>
-	</li>
-</ul>
-
-
-<blockquote>
-<p>A role with <b>Read-Only</b> permission level does <b><em>not</em></b> have permissions to enable/disable/fix/ack alerts or control resources - these capabilities must be explicitly granted.</p></blockquote>
-
-<ul>
-	<li><b>Read-Write</b> &#45; Allows role users to view and edit instances of the type, but not create or delete them. For <b>Platforms</b>, <b>Servers</b>, <b>Services</b>, <b>Groups</b>, also gives:
-	<ul>
-		<li><b>Full</b> access to alert definitions for the inventory type,&nbsp;</li>
-		<li>Permission to manage alerts (enable/disable, fix, acknowledge) for the inventory type.</li>
-		<li>Permission to perform supported control operations on resources of the inventory type.</li>
-	</ul>
-	</li>
-</ul>
-
-
-<ul>
-	<li><b>Full</b> &#45; Allows role users to create, edit, delete, and view instance of the type. For <b>Platforms</b>, <b>Servers</b>, <b>Services</b>, <b>Groups</b>, also gives:
-	<ul>
-		<li><b>Full</b> access to alert definitions for the inventory type.</li>
-		<li>Permission to manage alerts (enable/disable, fix, acknowledge) for the inventory type.</li>
-		<li>Permission to perform supported control operations on resources of the inventory type.</li>
-	</ul>
-	</li>
-</ul>
-
-
-<h2><a name="ui-Admin.Role.New-HowHQValidatesPlatformServerServicePermissionLevelAssignments"></a>How HQ Validates Platform-Server-Service Permission Level Assignments</h2>
-
-<p>HQ Enterprise does a bottom-up validation of the permission levels a role grants to Platforms, Servers, and Services. </p>
-
-<p>A role with <b>Full</b> access (which enables resource deletion) to an inventory type must have at least <b>Read-Only</b> access to the parent type (if there is one) and Full to the child type (if there is one). </p>
-
-<p>For example, <b>Full</b> access to Servers requires at least Read access to Platforms and Full access to Services.</p>
 
 				    					    <br/>
                         <div class="tabletitle">
@@ -268,7 +103,7 @@ div.rbtoc1288304551109 li {margin-left: 0px;padding-left: 0px;}
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828509/71926252.gif">fb_ok.gif</a> (image/gif)
+                                <a href="attachments/72451100/72646787.gif">fb_ok.gif</a> (image/gif)
                                 <br/>
                                                     </div>
 				    
@@ -280,7 +115,7 @@ div.rbtoc1288304551109 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 28, 2010 15:34</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Dec 15, 2010 14:34</font></td>
 		    </tr>
 	    </table>
     </body>
