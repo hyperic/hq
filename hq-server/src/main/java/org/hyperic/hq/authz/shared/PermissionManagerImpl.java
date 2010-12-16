@@ -48,6 +48,9 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.shared.HierarchicalAlertingManager;
 import org.hyperic.hq.events.shared.MaintenanceEventManager;
+import org.hyperic.hq.inventory.dao.ResourceDao;
+import org.hyperic.hq.inventory.dao.ResourceGroupDao;
+import org.hyperic.hq.inventory.dao.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
@@ -68,6 +71,12 @@ public class PermissionManagerImpl
     private final String _falseToken;
 
     private DBUtil dbUtil;
+    
+    private ResourceDao resourceDao;
+    
+    private ResourceGroupDao resourceGroupDao;
+    
+    private ResourceTypeDao resourceTypeDao;
 
     private static final String VIEWABLE_SELECT = "SELECT instance_id, EAM_RESOURCE.sort_name, EAM_RESOURCE.id, "
                                                   + "EAM_RESOURCE.resource_type_id "
@@ -98,9 +107,13 @@ public class PermissionManagerImpl
     }
 
     @Autowired
-    public PermissionManagerImpl(DBUtil dbUtil) {
+    public PermissionManagerImpl(DBUtil dbUtil, ResourceDao resourceDao, 
+                                 ResourceGroupDao resourceGroupDao, ResourceTypeDao resourceTypeDao) {
         Connection conn = null;
         this.dbUtil = dbUtil;
+        this.resourceGroupDao = resourceGroupDao;
+        this.resourceDao = resourceDao;
+        this.resourceTypeDao = resourceTypeDao;
         try {
             conn = getConnection();
             _falseToken = DBUtil.getBooleanValue(false, conn);
@@ -134,7 +147,7 @@ public class PermissionManagerImpl
             _log.debug("Checking Scope for Operation: " + opName + " subject: " + subj);
         }
 
-        ResourceType resTypeBean = ResourceType.findResourceTypeByName(resType);
+        ResourceType resTypeBean = resourceTypeDao.findByName(resType);
 
         if (resTypeBean != null) {
             OperationType op = resTypeBean.getOperationType(opName);
@@ -179,7 +192,7 @@ public class PermissionManagerImpl
    
 
     private Resource lookupResource(ResourceValue resource) {
-        return Resource.findResource(resource.getId());
+        return resourceDao.findById(resource.getId());
     }
 
     private Set toPojos(Object[] vals) {
@@ -202,7 +215,7 @@ public class PermissionManagerImpl
                 ret.add(roleDao.findById(((RoleValue) vals[i]).getId()));
             } else if (vals[i] instanceof ResourceGroupValue) {
                 
-                ret.add(ResourceGroup.findResourceGroup(((ResourceGroupValue) vals[i]).getId()));
+                ret.add(resourceGroupDao.findById(((ResourceGroupValue) vals[i]).getId()));
             } else {
                 _log.error("Invalid type.");
             }

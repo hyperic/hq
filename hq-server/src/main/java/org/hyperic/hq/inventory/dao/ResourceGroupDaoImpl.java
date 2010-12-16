@@ -26,7 +26,9 @@ public class ResourceGroupDaoImpl implements ResourceGroupDao {
         ResourceGroup result = entityManager.find(ResourceGroup.class, id); 
         
         // TODO workaround to trigger Neo4jNodeBacking's around advice for the getter
-        result.getId();
+        if(result != null) {
+            result.getId();
+        }
         
         return result;
     }

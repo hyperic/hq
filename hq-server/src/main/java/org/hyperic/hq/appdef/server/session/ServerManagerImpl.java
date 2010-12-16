@@ -223,7 +223,7 @@ public class ServerManagerImpl implements ServerManager {
  
     private Collection<Resource> getAllServers() {
         Set<Resource> servers = new HashSet<Resource>();
-        Collection<Resource> platforms = Resource.findRootResource().getResourcesFrom(RelationshipTypes.PLATFORM);
+        Collection<Resource> platforms = resourceManager.findRootResource().getResourcesFrom(RelationshipTypes.PLATFORM);
         for(Resource platform: platforms) {
             servers.addAll(platform.getResourcesFrom(RelationshipTypes.SERVER));
         }
@@ -237,7 +237,7 @@ public class ServerManagerImpl implements ServerManager {
         s.setLocation(sv.getLocation());
         s.setModifiedBy(sv.getModifiedBy());
         s.persist();
-        ResourceType st = ResourceType.findResourceType(sv.getServerType().getId());
+        ResourceType st = resourceManager.findResourceTypeById(sv.getServerType().getId());
         s.setType(st);
         s.setProperty(INSTALL_PATH,sv.getInstallPath());
         String aiid = sv.getAutoinventoryIdentifier();
@@ -316,8 +316,8 @@ public class ServerManagerImpl implements ServerManager {
             //.checkPermission(subject, resourceManager.findResourceTypeByName(AuthzConstants.platformResType), platformId, 
               //  AuthzConstants.platformOpAddServer);
 
-            Resource platform = Resource.findResource(platformId);
-            ResourceType serverType = ResourceType.findResourceType(serverTypeId);
+            Resource platform = resourceManager.findResourceById(platformId);
+            ResourceType serverType = resourceManager.findResourceTypeById(serverTypeId);
 
             sValue.setServerType(toServerType(serverType).getServerTypeValue());
             sValue.setModifiedBy(subject.getName());
@@ -364,7 +364,7 @@ public class ServerManagerImpl implements ServerManager {
 
             //TODO remove services         
             //config, cprops, and relationships will get cleaned up by removal here
-            resourceManager.removeResource(subject, Resource.findResource(server.getId()));
+            resourceManager.removeResource(subject, resourceManager.findResourceById(server.getId()));
            
         } finally {
             if (pushed) {
@@ -398,7 +398,8 @@ public class ServerManagerImpl implements ServerManager {
     }
     private Set<ResourceType> getAllServerResourceTypes() {
         Set<ResourceType> resourceTypes = new HashSet<ResourceType>();
-        Collection<ResourceType> platformTypes = ResourceType.findRootResourceType().getResourceTypesFrom(RelationshipTypes.PLATFORM);
+        Collection<ResourceType> platformTypes = resourceManager.findRootResourceType().
+            getResourceTypesFrom(RelationshipTypes.PLATFORM);
         for(ResourceType platformType:platformTypes) {
             resourceTypes.addAll(platformType.getResourceTypesFrom(RelationshipTypes.SERVER));
         }
@@ -458,7 +459,7 @@ public class ServerManagerImpl implements ServerManager {
     @Transactional(readOnly=true)
     public PageList<ServerTypeValue> getServerTypesByPlatformType(AuthzSubject subject, Integer platformTypeId,
                                                                   PageControl pc) throws PlatformNotFoundException {
-        ResourceType platType = ResourceType.findResourceType(platformTypeId);
+        ResourceType platType = resourceManager.findResourceTypeById(platformTypeId);
 
         Collection<ResourceType> resourceTypes = platType.getResourceTypesFrom(RelationshipTypes.SERVER);
         Set<ServerType> serverTypes = new HashSet<ServerType>();
@@ -486,7 +487,7 @@ public class ServerManagerImpl implements ServerManager {
     public Server findServerByAIID(AuthzSubject subject, Platform platform, String aiid) throws PermissionException {
         //TODO perm check
         //permissionManager.checkViewPermission(subject, platform.getId());
-        return toServer(findServerByAIID(Resource.findResource(platform.getId()), aiid));
+        return toServer(findServerByAIID(resourceManager.findResourceById(platform.getId()), aiid));
     }
 
     /**
@@ -511,7 +512,7 @@ public class ServerManagerImpl implements ServerManager {
      */
     @Transactional(readOnly=true)
     public Server getServerById(Integer id) {
-        return toServer(Resource.findResource(id));
+        return toServer(resourceManager.findResourceById(id));
     }
 
     /**
@@ -520,7 +521,7 @@ public class ServerManagerImpl implements ServerManager {
      */
     @Transactional(readOnly=true)
     public ServerType findServerType(Integer id) {
-        return toServerType(ResourceType.findResourceType(id));
+        return toServerType(resourceManager.findResourceTypeById(id));
     }
 
     /**
@@ -531,7 +532,7 @@ public class ServerManagerImpl implements ServerManager {
      */
     @Transactional(readOnly=true)
     public ServerType findServerTypeByName(String name) throws NotFoundException {
-        ResourceType type = ResourceType.findResourceTypeByName(name);
+        ResourceType type = resourceManager.findResourceTypeByName(name);
         if (type == null) {
             throw new NotFoundException("name not found: " + name);
         }
@@ -541,7 +542,7 @@ public class ServerManagerImpl implements ServerManager {
     @Transactional(readOnly=true)
     public List<Server> findServersByType(Platform p, ServerType st) {
         List<Server> servers = new ArrayList<Server>();
-        Resource platResource = Resource.findResource(p.getId());
+        Resource platResource = resourceManager.findResourceById(p.getId());
         Collection<Resource> relatedServers = platResource.getResourcesFrom(RelationshipTypes.SERVER);
         for(Resource server: relatedServers) {
             if(st.equals(server.getType())) {
@@ -598,7 +599,7 @@ public class ServerManagerImpl implements ServerManager {
 
         try {
 
-            Collection<Resource> servers = ResourceType.findResourceType(servTypeId).getResources();
+            Collection<Resource> servers = resourceManager.findResourceTypeById(servTypeId).getResources();
             if (servers.size() == 0) {
                 return new Integer[0];
             }
@@ -631,7 +632,7 @@ public class ServerManagerImpl implements ServerManager {
     @Transactional(readOnly=true)
     public ServerValue getServerByService(AuthzSubject subject, Integer sID) throws ServerNotFoundException,
         ServiceNotFoundException, PermissionException {
-        Resource svc = Resource.findResource(sID);
+        Resource svc = resourceManager.findResourceById(sID);
         Resource s = svc.getResourceTo(RelationshipTypes.SERVICE);
         //TODO
         //permissionManager.checkViewPermission(subject, s.getId());
@@ -649,7 +650,7 @@ public class ServerManagerImpl implements ServerManager {
         Set<Resource> servers = new HashSet<Resource>();
         for (AppdefEntityID svcId : sIDs) {
 
-            Resource svc = Resource.findResource(svcId.getId());
+            Resource svc = resourceManager.findResourceById(svcId.getId());
 
             servers.add(svc.getResourceTo(RelationshipTypes.SERVICE));
         }
@@ -662,7 +663,7 @@ public class ServerManagerImpl implements ServerManager {
      */
     @Transactional(readOnly=true)
     public Collection<Server> getViewableServers(AuthzSubject subject, Platform platform) {
-        Resource platformRes = Resource.findResource(platform.getId());
+        Resource platformRes = resourceManager.findResourceById(platform.getId());
         return filterViewableServers(platformRes.getResourcesFrom(RelationshipTypes.SERVER), subject);
     }
 
@@ -679,10 +680,11 @@ public class ServerManagerImpl implements ServerManager {
         List<Server> servers;
         // first, if they specified a server type, then filter on it
         if (servTypeId != null) {
-            servers = findServersByType(Resource.findResource(platId), ResourceType.findResourceType(servTypeId));
+            servers = findServersByType(resourceManager.findResourceById(platId), 
+                resourceManager.findResourceTypeById(servTypeId));
             
         } else {
-            servers = findByPlatformOrderName(Resource.findResource(platId));
+            servers = findByPlatformOrderName(resourceManager.findResourceById(platId));
             
         }
         for (Iterator<Server> i = servers.iterator(); i.hasNext();) {
@@ -759,7 +761,7 @@ public class ServerManagerImpl implements ServerManager {
         PageControl pc = PageControl.PAGE_ALL;
         Integer servTypeId;
         try {
-            ResourceType typeV = ResourceType.findResourceType(svcTypeId);
+            ResourceType typeV = resourceManager.findResourceTypeById(svcTypeId);
             servTypeId = typeV.getResourceTypeTo(RelationshipTypes.SERVICE).getId();
         } catch (ObjectNotFoundException e) {
             throw new ServerNotFoundException("Service Type not found", e);
@@ -814,7 +816,7 @@ public class ServerManagerImpl implements ServerManager {
         ResourceGroup appLocal;
 
         try {
-            appLocal = ResourceGroup.findResourceGroup(appId);
+            appLocal = resourceGroupManager.findResourceGroupById(appId);
         } catch (ObjectNotFoundException exc) {
             throw new ApplicationNotFoundException(appId, exc);
         }
@@ -964,7 +966,7 @@ public class ServerManagerImpl implements ServerManager {
     public Server updateServer(AuthzSubject subject, ServerValue existing) throws PermissionException, UpdateException,
         AppdefDuplicateNameException, ServerNotFoundException {
         try {
-            Resource server = Resource.findResource(existing.getId());
+            Resource server = resourceManager.findResourceById(existing.getId());
             //TODO perm check
             //permissionManager.checkModifyPermission(subject, server.getId());
             existing.setModifiedBy(subject.getName());
@@ -1167,7 +1169,7 @@ public class ServerManagerImpl implements ServerManager {
      * 
      */
     public void setAutodiscoveryZombie(Server server, boolean zombie) {
-        Resource.findResource(server.getId()).setProperty(AUTODISCOVERY_ZOMBIE,zombie);
+        resourceManager.findResourceById(server.getId()).setProperty(AUTODISCOVERY_ZOMBIE,zombie);
     }
 
     /**
@@ -1176,7 +1178,7 @@ public class ServerManagerImpl implements ServerManager {
      */
     private void findAndSetPlatformType(String[] platNames, ResourceType stype) throws NotFoundException {
         for (int i = 0; i < platNames.length; i++) {
-            ResourceType pType = ResourceType.findResourceTypeByName(platNames[i]);
+            ResourceType pType = resourceManager.findResourceTypeByName(platNames[i]);
             if (pType == null) {
                 throw new NotFoundException("Could not find platform type '" + platNames[i] + "'");
             }

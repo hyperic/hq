@@ -57,6 +57,9 @@ import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.shared.EventLogManager;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.grouping.shared.GroupEntry;
+import org.hyperic.hq.inventory.dao.ResourceDao;
+import org.hyperic.hq.inventory.dao.ResourceGroupDao;
+import org.hyperic.hq.inventory.dao.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
@@ -85,13 +88,20 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     private EventLogManager eventLogManager;
     private final Log log = LogFactory.getLog(ResourceGroupManagerImpl.class);
     private ApplicationContext applicationContext;
+    private ResourceGroupDao resourceGroupDao;
+    private ResourceDao resourceDao;
+    private ResourceTypeDao resourceTypeDao;
    
 
     @Autowired
     public ResourceGroupManagerImpl(AuthzSubjectManager authzSubjectManager,
-                                    EventLogManager eventLogManager) {
+                                    EventLogManager eventLogManager, ResourceGroupDao resourceGroupDao,
+                                    ResourceDao resourceDao, ResourceTypeDao resourceTypeDao) {
         this.authzSubjectManager = authzSubjectManager;
         this.eventLogManager = eventLogManager;
+        this.resourceGroupDao = resourceGroupDao;
+        this.resourceDao = resourceDao;
+        this.resourceTypeDao = resourceTypeDao;
     }
 
     /**
@@ -113,7 +123,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     private ResourceGroup createGroup(AuthzSubject whoami, ResourceGroupCreateInfo cInfo,
                                       Collection<Role> roles, Collection<Resource> resources)
         throws GroupDuplicateNameException, GroupCreationException {
-        ResourceGroup existing = ResourceGroup.findResourceGroupByName(cInfo.getName());
+        ResourceGroup existing = resourceGroupDao.findByName(cInfo.getName());
 
         if (existing != null) {
             throw new GroupDuplicateNameException("Group by the name [" + cInfo.getName() +
@@ -126,7 +136,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         res.setPrivateGroup(cInfo.isPrivateGroup());
         res.setDescription(cInfo.getDescription());
         res.setModifiedBy(whoami.getName());
-        ResourceType groupType = ResourceType.findResourceType(cInfo.getGroupTypeId());
+        ResourceType groupType = resourceTypeDao.findById(cInfo.getGroupTypeId());
         //TODO throw Exception if type doesn't exist?
         res.persist();
         res.setType(groupType);
@@ -175,7 +185,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     @Transactional(readOnly = true)
     public ResourceGroup findResourceGroupById(AuthzSubject whoami, Integer id)
         throws PermissionException {
-        ResourceGroup group = ResourceGroup.findResourceGroup(id);
+        ResourceGroup group = resourceGroupDao.findById(id);
         if (group == null) {
             return null;
         }
@@ -197,7 +207,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      */
     @Transactional(readOnly = true)
     public ResourceGroup findResourceGroupById(Integer id) {
-        return ResourceGroup.findResourceGroup(id);
+        return resourceGroupDao.findById(id);
     }
 
 
@@ -217,7 +227,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
 
         // XXX: Add Auditing
         if (name != null && !name.equals(group.getName())) {
-            ResourceGroup existing = ResourceGroup.findResourceGroupByName(name);
+            ResourceGroup existing = resourceGroupDao.findByName(name);
 
             if (existing != null) {
                 throw new GroupDuplicateNameException("Group by that name [" + name +
@@ -258,7 +268,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     }
     
     public void removeResourceGroup(AuthzSubject whoami, Integer groupId) throws PermissionException, VetoException {
-        ResourceGroup group = ResourceGroup.findResourceGroup(groupId);
+        ResourceGroup group = resourceGroupDao.findById(groupId);
         removeResourceGroup(whoami, group);
     }
 
@@ -486,7 +496,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     }
 
     private Collection<ResourceGroup> getAllResourceGroups() {
-        return ResourceGroup.findAllResourceGroups();
+        return resourceGroupDao.findAll();
     }
 
   
@@ -511,7 +521,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     }
 
     private void updateGroupMember(ResourceCreatedZevent resourceEvent) {
-        final Resource resource = Resource.findResource(resourceEvent.getId());
+        final Resource resource = resourceDao.findById(resourceEvent.getId());
         final AuthzSubject subject = authzSubjectManager.findSubjectById(resourceEvent
             .getAuthzSubjectId());
         for (ResourceGroup group : getAllResourceGroups()) {
@@ -578,6 +588,11 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     public int getGroupEntResType(ResourceGroup group) {
        //TODO return id of ResourceType for Platform, Server, or Service
         return 1;
+    }
+
+    @Transactional(readOnly=true)
+    public ResourceGroup findResourceGroupByName(String name) {
+       return resourceGroupDao.findByName(name);
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {

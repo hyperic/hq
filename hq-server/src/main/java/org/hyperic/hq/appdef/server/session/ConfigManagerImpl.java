@@ -80,7 +80,7 @@ public class ConfigManagerImpl implements ConfigManager {
      */
     public void createConfigResponse(int resourceId, byte[] productResponse, byte[] measResponse, byte[] controlResponse,
                                                  byte[] rtResponse) {
-        Resource resource = Resource.findResource(resourceId);
+        Resource resource = resourceManager.findResourceById(resourceId);
         resource.setProductConfig(createConfig(productResponse));
         resource.setMeasurementConfig(createConfig(measResponse));
         resource.setControlConfig(createConfig(controlResponse));
@@ -342,7 +342,7 @@ public class ConfigManagerImpl implements ConfigManager {
      * 
      */
     public void clearValidationError(AuthzSubject subject, AppdefEntityID id) {
-       Resource.findResource(id.getId()).setConfigValidationError(null);
+        resourceManager.findResourceById(id.getId()).setConfigValidationError(null);
     }
 
     /**
@@ -393,7 +393,7 @@ public class ConfigManagerImpl implements ConfigManager {
             }
         }
 
-        Resource.findResource(id.getId()).setConfigValidationError(validationError);
+        resourceManager.findResourceById(id.getId()).setConfigValidationError(validationError);
     }
 
     /**
@@ -455,7 +455,7 @@ public class ConfigManagerImpl implements ConfigManager {
                                             boolean force) {
         boolean wasUpdated = false;
         byte[] configBytes;
-        Resource resource = Resource.findResource(appdefID.getId());
+        Resource resource = resourceManager.findResourceById(appdefID.getId());
         boolean overwrite = ((userManaged != null) && userManaged.booleanValue()) || // via
                             // UI
                             // or
@@ -500,7 +500,7 @@ public class ConfigManagerImpl implements ConfigManager {
     private byte[] getConfigForType(String productType, AppdefEntityID id, boolean fail)
         throws ConfigFetchException {
         Config config;
-        Resource resource = Resource.findResource(id.getId());
+        Resource resource = resourceManager.findResourceById(id.getId());
         //TODO resource null?
         if (productType.equals(ProductPlugin.TYPE_PRODUCT)) {
             config= resource.getProductConfig();

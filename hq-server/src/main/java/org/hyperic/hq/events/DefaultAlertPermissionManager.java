@@ -41,6 +41,8 @@ import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceOperationsHelper;
 import org.hyperic.hq.authz.shared.RoleManager;
 import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.inventory.dao.ResourceDao;
+import org.hyperic.hq.inventory.dao.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,11 +63,13 @@ public class DefaultAlertPermissionManager implements AlertPermissionManager {
     private  Map resourceTypes = new HashMap();
     private  Map operations = new HashMap();
     private RoleManager roleManager;
+    private ResourceTypeDao resourceTypeDao;
     
     
     @Autowired
-    public DefaultAlertPermissionManager(RoleManager roleManager) {
+    public DefaultAlertPermissionManager(RoleManager roleManager, ResourceTypeDao resourceTypeDao) {
         this.roleManager = roleManager;
+        this.resourceTypeDao = resourceTypeDao;
     }
 
     private  void checkPermission(Integer subjectId, String rtName, Integer instId, String opName) throws PermissionException
@@ -74,7 +78,7 @@ public class DefaultAlertPermissionManager implements AlertPermissionManager {
         if (!PermissionManagerFactory.getInstance().hasAdminPermission(subjectId)) {
             PermissionManager permMgr = PermissionManagerFactory.getInstance();
             if (!resourceTypes.containsKey(rtName)) {
-                resourceTypes.put(rtName, ResourceType.findResourceTypeByName(rtName));
+                resourceTypes.put(rtName,resourceTypeDao.findByName(rtName));
             }
             ResourceType resType = (ResourceType) resourceTypes.get(rtName);
             
@@ -249,8 +253,8 @@ public class DefaultAlertPermissionManager implements AlertPermissionManager {
         // The escalation resource type is looked up for its ID to be used
         // instance ID.  The reason is that escalations are global, and we're
         // not applying escalation permission per appdef resource.
-        ResourceType rt = ResourceType
-            .findResourceTypeByName(AuthzConstants.escalationResourceTypeName);
+        ResourceType rt = resourceTypeDao
+            .findByName(AuthzConstants.escalationResourceTypeName);
 
         //TODO
         //checkPermission(subjectId, AuthzConstants.rootResType, rt.getId(),

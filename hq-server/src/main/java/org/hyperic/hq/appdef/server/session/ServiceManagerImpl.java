@@ -55,6 +55,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
@@ -103,12 +104,14 @@ public class ServiceManagerImpl implements ServiceManager {
     private PluginDAO pluginDAO;
     private ServerManager serverManager;
     private PlatformManager platformManager;
+    private ResourceGroupManager resourceGroupManager;
 
     @Autowired
     public ServiceManagerImpl(PermissionManager permissionManager,
                               ResourceManager resourceManager,
                               AuthzSubjectManager authzSubjectManager, PluginDAO pluginDAO,
-                              ServerManager serverManager, PlatformManager platformManager) {
+                              ServerManager serverManager, PlatformManager platformManager,
+                              ResourceGroupManager resourceGroupManager) {
      
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
@@ -116,6 +119,7 @@ public class ServiceManagerImpl implements ServiceManager {
         this.pluginDAO = pluginDAO;
         this.serverManager = serverManager;
         this.platformManager = platformManager;
+        this.resourceGroupManager = resourceGroupManager;
     }
     
     private Service toService(Resource resource) {
@@ -195,8 +199,8 @@ public class ServiceManagerImpl implements ServiceManager {
         throws ValidationException, PermissionException, ServerNotFoundException,
         AppdefDuplicateNameException {
         //TODO need a method that creates a service directly under a Platform
-        Resource server = Resource.findResource(serverId);
-        ResourceType serviceType = ResourceType.findResourceType(serviceTypeId);
+        Resource server =resourceManager.findResourceById(serverId);
+        ResourceType serviceType = resourceManager.findResourceTypeById(serviceTypeId);
         return toService(create(subject, serviceType, server,name, desc, location));
     }
 
@@ -204,7 +208,7 @@ public class ServiceManagerImpl implements ServiceManager {
     private Collection<Resource> findByServerType(Integer serverTypeId, boolean asc) {
         Set<Resource> services = new HashSet<Resource>();
         //TODO sort
-        Collection<ResourceType> relatedServiceTypes = ResourceType.findResourceType(serverTypeId).getResourceTypesFrom(RelationshipTypes.SERVICE);
+        Collection<ResourceType> relatedServiceTypes = resourceManager.findResourceTypeById(serverTypeId).getResourceTypesFrom(RelationshipTypes.SERVICE);
         for(ResourceType serviceType:relatedServiceTypes) {
             services.addAll(serviceType.getResources());
         }
@@ -272,7 +276,7 @@ public class ServiceManagerImpl implements ServiceManager {
      */
     @Transactional(readOnly = true)
     public Service getServiceById(Integer id) {
-        return toService(Resource.findResource(id));
+        return toService(resourceManager.findResourceById(id));
     }
 
     /**
@@ -306,7 +310,7 @@ public class ServiceManagerImpl implements ServiceManager {
      */
     @Transactional(readOnly = true)
     public ServiceType findServiceType(Integer id) throws ObjectNotFoundException {
-        return toServiceType(ResourceType.findResourceType(id));
+        return toServiceType(resourceManager.findResourceTypeById(id));
     }
 
     /**
@@ -314,7 +318,7 @@ public class ServiceManagerImpl implements ServiceManager {
      */
     @Transactional(readOnly = true)
     public ServiceType findServiceTypeByName(String name) {
-        return toServiceType(ResourceType.findResourceTypeByName(name));
+        return toServiceType(resourceManager.findResourceTypeByName(name));
     }
 
     /**
@@ -338,7 +342,8 @@ public class ServiceManagerImpl implements ServiceManager {
     
     private Set<ResourceType> getAllServiceResourceTypes() {
         Set<ResourceType> resourceTypes = new HashSet<ResourceType>();
-        Collection<ResourceType> platformTypes = ResourceType.findRootResourceType().getResourceTypesFrom(RelationshipTypes.PLATFORM);
+        Collection<ResourceType> platformTypes = resourceManager.findRootResourceType().
+            getResourceTypesFrom(RelationshipTypes.PLATFORM);
         for(ResourceType platformType: platformTypes) {
             Collection<ResourceType> serverTypes = platformType.getResourceTypesFrom(RelationshipTypes.SERVER);
             for(ResourceType serverType: serverTypes) {
@@ -635,7 +640,7 @@ public class ServiceManagerImpl implements ServiceManager {
         try {
             // we only look up the application to validate
             // the appId param
-            ResourceGroup.findResourceGroup(appId);
+            resourceGroupManager.findResourceGroupById(appId);
         } catch (ObjectNotFoundException e) {
             //TODO this wouldn't happen
             throw new ApplicationNotFoundException(appId, e);
@@ -712,7 +717,7 @@ public class ServiceManagerImpl implements ServiceManager {
         throws PermissionException {
         //TODO perm checks
         //permissionManager.checkModifyPermission(subject, svc.getEntityId());
-        Resource resource = Resource.findResource(svc.getId());
+        Resource resource = resourceManager.findResourceById(svc.getId());
         resource.setModifiedBy(subject.getName());
         resource.setProperty(AUTO_DISCOVERY_ZOMBIE,zombieStatus);
         resource.merge();
@@ -726,7 +731,7 @@ public class ServiceManagerImpl implements ServiceManager {
         throws PermissionException, UpdateException, AppdefDuplicateNameException,
         ServiceNotFoundException {
         permissionManager.checkModifyPermission(subject, existing.getEntityId());
-        Resource service = Resource.findResource(existing.getId());
+        Resource service = resourceManager.findResourceById(existing.getId());
 
         existing.setModifiedBy(subject.getName());
         if (existing.getDescription() != null)
@@ -767,8 +772,13 @@ public class ServiceManagerImpl implements ServiceManager {
 //        }
 
         try {
-            Collection<ResourceType> curServices = ResourceType.findByPlugin(plugin);
-            //TODO this will be more than just ServiceTypes
+            Collection<ResourceType> serviceTypes = getAllServiceResourceTypes();
+            Set<ResourceType> curServices = new HashSet<ResourceType>();
+            for(ResourceType curResourceType: serviceTypes) {
+                if(curResourceType.getPlugin().getName().equals(plugin)) {
+                    curServices.add(curResourceType);
+                }
+            }
             for (ResourceType serviceType : curServices) {
 
                 if (log.isDebugEnabled()) {
@@ -839,7 +849,7 @@ public class ServiceManagerImpl implements ServiceManager {
 
     public ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin,
                                           ServerType servType) throws NotFoundException {
-        return createServiceType(sinfo, plugin, ResourceType.findResourceType(servType.getId()));
+        return createServiceType(sinfo, plugin, resourceManager.findResourceTypeById(servType.getId()));
     }
     
     private ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin,
@@ -856,7 +866,7 @@ public class ServiceManagerImpl implements ServiceManager {
     
     public void deleteServiceType(ServiceType serviceType, AuthzSubject overlord)
         throws VetoException {
-        ResourceType.findResourceType(serviceType.getId()).remove();
+        resourceManager.findResourceTypeById(serviceType.getId()).remove();
     }
 
     /**
@@ -868,7 +878,7 @@ public class ServiceManagerImpl implements ServiceManager {
         VetoException {
         //TODO perm check
         //permissionManager.checkRemovePermission(subject, aeid);
-        resourceManager.removeResource(subject, Resource.findResource(service.getId()));
+        resourceManager.removeResource(subject, resourceManager.findResourceById(service.getId()));
     }
 
     /**

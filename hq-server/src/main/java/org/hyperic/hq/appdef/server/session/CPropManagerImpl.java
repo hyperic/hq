@@ -26,8 +26,6 @@
 package org.hyperic.hq.appdef.server.session;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +33,6 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -45,16 +42,14 @@ import org.hyperic.hq.appdef.shared.CPropChangeEvent;
 import org.hyperic.hq.appdef.shared.CPropKeyExistsException;
 import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropManager;
-import org.hyperic.hq.appdef.shared.ServerNotFoundException;
-import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
-import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,12 +64,13 @@ public class CPropManagerImpl implements CPropManager {
 
     private Messenger sender;
     
-   
+    private ResourceManager resourceManager;
    
 
     @Autowired
-    public CPropManagerImpl(Messenger sender) {
+    public CPropManagerImpl(Messenger sender, ResourceManager resourceManager) {
         this.sender = sender;
+        this.resourceManager = resourceManager;
     }
 
     /**
@@ -87,7 +83,7 @@ public class CPropManagerImpl implements CPropManager {
      */
     @Transactional(readOnly = true)
     public List<PropertyType> getKeys(int appdefType, int appdefTypeId) {
-        return new ArrayList<PropertyType>(ResourceType.findResourceType(appdefTypeId).getPropertyTypes());
+        return new ArrayList<PropertyType>(resourceManager.findResourceTypeById(appdefTypeId).getPropertyTypes());
     }
 
     /**
@@ -157,7 +153,7 @@ public class CPropManagerImpl implements CPropManager {
         throws CPropKeyNotFoundException {
         
         //TODO appdefTypeId is likely not resourceId
-        ResourceType resourceType = ResourceType.findResourceType(appdefTypeId);
+        ResourceType resourceType = resourceManager.findResourceTypeById(appdefTypeId);
         PropertyType cpKey  = resourceType.getPropertyType(key);
      
 
@@ -190,7 +186,7 @@ public class CPropManagerImpl implements CPropManager {
         throws CPropKeyNotFoundException, AppdefEntityNotFoundException, PermissionException {
         String oldval;
         try {
-           oldval = (String) Resource.findResource(aID.getId()).setProperty(key, val);
+           oldval = (String) resourceManager.findResourceById(aID.getId()).setProperty(key, val);
         }catch(Exception e) {
             log.error("Unable to update CPropKey values: " + e.getMessage(), e);
             throw new SystemException(e);
@@ -225,7 +221,7 @@ public class CPropManagerImpl implements CPropManager {
         AppdefEntityNotFoundException, PermissionException {
         try {
             //TODO use correct ID
-            return (String)Resource.findResource(aVal.getID().getId()).getProperty(key);            
+            return (String)resourceManager.findResourceById(aVal.getID().getId()).getProperty(key);            
         }catch(Exception e) {
             log.error("Unable to get CPropKey values: " + e.getMessage(), e);
             throw new SystemException(e);
@@ -247,7 +243,7 @@ public class CPropManagerImpl implements CPropManager {
         AppdefEntityNotFoundException {
         //TODO
         Properties properties = new Properties();
-        Map<String,Object> propValues = Resource.findResource(aID.getId()).getProperties();
+        Map<String,Object> propValues = resourceManager.findResourceById(aID.getId()).getProperties();
         for(Map.Entry<String, Object> propValue:propValues.entrySet()) {
             properties.setProperty(propValue.getKey(), (String)propValue.getValue());
         }
@@ -313,7 +309,7 @@ public class CPropManagerImpl implements CPropManager {
      */
     public void deleteValues(int appdefType, int id) {
         try {
-            Resource.findResource(id).removeProperties();
+            resourceManager.findResourceById(id).removeProperties();
         }catch(Exception e) {
             log.error("Unable to delete CProp values: " + e.getMessage(), e);
             throw new SystemException(e);
@@ -328,7 +324,7 @@ public class CPropManagerImpl implements CPropManager {
         int type = appdefType.getAppdefType();
         int instanceId = appdefType.getId().intValue();
         //TODO appdefTypeId is likely not resourceId
-        ResourceType resourceType = ResourceType.findResourceType(instanceId);
+        ResourceType resourceType = resourceManager.findResourceTypeById(instanceId);
         PropertyType pkey  = resourceType.getPropertyType(key);
         //TODO this can't possibly be what you'd expect from this method
         List<String> values = new ArrayList<String>();

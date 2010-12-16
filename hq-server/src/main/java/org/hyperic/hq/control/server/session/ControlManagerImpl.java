@@ -53,8 +53,10 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.MessagePublisher;
 import org.hyperic.hq.control.ControlActionResult;
@@ -106,7 +108,7 @@ public class ControlManagerImpl implements ControlManager {
     private AuthzSubjectManager authzSubjectManager;
     private PermissionManager permissionManager;
     private ControlPluginManager controlPluginManager;
-
+    private ResourceManager resourceManager;
     private MessagePublisher messagePublisher;
     private ControlCommandsClientFactory controlCommandsClientFactory;
     private ControlActionResultsCollector controlActionResultsCollector;
@@ -127,7 +129,8 @@ public class ControlManagerImpl implements ControlManager {
                               ControlActionResultsCollector controlActionResultsCollector, 
                               @Value("#{controlExecutor}")AsyncTaskExecutor executor, 
                               ControlActionExecutor controlActionExecutor, 
-                              GroupControlActionExecutor groupControlActionExecutor) {
+                              GroupControlActionExecutor groupControlActionExecutor,
+                              ResourceManager resourceManager) {
         this.productManager = productManager;
         this.controlScheduleManager = controlScheduleManager;
         this.controlHistoryDao = controlHistoryDao;
@@ -141,6 +144,7 @@ public class ControlManagerImpl implements ControlManager {
         this.executor = executor;
         this.controlActionExecutor = controlActionExecutor;
         this.groupControlActionExecutor = groupControlActionExecutor;
+        this.resourceManager = resourceManager;
     }
 
     @PostConstruct
@@ -437,7 +441,7 @@ public class ControlManagerImpl implements ControlManager {
      */
     @Transactional(readOnly=true)
     public void checkControlEnabled(AuthzSubject subject, AppdefEntityID id) throws PluginException {
-        Config config = Resource.findResource(id.getId()).getControlConfig();
+        Config config = resourceManager.findResourceById(id.getId()).getControlConfig();
         if (config == null) {
             throw new PluginException("Control not " + "configured for " + id);
         }
@@ -556,7 +560,9 @@ public class ControlManagerImpl implements ControlManager {
             opList.add(getControlPermissionByType(entity));
             ResourceValue rv = new ResourceValue();
             rv.setInstanceId(entity.getId());
-            rv.setResourceType(ResourceType.findResourceTypeByName(AppdefUtil.appdefTypeIdToAuthzTypeStr(entity.getType())));
+            rv.setResourceType(resourceManager.findResourceTypeByName(AppdefUtil.appdefTypeIdToAuthzTypeStr(entity.getType())));
+            
+            
             resList.add(rv);
         }
         if (resList.size() > 0) {

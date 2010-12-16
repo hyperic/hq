@@ -228,7 +228,7 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     @Transactional(readOnly = true)
     public PlatformType findPlatformType(Integer id) throws ObjectNotFoundException {
-        return toPlatformType(ResourceType.findResourceType(id));
+        return toPlatformType(resourceManager.findResourceTypeById(id));
     }
 
     /**
@@ -240,7 +240,7 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     @Transactional(readOnly = true)
     public PlatformType findPlatformTypeByName(String type) throws PlatformNotFoundException {
-        ResourceType ptype = ResourceType.findResourceTypeByName(type);
+        ResourceType ptype = resourceManager.findResourceTypeByName(type);
         if (ptype == null) {
             throw new PlatformNotFoundException(type);
         }
@@ -258,7 +258,7 @@ public class PlatformManagerImpl implements PlatformManager {
     }
     
     private Collection<ResourceType> findAllPlatformResourceTypes() {
-        return ResourceType.findRootResourceType().getResourceTypesFrom(RelationshipTypes.PLATFORM);
+        return resourceManager.findRootResourceType().getResourceTypesFrom(RelationshipTypes.PLATFORM);
     }
 
     /**
@@ -329,7 +329,7 @@ public class PlatformManagerImpl implements PlatformManager {
 
         if (id.isService()) {
             // look up the service
-            Resource service = Resource.findResource(id.getId());
+            Resource service = resourceManager.findResourceById(id.getId());
 
             if (service == null) {
                 throw new ServiceNotFoundException(id);
@@ -339,7 +339,7 @@ public class PlatformManagerImpl implements PlatformManager {
             typeName = service.getType().getName();
         } else if (id.isServer()) {
             // look up the server
-            Resource server = Resource.findResource(id.getId());
+            Resource server = resourceManager.findResourceById(id.getId());
 
             if (server == null) {
                 throw new ServerNotFoundException(id);
@@ -387,7 +387,7 @@ public class PlatformManagerImpl implements PlatformManager {
            
            
              //config, cprops, and relationships will get cleaned up by removal here
-            resourceManager.removeResource(subject, Resource.findResource(platform.getId()));
+            resourceManager.removeResource(subject, resourceManager.findResourceById(platform.getId()));
 
         //} catch (PermissionException e) {
           //  log.debug("Error while removing Platform");
@@ -495,7 +495,7 @@ public class PlatformManagerImpl implements PlatformManager {
         AppdefDuplicateFQDNException, ApplicationException {
         // check if the object already exists
 
-        if (Resource.findResourceByName(pValue.getName()) != null) {
+        if (resourceManager.findResourceByName(pValue.getName()) != null) {
             // duplicate found, throw a duplicate object exception
             throw new AppdefDuplicateNameException();
         }
@@ -522,7 +522,7 @@ public class PlatformManagerImpl implements PlatformManager {
             } catch (Exception e) {
                 throw new SystemException(e);
             }
-            ResourceType platType = ResourceType.findResourceType(platformTypeId);
+            ResourceType platType = resourceManager.findResourceTypeById(platformTypeId);
             Resource platform = create(subject,pValue, agent, platType);
             Platform plat = toPlatform(platform);
 
@@ -544,14 +544,14 @@ public class PlatformManagerImpl implements PlatformManager {
         throws ApplicationException {
         getCounter().addCPUs(aipValue.getCpuCount().intValue());
 
-        ResourceType platType = ResourceType.findResourceTypeByName(aipValue.getPlatformTypeName());
+        ResourceType platType = resourceManager.findResourceTypeByName(aipValue.getPlatformTypeName());
 
         if (platType == null) {
             throw new SystemException("Unable to find PlatformType [" +
                                       aipValue.getPlatformTypeName() + "]");
         }
 
-        Resource checkP = Resource.findResourceByName(aipValue.getName());
+        Resource checkP = resourceManager.findResourceByName(aipValue.getName());
         if (checkP != null) {
             throwDupPlatform(checkP.getId(), aipValue.getName());
         }
@@ -618,8 +618,10 @@ public class PlatformManagerImpl implements PlatformManager {
         throws PermissionException, NotFoundException {
         PageControl pc = new PageControl(0, size);
 
-        Collection<Resource> platforms = Resource
-            .findByCTime(System.currentTimeMillis() - range);
+        Collection<Resource> platforms = new ArrayList<Resource>();
+            //TODO find by CTime on ResourceManager?
+            //Resource
+            //.findByCTime(System.currentTimeMillis() - range);
 
         // now get the list of PKs
         List<Integer> viewable = getViewablePlatformPKs(subject);
@@ -661,7 +663,7 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     @Transactional(readOnly = true)
     public Platform findPlatformById(Integer id) throws PlatformNotFoundException {
-        Resource platform = Resource.findResource(id);
+        Resource platform = resourceManager.findResourceById(id);
         if (platform == null) {
             throw new PlatformNotFoundException(id);
         }
@@ -670,7 +672,7 @@ public class PlatformManagerImpl implements PlatformManager {
     }
     
     private Collection<Resource> getAllPlatforms() {
-        return Resource.findRootResource().getResourcesFrom(RelationshipTypes.PLATFORM);
+        return resourceManager.findRootResource().getResourcesFrom(RelationshipTypes.PLATFORM);
         
     }
     
@@ -1016,7 +1018,7 @@ public class PlatformManagerImpl implements PlatformManager {
     }
     
     private Resource findByServiceId(Integer serviceId) {
-        Set<Resource> servers = Resource.findRootResource().getResourcesFrom(RelationshipTypes.SERVER);
+        Set<Resource> servers = resourceManager.findRootResource().getResourcesFrom(RelationshipTypes.SERVER);
         for(Resource server: servers) {
             Set<Resource> services = server.getResourcesFrom(RelationshipTypes.SERVICE);
             for(Resource service : services) {
@@ -1031,7 +1033,7 @@ public class PlatformManagerImpl implements PlatformManager {
     private List<Resource> findByServers(Integer[] ids) {
         List<Resource> platforms = new ArrayList<Resource>();
         for(Integer id: ids) {
-            Resource server = Resource.findResource(id);
+            Resource server = resourceManager.findResourceById(id);
             platforms.add(server.getResourceTo(RelationshipTypes.PLATFORM));
         }
         return platforms;
@@ -1064,7 +1066,7 @@ public class PlatformManagerImpl implements PlatformManager {
     @Transactional(readOnly = true)
     public PlatformValue getPlatformByServer(AuthzSubject subject, Integer serverId)
         throws PlatformNotFoundException, PermissionException {
-        Resource server = Resource.findResource(serverId);
+        Resource server = resourceManager.findResourceById(serverId);
 
         if (server == null || server.getResourceTo(RelationshipTypes.PLATFORM) == null) {
             // This should throw server not found. Servers always have
@@ -1086,7 +1088,7 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     @Transactional(readOnly = true)
     public Integer getPlatformIdByServer(Integer serverId) throws PlatformNotFoundException {
-        Resource server = Resource.findResource(serverId);
+        Resource server = resourceManager.findResourceById(serverId);
 
         if (server == null)
             throw new PlatformNotFoundException("platform for server " + serverId + " not found");
@@ -1146,7 +1148,7 @@ public class PlatformManagerImpl implements PlatformManager {
                                                              PageControl pc)
         throws ApplicationNotFoundException, PlatformNotFoundException, PermissionException {
 
-        ResourceGroup appLocal = ResourceGroup.findResourceGroup(appId);
+        ResourceGroup appLocal = resourceGroupManager.findResourceGroupById(appId);
         if (appLocal == null) {
             throw new ApplicationNotFoundException(appId);
         }
@@ -1254,7 +1256,7 @@ public class PlatformManagerImpl implements PlatformManager {
 
         try {
 
-            Collection<Resource> platforms = ResourceType.findResourceType(platTypeId).getResources();
+            Collection<Resource> platforms = resourceManager.findResourceTypeById(platTypeId).getResources();
             Collection<Integer> platIds = new ArrayList<Integer>();
 
             // now get the list of PKs
@@ -1348,7 +1350,7 @@ public class PlatformManagerImpl implements PlatformManager {
         existing.setMTime(new Long(System.currentTimeMillis()));
         trimStrings(existing);
 
-        Resource plat = Resource.findResource(existing.getId());
+        Resource plat = resourceManager.findResourceById(existing.getId());
         Platform platform = toPlatform(plat);
         if (existing.getCpuCount() == null) {
             // cpu count is no longer an option in the UI
@@ -1366,7 +1368,7 @@ public class PlatformManagerImpl implements PlatformManager {
             }
 
             if (!(existing.getName().equals(plat.getName()))) {
-                if (Resource.findResourceByName(existing.getName()) != null)
+                if (resourceManager.findResourceByName(existing.getName()) != null)
                     // duplicate found, throw a duplicate object exception
                     throw new AppdefDuplicateNameException();
             }
@@ -1525,9 +1527,15 @@ public class PlatformManagerImpl implements PlatformManager {
         for (int i = 0; i < infos.length; i++) {
             infoMap.put(infos[i].getName(), infos[i]);
         }
-
-        Collection<ResourceType> curPlatforms = ResourceType.findByPlugin(plugin);
-
+        
+        Collection<ResourceType> platformTypes = findAllPlatformResourceTypes();
+        Set<ResourceType> curPlatforms = new HashSet<ResourceType>();
+        for(ResourceType curResourceType: platformTypes) {
+            if(curResourceType.getPlugin().getName().equals(plugin)) {
+                curPlatforms.add(curResourceType);
+            }
+        }
+        
         for (ResourceType ptlocal : curPlatforms) {
 
             String localName = ptlocal.getName();
@@ -1570,7 +1578,7 @@ public class PlatformManagerImpl implements PlatformManager {
         propTypes.add(createPlatformPropertyType(AppdefResource.SORT_NAME));
         //TODO add method?
         pt.setPropertyTypes(propTypes);
-        ResourceType.findRootResourceType().relateTo(pt, RelationshipTypes.PLATFORM);
+        resourceManager.findRootResourceType().relateTo(pt, RelationshipTypes.PLATFORM);
         return toPlatformType(pt);
     }
     
@@ -1583,7 +1591,7 @@ public class PlatformManagerImpl implements PlatformManager {
     }
     
     private void updateWithAI(Platform platform, AIPlatformValue aiplatform,String owner) {
-        Resource resource = Resource.findResource(platform.getId());
+        Resource resource = resourceManager.findResourceById(platform.getId());
         if (aiplatform.getName() != null
             && !aiplatform.getName().equals(platform.getName())) {
             resource.setName(aiplatform.getName());
@@ -1642,7 +1650,7 @@ public class PlatformManagerImpl implements PlatformManager {
         }
 
         // need to check if IPs have changed, if so update Agent
-        updateAgentIps(subj, aiplatform, Resource.findResource(platform.getId()));
+        updateAgentIps(subj, aiplatform, resourceManager.findResourceById(platform.getId()));
 
     }
 
@@ -1817,7 +1825,7 @@ public class PlatformManagerImpl implements PlatformManager {
         ip.setProperty(MAC_ADDRESS,macAddress);
         ip.setProperty(CREATION_TIME, System.currentTimeMillis());
         ip.setProperty(MODIFIED_TIME,System.currentTimeMillis());
-        Resource.findResource(platform.getId()).relateTo(ip, RelationshipTypes.IP);
+        resourceManager.findResourceById(platform.getId()).relateTo(ip, RelationshipTypes.IP);
         return toIp(ip);  
     }
 
@@ -1827,7 +1835,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      */
     public Ip updateIp(Platform platform, String address, String netmask, String macAddress) {
-        Resource resource = Resource.findResource(platform.getId());
+        Resource resource = resourceManager.findResourceById(platform.getId());
         Collection<Resource> ips = resource.getResourcesFrom(RelationshipTypes.IP);
         for(Resource ip: ips) {
             if(ip.getProperty(IP_ADDRESS).equals(address)) {
@@ -1850,7 +1858,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      */
     public void removeIp(Platform platform, String address, String netmask, String macAddress) {
-        Resource resource = Resource.findResource(platform.getId());
+        Resource resource = resourceManager.findResourceById(platform.getId());
         Collection<Resource> ips = resource.getResourcesFrom(RelationshipTypes.IP);
         for(Resource ip: ips) {
             if(ip.getProperty(IP_ADDRESS).equals(address) && ip.getProperty(NETMASK).equals(netmask) && 
@@ -1889,7 +1897,7 @@ public class PlatformManagerImpl implements PlatformManager {
 
     public List<Platform> getPlatformsByType(AuthzSubject subject, String platformTypeName) {
         // TODO perm checking?
-        ResourceType platType = ResourceType.findResourceTypeByName(platformTypeName);
+        ResourceType platType = resourceManager.findResourceTypeByName(platformTypeName);
         Collection<Resource> platforms = platType.getResources();
         List<Platform> platList = new ArrayList<Platform>(platforms.size());
         for(Resource platform: platforms) {
@@ -1935,7 +1943,7 @@ public class PlatformManagerImpl implements PlatformManager {
     public void afterPropertiesSet() throws Exception {
         valuePager = Pager.getPager(VALUE_PROCESSOR);
         //TODO this is not the place for this
-        if(ResourceType.findRootResourceType() == null) {
+        if(resourceManager.findRootResourceType() == null) {
             ResourceType system=new ResourceType();
             system.setName("System");
             system.persist();

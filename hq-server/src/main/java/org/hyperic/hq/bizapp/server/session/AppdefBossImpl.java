@@ -1373,7 +1373,7 @@ public class AppdefBossImpl implements AppdefBoss {
             // Disable all measurements for this platform. We don't actually
             // remove the measurements here to avoid delays in deleting
             // resources.
-            disableMeasurements(subject, Resource.findResource(platformId));
+            disableMeasurements(subject, resourceManager.findResourceById(platformId));
 
             // Remove from AI queue
             try {

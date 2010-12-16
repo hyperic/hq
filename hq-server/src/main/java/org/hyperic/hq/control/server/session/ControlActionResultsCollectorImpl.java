@@ -34,13 +34,13 @@ import java.util.Set;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.control.ControlActionResult;
 import org.hyperic.hq.control.GroupControlActionResult;
 import org.hyperic.hq.control.shared.ControlActionTimeoutException;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlScheduleManager;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
@@ -67,10 +67,13 @@ public class ControlActionResultsCollectorImpl implements ControlActionResultsCo
     private ControlScheduleManager controlScheduleManager;
 
     private ConfigManager configManager;
+    
+    private ResourceManager resourceManager;
 
     @Autowired
     public ControlActionResultsCollectorImpl(ControlScheduleManager controlScheduleManager,
-                                             ConfigManager configManager) {
+                                             ConfigManager configManager,
+                                             ResourceManager resourceManager) {
         this.controlScheduleManager = controlScheduleManager;
         this.configManager = configManager;
     }
@@ -170,7 +173,7 @@ public class ControlActionResultsCollectorImpl implements ControlActionResultsCo
 
     private ConfigResponse getConfigResponse(AuthzSubject subject, AppdefEntityID id)
         throws PluginException {
-        byte[] controlResponse = configManager.toConfigResponse(Resource.findResource(id.getId()).getControlConfig());
+        byte[] controlResponse = configManager.toConfigResponse(resourceManager.findResourceById(id.getId()).getControlConfig());
         ConfigResponse configResponse;
         try {
             configResponse = ConfigResponse.decode(controlResponse);

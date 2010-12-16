@@ -22,12 +22,11 @@ public class ResourceDaoImpl implements ResourceDao {
     @Transactional(readOnly = true)
 	public Resource findById(Integer id) {
         if (id == null) return null;
-        
         Resource result = entityManager.find(Resource.class, id);
-        
         // TODO workaround to trigger Neo4jNodeBacking's around advice for the getter
-        result.getId();
-        
+        if(result != null) {
+            result.getId();
+        }    
         return result;
     }
 

@@ -46,6 +46,8 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AICompare;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.inventory.dao.ResourceDao;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
@@ -108,7 +110,7 @@ public class AI2AppdefDiff {
                 revisedAIplatform.setCpuCount(appdefPlatform.getCpuCount());
             }
             
-            Resource resource = Resource.findResource(appdefPlatform.getEntityId().getId());
+            Resource resource = Bootstrap.getBean(ResourceDao.class).findById(appdefPlatform.getEntityId().getId());
             
             //if the plugin did not set a config, apply the existing config.
             if (revisedAIplatform.getProductConfig() == null) {
@@ -397,7 +399,7 @@ public class AI2AppdefDiff {
                 boolean configChanged = false;
                 
                 // Look at configs
-               Resource resource = Resource.findResource(aID.getId());
+               Resource resource = Bootstrap.getBean(ResourceDao.class).findById(aID.getId());
                 
                 if (!resource.isConfigUserManaged() && (
                     !configsEqual(scannedServer.getProductConfig(), cmLocal.toConfigResponse(resource.getProductConfig())) ||

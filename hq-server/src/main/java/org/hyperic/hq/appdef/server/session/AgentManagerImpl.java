@@ -56,17 +56,14 @@ import org.hyperic.hq.appdef.shared.AgentCreateException;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentUnauthorizedException;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
-import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.inventory.dao.ResourceDao;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
@@ -97,18 +94,21 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     private ServerConfigManager serverConfigManager;
     private AgentCommandsClientFactory agentCommandsClientFactory;
     private ApplicationContext applicationContext;
+    private ResourceDao resourceDao;
 
     @Autowired
     public AgentManagerImpl(AgentTypeDAO agentTypeDao,
                             AgentDAO agentDao, 
                             PermissionManager permissionManager, 
                             ServerConfigManager serverConfigManager,
-                            AgentCommandsClientFactory agentCommandsClientFactory) {
+                            AgentCommandsClientFactory agentCommandsClientFactory,
+                            ResourceDao resourceDao) {
         this.agentTypeDao = agentTypeDao;
         this.agentDao = agentDao;
         this.permissionManager = permissionManager;
         this.serverConfigManager = serverConfigManager;
         this.agentCommandsClientFactory = agentCommandsClientFactory;
+        this.resourceDao = resourceDao;
     }
 
     /**
@@ -498,7 +498,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     @Transactional(readOnly = true)
     public Agent getAgent(AppdefEntityID aID) throws AgentNotFoundException {
         try {
-            return org.hyperic.hq.inventory.domain.Resource.findResource(aID.getId()).getAgent();
+            return resourceDao.findById(aID.getId()).getAgent();
         } catch (ObjectNotFoundException exc) {
             throw new AgentNotFoundException("No agent found for " + aID);
         }

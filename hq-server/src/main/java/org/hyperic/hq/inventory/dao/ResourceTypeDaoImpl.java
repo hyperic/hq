@@ -1,8 +1,6 @@
 package org.hyperic.hq.inventory.dao;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.persistence.EntityManager;
@@ -28,7 +26,9 @@ public class ResourceTypeDaoImpl implements ResourceTypeDao {
         ResourceType result = entityManager.find(ResourceType.class, id);
         
         // TODO workaround to trigger Neo4jNodeBacking's around advice for the getter
-        result.getId();
+        if(result != null) {
+            result.getId();
+        }
         
         return result;
     }
@@ -84,20 +84,4 @@ public class ResourceTypeDaoImpl implements ResourceTypeDao {
 	public ResourceType findRoot() {
     	return findById(1);
     }
-
-    @Transactional(readOnly = true)
-	public Set<ResourceType> findByPlugin(String plugin) {
-        Set<ResourceType> pluginTypes = new HashSet<ResourceType>();
-        
-        //TODO can we do a JPA-style query that is quicker here?
-        List<ResourceType> types = findAll();
-        for(ResourceType type: types) {
-            if(type.getPlugin() != null && type.getPlugin().getName().equals(plugin)) {
-                pluginTypes.add(type);
-            }
-        }
-        
-        return pluginTypes;
-    }
 }
-

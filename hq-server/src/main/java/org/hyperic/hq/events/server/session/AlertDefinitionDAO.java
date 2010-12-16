@@ -46,6 +46,7 @@ import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
+import org.hyperic.hq.inventory.dao.ResourceDao;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,19 +59,21 @@ public class AlertDefinitionDAO
     private PermissionManager permissionManager;
     private ActionDAO actDAO;
     private TriggerDAO tDAO;
-
     private AlertConditionDAO alertConditionDAO;
+    private ResourceDao resourceDao;
 
 
     @Autowired
     public AlertDefinitionDAO(SessionFactory f, PermissionManager permissionManager,
                               ActionDAO actDAO, TriggerDAO tDAO,
-                              AlertConditionDAO alertConditionDAO) {
+                              AlertConditionDAO alertConditionDAO,
+                              ResourceDao resourceDao) {
         super(AlertDefinition.class, f);
         this.permissionManager = permissionManager;
         this.actDAO = actDAO;
         this.tDAO = tDAO;
         this.alertConditionDAO = alertConditionDAO;
+        this.resourceDao = resourceDao;
     }
 
   
@@ -283,7 +286,7 @@ public class AlertDefinitionDAO
 
         // def.set the resource based on the entity ID
 
-        def.setResource(Resource.findResource(val.getAppdefId()));
+        def.setResource(resourceDao.findById(val.getAppdefId()));
 
         for (RegisteredTriggerValue tVal : val.getAddedTriggers()) {
             def.addTrigger(tDAO.findById(tVal.getId()));

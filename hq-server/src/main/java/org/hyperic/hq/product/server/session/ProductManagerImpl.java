@@ -46,6 +46,7 @@ import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
@@ -102,7 +103,7 @@ public class ProductManagerImpl implements ProductManager {
     private ServiceManager serviceManager;
     private AlertDefinitionXmlParser alertDefinitionXmlParser;
     private PluginAuditFactory pluginAuditFactory;
-   
+    private ResourceManager resourceManager;
 
     @Autowired
     public ProductManagerImpl(PluginDAO pluginDao, AlertDefinitionManager alertDefinitionManager,
@@ -110,7 +111,8 @@ public class ProductManagerImpl implements ProductManager {
                               AuditManager auditManager, ServerManager serverManager,
                               ServiceManager serviceManager, PlatformManager platformManager,
                               AlertDefinitionXmlParser alertDefinitionXmlParser,
-                              PluginAuditFactory pluginAuditFactory) {
+                              PluginAuditFactory pluginAuditFactory,
+                              ResourceManager resourceManager) {        
         this.pluginDao = pluginDao;
         this.alertDefinitionManager = alertDefinitionManager;
         this.cPropManager = cPropManager;
@@ -121,6 +123,7 @@ public class ProductManagerImpl implements ProductManager {
         this.platformManager = platformManager;
         this.alertDefinitionXmlParser = alertDefinitionXmlParser;
         this.pluginAuditFactory = pluginAuditFactory;
+        this.resourceManager = resourceManager;
     }
 
     /**
@@ -425,7 +428,8 @@ public class ProductManagerImpl implements ProductManager {
             TypeInfo info = entities[i];
             ConfigSchema schema = pplugin.getCustomPropertiesSchema(info);
             List<ConfigOption> options = schema.getOptions();
-            ResourceType appdefType = ResourceType.findResourceTypeByName(info.getName());
+            
+            ResourceType appdefType = resourceManager.findResourceTypeByName(info.getName());
             for (ConfigOption opt : options) {
                 if (debug)
                     watch.markTimeBegin("findByKey");

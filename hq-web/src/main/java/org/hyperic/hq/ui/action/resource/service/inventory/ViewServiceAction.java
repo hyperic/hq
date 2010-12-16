@@ -41,9 +41,8 @@ import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
-import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
-import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.common.ApplicationException;
@@ -189,7 +188,8 @@ public class ViewServiceAction
             request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS, uiControlOptions);
             request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS_COUNT, new Integer(uiControlOptions.size()));
 
-            request.setAttribute(Constants.AUTO_INVENTORY, new Boolean(service.getServer().getRuntimeAutodiscovery()));
+            //TODO assuming service parent is Server
+            request.setAttribute(Constants.AUTO_INVENTORY, new Boolean(((ServerValue)service.getParent()).getRuntimeAutodiscovery()));
 
             if (!editConfig)
                 RequestUtils.setError(request, "resource.common.inventory.error.serverConfigNotSet", "configServer");

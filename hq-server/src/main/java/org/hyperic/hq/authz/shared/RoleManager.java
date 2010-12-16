@@ -455,9 +455,4 @@ public interface RoleManager {
      */
     public void removeSubjects(AuthzSubject whoami, Integer id, java.lang.Integer[] ids) throws PermissionException;
 
-    /**
-     * Find all {@link OperationType} objects
-     */
-    public Collection<OperationType> findAllOperations();
-
 }

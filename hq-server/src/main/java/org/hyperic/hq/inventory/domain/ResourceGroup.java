@@ -1,6 +1,5 @@
 package org.hyperic.hq.inventory.domain;
 
-import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Entity;
@@ -8,13 +7,11 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Transient;
 
 import org.hyperic.hq.authz.server.session.Role;
-import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.Node;
 import org.springframework.datastore.graph.annotation.GraphProperty;
 import org.springframework.datastore.graph.annotation.NodeEntity;
 import org.springframework.datastore.graph.annotation.RelatedTo;
 import org.springframework.datastore.graph.api.Direction;
-import org.springframework.datastore.graph.neo4j.finder.FinderFactory;
 
 @Entity
 @NodeEntity(partial = true)

@@ -44,7 +44,9 @@ import org.hyperic.hq.authz.shared.AuthzDuplicateNameException;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.RoleManager;
 import org.hyperic.hq.authz.shared.RoleValue;
@@ -92,17 +94,22 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
     private CalendarManager calendarManager;
     private PermissionManager permissionManager;
     private ApplicationContext applicationContext;
+    private ResourceManager resourceManager;
+    private ResourceGroupManager resourceGroupManager;
 
     @Autowired
     public RoleManagerImpl(RoleCalendarDAO roleCalendarDAO,
                            RoleDAO roleDAO,
                            AuthzSubjectDAO authzSubjectDAO, CalendarManager calendarManager,
-                           PermissionManager permissionManager) {
+                           PermissionManager permissionManager, ResourceManager resourceManager,
+                           ResourceGroupManager resourceGroupManager) {
         this.roleCalendarDAO = roleCalendarDAO;
         this.roleDAO = roleDAO;
         this.authzSubjectDAO = authzSubjectDAO;
         this.calendarManager = calendarManager;
         this.permissionManager = permissionManager;
+        this.resourceManager = resourceManager;
+        this.resourceGroupManager = resourceGroupManager;
     }
 
     @PostConstruct
@@ -136,7 +143,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
     }
 
     private ResourceGroup lookupGroup(Integer id) {
-        return ResourceGroup.findResourceGroup(id);
+        return resourceGroupManager.findResourceGroupById(id);
     }
 
     /**
@@ -1104,7 +1111,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
     @Transactional(readOnly=true)
     public PageList<RoleValue> getResourceGroupRoles(AuthzSubject whoami, Integer groupId, PageControl pc)
         throws PermissionException {
-        ResourceGroup resGrp = ResourceGroup.findResourceGroup(groupId);
+        ResourceGroup resGrp = resourceGroupManager.findResourceGroupById(groupId);
 
         //TODO
         //permissionManager.check(whoami.getId(), AuthzConstants.authzGroup, resGrp.getId(),
@@ -1391,16 +1398,6 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
         }
     }
 
-    /**
-     * Find all {@link OperationType} objects
-     * 
-     * 
-     */
-    @Transactional(readOnly=true)
-    public Collection<OperationType> findAllOperations() {
-        return OperationType.findAllOperationTypes();
-    }
-
     protected Set toPojos(Object[] vals) {
         Set ret = new HashSet();
         if (vals == null || vals.length == 0) {
@@ -1414,7 +1411,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
             } else if (vals[i] instanceof RoleValue) {
                 ret.add(roleDAO.findById(((RoleValue) vals[i]).getId()));
             } else if (vals[i] instanceof ResourceGroupValue) {
-                ret.add(ResourceGroup.findResourceGroup(((ResourceGroupValue) vals[i]).getId()));
+                ret.add(resourceGroupManager.findResourceGroupById(((ResourceGroupValue) vals[i]).getId()));
             } else {
                 log.error("Invalid type.");
             }
@@ -1424,7 +1421,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
     }
 
     private Resource lookupResource(ResourceValue resource) {
-        return Resource.findResource(resource.getId());
+        return resourceManager.findResourceById(resource.getId());
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {

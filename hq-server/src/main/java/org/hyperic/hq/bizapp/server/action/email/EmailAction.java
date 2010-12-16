@@ -49,6 +49,7 @@ import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.application.Scheduler;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.EmailManager;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.common.shared.ServerConfigManager;
@@ -373,7 +374,7 @@ public class EmailAction extends EmailActionConfig
 
         AppdefEntityID appEnt = getResource(defInfo);
 
-        Resource resource = Resource.findResource(appEnt.getId());
+        Resource resource = Bootstrap.getBean(ResourceManager.class).findResourceById(appEnt.getId());
        
         final String subject = createSubject(
             defInfo, alert.getAlertInfo(), resource, null, change.getDescription());

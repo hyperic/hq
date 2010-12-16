@@ -51,7 +51,9 @@ public interface ResourceManager {
      * @return The value-object of the type of the given name.
      * @throws NotFoundException Unable to find a given or dependent entities.
      */
-    public ResourceType findResourceTypeByName(String name) throws NotFoundException;
+    public ResourceType findResourceTypeByName(String name);
+    
+    ResourceType findResourceTypeById(Integer id);
 
     /**
      * Check if there are any resources of a given type
@@ -93,9 +95,12 @@ public interface ResourceManager {
      * Find's the root (id=0) resource
      */
     public Resource findRootResource();
+    
+    ResourceType findRootResourceType();
 
     public Resource findResourceById(Integer id);
-
+    
+    Resource findResourceByName(String name);
 
     public void removeResource(AuthzSubject subject, Resource r) throws VetoException;
 

@@ -56,6 +56,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
@@ -87,6 +88,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
     private Pager valuePager;
 
     private ResourceManager resourceManager;
+    
+    private ResourceGroupManager resourceGroupManager;
 
     private PermissionManager permissionManager;
 
@@ -113,10 +116,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
     public ApplicationManagerImpl(
                                   ResourceManager resourceManager,
                                   PermissionManager permissionManager,
-                                  ZeventEnqueuer zeventManager) {
+                                  ZeventEnqueuer zeventManager,
+                                  ResourceGroupManager resourceGroupManager) {
         this.resourceManager = resourceManager;
         this.permissionManager = permissionManager;
         this.zeventManager = zeventManager;
+        this.resourceGroupManager = resourceGroupManager;
     }
 
     /**
@@ -203,7 +208,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         app.setName(appV.getName());
         updateApplication(app, appV);
         app.persist();
-        app.setType(ResourceType.findResourceType(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP));
+        app.setType(resourceManager.findResourceTypeById(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP));
         return app;
     }
     
@@ -222,14 +227,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
             Iterator iAppServiceValue = appV.getAddedAppServiceValues().iterator();
             while (iAppServiceValue.hasNext()) {
                 AppServiceValue o = (AppServiceValue) iAppServiceValue.next();
-                app.addMember(Resource.findResource(o.getId()));
+                app.addMember(resourceManager.findResourceById(o.getId()));
             }
         }
         if (appV.getRemovedAppServiceValues() != null) {
             Iterator iAppServiceValue = appV.getRemovedAppServiceValues().iterator();
             while (iAppServiceValue.hasNext()) {
                 AppServiceValue o = (AppServiceValue) iAppServiceValue.next();
-                app.removeMember(Resource.findResource(o.getId()));
+                app.removeMember(resourceManager.findResourceById(o.getId()));
             }
         }
         if (appV.getApplicationType() != null) {
@@ -247,7 +252,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         throws ApplicationNotFoundException, PermissionException, UpdateException,
         AppdefDuplicateNameException {
 
-        ResourceGroup app = ResourceGroup.findResourceGroup(newValue.getId());
+        ResourceGroup app = resourceGroupManager.findResourceGroupById(newValue.getId());
         //TODO
         //permissionManager.checkModifyPermission(subject, app.getEntityId());
         newValue.setModifiedBy(subject.getName());
@@ -282,7 +287,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     public void removeApplication(AuthzSubject subject, Integer id)
         throws ApplicationNotFoundException, PermissionException, VetoException {
 
-        ResourceGroup app = ResourceGroup.findResourceGroup(id);
+        ResourceGroup app = resourceGroupManager.findResourceGroupById(id);
         //TODO
         //permissionManager.checkRemovePermission(subject, app.getEntityId());
         app.remove();
@@ -305,11 +310,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
     public void removeAppService(AuthzSubject caller, Integer appId, Integer appServiceId)
         throws ApplicationException, ApplicationNotFoundException, PermissionException {
         try {
-            ResourceGroup app = ResourceGroup.findResourceGroup(appId);
+            ResourceGroup app = resourceGroupManager.findResourceGroupById(appId);
             //TODO perm check
             //permissionManager.checkModifyPermission(caller, app.getEntityId());
 
-            Resource appSvcLoc = Resource.findResource(appServiceId);
+            Resource appSvcLoc = resourceManager.findResourceById(appServiceId);
             app.removeMember(appSvcLoc);
         } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(appId);
@@ -392,7 +397,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         throws ApplicationNotFoundException, PermissionException {
         try {
             // find the app
-            Application app = toApplication(ResourceGroup.findResourceGroup(pk));
+            Application app = toApplication(resourceGroupManager.findResourceGroupById(pk));
             permissionManager.checkViewPermission(subject, app.getEntityId());
             return getDependencyTree(app);
         } catch (ObjectNotFoundException e) {
@@ -411,7 +416,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         Integer pk = depTree.getApplication().getId();
         try {
             // find the app
-            Application app = toApplication(ResourceGroup.findResourceGroup(pk));
+            Application app = toApplication(resourceGroupManager.findResourceGroupById(pk));
             permissionManager.checkModifyPermission(subject, app.getEntityId());
            setDependencyTree(app, depTree);
         } catch (ObjectNotFoundException e) {
@@ -426,7 +431,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
      */
     private Application findApplicationByName(AuthzSubject subject, String name)
         throws ApplicationNotFoundException, PermissionException {
-        ResourceGroup app = ResourceGroup.findResourceGroupByName(name);
+        ResourceGroup app = resourceGroupManager.findResourceGroupByName(name);
         if (app == null) {
             throw new ApplicationNotFoundException(name);
         }
@@ -444,7 +449,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     public Application findApplicationById(AuthzSubject subject, Integer id)
         throws ApplicationNotFoundException, PermissionException {
         try {
-            ResourceGroup app = ResourceGroup.findResourceGroup(id);
+            ResourceGroup app = resourceGroupManager.findResourceGroupById(id);
             //permissionManager.checkViewPermission(subject, app.getEntityId());
             return toApplication(app);
         } catch (ObjectNotFoundException e) {
@@ -504,7 +509,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                                        List<AppdefEntityID> entityIds)
         throws ApplicationNotFoundException, AppdefGroupNotFoundException, PermissionException {
         try {
-            ResourceGroup app = ResourceGroup.findResourceGroup(appId);
+            ResourceGroup app = resourceGroupManager.findResourceGroupById(appId);
             //TODO
             //permissionManager.checkModifyPermission(subject, app.getEntityId());
             for (Iterator<Resource> i = app.getMembers().iterator(); i.hasNext();) {
@@ -525,7 +530,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
             for (int i = 0; i < entityIds.size(); i++) {
                 AppdefEntityID id = (AppdefEntityID) entityIds.get(i);
-                app.addMember(Resource.findResource(id.getId()));
+                app.addMember(resourceManager.findResourceById(id.getId()));
                 
             }
         } catch (ObjectNotFoundException e) {
@@ -732,8 +737,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
      */
     @Transactional(readOnly = true)
     public boolean isApplicationMember(AppdefEntityID application, AppdefEntityID service) {
-        ResourceGroup app = ResourceGroup.findResourceGroup(application.getId());
-        return app.isMember(Resource.findResource(service.getId()));
+        ResourceGroup app = resourceGroupManager.findResourceGroupById(application.getId());
+        return app.isMember(resourceManager.findResourceById(service.getId()));
     }
 
     /**

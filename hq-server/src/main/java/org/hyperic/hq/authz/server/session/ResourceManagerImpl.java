@@ -32,26 +32,19 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.ResourceTreeGenerator;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
-import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
-import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.NotFoundException;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
-import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.inventory.dao.ResourceDao;
+import org.hyperic.hq.inventory.dao.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.Relationship;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
@@ -92,18 +85,23 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     private PermissionManager permissionManager;
     private ResourceAuditFactory resourceAuditFactory;
     private ApplicationContext applicationContext;
+    private ResourceDao resourceDao;
+    private ResourceTypeDao resourceTypeDao;
 
     @Autowired
     public ResourceManagerImpl(AuthzSubjectManager authzSubjectManager,
                                AuthzSubjectDAO authzSubjectDAO,
                                ZeventEnqueuer zeventManager, PermissionManager permissionManager,
-                               ResourceAuditFactory resourceAuditFactory) {
+                               ResourceAuditFactory resourceAuditFactory, ResourceDao resourceDao,
+                               ResourceTypeDao resourceTypeDao) {
         this.authzSubjectManager = authzSubjectManager;
         this.authzSubjectDAO = authzSubjectDAO;
         this.zeventManager = zeventManager;
         this.permissionManager = permissionManager;
         resourceTypePager = Pager.getDefaultPager();
         this.resourceAuditFactory = resourceAuditFactory;
+        this.resourceDao = resourceDao;
+        this.resourceTypeDao = resourceTypeDao;
     }
 
     /**
@@ -114,14 +112,8 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      * 
      */
     @Transactional(readOnly = true)
-    public ResourceType findResourceTypeByName(String name) throws NotFoundException {
-       
-        ResourceType rt = ResourceType.findResourceTypeByName(name);
-
-        if (rt == null) {
-            throw new NotFoundException("ResourceType " + name + " not found");
-        }
-
+    public ResourceType findResourceTypeByName(String name)  {     
+        ResourceType rt = resourceTypeDao.findByName(name);
         return rt;
     }
 
@@ -132,7 +124,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      */
     @Transactional(readOnly = true)
     public boolean resourcesExistOfType(String typeName) {
-        return ResourceType.findResourceTypeByName(typeName).hasResources();
+        return resourceTypeDao.findByName(typeName).hasResources();
     }
 
     /**
@@ -191,7 +183,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      */
     @Transactional(readOnly = true)
     public Number getResourceCount() {
-        return new Integer(Resource.countResources());
+        return resourceDao.count();
     }
 
     /**
@@ -200,7 +192,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      */
     @Transactional(readOnly = true)
     public Number getResourceTypeCount() {
-        return (int) ResourceType.countResourceTypes();
+        return resourceTypeDao.count();
     }
 
     /**
@@ -209,7 +201,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      */
     @Transactional(readOnly = true)
     public Resource findRootResource() {
-        return Resource.findRootResource();
+        return resourceDao.findRoot();
     }
 
     /**
@@ -217,7 +209,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      */
     @Transactional(readOnly = true)
     public Resource findResourceById(Integer id) {
-        return Resource.findResource(id);
+        return resourceDao.findById(id);
     }
 
     /**
@@ -263,7 +255,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      */
     @Transactional(readOnly = true)
     public List<ResourceType> getAllResourceTypes(AuthzSubject subject, PageControl pc) {
-        Collection<ResourceType> resTypes = ResourceType.findAllResourceTypes();
+        Collection<ResourceType> resTypes = resourceTypeDao.findAll();
         pc = PageControl.initDefaults(pc, SortAttribute.RESTYPE_NAME);
         return resourceTypePager.seek(resTypes, pc.getPagenum(), pc.getPagesize());
     }
@@ -306,7 +298,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
 
         PageList<Resource> resources = new PageList<Resource>();
         for (Integer id : paged) {
-            resources.add(Resource.findResource(id));
+            resources.add(resourceDao.findById(id));
         }
 
         resources.setTotalSize(resIds.size());
@@ -326,7 +318,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         // First get all resource types
         Map<String, List<Integer>> resourceMap = new HashMap<String, List<Integer>>();
 
-        Collection<ResourceType> resTypes = ResourceType.findAllResourceTypes();
+        Collection<ResourceType> resTypes = resourceTypeDao.findAll();
         for (ResourceType type : resTypes) {
             String typeName = type.getName();
 
@@ -360,7 +352,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     @Transactional(readOnly = true)
     public List<Resource> findResourcesOfType(int resourceType, PageInfo pInfo) {
         //TODO paging and sorting
-        return new ArrayList<Resource>(ResourceType.findResourceType(resourceType).getResources());
+        return new ArrayList<Resource>(resourceTypeDao.findById(resourceType).getResources());
     }
 
     /**
@@ -371,7 +363,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      */
     @Transactional(readOnly = true)
     public Collection<Resource> findResourceByOwner(AuthzSubject owner) {
-        return Resource.findByOwner(owner);
+        return resourceDao.findByOwner(owner);
     }
 
     /**
@@ -440,7 +432,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     @Transactional(readOnly = true)
     public Collection<Relationship<Resource>> findResourceEdgesByName(String name, Relationship<ResourceType> relation) {
         //TODO guard against NPE and this is a terrible method name
-        return Resource.findResourceByName(name).getRelationshipsFrom(relation.getName());
+        return resourceDao.findByName(name).getRelationshipsFrom(relation.getName());
         
     }
 
@@ -525,9 +517,24 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     
     //TODO remove this method - ResourceManager (if kept) should have not knowledge of AppdefEntityIDs
     public Resource findResource(AppdefEntityID entityID) {
-        return Resource.findResource(entityID.getId());
+        return resourceDao.findById(entityID.getId());
     }
     
+    @Transactional(readOnly=true)
+    public ResourceType findResourceTypeById(Integer id) {
+        return resourceTypeDao.findById(id);
+    }
+
+    @Transactional(readOnly=true)
+    public ResourceType findRootResourceType() {
+       return resourceTypeDao.findRoot();
+    }
+
+    @Transactional(readOnly=true)
+    public Resource findResourceByName(String name) {
+       return resourceDao.findByName(name);
+    }
+
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }

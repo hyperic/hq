@@ -37,6 +37,7 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.hq.common.server.session.CrispoDAO;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.inventory.dao.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
@@ -49,14 +50,16 @@ public class AuthzSubjectDAO
     extends HibernateDAO<AuthzSubject> {
     private CrispoDAO crispoDao;
     private RoleDAO roleDAO;
+    private ResourceTypeDao resourceTypeDao;
    
 
     @Autowired
     public AuthzSubjectDAO(SessionFactory f, CrispoDAO crispoDAO, 
-                           RoleDAO roleDAO) {
+                           RoleDAO roleDAO, ResourceTypeDao resourceTypeDao) {
         super(AuthzSubject.class, f);
         this.crispoDao = crispoDAO;
         this.roleDAO = roleDAO;
+        this.resourceTypeDao = resourceTypeDao;
     }
 
     AuthzSubject create(AuthzSubject creator, String name, boolean active, String dsn, String dept,
@@ -68,7 +71,7 @@ public class AuthzSubjectDAO
 
         // XXX create resource for owner
       
-        ResourceType rt = ResourceType.findResourceTypeByName(AuthzConstants.subjectResourceTypeName);
+        ResourceType rt = resourceTypeDao.findByName(AuthzConstants.subjectResourceTypeName);
         if (rt == null) {
             throw new IllegalArgumentException("resource type not found " +
                                                AuthzConstants.subjectResourceTypeName);

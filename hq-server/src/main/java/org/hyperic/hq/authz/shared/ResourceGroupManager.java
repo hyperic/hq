@@ -67,6 +67,8 @@ public interface ResourceGroupManager
      */
     public ResourceGroup findResourceGroupById(AuthzSubject whoami, Integer id)
         throws PermissionException;
+    
+    ResourceGroup findResourceGroupByName(String name);
 
     /**
      * Find the group that has the given ID. Does not do any authz checking
