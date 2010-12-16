@@ -49,14 +49,6 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
     @PersistenceContext
     transient EntityManager entityManager;
 
-    @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.INCOMING, elementClass = Resource.class)
-    @OneToMany
-    @Transient
-    private Set<Resource> resources;
-
-    @javax.annotation.Resource
-    transient FinderFactory finderFactory;
-
     @javax.annotation.Resource
     private transient GraphDatabaseContext graphDatabaseContext;
 
@@ -95,6 +87,11 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
     @ManyToOne
     @RelatedTo(type = "DEFINED_BY", direction = Direction.OUTGOING, elementClass = Plugin.class)
     private Plugin plugin;
+
+    @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.INCOMING, elementClass = Resource.class)
+    @OneToMany
+    @Transient
+    private Set<Resource> resources;
 
     @Version
     @Column(name = "version")
@@ -398,59 +395,12 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
         return resourceTypes;
     }
 
-    public static int countResourceTypes() {
-        return entityManager().createQuery("select count(o) from ResourceType o", Integer.class)
-            .getSingleResult();
-    }
-
     public static final EntityManager entityManager() {
         EntityManager em = new ResourceType().entityManager;
         if (em == null)
             throw new IllegalStateException(
                 "Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)");
         return em;
-    }
-
-    public static List<ResourceType> findAllResourceTypes() {
-        List<ResourceType> types = entityManager().createQuery("select o from ResourceType o", ResourceType.class)
-            .getResultList();
-        for(ResourceType type: types) {
-            type.getId();
-        }
-        return types;
-    }
-
-    public static ResourceType findResourceType(Integer id) {
-    	return findById(id);
-    }
-    
-    public static ResourceType findById(Integer id) {
-        if (id == null)
-            return null;
-        ResourceType resourceType = entityManager().find(ResourceType.class, id);
-        if(resourceType !=null) {
-            resourceType.getId();
-        }
-        return resourceType;
-    }
-
-    public static ResourceType findResourceTypeByName(String name) {
-        // Can't do JPA-style queries on property values that are only in graph
-        ResourceType type = new ResourceType().finderFactory.getFinderForClass(ResourceType.class)
-            .findByPropertyValue("name", name);
-        if (type != null) {
-            type.getId();
-        }
-        return type;
-    }
-
-    public static List<ResourceType> find(Integer firstResult, Integer maxResults) {
-        List<ResourceType> types = entityManager().createQuery("select o from ResourceType o", ResourceType.class)
-            .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
-        for(ResourceType type: types) {
-            type.getId();
-        }
-        return types;
     }
     
     public void setPropertyTypes(Set<PropertyType> propertyTypes) {
@@ -475,24 +425,7 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
     public Plugin getPlugin() {
         return plugin;
     }
-
-    public static ResourceType findRootResourceType() {
-    	// TODO Should this be hardcoded?
-    	return findById(1);
-    }
-
-    public static Set<ResourceType> findByPlugin(String plugin) {
-        Set<ResourceType> pluginTypes = new HashSet<ResourceType>();
-        //TODO can we do a JPA-style query that is quicker here?
-        List<ResourceType> types = findAllResourceTypes();
-        for(ResourceType type: types) {
-            if(type.getPlugin() != null && type.getPlugin().getName().equals(plugin)) {
-                pluginTypes.add(type);
-            }
-        }
-        return pluginTypes;
-    }
-    
+   
     public void setPlugin(Plugin plugin) {
         this.plugin = plugin;
     }

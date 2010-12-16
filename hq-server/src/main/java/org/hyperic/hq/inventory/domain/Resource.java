@@ -65,9 +65,6 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     transient EntityManager entityManager;
 
     @javax.annotation.Resource
-    transient FinderFactory finderFactory;
-
-    @javax.annotation.Resource
     private transient GraphDatabaseContext graphDatabaseContext;
 
     @Id
@@ -544,71 +541,11 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
         return false;
     }
 
-    public static int countResources() {
-        return entityManager().createQuery("select count(o) from Resource o", Integer.class)
-            .getSingleResult();
-    }
-
     public static final EntityManager entityManager() {
         EntityManager em = new Resource().entityManager;
         if (em == null)
             throw new IllegalStateException(
                 "Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)");
         return em;
-    }
-
-    public static List<Resource> findAllResources() {
-        List<Resource> resources = entityManager().createQuery("select o from Resource o", Resource.class)
-            .getResultList();
-        for(Resource resource: resources) {
-            resource.getId();
-        }
-        return resources;
-    }
- 
-    public static Collection<Resource> findByCTime(long ctime) {
-        // TODO impl?
-        return null;
-    }
-
-    public static Collection<Resource> findByOwner(AuthzSubject owner) {
-        // TODO best way to implement cutting across to AuthzSubject
-        return null;
-    }
-
-    public static Resource findResource(Integer id) {
-    	return findById(id);
-    }
-
-    public static Resource findById(Integer id) {
-        if (id == null)
-            return null;
-        Resource resource = entityManager().find(Resource.class, id);
-        if(resource != null) {
-            resource.getId();
-        }
-        return resource;
-    }
-
-    public static Resource findResourceByName(String name) {
-        Resource resource = new Resource().finderFactory.getFinderForClass(Resource.class).findByPropertyValue(
-            "name", name);
-        if(resource != null) {
-            resource.getId();
-        }
-        return resource;
-    }
-
-    public static List<Resource> findResourceEntries(int firstResult, int maxResults) {
-        List<Resource> resources = entityManager().createQuery("select o from Resource o", Resource.class)
-            .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
-        for(Resource resource: resources) {
-            resource.getId();
-        }
-        return resources;
-    }
-
-    public static Resource findRootResource() {
-       return findResource(1);
     }
 }

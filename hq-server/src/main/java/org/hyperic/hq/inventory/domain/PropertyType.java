@@ -30,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 @NodeEntity(partial = true)
 @JsonIgnoreProperties(ignoreUnknown = true, value = {"underlyingState", "stateAccessors"})
 public class PropertyType implements IdentityAware, PersistenceAware<PropertyType> {
-
     @GraphProperty
     @Transient
     private String defaultValue;
@@ -42,9 +41,6 @@ public class PropertyType implements IdentityAware, PersistenceAware<PropertyTyp
 
     @PersistenceContext
     transient EntityManager entityManager;
-
-    @Resource
-    transient FinderFactory finderFactory;
 
     @Id
     @GenericGenerator(name = "mygen1", strategy = "increment")  
@@ -198,44 +194,11 @@ public class PropertyType implements IdentityAware, PersistenceAware<PropertyTyp
         return sb.toString();
     }
 
-    public static int countPropertyTypes() {
-        return entityManager().createQuery("select count(o) from PropertyType o", Integer.class)
-            .getSingleResult();
-    }
-
     public static final EntityManager entityManager() {
         EntityManager em = new PropertyType().entityManager;
         if (em == null)
             throw new IllegalStateException(
                 "Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)");
         return em;
-    }
-
-    public static List<PropertyType> findAllPropertyTypes() {
-        List<PropertyType> propertyTypes = entityManager().createQuery("select o from PropertyType o", PropertyType.class)
-            .getResultList();
-        for(PropertyType propertyType: propertyTypes) {
-            propertyType.getId();
-        }
-        return propertyTypes;
-    }
-
-    public static PropertyType findById(Integer id) {
-        if (id == null)
-            return null;
-        PropertyType propertyType = entityManager().find(PropertyType.class, id);
-        if(propertyType != null) {
-            propertyType.getId();
-        }
-        return propertyType;
-    }
-
-    public static List<PropertyType> find(Integer firstResult, Integer maxResults) {
-        List<PropertyType> propertyTypes = entityManager().createQuery("select o from PropertyType o", PropertyType.class)
-            .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
-        for(PropertyType propertyType: propertyTypes) {
-            propertyType.getId();
-        }
-        return propertyTypes;
     }
 }

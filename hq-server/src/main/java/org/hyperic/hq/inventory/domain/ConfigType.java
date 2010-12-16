@@ -39,9 +39,6 @@ public class ConfigType implements IdentityAware, PersistenceAware<ConfigType> {
 	@PersistenceContext
     transient EntityManager entityManager;
 
-    @Resource
-    transient FinderFactory finderFactory;
-
     @Id
     @GenericGenerator(name = "mygen1", strategy = "increment")  
     @GeneratedValue(generator = "mygen1") 
@@ -133,44 +130,11 @@ public class ConfigType implements IdentityAware, PersistenceAware<ConfigType> {
         return sb.toString();
     }
 
-    public static int countConfigTypes() {
-        return entityManager().createQuery("select count(o) from ConfigType o", Integer.class)
-            .getSingleResult();
-    }
-
     public static final EntityManager entityManager() {
         EntityManager em = new ConfigType().entityManager;
         if (em == null)
             throw new IllegalStateException(
                 "Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)");
         return em;
-    }
-
-    public static List<ConfigType> findAllConfigTypes() {
-        List<ConfigType> configTypes = entityManager().createQuery("select o from ConfigType o", ConfigType.class)
-            .getResultList();
-        for(ConfigType configType: configTypes) {
-            configType.getId();
-        }
-        return configTypes;
-    }
-
-    public static ConfigType findById(Integer id) {
-        if (id == null)
-            return null;
-        ConfigType configType = entityManager().find(ConfigType.class, id);
-        if(configType != null) {
-            configType.getId();
-        }
-        return configType;
-    }
-
-    public static List<ConfigType> find(Integer firstResult, Integer maxResults) {
-        List<ConfigType> configTypes = entityManager().createQuery("select o from ConfigType o", ConfigType.class)
-            .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
-        for(ConfigType configType: configTypes) {
-            configType.getId();
-        }
-        return configTypes;
     }
 }
