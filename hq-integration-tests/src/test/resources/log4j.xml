@@ -220,6 +220,11 @@
 	<!-- ======================= -->
 	<!-- Setup the Root logger -->
 	<!-- ======================= -->
+	
+	<!--  TODO Temporarily disabling warning messages documented in HQ-3016 and HQ-3017 -->
+	<logger name="org.springframework.datastore.graph.neo4j.fieldaccess.DetachableEntityStateAccessors">
+		<level value="ERROR" />
+	</logger>
 
 	<root>
 		<level value="INFO" />
