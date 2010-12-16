@@ -1,7 +1,6 @@
 package org.hyperic.hq.inventory.domain;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Column;
@@ -16,20 +15,19 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.hibernate.annotations.GenericGenerator;
 import org.neo4j.graphdb.Node;
 import org.springframework.datastore.graph.annotation.NodeEntity;
-import org.springframework.datastore.graph.neo4j.finder.FinderFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 @Entity
 @NodeEntity(partial = true)
-@JsonIgnoreProperties(ignoreUnknown = true, value = {"underlyingState", "stateAccessors"})
+@JsonIgnoreProperties(ignoreUnknown = true, value = { "underlyingState", "stateAccessors" })
 public class Config {
 
     @PersistenceContext
     transient EntityManager entityManager;
 
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1") 
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "id")
     private Integer id;
 
@@ -46,8 +44,6 @@ public class Config {
 
     @Transactional
     public void flush() {
-        if (this.entityManager == null)
-            this.entityManager = entityManager();
         this.entityManager.flush();
     }
 
@@ -56,11 +52,11 @@ public class Config {
     }
 
     public Object getValue(String key) {
-         //TODO default values
+        // TODO default values
         return getUnderlyingState().getProperty(key);
     }
-    
-    public Map<String,Object> getValues() {
+
+    public Map<String, Object> getValues() {
         Map<String, Object> properties = new HashMap<String, Object>();
         for (String key : getUnderlyingState().getPropertyKeys()) {
             try {
@@ -72,15 +68,13 @@ public class Config {
         }
         return properties;
     }
-    
+
     public Integer getVersion() {
         return this.version;
     }
-    
+
     @Transactional
     public Config merge() {
-        if (this.entityManager == null)
-            this.entityManager = entityManager();
         Config merged = this.entityManager.merge(this);
         this.entityManager.flush();
         merged.getId();
@@ -89,16 +83,12 @@ public class Config {
 
     @Transactional
     public void persist() {
-        if (this.entityManager == null)
-            this.entityManager = entityManager();
         this.entityManager.persist(this);
         getId();
     }
 
     @Transactional
     public void remove() {
-        if (this.entityManager == null)
-            this.entityManager = entityManager();
         if (this.entityManager.contains(this)) {
             this.entityManager.remove(this);
         } else {
@@ -112,21 +102,13 @@ public class Config {
     }
 
     public void setValue(String key, Object value) {
-        //TODO type validation?
-        
+        // TODO type validation?
+
         // TODO check other stuff?
         getUnderlyingState().setProperty(key, value);
     }
 
     public void setVersion(Integer version) {
         this.version = version;
-    }
-
-    public static final EntityManager entityManager() {
-        EntityManager em = new Config().entityManager;
-        if (em == null)
-            throw new IllegalStateException(
-                "Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)");
-        return em;
     }
 }

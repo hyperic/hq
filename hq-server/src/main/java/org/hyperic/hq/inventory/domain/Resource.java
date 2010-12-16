@@ -1,10 +1,8 @@
 package org.hyperic.hq.inventory.domain;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,7 +39,6 @@ import org.springframework.datastore.graph.annotation.GraphProperty;
 import org.springframework.datastore.graph.annotation.NodeEntity;
 import org.springframework.datastore.graph.annotation.RelatedTo;
 import org.springframework.datastore.graph.api.Direction;
-import org.springframework.datastore.graph.neo4j.finder.FinderFactory;
 import org.springframework.datastore.graph.neo4j.support.GraphDatabaseContext;
 import org.springframework.datastore.graph.neo4j.support.SubReferenceNodeTypeStrategy;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,7 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Entity
 @NodeEntity(partial = true)
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-@JsonIgnoreProperties(ignoreUnknown = true, value = {"underlyingState", "stateAccessors"})
+@JsonIgnoreProperties(ignoreUnknown = true, value = { "underlyingState", "stateAccessors" })
 public class Resource implements IdentityAware, RelationshipAware<Resource> {
 
     @Transient
@@ -68,8 +65,8 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     private transient GraphDatabaseContext graphDatabaseContext;
 
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1") 
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "id")
     private Integer id;
 
@@ -115,8 +112,6 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
 
     @Transactional
     public void flush() {
-        if (this.entityManager == null)
-            this.entityManager = entityManager();
         this.entityManager.flush();
     }
 
@@ -129,8 +124,9 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     }
 
     private Config getConfig(String type) {
-        Iterable<org.neo4j.graphdb.Relationship> relationships = this.getUnderlyingState().getRelationships(
-            DynamicRelationshipType.withName(RelationshipTypes.HAS_CONFIG), org.neo4j.graphdb.Direction.OUTGOING);
+        Iterable<org.neo4j.graphdb.Relationship> relationships = this.getUnderlyingState()
+            .getRelationships(DynamicRelationshipType.withName(RelationshipTypes.HAS_CONFIG),
+                org.neo4j.graphdb.Direction.OUTGOING);
         for (org.neo4j.graphdb.Relationship relationship : relationships) {
             if (type.equals(relationship.getProperty("configType"))) {
                 // TODO enforce no more than one?
@@ -201,53 +197,57 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     }
 
     @SuppressWarnings("unchecked")
-    public Set<Relationship<Resource>> getRelationships(Resource entity, String name, RelationshipDirection direction) {
-    	Set<Relationship<Resource>> relations = new HashSet<Relationship<Resource>>();
-    	Iterable<org.neo4j.graphdb.Relationship> relationships;
-    	org.neo4j.graphdb.Direction neo4jDirection = null;
-    	
-    	switch (direction) {
-    		case BOTH_WAYS:
-    			neo4jDirection = org.neo4j.graphdb.Direction.BOTH;
-    			break;
-    		case INCOMING:
-    			neo4jDirection = org.neo4j.graphdb.Direction.INCOMING;
-    			break;
-    		case OUTGOING:
-    			neo4jDirection = org.neo4j.graphdb.Direction.OUTGOING;
-    			break;
-    	}
+    public Set<Relationship<Resource>> getRelationships(Resource entity, String name,
+                                                        RelationshipDirection direction) {
+        Set<Relationship<Resource>> relations = new HashSet<Relationship<Resource>>();
+        Iterable<org.neo4j.graphdb.Relationship> relationships;
+        org.neo4j.graphdb.Direction neo4jDirection = null;
 
-    	if (name != null) {
-    		if (neo4jDirection != null) {
-    			relationships = getUnderlyingState().getRelationships(DynamicRelationshipType.withName(name), neo4jDirection);
-    		} else {
-    			relationships = getUnderlyingState().getRelationships(DynamicRelationshipType.withName(name));
-    		}
-    	} else {
-    		if (neo4jDirection != null) {
-    			relationships = getUnderlyingState().getRelationships(neo4jDirection);
-    		} else {
-    			relationships = getUnderlyingState().getRelationships();
-    		}
-    	}
+        switch (direction) {
+            case BOTH_WAYS:
+                neo4jDirection = org.neo4j.graphdb.Direction.BOTH;
+                break;
+            case INCOMING:
+                neo4jDirection = org.neo4j.graphdb.Direction.INCOMING;
+                break;
+            case OUTGOING:
+                neo4jDirection = org.neo4j.graphdb.Direction.OUTGOING;
+                break;
+        }
 
-    	for (org.neo4j.graphdb.Relationship relationship : relationships) {
-    		// Don't include Neo4J relationship b/w Node and its Java type
+        if (name != null) {
+            if (neo4jDirection != null) {
+                relationships = getUnderlyingState().getRelationships(
+                    DynamicRelationshipType.withName(name), neo4jDirection);
+            } else {
+                relationships = getUnderlyingState().getRelationships(
+                    DynamicRelationshipType.withName(name));
+            }
+        } else {
+            if (neo4jDirection != null) {
+                relationships = getUnderlyingState().getRelationships(neo4jDirection);
+            } else {
+                relationships = getUnderlyingState().getRelationships();
+            }
+        }
+
+        for (org.neo4j.graphdb.Relationship relationship : relationships) {
+            // Don't include Neo4J relationship b/w Node and its Java type
             if (!relationship.isType(SubReferenceNodeTypeStrategy.INSTANCE_OF_RELATIONSHIP_TYPE)) {
-            	Node node = relationship.getOtherNode(getUnderlyingState());
-            	Class<?> otherEndType = graphDatabaseContext.getJavaType(node);
+                Node node = relationship.getOtherNode(getUnderlyingState());
+                Class<?> otherEndType = graphDatabaseContext.getJavaType(node);
 
-            	if (Resource.class.isAssignableFrom(otherEndType)) {
-            		if (entity == null || node.equals(entity.getUnderlyingState())) {
-            			relations.add(graphDatabaseContext.createEntityFromState(relationship, Relationship.class));
-            		}
+                if (Resource.class.isAssignableFrom(otherEndType)) {
+                    if (entity == null || node.equals(entity.getUnderlyingState())) {
+                        relations.add(graphDatabaseContext.createEntityFromState(relationship,
+                            Relationship.class));
+                    }
                 }
             }
         }
 
-    	return relations;
-	}
+        return relations;
+    }
 
     public boolean isRelatedTo(Resource resource, String relationName) {
         Traverser relationTraverser = getUnderlyingState().traverse(Traverser.Order.BREADTH_FIRST,
@@ -267,7 +267,7 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
 
     @SuppressWarnings("unchecked")
     @Transactional
-	public Relationship<Resource> relateTo(Resource resource, String relationName) {
+    public Relationship<Resource> relateTo(Resource resource, String relationName) {
         if (!type.isRelatedTo(resource.getType(), relationName)) {
             throw new InvalidRelationshipException();
         }
@@ -280,23 +280,23 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
         for (Relationship<Resource> relation : getRelationships(entity, name, direction)) {
             relation.getUnderlyingState().delete();
         }
-	}
+    }
 
     public void removeRelationship(Resource resource, String relationName) {
         if (isRelatedTo(resource, relationName)) {
-        	removeRelationships(resource, relationName, RelationshipDirection.ALL);
+            removeRelationships(resource, relationName, RelationshipDirection.ALL);
         }
     }
 
     public void removeRelationships() {
-    	removeRelationships(null, null, RelationshipDirection.ALL);
+        removeRelationships(null, null, RelationshipDirection.ALL);
     }
 
     public void removeRelationships(String relationName) {
-    	removeRelationships(null, relationName, RelationshipDirection.ALL);
+        removeRelationships(null, relationName, RelationshipDirection.ALL);
     }
 
-	public Set<Relationship<Resource>> getRelationships() {
+    public Set<Relationship<Resource>> getRelationships() {
         return getRelationships(null, null, RelationshipDirection.ALL);
     }
 
@@ -317,31 +317,31 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     }
 
     private Set<Resource> getRelatedResources(String relationName, RelationshipDirection direction) {
-    	Set<Relationship<Resource>> relations = getRelationships(null, relationName, direction);
-    	Set<Resource> resources = new HashSet<Resource>();
-        
+        Set<Relationship<Resource>> relations = getRelationships(null, relationName, direction);
+        Set<Resource> resources = new HashSet<Resource>();
+
         for (Relationship<Resource> relation : relations) {
             switch (direction) {
-            	case INCOMING:
-            		resources.add(relation.getTo());
-            		break;
-            	case OUTGOING:
-            		resources.add(relation.getFrom());
+                case INCOMING:
+                    resources.add(relation.getTo());
+                    break;
+                case OUTGOING:
+                    resources.add(relation.getFrom());
             }
         }
-        
+
         return resources;
     }
 
     public Relationship<Resource> getRelationshipTo(Resource resource, String relationName) {
-    	Set<Relationship<Resource>> relations = getRelationships(resource, relationName, null);
-    	Relationship<Resource> result = null;
-    	Iterator<Relationship<Resource>> i = relations.iterator();
-    	
-    	if (i.hasNext()) {
-    		result = i.next();
-    	}
-    	
+        Set<Relationship<Resource>> relations = getRelationships(resource, relationName, null);
+        Relationship<Resource> result = null;
+        Iterator<Relationship<Resource>> i = relations.iterator();
+
+        if (i.hasNext()) {
+            result = i.next();
+        }
+
         return result;
     }
 
@@ -356,7 +356,7 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
             }, ReturnableEvaluator.ALL_BUT_START_NODE,
             DynamicRelationshipType.withName(relationName), direction);
         for (Node related : relationTraverser) {
-        	Resource resource = graphDatabaseContext.createEntityFromState(related, Resource.class);
+            Resource resource = graphDatabaseContext.createEntityFromState(related, Resource.class);
             resource.getId();
             resources.add(resource);
         }
@@ -364,11 +364,12 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     }
 
     public Resource getResourceFrom(String relationName) {
-        Set<Resource> resources = getRelatedResources(relationName, org.neo4j.graphdb.Direction.OUTGOING);
-        if(resources.isEmpty()) {
+        Set<Resource> resources = getRelatedResources(relationName,
+            org.neo4j.graphdb.Direction.OUTGOING);
+        if (resources.isEmpty()) {
             return null;
         }
-        //TODO enforce only one?
+        // TODO enforce only one?
         return resources.iterator().next();
     }
 
@@ -377,11 +378,12 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     }
 
     public Resource getResourceTo(String relationName) {
-        Set<Resource> resources = getRelatedResources(relationName, org.neo4j.graphdb.Direction.INCOMING);
-        if(resources.isEmpty()) {
+        Set<Resource> resources = getRelatedResources(relationName,
+            org.neo4j.graphdb.Direction.INCOMING);
+        if (resources.isEmpty()) {
             return null;
         }
-        //TODO enforce only one?
+        // TODO enforce only one?
         return resources.iterator().next();
     }
 
@@ -409,8 +411,6 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
 
     @Transactional
     public Resource merge() {
-        if (this.entityManager == null)
-            this.entityManager = entityManager();
         Resource merged = this.entityManager.merge(this);
         this.entityManager.flush();
         merged.getId();
@@ -419,8 +419,6 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
 
     @Transactional
     public void persist() {
-        if (this.entityManager == null)
-            this.entityManager = entityManager();
         this.entityManager.persist(this);
         getId();
     }
@@ -428,8 +426,6 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     @Transactional
     public void remove() {
         removeConfig();
-        if (this.entityManager == null)
-            this.entityManager = entityManager();
         if (this.entityManager.contains(this)) {
             this.entityManager.remove(this);
         } else {
@@ -458,7 +454,8 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
 
     private void setConfig(Config config, String type) {
         org.neo4j.graphdb.Relationship rel = this.getUnderlyingState().createRelationshipTo(
-            config.getUnderlyingState(), DynamicRelationshipType.withName(RelationshipTypes.HAS_CONFIG));
+            config.getUnderlyingState(),
+            DynamicRelationshipType.withName(RelationshipTypes.HAS_CONFIG));
         rel.setProperty("configType", type);
     }
 
@@ -469,7 +466,7 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     public void setConfigValidationError(String error) {
         // TODO from ConfigResponseDB. remove?
     }
-    
+
     public String getConfigValidationError() {
         // TODO from ConfigResponseDB. remove?
         return null;
@@ -517,18 +514,19 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
                                                " is not defined for resource of type " +
                                                type.getName());
         }
-        if(value == null) {
-            //TODO log a warning?
-            //Neo4J doesn't accept null values 
+        if (value == null) {
+            // TODO log a warning?
+            // Neo4J doesn't accept null values
             return null;
         }
-        // TODO check other stuff?  Should def check optional param and maybe disregard nulls, below throws Exception
-        //with null values
+        // TODO check other stuff? Should def check optional param and maybe
+        // disregard nulls, below throws Exception
+        // with null values
         Object oldValue = null;
         try {
             oldValue = getUnderlyingState().getProperty(key);
-        }catch(NotFoundException e) {
-            //could be first time
+        } catch (NotFoundException e) {
+            // could be first time
         }
         getUnderlyingState().setProperty(key, value);
         return oldValue;
@@ -545,17 +543,9 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     public void setVersion(Integer version) {
         this.version = version;
     }
-    
-    public boolean isInAsyncDeleteState() {
-        //TODO remove
-        return false;
-    }
 
-    public static final EntityManager entityManager() {
-        EntityManager em = new Resource().entityManager;
-        if (em == null)
-            throw new IllegalStateException(
-                "Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)");
-        return em;
+    public boolean isInAsyncDeleteState() {
+        // TODO remove
+        return false;
     }
 }

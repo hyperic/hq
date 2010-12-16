@@ -1,8 +1,5 @@
 package org.hyperic.hq.inventory.domain;
 
-import java.util.List;
-
-import javax.annotation.Resource;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -23,20 +20,19 @@ import org.springframework.datastore.graph.annotation.GraphProperty;
 import org.springframework.datastore.graph.annotation.NodeEntity;
 import org.springframework.datastore.graph.annotation.RelatedTo;
 import org.springframework.datastore.graph.api.Direction;
-import org.springframework.datastore.graph.neo4j.finder.FinderFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 @Entity
 @Configurable
 @NodeEntity(partial = true)
-@JsonIgnoreProperties(ignoreUnknown = true, value = {"underlyingState", "stateAccessors"})
+@JsonIgnoreProperties(ignoreUnknown = true, value = { "underlyingState", "stateAccessors" })
 public class OperationType implements IdentityAware, PersistenceAware<OperationType> {
     @PersistenceContext
     transient EntityManager entityManager;
 
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1") 
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "id")
     private Integer id;
 
@@ -65,8 +61,6 @@ public class OperationType implements IdentityAware, PersistenceAware<OperationT
 
     @Transactional
     public void flush() {
-        if (this.entityManager == null)
-            this.entityManager = entityManager();
         this.entityManager.flush();
     }
 
@@ -88,8 +82,6 @@ public class OperationType implements IdentityAware, PersistenceAware<OperationT
 
     @Transactional
     public OperationType merge() {
-        if (this.entityManager == null)
-            this.entityManager = entityManager();
         OperationType merged = this.entityManager.merge(this);
         this.entityManager.flush();
         merged.getId();
@@ -98,16 +90,12 @@ public class OperationType implements IdentityAware, PersistenceAware<OperationT
 
     @Transactional
     public void persist() {
-        if (this.entityManager == null)
-            this.entityManager = entityManager();
         this.entityManager.persist(this);
         getId();
     }
 
     @Transactional
     public void remove() {
-        if (this.entityManager == null)
-            this.entityManager = entityManager();
         if (this.entityManager.contains(this)) {
             this.entityManager.remove(this);
         } else {
@@ -139,13 +127,5 @@ public class OperationType implements IdentityAware, PersistenceAware<OperationT
         sb.append("Name: ").append(getName()).append(", ");
         sb.append("ResourceType: ").append(getResourceType());
         return sb.toString();
-    }
-
-    public static final EntityManager entityManager() {
-        EntityManager em = new OperationType().entityManager;
-        if (em == null)
-            throw new IllegalStateException(
-                "Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)");
-        return em;
     }
 }

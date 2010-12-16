@@ -2,7 +2,6 @@ package org.hyperic.hq.inventory.domain;
 
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -18,7 +17,6 @@ import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.reference.RelationshipDirection;
@@ -35,7 +33,6 @@ import org.springframework.datastore.graph.annotation.GraphProperty;
 import org.springframework.datastore.graph.annotation.NodeEntity;
 import org.springframework.datastore.graph.annotation.RelatedTo;
 import org.springframework.datastore.graph.api.Direction;
-import org.springframework.datastore.graph.neo4j.finder.FinderFactory;
 import org.springframework.datastore.graph.neo4j.support.GraphDatabaseContext;
 import org.springframework.datastore.graph.neo4j.support.SubReferenceNodeTypeStrategy;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Entity
 @Configurable
 @NodeEntity(partial = true)
-@JsonIgnoreProperties(ignoreUnknown = true, value = {"underlyingState", "stateAccessors"})
+@JsonIgnoreProperties(ignoreUnknown = true, value = { "underlyingState", "stateAccessors" })
 public class ResourceType implements IdentityAware, RelationshipAware<ResourceType> {
 
     @PersistenceContext
@@ -53,8 +50,8 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
     private transient GraphDatabaseContext graphDatabaseContext;
 
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1") 
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "id")
     private Integer id;
 
@@ -63,7 +60,7 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
     @GraphProperty
     @Transient
     private String name;
-    
+
     @GraphProperty
     @Transient
     private String description;
@@ -106,8 +103,6 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
 
     @Transactional
     public void flush() {
-        if (this.entityManager == null)
-            this.entityManager = entityManager();
         this.entityManager.flush();
     }
 
@@ -146,103 +141,106 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
     }
 
     @SuppressWarnings("unchecked")
-    public Set<Relationship<ResourceType>> getRelationships(ResourceType entity, String name, RelationshipDirection direction) {
-    	Set<Relationship<ResourceType>> relations = new HashSet<Relationship<ResourceType>>();
-    	Iterable<org.neo4j.graphdb.Relationship> relationships;
-    	org.neo4j.graphdb.Direction neo4jDirection = null;
-    	
-    	switch (direction) {
-    		case BOTH_WAYS:
-    			neo4jDirection = org.neo4j.graphdb.Direction.BOTH;
-    			break;
-    		case INCOMING:
-    			neo4jDirection = org.neo4j.graphdb.Direction.INCOMING;
-    			break;
-    		case OUTGOING:
-    			neo4jDirection = org.neo4j.graphdb.Direction.OUTGOING;
-    			break;
-    	}
+    public Set<Relationship<ResourceType>> getRelationships(ResourceType entity, String name,
+                                                            RelationshipDirection direction) {
+        Set<Relationship<ResourceType>> relations = new HashSet<Relationship<ResourceType>>();
+        Iterable<org.neo4j.graphdb.Relationship> relationships;
+        org.neo4j.graphdb.Direction neo4jDirection = null;
 
-    	if (name != null) {
-    		if (neo4jDirection != null) {
-    			relationships = getUnderlyingState().getRelationships(DynamicRelationshipType.withName(name), neo4jDirection);
-    		} else {
-    			relationships = getUnderlyingState().getRelationships(DynamicRelationshipType.withName(name));
-    		}
-    	} else {
-    		if (neo4jDirection != null) {
-    			relationships = getUnderlyingState().getRelationships(neo4jDirection);
-    		} else {
-    			relationships = getUnderlyingState().getRelationships();
-    		}
-    	}
+        switch (direction) {
+            case BOTH_WAYS:
+                neo4jDirection = org.neo4j.graphdb.Direction.BOTH;
+                break;
+            case INCOMING:
+                neo4jDirection = org.neo4j.graphdb.Direction.INCOMING;
+                break;
+            case OUTGOING:
+                neo4jDirection = org.neo4j.graphdb.Direction.OUTGOING;
+                break;
+        }
 
-    	for (org.neo4j.graphdb.Relationship relationship : relationships) {
-    		// Don't include Neo4J relationship b/w Node and its Java type
+        if (name != null) {
+            if (neo4jDirection != null) {
+                relationships = getUnderlyingState().getRelationships(
+                    DynamicRelationshipType.withName(name), neo4jDirection);
+            } else {
+                relationships = getUnderlyingState().getRelationships(
+                    DynamicRelationshipType.withName(name));
+            }
+        } else {
+            if (neo4jDirection != null) {
+                relationships = getUnderlyingState().getRelationships(neo4jDirection);
+            } else {
+                relationships = getUnderlyingState().getRelationships();
+            }
+        }
+
+        for (org.neo4j.graphdb.Relationship relationship : relationships) {
+            // Don't include Neo4J relationship b/w Node and its Java type
             if (!relationship.isType(SubReferenceNodeTypeStrategy.INSTANCE_OF_RELATIONSHIP_TYPE)) {
-            	Node node = relationship.getOtherNode(getUnderlyingState());
-            	Class<?> otherEndType = graphDatabaseContext.getJavaType(node);
+                Node node = relationship.getOtherNode(getUnderlyingState());
+                Class<?> otherEndType = graphDatabaseContext.getJavaType(node);
 
-            	if (Resource.class.isAssignableFrom(otherEndType)) {
-            		if (entity == null || node.equals(entity.getUnderlyingState())) {
-            			relations.add(graphDatabaseContext.createEntityFromState(relationship, Relationship.class));
-            		}
+                if (Resource.class.isAssignableFrom(otherEndType)) {
+                    if (entity == null || node.equals(entity.getUnderlyingState())) {
+                        relations.add(graphDatabaseContext.createEntityFromState(relationship,
+                            Relationship.class));
+                    }
                 }
             }
         }
 
-    	return relations;
-	}
+        return relations;
+    }
 
-	public boolean isRelatedTo(ResourceType entity, String name) {
-		Traverser relationTraverser = getUnderlyingState().traverse(Traverser.Order.BREADTH_FIRST,
-	            new StopEvaluator() {
+    public boolean isRelatedTo(ResourceType entity, String name) {
+        Traverser relationTraverser = getUnderlyingState().traverse(Traverser.Order.BREADTH_FIRST,
+            new StopEvaluator() {
 
-	                public boolean isStopNode(TraversalPosition currentPos) {
-	                    return currentPos.depth() >= 1;
-	                }
-	            }, 
-	            ReturnableEvaluator.ALL_BUT_START_NODE,
-	            DynamicRelationshipType.withName(name), 
-	            org.neo4j.graphdb.Direction.OUTGOING);
-		for (Node related : relationTraverser) {
-			if (related.equals(entity.getUnderlyingState())) {
-				return true;
-			}
-		}
-	    
-		return false;
-	}
+                public boolean isStopNode(TraversalPosition currentPos) {
+                    return currentPos.depth() >= 1;
+                }
+            }, ReturnableEvaluator.ALL_BUT_START_NODE, DynamicRelationshipType.withName(name),
+            org.neo4j.graphdb.Direction.OUTGOING);
+        for (Node related : relationTraverser) {
+            if (related.equals(entity.getUnderlyingState())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     @SuppressWarnings("unchecked")
     @Transactional
-	public Relationship<ResourceType> relateTo(ResourceType entity, String relationName) {
+    public Relationship<ResourceType> relateTo(ResourceType entity, String relationName) {
         return (Relationship<ResourceType>) this.relateTo(entity, Relationship.class, relationName);
     }
 
     @Transactional
-    public void removeRelationships(ResourceType entity, String name, RelationshipDirection direction) {
+    public void removeRelationships(ResourceType entity, String name,
+                                    RelationshipDirection direction) {
         // TODO getRelationships only does one direction
         for (Relationship<ResourceType> relation : getRelationships(entity, name, direction)) {
             relation.getUnderlyingState().delete();
         }
-	}
+    }
 
     public void removeRelationship(ResourceType entity, String relationName) {
         if (isRelatedTo(entity, relationName)) {
-        	removeRelationships(entity, relationName, RelationshipDirection.ALL);
+            removeRelationships(entity, relationName, RelationshipDirection.ALL);
         }
     }
 
     public void removeRelationships() {
-    	removeRelationships(null, null, RelationshipDirection.ALL);
+        removeRelationships(null, null, RelationshipDirection.ALL);
     }
 
     public void removeRelationships(String relationName) {
-    	removeRelationships(null, relationName, RelationshipDirection.ALL);
+        removeRelationships(null, relationName, RelationshipDirection.ALL);
     }
 
-	public Set<Relationship<ResourceType>> getRelationships() {
+    public Set<Relationship<ResourceType>> getRelationships() {
         return getRelationships(null, null, RelationshipDirection.ALL);
     }
 
@@ -255,14 +253,14 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
     }
 
     public Relationship<ResourceType> getRelationshipTo(ResourceType entity, String relationName) {
-    	Set<Relationship<ResourceType>> relations = getRelationships(entity, relationName, null);
-    	Relationship<ResourceType> result = null;
-    	Iterator<Relationship<ResourceType>> i = relations.iterator();
-    	
-    	if (i.hasNext()) {
-    		result = i.next();
-    	}
-    	
+        Set<Relationship<ResourceType>> relations = getRelationships(entity, relationName, null);
+        Relationship<ResourceType> result = null;
+        Iterator<Relationship<ResourceType>> i = relations.iterator();
+
+        if (i.hasNext()) {
+            result = i.next();
+        }
+
         return result;
     }
 
@@ -272,8 +270,6 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
 
     @Transactional
     public ResourceType merge() {
-        if (this.entityManager == null)
-            this.entityManager = entityManager();
         ResourceType merged = this.entityManager.merge(this);
         this.entityManager.flush();
         merged.getId();
@@ -282,8 +278,6 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
 
     @Transactional
     public void persist() {
-        if (this.entityManager == null)
-            this.entityManager = entityManager();
         this.entityManager.persist(this);
         getId();
     }
@@ -294,8 +288,6 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
         removePropertyTypes();
         removeOperationTypes();
         removeConfigTypes();
-        if (this.entityManager == null)
-            this.entityManager = entityManager();
         if (this.entityManager.contains(this)) {
             this.entityManager.remove(this);
         } else {
@@ -343,7 +335,7 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
     public Set<Resource> getResources() {
         return resources;
     }
-    
+
     public String getDescription() {
         return description;
     }
@@ -365,8 +357,9 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
     }
 
     public ResourceType getResourceTypeFrom(String relationName) {
-        Set<ResourceType> resourceTypes = getRelatedResourceTypes(relationName, org.neo4j.graphdb.Direction.OUTGOING);
-        if(resourceTypes.isEmpty()) {
+        Set<ResourceType> resourceTypes = getRelatedResourceTypes(relationName,
+            org.neo4j.graphdb.Direction.OUTGOING);
+        if (resourceTypes.isEmpty()) {
             return null;
         }
         // TODO validate only one
@@ -374,8 +367,9 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
     }
 
     public ResourceType getResourceTypeTo(String relationName) {
-        Set<ResourceType> resourceTypes =getRelatedResourceTypes(relationName, org.neo4j.graphdb.Direction.INCOMING);
-        if(resourceTypes.isEmpty()) {
+        Set<ResourceType> resourceTypes = getRelatedResourceTypes(relationName,
+            org.neo4j.graphdb.Direction.INCOMING);
+        if (resourceTypes.isEmpty()) {
             return null;
         }
         // TODO validate only one
@@ -401,14 +395,6 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
         return resourceTypes;
     }
 
-    public static final EntityManager entityManager() {
-        EntityManager em = new ResourceType().entityManager;
-        if (em == null)
-            throw new IllegalStateException(
-                "Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)");
-        return em;
-    }
-    
     public void setPropertyTypes(Set<PropertyType> propertyTypes) {
         this.propertyTypes = propertyTypes;
     }
@@ -416,9 +402,9 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
     // TODO other config types and setters
     public Set<ConfigType> getMeasurementConfigTypes() {
         Set<ConfigType> configTypes = new HashSet<ConfigType>();
-        Iterable<org.neo4j.graphdb.Relationship> relationships = this.getUnderlyingState().getRelationships(
-            DynamicRelationshipType.withName(RelationshipTypes.HAS_CONFIG_TYPE),
-            org.neo4j.graphdb.Direction.OUTGOING);
+        Iterable<org.neo4j.graphdb.Relationship> relationships = this.getUnderlyingState()
+            .getRelationships(DynamicRelationshipType.withName(RelationshipTypes.HAS_CONFIG_TYPE),
+                org.neo4j.graphdb.Direction.OUTGOING);
         for (org.neo4j.graphdb.Relationship relationship : relationships) {
             if ("Measurement".equals(relationship.getProperty("configType"))) {
                 configTypes.add(graphDatabaseContext.createEntityFromState(
@@ -431,7 +417,7 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
     public Plugin getPlugin() {
         return plugin;
     }
-   
+
     public void setPlugin(Plugin plugin) {
         this.plugin = plugin;
     }
