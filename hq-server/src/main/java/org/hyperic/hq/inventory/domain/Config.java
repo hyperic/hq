@@ -27,9 +27,6 @@ public class Config {
     @PersistenceContext
     transient EntityManager entityManager;
 
-    @javax.annotation.Resource
-    transient FinderFactory finderFactory;
-
     @Id
     @GenericGenerator(name = "mygen1", strategy = "increment")  
     @GeneratedValue(generator = "mygen1") 
@@ -125,43 +122,11 @@ public class Config {
         this.version = version;
     }
 
-    public static int countConfigs() {
-        return entityManager().createQuery("select count(o) from Config o", Integer.class)
-            .getSingleResult();
-    }
-
     public static final EntityManager entityManager() {
         EntityManager em = new Config().entityManager;
         if (em == null)
             throw new IllegalStateException(
                 "Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)");
         return em;
-    }
-
-    public static List<Config> findAllConfigs() {
-        List<Config> configs = entityManager().createQuery("select o from Config o", Config.class).getResultList();
-        for(Config config: configs) {
-            config.getId();
-        }
-        return configs;
-    }
-
-    public static Config findById(Integer id) {
-        if (id == null)
-            return null;
-        Config config  = entityManager().find(Config.class, id);
-        if(config != null) {
-            config.getId();
-        }
-        return config;
-    }
-
-    public static List<Config> find(Integer firstResult, Integer maxResults) {
-        List<Config> configs = entityManager().createQuery("select o from Config o", Config.class)
-            .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
-        for(Config config: configs) {
-            config.getId();
-        }
-        return configs;
     }
 }

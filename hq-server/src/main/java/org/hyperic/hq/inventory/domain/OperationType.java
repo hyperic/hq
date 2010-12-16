@@ -30,12 +30,8 @@ import org.springframework.transaction.annotation.Transactional;
 @NodeEntity(partial = true)
 @JsonIgnoreProperties(ignoreUnknown = true, value = {"underlyingState", "stateAccessors"})
 public class OperationType implements IdentityAware, PersistenceAware<OperationType> {
-
     @PersistenceContext
     transient EntityManager entityManager;
-
-    @Resource
-    transient FinderFactory finderFactory;
 
     @Id
     @GenericGenerator(name = "mygen1", strategy = "increment")  
@@ -144,44 +140,11 @@ public class OperationType implements IdentityAware, PersistenceAware<OperationT
         return sb.toString();
     }
 
-    public static int countOperationTypes() {
-        return entityManager().createQuery("select count(o) from OperationType o", Integer.class)
-            .getSingleResult();
-    }
-
     public static final EntityManager entityManager() {
         EntityManager em = new OperationType().entityManager;
         if (em == null)
             throw new IllegalStateException(
                 "Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)");
         return em;
-    }
-
-    public static List<OperationType> findAllOperationTypes() {
-        List<OperationType> operationTypes = entityManager().createQuery("select o from OperationType o", OperationType.class)
-            .getResultList();
-        for(OperationType operationType : operationTypes) {
-            operationType.getId();
-        }
-        return operationTypes;
-    }
-
-    public static OperationType findById(Integer id) {
-        if (id == null)
-            return null;
-        OperationType operationType = entityManager().find(OperationType.class, id);
-        if(operationType != null) {
-            operationType.getId();
-        }
-        return operationType;
-    }
-
-    public static List<OperationType> find(Integer firstResult, Integer maxResults) {
-        List<OperationType> operationTypes = entityManager().createQuery("select o from OperationType o", OperationType.class)
-            .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
-        for(OperationType operationType : operationTypes) {
-            operationType.getId();
-        }
-        return operationTypes;
     }
 }
