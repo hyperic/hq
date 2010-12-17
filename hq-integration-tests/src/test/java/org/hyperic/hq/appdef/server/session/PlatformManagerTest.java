@@ -31,6 +31,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -41,8 +42,6 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
-import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
-import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
@@ -59,9 +58,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.annotation.DirtiesContext;
 
+
+
 /**
  * Integration test of the {@link PlatformManagerImpl}
  * @author iperumal
+ * @author jhickey
  * 
  */
 @DirtiesContext
@@ -146,14 +148,6 @@ public class PlatformManagerTest
     public void testFindPlatformTypeByNameNotFound() throws PlatformNotFoundException {
         platformManager.findPlatformTypeByName("Test");
     }
-
-    @Test
-    public void testFindSupportedPlatformTypes() {
-        List<PlatformType> supported = (List<PlatformType>) platformManager
-            .findSupportedPlatformTypes();
-        assertEquals("Support platform doesn't exist", supported.get(0), testPlatformType);
-    }
-
 
     public void testGetAllPlatformTypes() {
         fail("Not yet implemented");
@@ -254,6 +248,7 @@ public class PlatformManagerTest
         aiPlatform.setPlatformTypeName(testPlatformType.getName());
         aiPlatform.setAgentToken(agentToken);
         aiPlatform.setFqdn("Test Platform Creation");
+        aiPlatform.setName("Test Platform Creation");
         try {
             platformManager.createPlatform(authzSubjectManager.getOverlordPojo(), aiPlatform);
         } catch (ApplicationException e) {
@@ -274,17 +269,17 @@ public class PlatformManagerTest
         assertEquals(platform.getCpuCount(), new Integer(2));
     }
 
-    @Test(expected = AppdefDuplicateNameException.class)
+    @Test(expected = NonUniqueObjectException.class)
     public void testCreatePlatformDuplicateName() throws ApplicationException {
         createPlatform(testAgent.getAgentToken(), testPlatformType.getName(),"Test Platform CreationByPlatformType","Test Platform ByPlatformType",2);
         createPlatform(testAgent.getAgentToken(), testPlatformType.getName(),"Test Platform CreationByPlatformType","Test Platform ByPlatformType",2);
     }
 
-    @Test(expected = AppdefDuplicateFQDNException.class)
-    public void testCreatePlatformDuplicateFQDN() throws ApplicationException {
-        createPlatform(testAgent.getAgentToken(), testPlatformType.getName(),"Test Platform CreationByPlatformType","Test Platform ByPlatformType",2);
-        createPlatform(testAgent.getAgentToken(), testPlatformType.getName(),"Test Platform CreationByPlatformType","Test Platform ByPlatformType1",2);
-    }
+//    @Test(expected = AppdefDuplicateFQDNException.class)
+//    public void testCreatePlatformDuplicateFQDN() throws ApplicationException {
+//        createPlatform(testAgent.getAgentToken(), testPlatformType.getName(),"Test Platform CreationByPlatformType","Test Platform ByPlatformType",2);
+//        createPlatform(testAgent.getAgentToken(), testPlatformType.getName(),"Test Platform CreationByPlatformType","Test Platform ByPlatformType1",2);
+//    }
 
     @Test
     public void testGetAllPlatforms() throws ApplicationException, NotFoundException {
@@ -299,13 +294,17 @@ public class PlatformManagerTest
         int i = 1;
         for (Platform p : testPlatforms) {
             // Set Platforms creation time 20 minutes before the current time.
-            p.setCreationTime(setTime - 20 * 60000l);
+            p.getResource().setProperty(PlatformManagerImpl.CREATION_TIME,setTime - 20 * 60000l);
+            p.getResource().merge();
             i++;
         }
         // Change two of the platform's creation time to recent
-        testPlatforms.get(0).setCreationTime(setTime);
-        testPlatforms.get(1).setCreationTime(setTime - 2 * 60000l);
-        testPlatforms.get(2).setCreationTime(setTime - 3 * 60000l);
+        testPlatforms.get(0).getResource().setProperty(PlatformManagerImpl.CREATION_TIME,setTime);
+        testPlatforms.get(0).getResource().merge();
+        testPlatforms.get(1).getResource().setProperty(PlatformManagerImpl.CREATION_TIME,setTime - 2 * 60000l);
+        testPlatforms.get(1).getResource().merge();
+        testPlatforms.get(2).getResource().setProperty(PlatformManagerImpl.CREATION_TIME,setTime - 3 * 60000l);
+        testPlatforms.get(2).getResource().merge();
         PageList<PlatformValue> pValues = platformManager.getRecentPlatforms(authzSubjectManager
             .getOverlordPojo(), 5 * 60000l, 10);
         assertEquals(3, pValues.size());
@@ -396,9 +395,9 @@ public class PlatformManagerTest
 
     @Test
     public void testGetPlatformPksByAgentToken() throws ApplicationException {
-        List<Integer> platformPKs = (List<Integer>) platformManager.getPlatformPksByAgentToken(
+        Collection<Integer> platformPKs = platformManager.getPlatformPksByAgentToken(
             authzSubjectManager.getOverlordPojo(), "agentToken123");
-        List<Integer> testPlatformPKs = new ArrayList<Integer>();
+        Set<Integer> testPlatformPKs = new HashSet<Integer>();
         for (Platform platform : testPlatforms) {
             testPlatformPKs.add(platform.getId());
         }
@@ -515,18 +514,25 @@ public class PlatformManagerTest
         assertEquals(testPlatform.getPlatformValue(), pValues.get(0));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testGetPlatformIdsByType() throws ApplicationException {
         Integer[] platformIds = platformManager.getPlatformIds(authzSubjectManager
             .getOverlordPojo(), testPlatform.getPlatformType().getId());
-        assertEquals(platformIds[0], testPlatform.getId());
+        
+        Set<Integer> expectedIds = new HashSet<Integer>();
+        expectedIds.add(testPlatform.getId());
+        //platformIds is an Array, but not guaranteed to be ordered
+        assertEquals(expectedIds,new HashSet<Integer>(Arrays.asList(platformIds)));
     }
 
     @Test
     public void testGetPlatformsByType() throws ApplicationException {
-        List<Platform> platforms = platformManager.getPlatformsByType(authzSubjectManager
+        Collection<Platform> platforms = platformManager.getPlatformsByType(authzSubjectManager
             .getOverlordPojo(), testPlatform.getPlatformType().getName());
-        assertEquals(platforms.get(0), testPlatform);
+        Set<Platform> expectedPlats = new HashSet<Platform>();
+        expectedPlats.add(testPlatform);
+        assertEquals(expectedPlats, platforms);
     } 
 
     // TODO:
@@ -542,11 +548,9 @@ public class PlatformManagerTest
     @Test
     public void testCreatePlatformType() throws NotFoundException {
         String platformTypeName = "platformType";
-        String plugin = "Test PlatformType Plugin";
-        PlatformType pType = platformManager.createPlatformType(platformTypeName, plugin);
+        PlatformType pType = platformManager.createPlatformType(platformTypeName, BaseInfrastructureTest.TEST_PLUGIN_NAME);
         assertEquals(pType.getName(), platformTypeName);
-        assertEquals(pType.getPlugin(), plugin);
-        
+        assertEquals(pType.getPlugin(), BaseInfrastructureTest.TEST_PLUGIN_NAME);
         assertEquals(resourceManager.findResourceTypeById(pType.getId()).getName(), platformTypeName);
     }
 
@@ -561,9 +565,9 @@ public class PlatformManagerTest
         aiPlatform.setName("Updated PlatformName");
         aiPlatform.setCpuCount(4);
         platformManager.updateWithAI(aiPlatform, authzSubjectManager.getOverlordPojo());
-        assertEquals(testPlatform.getName(), "Updated PlatformName");
-        assertEquals(testPlatform.getResource().getName(), "Updated PlatformName");
-        assertEquals(testPlatform.getCpuCount().intValue(), 4);
+        Platform updatedPlatform = platformManager.findPlatformById(testPlatform.getId());
+        assertEquals(updatedPlatform.getName(), "Updated PlatformName");
+        assertEquals(updatedPlatform.getCpuCount().intValue(), 4);
     }
 
     // TODO
@@ -644,19 +648,20 @@ public class PlatformManagerTest
 
     @Test
     public void testGetPlatformTypeCounts() {
-
         List<Object[]> counts = platformManager.getPlatformTypeCounts();
         List<Object[]> actuals = new ArrayList<Object[]>(10);
         // Add the Linux testPlatformType as the result is sorted
-        actuals.add(0, new Object[] { testPlatformTypes.get(9).getName(), Long.valueOf("1") });
-        for (int i = 1; i <= 9; i++) {
+        actuals.add(0, new Object[] { testPlatformTypes.get(9).getName(),1l});
+        actuals.add(1, new Object[] {"PluginTestPlatform",0l});
+        for (int i = 2; i <= 10; i++) {
             // Add platform Type name and count (here count is always 1)
             actuals.add(i,
-                new Object[] { testPlatformTypes.get(i - 1).getName(), Long.valueOf("1") });
+                new Object[] { testPlatformTypes.get(i - 2).getName(),1l });
         }
-        for (int i = 0; i <= 9; i++) {
-            assertEquals((String) counts.get(i)[0], ((String) actuals.get(i)[0]));
-            assertEquals((Long) counts.get(i)[1], ((Long) actuals.get(i)[1]));
+        for (int i = 0; i <= 10; i++) {
+            String platformName = (String)actuals.get(i)[0];
+            assertEquals(platformName,(String) counts.get(i)[0]);
+            assertEquals(((Long) actuals.get(i)[1]),(Long) counts.get(i)[1]);
         }
     }
 

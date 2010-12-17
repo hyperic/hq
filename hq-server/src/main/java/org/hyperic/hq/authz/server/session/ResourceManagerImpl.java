@@ -238,7 +238,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     public void setResourceOwner(AuthzSubject whoami, Resource resource, AuthzSubject newOwner)
         throws PermissionException {
         PermissionManager pm = PermissionManagerFactory.getInstance();
-
+        //TODO set modified by
         if (pm.hasAdminPermission(whoami.getId()) || resource.isOwner(whoami.getId())) {
             resource.setOwner(newOwner);
             resource.merge();

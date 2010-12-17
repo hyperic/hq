@@ -3676,7 +3676,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         final AuthzSubject subject = sessionManager.getSubject(sessionId);
 
         PlatformType pt = platformManager.findPlatformType(platTypeId);
-        List<Platform> platforms = platformManager.getPlatformsByType(subject, pt.getName());
+        Collection<Platform> platforms = platformManager.getPlatformsByType(subject, pt.getName());
 
         // Need list of AppdefEntityValues
         PageList<AppdefEntityValue> aevs = new PageList<AppdefEntityValue>();

@@ -30,10 +30,9 @@ public class ResourceDaoImpl implements ResourceDao {
         return result;
     }
 
-    @SuppressWarnings("unchecked")
     @Transactional(readOnly = true)
 	public List<Resource> findAll() {
-    	List<Resource> result = entityManager.createQuery("select o from Resource o").getResultList();
+    	List<Resource> result = entityManager.createQuery("select o from Resource o",Resource.class).getResultList();
     	
         // TODO workaround to trigger Neo4jNodeBacking's around advice for the getter
         for (Resource resource : result) {
@@ -42,11 +41,10 @@ public class ResourceDaoImpl implements ResourceDao {
         
         return result;
     }
-
-	@SuppressWarnings("unchecked")
+    
     @Transactional(readOnly = true)
     public List<Resource> find(Integer firstResult, Integer maxResults) {
-        List<Resource> result = entityManager.createQuery("select o from Resource o")
+        List<Resource> result = entityManager.createQuery("select o from Resource o",Resource.class)
         	.setFirstResult(firstResult)
         	.setMaxResults(maxResults)
         	.getResultList();
@@ -63,13 +61,7 @@ public class ResourceDaoImpl implements ResourceDao {
 	public Long count() {
         return (Long) entityManager.createQuery("select count(o) from Resource o").getSingleResult();
     }
-    
-    @Transactional(readOnly = true)
-	public List<Resource> findByCTime(Long ctime) {
-        // TODO impl?
-        return null;
-    }
-    
+      
     @Transactional(readOnly = true)
 	public List<Resource> findByOwner(AuthzSubject owner) {
         // TODO best way to implement cutting across to AuthzSubject

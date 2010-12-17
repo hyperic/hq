@@ -69,10 +69,6 @@ public interface PlatformManager {
      */
     public PlatformType findPlatformTypeByName(String type) throws PlatformNotFoundException;
 
-
-    public Collection<PlatformType> findSupportedPlatformTypes();
-
-
     /**
      * Find all platform types
      * @return List of PlatformTypeValues
@@ -243,8 +239,7 @@ public interface PlatformManager {
     /**
      * Get server IDs by server type and platform.
      * @param subject The subject trying to list servers.
-     * @return A PageList of ServerValue objects representing servers on the
-     *         specified platform that the subject is allowed to view.
+     * @return A Collecction of IDs
      */
     public Integer[] getPlatformIds(AuthzSubject subject, Integer platTypeId)
         throws PermissionException;
@@ -296,7 +291,8 @@ public interface PlatformManager {
 
     public Number getPlatformCount();
     
-    List<Platform> getPlatformsByType(AuthzSubject subject,String platformTypeName);
+    Collection<Platform> getPlatformsByType(AuthzSubject subject,String platformTypeName) throws PermissionException, 
+        InvalidAppdefTypeException;
     
     ResourceTree getEntitiesForAgent(AuthzSubject subject, Agent agt)
         throws AgentNotFoundException, PermissionException;
