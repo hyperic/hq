@@ -597,10 +597,10 @@ public class PlatformManagerTest
     }
 
     @Test
-    public void testAddIp() {
+    public void testAddIp() throws PlatformNotFoundException {
         platformManager.addIp(testPlatform, "127.0.0.1", "255:255:255:0", "12:34:G0:93:58:96");
         platformManager.addIp(testPlatform, "192.168.1.2", "255:255:0:0", "91:34:45:93:67:96");
-        Collection<Ip> ips = testPlatform.getIps();
+        Collection<Ip> ips = platformManager.findPlatformById(testPlatform.getId()).getIps();
         assertEquals(ips.size(), 2);
         for (Ip ip : ips) {
             if (ip.getAddress().equals("192.168.1.2")) {
@@ -615,16 +615,16 @@ public class PlatformManagerTest
     }
 
     @Test
-    public void testUpdateIp() {
+    public void testUpdateIp() throws PlatformNotFoundException {
         platformManager.addIp(testPlatform, "127.0.0.1", "255:255:255:0", "12:34:G0:93:58:96");
-        Collection<Ip> ips = testPlatform.getIps();
+        Collection<Ip> ips = platformManager.findPlatformById(testPlatform.getId()).getIps();
         for (Ip ip : ips) {
             assertEquals(ip.getAddress(), "127.0.0.1");
             assertEquals(ip.getMacAddress(), "12:34:G0:93:58:96");
             assertEquals(ip.getNetmask(), "255:255:255:0");
         }
         platformManager.updateIp(testPlatform, "127.0.0.1", "255:255:0:0", "91:34:45:93:67:96");
-        ips = testPlatform.getIps();
+        ips = platformManager.findPlatformById(testPlatform.getId()).getIps();
         for (Ip ip : ips) {
             assertEquals(ip.getAddress(), "127.0.0.1");
             assertEquals(ip.getMacAddress(), "91:34:45:93:67:96");
@@ -633,11 +633,11 @@ public class PlatformManagerTest
     }
 
     @Test
-    public void testRemoveIp() {
+    public void testRemoveIp() throws PlatformNotFoundException {
         platformManager.addIp(testPlatform, "127.0.0.1", "255:255:255:0", "12:34:G0:93:58:96");
         platformManager.addIp(testPlatform, "192.168.1.2", "255:255:0:0", "91:34:45:93:67:96");
         platformManager.removeIp(testPlatform, "192.168.1.2", "255:255:0:0", "91:34:45:93:67:96");
-        Collection<Ip> ips = testPlatform.getIps();
+        Collection<Ip> ips = platformManager.findPlatformById(testPlatform.getId()).getIps();
         assertEquals(ips.size(), 1);
         for (Ip ip : ips) {
             assertEquals(ip.getAddress(), "127.0.0.1");

@@ -25,6 +25,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.inventory.InvalidRelationshipException;
+import org.hyperic.hq.reference.ConfigType;
 import org.hyperic.hq.reference.RelationshipDirection;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.DynamicRelationshipType;
@@ -120,15 +121,15 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     }
 
     public Config getAutoInventoryConfig() {
-        return getConfig("AutoInventory");
+        return getConfig(ConfigType.AUTOINVENTORY);
     }
 
-    private Config getConfig(String type) {
+    private Config getConfig(ConfigType type) {
         Iterable<org.neo4j.graphdb.Relationship> relationships = this.getUnderlyingState()
             .getRelationships(DynamicRelationshipType.withName(RelationshipTypes.HAS_CONFIG),
                 org.neo4j.graphdb.Direction.OUTGOING);
         for (org.neo4j.graphdb.Relationship relationship : relationships) {
-            if (type.equals(relationship.getProperty("configType"))) {
+            if (type.toString().equals(relationship.getProperty("configType"))) {
                 // TODO enforce no more than one?
                 return graphDatabaseContext.createEntityFromState(
                     relationship.getOtherNode(getUnderlyingState()), Config.class);
@@ -138,7 +139,7 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     }
 
     public Config getControlConfig() {
-        return getConfig("Control");
+        return getConfig(ConfigType.CONTROL);
     }
 
     public String getDescription() {
@@ -154,7 +155,7 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     }
 
     public Config getMeasurementConfig() {
-        return getConfig("Measurement");
+        return getConfig(ConfigType.MEASUREMENT);
     }
 
     public String getModifiedBy() {
@@ -170,7 +171,7 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     }
 
     public Config getProductConfig() {
-        return getConfig("Product");
+        return getConfig(ConfigType.PRODUCT);
     }
 
     public Map<String, Object> getProperties() {
@@ -369,10 +370,6 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
         return resources.iterator().next();
     }
 
-    public Config getResponseTimeConfig() {
-        return getConfig("ResponseTime");
-    }
-
     public ResourceType getType() {
         return type;
     }
@@ -408,6 +405,10 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     @Transactional
     public void remove() {
         removeConfig();
+        for(org.neo4j.graphdb.Relationship relationship: getUnderlyingState().getRelationships()) {
+            relationship.delete();
+        }
+        getUnderlyingState().delete();
         if (this.entityManager.contains(this)) {
             this.entityManager.remove(this);
         } else {
@@ -417,11 +418,22 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     }
 
     private void removeConfig() {
-        getMeasurementConfig().remove();
-        getProductConfig().remove();
-        getAutoInventoryConfig().remove();
-        getControlConfig().remove();
-        getResponseTimeConfig().remove();
+        Config measurementConfig = getMeasurementConfig();
+        if(measurementConfig != null) {
+            measurementConfig.remove();
+        }
+        Config productConfig = getProductConfig();
+        if(productConfig != null) {
+            productConfig.remove();
+        }
+        Config aiConfig = getAutoInventoryConfig();
+        if(aiConfig != null) {
+            aiConfig.remove();
+        }
+        Config controlConfig = getControlConfig();
+        if(controlConfig != null) {
+            controlConfig.remove();
+        }
     }
 
     public void removeProperties() {
@@ -434,11 +446,11 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
         this.agent = agent;
     }
 
-    private void setConfig(Config config, String type) {
+    private void setConfig(Config config, ConfigType type) {
         org.neo4j.graphdb.Relationship rel = this.getUnderlyingState().createRelationshipTo(
             config.getUnderlyingState(),
             DynamicRelationshipType.withName(RelationshipTypes.HAS_CONFIG));
-        rel.setProperty("configType", type);
+        rel.setProperty("configType", type.toString());
     }
 
     public void setConfigUserManaged(boolean userManaged) {
@@ -455,7 +467,7 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     }
 
     public void setControlConfig(Config config) {
-        setConfig(config, "Control");
+        setConfig(config, ConfigType.CONTROL);
     }
 
     public void setDescription(String description) {
@@ -471,7 +483,7 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     }
 
     public void setMeasurementConfig(Config config) {
-        setConfig(config, "Measurement");
+        setConfig(config, ConfigType.MEASUREMENT);
     }
 
     public void setModifiedBy(String modifiedBy) {
@@ -487,7 +499,7 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     }
 
     public void setProductConfig(Config config) {
-        setConfig(config, "Product");
+        setConfig(config, ConfigType.PRODUCT);
     }
 
     public Object setProperty(String key, Object value) {
@@ -512,10 +524,6 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
         }
         getUnderlyingState().setProperty(key, value);
         return oldValue;
-    }
-
-    public void setResponseTimeConfig(Config config) {
-        setConfig(config, "ResponseTime");
     }
 
     public void setType(ResourceType type) {

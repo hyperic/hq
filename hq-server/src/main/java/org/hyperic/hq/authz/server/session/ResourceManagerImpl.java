@@ -29,10 +29,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -45,6 +48,7 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.inventory.dao.ResourceDao;
 import org.hyperic.hq.inventory.dao.ResourceTypeDao;
+import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Relationship;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
@@ -533,6 +537,37 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     @Transactional(readOnly=true)
     public Resource findResourceByName(String name) {
        return resourceDao.findByName(name);
+    }
+    
+    @PostConstruct
+    public void initializeResourceTypes() {
+        //TODO Is this the place for this?
+        if(resourceTypeDao.findRoot() == null) {
+            ResourceType system=new ResourceType();
+            system.setName("System");
+            system.persist();
+            Resource root = new Resource();
+            root.setName("Root");
+            root.persist();
+            root.setType(system);
+        }
+        int[] groupTypes = AppdefEntityConstants.getAppdefGroupTypes();
+        for(int i=0;i< groupTypes.length;i++) {
+            if(resourceTypeDao.findByName(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i])) == null) {
+                ResourceType groupType = new ResourceType();
+                groupType.setName(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i]));
+                groupType.persist();
+                if(groupTypes[i] == AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP) {
+                    Set<PropertyType> appPropTypes = new HashSet<PropertyType>();
+                    PropertyType propType = new PropertyType();
+                    propType.setName("applicationType");
+                    propType.setDescription("applicationType");
+                    propType.persist();
+                    appPropTypes.add(propType);
+                    groupType.setPropertyTypes(appPropTypes);
+                }
+            }
+        }
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
