@@ -13,8 +13,16 @@ import javax.persistence.Version;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.hibernate.annotations.GenericGenerator;
+import org.hyperic.hq.reference.RelationshipTypes;
+import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.ReturnableEvaluator;
+import org.neo4j.graphdb.StopEvaluator;
+import org.neo4j.graphdb.TraversalPosition;
+import org.neo4j.graphdb.Traverser;
 import org.springframework.datastore.graph.annotation.NodeEntity;
+import org.springframework.datastore.graph.api.Direction;
+import org.springframework.datastore.graph.neo4j.support.GraphDatabaseContext;
 import org.springframework.transaction.annotation.Transactional;
 
 @Entity
@@ -24,6 +32,9 @@ public class Config {
 
     @PersistenceContext
     transient EntityManager entityManager;
+    
+    @javax.annotation.Resource
+    private transient GraphDatabaseContext graphDatabaseContext;
 
     @Id
     @GenericGenerator(name = "mygen1", strategy = "increment")
@@ -34,7 +45,8 @@ public class Config {
     @Version
     @Column(name = "version")
     private Integer version;
-
+    
+    
     public Config() {
     }
 
@@ -89,6 +101,10 @@ public class Config {
 
     @Transactional
     public void remove() {
+        for(org.neo4j.graphdb.Relationship relationship: getUnderlyingState().getRelationships()) {
+            relationship.delete();
+        }
+        getUnderlyingState().delete();
         if (this.entityManager.contains(this)) {
             this.entityManager.remove(this);
         } else {
@@ -102,10 +118,34 @@ public class Config {
     }
 
     public void setValue(String key, Object value) {
-        // TODO type validation?
-
-        // TODO check other stuff?
+        if (value == null) {
+            // TODO log a warning?
+            // Neo4J doesn't accept null values
+            return;
+        }
+        if (!(isAllowableConfigValue(key, value))) {
+            throw new IllegalArgumentException("Config option " + key +
+                                               " is not defined");
+        }
         getUnderlyingState().setProperty(key, value);
+    }
+    
+    private boolean isAllowableConfigValue(String key, Object value) {
+        Traverser relationTraverser = getUnderlyingState().traverse(Traverser.Order.BREADTH_FIRST,
+            new StopEvaluator() {
+                public boolean isStopNode(TraversalPosition currentPos) {
+                    return currentPos.depth() >= 1;
+                }
+            }, ReturnableEvaluator.ALL_BUT_START_NODE,
+            DynamicRelationshipType.withName(RelationshipTypes.ALLOWS_CONFIG_OPTS), Direction.OUTGOING);
+        for (Node related : relationTraverser) {
+            ConfigOptionType optionType = graphDatabaseContext.createEntityFromState(related, ConfigOptionType.class);
+            if(optionType.getName().equals(key)) {
+                //TODO check more than just option name?
+                return true;
+            }
+        }
+        return false;
     }
 
     public void setVersion(Integer version) {

@@ -128,6 +128,10 @@ public class PropertyType implements IdentityAware, PersistenceAware<PropertyTyp
 
     @Transactional
     public void remove() {
+        for(org.neo4j.graphdb.Relationship relationship: getUnderlyingState().getRelationships()) {
+            relationship.delete();
+        }
+        getUnderlyingState().delete();
         if (this.entityManager.contains(this)) {
             this.entityManager.remove(this);
         } else {

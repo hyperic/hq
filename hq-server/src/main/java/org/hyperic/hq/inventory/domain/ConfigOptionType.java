@@ -31,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Configurable
 @NodeEntity
 @JsonIgnoreProperties(ignoreUnknown = true, value = { "underlyingState", "stateAccessors" })
-public class ConfigType implements IdentityAware, PersistenceAware<ConfigType> {
+public class ConfigOptionType implements IdentityAware, PersistenceAware<ConfigOptionType> {
     @PersistenceContext
     transient EntityManager entityManager;
 
@@ -50,10 +50,10 @@ public class ConfigType implements IdentityAware, PersistenceAware<ConfigType> {
     @Column(name = "version")
     private Integer version;
 
-    public ConfigType() {
+    public ConfigOptionType() {
     }
 
-    public ConfigType(Node n) {
+    public ConfigOptionType(Node n) {
         setUnderlyingState(n);
     }
 
@@ -75,8 +75,8 @@ public class ConfigType implements IdentityAware, PersistenceAware<ConfigType> {
     }
 
     @Transactional
-    public ConfigType merge() {
-        ConfigType merged = this.entityManager.merge(this);
+    public ConfigOptionType merge() {
+        ConfigOptionType merged = this.entityManager.merge(this);
         this.entityManager.flush();
         merged.getId();
         return merged;
@@ -90,10 +90,14 @@ public class ConfigType implements IdentityAware, PersistenceAware<ConfigType> {
 
     @Transactional
     public void remove() {
+        for(org.neo4j.graphdb.Relationship relationship: getUnderlyingState().getRelationships()) {
+            relationship.delete();
+        }
+        getUnderlyingState().delete();
         if (this.entityManager.contains(this)) {
             this.entityManager.remove(this);
         } else {
-            ConfigType attached = this.entityManager.find(this.getClass(), this.id);
+            ConfigOptionType attached = this.entityManager.find(this.getClass(), this.id);
             this.entityManager.remove(attached);
         }
     }

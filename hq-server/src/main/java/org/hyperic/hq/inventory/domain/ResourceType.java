@@ -19,6 +19,7 @@ import javax.validation.constraints.NotNull;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.product.Plugin;
+import org.hyperic.hq.reference.ConfigType;
 import org.hyperic.hq.reference.RelationshipDirection;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.DynamicRelationshipType;
@@ -75,10 +76,10 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
     @Transient
     private Set<PropertyType> propertyTypes;
 
-    @RelatedTo(type = RelationshipTypes.HAS_CONFIG_TYPE, direction = Direction.OUTGOING, elementClass = ConfigType.class)
+    @RelatedTo(type = RelationshipTypes.HAS_CONFIG_OPT_TYPE, direction = Direction.OUTGOING, elementClass = ConfigOptionType.class)
     @OneToMany
     @Transient
-    private Set<ConfigType> configTypes;
+    private Set<ConfigOptionType> configTypes;
 
     @Transient
     @ManyToOne
@@ -288,6 +289,10 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
         removePropertyTypes();
         removeOperationTypes();
         removeConfigTypes();
+        for(org.neo4j.graphdb.Relationship relationship: getUnderlyingState().getRelationships()) {
+            relationship.delete();
+        }
+        getUnderlyingState().delete();
         if (this.entityManager.contains(this)) {
             this.entityManager.remove(this);
         } else {
@@ -315,7 +320,7 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
     }
 
     private void removeConfigTypes() {
-        for (ConfigType configType : configTypes) {
+        for (ConfigOptionType configType : configTypes) {
             configType.remove();
         }
     }
@@ -400,15 +405,15 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
     }
 
     // TODO other config types and setters
-    public Set<ConfigType> getMeasurementConfigTypes() {
-        Set<ConfigType> configTypes = new HashSet<ConfigType>();
+    public Set<ConfigOptionType> getMeasurementConfigTypes() {
+        Set<ConfigOptionType> configTypes = new HashSet<ConfigOptionType>();
         Iterable<org.neo4j.graphdb.Relationship> relationships = this.getUnderlyingState()
-            .getRelationships(DynamicRelationshipType.withName(RelationshipTypes.HAS_CONFIG_TYPE),
+            .getRelationships(DynamicRelationshipType.withName(RelationshipTypes.HAS_CONFIG_OPT_TYPE),
                 org.neo4j.graphdb.Direction.OUTGOING);
         for (org.neo4j.graphdb.Relationship relationship : relationships) {
-            if ("Measurement".equals(relationship.getProperty("configType"))) {
+            if (ConfigType.MEASUREMENT.toString().equals(relationship.getProperty("configType"))) {
                 configTypes.add(graphDatabaseContext.createEntityFromState(
-                    relationship.getOtherNode(getUnderlyingState()), ConfigType.class));
+                    relationship.getOtherNode(getUnderlyingState()), ConfigOptionType.class));
             }
         }
         return configTypes;

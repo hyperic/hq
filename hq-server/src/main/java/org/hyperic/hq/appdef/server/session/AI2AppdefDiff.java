@@ -404,8 +404,7 @@ public class AI2AppdefDiff {
                 if (!resource.isConfigUserManaged() && (
                     !configsEqual(scannedServer.getProductConfig(), cmLocal.toConfigResponse(resource.getProductConfig())) ||
                     !configsEqual(scannedServer.getControlConfig(), cmLocal.toConfigResponse(resource.getControlConfig())) ||
-                    !configsEqual(scannedServer.getMeasurementConfig(), cmLocal.toConfigResponse(resource.getMeasurementConfig())) ||
-                    !configsEqual(scannedServer.getResponseTimeConfig(), cmLocal.toConfigResponse(resource.getResponseTimeConfig()))))
+                    !configsEqual(scannedServer.getMeasurementConfig(), cmLocal.toConfigResponse(resource.getMeasurementConfig()))))
                 {
                     // config was changed (and is NOT user-managed)
                     configChanged = true;

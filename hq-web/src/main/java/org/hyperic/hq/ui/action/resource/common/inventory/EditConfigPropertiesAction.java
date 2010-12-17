@@ -152,9 +152,7 @@ public class EditConfigPropertiesAction
                         oldCfgBytes = configManager.toConfigResponse(resource.getMeasurementConfig());
                     } else if (cfgTypes[i].equals(ProductPlugin.TYPE_CONTROL)) {
                         oldCfgBytes =configManager.toConfigResponse(resource.getControlConfig());
-                    } else if (cfgTypes[i].equals(ProductPlugin.TYPE_RESPONSE_TIME)) {
-                        oldCfgBytes =configManager.toConfigResponse(resource.getResponseTimeConfig());
-                    }
+                    } 
 
                     if (oldCfgBytes == null) {
                         oldConfigs[i] = new ConfigResponse();

@@ -84,7 +84,6 @@ public class ConfigManagerImpl implements ConfigManager {
         resource.setProductConfig(createConfig(productResponse));
         resource.setMeasurementConfig(createConfig(measResponse));
         resource.setControlConfig(createConfig(controlResponse));
-        resource.setResponseTimeConfig(createConfig(rtResponse));
     }
     
     private Config createConfig(byte[] configBytes) {
@@ -483,12 +482,6 @@ public class ConfigManagerImpl implements ConfigManager {
             wasUpdated = true;
         }
 
-        configBytes = mergeConfig(toConfigResponse(resource.getResponseTimeConfig()), rtConfig, overwrite, false);
-        if (!AICompare.configsEqual(configBytes, toConfigResponse(resource.getResponseTimeConfig()))) {
-            resource.setResponseTimeConfig(createConfig(configBytes));
-            wasUpdated = true;
-        }
-
         if (userManaged != null && resource.isConfigUserManaged() != userManaged.booleanValue()) {
             resource.setConfigUserManaged(userManaged.booleanValue());
             wasUpdated = true;
@@ -510,8 +503,6 @@ public class ConfigManagerImpl implements ConfigManager {
             config = resource.getMeasurementConfig();
         } else if (productType.equals(ProductPlugin.TYPE_AUTOINVENTORY)) {
             config = resource.getAutoInventoryConfig();
-        } else if (productType.equals(ProductPlugin.TYPE_RESPONSE_TIME)) {
-            config = resource.getResponseTimeConfig();
         } else {
             throw new IllegalArgumentException("Unknown product type");
         }
