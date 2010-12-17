@@ -128,7 +128,8 @@ public class AppdefUtil {
             else if(rv.getResourceTo(RelationshipTypes.SERVICE) !=null) {
                 entityType = AppdefEntityConstants.APPDEF_TYPE_SERVICE;
             }
-            else if(rv instanceof ResourceGroup && ((ResourceGroup)rv).getGroupType() ==  AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP){
+            else if(rv instanceof ResourceGroup && ((ResourceGroup)rv).getType().getName().
+                equals(AppdefEntityConstants.getAppdefGroupTypeName(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP))){
                 entityType = AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
             }
             else if(rv instanceof ResourceGroup) {

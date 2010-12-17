@@ -146,7 +146,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     @Transactional(readOnly = true)
     public ApplicationType findApplicationType(Integer id) {
         //TODO throw Exception if not in list
-        return APPLICATION_TYPES.get(id);
+        return APPLICATION_TYPES.get(id-1);
     }
 
     /**
@@ -199,16 +199,19 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
     
     private Application toApplication(ResourceGroup resourceGroup) {
-        //TODO
-        return new Application();
+        //TODO fully flesh out
+        Application application =  new Application();
+        application.setId(resourceGroup.getId());
+        return application;
     }
     
     private ResourceGroup create(ApplicationValue appV) {
         ResourceGroup app =  new ResourceGroup();
         app.setName(appV.getName());
-        updateApplication(app, appV);
         app.persist();
-        app.setType(resourceManager.findResourceTypeById(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP));
+        app.setType(resourceManager.findResourceTypeByName(AppdefEntityConstants.
+            getAppdefGroupTypeName(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP)));
+        updateApplication(app, appV);
         return app;
     }
     
@@ -787,7 +790,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     public boolean isApplication(ResourceGroup group) {
-        return group.getGroupType() == AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP;
+        return group.getType().getName().equals(AppdefEntityConstants.getAppdefGroupTypeName(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP));
     }
     
 }

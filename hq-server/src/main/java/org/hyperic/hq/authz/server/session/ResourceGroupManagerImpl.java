@@ -29,11 +29,14 @@ package org.hyperic.hq.authz.server.session;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,6 +63,7 @@ import org.hyperic.hq.grouping.shared.GroupEntry;
 import org.hyperic.hq.inventory.dao.ResourceDao;
 import org.hyperic.hq.inventory.dao.ResourceGroupDao;
 import org.hyperic.hq.inventory.dao.ResourceTypeDao;
+import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
@@ -136,7 +140,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         res.setPrivateGroup(cInfo.isPrivateGroup());
         res.setDescription(cInfo.getDescription());
         res.setModifiedBy(whoami.getName());
-        ResourceType groupType = resourceTypeDao.findById(cInfo.getGroupTypeId());
+        ResourceType groupType = resourceTypeDao.findByName(AppdefEntityConstants.getAppdefGroupTypeName(cInfo.getGroupTypeId()));
         //TODO throw Exception if type doesn't exist?
         res.persist();
         res.setType(groupType);
@@ -559,8 +563,8 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
 
     //TODO remove legacy support
     public boolean isMixed(ResourceGroup group) {
-      if(group.getGroupType() == AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS || 
-          group.getGroupType() == AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC) {
+      if(group.getType().getName().equals(AppdefEntityConstants.getAppdefGroupTypeName(AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS)) || 
+          group.getType().getName().equals(AppdefEntityConstants.getAppdefGroupTypeName(AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC))) {
           return false;
       }
       return true;
@@ -593,6 +597,37 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     @Transactional(readOnly=true)
     public ResourceGroup findResourceGroupByName(String name) {
        return resourceGroupDao.findByName(name);
+    }
+    
+    @PostConstruct
+    public void initializeGroupTypes() {
+        //TODO Is this the place for this?
+        if(resourceTypeDao.findRoot() == null) {
+            ResourceType system=new ResourceType();
+            system.setName("System");
+            system.persist();
+            Resource root = new Resource();
+            root.setName("Root");
+            root.persist();
+            root.setType(system);
+        }
+        int[] groupTypes = AppdefEntityConstants.getAppdefGroupTypes();
+        for(int i=0;i< groupTypes.length;i++) {
+            if(resourceTypeDao.findByName(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i])) == null) {
+                ResourceType groupType = new ResourceType();
+                groupType.setName(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i]));
+                groupType.persist();
+                if(groupTypes[i] == AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP) {
+                    Set<PropertyType> appPropTypes = new HashSet<PropertyType>();
+                    PropertyType propType = new PropertyType();
+                    propType.setName("applicationType");
+                    propType.setDescription("applicationType");
+                    propType.persist();
+                    appPropTypes.add(propType);
+                    groupType.setPropertyTypes(appPropTypes);
+                }
+            }
+        }
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {

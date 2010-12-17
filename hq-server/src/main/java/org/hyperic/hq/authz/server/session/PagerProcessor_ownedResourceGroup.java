@@ -62,7 +62,7 @@ public class PagerProcessor_ownedResourceGroup implements PagerProcessor {
         resourceGroupValue.setDescription(group.getDescription());
         //resourceGroupValue.setGroupEntResType(getGroupEntResType().intValue());
         //resourceGroupValue.setGroupEntType(getGroupEntType().intValue());
-        resourceGroupValue.setGroupType(group.getGroupType());
+        resourceGroupValue.setGroupType(group.getType().getId());
         resourceGroupValue.setId(group.getId());
         resourceGroupValue.setLocation(group.getLocation());
         resourceGroupValue.setModifiedBy(group.getModifiedBy());

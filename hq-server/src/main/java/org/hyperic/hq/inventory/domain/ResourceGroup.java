@@ -78,10 +78,4 @@ public class ResourceGroup extends Resource {
     public void setPrivateGroup(boolean privateGroup) {
         this.privateGroup = privateGroup;
     }
-    
-    public Integer getGroupType() {
-        //TODO replace with calls to group.getType().getId()
-       //Doing this just in case we can't pre-populate ResourceTypes with IDs as expected in AppdefEntityConstants.getAppdefGroupTypeName
-        return getType().getId();
-    }
 }

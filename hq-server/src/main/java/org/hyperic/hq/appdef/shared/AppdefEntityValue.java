@@ -38,8 +38,10 @@ import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -431,7 +433,8 @@ public class AppdefEntityValue {
     private void validateGroupType (int groupTypeId) 
         throws PermissionException, AppdefEntityNotFoundException { 
         ResourceGroup g = getGroup();
-        if (g.getGroupType() != groupTypeId) {
+        ResourceType groupType = Bootstrap.getBean(ResourceManager.class).findResourceTypeByName(AppdefEntityConstants.getAppdefGroupTypeName(groupTypeId));
+        if (!(g.getType().equals(groupType))) {
             throw new IllegalArgumentException("Invalid group type."+
                 "Expecting type:"+AppdefEntityConstants
                 .getAppdefGroupTypeName(groupTypeId));

@@ -211,9 +211,8 @@ public abstract class AppdefResourceValue
     public AppdefResourceTypeValue getAppdefResourceTypeValue(AuthzSubject subject, ResourceGroup group) {
         if (Bootstrap.getBean(ResourceGroupManager.class).isMixed(group)) {
             AppdefResourceTypeValue res = new GroupTypeValue();
-            int iGrpType = group.getGroupType();
-            res.setId(group.getGroupType());
-            res.setName(AppdefEntityConstants.getAppdefGroupTypeName(iGrpType));
+            res.setId(group.getType().getId());
+            res.setName(group.getType().getName());
             return res;
         } else {
             return getAppdefResourceType(subject, group)
