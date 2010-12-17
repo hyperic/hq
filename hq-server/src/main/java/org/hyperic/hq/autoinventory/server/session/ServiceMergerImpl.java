@@ -147,12 +147,18 @@ public class ServiceMergerImpl implements ServiceMerger {
                 // if aiid.equals(svcName) this means that the name has
                 // not been manually changed. Therefore it is ok to change
                 // the current resource name
+                boolean modified=false;
                 if (aiSvcName != null && !aiSvcName.equals(svcName) && aiid.equals(svcName)) {
                     service.setName(aiservice.getName().trim());
-                    service.getResource().setName(service.getName());
+                    modified=true;
                 }
-                if (aiservice.getDescription() != null)
+                if (aiservice.getDescription() != null) {
                     service.setDescription(aiservice.getDescription().trim());
+                    modified=true;
+                }
+                if(modified) {
+                    serviceManager.updateService( service);
+                }
             }
 
             // CONFIGURE SERVICE

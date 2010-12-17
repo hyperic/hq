@@ -264,7 +264,5 @@ public class AppdefManagerImpl implements AppdefManager {
         Resource authzRes = res.getResource();
         // change the authz owner
         resourceManager.setResourceOwner(who, authzRes, newOwner);
-        // update the modified field in the appdef table -- YUCK
-        res.setModifiedBy(who.getName());
     }
 }

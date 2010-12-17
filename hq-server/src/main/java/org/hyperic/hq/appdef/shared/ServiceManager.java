@@ -160,6 +160,8 @@ public interface ServiceManager {
     public Service updateService(AuthzSubject subject, ServiceValue existing) throws PermissionException,
         org.hyperic.hq.appdef.shared.UpdateException, org.hyperic.hq.appdef.shared.AppdefDuplicateNameException,
         ServiceNotFoundException;
+    
+    void updateService(Service service);
 
     public void updateServiceTypes(String plugin, org.hyperic.hq.product.ServiceTypeInfo[] infos) throws VetoException, NotFoundException;
 

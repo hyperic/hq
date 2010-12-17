@@ -589,15 +589,21 @@ public class RuntimeReportProcessor {
                 if (found) {
                     // Update name if FQDN changed
                     final String svcName = service.getName();
+                    boolean modified=false;
                     // only change the name if it hasn't been changed already
                     // for example if !svcName.equals(aiid): this means that
                     // the user has explicitly change the service's name
                     if (aiSvc != null && svcName.equals(aiid)) {
                         service.setName(aiSvc.getName());
+                        modified=true;
                     }
                     // this means that the fqdn changed
                     if (aiSvc != null && !aiid.equals(aiSvc.getName())) {
                         service.setAutoinventoryIdentifier(aiSvc.getName());
+                        modified=true;
+                    }
+                    if(modified) {
+                        serviceManager.updateService(service);
                     }
                 } else {
                     log.info("Service id=" + service.getId() + " name=" + service.getName() + " has become a zombie");

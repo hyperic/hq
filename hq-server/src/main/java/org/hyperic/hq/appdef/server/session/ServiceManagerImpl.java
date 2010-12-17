@@ -913,6 +913,11 @@ public class ServiceManagerImpl implements ServiceManager {
         }
         return counts;
     }
+   
+    public void updateService(Service service) {
+        // TODO Auto-generated method stub
+        
+    }
 
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
