@@ -112,6 +112,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class PlatformManagerImpl implements PlatformManager {
     
+    private static final String IP_RESOURCE_TYPE_NAME = "IP";
+
     private static final String MODIFIED_TIME = "ModifiedTime";
 
     static final String CREATION_TIME = "CreationTime";
@@ -223,6 +225,10 @@ public class PlatformManagerImpl implements PlatformManager {
         platform.setName(resource.getName());
         platform.setResource(resource);
         platform.setPlatformType(toPlatformType(resource.getType()));
+        Set<Resource> ips = resource.getResourcesFrom(RelationshipTypes.IP);
+        for(Resource ip: ips) {
+            platform.addIp(toIp(ip));
+        }
         return platform;
     }
 
@@ -1567,20 +1573,21 @@ public class PlatformManagerImpl implements PlatformManager {
         pt.persist();
         pt.setPlugin(pluginDAO.findByName(plugin));
         Set<PropertyType> propTypes = new HashSet<PropertyType>();
-        propTypes.add(createPlatformPropertyType(CERT_DN));
-        propTypes.add(createPlatformPropertyType(FQDN));
-        propTypes.add(createPlatformPropertyType(COMMENT_TEXT));
-        propTypes.add(createPlatformPropertyType(CPU_COUNT));
-        propTypes.add(createPlatformPropertyType(CREATION_TIME));
-        propTypes.add(createPlatformPropertyType(MODIFIED_TIME));
-        propTypes.add(createPlatformPropertyType(AppdefResource.SORT_NAME));
+        propTypes.add(createPropertyType(CERT_DN));
+        propTypes.add(createPropertyType(FQDN));
+        propTypes.add(createPropertyType(COMMENT_TEXT));
+        propTypes.add(createPropertyType(CPU_COUNT));
+        propTypes.add(createPropertyType(CREATION_TIME));
+        propTypes.add(createPropertyType(MODIFIED_TIME));
+        propTypes.add(createPropertyType(AppdefResource.SORT_NAME));
         //TODO add method?
         pt.setPropertyTypes(propTypes);
         resourceManager.findRootResourceType().relateTo(pt, RelationshipTypes.PLATFORM);
+        pt.relateTo(resourceManager.findResourceTypeByName(IP_RESOURCE_TYPE_NAME),RelationshipTypes.IP);
         return toPlatformType(pt);
     }
     
-    private PropertyType createPlatformPropertyType(String propName) {
+    private PropertyType createPropertyType(String propName) {
         PropertyType propType = new PropertyType();
         propType.setName(propName);
         propType.setDescription(propName);
@@ -1818,6 +1825,7 @@ public class PlatformManagerImpl implements PlatformManager {
         //TODO unique name for IP?
         ip.setName(address);
         ip.persist();
+        ip.setType(resourceManager.findResourceTypeByName(IP_RESOURCE_TYPE_NAME));
         ip.setProperty(IP_ADDRESS,address);
         ip.setProperty(NETMASK,netmask);
         ip.setProperty(MAC_ADDRESS,macAddress);
@@ -1971,7 +1979,23 @@ public class PlatformManagerImpl implements PlatformManager {
 
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
-        valuePager = Pager.getPager(VALUE_PROCESSOR);    
+        valuePager = Pager.getPager(VALUE_PROCESSOR);
+        //TODO preload some other way?
+        if(resourceManager.findResourceTypeByName(IP_RESOURCE_TYPE_NAME) == null) {
+            ResourceType ipType = new ResourceType();
+            ipType.setName(IP_RESOURCE_TYPE_NAME);
+            //TODO ipType isn't really getting a plugin here.  
+            //Maybe give it System plugin or consider making it a first class citizen in new model?
+            ipType.persist();
+            Set<PropertyType> propTypes = new HashSet<PropertyType>();
+            propTypes.add(createPropertyType(IP_ADDRESS));
+            propTypes.add(createPropertyType(NETMASK));
+            propTypes.add(createPropertyType(MAC_ADDRESS));
+            propTypes.add(createPropertyType(CREATION_TIME));
+            propTypes.add(createPropertyType(MODIFIED_TIME));
+            //TODO add method?
+            ipType.setPropertyTypes(propTypes);
+        }
     }
 
 }

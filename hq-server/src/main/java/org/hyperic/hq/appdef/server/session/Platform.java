@@ -48,6 +48,10 @@ public class Platform
     public Collection<Ip> getIps() {
         return ips;
     }
+    
+    public void addIp(Ip ip) {
+        this.ips.add(ip);
+    }
 
     public Collection<Server> getServers() {
         return servers;
