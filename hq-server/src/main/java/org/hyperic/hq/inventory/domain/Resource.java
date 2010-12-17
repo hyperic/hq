@@ -236,7 +236,6 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
             if (!relationship.isType(SubReferenceNodeTypeStrategy.INSTANCE_OF_RELATIONSHIP_TYPE)) {
                 Node node = relationship.getOtherNode(getUnderlyingState());
                 Class<?> otherEndType = graphDatabaseContext.getJavaType(node);
-
                 if (Resource.class.isAssignableFrom(otherEndType)) {
                     if (entity == null || node.equals(entity.getUnderlyingState())) {
                         relations.add(graphDatabaseContext.createEntityFromState(relationship,
@@ -309,28 +308,11 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     }
 
     public Set<Resource> getResourcesFrom(String relationName) {
-        return getRelatedResources(relationName, RelationshipDirection.OUTGOING);
+        return getRelatedResources(relationName, org.neo4j.graphdb.Direction.OUTGOING);
     }
 
     public Set<Resource> getResourcesTo(String relationName) {
-        return getRelatedResources(relationName, RelationshipDirection.INCOMING);
-    }
-
-    private Set<Resource> getRelatedResources(String relationName, RelationshipDirection direction) {
-        Set<Relationship<Resource>> relations = getRelationships(null, relationName, direction);
-        Set<Resource> resources = new HashSet<Resource>();
-
-        for (Relationship<Resource> relation : relations) {
-            switch (direction) {
-                case INCOMING:
-                    resources.add(relation.getTo());
-                    break;
-                case OUTGOING:
-                    resources.add(relation.getFrom());
-            }
-        }
-
-        return resources;
+        return getRelatedResources(relationName, org.neo4j.graphdb.Direction.INCOMING);
     }
 
     public Relationship<Resource> getRelationshipTo(Resource resource, String relationName) {
