@@ -32,11 +32,10 @@ public class ResourceTypeDaoImpl implements ResourceTypeDao {
         
         return result;
     }
-
-	@SuppressWarnings("unchecked")
+    
     @Transactional(readOnly = true)
     public List<ResourceType> findAll() {
-		List<ResourceType> result =  entityManager.createQuery("select o from ResourceType o").getResultList();
+		List<ResourceType> result =  entityManager.createQuery("select o from ResourceType o",ResourceType.class).getResultList();
 		
 		// TODO workaround to trigger Neo4jNodeBacking's around advice for the getter
 		for (ResourceType resourceType : result) {
@@ -46,10 +45,10 @@ public class ResourceTypeDaoImpl implements ResourceTypeDao {
 		return result;
     }
 
-	@SuppressWarnings("unchecked")
+	
     @Transactional(readOnly = true)
     public List<ResourceType> find(Integer firstResult, Integer maxResults) {
-		List<ResourceType> result = entityManager.createQuery("select o from ResourceType o")
+		List<ResourceType> result = entityManager.createQuery("select o from ResourceType o",ResourceType.class)
         	.setFirstResult(firstResult)
         	.setMaxResults(maxResults)
         	.getResultList();

@@ -33,10 +33,10 @@ public class ResourceGroupDaoImpl implements ResourceGroupDao {
         return result;
     }
 
-	@SuppressWarnings("unchecked")
+	
     @Transactional(readOnly = true)
     public List<ResourceGroup> findAll() {
-		List<ResourceGroup> result = entityManager.createQuery("select o from ResourceGroup o").getResultList();
+		List<ResourceGroup> result = entityManager.createQuery("select o from ResourceGroup o",ResourceGroup.class).getResultList();
 		
 		// TODO workaround to trigger Neo4jNodeBacking's around advice for the getter
 		for (ResourceGroup resourceGroup : result) {
@@ -46,10 +46,10 @@ public class ResourceGroupDaoImpl implements ResourceGroupDao {
 		return result;
     }
 
-	@SuppressWarnings("unchecked")
+	
     @Transactional(readOnly = true)
     public List<ResourceGroup> find(Integer firstResult, Integer maxResults) {
-		List<ResourceGroup> result = entityManager.createQuery("select o from ResourceGroup o")
+		List<ResourceGroup> result = entityManager.createQuery("select o from ResourceGroup o",ResourceGroup.class)
         	.setFirstResult(firstResult)
         	.setMaxResults(maxResults)
         	.getResultList();
