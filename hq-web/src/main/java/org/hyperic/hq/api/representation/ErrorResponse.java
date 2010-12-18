@@ -1,15 +1,15 @@
-package org.hyperic.hq.api;
+package org.hyperic.hq.api.representation;
 
-public class ErrorRepresentation {
+public class ErrorResponse {
 	private String exception;
 	private String message;
 	
-	public ErrorRepresentation(String exception, String message) {
+	public ErrorResponse(String exception, String message) {
 		this.exception = exception;
 		this.message = message;
 	}
 	
-	public ErrorRepresentation(Exception e) {
+	public ErrorResponse(Exception e) {
 		this.exception = e.getClass().getName();
 		this.message = e.getMessage();
 	}

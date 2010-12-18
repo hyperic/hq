@@ -21,7 +21,6 @@ import org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExc
 public class ApiControllerTest {
 	private MockHttpServletRequest request;
 	private MockHttpServletResponse response;
-	private ApiController controller;
 	private AnnotationMethodHandlerAdapter handler;
 	private AnnotationMethodHandlerExceptionResolver exHandler;
 	
@@ -29,7 +28,6 @@ public class ApiControllerTest {
 	public void setup() {
 		request = new MockHttpServletRequest();
 		response = new MockHttpServletResponse();
-		controller = new ApiController();
 		handler = new AnnotationMethodHandlerAdapter();
 		exHandler = new AnnotationMethodHandlerExceptionResolver();
 		
@@ -70,7 +68,7 @@ public class ApiControllerTest {
 			
 			testRequest("/api/resources", RequestMethod.POST, headers);
 		} catch(Exception e) {
-			exHandler.resolveException(request, response, controller, e);
+			exHandler.resolveException(request, response, null, e);
 		}
 		
 		assertEquals(HttpStatus.BAD_REQUEST, HttpStatus.valueOf(response.getStatus()));
@@ -85,7 +83,7 @@ public class ApiControllerTest {
 			
 			testRequest("/api/resources/1", RequestMethod.PUT, headers, "{some content}");
 		} catch(Exception e) {
-			exHandler.resolveException(request, response, controller, e);
+			exHandler.resolveException(request, response, null, e);
 		}
 		
 		assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE, HttpStatus.valueOf(response.getStatus()));
@@ -100,7 +98,7 @@ public class ApiControllerTest {
 
 			testRequest("/api/resources", RequestMethod.GET, headers);
 		} catch(Exception e) {
-			exHandler.resolveException(request, response, controller, e);
+			exHandler.resolveException(request, response, null, e);
 		}
 		
 		assertEquals(HttpStatus.NOT_ACCEPTABLE, HttpStatus.valueOf(response.getStatus()));
@@ -113,7 +111,7 @@ public class ApiControllerTest {
 			
 			testRequest("/api/resources", RequestMethod.DELETE, headers);
 		} catch(Exception e) {
-			exHandler.resolveException(request, response, controller, e);
+			exHandler.resolveException(request, response, null, e);
 		}
 		
 		assertEquals(HttpStatus.METHOD_NOT_ALLOWED, HttpStatus.valueOf(response.getStatus()));
@@ -135,6 +133,6 @@ public class ApiControllerTest {
 			request.setContent(body.getBytes());
 		}
 		
-		return handler.handle(request, response, controller);	
+		return handler.handle(request, response, null);	
 	}
 }

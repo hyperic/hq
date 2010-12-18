@@ -10,7 +10,6 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.hibernate.annotations.GenericGenerator;
 import org.neo4j.graphdb.Node;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -30,8 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Entity
 @Configurable
 @NodeEntity
-@JsonIgnoreProperties(ignoreUnknown = true, value = { "underlyingState", "stateAccessors" })
-public class ConfigOptionType implements IdentityAware, PersistenceAware<ConfigOptionType> {
+public class ConfigOptionType {
     @PersistenceContext
     transient EntityManager entityManager;
 

@@ -20,13 +20,11 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.inventory.InvalidRelationshipException;
 import org.hyperic.hq.reference.ConfigType;
-import org.hyperic.hq.reference.RelationshipDirection;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
@@ -47,12 +45,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Entity
 @NodeEntity(partial = true)
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-@JsonIgnoreProperties(ignoreUnknown = true, value = { "underlyingState", "stateAccessors" })
-public class Resource implements IdentityAware, RelationshipAware<Resource> {
-
+public class Resource {
     @Transient
     @ManyToOne
-    @RelatedTo(type = "MANAGED_BY", direction = Direction.OUTGOING, elementClass = Agent.class)
+    @RelatedTo(type = RelationshipTypes.MANAGED_BY, direction = Direction.OUTGOING, elementClass = Agent.class)
     private Agent agent;
 
     @GraphProperty
@@ -110,7 +106,7 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     public Resource(Node n) {
         setUnderlyingState(n);
     }
-
+    
     @Transactional
     public void flush() {
         this.entityManager.flush();
@@ -127,7 +123,7 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     private Config getConfig(ConfigType type) {
         Iterable<org.neo4j.graphdb.Relationship> relationships = this.getUnderlyingState()
             .getRelationships(DynamicRelationshipType.withName(RelationshipTypes.HAS_CONFIG),
-                org.neo4j.graphdb.Direction.OUTGOING);
+                Direction.OUTGOING.toNeo4jDir());
         for (org.neo4j.graphdb.Relationship relationship : relationships) {
             if (type.toString().equals(relationship.getProperty("configType"))) {
                 // TODO enforce no more than one?
@@ -198,35 +194,21 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     }
 
     @SuppressWarnings("unchecked")
-    public Set<Relationship<Resource>> getRelationships(Resource entity, String name,
-                                                        RelationshipDirection direction) {
+    public Set<Relationship<Resource>> getRelationships(Resource entity, String name, Direction direction) {
         Set<Relationship<Resource>> relations = new HashSet<Relationship<Resource>>();
         Iterable<org.neo4j.graphdb.Relationship> relationships;
-        org.neo4j.graphdb.Direction neo4jDirection = null;
-
-        switch (direction) {
-            case BOTH_WAYS:
-                neo4jDirection = org.neo4j.graphdb.Direction.BOTH;
-                break;
-            case INCOMING:
-                neo4jDirection = org.neo4j.graphdb.Direction.INCOMING;
-                break;
-            case OUTGOING:
-                neo4jDirection = org.neo4j.graphdb.Direction.OUTGOING;
-                break;
-        }
 
         if (name != null) {
-            if (neo4jDirection != null) {
+            if (direction != null) {
                 relationships = getUnderlyingState().getRelationships(
-                    DynamicRelationshipType.withName(name), neo4jDirection);
+                    DynamicRelationshipType.withName(name), direction.toNeo4jDir());
             } else {
                 relationships = getUnderlyingState().getRelationships(
                     DynamicRelationshipType.withName(name));
             }
         } else {
-            if (neo4jDirection != null) {
-                relationships = getUnderlyingState().getRelationships(neo4jDirection);
+            if (direction != null) {
+                relationships = getUnderlyingState().getRelationships(direction.toNeo4jDir());
             } else {
                 relationships = getUnderlyingState().getRelationships();
             }
@@ -256,7 +238,7 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
                     return currentPos.depth() >= 1;
                 }
             }, ReturnableEvaluator.ALL_BUT_START_NODE,
-            DynamicRelationshipType.withName(relationName), org.neo4j.graphdb.Direction.OUTGOING);
+            DynamicRelationshipType.withName(relationName), Direction.OUTGOING.toNeo4jDir());
         for (Node related : relationTraverser) {
             if (related.equals(resource.getUnderlyingState())) {
                 return true;
@@ -275,7 +257,7 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     }
 
     @Transactional
-    public void removeRelationships(Resource entity, String name, RelationshipDirection direction) {
+    public void removeRelationships(Resource entity, String name, Direction direction) {
         // TODO getRelationships only does one direction
         for (Relationship<Resource> relation : getRelationships(entity, name, direction)) {
             relation.getUnderlyingState().delete();
@@ -284,36 +266,36 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
 
     public void removeRelationship(Resource resource, String relationName) {
         if (isRelatedTo(resource, relationName)) {
-            removeRelationships(resource, relationName, RelationshipDirection.ALL);
+            removeRelationships(resource, relationName, Direction.BOTH);
         }
     }
 
     public void removeRelationships() {
-        removeRelationships(null, null, RelationshipDirection.ALL);
+        removeRelationships(null, null, Direction.BOTH);
     }
 
     public void removeRelationships(String relationName) {
-        removeRelationships(null, relationName, RelationshipDirection.ALL);
+        removeRelationships(null, relationName, Direction.BOTH);
     }
 
     public Set<Relationship<Resource>> getRelationships() {
-        return getRelationships(null, null, RelationshipDirection.ALL);
+        return getRelationships(null, null, Direction.BOTH);
     }
 
     public Set<Relationship<Resource>> getRelationshipsFrom(String relationName) {
-        return getRelationships(null, relationName, RelationshipDirection.OUTGOING);
+        return getRelationships(null, relationName, Direction.OUTGOING);
     }
 
     public Set<Relationship<Resource>> getRelationshipsTo(String relationName) {
-        return getRelationships(null, relationName, RelationshipDirection.INCOMING);
+        return getRelationships(null, relationName, Direction.INCOMING);
     }
 
     public Set<Resource> getResourcesFrom(String relationName) {
-        return getRelatedResources(relationName, org.neo4j.graphdb.Direction.OUTGOING);
+        return getRelatedResources(relationName, Direction.OUTGOING);
     }
 
     public Set<Resource> getResourcesTo(String relationName) {
-        return getRelatedResources(relationName, org.neo4j.graphdb.Direction.INCOMING);
+        return getRelatedResources(relationName, Direction.INCOMING);
     }
 
     public Relationship<Resource> getRelationshipTo(Resource resource, String relationName) {
@@ -328,8 +310,7 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
         return result;
     }
 
-    private Set<Resource> getRelatedResources(String relationName,
-                                              org.neo4j.graphdb.Direction direction) {
+    private Set<Resource> getRelatedResources(String relationName, Direction direction) {
         Set<Resource> resources = new HashSet<Resource>();
         Traverser relationTraverser = getUnderlyingState().traverse(Traverser.Order.BREADTH_FIRST,
             new StopEvaluator() {
@@ -337,7 +318,7 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
                     return currentPos.depth() >= 1;
                 }
             }, ReturnableEvaluator.ALL_BUT_START_NODE,
-            DynamicRelationshipType.withName(relationName), direction);
+            DynamicRelationshipType.withName(relationName), direction.toNeo4jDir());
         for (Node related : relationTraverser) {
             Resource resource = graphDatabaseContext.createEntityFromState(related, Resource.class);
             resource.getId();
@@ -347,8 +328,7 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     }
 
     public Resource getResourceFrom(String relationName) {
-        Set<Resource> resources = getRelatedResources(relationName,
-            org.neo4j.graphdb.Direction.OUTGOING);
+        Set<Resource> resources = getRelatedResources(relationName, Direction.OUTGOING);
         if (resources.isEmpty()) {
             return null;
         }
@@ -361,8 +341,7 @@ public class Resource implements IdentityAware, RelationshipAware<Resource> {
     }
 
     public Resource getResourceTo(String relationName) {
-        Set<Resource> resources = getRelatedResources(relationName,
-            org.neo4j.graphdb.Direction.INCOMING);
+        Set<Resource> resources = getRelatedResources(relationName, Direction.INCOMING);
         if (resources.isEmpty()) {
             return null;
         }

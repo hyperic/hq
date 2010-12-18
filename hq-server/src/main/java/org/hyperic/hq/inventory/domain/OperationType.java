@@ -11,7 +11,6 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.Node;
@@ -25,8 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Entity
 @Configurable
 @NodeEntity(partial = true)
-@JsonIgnoreProperties(ignoreUnknown = true, value = { "underlyingState", "stateAccessors" })
-public class OperationType implements IdentityAware, PersistenceAware<OperationType> {
+public class OperationType {
     @PersistenceContext
     transient EntityManager entityManager;
 

@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -16,11 +17,9 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.reference.ConfigType;
-import org.hyperic.hq.reference.RelationshipDirection;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
@@ -41,8 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Entity
 @Configurable
 @NodeEntity(partial = true)
-@JsonIgnoreProperties(ignoreUnknown = true, value = { "underlyingState", "stateAccessors" })
-public class ResourceType implements IdentityAware, RelationshipAware<ResourceType> {
+public class ResourceType {
 
     @PersistenceContext
     transient EntityManager entityManager;
@@ -67,17 +65,17 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
     private String description;
 
     @RelatedTo(type = RelationshipTypes.HAS_OPERATION_TYPE, direction = Direction.OUTGOING, elementClass = OperationType.class)
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     @Transient
     private Set<OperationType> operationTypes;
 
     @RelatedTo(type = RelationshipTypes.HAS_PROPERTY_TYPE, direction = Direction.OUTGOING, elementClass = PropertyType.class)
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     @Transient
     private Set<PropertyType> propertyTypes;
 
     @RelatedTo(type = RelationshipTypes.HAS_CONFIG_OPT_TYPE, direction = Direction.OUTGOING, elementClass = ConfigOptionType.class)
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     @Transient
     private Set<ConfigOptionType> configTypes;
 
@@ -87,7 +85,7 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
     private Plugin plugin;
 
     @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.INCOMING, elementClass = Resource.class)
-    @OneToMany
+    @OneToMany(cascade = CascadeType.REMOVE)
     @Transient
     private Set<Resource> resources;
 
@@ -143,34 +141,21 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
 
     @SuppressWarnings("unchecked")
     public Set<Relationship<ResourceType>> getRelationships(ResourceType entity, String name,
-                                                            RelationshipDirection direction) {
+                                                            Direction direction) {
         Set<Relationship<ResourceType>> relations = new HashSet<Relationship<ResourceType>>();
         Iterable<org.neo4j.graphdb.Relationship> relationships;
-        org.neo4j.graphdb.Direction neo4jDirection = null;
-
-        switch (direction) {
-            case BOTH_WAYS:
-                neo4jDirection = org.neo4j.graphdb.Direction.BOTH;
-                break;
-            case INCOMING:
-                neo4jDirection = org.neo4j.graphdb.Direction.INCOMING;
-                break;
-            case OUTGOING:
-                neo4jDirection = org.neo4j.graphdb.Direction.OUTGOING;
-                break;
-        }
-
+        
         if (name != null) {
-            if (neo4jDirection != null) {
+            if (direction != null) {
                 relationships = getUnderlyingState().getRelationships(
-                    DynamicRelationshipType.withName(name), neo4jDirection);
+                    DynamicRelationshipType.withName(name), direction.toNeo4jDir());
             } else {
                 relationships = getUnderlyingState().getRelationships(
                     DynamicRelationshipType.withName(name));
             }
         } else {
-            if (neo4jDirection != null) {
-                relationships = getUnderlyingState().getRelationships(neo4jDirection);
+            if (direction != null) {
+                relationships = getUnderlyingState().getRelationships(direction.toNeo4jDir());
             } else {
                 relationships = getUnderlyingState().getRelationships();
             }
@@ -220,7 +205,7 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
 
     @Transactional
     public void removeRelationships(ResourceType entity, String name,
-                                    RelationshipDirection direction) {
+                                    Direction direction) {
         // TODO getRelationships only does one direction
         for (Relationship<ResourceType> relation : getRelationships(entity, name, direction)) {
             relation.getUnderlyingState().delete();
@@ -229,28 +214,28 @@ public class ResourceType implements IdentityAware, RelationshipAware<ResourceTy
 
     public void removeRelationship(ResourceType entity, String relationName) {
         if (isRelatedTo(entity, relationName)) {
-            removeRelationships(entity, relationName, RelationshipDirection.ALL);
+            removeRelationships(entity, relationName, Direction.BOTH);
         }
     }
 
     public void removeRelationships() {
-        removeRelationships(null, null, RelationshipDirection.ALL);
+        removeRelationships(null, null, Direction.BOTH);
     }
 
     public void removeRelationships(String relationName) {
-        removeRelationships(null, relationName, RelationshipDirection.ALL);
+        removeRelationships(null, relationName, Direction.BOTH);
     }
 
     public Set<Relationship<ResourceType>> getRelationships() {
-        return getRelationships(null, null, RelationshipDirection.ALL);
+        return getRelationships(null, null, Direction.BOTH);
     }
 
     public Set<Relationship<ResourceType>> getRelationshipsFrom(String relationName) {
-        return getRelationships(null, relationName, RelationshipDirection.OUTGOING);
+        return getRelationships(null, relationName, Direction.OUTGOING);
     }
 
     public Set<Relationship<ResourceType>> getRelationshipsTo(String relationName) {
-        return getRelationships(null, relationName, RelationshipDirection.INCOMING);
+        return getRelationships(null, relationName, Direction.INCOMING);
     }
 
     public Relationship<ResourceType> getRelationshipTo(ResourceType entity, String relationName) {

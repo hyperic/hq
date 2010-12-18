@@ -1,4 +1,4 @@
-package org.hyperic.hq.api;
+package org.hyperic.hq.api.form;
 
 public class ListSettings {
 	private Integer page = 1;
@@ -28,4 +28,3 @@ public class ListSettings {
 		return getStartIndex() + size;
 	}
 }
-

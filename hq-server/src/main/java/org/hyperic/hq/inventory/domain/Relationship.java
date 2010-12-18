@@ -3,7 +3,6 @@ package org.hyperic.hq.inventory.domain;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.datastore.graph.annotation.EndNode;
 import org.springframework.datastore.graph.annotation.RelationshipEntity;
@@ -11,7 +10,6 @@ import org.springframework.datastore.graph.annotation.StartNode;
 
 @Configurable
 @RelationshipEntity
-@JsonIgnoreProperties(ignoreUnknown = true, value = {"underlyingState", "stateAccessors"})
 public class Relationship<T> {
 	@StartNode
 	private T from;

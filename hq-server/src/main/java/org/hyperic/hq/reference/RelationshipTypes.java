@@ -32,6 +32,8 @@ abstract public class RelationshipTypes {
     
     public static final String HAS_ROLE="HAS_ROLE";
     
+    public static final String MANAGED_BY = "MANAGED_BY";
+    
     //The relationship types below will eventually be removed
 
     public static final String PLATFORM = "PLATFORM";

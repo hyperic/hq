@@ -7,6 +7,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Transient;
 
 import org.hyperic.hq.authz.server.session.Role;
+import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.Node;
 import org.springframework.datastore.graph.annotation.GraphProperty;
 import org.springframework.datastore.graph.annotation.NodeEntity;
@@ -16,7 +17,7 @@ import org.springframework.datastore.graph.api.Direction;
 @Entity
 @NodeEntity(partial = true)
 public class ResourceGroup extends Resource {
-    @RelatedTo(type = "HAS_MEMBER", direction = Direction.OUTGOING, elementClass = Resource.class)
+    @RelatedTo(type = RelationshipTypes.HAS_MEMBER, direction = Direction.OUTGOING, elementClass = Resource.class)
     @ManyToMany(targetEntity = Resource.class)
     private Set<Resource> members;
 
@@ -24,7 +25,7 @@ public class ResourceGroup extends Resource {
     @Transient
     private boolean privateGroup;
 
-    @RelatedTo(type = "HAS_ROLE", direction = Direction.OUTGOING, elementClass = Role.class)
+    @RelatedTo(type = RelationshipTypes.HAS_ROLE, direction = Direction.OUTGOING, elementClass = Role.class)
     @ManyToMany(targetEntity = Role.class)
     private Set<Role> roles;
 
