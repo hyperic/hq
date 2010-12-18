@@ -759,19 +759,10 @@ public class ServiceManagerImpl implements ServiceManager {
 
         // First, put all of the infos into a Hash
         HashMap<String, ServiceTypeInfo> infoMap = new HashMap<String, ServiceTypeInfo>();
-        List<String> names = new ArrayList<String>();
         for (int i = 0; i < infos.length; i++) {
             infoMap.put(infos[i].getName(), infos[i]);
-            names.add(infos[i].getName());
         }
-        //TODO server type mess
-
-//        List<ServerType> types = serverTypeDAO.findByName(names);
-//        //HashMap<String, ServerType> serverTypes = new HashMap<String, ServerType>(types.size());
-//        for (ServerType type : types) {
-//            serverTypes.put(type.getName(), type);
-//        }
-
+        
         try {
             Collection<ResourceType> serviceTypes = getAllServiceResourceTypes();
             Set<ResourceType> curServices = new HashSet<ResourceType>();
@@ -780,6 +771,7 @@ public class ServiceManagerImpl implements ServiceManager {
                     curServices.add(curResourceType);
                 }
             }
+            
             for (ResourceType serviceType : curServices) {
 
                 if (log.isDebugEnabled()) {
@@ -793,53 +785,51 @@ public class ServiceManagerImpl implements ServiceManager {
                     deleteServiceType(toServiceType(serviceType), overlord);
                 } else {
                     // Just update it
-                    // XXX TODO MOVE THIS INTO THE ENTITY
-                    if (!sinfo.getName().equals(serviceType.getName()))
+                    if (!sinfo.getName().equals(serviceType.getName())) {
                         serviceType.setName(sinfo.getName());
-
-                    if (!sinfo.getDescription().equals(serviceType.getDescription()))
+                        serviceType.merge();
+                    }
+                    if (!sinfo.getDescription().equals(serviceType.getDescription())) {
                         serviceType.setDescription(sinfo.getDescription());
+                        serviceType.merge();
+                    }
                     //TODO internal?
-
 //                    if (sinfo.getInternal() != serviceType.isIsInternal())
 //                        serviceType.setIsInternal(sinfo.getInternal());
 
                     // Could be null if servertype was deleted/updated by plugin
                     ResourceType svrtype = serviceType.getResourceTypeTo(RelationshipTypes.SERVICE);
 
-                    // TODO Check server type
-//                    if (!sinfo.getServerName().equals(svrtype.getName())) {
-//                        // Lookup the server type
-//                        if (null == (svrtype = serverTypes.get(sinfo.getServerName()))) {
-//                            svrtype = serverTypeDAO.findByName(sinfo.getServerName());
-//                            if (svrtype == null) {
-//                                throw new NotFoundException("Unable to find server " +
-//                                                            sinfo.getServerName() +
-//                                                            " on which service '" +
-//                                                            serviceType.getName() + "' relies");
-//                            }
-//                            serverTypes.put(svrtype.getName(), svrtype);
-//                        }
-//                        serviceType.setServerType(svrtype);
-//                    }
+                    if (!sinfo.getServerName().equals(svrtype.getName())) {
+                        // Lookup the new server type
+                        ResourceType newServerType = resourceManager.findResourceTypeByName(sinfo.getServerName());
+                        if (newServerType == null) {
+                            throw new NotFoundException("Unable to find server " +
+                                                            sinfo.getServerName() +
+                                                            " on which service '" +
+                                                            serviceType.getName() + "' relies");
+                        }
+                        serviceType.removeRelationship(svrtype, RelationshipTypes.SERVICE);
+                        newServerType.relateTo(svrtype, RelationshipTypes.SERVICE);
+                    }
                 }
             }
 
             // Now create the left-overs
             final Set<String> creates = new HashSet<String>();
             for (final ServiceTypeInfo sinfo : infoMap.values()) {
-                ResourceType servType=null;
-                //TODO
-//                if (null == (servType = serverTypes.get(sinfo.getServerName()))) {
-//                    servType = serverTypeDAO.findByName(sinfo.getServerName());
-//                    serverTypes.put(servType.getName(), servType);
-//                }
                 if (creates.contains(sinfo.getName())) {
                     continue;
                 }
+                ResourceType servType= resourceManager.findResourceTypeByName(sinfo.getServerName());
+                if (servType == null) {
+                    throw new NotFoundException("Unable to find server " +
+                                                    sinfo.getServerName() +
+                                                    " on which service '" +
+                                                    sinfo.getName() + "' relies");
+                }
                 creates.add(sinfo.getName());
                 if (debug) watch.markTimeBegin("create");
-                //TODO get the right servType
                 createServiceType(sinfo, plugin, servType);
                 if (debug) watch.markTimeEnd("create");
             }
