@@ -1,18 +1,12 @@
 package org.hyperic.hq.web;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-@Component
 public class StaticContentBaseUrlResolver {
 	private static final String BASE_PATH = "static";
 	
 	private String baseUrl;
 	
-	@Autowired
-	public StaticContentBaseUrlResolver(@Value("#{ webProperties['static.content.base.url'] }") String baseUrl, 
-			                            @Value("#{ webProperties['version'] }") String version) {
+	public StaticContentBaseUrlResolver(String baseUrl, 
+			                            String version) {
 		StringBuilder tempBaseUrl = new StringBuilder();
 		
 		// ...first construct the base path...
