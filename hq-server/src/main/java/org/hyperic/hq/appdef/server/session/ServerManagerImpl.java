@@ -50,6 +50,7 @@ import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
+import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
@@ -87,21 +88,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ServerManagerImpl implements ServerManager {
 
-    private static final String MODIFIED_TIME = "ModifiedTime";
-
-    private static final String CREATION_TIME = "CreationTime";
-
-    private static final String WAS_AUTODISCOVERED = "wasAutodiscovered";
-
-    private static final String RUNTIME_AUTODISCOVERY = "runtimeAutodiscovery";
-
-    private static final String SERVICES_AUTO_MANAGED = "servicesAutoManaged";
-
-    private static final String AUTODISCOVERY_ZOMBIE = "autodiscoveryZombie";
-
-    private static final String AUTO_INVENTORY_IDENTIFIER = "autoInventoryIdentifier";
-
-    private static final String INSTALL_PATH = "installPath";
+   
 
     private final Log log = LogFactory.getLog(ServerManagerImpl.class);
 
@@ -116,14 +103,16 @@ public class ServerManagerImpl implements ServerManager {
     private ResourceGroupManager resourceGroupManager;
     private ZeventEnqueuer zeventManager;
     private ResourceAuditFactory resourceAuditFactory;
-    private PlatformManager platformManager;
+    private ServerFactory serverFactory;
+    private ServiceManager serviceManager;
 
     @Autowired
     public ServerManagerImpl(PermissionManager permissionManager,  ResourceManager resourceManager,
                               AuditManager auditManager,
                              AuthzSubjectManager authzSubjectManager, ResourceGroupManager resourceGroupManager,
                              ZeventEnqueuer zeventManager, ResourceAuditFactory resourceAuditFactory,
-                             PluginDAO pluginDAO, PlatformManager platformManager) {
+                             PluginDAO pluginDAO, ServerFactory serverFactory,
+                             ServiceManager serviceManager) {
 
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
@@ -133,7 +122,8 @@ public class ServerManagerImpl implements ServerManager {
         this.zeventManager = zeventManager;
         this.resourceAuditFactory = resourceAuditFactory;
         this.pluginDAO = pluginDAO;
-        this.platformManager = platformManager;
+        this.serverFactory = serverFactory;
+        this.serviceManager = serviceManager;
     }
 
     /**
@@ -155,7 +145,7 @@ public class ServerManagerImpl implements ServerManager {
             //try {
                 //TODO perm check
                 //permissionManager.check(who.getId(), typeId, s.getId(), op.getId());
-                res.add(toServer(s));
+                res.add(serverFactory.createServer(s));
             //} catch (PermissionException e) {
                 // Ok
             //}
@@ -239,24 +229,24 @@ public class ServerManagerImpl implements ServerManager {
         s.persist();
         ResourceType st = resourceManager.findResourceTypeById(sv.getServerType().getId());
         s.setType(st);
-        s.setProperty(INSTALL_PATH,sv.getInstallPath());
+        s.setProperty(ServerFactory.INSTALL_PATH,sv.getInstallPath());
         String aiid = sv.getAutoinventoryIdentifier();
         if (aiid != null) {
-            s.setProperty(AUTO_INVENTORY_IDENTIFIER,sv.getAutoinventoryIdentifier());
+            s.setProperty(ServerFactory.AUTO_INVENTORY_IDENTIFIER,sv.getAutoinventoryIdentifier());
         } else {
             // Server was created by hand, use a generated AIID. (This matches
             // the behaviour in 2.7 and prior)
             aiid = sv.getInstallPath() + "_" + System.currentTimeMillis() + "_" + sv.getName();
-            s.setProperty(AUTO_INVENTORY_IDENTIFIER,aiid);
+            s.setProperty(ServerFactory.AUTO_INVENTORY_IDENTIFIER,aiid);
         }
       
-        s.setProperty(SERVICES_AUTO_MANAGED,sv.getServicesAutomanaged());
-        s.setProperty(RUNTIME_AUTODISCOVERY,sv.getRuntimeAutodiscovery());
-        s.setProperty(WAS_AUTODISCOVERED,sv.getWasAutodiscovered());
-        s.setProperty(AUTODISCOVERY_ZOMBIE,false);
+        s.setProperty(ServerFactory.SERVICES_AUTO_MANAGED,sv.getServicesAutomanaged());
+        s.setProperty(ServerFactory.RUNTIME_AUTODISCOVERY,sv.getRuntimeAutodiscovery());
+        s.setProperty(ServerFactory.WAS_AUTODISCOVERED,sv.getWasAutodiscovered());
+        s.setProperty(ServerFactory.AUTODISCOVERY_ZOMBIE,false);
         //TODO abstract creationTime, modifiedTime, and sortName?
-        s.setProperty(CREATION_TIME, System.currentTimeMillis());
-        s.setProperty(MODIFIED_TIME,System.currentTimeMillis());
+        s.setProperty(ServerFactory.CREATION_TIME, System.currentTimeMillis());
+        s.setProperty(ServerFactory.MODIFIED_TIME,System.currentTimeMillis());
         s.setProperty(AppdefResource.SORT_NAME, sv.getName().toUpperCase());
         s.setOwner(owner);
         s.setAgent(p.getAgent());
@@ -264,40 +254,6 @@ public class ServerManagerImpl implements ServerManager {
         return s;
    }
     
-    public Server toServer(Resource serverResource) {
-        Server server = new Server(serverResource.getId());
-        server.setAutoinventoryIdentifier((String)serverResource.getProperty(AUTO_INVENTORY_IDENTIFIER));
-        server.setCreationTime((Long)serverResource.getProperty(CREATION_TIME));
-        server.setDescription(serverResource.getDescription());
-        server.setInstallPath((String)serverResource.getProperty(INSTALL_PATH));
-        server.setLocation(serverResource.getLocation());
-        server.setModifiedBy(serverResource.getModifiedBy());
-        server.setModifiedTime((Long)serverResource.getProperty(MODIFIED_TIME));
-        server.setName(serverResource.getName());
-        server.setPlatform(platformManager.toPlatform(serverResource.getResourceTo(RelationshipTypes.SERVER)));
-        server.setResource(serverResource);
-        server.setRuntimeAutodiscovery((Boolean)serverResource.getProperty(RUNTIME_AUTODISCOVERY));
-        server.setServerType(toServerType(serverResource.getType()));
-        server.setServicesAutomanaged((Boolean)serverResource.getProperty(SERVICES_AUTO_MANAGED));
-        server.setWasAutodiscovered((Boolean)serverResource.getProperty(WAS_AUTODISCOVERED));
-        server.setAutodiscoveryZombie((Boolean)serverResource.getProperty(AUTODISCOVERY_ZOMBIE));
-        return server;
-    }
-    
-    private ServerType toServerType(ResourceType serverResType) {
-        ServerType serverType = new ServerType();
-        //TODO?
-        //serverType.setCreationTime(creationTime)
-        //serverType.setModifiedTime();
-        serverType.setDescription(serverResType.getDescription());
-        serverType.setId(serverResType.getId());
-        serverType.setName(serverResType.getName());
-        serverType.setPlugin(serverResType.getPlugin().getName());
-        //TODO for types, we just fake out sort name for now.  Can't do setProperty on ResourceType
-        serverType.setSortName(serverResType.getName().toUpperCase());
-        return serverType;
-    }
-
     /**
      * Create a Server on the given platform.
      * 
@@ -319,7 +275,7 @@ public class ServerManagerImpl implements ServerManager {
             Resource platform = resourceManager.findResourceById(platformId);
             ResourceType serverType = resourceManager.findResourceTypeById(serverTypeId);
 
-            sValue.setServerType(toServerType(serverType).getServerTypeValue());
+            sValue.setServerType(serverFactory.createServerType(serverType).getServerTypeValue());
             sValue.setModifiedBy(subject.getName());
 
             // validate the object
@@ -329,7 +285,7 @@ public class ServerManagerImpl implements ServerManager {
             Resource server = create(subject,sValue, platform);
 
             //TODO abstract to ResourceManager when we can send events w/out AppdefEntityIDs
-            Server serv = toServer(server);
+            Server serv = serverFactory.createServer(server);
             ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, serv.getEntityId());
             zeventManager.enqueueEventAfterCommit(zevent);
 
@@ -349,31 +305,32 @@ public class ServerManagerImpl implements ServerManager {
      * 
      */
     public void removeServer(AuthzSubject subject, Server server) throws PermissionException, VetoException {
+        removeServer(subject,server.getId());
+    }
+
+    public void removeServer(AuthzSubject subject, Integer serverId) throws PermissionException, VetoException {
         //TODO authzHQSystem resource doesn't exist now
         //        final Audit audit = resourceAuditFactory.deleteResource(resourceManager
 //            .findResourceById(AuthzConstants.authzHQSystem), subject, 0, 0);
-        boolean pushed = false;
+        //boolean pushed = false;
 
         try {
             //auditManager.pushContainer(audit);
-            pushed = true;
-            //TODO virtual?
-            //if (!server.getType().isVirtual()) {
-              //  permissionManager.checkRemovePermission(subject, server.getEntityId());
-            //}
-
-            //TODO remove services         
+            //pushed = true;
+         
+            Set<Resource> services=resourceManager.findResourceById(serverId).getResourcesFrom(RelationshipTypes.SERVICE);
+            for(Resource service: services) {
+                serviceManager.removeService(subject, service.getId());
+            }      
             //config, cprops, and relationships will get cleaned up by removal here
-            resourceManager.removeResource(subject, resourceManager.findResourceById(server.getId()));
+            resourceManager.removeResource(subject, resourceManager.findResourceById(serverId));
            
         } finally {
-            if (pushed) {
-                auditManager.popContainer(true);
-            }
+            //if (pushed) {
+               // auditManager.popContainer(true);
+           // }
         }
     }
-
-   
 
     /**
      * Find all server types
@@ -392,7 +349,7 @@ public class ServerManagerImpl implements ServerManager {
         Set<ServerType> serverTypes = new HashSet<ServerType>();
         Set<ResourceType> resourceTypes = getAllServerResourceTypes();
         for(ResourceType serverType: resourceTypes) {
-            serverTypes.add(toServerType(serverType));
+            serverTypes.add(serverFactory.createServerType(serverType));
         }
         return serverTypes;
     }
@@ -464,7 +421,7 @@ public class ServerManagerImpl implements ServerManager {
         Collection<ResourceType> resourceTypes = platType.getResourceTypesFrom(RelationshipTypes.SERVER);
         Set<ServerType> serverTypes = new HashSet<ServerType>();
         for(ResourceType resourceType: resourceTypes) {
-            serverTypes.add(toServerType(resourceType));
+            serverTypes.add(serverFactory.createServerType(resourceType));
         }
 
         return valuePager.seek(serverTypes, pc);
@@ -473,7 +430,7 @@ public class ServerManagerImpl implements ServerManager {
     private Resource findServerByAIID(Resource platform, String aiid) {
         Collection<Resource> servers = platform.getResourcesFrom(RelationshipTypes.SERVER);
         for(Resource server: servers) {
-            if(server.getProperty(AUTO_INVENTORY_IDENTIFIER).equals(aiid)) {
+            if(server.getProperty(ServerFactory.AUTO_INVENTORY_IDENTIFIER).equals(aiid)) {
                 return server;
             }
         }
@@ -487,7 +444,7 @@ public class ServerManagerImpl implements ServerManager {
     public Server findServerByAIID(AuthzSubject subject, Platform platform, String aiid) throws PermissionException {
         //TODO perm check
         //permissionManager.checkViewPermission(subject, platform.getId());
-        return toServer(findServerByAIID(resourceManager.findResourceById(platform.getId()), aiid));
+        return serverFactory.createServer(findServerByAIID(resourceManager.findResourceById(platform.getId()), aiid));
     }
 
     /**
@@ -512,7 +469,11 @@ public class ServerManagerImpl implements ServerManager {
      */
     @Transactional(readOnly=true)
     public Server getServerById(Integer id) {
-        return toServer(resourceManager.findResourceById(id));
+        Resource serverResource = resourceManager.findResourceById(id);
+        if(serverResource == null) {
+            return null;
+        }
+        return serverFactory.createServer(serverResource);
     }
 
     /**
@@ -521,7 +482,7 @@ public class ServerManagerImpl implements ServerManager {
      */
     @Transactional(readOnly=true)
     public ServerType findServerType(Integer id) {
-        return toServerType(resourceManager.findResourceTypeById(id));
+        return serverFactory.createServerType(resourceManager.findResourceTypeById(id));
     }
 
     /**
@@ -536,7 +497,7 @@ public class ServerManagerImpl implements ServerManager {
         if (type == null) {
             throw new NotFoundException("name not found: " + name);
         }
-        return toServerType(type);
+        return serverFactory.createServerType(type);
     }
     
     @Transactional(readOnly=true)
@@ -546,7 +507,7 @@ public class ServerManagerImpl implements ServerManager {
         Collection<Resource> relatedServers = platResource.getResourcesFrom(RelationshipTypes.SERVER);
         for(Resource server: relatedServers) {
             if(st.equals(server.getType())) {
-                servers.add(toServer(server));
+                servers.add(serverFactory.createServer(server));
             }
         }
         return servers;
@@ -557,7 +518,7 @@ public class ServerManagerImpl implements ServerManager {
         Collection<Resource> relatedServers = platform.getResourcesFrom(RelationshipTypes.SERVER);
         for(Resource server: relatedServers) {
             if(serverType.equals(server.getType())) {
-                servers.add(toServer(server));
+                servers.add(serverFactory.createServer(server));
             }
         }
         return servers;
@@ -567,7 +528,7 @@ public class ServerManagerImpl implements ServerManager {
         List<Server> servers = new ArrayList<Server>();
         Collection<Resource> relatedServers = platform.getResourcesFrom(RelationshipTypes.SERVER);
         for(Resource server: relatedServers) {
-                servers.add(toServer(server));
+                servers.add(serverFactory.createServer(server));
         }
         //TODO order
         return servers;
@@ -636,7 +597,7 @@ public class ServerManagerImpl implements ServerManager {
         Resource s = svc.getResourceTo(RelationshipTypes.SERVICE);
         //TODO
         //permissionManager.checkViewPermission(subject, s.getId());
-        return toServer(s).getServerValue();
+        return serverFactory.createServer(s).getServerValue();
     }
 
     /**
@@ -864,7 +825,7 @@ public class ServerManagerImpl implements ServerManager {
 //                }
 //            } else {
             //TODO making assumption that all group members are services here
-                Server server = toServer(appService.getResourceTo(RelationshipTypes.SERVICE));
+                Server server = serverFactory.createServer(appService.getResourceTo(RelationshipTypes.SERVICE));
                 
                     Integer serverId = server.getId();
 
@@ -973,7 +934,7 @@ public class ServerManagerImpl implements ServerManager {
             existing.setMTime(new Long(System.currentTimeMillis()));
             trimStrings(existing);
 
-            if (toServer(server).matchesValueObject(existing)) {
+            if (serverFactory.createServer(server).matchesValueObject(existing)) {
                 log.debug("No changes found between value object and entity");
             } else {
                 if (!existing.getName().equals(server.getName())) {
@@ -983,7 +944,7 @@ public class ServerManagerImpl implements ServerManager {
 
                 updateServer(existing,server);
             }
-            return toServer(server);
+            return serverFactory.createServer(server);
         } catch (ObjectNotFoundException e) {
             throw new ServerNotFoundException(existing.getId(), e);
         }
@@ -1085,20 +1046,20 @@ public class ServerManagerImpl implements ServerManager {
         stype.persist();
         stype.setPlugin(pluginDAO.findByName(plugin));
         Set<PropertyType> propTypes = new HashSet<PropertyType>();
-        propTypes.add(createServerPropertyType(WAS_AUTODISCOVERED));
-        propTypes.add(createServerPropertyType(AUTO_INVENTORY_IDENTIFIER));
-        propTypes.add(createServerPropertyType(AUTODISCOVERY_ZOMBIE));
-        propTypes.add(createServerPropertyType(CREATION_TIME));
-        propTypes.add(createServerPropertyType(MODIFIED_TIME));
+        propTypes.add(createServerPropertyType(ServerFactory.WAS_AUTODISCOVERED));
+        propTypes.add(createServerPropertyType(ServerFactory.AUTO_INVENTORY_IDENTIFIER));
+        propTypes.add(createServerPropertyType(ServerFactory.AUTODISCOVERY_ZOMBIE));
+        propTypes.add(createServerPropertyType(ServerFactory.CREATION_TIME));
+        propTypes.add(createServerPropertyType(ServerFactory.MODIFIED_TIME));
         propTypes.add(createServerPropertyType(AppdefResource.SORT_NAME));
-        propTypes.add(createServerPropertyType(INSTALL_PATH));
-        propTypes.add(createServerPropertyType(SERVICES_AUTO_MANAGED));
-        propTypes.add(createServerPropertyType(RUNTIME_AUTODISCOVERY));
+        propTypes.add(createServerPropertyType(ServerFactory.INSTALL_PATH));
+        propTypes.add(createServerPropertyType(ServerFactory.SERVICES_AUTO_MANAGED));
+        propTypes.add(createServerPropertyType(ServerFactory.RUNTIME_AUTODISCOVERY));
         //TODO add method?
         stype.setPropertyTypes(propTypes);
         String newPlats[] = sinfo.getValidPlatformTypes();
         findAndSetPlatformType(newPlats, stype);
-        return toServerType(stype);
+        return serverFactory.createServerType(stype);
     }
     
     private PropertyType createServerPropertyType(String propName) {
@@ -1169,7 +1130,7 @@ public class ServerManagerImpl implements ServerManager {
      * 
      */
     public void setAutodiscoveryZombie(Server server, boolean zombie) {
-        resourceManager.findResourceById(server.getId()).setProperty(AUTODISCOVERY_ZOMBIE,zombie);
+        resourceManager.findResourceById(server.getId()).setProperty(ServerFactory.AUTODISCOVERY_ZOMBIE,zombie);
     }
 
     /**

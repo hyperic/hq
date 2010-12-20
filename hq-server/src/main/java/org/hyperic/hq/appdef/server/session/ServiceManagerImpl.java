@@ -82,18 +82,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ServiceManagerImpl implements ServiceManager {
 
-    private static final String SERVICE_RT = "ServiceRt";
-
-    private static final String MODIFIED_TIME = "ModifiedTime";
-
-    private static final String END_USER_RT = "EndUserRt";
-
-    private static final String CREATION_TIME = "CreationTime";
-
-    private static final String AUTO_INVENTORY_IDENTIFIER = "AutoInventoryIdentifier";
-
-    private static final String AUTO_DISCOVERY_ZOMBIE = "autoDiscoveryZombie";
-
     private final Log log = LogFactory.getLog(ServiceManagerImpl.class);
 
     private static final String VALUE_PROCESSOR = "org.hyperic.hq.appdef.server.session.PagerProcessor_service";
@@ -103,64 +91,22 @@ public class ServiceManagerImpl implements ServiceManager {
     private ResourceManager resourceManager;
     private AuthzSubjectManager authzSubjectManager;
     private PluginDAO pluginDAO;
-    private ServerManager serverManager;
-    private PlatformManager platformManager;
+    private ServiceFactory serviceFactory;
     private ResourceGroupManager resourceGroupManager;
 
     @Autowired
     public ServiceManagerImpl(PermissionManager permissionManager,
                               ResourceManager resourceManager,
                               AuthzSubjectManager authzSubjectManager, PluginDAO pluginDAO,
-                              ServerManager serverManager, PlatformManager platformManager,
+                              ServiceFactory serviceFactory,
                               ResourceGroupManager resourceGroupManager) {
      
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
         this.authzSubjectManager = authzSubjectManager;
         this.pluginDAO = pluginDAO;
-        this.serverManager = serverManager;
-        this.platformManager = platformManager;
+        this.serviceFactory = serviceFactory;
         this.resourceGroupManager = resourceGroupManager;
-    }
-    
-    private Service toService(Resource resource) {
-        Service service = new Service();
-        service.setAutodiscoveryZombie((Boolean)resource.getProperty(AUTO_DISCOVERY_ZOMBIE));
-        service.setAutoinventoryIdentifier((String)resource.getProperty(AUTO_INVENTORY_IDENTIFIER));
-        service.setCreationTime((Long)resource.getProperty(CREATION_TIME));
-        service.setDescription(resource.getDescription());
-        service.setEndUserRt((Boolean)resource.getProperty(END_USER_RT));
-        service.setId(resource.getId());
-        service.setLocation(resource.getLocation());
-        service.setModifiedBy(resource.getModifiedBy());
-        service.setModifiedTime((Long)resource.getProperty(MODIFIED_TIME));
-        service.setName(resource.getName());
-        service.setResource(resource);
-        Resource parent = resource.getResourceTo(RelationshipTypes.SERVICE);
-        Resource grandParent = parent.getResourceTo(RelationshipTypes.SERVER);
-        if(grandParent != null) {
-            service.setParent(serverManager.toServer(parent));
-        }else {
-            service.setParent(platformManager.toPlatform(parent));
-        }
-        service.setServiceRt((Boolean)resource.getProperty(SERVICE_RT));
-        service.setServiceType(toServiceType(resource.getType()));
-        service.setSortName((String)resource.getProperty(AppdefResource.SORT_NAME));
-        return service;
-    }
-    
-    private ServiceType toServiceType(ResourceType resourceType) {
-        ServiceType serviceType = new ServiceType();
-        //TODO
-        //serviceType.setCreationTime(creationTime);
-        //serviceType.setModifiedTime(modifiedTime);
-        serviceType.setDescription(resourceType.getDescription());
-        serviceType.setId(resourceType.getId());
-        serviceType.setName(resourceType.getName());
-        serviceType.setPlugin(resourceType.getPlugin().getName());
-        //TODO for types, we just fake out sort name for now.  Can't do setProperty on ResourceType
-        serviceType.setSortName(resourceType.getName().toUpperCase());
-        return serviceType;
     }
     
     private Resource create(AuthzSubject subject,ResourceType type, Resource server, String name, String desc,
@@ -177,13 +123,13 @@ public class ServiceManagerImpl implements ServiceManager {
         s.setLocation(location);
         s.persist();
         s.setType(type);
-        s.setProperty(AUTO_INVENTORY_IDENTIFIER,name);
-        s.setProperty(AUTO_DISCOVERY_ZOMBIE,false);
-        s.setProperty(SERVICE_RT,false);
-        s.setProperty(END_USER_RT,false);
+        s.setProperty(ServiceFactory.AUTO_INVENTORY_IDENTIFIER,name);
+        s.setProperty(ServiceFactory.AUTO_DISCOVERY_ZOMBIE,false);
+        s.setProperty(ServiceFactory.SERVICE_RT,false);
+        s.setProperty(ServiceFactory.END_USER_RT,false);
         //TODO abstract creationTime, modifiedTime, and sortName?
-        s.setProperty(CREATION_TIME, System.currentTimeMillis());
-        s.setProperty(MODIFIED_TIME,System.currentTimeMillis());
+        s.setProperty(ServiceFactory.CREATION_TIME, System.currentTimeMillis());
+        s.setProperty(ServiceFactory.MODIFIED_TIME,System.currentTimeMillis());
         s.setProperty(AppdefResource.SORT_NAME, name.toUpperCase());
         s.setOwner(subject);
         server.relateTo(s, RelationshipTypes.SERVICE);
@@ -199,10 +145,10 @@ public class ServiceManagerImpl implements ServiceManager {
                                  String name, String desc, String location)
         throws ValidationException, PermissionException, ServerNotFoundException,
         AppdefDuplicateNameException {
-        //TODO need a method that creates a service directly under a Platform
+        //TODO need a method that creates a service directly under a Platform.  Test PlatformManager.removePlatform gets rid of them
         Resource server =resourceManager.findResourceById(serverId);
         ResourceType serviceType = resourceManager.findResourceTypeById(serviceTypeId);
-        return toService(create(subject, serviceType, server,name, desc, location));
+        return serviceFactory.createService(create(subject, serviceType, server,name, desc, location));
     }
 
    
@@ -277,7 +223,11 @@ public class ServiceManagerImpl implements ServiceManager {
      */
     @Transactional(readOnly = true)
     public Service getServiceById(Integer id) {
-        return toService(resourceManager.findResourceById(id));
+        Resource serviceResource = resourceManager.findResourceById(id);
+        if(serviceResource == null) {
+            return null;
+        }
+        return serviceFactory.createService(serviceResource);
     }
 
     /**
@@ -311,7 +261,7 @@ public class ServiceManagerImpl implements ServiceManager {
      */
     @Transactional(readOnly = true)
     public ServiceType findServiceType(Integer id) throws ObjectNotFoundException {
-        return toServiceType(resourceManager.findResourceTypeById(id));
+        return serviceFactory.createServiceType(resourceManager.findResourceTypeById(id));
     }
 
     /**
@@ -319,7 +269,7 @@ public class ServiceManagerImpl implements ServiceManager {
      */
     @Transactional(readOnly = true)
     public ServiceType findServiceTypeByName(String name) {
-        return toServiceType(resourceManager.findResourceTypeByName(name));
+        return serviceFactory.createServiceType(resourceManager.findResourceTypeByName(name));
     }
 
     /**
@@ -336,7 +286,7 @@ public class ServiceManagerImpl implements ServiceManager {
     private Set<ServiceType> getAllServiceTypes() {
         Set<ServiceType> serviceTypes = new HashSet<ServiceType>();
         for(ResourceType serviceType: getAllServiceResourceTypes()) {
-            serviceTypes.add(toServiceType(serviceType));
+            serviceTypes.add(serviceFactory.createServiceType(serviceType));
         }
         return serviceTypes;
     }
@@ -720,7 +670,7 @@ public class ServiceManagerImpl implements ServiceManager {
         //permissionManager.checkModifyPermission(subject, svc.getEntityId());
         Resource resource = resourceManager.findResourceById(svc.getId());
         resource.setModifiedBy(subject.getName());
-        resource.setProperty(AUTO_DISCOVERY_ZOMBIE,zombieStatus);
+        resource.setProperty(ServiceFactory.AUTO_DISCOVERY_ZOMBIE,zombieStatus);
         resource.merge();
     }
     
@@ -742,7 +692,7 @@ public class ServiceManagerImpl implements ServiceManager {
         if (existing.getName() != null)
             existing.setName(existing.getName().trim());
         
-        Service svc = toService(service);
+        Service svc = serviceFactory.createService(service);
         if (svc.matchesValueObject(existing)) {
             log.debug("No changes found between value object and entity");
         } else {
@@ -782,7 +732,7 @@ public class ServiceManagerImpl implements ServiceManager {
 
                 // See if this exists
                 if (sinfo == null) {
-                    deleteServiceType(toServiceType(serviceType), overlord);
+                    deleteServiceType(serviceFactory.createServiceType(serviceType), overlord);
                 } else {
                     // Just update it
                     if (!sinfo.getName().equals(serviceType.getName())) {
@@ -850,18 +800,18 @@ public class ServiceManagerImpl implements ServiceManager {
         serviceType.setDescription(sinfo.getDescription());
         serviceType.persist();
         Set<PropertyType> propTypes = new HashSet<PropertyType>();
-        propTypes.add(createServicePropertyType(AUTO_INVENTORY_IDENTIFIER));
-        propTypes.add(createServicePropertyType(CREATION_TIME));
-        propTypes.add(createServicePropertyType(MODIFIED_TIME));
+        propTypes.add(createServicePropertyType(ServiceFactory.AUTO_INVENTORY_IDENTIFIER));
+        propTypes.add(createServicePropertyType(ServiceFactory.CREATION_TIME));
+        propTypes.add(createServicePropertyType(ServiceFactory.MODIFIED_TIME));
         propTypes.add(createServicePropertyType(AppdefResource.SORT_NAME));
-        propTypes.add(createServicePropertyType(AUTO_DISCOVERY_ZOMBIE));
-        propTypes.add(createServicePropertyType(END_USER_RT));
-        propTypes.add(createServicePropertyType(SERVICE_RT));
+        propTypes.add(createServicePropertyType(ServiceFactory.AUTO_DISCOVERY_ZOMBIE));
+        propTypes.add(createServicePropertyType(ServiceFactory.END_USER_RT));
+        propTypes.add(createServicePropertyType(ServiceFactory.SERVICE_RT));
         //TODO add method?
         serviceType.setPropertyTypes(propTypes);
         serviceType.setPlugin(pluginDAO.findByName(plugin));
         servType.relateTo(serviceType, RelationshipTypes.SERVICE);
-        return toServiceType(serviceType);
+        return serviceFactory.createServiceType(serviceType);
     }
     
     private PropertyType createServicePropertyType(String propName) {
@@ -884,9 +834,14 @@ public class ServiceManagerImpl implements ServiceManager {
 
     public void removeService(AuthzSubject subject, Service service) throws PermissionException,
         VetoException {
+        removeService(subject,service.getId());
+    }
+    
+    public void removeService(AuthzSubject subject, Integer serviceId) throws PermissionException,
+    VetoException {
         //TODO perm check
         //permissionManager.checkRemovePermission(subject, aeid);
-        resourceManager.removeResource(subject, resourceManager.findResourceById(service.getId()));
+        resourceManager.removeResource(subject, resourceManager.findResourceById(serviceId));
     }
 
     /**

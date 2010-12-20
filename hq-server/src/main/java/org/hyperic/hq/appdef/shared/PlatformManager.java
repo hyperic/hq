@@ -297,6 +297,4 @@ public interface PlatformManager {
     ResourceTree getEntitiesForAgent(AuthzSubject subject, Agent agt)
         throws AgentNotFoundException, PermissionException;
     
-    Platform toPlatform(Resource platformResource);
-
 }

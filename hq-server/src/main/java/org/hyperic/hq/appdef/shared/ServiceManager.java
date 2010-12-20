@@ -172,6 +172,9 @@ public interface ServiceManager {
      * ServerManager.removeServer when cascading a delete onto services.
      */
     public void removeService(AuthzSubject subject, Service service) throws PermissionException, VetoException;
+    
+    void removeService(AuthzSubject subject, Integer serviceId) throws PermissionException,
+        VetoException;
 
     /**
      * Returns a list of 2 element arrays. The first element is the name of the

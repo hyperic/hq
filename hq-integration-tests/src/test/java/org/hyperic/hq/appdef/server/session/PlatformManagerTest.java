@@ -28,6 +28,7 @@ package org.hyperic.hq.appdef.server.session;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
@@ -40,12 +41,18 @@ import java.util.Set;
 import org.hibernate.NonUniqueObjectException;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.Ip;
-import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
+import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
+import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.appdef.shared.ServerNotFoundException;
+import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
+import org.hyperic.hq.appdef.shared.UpdateException;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
@@ -57,7 +64,6 @@ import org.hyperic.util.pager.PageList;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.annotation.DirtiesContext;
-
 
 
 /**
@@ -177,27 +183,35 @@ public class PlatformManagerTest
             ppNameOfService);
     }
 
-    /*
-     * @Test public void testGetPlatformPluginNameForGroup() throws
-     * AppdefEntityNotFoundException { String ppNameOfGroup =
-     * platformManager.getPlatformPluginName(AppdefEntityID
-     * .newGroupID(testGroup.getId()));
-     * assertEquals("PlatformPluginName incorrect for service",
-     * "Spring JDBC Template Linux", ppNameOfGroup); }
-     */
-
-    /*
-     * @Test public void testRemovePlatform() throws PermissionException,
-     * VetoException, PlatformNotFoundException {
-     * platformManager.removePlatform(authzSubjectManager.getOverlordPojo(),
-     * testPlatform);
-     * assertNull(platformManager.findPlatformById(testPlatform.getId())); }
-     */
-
-    /*
-     * public void testHandleResourceDelete() { fail("Not yet implemented"); }
-     */
-
+    @Test
+    public void testRemovePlatform() throws PermissionException,
+          VetoException, PlatformNotFoundException {
+        platformManager.addIp(testPlatform, "127.0.0.1", "255:255:255:0", "12:34:G0:93:58:96");
+        platformManager.removePlatform(authzSubjectManager.getOverlordPojo(),
+              testPlatform);
+        try {
+            platformManager.findPlatformById(testPlatform.getId());
+            fail("Platform was found after removal");
+        }catch(PlatformNotFoundException e) {
+            //expected
+        }
+        //Server and Service should be deleted as well
+        try {
+            serverManager.findServerById(testServer.getId());
+            fail("Server was found after removal");
+        }catch(ServerNotFoundException e) {
+            //expected
+        }
+        try {
+            serviceManager.findServiceById(testService.getId());
+            fail("Service was found after removal");
+        }catch(ServiceNotFoundException e) {
+            //expected
+        }
+        //Ensure IP is removed
+        assertTrue(resourceManager.findResourceTypeByName(PlatformManagerImpl.IP_RESOURCE_TYPE_NAME).getResources().isEmpty());
+    }
+    
     @Test
     public void testCreatePlatformByAIPlatformValues() throws ApplicationException {
         String agentToken = "agentToken123";
@@ -275,12 +289,6 @@ public class PlatformManagerTest
         createPlatform(testAgent.getAgentToken(), testPlatformType.getName(),"Test Platform CreationByPlatformType","Test Platform ByPlatformType",2);
     }
 
-//    @Test(expected = AppdefDuplicateFQDNException.class)
-//    public void testCreatePlatformDuplicateFQDN() throws ApplicationException {
-//        createPlatform(testAgent.getAgentToken(), testPlatformType.getName(),"Test Platform CreationByPlatformType","Test Platform ByPlatformType",2);
-//        createPlatform(testAgent.getAgentToken(), testPlatformType.getName(),"Test Platform CreationByPlatformType","Test Platform ByPlatformType1",2);
-//    }
-
     @Test
     public void testGetAllPlatforms() throws ApplicationException, NotFoundException {
         PageList<PlatformValue> pValues = platformManager.getAllPlatforms(authzSubjectManager
@@ -294,16 +302,16 @@ public class PlatformManagerTest
         int i = 1;
         for (Platform p : testPlatforms) {
             // Set Platforms creation time 20 minutes before the current time.
-            p.getResource().setProperty(PlatformManagerImpl.CREATION_TIME,setTime - 20 * 60000l);
+            p.getResource().setProperty(PlatformFactory.CREATION_TIME,setTime - 20 * 60000l);
             p.getResource().merge();
             i++;
         }
         // Change two of the platform's creation time to recent
-        testPlatforms.get(0).getResource().setProperty(PlatformManagerImpl.CREATION_TIME,setTime);
+        testPlatforms.get(0).getResource().setProperty(PlatformFactory.CREATION_TIME,setTime);
         testPlatforms.get(0).getResource().merge();
-        testPlatforms.get(1).getResource().setProperty(PlatformManagerImpl.CREATION_TIME,setTime - 2 * 60000l);
+        testPlatforms.get(1).getResource().setProperty(PlatformFactory.CREATION_TIME,setTime - 2 * 60000l);
         testPlatforms.get(1).getResource().merge();
-        testPlatforms.get(2).getResource().setProperty(PlatformManagerImpl.CREATION_TIME,setTime - 3 * 60000l);
+        testPlatforms.get(2).getResource().setProperty(PlatformFactory.CREATION_TIME,setTime - 3 * 60000l);
         testPlatforms.get(2).getResource().merge();
         PageList<PlatformValue> pValues = platformManager.getRecentPlatforms(authzSubjectManager
             .getOverlordPojo(), 5 * 60000l, 10);
@@ -346,31 +354,6 @@ public class PlatformManagerTest
         assertNotNull(fetchedPlatform);
         assertEquals(testPlatform, fetchedPlatform);
     }
-
-    // @Test TODO: Find out why getPhysPlatformByAgentToken() doesn't return a
-    // valid platform by agent token
-    // public void testGetPlatformByAIPlatformAgentToken() throws
-    // ApplicationException {
-    // AIPlatformValue aiPlatform = new AIPlatformValue();
-    // //First set AIPlatformValue to invalid FQDN
-    // aiPlatform.setFqdn("abcd");
-    // aiPlatform.setAgentToken(testPlatform.getAgent().getAgentToken());
-    // //Following method will fetch the platform based on agent token
-    // Platform fetchedPlatform =
-    // platformManager.getPlatformByAIPlatform(authzSubjectManager.getOverlordPojo(),
-    // aiPlatform);
-    // assertNotNull(fetchedPlatform);
-    // assertEquals(testPlatform, fetchedPlatform);
-    // }
-
-    // @Test
-    // public void testGetPlatformByNameAndAuth() throws ApplicationException {
-    // PlatformValue fetchedPlatform =
-    // platformManager.getPlatformByName(authzSubjectManager.getOverlordPojo(),
-    // testPlatform.getName());
-    // assertNotNull(fetchedPlatform);
-    // assertEquals(testPlatform.getPlatformValue(), fetchedPlatform);
-    // }
 
     @Test
     public void testFindPlatformByFqdn() throws ApplicationException {
@@ -570,30 +553,26 @@ public class PlatformManagerTest
         assertEquals(updatedPlatform.getCpuCount().intValue(), 4);
     }
 
-    // TODO
-    // Currently the method updateWithAI -> getPlatformByAIPlatform() ->
-    // getPhysPlatformByAgentToken(agentToken) has some issues
-    // Once this is fixed, we can add the usecase to update FQDN
-    public void testUpdateAIForFQDNChange() {
-    }
-
-    // TODO
-    public void testUpdateAIIpValues() throws ApplicationException {
-        AIPlatformValue aiPlatform = new AIPlatformValue();
-        // Set AIPlatformValue for the testPlatform
-        aiPlatform.setPlatformTypeName(testPlatform.getPlatformType().getName());
-        aiPlatform.setAgentToken(testPlatform.getAgent().getAgentToken());
-        aiPlatform.setFqdn(testPlatform.getFqdn());
-        AIIpValue aiIpVal = new AIIpValue();
-        aiIpVal.setAddress("192.168.1.2");
-        aiIpVal.setMACAddress("12:34:G0:93:58:96");
-        aiIpVal.setNetmask("255:255:255:0");
-        // Queue status to AIQueueConstants.Q_STATUS_REMOVED
-        aiIpVal.setQueueStatus(3);
-        aiPlatform.addAIIpValue(aiIpVal);
-        // Now perform updateAI
-        // TODO: why update of AgentIP happens only if the queue status removed?
-        platformManager.updateWithAI(aiPlatform, authzSubjectManager.getOverlordPojo());
+    @Test
+    public void testUpdatePlatform() throws PlatformNotFoundException, AppdefDuplicateNameException, AppdefDuplicateFQDNException, UpdateException, PermissionException, ApplicationException {
+        PlatformValue platform = new PlatformValue();
+        platform.setId(testPlatform.getId());
+        platform.setCpuCount(4);
+        platform.setLocation("Somewhere");
+        platform.setName("Updated Name");
+        platform.setFqdn("Updated FQDN");
+        IpValue newIp = new IpValue();
+        newIp.setAddress("1.2.3.4");
+        newIp.setMACAddress("10");
+        newIp.setNetmask("100");
+        platform.addIpValue(newIp);
+        platformManager.updatePlatform(authzSubjectManager.getOverlordPojo(), platform);
+        Platform updatedPlatform = platformManager.findPlatformById(testPlatform.getId());
+        assertEquals("Updated Name",updatedPlatform.getName());
+        assertEquals("Updated FQDN",updatedPlatform.getFqdn());
+        assertEquals("Somewhere",updatedPlatform.getLocation());
+        assertEquals(new Integer(4),updatedPlatform.getCpuCount());
+        assertEquals(1,updatedPlatform.getIps().size());
     }
 
     @Test

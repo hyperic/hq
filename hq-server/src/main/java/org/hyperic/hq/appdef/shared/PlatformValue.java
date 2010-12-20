@@ -364,7 +364,7 @@ public class PlatformValue extends AppdefResourceValue
     protected java.util.Collection updatedIpValues = new java.util.HashSet();
 
     public java.util.Collection<IpValue> getAddedIpValues() { return addedIpValues; }
-    public java.util.Collection getRemovedIpValues() { return removedIpValues; }
+    public java.util.Collection<IpValue> getRemovedIpValues() { return removedIpValues; }
     public java.util.Collection getUpdatedIpValues() { return updatedIpValues; }
 
     public org.hyperic.hq.appdef.shared.IpValue[] getIpValues()
