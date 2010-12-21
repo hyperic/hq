@@ -261,7 +261,30 @@ public abstract class PermissionManager {
      */
     public void checkRemovePermission(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException {
-       //TODO
+        //TODO
+//        int type = id.getType();
+//        String opName = null;
+//        switch (type) {
+//            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+//                opName = AuthzConstants.platformOpRemovePlatform;
+//                break;
+//            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+//                opName = AuthzConstants.serverOpRemoveServer;
+//                break;
+//            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+//                opName = AuthzConstants.serviceOpRemoveService;
+//                break;
+//            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+//                opName = AuthzConstants.appOpRemoveApplication;
+//                break;
+//            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+//                opName = AuthzConstants.groupOpRemoveResourceGroup;
+//                break;
+//            default:
+//                throw new InvalidAppdefTypeException("Unknown type: " + type);
+//        }
+//        // now check
+//        checkPermission(subject, id, opName);
     }
 
     /**
@@ -554,7 +577,30 @@ public abstract class PermissionManager {
      */
     public void checkViewPermission(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException {
-      //TODO
+        //TODO
+//        int type = id.getType();
+//        String opName = null;
+//        switch (type) {
+//            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+//                opName = AuthzConstants.platformOpViewPlatform;
+//                break;
+//            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+//                opName = AuthzConstants.serverOpViewServer;
+//                break;
+//            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+//                opName = AuthzConstants.serviceOpViewService;
+//                break;
+//            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+//                opName = AuthzConstants.appOpViewApplication;
+//                break;
+//            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+//                opName = AuthzConstants.groupOpViewResourceGroup;
+//                break;
+//            default:
+//                throw new InvalidAppdefTypeException("Unknown type: " + type);
+//        }
+//        // now check
+//        checkPermission(subject, id, opName);
     }
 
     /**

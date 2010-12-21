@@ -379,12 +379,14 @@ public class PermissionManagerImpl
 
     public Collection<Resource> getGroupResources(Integer subjectId, Integer groupId,
                                                   Boolean fsystem) {
-       //TODO
+        //TODO
+        //return ResourceGroup.findResourceGroup(groupId).findInGroup_orderName(fsystem);
         return null;
     }
 
     public Collection<Resource> findServiceResources(AuthzSubject subj, Boolean fsystem) {
-       //TODO
+        //TODO
+        //return Resource.findSvcRes_orderName(fsystem);
         return null;
     }
 
