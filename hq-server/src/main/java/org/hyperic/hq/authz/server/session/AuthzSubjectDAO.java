@@ -25,7 +25,11 @@
 
 package org.hyperic.hq.authz.server.session;
 
+import java.io.Serializable;
 import java.util.Collection;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
@@ -51,6 +55,8 @@ public class AuthzSubjectDAO
     private CrispoDAO crispoDao;
     private RoleDAO roleDAO;
     private ResourceTypeDao resourceTypeDao;
+    @PersistenceContext
+    private EntityManager entityManager;
    
 
     @Autowired
@@ -60,6 +66,16 @@ public class AuthzSubjectDAO
         this.crispoDao = crispoDAO;
         this.roleDAO = roleDAO;
         this.resourceTypeDao = resourceTypeDao;
+    }
+    
+    public AuthzSubject findById(Serializable id) {
+        if (id == null) return null;
+        AuthzSubject result = entityManager.find(AuthzSubject.class, id);
+        // TODO workaround to trigger Neo4jNodeBacking's around advice for the getter
+        if(result != null) {
+            result.getId();
+        }    
+        return result;
     }
 
     AuthzSubject create(AuthzSubject creator, String name, boolean active, String dsn, String dept,

@@ -81,14 +81,14 @@ public class AuthzSubject  {
     @Column(name="HTML_EMAIL",nullable=false)
     private boolean    htmlEmail;
     
-    @ManyToOne(fetch=FetchType.LAZY)
+    @ManyToOne
     private Resource   resource;
     
-    @ManyToMany(fetch=FetchType.LAZY)
+    @ManyToMany
     @OptimisticLock(excluded = true)
     private Set<Role> roles;
     
-    @ManyToOne(fetch=FetchType.LAZY)
+    @ManyToOne
     private Crispo     prefs;
     
     @Column(name="NAME",length=100,nullable=false)
