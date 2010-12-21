@@ -1,12 +1,14 @@
 package org.hyperic.hq.web;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class StaticContentBaseUrlResolver {
 	private static final String BASE_PATH = "static";
 	
 	private String baseUrl;
 	
-	public StaticContentBaseUrlResolver(String baseUrl, 
-			                            String version) {
+	public StaticContentBaseUrlResolver() {
 		StringBuilder tempBaseUrl = new StringBuilder();
 		
 		// ...first construct the base path...
@@ -28,9 +30,9 @@ public class StaticContentBaseUrlResolver {
 		tempBaseUrl.append(BASE_PATH).append("/");
 
 		// ...and finally, add the version number, if we have one...
-		if (version != null) {
-			tempBaseUrl.append(version).append("/");
-		}
+		//if (version != null) {
+			tempBaseUrl.append("5.0").append("/");
+		//}
 
 		// ...we have the base url, set it...
 		this.baseUrl = tempBaseUrl.toString();

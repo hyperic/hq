@@ -42,11 +42,6 @@
     <context:component-scan base-package="org.hyperic.hq.web,org.hyperic.hq.api"/>
     <context:annotation-config />
 	<mvc:annotation-driven/>
-
-	<bean class="org.hyperic.hq.web.StaticContentBaseUrlResolver">
-		<constructor-arg name="baseUrl" value="/" />
-		<constructor-arg name="version" value="5.0" />
-	</bean>	
 	
 	<!-- Defines the set of portlets that can be added multiple times on the dashboard -->
 	<bean id="dashboardController" class="org.hyperic.hq.web.dashboard.DashboardController">
