@@ -52,12 +52,12 @@ import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
+import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -89,6 +89,8 @@ public class PlatformManagerTest
     private Server testServer;
 
     private Service testService;
+    
+    private ServiceType serviceType;
 
     private List<Platform> createPlatforms(String agentToken) throws ApplicationException {
         List<Platform> platforms = new ArrayList<Platform>(10);
@@ -129,9 +131,9 @@ public class PlatformManagerTest
         // Create test server
         testServer = createServer(testPlatform, testServerType, "My Tomcat");
         // Create ServiceType
-        ServiceType serviceType = createServiceType("Spring JDBC Template", testServerType);
+        serviceType = createServiceType("Spring JDBC Template", testServerType);
         // Create test service
-        testService = createService(testServer, serviceType, "platformService jdbcTemplate",
+        testService = createService(testServer.getId(), serviceType, "platformService jdbcTemplate",
             "Spring JDBC Template", "my computer");
         Set<Platform> testPlatforms = new HashSet<Platform>(1);
         testPlatforms.add(testPlatform);
@@ -185,8 +187,13 @@ public class PlatformManagerTest
 
     @Test
     public void testRemovePlatform() throws PermissionException,
-          VetoException, PlatformNotFoundException {
+          VetoException, PlatformNotFoundException, ServerNotFoundException, AppdefDuplicateNameException, ValidationException, NotFoundException {
         platformManager.addIp(testPlatform, "127.0.0.1", "255:255:255:0", "12:34:G0:93:58:96");
+        //create a Service directly under Platform
+        ServiceType serviceType = createServiceType("MyServiceType",testPlatform.getPlatformType());
+      
+        Service platformService = createService(testPlatform.getId(), serviceType, "Service123",
+            "Spring JDBC Template", "my computer");
         platformManager.removePlatform(authzSubjectManager.getOverlordPojo(),
               testPlatform);
         try {
@@ -208,9 +215,16 @@ public class PlatformManagerTest
         }catch(ServiceNotFoundException e) {
             //expected
         }
+        try {
+            serviceManager.findServiceById(platformService.getId());
+            fail("Platform service was found after removal");
+        }catch(ServiceNotFoundException e) {
+            //expected
+        }
         //Ensure IP is removed
         assertTrue(resourceManager.findResourceTypeByName(PlatformManagerImpl.IP_RESOURCE_TYPE_NAME).getResources().isEmpty());
     }
+    
     
     @Test
     public void testCreatePlatformByAIPlatformValues() throws ApplicationException {
@@ -517,16 +531,6 @@ public class PlatformManagerTest
         expectedPlats.add(testPlatform);
         assertEquals(expectedPlats, platforms);
     } 
-
-    // TODO:
-    /*
-     * Yet to confirm how does the method updatePlatformTypes updates the
-     * platformType name
-     */
-    public void testUpdatePlatformTypes() throws NotFoundException, VetoException {
-        PlatformTypeInfo[] pInfos = new PlatformTypeInfo[] { new PlatformTypeInfo("Linux") };
-        platformManager.updatePlatformTypes("Test Plugin", pInfos);
-    }
 
     @Test
     public void testCreatePlatformType() throws NotFoundException {

@@ -570,7 +570,7 @@ public class AppdefEntityValue {
 
         switch(_id.getType()){
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION :
-            return sManager.getServiceInventoryByApplication(getSubject(), iId,
+            return sManager.getServicesByApplication(getSubject(), iId,
                                                              pc);
         case AppdefEntityConstants.APPDEF_TYPE_GROUP:
             validateGroupType(
@@ -610,7 +610,7 @@ public class AppdefEntityValue {
 
         switch (_id.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION :
-                res = sManager.getServiceInventoryByApplication(getSubject(),
+                res = sManager.getServicesByApplication(getSubject(),
                                                                 iId, typeId,pc);
                 break;
             //TODO services associated to services?

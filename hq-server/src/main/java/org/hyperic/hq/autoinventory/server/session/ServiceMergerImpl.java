@@ -157,7 +157,7 @@ public class ServiceMergerImpl implements ServiceMerger {
                     modified=true;
                 }
                 if(modified) {
-                    serviceManager.updateService( service);
+                    serviceManager.updateService( subj,service.getServiceValue());
                 }
             }
 

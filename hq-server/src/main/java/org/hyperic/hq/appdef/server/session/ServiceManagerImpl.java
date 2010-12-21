@@ -28,6 +28,7 @@ package org.hyperic.hq.appdef.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -41,15 +42,12 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
-import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -109,7 +107,7 @@ public class ServiceManagerImpl implements ServiceManager {
         this.resourceGroupManager = resourceGroupManager;
     }
     
-    private Resource create(AuthzSubject subject,ResourceType type, Resource server, String name, String desc,
+    private Resource create(AuthzSubject subject,ResourceType type, Resource parent, String name, String desc,
                                             String location) {
       
         // TODO perm check
@@ -132,7 +130,7 @@ public class ServiceManagerImpl implements ServiceManager {
         s.setProperty(ServiceFactory.MODIFIED_TIME,System.currentTimeMillis());
         s.setProperty(AppdefResource.SORT_NAME, name.toUpperCase());
         s.setOwner(subject);
-        server.relateTo(s, RelationshipTypes.SERVICE);
+        parent.relateTo(s, RelationshipTypes.SERVICE);
         return s;
    }
     
@@ -141,24 +139,27 @@ public class ServiceManagerImpl implements ServiceManager {
      * @return The service id.
      */
 
-    public Service createService(AuthzSubject subject, Integer serverId, Integer serviceTypeId,
+    public Service createService(AuthzSubject subject, Integer parentId, Integer serviceTypeId,
                                  String name, String desc, String location)
         throws ValidationException, PermissionException, ServerNotFoundException,
         AppdefDuplicateNameException {
-        //TODO need a method that creates a service directly under a Platform.  Test PlatformManager.removePlatform gets rid of them
-        Resource server =resourceManager.findResourceById(serverId);
+        Resource parent =resourceManager.findResourceById(parentId);
         ResourceType serviceType = resourceManager.findResourceTypeById(serviceTypeId);
-        return serviceFactory.createService(create(subject, serviceType, server,name, desc, location));
+        return serviceFactory.createService(create(subject, serviceType, parent ,name, desc, location));
     }
 
    
-    private Collection<Resource> findByServerType(Integer serverTypeId, boolean asc) {
-        Set<Resource> services = new HashSet<Resource>();
-        //TODO sort
-        Collection<ResourceType> relatedServiceTypes = resourceManager.findResourceTypeById(serverTypeId).getResourceTypesFrom(RelationshipTypes.SERVICE);
-        for(ResourceType serviceType:relatedServiceTypes) {
-            services.addAll(serviceType.getResources());
+    private Collection<Service> findByServiceType(Integer serviceTypeId, boolean asc) {
+        List<Service> services = new ArrayList<Service>();
+        Set<Resource> serviceResources = resourceManager.findResourceTypeById(serviceTypeId).getResources();
+        for(Resource serviceResource: serviceResources) {
+            services.add(serviceFactory.createService(serviceResource));
         }
+        Collections.sort(services, new Comparator<Service>() {
+            public int compare(Service o1,Service o2) {
+                return (o1.getSortName().compareTo(o2.getSortName()));
+            }
+        });
         return services;
     }
 
@@ -173,33 +174,30 @@ public class ServiceManagerImpl implements ServiceManager {
     public Integer[] getServiceIds(AuthzSubject subject, Integer servTypeId)
         throws PermissionException {
 
-        //try {
-
-            Collection<Resource> services = findByServerType(servTypeId, true);
+        try {
+            Collection<Service> services = findByServiceType(servTypeId, true);
             if (services.size() == 0) {
                 return new Integer[0];
             }
             List<Integer> serviceIds = new ArrayList<Integer>(services.size());
 
-            // TODO now get the list of PKs
-            //Set<Integer> viewable = new HashSet<Integer>(getViewableServices(subject));
+            
+            Set<Integer> viewable = new HashSet<Integer>(getViewableServices(subject));
             // and iterate over the List to remove any item not in the
             // viewable list
             int i = 0;
-            for (Iterator<Resource> it = services.iterator(); it.hasNext(); i++) {
-                Resource service = it.next();
-                //if (viewable.contains(service.getId())) {
+            for (Iterator<Service> it = services.iterator(); it.hasNext(); i++) {
+                Service service = it.next();
+                if (viewable.contains(service.getId())) {
                     // add the item, user can see it
                     serviceIds.add(service.getId());
-                //}
+                }
             }
-
             return (Integer[]) serviceIds.toArray(new Integer[0]);
-            //TODO
-        //} catch (NotFoundException e) {
-            // There are no viewable servers
-         //   return new Integer[0];
-       // }
+        } catch (NotFoundException e) {
+             //There are no viewable servers
+            return new Integer[0];
+        }
     }
 
     /**
@@ -240,7 +238,7 @@ public class ServiceManagerImpl implements ServiceManager {
         throws ServiceNotFoundException, PermissionException {
 
         Service service = findServiceById(id);
-        //TODO
+        //TODO perm check
         //permissionManager.checkViewPermission(subject, service.getId());
         return service;
     }
@@ -252,8 +250,15 @@ public class ServiceManagerImpl implements ServiceManager {
      */
     @Transactional(readOnly = true)
     public List<Service> getServicesByAIID(Server server, String aiid) {
-      //TODO
-        return null;
+        List<Service> aiidServices = new ArrayList<Service>();
+        Resource serverResource = resourceManager.findResourceById(server.getId());
+        Set<Resource> services = serverResource.getResourcesFrom(RelationshipTypes.SERVICE);
+        for(Resource service: services) {
+            if(aiid.equals(service.getProperty(ServiceFactory.AUTO_INVENTORY_IDENTIFIER))) {
+                aiidServices.add(serviceFactory.createService(service));
+            }
+        }
+        return aiidServices;
     }
 
     /**
@@ -308,13 +313,40 @@ public class ServiceManagerImpl implements ServiceManager {
     }
     
     private Collection<ServiceType> getServiceTypes(List<Integer> authzPks,boolean asc) {
-        //TODO from ServiceDAO
-        return null;
+       Set<ServiceType> serviceTypes = new HashSet<ServiceType>();
+       for(Integer serviceId: authzPks) {
+           serviceTypes.add(serviceFactory.createServiceType(resourceManager.findResourceById(serviceId).getType()));
+       }
+       final List<ServiceType> rtn = new ArrayList<ServiceType>(serviceTypes);
+       Collections.sort(rtn, new AppdefNameComparator(asc));
+       return rtn;
+
     }
     
     private Collection<ServiceType> findByServerTypeOrderName(Integer serverTypeId, boolean asc) {
-        //TODO from ServiceDAO
-        return null; 
+        List<ServiceType> serviceTypes = new ArrayList<ServiceType>();
+        ResourceType serverType = resourceManager.findResourceTypeById(serverTypeId);
+        if(serverType ==  null) {
+            return serviceTypes;
+        }
+        Collection<ResourceType> relatedServiceTypes = serverType.getResourceTypesFrom(RelationshipTypes.SERVICE);
+        for(ResourceType serviceType:relatedServiceTypes) {
+            serviceTypes.add(serviceFactory.createServiceType(serviceType));
+        }
+        if(asc) {
+            Collections.sort(serviceTypes, new Comparator<ServiceType>() {
+                public int compare(ServiceType o1,ServiceType o2) {
+                    return (o1.getSortName().compareTo(o2.getSortName()));
+                }
+            });
+        }else {
+            Collections.sort(serviceTypes, new Comparator<ServiceType>() {
+                public int compare(ServiceType o1,ServiceType o2) {
+                    return (o2.getSortName().compareTo(o1.getSortName()));
+                }
+            });
+        }
+        return serviceTypes;
     }
 
     /**
@@ -324,9 +356,9 @@ public class ServiceManagerImpl implements ServiceManager {
     public PageList<ServiceTypeValue> getViewableServiceTypes(AuthzSubject subject, PageControl pc)
         throws PermissionException, NotFoundException {
         // build the server types from the visible list of servers
-        //TODO
-        //final List<Integer> authzPks = getViewableServices(subject);
-        final Collection<ServiceType> serviceTypes = getServiceTypes(new ArrayList<Integer>(), true);
+     
+        final List<Integer> authzPks = getViewableServices(subject);
+        final Collection<ServiceType> serviceTypes = getServiceTypes(authzPks, true);
 
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
@@ -352,21 +384,13 @@ public class ServiceManagerImpl implements ServiceManager {
         // present in the viewablePKs list
         if (svcTypeId != null) {
             for (Service o : svcCol) {
-                
-                 Integer thisSvcTypeId = ((Service) o).getServiceType().getId();
-                 
-                //TODO groups?
-                //else {
-                    //ResourceGroup cluster = (ResourceGroup) o;
-                    //thisSvcTypeId = cluster.getResourcePrototype().getInstanceId();
-                //}
+                Integer thisSvcTypeId = o.getServiceType().getId();
                 // first, if they specified a server type, then filter on it
                 if (!(thisSvcTypeId.equals(svcTypeId))) {
                     continue;
                 }
 
                 services.add(o);
-                //services.add(o instanceof Service ? o : getServiceCluster((ResourceGroup) o));
             }
         } else {
             services.addAll(svcCol);
@@ -379,39 +403,19 @@ public class ServiceManagerImpl implements ServiceManager {
 
     private List<Service> filterUnviewable(AuthzSubject subject, Collection<Service> services)
         throws PermissionException, ServiceNotFoundException {
-        //TODO
-        //        List<AppdefEntityID> viewableEntityIds;
-//        try {
-//            viewableEntityIds = getViewableServiceInventory(subject);
-//        } catch (NotFoundException e) {
-//            throw new ServiceNotFoundException("no viewable services for " + subject);
-//        }
+       
+        List<Integer> viewableEntityIds;
+        try {
+            viewableEntityIds = getViewableServices(subject);
+        } catch (NotFoundException e) {
+            throw new ServiceNotFoundException("no viewable services for " + subject);
+        }
 
         List<Service> retVal = new ArrayList<Service>();
-        // if a cluster has some members that aren't viewable then
-        // the user can't get at them but we don't worry about it here
-        // when the cluster members are accessed, the group subsystem
-        // will filter them
-        // so here's the case for the ServiceLocal amongst the
-        // List of services
-        // *****************
-        // Note: yes, that's the case with regard to group members,
-        // but not groups themselves. Clusters still need to be weeded
-        // out here. - desmond
-        for (Iterator iter = services.iterator(); iter.hasNext();) {
-            Object o = iter.next();
-            if (o instanceof Service) {
-                Service aService = (Service) o;
-                //if (viewableEntityIds != null && viewableEntityIds.contains(aService.getEntityId())) {
-                    retVal.add(aService);
-                //}
-//            } else if (o instanceof ResourceGroup) {
-//                ResourceGroup aCluster = (ResourceGroup) o;
-//                AppdefEntityID clusterId = AppdefEntityID.newGroupID(aCluster.getId());
-//                if (viewableEntityIds != null && viewableEntityIds.contains(clusterId)) {
-//                    retVal.add(getServiceCluster(aCluster));
-//                }
-            }
+        for (Service aService: services) {
+           if (viewableEntityIds.contains(aService.getId())) {
+               retVal.add(aService);
+           }
         }
         return retVal;
     }
@@ -434,18 +438,50 @@ public class ServiceManagerImpl implements ServiceManager {
     }
     
     private List<Service> findByServerAndTypeOrderName(Integer serverId, Integer svcTypeId) {
-        //TODO
-        return null;
+        List<Service> services = new ArrayList<Service>();
+        Resource server = resourceManager.findResourceById(serverId);
+        Set<Resource> serviceResources = server.getResourcesFrom(RelationshipTypes.SERVICE);
+        for(Resource service: serviceResources) {
+            if(service.getType().getId().equals(svcTypeId)) {
+                services.add(serviceFactory.createService(service));
+            }
+        }
+        Collections.sort(services, new Comparator<Service>() {
+            public int compare(Service o1,Service o2) {
+                return (o1.getSortName().compareTo(o2.getSortName()));
+            }
+        });
+        return services;
     }
     
     private List<Service> findByServerOrderName(Integer serverId) {
-        //TODO
-        return null;
+        List<Service> services = new ArrayList<Service>();
+        Resource server = resourceManager.findResourceById(serverId);
+        Set<Resource> serviceResources = server.getResourcesFrom(RelationshipTypes.SERVICE);
+        for(Resource service: serviceResources) {
+            services.add(serviceFactory.createService(service));
+        }
+        Collections.sort(services, new Comparator<Service>() {
+            public int compare(Service o1,Service o2) {
+                return (o1.getSortName().compareTo(o2.getSortName()));
+            }
+        });
+        return services;
     }
     
     private List<Service> findByServerOrderType(Integer serverId) {
-        //TODO
-        return null;
+        List<Service> services = new ArrayList<Service>();
+        Resource server = resourceManager.findResourceById(serverId);
+        Set<Resource> serviceResources = server.getResourcesFrom(RelationshipTypes.SERVICE);
+        for(Resource service: serviceResources) {
+            services.add(serviceFactory.createService(service));
+        }
+        Collections.sort(services, new Comparator<Service>() {
+            public int compare(Service o1,Service o2) {
+                return (o1.getServiceType().getSortName().compareTo(o2.getServiceType().getSortName()));
+            }
+        });
+        return services;
     }
 
     private List<Service> getServicesByServerImpl(AuthzSubject subject, Integer serverId, Integer svcTypeId,
@@ -482,7 +518,12 @@ public class ServiceManagerImpl implements ServiceManager {
     @Transactional(readOnly = true)
     public List<Service> getServicesByServer(AuthzSubject subject, Server server)
         throws PermissionException, ServiceNotFoundException {
-        return filterUnviewable(subject, server.getServices());
+        Set<Resource> serviceResources = resourceManager.findResourceById(server.getId()).getResourcesFrom(RelationshipTypes.SERVICE);
+        Set<Service> services = new HashSet<Service>();
+        for(Resource service: serviceResources) {
+            services.add(serviceFactory.createService(service));
+        }
+        return filterUnviewable(subject, services);
     }
 
     @Transactional(readOnly = true)
@@ -521,8 +562,26 @@ public class ServiceManagerImpl implements ServiceManager {
     }
     
     private List<Service> findPlatformServicesOrderName(Integer platId, boolean asc) {
-        //TODO
-        return null;
+        List<Service> services = new ArrayList<Service>();
+        Resource platform = resourceManager.findResourceById(platId);
+        Set<Resource> serviceResources = platform.getResourcesFrom(RelationshipTypes.SERVICE);
+        for(Resource service: serviceResources) {
+            services.add(serviceFactory.createService(service));
+        }
+        if(asc) {
+            Collections.sort(services, new Comparator<Service>() {
+                public int compare(Service o1,Service o2) {
+                    return (o1.getSortName().compareTo(o2.getSortName()));
+                }
+            });
+        }else {
+            Collections.sort(services, new Comparator<Service>() {
+                public int compare(Service o1,Service o2) {
+                    return (o2.getSortName().compareTo(o1.getSortName()));
+                }
+            });
+        }
+        return services;
     }
 
     /**
@@ -545,26 +604,33 @@ public class ServiceManagerImpl implements ServiceManager {
     public Collection<Service> getPlatformServices(AuthzSubject subject, Integer platId)
         throws ServiceNotFoundException, PermissionException {
         Collection<Service> services = findPlatformServicesOrderName(platId, true);
-        //TODO this used to return services and groups in same Collection!  Yikes!
         return filterUnviewable(subject, services);
     }
 
 
     /**
-     * @return A List of ServiceValue and ServiceClusterValue objects
+     * @return A List of ServiceValue objects
      *         representing all of the services that the given subject is
      *         allowed to view.
      */
     @Transactional(readOnly = true)
     public PageList<ServiceValue> getServicesByApplication(AuthzSubject subject, Integer appId, PageControl pc)
         throws ApplicationNotFoundException, ServiceNotFoundException, PermissionException {
-        //TODO used to return Services and ServiceClusters
         List<Service> services = getServicesByApplication(appId,  pc);
         return valuePager.seek(services, pc);
     }
+    
+    
+    @Transactional(readOnly = true)
+    public PageList<ServiceValue> getServicesByApplication(AuthzSubject subject, Integer appId,
+                                                  Integer serviceTypeId, PageControl pc)
+        throws PermissionException, ApplicationNotFoundException, ServiceNotFoundException {
+        List<Service> services = getServicesByApplication(appId,  pc);
+        return filterAndPage(services, subject, serviceTypeId, pc);
+    }
 
     /**
-     * @return A List of Service and ServiceCluster objects representing all of
+     * @return A List of Service objects representing all of
      *         the services that the given subject is allowed to view.
      * @throws ApplicationNotFoundException if the appId is bogus
      * @throws ServiceNotFoundException if services could not be looked up
@@ -572,29 +638,61 @@ public class ServiceManagerImpl implements ServiceManager {
     @Transactional(readOnly = true)
     public List<Service> getServicesByApplication(AuthzSubject subject, Integer appId)
         throws PermissionException, ApplicationNotFoundException, ServiceNotFoundException {
-        //TODO used to return a list w/both services and ServiceClusters.  Now returns just services
         return filterUnviewable(subject, getServicesByApplication(appId, PageControl.PAGE_ALL));
     }
     
     private List<Service> findByApplicationOrderSvcName(Integer appId, boolean asc) {
-        //TODO
-        return null;
+        List<Service> services = new ArrayList<Service>();
+        ResourceGroup app = resourceGroupManager.findResourceGroupById(appId);
+        Set<Resource> serviceResources = app.getMembers();
+        for(Resource service: serviceResources) {
+            services.add(serviceFactory.createService(service));
+        }
+        if(asc) {
+            Collections.sort(services, new Comparator<Service>() {
+                public int compare(Service o1,Service o2) {
+                    return (o1.getName().compareTo(o2.getName()));
+                }
+            });
+        }else {
+            Collections.sort(services, new Comparator<Service>() {
+                public int compare(Service o1,Service o2) {
+                    return (o2.getName().compareTo(o1.getName()));
+                }
+            });
+        }
+        return services;
     }
     
     private List<Service> findByApplicationOrderSvcType(Integer appId, boolean asc) {
-        //TODO
-        return null;
+        List<Service> services = new ArrayList<Service>();
+        ResourceGroup app = resourceGroupManager.findResourceGroupById(appId);
+        Set<Resource> serviceResources = app.getMembers();
+        for(Resource service: serviceResources) {
+            services.add(serviceFactory.createService(service));
+        }
+        if(asc) {
+            Collections.sort(services, new Comparator<Service>() {
+                public int compare(Service o1,Service o2) {
+                    return (o1.getServiceType().getName().compareTo(o2.getServiceType().getName()));
+                }
+            });
+        }else {
+            Collections.sort(services, new Comparator<Service>() {
+                public int compare(Service o1,Service o2) {
+                    return (o2.getServiceType().getName().compareTo(o1.getServiceType().getName()));
+                }
+            });
+        }
+        return services;
     }
 
     private List<Service> getServicesByApplication(Integer appId, PageControl pc)
         throws ApplicationNotFoundException {
-        try {
-            // we only look up the application to validate
-            // the appId param
-            resourceGroupManager.findResourceGroupById(appId);
-        } catch (ObjectNotFoundException e) {
-            //TODO this wouldn't happen
-            throw new ApplicationNotFoundException(appId, e);
+        // we only look up the application to validate
+        // the appId param
+        if(resourceGroupManager.findResourceGroupById(appId) == null) {
+            throw new ApplicationNotFoundException(appId);
         }
 
         List<Service> appServiceCollection;
@@ -616,54 +714,10 @@ public class ServiceManagerImpl implements ServiceManager {
                                                    pc.getSortattribute() + "] on PageControl : " +
                                                    pc);
         }
-      //TODO
-//        List services = new ArrayList();
-//        for (AppService appService : appServiceCollection) {
-//            
-//            //if (appService.isIsGroup()) {
-//              //  services.add(appService.getResourceGroup());
-//            //} else {
-//                services.add(appService.getService());
-//            //}
-//        }
-//        return services;
         return appServiceCollection;
     }
 
-    /**
-     * @return A List of ServiceValue and ServiceClusterValue objects
-     *         representing all of the services that the given subject is
-     *         allowed to view.
-     */
-    @Transactional(readOnly = true)
-    public PageList<ServiceValue> getServiceInventoryByApplication(AuthzSubject subject, Integer appId,
-                                                     PageControl pc)
-        throws ApplicationNotFoundException, ServiceNotFoundException, PermissionException {
-        //TODO used to return ServiceClusterValue also
-        return getServiceInventoryByApplication(subject, appId, null, pc);
-    }
-
    
-
-    /**
-     * @return A List of ServiceValue and ServiceClusterValue objects
-     *         representing all of the services that the given subject is
-     *         allowed to view.
-     */
-    @Transactional(readOnly = true)
-    public PageList<ServiceValue> getServiceInventoryByApplication(AuthzSubject subject, Integer appId,
-                                                     Integer svcTypeId, PageControl pc)
-        throws ApplicationNotFoundException, ServiceNotFoundException, PermissionException {
-        if (svcTypeId == null) {
-            List<Service> services = getServicesByApplication( appId, pc);
-            return filterAndPage(services, subject, null, pc);
-        } else {
-            //TODO
-            return null;
-            //return getUnflattenedServiceInventoryByApplication(subject, appId, svcTypeId, pc);
-        }
-    }
-
     public void updateServiceZombieStatus(AuthzSubject subject, Service svc, boolean zombieStatus)
         throws PermissionException {
         //TODO perm checks
@@ -674,15 +728,32 @@ public class ServiceManagerImpl implements ServiceManager {
         resource.merge();
     }
     
-    private void updateService(ServiceValue existing, Resource service) {
-        //TODO from Service
+    private void updateService(ServiceValue valueHolder, Resource service) {
+        service.setProperty(ServiceFactory.AUTO_INVENTORY_IDENTIFIER,valueHolder.getAutoinventoryIdentifier());
+        service.setDescription( valueHolder.getDescription() );
+        service.setProperty(ServiceFactory.AUTO_DISCOVERY_ZOMBIE, valueHolder.getAutodiscoveryZombie() );
+        service.setProperty(ServiceFactory.SERVICE_RT, valueHolder.getServiceRt() );
+        service.setProperty(ServiceFactory.END_USER_RT, valueHolder.getEndUserRt() );
+        service.setModifiedBy( valueHolder.getModifiedBy() );
+        service.setLocation( valueHolder.getLocation() );
+        service.setName( valueHolder.getName() );
+        service.merge();
+        Resource parent = service.getResourceTo(RelationshipTypes.SERVICE);
+        if(valueHolder.getParent() != null && !(parent.getId().equals(valueHolder.getParent().getId()))) {
+            service.removeRelationship(parent, RelationshipTypes.SERVICE);
+            Resource newParent = resourceManager.findResourceById(valueHolder.getParent().getId());
+            newParent.relateTo(service, RelationshipTypes.SERVICE);
+        }
     }
 
     public Service updateService(AuthzSubject subject, ServiceValue existing)
-        throws PermissionException, UpdateException, AppdefDuplicateNameException,
-        ServiceNotFoundException {
-        permissionManager.checkModifyPermission(subject, existing.getEntityId());
+        throws PermissionException, ServiceNotFoundException {
+        //TODO perm check
+        //permissionManager.checkModifyPermission(subject, existing.getEntityId());
         Resource service = resourceManager.findResourceById(existing.getId());
+        if(service ==  null) {
+            throw new ServiceNotFoundException(existing.getId());
+        }
 
         existing.setModifiedBy(subject.getName());
         if (existing.getDescription() != null)
@@ -743,9 +814,6 @@ public class ServiceManagerImpl implements ServiceManager {
                         serviceType.setDescription(sinfo.getDescription());
                         serviceType.merge();
                     }
-                    //TODO internal?
-//                    if (sinfo.getInternal() != serviceType.isIsInternal())
-//                        serviceType.setIsInternal(sinfo.getInternal());
 
                     // Could be null if servertype was deleted/updated by plugin
                     ResourceType svrtype = serviceType.getResourceTypeTo(RelationshipTypes.SERVICE);
@@ -793,8 +861,13 @@ public class ServiceManagerImpl implements ServiceManager {
         return createServiceType(sinfo, plugin, resourceManager.findResourceTypeById(servType.getId()));
     }
     
+    public ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin,
+                                         PlatformType platformType) throws NotFoundException {
+       return createServiceType(sinfo, plugin, resourceManager.findResourceTypeById(platformType.getId()));
+   }
+    
     private ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin,
-                                          ResourceType servType) throws NotFoundException {
+                                          ResourceType parentType) throws NotFoundException {
         ResourceType serviceType = new ResourceType();
         serviceType.setName(sinfo.getName());
         serviceType.setDescription(sinfo.getDescription());
@@ -810,7 +883,7 @@ public class ServiceManagerImpl implements ServiceManager {
         //TODO add method?
         serviceType.setPropertyTypes(propTypes);
         serviceType.setPlugin(pluginDAO.findByName(plugin));
-        servType.relateTo(serviceType, RelationshipTypes.SERVICE);
+        parentType.relateTo(serviceType, RelationshipTypes.SERVICE);
         return serviceFactory.createServiceType(serviceType);
     }
     
@@ -852,17 +925,57 @@ public class ServiceManagerImpl implements ServiceManager {
     @Transactional(readOnly = true)
     public List<Object[]> getServiceTypeCounts() {
         Collection<ResourceType> serviceTypes = getAllServiceResourceTypes();
+        List<ResourceType> orderedServiceTypes =  new ArrayList<ResourceType>(serviceTypes);
+        Collections.sort(orderedServiceTypes, new Comparator<ResourceType>() {
+            public int compare(ResourceType o1, ResourceType o2) {
+                return (o1.getName().compareTo(o2.getName()));
+            }
+        });
         List<Object[]> counts = new ArrayList<Object[]>();
-        for(ResourceType serviceType: serviceTypes) {
-            counts.add(new Object[]{serviceType.getName(),serviceType.getResources().size()});
+        for(ResourceType serviceType: orderedServiceTypes) {
+            counts.add(new Object[]{serviceType.getName(),(long)serviceType.getResources().size()});
         }
         return counts;
     }
-   
-    public void updateService(Service service) {
-        // TODO Auto-generated method stub
-        
+      
+    private Set<Resource> findAllServiceResources() {
+        Set<Resource> resources = new HashSet<Resource>();
+        Collection<Resource> platforms = resourceManager.findRootResource().
+            getResourcesFrom(RelationshipTypes.PLATFORM);
+        for(Resource platform: platforms) {
+            Collection<Resource> servers = platform.getResourcesFrom(RelationshipTypes.SERVER);
+            for(Resource server: servers) {
+                resources.addAll(server.getResourcesFrom(RelationshipTypes.SERVICE));
+            }
+        }
+        for(Resource platform: platforms) {
+            resources.addAll(platform.getResourcesFrom(RelationshipTypes.SERVICE));
+        }
+        return resources;
     }
+    
+    /**
+     * Get the scope of viewable services for a given user
+     * @param whoami - the user
+     * @return List of ServicePK's for which subject has
+     *         AuthzConstants.serviceOpViewService
+     */
+    private List<Integer> getViewableServices(AuthzSubject whoami) throws PermissionException,
+        NotFoundException {
+        //TODO perm check
+        //Operation op = getOperationByName(resourceManager
+          //  .findResourceTypeByName(AuthzConstants.serviceResType),
+            //AuthzConstants.serviceOpViewService);
+        //List<Integer> idList = permissionManager.findOperationScopeBySubject(whoami, op.getId());
+        ArrayList<Integer> idList = new ArrayList<Integer>();
+        Set<Resource> services = findAllServiceResources();
+        for(Resource service: services) {
+            idList.add(service.getId());
+        }
+        return idList;
+    }
+
+
 
     @PostConstruct
     public void afterPropertiesSet() throws Exception {

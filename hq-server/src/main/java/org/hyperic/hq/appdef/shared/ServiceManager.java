@@ -28,6 +28,7 @@ package org.hyperic.hq.appdef.shared;
 import java.util.Collection;
 import java.util.List;
 
+import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.Service;
@@ -46,10 +47,10 @@ import org.hyperic.util.pager.PageList;
 public interface ServiceManager {
 
     /**
-     * Create a Service which runs on a given server
+     * Create a Service which runs on a given server or platform
      * @return The service id.
      */
-    public Service createService(AuthzSubject subject, Integer serverId, Integer serviceTypeId, String name,
+    public Service createService(AuthzSubject subject, Integer parentId, Integer serviceTypeId, String name,
                                  String desc, String location) throws ValidationException, PermissionException,
         ServerNotFoundException, AppdefDuplicateNameException;
 
@@ -143,26 +144,16 @@ public interface ServiceManager {
     
     public List<Service> getServicesByApplication(AuthzSubject subject, Integer appId) throws PermissionException,
         org.hyperic.hq.appdef.shared.ApplicationNotFoundException, ServiceNotFoundException;
-
-    public PageList<ServiceValue> getServiceInventoryByApplication(AuthzSubject subject, Integer appId,
-                                                                          PageControl pc)
-        throws org.hyperic.hq.appdef.shared.ApplicationNotFoundException, ServiceNotFoundException, PermissionException;
-
-
-    public PageList<ServiceValue> getServiceInventoryByApplication(AuthzSubject subject, Integer appId, Integer svcTypeId,
-                                                     PageControl pc)
-        throws org.hyperic.hq.appdef.shared.ApplicationNotFoundException, ServiceNotFoundException, PermissionException;
-
+    
+    PageList<ServiceValue> getServicesByApplication(AuthzSubject subject, Integer appId, Integer serviceTypeId, PageControl pc) throws PermissionException,
+    org.hyperic.hq.appdef.shared.ApplicationNotFoundException, ServiceNotFoundException;
 
     public void updateServiceZombieStatus(AuthzSubject subject, Service svc, boolean zombieStatus)
         throws PermissionException;
 
     public Service updateService(AuthzSubject subject, ServiceValue existing) throws PermissionException,
-        org.hyperic.hq.appdef.shared.UpdateException, org.hyperic.hq.appdef.shared.AppdefDuplicateNameException,
         ServiceNotFoundException;
     
-    void updateService(Service service);
-
     public void updateServiceTypes(String plugin, org.hyperic.hq.product.ServiceTypeInfo[] infos) throws VetoException, NotFoundException;
 
     public void deleteServiceType(ServiceType serviceType, AuthzSubject overlord) throws VetoException;
@@ -185,5 +176,8 @@ public interface ServiceManager {
     
     ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin,
                                   ServerType servType) throws NotFoundException;
+    
+    ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin,
+                                  PlatformType platformType) throws NotFoundException;
 
 }

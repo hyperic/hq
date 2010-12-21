@@ -53,6 +53,7 @@ import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AIServiceTypeValue;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
 import org.hyperic.hq.appdef.shared.AgentManager;
+import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
@@ -61,8 +62,10 @@ import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceManager;
+import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceTypeFactory;
 import org.hyperic.hq.appdef.shared.ServiceValue;
+import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -603,7 +606,12 @@ public class RuntimeReportProcessor {
                         modified=true;
                     }
                     if(modified) {
-                        serviceManager.updateService(service);
+                        try {
+                            serviceManager.updateService(subject,service.getServiceValue());
+                        } catch (ServiceNotFoundException e) {
+                            log.warn("Unexpected ServiceNotFoundException obtained while changing name or autoInventory ID of existing service.  Update to " + 
+                                aiSvc.getName() + " will be ignored.");
+                        } 
                     }
                 } else {
                     log.info("Service id=" + service.getId() + " name=" + service.getName() + " has become a zombie");

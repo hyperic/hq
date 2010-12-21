@@ -210,16 +210,23 @@ abstract public class BaseInfrastructureTest {
                                             ServerType serverType) throws NotFoundException {
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription(serviceTypeName);
-        sinfo.setInternal(false);
         sinfo.setName(serviceTypeName);
         return serviceManager.createServiceType(sinfo, TEST_PLUGIN_NAME, serverType);
     }
+    
+    protected ServiceType createServiceType(String serviceTypeName,
+                                            PlatformType platformType) throws NotFoundException {
+        ServiceTypeInfo sinfo = new ServiceTypeInfo();
+        sinfo.setDescription(serviceTypeName);
+        sinfo.setName(serviceTypeName);
+        return serviceManager.createServiceType(sinfo, TEST_PLUGIN_NAME, platformType);
+    }
 
-    protected Service createService(Server server, ServiceType serviceType, String serviceName,
+    protected Service createService(Integer parentId, ServiceType serviceType, String serviceName,
                                     String description, String location)
         throws ServerNotFoundException, AppdefDuplicateNameException, ValidationException,
         PermissionException {
-        return serviceManager.createService(authzSubjectManager.getOverlordPojo(), server.getId(),
+        return serviceManager.createService(authzSubjectManager.getOverlordPojo(), parentId,
             serviceType.getId(), serviceName, "Spring JDBC Template", "my computer");
     }
 

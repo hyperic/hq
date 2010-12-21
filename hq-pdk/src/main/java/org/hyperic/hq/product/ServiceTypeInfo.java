@@ -48,12 +48,7 @@ public class ServiceTypeInfo
             new ServiceTypeInfo(getName(),
                                 getDescription(),
                                 getServerTypeInfo());
-        service.setInternal(getInternal());
         return service;
-    }
-    
-    public boolean getInternal() {
-        return internal;
     }
     
     public void setInternal(boolean flag) {

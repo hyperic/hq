@@ -101,7 +101,6 @@ import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
@@ -617,13 +616,7 @@ public class AppdefBossImpl implements AppdefBoss {
                 res = aeval.getAssociatedServices(pc);
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                // fetch all service inventory including clusters.
-                if (allServiceInventory) {
-                    res = serviceManager
-                        .getServiceInventoryByApplication(subject, aeid.getId(), pc);
-                } else {
-                    res = serviceManager.getServicesByApplication(subject, aeid.getId(), pc);
-                }
+                res = serviceManager.getServicesByApplication(subject, aeid.getId(), pc);
                 break;
             default:
                 log.error("Invalid type given to find services.");
@@ -3002,6 +2995,7 @@ public class AppdefBossImpl implements AppdefBoss {
                         allConfigs.setShouldConfig(ProductPlugin.CFGTYPE_IDX_RESPONSE_TIME, true);
                         svc.setServiceRt(allConfigs.getEnableServiceRT());
                         svc.setEndUserRt(allConfigs.getEnableEuRT());
+                        serviceManager.updateService(subject, svc.getServiceValue());
                     }
                 }
 

@@ -41,9 +41,6 @@ public class PagerProcessor_service implements PagerProcessor {
             if (o instanceof AppService) {
                 return ((AppService) o).getAppServiceValue();
             }
-            //if (o instanceof ServiceCluster) {
-              //  return ((ServiceCluster) o).getServiceClusterValue();
-            //}
             if (o instanceof ServiceType) {
                 return ((ServiceType)o).getServiceTypeValue();
             }
