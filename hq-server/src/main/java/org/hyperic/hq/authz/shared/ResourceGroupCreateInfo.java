@@ -11,6 +11,10 @@ public class ResourceGroupCreateInfo {
     private String description;
     
     private int groupTypeId;
+    
+    private int groupEntResType=-1;
+    
+    private int groupEntType=-1;
 
     public ResourceGroupCreateInfo(String name, String description, String location,
                                    boolean privateGroup, int groupTypeId) {
@@ -41,4 +45,20 @@ public class ResourceGroupCreateInfo {
         return groupTypeId;
     }
 
+    public int getGroupEntResType() {
+        return groupEntResType;
+    }
+
+    public void setGroupEntResType(int groupEntResType) {
+        this.groupEntResType = groupEntResType;
+    }
+
+    public int getGroupEntType() {
+        return groupEntType;
+    }
+
+    public void setGroupEntType(int groupEntType) {
+        this.groupEntType = groupEntType;
+    }
+    
 }

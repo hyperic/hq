@@ -243,7 +243,7 @@ public class AppdefPagerFilterGroupEntityResource implements AppdefPagerFilter {
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                 ResourceGroup group =  Bootstrap.getBean(ResourceGroupManager.class)
                     .findResourceGroupById(_subject, id.getId()); 
-                return _resourceType == Bootstrap.getBean(ResourceGroupManager.class).getGroupEntResType(group);
+                return _resourceType == Bootstrap.getBean(ResourceGroupManager.class).getGroupConvert(null, group).getGroupEntResType();
             default:
                 return false;
         }

@@ -87,7 +87,6 @@ public class GalertDefDAO
     Collection<GalertDef> findAll(ResourceGroup g) {
         String sql = "from GalertDef d where d.group = :group "
                      + "and d.deleted = false "
-                     + "and d.group.resource.resourceType is not null "
                      + "order by d.name";
 
         return (Collection<GalertDef>) getSession().createQuery(sql).setParameter("group", g)

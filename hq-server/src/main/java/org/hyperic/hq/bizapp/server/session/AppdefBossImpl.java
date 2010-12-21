@@ -161,6 +161,7 @@ import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.AvailabilityType;
@@ -1861,7 +1862,8 @@ public class AppdefBossImpl implements AppdefBoss {
 
         ResourceGroupCreateInfo cInfo = new ResourceGroupCreateInfo(name, description,location, 
             privGrp, groupType);
-
+        cInfo.setGroupEntResType(adResType);
+        cInfo.setGroupEntType(adType);
         // No roles or resources
         return resourceGroupManager.createResourceGroup(subject, cInfo, Collections.EMPTY_LIST,
             getResources(resources));
@@ -2016,7 +2018,7 @@ public class AppdefBossImpl implements AppdefBoss {
     public PageList<AppdefGroupValue> findAllGroupsMemberExclusive(int sessionId, PageControl pc,
                                                                    AppdefEntityID entity,
                                                                    Integer[] removeIds,
-                                                                   Resource resourceType)
+                                                                   ResourceType resourceType)
         throws PermissionException, SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         List<ResourceGroup> excludeGroups = new ArrayList<ResourceGroup>(removeIds.length);
@@ -2055,9 +2057,9 @@ public class AppdefBossImpl implements AppdefBoss {
         for (int i = 0; i < entities.length; i++) {
             AppdefEntityID eid = entities[i];
             Resource resource = resourceManager.findResource(eid);
-            //TODO below used resource.getPrototype()
+           
             List<AppdefGroupValue> result = findAllGroupsMemberExclusive(sessionId, pc, eid,
-                new Integer[] {}, resource);
+                new Integer[] {}, resource.getType());
 
             if (i == 0) {
                 commonList.addAll(result);

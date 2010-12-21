@@ -256,7 +256,7 @@ public class UIPluginManagerImpl implements UIPluginManager {
 
             attachments = attachmentResourceDAO.findFor(resourceManager.findRootResource(), cat);
 
-            if (!resourceGroupManager.isMixed(group)) {
+            if (!resourceGroupManager.getGroupConvert(user, group).isMixed()) {
                 // For compatible groups add in attachments specific to that
                 // resource type.
                 Collection<Attachment> compatAttachments = attachmentResourceDAO.findFor(group,

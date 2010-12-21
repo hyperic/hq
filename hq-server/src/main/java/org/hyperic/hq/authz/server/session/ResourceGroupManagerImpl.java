@@ -27,8 +27,11 @@
 package org.hyperic.hq.authz.server.session;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -82,6 +85,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Service
 public class ResourceGroupManagerImpl implements ResourceGroupManager, ApplicationContextAware {
+    private static final String GROUP_ENT_RES_TYPE = "groupEntResType";
+
+    private static final String GROUP_ENT_TYPE = "groupEntType";
+
     private final String BUNDLE = "org.hyperic.hq.authz.Resources";
    
     private AuthzSubjectManager authzSubjectManager;
@@ -115,21 +122,19 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     public ResourceGroup createResourceGroup(AuthzSubject whoami, ResourceGroupCreateInfo cInfo,
                                              Collection<Role> roles, Collection<Resource> resources)
         throws GroupCreationException, GroupDuplicateNameException {
-        ResourceGroup res = createGroup(whoami, cInfo, roles, resources);
+        ResourceGroup res = createGroup(whoami, cInfo, new HashSet<Role>(roles), new HashSet<Resource>(resources));
         applicationContext.publishEvent(new GroupCreatedEvent(res));
         return res;
     }
 
     private ResourceGroup createGroup(AuthzSubject whoami, ResourceGroupCreateInfo cInfo,
-                                      Collection<Role> roles, Collection<Resource> resources)
+                                      Set<Role> roles, Set<Resource> resources)
         throws GroupDuplicateNameException, GroupCreationException {
         ResourceGroup existing = resourceGroupDao.findByName(cInfo.getName());
-
         if (existing != null) {
             throw new GroupDuplicateNameException("Group by the name [" + cInfo.getName() +
                                                   "] already exists");
         }
-
         ResourceGroup res = new ResourceGroup();
         res.setName(cInfo.getName());
         res.setLocation(cInfo.getLocation());
@@ -137,13 +142,13 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         res.setDescription(cInfo.getDescription());
         res.setModifiedBy(whoami.getName());
         ResourceType groupType = resourceTypeDao.findByName(AppdefEntityConstants.getAppdefGroupTypeName(cInfo.getGroupTypeId()));
-        //TODO throw Exception if type doesn't exist?
         res.persist();
         res.setType(groupType);
-        
-        //TODO why?
-        //resourceEdgeDAO.create(res.getResource(), res.getResource(), 0, resourceRelationDAO.findById(AuthzConstants.RELATION_CONTAINMENT_ID)); // Self-edge
-        applicationContext.publishEvent(new GroupCreatedEvent(res));
+        res.setMembers(resources);
+        res.setRoles(roles);
+        res.setOwner(whoami);
+        res.setProperty(GROUP_ENT_RES_TYPE, cInfo.getGroupEntResType());
+        res.setProperty(GROUP_ENT_TYPE, cInfo.getGroupEntType());
         return res;
     }
 
@@ -195,7 +200,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
 
     private void checkGroupPermission(AuthzSubject whoami, Integer group, Integer op)
         throws PermissionException {
-        //TODO
+        //TODO perm check
         //PermissionManager pm = PermissionManagerFactory.getInstance();
        
         //pm.check(whoami.getId(), AuthzConstants.authzGroup, group, op);
@@ -344,7 +349,14 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      */
     @Transactional(readOnly = true)
     public Collection<Resource> getMembers(ResourceGroup g) {
-        return g.getMembers();
+        Set<Resource> members = g.getMembers();
+        List<Resource> orderedMembers = new ArrayList<Resource>(members);
+        Collections.sort(orderedMembers, new Comparator<Resource>() {
+            public int compare(Resource o1, Resource o2) {
+                return (o1.getName().compareTo(o2.getName()));
+            }
+        });
+        return orderedMembers;
     }
 
     /**
@@ -353,10 +365,26 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      */
     @Transactional(readOnly = true)
     public Map<String, Number> getMemberTypes(ResourceGroup g) {
-        //TODO member types?
-        //return resourceGroupDAO.getMemberTypes(g);
-        return null;
+        Set<ResourceType> memberTypes = new HashSet<ResourceType>();
+        for(Resource member: g.getMembers()) {
+            memberTypes.add(member.getType());
+        }
+      
+        List<ResourceType> orderedMemberTypes =  new ArrayList<ResourceType>(memberTypes);
+        Collections.sort(orderedMemberTypes, new Comparator<ResourceType>() {
+            public int compare(ResourceType o1, ResourceType o2) {
+                return (o1.getName().compareTo(o2.getName()));
+            }
+        });
+        
+        Map<String, Number> types = new HashMap<String, Number>();
+        for(ResourceType memberType: orderedMemberTypes) {
+            types.put(memberType.getName(),memberType.getResources().size());
+           
+        }
+        return types;
     }
+   
     
     /**
      * Get the # of members in a group
@@ -381,20 +409,17 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     public AppdefGroupValue getGroupConvert(AuthzSubject subj, ResourceGroup g) {
         AppdefGroupValue retVal = new AppdefGroupValue();
         Collection<Resource> members = getMembers(g);
-
-        // Create our return group vo
+        
         retVal.setId(g.getId());
         retVal.setName(g.getName());
         retVal.setDescription(g.getDescription());
         retVal.setLocation(g.getLocation());
-        retVal.setGroupType(g.getType().getId());
-        //TODO don't have res type at the momennt
-        //retVal.setGroupEntType(g.getGroupEntType().intValue());
-        //retVal.setGroupEntResType(g.getGroupEntResType().intValue());
+        retVal.setGroupType(AppdefEntityConstants.getAppdefGroupTypeInt(g.getType().getName()));
+        retVal.setGroupEntType((Integer)g.getProperty(GROUP_ENT_TYPE));
+        retVal.setGroupEntResType((Integer)g.getProperty(GROUP_ENT_RES_TYPE));
         retVal.setTotalSize(members.size());
         retVal.setSubject(subj);
         //TODO don't have these at the moment
-        //retVal.setClusterId(g.getClusterId().intValue());
         //retVal.setMTime(new Long(g.getMtime()));
         //retVal.setCTime(new Long(g.getCtime()));
         retVal.setModifiedBy(g.getModifiedBy());
@@ -429,13 +454,11 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      */
     @Transactional(readOnly = true)
     public PageList<ResourceGroup> findGroupsNotContaining(AuthzSubject subject, Resource member,
-                                                           Resource prototype,
+                                                           ResourceType prototype,
                                                            Collection<ResourceGroup> excGrps,
                                                            PageInfo pInfo) {
-        //TODO not supporting compat groups
-        return null;
-        //return resourceGroupDAO.findGroupsClusionary(subject, member, prototype, excGrps, pInfo,
-          //  false);
+        return findGroupsClusionary(subject, member, prototype, excGrps, pInfo,
+            false);
     }
 
     /**
@@ -457,11 +480,88 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     public PageList<ResourceGroup> findGroupsContaining(AuthzSubject subject, Resource member,
                                                         Collection<ResourceGroup> excludeGroups,
                                                         PageInfo pInfo) {
-        //TODO not supporting compat groups
-        return null;
-        //return resourceGroupDAO.findGroupsClusionary(subject, member, null, excludeGroups, pInfo,
-          //  true);
+        return findGroupsClusionary(subject, member, null, excludeGroups, pInfo,
+            true);
     }
+    
+    private PageList<ResourceGroup> findGroupsClusionary(AuthzSubject subject, Resource member,
+          ResourceType prototype,
+          Collection<ResourceGroup> excludeGroups,
+          PageInfo pInfo, boolean inclusive) {
+        //TODO
+//        ResourceGroupSortField sort = (ResourceGroupSortField) pInfo.getSort();
+//        String hql = "from ResourceGroup g where g.system = false and ";
+//        
+//        if (prototype != null) {
+//        hql += " (g.resourcePrototype = :proto ";
+//        
+//        // Mixed groups, too
+//        
+//        Integer protoType = prototype.getResourceType().getId();
+//        if (protoType.equals(AuthzConstants.authzPlatformProto) ||
+//        protoType.equals(AuthzConstants.authzServerProto) ||
+//        protoType.equals(AuthzConstants.authzServiceProto)) {
+//        hql += " or g.groupType = " + AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS;
+//        } else if (protoType.equals(AuthzConstants.authzApplicationProto)) {
+//        hql += " or g.groupType = " + AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP;
+//        }
+//        
+//        hql += ") and ";
+//        }
+//        
+//        List<Integer> excludes = new ArrayList<Integer>(excludeGroups.size());
+//        for (ResourceGroup g : excludeGroups) {
+//        excludes.add(g.getId());
+//        }
+//        if (!excludes.isEmpty())
+//        hql += " g.id not in (:excludes) and ";
+//        
+//        String inclusionStr = "";
+//        if (!inclusive)
+//        inclusionStr = " not ";
+//        
+//        PermissionManager pm = PermissionManagerFactory.getInstance();
+//        hql += inclusionStr + " exists ( " + " select m.id from GroupMember m " +
+//        " where m.resource = :resource and m.group = g " + ") ";
+//        
+//        String pmql = pm.getOperableGroupsHQL(subject, "g",
+//        inclusive ? AuthzConstants.groupOpViewResourceGroup
+//        : AuthzConstants.groupOpModifyResourceGroup);
+//        
+//        if (pmql.length() > 0)
+//        hql += pmql;
+//        
+//        String countHql = "select count(g.id) " + hql;
+//        String actualHql = "select g " + hql + " order by " + sort.getSortString("g");
+//        
+//        Query q = getSession().createQuery(countHql).setParameter("resource", member);
+//        
+//        if (!excludes.isEmpty())
+//        q.setParameterList("excludes", excludes);
+//        
+//        if (prototype != null)
+//        q.setParameter("proto", prototype);
+//        
+//        if (pmql.length() > 0)
+//        q.setInteger("subjId", subject.getId().intValue());
+//        
+//        int total = ((Number) (q.uniqueResult())).intValue();
+//        q = getSession().createQuery(actualHql).setParameter("resource", member);
+//        
+//        if (prototype != null)
+//        q.setParameter("proto", prototype);
+//        
+//        if (!excludes.isEmpty())
+//        q.setParameterList("excludes", excludes);
+//        
+//        if (pmql.length() > 0)
+//        q.setInteger("subjId", subject.getId().intValue());
+//        
+//        List<ResourceGroup> vals = (List<ResourceGroup>) pInfo.pageResults(q).list();
+//        return new PageList<ResourceGroup>(vals, total);
+        return new PageList<ResourceGroup>();
+    }
+
 
     /**
      * Get all the resource groups excluding the root resource group.
@@ -479,7 +579,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
          * viewable resource groups instead of going through the perm manager to
          * get the IDs
          */
-        //TODO
+        //TODO perm check
        // PermissionManager pm = PermissionManagerFactory.getInstance();
         // List<Integer> groupIds;
 //        try {
@@ -513,40 +613,8 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         group.setOwner(newOwner);
         group.setModifiedBy(newOwner.getName());
     }
-
-    public void updateGroupMembers(List<ResourceCreatedZevent> resourceEvents) {
-        for (ResourceCreatedZevent resourceEvent : resourceEvents) {
-            updateGroupMember(resourceEvent);
-        }
-    }
-
-    private void updateGroupMember(ResourceCreatedZevent resourceEvent) {
-        final Resource resource = resourceDao.findById(resourceEvent.getId());
-        final AuthzSubject subject = authzSubjectManager.findSubjectById(resourceEvent
-            .getAuthzSubjectId());
-        for (ResourceGroup group : getAllResourceGroups()) {
-            try {
-                //TODO critter stuff
-                //CritterList groupCriteria = group.getCritterList();
-                //if (isCriteriaMet(groupCriteria, resource)) {
-                    try {
-                        addResource(subject, group, resource);
-                    } catch (Exception e) {
-                        log.error("Unable to add resource " + resource + " to group " +
-                                  group.getName());
-                    }
-                //}
-            } catch (Exception e) {
-                log.error("Unable to process criteria for group " + group.getName() +
-                          " while processing event " + resourceEvent +
-                          ".  The groups' members may not be updated.");
-            }
-        }
-    }
-    
-    
-    
-   public Collection<ResourceGroup> getGroups(Resource r) {
+        
+    public Collection<ResourceGroup> getGroups(Resource r) {
        Set<ResourceGroup> groups = new HashSet<ResourceGroup>();
        Collection<ResourceGroup> allGroups = getAllResourceGroups();
        for(ResourceGroup group: allGroups) {
@@ -555,39 +623,6 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
            }
        }
        return groups;
-    }
-
-    //TODO remove legacy support
-    public boolean isMixed(ResourceGroup group) {
-      if(group.getType().getName().equals(AppdefEntityConstants.getAppdefGroupTypeName(AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS)) || 
-          group.getType().getName().equals(AppdefEntityConstants.getAppdefGroupTypeName(AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC))) {
-          return false;
-      }
-      return true;
-    }
-
-    public int getGroupEntType(ResourceGroup group) {
-        //TODO let's say we used a prop to set this on create
-//        if (_resourcePrototype == null) {
-//            -            return new Integer(-1);
-//            -        }
-//            -
-//            -        Integer type = _resourcePrototype.getResourceType().getId();
-//            -        if (type.equals(AuthzConstants.authzPlatformProto)) {
-//            -            return new Integer(AppdefEntityConstants.APPDEF_TYPE_PLATFORM);
-//            -        } else if (type.equals(AuthzConstants.authzServerProto)) {
-//            -            return new Integer(AppdefEntityConstants.APPDEF_TYPE_SERVER);
-//            -        } else if (type.equals(AuthzConstants.authzServiceProto)) {
-//            -            return new Integer(AppdefEntityConstants.APPDEF_TYPE_SERVICE);
-//            -        } else {
-//            -            return new Integer(-1); // Backwards compat.
-//            -        }
-        return 1;
-    }
-
-    public int getGroupEntResType(ResourceGroup group) {
-       //TODO return id of ResourceType for Platform, Server, or Service
-        return 1;
     }
 
     @Transactional(readOnly=true)

@@ -40,6 +40,7 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.pager.PageList;
 
 /**
@@ -164,7 +165,7 @@ public interface ResourceGroupManager
      *        {@link ResourceGroupSortField}
      */
     public PageList<ResourceGroup> findGroupsNotContaining(AuthzSubject subject, Resource member,
-                                                           Resource prototype,
+                                                           ResourceType prototype,
                                                            Collection<ResourceGroup> excGrps,
                                                            org.hyperic.hibernate.PageInfo pInfo);
 
@@ -193,19 +194,6 @@ public interface ResourceGroupManager
     public void changeGroupOwner(AuthzSubject subject, ResourceGroup group, AuthzSubject newOwner)
         throws PermissionException;
     
-    /**
-     * Adds new resources to any groups whose criteria match the resources
-     * @param resourceEvents Events representing resource creations
-     */
-    public void updateGroupMembers(List<ResourceCreatedZevent> resourceEvents);
-    
     Collection<ResourceGroup> getGroups(Resource r);
-    
-    //TODO remove legacy support
-    public boolean isMixed(ResourceGroup group);
-    
-    public int getGroupEntType(ResourceGroup group);
-    
-    public int getGroupEntResType(ResourceGroup group);
-
+ 
 }

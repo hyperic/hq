@@ -83,6 +83,7 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
@@ -539,7 +540,7 @@ public interface AppdefBoss {
      */
     public PageList<AppdefGroupValue> findAllGroupsMemberExclusive(int sessionId, PageControl pc,
                                                                    AppdefEntityID entity,
-                                                                   java.lang.Integer[] removeIds, Resource resourceType)
+                                                                   java.lang.Integer[] removeIds, ResourceType resourceType)
         throws PermissionException, SessionTimeoutException, SessionNotFoundException;
 
     /**

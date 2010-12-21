@@ -305,6 +305,8 @@ abstract public class BaseInfrastructureTest {
         throws GroupDuplicateNameException, GroupCreationException {
         ResourceGroupCreateInfo gCInfo = new ResourceGroupCreateInfo(groupName, "",
             "", false,AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS);
+        gCInfo.setGroupEntType(appDefEntTypeId.getType());
+        gCInfo.setGroupEntResType(appDefEntTypeId.getId());
         ResourceGroup resGrp = resourceGroupManager.createResourceGroup(
             authzSubjectManager.getOverlordPojo(), gCInfo, roles, resources);
         return resGrp;

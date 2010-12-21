@@ -190,6 +190,26 @@ public final class AppdefEntityConstants {
         throw new IllegalArgumentException("Unknown appdef group type: " +
                                            grpType);
     }
+    
+    public static int getAppdefGroupTypeInt(String name) {
+        if(name.equals(APPDEF_TYPE_GROUP_ADHOC_APP_LABEL)) {
+            return APPDEF_TYPE_GROUP_ADHOC_APP;
+        }
+        if(name.equals(APPDEF_TYPE_GROUP_ADHOC_GRP_LABEL)) {
+            return APPDEF_TYPE_GROUP_ADHOC_GRP;
+        }
+        if(name.equals(APPDEF_TYPE_GROUP_ADHOC_PSS_LABEL)) {
+            return APPDEF_TYPE_GROUP_ADHOC_PSS;
+        }
+        if(name.equals(APPDEF_TYPE_GROUP_COMPAT_PS_LABEL)) {
+            return APPDEF_TYPE_GROUP_COMPAT_PS;
+        }
+        if(name.equals(APPDEF_TYPE_GROUP_COMPAT_SVC_LABEL)) {
+            return APPDEF_TYPE_GROUP_COMPAT_SVC;
+        }
+        throw new IllegalArgumentException("Unknown appdef group type: " +
+            name);
+    }
 
     public static boolean isGroupAdhoc (int grpType) {
         return (grpType ==

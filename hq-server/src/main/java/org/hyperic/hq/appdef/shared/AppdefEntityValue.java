@@ -301,7 +301,7 @@ public class AppdefEntityValue {
         switch(_id.getType()) {
         case AppdefEntityConstants.APPDEF_TYPE_GROUP:
             ResourceGroup g = getGroup();
-            if (getResourceGroupManager().isMixed(g)) {
+            if (getResourceGroupManager().getGroupConvert(null, g).isMixed()) {
                 return getGroup(false).getAppdefResourceTypeValue().getName();
             }
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
@@ -371,7 +371,7 @@ public class AppdefEntityValue {
         case AppdefEntityConstants.APPDEF_TYPE_GROUP:
             // Make sure this is a compatible group
             ResourceGroup g = getGroup();
-            if (getResourceGroupManager().isMixed(g))
+            if (getResourceGroupManager().getGroupConvert(null, g).isMixed())
                 throw new IllegalStateException("Can't return for mixed group: "
                                                 + _id);
        

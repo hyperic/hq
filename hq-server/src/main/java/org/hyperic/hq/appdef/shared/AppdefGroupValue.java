@@ -63,7 +63,7 @@ public class AppdefGroupValue
     private int      groupType;     // adhoc|compat|clusterable
     private int      groupEntType;  // platform|server|group|app|service
     private int      groupEntResType; // jboss|oracle,etc.
-    private int      clusterId;     // clusterId
+  
     private String   name;          // group name
     private String   description;   // group description
     private AuthzSubject subject;   // group owner
@@ -89,7 +89,6 @@ public class AppdefGroupValue
     private void init () {
         groupEntries = new PageList<GroupEntry>();
         appdefResourceTypeValue = new GroupTypeValue();
-        clusterId = -1;
     }
 
     /** The group identifier */
@@ -132,9 +131,6 @@ public class AppdefGroupValue
     public void      setGroupEntResType( int groupEntResType ) {
         this.groupEntResType = groupEntResType;
     }
-
-    public int       getClusterId () { return this.clusterId; }
-    public void      setClusterId (int clusterId) { this.clusterId=clusterId; }
 
     /** The name of the group */
     public String    getName() { return this.name; }
@@ -350,5 +346,13 @@ public class AppdefGroupValue
         newGroupVo.init(); // reset any state.
 
         return newGroupVo;
+    }
+    
+    public boolean isMixed() {
+        if(getGroupType() == AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS || 
+            getGroupType() == AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC) {
+            return false;
+        }
+        return true;
     }
 }

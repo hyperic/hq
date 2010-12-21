@@ -51,10 +51,6 @@ public interface GroupValue {
     public int       getGroupEntResType();
     public void      setGroupEntResType( int groupEntResType );
 
-    /** The group's clusterId */
-    public int       getClusterId ();
-    public void      setClusterId (int clusterId);
-
     /** The name of the group */
     public String    getName();
     public void      setName( String name );
