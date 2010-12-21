@@ -37,12 +37,10 @@ public class ResourceGroup extends Resource {
     }
 
     public void addMember(Resource member) {
-        // TODO confirm actually adds
         members.add(member);
     }
 
     public void addRole(Role role) {
-        //TODO what else?
         roles.add(role);
     }
 
@@ -63,17 +61,19 @@ public class ResourceGroup extends Resource {
     }
 
     public void removeMember(Resource member) {
-        // TODO confims actually removes
         members.remove(member);
     }
 
     public void removeRole(Role role) {
-      //TODO what else?
         roles.remove(role);
     }
 
     public void setMembers(Set<Resource> members) {
         this.members = members;
+    }
+    
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 
     public void setPrivateGroup(boolean privateGroup) {

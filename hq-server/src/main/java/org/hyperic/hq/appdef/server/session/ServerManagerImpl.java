@@ -44,7 +44,6 @@ import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
@@ -1045,18 +1044,17 @@ public class ServerManagerImpl implements ServerManager {
         stype.setDescription(sinfo.getDescription());
         stype.persist();
         stype.setPlugin(pluginDAO.findByName(plugin));
-        Set<PropertyType> propTypes = new HashSet<PropertyType>();
-        propTypes.add(createServerPropertyType(ServerFactory.WAS_AUTODISCOVERED));
-        propTypes.add(createServerPropertyType(ServerFactory.AUTO_INVENTORY_IDENTIFIER));
-        propTypes.add(createServerPropertyType(ServerFactory.AUTODISCOVERY_ZOMBIE));
-        propTypes.add(createServerPropertyType(ServerFactory.CREATION_TIME));
-        propTypes.add(createServerPropertyType(ServerFactory.MODIFIED_TIME));
-        propTypes.add(createServerPropertyType(AppdefResource.SORT_NAME));
-        propTypes.add(createServerPropertyType(ServerFactory.INSTALL_PATH));
-        propTypes.add(createServerPropertyType(ServerFactory.SERVICES_AUTO_MANAGED));
-        propTypes.add(createServerPropertyType(ServerFactory.RUNTIME_AUTODISCOVERY));
-        //TODO add method?
-        stype.setPropertyTypes(propTypes);
+       
+        stype.addPropertyType(createServerPropertyType(ServerFactory.WAS_AUTODISCOVERED));
+        stype.addPropertyType(createServerPropertyType(ServerFactory.AUTO_INVENTORY_IDENTIFIER));
+        stype.addPropertyType(createServerPropertyType(ServerFactory.AUTODISCOVERY_ZOMBIE));
+        stype.addPropertyType(createServerPropertyType(ServerFactory.CREATION_TIME));
+        stype.addPropertyType(createServerPropertyType(ServerFactory.MODIFIED_TIME));
+        stype.addPropertyType(createServerPropertyType(AppdefResource.SORT_NAME));
+        stype.addPropertyType(createServerPropertyType(ServerFactory.INSTALL_PATH));
+        stype.addPropertyType(createServerPropertyType(ServerFactory.SERVICES_AUTO_MANAGED));
+        stype.addPropertyType(createServerPropertyType(ServerFactory.RUNTIME_AUTODISCOVERY));
+       
         String newPlats[] = sinfo.getValidPlatformTypes();
         findAndSetPlatformType(newPlats, stype);
         return serverFactory.createServerType(stype);

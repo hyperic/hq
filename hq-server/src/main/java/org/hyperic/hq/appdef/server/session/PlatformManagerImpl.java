@@ -1543,16 +1543,13 @@ public class PlatformManagerImpl implements PlatformManager {
         pt.setName(name);
         pt.persist();
         pt.setPlugin(pluginDAO.findByName(plugin));
-        Set<PropertyType> propTypes = new HashSet<PropertyType>();
-        propTypes.add(createPropertyType(PlatformFactory.CERT_DN));
-        propTypes.add(createPropertyType(PlatformFactory.FQDN));
-        propTypes.add(createPropertyType(PlatformFactory.COMMENT_TEXT));
-        propTypes.add(createPropertyType(PlatformFactory.CPU_COUNT));
-        propTypes.add(createPropertyType(PlatformFactory.CREATION_TIME));
-        propTypes.add(createPropertyType(PlatformFactory.MODIFIED_TIME));
-        propTypes.add(createPropertyType(AppdefResource.SORT_NAME));
-        //TODO add method?
-        pt.setPropertyTypes(propTypes);
+        pt.addPropertyType(createPropertyType(PlatformFactory.CERT_DN));
+        pt.addPropertyType(createPropertyType(PlatformFactory.FQDN));
+        pt.addPropertyType(createPropertyType(PlatformFactory.COMMENT_TEXT));
+        pt.addPropertyType(createPropertyType(PlatformFactory.CPU_COUNT));
+        pt.addPropertyType(createPropertyType(PlatformFactory.CREATION_TIME));
+        pt.addPropertyType(createPropertyType(PlatformFactory.MODIFIED_TIME));
+        pt.addPropertyType(createPropertyType(AppdefResource.SORT_NAME));
         resourceManager.findRootResourceType().relateTo(pt, RelationshipTypes.PLATFORM);
         pt.relateTo(resourceManager.findResourceTypeByName(IP_RESOURCE_TYPE_NAME),RelationshipTypes.IP);
         return platformFactory.createPlatformType(pt);
@@ -1949,14 +1946,11 @@ public class PlatformManagerImpl implements PlatformManager {
             //TODO ipType isn't really getting a plugin here.  
             //Maybe give it System plugin or consider making it a first class citizen in new model?
             ipType.persist();
-            Set<PropertyType> propTypes = new HashSet<PropertyType>();
-            propTypes.add(createPropertyType(PlatformFactory.IP_ADDRESS));
-            propTypes.add(createPropertyType(PlatformFactory.NETMASK));
-            propTypes.add(createPropertyType(PlatformFactory.MAC_ADDRESS));
-            propTypes.add(createPropertyType(PlatformFactory.CREATION_TIME));
-            propTypes.add(createPropertyType(PlatformFactory.MODIFIED_TIME));
-            //TODO add method?
-            ipType.setPropertyTypes(propTypes);
+            ipType.addPropertyType(createPropertyType(PlatformFactory.IP_ADDRESS));
+            ipType.addPropertyType(createPropertyType(PlatformFactory.NETMASK));
+            ipType.addPropertyType(createPropertyType(PlatformFactory.MAC_ADDRESS));
+            ipType.addPropertyType(createPropertyType(PlatformFactory.CREATION_TIME));
+            ipType.addPropertyType(createPropertyType(PlatformFactory.MODIFIED_TIME));
         }
     }
 

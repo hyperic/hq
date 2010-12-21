@@ -872,16 +872,15 @@ public class ServiceManagerImpl implements ServiceManager {
         serviceType.setName(sinfo.getName());
         serviceType.setDescription(sinfo.getDescription());
         serviceType.persist();
-        Set<PropertyType> propTypes = new HashSet<PropertyType>();
-        propTypes.add(createServicePropertyType(ServiceFactory.AUTO_INVENTORY_IDENTIFIER));
-        propTypes.add(createServicePropertyType(ServiceFactory.CREATION_TIME));
-        propTypes.add(createServicePropertyType(ServiceFactory.MODIFIED_TIME));
-        propTypes.add(createServicePropertyType(AppdefResource.SORT_NAME));
-        propTypes.add(createServicePropertyType(ServiceFactory.AUTO_DISCOVERY_ZOMBIE));
-        propTypes.add(createServicePropertyType(ServiceFactory.END_USER_RT));
-        propTypes.add(createServicePropertyType(ServiceFactory.SERVICE_RT));
-        //TODO add method?
-        serviceType.setPropertyTypes(propTypes);
+       
+        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.AUTO_INVENTORY_IDENTIFIER));
+        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.CREATION_TIME));
+        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.MODIFIED_TIME));
+        serviceType.addPropertyType(createServicePropertyType(AppdefResource.SORT_NAME));
+        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.AUTO_DISCOVERY_ZOMBIE));
+        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.END_USER_RT));
+        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.SERVICE_RT));
+       
         serviceType.setPlugin(pluginDAO.findByName(plugin));
         parentType.relateTo(serviceType, RelationshipTypes.SERVICE);
         return serviceFactory.createServiceType(serviceType);

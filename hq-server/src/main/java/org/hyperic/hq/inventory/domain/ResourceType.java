@@ -388,6 +388,10 @@ public class ResourceType {
     public void setPropertyTypes(Set<PropertyType> propertyTypes) {
         this.propertyTypes = propertyTypes;
     }
+    
+    public void addPropertyType(PropertyType propertyType) {
+        propertyTypes.add(propertyType);
+    }
 
     // TODO other config types and setters
     public Set<ConfigOptionType> getMeasurementConfigTypes() {
