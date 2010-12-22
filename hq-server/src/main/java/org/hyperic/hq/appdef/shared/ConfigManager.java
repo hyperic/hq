@@ -36,10 +36,6 @@ import org.hyperic.util.config.EncodingException;
  */
 public interface ConfigManager {
 
-    public void createConfigResponse(int resoruceId, byte[] productResponse, byte[] measResponse, byte[] controlResponse,
-                                                 byte[] rtResponse);
-
-
     public String getPluginName(AppdefEntityID id) throws AppdefEntityNotFoundException;
 
     /**

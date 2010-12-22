@@ -75,19 +75,9 @@ public class ConfigManagerImpl implements ConfigManager {
         this.resourceManager = resourceManager;
     }
 
-    /**
-     * 
-     */
-    public void createConfigResponse(int resourceId, byte[] productResponse, byte[] measResponse, byte[] controlResponse,
-                                                 byte[] rtResponse) {
-        Resource resource = resourceManager.findResourceById(resourceId);
-        resource.setProductConfig(createConfig(productResponse));
-        resource.setMeasurementConfig(createConfig(measResponse));
-        resource.setControlConfig(createConfig(controlResponse));
-    }
-    
     private Config createConfig(byte[] configBytes) {
         Config config = new Config();
+        config.persist();
         try {
             ConfigResponse configResponse = ConfigResponse.decode(configBytes);
             
@@ -99,7 +89,6 @@ public class ConfigManagerImpl implements ConfigManager {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        config.persist();
         return config;
     }
 
@@ -465,6 +454,7 @@ public class ConfigManagerImpl implements ConfigManager {
         // UI or CLI
 
         configBytes = mergeConfig(toConfigResponse(resource.getProductConfig()), productConfig, overwrite, force);
+        //TODO might just be updating product config, don't create a whole new one and associate it.  Check if resource.getProductConfig() null first
         if (!AICompare.configsEqual(configBytes, toConfigResponse(resource.getProductConfig()))) {
             resource.setProductConfig(createConfig(configBytes));
             wasUpdated = true;
@@ -515,13 +505,15 @@ public class ConfigManagerImpl implements ConfigManager {
     
     public byte[] toConfigResponse(Config config) {
         ConfigResponse configResponse = new ConfigResponse();
-        for(Map.Entry<String, Object> entry: config.getValues().entrySet()) {
-            //TODO not all values will be Strings
-            configResponse.setValue(entry.getKey(), (String)entry.getValue());
+        if(config != null) {
+            for(Map.Entry<String, Object> entry: config.getValues().entrySet()) {
+                //TODO not all values will be Strings
+                configResponse.setValue(entry.getKey(), entry.getValue().toString());
+            }
         }
         byte[] res=null;
         try {
-            res = configResponse.encode();
+                res = configResponse.encode();
         } catch (EncodingException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

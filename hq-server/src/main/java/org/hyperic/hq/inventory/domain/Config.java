@@ -121,10 +121,11 @@ public class Config {
             // Neo4J doesn't accept null values
             return;
         }
-        if (!(isAllowableConfigValue(key, value))) {
-            throw new IllegalArgumentException("Config option " + key +
-                                               " is not defined");
-        }
+        //TODO re-enable when product plugin deployment actually creates ConfigOptionTypes
+//        if (!(isAllowableConfigValue(key, value))) {
+//            throw new IllegalArgumentException("Config option " + key +
+//                                               " is not defined");
+//        }
         getUnderlyingState().setProperty(key, value);
     }
     
@@ -135,7 +136,7 @@ public class Config {
                     return currentPos.depth() >= 1;
                 }
             }, ReturnableEvaluator.ALL_BUT_START_NODE,
-            DynamicRelationshipType.withName(RelationshipTypes.ALLOWS_CONFIG_OPTS), Direction.OUTGOING);
+            DynamicRelationshipType.withName(RelationshipTypes.ALLOWS_CONFIG_OPTS), Direction.OUTGOING.toNeo4jDir());
         for (Node related : relationTraverser) {
             ConfigOptionType optionType = graphDatabaseContext.createEntityFromState(related, ConfigOptionType.class);
             if(optionType.getName().equals(key)) {
