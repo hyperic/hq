@@ -322,7 +322,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
         try {
             Server server = serverManager.findServerById(id.getId());
             server.setRuntimeAutodiscovery(enable);
-
+            serverManager.updateServer(subject, server.getServerValue());
             ConfigResponse metricConfig = configManager.getMergedConfigResponse(subject,
                 ProductPlugin.TYPE_MEASUREMENT, id, true);
 
