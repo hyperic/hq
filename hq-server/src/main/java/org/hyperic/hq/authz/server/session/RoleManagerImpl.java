@@ -189,7 +189,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
      */
     private Collection<Role> filterViewableRoles(AuthzSubject who, Collection<Role> roles, Integer[] excludeIds)
         throws PermissionException {
-        //TODO
+        //TODO perm check
 //        try {
 //
 //            permissionManager.check(who.getId(), ResourceType.findResourceTypeByName(AuthzConstants.roleResourceTypeName),
@@ -239,7 +239,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
 
         validateRole(role);
 
-        //TODO
+        //TODO perm check
         //permissionManager.check(whoami.getId(), ResourceType.findTypeResourceType(), AuthzConstants.rootResourceId,
           //  AuthzConstants.roleOpCreateRole);
 
@@ -723,7 +723,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
     }
 
     private List<Role> getRolesByIds(AuthzSubject whoami, Integer[] ids, PageControl pc) throws PermissionException {
-        //TODO
+        //TODO perm check
        // permissionManager.check(whoami.getId(), AuthzConstants.roleResourceTypeName, AuthzConstants.rootResourceId,
          //   AuthzConstants.roleOpViewRole);
 
@@ -1113,7 +1113,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
         throws PermissionException {
         ResourceGroup resGrp = resourceGroupManager.findResourceGroupById(groupId);
 
-        //TODO
+        //TODO perm check
         //permissionManager.check(whoami.getId(), AuthzConstants.authzGroup, resGrp.getId(),
           //  AuthzConstants.perm_viewResourceGroup);
 
@@ -1275,7 +1275,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
         // check if this user is a member of this role
         boolean roleHasUser = roleLocal.getSubjects().contains(whoami);
         // check whether the user can see subjects other than himself
-        //TODO
+        //TODO perm check
 //        try {
 //
 //            permissionManager.check(whoami.getId(), ResourceType.findTypeResourceType(),

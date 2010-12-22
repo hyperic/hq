@@ -256,7 +256,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         AppdefDuplicateNameException {
 
         ResourceGroup app = resourceGroupManager.findResourceGroupById(newValue.getId());
-        //TODO
+        //TODO perm check
         //permissionManager.checkModifyPermission(subject, app.getEntityId());
         newValue.setModifiedBy(subject.getName());
         newValue.setMTime(new Long(System.currentTimeMillis()));
@@ -291,7 +291,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         throws ApplicationNotFoundException, PermissionException, VetoException {
 
         ResourceGroup app = resourceGroupManager.findResourceGroupById(id);
-        //TODO
+        //TODO perm check
         //permissionManager.checkRemovePermission(subject, app.getEntityId());
         app.remove();
         // Send resource delete event
@@ -438,7 +438,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         if (app == null) {
             throw new ApplicationNotFoundException(name);
         }
-        //TODO
+        //TODO perm check
         //permissionManager.checkViewPermission(subject, app.getEntityId());
         return toApplication(app);
     }
@@ -513,7 +513,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         throws ApplicationNotFoundException, AppdefGroupNotFoundException, PermissionException {
         try {
             ResourceGroup app = resourceGroupManager.findResourceGroupById(appId);
-            //TODO
+            //TODO perm check
             //permissionManager.checkModifyPermission(subject, app.getEntityId());
             for (Iterator<Resource> i = app.getMembers().iterator(); i.hasNext();) {
                 Resource appSvc = i.next();

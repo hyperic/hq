@@ -256,7 +256,7 @@ public class DefaultAlertPermissionManager implements AlertPermissionManager {
         ResourceType rt = resourceTypeDao
             .findByName(AuthzConstants.escalationResourceTypeName);
 
-        //TODO
+        //TODO perm check
         //checkPermission(subjectId, AuthzConstants.rootResType, rt.getId(),
           //              operation);
     }

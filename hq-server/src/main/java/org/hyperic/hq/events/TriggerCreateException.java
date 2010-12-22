@@ -64,7 +64,6 @@ public class TriggerCreateException extends AlertDefinitionCreateException {
      */
     public TriggerCreateException(String s, Throwable t) {
         super(s, t);
-        // TODO Auto-generated constructor stub
     }
 
 }

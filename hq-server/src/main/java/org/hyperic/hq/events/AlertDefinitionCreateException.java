@@ -66,7 +66,6 @@ public class AlertDefinitionCreateException extends CreateFailedException {
      */
     public AlertDefinitionCreateException(String s, Throwable t) {
         super(s, t);
-        // TODO Auto-generated constructor stub
     }
 
 }

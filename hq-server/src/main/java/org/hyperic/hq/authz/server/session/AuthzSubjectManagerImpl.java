@@ -222,7 +222,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
      */
     @Transactional(readOnly = true)
     public void checkModifyUsers(AuthzSubject caller) throws PermissionException {
-        //TODO
+        //TODO perm check
         //permissionManager.check(caller.getId(), ResourceType.findTypeResourceType(),
           //  AuthzConstants.rootResourceId, AuthzConstants.subjectOpModifySubject);
     }
@@ -244,7 +244,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
 
         // XXX Should we do anything special for the "suicide" case?
         // Perhaps a _log message?
-        //TODO
+        //TODO perm check
 //        if (!whoami.getId().equals(subject)) {
 //
 //            permissionManager.check(whoami.getId(), ResourceType.findTypeResourceType().getId(),
@@ -272,7 +272,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
      */
     @Transactional(readOnly = true)
     public AuthzSubject findSubjectById(AuthzSubject whoami, Integer id) throws PermissionException {
-//TODO
+//TODO perm check
         // users can see their own entries without requiring special permission
 //        if (!whoami.getId().equals(id)) {
 //            permissionManager.check(whoami.getId(), ResourceType.findTypeResourceType().getId(),
@@ -341,7 +341,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
         AuthzSubject who = authzSubjectDAO.findById(whoami.getId());
         Collection<AuthzSubject> subjects;
         //try {
-            //TODO
+            //TODO perm check
             //permissionManager.check(whoami.getId(), ResourceType.findTypeResourceType(),
               //  AuthzConstants.rootResourceId, AuthzConstants.subjectOpViewSubject);
 
@@ -461,7 +461,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
         // users can always see their own prefs.
         if (!who.getId().equals(subjId)) {
             // check that the caller can see users
-            //TODO
+            //TODO perm check
             //permissionManager.check(who.getId(), ResourceType.findTypeResourceType(),
               //  AuthzConstants.rootResourceId, AuthzConstants.subjectOpViewSubject);
         }
@@ -482,7 +482,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
         // check to see if the user attempting the modification
         // is the same as the one being modified
         if (!(who.getId().intValue() == subjId.intValue())) {
-            //TODO
+            //TODO perm check
             //permissionManager.check(who.getId(), ResourceType.findTypeResourceType(),
               //  AuthzConstants.rootResourceId, AuthzConstants.subjectOpModifySubject);
         }
