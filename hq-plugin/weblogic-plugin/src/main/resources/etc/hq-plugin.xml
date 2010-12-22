@@ -1207,8 +1207,10 @@
   <server name="Weblogic NodeManager"
           version="6.1"
           description="Node Manager Agent">
+    <plugin type="autoinventory"
+            class="WeblogicDetectorNodeManager"/>
 
-    <config include="admin-server">
+    <config>
       <option name="nodemgr.address"
               description="Node Manager address"
               default="localhost"/>
