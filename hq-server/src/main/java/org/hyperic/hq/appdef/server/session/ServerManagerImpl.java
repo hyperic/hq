@@ -441,7 +441,11 @@ public class ServerManagerImpl implements ServerManager {
     public Server findServerByAIID(AuthzSubject subject, Platform platform, String aiid) throws PermissionException {
         //TODO perm check
         //permissionManager.checkViewPermission(subject, platform.getId());
-        return serverFactory.createServer(findServerByAIID(resourceManager.findResourceById(platform.getId()), aiid));
+        Resource server = findServerByAIID(resourceManager.findResourceById(platform.getId()), aiid);
+        if(server == null) {
+            return null;
+        }
+        return serverFactory.createServer(server);
     }
 
     /**
@@ -1034,6 +1038,7 @@ public class ServerManagerImpl implements ServerManager {
         PropertyType propType = new PropertyType();
         propType.setName(propName);
         propType.setDescription(propName);
+        propType.setHidden(true);
         propType.persist();
         return propType;
     }

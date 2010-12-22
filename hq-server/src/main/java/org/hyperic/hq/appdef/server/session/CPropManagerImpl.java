@@ -238,11 +238,16 @@ public class CPropManagerImpl implements CPropManager {
     @Transactional(readOnly = true)
     public Properties getEntries(AppdefEntityID aID) throws PermissionException,
         AppdefEntityNotFoundException {
-        //TODO assuming all prop values are String, should we just disallow objects?
+        Resource resource = resourceManager.findResourceById(aID.getId());
+        //TODO assuming all prop values go to toString
         Properties properties = new Properties();
-        Map<String,Object> propValues = resourceManager.findResourceById(aID.getId()).getProperties();
+        Map<String,Object> propValues = resource.getProperties();
         for(Map.Entry<String, Object> propValue:propValues.entrySet()) {
-            properties.setProperty(propValue.getKey(), (String)propValue.getValue());
+            PropertyType type = resource.getType().getPropertyType(propValue.getKey());
+            //TODO is this the place to filter hidden?
+            if(!(type.isHidden())) {
+                properties.setProperty(propValue.getKey(), propValue.getValue().toString());
+            }
         }
         return properties;
     }
@@ -258,12 +263,16 @@ public class CPropManagerImpl implements CPropManager {
     @Transactional(readOnly = true)
     public Properties getDescEntries(AppdefEntityID aID) throws PermissionException,
         AppdefEntityNotFoundException {
-        //TODO assuming all prop values are String, should we just disallow objects?
+        //TODO assuming all prop values go to toString, should we just disallow objects?
         Resource resource = resourceManager.findResourceById(aID.getId());
         Properties properties = new Properties();
         Map<String,Object> propValues = resource.getProperties();
         for(Map.Entry<String, Object> propValue:propValues.entrySet()) {
-            properties.setProperty(resource.getType().getPropertyType(propValue.getKey()).getDescription(), (String)propValue.getValue());
+            PropertyType type = resource.getType().getPropertyType(propValue.getKey());
+            //TODO is this the place to filter hidden?
+            if(!(type.isHidden())) {
+                properties.setProperty(type.getDescription(), propValue.getValue().toString());
+            }
         }
         return properties;
     }

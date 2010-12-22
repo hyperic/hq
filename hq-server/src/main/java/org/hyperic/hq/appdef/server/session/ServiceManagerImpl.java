@@ -890,6 +890,7 @@ public class ServiceManagerImpl implements ServiceManager {
         PropertyType propType = new PropertyType();
         propType.setName(propName);
         propType.setDescription(propName);
+        propType.setHidden(true);
         propType.persist();
         return propType;
     }

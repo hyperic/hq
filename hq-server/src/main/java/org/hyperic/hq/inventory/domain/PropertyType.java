@@ -60,6 +60,10 @@ public class PropertyType {
     @GraphProperty
     @Transient
     private Boolean secret;
+    
+    @GraphProperty
+    @Transient
+    private Boolean hidden;
 
     @Version
     @Column(name = "version")
@@ -94,15 +98,22 @@ public class PropertyType {
         return this.name;
     }
 
-    public Boolean getOptional() {
-        return this.optional;
+    public Boolean isOptional() {
+        //TODO proper way to do default value?
+       if(this.optional == null) {
+           return false;
+       }
+       return this.optional;
     }
 
     public ResourceType getResourceType() {
         return this.resourceType;
     }
 
-    public Boolean getSecret() {
+    public Boolean isSecret() {
+        if(this.secret == null) {
+            return false;
+        }
         return this.secret;
     }
 
@@ -169,6 +180,17 @@ public class PropertyType {
     public void setVersion(Integer version) {
         this.version = version;
     }
+    
+    public Boolean isHidden() {
+        if(this.hidden == null) {
+            return false;
+        }
+        return hidden;
+    }
+
+    public void setHidden(Boolean hidden) {
+        this.hidden = hidden;
+    }
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -177,9 +199,10 @@ public class PropertyType {
         sb.append("ResourceType: ").append(getResourceType()).append(", ");
         sb.append("Name: ").append(getName()).append(", ");
         sb.append("Description: ").append(getDescription()).append(", ");
-        sb.append("Optional: ").append(getOptional()).append(", ");
-        sb.append("Secret: ").append(getSecret()).append(", ");
+        sb.append("Optional: ").append(isOptional()).append(", ");
+        sb.append("Secret: ").append(isSecret()).append(", ");
         sb.append("DefaultValue: ").append(getDefaultValue());
+        sb.append("Hidden: ").append(isHidden());
         return sb.toString();
     }
 }

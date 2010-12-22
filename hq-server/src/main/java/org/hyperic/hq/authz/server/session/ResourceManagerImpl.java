@@ -561,17 +561,20 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
                     PropertyType propType = new PropertyType();
                     propType.setName("applicationType");
                     propType.setDescription("applicationType");
+                    propType.setHidden(true);
                     propType.persist();
                     groupType.addPropertyType(propType);
                 }else {
                     PropertyType propType = new PropertyType();
                     propType.setName("groupEntType");
                     propType.setDescription("groupEntType");
+                    propType.setHidden(true);
                     propType.persist();
                     groupType.addPropertyType(propType);
                     PropertyType propEntResType = new PropertyType();
                     propEntResType.setName("groupEntResType");
                     propEntResType.setDescription("groupEntResType");
+                    propEntResType.setHidden(true);
                     propEntResType.persist();
                     groupType.addPropertyType(propEntResType);
                 }

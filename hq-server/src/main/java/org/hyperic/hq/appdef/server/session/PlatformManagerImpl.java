@@ -843,6 +843,9 @@ public class PlatformManagerImpl implements PlatformManager {
                 p = null;
             }
         }
+        if(p == null) {
+            return null;
+        }
 
         return platformFactory.createPlatform(p);
     }
@@ -1559,6 +1562,7 @@ public class PlatformManagerImpl implements PlatformManager {
         PropertyType propType = new PropertyType();
         propType.setName(propName);
         propType.setDescription(propName);
+        propType.setHidden(true);
         propType.persist();
         return propType;
     }
