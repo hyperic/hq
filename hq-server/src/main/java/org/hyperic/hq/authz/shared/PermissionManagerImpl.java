@@ -413,8 +413,7 @@ public class PermissionManagerImpl
                (inEscalation ? "EscalationState es, " : "") +
                "Alert a " +
                "join a.alertDefinition d " +
-               "join d.resource r " +
-               "where r.resourceType is not null and " +
+               "join d.resource r where " +
                (groupId == null ? "" : "exists (select rg from r.groupBag rg " +
                                        "where rg.group.id = " + groupId + ") and ") +
                "a.ctime between :begin and :end and " + (notFixed ? " a.fixed = false and " : "") +
