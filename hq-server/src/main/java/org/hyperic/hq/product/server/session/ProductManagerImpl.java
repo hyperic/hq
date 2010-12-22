@@ -191,11 +191,6 @@ public class ProductManagerImpl implements ProductManager {
             value.getTypeName());
     }
 
-    /**
-     */
-    // TODO This is a get method, but the transaction cannot be read-only since
-    // modifications are made.
-    @Transactional
     public PluginManager getPluginManager(String type) throws PluginException {
         return getProductPluginManager().getPluginManager(type);
     }
@@ -351,7 +346,6 @@ public class ProductManagerImpl implements ProductManager {
 
         PluginInfo pInfo = getProductPluginManager().getPluginInfo(pluginName);
         
-        //TODO moved this up from bottom.  Any issues w/that?
         updatePlugin(pluginDao, pInfo);
 
         TypeInfo[] entities = pplugin.getTypes();
