@@ -1618,6 +1618,7 @@ public class PlatformManagerImpl implements PlatformManager {
                 if (server.getAutoinventoryIdentifier().startsWith(prevFqdn)) {
                     String newAID = server.getAutoinventoryIdentifier().replace(prevFqdn, fqdn);
                     server.setAutoinventoryIdentifier(newAID);
+                    serverManager.updateServer(subj, server.getServerValue());
                 }
             }
         }

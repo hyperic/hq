@@ -151,8 +151,6 @@ public class CPropManagerImpl implements CPropManager {
      */
     public void deleteKey(int appdefType, int appdefTypeId, String key)
         throws CPropKeyNotFoundException {
-        
-        //TODO appdefTypeId is likely not resourceId
         ResourceType resourceType = resourceManager.findResourceTypeById(appdefTypeId);
         PropertyType cpKey  = resourceType.getPropertyType(key);
      
@@ -220,7 +218,6 @@ public class CPropManagerImpl implements CPropManager {
     public String getValue(AppdefEntityValue aVal, String key) throws CPropKeyNotFoundException,
         AppdefEntityNotFoundException, PermissionException {
         try {
-            //TODO use correct ID
             return (String)resourceManager.findResourceById(aVal.getID().getId()).getProperty(key);            
         }catch(Exception e) {
             log.error("Unable to get CPropKey values: " + e.getMessage(), e);
@@ -241,7 +238,7 @@ public class CPropManagerImpl implements CPropManager {
     @Transactional(readOnly = true)
     public Properties getEntries(AppdefEntityID aID) throws PermissionException,
         AppdefEntityNotFoundException {
-        //TODO
+        //TODO assuming all prop values are String, should we just disallow objects?
         Properties properties = new Properties();
         Map<String,Object> propValues = resourceManager.findResourceById(aID.getId()).getProperties();
         for(Map.Entry<String, Object> propValue:propValues.entrySet()) {
@@ -261,8 +258,14 @@ public class CPropManagerImpl implements CPropManager {
     @Transactional(readOnly = true)
     public Properties getDescEntries(AppdefEntityID aID) throws PermissionException,
         AppdefEntityNotFoundException {
-        //TODO
-        return new Properties();
+        //TODO assuming all prop values are String, should we just disallow objects?
+        Resource resource = resourceManager.findResourceById(aID.getId());
+        Properties properties = new Properties();
+        Map<String,Object> propValues = resource.getProperties();
+        for(Map.Entry<String, Object> propValue:propValues.entrySet()) {
+            properties.setProperty(resource.getType().getPropertyType(propValue.getKey()).getDescription(), (String)propValue.getValue());
+        }
+        return properties;
     }
 
     /**
@@ -321,11 +324,8 @@ public class CPropManagerImpl implements CPropManager {
      */
     @Transactional(readOnly = true)
     public List<String> getCPropValues(AppdefResourceTypeValue appdefType, String key, boolean asc) {
-        int type = appdefType.getAppdefType();
         int instanceId = appdefType.getId().intValue();
-        //TODO appdefTypeId is likely not resourceId
         ResourceType resourceType = resourceManager.findResourceTypeById(instanceId);
-        PropertyType pkey  = resourceType.getPropertyType(key);
         //TODO this can't possibly be what you'd expect from this method
         List<String> values = new ArrayList<String>();
         for(Resource resource: resourceType.getResources()) {

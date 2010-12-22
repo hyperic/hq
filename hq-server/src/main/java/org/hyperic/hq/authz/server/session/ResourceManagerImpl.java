@@ -226,7 +226,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         applicationContext.publishEvent(new ResourceDeleteRequestedEvent(r));
 
         final long now = System.currentTimeMillis();
-        //TODO authzHQSystem resource doesn't exist now
+        //TODO audit
         //resourceAuditFactory.deleteResource(findResourceById(AuthzConstants.authzHQSystem),
           //  subject, now, now);
         Collection<ResourceGroup> groups = r.getResourceGroups();
@@ -242,9 +242,9 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     public void setResourceOwner(AuthzSubject whoami, Resource resource, AuthzSubject newOwner)
         throws PermissionException {
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        //TODO set modified by
         if (pm.hasAdminPermission(whoami.getId()) || resource.isOwner(whoami.getId())) {
             resource.setOwner(newOwner);
+            resource.setModifiedBy(whoami.getName());
             resource.merge();
         } else {
             throw new PermissionException("Only an owner or admin may " + "reassign ownership.");
@@ -479,7 +479,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
 
      
 
-        // TODO Make sure user has permission to modify resource edges
+        // TODO perm check
         //final PermissionManager pm = PermissionManagerFactory.getInstance();
 
        

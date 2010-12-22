@@ -158,8 +158,6 @@ public class ServerManagerImpl implements ServerManager {
      * required to succesfully add a server instance to a platform
      */
     private void validateNewServer(Resource p, ServerValue sv) throws ValidationException {
-        //TODO above validation already done when creating new Resource
-        // ensure the server value has a server type
         String msg = null;
         if (sv.getServerType() == null) {
             msg = "Server has no ServiceType";
@@ -308,7 +306,7 @@ public class ServerManagerImpl implements ServerManager {
     }
 
     public void removeServer(AuthzSubject subject, Integer serverId) throws PermissionException, VetoException {
-        //TODO authzHQSystem resource doesn't exist now
+        //TODO audit
         //        final Audit audit = resourceAuditFactory.deleteResource(resourceManager
 //            .findResourceById(AuthzConstants.authzHQSystem), subject, 0, 0);
         //boolean pushed = false;
@@ -541,7 +539,7 @@ public class ServerManagerImpl implements ServerManager {
     @Transactional(readOnly=true)
     public Server getServerById(AuthzSubject subject, Integer id) throws ServerNotFoundException, PermissionException {
         Server server = findServerById(id);
-        //TODO
+        //TODO perm check
         //permissionManager.checkViewPermission(subject, server.getId());
         return server;
     }
@@ -594,7 +592,7 @@ public class ServerManagerImpl implements ServerManager {
         ServiceNotFoundException, PermissionException {
         Resource svc = resourceManager.findResourceById(sID);
         Resource s = svc.getResourceTo(RelationshipTypes.SERVICE);
-        //TODO
+        //TODO perm check
         //permissionManager.checkViewPermission(subject, s.getId());
         return serverFactory.createServer(s).getServerValue();
     }
@@ -796,33 +794,7 @@ public class ServerManagerImpl implements ServerManager {
         Iterator<Resource> it = appServiceCollection.iterator();
 
         while (it.hasNext()) {
-
             Resource appService = it.next();
-            //TODO
-
-//            if (appService.isIsGroup()) {
-//                Collection<Service> services = serviceManager.getServiceCluster(appService.getResourceGroup())
-//                    .getServices();
-//
-//                Iterator<Service> serviceIterator = services.iterator();
-//                while (serviceIterator.hasNext()) {
-//                    Service service = serviceIterator.next();
-//                    Server server = service.getServer();
-//
-//                    // Don't bother with entire cluster if type is platform svc
-//                    if (server.getServerType().isVirtual()) {
-//                        break;
-//                    }
-//
-//                    Integer serverId = server.getId();
-//
-//                    if (serverCollection.containsKey(serverId)) {
-//                        continue;
-//                    }
-//
-//                    serverCollection.put(serverId, server);
-//                }
-//            } else {
             //TODO making assumption that all group members are services here
                 Server server = serverFactory.createServer(appService.getResourceTo(RelationshipTypes.SERVICE));
                 
@@ -832,8 +804,6 @@ public class ServerManagerImpl implements ServerManager {
                         continue;
 
                     serverCollection.put(serverId, server);
-                
-            //}
         }
 
         for (Iterator<Map.Entry<Integer, Server>> i = serverCollection.entrySet().iterator(); i.hasNext();) {

@@ -81,6 +81,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
 
     private ResourceGroupManager resourceGroupManager;
 
+    //TODO all the AppdefStatDAO queries are going to fail
     private AppdefStatDAO appdefStatDAO;
 
     @Autowired
@@ -121,7 +122,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
     @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public int getPlatformsCount(AuthzSubject subject) {
         try {
-            return appdefStatDAO.getPlatformsCount(subject);
+            return platformManager.getPlatformCount().intValue();
         } catch (Exception e) {
             log.error("Caught Exception counting Platforms: " + e, e);
             throw new SystemException(e);

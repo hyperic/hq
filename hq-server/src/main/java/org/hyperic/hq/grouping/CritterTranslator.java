@@ -26,6 +26,8 @@
 package org.hyperic.hq.grouping;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -35,10 +37,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
+import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
+import org.hyperic.hq.inventory.dao.ResourceDao;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -50,7 +55,11 @@ public class CritterTranslator {
     private final Log _log = LogFactory.getLog(CritterTranslator.class);
     public static final String EMPTY_SQL = "";
     
-    public CritterTranslator() {
+    private ResourceDao resourceDao;
+    
+    @Autowired
+    public CritterTranslator(ResourceDao resourceDao) {
+        this.resourceDao = resourceDao;
     }
 
     public PageList translate(CritterTranslationContext ctx, CritterList cList,
@@ -58,14 +67,22 @@ public class CritterTranslator {
     {
         PageList rtn = new PageList();
         rtn.ensureCapacity(pc.getPagesize());
-        Query query = translate(ctx, cList, false, pc.isDescending())
-                        .setFirstResult(pc.getPageEntityIndex());
-        if (PageControl.SIZE_UNLIMITED != pc.getPagesize()) {
-            query.setMaxResults(pc.getPagesize());
-        }
-        rtn.addAll(query.list());
-        rtn.setTotalSize(
-            ((Number)translate(ctx, cList, true, false).uniqueResult()).intValue());
+        //TODO handle other search params besides ALL and set max results
+        //Query query = translate(ctx, cList, false, pc.isDescending())
+          //              .setFirstResult(pc.getPageEntityIndex());
+        //if (PageControl.SIZE_UNLIMITED != pc.getPagesize()) {
+          //  query.setMaxResults(pc.getPagesize());
+        //}
+        
+        //rtn.addAll(query.list());
+       // rtn.setTotalSize(
+         //   ((Number)translate(ctx, cList, true, false).uniqueResult()).intValue());
+        rtn.addAll(resourceDao.find(1, pc.getPagesize()));
+        Collections.sort(rtn, new Comparator<Resource>() {
+            public int compare(Resource o1,Resource o2) {
+                return (o1.getName().compareTo(o2.getName()));
+            }
+        });
         return rtn;
     }
 

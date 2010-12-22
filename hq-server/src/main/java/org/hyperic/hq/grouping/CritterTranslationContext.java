@@ -28,6 +28,8 @@ package org.hyperic.hq.grouping;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.EntityManagerFactory;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.dialect.Dialect;
@@ -36,6 +38,7 @@ import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.StringUtil;
+import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 
 /**
  * This context is used to provide additional information to {@link Critter}s 
@@ -54,7 +57,8 @@ public class CritterTranslationContext {
     private final AuthzSubject _subject;
     
     public CritterTranslationContext(AuthzSubject subj) {
-        this(subj, Bootstrap.getBean(SessionFactory.class).getCurrentSession(),
+        this(subj,(Session)EntityManagerFactoryUtils
+            .getTransactionalEntityManager(Bootstrap.getBean(EntityManagerFactory.class)).getDelegate(),
             (HQDialect) ((SessionFactoryImplementor) Bootstrap.getBean(SessionFactory.class))
             .getDialect(), "x");
     }
