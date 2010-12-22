@@ -49,6 +49,7 @@ import org.hyperic.hq.plugin.weblogic.jmx.WeblogicDiscoverException;
 import org.hyperic.hq.plugin.weblogic.jmx.WeblogicQuery;
 import org.hyperic.hq.plugin.weblogic.jmx.WeblogicRuntimeDiscoverer;
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.RuntimeDiscoverer;
 import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.util.config.ConfigResponse;
 
@@ -72,10 +73,14 @@ public abstract class WeblogicDetector extends ServerDetector implements AutoSer
         setName(WeblogicProductPlugin.SERVER_NAME);
     }
 
-//    @Override
-//    public RuntimeDiscoverer getRuntimeDiscoverer() {
-//        return new WeblogicRuntimeDiscoverer(this);
-//    }
+    @Override
+    public RuntimeDiscoverer getRuntimeDiscoverer() {
+        if(WeblogicProductPlugin.NEW_DISCOVERY){
+            return super.getRuntimeDiscoverer();
+        }
+        return new WeblogicRuntimeDiscoverer(this);
+    }
+
     //just here to override protected access.
     void adjustWeblogicClassPath(String installpath) {
         adjustClassPath(installpath);
@@ -193,14 +198,18 @@ public abstract class WeblogicDetector extends ServerDetector implements AutoSer
 
         String installpath = getCanonicalPath(installDir.getPath());
         List servers = new ArrayList();
-        ServerResource server = createServer(installpath,proc);
+        ServerResource server = createServerResource(installpath);
 
-        String name = getPlatformName() + " "
-                + getTypeInfo().getName()
+        String name = getTypeInfo().getName()
                 + " " + srvConfig.domain + " " + srvConfig.name;
+		if (WeblogicProductPlugin.usePlatformName && WeblogicProductPlugin.NEW_DISCOVERY) {
+			name = getPlatformName() + " " + name;
+		}
 
         server.setName(name);
-
+        if(WeblogicProductPlugin.NEW_DISCOVERY)
+            server.setIdentifier(name);
+        
         setProductConfig(server, productConfig);
         setControlConfig(server, controlConfig);
         //force user to configure by not setting measurement config
@@ -425,9 +434,7 @@ public abstract class WeblogicDetector extends ServerDetector implements AutoSer
         return aiservice;
     }
 
-    public abstract ServerResource createServer(String installpath, WLSProc proc);
-
-    class WLSProc {
+    public class WLSProc {
 
         private String path;
         private String name;
