@@ -40,7 +40,7 @@
 		class="org.springframework.persistence.transaction.NaiveDoubleTransactionManager">
 		<constructor-arg>
 			<bean class="org.springframework.orm.jpa.JpaTransactionManager"
-				id="jpaTransactionManager" p:defaultTimeout="900">
+				id="jpaTransactionManager">
 				<property name="entityManagerFactory" ref="entityManagerFactory" />
 			</bean>
 		</constructor-arg>
