@@ -269,121 +269,21 @@ public class AppdefStatDAO {
         final ResourceTreeNode aPlatformNode = new ResourceTreeNode(plat.getName(),
             getAppdefTypeLabel(APPDEF_TYPE_PLATFORM, plat.getAppdefResourceType().getName()), plat
                 .getEntityId(), ResourceTreeNode.RESOURCE);
-        String falseStr = DBUtil.getBooleanValue(false, jdbcTemplate.getDataSource()
-            .getConnection());
-        StringBuffer buf = new StringBuffer();
-        buf.append("SELECT svr_svrt_svc_svct.server_id, ")
-            .append("svr_svrt_svc_svct.server_name, ").append(
-                "       svr_svrt_svc_svct.server_type_id, ").append(
-                "svr_svrt_svc_svct.server_type_name, ").append(
-                "       svr_svrt_svc_svct.service_id, ").append("svr_svrt_svc_svct.service_name, ")
-            .append("       svr_svrt_svc_svct.service_type_id, ").append(
-                "svr_svrt_svc_svct.service_type_name ").append(
-                "FROM (SELECT app.id as application_id, ").append(
-                "appsvc.service_id as service_id ").append("      FROM EAM_APP_SERVICE appsvc ");
-        if (isOracle8()) {
-            buf.append(", ").append(TBL_APP).append(" app ").append(
-                "WHERE app.id=appsvc.application_id(+) AND EXISTS (").append(
-                getResourceTypeSQL("app.id", subject.getId(), APPLICATION_RES_TYPE,
-                    APPLICATION_OP_VIEW_APPLICATION)).append(") ) app_appsvc, ");
-        } else {
-            buf.append("RIGHT JOIN ").append(TBL_APP).append(
-                " app ON app.id=appsvc.application_id ").append("WHERE EXISTS (").append(
-                getResourceTypeSQL("app.id", subject.getId(), APPLICATION_RES_TYPE,
-                    APPLICATION_OP_VIEW_APPLICATION)).append(") ) app_appsvc RIGHT JOIN ");
+        
+        final Set<ResourceTreeNode> servers = new HashSet<ResourceTreeNode>();
+        for(Server server: plat.getServers()) {
+            servers.add(new ResourceTreeNode(server.getName(), getAppdefTypeLabel(
+                APPDEF_TYPE_SERVER, server.getServerType().getName()), AppdefEntityID
+                .newServerID(new Integer(server.getId())), plat.getEntityId(),
+                server.getServerType().getId()));
         }
-        buf.append("(SELECT svr_svrt.server_id, ").append("svr_svrt.server_name, ").append(
-            "        svr_svrt.server_type_id, ").append("svr_svrt.server_type_name, ").append(
-            "        svc_svct.service_id, ").append("svc_svct.service_name, ").append(
-            "        svc_svct.service_type_id, ").append("svc_svct.service_type_name ").append(
-            " FROM ( SELECT svc.id as service_id, ").append(
-            "               res2.name  as service_name, ").append(
-            "               svct.id   as service_type_id, ").append(
-            "               svct.name as service_type_name,").append(
-            "               svc.server_id as server_id ").append("          FROM ").append(
-            TBL_SERVICE).append("_TYPE svct, ").append(TBL_SERVICE).append(" svc ").append(
-            " JOIN " + TBL_RES).append(" res2 ON svc.resource_id = res2.id ").append(
-            "         WHERE svc.service_type_id=svct.id ").append("           AND EXISTS (")
-            .append(
-                getResourceTypeSQL("svc.id", subject.getId(), SERVICE_RES_TYPE,
-                    SERVICE_OP_VIEW_SERVICE)).append(") ) svc_svct ");
-        if (isOracle8()) {
-            buf.append(",");
-        } else {
-            buf.append("     RIGHT JOIN");
-        }
-        buf.append("       ( SELECT svr.id    as server_id, ").append(
-            "                res1.name as server_name, ").append(
-            "                svrt.id   as server_type_id,").append(
-            "                svrt.name as server_type_name ").append("         FROM ").append(
-            TBL_SERVER).append("_TYPE svrt, ").append(TBL_SERVER).append(" svr ").append(
-            " JOIN " + TBL_RES).append(" res1 ON svr.resource_id = res1.id ").append(
-            "         WHERE  svr.platform_id=").append(plat.getId())
-        // exclude virtual server types from the navMap
-            .append("                    AND svrt.fvirtual = " + falseStr).append(
-                "                    AND svrt.id=svr.server_type_id ").append(
-                "                    AND EXISTS (").append(
-                getResourceTypeSQL("svr.id", subject.getId(), SERVER_RES_TYPE,
-                    SERVER_OP_VIEW_SERVER)).append(") ) svr_svrt ");
-        if (isOracle8()) {
-            buf.append(" WHERE svr_svrt.server_id=svc_svct.server_id(+)").append(
-                "  ) svr_svrt_svc_svct ").append(
-                "WHERE svr_svrt_svc_svct.service_id=app_appsvc.service_id(+)");
-        } else {
-            buf.append("   ON svr_svrt.server_id=svc_svct.server_id ").append(
-                "  ) svr_svrt_svc_svct ").append(
-                "ON svr_svrt_svc_svct.service_id=app_appsvc.service_id ");
-        }
-        buf.append(" ORDER BY svr_svrt_svc_svct.server_id, ").append(
-            "svr_svrt_svc_svct.server_type_id, ")
-            .append("          svr_svrt_svc_svct.service_id, ").append(
-                "svr_svrt_svc_svct.service_type_id ");
-        if (log.isDebugEnabled()) {
-            log.debug(buf.toString());
-        }
-
-        ResourceTreeNode[] platformNode = this.jdbcTemplate.query(buf.toString(),
-            new ResultSetExtractor<ResourceTreeNode[]>() {
-                public ResourceTreeNode[] extractData(ResultSet rs) throws SQLException,
-                    DataAccessException {
-                    final Set<ResourceTreeNode> servers = new HashSet<ResourceTreeNode>();
-                    final Set<ResourceTreeNode> services = new HashSet<ResourceTreeNode>();
-                    while (rs.next()) {
-                        int thisSvrId = rs.getInt(1);
-                        String thisServerName = rs.getString(2);
-                        int thisServerTypeId = rs.getInt(3);
-                        String thisServerTypeName = rs.getString(4);
-                        int thisSvcId = rs.getInt(5);
-                        String thisServiceName = rs.getString(6);
-                        int thisServiceTypeId = rs.getInt(7);
-                        String thisServiceTypeName = rs.getString(8);
-
-                        if (thisServerTypeName != null) {
-                            servers.add(new ResourceTreeNode(thisServerName, getAppdefTypeLabel(
-                                APPDEF_TYPE_SERVER, thisServerTypeName), AppdefEntityID
-                                .newServerID(new Integer(thisSvrId)), plat.getEntityId(),
-                                thisServerTypeId));
-                        }
-
-                        if (thisServiceTypeName != null) {
-                            services.add(new ResourceTreeNode(thisServiceName, getAppdefTypeLabel(
-                                APPDEF_TYPE_SERVICE, thisServiceTypeName), AppdefEntityID
-                                .newServiceID(new Integer(thisSvcId)), AppdefEntityID
-                                .newServerID(new Integer(thisSvrId)), thisServiceTypeId));
-                        }
-                    }
-                    // XXX Leave out service data No current way to represent it
-                    // (ResourceTreeNode[]) serviceMap.values()
-                    // .toArray(new ResourceTreeNode[0]);
-                    aPlatformNode.setSelected(true);
-                    ResourceTreeNode[] svrNodes = (ResourceTreeNode[]) servers
-                        .toArray(new ResourceTreeNode[0]);
-                    ResourceTreeNode.alphaSortNodes(svrNodes, true);
-                    aPlatformNode.addUpChildren(svrNodes);
-                    return new ResourceTreeNode[] { aPlatformNode };
-                }
-            });
-        return platformNode;
+        
+        aPlatformNode.setSelected(true);
+        ResourceTreeNode[] svrNodes = (ResourceTreeNode[]) servers
+            .toArray(new ResourceTreeNode[0]);
+        ResourceTreeNode.alphaSortNodes(svrNodes, true);
+        aPlatformNode.addUpChildren(svrNodes);
+        return new ResourceTreeNode[] { aPlatformNode };
     }
 
     public ResourceTreeNode[] getNavMapDataForServer(AuthzSubject subject, final Server server)
