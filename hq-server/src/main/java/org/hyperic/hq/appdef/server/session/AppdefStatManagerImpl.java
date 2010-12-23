@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -45,9 +46,11 @@ import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,6 +83,8 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
     private ServiceManager serviceManager;
 
     private ResourceGroupManager resourceGroupManager;
+    
+    private ResourceManager resourceManager;
 
     //TODO all the AppdefStatDAO queries are going to fail
     private AppdefStatDAO appdefStatDAO;
@@ -89,12 +94,13 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
                                  PlatformManager platformManager, ServerManager serverManager,
                                  ServiceManager serviceManager,
                                  ResourceGroupManager resourceGroupManager,
-                                 AppdefStatDAO appdefStatDAO) {
+                                 AppdefStatDAO appdefStatDAO, ResourceManager resourceManager) {
         this.applicationManager = applicationManager;
         this.platformManager = platformManager;
         this.serverManager = serverManager;
         this.serviceManager = serviceManager;
         this.resourceGroupManager = resourceGroupManager;
+        this.resourceManager = resourceManager;
         this.appdefStatDAO = appdefStatDAO;
     }
 
@@ -106,7 +112,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
     @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public Map<String, Integer> getPlatformCountsByTypeMap(AuthzSubject subject) {
         try {
-            return appdefStatDAO.getPlatformCountsByTypeMap(subject);
+            return platformManager.getPlatformTypeCounts();
         } catch (Exception e) {
             log.error("Caught Exception finding Platforms by type: " + e, e);
             throw new SystemException(e);
@@ -138,7 +144,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
     @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public Map<String, Integer> getServerCountsByTypeMap(AuthzSubject subject) {
         try {
-            return appdefStatDAO.getServerCountsByTypeMap(subject);
+            return serverManager.getServerTypeCounts();
         } catch (Exception e) {
             log.error("Caught Exception finding Servers by type: " + e, e);
             throw new SystemException(e);
@@ -153,7 +159,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
     @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public int getServersCount(AuthzSubject subject) {
         try {
-            return appdefStatDAO.getServersCount(subject);
+            return serverManager.getServerCount().intValue();
         } catch (Exception e) {
             log.error("Caught Exception finding Servers by type: " + e, e);
             throw new SystemException(e);
@@ -168,7 +174,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
     @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public Map<String, Integer> getServiceCountsByTypeMap(AuthzSubject subject) {
         try {
-            return appdefStatDAO.getServiceCountsByTypeMap(subject);
+            return serviceManager.getServiceTypeCounts();
         } catch (Exception e) {
             log.error("Caught Exception finding Services by type: " + e, e);
             throw new SystemException(e);
@@ -183,7 +189,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
     @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public int getServicesCount(AuthzSubject subject) {
         try {
-            return appdefStatDAO.getServicesCount(subject);
+            return serviceManager.getServiceCount().intValue();
         } catch (Exception e) {
             log.error("Caught Exception finding Services by type: " + e, e);
             throw new SystemException(e);
@@ -213,7 +219,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
     @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public int getApplicationsCount(AuthzSubject subject) {
         try {
-            return appdefStatDAO.getApplicationsCount(subject);
+            return applicationManager.getApplicationCount().intValue();
         } catch (Exception e) {
             log.error("Caught Exception finding applications by type: " + e, e);
             throw new SystemException(e);
@@ -228,7 +234,13 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
     @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public Map<Integer, Integer> getGroupCountsMap(AuthzSubject subject) {
         try {
-            return appdefStatDAO.getGroupCountsMap(subject);
+            Map<Integer,Integer> groupCounts = new HashMap<Integer,Integer>();
+            int[] groupTypes = AppdefEntityConstants.getAppdefGroupTypes();
+            for (int x = 0; x < groupTypes.length; x++) {
+                ResourceType groupType =  resourceManager.findResourceTypeByName(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[x]));
+                groupCounts.put(groupTypes[x], resourceGroupManager.getGroupCountOfType(groupType).intValue());
+            }
+            return groupCounts;
         } catch (Exception e) {
             log.error("Caught Exception finding groups by type: " + e, e);
             throw new SystemException(e);

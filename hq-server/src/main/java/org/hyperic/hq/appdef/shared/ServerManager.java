@@ -27,6 +27,7 @@ package org.hyperic.hq.appdef.shared;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
@@ -35,6 +36,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -72,7 +74,8 @@ public interface ServerManager {
      * @return list of serverTypeValues
      */
     public PageList<ServerTypeValue> getAllServerTypes(AuthzSubject subject, PageControl pc);
-
+    
+    PageList<Resource> getAllServerResources(AuthzSubject subject, PageControl pc);
 
     /**
      * Find viewable server types
@@ -248,9 +251,10 @@ public interface ServerManager {
     public void setAutodiscoveryZombie(Server server, boolean zombie);
 
     /**
-     * Returns a list of 2 element arrays. The first element is the name of the
-     * server type, the second element is the # of servers of that type in the
+     * @return A Map of server type to the # of servers of that type in the
      * inventory.
      */
-    public List<Object[]> getServerTypeCounts();
+    public Map<String,Integer> getServerTypeCounts();
+    
+    Number getServerCount() ;
 }

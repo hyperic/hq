@@ -27,6 +27,7 @@ package org.hyperic.hq.appdef.shared;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.Agent;
@@ -121,6 +122,8 @@ public interface PlatformManager {
      */
     public PageList<PlatformValue> getAllPlatforms(AuthzSubject subject, PageControl pc)
         throws PermissionException, NotFoundException;
+    
+    PageList<Resource> getAllPlatformResources(AuthzSubject subject, PageControl pc);
 
     /**
      * Get platforms created within a given time range.
@@ -283,11 +286,11 @@ public interface PlatformManager {
     public void removeIp(Platform platform, String address, String netmask, String macAddress);
 
     /**
-     * Returns a list of 2 element arrays. The first element is the name of the
-     * platform type, the second element is the # of platforms of that type in
+     * 
+     * @return  A Map of platform types to the # of platforms of that type in
      * the inventory.
      */
-    public List<Object[]> getPlatformTypeCounts();
+    public Map<String,Integer> getPlatformTypeCounts();
 
     public Number getPlatformCount();
     

@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -118,6 +119,8 @@ public class PlatformManagerImpl implements PlatformManager {
     private static final String VALUE_PROCESSOR = PagerProcessor_platform.class.getName();
 
     private Pager valuePager;
+    
+    private Pager defaultPager;
 
     private PermissionManager permissionManager;
 
@@ -562,6 +565,12 @@ public class PlatformManagerImpl implements PlatformManager {
         return valuePager.seek(platforms, pc);
     }
     
+    public PageList<Resource> getAllPlatformResources(AuthzSubject subject, PageControl pc) {
+        Collection<Resource> platforms = getAllPlatforms();
+
+        return defaultPager.seek(platforms, pc);
+    }
+    
     private Set<Resource> findByCreationTime(long creationTime) {
         //TODO this would be more performant with a JPA or Graph query,
         //but not sure yet if we need creationTime as a concept for all Resources
@@ -592,21 +601,20 @@ public class PlatformManagerImpl implements PlatformManager {
         PageControl pc = new PageControl(0, size);
 
         Collection<Resource> platforms = findByCreationTime(System.currentTimeMillis() - range);
-
+        Set<Platform> plats = new HashSet<Platform>();
        
         Collection<Integer> viewable = getViewablePlatformPKs(subject);
         //and iterate over the list to remove any item not viewable
         for (Iterator<Resource> i = platforms.iterator(); i.hasNext();) {
             Resource platform = i.next();
-            if (!viewable.contains(platform.getId())) {
-                // remove the item, user cant see it
-                i.remove();
+            if (viewable.contains(platform.getId())) {
+               plats.add(platformFactory.createPlatform(platform));
             }
         }
 
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
-        return valuePager.seek(platforms, pc);
+        return valuePager.seek(plats, pc);
     }
 
     /**
@@ -1838,15 +1846,8 @@ public class PlatformManagerImpl implements PlatformManager {
         }
     }
 
-    /**
-     * Returns a list of 2 element arrays. The first element is the name of the
-     * platform type, the second element is the # of platforms of that type in
-     * the inventory.
-     * 
-     * 
-     */
     @Transactional(readOnly = true)
-    public List<Object[]> getPlatformTypeCounts() {
+    public Map<String,Integer> getPlatformTypeCounts() {
         Collection<ResourceType> platformTypes = findAllPlatformResourceTypes();
         List<ResourceType> orderedPlatformTypes =  new ArrayList<ResourceType>(platformTypes);
         Collections.sort(orderedPlatformTypes, new Comparator<ResourceType>() {
@@ -1854,9 +1855,9 @@ public class PlatformManagerImpl implements PlatformManager {
                 return (o1.getName().compareTo(o2.getName()));
             }
         });
-        List<Object[]> counts = new ArrayList<Object[]>();
+        Map<String,Integer> counts = new HashMap<String,Integer>();
         for(ResourceType platformType: orderedPlatformTypes) {
-            counts.add(new Object[]{platformType.getName(),(long)platformType.getResources().size()});
+            counts.put(platformType.getName(),platformType.getResources().size());
         }
         return counts;
     }
@@ -1869,8 +1870,6 @@ public class PlatformManagerImpl implements PlatformManager {
         return getAllPlatforms().size();
     }
     
-    
-
     public Collection<Platform> getPlatformsByType(AuthzSubject subject, String platformTypeName) throws PermissionException, InvalidAppdefTypeException {
         try {
             ResourceType ptype = resourceManager.findResourceTypeByName(platformTypeName);
@@ -1944,6 +1943,7 @@ public class PlatformManagerImpl implements PlatformManager {
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
         valuePager = Pager.getPager(VALUE_PROCESSOR);
+        defaultPager = Pager.getDefaultPager();
         //TODO preload some other way?
         if(resourceManager.findResourceTypeByName(IP_RESOURCE_TYPE_NAME) == null) {
             ResourceType ipType = new ResourceType();

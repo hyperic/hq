@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.zip.GZIPOutputStream;
 
@@ -114,9 +115,9 @@ public class UpdateBossImpl implements UpdateBoss {
         req.setProperty("java.version", System.getProperty("java.version"));
         req.setProperty("java.vendor", System.getProperty("java.vendor"));
 
-        List<Object[]> plats = platformManager.getPlatformTypeCounts();
-        List<Object[]> svrs = serverManager.getServerTypeCounts();
-        List<Object[]> svcs = serviceManager.getServiceTypeCounts();
+        Map<String,Integer> plats = platformManager.getPlatformTypeCounts();
+        Map<String,Integer> svrs = serverManager.getServerTypeCounts();
+        Map<String,Integer> svcs = serviceManager.getServiceTypeCounts();
 
         addResourceProperties(req, plats, "hq.rsrc.plat.");
         addResourceProperties(req, svrs, "hq.rsrc.svr.");
@@ -142,9 +143,9 @@ public class UpdateBossImpl implements UpdateBoss {
         return res;
     }
 
-    private void addResourceProperties(Properties p, List<Object[]> resCounts, String prefix) {
-        for (Object[] val : resCounts) {
-            p.setProperty(prefix + val[0], "" + val[1]);
+    private void addResourceProperties(Properties p, Map<String,Integer> resCounts, String prefix) {
+        for (Map.Entry<String, Integer> val : resCounts.entrySet()) {
+            p.setProperty(prefix +val.getKey(), "" + val.getValue());
         }
     }
 

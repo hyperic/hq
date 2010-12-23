@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -84,7 +85,7 @@ public class ServiceManagerImpl implements ServiceManager {
 
     private static final String VALUE_PROCESSOR = "org.hyperic.hq.appdef.server.session.PagerProcessor_service";
     private Pager valuePager;
-  
+    private Pager defaultPager;
     private PermissionManager permissionManager;
     private ResourceManager resourceManager;
     private AuthzSubjectManager authzSubjectManager;
@@ -286,6 +287,12 @@ public class ServiceManagerImpl implements ServiceManager {
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
         return valuePager.seek(getAllServiceTypes(), pc);
+    }
+    
+    @Transactional(readOnly=true)
+    public PageList<Resource> getAllServiceResources(AuthzSubject subject, PageControl pc) {
+        Collection<Resource> services = findAllServiceResources();
+        return defaultPager.seek(services, pc);
     }
     
     private Set<ServiceType> getAllServiceTypes() {
@@ -917,13 +924,9 @@ public class ServiceManagerImpl implements ServiceManager {
         resourceManager.removeResource(subject, resourceManager.findResourceById(serviceId));
     }
 
-    /**
-     * Returns a list of 2 element arrays. The first element is the name of the
-     * service type, the second element is the # of services of that type in the
-     * inventory.
-     */
+   
     @Transactional(readOnly = true)
-    public List<Object[]> getServiceTypeCounts() {
+    public Map<String,Integer> getServiceTypeCounts() {
         Collection<ResourceType> serviceTypes = getAllServiceResourceTypes();
         List<ResourceType> orderedServiceTypes =  new ArrayList<ResourceType>(serviceTypes);
         Collections.sort(orderedServiceTypes, new Comparator<ResourceType>() {
@@ -931,9 +934,9 @@ public class ServiceManagerImpl implements ServiceManager {
                 return (o1.getName().compareTo(o2.getName()));
             }
         });
-        List<Object[]> counts = new ArrayList<Object[]>();
+        Map<String,Integer> counts = new HashMap<String,Integer>();
         for(ResourceType serviceType: orderedServiceTypes) {
-            counts.add(new Object[]{serviceType.getName(),(long)serviceType.getResources().size()});
+            counts.put(serviceType.getName(),serviceType.getResources().size());
         }
         return counts;
     }
@@ -975,11 +978,15 @@ public class ServiceManagerImpl implements ServiceManager {
         return idList;
     }
 
-
+    @Transactional(readOnly = true)
+    public Number getServiceCount() {
+        return findAllServiceResources().size();
+    }
 
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
         valuePager = Pager.getPager(VALUE_PROCESSOR);
+        defaultPager = Pager.getDefaultPager();
     }
 
 }

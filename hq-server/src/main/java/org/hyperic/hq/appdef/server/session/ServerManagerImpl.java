@@ -78,6 +78,7 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import org.tanukisoftware.wrapper.WrapperActionServer;
 
 /**
  * This class is responsible for managing Server objects in appdef and their
@@ -93,6 +94,7 @@ public class ServerManagerImpl implements ServerManager {
 
     private static final String VALUE_PROCESSOR = "org.hyperic.hq.appdef.server.session.PagerProcessor_server";
     private Pager valuePager;
+    private Pager defaultPager;
     private PluginDAO pluginDAO;
 
     private PermissionManager permissionManager;
@@ -342,6 +344,12 @@ public class ServerManagerImpl implements ServerManager {
         return valuePager.seek(getAllServerTypes(), pc);
     }
     
+    @Transactional(readOnly=true)
+    public PageList<Resource> getAllServerResources(AuthzSubject subject, PageControl pc) {
+        Collection<Resource> servers = getAllServers();
+        return defaultPager.seek(servers, pc);
+    }
+    
     private Set<ServerType> getAllServerTypes() {
         Set<ServerType> serverTypes = new HashSet<ServerType>();
         Set<ResourceType> resourceTypes = getAllServerResourceTypes();
@@ -361,8 +369,13 @@ public class ServerManagerImpl implements ServerManager {
     }
     
     private Collection<ServerType> getServerTypes(final List<Integer> serverIds, final boolean asc) {
-        //TODO from ServerDAO
-        return null;
+        Set<ServerType> serverTypes = new HashSet<ServerType>();
+        for(Integer serverId: serverIds) {
+            serverTypes.add(serverFactory.createServerType(resourceManager.findResourceById(serverId).getType()));
+        }
+        final List<ServerType> rtn = new ArrayList<ServerType>(serverTypes);
+        Collections.sort(rtn, new AppdefNameComparator(asc));
+        return rtn;
     }
 
     /**
@@ -889,7 +902,17 @@ public class ServerManagerImpl implements ServerManager {
     }
      
     private void updateServer(ServerValue existing, Resource server) {
-        //TODO from Server
+        server.setDescription( existing.getDescription() );
+        server.setProperty(ServerFactory.RUNTIME_AUTODISCOVERY, existing.getRuntimeAutodiscovery() );
+        server.setProperty(ServerFactory.WAS_AUTODISCOVERED,existing.getWasAutodiscovered() );
+        server.setProperty(ServerFactory.AUTODISCOVERY_ZOMBIE,existing.getAutodiscoveryZombie() );
+        server.setModifiedBy( existing.getModifiedBy() );
+        server.setLocation( existing.getLocation() );
+        server.setName( existing.getName() );
+        server.setProperty(ServerFactory.AUTO_INVENTORY_IDENTIFIER, existing.getAutoinventoryIdentifier() );
+        server.setProperty(ServerFactory.INSTALL_PATH, existing.getInstallPath() );
+        server.setProperty(ServerFactory.SERVICES_AUTO_MANAGED, existing.getServicesAutomanaged() );
+        server.merge();
     }
 
     /**
@@ -1057,8 +1080,7 @@ public class ServerManagerImpl implements ServerManager {
         Collections.sort(rtn, new Comparator<ServerType>() {
             private String getName(Object obj) {
                 if (obj instanceof ServerType) {
-                    //TODO was sortName
-                    return ((ServerType) obj).getName();
+                    return ((ServerType) obj).getSortName();
                 }
                 return "";
             }
@@ -1138,27 +1160,31 @@ public class ServerManagerImpl implements ServerManager {
             server.setName(server.getName().trim());
     }
 
-    /**
-     * Returns a list of 2 element arrays. The first element is the name of the
-     * server type, the second element is the # of servers of that type in the
-     * inventory.
-     * 
-     * 
-     */
+   
     @Transactional(readOnly=true)
-    public List<Object[]> getServerTypeCounts() {
+    public Map<String,Integer> getServerTypeCounts() {
         Collection<ResourceType> serverTypes = getAllServerResourceTypes();
-        List<Object[]> counts = new ArrayList<Object[]>();
-        for(ResourceType serverType: serverTypes) {
-            counts.add(new Object[]{serverType.getName(),serverType.getResources().size()});
+        List<ResourceType> orderedServerTypes =  new ArrayList<ResourceType>(serverTypes);
+        Collections.sort(orderedServerTypes, new Comparator<ResourceType>() {
+            public int compare(ResourceType o1, ResourceType o2) {
+                return (o1.getName().compareTo(o2.getName()));
+            }
+        });
+        Map<String,Integer> counts = new HashMap<String,Integer>();
+        for(ResourceType serverType: orderedServerTypes) {
+            counts.put(serverType.getName(),serverType.getResources().size());
         }
         return counts;
     }
-
+    
+    @Transactional(readOnly = true)
+    public Number getServerCount() {
+        return getAllServers().size();
+    }
+    
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
-
         valuePager = Pager.getPager(VALUE_PROCESSOR);
-
+        defaultPager = Pager.getDefaultPager();
     }
 }

@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -86,6 +87,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
     protected static final String VALUE_PROCESSOR = "org.hyperic.hq.appdef.server.session.PagerProcessor_app";
     private Pager valuePager;
+    private Pager defaultPager;
 
     private ResourceManager resourceManager;
     
@@ -767,13 +769,25 @@ public class ApplicationManagerImpl implements ApplicationManager {
         //TODO from ApplicationDAO - find all applications that all services in g belong to
         return null;
     }
-
+    
+    public Number getApplicationCount() {
+      return getAllApplications().size();
+    }
+    
+    private Set<Resource> getAllApplications() {
+        return resourceManager.findResourceTypeByName(AppdefEntityConstants.getAppdefGroupTypeName(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP)).
+            getResources();
+    }
+    
+    public PageList<Resource> getAllApplicationResources(AuthzSubject subject, PageControl pc) {
+        Collection<Resource> applications = getAllApplications();
+        return defaultPager.seek(applications, pc);
+    }
 
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
-
         valuePager = Pager.getPager(VALUE_PROCESSOR);
-
+        defaultPager = Pager.getDefaultPager();
     }
 
     private void trimStrings(ApplicationValue app) {

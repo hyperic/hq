@@ -38,6 +38,8 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
@@ -67,7 +69,9 @@ import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.zevents.ZeventManager;
+import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.hyperic.util.pager.Pager;
 import org.quartz.SchedulerException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,7 +102,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     private ResourceGroupDao resourceGroupDao;
     private ResourceDao resourceDao;
     private ResourceTypeDao resourceTypeDao;
-   
+    private Pager defaultPager;
 
     @Autowired
     public ResourceGroupManagerImpl(AuthzSubjectManager authzSubjectManager,
@@ -109,6 +113,11 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         this.resourceGroupDao = resourceGroupDao;
         this.resourceDao = resourceDao;
         this.resourceTypeDao = resourceTypeDao;
+    }
+    
+    @PostConstruct
+    public void initialize() {
+        this.defaultPager = Pager.getDefaultPager();
     }
 
     /**
@@ -599,14 +608,6 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         return resourceGroupDao.findAll();
     }
 
-  
-
-   
-    /**
-     * Change owner of a group.
-     * 
-     * 
-     */
     public void changeGroupOwner(AuthzSubject subject, ResourceGroup group, AuthzSubject newOwner)
         throws PermissionException {
         //TODO this used to call ResourceManager. Perm check?
@@ -624,10 +625,22 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
        }
        return groups;
     }
+    
+    public Number getGroupCountOfType(ResourceType groupType) {
+        return groupType.getResources().size();
+    }
 
     @Transactional(readOnly=true)
     public ResourceGroup findResourceGroupByName(String name) {
        return resourceGroupDao.findByName(name);
+    }
+    
+    public PageList<Resource> findGroupsOfType(AuthzSubject subject, Set<ResourceType> groupTypes, PageControl pc) {
+        Set<Resource> groups = new HashSet<Resource>();
+        for(ResourceType groupType: groupTypes) {
+            groups.addAll(groupType.getResources());
+        }
+        return defaultPager.seek(groups, pc);
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {

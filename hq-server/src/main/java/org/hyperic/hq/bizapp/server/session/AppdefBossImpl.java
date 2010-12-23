@@ -2429,11 +2429,12 @@ public class AppdefBossImpl implements AppdefBoss {
         PageList<AppdefResourceValue> res = new PageList<AppdefResourceValue>();
 
        
-        CritterTranslationContext ctx = new CritterTranslationContext(subject);
-        CritterList cList = getCritterList(subject, matchAny, appdefResType, searchFor, grpId,
-            grpEntId, groupSubType, appdefTypeId, matchOwn, matchUnavail);
-        // TODO: G
-        PageList<Resource> children = critterTranslator.translate(ctx, cList, pc);
+        //CritterTranslationContext ctx = new CritterTranslationContext(subject);
+        //CritterList cList = getCritterList(subject, matchAny, appdefResType, searchFor, grpId,
+          //  grpEntId, groupSubType, appdefTypeId, matchOwn, matchUnavail);
+    
+        PageList<Resource> children = getResources(subject, matchAny, appdefResType, searchFor, grpId,
+          grpEntId, groupSubType, appdefTypeId, matchOwn, matchUnavail,pc);
         res.ensureCapacity(children.size());
         res.setTotalSize(children.getTotalSize());
         for (Resource child : children) {
@@ -2452,104 +2453,31 @@ public class AppdefBossImpl implements AppdefBoss {
         }
         return res;
     }
-
-    private CritterList getCritterList(AuthzSubject subj, boolean matchAny,
-                                       AppdefEntityTypeID appdefResType, String resourceName,
-                                       AppdefEntityID grpId, int grpEntId, int[] groupTypes,
-                                       int appdefTypeId, boolean matchOwn, boolean matchUnavail)
-        throws PatternSyntaxException {
-        Critter tmp;
-        //TODO impl?
-//        Resource proto = (appdefResType != null) ? resourceManager
-//            .findResourcePrototype(appdefResType) : null;
-//        boolean isGroup = (groupTypes == null) ? false : true;
-        List<Critter> critters = new ArrayList<Critter>();
-//        if (isGroup) {
-//            critters.add(getGrpTypeCritter(groupTypes, proto));
-//            if (null != (tmp = getResourceTypeCritter(grpEntId, null))) {
-//                critters.add(tmp);
-//            } else if (null != (tmp = getResourceTypeCritter(appdefTypeId, null))) {
-//                critters.add(tmp);
-//            }
-//        } else {
-//            if (null != (tmp = getProtoCritter(appdefResType, proto))) {
-//                critters.add(tmp);
-//            }
-//          
-//        }
-//        if (null != (tmp = getResourceNameCritter(resourceName))) {
-//            critters.add(tmp);
-//        }
-//        if (null != (tmp = getGrpMemCritter(grpId))) {
-//            critters.add(tmp);
-//        }
-//        if (matchOwn) {
-//            critters.add(getOwnCritter(subj));
-//        }
-//        if (matchUnavail) {
-//            critters.add(getUnavailCritter());
-//        }
-        return new CritterList(critters, matchAny);
-    }
-
-    private Critter getGrpTypeCritter(int[] groupTypes, Resource proto) {
-        if (groupTypes.length == 0 || groupTypes[0] == APPDEF_GROUP_TYPE_UNDEFINED) {
-            return null;
+    
+    private PageList<Resource> getResources(AuthzSubject subj, boolean matchAny,
+        AppdefEntityTypeID appdefResType, String resourceName,
+        AppdefEntityID grpId, int grpEntId, int[] groupTypes,
+        int appdefTypeId, boolean matchOwn, boolean matchUnavail, PageControl pc) {
+        //TODO critters from getCritterList used to order by name in CritterTranslator
+        switch (appdefTypeId) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                //TODO the max results and first results used to be set on query by CritterTranslator.  Not seeing how next batch was picked up
+                return platformManager.getAllPlatformResources(subj,pc);
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                return serverManager.getAllServerResources(subj, pc);
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                return serviceManager.getAllServiceResources(subj, pc);
+            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                return applicationManager.getAllApplicationResources(subj, pc);
+            default:
+                
         }
-        if (AppdefEntityConstants.isGroupCompat(groupTypes[0])) {
-            CompatGroupTypeCritterType critter = new CompatGroupTypeCritterType();
-            return critter.newInstance(proto);
-        } else {
-            MixedGroupType type = MixedGroupType.findByCode(groupTypes);
-            MixedGroupTypeCritterType critter = new MixedGroupTypeCritterType();
-            return critter.newInstance(type);
+        //TODO Not handling ResourceName, GrpMem,Own, and Unavail critters yet
+        Set<ResourceType> groupResTypes = new HashSet<ResourceType>();
+        for(int groupType: groupTypes) {
+            groupResTypes.add(resourceManager.findResourceTypeByName(AppdefEntityConstants.getAppdefGroupTypeName(groupType)));
         }
-    }
-
-    private Critter getProtoCritter(AppdefEntityTypeID appdefResType, Resource proto) {
-        if (appdefResType != null && proto != null) {
-            ProtoCritterType protoType = new ProtoCritterType();
-            return protoType.newInstance(proto);
-        }
-        return null;
-    }
-
-    private Critter getGrpMemCritter(AppdefEntityID grpId) {
-        if (grpId != null) {
-
-            ResourceGroup group = resourceGroupManager.findResourceGroupById(grpId.getId());
-            GroupMembershipCritterType groupMemType = new GroupMembershipCritterType();
-            return groupMemType.newInstance(group);
-        }
-        return null;
-    }
-
-    private Critter getResourceTypeCritter(int appdefTypeId, Integer protoToExclude) {
-        if (appdefTypeId == APPDEF_GROUP_TYPE_UNDEFINED || appdefTypeId == APPDEF_TYPE_UNDEFINED ||
-            appdefTypeId == APPDEF_RES_TYPE_UNDEFINED) {
-            return null;
-        }
-        String resTypeName = AppdefUtil.appdefTypeIdToAuthzTypeStr(appdefTypeId);
-        ResourceTypeCritterType type = new ResourceTypeCritterType();
-        return type.newInstance(resTypeName, protoToExclude);
-    }
-
-    private Critter getResourceNameCritter(String resourceName) throws PatternSyntaxException {
-        if (resourceName != null) {
-            ResourceNameCritterType resNameCritterType = new ResourceNameCritterType();
-            return resNameCritterType.newInstance(resourceName);
-        }
-        return null;
-    }
-
-    private Critter getOwnCritter(AuthzSubject subj) {
-        OwnedCritterType ct = new OwnedCritterType();
-        return ct.newInstance(subj);
-    }
-
-    private Critter getUnavailCritter() {
-        AvailabilityCritterType ct = new AvailabilityCritterType();
-        return ct.newInstance(AvailabilityType.AVAIL_DOWN);
+        return resourceGroupManager.findGroupsOfType(subj, groupResTypes, pc);
     }
 
     /**

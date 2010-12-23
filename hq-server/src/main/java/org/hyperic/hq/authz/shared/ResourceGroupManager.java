@@ -28,6 +28,7 @@ package org.hyperic.hq.authz.shared;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
@@ -41,6 +42,7 @@ import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
+import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
 /**
@@ -147,6 +149,10 @@ public interface ResourceGroupManager
      * Get the # of members in a group
      */
     public int getNumMembers(ResourceGroup g);
+    
+    Number getGroupCountOfType(ResourceType groupType);
+    
+    PageList<Resource> findGroupsOfType(AuthzSubject subject, Set<ResourceType> groupTypes, PageControl pc);
 
     /**
      * Temporary method to convert a ResourceGroup into an AppdefGroupValue

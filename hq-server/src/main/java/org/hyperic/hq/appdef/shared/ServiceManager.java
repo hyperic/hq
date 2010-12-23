@@ -27,6 +27,7 @@ package org.hyperic.hq.appdef.shared;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.Server;
@@ -37,6 +38,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -93,6 +95,8 @@ public interface ServiceManager {
     public ServiceType findServiceTypeByName(String name);
     
     public PageList<ServiceTypeValue> getAllServiceTypes(AuthzSubject subject, PageControl pc);
+    
+    PageList<Resource> getAllServiceResources(AuthzSubject subject, PageControl pc);
 
     public PageList<ServiceTypeValue> getViewableServiceTypes(AuthzSubject subject, PageControl pc)
         throws PermissionException, NotFoundException;
@@ -168,11 +172,12 @@ public interface ServiceManager {
         VetoException;
 
     /**
-     * Returns a list of 2 element arrays. The first element is the name of the
-     * service type, the second element is the # of services of that type in the
+     * @return A Map of service type to the # of services of that type in the
      * inventory.
      */
-    public List<Object[]> getServiceTypeCounts();
+    public  Map<String,Integer> getServiceTypeCounts();
+    
+    Number getServiceCount();
     
     ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin,
                                   ServerType servType) throws NotFoundException;
