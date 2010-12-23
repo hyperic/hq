@@ -25,15 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Configurable
 @NodeEntity(partial = true)
 public class PropertyType {
-    @GraphProperty
-    @Transient
-    private String defaultValue;
-
-    @NotNull
-    @GraphProperty
-    @Transient
-    private String description;
-
     @PersistenceContext
     transient EntityManager entityManager;
 
@@ -50,20 +41,28 @@ public class PropertyType {
 
     @GraphProperty
     @Transient
+    private String defaultValue;
+
+    @GraphProperty
+    @Transient
+    private String description;
+	
+    @GraphProperty
+    @Transient
     private Boolean optional;
+	
+    @GraphProperty
+    @Transient
+    private Boolean hidden;
+	
+    @GraphProperty
+    @Transient
+    private Boolean secret;
 
     @ManyToOne
     @Transient
     @RelatedTo(type = RelationshipTypes.HAS_PROPERTY_TYPE, direction = Direction.INCOMING, elementClass = ResourceType.class)
     private ResourceType resourceType;
-
-    @GraphProperty
-    @Transient
-    private Boolean secret;
-    
-    @GraphProperty
-    @Transient
-    private Boolean hidden;
 
     @Version
     @Column(name = "version")
@@ -82,45 +81,6 @@ public class PropertyType {
         this.entityManager.flush();
     }
 
-    public String getDefaultValue() {
-        return this.defaultValue;
-    }
-
-    public String getDescription() {
-        return this.description;
-    }
-
-    public Integer getId() {
-        return this.id;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public Boolean isOptional() {
-        //TODO proper way to do default value?
-       if(this.optional == null) {
-           return false;
-       }
-       return this.optional;
-    }
-
-    public ResourceType getResourceType() {
-        return this.resourceType;
-    }
-
-    public Boolean isSecret() {
-        if(this.secret == null) {
-            return false;
-        }
-        return this.secret;
-    }
-
-    public Integer getVersion() {
-        return this.version;
-    }
-
     @Transactional
     public PropertyType merge() {
         PropertyType merged = this.entityManager.merge(this);
@@ -137,10 +97,6 @@ public class PropertyType {
 
     @Transactional
     public void remove() {
-        for(org.neo4j.graphdb.Relationship relationship: getUnderlyingState().getRelationships()) {
-            relationship.delete();
-        }
-        getUnderlyingState().delete();
         if (this.entityManager.contains(this)) {
             this.entityManager.remove(this);
         } else {
@@ -149,60 +105,91 @@ public class PropertyType {
         }
     }
 
-    public void setDefaultValue(String defaultValue) {
-        this.defaultValue = defaultValue;
-    }
+    public Integer getId() {
+		return id;
+	}
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+	public void setId(Integer id) {
+		this.id = id;
+	}
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public void setOptional(Boolean optional) {
-        this.optional = optional;
-    }
+	public String getDefaultValue() {
+		return defaultValue;
+	}
 
-    public void setResourceType(ResourceType resourceType) {
-        this.resourceType = resourceType;
-    }
+	public void setDefaultValue(String defaultValue) {
+		this.defaultValue = defaultValue;
+	}
 
-    public void setSecret(Boolean secret) {
-        this.secret = secret;
-    }
+	public String getDescription() {
+		return description;
+	}
 
-    public void setVersion(Integer version) {
-        this.version = version;
-    }
-    
-    public Boolean isHidden() {
-        if(this.hidden == null) {
-            return false;
-        }
-        return hidden;
-    }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-    public void setHidden(Boolean hidden) {
-        this.hidden = hidden;
-    }
+	public Boolean isOptional() {
+		return optional;
+	}
 
-    public String toString() {
+	public void setOptional(Boolean optional) {
+		this.optional = optional;
+	}
+
+	public Boolean isHidden() {
+		return hidden;
+	}
+
+	public void setHidden(Boolean hidden) {
+		this.hidden = hidden;
+	}
+
+	public Boolean isSecret() {
+		return secret;
+	}
+
+	public void setSecret(Boolean secret) {
+		this.secret = secret;
+	}
+
+	public ResourceType getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(ResourceType resourceType) {
+		this.resourceType = resourceType;
+	}
+
+	public Integer getVersion() {
+		return version;
+	}
+
+	public void setVersion(Integer version) {
+		this.version = version;
+	}
+
+	public String toString() {
         StringBuilder sb = new StringBuilder();
+
         sb.append("Id: ").append(getId()).append(", ");
         sb.append("Version: ").append(getVersion()).append(", ");
         sb.append("ResourceType: ").append(getResourceType()).append(", ");
         sb.append("Name: ").append(getName()).append(", ");
         sb.append("Description: ").append(getDescription()).append(", ");
         sb.append("Optional: ").append(isOptional()).append(", ");
+        sb.append("HIdden: ").append(isHidden()).append(", ");
         sb.append("Secret: ").append(isSecret()).append(", ");
         sb.append("DefaultValue: ").append(getDefaultValue());
-        sb.append("Hidden: ").append(isHidden());
+
         return sb.toString();
     }
 }

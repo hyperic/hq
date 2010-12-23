@@ -1,17 +1,25 @@
 package org.hyperic.hq.api.representation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.hyperic.hq.api.LinkHelper;
+import org.hyperic.hq.inventory.domain.OperationType;
+import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.springframework.util.Assert;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ResourceTypeRep implements SimpleRepresentation, LinkedRepresentation {	
 	private Integer id;
 	private String name;
 	private String description;
-	private PluginRep plugin;
+	private String pluginName;
+	private List<OperationTypeRep> operationTypes;
+	private List<PropertyTypeRep> propertyTypes;
 	private Map<String, String> links = new HashMap<String, String>();
 	
 	public ResourceTypeRep() {}
@@ -25,16 +33,32 @@ public class ResourceTypeRep implements SimpleRepresentation, LinkedRepresentati
 		name = type.getName();
 		description = type.getDescription();
 		
+		if (type.getPlugin() != null) {
+			pluginName = type.getPlugin().getName();
+		}
+		
+		if (type.getOperationTypes() != null) {
+			operationTypes = new ArrayList<OperationTypeRep>();
+			
+			for (OperationType operationType : type.getOperationTypes()) {
+				operationTypes.add(new OperationTypeRep(operationType));
+			}
+		}
+		
+		if (type.getPropertyTypes() != null) {
+			propertyTypes = new ArrayList<PropertyTypeRep>();
+			
+			for (PropertyType propertyType : type.getPropertyTypes()) {
+				propertyTypes.add(new PropertyTypeRep(propertyType));
+			}
+		}
+		
 		// Setup links...
 		links.put(RELATIONSHIPS_LABEL, LinkHelper.getCollectionUri(RESOURCE_TYPES_LABEL, id, RELATIONSHIPS_LABEL));
 		links.put(RESOURCES_LABEL, LinkHelper.getCollectionUri(RESOURCE_TYPES_LABEL, id, RESOURCES_LABEL));
 		links.put(OPERATION_TYPES_LABEL, LinkHelper.getCollectionUri(RESOURCE_TYPES_LABEL, id, OPERATION_TYPES_LABEL));
 		links.put(PROPERTY_TYPES_LABEL, LinkHelper.getCollectionUri(RESOURCE_TYPES_LABEL, id, PROPERTY_TYPES_LABEL));
 		links.put(CONFIG_TYPES_LABEL, LinkHelper.getCollectionUri(RESOURCE_TYPES_LABEL, id, CONFIG_TYPES_LABEL));
-		
-		if (type.getPlugin() != null) {
-			plugin = new PluginRep(type.getPlugin());
-		}
 	}
 	
 	public Integer getId() {
@@ -63,12 +87,28 @@ public class ResourceTypeRep implements SimpleRepresentation, LinkedRepresentati
 		this.description = description;
 	}
 
-	public PluginRep getPlugin() {
-		return plugin;
+	public String getPluginName() {
+		return pluginName;
 	}
 
-	public void setPlugin(PluginRep plugin) {
-		this.plugin = plugin;
+	public void setPluginName(String pluginName) {
+		this.pluginName = pluginName;
+	}
+
+	public List<OperationTypeRep> getOperationTypes() {
+		return operationTypes;
+	}
+
+	public void setOperationTypes(List<OperationTypeRep> operationTypes) {
+		this.operationTypes = operationTypes;
+	}
+
+	public List<PropertyTypeRep> getPropertyTypes() {
+		return propertyTypes;
+	}
+
+	public void setPropertyTypes(List<PropertyTypeRep> propertyTypes) {
+		this.propertyTypes = propertyTypes;
 	}
 
 	public Map<String, String> getLinks() {
