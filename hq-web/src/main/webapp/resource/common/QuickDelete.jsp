@@ -35,32 +35,10 @@
 <tiles:importAttribute name="resource"/>
 <tiles:importAttribute name="deleteMessage"/>
 
-<hq:constant
-    classname="org.hyperic.hq.authz.shared.AuthzConstants" 
-    symbol="platformPrototypeVmwareVsphereVm" var="platformPrototypeVmwareVsphereVm" />
 
-<hq:constant
-    classname="org.hyperic.hq.authz.shared.AuthzConstants" 
-    symbol="platformPrototypeVmwareVsphereHost" var="platformPrototypeVmwareVsphereHost" />
-
-<hq:constant
-    classname="org.hyperic.hq.authz.shared.AuthzConstants" 
-    symbol="serverPrototypeVmwareVcenter" var="serverPrototypeVmwareVcenter" />
-
-<c:choose>
-	<c:when test="${(resource.entityId.platform && (resource.platformType.name == platformPrototypeVmwareVsphereVm || 
-	                                                resource.platformType.name == platformPrototypeVmwareVsphereHost)) ||
-	                (resource.entityId.server && resource.serverType.name == serverPrototypeVmwareVcenter)}">
-		<c:set var="userMsg">
-			<fmt:message key="delete.vsphere.resource" />
-		</c:set>
-	</c:when>
-	<c:otherwise>
-		<c:set var="userMsg">
-			<fmt:message key="delete.resource" />
-		</c:set>
-	</c:otherwise>
-</c:choose>
+<c:set var="userMsg">
+	<fmt:message key="delete.resource" />
+</c:set>
 <html:link page="javascript:hyperic.utils.deleteResource('${resource.entityId.type}:${resource.id}', '${userMsg}');">
 	<c:out value="${deleteMessage}"/>
 </html:link>
