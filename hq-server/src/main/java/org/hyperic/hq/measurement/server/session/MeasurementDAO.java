@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,6 +33,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceContext;
 
 import org.hibernate.FlushMode;
 import org.hibernate.Query;
@@ -57,6 +62,9 @@ public class MeasurementDAO
                                                MeasurementConstants.CAT_AVAILABILITY.toUpperCase() +
                                                "' ";
     private AgentDAO agentDao;
+    
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Autowired
     public MeasurementDAO(SessionFactory f, AgentDAO agentDao) {
@@ -99,12 +107,19 @@ public class MeasurementDAO
 
     Measurement create(Resource resource, MeasurementTemplate mt, String dsn, long interval) {
         Measurement m = new Measurement(resource.getId(), mt, interval);
-
         m.setEnabled(interval != 0);
         m.setDsn(dsn);
+        entityManager.persist(m);
         m.setResource(resource);
-        save(m);
         return m;
+    }
+    
+    public Measurement get(Serializable id) {
+        Measurement result = entityManager.find(Measurement.class, id);
+        if(result != null) {
+            result.getId();
+        }    
+        return result;
     }
 
     /**

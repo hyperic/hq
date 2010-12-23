@@ -67,23 +67,32 @@ public class MeasurementManagerTest
 
     @Autowired
     private ServerManager serverManager;
+    
+    private Integer measId;
 
     @Before
     public void setUp() throws Exception {
         String agentToken = "agentToken123";
         agent = createAgent("127.0.0.1", 2144, "authToken", agentToken, "5.0");
         // Using the automatically deployed test plugin
-        Platform platform = createPlatform(agentToken, "PluginTestPlatform", "Platform1",
-            "Platform1");
+        Platform platform = createPlatform(agentToken, "PluginTestPlatform","Platform1",
+            "Platform1",3);
         ServerType serverType = serverManager.findServerTypeByName("PluginTestServer 1.0");
         Server server = createServer(platform, serverType, "Server1");
         Server server2 = createServer(platform, serverType, "Server2");
         servers = new AppdefEntityID[] { server.getEntityId(), server2.getEntityId() };
-        measurementManager.createDefaultMeasurements(authzSubjectManager.getOverlordPojo(), server
+        List<Measurement> defaultMeasurements = measurementManager.createDefaultMeasurements(authzSubjectManager.getOverlordPojo(), server
             .getEntityId(), "PluginTestServer 1.0", new ConfigResponse());
+        measId = defaultMeasurements.get(0).getId();
         measurementManager.createDefaultMeasurements(authzSubjectManager.getOverlordPojo(), server2
             .getEntityId(), "PluginTestServer 1.0", new ConfigResponse());
         flushSession();
+    }
+    
+    @Test
+    public void testGetMeasurements() {
+        Measurement m = measurementManager.getMeasurement(measId);
+        System.out.println("YO!");
     }
 
     @Test
