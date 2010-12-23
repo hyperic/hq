@@ -26,41 +26,79 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
-import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.inventory.domain.Resource;
+import org.springframework.datastore.graph.annotation.NodeEntity;
 
-public class Measurement extends PersistedObject
-    implements ContainerManagedTimestampTrackable, Serializable
-{
-    private Integer             _instanceId;
-    private MeasurementTemplate _template;
-    private long                _mtime;
-    private boolean             _enabled = true;
-    private long                _interval;
-    private String              _formula;
-    private Collection          _baselines = new ArrayList();
-    private Collection          _availabilityData = new ArrayList();
-    private Resource            _resource;
+@Entity
+@Table(name = "EAM_MEASUREMENT")
+@NodeEntity(partial = true)
+public class Measurement implements ContainerManagedTimestampTrackable, Serializable {
+    
+    //TODO don't really need instanceId anymore b/c we have Resource
+    @Column(name = "INSTANCE_ID", nullable = false)
+    private int instanceId;
+    
+    @ManyToOne
+    private MeasurementTemplate template;
+
+    @Column(name = "MTIME", nullable = false)
+    private long mtime;
+
+    @Column(name = "ENABLED", nullable = false)
+    private boolean enabled = true;
+
+    @Column(name = "COLL_INTERVAL", nullable = false)
+    private long interval;
+
+    @Column(name = "DSN", nullable = false, length = 2048)
+    private String formula;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    private Collection<Baseline> baselines;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    private Collection<AvailabilityDataRLE> availabilityData;
+
+    @ManyToOne
+    private Resource resource;
+
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name = "VERSION_COL")
+    @Version
+    private Long version;
 
     public Measurement() {
     }
 
     public Measurement(Integer instanceId, MeasurementTemplate template) {
-        _instanceId = instanceId;
-        _template   = template;
+        this.instanceId = instanceId;
+        this.template = template;
     }
 
-    public Measurement(Integer instanceId, MeasurementTemplate template,
-                       long interval)
-    {
+    public Measurement(Integer instanceId, MeasurementTemplate template, long interval) {
         this(instanceId, template);
-        _interval = interval;
+        this.interval = interval;
     }
 
     /**
@@ -80,59 +118,55 @@ public class Measurement extends PersistedObject
     }
 
     public Integer getInstanceId() {
-        return _instanceId;
-    }
-
-    protected void setInstanceId(Integer instanceId) {
-        _instanceId = instanceId;
+        return resource.getId();
     }
 
     public MeasurementTemplate getTemplate() {
-        return _template;
+        return template;
     }
 
     protected void setTemplate(MeasurementTemplate template) {
-        _template = template;
+        this.template = template;
     }
 
     public long getMtime() {
-        return _mtime;
+        return mtime;
     }
 
     protected void setMtime(long mtime) {
-        _mtime = mtime;
+        this.mtime = mtime;
     }
 
     public Resource getResource() {
-        return _resource;
+        return resource;
     }
 
     void setResource(Resource resource) {
-        _resource = resource;
+        this.resource = resource;
     }
 
     public boolean isEnabled() {
-        return _enabled;
+        return enabled;
     }
 
     public void setEnabled(boolean enabled) {
-        _enabled = enabled;
+        this.enabled = enabled;
     }
 
     public long getInterval() {
-        return _interval;
+        return interval;
     }
 
     protected void setInterval(long interval) {
-        _interval = interval;
+        this.interval = interval;
     }
 
     public String getDsn() {
-        return _formula;
+        return formula;
     }
 
     protected void setDsn(String formula) {
-        _formula = formula;
+        this.formula = formula;
     }
 
     public AppdefEntityID getEntityId() {
@@ -143,28 +177,28 @@ public class Measurement extends PersistedObject
         return getTemplate().getMonitorableType().getAppdefType();
     }
 
-    protected void setBaselinesBag(Collection baselines) {
-        _baselines = baselines;
+    protected void setBaselinesBag(Collection<Baseline> baselines) {
+        this.baselines = baselines;
     }
 
-    protected Collection getAvailabilityData() {
-        return _availabilityData;
+    protected Collection<AvailabilityDataRLE> getAvailabilityData() {
+        return availabilityData;
     }
 
-    protected void setAvailabilityData(Collection availabilityData) {
-        _availabilityData = availabilityData;
+    protected void setAvailabilityData(Collection<AvailabilityDataRLE> availabilityData) {
+        this.availabilityData = availabilityData;
     }
 
-    protected Collection getBaselinesBag() {
-        return _baselines;
+    protected Collection<Baseline> getBaselinesBag() {
+        return baselines;
     }
 
-    public Collection getBaselines() {
-        return Collections.unmodifiableCollection(_baselines);
+    public Collection<Baseline> getBaselines() {
+        return Collections.unmodifiableCollection(baselines);
     }
 
     public void setBaseline(Baseline b) {
-        final Collection baselines = getBaselinesBag();
+        final Collection<Baseline> baselines = getBaselinesBag();
         if (!baselines.isEmpty())
             baselines.clear();
 
@@ -176,31 +210,29 @@ public class Measurement extends PersistedObject
         if (getBaselinesBag().isEmpty())
             return null;
         else
-            return (Baseline)getBaselinesBag().iterator().next();
+            return (Baseline) getBaselinesBag().iterator().next();
     }
 
-    public boolean equals(Object obj) {
-        if (!(obj instanceof Measurement) || !super.equals(obj)) {
-            return false;
-        }
-        Measurement o = (Measurement)obj;
-        return ((_instanceId == o.getInstanceId() ||
-                 (_instanceId!=null && o.getInstanceId()!=null &&
-                  _instanceId.equals(o.getInstanceId()))))
-               &&
-               ((_template == o.getTemplate() ||
-                 (_template!=null && o.getTemplate()!=null &&
-                  _template.equals(o.getTemplate()))));
+    public Integer getId() {
+        return id;
     }
 
-    public int hashCode() {
-        int result = super.hashCode();
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-        result = 37*result + (_instanceId != null ? _instanceId.hashCode(): 0);
-        result = 37*result + (_template != null ? _template.hashCode(): 0);
-        return result;
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
     
+    public void setInstanceId(int instanceId) {
+        this.instanceId = instanceId;
+    }
+
     public String toString() {
         return getId().toString();
     }
