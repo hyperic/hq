@@ -24,6 +24,7 @@
   USA.
  -->
 <plugin name="vsphere" class="VSphereProductPlugin">
+<!-- 
 	<config name="sdk">
     <option name="url"
             description="vCenter sdk url"
@@ -129,13 +130,11 @@
             alias="mem.usage.average"
             units="percent"/>
 
-    <!-- units=KBps -->
     <metric name="Network Usage (Average)"
             defaultOn="true"
             alias="net.usage.average"
             units="KB"/>
 
-    <!-- units=MHz -->
     <metric name="CPU Reserved Capacity"
             alias="cpu.reservedCapacity.average"/>
 
@@ -326,7 +325,6 @@
             alias="mem.usage.average"
             units="percent"/>
 
-    <!-- units=KBps -->
     <metric name="Network Usage (Average)"
             defaultOn="true"
             alias="net.usage.average"
@@ -430,8 +428,6 @@
               default="${PROC_QUERY}"/>
     </config>
 
-   <!-- autoinventory plugin is created by individual product plugins -->
-
     <plugin type="measurement"
             class="org.hyperic.hq.product.MeasurementPlugin"/>
 
@@ -439,4 +435,5 @@
             template="sigar:Type=ProcState,Arg=%process.query%:State"
             indicator="true"/>
   </server>
+-->
 </plugin>

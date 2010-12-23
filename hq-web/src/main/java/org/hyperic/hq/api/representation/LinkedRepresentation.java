@@ -5,6 +5,7 @@ import java.util.Map;
 public interface LinkedRepresentation {
 	public final static String SELF_LABEL = "self";
 	public final static String RELATIONSHIPS_LABEL = "relationships";
+	public final static String AGENTS_LABEL = "agents";
 	public final static String RESOURCES_LABEL = "resources";
 	public final static String RESOURCE_GROUPS_LABEL = "resource-groups";
 	public final static String RESOURCE_TYPES_LABEL = "resource-types";

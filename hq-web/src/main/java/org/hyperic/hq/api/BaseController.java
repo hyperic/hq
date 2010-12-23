@@ -5,7 +5,6 @@ import java.io.EOFException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.api.representation.ErrorResponse;
-import org.neo4j.graphdb.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;

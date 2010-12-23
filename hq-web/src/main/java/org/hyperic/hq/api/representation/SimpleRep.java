@@ -2,6 +2,9 @@ package org.hyperic.hq.api.representation;
 
 import java.util.Map;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SimpleRep {
 	private Integer id;
 	private String name;
@@ -30,17 +33,29 @@ public class SimpleRep {
 		this.name = name;
 		this.uri = uri;
 	}
-	
+
 	public Integer getId() {
 		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
 	}
 
 	public String getName() {
 		return name;
 	}
 
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public String getUri() {
 		return uri;
+	}
+
+	public void setUri(String uri) {
+		this.uri = uri;
 	}
 }
 

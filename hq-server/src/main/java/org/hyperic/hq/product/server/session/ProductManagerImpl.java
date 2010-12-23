@@ -310,6 +310,8 @@ public class ProductManagerImpl implements ProductManager {
             auditManager.pushContainer(audit);
             pushed = true;
             updatePlugin(pluginName);
+        } catch(Exception e) {
+        	e.printStackTrace();
         } finally {
             if (pushed) {
                 auditManager.popContainer(true);
