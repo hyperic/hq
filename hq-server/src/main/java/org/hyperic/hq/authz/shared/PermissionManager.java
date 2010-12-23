@@ -486,18 +486,19 @@ public abstract class PermissionManager {
      */
     public void checkPermission(AuthzSubject subject, AppdefEntityID id, String operation)
         throws PermissionException {
-        ResourceType rtv = null;
-        try {
-            // get the resource type
-            rtv = getAuthzResourceType(id);
-        } catch (Exception e) {
-            throw new PermissionException(e);
-        }
-
-        // never wrap permission exception unless absolutely necessary
-        Integer instanceId = id.getId();
-        // now call the protected method
-        checkPermission(subject, rtv, instanceId, operation);
+        //TODO
+//        ResourceType rtv = null;
+//        try {
+//            // get the resource type
+//            rtv = getAuthzResourceType(id);
+//        } catch (Exception e) {
+//            throw new PermissionException(e);
+//        }
+//
+//        // never wrap permission exception unless absolutely necessary
+//        Integer instanceId = id.getId();
+//        // now call the protected method
+//        checkPermission(subject, rtv, instanceId, operation);
     }
 
     /**
