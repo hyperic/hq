@@ -94,9 +94,12 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
     static final String AGENT_PORT = "agent.setup.agentPort";
     static final String AGENT_UNIDIRECTIONAL = "agent.setup.unidirectional";
 
-    static final String VC_TYPE = AuthzConstants.serverPrototypeVmwareVcenter;
-    static final String VM_TYPE = AuthzConstants.platformPrototypeVmwareVsphereVm;
-    static final String HOST_TYPE = AuthzConstants.platformPrototypeVmwareVsphereHost;
+   // static final String VC_TYPE = AuthzConstants.serverPrototypeVmwareVcenter;
+    //static final String VM_TYPE = AuthzConstants.platformPrototypeVmwareVsphereVm;
+    //static final String HOST_TYPE = AuthzConstants.platformPrototypeVmwareVsphereHost;
+    static final String VC_TYPE = "VMware vCenter";
+    static final String VM_TYPE = "VMware vSphere VM";
+    static final String HOST_TYPE = "VMware vSphere Host";
     static final String ESX_HOST = "esxHost";
 
     private static final Log log =

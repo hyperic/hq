@@ -35,8 +35,9 @@ public class VSphereProductPlugin extends ProductPlugin {
 
     public GenericPlugin getPlugin(String type, TypeInfo entity)
     {  
+        
         if (type.equals(ProductPlugin.TYPE_AUTOINVENTORY) &&
-            entity.getName().equals(AuthzConstants.serverPrototypeVmwareVcenter)) {
+            entity.getName().equals("VMware vCenter")) {
             return new VCenterDetector();
         }
         return super.getPlugin(type, entity);

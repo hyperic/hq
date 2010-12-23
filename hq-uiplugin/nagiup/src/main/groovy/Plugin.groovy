@@ -29,7 +29,7 @@ import org.hyperic.hq.hqu.rendit.HQUPlugin
 
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.authz.server.session.Resource
+import org.hyperic.hq.inventory.domain.Resource
 import org.hyperic.hq.hqu.AttachmentDescriptor
 import org.hyperic.hq.hqu.server.session.Attachment
 

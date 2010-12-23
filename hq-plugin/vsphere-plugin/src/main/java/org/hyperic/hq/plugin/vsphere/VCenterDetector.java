@@ -126,7 +126,7 @@ public class VCenterDetector extends DaemonDetector {
                 ConfigStorage.Key key = (ConfigStorage.Key)entry.getKey();
                 String type = key.getTypeName();
 
-                if (AuthzConstants.serverPrototypeVmwareVcenter.equals(type)) {
+                if ("VMware vCenter".equals(type)) {
                     ConfigResponse serverConfig = (ConfigResponse)entry.getValue();
                     discoverPlatforms(serverConfig);
                 }
