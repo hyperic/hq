@@ -65,6 +65,10 @@
 	<bean class="org.springframework.orm.hibernate3.HibernateTemplate">
 		<constructor-arg ref="sessionFactory" />
 	</bean>
+	
+	<bean class="org.springframework.orm.jpa.JpaTemplate">
+		<constructor-arg ref="entityManagerFactory" />
+	</bean>
 
 	<bean id="sessionFactory"
 		class="org.hyperic.hibernate.CacheInitializingLocalSessionFactoryBean">

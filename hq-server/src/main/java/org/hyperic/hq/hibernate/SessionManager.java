@@ -17,35 +17,33 @@
 
 package org.hyperic.hq.hibernate;
 
-import java.sql.SQLException;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hyperic.hq.context.Bootstrap;
-import org.springframework.orm.hibernate3.HibernateCallback;
-import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.orm.hibernate3.SessionFactoryUtils;
 import org.springframework.orm.hibernate3.SessionHolder;
+import org.springframework.orm.jpa.EntityManagerFactoryUtils;
+import org.springframework.orm.jpa.EntityManagerHolder;
+import org.springframework.orm.jpa.JpaCallback;
+import org.springframework.orm.jpa.JpaTemplate;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * This class manages the creation and deletion of Hibernate sessions.
  */
 public class SessionManager {
-    private static final Log _log = LogFactory.getLog(SessionManager.class);
-
+  
     private static final SessionManager INSTANCE = new SessionManager();
 
-    private SessionFactory getSessionFactory() {
-        return Bootstrap.getBean(SessionFactory.class);
+    private EntityManagerFactory getEntityManagerFactory() {
+        return Bootstrap.getBean(EntityManagerFactory.class);
     }
 
-    private HibernateTemplate getHibernateTemplate() {
-        return Bootstrap.getBean(HibernateTemplate.class);
+    private JpaTemplate getJpaTemplate() {
+        return Bootstrap.getBean(JpaTemplate.class);
     }
 
     private SessionManager() {
@@ -71,17 +69,18 @@ public class SessionManager {
         boolean participate = false;
         try {
 
-            if (TransactionSynchronizationManager.hasResource(getSessionFactory())) {
+            if (TransactionSynchronizationManager.hasResource(getEntityManagerFactory())) {
                 // Do not modify the Session: just set the participate flag.
                 participate = true;
             } else {
-                Session session = SessionFactoryUtils.getSession(getSessionFactory(), true);
-                session.setFlushMode(FlushMode.MANUAL);
-                TransactionSynchronizationManager.bindResource(getSessionFactory(), new SessionHolder(session));
+                EntityManager entityManager = getEntityManagerFactory().createEntityManager();
+                TransactionSynchronizationManager.bindResource(getEntityManagerFactory(), new EntityManagerHolder(entityManager));
             }
-            HibernateTemplate template = getHibernateTemplate();
-            template.execute(new HibernateCallback() {
-                public Object doInHibernate(Session session) throws HibernateException, SQLException {
+            JpaTemplate template = getJpaTemplate();
+           
+            template.execute(new JpaCallback() {
+                
+                public Object doInJpa(EntityManager em) throws PersistenceException {
                     try {
                         r.run();
                     } catch (Exception e) {
@@ -92,21 +91,10 @@ public class SessionManager {
             });
         } finally {
             if (!participate) {
-
-                // single session mode
-                SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.unbindResource(getSessionFactory());
-                SessionFactoryUtils.closeSession(sessionHolder.getSession());
+                EntityManagerHolder entityManagerHolder= (EntityManagerHolder) TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());
+                EntityManagerFactoryUtils.closeEntityManager(entityManagerHolder.getEntityManager());
             }
         }
 
-    }
-
-    public static Session currentSession() {
-        Session res = INSTANCE.getSessionFactory().getCurrentSession();
-
-        if (res == null) {
-            throw new HibernateException("Unable to find current session");
-        }
-        return res;
     }
 }
