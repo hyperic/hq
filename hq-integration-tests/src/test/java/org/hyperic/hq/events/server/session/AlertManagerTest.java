@@ -137,14 +137,13 @@ public class AlertManagerTest
         String platformType = "Linux";
         platformManager.createPlatformType(platformType, "Test Plugin");
         // Create test platform
-        this.testPlatform = createPlatform(agentToken, platformType, "leela.local", "leela.local");
+        this.testPlatform = createPlatform(agentToken, platformType, "leela.local", "leela.local",3);
         // Create ServerType
-        ServerType testServerType = createServerType("Tomcat", "6.0", new String[] { "Linux" },
-            "Test Server Plugin", false);
+        ServerType testServerType = createServerType("Tomcat", "6.0", new String[] { "Linux" });
         // Create test server
         Server testServer = createServer(testPlatform, testServerType, "My Server");
         // Create ServiceType
-        ServiceType serviceType = createServiceType("Spring JDBC Template", "Test Server Plugin",
+        ServiceType serviceType = createServiceType("Spring JDBC Template",
             testServerType);
         // Create test service
         serviceManager.createService(authzSubjectManager.getOverlordPojo(), testServer.getId(),

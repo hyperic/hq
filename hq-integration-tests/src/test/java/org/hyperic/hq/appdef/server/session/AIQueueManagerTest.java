@@ -25,6 +25,8 @@
  */
 package org.hyperic.hq.appdef.server.session;
 
+import static org.junit.Assert.assertEquals;
+
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -32,7 +34,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -40,7 +41,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Integration test of {@link AIQueueManagerImpl}
@@ -57,13 +57,14 @@ public class AIQueueManagerTest
     private CPropManager cPropManager;
     private AIPlatformValue queuedAIPlatform;
     private Platform platform;
+  
 
     @Before
     public void setUp() throws Exception {
         createAgent("127.0.0.1", 2144, "hqadmin", "agentToken", "4.5");
-        PlatformType platformType = createPlatformType("JenOS", "testit");
+        PlatformType platformType = createPlatformType("JenOS");
         
-        cPropManager.addKey(ResourceType.findResourceType(platformType.getId()), "numCpus", "Number of CPUs");
+        cPropManager.addKey(resourceManager.findResourceTypeById(platformType.getId()), "numCpus", "Number of CPUs");
 
         // Add the platform to AI Queue with custom prop value of 4 CPUs
         AIPlatformValue aiPlatform = new AIPlatformValue();
@@ -76,7 +77,7 @@ public class AIQueueManagerTest
             aiPlatform, false, false, false);
 
         // Add the platform to inventory with custom prop value of 2 CPUs
-        this.platform = createPlatform("agentToken", "JenOS", "Platform1", "Platform1");
+        this.platform = createPlatform("agentToken", "JenOS", "Platform1", "Platform1",5);
         cPropManager.setValue(platform.getEntityId(), platformType.getId(), "numCpus", "2");
     }
 
