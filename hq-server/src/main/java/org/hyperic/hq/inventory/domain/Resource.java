@@ -81,7 +81,7 @@ public class Resource {
     @Transient
     private String name;
 
-    @OneToMany
+    @ManyToOne
     @Transient
     @RelatedTo(type = RelationshipTypes.OWNS, direction = Direction.INCOMING, elementClass = AuthzSubject.class)
     private AuthzSubject owner;

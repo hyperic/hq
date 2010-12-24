@@ -45,7 +45,6 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.inventory.domain.Resource;
-import org.springframework.datastore.graph.annotation.NodeEntity;
 
 @Entity
 @Table(name = "EAM_MEASUREMENT")
@@ -70,10 +69,10 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
     @Column(name = "DSN", nullable = false, length = 2048)
     private String formula;
 
-    @OneToMany(cascade = CascadeType.ALL,fetch=FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL)
     private Collection<Baseline> baselinesBag;
 
-    @OneToMany(cascade = CascadeType.ALL,fetch=FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name="MEASUREMENT_ID")
     private Collection<AvailabilityDataRLE> availabilityData;
 
@@ -120,7 +119,7 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
     }
 
     public Integer getInstanceId() {
-        return resource.getId();
+        return instanceId;
     }
 
     public MeasurementTemplate getTemplate() {

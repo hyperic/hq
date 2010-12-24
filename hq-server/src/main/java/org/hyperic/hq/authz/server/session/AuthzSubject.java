@@ -43,7 +43,6 @@ import org.hibernate.annotations.OptimisticLock;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.common.server.session.Crispo;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.springframework.datastore.graph.annotation.NodeEntity;
 
 @Entity
@@ -80,15 +79,12 @@ public class AuthzSubject  {
     
     @Column(name="HTML_EMAIL",nullable=false)
     private boolean    htmlEmail;
-    
-    @ManyToOne
-    private Resource   resource;
-    
-    @ManyToMany
+     
+    @ManyToMany(fetch=FetchType.LAZY)
     @OptimisticLock(excluded = true)
     private Set<Role> roles;
     
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY)
     private Crispo     prefs;
     
     @Column(name="NAME",length=100,nullable=false)
@@ -251,15 +247,7 @@ public class AuthzSubject  {
     protected void setSystem(boolean val) {
         system = val;
     }
-
-    public Resource getResource() {
-        return resource;
-    }
-
-    protected void setResource(Resource val) {
-        resource = val;
-    }
-
+    
     public Collection<Role> getRoles() {
         return roles;
     }

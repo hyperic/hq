@@ -114,14 +114,6 @@ public class MeasurementDAO
         return m;
     }
     
-    public Measurement get(Serializable id) {
-        Measurement result = entityManager.find(Measurement.class, id);
-        if(result != null) {
-            result.getId();
-        }    
-        return result;
-    }
-
     /**
      * Look up a Measurement, allowing for the query to return a stale copy (for
      * efficiency reasons).
@@ -232,8 +224,10 @@ public class MeasurementDAO
 
     @SuppressWarnings("unchecked")
     List<Measurement> findByResource(Resource resource) {
-        return createCriteria().add(Restrictions.eq("resource", resource)).setCacheable(true)
-            .setCacheRegion("Measurement.findByResource").list();
+        //TODO exception with query cache
+        //.setCacheable(true)
+        //.setCacheRegion("Measurement.findByResource")
+        return createCriteria().add(Restrictions.eq("resource", resource)).list();
     }
 
     int deleteByIds(List<Integer> ids) {

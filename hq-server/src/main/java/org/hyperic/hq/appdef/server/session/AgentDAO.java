@@ -25,109 +25,126 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import java.sql.SQLException;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Order;
-import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AgentType;
-import org.hyperic.hq.dao.HibernateDAO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.hibernate3.HibernateCallback;
-import org.springframework.orm.hibernate3.HibernateTemplate;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class AgentDAO
-    extends HibernateDAO<Agent> {
+public class AgentDAO {
     
-    private final SessionFactory sessionFactory;
+   
+    @PersistenceContext
+    private EntityManager entityManager; 
     
-    @Autowired
-    public AgentDAO(SessionFactory f) {
-        super(Agent.class, f);
-        this.sessionFactory =f;
+    public AgentDAO() {
+     
     }
 
     @SuppressWarnings("unchecked")
     @PostConstruct
     public void preloadQueryCache() {
         //TODO replace this
-        new HibernateTemplate(sessionFactory, true).execute(new HibernateCallback() {
-            public Object doInHibernate(Session session) throws HibernateException, SQLException {
-                List<String> tokens = session.createQuery("select agentToken from Agent").list();
-                final String sql = "from Agent where agentToken=?";
-                for(String token : tokens) {
-                    //HQ-2575 Preload findByAgentToken query cache to minimize DB connections when multiple agents
-                    //send measurement reports to a restarted server 
-                    session.createQuery(sql).setString(0,token).setCacheRegion(
-                        "Agent.findByAgentToken").setCacheable(true).uniqueResult();
-                }
-                return null;
-            }
-        });
+//        new HibernateTemplate(sessionFactory, true).execute(new HibernateCallback() {
+//            public Object doInHibernate(Session session) throws HibernateException, SQLException {
+//                List<String> tokens = session.createQuery("select agentToken from Agent").list();
+//                final String sql = "from Agent where agentToken=?";
+//                for(String token : tokens) {
+//                    //HQ-2575 Preload findByAgentToken query cache to minimize DB connections when multiple agents
+//                    //send measurement reports to a restarted server 
+//                    session.createQuery(sql).setString(0,token).setCacheRegion(
+//                        "Agent.findByAgentToken").setCacheable(true).uniqueResult();
+//                }
+//                return null;
+//            }
+//        });
     }
 
     public Agent create(AgentType type, String address, Integer port, boolean unidirectional,
                         String authToken, String agentToken, String version) {
         Agent ag = new Agent(type, address, port, unidirectional, authToken, agentToken, version);
-        save(ag);
+        entityManager.persist(ag);
+        ag.getId();
         return ag;
     }
 
-    @SuppressWarnings("unchecked")
     public List<Agent> findAll() {
-        return getSession().createCriteria(Agent.class).addOrder(Order.asc("address")).addOrder(
-            Order.asc("port")).list();
+        //TODO previously ordered by Address, then Port
+        List<Agent> agents = entityManager.createQuery("select a from Agent a",Agent.class).getResultList();
+        for(Agent agent: agents) {
+            agent.getId();
+        }
+        return agents;
     }
 
-    @SuppressWarnings("unchecked")
+  
     public List<Agent> findByIP(String ip) {
-        String hql = "from Agent where address=:address";
-        return (List<Agent>) getSession().createQuery(hql).setString("address", ip).list();
+        List<Agent> agents = entityManager.createQuery("SELECT a FROM Agent a WHERE a.address = :address",Agent.class).
+            setParameter("address", ip).getResultList();
+        for(Agent agent: agents) {
+            agent.getId();
+        }
+        return agents;
     }
     
     public int countUsed() {
-        return ((Number) getSession().createQuery(
-            "select count(distinct a) from Platform p " + "join p.agent a").uniqueResult())
+        return ((Number) entityManager.createQuery(
+            "select count(distinct a) from Resource r " + "join r.agent a").getSingleResult())
             .intValue();
-
     }
 
     public Agent findByIpAndPort(String address, int port) {
-        String sql = "from Agent where address=? and port=?";
-        return (Agent) getSession().createQuery(sql).setString(0, address).setInteger(1, port)
-            .uniqueResult();
+        try {
+            Agent agent = entityManager.createQuery("SELECT a FROM Agent a WHERE a.address = :address and a.port = :port",Agent.class).
+                setParameter("address", address).setParameter("port", port).getSingleResult();
+            agent.getId();
+            return agent;
+        }catch(EmptyResultDataAccessException e) {
+            //Hibernate UniqueResult would return null if nothing, but throw Exception if more than one.  getSingleResult does not do this
+            return null;
+        }
     }
 
     public Agent findByAgentToken(String token) {
-        String sql = "from Agent where agentToken=?";
-        return (Agent) getSession().createQuery(sql).setString(0, token).setCacheRegion(
-            "Agent.findByAgentToken").setCacheable(true).uniqueResult();
-    }
-
-    @SuppressWarnings("unchecked")
-    public List<Agent> findAgents(PageInfo pInfo) {
-        final AgentSortField sort = (AgentSortField) pInfo.getSort();
-        final StringBuilder sql = new StringBuilder().append("select distinct a from Platform p ")
-            .append(" JOIN p.agent a").append(" JOIN p.resource r").append(
-                " WHERE r.resourceType is not null").append(" ORDER BY ").append(
-                sort.getSortString("a")).append((pInfo.isAscending() ? "" : " DESC"));
-
-        // Secondary sort by CTime
-        if (!sort.equals(AgentSortField.CTIME)) {
-            sql.append(", ").append(AgentSortField.CTIME.getSortString("a")).append(" DESC");
+        //TODO this used to set cache region for query cache interaction.  Still possible?
+        try {
+            Agent agent = entityManager.createQuery("SELECT a FROM Agent a WHERE a.agentToken = :agentToken",Agent.class).
+                setParameter("agentToken", token).getSingleResult();
+            agent.getId();
+            return agent;
+        }catch(EmptyResultDataAccessException e) {
+            //Hibernate UniqueResult would return null if nothing, but throw Exception if more than one.  getSingleResult does not do this
+            return null;
         }
-
-        final Query q = getSession().createQuery(sql.toString());
-
-        return (List<Agent>) pInfo.pageResults(q).list();
+    }
+    
+    public Agent findById(Integer id) {
+        if (id == null) return null;
+        //We aren't allowing lazy fetching of Node-Backed objects, so while you may have gotten a proxy here before, now you don't
+        //You also may have been expecting an ObjectNotFoundException.  Now you get back null.
+        Agent result = entityManager.find(Agent.class, id);
+        if(result != null) {
+            result.getId();
+        }    
+        return result;
+    }
+    
+    public Agent get(Integer id) {
+        //You are getting exactly what you expected from Hibernate
+        return findById(id);
+    }
+    
+    public void remove(Agent agent) {
+        entityManager.remove(agent);
+    }
+    
+    public int size() {
+        return ((Number)entityManager.createQuery("select count(a) from Agent a").getSingleResult()).intValue();
     }
 }

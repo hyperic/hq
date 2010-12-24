@@ -59,7 +59,7 @@
       <key on-delete="cascade" column="ATTACH_ID"/>
 
       <many-to-one name="resource" cascade="save-update" 
-                   class="org.hyperic.hq.inventory.domain.Resource">
+                   class="org.hyperic.hq.inventory.domain.Resource" lazy="false">
         <column name="RESOURCE_ID" not-null="true" index="UI_ATTACHMENT_RES_ID_IDX"/>
       </many-to-one>
 

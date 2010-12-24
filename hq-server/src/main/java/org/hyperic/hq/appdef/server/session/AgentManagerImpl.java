@@ -142,18 +142,6 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     }
 
     /**
-     * Get a paged list of agents in the system.
-     * 
-     * @param pInfo a pager object, with an {@link AgentSortField} sort field
-     * 
-     * @return a list of {@link Agent}s
-     */
-    @Transactional(readOnly = true)
-    public List<Agent> findAgents(PageInfo pInfo) {
-        return agentDao.findAgents(pInfo);
-    }
-
-    /**
      * Get a list of all the agents in the system
      */
     @Transactional(readOnly = true)

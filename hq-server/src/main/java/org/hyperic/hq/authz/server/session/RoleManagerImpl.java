@@ -581,7 +581,9 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
 
         Role local = roleDAO.findById(id);
 
-        int numSubjects = authzSubjectDAO.size(local.getSubjects());
+        //TODO I guess below gave total number but not sure how it filtered on what was already there.  Trying to prevent eager collection loading I guess?
+        //int numSubjects = authzSubjectDAO.size(local.getSubjects());
+        int numSubjects = local.getSubjects().size();
 
         permissionManager.check(whoami.getId(), local.getResource().getType(), id,
             AuthzConstants.roleOpViewRole);

@@ -62,40 +62,48 @@ public class UserAuditFactory {
 
     public UserAudit loginAudit(AuthzSubject user) {
         String msg = MSGS.format("auditMsg.user.login", getAuditUserName(user));
-        UserAudit res = new UserAudit(user.getResource(), user, USER_LOGIN, AuditImportance.LOW, AuditNature.START, msg);
+        //TODO users don't have an associated Resource anymore
+        //UserAudit res = new UserAudit(user.getResource(), user, USER_LOGIN, AuditImportance.LOW, AuditNature.START, msg);
 
-        auditManager.saveAudit(res);
-        return res;
+        //auditManager.saveAudit(res);
+        //return res;
+        return null;
     }
 
     public UserAudit logoutAudit(AuthzSubject user) {
         String msg = MSGS.format("auditMsg.user.logout", getAuditUserName(user));
-        UserAudit res = new UserAudit(user.getResource(), user, USER_LOGOUT, AuditImportance.LOW, AuditNature.STOP, msg);
+        //TODO users don't have an associated Resource anymore
+        //UserAudit res = new UserAudit(user.getResource(), user, USER_LOGOUT, AuditImportance.LOW, AuditNature.STOP, msg);
 
-        auditManager.saveAudit(res);
-        return res;
+        //auditManager.saveAudit(res);
+        //return res;
+        return null;
     }
 
     public UserAudit createAudit(AuthzSubject creator, AuthzSubject newUser) {
         String msg = MSGS.format("auditMsg.user.create", newUser.getFullName() + "(" + newUser.getName() + ")");
-        UserAudit res = new UserAudit(newUser.getResource(), creator, USER_CREATE, AuditImportance.HIGH,
-            AuditNature.CREATE, msg);
+        //TODO users don't have an associated Resource anymore
+        //UserAudit res = new UserAudit(newUser.getResource(), creator, USER_CREATE, AuditImportance.HIGH,
+          //  AuditNature.CREATE, msg);
 
-        auditManager.saveAudit(res);
-        return res;
+        //auditManager.saveAudit(res);
+        //return res;
+        return null;
     }
 
     public UserAudit updateAudit(AuthzSubject updator, AuthzSubject target, AuthzSubjectField field, String oldVal,
                                  String newVal) {
         String msg = MSGS.format("auditMsg.user.update", target.getFullName(), field.getValue(), newVal);
-        UserAudit res = new UserAudit(target.getResource(), updator, USER_UPDATE, AuditImportance.LOW,
-            AuditNature.UPDATE, msg);
-
-        res.setFieldName(field.getValue());
-        res.setOldFieldValue(oldVal);
-        res.setNewFieldValue(newVal);
-        auditManager.saveAudit(res);
-        return res;
+        //TODO users don't have an associated Resource anymore
+//        UserAudit res = new UserAudit(target.getResource(), updator, USER_UPDATE, AuditImportance.LOW,
+//            AuditNature.UPDATE, msg);
+//
+//        res.setFieldName(field.getValue());
+//        res.setOldFieldValue(oldVal);
+//        res.setNewFieldValue(newVal);
+//        auditManager.saveAudit(res);
+//        return res;
+        return null;
     }
     
     private String getAuditUserName(AuthzSubject user) {

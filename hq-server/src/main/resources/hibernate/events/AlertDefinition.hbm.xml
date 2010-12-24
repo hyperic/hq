@@ -110,7 +110,7 @@
       <column name="ESCALATION_ID" not-null="false" index="ALERT_DEF_ESC_ID_IDX"/>
     </many-to-one>
 
-    <many-to-one name="resource" class="org.hyperic.hq.inventory.domain.Resource">
+    <many-to-one name="resource" class="org.hyperic.hq.inventory.domain.Resource" lazy="false">
       <column name="RESOURCE_ID" index="ALERT_DEF_RES_ID_IDX"/>
     </many-to-one>
 

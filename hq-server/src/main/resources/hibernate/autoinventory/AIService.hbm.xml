@@ -92,7 +92,7 @@
       <column name="RESPONSETIME_CONFIG" not-null="false" length="256"/>
     </property>
 
-    <many-to-one name="server" class="org.hyperic.hq.inventory.domain.Resource">
+    <many-to-one name="server" class="org.hyperic.hq.inventory.domain.Resource" lazy="false">
       <column name="SERVER_ID" not-null="true" index="AIQ_SVC_SERVER_ID_IDX"/>
     </many-to-one>
   </class>

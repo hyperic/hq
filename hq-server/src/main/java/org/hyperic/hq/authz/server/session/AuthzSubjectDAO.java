@@ -26,32 +26,27 @@
 package org.hyperic.hq.authz.server.session;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import org.hibernate.Criteria;
-import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Disjunction;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.hq.common.server.session.CrispoDAO;
-import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.inventory.dao.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class AuthzSubjectDAO
-    extends HibernateDAO<AuthzSubject> {
+public class AuthzSubjectDAO {
     private CrispoDAO crispoDao;
     private RoleDAO roleDAO;
     private ResourceTypeDao resourceTypeDao;
@@ -60,9 +55,8 @@ public class AuthzSubjectDAO
    
 
     @Autowired
-    public AuthzSubjectDAO(SessionFactory f, CrispoDAO crispoDAO, 
+    public AuthzSubjectDAO( CrispoDAO crispoDAO, 
                            RoleDAO roleDAO, ResourceTypeDao resourceTypeDao) {
-        super(AuthzSubject.class, f);
         this.crispoDao = crispoDAO;
         this.roleDAO = roleDAO;
         this.resourceTypeDao = resourceTypeDao;
@@ -83,7 +77,7 @@ public class AuthzSubjectDAO
                         boolean html) {
         AuthzSubject subject = new AuthzSubject(active, dsn, dept, email, html, first, last, name,
             phone, sms, false);
-        save(subject);
+        entityManager.persist(subject);
 
         // XXX create resource for owner
       
@@ -109,84 +103,125 @@ public class AuthzSubjectDAO
         crispoDao.save(c);
 
         subject.setPrefs(c);
-        save(subject);
+        subject.getId();
         return subject;
     }
 
-   
+    public AuthzSubject findById(Integer id) {
+        if (id == null) return null;
+        //We aren't allowing lazy fetching of Node-Backed objects, so while you may have gotten a proxy here before, now you don't
+        //You also may have been expecting an ObjectNotFoundException.  Now you get back null.
+        AuthzSubject result = entityManager.find(AuthzSubject.class, id);
+        if(result != null) {
+            result.getId();
+        }    
+        return result;
+    }
+    
+    public AuthzSubject get(Integer id) {
+        //You are getting exactly what you expected from Hibernate
+        return findById(id);
+    }
 
     public void remove(AuthzSubject entity) {
         Crispo c = entity.getPrefs();
         entity.setPrefs(null);
         crispoDao.remove(c);
-        super.remove(entity);
+        entityManager.remove(entity);
+    }
+    
+    public int size() {
+        return ((Number)entityManager.createQuery("select count(a) from AuthzSubject a").getSingleResult()).intValue();
     }
 
     public AuthzSubject findByAuth(String name, String dsn) {
-        String sql = "from AuthzSubject s where s.name=? and s.dsn=?";
-        return (AuthzSubject) getSession().createQuery(sql).setString(0, name).setString(1, dsn)
-            .setCacheable(true).setCacheRegion("AuthzSubject.findByAuth").uniqueResult();
+        //TODO query cache
+        //.setCacheable(true).setCacheRegion("AuthzSubject.findByAuth")
+        String sql = "select s from AuthzSubject s where s.name=:name and s.dsn=:dsn";
+        try {
+            AuthzSubject subject =  entityManager.createQuery(sql,AuthzSubject.class).setParameter("name", name).setParameter("dsn", dsn).getSingleResult();
+            subject.getId();
+            return subject;
+        }catch(EmptyResultDataAccessException e) {
+            //Hibernate UniqueResult would return null if nothing, but throw Exception if more than one.  getSingleResult does not do this
+            return null;
+        }
     }
 
     public AuthzSubject findByName(String name) {
-        String sql = "from AuthzSubject where name=?";
-        return (AuthzSubject) getSession().createQuery(sql).setString(0, name).setCacheable(true)
-            .setCacheRegion("AuthzSubject.findByName").uniqueResult();
+        //TODO query cache
+        //.setCacheable(true)
+       // .setCacheRegion("AuthzSubject.findByName")
+        String sql = "select s from AuthzSubject s where s.name=?";
+        try {
+            AuthzSubject subject = entityManager.createQuery(sql,AuthzSubject.class).setParameter(1, name).getSingleResult();
+            subject.getId();
+            return subject;
+        }catch(EmptyResultDataAccessException e) {
+            //Hibernate UniqueResult would return null if nothing, but throw Exception if more than one.  getSingleResult does not do this
+            return null;
+        }
     }
 
-    private Criteria findMatchingNameCriteria(String name) {
-        name = '%' + name + '%';
-        return createCriteria().add(
-            Restrictions.or(Restrictions.ilike("name", name), Restrictions.or(Restrictions.ilike(
-                "firstName", name), Restrictions.ilike("lastName", name)))).add(
-            Restrictions.eq("system", Boolean.FALSE));
-    }
+//    private Criteria findMatchingNameCriteria(String name) {
+//        name = '%' + name + '%';
+//        return createCriteria().add(
+//            Restrictions.or(Restrictions.ilike("name", name), Restrictions.or(Restrictions.ilike(
+//                "firstName", name), Restrictions.ilike("lastName", name)))).add(
+//            Restrictions.eq("system", Boolean.FALSE));
+//    }
 
     public PageList<AuthzSubject> findMatchingName(String name, PageControl pc) {
-        Integer count = (Integer) findMatchingNameCriteria(name).setProjection(
-            Projections.rowCount()).uniqueResult();
+        //TODO implement
+        //Integer count = (Integer) findMatchingNameCriteria(name).setProjection(
+          //  Projections.rowCount()).uniqueResult();
 
-        Criteria crit = findMatchingNameCriteria(name).addOrder(Order.asc("sortName"));
-        return getPagedResult(crit, count, pc);
+        //Criteria crit = findMatchingNameCriteria(name).addOrder(Order.asc("sortName"));
+        //return getPagedResult(crit, count, pc);
+        return new PageList<AuthzSubject>();
     }
 
     /**
-     * Create the criteria used by findById_orderName() because Criteria does
-     * not yet support Cloneable
-     */
-    private Criteria findById_orderNameCriteria(Integer[] ids) {
-        return createCriteria().add(Restrictions.in("id", ids));
-    }
+//     * Create the criteria used by findById_orderName() because Criteria does
+//     * not yet support Cloneable
+//     */
+//    private Criteria findById_orderNameCriteria(Integer[] ids) {
+//        return createCriteria().add(Restrictions.in("id", ids));
+//    }
 
     public PageList<AuthzSubject> findById_orderName(Integer[] ids, PageControl pc) {
-        Integer count = (Integer) findById_orderNameCriteria(ids).setProjection(
-            Projections.rowCount()).uniqueResult();
-
-        Criteria crit = findById_orderNameCriteria(ids).addOrder(
-            pc.isAscending() ? Order.asc("sortName") : Order.desc("sortName"));
-
-        return getPagedResult(crit, count, pc);
+        //TODO
+//        Integer count = (Integer) findById_orderNameCriteria(ids).setProjection(
+//            Projections.rowCount()).uniqueResult();
+//
+//        Criteria crit = findById_orderNameCriteria(ids).addOrder(
+//            pc.isAscending() ? Order.asc("sortName") : Order.desc("sortName"));
+//
+//        return getPagedResult(crit, count, pc);
+        return new PageList<AuthzSubject>();
     }
 
     public Collection findAll_order(boolean isRoot, String col, boolean asc, Collection excludes) {
-        Criteria criteria = createCriteria();
-
-        if (isRoot) {
-            Disjunction disjunctions = Restrictions.disjunction();
-            disjunctions.add(Restrictions.eq("system", Boolean.FALSE));
-            disjunctions.add(Restrictions.eq("id", AuthzConstants.rootSubjectId));
-            criteria.add(disjunctions);
-        } else {
-            criteria.add(Restrictions.eq("system", Boolean.FALSE));
-        }
-
-        criteria.addOrder(asc ? Order.asc(col) : Order.desc(col));
-
-        if (excludes != null && excludes.size() > 0) {
-            criteria.add(Restrictions.not(Restrictions.in("id", excludes)));
-        }
-
-        return criteria.list();
+        //TODO
+//        Criteria criteria = createCriteria();
+//
+//        if (isRoot) {
+//            Disjunction disjunctions = Restrictions.disjunction();
+//            disjunctions.add(Restrictions.eq("system", Boolean.FALSE));
+//            disjunctions.add(Restrictions.eq("id", AuthzConstants.rootSubjectId));
+//            criteria.add(disjunctions);
+//        } else {
+//            criteria.add(Restrictions.eq("system", Boolean.FALSE));
+//        }
+//
+//        criteria.addOrder(asc ? Order.asc(col) : Order.desc(col));
+//
+//        if (excludes != null && excludes.size() > 0) {
+//            criteria.add(Restrictions.not(Restrictions.in("id", excludes)));
+//        }
+//
+//        return criteria.list();
+        return new ArrayList();
 
     }
 
@@ -215,18 +250,26 @@ public class AuthzSubjectDAO
     }
 
     public Collection<AuthzSubject> findByRoleId_orderName(Integer roleId, boolean asc) {
-        return getSession().createQuery(
+        List<AuthzSubject> subjects = entityManager.createQuery(
             "select s from AuthzSubject s join fetch s.roles r " + "where r.id = ? and " +
                 "(s.system = false or s.id = " + AuthzConstants.rootSubjectId +
-                ") order by s.sortName " + (asc ? "asc" : "desc")).setInteger(0, roleId.intValue())
-            .list();
+                ") order by s.sortName " + (asc ? "asc" : "desc"),AuthzSubject.class).setParameter(1, roleId.intValue())
+            .getResultList();
+        for(AuthzSubject subject: subjects) {
+            subject.getId();
+        }
+        return subjects;
     }
 
     public Collection<AuthzSubject> findByNotRoleId_orderName(Integer roleId, boolean asc) {
-        return getSession().createQuery(
+        List<AuthzSubject> subjects = entityManager.createQuery(
             "select distinct s from AuthzSubject s, Role r " + "where r.id = ? and s.id not in " +
                 "(select id from r.subjects) and " + "s.system = false order by s.sortName " +
-                (asc ? "asc" : "desc")).setInteger(0, roleId.intValue()).list();
+                (asc ? "asc" : "desc"),AuthzSubject.class).setParameter(1, roleId.intValue()).getResultList();
+        for(AuthzSubject subject: subjects) {
+            subject.getId();
+        }
+        return subjects;
     }
     
     //TODO was taken from ResourceDAO.  Implement properly

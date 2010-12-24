@@ -51,13 +51,6 @@ public interface AgentManager {
     public void removeAgent(Agent agent);
 
     /**
-     * Get a paged list of agents in the system.
-     * @param pInfo a pager object, with an {@link AgentSortField} sort field
-     * @return a list of {@link Agent}s
-     */
-    public List<Agent> findAgents(PageInfo pInfo);
-
-    /**
      * Get a list of all the agents in the system
      */
     public List<Agent> getAgents();

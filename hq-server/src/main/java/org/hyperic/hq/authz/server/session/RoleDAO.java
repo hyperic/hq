@@ -26,33 +26,31 @@
 package org.hyperic.hq.authz.server.session;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
-import org.hibernate.SessionFactory;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.GroupCreationException;
-import org.hyperic.hq.authz.shared.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.RoleValue;
-import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.inventory.dao.ResourceTypeDao;
-import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class RoleDAO
-    extends HibernateDAO<Role> {
+public class RoleDAO {
 
     private ResourceTypeDao resourceTypeDao;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+    
     @Autowired
-    public RoleDAO(SessionFactory f, ResourceTypeDao resourceTypeDao) {
-        super(Role.class, f);
+    public RoleDAO(ResourceTypeDao resourceTypeDao) {
         this.resourceTypeDao = resourceTypeDao;
     }
 
@@ -60,7 +58,7 @@ public class RoleDAO
         Role role = new Role();
         role.setRoleValue(createInfo);
         // Save it at this point to get an ID
-        save(role);
+        entityManager.persist(role);
 
         ResourceType resType = resourceTypeDao.findByName(AuthzConstants.roleResourceTypeName);
         if (resType == null) {
@@ -122,7 +120,7 @@ public class RoleDAO
 //        resourceGroupDAO.addMembers(group, Collections.singleton(myResource));
 //
 //        role.setResourceGroups(groups);
-
+        role.getId();
         return role;
     }
 
@@ -130,60 +128,127 @@ public class RoleDAO
         entity.clearCalendars();
         entity.clearResourceGroups();
         entity.clearSubjects();
-        super.remove(entity);
+        entityManager.remove(entity);
+    }
+    
+    public Role findById(Integer id) {
+        if (id == null) return null;
+        //We aren't allowing lazy fetching of Node-Backed objects, so while you may have gotten a proxy here before, now you don't
+        //You also may have been expecting an ObjectNotFoundException.  Now you get back null.
+        Role result = entityManager.find(Role.class, id);
+        if(result != null) {
+            result.getId();
+        }    
+        return result;
+    }
+    
+    public Role get(Integer id) {
+        //You are getting exactly what you expected from Hibernate
+        return findById(id);
+    }
+    
+    public int size() {
+        return ((Number)entityManager.createQuery("select count(r) from Role r").getSingleResult()).intValue();
+    }
+    
+    public List<Role> findAll() {
+        //TODO HibernateDAO find all prev used query cache
+        List<Role> roles = entityManager.createQuery("select r from Agent r",Role.class).getResultList();
+        for(Role role: roles) {
+            role.getId();
+        }
+        return roles;
     }
 
     public Role findByName(String name) {
-        String sql = "from Role where name=?";
-        return (Role) getSession().createQuery(sql).setString(0, name).uniqueResult();
+        String sql = "select r from Role r where r.name=?";
+        try {
+            Role role= entityManager.createQuery(sql,Role.class).setParameter(1, name).getSingleResult();
+            role.getId();
+            return role;
+        }catch(EmptyResultDataAccessException e) {
+            //Hibernate UniqueResult would return null if nothing, but throw Exception if more than one.  getSingleResult does not do this
+            return null;
+        }
     }
 
     public Collection<Role> findAll_orderName(boolean asc) {
-        return getSession().createQuery("from Role order by sortName " + (asc ? "asc" : "desc"))
-            .list();
+        Collection<Role> roles =  entityManager.createQuery("select r from Role r order by r.sortName " + (asc ? "asc" : "desc"),Role.class)
+            .getResultList();
+        for(Role role: roles) {
+            role.getId();
+        }
+        return roles;
     }
 
     public Collection<Role> findBySystem_orderName(boolean system, boolean asc) {
-        return getSession().createQuery(
-            "from Role where system = ? order by sortName " + (asc ? "asc" : "desc")).setBoolean(0,
-            system).list();
+        Collection<Role> roles =   entityManager.createQuery(
+            "select r from Role r where r.system = ? order by r.sortName " + (asc ? "asc" : "desc"),Role.class).setParameter(1,
+            system).getResultList();
+        for(Role role: roles) {
+            role.getId();
+        }
+        return roles;
     }
 
     public Collection<Role> findBySystemAndSubject_orderName(boolean system, Integer sid,
                                                              boolean asc) {
-        return getSession().createQuery(
-            "from Role r join fetch r.subjects s " + "where r.system = ? and s.id = ? " +
-                "order by r.sortName " + (asc ? "asc" : "desc")).setBoolean(0, system).setInteger(
-            1, sid.intValue()).list();
+        Collection<Role> roles = entityManager.createQuery(
+            "select r from Role r join fetch r.subjects s " + "where r.system = ? and s.id = ? " +
+                "order by r.sortName " + (asc ? "asc" : "desc"),Role.class).setParameter(1, system).setParameter(
+            2, sid.intValue()).getResultList();
+        for(Role role: roles) {
+            role.getId();
+        }
+        return roles;
     }
 
     public Collection<Role> findBySystemAndSubject_orderMember(boolean system, Integer sid,
                                                                boolean asc) {
-        return getSession().createQuery(
-            "from Role r join fetch r.subjects s " + "where r.system = ? and s.id = ? " +
-                "order by r.sortName " + (asc ? "asc" : "desc")).setBoolean(0, system).setInteger(
-            1, sid.intValue()).list();
+        Collection<Role> roles = entityManager.createQuery(
+            "select r from Role r join fetch r.subjects s " + "where r.system = ? and s.id = ? " +
+                "order by r.sortName " + (asc ? "asc" : "desc"),Role.class).setParameter(1, system).setParameter(
+            2, sid.intValue()).getResultList();
+        for(Role role: roles) {
+            role.getId();
+        }
+        return roles;
     }
 
     public Collection<Role> findBySystemAndAvailableForSubject_orderName(boolean system,
                                                                          Integer sid, boolean asc) {
-        return getSession().createQuery(
+        Collection<Role> roles = entityManager.createQuery(
             "select distinct r from Role r, AuthzSubject s " +
                 "where r.system = ? and s.id = ? and " + "r not in (select r2 from s.roles r2) " +
-                "order by r.sortName " + (asc ? "asc" : "desc")).setBoolean(0, system).setInteger(
-            1, sid.intValue()).list();
+                "order by r.sortName " + (asc ? "asc" : "desc"),Role.class).setParameter(1, system).setParameter(
+            2, sid.intValue()).getResultList();
+        for(Role role: roles) {
+            role.getId();
+        }
+        return roles;
     }
 
     public Role findAvailableRoleForSubject(Integer roleId, Integer subjectid) {
-        return (Role) getSession().createQuery(
-            "from Role r where r.id = ? and ? not in " + "(select id from r.subjects) ")
-            .setInteger(0, roleId.intValue()).setInteger(1, subjectid.intValue()).uniqueResult();
+        try {
+            Role role =  entityManager.createQuery(
+            "select r from Role r where r.id = ? and ? not in " + "(select id from r.subjects) ",Role.class)
+            .setParameter(0, roleId.intValue()).setParameter(1, subjectid.intValue()).getSingleResult();
+            role.getId();
+            return role;
+        }catch(EmptyResultDataAccessException e) {
+            //Hibernate UniqueResult would return null if nothing, but throw Exception if more than one.  getSingleResult does not do this
+            return null;
+        }
     }
 
     public Collection<Role> findAvailableForGroup(boolean system, Integer groupId) {
-        return getSession().createQuery(
-            "from Role r " + "where r.system = ? and "
-                + "? not in (select id from r.resourceGroups) " + "order by r.sortName ")
-            .setBoolean(0, system).setInteger(1, groupId.intValue()).list();
+        Collection<Role> roles = entityManager.createQuery(
+            "select r from Role r " + "where r.system = ? and "
+                + "? not in (select id from r.resourceGroups) " + "order by r.sortName ",Role.class)
+            .setParameter(0, system).setParameter(1, groupId.intValue()).getResultList();
+        for(Role role: roles) {
+            role.getId();
+        }
+        return roles;
     }
 }

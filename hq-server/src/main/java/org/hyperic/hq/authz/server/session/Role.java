@@ -37,7 +37,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
@@ -61,10 +60,7 @@ public class Role  {
     
     @Column(name="FSYSTEM")
     private boolean    system;
-    
-    @ManyToOne
-    private Resource   resource;
-    
+     
     @ManyToMany(mappedBy="roles")
     private Collection<AuthzSubject> subjects;
     
@@ -135,14 +131,6 @@ public class Role  {
         this.system = fsystem;
     }
 
-    public Resource getResource() {
-        return resource;
-    }
-    
-    void setResource(Resource resourceId) {
-        this.resource = resourceId;
-    }
-
     public Collection<ResourceGroup> getResourceGroups() {
         //TODO graph access
         return new HashSet<ResourceGroup>();
@@ -175,6 +163,11 @@ public class Role  {
     
     void setOperations(Collection<OperationType> val) {
         //TODO graph access
+    }
+    
+    public Resource getResource() {
+        //TODO remove.  No longer underlying Resource for Role
+        return null;
     }
 
     public Collection<AuthzSubject> getSubjects() {

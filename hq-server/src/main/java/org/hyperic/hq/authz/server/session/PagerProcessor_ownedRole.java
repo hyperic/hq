@@ -39,8 +39,10 @@ public class PagerProcessor_ownedRole implements PagerProcessor {
             if ( o instanceof Role) {
                 Role role = (Role)o;
 
-                int numSubjects = Bootstrap.getBean(AuthzSubjectDAO.class)
-                    .size(role.getSubjects());
+                //TODO I guess below gave total number but not sure how it filtered on what was already there.  Trying to prevent eager collection loading I guess?
+                //int numSubjects = Bootstrap.getBean(AuthzSubjectDAO.class)
+                  //  .size(role.getSubjects());
+                int numSubjects = role.getSubjects().size();
 
                 OwnedRoleValue value = new OwnedRoleValue(role);
                 value.setMemberCount(numSubjects);
