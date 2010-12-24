@@ -190,30 +190,32 @@ public class AuditManagerImpl implements AuditManager, ApplicationListener<Appli
 
         newContainer.setStartTime(System.currentTimeMillis());
         if (currentContainer == null) {
-            TransactionSynchronizationManager
-                .registerSynchronization(new TransactionSynchronization() {
-                    public void suspend() {
-                    }
-
-                    public void resume() {
-                    }
-
-                    public void flush() {
-                    }
-
-                    public void beforeCompletion() {
-                    }
-
-                    public void beforeCommit(boolean readOnly) {
-                        popAll();
-                    }
-
-                    public void afterCompletion(int status) {
-                    }
-
-                    public void afterCommit() {
-                    }
-                });
+            //TODO popAll in beforeCommit running in its own tx causes IllegalStateException when going back to JpaTransManager
+            //This is the only place we are doing something in beforeCommit....
+//            TransactionSynchronizationManager
+//                .registerSynchronization(new TransactionSynchronization() {
+//                    public void suspend() {
+//                    }
+//
+//                    public void resume() {
+//                    }
+//
+//                    public void flush() {
+//                    }
+//
+//                    public void beforeCompletion() {
+//                    }
+//
+//                    public void beforeCommit(boolean readOnly) {
+//                        popAll();
+//                    }
+//
+//                    public void afterCompletion(int status) {
+//                    }
+//
+//                    public void afterCommit() {
+//                    }
+//                });
         } else {
             currentContainer.addChild(newContainer);
         }
