@@ -41,10 +41,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.PostConstruct;
@@ -79,7 +79,6 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.hibernate3.HibernateTransactionManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -1535,6 +1534,7 @@ public class DataManagerImpl implements DataManager {
         return thread;
     }
 
+    @Transactional(readOnly=true)
     private AggMetricValue[] getHistDataSet(Integer[] mids, long start, long finish,
                                             long rangeBegin, long rangeEnd,
                                             long windowSize, final boolean returnNulls,

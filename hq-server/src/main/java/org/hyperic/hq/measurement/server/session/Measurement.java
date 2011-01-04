@@ -67,7 +67,7 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
     private long interval;
 
     @Column(name = "DSN", nullable = false, length = 2048)
-    private String formula;
+    private String dsn;
 
     @OneToMany(cascade = CascadeType.ALL)
     private Collection<Baseline> baselinesBag;
@@ -163,11 +163,11 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
     }
 
     public String getDsn() {
-        return formula;
+        return dsn;
     }
 
-    protected void setDsn(String formula) {
-        this.formula = formula;
+    protected void setDsn(String dsn) {
+        this.dsn = dsn;
     }
 
     public AppdefEntityID getEntityId() {

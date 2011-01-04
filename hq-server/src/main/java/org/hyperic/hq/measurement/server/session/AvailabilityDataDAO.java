@@ -320,7 +320,7 @@ public class AvailabilityDataDAO
             // there is an open bug on this for hibernate to
             // automatically expand group by's
             // http://opensource.atlassian.com/projects/hibernate/browse/HHH-2407
-            .append(" GROUP BY m.id, m._version_, m.instanceId,").append(
+            .append(" GROUP BY m.id, m.version, m.instanceId,").append(
                 " m.template, m.mtime,m.enabled,").append(" m.interval, m.dsn,m.resource,").append(
                 " rle.endtime").append(" ORDER BY rle.endtime").toString();
         final List<Integer> measIds = Arrays.asList(mids);
