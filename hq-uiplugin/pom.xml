@@ -24,11 +24,9 @@
 		<module>health</module>
 		<module>jmx</module>
 		<module>live_exec</module>
-		<module>mass</module>
 		<module>nagiup</module>
 		<module>opennms</module>
 		<module>public</module>
-		<module>saasCenter</module>
 		<module>scaffold</module>
 		<module>systemsdown</module>
 		<module>tmpl_render</module>
