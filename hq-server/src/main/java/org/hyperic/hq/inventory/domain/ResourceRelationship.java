@@ -10,17 +10,17 @@ import org.springframework.datastore.graph.annotation.StartNode;
 
 @Configurable
 @RelationshipEntity
-public class Relationship<T> {
+public class ResourceRelationship {
 	@StartNode
-	private T from;
+	private Resource from;
 	
 	@EndNode
-	private T to;
+	private Resource to;
 	
-	public Relationship() {
+	public ResourceRelationship() {
 	}
 	
-	public Relationship(org.neo4j.graphdb.Relationship r) {
+	public ResourceRelationship(org.neo4j.graphdb.Relationship r) {
 		setUnderlyingState(r);
 	}
 	
@@ -28,11 +28,11 @@ public class Relationship<T> {
 		return getUnderlyingState().getType().name();
 	}
 
-	public T getFrom() {
+	public Resource getFrom() {
 		return from;
 	}
 
-	public T getTo() {
+	public Resource getTo() {
 		return to;
 	}
 	
@@ -68,7 +68,7 @@ public class Relationship<T> {
         //TODO give a way to model properties on a type relation to validate creation of properties on the relation?  What about pre-defined types?
         getUnderlyingState().setProperty(key, value);    	
     }
-    
+   
     public void remove() {
     	getUnderlyingState().delete();
     }

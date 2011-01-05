@@ -41,7 +41,7 @@ import org.hyperic.hq.authz.server.session.ResourceManagerImpl
 import org.hyperic.hq.authz.server.session.ResourceSortField
 import org.hyperic.hq.inventory.domain.Resource
 import org.hyperic.hq.inventory.domain.ResourceGroup
-import org.hyperic.hq.inventory.domain.Relationship
+import org.hyperic.hq.inventory.domain.ResourceRelationship
 import org.hyperic.hq.bizapp.server.session.AppdefBossImpl as AppdefBoss
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.appdef.shared.ApplicationManager;
@@ -500,7 +500,7 @@ class ResourceHelper extends BaseHelper {
     }
     
     void createResourceEdges(String resourceRelation, AppdefEntityID parent, AppdefEntityID[] children, boolean deleteExisting) {
-        Relationship<Resource> relation = null;
+        ResourceRelationship<Resource> relation = null;
         /*
         if (AuthzConstants.ResourceEdgeNetworkRelation.equals(resourceRelation)) {
             relation = rman.getNetworkRelation()

@@ -140,9 +140,9 @@ public class ResourceType {
     }
 
     @SuppressWarnings("unchecked")
-    public Set<Relationship<ResourceType>> getRelationships(ResourceType entity, String name,
+    public Set<ResourceTypeRelationship> getRelationships(ResourceType entity, String name,
                                                             Direction direction) {
-        Set<Relationship<ResourceType>> relations = new HashSet<Relationship<ResourceType>>();
+        Set<ResourceTypeRelationship> relations = new HashSet<ResourceTypeRelationship>();
         Iterable<org.neo4j.graphdb.Relationship> relationships;
         
         if (name != null) {
@@ -170,7 +170,7 @@ public class ResourceType {
                 if (Resource.class.isAssignableFrom(otherEndType)) {
                     if (entity == null || node.equals(entity.getUnderlyingState())) {
                         relations.add(graphDatabaseContext.createEntityFromState(relationship,
-                            Relationship.class));
+                            ResourceTypeRelationship.class));
                     }
                 }
             }
@@ -197,17 +197,17 @@ public class ResourceType {
         return false;
     }
 
-    @SuppressWarnings("unchecked")
+    
     @Transactional
-    public Relationship<ResourceType> relateTo(ResourceType entity, String relationName) {
-        return (Relationship<ResourceType>) this.relateTo(entity, Relationship.class, relationName);
+    public ResourceTypeRelationship relateTo(ResourceType entity, String relationName) {
+        return (ResourceTypeRelationship) this.relateTo(entity, ResourceTypeRelationship.class, relationName);
     }
 
     @Transactional
     public void removeRelationships(ResourceType entity, String name,
                                     Direction direction) {
         // TODO getRelationships only does one direction
-        for (Relationship<ResourceType> relation : getRelationships(entity, name, direction)) {
+        for (ResourceTypeRelationship relation : getRelationships(entity, name, direction)) {
             relation.getUnderlyingState().delete();
         }
     }
@@ -226,22 +226,22 @@ public class ResourceType {
         removeRelationships(null, relationName, Direction.BOTH);
     }
 
-    public Set<Relationship<ResourceType>> getRelationships() {
+    public Set<ResourceTypeRelationship> getRelationships() {
         return getRelationships(null, null, Direction.BOTH);
     }
 
-    public Set<Relationship<ResourceType>> getRelationshipsFrom(String relationName) {
+    public Set<ResourceTypeRelationship> getRelationshipsFrom(String relationName) {
         return getRelationships(null, relationName, Direction.OUTGOING);
     }
 
-    public Set<Relationship<ResourceType>> getRelationshipsTo(String relationName) {
+    public Set<ResourceTypeRelationship> getRelationshipsTo(String relationName) {
         return getRelationships(null, relationName, Direction.INCOMING);
     }
 
-    public Relationship<ResourceType> getRelationshipTo(ResourceType entity, String relationName) {
-        Set<Relationship<ResourceType>> relations = getRelationships(entity, relationName, null);
-        Relationship<ResourceType> result = null;
-        Iterator<Relationship<ResourceType>> i = relations.iterator();
+    public ResourceTypeRelationship getRelationshipTo(ResourceType entity, String relationName) {
+        Set<ResourceTypeRelationship> relations = getRelationships(entity, relationName, null);
+        ResourceTypeRelationship result = null;
+        Iterator<ResourceTypeRelationship> i = relations.iterator();
 
         if (i.hasNext()) {
             result = i.next();
