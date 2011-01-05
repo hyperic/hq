@@ -43,7 +43,6 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.hq.common.shared.CrispoManager;
-import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -88,6 +87,8 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
         subjectPager = Pager.getPager(SUBJECT_PAGER);
+        //TODO better way to pre-populate nodes.  Problem with multiple login threads trying to create Neo4j node for guest user
+        getSubjectById(AuthzConstants.guestId);
     }
 
     /**
