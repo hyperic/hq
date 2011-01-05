@@ -29,13 +29,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.ResourceSortField;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.inventory.domain.Relationship;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.pager.PageControl;
@@ -45,6 +42,13 @@ import org.hyperic.util.pager.PageList;
  * Local interface for ResourceManager.
  */
 public interface ResourceManager {
+    
+    /**
+     * Check if there are any resources of a given type
+     * 
+     * 
+     */
+    boolean resourcesExistOfType(String typeName);
     /**
      * Find the type that has the given name.
      * @param name The name of the type you're looking for.
@@ -52,13 +56,8 @@ public interface ResourceManager {
      * @throws NotFoundException Unable to find a given or dependent entities.
      */
     public ResourceType findResourceTypeByName(String name);
-    
-    ResourceType findResourceTypeById(Integer id);
 
-    /**
-     * Check if there are any resources of a given type
-     */
-    public boolean resourcesExistOfType(String typeName);
+    ResourceType findResourceTypeById(Integer id);
 
     /**
      * @param {@link Collection} of {@link Resource}s
@@ -67,39 +66,14 @@ public interface ResourceManager {
     public void resourceHierarchyUpdated(AuthzSubject subj, Collection<Resource> resources);
 
     /**
-     * Create a resource.
-     */
-    public Resource createResource(AuthzSubject owner, ResourceType rt, String name, boolean system, Resource parent);
-
-    /**
-     * Move a resource. It is the responsibility of the caller (AppdefManager)
-     * to ensure that this resource can be moved to the destination. It's also
-     * of note that this method only deals with relinking resource edges to the
-     * ancestors of the destination resource. This means that in the case of
-     * Server moves, it's up to the caller to re-link dependent chilren.
-     */
-    public void moveResource(AuthzSubject owner, Resource target, Resource destination);
-
-    /**
-     * Get the # of resources within HQ inventory
-     */
-    public Number getResourceCount();
-
-    /**
-     * Get the # of resource types within HQ inventory
-     */
-    public Number getResourceTypeCount();
-
-
-    /**
      * Find's the root (id=0) resource
      */
     public Resource findRootResource();
-    
+
     ResourceType findRootResourceType();
 
     public Resource findResourceById(Integer id);
-    
+
     Resource findResourceByName(String name);
 
     public void removeResource(AuthzSubject subject, Resource r) throws VetoException;
@@ -139,20 +113,8 @@ public interface ResourceManager {
      */
     public Map<String, List<Integer>> findAllViewableInstances(AuthzSubject subject);
 
-    /**
-     * Find all the resources which are descendents of the given resource
-     */
-    public List<Resource> findResourcesByParent(AuthzSubject subject, Resource res);
-
-    /**
-     * Find all the resources of an authz resource type
-     * @param resourceType 301 for platforms, etc.
-     * @param pInfo A pager, using a sort field of {@link ResourceSortField}
-     * @return a list of {@link Resource}s
-     */
-    public List<Resource> findResourcesOfType(int resourceType, PageInfo pInfo);
-    
-    //TODO remove this method - ResourceManager (if kept) should have not knowledge of AppdefEntityIDs
+    // TODO remove this method - ResourceManager (if kept) should have not
+    // knowledge of AppdefEntityIDs
     Resource findResource(AppdefEntityID entityID);
 
     /**
@@ -162,36 +124,6 @@ public interface ResourceManager {
      */
     public Collection<Resource> findResourceByOwner(AuthzSubject owner);
 
-    Collection<Relationship<Resource>> findResourceEdges(Relationship<ResourceType> relation, List<Resource> parentList);
-
-    public Collection<Relationship<Resource>> findResourceEdges(Relationship<ResourceType> relation, Resource parent);
-
     public boolean isResourceChildOf(Resource parent, Resource child);
-
-    public boolean hasChildResourceEdges(Resource resource, Relationship<ResourceType> relation);
-
-    public int getDescendantResourceEdgeCount(Resource resource, Relationship<ResourceType> relation);
-
-    public Collection<Relationship<Resource>> findChildResourceEdges(Resource resource,
-    		Relationship<ResourceType> relation);
-
-    public Collection<Relationship<Resource>> findDescendantResourceEdges(Resource resource,
-    		Relationship<ResourceType> relation);
-
-    public Collection<Relationship<Resource>> findAncestorResourceEdges(Resource resource,
-    		Relationship<ResourceType> relation);
-
-    public Collection<Relationship<Resource>> findResourceEdgesByName(String name, Relationship<ResourceType> relation);
-
-    public Relationship<Resource> getParentResourceEdge(Resource resource, Relationship<ResourceType> relation);
-
-    public boolean hasResourceTypeRelation(Resource resource, Relationship<ResourceType> relation);
-
-
-    public void removeResourceEdges(AuthzSubject subject, Relationship<ResourceType> relation, Resource parent)
-        throws PermissionException;
-
-    public Relationship<ResourceType> getContainmentRelation();
-
 
 }

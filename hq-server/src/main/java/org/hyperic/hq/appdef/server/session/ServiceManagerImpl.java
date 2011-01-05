@@ -132,6 +132,7 @@ public class ServiceManagerImpl implements ServiceManager {
         s.setProperty(AppdefResource.SORT_NAME, name.toUpperCase());
         s.setOwner(subject);
         parent.relateTo(s, RelationshipTypes.SERVICE);
+        parent.relateTo(s, RelationshipTypes.CONTAINS);
         return s;
    }
     
@@ -750,6 +751,7 @@ public class ServiceManagerImpl implements ServiceManager {
             service.removeRelationship(parent, RelationshipTypes.SERVICE);
             Resource newParent = resourceManager.findResourceById(valueHolder.getParent().getId());
             newParent.relateTo(service, RelationshipTypes.SERVICE);
+            newParent.relateTo(service, RelationshipTypes.CONTAINS);
         }
     }
 

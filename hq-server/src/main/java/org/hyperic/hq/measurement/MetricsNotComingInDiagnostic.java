@@ -44,14 +44,12 @@ import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.common.DiagnosticsLogger;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.ha.HAUtil;
 import org.hyperic.hq.hibernate.SessionManager;
 import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
-import org.hyperic.hq.inventory.domain.Relationship;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MetricDataCache;
@@ -74,7 +72,6 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
     private AuthzSubjectManager authzSubjectManager;
     private AvailabilityManager availabilityManager;
     private MeasurementManager measurementManager;
-    private ResourceManager resourceManager;
     private PlatformManager platformManager;
     private MetricDataCache metricDataCache;
 
@@ -83,14 +80,12 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
                                         AuthzSubjectManager authzSubjectManager,
                                         AvailabilityManager availabilityManager,
                                         MeasurementManager measurementManager,
-                                        ResourceManager resourceManager,
                                         PlatformManager platformManager,
                                         MetricDataCache metricDataCache) {
         this.diagnosticsLogger = diagnosticsLogger;
         this.authzSubjectManager = authzSubjectManager;
         this.availabilityManager = availabilityManager;
         this.measurementManager = measurementManager;
-        this.resourceManager = resourceManager;
         this.platformManager = platformManager;
         this.metricDataCache = metricDataCache;
     }
@@ -263,7 +258,7 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
                                                 List<Resource> children) {
         final Map<Resource, Platform> rtn = new HashMap<Resource, Platform>(platforms.size());
         final long now = now();
-        final List<Resource> resources = new ArrayList<Resource>(platforms.size());
+     
         for (final Platform platform : platforms) {
             final Resource r = platform.getResource();
             if (r == null || r.isInAsyncDeleteState()) {
@@ -274,23 +269,12 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
                 !platformIsAvailable(platform, measCache, avails)) {
                 continue;
             }
-            resources.add(platform.getResource());
-        }
-
-        final Collection<Relationship<Resource>> edges = resourceManager.findResourceEdges(resourceManager
-            .getContainmentRelation(), resources);
-        for (final Relationship<Resource> edge : edges) {
-            try {
-                final Platform platform = platformManager.findPlatformById(edge.getFrom()
-                    .getId());
-                final Resource child = edge.getTo();
+            for(Resource child: r.getChildren(true)) {
                 if (child == null || child.isInAsyncDeleteState()) {
                     continue;
                 }
                 children.add(child);
                 rtn.put(child, platform);
-            } catch (PlatformNotFoundException e) {
-                log.debug(e);
             }
         }
         return rtn;

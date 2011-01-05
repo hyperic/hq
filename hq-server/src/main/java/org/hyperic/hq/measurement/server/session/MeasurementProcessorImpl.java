@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -47,7 +48,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.inventory.domain.Relationship;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.agent.client.AgentMonitor;
@@ -131,16 +131,15 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
             if (resource == null || resource.isInAsyncDeleteState()) {
                 continue;
             }
-            final Collection<Relationship<Resource>> edges =
-                resourceManager.findResourceEdges(resourceManager.getContainmentRelation(), resource);
-            aeids.ensureCapacity(aeids.size()+edges.size()+1);
+            final Set<Resource> children= resource.getChildren(true);
+           
+            aeids.ensureCapacity(aeids.size()+children.size()+1);
             aeids.add(AppdefUtil.newAppdefEntityId(resource));
-            for (final Relationship<Resource> e : edges ) {
-                final Resource r = e.getTo();
-                if (r == null || r.isInAsyncDeleteState()) {
+            for (Resource child: children ) { 
+                if (child == null || child.isInAsyncDeleteState()) {
                     continue;
                 }
-                aeids.add(AppdefUtil.newAppdefEntityId(e.getTo()));
+                aeids.add(AppdefUtil.newAppdefEntityId(child));
             }
         }
         if (!aeids.isEmpty()) {

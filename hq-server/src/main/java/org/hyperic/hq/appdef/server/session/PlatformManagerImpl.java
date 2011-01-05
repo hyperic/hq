@@ -34,6 +34,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -388,6 +389,7 @@ public class PlatformManagerImpl implements PlatformManager {
         p.setAgent(agent);
         p.setOwner(subject);
         resourceManager.findRootResource().relateTo(p, RelationshipTypes.PLATFORM);
+        resourceManager.findRootResource().relateTo(p, RelationshipTypes.CONTAINS);
         return p;
     }
     
@@ -415,6 +417,7 @@ public class PlatformManagerImpl implements PlatformManager {
             addIp(platformFactory.createPlatform(p), ipv.getAddress(), ipv.getNetmask(), ipv.getMACAddress());
         }
         resourceManager.findRootResource().relateTo(p, RelationshipTypes.PLATFORM);
+        resourceManager.findRootResource().relateTo(p, RelationshipTypes.CONTAINS);
         return p;
     }
   
@@ -1855,7 +1858,8 @@ public class PlatformManagerImpl implements PlatformManager {
                 return (o1.getName().compareTo(o2.getName()));
             }
         });
-        Map<String,Integer> counts = new HashMap<String,Integer>();
+        //TODO do we really need to order the Map?
+        Map<String,Integer> counts = new LinkedHashMap<String,Integer>();
         for(ResourceType platformType: orderedPlatformTypes) {
             counts.put(platformType.getName(),platformType.getResources().size());
         }

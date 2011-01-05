@@ -250,6 +250,7 @@ public class ServerManagerImpl implements ServerManager {
         s.setOwner(owner);
         s.setAgent(p.getAgent());
         p.relateTo(s,RelationshipTypes.SERVER);
+        p.relateTo(s,RelationshipTypes.CONTAINS);
         return s;
    }
     

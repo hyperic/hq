@@ -2,8 +2,7 @@ package org.hyperic.hq.reference;
 
 abstract public class RelationshipTypes {
 
-    // TODO this is used for parent/child and ResourceGroup membership. Probably
-    // OK
+    // This is used for parent/child relationships
     public static final String CONTAINS = "CONTAINS";
 
     // This is used for Resource->ResourceType

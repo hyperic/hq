@@ -193,27 +193,16 @@ public class Resource {
         return getUnderlyingState().getProperty(key, propertyType.getDefaultValue());
     }
 
+    
+    public Set<ResourceRelationship> getRelationships(Resource entity, String name, Direction direction) {
+       return convertRelationships(entity, getUnderlyingState().getRelationships(
+                    DynamicRelationshipType.withName(name)));
+    }
+    
     @SuppressWarnings("unchecked")
-    public Set<Relationship<Resource>> getRelationships(Resource entity, String name, Direction direction) {
-        Set<Relationship<Resource>> relations = new HashSet<Relationship<Resource>>();
-        Iterable<org.neo4j.graphdb.Relationship> relationships;
-
-        if (name != null) {
-            if (direction != null) {
-                relationships = getUnderlyingState().getRelationships(
-                    DynamicRelationshipType.withName(name), direction.toNeo4jDir());
-            } else {
-                relationships = getUnderlyingState().getRelationships(
-                    DynamicRelationshipType.withName(name));
-            }
-        } else {
-            if (direction != null) {
-                relationships = getUnderlyingState().getRelationships(direction.toNeo4jDir());
-            } else {
-                relationships = getUnderlyingState().getRelationships();
-            }
-        }
-
+    private Set<ResourceRelationship> convertRelationships(Resource entity, 
+        Iterable<org.neo4j.graphdb.Relationship> relationships) {
+        Set<ResourceRelationship> relations = new HashSet<ResourceRelationship>();
         for (org.neo4j.graphdb.Relationship relationship : relationships) {
             // Don't include Neo4J relationship b/w Node and its Java type
             if (!relationship.isType(SubReferenceNodeTypeStrategy.INSTANCE_OF_RELATIONSHIP_TYPE)) {
@@ -222,15 +211,14 @@ public class Resource {
                 if (Resource.class.isAssignableFrom(otherEndType)) {
                     if (entity == null || node.equals(entity.getUnderlyingState())) {
                         relations.add(graphDatabaseContext.createEntityFromState(relationship,
-                            Relationship.class));
+                            ResourceRelationship.class));
                     }
                 }
             }
         }
-
         return relations;
     }
-
+    
     public boolean isRelatedTo(Resource resource, String relationName) {
         Traverser relationTraverser = getUnderlyingState().traverse(Traverser.Order.BREADTH_FIRST,
             new StopEvaluator() {
@@ -249,17 +237,16 @@ public class Resource {
 
     @SuppressWarnings("unchecked")
     @Transactional
-    public Relationship<Resource> relateTo(Resource resource, String relationName) {
-        if (!type.isRelatedTo(resource.getType(), relationName)) {
+    public ResourceRelationship relateTo(Resource resource, String relationName) {
+        if (!(RelationshipTypes.CONTAINS.equals(relationName)) && !type.isRelatedTo(resource.getType(), relationName)) {
             throw new InvalidRelationshipException();
         }
-        return (Relationship<Resource>) this.relateTo(resource, Relationship.class, relationName);
+        return (ResourceRelationship) this.relateTo(resource, ResourceRelationship.class, relationName);
     }
-
+    
     @Transactional
     public void removeRelationships(Resource entity, String name, Direction direction) {
-        // TODO getRelationships only does one direction
-        for (Relationship<Resource> relation : getRelationships(entity, name, direction)) {
+        for (ResourceRelationship relation : getRelationships(entity, name, direction)) {
             relation.getUnderlyingState().delete();
         }
     }
@@ -271,37 +258,73 @@ public class Resource {
     }
 
     public void removeRelationships() {
-        removeRelationships(null, null, Direction.BOTH);
+        for(org.neo4j.graphdb.Relationship relationship:getUnderlyingState().getRelationships()) {
+            relationship.delete();
+        }
     }
 
     public void removeRelationships(String relationName) {
-        removeRelationships(null, relationName, Direction.BOTH);
+        for(org.neo4j.graphdb.Relationship relationship:getUnderlyingState().getRelationships(
+            DynamicRelationshipType.withName(relationName), Direction.BOTH.toNeo4jDir())) {
+            relationship.delete();
+        }
     }
 
-    public Set<Relationship<Resource>> getRelationships() {
-        return getRelationships(null, null, Direction.BOTH);
+    public Set<ResourceRelationship> getRelationships() {
+        return convertRelationships(null, getUnderlyingState().getRelationships());
     }
 
-    public Set<Relationship<Resource>> getRelationshipsFrom(String relationName) {
-        return getRelationships(null, relationName, Direction.OUTGOING);
+    public Set<ResourceRelationship> getRelationshipsFrom(String relationName) {
+        return convertRelationships(null, getUnderlyingState().getRelationships(
+            DynamicRelationshipType.withName(relationName), Direction.OUTGOING.toNeo4jDir()));
     }
 
-    public Set<Relationship<Resource>> getRelationshipsTo(String relationName) {
-        return getRelationships(null, relationName, Direction.INCOMING);
+    public Set<ResourceRelationship> getRelationshipsTo(String relationName) {
+        return convertRelationships(null, getUnderlyingState().getRelationships(
+            DynamicRelationshipType.withName(relationName), Direction.INCOMING.toNeo4jDir()));
     }
 
     public Set<Resource> getResourcesFrom(String relationName) {
         return getRelatedResources(relationName, Direction.OUTGOING);
     }
-
+    
     public Set<Resource> getResourcesTo(String relationName) {
         return getRelatedResources(relationName, Direction.INCOMING);
     }
-
-    public Relationship<Resource> getRelationshipTo(Resource resource, String relationName) {
-        Set<Relationship<Resource>> relations = getRelationships(resource, relationName, null);
-        Relationship<Resource> result = null;
-        Iterator<Relationship<Resource>> i = relations.iterator();
+    
+    public Set<Resource> getChildren(boolean recursive) {
+        Set<Resource> children = new HashSet<Resource>();
+        StopEvaluator stopEvaluator;
+        if(recursive) {
+            stopEvaluator = StopEvaluator.END_OF_GRAPH;
+        }else {
+            stopEvaluator = new StopEvaluator() {
+                public boolean isStopNode(TraversalPosition currentPos) {
+                    return currentPos.depth() >= 1;
+                }
+            };
+        }
+        Traverser relationTraverser = getUnderlyingState().traverse(Traverser.Order.BREADTH_FIRST,
+            stopEvaluator, ReturnableEvaluator.ALL_BUT_START_NODE,
+            DynamicRelationshipType.withName(RelationshipTypes.CONTAINS), Direction.OUTGOING.toNeo4jDir());
+        for (Node related : relationTraverser) {
+            children.add(graphDatabaseContext.createEntityFromState(related,Resource.class));
+        }
+        return children;
+    }
+     
+    public boolean hasChild(Resource resource,boolean recursive) {
+        if(getChildren(recursive).contains(resource)) {
+            return true;
+        }
+        return false;
+    }
+    
+    public ResourceRelationship getRelationshipTo(Resource resource, String relationName) {
+        Set<ResourceRelationship> relations = convertRelationships(resource, getUnderlyingState().getRelationships(
+            DynamicRelationshipType.withName(relationName)));
+        ResourceRelationship result = null;
+        Iterator<ResourceRelationship> i = relations.iterator();
 
         if (i.hasNext()) {
             result = i.next();
@@ -516,5 +539,13 @@ public class Resource {
     public boolean isInAsyncDeleteState() {
         // TODO remove
         return false;
+    }
+    
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Id: ").append(getId()).append(", ");
+        sb.append("Name: ").append(getName()).append(", ");
+        sb.append("Type: ").append(getType().getName());
+        return sb.toString();
     }
 }
