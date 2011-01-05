@@ -34,8 +34,11 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.hibernate.NonUniqueObjectException;
@@ -58,6 +61,7 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -631,21 +635,16 @@ public class PlatformManagerTest
 
     @Test
     public void testGetPlatformTypeCounts() {
-        List<Object[]> counts = platformManager.getPlatformTypeCounts();
-        List<Object[]> actuals = new ArrayList<Object[]>(10);
+        Map<String,Integer> counts = platformManager.getPlatformTypeCounts();
+        Map<String,Integer> actuals = new LinkedHashMap<String,Integer>();
         // Add the Linux testPlatformType as the result is sorted
-        actuals.add(0, new Object[] { testPlatformTypes.get(9).getName(),1l});
-        actuals.add(1, new Object[] {"PluginTestPlatform",0l});
+        actuals.put(testPlatformTypes.get(9).getName(),1);
+        actuals.put("PluginTestPlatform",0);
         for (int i = 2; i <= 10; i++) {
             // Add platform Type name and count (here count is always 1)
-            actuals.add(i,
-                new Object[] { testPlatformTypes.get(i - 2).getName(),1l });
+            actuals.put(testPlatformTypes.get(i - 2).getName(),1 );
         }
-        for (int i = 0; i <= 10; i++) {
-            String platformName = (String)actuals.get(i)[0];
-            assertEquals(platformName,(String) counts.get(i)[0]);
-            assertEquals(((Long) actuals.get(i)[1]),(Long) counts.get(i)[1]);
-        }
+        assertEquals(actuals,counts);
     }
 
     @Test
