@@ -630,7 +630,9 @@ public class RuntimeReportProcessor {
                 flushCurrentSession();
             }
         }
-        zEventManager.enqueueEventAfterCommit(new AgentScheduleSyncZevent(toSchedule));
+        if(!(toSchedule.isEmpty())) {
+            zEventManager.enqueueEventAfterCommit(new AgentScheduleSyncZevent(toSchedule));
+        }
         log.info("Completed merging server: " + reportingServer.getName() + " into inventory");
     }
 
