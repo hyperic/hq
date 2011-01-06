@@ -65,6 +65,7 @@ import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.hq.product.server.session.PluginDAO;
 import org.hyperic.hq.reference.RelationshipTypes;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -92,13 +93,14 @@ public class ServiceManagerImpl implements ServiceManager {
     private PluginDAO pluginDAO;
     private ServiceFactory serviceFactory;
     private ResourceGroupManager resourceGroupManager;
+    private ZeventEnqueuer zeventEnqueuer;
 
     @Autowired
     public ServiceManagerImpl(PermissionManager permissionManager,
                               ResourceManager resourceManager,
                               AuthzSubjectManager authzSubjectManager, PluginDAO pluginDAO,
                               ServiceFactory serviceFactory,
-                              ResourceGroupManager resourceGroupManager) {
+                              ResourceGroupManager resourceGroupManager, ZeventEnqueuer zeventEnqueuer) {
      
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
@@ -106,6 +108,7 @@ public class ServiceManagerImpl implements ServiceManager {
         this.pluginDAO = pluginDAO;
         this.serviceFactory = serviceFactory;
         this.resourceGroupManager = resourceGroupManager;
+        this.zeventEnqueuer = zeventEnqueuer;
     }
     
     private Resource create(AuthzSubject subject,ResourceType type, Resource parent, String name, String desc,
@@ -148,7 +151,10 @@ public class ServiceManagerImpl implements ServiceManager {
         AppdefDuplicateNameException {
         Resource parent =resourceManager.findResourceById(parentId);
         ResourceType serviceType = resourceManager.findResourceTypeById(serviceTypeId);
-        return serviceFactory.createService(create(subject, serviceType, parent ,name, desc, location));
+        Service service = serviceFactory.createService(create(subject, serviceType, parent ,name, desc, location));
+        ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, service.getEntityId());
+        zeventEnqueuer.enqueueEventAfterCommit(zevent);
+        return service;
     }
 
    
