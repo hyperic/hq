@@ -1,7 +1,7 @@
 From 76167e272219562217f5c2957f1a6c109d7cd094 Mon Sep 17 00:00:00 2001
 From: Jennifer Hickey <jennifer.hickey@springsource.com>
 Date: Mon, 13 Dec 2010 15:43:47 -0800
-Subject: [PATCH] Added commit only if new tx (to support nested @Transactional)
+Subject: [PATCH 1/2] Added commit only if new tx (to support nested @Transactional)
 
 ---
  .../transaction/NaiveDoubleTransactionManager.java |   30 ++++++++++---------
@@ -48,6 +48,71 @@ index 60bd3c2..f18d251 100644
  		} finally {
  			status.remove(ts);
  		}
+-- 
+1.6.4.4
+
+
+From 059fc761366f0664beed54f524dbdc1561624ead Mon Sep 17 00:00:00 2001
+From: Jennifer Hickey <jennifer.hickey@springsource.com>
+Date: Thu, 6 Jan 2011 10:40:53 -0800
+Subject: [PATCH 2/2] Activate transaction synchronizations only after the second tx is committed
+
+---
+ .../transaction/NaiveDoubleTransactionManager.java |   22 ++++++++++++++-----
+ 1 files changed, 16 insertions(+), 6 deletions(-)
+
+diff --git a/spring-data-commons-core/src/main/java/org/springframework/persistence/transaction/NaiveDoubleTransactionManager.java b/spring-data-commons-core/src/main/java/org/springframework/persistence/transaction/NaiveDoubleTransactionManager.java
+index f18d251..b3456b3 100644
+--- a/spring-data-commons-core/src/main/java/org/springframework/persistence/transaction/NaiveDoubleTransactionManager.java
++++ b/spring-data-commons-core/src/main/java/org/springframework/persistence/transaction/NaiveDoubleTransactionManager.java
+@@ -24,9 +24,11 @@ public class NaiveDoubleTransactionManager implements PlatformTransactionManager
+ 	public void commit(TransactionStatus ts) throws TransactionException {
+ 		try {
+     		if(ts.isNewTransaction()) {
+-    		    final TransactionStatus tsb = copyTransactionStatus(status.get(ts));
++    		    final TransactionStatus tsa = copyTransactionStatusForFirst(ts);
++    		    final TransactionStatus tsb = copyTransactionStatusForSecond(status.get(ts));
++    		  
+         		try {
+-        			a.commit(ts);
++        			a.commit(tsa);
+         		}
+         		catch (Throwable t) {
+         			System.err.println("Continuing to commit tx despite this:" + t);
+@@ -44,11 +46,18 @@ public class NaiveDoubleTransactionManager implements PlatformTransactionManager
+ 		}
+ 	}
+ 
+-	private TransactionStatus copyTransactionStatus(TransactionStatus ts) {
++	private TransactionStatus copyTransactionStatusForSecond(TransactionStatus ts) {
+ 		Object t = (ts instanceof DefaultTransactionStatus) ? ((DefaultTransactionStatus) ts).getTransaction() : null;
+-		return new DefaultTransactionStatus(t,ts.isNewTransaction(), false,  false, false, null);
++		return new DefaultTransactionStatus(t,ts.isNewTransaction(), ((DefaultTransactionStatus)ts).isNewSynchronization(),  false, false, null);
+ 	}
+ 	
++	private TransactionStatus copyTransactionStatusForFirst(TransactionStatus ts) {
++        Object t = (ts instanceof DefaultTransactionStatus) ? ((DefaultTransactionStatus) ts).getTransaction() : null;
++        //Set new synchronization to false so trans sync won't kick in until 2nd tx committed
++        return  new DefaultTransactionStatus(t,ts.isNewTransaction(), false,  ((DefaultTransactionStatus)ts).isReadOnly(),  
++            ((DefaultTransactionStatus)ts).isDebug(),  ((DefaultTransactionStatus)ts).getSuspendedResources());
++    }
++	
+ 	public TransactionStatus getTransaction(TransactionDefinition td)
+ 			throws TransactionException {
+ 		TransactionStatus atx = a.getTransaction(td);
+@@ -58,9 +67,10 @@ public class NaiveDoubleTransactionManager implements PlatformTransactionManager
+ 	}
+ 
+ 	public void rollback(TransactionStatus ts) throws TransactionException {
+-		final TransactionStatus tsb = copyTransactionStatus(status.remove(ts));
++	    final TransactionStatus tsa = copyTransactionStatusForFirst(ts);
++        final TransactionStatus tsb = copyTransactionStatusForSecond(status.remove(ts));
+ 		try {
+-			a.rollback(ts);
++			a.rollback(tsa);
+ 		}
+ 		catch (Throwable t) {
+ 			System.err.println("Continuing to rollback tx despite this:" + t);
 -- 
 1.6.4.4
 
