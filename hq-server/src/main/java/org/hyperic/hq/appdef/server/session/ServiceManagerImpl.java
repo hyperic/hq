@@ -131,6 +131,7 @@ public class ServiceManagerImpl implements ServiceManager {
         s.setProperty(ServiceFactory.MODIFIED_TIME,System.currentTimeMillis());
         s.setProperty(AppdefResource.SORT_NAME, name.toUpperCase());
         s.setOwner(subject);
+        s.setAgent(parent.getAgent());
         parent.relateTo(s, RelationshipTypes.SERVICE);
         parent.relateTo(s, RelationshipTypes.CONTAINS);
         return s;
@@ -786,13 +787,20 @@ public class ServiceManagerImpl implements ServiceManager {
     	final boolean debug = log.isDebugEnabled();
         StopWatch watch = new StopWatch();
         AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-
+        
+        
         // First, put all of the infos into a Hash
         HashMap<String, ServiceTypeInfo> infoMap = new HashMap<String, ServiceTypeInfo>();
+        Set<String> names = new HashSet<String>();
         for (int i = 0; i < infos.length; i++) {
             infoMap.put(infos[i].getName(), infos[i]);
+            names.add(infos[i].getServerName());
         }
-        
+        HashMap<String, ResourceType> serverTypes = new HashMap<String, ResourceType>(names.size());
+        for(String serverName: names) {
+            serverTypes.put(serverName, resourceManager.findResourceTypeByName(serverName));
+        }
+
         try {
             Collection<ResourceType> serviceTypes = getAllServiceResourceTypes();
             Set<ResourceType> curServices = new HashSet<ResourceType>();
@@ -827,17 +835,20 @@ public class ServiceManagerImpl implements ServiceManager {
                     // Could be null if servertype was deleted/updated by plugin
                     ResourceType svrtype = serviceType.getResourceTypeTo(RelationshipTypes.SERVICE);
 
-                    if (!sinfo.getServerName().equals(svrtype.getName())) {
+                    if (svrtype == null || !sinfo.getServerName().equals(svrtype.getName())) {
                         // Lookup the new server type
-                        ResourceType newServerType = resourceManager.findResourceTypeByName(sinfo.getServerName());
-                        if (newServerType == null) {
-                            throw new NotFoundException("Unable to find server " +
-                                                            sinfo.getServerName() +
-                                                            " on which service '" +
-                                                            serviceType.getName() + "' relies");
+                        if (null == (svrtype = serverTypes.get(sinfo.getServerName()))) {
+                            svrtype = resourceManager.findResourceTypeByName(sinfo.getServerName());
+                            if (svrtype == null) {
+                                throw new NotFoundException("Unable to find server " +
+                                                                sinfo.getServerName() +
+                                                                " on which service '" +
+                                                                serviceType.getName() + "' relies");
+                            }
+                            serverTypes.put(svrtype.getName(), svrtype);
                         }
                         serviceType.removeRelationship(svrtype, RelationshipTypes.SERVICE);
-                        newServerType.relateTo(svrtype, RelationshipTypes.SERVICE);
+                        svrtype.relateTo(serviceType, RelationshipTypes.SERVICE);
                     }
                 }
             }
@@ -845,15 +856,19 @@ public class ServiceManagerImpl implements ServiceManager {
             // Now create the left-overs
             final Set<String> creates = new HashSet<String>();
             for (final ServiceTypeInfo sinfo : infoMap.values()) {
+                ResourceType servType;
+                if (null == (servType = serverTypes.get(sinfo.getServerName()))) {
+                    servType = resourceManager.findResourceTypeByName(sinfo.getServerName());
+                    if (servType == null) {
+                        throw new NotFoundException("Unable to find server " +
+                                                        sinfo.getServerName() +
+                                                        " on which service '" +
+                                                        sinfo.getName() + "' relies");
+                    }
+                    serverTypes.put(servType.getName(), servType);
+                }
                 if (creates.contains(sinfo.getName())) {
                     continue;
-                }
-                ResourceType servType= resourceManager.findResourceTypeByName(sinfo.getServerName());
-                if (servType == null) {
-                    throw new NotFoundException("Unable to find server " +
-                                                    sinfo.getServerName() +
-                                                    " on which service '" +
-                                                    sinfo.getName() + "' relies");
                 }
                 creates.add(sinfo.getName());
                 if (debug) watch.markTimeBegin("create");
