@@ -26,8 +26,9 @@
 
 package org.hyperic.hq.authz.server.session;
 
+import org.hyperic.hq.ApplicationEvent;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
-import org.springframework.context.ApplicationEvent;
+
 
 /**
  * Indicates that a group has been created

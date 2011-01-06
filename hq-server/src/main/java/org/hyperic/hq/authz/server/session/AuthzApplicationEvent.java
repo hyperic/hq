@@ -26,7 +26,9 @@
 
 package org.hyperic.hq.authz.server.session;
 
-import org.springframework.context.ApplicationEvent;
+import org.hyperic.hq.ApplicationEvent;
+
+
 /**
  * Abstract class for any events in the Authz subsystem
  * @author jhickey

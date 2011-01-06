@@ -26,8 +26,9 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import org.hyperic.hq.ApplicationEvent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.springframework.context.ApplicationEvent;
+
 
 /**
  * Indicates that metrics have been 

@@ -30,25 +30,23 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.ApplicationEvent;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceDeleteRequestedEvent;
 import org.hyperic.hq.authz.server.session.SubjectDeleteRequestedEvent;
 import org.hyperic.hq.common.shared.AuditManager;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  *
  */
 @Service
 @Transactional
-public class AuditManagerImpl implements AuditManager, ApplicationListener<ApplicationEvent> {
+public class AuditManagerImpl implements AuditManager, ApplicationListener<ApplicationEvent>  {
     private final Log log = LogFactory.getLog(AuditManagerImpl.class);
     private static final ThreadLocal<Audit> CONTAINERS = new ThreadLocal<Audit>();
 
@@ -239,6 +237,7 @@ public class AuditManagerImpl implements AuditManager, ApplicationListener<Appli
     private void handleSubjectDelete(AuthzSubject s) {
         auditDao.handleSubjectDelete(s);
     }
+    
 
     public void onApplicationEvent(ApplicationEvent event) {
         if (event instanceof ResourceDeleteRequestedEvent) {

@@ -26,8 +26,9 @@
 
 package org.hyperic.hq.authz.server.session;
 
+import org.hyperic.hq.ApplicationEvent;
 import org.hyperic.hq.inventory.domain.Resource;
-import org.springframework.context.ApplicationEvent;
+
 
 /**
  * Sent before resource deletion

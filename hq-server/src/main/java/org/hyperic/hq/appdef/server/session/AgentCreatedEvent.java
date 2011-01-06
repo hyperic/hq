@@ -26,8 +26,9 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import org.hyperic.hq.ApplicationEvent;
 import org.hyperic.hq.appdef.Agent;
-import org.springframework.context.ApplicationEvent;
+
 /**
  * Indicates that an agent has been created
  * @author jhickey

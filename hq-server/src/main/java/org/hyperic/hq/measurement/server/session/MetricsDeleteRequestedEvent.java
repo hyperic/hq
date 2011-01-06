@@ -28,7 +28,9 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.util.Collection;
 
-import org.springframework.context.ApplicationEvent;
+import org.hyperic.hq.ApplicationEvent;
+
+
 
 /**
  * Sent before metrics are deleted.

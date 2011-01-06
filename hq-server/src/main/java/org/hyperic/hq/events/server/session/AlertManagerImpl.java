@@ -39,6 +39,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Hibernate;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.ApplicationEvent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
@@ -71,7 +72,6 @@ import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,7 +82,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class AlertManagerImpl implements AlertManager,
-    ApplicationListener<ApplicationEvent> {
+    ApplicationListener<SubjectDeleteRequestedEvent> {
 
     private AlertPermissionManager alertPermissionManager;
 
@@ -143,10 +143,8 @@ public class AlertManagerImpl implements AlertManager,
         concurrentStatsCollector.register(ConcurrentStatsCollector.FIRE_ALERT_TIME);
     }
 
-    public void onApplicationEvent(ApplicationEvent event) {
-        if (event instanceof SubjectDeleteRequestedEvent) {
-            subjectRemoved(((SubjectDeleteRequestedEvent) event).getSubject());
-        }
+    public void onApplicationEvent(SubjectDeleteRequestedEvent event) {
+        subjectRemoved(((SubjectDeleteRequestedEvent) event).getSubject());
     }
     
     private void subjectRemoved(AuthzSubject toDelete) {
