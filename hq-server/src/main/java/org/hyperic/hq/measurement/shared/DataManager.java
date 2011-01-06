@@ -42,14 +42,7 @@ import org.hyperic.util.pager.PageList;
  * Local interface for DataManager.
  */
 public interface DataManager {
-    /**
-     * Save the new MetricValue to the database
-     * @param dp the new MetricValue
-     * @throws NumberFormatException if the value from the
-     *         DataPoint.getMetricValue() cannot instantiate a BigDecimal
-     */
-    public void addData(Integer mid, MetricValue mv, boolean overwrite);
-
+   
     /**
      * Write metric data points to the DB with transaction
      * @param data a list of {@link DataPoint}s
@@ -58,17 +51,6 @@ public interface DataManager {
      */
     public boolean addData(List<DataPoint> data);
 
-    /**
-     * Write metric datapoints to the DB without transaction
-     * @param data a list of {@link DataPoint}s
-     * @param overwrite If true, attempt to over-write values when an insert of
-     *        the data fails (i.e. it already exists). You may not want to
-     *        over-write values when, for instance, the back filler is inserting
-     *        data.
-     * @throws NumberFormatException if the value from the
-     *         DataPoint.getMetricValue() cannot instantiate a BigDecimal
-     */
-    public void addData(List<DataPoint> data, boolean overwrite);
 
     /**
      * Fetch the list of historical data points given a begin and end time

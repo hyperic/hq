@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,7 +64,6 @@ import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -126,14 +126,12 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
             return;
         }
        
-        final ArrayList<AppdefEntityID> aeids = new ArrayList<AppdefEntityID>(resources.size()+1);
+        final Set<AppdefEntityID> aeids = new HashSet<AppdefEntityID>(resources.size()+1);
         for (final Resource resource : resources ) {
             if (resource == null || resource.isInAsyncDeleteState()) {
                 continue;
             }
             final Set<Resource> children= resource.getChildren(true);
-           
-            aeids.ensureCapacity(aeids.size()+children.size()+1);
             aeids.add(AppdefUtil.newAppdefEntityId(resource));
             for (Resource child: children ) { 
                 if (child == null || child.isInAsyncDeleteState()) {
@@ -184,7 +182,8 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
     /**
      * @param eids List<AppdefEntityID>
      */
-    @Transactional(propagation=Propagation.NOT_SUPPORTED, readOnly=true)
+    //TODO was propagation not supported - any benefit to suspending tx?
+    @Transactional(readOnly=true)
     public void scheduleEnabled(Agent agent, Collection<AppdefEntityID> eids) throws MonitorAgentException {
         final StopWatch watch = new StopWatch();
         final boolean debug = log.isDebugEnabled();

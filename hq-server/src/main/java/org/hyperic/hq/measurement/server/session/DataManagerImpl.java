@@ -80,7 +80,6 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -232,24 +231,7 @@ public class DataManagerImpl implements DataManager {
             throw new IllegalArgumentException(ERR_INTERVAL);
     }
 
-    /**
-     * Save the new MetricValue to the database
-     * 
-     * @param dp the new MetricValue
-     * @throws NumberFormatException if the value from the
-     *         DataPoint.getMetricValue() cannot instantiate a BigDecimal
-     * 
-     * 
-     */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void addData(Integer mid, MetricValue mv, boolean overwrite) {
-
-        Measurement meas = measurementManager.getMeasurement(mid);
-        List<DataPoint> pts = Collections.singletonList(new DataPoint(meas.getId(), mv));
-
-        addData(pts, overwrite);
-    }
-
+    
     /**
      * Write metric data points to the DB with transaction
      * 
@@ -259,7 +241,8 @@ public class DataManagerImpl implements DataManager {
      * 
      * 
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    //TODO this used to be requires new propagation, which only matters w/path from SyncDataInserter
+    //may need to re-organize ReportProcessor handleMeasurementReport
     public boolean addData(List<DataPoint> data) {
         if (shouldAbortDataInsertion(data)) {
             return true;
@@ -329,66 +312,6 @@ public class DataManagerImpl implements DataManager {
             DBUtil.closeConnection(LOG_CTX, conn);
         }
         return succeeded;
-    }
-
-    /**
-     * Write metric datapoints to the DB without transaction
-     * 
-     * @param data a list of {@link DataPoint}s
-     * @param overwrite If true, attempt to over-write values when an insert of
-     *        the data fails (i.e. it already exists). You may not want to
-     *        over-write values when, for instance, the back filler is inserting
-     *        data.
-     * @throws NumberFormatException if the value from the
-     *         DataPoint.getMetricValue() cannot instantiate a BigDecimal
-     * 
-     * 
-     */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void addData(List<DataPoint> data, boolean overwrite) {
-        /**
-         * We have to account for 2 types of metric data insertion here: 1 - New
-         * data, using 'insert' 2 - Old data, using 'update'
-         * 
-         * We optimize the amount of DB roundtrips here by executing in batch,
-         * however there are some serious gotchas:
-         * 
-         * 1 - If the 'insert' batch update fails, a BatchUpdateException can be
-         * thrown instead of just returning an error within the executeBatch()
-         * array. 2 - This is further complicated by the fact that some drivers
-         * will throw the exception at the first instance of an error, and some
-         * will continue with the rest of the batch.
-         */
-        if (shouldAbortDataInsertion(data)) {
-            return;
-        }
-
-        log.debug("Attempting to insert/update data outside a transaction.");
-
-        data = enforceUnmodifiable(data);
-
-        Connection conn = safeGetConnection();
-
-        if (conn == null) {
-            log.debug("Inserting/Updating data outside a transaction failed.");
-            return;
-        }
-
-        try {
-            boolean autocommit = conn.getAutoCommit();
-
-            try {
-                conn.setAutoCommit(true);
-                addDataWithCommits(data, overwrite, conn);
-            } finally {
-                conn.setAutoCommit(autocommit);
-            }
-        } catch (SQLException e) {
-            log.debug("Inserting/Updating data outside a transaction failed "
-                      + "because autocommit management failed.", e);
-        } finally {
-            DBUtil.closeConnection(LOG_CTX, conn);
-        }
     }
 
     private List<DataPoint> addDataWithCommits(List<DataPoint> data, boolean overwrite,
