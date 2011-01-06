@@ -78,7 +78,6 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.tanukisoftware.wrapper.WrapperActionServer;
 
 /**
  * This class is responsible for managing Server objects in appdef and their
@@ -106,6 +105,7 @@ public class ServerManagerImpl implements ServerManager {
     private ResourceAuditFactory resourceAuditFactory;
     private ServerFactory serverFactory;
     private ServiceManager serviceManager;
+    private ServiceFactory serviceFactory;
 
     @Autowired
     public ServerManagerImpl(PermissionManager permissionManager,  ResourceManager resourceManager,
@@ -113,7 +113,7 @@ public class ServerManagerImpl implements ServerManager {
                              AuthzSubjectManager authzSubjectManager, ResourceGroupManager resourceGroupManager,
                              ZeventEnqueuer zeventManager, ResourceAuditFactory resourceAuditFactory,
                              PluginDAO pluginDAO, ServerFactory serverFactory,
-                             ServiceManager serviceManager) {
+                             ServiceManager serviceManager, ServiceFactory serviceFactory) {
 
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
@@ -125,6 +125,16 @@ public class ServerManagerImpl implements ServerManager {
         this.pluginDAO = pluginDAO;
         this.serverFactory = serverFactory;
         this.serviceManager = serviceManager;
+        this.serviceFactory = serviceFactory;
+    }
+    
+    private Server toServer(Resource resource) {
+        Server server = serverFactory.createServer(resource);
+        Set<Resource> services = resource.getResourcesFrom(RelationshipTypes.SERVICE);
+        for(Resource service: services) {
+            server.addService(serviceFactory.createService(service));
+        }
+        return server;
     }
 
     /**
@@ -146,7 +156,7 @@ public class ServerManagerImpl implements ServerManager {
             //try {
                 //TODO perm check
                 //permissionManager.check(who.getId(), typeId, s.getId(), op.getId());
-                res.add(serverFactory.createServer(s));
+                res.add(toServer(s));
             //} catch (PermissionException e) {
                 // Ok
             //}
@@ -285,7 +295,7 @@ public class ServerManagerImpl implements ServerManager {
             Resource server = create(subject,sValue, platform);
 
             //TODO abstract to ResourceManager when we can send events w/out AppdefEntityIDs
-            Server serv = serverFactory.createServer(server);
+            Server serv = toServer(server);
             ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, serv.getEntityId());
             zeventManager.enqueueEventAfterCommit(zevent);
 
@@ -459,7 +469,7 @@ public class ServerManagerImpl implements ServerManager {
         if(server == null) {
             return null;
         }
-        return serverFactory.createServer(server);
+        return toServer(server);
     }
 
     /**
@@ -488,7 +498,7 @@ public class ServerManagerImpl implements ServerManager {
         if(serverResource == null) {
             return null;
         }
-        return serverFactory.createServer(serverResource);
+        return toServer(serverResource);
     }
 
     /**
@@ -522,7 +532,7 @@ public class ServerManagerImpl implements ServerManager {
         Collection<Resource> relatedServers = platResource.getResourcesFrom(RelationshipTypes.SERVER);
         for(Resource server: relatedServers) {
             if(st.equals(server.getType())) {
-                servers.add(serverFactory.createServer(server));
+                servers.add(toServer(server));
             }
         }
         return servers;
@@ -533,7 +543,7 @@ public class ServerManagerImpl implements ServerManager {
         Collection<Resource> relatedServers = platform.getResourcesFrom(RelationshipTypes.SERVER);
         for(Resource server: relatedServers) {
             if(serverType.equals(server.getType())) {
-                servers.add(serverFactory.createServer(server));
+                servers.add(toServer(server));
             }
         }
         return servers;
@@ -543,7 +553,7 @@ public class ServerManagerImpl implements ServerManager {
         List<Server> servers = new ArrayList<Server>();
         Collection<Resource> relatedServers = platform.getResourcesFrom(RelationshipTypes.SERVER);
         for(Resource server: relatedServers) {
-                servers.add(serverFactory.createServer(server));
+                servers.add(toServer(server));
         }
         //TODO order
         return servers;
@@ -612,7 +622,7 @@ public class ServerManagerImpl implements ServerManager {
         Resource s = svc.getResourceTo(RelationshipTypes.SERVICE);
         //TODO perm check
         //permissionManager.checkViewPermission(subject, s.getId());
-        return serverFactory.createServer(s).getServerValue();
+        return toServer(s).getServerValue();
     }
 
     /**
@@ -814,7 +824,7 @@ public class ServerManagerImpl implements ServerManager {
         while (it.hasNext()) {
             Resource appService = it.next();
             //TODO making assumption that all group members are services here
-                Server server = serverFactory.createServer(appService.getResourceTo(RelationshipTypes.SERVICE));
+                Server server = toServer(appService.getResourceTo(RelationshipTypes.SERVICE));
                 
                     Integer serverId = server.getId();
 
@@ -931,7 +941,7 @@ public class ServerManagerImpl implements ServerManager {
             existing.setMTime(new Long(System.currentTimeMillis()));
             trimStrings(existing);
 
-            if (serverFactory.createServer(server).matchesValueObject(existing)) {
+            if (toServer(server).matchesValueObject(existing)) {
                 log.debug("No changes found between value object and entity");
             } else {
                 if (!existing.getName().equals(server.getName())) {
@@ -941,7 +951,7 @@ public class ServerManagerImpl implements ServerManager {
 
                 updateServer(existing,server);
             }
-            return serverFactory.createServer(server);
+            return toServer(server);
         } catch (ObjectNotFoundException e) {
             throw new ServerNotFoundException(existing.getId(), e);
         }

@@ -146,6 +146,8 @@ public class PlatformManagerImpl implements PlatformManager {
     private ServerManager serverManager;
     
     private ServiceManager serviceManager;
+    
+    private ServerFactory serverFactory;
 
     @Autowired
     public PlatformManagerImpl(
@@ -156,7 +158,7 @@ public class PlatformManagerImpl implements PlatformManager {
                                ZeventEnqueuer zeventManager,
                                ResourceAuditFactory resourceAuditFactory, PluginDAO pluginDAO,
                                ServerManager serverManager, PlatformFactory platformFactory,
-                               ServiceManager serviceManager) {
+                               ServiceManager serviceManager, ServerFactory serverFactory) {
         this.permissionManager = permissionManager;
         this.agentDAO = agentDAO;
         this.resourceManager = resourceManager;
@@ -169,6 +171,16 @@ public class PlatformManagerImpl implements PlatformManager {
         this.serverManager = serverManager;
         this.platformFactory = platformFactory;
         this.serviceManager = serviceManager;
+        this.serverFactory = serverFactory;
+    }
+    
+    private Platform toPlatform(Resource resource) {
+        Platform platform = platformFactory.createPlatform(resource);
+        Set<Resource> servers = resource.getResourcesFrom(RelationshipTypes.SERVER);
+        for(Resource server: servers) {
+            platform.addServer(serverFactory.createServer(server));
+        }
+        return platform;
     }
 
     // TODO resolve circular dependency
@@ -414,7 +426,7 @@ public class PlatformManagerImpl implements PlatformManager {
         p.setAgent(agent);
         p.setOwner(owner);
         for (IpValue ipv : pv.getAddedIpValues()) {
-            addIp(platformFactory.createPlatform(p), ipv.getAddress(), ipv.getNetmask(), ipv.getMACAddress());
+            addIp(toPlatform(p), ipv.getAddress(), ipv.getNetmask(), ipv.getMACAddress());
         }
         resourceManager.findRootResource().relateTo(p, RelationshipTypes.PLATFORM);
         resourceManager.findRootResource().relateTo(p, RelationshipTypes.CONTAINS);
@@ -490,7 +502,7 @@ public class PlatformManagerImpl implements PlatformManager {
             }
             ResourceType platType = resourceManager.findResourceTypeById(platformTypeId);
             Resource platform = create(subject,pValue, agent, platType);
-            Platform plat = platformFactory.createPlatform(platform);
+            Platform plat = toPlatform(platform);
 
             // Send resource create event
             ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, plat.getEntityId());
@@ -540,7 +552,7 @@ public class PlatformManagerImpl implements PlatformManager {
         
 
         // Send resource create event.  TODO abstract to ResourceManager when we don't need to use entity ID
-        Platform plat = platformFactory.createPlatform(platform);
+        Platform plat = toPlatform(platform);
         ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, plat.getEntityId());
         zeventManager.enqueueEventAfterCommit(zevent);
 
@@ -611,7 +623,7 @@ public class PlatformManagerImpl implements PlatformManager {
         for (Iterator<Resource> i = platforms.iterator(); i.hasNext();) {
             Resource platform = i.next();
             if (viewable.contains(platform.getId())) {
-               plats.add(platformFactory.createPlatform(platform));
+               plats.add(toPlatform(platform));
             }
         }
 
@@ -649,7 +661,7 @@ public class PlatformManagerImpl implements PlatformManager {
             throw new PlatformNotFoundException(id);
         }
 
-        return platformFactory.createPlatform(platform);
+        return toPlatform(platform);
     }
     
     private Collection<Resource> getAllPlatforms() {
@@ -747,7 +759,7 @@ public class PlatformManagerImpl implements PlatformManager {
             throw new PlatformNotFoundException("platform not found for ai " + "platform: " +
                 aiPlatform.getId());
         }
-        return platformFactory.createPlatform(p);
+        return toPlatform(p);
     }
 
     /**
@@ -858,7 +870,7 @@ public class PlatformManagerImpl implements PlatformManager {
             return null;
         }
 
-        return platformFactory.createPlatform(p);
+        return toPlatform(p);
     }
 
     /**
@@ -938,7 +950,7 @@ public class PlatformManagerImpl implements PlatformManager {
         }
         // TODO perm check
         //permissionManager.checkViewPermission(subject, p.getId());
-        return platformFactory.createPlatform(p);
+        return toPlatform(p);
     }
 
     /**
@@ -992,7 +1004,7 @@ public class PlatformManagerImpl implements PlatformManager {
         }
         // TODO perm check
         //permissionManager.checkViewPermission(subject, p.getId());
-        return platformFactory.createPlatform(p).getPlatformValue();
+        return toPlatform(p).getPlatformValue();
     }
     
     private Resource findByServiceId(Integer serviceId) {
@@ -1060,7 +1072,7 @@ public class PlatformManagerImpl implements PlatformManager {
         Resource p = server.getResourceTo(RelationshipTypes.SERVER);
         //TODO perm check
         //permissionManager.checkViewPermission(subject, p.getId());
-        return platformFactory.createPlatform(p).getPlatformValue();
+        return toPlatform(p).getPlatformValue();
     }
 
     /**
@@ -1108,7 +1120,7 @@ public class PlatformManagerImpl implements PlatformManager {
         ArrayList<Platform> platforms = new ArrayList<Platform>();
         for (Resource platform : foundPlats) {
             if (authzPks.contains(platform.getId())) {
-                platforms.add(platformFactory.createPlatform(platform));
+                platforms.add(toPlatform(platform));
             }
         }
         return valuePager.seek(platforms, null);
@@ -1315,7 +1327,7 @@ public class PlatformManagerImpl implements PlatformManager {
         Set<Platform> viewablePlatforms = new HashSet<Platform>();
         for (Resource platform : platforms) {
             if (viewable.contains(platform.getId())) {
-                viewablePlatforms.add(platformFactory.createPlatform(platform));
+                viewablePlatforms.add(toPlatform(platform));
             }
         }
         return viewablePlatforms;
@@ -1342,7 +1354,7 @@ public class PlatformManagerImpl implements PlatformManager {
         trimStrings(existing);
 
         Resource plat = resourceManager.findResourceById(existing.getId());
-        Platform platform = platformFactory.createPlatform(plat);
+        Platform platform = toPlatform(plat);
         if (existing.getCpuCount() == null) {
             // cpu count is no longer an option in the UI
             existing.setCpuCount((Integer)plat.getProperty(PlatformFactory.CPU_COUNT));
@@ -1460,7 +1472,7 @@ public class PlatformManagerImpl implements PlatformManager {
                 updateAIp(curips, aIp);
             } else {
                 // looks like its a new one
-                addIp(platformFactory.createPlatform(platform), aIp.getAddress(), aIp.getNetmask(), aIp.getMACAddress());
+                addIp(toPlatform(platform), aIp.getAddress(), aIp.getNetmask(), aIp.getMACAddress());
             }
         }
         // finally update the platform
@@ -1900,7 +1912,7 @@ public class PlatformManagerImpl implements PlatformManager {
                 }
             }
             for(Resource resource: resources) {
-                platforms.add(platformFactory.createPlatform(resource));
+                platforms.add(toPlatform(resource));
             }
             return platforms;
         } catch (NotFoundException e) {
@@ -1922,7 +1934,7 @@ public class PlatformManagerImpl implements PlatformManager {
         Collection<Resource> resources = getAllPlatforms();
         for(Resource resource: resources) {
             if(resource.getAgent().equals(agt)) {
-                plats.add(platformFactory.createPlatform(resource));
+                plats.add(toPlatform(resource));
             }
         }
         if (plats.size() == 0) {

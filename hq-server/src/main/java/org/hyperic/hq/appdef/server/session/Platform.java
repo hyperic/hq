@@ -3,6 +3,7 @@ package org.hyperic.hq.appdef.server.session;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.Ip;
@@ -55,6 +56,10 @@ public class Platform
 
     public Collection<Server> getServers() {
         return servers;
+    }
+    
+    public void addServer(Server server) {
+        servers.add(server);
     }
 
     public PlatformType getPlatformType() {
