@@ -1,6 +1,6 @@
 open_source_licenses.txt
 
-Hyperic HQ 4.5.0
+Hyperic HQ 4.5.1
 Enterprise and Open Source Editions
 
 ===========================================================================
@@ -14498,4 +14498,4 @@ Source Files to you on a CD or equivalent physical medium.  This
 offer to obtain a copy of the Source Files is valid for three
 years from the date you acquired this Software product.
 
-[HYPERIC450GAKP101510]
+[HYPERIC451GAKP120910]

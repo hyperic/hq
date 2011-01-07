@@ -45,6 +45,7 @@ import org.hyperic.hq.hqapi1.HQApi;
 import org.hyperic.hq.product.DaemonDetector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.timer.StopWatch;
 
 public class VCenterDetector extends DaemonDetector {
 
@@ -156,11 +157,13 @@ public class VCenterDetector extends DaemonDetector {
     public List getServerResources(ConfigResponse platformConfig) 
         throws PluginException {
     
-        // only discover ESX hosts and VMs if a vCenter process exists
-        if (!getProcessResources(platformConfig).isEmpty()) {
-            AgentDaemon agent = AgentDaemon.getMainInstance();
-            discoverPlatforms(agent);
-        }
+        final AgentDaemon agent = AgentDaemon.getMainInstance();
+        final StopWatch watch = new StopWatch();
+        final boolean debug = _log.isDebugEnabled();
+        if (debug) watch.markTimeBegin("discoverPlatforms");
+        discoverPlatforms(agent);
+        if (debug) watch.markTimeEnd("discoverPlatforms");
+        if (debug) _log.debug(watch);
         
         // discover new vCenter servers
         return super.getServerResources(platformConfig);

@@ -24,7 +24,7 @@
   USA.
  -->
 <plugin name="vsphere" class="VSphereProductPlugin">
-	<config name="sdk">
+  <config name="sdk">
     <option name="url"
             description="vCenter sdk url"
             default="https://localhost/sdk"/>
@@ -433,10 +433,14 @@
    <!-- autoinventory plugin is created by individual product plugins -->
 
     <plugin type="measurement"
-            class="org.hyperic.hq.product.MeasurementPlugin"/>
-            
-    <plugin type="collector" class="org.hyperic.hq.plugin.vsphere.VCenterServerCollector"/>
+            class="org.hyperic.hq.plugin.vsphere.VCenterMeasurementPlugin"/>
 
-    <metric name="Availability" indicator="true"/>
+    <filter name="template"
+            value="vcenter:url=%url%,user=%user%,pass=%pass%:${alias}"/>
+    <metric name="Availability"
+            indicator="true"/>
+    <metric name="Connection Validation Time"
+            units="ms"
+            indicator="true"/>
   </server>
 </plugin>

@@ -30,6 +30,7 @@ import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.agent.AgentStreamPair;
+import org.hyperic.util.timer.StopWatch;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -48,6 +49,9 @@ import org.apache.commons.logging.LogFactory;
  */
 
 public class AgentConnection {
+    private static final Log log = LogFactory.getLog(AgentConnection.class);
+    private static final int MAX_RETRIES = 20;
+    private static final long SLEEP_TIME = 3000;
     private String   _agentAddress;
     private int      _agentPort;
     private AgentAPI _agentAPI;
@@ -76,22 +80,19 @@ public class AgentConnection {
         return _agentPort;
     }
 
-    protected Socket getSocket()
-        throws AgentConnectionException
-    {
+    protected Socket getSocket() throws IOException {
         Socket s;
-
         // Connect to the remote agent
         try {
             s = new Socket(_agentAddress, _agentPort);
         } catch(IOException exc){
-            String msg;
-
-            msg = "Error connecting to agent @ ("+ _agentAddress+ ":"+
-                _agentPort+"): " + exc.getMessage();
-            throw new AgentConnectionException(msg);
+            String msg = "Error connecting to agent @ ("+ _agentAddress+ 
+                         ":"+ _agentPort+"): " + exc.getMessage();
+            IOException toThrow = new IOException(msg);
+            // call initCause instead of constructor to be java 1.5 compat
+            toThrow.initCause(exc);
+            throw toThrow;
         }
-
         return s;
     }
 
@@ -114,9 +115,8 @@ public class AgentConnection {
                                         AgentRemoteValue arg)
         throws AgentRemoteException, AgentConnectionException
     {
-        AgentStreamPair sPair;
         if (_log.isDebugEnabled()) _log.debug(_agentAddress + ":" + _agentPort + " -> " + cmdName);
-        sPair = this.sendCommandHeaders(cmdName, cmdVersion, arg);
+        AgentStreamPair sPair = this.sendCommandHeaders(cmdName, cmdVersion, arg);
         return this.getCommandResult(sPair);
     }
 
@@ -138,36 +138,69 @@ public class AgentConnection {
      * @throws AgentConnectionException indicating a failure to connect to, or
      *                                  communicate with the agent.
      */
-
-    public AgentStreamPair sendCommandHeaders(String cmdName, int cmdVersion, 
-                                              AgentRemoteValue arg)
-        throws AgentConnectionException
-    {
-        DataOutputStream outputStream;
-        AgentStreamPair streamPair;
-        Socket s;
-
-        // Get the actual connection
-        s = this.getSocket();
-
-        // Send the command
+    public AgentStreamPair sendCommandHeaders(String cmdName, int cmdVersion, AgentRemoteValue arg)
+    throws AgentConnectionException {
+        final StopWatch watch = new StopWatch();
+        final boolean debug = log.isDebugEnabled();
         try {
-            streamPair = new SocketStreamPair(s, s.getInputStream(),
-                                              s.getOutputStream());
-            outputStream = new DataOutputStream(streamPair.getOutputStream());
-            outputStream.writeInt(_agentAPI.getVersion());
-            outputStream.writeInt(cmdVersion);
-            outputStream.writeUTF(cmdName);
-            arg.toStream(outputStream);
-            outputStream.flush();
+            if (debug) watch.markTimeBegin("cmdName=" + cmdName);
+            return sendCommandHeadersWithRetries(cmdName, cmdVersion, arg);
         } catch(IOException exc){
-            // Close the socket, ignoring errors
-            try { s.close(); } catch(IOException ignoreexc){}
-            throw new AgentConnectionException("Error sending argument: " +
-                                               exc.getMessage());
+            throw new AgentConnectionException(
+                "Error sending argument: " + exc.getMessage() + ", cmd=" + cmdName, exc);
+        } finally {
+            if (debug) watch.markTimeEnd("cmdName=" + cmdName);
+            if (debug) log.debug(watch);
         }
+    }
         
+    private AgentStreamPair sendCommandHeadersWithRetries(String cmdName, int cmdVersion,
+                                                          AgentRemoteValue arg)
+    throws IOException {
+        IOException ex = null;
+        AgentStreamPair streamPair = null;
+        Socket s = null;
+        int tries = 0;
+        while (tries++ < MAX_RETRIES) {
+            try {
+                s = getSocket();
+                streamPair = new SocketStreamPair(s, s.getInputStream(), s.getOutputStream());
+                DataOutputStream outputStream = new DataOutputStream(streamPair.getOutputStream());
+                outputStream.writeInt(_agentAPI.getVersion());
+                outputStream.writeInt(cmdVersion);
+                outputStream.writeUTF(cmdName);
+                arg.toStream(outputStream);
+                outputStream.flush();
+                return streamPair;
+            } catch (IOException e) {
+                ex = e;
+                close(s);
+            }
+            try {
+                Thread.sleep(SLEEP_TIME);
+            } catch (InterruptedException e) {
+                log.debug(e,e);
+            }
+        }
+        if (ex != null) {
+            IOException toThrow =
+                new IOException(ex.getMessage()+ ", retried " + MAX_RETRIES + " times");
+            // call initCause instead of constructor to be java 1.5 compat
+            toThrow.initCause(ex);
+            throw toThrow;
+        }
         return streamPair;
+    }
+    
+    private void close(Socket s) {
+        if (s == null) {
+            return;
+        }
+        try {
+            s.close();
+        } catch(IOException ex) {
+            log.debug(ex, ex);
+        }
     }
 
     /**
@@ -186,10 +219,7 @@ public class AgentConnection {
     public AgentRemoteValue getCommandResult(AgentStreamPair inStreamPair)
         throws AgentRemoteException, AgentConnectionException
     {
-        SocketStreamPair streamPair;
-
-        streamPair = (SocketStreamPair)inStreamPair;
-
+        SocketStreamPair streamPair = (SocketStreamPair)inStreamPair;
         // Get the response
         try {
             DataInputStream inputStream;
@@ -210,21 +240,28 @@ public class AgentConnection {
         } catch(EOFException exc){
             throw new AgentConnectionException("EOF received from Agent");
         } catch(IOException exc){
-            throw new AgentConnectionException("Error reading result: " +
-                                               exc.getMessage(), exc);
+            throw new AgentConnectionException("Error reading result: " + exc.getMessage(), exc);
         } finally {
-            try { 
-                streamPair.close(); 
-            } catch(IOException ignoreexc){
-            }
+            close(streamPair);
         }
     }
     
+    private void close(SocketStreamPair streamPair) {
+        if (streamPair == null) {
+            return;
+        }
+        try { 
+            streamPair.close(); 
+        } catch(IOException e){
+            log.debug(e,e);
+        }
+    }
+
     public void closeSocket() {
         try {
             getSocket().close();
-        } catch (AgentConnectionException e) {
         } catch (IOException e) {
+            log.debug(e,e);
         }
     }
 

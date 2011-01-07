@@ -16,92 +16,81 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Nov 10, 2008 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Dec 15, 2010 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <h1><a name="ui-Admin.Role.Permissions-EditingaRole%27sPropertiesandPermissions"></a>Editing a Role's Properties and Permissions</h1>
+				    <p>The screenshot below shows the permission matrix you define for a role. </p>
 
-<p><b>Available only in <font color="red">HQ Enterprise</font></b></p>
+<p><span class="image-wrap" style=""><img src="attachments/71828283/71925897.png" width="650" style="border: 0px solid black"/></span> </p>
 
+<h3><a name="ui-Admin.Role.Permissions-AboutPermissionLevels"></a>About Permission Levels </h3>
 
-
-
-<p>This screen allows users to edit the general properties and the permissions affiliated with a role. Users must have the Hyperic HQ Administrator privileges to do this. The <a href="http://support.hyperic.com/confluence/display/EVO/Role-Based+Dashboards" title="Role-Based Dashboards">dashboard</a> associated with this role is a constant.</p>
-
-
-
-
-
-<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
-
-
-
-
-
-<p><a name="ui-Admin.Role.Permissions-Tasks"></a></p>
-
-<h3><a name="ui-Admin.Role.Permissions-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h3>
-
-
-
-<p>On this screen, users can do the following tasks: </p>
-
-
-
-<p><b>To change the role's general properties:</b></p>
+<p>You assign one of the following permission levels to each type. </p>
 
 <ul>
-	<li>Change the <ins>Name</ins> or <ins>Description</ins> (optional) and click <span class="image-wrap" style=""><img src="attachments/71828510/71926253.gif" style="border: 0px solid black"/></span>.</li>
+	<li><b>None</b> &#45; No access at all to instances of the type.</li>
 </ul>
 
 
-
-
-<p><b>To change the role's owner:</b></p>
-
 <ul>
-	<li>Click <b>Change</b> next to <ins>Owner</ins>.</li>
+	<li><b>Read-Only</b> &#45; Allows role users to view instances of the type, but not create, edit, or delete them. For <b>Platforms</b>, <b>Servers</b>, <b>Services</b>, <b>Groups</b>, also enables:
+	<ul>
+		<li><b>Read-Only</b> access to alert definitions for the inventory type.</li>
+	</ul>
+	</li>
 </ul>
 
 
+<blockquote>
+<p>A role with <b>Read-Only</b> permission level does <b><em>not</em></b> have permissions to enable/disable/fix/ack alerts or control resources - these capabilities must be explicitly granted.</p></blockquote>
+
+<ul>
+	<li><b>Read-Write</b> &#45; Allows role users to view and edit instances of the type, but not create or delete them. For <b>Platforms</b>, <b>Servers</b>, <b>Services</b>, <b>Groups</b>, also gives:
+	<ul>
+		<li><b>Full</b> access to alert definitions for the inventory type,&nbsp;</li>
+		<li>Permission to manage alerts (enable/disable, fix, acknowledge) for the inventory type.</li>
+		<li>Permission to perform supported control operations on resources of the inventory type.</li>
+	</ul>
+	</li>
+</ul>
 
 
-<p><b>To change the permissions assignment of the role:</b></p>
+<ul>
+	<li><b>Full</b> &#45; Allows role users to create, edit, delete, and view instance of the type. For <b>Platforms</b>, <b>Servers</b>, <b>Services</b>, <b>Groups</b>, also gives:
+	<ul>
+		<li><b>Full</b> access to alert definitions for the inventory type.</li>
+		<li>Permission to manage alerts (enable/disable, fix, acknowledge) for the inventory type.</li>
+		<li>Permission to perform supported control operations on resources of the inventory type.</li>
+	</ul>
+	</li>
+</ul>
+ 
 
-<ol>
-	<li>Find the categories or inventory levels to which the role (and, by extension, the users assigned to the role) will have access and check the level of access the role will have.</li>
-</ol>
+<h3><a name="ui-Admin.Role.Permissions-PermissionTips"></a>Permission Tips </h3>
 
-
-<ol>
-	<li>Click <span class="image-wrap" style=""><img src="attachments/71828510/71926253.gif" style="border: 0px solid black"/></span>.</li>
-</ol>
-
-
-
-
-<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>The Final Step</b><br />Even if users are assigned to the role, the role's (and users') permissions will not apply to any specific resources until a group (of said specific resources) is also assigned to the role.</td></tr></table></div>
-
-
-
-<p><br class="atl-forced-newline" /></p>
-
-<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
-
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Next Steps</b></div><div class="panelContent">
-<p><a href="ui-Admin.Role.html" title="ui-Admin.Role">View and edit this role</a>, including assigning users and groups to it</p>
-</div></div>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Defining a Role's Permission Matrix</b><br />For roles that:
+<ul>
+	<li><b>Add resources to inventory and create alert definitions</b> &#45; use <b>Full</b> or <b>Read-Write</b> permission levels. These permission levels enable a role to also process fired alerts and control resources.</li>
+</ul>
 
 
-
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Related Information</b></div><div class="panelContent">
-<p>An explanation of <a href="http://support.hyperic.com/confluence/display/EVO/HQ+Users+and+Roles" title="HQ Users and Roles">role-based authorization in HQ</a></p>
-</div></div>
-</tr></tbody></table>
+<ul>
+	<li><b>Monitor resources, respond to alerts and control resources</b> &#45; use the <b>Read</b> permission level, and then grant <b>Fix/Ack</b> and <b>Control</b> capability, or both. This allows operations staff to respond to alerts, see the details of alert definitions, and perform routine or as-needed resource control tasks but <b>not</b> create/modify/delete resources and alert definitions.</li>
+</ul>
 
 
+<ul>
+	<li><b>Need visibility only</b> &#45; Use <b>Read</b> permission level for roles that view and monitor resources, but do not (1) create/modify/delete resources and alert definitions, or (2) response to alerts.</li>
+</ul>
+</td></tr></table></div>
 
-<h5><a name="ui-Admin.Role.Permissions-ReturntothelistofrolesuiAdmin.Role.List."></a>Return to the <a href="ui-Admin.Role.List.html" title="ui-Admin.Role.List">list of roles</a>.</h5>
+<h3><a name="ui-Admin.Role.Permissions-HowHQValidatesPlatformServerServicePermissionLevelAssignments"></a>How HQ Validates Platform-Server-Service Permission Level Assignments </h3>
+
+<p>HQ Enterprise does a bottom-up validation of the permission levels a role grants to Platforms, Servers, and Services. </p>
+
+<p>A role with <b>Full</b> access (which enables resource deletion) to an inventory type must have at least <b>Read-Only</b> access to the parent type (if there is one) and Full to the child type (if there is one). </p>
+
+<p>For example, <b>Full</b> access to Servers requires at least Read access to Platforms and Full access to Services.</p>
 
 				    					    <br/>
                         <div class="tabletitle">
@@ -110,7 +99,7 @@
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828510/71926253.gif">fb_ok.gif</a> (image/gif)
+                                <a href="attachments/72451234/72646809.gif">fb_ok.gif</a> (image/gif)
                                 <br/>
                                                     </div>
 				    
@@ -122,7 +111,7 @@
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 28, 2010 15:34</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Dec 15, 2010 14:34</font></td>
 		    </tr>
 	    </table>
     </body>
