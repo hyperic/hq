@@ -94,9 +94,11 @@ public class AgentDAO {
     }
     
     public int countUsed() {
-        return ((Number) entityManager.createQuery(
-            "select count(distinct a) from Resource r " + "join r.agent a").getSingleResult())
-            .intValue();
+        //TODO move this to ResourceDao and do graph traversal to find Agents.  Below won't work b/c nothing in RDBMS linking Resource to Agent
+//        return ((Number) entityManager.createQuery(
+//            "select count(distinct a) from Resource r " + "join r.agent a").getSingleResult())
+//            .intValue();
+        return 0;
     }
 
     public Agent findByIpAndPort(String address, int port) {

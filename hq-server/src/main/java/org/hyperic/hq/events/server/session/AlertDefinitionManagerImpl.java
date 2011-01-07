@@ -161,7 +161,8 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
         if (event instanceof ResourceDeleteRequestedEvent) {
             disassociateResource(((ResourceDeleteRequestedEvent) event).getResource());
         } else if (event instanceof MetricsEnabledEvent) {
-            metricsEnabled(((MetricsEnabledEvent) event).getEntityId());
+            //TODO we won't be automatically inheriting type-based alert defs anymore
+            //metricsEnabled(((MetricsEnabledEvent) event).getEntityId());
         }
     }
     
