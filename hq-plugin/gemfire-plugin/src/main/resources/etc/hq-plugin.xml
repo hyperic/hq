@@ -91,7 +91,6 @@
                 <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
                 <plugin type="collector" class="com.vmware.springsource.hyperic.plugin.gemfire.collectors.RegionCollector" />
                 <config type="measurement">
-                    <option name="memberID" description="Cache Server Id"/>
                     <option name="regionID" description="Region Name"/>
                 </config>
                 <properties>
@@ -119,7 +118,6 @@
                 <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
                 <plugin type="collector" class="com.vmware.springsource.hyperic.plugin.gemfire.collectors.GatewayCollector" />
                 <config type="measurement">
-                    <option name="memberID" description="Cache Server Id"/>
                     <option name="gatewayID" description="Gateway Id"/>
                 </config>
                 <filter name="template" value="GemFire:${JXMCFG},memberID=%memberID%,gatewayID=%gatewayID%:${alias}"/>
