@@ -50,45 +50,5 @@ public abstract class AppdefResource extends AppdefNamedBean
     protected void setResource(Resource resource) {
         _resource = resource;
     }
-
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.appdef.server.session.AppdefNamedBean#getName()
-     */
-    public String getName() {
-        if (_resource != null)
-            return _resource.getName();
-        return super.getName();
-    }
-
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.appdef.server.session.AppdefNamedBean#setName(java.lang.String)
-     */
-    public void setName(String name) {
-        if (_resource != null)
-            _resource.setName(name);
-        else
-            super.setName(name);
-    }
-
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.appdef.server.session.AppdefNamedBean#getSortName()
-     */
-    public String getSortName() {
-        //I believe Resource is only set for Platform, Server, Service
-      if (_resource != null && _resource.getProperty(SORT_NAME) != null) {
-          return (String)_resource.getProperty(SORT_NAME);
-      }
-        return super.getSortName();
-    }
-
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.appdef.server.session.AppdefNamedBean#setSortName(java.lang.String)
-     */
-    public void setSortName(String sortName) {
-        //I believe Resource is only set for Platform, Server, Service
-        if (_resource != null)
-            _resource.setProperty(SORT_NAME,sortName);
-        else
-            super.setSortName(sortName);
-    }
+      
 }

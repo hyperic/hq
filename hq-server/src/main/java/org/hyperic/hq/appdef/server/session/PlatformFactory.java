@@ -45,6 +45,7 @@ public class PlatformFactory {
         platform.setName(resource.getName());
         platform.setResource(resource);
         platform.setPlatformType(createPlatformType(resource.getType()));
+        platform.setSortName((String) resource.getProperty(AppdefResource.SORT_NAME));
         Set<Resource> ips = resource.getResourcesFrom(RelationshipTypes.IP);
         for (Resource ip : ips) {
             platform.addIp(createIp(ip));
