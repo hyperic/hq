@@ -55,6 +55,7 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
     private int instanceId;
     
     @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name = "TEMPLATE_ID")
     private MeasurementTemplate template;
 
     @Column(name = "MTIME", nullable = false)
@@ -70,6 +71,7 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
     private String dsn;
 
     @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name="MEASUREMENT_ID")
     private Collection<Baseline> baselinesBag;
 
     @OneToMany(cascade = CascadeType.ALL)
@@ -77,6 +79,7 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
     private Collection<AvailabilityDataRLE> availabilityData;
 
     @ManyToOne
+    @JoinColumn(name = "RESOURCE_ID")
     private Resource resource;
 
     @Id

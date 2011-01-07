@@ -33,6 +33,8 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -82,9 +84,12 @@ public class AuthzSubject  {
      
     @ManyToMany(fetch=FetchType.LAZY)
     @OptimisticLock(excluded = true)
+    @JoinTable(name="EAM_SUBJECT_ROLE_MAP",joinColumns = {@JoinColumn(name="SUBJECT_ID")},
+    inverseJoinColumns = {@JoinColumn(name="ROLE_ID")})
     private Set<Role> roles;
     
     @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="PREF_CRISPO_ID")
     private Crispo     prefs;
     
     @Column(name="NAME",length=100,nullable=false)

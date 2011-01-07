@@ -36,6 +36,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -61,10 +63,13 @@ public class Role  {
     @Column(name="FSYSTEM")
     private boolean    system;
      
-    @ManyToMany(mappedBy="roles")
+    @ManyToMany
+    @JoinTable(name="EAM_SUBJECT_ROLE_MAP",joinColumns = {@JoinColumn(name="ROLE_ID")},
+    inverseJoinColumns = {@JoinColumn(name="SUBJECT_ID")})
     private Collection<AuthzSubject> subjects;
     
     @OneToMany(cascade=CascadeType.ALL)
+    @JoinTable(name="EAM_ROLE_CALENDARS",joinColumns = {@JoinColumn(name="ROLE_ID")})
     private Collection<RoleCalendar> calendars;
       
     @Column(name="NAME",length=100,nullable=false,unique=true)

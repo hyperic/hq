@@ -29,6 +29,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
@@ -66,6 +67,7 @@ public class Agent {
     private Integer id;
     
     @ManyToOne
+    @JoinColumn(name="AGENT_TYPE_ID")
     private AgentType agentType;
     
     @Column(name="CTIME")
