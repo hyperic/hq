@@ -508,20 +508,19 @@ public class EventLogDAO
         }
     }
 
-    private String getLogsExistSQL(Resource resource, long begin, long end, int intervals,
-                                   EdgePermCheck wherePermCheck) {
+    private String getLogsExistSQL(Resource resource, long begin, long end, int intervals) {
         HQDialect dialect = getHQDialect();
         StringBuilder sql = new StringBuilder();
-        String resVar = wherePermCheck.getResourceVar();
-        String permSql = wherePermCheck.getSql();
+        //String resVar = wherePermCheck.getResourceVar();
+        //String permSql = wherePermCheck.getSql();
         if (!dialect.useEamNumbers()) {
             for (int i = 0; i < intervals; i++) {
                 sql.append("(SELECT ").append(i).append(" AS I FROM ").append(TABLE_EVENT_LOG)
-                    .append(" evlog").append(" JOIN EAM_RESOURCE ").append(resVar).append(" on ")
-                    .append("evlog.resource_id = ").append(resVar).append(".id").append(permSql)
+                    .append(" evlog")
+                    .append(" where evlog.resource_id = ").append(":resourceId")
                     .append(" AND timestamp BETWEEN (:begin + (:interval * ").append(i).append(
-                        ")) AND ((:begin + (:interval * (").append(i).append(" + 1))) - 1)")
-                    .append(" AND ").append(resVar).append(".id = :resourceId ").append(
+                        ")) AND ((:begin + (:interval * (").append(i).append(" + 1))) - 1) ")
+                    .append(
                         dialect.getLimitString(1)).append(')');
                 if (i < intervals - 1) {
                     sql.append(" UNION ALL ");
@@ -530,11 +529,11 @@ public class EventLogDAO
         } else {
             sql.append("SELECT i AS I FROM ").append(TABLE_EAM_NUMBERS).append(" WHERE i < ")
                 .append(intervals).append(" AND EXISTS (").append("SELECT 1 FROM ").append(
-                    TABLE_EVENT_LOG).append(" evlog").append(" JOIN EAM_RESOURCE ").append(resVar)
-                .append(" on ").append("evlog.resource_id = ").append(resVar).append(".id").append(
-                    permSql).append(" AND timestamp BETWEEN (:begin + (:interval").append(
-                    " * i)) AND ((:begin + (:interval").append(" * (i + 1))) - 1)").append(" AND ")
-                .append(resVar).append(".id = :resourceId ").append(dialect.getLimitString(1))
+                    TABLE_EVENT_LOG).append(" evlog")
+                .append("where evlog.resource_id = ").append(":resourceId")
+                .append(" AND timestamp BETWEEN (:begin + (:interval").append(
+                    " * i)) AND ((:begin + (:interval").append(" * (i + 1))) - 1) ")
+                .append(dialect.getLimitString(1))
                 .append(')');
         }
         return sql.toString();
@@ -543,14 +542,19 @@ public class EventLogDAO
     boolean[] logsExistPerInterval(Resource resource, AuthzSubject subject, long begin, long end,
                                    int intervals) {
         long interval = (end - begin) / intervals;
-        EdgePermCheck wherePermCheck = permissionManager.makePermCheckSql("rez", false);
+        //TODO EventLogManager indicates that descendents will be taken into consideration, but below passing of false only uses distance of 0
+        //on ResourceEdge table, creating unnecessary join.  Implementing solution using only the resource
+        //EdgePermCheck wherePermCheck = permissionManager.makePermCheckSql("rez", false);
 
-        String sql = getLogsExistSQL(resource, begin, end, intervals, wherePermCheck);
+        String sql = getLogsExistSQL(resource, begin, end, intervals);
         Query q = getSession().createSQLQuery(sql).addEntity("I",
             org.hyperic.hq.measurement.server.session.Number.class).setInteger("resourceId",
             resource.getId().intValue()).setLong("begin", begin).setLong("interval", interval);
-        List result = wherePermCheck.addQueryParameters(q, subject, resource, 0, VIEW_PERMISSIONS)
-            .list();
+        List result = q.list();
+        //TODO impl permission checking in EE
+        //List result = wherePermCheck.addQueryParameters(q, subject, resource, 0, VIEW_PERMISSIONS)
+          //  .list();
+        
 
         boolean[] eventLogsInIntervals = new boolean[intervals];
 
