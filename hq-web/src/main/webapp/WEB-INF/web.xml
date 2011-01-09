@@ -39,6 +39,7 @@
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
 			/WEB-INF/spring/security-web-context.xml,
+            /WEB-INF/spring/hqugrails-context.xml,
 			classpath*:/META-INF/spring/*-context.xml
 		</param-value>
 	</context-param>
@@ -78,6 +79,62 @@
         <servlet-name>webapp</servlet-name>
         <url-pattern>/app/*</url-pattern>
     </servlet-mapping>
+    
+    <!-- HQU Grails Servlets -->
+    <servlet>
+        <servlet-name>hqugrails</servlet-name>
+        <servlet-class>org.hyperic.hq.hqu.grails.web.servlet.HQUGrailsDispatcherServlet</servlet-class>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>/WEB-INF/spring/hqugrails-servlet.xml</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>gsp</servlet-name>
+        <servlet-class>org.codehaus.groovy.grails.web.pages.GroovyPagesServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>hqugrails</servlet-name>
+        <url-pattern>/hqug/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>hqugrails</servlet-name>
+        <url-pattern>*.dispatch</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>gsp</servlet-name>
+        <url-pattern>*.gsp</url-pattern>
+    </servlet-mapping>
+
+    <!-- HQU Grails Filters -->
+    <filter>
+        <filter-name>HQUGFilter</filter-name>
+        <filter-class>org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequestFilter</filter-class>
+    </filter>
+
+    <filter>
+        <filter-name>HQUGUrlMappingsFilter</filter-name>
+        <filter-class>org.hyperic.hq.hqu.grails.web.mapping.filter.HQUGrailsUrlMappingsFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>HQUGFilter</filter-name>
+        <url-pattern>/hqug/*</url-pattern>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>HQUGUrlMappingsFilter</filter-name>
+        <url-pattern>/hqug/*</url-pattern>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
 
 	<!-- URLRewite Filter -->
 	<filter>
