@@ -25,6 +25,7 @@
  */
 package org.hyperic.hq.appdef.shared;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.hyperic.hq.appdef.server.session.Application;
@@ -127,9 +128,13 @@ public interface ApplicationManager {
     /**
      * Get all applications for a resource.
      */
-    public org.hyperic.util.pager.PageList<ApplicationValue> getApplicationsByResource(AuthzSubject subject,
+    public PageList<ApplicationValue> getApplicationsByResource(AuthzSubject subject,
                                                                                        AppdefEntityID resource,
                                                                                        PageControl pc)
+        throws ApplicationNotFoundException, PermissionException;
+    
+    
+    Collection<Application> getApplicationsByResource(AuthzSubject subject,AppdefEntityID resource) 
         throws ApplicationNotFoundException, PermissionException;
 
 

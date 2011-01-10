@@ -136,10 +136,7 @@ public abstract class AppdefResourceValue
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
                 return ((ApplicationValue)this).getApplicationType()
                     .getAppdefResourceTypeValue();
-            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                if (this instanceof ServiceClusterValue)
-                    return ((ServiceClusterValue) this).getServiceType();
-                    
+            case AppdefEntityConstants.APPDEF_TYPE_GROUP:    
                 return ((AppdefGroupValue) this).getAppdefResourceTypeValue();
             default:
                 throw new InvalidAppdefTypeException

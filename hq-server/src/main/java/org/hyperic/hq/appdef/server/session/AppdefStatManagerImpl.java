@@ -25,8 +25,11 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,6 +54,7 @@ import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
+import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -257,7 +261,24 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
         throws PlatformNotFoundException, PermissionException {
         try {
             Platform plat = platformManager.findPlatformById(platformId);
-            ResourceTreeNode[] retVal = appdefStatDAO.getNavMapDataForPlatform(subject, plat);
+            final ResourceTreeNode aPlatformNode = new ResourceTreeNode(plat.getName(),
+                getAppdefTypeLabel(APPDEF_TYPE_PLATFORM, plat.getAppdefResourceType().getName()), plat
+                    .getEntityId(), ResourceTreeNode.RESOURCE);
+            
+            final Set<ResourceTreeNode> servers = new HashSet<ResourceTreeNode>();
+            for(Server server: plat.getServers()) {
+                servers.add(new ResourceTreeNode(server.getName(), getAppdefTypeLabel(
+                    APPDEF_TYPE_SERVER, server.getServerType().getName()), AppdefEntityID
+                    .newServerID(new Integer(server.getId())), plat.getEntityId(),
+                    server.getServerType().getId()));
+            }
+            
+            aPlatformNode.setSelected(true);
+            ResourceTreeNode[] svrNodes = (ResourceTreeNode[]) servers
+                .toArray(new ResourceTreeNode[0]);
+            ResourceTreeNode.alphaSortNodes(svrNodes, true);
+            aPlatformNode.addUpChildren(svrNodes);
+            ResourceTreeNode[] retVal = new ResourceTreeNode[] { aPlatformNode };
             if (log.isDebugEnabled()) {
                 log.debug(mapToString(retVal));
             }
@@ -279,7 +300,41 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
         Server server = serverManager.findServerById(serverId);
 
         try {
-            return appdefStatDAO.getNavMapDataForServer(subject, server);
+            StopWatch timer = new StopWatch();
+            final Map<Integer, ResourceTreeNode> serviceMap = new HashMap<Integer, ResourceTreeNode>();
+            Platform platform = server.getPlatform();
+            ResourceTreeNode aPlatformNode = new ResourceTreeNode(platform.getName(),
+                getAppdefTypeLabel(APPDEF_TYPE_PLATFORM, platform.getPlatformType().getName()),
+                AppdefEntityID.newPlatformID(new Integer(platform.getId())),
+                (AppdefEntityID) null, platform.getPlatformType().getId());
+            
+            final ResourceTreeNode aServerNode = new ResourceTreeNode(server.getName(),
+                getAppdefTypeLabel(server.getEntityId().getType(), server.getAppdefResourceType()
+                    .getName()), server.getEntityId(), ResourceTreeNode.RESOURCE);
+            
+            for(Service service: server.getServices()) {
+                serviceMap.put(new Integer(service.getId()), new ResourceTreeNode(
+                    service.getName(), getAppdefTypeLabel(APPDEF_TYPE_SERVICE,
+                        service.getServiceType().getName()), AppdefEntityID.newServiceID(new Integer(
+                        service.getId())), server.getEntityId(), service.getServiceType().getId()));
+            }
+            
+            aServerNode.setSelected(true);
+            ResourceTreeNode[] services = (ResourceTreeNode[]) serviceMap.values().toArray(
+                new ResourceTreeNode[0]);
+            ResourceTreeNode.alphaSortNodes(services, true);
+            aServerNode.addUpChildren(services);
+            // TODO aPlatformNode can be null if user is unauthz
+            //if (aPlatformNode != null) {
+                aServerNode.addDownChild(aPlatformNode);
+            //}
+            ResourceTreeNode[] serverNode = new ResourceTreeNode[] { aServerNode };
+
+            if (log.isDebugEnabled()) {
+                log.debug("getNavMapDataForServer() executed in: " + timer);
+            }
+
+            return serverNode;
         } catch (Exception e) {
             log.error("Unable to get NavMap data: " + e, e);
             throw new SystemException(e);
@@ -296,11 +351,81 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
         throws ServiceNotFoundException, PermissionException {
         Service service = serviceManager.findServiceById(serviceId);
         try {
-            return appdefStatDAO.getNavMapDataForService(subject, service);
+            StopWatch timer = new StopWatch();
+            
+            ResourceTreeNode aServiceNode = new ResourceTreeNode(service.getName(),
+                getAppdefTypeLabel(service.getEntityId().getType(), service
+                    .getAppdefResourceType().getName()), service.getEntityId(),
+                ResourceTreeNode.RESOURCE);
+            
+            Map<Integer, ResourceTreeNode> appMap = new HashMap<Integer, ResourceTreeNode>();
+            
+            AppdefResource parent = service.getParent();
+            ResourceTreeNode aPlatformNode;
+            ResourceTreeNode aServerNode=null;
+            if(parent instanceof Platform) {
+                Platform parentPlatform = (Platform)parent;
+                aPlatformNode = new ResourceTreeNode(parentPlatform.getName(),
+                    getAppdefTypeLabel(APPDEF_TYPE_PLATFORM, parentPlatform.getPlatformType().getName()),
+                    AppdefEntityID.newPlatformID(new Integer(parentPlatform.getId())),
+                    ResourceTreeNode.RESOURCE);
+            }else {
+                Server parentServer = (Server)parent;
+                aServerNode = new ResourceTreeNode(parentServer.getName(), getAppdefTypeLabel(
+                    APPDEF_TYPE_SERVER, parentServer.getServerType().getName()), AppdefEntityID
+                    .newServerID(new Integer(parentServer.getId())), ResourceTreeNode.RESOURCE);
+                aPlatformNode = new ResourceTreeNode(parentServer.getPlatform().getName(),
+                    getAppdefTypeLabel(APPDEF_TYPE_PLATFORM, parentServer.getPlatform().getPlatformType().getName()),
+                    AppdefEntityID.newPlatformID(new Integer(parentServer.getPlatform().getId())),
+                    ResourceTreeNode.RESOURCE);
+            }
+            
+            // TODO server nodes and platform nodes can be null if user is
+            // unauthz
+            if (aServerNode != null) {
+                //if (aPlatformNode != null) {
+                    aServerNode.addDownChild(aPlatformNode);
+                //}
+                aServiceNode.addDownChild(aServerNode);
+            } else if (aPlatformNode != null) {
+                aServiceNode.addDownChild(aPlatformNode);
+            }
+            
+            aServiceNode.setSelected(true);
+            
+            Collection<Application> applications = applicationManager.getApplicationsByResource(subject, service.getEntityId());
+            for(Application application: applications) {
+                appMap.put(new Integer(application.getId()), new ResourceTreeNode(
+                    application.getName(), getAppdefTypeLabel(
+                    AppdefEntityConstants.APPDEF_TYPE_APPLICATION,
+                    application.getDescription()), AppdefEntityID.newAppID(new Integer(
+                    application.getId())), ResourceTreeNode.RESOURCE));
+            }
+            ResourceTreeNode[] appNodes = (ResourceTreeNode[]) appMap.values().toArray(
+                new ResourceTreeNode[0]);
+            ResourceTreeNode.alphaSortNodes(appNodes, true);
+            aServiceNode.addUpChildren(appNodes);
+            
+            ResourceTreeNode[] serviceNode = new ResourceTreeNode[] { aServiceNode };
+
+            if (log.isDebugEnabled()) {
+                log.debug("getNavMapDataForService() executed in: " + timer);
+            }
+            return serviceNode;
         } catch (Exception e) {
             log.error("Unable to get NavMap data: " + e, e);
             throw new SystemException(e);
         }
+    }
+    
+    private String getAppdefTypeLabel(int typeId, String desc) {
+        String typeLabel = AppdefEntityConstants.typeToString(typeId);
+        if (desc == null) {
+            desc = typeLabel;
+        } else if (desc.toLowerCase().indexOf(typeLabel.toLowerCase()) == -1) {
+            desc += " " + typeLabel;
+        }
+        return desc;
     }
 
     private String mapToString(ResourceTreeNode[] node) {

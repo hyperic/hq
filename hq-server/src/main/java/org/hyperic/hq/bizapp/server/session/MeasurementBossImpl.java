@@ -56,7 +56,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
@@ -68,7 +67,6 @@ import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
@@ -81,7 +79,6 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.AutogroupDisplaySummary;
-import org.hyperic.hq.bizapp.shared.uibeans.ClusterDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.GroupMetricDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.MeasurementMetadataSummary;
 import org.hyperic.hq.bizapp.shared.uibeans.MeasurementSummary;
@@ -95,10 +92,7 @@ import org.hyperic.hq.bizapp.shared.uibeans.ResourceMetricDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTypeDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.SingletonDisplaySummary;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.grouping.CritterList;
-import org.hyperic.hq.grouping.CritterTranslationContext;
 import org.hyperic.hq.grouping.CritterTranslator;
-import org.hyperic.hq.grouping.critters.DescendantProtoCritterType;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.inventory.domain.Resource;
@@ -2684,8 +2678,9 @@ public class MeasurementBossImpl implements MeasurementBoss {
             if (typeId != null) {
                 for (Iterator<AppdefResourceValue> i = resources.iterator(); i.hasNext();) {
                     AppdefResourceValue r = i.next();
-                    if (r instanceof ServiceClusterValue)
-                        i.remove();
+                    //TODO not using ServiceCluster anymore
+                    //if (r instanceof ServiceClusterValue)
+                        //i.remove();
                 }
             }
 
@@ -2768,24 +2763,25 @@ public class MeasurementBossImpl implements MeasurementBoss {
         final Map<Integer, Measurement> midMap = getMidMap(getAeids(appdefVals), tmp);
         // keys are type id's and the values are AppdefResourceTypeValues
         for (int i = 0; i < resources.length; i++) {
-            if (resources[i] instanceof ServiceClusterValue) {
-                AppdefResourceValue resource = resources[i];
-                AppdefEntityID aid = resource.getEntityId();
-                AppdefEntityValue aeval = new AppdefEntityValue(aid, subject);
-                AppdefGroupValue agval = (AppdefGroupValue) aeval.getResourceValue();
-                ClusterDisplaySummary cds = new ClusterDisplaySummary();
-
-                cds.setEntityId(resource.getEntityId());
-                cds.setEntityName(agval.getName());
-                int size = agval.getTotalSize();
-                cds.setNumResources(new Integer(size));
-                // Replace the IDs with all of the members
-                List<AppdefEntityID> memberIds = getResourceIds(subject, aid, null);
-                AppdefEntityID[] ids = (AppdefEntityID[]) memberIds.toArray(new AppdefEntityID[0]);
-                setResourceTypeDisplaySummary(subject, cds, agval.getAppdefResourceTypeValue(),
-                    ids, midMap);
-                summaries.add(cds);
-            } else {
+            //TODO not using ServiceClusterValue anymore
+//            if (resources[i] instanceof ServiceClusterValue) {
+//                AppdefResourceValue resource = resources[i];
+//                AppdefEntityID aid = resource.getEntityId();
+//                AppdefEntityValue aeval = new AppdefEntityValue(aid, subject);
+//                AppdefGroupValue agval = (AppdefGroupValue) aeval.getResourceValue();
+//                ClusterDisplaySummary cds = new ClusterDisplaySummary();
+//
+//                cds.setEntityId(resource.getEntityId());
+//                cds.setEntityName(agval.getName());
+//                int size = agval.getTotalSize();
+//                cds.setNumResources(new Integer(size));
+//                // Replace the IDs with all of the members
+//                List<AppdefEntityID> memberIds = getResourceIds(subject, aid, null);
+//                AppdefEntityID[] ids = (AppdefEntityID[]) memberIds.toArray(new AppdefEntityID[0]);
+//                setResourceTypeDisplaySummary(subject, cds, agval.getAppdefResourceTypeValue(),
+//                    ids, midMap);
+//                summaries.add(cds);
+//            } else {
                 // all of the non-clusters get organized in here
                 resourcemap.put(resources[i].getEntityId(), resources[i]);
                 AppdefResourceTypeValue type = resources[i].getAppdefResourceTypeValue();
@@ -2797,7 +2793,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
                 }
                 // Add resource to list
                 siblings.add(resources[i].getEntityId());
-            }
+            //}
         }
         // first deal with the autogroubz and singletons (singletons
         // are just the degenerative case of an autogroup, why it's

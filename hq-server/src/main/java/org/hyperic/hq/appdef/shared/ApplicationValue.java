@@ -319,9 +319,9 @@ public class ApplicationValue extends AppdefResourceValue
     protected Set removedAppServiceValues = new java.util.HashSet();
     protected Set updatedAppServiceValues = new java.util.HashSet();
 
-    public Set getAddedAppServiceValues() { return addedAppServiceValues; }
-    public Set getRemovedAppServiceValues() { return removedAppServiceValues; }
-    public Set getUpdatedAppServiceValues() { return updatedAppServiceValues; }
+    public Set<AppServiceValue> getAddedAppServiceValues() { return addedAppServiceValues; }
+    public Set<AppServiceValue> getRemovedAppServiceValues() { return removedAppServiceValues; }
+    public Set<AppServiceValue> getUpdatedAppServiceValues() { return updatedAppServiceValues; }
 
     public org.hyperic.hq.appdef.shared.AppServiceValue[] getAppServiceValues()
     {

@@ -38,6 +38,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.Application;
+import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.Server;
@@ -130,10 +131,6 @@ abstract public class BaseInfrastructureTest {
     @Autowired
     protected ApplicationManager applicationManager;
 
-    protected static final int GENERIC_APPLICATION_TYPE = 1;
-
-    protected static final int J2EE_APPLICATION_TYPE = 2;
-    
     //The test plugin is automatically deployed when the integration test starts
     protected static final String TEST_PLUGIN_NAME="test";
 
@@ -312,7 +309,7 @@ abstract public class BaseInfrastructureTest {
         return resGrp;
     }
 
-    protected Application createApplication(String name, String desc, int applicationType,
+    protected Application createApplication(String name, String desc,
                                             List<AppdefEntityID> services)
         throws AppdefDuplicateNameException, ValidationException, PermissionException,
         NotFoundException, ApplicationNotFoundException, AppdefGroupNotFoundException {
@@ -323,7 +320,7 @@ abstract public class BaseInfrastructureTest {
         app.setBusinessContact("admin");
         app.setOpsContact("admin");
         app.setLocation("dataCenter");
-        app.setApplicationType(applicationManager.findApplicationType(applicationType));
+        app.setCTime(System.currentTimeMillis());
         Application application = applicationManager.createApplication(
             authzSubjectManager.getOverlordPojo(), app);
         applicationManager.setApplicationServices(authzSubjectManager.getOverlordPojo(),

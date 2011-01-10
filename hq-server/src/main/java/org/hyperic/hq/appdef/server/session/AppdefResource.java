@@ -32,7 +32,7 @@ import org.hyperic.hq.inventory.domain.Resource;
  */
 public abstract class AppdefResource extends AppdefNamedBean
 {
-    static final String SORT_NAME = "SortName";
+    public static final String SORT_NAME = "SortName";
     private Resource _resource;
     
     /**

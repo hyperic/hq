@@ -128,9 +128,10 @@ public class AddServiceDependenciesAction
         // list of AppService, not AppServiceValue
         for (Iterator iter = depNode.getChildren().iterator(); iter.hasNext();) {
             AppServiceValue anAppSvc = (AppServiceValue) iter.next();
-            if (anAppSvc.getIsCluster())
-                depNodeChildren.put(anAppSvc.getServiceCluster().getGroupId(), anAppSvc);
-            else
+            //TODO not using ServiceCluster anymore
+            //if (anAppSvc.getIsCluster())
+              //  depNodeChildren.put(anAppSvc.getServiceCluster().getGroupId(), anAppSvc);
+            //else
                 depNodeChildren.put(anAppSvc.getService().getId(), anAppSvc);
         }
 

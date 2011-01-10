@@ -32,6 +32,8 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.server.session.AppdefResource;
+import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -338,28 +340,27 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
                 groupType.setName(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i]));
                 groupType.persist();
                 if(groupTypes[i] == AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP) {
-                    PropertyType propType = new PropertyType();
-                    propType.setName("applicationType");
-                    propType.setDescription("applicationType");
-                    propType.setHidden(true);
-                    propType.persist();
-                    groupType.addPropertyType(propType);
+                    setPropertyType(groupType,AppdefResource.SORT_NAME);
+                    setPropertyType(groupType,ApplicationManagerImpl.BUSINESS_CONTACT);
+                    setPropertyType(groupType,ApplicationManagerImpl.CREATION_TIME);
+                    setPropertyType(groupType,ApplicationManagerImpl.ENG_CONTACT);
+                    setPropertyType(groupType,ApplicationManagerImpl.MODIFIED_TIME);
+                    setPropertyType(groupType,ApplicationManagerImpl.OPS_CONTACT);
                 }else {
-                    PropertyType propType = new PropertyType();
-                    propType.setName("groupEntType");
-                    propType.setDescription("groupEntType");
-                    propType.setHidden(true);
-                    propType.persist();
-                    groupType.addPropertyType(propType);
-                    PropertyType propEntResType = new PropertyType();
-                    propEntResType.setName("groupEntResType");
-                    propEntResType.setDescription("groupEntResType");
-                    propEntResType.setHidden(true);
-                    propEntResType.persist();
-                    groupType.addPropertyType(propEntResType);
+                    setPropertyType(groupType,"groupEntType");
+                    setPropertyType(groupType,"groupEntResType");
                 }
             }
         }
+    }
+    
+    private void setPropertyType(ResourceType groupType, String propTypeName) {
+        PropertyType propType = new PropertyType();
+        propType.setName(propTypeName);
+        propType.setDescription(propTypeName);
+        propType.setHidden(true);
+        propType.persist();
+        groupType.addPropertyType(propType);
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {

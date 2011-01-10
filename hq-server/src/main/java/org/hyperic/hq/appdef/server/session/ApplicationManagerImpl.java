@@ -28,6 +28,8 @@ package org.hyperic.hq.appdef.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -67,6 +69,7 @@ import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
+import org.hyperic.hq.reference.RelationshipTypes;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -97,8 +100,21 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
     private ZeventEnqueuer zeventManager;
     
-    private static final List<ApplicationType> APPLICATION_TYPES = new ArrayList<ApplicationType>(2);
+    private ServiceFactory serviceFactory;
     
+    public static final String MODIFIED_TIME = "ModifiedTime";
+
+    public static final String CREATION_TIME = "CreationTime";
+    
+    public static final String ENG_CONTACT = "EngContact";
+    
+    public static final String OPS_CONTACT = "OpsContact";
+    
+    public static final String BUSINESS_CONTACT = "BusinessContact";
+    
+    static final List<ApplicationType> APPLICATION_TYPES = new ArrayList<ApplicationType>(2);
+    
+    //TODO we are removing application type
     static {
         ApplicationType generic = new ApplicationType();
         generic.setName("Generic Application");
@@ -119,11 +135,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
                                   ResourceManager resourceManager,
                                   PermissionManager permissionManager,
                                   ZeventEnqueuer zeventManager,
-                                  ResourceGroupManager resourceGroupManager) {
+                                  ResourceGroupManager resourceGroupManager, ServiceFactory serviceFactory) {
         this.resourceManager = resourceManager;
         this.permissionManager = permissionManager;
         this.zeventManager = zeventManager;
         this.resourceGroupManager = resourceGroupManager;
+        this.serviceFactory = serviceFactory;
     }
 
     /**
@@ -164,7 +181,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
         throws ValidationException, PermissionException, AppdefDuplicateNameException,
         NotFoundException {
 
-        findApplicationType(newApp.getApplicationType().getId());
         if (log.isDebugEnabled()) {
             log.debug("Begin createApplication: " + newApp);
         }
@@ -193,7 +209,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             // set modified by
             newApp.setModifiedBy(subject.getName());
             // call the create
-            ResourceGroup application = create(newApp);
+            ResourceGroup application = create(subject,newApp);
             return toApplication(application);
         } catch (ValidationException e) {
             throw e;
@@ -201,50 +217,60 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
     
     private Application toApplication(ResourceGroup resourceGroup) {
-        //TODO fully flesh out
         Application application =  new Application();
         application.setId(resourceGroup.getId());
+        application.setCreationTime((Long)resourceGroup.getProperty(CREATION_TIME));
+        application.setDescription(resourceGroup.getDescription());
+        application.setLocation(resourceGroup.getLocation());
+        application.setModifiedBy(resourceGroup.getModifiedBy());
+        application.setModifiedTime((Long)resourceGroup.getProperty(MODIFIED_TIME));
+        application.setName(resourceGroup.getName());
+        application.setResource(resourceGroup);
+        application.setSortName((String) resourceGroup.getProperty(AppdefResource.SORT_NAME));
+        application.setBusinessContact((String)resourceGroup.getProperty(BUSINESS_CONTACT));
+        application.setEngContact((String)resourceGroup.getProperty(ENG_CONTACT));
+        application.setOpsContact((String)resourceGroup.getProperty(OPS_CONTACT));
+        //TODO get rid of ApplicationType.  For now just hard-coding them all to Generic type
+        application.setApplicationType(APPLICATION_TYPES.get(0));
+        for(Resource member: resourceGroup.getMembers()) {
+            application.addAppService(toAppService(member));
+        }
         return application;
     }
     
-    private ResourceGroup create(ApplicationValue appV) {
+    private ResourceGroup create(AuthzSubject owner, ApplicationValue appV) {
         ResourceGroup app =  new ResourceGroup();
         app.setName(appV.getName());
         app.persist();
         app.setType(resourceManager.findResourceTypeByName(AppdefEntityConstants.
             getAppdefGroupTypeName(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP)));
+        app.setOwner(owner);
         updateApplication(app, appV);
         return app;
     }
     
     private void updateApplication(ResourceGroup app, ApplicationValue appV) {
-        //a.setSortName(appV.getSortName());
+        app.setProperty(AppdefResource.SORT_NAME,appV.getName().toUpperCase());
         app.setModifiedBy(appV.getModifiedBy());
         app.setLocation(appV.getLocation());
-        //a.setEngContact(appV.getEngContact());
-        //a.setOpsContact(appV.getOpsContact());
-       // a.setBusinessContact(appV.getBusinessContact());
         app.setDescription(appV.getDescription());
-        //app.setCreationTime(appV.getCTime());
-       
-        
+        app.setProperty(CREATION_TIME,appV.getCTime());
+        app.setProperty(MODIFIED_TIME,System.currentTimeMillis());
+        app.setProperty(ENG_CONTACT,appV.getEngContact());
+        app.setProperty(OPS_CONTACT,appV.getOpsContact());
+        app.setProperty(BUSINESS_CONTACT,appV.getBusinessContact());
+
         if (appV.getAddedAppServiceValues() != null) {
-            Iterator iAppServiceValue = appV.getAddedAppServiceValues().iterator();
-            while (iAppServiceValue.hasNext()) {
-                AppServiceValue o = (AppServiceValue) iAppServiceValue.next();
+            for (AppServiceValue o: appV.getAddedAppServiceValues()) {
                 app.addMember(resourceManager.findResourceById(o.getId()));
             }
         }
         if (appV.getRemovedAppServiceValues() != null) {
-            Iterator iAppServiceValue = appV.getRemovedAppServiceValues().iterator();
-            while (iAppServiceValue.hasNext()) {
-                AppServiceValue o = (AppServiceValue) iAppServiceValue.next();
+            for( AppServiceValue o : appV.getRemovedAppServiceValues()) {
                 app.removeMember(resourceManager.findResourceById(o.getId()));
             }
         }
-        if (appV.getApplicationType() != null) {
-            app.setProperty("applicationType",appV.getApplicationType().getId());
-        }
+        app.merge();
     }
 
     /**
@@ -280,7 +306,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
             app.setName(newValue.getName());
         }
         updateApplication(app, newValue);
-        app.merge();
         return findApplicationById(subject, app.getId()).getApplicationValue();
     }
 
@@ -295,9 +320,10 @@ public class ApplicationManagerImpl implements ApplicationManager {
         ResourceGroup app = resourceGroupManager.findResourceGroupById(id);
         //TODO perm check
         //permissionManager.checkRemovePermission(subject, app.getEntityId());
+        AppdefEntityID appId = AppdefUtil.newAppdefEntityId(app);
         app.remove();
         // Send resource delete event
-        ResourceDeletedZevent zevent = new ResourceDeletedZevent(subject, AppdefUtil.newAppdefEntityId(app));
+        ResourceDeletedZevent zevent = new ResourceDeletedZevent(subject, appId);
         zeventManager.enqueueEventAfterCommit(zevent);
     }
 
@@ -453,13 +479,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
     @Transactional(readOnly = true)
     public Application findApplicationById(AuthzSubject subject, Integer id)
         throws ApplicationNotFoundException, PermissionException {
-        try {
-            ResourceGroup app = resourceGroupManager.findResourceGroupById(id);
-            //permissionManager.checkViewPermission(subject, app.getEntityId());
-            return toApplication(app);
-        } catch (ObjectNotFoundException e) {
-            throw new ApplicationNotFoundException(id, e);
+        ResourceGroup app = resourceGroupManager.findResourceGroupById(id);
+        if(app == null) {
+            throw new ApplicationNotFoundException(id);
         }
+        //permissionManager.checkViewPermission(subject, app.getEntityId());
+        return toApplication(app);
     }
 
     /**
@@ -499,8 +524,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
    
     private AppService toAppService(Resource service) {
-        //TODO
-        return new AppService();
+       AppService appService = new AppService();
+       appService.setService(serviceFactory.createService(service));
+       appService.setCreationTime((Long)service.getProperty(CREATION_TIME));
+       appService.setModifiedTime((Long)service.getProperty(MODIFIED_TIME));
+       appService.setId(service.getId());
+       return appService;
     }
 
     /**
@@ -588,8 +617,27 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
     
     private Collection<Application> findByServerIdOrderName(Integer id, boolean asc) {
-        //TODO from ApplicationDAO
-        return null;
+        Set<Application> applications = new HashSet<Application>();
+        Resource server = resourceManager.findResourceById(id);
+        Set<Resource> services = server.getResourcesFrom(RelationshipTypes.SERVICE);
+        for(Resource service: services) {
+           applications.addAll(findByService(service));
+        }
+        final List<Application> rtn = new ArrayList<Application>(applications);
+        if(asc) {
+            Collections.sort(rtn, new Comparator<Application>() {
+                public int compare(Application o1, Application o2) {
+                    return o1.getSortName().compareTo(o2.getSortName());
+                }
+            });
+        }else {
+            Collections.sort(rtn, new Comparator<Application>() {
+                public int compare(Application o1, Application o2) {
+                    return o2.getSortName().compareTo(o1.getSortName());
+                }
+            });
+        }
+        return rtn;
     }
     
     private Collection<Application> findByServerIdOrderOwner(Integer id, boolean asc) {
@@ -597,9 +645,27 @@ public class ApplicationManagerImpl implements ApplicationManager {
         return null;
     }
     
+    private Set<Application> findByService(Resource service) {
+        Set<Application> applications = new HashSet<Application>();
+        Set<ResourceGroup> groups = service.getResourceGroups();
+        for(ResourceGroup group: groups) {
+            if(group.getType().getName().equals(AppdefEntityConstants.
+                getAppdefGroupTypeName(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP))) {
+                applications.add(toApplication(group));
+            }
+        }
+        return applications;
+    }
+    
     private Collection<Application> findByServiceIdOrderName(Integer id) {
-        //TODO from ApplicationDAO
-        return null;
+        Resource service = resourceManager.findResourceById(id);
+        final List<Application> rtn = new ArrayList<Application>(findByService(service));
+        Collections.sort(rtn, new Comparator<Application>() {
+            public int compare(Application o1, Application o2) {
+                return o1.getSortName().compareTo(o2.getSortName());
+            }
+        });
+        return rtn;
     }
     
     private Collection<Application> findByServiceIdOrderOwner(Integer id, boolean asc) {
@@ -707,6 +773,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
         return apps;
     }
+    
+    @Transactional(readOnly = true)
+    public Collection<Application> getApplicationsByResource(AuthzSubject subject,AppdefEntityID resource) 
+        throws ApplicationNotFoundException, PermissionException {
+        return getApplications(subject,resource,null);
+    }
 
     /**
      * Get all applications for a resource.
@@ -717,6 +789,16 @@ public class ApplicationManagerImpl implements ApplicationManager {
                                                                 AppdefEntityID resource,
                                                                 PageControl pc)
         throws ApplicationNotFoundException, PermissionException {
+       
+        Collection<Application> apps = getApplications(subject, resource, pc);
+
+        // valuePager converts local/remote interfaces to value objects
+        // as it pages through them.
+        return valuePager.seek(apps, pc.getPagenum(), pc.getPagesize());
+    }
+    
+    private Collection<Application> getApplications(AuthzSubject subject,
+        AppdefEntityID resource, PageControl pc)  throws ApplicationNotFoundException, PermissionException {
         // XXX Call to authz, get the collection of all services
         // that we are allowed to see.
         // OR, alternatively, find everything, and then call out
@@ -731,10 +813,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         } catch (AppdefEntityNotFoundException e) {
             throw new ApplicationNotFoundException("Cannot find application by " + resource);
         }
-
-        // valuePager converts local/remote interfaces to value objects
-        // as it pages through them.
-        return valuePager.seek(apps, pc.getPagenum(), pc.getPagesize());
+        return apps;
     }
 
     /**
