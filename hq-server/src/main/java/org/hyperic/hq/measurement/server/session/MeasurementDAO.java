@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -35,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 
 import org.hibernate.FlushMode;
@@ -376,12 +374,12 @@ public class MeasurementDAO
 
     @SuppressWarnings("unchecked")
     List<Measurement> findDesignatedByCategoryForGroup(ResourceGroup g, String cat) {
-        String sql = "select m from Measurement m, GroupMember gm " + "join m.template t "
+        String sql = "select m from Measurement m join m.template t "
                      + "join t.category c "
-                     + "where gm.group = :group and gm.resource = m.resource "
+                     + "where m.resource in (:resources) "
                      + "and t.designate = true and c.name = :cat order by t.name";
 
-        return getSession().createQuery(sql).setParameter("group", g).setParameter("cat", cat)
+        return getSession().createQuery(sql).setParameter("cat", cat).setParameterList("resources",new ArrayList<Resource>(g.getMembers()))
             .setCacheable(true).setCacheRegion("Measurement.findDesignatedByCategoryForGroup")
             .list();
     }
@@ -395,7 +393,7 @@ public class MeasurementDAO
      * @return templateId The maximum collection time in milliseconds.
      */
     public Long getMaxCollectionInterval(ResourceGroup g, Integer templateId) {
-        String sql = "select max(m.interval) from Measurement m, GroupMember g "
+        String sql = "select max(m.interval) from Measurement m "
                      + "join g.group rg " + "join g.resource r "
                      + "where m.instanceId = r.instanceId and " + "rg = ? and m.template.id = ?";
 
@@ -415,11 +413,10 @@ public class MeasurementDAO
      */
     @SuppressWarnings("unchecked")
     public List<Measurement> getMetricsCollecting(ResourceGroup g, Integer templateId) {
-        String sql = "select m from Measurement m, GroupMember g " + "join g.group rg "
-                     + "join g.resource r " + "where m.instanceId = r.instanceId and "
-                     + "rg = ? and m.template.id = ? and m.enabled = true";
+        String sql = "select m from Measurement m where m.resource in (:resources) "
+                     + "and m.template.id = ? and m.enabled = true";
 
-        return (List<Measurement>) getSession().createQuery(sql).setParameter(0, g).setInteger(1,
+        return (List<Measurement>) getSession().createQuery(sql).setParameterList("resources", new ArrayList<Resource>(g.getMembers())).setInteger(0,
             templateId.intValue()).setCacheable(true).setCacheRegion(
             "ResourceGroup.getMetricsCollecting").list();
     }
@@ -490,9 +487,9 @@ public class MeasurementDAO
 
     @SuppressWarnings("unchecked")
     List<Measurement> findAvailMeasurements(ResourceGroup g) {
-        String hql = "select m from GroupMember gm, " + "Measurement m join m.template t " +
-                     "where m.resource = gm.resource and gm.group = :group and " + ALIAS_CLAUSE;
-        return createQuery(hql).setParameter("group", g).setCacheable(true).setCacheRegion(
+        String hql = "select m from  " + "Measurement m join m.template t " +
+                     "where m.resource in (:resources) and " + ALIAS_CLAUSE;
+        return createQuery(hql).setParameterList("resources", new ArrayList<Resource>(g.getMembers())).setCacheable(true).setCacheRegion(
             "Measurement.findAvailMeasurementsForGroup").list();
     }
 
