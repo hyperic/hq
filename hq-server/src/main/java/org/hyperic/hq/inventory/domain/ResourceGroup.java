@@ -19,6 +19,7 @@ import org.springframework.datastore.graph.api.Direction;
 public class ResourceGroup extends Resource {
     @RelatedTo(type = RelationshipTypes.HAS_MEMBER, direction = Direction.OUTGOING, elementClass = Resource.class)
     @ManyToMany(targetEntity = Resource.class)
+    @Transient
     private Set<Resource> members;
 
     @GraphProperty
@@ -27,6 +28,7 @@ public class ResourceGroup extends Resource {
 
     @RelatedTo(type = RelationshipTypes.HAS_ROLE, direction = Direction.OUTGOING, elementClass = Role.class)
     @ManyToMany(targetEntity = Role.class)
+    @Transient
     private Set<Role> roles;
 
     public ResourceGroup() {
