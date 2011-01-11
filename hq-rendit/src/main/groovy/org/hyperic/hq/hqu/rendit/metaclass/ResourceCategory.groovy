@@ -36,8 +36,8 @@ import org.hyperic.hq.control.shared.ControlManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.control.shared.ControlScheduleManager;
-import org.hyperic.hq.inventory.domain.Resource
-import org.hyperic.hq.inventory.domain.ResourceGroup
+import org.hyperic.hq.authz.server.session.Resource
+import org.hyperic.hq.authz.server.session.ResourceGroup
 import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
 import org.hyperic.hq.authz.shared.ResourceGroupCreateInfo
 import org.hyperic.hq.appdef.Agent
@@ -141,19 +141,20 @@ class ResourceCategory {
 			return AppdefEntityID.newPlatformID(r.instanceId)
 		}
 		
-		def typeId = r.resourceType.id
+		def typeId = r.resourceType.appdefType
 		
-		if (typeId == AuthzConstants.authzPlatform) {
+		if (typeId == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
 			return AppdefEntityID.newPlatformID(r.instanceId)
-		} else if (typeId == AuthzConstants.authzServer) {
+		} else if (typeId == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
 			return AppdefEntityID.newServerID(r.instanceId)
-		} else if (typeId == AuthzConstants.authzService) {
+		} else if (typeId == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
 			return AppdefEntityID.newServiceID(r.instanceId)
-		} else if (typeId == AuthzConstants.authzApplication) {
+		} else if (typeId == AppdefEntityConstants.APPDEF_TYPE_APPLICATION) {
 			return AppdefEntityID.newAppID(r.instanceId)
-		} else if (typeId == AuthzConstants.authzGroup) {
-			return AppdefEntityID.newGroupID(r.instanceId)
-		} else {
+            //TODO where was this set?
+//		} else if (typeId == AuthzConstants.authzGroup) {
+//			return AppdefEntityID.newGroupID(r.instanceId)
+//		} else {
 			throw new RuntimeException("Resource [${r}] is not an appdef object.  " + 
 			"typeId=${typeId}")
 		}
@@ -310,15 +311,15 @@ class ResourceCategory {
 	}
 	
 	static boolean isPlatform(Resource r) {
-		r.resourceType.id == AuthzConstants.authzPlatform
+		r.resourceType.appdefType == AppdefEntityConstants.APPDEF_TYPE_PLATFORM
 	}
 	
 	static boolean isServer(Resource r) {
-		r.resourceType.id == AuthzConstants.authzServer
+		r.resourceType.appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVER
 	}
 	
 	static boolean isService(Resource r) {
-		r.resourceType.id == AuthzConstants.authzService
+		r.resourceType.appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVICE
 	}
 	
 	static Platform toPlatform(Resource r) {

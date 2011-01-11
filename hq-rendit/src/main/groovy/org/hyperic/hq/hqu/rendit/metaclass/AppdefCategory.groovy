@@ -26,7 +26,8 @@
 
 package org.hyperic.hq.hqu.rendit.metaclass
 
-import org.hyperic.hq.inventory.domain.Resource
+import org.hyperic.hq.authz.server.session.Resource
+import org.hyperic.hq.authz.server.session.ResourceFactory;
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.appdef.server.session.AppdefResource
@@ -39,11 +40,11 @@ import org.hyperic.hq.authz.shared.PermissionException;
 
 class AppdefCategory {
     static Resource getResource(AppdefResource r) {
-		Bootstrap.getBean(ResourceManager.class).findResource(r.entityId) 
+		return ResourceFactory.create(Bootstrap.getBean(ResourceManager.class).findResource(r.entityId) )
     }
 
     static Resource getResource(AppdefResourceType r) {
-		Bootstrap.getBean(ResourceManager.class).findResourceByInstanceId(r.authzType, r.id)
+		return ResourceFactory.create(Bootstrap.getBean(ResourceManager.class).findResourceById(r.id))
     }
     
     /**
@@ -67,14 +68,15 @@ class AppdefCategory {
      */
     static Resource checkPerms(AppdefResource r, Map p) {
         if (p.permCheck == false)
-            return r.resource
+            return ResourceFactory.create(r.resource)
 
         PermissionManager permMan = PermManFactory.instance
 
         ['operation', 'user'].each {p.get(it, null)}
 
-        def operation = r.getAuthzOp(p.operation)
-        def user = p.user
+        //TODO perm check
+        //def operation = r.getAuthzOp(p.operation)
+        //def user = p.user
         def resource = r.resource
         
         // HHQ-3736 - null resource_id in EAM_PLATFORM,EAM_SERVER,EAM_SERVICE.
@@ -82,11 +84,12 @@ class AppdefCategory {
             throw new PermissionException()
         }  
         
-        def instanceId = resource.instanceId
-        assert instanceId == r.id
+        //TODO perm check
+        //def instanceId = resource.instanceId
+        //assert instanceId == r.id
 
-        permMan.check(user.id, resource.resourceType, instanceId,
-                      operation)
+        //permMan.check(user.id, resource.resourceType, instanceId,
+          //            operation)
         resource
     }
 }

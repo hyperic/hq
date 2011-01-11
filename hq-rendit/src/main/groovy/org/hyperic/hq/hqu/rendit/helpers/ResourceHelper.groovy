@@ -37,10 +37,13 @@ import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.authz.server.session.ResourceFactory;
+import org.hyperic.hq.authz.server.session.ResourceGroupFactory;
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl
 import org.hyperic.hq.authz.server.session.ResourceSortField
-import org.hyperic.hq.inventory.domain.Resource
-import org.hyperic.hq.inventory.domain.ResourceGroup
+import org.hyperic.hq.authz.server.session.Resource
+import org.hyperic.hq.authz.server.session.ResourceGroup
+import org.hyperic.hq.authz.server.session.ResourceTypeFactory;
 import org.hyperic.hq.inventory.domain.ResourceRelationship
 import org.hyperic.hq.bizapp.server.session.AppdefBossImpl as AppdefBoss
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
@@ -67,7 +70,6 @@ class ResourceHelper extends BaseHelper {
      * counts.  View-Permission checking is performed on the resource 
      * (throwing PermissionException if denied) unless the permCheck = false 
      *
-     * This method generally returns a {@link Resource}
      *
      * To find the counts of resource types:  (no perm checking done)
      *   find count:'platforms'
@@ -190,37 +192,41 @@ class ResourceHelper extends BaseHelper {
     }
     
     public Resource findById(id) {
-        rman.findResourceById(id)
+        return ResourceFactory.create(rman.findResourceById(id))
+        
     }
     
     private Resource findByFqdn(fqdn) {
         try {
             def plat = platMan.findPlatformByFqdn(user, fqdn)
-            return plat.resource
+            return ResourceFactory.create(plat.resource)
         } catch (PlatformNotFoundException e) {
             return null
         }
     }
     
     private Resource findPrototype(Map args) {
-        rman.findResourcePrototypeByName(args.prototype)
+        org.hyperic.hq.inventory.domain.ResourceType resType = rman.findResourceTypeByName(args.prototype)
+        return ResourceTypeFactory.toPrototype(resType);
     }
     
     private List findByPrototype(Map args) {
         def proto = args.byPrototype
-        
+        def org.hyperic.hq.inventory.domain.ResourceType type 
         if (proto in String) {
-            proto = rman.findResourcePrototypeByName(proto)
-            if (proto == null) {
+            type = rman.findResourceTypeByName(proto)
+            if (type == null) {
                 return []  // Correct?  We don't have a proto
             }
-        } // else we assume it's already a Resource
+        } // TODO else we assume it's already a Resource 
+        
         
         def pageInfo = args.withPaging
         if (!pageInfo) {
             pageInfo = PageInfo.getAll(ResourceSortField.NAME, true)
         }
-        rman.findResourcesOfPrototype(proto, pageInfo)
+        //TODO used to take pageInfo into account
+        return ResourceFactory.create(type.getResources())
     }
     
     /**
@@ -650,7 +656,8 @@ class ResourceHelper extends BaseHelper {
      * Find a group by name.  Permission checking is performed.
      */
     ResourceGroup findGroupByName(String name) {
-        groupMan.findResourceGroupByName(user, name)
+        //TODO perm check
+        return ResourceGroupFactory.create(groupMan.findResourceGroupByName(name))
     }
     
     Resource findResource(int id) {
