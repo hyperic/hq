@@ -25,6 +25,7 @@
 
 package org.hyperic.hibernate.dialect;
 
+import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -166,4 +167,9 @@ public class PostgreSQLDialect
     public String getMetricDataHint() {
         return "";
     }
+
+	public Long getSchemaCreationTimestampInMillis(Statement stmt) throws SQLException {
+		// Not implemented for Postgres since it doesn't provide a way to get this information. Instead we'll check the 'postmaster' file timestamp...
+		return null;
+	}
 }
