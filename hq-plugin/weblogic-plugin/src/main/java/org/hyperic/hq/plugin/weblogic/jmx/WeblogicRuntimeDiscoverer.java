@@ -83,13 +83,11 @@ public class WeblogicRuntimeDiscoverer implements RuntimeDiscoverer, PrivilegedA
 
 	private String targetFqdn = null;
 
-	private boolean usePlatformName = false;
-
 	private WeblogicDetector plugin;
 
 	private String version;
 	
-	private ServiceTypeFactory serviceTypeFactory = new ServiceTypeFactory();
+	//private ServiceTypeFactory serviceTypeFactory = new ServiceTypeFactory();
 	
 	private PluginUpdater pluginUpdater = new PluginUpdater();
 
@@ -104,9 +102,6 @@ public class WeblogicRuntimeDiscoverer implements RuntimeDiscoverer, PrivilegedA
 		// as the admin server.
 		this.targetFqdn = props.getProperty(PROP_FQDN);
 
-		// XXX cant do this by default because it will ruin DB
-		// make it optional for acotel
-		this.usePlatformName = "true".equals(props.getProperty("weblogic.discover.pname"));
 	}
 
 	public WeblogicDetector getPlugin() {
@@ -341,46 +336,46 @@ public class WeblogicRuntimeDiscoverer implements RuntimeDiscoverer, PrivilegedA
 
 	private void discoverDynamicServices(WeblogicDiscover discover, MBeanServerConnection mServer, ServerQuery parent,
 			ArrayList services, Set serviceTypes) throws PluginException, WeblogicDiscoverException {
-		try {
-			final Set objectNames = mServer.queryNames(new ObjectName(MBeanUtil.DYNAMIC_SERVICE_DOMAIN + ":*"), null);
-			//Only WebLogic Admin servers have auto-inventory plugins - have to construct a ServerInfo for the WebLogic server
-			String[] platformTypes = ((ServerTypeInfo)plugin.getTypeInfo()).getPlatformTypes();
-			 ServerTypeInfo server =
-	                new ServerTypeInfo(parent.getResourceType(), parent.getDescription(), parent.getVersion());
-	        server.setValidPlatformTypes(platformTypes);
-			for (Iterator iterator = objectNames.iterator(); iterator.hasNext();) {
-				final ObjectName objectName = (ObjectName) iterator.next();
-				final MBeanInfo serviceInfo = mServer.getMBeanInfo(objectName);
-				if (serviceInfo instanceof ModelMBeanInfo) {
-					ServiceType identityType = serviceTypeFactory.getServiceType(plugin.getProductPlugin().getName(),server,
-							(ModelMBeanInfo) serviceInfo, objectName);
-					//identityType could be null if MBean is not to be exported
-					if(identityType != null) {
-						ServiceType serviceType;
-						if (!serviceTypes.contains(identityType)) {
-							serviceType = serviceTypeFactory.create(plugin.getProductPlugin(),
-									server, (ModelMBeanInfo) serviceInfo,
-									objectName);
-							if (serviceType != null) {
-								serviceTypes.add(serviceType);
-							}
-						}else {
-							serviceType = findServiceType(identityType.getInfo().getName(),serviceTypes);
-						}
-						final String shortServiceType = identityType.getServiceName();
-						DynamicServiceQuery dynamicServiceQuery = new DynamicServiceQuery();
-						dynamicServiceQuery.setParent(parent);
-						dynamicServiceQuery.setType(shortServiceType);
-						dynamicServiceQuery.setAttributeNames(serviceType.getCustomProperties().getOptionNames());
-						dynamicServiceQuery.setName(objectName.getKeyProperty("name"));
-						dynamicServiceQuery.getDynamicAttributes(mServer, objectName);
-						services.add(dynamicServiceQuery);
-					}
-				}
-			}
-		} catch (Exception e) {
-			 throw new PluginException(e.getMessage(), e);
-		} 	
+//		try {
+//			final Set objectNames = mServer.queryNames(new ObjectName(MBeanUtil.DYNAMIC_SERVICE_DOMAIN + ":*"), null);
+//			//Only WebLogic Admin servers have auto-inventory plugins - have to construct a ServerInfo for the WebLogic server
+//			String[] platformTypes = ((ServerTypeInfo)plugin.getTypeInfo()).getPlatformTypes();
+//			 ServerTypeInfo server =
+//	                new ServerTypeInfo(parent.getResourceType(), parent.getDescription(), parent.getVersion());
+//	        server.setValidPlatformTypes(platformTypes);
+//			for (Iterator iterator = objectNames.iterator(); iterator.hasNext();) {
+//				final ObjectName objectName = (ObjectName) iterator.next();
+//				final MBeanInfo serviceInfo = mServer.getMBeanInfo(objectName);
+//				if (serviceInfo instanceof ModelMBeanInfo) {
+//					ServiceType identityType = serviceTypeFactory.getServiceType(plugin.getProductPlugin().getName(),server,
+//							(ModelMBeanInfo) serviceInfo, objectName);
+//					//identityType could be null if MBean is not to be exported
+//					if(identityType != null) {
+//						ServiceType serviceType;
+//						if (!serviceTypes.contains(identityType)) {
+//							serviceType = serviceTypeFactory.create(plugin.getProductPlugin(),
+//									server, (ModelMBeanInfo) serviceInfo,
+//									objectName);
+//							if (serviceType != null) {
+//								serviceTypes.add(serviceType);
+//							}
+//						}else {
+//							serviceType = findServiceType(identityType.getInfo().getName(),serviceTypes);
+//						}
+//						final String shortServiceType = identityType.getServiceName();
+//						DynamicServiceQuery dynamicServiceQuery = new DynamicServiceQuery();
+//						dynamicServiceQuery.setParent(parent);
+//						dynamicServiceQuery.setType(shortServiceType);
+//						dynamicServiceQuery.setAttributeNames(serviceType.getCustomProperties().getOptionNames());
+//						dynamicServiceQuery.setName(objectName.getKeyProperty("name"));
+//						dynamicServiceQuery.getDynamicAttributes(mServer, objectName);
+//						services.add(dynamicServiceQuery);
+//					}
+//				}
+//			}
+//		} catch (Exception e) {
+//			 throw new PluginException(e.getMessage(), e);
+//		} 	
 	}
 	
 	private ServiceType findServiceType(String serviceName, Set serviceTypes) {
@@ -448,7 +443,7 @@ public class WeblogicRuntimeDiscoverer implements RuntimeDiscoverer, PrivilegedA
 		aiserver.setServicesAutomanaged(true);
 		aiserver.setServerTypeName(server.getResourceName());
 		String name = server.getResourceFullName();
-		if (this.usePlatformName) {
+		if (WeblogicProductPlugin.usePlatformName) {
 			name = GenericPlugin.getPlatformName() + " " + name;
 		}
 		aiserver.setName(name);
@@ -496,7 +491,7 @@ public class WeblogicRuntimeDiscoverer implements RuntimeDiscoverer, PrivilegedA
 		aiservice.setServiceTypeName(service.getResourceName());
 
 		String name = service.getResourceFullName();
-		if (this.usePlatformName) {
+		if (WeblogicProductPlugin.usePlatformName) {
 			name = GenericPlugin.getPlatformName() + " " + name;
 		}
 		if (name.length() >= 200) {
