@@ -83,9 +83,6 @@ public interface MeasurementManager {
         String mtype, ConfigResponse props) throws TemplateNotFoundException, PermissionException, 
         MeasurementCreateException;
     
-    void disableMeasurementsForDeletion(AuthzSubject subject, Agent agent,
-             AppdefEntityID[] ids) throws PermissionException;
-
     /**
      * Create Measurement objects based their templates and default intervals
      * @param templates List of Integer template IDs to add
@@ -294,25 +291,10 @@ public interface MeasurementManager {
         throws PermissionException;
 
     /**
-     * Disable all measurements for the given resources.
-     * @param agentId The entity id to use to look up the agent connection
-     * @param ids The list of entitys to unschedule
-     */
-    public void disableMeasurements(AuthzSubject subject, AppdefEntityID agentId,
-                                    AppdefEntityID[] ids) throws PermissionException, AgentNotFoundException;
-
-    /**
-     * Disable all Measurements for a resource
-     */
-    public void disableMeasurements(AuthzSubject subject, AppdefEntityID id)
-        throws PermissionException;
-
-    /**
      * Disable all Measurements for a resource
      */
     public void disableMeasurements(AuthzSubject subject, Resource res) throws PermissionException;
     
-    void disableMeasurements(AuthzSubject subject, Agent agent, AppdefEntityID[] ids, boolean isAsyncDelete) throws PermissionException;
 
     /**
      * XXX: not sure why all the findMeasurements require an authz if they do

@@ -181,13 +181,6 @@ public interface MeasurementBoss {
         EncodingException;
 
     /**
-     * Disable all measurements for an instance
-     * @param id the resource's ID
-     */
-    public void disableMeasurements(int sessionId, AppdefEntityID id) throws SessionTimeoutException,
-        SessionNotFoundException, PermissionException;
-
-    /**
      * Disable all measurements for a resource
      * @param id the resource's ID
      * @param tids the array of measurement ID's

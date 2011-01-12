@@ -36,10 +36,10 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.EntityNotFoundException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.Agent;
@@ -302,7 +302,7 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
         for (AppdefEntityID entId: entIds) {
             try {
                 srnManager.removeSrn(entId);
-            } catch (ObjectNotFoundException e) {
+            } catch (EntityNotFoundException e) {
                 // Ok to ignore, this is the first time scheduling metrics
                 // for this resource.
             }

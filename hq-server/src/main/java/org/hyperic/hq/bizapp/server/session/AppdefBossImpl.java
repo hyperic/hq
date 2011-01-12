@@ -29,7 +29,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -96,13 +95,11 @@ import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceManager;
-import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
@@ -123,7 +120,6 @@ import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.GroupCreationException;
-import org.hyperic.hq.authz.shared.MixedGroupType;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -145,18 +141,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.shared.MaintenanceEventManager;
-import org.hyperic.hq.grouping.Critter;
-import org.hyperic.hq.grouping.CritterList;
-import org.hyperic.hq.grouping.CritterTranslationContext;
 import org.hyperic.hq.grouping.CritterTranslator;
-import org.hyperic.hq.grouping.critters.AvailabilityCritterType;
-import org.hyperic.hq.grouping.critters.CompatGroupTypeCritterType;
-import org.hyperic.hq.grouping.critters.GroupMembershipCritterType;
-import org.hyperic.hq.grouping.critters.MixedGroupTypeCritterType;
-import org.hyperic.hq.grouping.critters.OwnedCritterType;
-import org.hyperic.hq.grouping.critters.ProtoCritterType;
-import org.hyperic.hq.grouping.critters.ResourceNameCritterType;
-import org.hyperic.hq.grouping.critters.ResourceTypeCritterType;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
@@ -164,7 +149,6 @@ import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
-import org.hyperic.hq.measurement.shared.AvailabilityType;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TrackerManager;
 import org.hyperic.hq.product.PluginException;
@@ -1282,23 +1266,20 @@ public class AppdefBossImpl implements AppdefBoss {
         }
         //TODO removed used to have every ID but not used.  Just add 1 for RemoveResourcesAction
         AppdefEntityID[] removed=new AppdefEntityID[] {aeid};
-        Map<Integer, List<AppdefEntityID>> agentCache = null;
 
         final Integer id = aeid.getId();
         switch (aeid.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                 Server server = serverManager.findServerById(id);
-                agentCache = buildAsyncDeleteAgentCache(server);
-                removeServer(subject, server.getId());
+                removeServer(subject, server);
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                 Platform platform = platformManager.findPlatformById(id);
-                agentCache = buildAsyncDeleteAgentCache(platform);
-                removePlatform(subject, platform.getId());
+                removePlatform(subject, platform);
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-
-                serviceManager.removeService(subject, serviceManager.findServiceById(id));
+                Service service = serviceManager.findServiceById(id);
+                removeService(subject, service);
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                 resourceGroupManager.removeResourceGroup(subject, resourceGroupManager
@@ -1314,8 +1295,6 @@ public class AppdefBossImpl implements AppdefBoss {
         if (log.isDebugEnabled()) {
             log.debug("removeAppdefEntity() for " + aeid + " executed in " + timer.getElapsed());
         }
-
-        zEventManager.enqueueEventAfterCommit(new ResourcesCleanupZevent(agentCache));
 
         return removed;
     }
@@ -1359,14 +1338,16 @@ public class AppdefBossImpl implements AppdefBoss {
     /**
      * 
      */
-    public void removePlatform(AuthzSubject subject, Integer platformId)
+    public void removePlatform(AuthzSubject subject, Platform platform)
         throws ApplicationException, VetoException {
         try {
-            Platform platform = platformManager.findPlatformById(platformId);
+            for(Server server: platform.getServers()) {
+                removeServer(subject,server);
+            }
             // Disable all measurements for this platform. We don't actually
             // remove the measurements here to avoid delays in deleting
             // resources.
-            disableMeasurements(subject, resourceManager.findResourceById(platformId));
+            disableMeasurements(subject, resourceManager.findResourceById(platform.getId()));
 
             // Remove from AI queue
             try {
@@ -1388,68 +1369,14 @@ public class AppdefBossImpl implements AppdefBoss {
             // now, remove the platform.
             platformManager.removePlatform(subject, platform);
         } catch (PermissionException e) {
-            log.error("Caught PermissionException while removing platform: " + platformId, e);
+            log.error("Caught PermissionException while removing platform: " + platform.getId(), e);
             throw e;
         }
     }
 
-    /**
-     * @param server The server being deleted
-     * 
-     * @return {@link Map} of {@link Integer} of agentIds to {@link List} of
-     *         {@link AppdefEntityID}s
-     */
-    private Map<Integer, List<AppdefEntityID>> buildAsyncDeleteAgentCache(Server server) {
-        Map<Integer, List<AppdefEntityID>> cache = new HashMap<Integer, List<AppdefEntityID>>();
-
+    public void removeService(AuthzSubject subject, Service service)
+        throws VetoException, PermissionException {
         try {
-            Agent agent = findResourceAgent(server.getEntityId());
-            List<AppdefEntityID> resources = new ArrayList<AppdefEntityID>();
-
-            for (Service s : server.getServices()) {
-                resources.add(s.getEntityId());
-            }
-            cache.put(agent.getId(), resources);
-        } catch (Exception e) {
-            log.warn("Unable to build AsyncDeleteAgentCache for server[id=" + server.getId() +
-                     ", name=" + server.getName() + "]: " + e.getMessage());
-        }
-
-        return cache;
-    }
-
-    /**
-     * @param platform The platform being deleted
-     * 
-     * @return {@link Map} of {@link Integer} of agentIds to {@link List} of
-     *         {@link AppdefEntityID}s
-     */
-    private Map<Integer, List<AppdefEntityID>> buildAsyncDeleteAgentCache(Platform platform) {
-        Map<Integer, List<AppdefEntityID>> cache = new HashMap<Integer, List<AppdefEntityID>>();
-
-        try {
-            Agent agent = platform.getAgent();
-            List<AppdefEntityID> resources = new ArrayList<AppdefEntityID>();
-
-            for (Server s : platform.getServers()) {
-                resources.add(s.getEntityId());
-                List<AppdefEntityID> services = buildAsyncDeleteAgentCache(s).get(agent.getId());
-                resources.addAll(services);
-            }
-            cache.put(agent.getId(), resources);
-        } catch (Exception e) {
-            log.warn("Unable to build AsyncDeleteAgentCache for platform[id=" + platform.getId() +
-                     ", name=" + platform.getName() + "]: " + e.getMessage());
-        }
-
-        return cache;
-    }
-
-  
-    public void removeService(AuthzSubject subject, Integer serviceId)
-        throws VetoException, PermissionException, ServiceNotFoundException {
-        try {
-            Service service = serviceManager.findServiceById(serviceId);
             // now remove any measurements associated with the service
             disableMeasurements(subject, service.getResource());
             removeTrackers(subject, service.getEntityId());
@@ -1677,10 +1604,13 @@ public class AppdefBossImpl implements AppdefBoss {
     }
 
    
-    public void removeServer(AuthzSubject subj, Integer serverId) throws ServerNotFoundException,
+    public void removeServer(AuthzSubject subj, Server server) throws ServerNotFoundException,
         SessionNotFoundException, SessionTimeoutException, PermissionException, SessionException,
         VetoException {
-        Server server = serverManager.findServerById(serverId);
+       
+        for(Service service: server.getServices()) {
+            removeService(subj, service);
+        }
         try {
             // now remove the measurements
             disableMeasurements(subj, server.getResource());

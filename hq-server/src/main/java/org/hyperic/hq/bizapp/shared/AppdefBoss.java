@@ -37,6 +37,7 @@ import org.hyperic.hq.appdef.server.session.ApplicationType;
 import org.hyperic.hq.appdef.server.session.DownResource;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
+import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
@@ -60,7 +61,6 @@ import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
@@ -358,7 +358,7 @@ public interface AppdefBoss {
     public AppdefEntityID[] removeAppdefEntity(int sessionId, AppdefEntityID aeid) throws SessionNotFoundException,
         SessionTimeoutException, ApplicationException, VetoException;
     
-    public void removePlatform(AuthzSubject subject, Integer platformId) throws ApplicationException, VetoException;
+    public void removePlatform(AuthzSubject subject, Platform platform) throws ApplicationException, VetoException;
 
     public ServerValue updateServer(int sessionId, ServerValue aServer) throws PermissionException,
         ValidationException, SessionTimeoutException, SessionNotFoundException, UpdateException,
@@ -419,11 +419,11 @@ public interface AppdefBoss {
     public void setAppDependencyTree(int sessionId, DependencyTree depTree) throws ApplicationException,
         PermissionException;
 
-    public void removeServer(AuthzSubject subj, Integer serverId) throws ServerNotFoundException,
+    public void removeServer(AuthzSubject subj, Server server) throws ServerNotFoundException,
         SessionNotFoundException, SessionTimeoutException, PermissionException, SessionException, VetoException;
     
-    void removeService(AuthzSubject subject, Integer serviceId)
-    throws VetoException, PermissionException, ServiceNotFoundException;
+    void removeService(AuthzSubject subject, Service service)
+    throws VetoException, PermissionException;
 
     /**
      * Remove an application service.

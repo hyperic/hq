@@ -1122,110 +1122,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         enqueueZeventForMeasScheduleChange(meas, interval);
     }
 
-    /**
-     * Disable all measurements for the given resources.
-     * 
-     * @param agentId The entity id to use to look up the agent connection
-     * @param ids The list of entitys to unschedule
-     * 
-     *        NOTE: This method requires all entity ids to be monitored by the
-     *        same agent as specified by the agentId
-     */
-    public void disableMeasurements(AuthzSubject subject, AppdefEntityID agentId,
-                                    AppdefEntityID[] ids) throws PermissionException, AgentNotFoundException {
-        Agent agent = agentManager.getAgent(agentId);
-        disableMeasurements(subject, agent, ids, false);
-    }
-    
-    public void disableMeasurementsForDeletion(AuthzSubject subject, Agent agent,
-                    AppdefEntityID[] ids) throws PermissionException {
-        List<Resource> resources = new ArrayList<Resource>();
-        for (int i = 0; i < ids.length; i++) {
-            permissionManager.checkModifyPermission(subject.getId(), ids[i]);
-            resources.add(resourceManager.findResource(ids[i]));
-        } 
-        List<Measurement> mcol = measurementDAO.findByResources(resources);
-        
-        Integer[] mids = new Integer[mcol.size()];
-        Iterator<Measurement> it = mcol.iterator();
-        for (int j = 0; it.hasNext(); j++) {
-            Measurement dm = it.next();
-            dm.setEnabled(false);
-            mids[j] = dm.getId();
-        }
-
-        removeMeasurementsFromCache(mids);
-        
-        enqueueZeventsForMeasScheduleCollectionDisabled(mids);
-    
-        ZeventManager.getInstance().enqueueEventAfterCommit(new AgentUnscheduleZevent(Arrays.asList(ids), agent.getAgentToken()));
-    }
-    
-    /**
-     * Disable all measurements for the given resources.
-     *
-     * @param agent The agent for the given resources
-     * @param ids The list of entitys to unschedule
-     * @param isAsyncDelete Indicates whether it is for async delete
-     * @ejb:interface-method
-     *
-     * NOTE: This method requires all entity ids to be monitored by the same
-     * agent as specified by the agent
-     */
-    public void disableMeasurements(AuthzSubject subject, Agent agent,
-                                    AppdefEntityID[] ids, boolean isAsyncDelete)
-        throws PermissionException {
   
-        for (int i = 0; i < ids.length; i++) {
-            permissionManager.checkModifyPermission(subject.getId(), ids[i]);
-            List<Measurement> mcol = null;
-            Resource res = resourceManager.findResource(ids[i]);
-            if (isAsyncDelete) {
-                // For asynchronous deletes, we need to get all measurements
-                // because some disabled measurements are not unscheduled
-                // from the agent (like during the maintenance window) and
-                // we need to unschedule these measurements
-                mcol = findMeasurements(subject, res);
-            } else {
-                mcol = measurementDAO.findEnabledByResource(res);            
-            }
-            
-            if (mcol.isEmpty()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("No measurements to disable for resource[" 
-                                    + ids[i]
-                                    + "], isAsyncDelete=" + isAsyncDelete);
-                }
-                continue;
-            }
-            
-            Integer[] mids = new Integer[mcol.size()];
-            Iterator<Measurement> it = mcol.iterator();
-            for (int j = 0; it.hasNext(); j++) {
-                Measurement dm = it.next();
-                dm.setEnabled(false);
-                mids[j] = dm.getId();
-            }
-
-            removeMeasurementsFromCache(mids);
-            
-            enqueueZeventsForMeasScheduleCollectionDisabled(mids);
-        }
-        ZeventManager.getInstance().enqueueEventAfterCommit(new AgentUnscheduleZevent(Arrays.asList(ids), agent.getAgentToken()));
-    }
-
-
-    /**
-     * Disable all Measurements for a resource
-     * 
-     */
-    public void disableMeasurements(AuthzSubject subject, AppdefEntityID id)
-        throws PermissionException {
-        // Authz check
-        permissionManager.checkModifyPermission(subject.getId(), id);
-        disableMeasurements(subject, resourceManager.findResource(id));
-    }
-
     /**
      * Disable all Measurements for a resource
      * 
@@ -1239,28 +1136,17 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         Integer[] mids = new Integer[mcol.size()];
         Iterator<Measurement> it = mcol.iterator();
-        AppdefEntityID aeid = null;
+        AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(res);
         for (int i = 0; it.hasNext(); i++) {
             Measurement dm = it.next();
             dm.setEnabled(false);
             mids[i] = dm.getId();
-            if (aeid == null) {
-                aeid = new AppdefEntityID(dm.getTemplate().getMonitorableType().getAppdefType(), dm
-                    .getInstanceId());
-            }
         }
 
         removeMeasurementsFromCache(mids);
         enqueueZeventsForMeasScheduleCollectionDisabled(mids);
-
-        // Unscheduling of all metrics for a resource could indicate that
-        // the resource is getting removed. Send the unschedule synchronously
-        // so that all the necessary plumbing is in place.
-        try {
-            getMeasurementProcessor().unschedule(Collections.singletonList(aeid));
-        } catch (MeasurementUnscheduleException e) {
-            log.error("Unable to disable measurements", e);
-        }
+        ZeventManager.getInstance().enqueueEventAfterCommit(new AgentUnscheduleZevent(Collections.singletonList(aeid), 
+            res.getAgent().getAgentToken()));
     }
 
     /**
