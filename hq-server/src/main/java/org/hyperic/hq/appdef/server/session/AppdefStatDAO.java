@@ -42,6 +42,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
 import org.hibernate.engine.SessionFactoryImplementor;
 import org.hyperic.hibernate.dialect.HQDialect;
+import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -268,89 +269,33 @@ public class AppdefStatDAO {
     }
 
     public ResourceTreeNode[] getNavMapDataForApplication(AuthzSubject subject,
-                                                          final Application app)
-        throws SQLException {
-        StringBuffer buf = new StringBuffer().append("SELECT appsvc.service_id, pm.name,").append(
-            " appsvc.service_type_id,").append(" svct.name as service_type_name,").append(
-            " appsvc.application_id, appsvc.group_id").append(" FROM EAM_APP_SERVICE appsvc, ")
-            .append(TBL_SERVICE).append("_TYPE svct, ").append(TBL_GROUP).append(" grp, (").append(
-                getPermGroupSQL(subject.getId())).append(") pm").append(
-                " WHERE svct.id = appsvc.service_type_id AND ").append(
-                " grp.id = appsvc.group_id AND pm.group_id = grp.id").append(
-                " AND appsvc.application_id = ").append(app.getId()).append(" UNION ALL ").append(
-                "SELECT appsvc.service_id, res2.name,").append(" appsvc.service_type_id,").append(
-                " svct.name as service_type_name,").append(
-                " appsvc.application_id, appsvc.group_id").append(" FROM EAM_APP_SERVICE appsvc, ")
-            .append(TBL_SERVICE).append("_TYPE svct, (").append(getPermServiceSQL(subject.getId()))
-            .append(") pm, ").append(TBL_SERVICE).append(" svc JOIN ").append(TBL_RES).append(
-                " res2 ON svc.resource_id = res2.id ").append(
-                " WHERE svct.id = appsvc.service_type_id AND ").append(
-                " svc.id = appsvc.service_id AND ").append(" pm.service_id = svc.id AND ").append(
-                " appsvc.application_id = ").append(app.getId()).append(
-                " ORDER BY service_type_id, service_id");
-
-        if (log.isDebugEnabled()) {
-            log.debug(buf.toString());
-        }
-
+                                                          final Application app) {
+        
         StopWatch timer = new StopWatch();
-        ResourceTreeNode[] appNode = this.jdbcTemplate.query(buf.toString(),
-            new ResultSetExtractor<ResourceTreeNode[]>() {
-                public ResourceTreeNode[] extractData(ResultSet rs) throws SQLException,
-                    DataAccessException {
-                    Map<String, ResourceTreeNode> svcMap = new HashMap<String, ResourceTreeNode>();
+        ResourceTreeNode appNode = new ResourceTreeNode(app.getName(),
+            getAppdefTypeLabel(app.getEntityId().getType(), app.getAppdefResourceType()
+                .getName()), app.getEntityId(), ResourceTreeNode.RESOURCE);
+        
+        Map<String, ResourceTreeNode> svcMap = new HashMap<String, ResourceTreeNode>();
+        for(AppService svc : app.getAppServices()) {
+            String key = APPDEF_TYPE_SERVICE + "-" + svc.getId();
+            svcMap.put(key, new ResourceTreeNode(svc.getService().getName(), getAppdefTypeLabel(
+                APPDEF_TYPE_SERVICE, svc.getService().getServiceType().getName()), AppdefEntityID
+                .newServiceID(svc.getId()), app.getEntityId(),
+                svc.getService().getServiceType().getId()));
+        }
+        appNode.setSelected(true);
+        ResourceTreeNode[] svcNodes = (ResourceTreeNode[]) svcMap.values().toArray(
+            new ResourceTreeNode[0]);
+        ResourceTreeNode.alphaSortNodes(svcNodes);
+        appNode.addDownChildren(svcNodes);
 
-                    ResourceTreeNode appNode = new ResourceTreeNode(app.getName(),
-                        getAppdefTypeLabel(app.getEntityId().getType(), app.getAppdefResourceType()
-                            .getName()), app.getEntityId(), ResourceTreeNode.RESOURCE);
-
-                    int svc_id_col = rs.findColumn("service_id"), name_col = rs.findColumn("name"), service_type_col = rs
-                        .findColumn("service_type_id"), type_name_col = rs
-                        .findColumn("service_type_name"), group_id_col = rs.findColumn("group_id");
-
-                    while (rs.next()) {
-                        int serviceId = rs.getInt(svc_id_col);
-                        String serviceName = rs.getString(name_col);
-                        int serviceTypeId = rs.getInt(service_type_col);
-                        String serviceTypeName = rs.getString(type_name_col);
-                        int groupId = rs.getInt(group_id_col);
-                        String thisGroupName = rs.getString(name_col);
-                        // means that column is null, hence row is not a group
-                        if (groupId == 0) {
-                            thisGroupName = null;
-                        } else {
-                            serviceName = null;
-                        }
-
-                        if (thisGroupName != null) {
-                            String key = APPDEF_TYPE_GROUP + "-" + groupId;
-                            svcMap.put(key, new ResourceTreeNode(thisGroupName, getAppdefTypeLabel(
-                                APPDEF_TYPE_GROUP, serviceTypeName), AppdefEntityID
-                                .newGroupID(new Integer(groupId)), ResourceTreeNode.CLUSTER));
-                        } else if (serviceName != null) {
-                            String key = APPDEF_TYPE_SERVICE + "-" + serviceId;
-                            svcMap.put(key, new ResourceTreeNode(serviceName, getAppdefTypeLabel(
-                                APPDEF_TYPE_SERVICE, serviceTypeName), AppdefEntityID
-                                .newServiceID(new Integer(serviceId)), app.getEntityId(),
-                                serviceTypeId));
-                        }
-                    }
-
-                    appNode.setSelected(true);
-                    ResourceTreeNode[] svcNodes = (ResourceTreeNode[]) svcMap.values().toArray(
-                        new ResourceTreeNode[0]);
-                    ResourceTreeNode.alphaSortNodes(svcNodes);
-                    appNode.addDownChildren(svcNodes);
-
-                    return new ResourceTreeNode[] { appNode };
-                }
-            });
+        ResourceTreeNode[] appNodes = new ResourceTreeNode[] { appNode };
 
         if (log.isDebugEnabled()) {
             log.debug("getNavMapDataForApplication() executed in: " + timer);
-            log.debug("SQL: " + buf);
         }
-        return appNode;
+        return appNodes;
     }
 
     public ResourceTreeNode[] getNavMapDataForAutoGroup(AuthzSubject subject,
@@ -545,7 +490,7 @@ public class AppdefStatDAO {
     }
 
     public ResourceTreeNode[] getNavMapDataForGroup(AuthzSubject subject, ResourceGroup group, AppdefGroupValue groupVo)
-        throws PermissionException, SQLException {
+        throws PermissionException {
         ResourceTreeNode grpNode = new ResourceTreeNode(groupVo.getName(), getAppdefTypeLabel(
             APPDEF_TYPE_GROUP, groupVo.getAppdefResourceTypeValue().getName()), groupVo
             .getEntityId(), ResourceTreeNode.CLUSTER);

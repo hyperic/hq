@@ -166,16 +166,17 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
 
 	protected static Map<String, Boolean> loadUserPermissions(Integer sessionId, AuthzBoss authzBoss) 
     throws SessionTimeoutException, SessionNotFoundException, PermissionException {
-        // look up the user's permissions
         Map<String, Boolean> userOperationsMap = new HashMap<String, Boolean>();
-        List<OperationType> userOperations = authzBoss.getAllOperations(sessionId);
-        
-        for (Iterator<OperationType> it = userOperations.iterator(); it.hasNext();) {
-            OperationType operation = it.next();
-            
-            userOperationsMap.put(operation.getName(), Boolean.TRUE);
-        }
-        
+        userOperationsMap.put("createApplication", true);
+        //TODO look up permissions relative to the ResourceTypes
+//        List<OperationType> userOperations = authzBoss.getAllOperations(sessionId);
+//        
+//        for (Iterator<OperationType> it = userOperations.iterator(); it.hasNext();) {
+//            OperationType operation = it.next();
+//            
+//            userOperationsMap.put(operation.getName(), Boolean.TRUE);
+//        }
+//        
         return userOperationsMap;
     }   
 
