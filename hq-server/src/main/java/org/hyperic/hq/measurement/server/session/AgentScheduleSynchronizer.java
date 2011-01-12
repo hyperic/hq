@@ -46,8 +46,10 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.hibernate.SessionManager;
 import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.hq.zevents.Zevent;
@@ -70,6 +72,8 @@ public class AgentScheduleSynchronizer {
     private ZeventEnqueuer zEventManager;
 
     private AgentManager agentManager;
+    
+    private ResourceManager resourceManager;
 
     private final Map<Integer, Collection<AppdefEntityID>> scheduleAeids = new HashMap<Integer, Collection<AppdefEntityID>>();
 
@@ -85,11 +89,14 @@ public class AgentScheduleSynchronizer {
     
 
     @Autowired
-    public AgentScheduleSynchronizer(ZeventEnqueuer zEventManager, AgentManager agentManager, MeasurementProcessor measurementProcessor, ConcurrentStatsCollector concurrentStatsCollector) {
+    public AgentScheduleSynchronizer(ZeventEnqueuer zEventManager, AgentManager agentManager, 
+                                     MeasurementProcessor measurementProcessor, 
+                                     ConcurrentStatsCollector concurrentStatsCollector, ResourceManager resourceManager) {
         this.zEventManager = zEventManager;
         this.agentManager = agentManager;
         this.measurementProcessor = measurementProcessor;
         this.concurrentStatsCollector = concurrentStatsCollector;
+        this.resourceManager = resourceManager;
     }
 
     @PostConstruct
@@ -135,19 +142,19 @@ public class AgentScheduleSynchronizer {
                     }
                 }
 
-                final Map<Integer, Collection<AppdefEntityID>> agentAppdefIds = agentManager
-                    .getAgentMap(toSchedule);
                 synchronized (scheduleAeids) {
-                    for (final Map.Entry<Integer, Collection<AppdefEntityID>> entry : agentAppdefIds
-                        .entrySet()) {
-                        final Integer agentId = entry.getKey();
-                        final Collection<AppdefEntityID> eids = entry.getValue();
-                        Collection<AppdefEntityID> tmp;
-                        if (null == (tmp = scheduleAeids.get(agentId))) {
-                            tmp = new HashSet<AppdefEntityID>(eids.size());
-                            scheduleAeids.put(agentId, tmp);
+                    for (AppdefEntityID id: toSchedule) {
+                        Resource resource = resourceManager.findResourceById(id.getId());
+                        //Resource may have been deleted while we are processing this
+                        if(resource != null) {
+                            Collection<AppdefEntityID> tmp;
+                            final int agentId = resource.getAgent().getId();
+                            if (null == (tmp = scheduleAeids.get(agentId))) {
+                                tmp = new HashSet<AppdefEntityID>();
+                                scheduleAeids.put(agentId, tmp);
+                            }
+                            tmp.add(id);
                         }
-                        tmp.addAll(eids);
                     }
                 }
                 synchronized (unscheduleAeids) {
