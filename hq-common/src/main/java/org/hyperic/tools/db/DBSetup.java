@@ -399,11 +399,9 @@ public class DBSetup {
             // root element.
             if(nodeRoot.getNodeName().equalsIgnoreCase("Covalent.DBSetup") == false) {
                 if (source instanceof String) {
-                    throw new IOException(source.toString() + " is not a "
-                                          + "DBSetup XML file.");
+                    throw new IOException(source.toString() + " is not a DBSetup XML file.");
                 } else {
-                    throw new IOException("Source is not a "
-                                          + "DBSetup XML file.");
+                    throw new IOException("Source is not a DBSetup XML file.");
                 }
             }
 

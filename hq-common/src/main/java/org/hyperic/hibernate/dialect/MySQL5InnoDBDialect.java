@@ -360,4 +360,22 @@ public class MySQL5InnoDBDialect
     public String getMetricDataHint() {
         return "USE INDEX (PRIMARY)";
     }
+
+	public Long getSchemaCreationTimestampInMillis(Statement stmt) throws SQLException {
+        ResultSet rs = null;
+           
+        try {
+        	String sql = "select min(CREATE_TIME) from information_schema.tables where table_schema = database()";
+            
+        	rs = stmt.executeQuery(sql);
+            
+        	if (rs.next()) {
+        		return rs.getDate(1).getTime();
+        	}
+        } finally {
+        	DBUtil.closeResultSet(logCtx, rs);
+        }
+        
+        return null;
+	}
 }

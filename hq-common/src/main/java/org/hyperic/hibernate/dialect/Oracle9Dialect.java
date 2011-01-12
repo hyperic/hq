@@ -185,4 +185,23 @@ public class Oracle9Dialect
     public String getMetricDataHint() {
         return "";
     }
+
+	public Long getSchemaCreationTimestampInMillis(Statement stmt)
+			throws SQLException {
+        ResultSet rs = null;
+        
+        try {
+        	String sql = "select min(created) from user_objects where object_name like 'EAM_%'";
+        	
+        	rs = stmt.executeQuery(sql);
+            
+        	if (rs.next()) {
+        		return rs.getDate(1).getTime();
+        	}
+        } finally {
+        	DBUtil.closeResultSet(logCtx, rs);
+        }
+
+		return null;
+	}
 }
