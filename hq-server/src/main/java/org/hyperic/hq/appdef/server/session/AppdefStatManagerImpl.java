@@ -516,7 +516,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
         ResourceGroup group = resourceGroupManager.findResourceGroupById(subject, groupId);
         AppdefGroupValue groupVal = resourceGroupManager.getGroupConvert(subject, group);
         try {
-            return appdefStatDAO.getNavMapDataForGroup(subject, groupVal);
+            return appdefStatDAO.getNavMapDataForGroup(subject, group, groupVal);
         } catch (Exception e) {
             log.error("Unable to get NavMap data: " + e, e);
             throw new SystemException(e);

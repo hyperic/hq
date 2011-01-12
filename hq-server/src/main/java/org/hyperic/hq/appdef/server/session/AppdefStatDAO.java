@@ -47,10 +47,13 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
+import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -541,67 +544,25 @@ public class AppdefStatDAO {
         return groupNode;
     }
 
-    public ResourceTreeNode[] getNavMapDataForGroup(AuthzSubject subject, AppdefGroupValue groupVo)
+    public ResourceTreeNode[] getNavMapDataForGroup(AuthzSubject subject, ResourceGroup group, AppdefGroupValue groupVo)
         throws PermissionException, SQLException {
         ResourceTreeNode grpNode = new ResourceTreeNode(groupVo.getName(), getAppdefTypeLabel(
             APPDEF_TYPE_GROUP, groupVo.getAppdefResourceTypeValue().getName()), groupVo
             .getEntityId(), ResourceTreeNode.CLUSTER);
-        final List<AppdefEntityID> agEntries = groupVo.getAppdefGroupEntries();
-        if (agEntries.size() == 0) {
+        
+        if (group.getMembers().size() == 0) {
             return new ResourceTreeNode[] { grpNode };
         }
-        ResourceTreeNode[] retVal = null;
-        final StringBuilder grpSqlStmt = new StringBuilder();
-        final boolean debug = log.isDebugEnabled();
-
         int entityType = groupVo.getGroupEntType();
 
-        final String resJoin = new StringBuilder().append(" JOIN ").append(TBL_RES).append(
-            " res on resource_id = res.id ").toString();
-
-        switch (entityType) {
-            case APPDEF_TYPE_PLATFORM:
-                grpSqlStmt.append("SELECT p.id as platform_id, res.name as platform_name ").append(
-                    " FROM ").append(TBL_PLATFORM).append(" p ").append(resJoin).append(
-                    "WHERE p.id IN (");
-                break;
-            case APPDEF_TYPE_SERVER:
-                grpSqlStmt.append("SELECT s.id as server_id, res.name as server_name ").append(
-                    "FROM ").append(TBL_SERVER).append(" s ").append(resJoin).append(
-                    "WHERE s.id IN (");
-                break;
-            case APPDEF_TYPE_SERVICE:
-                grpSqlStmt.append("SELECT s.id as service_id, res.name as service_name ").append(
-                    "FROM ").append(TBL_SERVICE).append(" s  ").append(resJoin).append(
-                    "WHERE s.id IN (");
-                break;
-            default:
-                throw new IllegalArgumentException("No group support " + "for specified type");
-        }
-
-        if (debug) {
-            log.debug(grpSqlStmt);
-        }
-        Set<ResourceTreeNode> entitySet = new HashSet<ResourceTreeNode>(agEntries.size());
-
-        Map<Integer, String> entNameMap = new HashMap<Integer, String>();
-        if (groupVo.getTotalSize() > 0) {
-            final int max = getHQDialect().getMaxExpressions();
-            final int batchSize = (max < 0) ? Integer.MAX_VALUE : max;
-            for (int ii = 0; ii < agEntries.size(); ii += batchSize) {
-                int end = Math.min(ii + batchSize, agEntries.size());
-                List<AppdefEntityID> list = agEntries.subList(ii, end);
-                setEntNameMap(entNameMap, list, grpSqlStmt);
-            }
-
-            // Let group member order drive node creation (not db order).
-            for (AppdefEntityID id : groupVo.getAppdefGroupEntries()) {
-                entitySet
-                    .add(new ResourceTreeNode((String) entNameMap.get(id.getId()),
-                        getAppdefTypeLabel(id.getType(), groupVo.getAppdefResourceTypeValue()
-                            .getName()), new AppdefEntityID(entityType, id.getId()),
-                        ResourceTreeNode.RESOURCE));
-            }
+        Set<ResourceTreeNode> entitySet = new HashSet<ResourceTreeNode>(group.getMembers().size());
+        for (Resource member: group.getMembers()) {
+            AppdefEntityID resourceId = AppdefUtil.newAppdefEntityId(member);
+            entitySet
+                .add(new ResourceTreeNode(member.getName(),
+                    getAppdefTypeLabel(resourceId.getType(), groupVo.getAppdefResourceTypeValue()
+                        .getName()), new AppdefEntityID(entityType, resourceId.getId()),
+                    ResourceTreeNode.RESOURCE));
         }
 
         ResourceTreeNode[] memberNodes = entitySet.toArray(new ResourceTreeNode[0]);
@@ -610,49 +571,11 @@ public class AppdefStatDAO {
         ResourceTreeNode.alphaSortNodes(memberNodes);
         grpNode.addDownChildren(memberNodes);
 
-        retVal = new ResourceTreeNode[] { grpNode };
+        ResourceTreeNode[] retVal = new ResourceTreeNode[] { grpNode };
 
         return retVal;
     }
-    
-    private HQDialect getHQDialect() {
-        return (HQDialect) ((SessionFactoryImplementor) sessionFactory)
-            .getDialect();
-    }
-
-    private void setEntNameMap(final Map<Integer, String> entNameMap, List<AppdefEntityID> list,
-                               StringBuilder grpSqlStmt) throws SQLException {
-        if (list.size() == 0) {
-            return;
-        }
-        final boolean debug = log.isDebugEnabled();
-        // don't overwrite the caller's object
-        grpSqlStmt = new StringBuilder(grpSqlStmt);
-
-        int x = 1;
-        for (AppdefEntityID mem : list) {
-            if (debug) {
-                log.debug("Arg " + x + ": " + mem.getID());
-            }
-            grpSqlStmt.append((x == 1 ? "" : ",")).append(mem.getID());
-            x++;
-        }
-        grpSqlStmt.append(")");
-        StopWatch timer = new StopWatch();
-        if (debug) {
-            log.debug("SQL: " + grpSqlStmt);
-        }
-        jdbcTemplate.query(grpSqlStmt.toString(), new RowCallbackHandler() {
-            public void processRow(ResultSet rs) throws SQLException {
-                entNameMap.put(rs.getInt(1), rs.getString(2));
-            } 
-        });   
-     
-        if (debug) {
-            log.debug("getNavMapDataForGroup() executed in: " + timer);
-        }
-    }
-
+   
     protected String getResourceTypeSQL(String instanceId, Integer subjectId, String resType,
                                       String op) throws SQLException {
         return "SELECT RES.ID FROM EAM_RESOURCE RES, " + " EAM_RESOURCE_TYPE RT " + "WHERE " +
