@@ -206,14 +206,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.uiplugin</groupId>
-			<artifactId>mass</artifactId>
-			<version>${project.version}</version>
-			<classifier>server</classifier>
-			<type>zip</type>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.uiplugin</groupId>
 			<artifactId>nagiup</artifactId>
 			<version>${project.version}</version>
 			<classifier>server</classifier>
@@ -231,14 +223,6 @@
 		<dependency>
 			<groupId>org.hyperic.hq.uiplugin</groupId>
 			<artifactId>public</artifactId>
-			<version>${project.version}</version>
-			<classifier>server</classifier>
-			<type>zip</type>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.uiplugin</groupId>
-			<artifactId>saasCenter</artifactId>
 			<version>${project.version}</version>
 			<classifier>server</classifier>
 			<type>zip</type>
