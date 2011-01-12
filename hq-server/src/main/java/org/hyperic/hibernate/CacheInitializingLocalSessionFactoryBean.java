@@ -61,7 +61,7 @@ import org.springframework.orm.hibernate3.SessionFactoryUtils;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
 /**
- * Extension of the {@link LocalSessionFactoryBean} that preloads the 2nd level
+ * Preloads the 2nd level
  * cache for performance optimizations and registers Hibernate and EhCache stat
  * MBeans
  * @author jhickey

@@ -60,7 +60,10 @@
 		<property name="jpaDialect">
 			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
 		</property>
+		<property name="persistenceProvider" ref="persistenceProvider"/>
 	</bean>
+	
+	<bean id="persistenceProvider" class="org.hyperic.hibernate.HibernateConfigHolder"/>
 
 	<bean class="org.springframework.orm.hibernate3.HibernateTemplate">
 		<constructor-arg ref="sessionFactory" />

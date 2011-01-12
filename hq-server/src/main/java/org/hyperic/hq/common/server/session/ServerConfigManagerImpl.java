@@ -39,6 +39,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
 import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.mapping.Table;
+import org.hyperic.hibernate.HibernateConfigHolder;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -54,7 +55,6 @@ import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -283,10 +283,9 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
         Connection conn = null;
         try {
             conn = dbUtil.getConnection();
-       
-            for (Iterator i = Bootstrap.getBean(LocalSessionFactoryBean.class).getConfiguration().getTableMappings(); i.hasNext();) {
-                Table t = (Table) i.next();
-
+           
+            for ( Iterator<Table> tables = ((HibernateConfigHolder)Bootstrap.getBean("persistenceProvider")).getTableMappings();tables.hasNext();) {
+                Table t = tables.next();
                 if (t.getName().toUpperCase().startsWith("EAM_MEASUREMENT_DATA") ||
                     t.getName().toUpperCase().startsWith("HQ_METRIC_DATA")) {
                     continue;
