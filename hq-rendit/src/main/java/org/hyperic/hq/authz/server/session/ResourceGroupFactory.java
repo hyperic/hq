@@ -9,6 +9,7 @@ abstract public class ResourceGroupFactory {
         ResourceGroup groupDto = new ResourceGroup();
         groupDto.setName(group.getName());
         groupDto.setId(group.getId());
+        groupDto.setResource(ResourceFactory.create(group));
         //TODO other fields
         return groupDto;
     }

@@ -676,13 +676,10 @@ class ResourceCategory {
 		}
 		
 		ResourceGroupCreateInfo cInfo = 
-				new ResourceGroupCreateInfo(name, description,
-				groupType,
-				r,      
+				new ResourceGroupCreateInfo(name, description,    
 				location,
-				0,         // clusterId 
-				false,     // sytstem
-				false)     // private
+				false,
+                groupType)
 		
 		// No roles or resources
 		groupMan.createResourceGroup(user, cInfo, [], [])

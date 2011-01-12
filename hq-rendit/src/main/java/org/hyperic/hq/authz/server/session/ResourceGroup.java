@@ -33,75 +33,8 @@ public class ResourceGroup {
         return id;
     }
 
-    public static class ResourceGroupCreateInfo {
-        private String _name;
-        private String _description;
-        private String _location;
-        private int _groupType;
-        private Resource _resourcePrototype;
-        private int _clusterId;
-        private boolean _system;
-        private boolean _privateGroup;
-
-        public ResourceGroupCreateInfo(String name, String description, int groupType,
-                                       Resource prototype, String location, int clusterId,
-                                       boolean system, boolean privateGroup) {
-            _name = name;
-            _description = description;
-            _resourcePrototype = prototype;
-            _groupType = groupType;
-            _location = location;
-            _clusterId = clusterId;
-            _system = system;
-            _privateGroup = privateGroup;
-        }
-
-        public String getName() {
-            return _name;
-        }
-
-        public String getDescription() {
-            return _description;
-        }
-
-        public String getLocation() {
-            return _location;
-        }
-
-        public int getGroupType() {
-            return _groupType;
-        }
-
-        public Resource getResourcePrototype() {
-            return _resourcePrototype;
-        }
-
-        public int getClusterId() {
-            return _clusterId;
-        }
-
-        public boolean isSystem() {
-            return _system;
-        }
-
-        public boolean isPrivateGroup() {
-            return _privateGroup;
-        }
-    }
-
     public ResourceGroup() {
         super();
-    }
-
-    ResourceGroup(ResourceGroupCreateInfo cInfo, AuthzSubject creator) {
-        _clusterId = new Integer(cInfo.getClusterId());
-        _description = cInfo.getDescription();
-        _location = cInfo.getLocation();
-        _system = cInfo.isSystem();
-        _groupType = new Integer(cInfo.getGroupType());
-        _resourcePrototype = cInfo.getResourcePrototype();
-        _ctime = _mtime = System.currentTimeMillis();
-        _modifiedBy = creator.getName();
     }
 
     void markDirty() {

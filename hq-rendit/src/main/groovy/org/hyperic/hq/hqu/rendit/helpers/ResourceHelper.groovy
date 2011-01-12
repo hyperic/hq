@@ -591,7 +591,12 @@ class ResourceHelper extends BaseHelper {
     ResourceGroup createGroup(String name, String description, String location,
     Resource prototype, Collection roles,
     Collection resources, boolean isPrivate) {
-        groupMan.createResourceGroup(user, getCreateInfo(name,description,location,prototype,isPrivate), roles, resources)
+        Set<org.hyperic.hq.inventory.domain.Resource> convertedResources = new HashSet<org.hyperic.hq.inventory.domain.Resource>();
+         
+        for(Resource resource in resources) {
+            convertedResources.add(rman.findResourceById(resource.getId()))
+        }
+        return ResourceGroupFactory.create(groupMan.createResourceGroup(user, getCreateInfo(name,description,location,prototype,isPrivate), roles, convertedResources))
     }
     
     ResourceGroup createGroup(String name, String description, String location,
@@ -602,21 +607,24 @@ class ResourceHelper extends BaseHelper {
     
     private ResourceGroupCreateInfo getCreateInfo(String name, String description, String location,
     Resource prototype, boolean isPrivate) {
-        int groupType
+       
+        ResourceGroupCreateInfo info;
         if (!prototype) {
-            groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS
+            int groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS
+            info = new ResourceGroupCreateInfo(name, description, location,isPrivate,groupType);
         } else {
+            int groupType
+            int appdefType = prototype.resourceType.appdefType
             if (prototype.isService()) {
                 groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC
             } else {
                 groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS
             }
+            info = new ResourceGroupCreateInfo(name, description, location,isPrivate,groupType);
+            info.setGroupEntResType(prototype.getId())
+            info.setGroupEntType(appdefType)
         }
-        
-        ResourceGroupCreateInfo info =
-                new ResourceGroupCreateInfo(name, description, groupType, prototype,
-                location, 0, false, isPrivate);
-        return info
+        return info;
     }
     
     /**

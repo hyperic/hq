@@ -26,6 +26,7 @@
 
 package org.hyperic.hq.hqu.rendit.metaclass
 
+import org.hyperic.hq.authz.server.session.ResourceFactory;
 import org.hyperic.hq.authz.server.session.ResourceGroup
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.AuthzSubject
@@ -57,7 +58,12 @@ class ResourceGroupCategory {
     }
 
     static Collection getResources(ResourceGroup group) {
-        groupMan.getMembers(group)
+        List<Resource> members = new ArrayList<Resource>();
+        Collection<org.hyperic.hq.inventory.domain.Resource> resources = groupMan.getMembers(groupMan.findResourceGroupById(group.getId()))
+        for(org.hyperic.hq.inventory.domain.Resource resource in resources) {
+            members.add(ResourceFactory.create(resource));
+        }
+        return members;
     }
     
     /**
