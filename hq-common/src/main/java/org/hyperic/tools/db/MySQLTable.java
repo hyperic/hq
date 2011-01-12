@@ -49,21 +49,22 @@ class MySQLTable extends Table {
         super(set, meta, dbsetup);
     }
 
-	protected static Collection getTables(DBSetup parent, String username)
+	protected static Collection<Table> getTables(DBSetup parent, String username)
         throws SQLException    {
         if(username != null)
             username = username.toUpperCase();
 
-        Collection coll = new StrongCollection("org.hyperic.tools.db.Table");
+        Collection<Table> coll = new StrongCollection("org.hyperic.tools.db.Table");
 
         String[]         types   = {"TABLE"};
         DatabaseMetaData meta    = parent.getConn().getMetaData();
         ResultSet        setTabs = meta.getTables(null, username, "%", types);
 
         // Find Tables
-        while(setTabs.next())
+        while(setTabs.next()) {
             coll.add(new MySQLTable(setTabs, meta, parent));
-
+        }
+        
         return coll;
     }
 
