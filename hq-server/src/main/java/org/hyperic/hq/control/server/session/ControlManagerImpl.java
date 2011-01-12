@@ -404,9 +404,11 @@ public class ControlManagerImpl implements ControlManager {
                     return false;
                 }
 
-                checkControlPermission(subject, (AppdefEntityID) members.get(0));
+                //TODO perm check
+                //checkControlPermission(subject, (AppdefEntityID) members.get(0));
             } else {
-                checkControlPermission(subject, id);
+                //TODO perm check
+                //checkControlPermission(subject, id);
             }
             controlPluginManager.getPlugin(resType);
             return true;
