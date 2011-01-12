@@ -204,21 +204,8 @@ public abstract class AppdefResourceValue
         AppdefGroupValue groupValue = Bootstrap.getBean(ResourceGroupManager.class).getGroupConvert(subject, group);
         return getResourceTypeById(groupValue.getGroupEntType(),groupValue.getGroupEntResType());
     }
-
-    public AppdefResourceTypeValue getAppdefResourceTypeValue(AuthzSubject subject, ResourceGroup group) {
-        if (Bootstrap.getBean(ResourceGroupManager.class).getGroupConvert(subject, group).isMixed()) {
-            AppdefResourceTypeValue res = new GroupTypeValue();
-            res.setId(group.getType().getId());
-            res.setName(group.getType().getName());
-            return res;
-        } else {
-            return getAppdefResourceType(subject, group)
-                                                        .getAppdefResourceTypeValue();
-        }
-    }
-    
-    
-    private static AppdefResourceType getResourceTypeById(int type, int id) {
+ 
+    public static AppdefResourceType getResourceTypeById(int type, int id) {
         switch (type) {
             case (AppdefEntityConstants.APPDEF_TYPE_PLATFORM):
                 return getPlatformTypeById(id);

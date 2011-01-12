@@ -1282,7 +1282,6 @@ public class AppdefBossImpl implements AppdefBoss {
         }
         //TODO removed used to have every ID but not used.  Just add 1 for RemoveResourcesAction
         AppdefEntityID[] removed=new AppdefEntityID[] {aeid};
-        resourceManager.removeResource(subject, res);
         Map<Integer, List<AppdefEntityID>> agentCache = null;
 
         final Integer id = aeid.getId();

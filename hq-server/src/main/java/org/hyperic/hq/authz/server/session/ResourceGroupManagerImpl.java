@@ -46,8 +46,12 @@ import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
+import org.hyperic.hq.appdef.shared.GroupTypeValue;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.GroupCreationException;
@@ -58,6 +62,7 @@ import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.shared.EventLogManager;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
@@ -274,11 +279,6 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         eventLogManager.deleteLogs(group);
         applicationContext.publishEvent(new GroupDeleteRequestedEvent(group));
         group.remove();
-
-
-        // Send resource delete event
-        ResourceDeletedZevent zevent = new ResourceDeletedZevent(whoami, AppdefUtil.newAppdefEntityId(group));
-        ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
     }
     
     public void removeResourceGroup(AuthzSubject whoami, Integer groupId) throws PermissionException, VetoException {
@@ -436,15 +436,22 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
 
         // Add the group members
         for (Resource r : members) {
-            if (r.getType() != null) {
-                GroupEntry ge = new GroupEntry(r.getId(), r.getType().getName());
-                retVal.addEntry(ge);
-            }
+           GroupEntry ge = new GroupEntry(r.getId(), AppdefUtil.newAppdefEntityId(r).getAuthzTypeName());
+           retVal.addEntry(ge); 
         }
-
-        retVal.setAppdefResourceTypeValue(retVal.getAppdefResourceTypeValue(subj, g));
+        
+        if(retVal.isMixed()) {
+            AppdefResourceTypeValue res = new GroupTypeValue();
+            res.setId(g.getType().getId());
+            res.setName(g.getType().getName());
+            retVal.setAppdefResourceTypeValue(res);
+        }else {
+            retVal.setAppdefResourceTypeValue(AppdefResourceValue.getResourceTypeById(retVal.getGroupEntType(),retVal.getGroupEntResType()).getAppdefResourceTypeValue());
+        }
+        
         return retVal;
     }
+    
 
     /**
      * Get a list of {@link ResourceGroup}s which are compatible with the
