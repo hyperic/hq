@@ -2,7 +2,7 @@
 <% if(members!=null) {%>
 <ul id="members">
   <%for (member in members){%>
-  <li><a id="${member}" class="member" href="#${member}">${member}</a></li>
+  <li><a id="${member.id}" class="member" href="#${member.id}">${member.name}</a></li>
     <% } %>
 </ul>
   <% } %>
