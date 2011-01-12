@@ -135,11 +135,10 @@ public class AuthzSubjectDAO {
     }
 
     public AuthzSubject findByAuth(String name, String dsn) {
-        //TODO query cache
-        //.setCacheable(true).setCacheRegion("AuthzSubject.findByAuth")
         String sql = "select s from AuthzSubject s where s.name=:name and s.dsn=:dsn";
         try {
-            AuthzSubject subject =  entityManager.createQuery(sql,AuthzSubject.class).setParameter("name", name).setParameter("dsn", dsn).getSingleResult();
+            AuthzSubject subject =  entityManager.createQuery(sql,AuthzSubject.class).setHint("org.hibernate.cacheable", true).
+            setHint("org.hibernate.cacheRegion", "AuthzSubject.findByAuth").setParameter("name", name).setParameter("dsn", dsn).getSingleResult();
             subject.getId();
             return subject;
         }catch(EmptyResultDataAccessException e) {
@@ -149,12 +148,10 @@ public class AuthzSubjectDAO {
     }
 
     public AuthzSubject findByName(String name) {
-        //TODO query cache
-        //.setCacheable(true)
-       // .setCacheRegion("AuthzSubject.findByName")
         String sql = "select s from AuthzSubject s where s.name=?";
         try {
-            AuthzSubject subject = entityManager.createQuery(sql,AuthzSubject.class).setParameter(1, name).getSingleResult();
+            AuthzSubject subject = entityManager.createQuery(sql,AuthzSubject.class).setHint("org.hibernate.cacheable", true).
+            setHint("org.hibernate.cacheRegion", "AuthzSubject.findByName").setParameter(1, name).getSingleResult();
             subject.getId();
             return subject;
         }catch(EmptyResultDataAccessException e) {

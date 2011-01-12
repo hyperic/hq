@@ -40,6 +40,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.OptimisticLock;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -49,6 +51,7 @@ import org.springframework.datastore.graph.annotation.NodeEntity;
 
 @Entity
 @Table(name="EAM_SUBJECT")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @NodeEntity(partial=true)
 public class AuthzSubject  {
     

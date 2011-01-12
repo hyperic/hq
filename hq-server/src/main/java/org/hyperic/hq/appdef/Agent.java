@@ -34,11 +34,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.datastore.graph.annotation.NodeEntity;
 
 @Entity
 @Table(name="EAM_AGENT")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @NodeEntity(partial = true)
 public class Agent {
     

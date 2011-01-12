@@ -43,6 +43,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.authz.values.OwnedRoleValue;
@@ -70,6 +72,7 @@ public class Role  {
     
     @OneToMany(cascade=CascadeType.ALL)
     @JoinTable(name="EAM_ROLE_CALENDARS",joinColumns = {@JoinColumn(name="ROLE_ID")})
+    @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
     private Collection<RoleCalendar> calendars;
       
     @Column(name="NAME",length=100,nullable=false,unique=true)

@@ -41,6 +41,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -48,6 +50,7 @@ import org.hyperic.hq.inventory.domain.Resource;
 
 @Entity
 @Table(name = "EAM_MEASUREMENT")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Measurement implements ContainerManagedTimestampTrackable, Serializable {
     
     //TODO don't really need instanceId anymore b/c we have Resource
@@ -72,6 +75,7 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name="MEASUREMENT_ID")
+    @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
     private Collection<Baseline> baselinesBag;
 
     @OneToMany(cascade = CascadeType.ALL)

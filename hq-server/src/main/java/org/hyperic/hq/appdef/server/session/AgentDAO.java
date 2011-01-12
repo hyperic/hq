@@ -33,37 +33,41 @@ import javax.persistence.PersistenceContext;
 
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AgentType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.orm.jpa.JpaCallback;
+import org.springframework.orm.jpa.JpaTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class AgentDAO {
-    
-   
+     
     @PersistenceContext
     private EntityManager entityManager; 
     
-    public AgentDAO() {
-     
+    private JpaTemplate jpaTemplate;
+    
+    @Autowired
+    public AgentDAO(JpaTemplate jpaTemplate) {
+        this.jpaTemplate = jpaTemplate;
     }
 
     @SuppressWarnings("unchecked")
     @PostConstruct
     public void preloadQueryCache() {
-        //TODO replace this
-//        new HibernateTemplate(sessionFactory, true).execute(new HibernateCallback() {
-//            public Object doInHibernate(Session session) throws HibernateException, SQLException {
-//                List<String> tokens = session.createQuery("select agentToken from Agent").list();
-//                final String sql = "from Agent where agentToken=?";
-//                for(String token : tokens) {
-//                    //HQ-2575 Preload findByAgentToken query cache to minimize DB connections when multiple agents
-//                    //send measurement reports to a restarted server 
-//                    session.createQuery(sql).setString(0,token).setCacheRegion(
-//                        "Agent.findByAgentToken").setCacheable(true).uniqueResult();
-//                }
-//                return null;
-//            }
-//        });
+        jpaTemplate.execute(new JpaCallback() {
+            public Object doInJpa(EntityManager entityManager)  {
+                List<String> tokens = entityManager.createQuery("select a.agentToken from Agent a",String.class).getResultList();
+                final String sql = "select a from Agent a where a.agentToken=?";
+                for(String token : tokens) {
+                    //HQ-2575 Preload findByAgentToken query cache to minimize DB connections when multiple agents
+                    //send measurement reports to a restarted server 
+                    entityManager.createQuery(sql).setParameter(1,token).setHint("org.hibernate.cacheable", true).
+                    setHint("org.hibernate.cacheRegion", "Agent.findByAgentToken").getSingleResult();
+                }
+                return null;
+            }
+        });
     }
 
     public Agent create(AgentType type, String address, Integer port, boolean unidirectional,
@@ -114,10 +118,11 @@ public class AgentDAO {
     }
 
     public Agent findByAgentToken(String token) {
-        //TODO this used to set cache region for query cache interaction.  Still possible?
         try {
             Agent agent = entityManager.createQuery("SELECT a FROM Agent a WHERE a.agentToken = :agentToken",Agent.class).
-                setParameter("agentToken", token).getSingleResult();
+                setHint("org.hibernate.cacheable", true).setHint("org.hibernate.cacheRegion", "Agent.findByAgentToken").
+                setParameter("agentToken", token).
+                getSingleResult();
             agent.getId();
             return agent;
         }catch(EmptyResultDataAccessException e) {

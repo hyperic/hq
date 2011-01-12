@@ -152,7 +152,6 @@ public class RoleDAO {
     }
     
     public List<Role> findAll() {
-        //TODO HibernateDAO find all prev used query cache
         List<Role> roles = entityManager.createQuery("select r from Agent r",Role.class).getResultList();
         for(Role role: roles) {
             role.getId();
