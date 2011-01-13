@@ -448,6 +448,45 @@ class HealthController
         
         render(locals: locals)
     }
+
+    def serverProp(params) {
+        def s = Humidor.instance.sigar
+        def dateFormat  = DateFormat.dateTimeInstance
+        def cmdLine     = s.getProcArgs('$$')
+        def procEnv     = s.getProcEnv('$$')
+        def databaseVersion = runQueryAsText('version')
+        def dbVersionIndex = databaseVersion.lastIndexOf(':')
+        def dbVersion = databaseVersion.substring(dbVersionIndex+1)
+
+        def locals = [
+            numCpu:           Runtime.runtime.availableProcessors(),
+            fqdn:             s.getFQDN(),
+            dbVersion:        dbVersion,
+            numPlatforms:     resourceHelper.find(count:'platforms'),
+            numCpus:          resourceHelper.find(count:'cpus'),
+            numAgents:        agentHelper.find(count:'agents'),
+            numActiveAgents:  agentHelper.find(count:'activeAgents'),
+            numServers:       resourceHelper.find(count:'servers'),
+            numServices:      resourceHelper.find(count:'services'),
+            numApplications:  resourceHelper.find(count:'applications'),
+            numRoles:         resourceHelper.find(count:'roles'),
+            numUsers:         resourceHelper.find(count:'users'),
+            numAlertDefs:     resourceHelper.find(count:'alertDefs'),
+            numResources:     resourceHelper.find(count:'resources'),
+            numResourceTypes: resourceHelper.find(count:'resourceTypes'),
+            numGroups:        resourceHelper.find(count:'groups'),
+            numEscalations:   resourceHelper.find(count:'escalations'),
+            numActiveEscalations:  resourceHelper.find(count:'activeEscalations'),
+            metricsPerMinute: metricsPerMinute,
+            hqVersion:        Bootstrap.getBean(ProductBoss.class).version,
+            jvmProps:         System.properties,
+            schemaVersion:    Bootstrap.getBean(ServerConfigManager.class).config.getProperty('CAM_SCHEMA_VERSION'),
+            cmdLine:          cmdLine,
+            procEnv:          procEnv,
+        ] + getSystemStats([:])
+
+        render(locals: locals)
+    }
     
     private withConnection(Closure c) {
         def ctx  = new InitialContext()
