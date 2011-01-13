@@ -278,7 +278,11 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         // TODO scottmf, this should be invoking a pre-transaction callback
         eventLogManager.deleteLogs(group);
         applicationContext.publishEvent(new GroupDeleteRequestedEvent(group));
+        AppdefEntityID groupId = AppdefUtil.newAppdefEntityId(group);
         group.remove();
+        // Send resource delete event
+        ResourceDeletedZevent zevent = new ResourceDeletedZevent(whoami, groupId);
+        ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
     }
     
     public void removeResourceGroup(AuthzSubject whoami, Integer groupId) throws PermissionException, VetoException {
