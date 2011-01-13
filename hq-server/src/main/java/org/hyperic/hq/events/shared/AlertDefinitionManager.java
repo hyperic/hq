@@ -38,6 +38,8 @@ import org.hyperic.hq.events.AlertConditionCreateException;
 import org.hyperic.hq.events.AlertDefinitionCreateException;
 import org.hyperic.hq.events.server.session.AlertDefSortField;
 import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.events.server.session.ResourceAlertDefinition;
+import org.hyperic.hq.events.server.session.ResourceTypeAlertDefinition;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.util.pager.PageList;
@@ -46,18 +48,13 @@ import org.hyperic.util.pager.PageList;
  * Local interface for AlertDefinitionManager.
  */
 public interface AlertDefinitionManager {
-    /**
-     * Create a new alert definition
-     */
-    public AlertDefinitionValue createAlertDefinition(AuthzSubject subj, AlertDefinitionValue a)
+   
+    ResourceTypeAlertDefinition createResourceTypeAlertDefinition(AuthzSubject subj, 
+                                                                  AlertDefinitionValue a) 
         throws AlertDefinitionCreateException, PermissionException;
-
-    /**
-     * Create a new alert definition
-     */
-    public AlertDefinitionValue createAlertDefinition(AlertDefinitionValue a)
-    	throws AlertDefinitionCreateException;
-
+    
+    ResourceAlertDefinition createResourceAlertDefinition(AuthzSubject subj, AlertDefinitionValue a)
+        throws AlertDefinitionCreateException, PermissionException;
     /**
      * Update just the basics
      * @throws PermissionException
@@ -246,7 +243,7 @@ public interface AlertDefinitionManager {
     /**
      * Get list of alert definitions for a resource
      */
-    public List<AlertDefinition> findAlertDefinitions(AuthzSubject subject,
+    public List<ResourceAlertDefinition> findAlertDefinitions(AuthzSubject subject,
                                                       Resource prototype)
         throws PermissionException;
 
@@ -276,21 +273,15 @@ public interface AlertDefinitionManager {
 		throws PermissionException;
     
     /**
-     * Get list of children alert definition for a parent alert definition
-     */
-    public PageList<AlertDefinitionValue> findAlertDefinitionChildren(Integer id);
-
-    /**
      * Get list of alert definition names for a resource
      */
     public SortedMap<String, Integer> findAlertDefinitionNames(AuthzSubject subj,
-                                                               org.hyperic.hq.appdef.shared.AppdefEntityID id,
-                                                               java.lang.Integer parentId) throws PermissionException;
+                                                               AppdefEntityID id) throws PermissionException;
 
     /**
      * Get list of alert definition names for a resource
      */
-    public SortedMap<String, Integer> findAlertDefinitionNames(AppdefEntityID id, java.lang.Integer parentId);
+    public SortedMap<String, Integer> findAlertDefinitionNames(AppdefEntityID id);
 
     /**
      * Clone the parent actions into the alert definition.

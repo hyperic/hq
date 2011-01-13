@@ -47,6 +47,7 @@ import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.inventory.dao.ResourceDao;
+import org.hyperic.hq.inventory.dao.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +62,7 @@ public class AlertDefinitionDAO
     private TriggerDAO tDAO;
     private AlertConditionDAO alertConditionDAO;
     private ResourceDao resourceDao;
+    private ResourceTypeDao resourceTypeDao;
 
 
     @Autowired
@@ -88,7 +90,7 @@ public class AlertDefinitionDAO
     }
 
     @SuppressWarnings("unchecked")
-    public List<AlertDefinition> findAllByResource(Resource r) {
+    public List<ResourceAlertDefinition> findAllByResource(Resource r) {
         return createCriteria().add(Restrictions.eq("resource", r)).list();
     }
 
@@ -263,30 +265,22 @@ public class AlertDefinitionDAO
             getSession().saveOrUpdate(state);
         }
     }
-
-    int deleteByAlertDefinition(AlertDefinition def) {
-        String sql = "update AlertDefinition "
-                     + "set escalation = null, deleted = true, parent = null, "
-                     + "active = false, enabled = false where parent = :def";
-
-        int ret = getSession().createQuery(sql).setParameter("def", def).executeUpdate();
-        def.getChildrenBag().clear();
-
-        return ret;
+    
+    void setAlertDefinitionValue(ResourceTypeAlertDefinition def, AlertDefinitionValue val) {
+        def.setResourceType(resourceTypeDao.findById(val.getAppdefId()));
+        setValue(def, val);
     }
 
-    void setAlertDefinitionValue(AlertDefinition def, AlertDefinitionValue val) {
+   void setAlertDefinitionValue(ResourceAlertDefinition def, AlertDefinitionValue val) {
+       def.setResource(resourceDao.findById(val.getAppdefId()));
+       setValue(def, val);
+   }
 
-        // Set parent alert definition
-        if (val.parentIdHasBeenSet() && val.getParentId() != null) {
-            def.setParent(findById(val.getParentId()));
-        }
+   private void setValue(AlertDefinition def, AlertDefinitionValue val) {
 
-        setAlertDefinitionValueNoRels(def, val);
+         setAlertDefinitionValueNoRels(def, val);
 
         // def.set the resource based on the entity ID
-
-        def.setResource(resourceDao.findById(val.getAppdefId()));
 
         for (RegisteredTriggerValue tVal : val.getAddedTriggers()) {
             def.addTrigger(tDAO.findById(tVal.getId()));

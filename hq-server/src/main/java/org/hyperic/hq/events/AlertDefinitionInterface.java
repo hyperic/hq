@@ -35,5 +35,4 @@ public interface AlertDefinitionInterface {
     public boolean isNotifyFiltered();
     public boolean isDeleted();
     public boolean performsEscalations();
-    public Resource getResource();
 }

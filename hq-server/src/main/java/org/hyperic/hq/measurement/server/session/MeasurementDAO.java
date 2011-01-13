@@ -238,7 +238,7 @@ public class MeasurementDAO
                 continue;
             }
             count++;
-            remove(meas);
+            entityManager.remove(meas);
         }
         return count;
     }

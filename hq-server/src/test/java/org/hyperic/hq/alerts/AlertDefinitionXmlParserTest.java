@@ -612,7 +612,6 @@ public class AlertDefinitionXmlParserTest
         assertEquals(expected.getFrequency(), actual.getFrequencyType());
         assertEquals(expected.getName(), actual.getName());
         assertEquals(expected.isNotifyFiltered(), actual.getNotifyFiltered());
-        assertEquals(Integer.valueOf(0), actual.getParentId());
         assertEquals(expected.getPriority(), actual.getPriority());
         assertEquals(expected.getRange(), actual.getRange());
         assertEquals(expected.isWillRecover(), actual.getWillRecover());

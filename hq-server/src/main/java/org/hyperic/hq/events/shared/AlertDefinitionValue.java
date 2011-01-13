@@ -44,8 +44,6 @@ public class AlertDefinitionValue
    private boolean ctimeHasBeenSet = false;
    private long mtime;
    private boolean mtimeHasBeenSet = false;
-   private Integer parentId;
-   private boolean parentIdHasBeenSet = false;
    private java.lang.String description;
    private boolean descriptionHasBeenSet = false;
    private boolean active;
@@ -74,6 +72,7 @@ public class AlertDefinitionValue
    private boolean escalationIdHasBeenSet = false;
    private boolean deleted;
    private boolean deletedHasBeenSet = false;
+   private boolean typeAlertDefinition = true;
    private java.util.Collection Triggers = new java.util.ArrayList();
    private java.util.Collection Conditions = new java.util.ArrayList();
    private java.util.Collection Actions = new java.util.ArrayList();
@@ -93,8 +92,6 @@ public class AlertDefinitionValue
 	  ctimeHasBeenSet = true;
 	  this.mtime = otherValue.mtime;
 	  mtimeHasBeenSet = true;
-	  this.parentId = otherValue.parentId;
-	  parentIdHasBeenSet = true;
 	  this.description = otherValue.description;
 	  descriptionHasBeenSet = true;
 	  this.active = otherValue.active;
@@ -130,8 +127,16 @@ public class AlertDefinitionValue
 	  this.Actions = otherValue.Actions;
 
    }
+   
+   public boolean isTypeAlertDefinition() {
+    return typeAlertDefinition;
+   }
 
-   public Integer getId()
+public void setTypeAlertDefinition(boolean typeAlertDefinition) {
+    this.typeAlertDefinition = typeAlertDefinition;
+}
+
+public Integer getId()
    {
 	  return this.id;
    }
@@ -201,21 +206,8 @@ public class AlertDefinitionValue
    public boolean mtimeHasBeenSet(){
 	  return mtimeHasBeenSet;
    }
-   public Integer getParentId()
-   {
-	  return this.parentId;
-   }
+   
 
-   public void setParentId( Integer parentId )
-   {
-	  this.parentId = parentId;
-	  parentIdHasBeenSet = true;
-
-   }
-
-   public boolean parentIdHasBeenSet(){
-	  return parentIdHasBeenSet;
-   }
    public java.lang.String getDescription()
    {
 	  return this.description;
@@ -600,7 +592,7 @@ public class AlertDefinitionValue
    {
 	  StringBuffer str = new StringBuffer("{");
 
-	  str.append("id=" + getId() + " " + "name=" + getName() + " " + "ctime=" + getCtime() + " " + "mtime=" + getMtime() + " " + "parentId=" + getParentId() + " " + "description=" + getDescription() + " " + "active" + getActive() + "enabled=" + getEnabled() + " " + "willRecover=" + getWillRecover() + " " + "notifyFiltered=" + getNotifyFiltered() + " " + "controlFiltered=" + getControlFiltered() + " " + "priority=" + getPriority() + " " + "appdefId=" + getAppdefId() + " " + "appdefType=" + getAppdefType() + " " + "frequencyType=" + getFrequencyType() + " " + "count=" + getCount() + " " + "range=" + getRange() + " " + " " + "deleted=" + getDeleted());
+	  str.append("id=" + getId() + " " + "name=" + getName() + " " + "ctime=" + getCtime() + " " + "mtime=" + getMtime() + " " + "description=" + getDescription() + " " + "active" + getActive() + "enabled=" + getEnabled() + " " + "willRecover=" + getWillRecover() + " " + "notifyFiltered=" + getNotifyFiltered() + " " + "controlFiltered=" + getControlFiltered() + " " + "priority=" + getPriority() + " " + "appdefId=" + getAppdefId() + " " + "appdefType=" + getAppdefType() + " " + "frequencyType=" + getFrequencyType() + " " + "count=" + getCount() + " " + "range=" + getRange() + " " + " " + "deleted=" + getDeleted());
 	  str.append('}');
 
 	  return(str.toString());
@@ -663,14 +655,7 @@ public class AlertDefinitionValue
 		 }
 		 lEquals = lEquals && this.ctime == that.ctime;
 		 lEquals = lEquals && this.mtime == that.mtime;
-		 if( this.parentId == null )
-		 {
-			lEquals = lEquals && ( that.parentId == null );
-		 }
-		 else
-		 {
-			lEquals = lEquals && this.parentId.equals( that.parentId );
-		 }
+		
 		 if( this.description == null )
 		 {
 			lEquals = lEquals && ( that.description == null );
@@ -748,8 +733,6 @@ public class AlertDefinitionValue
       result = 37*result + (int)(ctime^(ctime>>>32));
 
       result = 37*result + (int)(mtime^(mtime>>>32));
-
-      result = 37*result + ((this.parentId != null) ? this.parentId.hashCode() : 0);
 
       result = 37*result + ((this.description != null) ? this.description.hashCode() : 0);
 
