@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Covalent.DBSetup name="appdef-data.xml" notice="DBSetup, Copyright (C) 2002, Covalent Technologies, Inc., All Rights Reserved.">
 <!-- Agent types -->
+<!-- Licensing is dependent on the CTIME -->
     <table name="EAM_AGENT_TYPE">
-        <data ID="1" NAME="covalent-eam"/>
-        <data ID="2" NAME="hyperic-hq-remoting"/>
+        <data ID="1" NAME="covalent-eam" CTIME="NOW()" />
+        <data ID="2" NAME="hyperic-hq-remoting" CTIME="NOW()" />
     </table>
 <!-- Application Types -->
+<!-- Licensing is dependent on the CTIME -->
     <table name="EAM_APPLICATION_TYPE">
-        <data ID="1" CID="1" NAME="Generic Application"/>
-        <data ID="2" CID="2" NAME="J2EE Application" />
+        <data ID="1" CID="1" NAME="Generic Application" CTIME="NOW()" />
+        <data ID="2" CID="2" NAME="J2EE Application" CTIME="NOW()" />
     </table>
     
 </Covalent.DBSetup> 
