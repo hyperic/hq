@@ -163,8 +163,7 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
         final Map<Integer, DataPoint> rtn = new HashMap<Integer, DataPoint>();
         final List<Integer> resourceIds = new ArrayList<Integer>(downPlatforms.keySet());
         final Map<Integer, List<Measurement>> rHierarchy = availabilityManager
-            .getAvailMeasurementChildren(resourceIds,
-                AuthzConstants.ResourceEdgeContainmentRelation);
+            .getAvailMeasurementChildren(resourceIds);
         for (ResourceDataPoint rdp : downPlatforms.values()) {
             final Resource platform = rdp.getResource();
             if (debug) {

@@ -30,8 +30,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -47,6 +49,7 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.inventory.dao.ResourceDao;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -61,13 +64,16 @@ public class MeasurementDAO
                                                "' ";
     private AgentDAO agentDao;
     
+    private ResourceDao resourceDao;
+    
     @PersistenceContext
     private EntityManager entityManager;
 
     @Autowired
-    public MeasurementDAO(SessionFactory f, AgentDAO agentDao) {
+    public MeasurementDAO(SessionFactory f, AgentDAO agentDao, ResourceDao resourceDao) {
         super(Measurement.class, f);
         this.agentDao = agentDao;
+        this.resourceDao = resourceDao;
     }
 
     public void removeBaseline(Measurement m) {
@@ -572,32 +578,32 @@ public class MeasurementDAO
      *         of the resource
      */
     @SuppressWarnings("unchecked")
-    final List<Object[]> findRelatedAvailMeasurements(final List<Integer> resourceIds,
-                                                      final String resourceRelationType) {
+    final List<Object[]> findRelatedAvailMeasurements(final List<Integer> resourceIds) {
         if (resourceIds.isEmpty()) {
             return Collections.EMPTY_LIST;
         }
-
-        final String sql = new StringBuilder().append("select e.from.id,m from Measurement m ")
-            .append("join m.resource.toEdges e ").append("join m.template t ").append(
-                "join e.relation r ").append("where m.resource.resourceType is not null ").append(
-                "and e.distance > 0 ").append("and r.name = :relationType ").append(
-                "and e.from in (:resourceIds) and ").append(ALIAS_CLAUSE).toString();
+        Set<Integer> childrenIds = new HashSet<Integer>();
+        for(Integer resourceId : resourceIds) {
+            childrenIds.addAll(resourceDao.findById(resourceId).getChildrenIds(true));
+        }
+        final String sql = new StringBuilder().append("select m.instanceId,m from Measurement m ")
+               .append("join m.template t ").append(
+                "where m.resource in (:childrenIds) and ").append(ALIAS_CLAUSE).toString();
 
         // create a new list so that the original list is not modified
         // and sort the resource ids so that the results are more cacheable
-        final List sortedResourceIds = new ArrayList(resourceIds);
-        Collections.sort(sortedResourceIds);
+        final List sortedChildrenIds = new ArrayList(childrenIds);
+        Collections.sort(sortedChildrenIds);
 
         final HQDialect dialect = getHQDialect();
         final int max = (dialect.getMaxExpressions() <= 0) ? Integer.MAX_VALUE : dialect
             .getMaxExpressions();
-        final List rtn = new ArrayList(sortedResourceIds.size());
-        for (int i = 0; i < sortedResourceIds.size(); i += max) {
-            final int end = Math.min(i + max, sortedResourceIds.size());
-            final List list = sortedResourceIds.subList(i, end);
-            rtn.addAll(getSession().createQuery(sql).setParameterList("resourceIds", list,
-                new IntegerType()).setParameter("relationType", resourceRelationType).setCacheable(
+        final List rtn = new ArrayList(sortedChildrenIds.size());
+        for (int i = 0; i < sortedChildrenIds.size(); i += max) {
+            final int end = Math.min(i + max, sortedChildrenIds.size());
+            final List list = sortedChildrenIds.subList(i, end);
+            rtn.addAll(getSession().createQuery(sql).setParameterList("childrenIds", list,
+                new IntegerType()).setCacheable(
                 true).setCacheRegion("Measurement.findRelatedAvailMeasurements").list());
         }
         return rtn;

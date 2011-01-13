@@ -1210,8 +1210,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         for (Resource resource : resources) {
             // HQ-1653: Only disable/enable availability measurements
             // TODO: G (when AvailabilityManager is convered)
-            List<Measurement> measurements = am.getAvailMeasurementChildren(resource,
-                                                                            AuthzConstants.ResourceEdgeContainmentRelation);
+            List<Measurement> measurements = am.getAvailMeasurementChildren(resource);
             measurements.add(am.getAvailMeasurement(resource));
             rtn.addAll(manageAvailabilityMeasurements(event, measurements));
         }

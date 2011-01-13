@@ -217,9 +217,9 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      * 
      */
     @Transactional(readOnly = true)
-    public List<Measurement> getAvailMeasurementChildren(Resource resource, String resourceRelationType) {
+    public List<Measurement> getAvailMeasurementChildren(Resource resource) {
         final List<Integer> sList = Collections.singletonList(resource.getId());
-        List<Measurement> rtn = getAvailMeasurementChildren(sList, resourceRelationType).get(resource.getId());
+        List<Measurement> rtn = getAvailMeasurementChildren(sList).get(resource.getId());
         if (rtn == null) {
             rtn = new ArrayList<Measurement>(0);
         }
@@ -233,9 +233,8 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      * 
      */
     @Transactional(readOnly = true)
-    public Map<Integer, List<Measurement>> getAvailMeasurementChildren(List<Integer> resourceIds,
-                                                                       String resourceRelationType) {
-        final List<Object[]> objects = measurementDAO.findRelatedAvailMeasurements(resourceIds, resourceRelationType);
+    public Map<Integer, List<Measurement>> getAvailMeasurementChildren(List<Integer> resourceIds) {
+        final List<Object[]> objects = measurementDAO.findRelatedAvailMeasurements(resourceIds);
         return convertAvailMeasurementListToMap(objects);
     }
 
@@ -295,7 +294,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
 
                 for (Resource resource : resources) {
                     List<Measurement> measurements = getAvailMeasurementChildren(
-                        resource, AuthzConstants.ResourceEdgeContainmentRelation);
+                        resource);
 
                     measurements.add(getAvailMeasurement(resource));
 
