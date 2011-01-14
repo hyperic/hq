@@ -4,6 +4,8 @@
  */
 package org.hyperic.hq.plugin.weblogic;
 
+import org.hyperic.hq.product.ServerResource;
+
 /**
  *
  * @author administrator
@@ -20,5 +22,10 @@ public class WeblogicDetectorManaged extends WeblogicDetector {
             }
         }
         return res && WeblogicProductPlugin.NEW_DISCOVERY;
+    }
+
+    @Override
+    void setIdentifier(ServerResource server, String name) {
+        server.setIdentifier(name);
     }
 }
