@@ -85,7 +85,8 @@ public class AlertDefinitionDAO
     }
 
     public void remove(AlertDefinition def) {
-        getSession().delete(def.getAlertDefinitionState());
+        //TODO better way
+        getSession().delete(((ResourceAlertDefinition)def).getAlertDefinitionState());
         super.remove(def);
     }
 
@@ -259,22 +260,34 @@ public class AlertDefinitionDAO
         super.save(def);
 
         // Make sure there's a valid alert definition state
-        if (def.getAlertDefinitionState() == null) {
-            AlertDefinitionState state = new AlertDefinitionState(def);
-            def.setAlertDefinitionState(state);
+        //TODO better way
+        if (def instanceof ResourceAlertDefinition && ((ResourceAlertDefinition)def).getAlertDefinitionState() == null) {
+            AlertDefinitionState state = new AlertDefinitionState((ResourceAlertDefinition)def);
+            ((ResourceAlertDefinition)def).setAlertDefinitionState(state);
             getSession().saveOrUpdate(state);
         }
     }
     
-    void setAlertDefinitionValue(ResourceTypeAlertDefinition def, AlertDefinitionValue val) {
-        def.setResourceType(resourceTypeDao.findById(val.getAppdefId()));
+    int deleteByAlertDefinition(AlertDefinition def) {
+        String sql = "update AlertDefinition "
+                     + "set escalation = null, deleted = true, parent = null, "
+                     + "active = false, enabled = false where parent = :def";
+        
+        int ret = getSession().createQuery(sql).setParameter("def", def).executeUpdate();
+        //TODO children
+        //def.getChildrenBag().clear();
+      
+        return ret;
+    }
+    
+    public void setAlertDefinitionValue(AlertDefinition def, AlertDefinitionValue val) {
+        if(def instanceof ResourceTypeAlertDefinition) {
+            ((ResourceTypeAlertDefinition)def).setResourceType(resourceTypeDao.findById(val.getAppdefId()));
+        }else {
+            ((ResourceAlertDefinition)def).setResource(resourceDao.findById(val.getAppdefId()));
+        }
         setValue(def, val);
     }
-
-   void setAlertDefinitionValue(ResourceAlertDefinition def, AlertDefinitionValue val) {
-       def.setResource(resourceDao.findById(val.getAppdefId()));
-       setValue(def, val);
-   }
 
    private void setValue(AlertDefinition def, AlertDefinitionValue val) {
 
@@ -283,11 +296,12 @@ public class AlertDefinitionDAO
         // def.set the resource based on the entity ID
 
         for (RegisteredTriggerValue tVal : val.getAddedTriggers()) {
-            def.addTrigger(tDAO.findById(tVal.getId()));
+            //TODO better way
+            ((ResourceAlertDefinition)def).addTrigger(tDAO.findById(tVal.getId()));
         }
 
         for (RegisteredTriggerValue tVal : val.getRemovedTriggers()) {
-            def.removeTrigger(tDAO.findById(tVal.getId()));
+            ((ResourceAlertDefinition)def).removeTrigger(tDAO.findById(tVal.getId()));
         }
 
         for (AlertConditionValue cVal : val.getAddedConditions()) {

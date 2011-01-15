@@ -51,6 +51,8 @@ import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertActionLog;
 import org.hyperic.hq.events.server.session.AlertConditionLog;
 import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.events.server.session.ResourceAlertDefinition;
+import org.hyperic.hq.events.server.session.ResourceTypeAlertDefinition;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.measurement.UnitsConvert;
@@ -128,12 +130,13 @@ public class ViewAlertAction
         }
 
         boolean template = false;
-        AlertDefinition parentAlertDefinition = alertDefinition.getParent();
-
-        if (parentAlertDefinition != null) {
-            template = EventConstants.TYPE_ALERT_DEF_ID.equals(parentAlertDefinition.getId());
+        //TODO better way?
+        if(alertDefinition instanceof ResourceAlertDefinition) {
+            ResourceTypeAlertDefinition parentAlertDefinition = ((ResourceAlertDefinition)alertDefinition).getResourceTypeAlertDefinition();
+            if (parentAlertDefinition != null) {
+                template = true;
+            }
         }
-
         List<AlertConditionBean> conditionBeans = AlertDefUtil.getAlertConditionBeanList(sessionID, request,
             measurementBoss, conditionValues, template);
 
@@ -238,14 +241,15 @@ public class ViewAlertAction
         request.setAttribute(Constants.AVAIL_USERS_ATTR, availableUsers);
         
         // ...check to see if user has the ability to fix/acknowledge...
-        try {
+        //try {
             AuthzSubject subject = authzBoss.getCurrentSubject(sessionID);
-            alertPermissionManager.canFixAcknowledgeAlerts(subject, alertDefinition.getAppdefEntityId());
+            //TODO perm check
+            //alertPermissionManager.canFixAcknowledgeAlerts(subject, alertDefinition.getAppdefEntityId());
             request.setAttribute(Constants.CAN_TAKE_ACTION_ON_ALERT_ATTR, true);
-        } catch(PermissionException e) {
+       // } catch(PermissionException e) {
             // We can view it, but can't take action on it
-            request.setAttribute(Constants.CAN_TAKE_ACTION_ON_ALERT_ATTR, false);
-        }
+            //request.setAttribute(Constants.CAN_TAKE_ACTION_ON_ALERT_ATTR, false);
+        //}
 
         return null;
     }

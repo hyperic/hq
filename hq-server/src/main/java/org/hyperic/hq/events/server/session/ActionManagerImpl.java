@@ -104,10 +104,11 @@ public class ActionManagerImpl implements ActionManager {
             if (action.getLogEntriesBag().size() == 0) {
                 actionDAO.removeAction(action);
             } else { // Disassociate from everything
-                if (action.getAlertDefinition() != null) {
-                    action.getAlertDefinition().getActionsBag().remove(action);
-                    action.setAlertDefinition(null);
-                }
+                 //TODO still necessary?
+//                if (action.getAlertDefinition() != null) {
+//                    action.getAlertDefinition().getActionsBag().remove(action);
+//                    action.setAlertDefinition(null);
+//                }
 
                 if (action.getParent() != null) {
                     action.getParent().getChildrenBag().remove(action);
@@ -128,9 +129,10 @@ public class ActionManagerImpl implements ActionManager {
         // HQ 942: We have seen orphaned actions on upgrade from
         // 3.0.5 to 3.1.1 where the action has no associated alert def.
         // Prevent the NPE.
-        if (action.getAlertDefinition() != null) {
-            action.getAlertDefinition().setMtime(mtime);
-        }
+        //TODO?
+//        if (action.getAlertDefinition() != null) {
+//            action.getAlertDefinition().setMtime(mtime);
+//        }
 
         // Then find and update the child actions.
 
@@ -149,9 +151,10 @@ public class ActionManagerImpl implements ActionManager {
             // HQ 942: We have seen orphaned actions on upgrade from
             // 3.0.5 to 3.1.1 where the action has no associated alert def.
             // Prevent the NPE.
-            if (act.getAlertDefinition() != null) {
-                act.getAlertDefinition().setMtime(mtime);
-            }
+            //TODO?
+//            if (act.getAlertDefinition() != null) {
+//                act.getAlertDefinition().setMtime(mtime);
+//            }
         }
 
         return action;

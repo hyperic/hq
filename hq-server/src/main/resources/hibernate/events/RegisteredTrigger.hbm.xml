@@ -52,7 +52,7 @@
       <column name="CONFIG"/>
     </property>
 
-    <many-to-one name="alertDefinition" class="AlertDefinition">
+    <many-to-one name="alertDefinition" class="ResourceAlertDefinition">
       <column name="ALERT_DEFINITION_ID" index="ALERT_DEF_TRIGGER_IDX"/>
     </many-to-one>
   </class>

@@ -83,15 +83,16 @@ public final class ClassicEscalationAlertType
         long mtime = System.currentTimeMillis();
         def.setMtime(mtime);
 
-        Collection children = def.getChildren();
-        for (Iterator it = children.iterator(); it.hasNext(); ) {
-            def = (AlertDefinition) it.next();
-            // End any escalation we were previously doing.
-            escMan.endEscalation(def);
-                
-            def.setEscalation(escalation);
-            def.setMtime(mtime);
-        }
+        //TODO children?
+        //Collection children = def.getChildren();
+//        for (Iterator it = children.iterator(); it.hasNext(); ) {
+//            def = (AlertDefinition) it.next();
+//            // End any escalation we were previously doing.
+//            escMan.endEscalation(def);
+//                
+//            def.setEscalation(escalation);
+//            def.setMtime(mtime);
+//        }
     }
 
     protected void changeAlertState(Escalatable esc, AuthzSubject who,

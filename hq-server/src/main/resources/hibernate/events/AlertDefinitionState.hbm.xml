@@ -39,7 +39,7 @@
     </id>
 	  
 	<one-to-one name="alertDefinition" 
-				class="AlertDefinition" 
+				class="ResourceAlertDefinition" 
 				constrained="true" 
 				foreign-key="none"/>
 

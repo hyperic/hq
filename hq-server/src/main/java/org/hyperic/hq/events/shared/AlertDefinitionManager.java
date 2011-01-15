@@ -53,8 +53,16 @@ public interface AlertDefinitionManager {
                                                                   AlertDefinitionValue a) 
         throws AlertDefinitionCreateException, PermissionException;
     
-    ResourceAlertDefinition createResourceAlertDefinition(AuthzSubject subj, AlertDefinitionValue a)
+    ResourceTypeAlertDefinition createResourceTypeAlertDefinition(AlertDefinitionValue a)
+    throws AlertDefinitionCreateException, PermissionException;
+    
+    ResourceAlertDefinition createResourceAlertDefinition(AuthzSubject subj, AlertDefinitionValue a, ResourceTypeAlertDefinition parent)
         throws AlertDefinitionCreateException, PermissionException;
+    
+    ResourceAlertDefinition createResourceAlertDefinition(AuthzSubject subj, AlertDefinitionValue a)
+    throws AlertDefinitionCreateException, PermissionException;
+    
+    List<AlertDefinitionValue> findResourceAlertDefinitions(Integer typeAlertDefId);
     /**
      * Update just the basics
      * @throws PermissionException
@@ -164,7 +172,7 @@ public interface AlertDefinitionManager {
      */
     public boolean isResourceTypeAlertDefinition(Integer id);
 
-    public AlertDefinition findAlertDefinitionById(Integer id);
+    public ResourceTypeAlertDefinition findResourceTypeAlertDefinitionById(Integer id);
 
     /**
      * Get an alert definition's name
@@ -271,17 +279,6 @@ public interface AlertDefinitionManager {
      */
     public List<AlertDefinition> findAvailAlertDefinitions(AuthzSubject subj) 
 		throws PermissionException;
-    
-    /**
-     * Get list of alert definition names for a resource
-     */
-    public SortedMap<String, Integer> findAlertDefinitionNames(AuthzSubject subj,
-                                                               AppdefEntityID id) throws PermissionException;
-
-    /**
-     * Get list of alert definition names for a resource
-     */
-    public SortedMap<String, Integer> findAlertDefinitionNames(AppdefEntityID id);
 
     /**
      * Clone the parent actions into the alert definition.

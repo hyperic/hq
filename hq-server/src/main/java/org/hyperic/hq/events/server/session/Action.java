@@ -59,7 +59,6 @@ public class Action
     private String _className;
     private byte[] _config;
     private Action _parent;
-    private AlertDefinition _alertDef;
     private Collection _logEntries = new ArrayList();
     private Collection<Action> _children = new ArrayList<Action>();
     private boolean _deleted = false;
@@ -132,11 +131,10 @@ public class Action
     protected Action() {
     }
 
-    Action(AlertDefinition def, String className, byte[] config, Action parent) {
+    Action(String className, byte[] config, Action parent) {
         _className = className;
         _config = config;
         _parent = parent;
-        _alertDef = def;
         _logEntries = Collections.EMPTY_LIST;
         _children = Collections.EMPTY_LIST;
     }
@@ -163,14 +161,6 @@ public class Action
 
     protected void setParent(Action parent) {
         _parent = parent;
-    }
-
-    public AlertDefinition getAlertDefinition() {
-        return _alertDef;
-    }
-
-    protected void setAlertDefinition(AlertDefinition alertDefinition) {
-        _alertDef = alertDefinition;
     }
 
     public Collection<Action> getChildren() {

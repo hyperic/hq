@@ -161,7 +161,8 @@ public class AlertManagerImpl implements AlertManager,
      */
     public Alert createAlert(AlertDefinition def, long ctime) {
         Alert alert = new Alert();
-        alert.setAlertDefinition(def);
+        //TODO better way
+        alert.setAlertDefinition((ResourceAlertDefinition)def);
         alert.setCtime(ctime);
         alertDAO.save(alert);
         return alert;

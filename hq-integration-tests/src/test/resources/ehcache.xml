@@ -344,7 +344,7 @@
   <!-- The AlertDefinition and AlertDefinitionState caches should have 
 	   the same maxElementsInMemory setting since there is a one-to-one 
 	   relationship between these objects. -->	
-  <cache name="org.hyperic.hq.events.server.session.AlertDefinition"
+  <cache name="org.hyperic.hq.events.server.session.ResourceAlertDefinition"
          maxElementsInMemory="5000"
          eternal="true"
          timeToIdleSeconds="0"
@@ -355,25 +355,52 @@
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
-         memoryStoreEvictionPolicy="LRU"/>	
-  <cache name="org.hyperic.hq.events.server.session.AlertDefinition.actionsBag"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.events.server.session.ResourceAlertDefinition.actionsBag"
          maxElementsInMemory="5000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  <cache name="org.hyperic.hq.events.server.session.AlertDefinition.conditionsBag"
+  <cache name="org.hyperic.hq.events.server.session.ResourceAlertDefinition.conditionsBag"
          maxElementsInMemory="5000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  <cache name="org.hyperic.hq.events.server.session.AlertDefinition.triggersBag"
+  <cache name="org.hyperic.hq.events.server.session.ResourceAlertDefinition.triggersBag"
          maxElementsInMemory="5000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
+  <!-- TODO ResourceTypeAlertDef stuff prolly doesn't need as large of cache -->
+   <cache name="org.hyperic.hq.events.server.session.ResourceTypeAlertDefinition"
+         maxElementsInMemory="5000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+   <cache name="org.hyperic.hq.events.server.session.ResourceTypeAlertDefinition.actionsBag"
+         maxElementsInMemory="5000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.events.server.session.ResourceTypeAlertDefinition.conditionsBag"
+         maxElementsInMemory="5000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.events.server.session.ResourceTypeAlertDefinition.triggersBag"
+         maxElementsInMemory="5000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>  
+         
+         
   <cache name="org.hyperic.hq.events.server.session.AlertConditionLog"
          maxElementsInMemory="1000"
          eternal="true"

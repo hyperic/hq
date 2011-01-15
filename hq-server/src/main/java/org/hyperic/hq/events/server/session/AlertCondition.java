@@ -47,7 +47,6 @@ public class AlertCondition
     private String _comparator;
     private double _threshold;
     private String _optionStatus;
-    private AlertDefinition _alertDefinition;
     private RegisteredTrigger _trigger;
     private Collection _logEntries;
 
@@ -56,7 +55,7 @@ public class AlertCondition
     protected AlertCondition() {
     }
 
-    AlertCondition(AlertDefinition def, AlertConditionValue val, RegisteredTrigger trigger) {
+    AlertCondition(AlertConditionValue val, RegisteredTrigger trigger) {
         _type = val.getType();
         _required = val.getRequired();
         _measurementId = val.getMeasurementId();
@@ -64,7 +63,6 @@ public class AlertCondition
         _comparator = val.getComparator();
         _threshold = val.getThreshold();
         _optionStatus = val.getOption();
-        _alertDefinition = def;
         _trigger = trigger;
         _logEntries = Collections.EMPTY_LIST;
     }
@@ -123,14 +121,6 @@ public class AlertCondition
 
     protected void setOptionStatus(String optionStatus) {
         _optionStatus = optionStatus;
-    }
-
-    public AlertDefinition getAlertDefinition() {
-        return _alertDefinition;
-    }
-
-    protected void setAlertDefinition(AlertDefinition alertDefinition) {
-        _alertDefinition = alertDefinition;
     }
 
     public RegisteredTrigger getTrigger() {

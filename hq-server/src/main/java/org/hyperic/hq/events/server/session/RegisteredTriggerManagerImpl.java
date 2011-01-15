@@ -111,40 +111,41 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
     
     @PostConstruct
     public void cleanupRegisteredTriggers() {
-        Connection conn = null;
-        Statement stmt = null;
-        Boolean autocommit = null;
-        boolean commit = false;
-        try {
-            conn = dbUtil.getConnection();
-            autocommit = Boolean.valueOf(conn.getAutoCommit());
-            conn.setAutoCommit(false);
-            stmt = conn.createStatement();
-            stmt.addBatch(
-                "update EAM_ALERT_CONDITION set trigger_id = null " +
-                "WHERE exists (" +
-                    "select 1 from EAM_ALERT_DEFINITION WHERE deleted = '1' " +
-                    "AND EAM_ALERT_CONDITION.alert_definition_id = id" +
-                ")");
-            stmt.addBatch(
-                "delete from EAM_REGISTERED_TRIGGER WHERE exists (" +
-                    "select 1 from EAM_ALERT_DEFINITION WHERE deleted = '1' " +
-                    "AND EAM_REGISTERED_TRIGGER.alert_definition_id = id" +
-                ")");
-            int[] rows = stmt.executeBatch();
-            conn.commit();
-            commit = true;
-            log.info("disassociated " + rows[0] + " triggers in EAM_ALERT_CONDITION" +
-                " from their deleted alert definitions");
-            log.info("deleted " + rows[1] + " rows from EAM_REGISTERED_TRIGGER");
-        } catch (SQLException e) {
-            log.error(e, e);
-        }  finally {
-            resetAutocommit(conn, autocommit);
-            if (!commit) rollback(conn);
-            DBUtil.closeJDBCObjects(
-                RegisteredTriggerManagerImpl.class.getName(), conn, stmt, null);
-        }
+        //TODO re-enable
+//        Connection conn = null;
+//        Statement stmt = null;
+//        Boolean autocommit = null;
+//        boolean commit = false;
+//        try {
+//            conn = dbUtil.getConnection();
+//            autocommit = Boolean.valueOf(conn.getAutoCommit());
+//            conn.setAutoCommit(false);
+//            stmt = conn.createStatement();
+//            stmt.addBatch(
+//                "update EAM_ALERT_CONDITION set trigger_id = null " +
+//                "WHERE exists (" +
+//                    "select 1 from ResourceAlertDefinition WHERE deleted = '1' " +
+//                    "AND EAM_ALERT_CONDITION.alert_definition_id = id" +
+//                ")");
+//            stmt.addBatch(
+//                "delete from EAM_REGISTERED_TRIGGER WHERE exists (" +
+//                    "select 1 from ResourceAlertDefinition WHERE deleted = '1' " +
+//                    "AND EAM_REGISTERED_TRIGGER.alert_definition_id = id" +
+//                ")");
+//            int[] rows = stmt.executeBatch();
+//            conn.commit();
+//            commit = true;
+//            log.info("disassociated " + rows[0] + " triggers in EAM_ALERT_CONDITION" +
+//                " from their deleted alert definitions");
+//            log.info("deleted " + rows[1] + " rows from EAM_REGISTERED_TRIGGER");
+//        } catch (SQLException e) {
+//            log.error(e, e);
+//        }  finally {
+//            resetAutocommit(conn, autocommit);
+//            if (!commit) rollback(conn);
+//            DBUtil.closeJDBCObjects(
+//                RegisteredTriggerManagerImpl.class.getName(), conn, stmt, null);
+//        }
     }
     
     private void rollback(Connection conn) {
@@ -824,8 +825,9 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
      * 
      */
     public void deleteTriggers(AlertDefinition alertDef) {
-        unregisterTriggers(alertDef.getId(), alertDef.getTriggers());
-        alertDef.clearTriggers();
+        //TODO better way?
+        unregisterTriggers(alertDef.getId(), ((ResourceAlertDefinition)alertDef).getTriggers());
+        ((ResourceAlertDefinition)alertDef).clearTriggers();
     }
 
     void setRegisteredTriggerRepository(RegisterableTriggerRepository registeredTriggerRepository) {

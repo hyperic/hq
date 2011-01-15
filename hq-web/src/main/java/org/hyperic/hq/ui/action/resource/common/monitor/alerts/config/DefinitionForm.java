@@ -477,8 +477,7 @@ public class DefinitionForm
         // we import the id here, too, so that the update will work
         setAd(adv.getId());
 
-        boolean isTypeAlert = EventConstants.TYPE_ALERT_DEF_ID.equals(adv.getParentId());
-
+        boolean isTypeAlert = adv.isTypeAlertDefinition();
         // ------------------------------------------------------------
         // -- conditions
         // ------------------------------------------------------------

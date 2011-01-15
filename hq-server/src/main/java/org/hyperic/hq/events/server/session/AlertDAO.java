@@ -359,7 +359,8 @@ public class AlertDAO
     public void save(Alert alert) {
         super.save(alert);
 
-        AlertDefinition def = alert.getAlertDefinition();
+        //TODO better way
+        ResourceAlertDefinition def = (ResourceAlertDefinition)alert.getAlertDefinition();
 
         // Update the last fired time
         if (def.getLastFired() < alert.getCtime())

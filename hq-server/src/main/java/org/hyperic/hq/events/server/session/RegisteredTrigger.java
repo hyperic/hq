@@ -34,7 +34,7 @@ public class RegisteredTrigger
     private String           _className;
     private byte[]           _config;
     private long             _frequency;
-    private AlertDefinition  _alertDef;
+    private ResourceAlertDefinition  _alertDef;
     
     private RegisteredTriggerValue _valueObj;
     
@@ -92,11 +92,11 @@ public class RegisteredTrigger
         _frequency = frequency;
     }
 
-    public AlertDefinition getAlertDefinition() {
+    public ResourceAlertDefinition getAlertDefinition() {
         return _alertDef;
     }
     
-    protected void setAlertDefinition(AlertDefinition def) {
+    protected void setAlertDefinition(ResourceAlertDefinition def) {
         _alertDef = def;
     }
 }

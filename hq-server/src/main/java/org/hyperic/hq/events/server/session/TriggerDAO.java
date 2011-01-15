@@ -161,7 +161,7 @@ public class TriggerDAO
         // guarantees that when we do trigger.getAlertDefinition().getConditions(),
         // the database is not hit again
         String hql = new StringBuilder(256)
-                    .append("from AlertDefinition ad ")
+                    .append("from ResourceAlertDefinition ad ")
                      .append("join fetch ad.alertDefinitionState ")
                      .append("join fetch ad.conditionsBag c ")
                     .append("join fetch c.trigger ")

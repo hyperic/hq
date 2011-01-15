@@ -457,17 +457,19 @@ public class ProductManagerImpl implements ProductManager {
                 try {
                     final AppdefEntityID id = new AppdefEntityID(alertDefinition.getAppdefType(),
                         alertDefinition.getAppdefId());
-                    final SortedMap<String, Integer> existingAlertDefinitions = alertDefinitionManager
-                        .findAlertDefinitionNames(id, EventConstants.TYPE_ALERT_DEF_ID);
+                    
+                    //final SortedMap<String, Integer> existingAlertDefinitions = alertDefinitionManager
+                      //  .findAlertDefinitionNames(id, EventConstants.TYPE_ALERT_DEF_ID);
                     // TODO update existing alert defs - for now, just create if
                     // one does not exist. Be aware that this method is also
                     // called
                     // when new service type metadata is discovered (from
                     // updateServiceTypes method), as well as when a new or
                     // modified plugin jar is detected
-                    if (!(existingAlertDefinitions.keySet().contains(alertDefinition.getName()))) {
-                        alertDefinitionManager.createAlertDefinition(alertDefinition);
-                    }
+                    //TODO check existing later, resource or resource type alerts?
+                    //if (!(existingAlertDefinitions.keySet().contains(alertDefinition.getName()))) {
+                        alertDefinitionManager.createResourceTypeAlertDefinition(alertDefinition);
+                    //}
                 } catch (Exception e) {
                     log.error("Unable to load some or all of alert definitions for plugin " +
                               pInfo.name + ".  Cause: " + e.getMessage());

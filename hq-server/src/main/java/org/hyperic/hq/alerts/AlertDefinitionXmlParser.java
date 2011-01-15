@@ -216,7 +216,6 @@ public class AlertDefinitionXmlParser {
         alertDefValue.setDescription(definition.getDescription());
         alertDefValue.setAppdefType(aeid.getType());
         alertDefValue.setAppdefId(aeid.getId());
-        alertDefValue.setTypeAlertDefinition(true);
         alertDefValue.setPriority(definition.getPriority());
         alertDefValue.setActive(definition.isActive());
         alertDefValue.setWillRecover(definition.isWillRecover());

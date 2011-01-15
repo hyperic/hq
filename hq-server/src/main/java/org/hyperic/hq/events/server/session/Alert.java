@@ -46,7 +46,7 @@ public class Alert
 {
     private boolean         _fixed;
     private long            _ctime;
-    private AlertDefinition _alertDefinition;
+    private ResourceAlertDefinition _alertDefinition;
     private Collection      _actionLog    = new ArrayList();
     private Collection      _conditionLog = new ArrayList();
     private Long            _stateId;
@@ -64,7 +64,8 @@ public class Alert
         // Now just set the entire value object
         setAlertValue(val);
 
-        setAlertDefinition(def);
+        //TODO
+        setAlertDefinition((ResourceAlertDefinition)def);
     }
 
     protected AlertActionLog createActionLog(String detail, Action action,
@@ -113,7 +114,7 @@ public class Alert
         return _alertDefinition;
     }
 
-    protected void setAlertDefinition(AlertDefinition alertDefinition) {
+    protected void setAlertDefinition(ResourceAlertDefinition alertDefinition) {
         _alertDefinition = alertDefinition;
     }
 
@@ -226,8 +227,9 @@ public class Alert
             _alertVal.addActionLog(l);
 
             // No action or alert definition means escalation log
-            if (l.getAction() == null ||
-                l.getAction().getAlertDefinition() == null) {
+            if (l.getAction() == null) { //TODO need this? ||
+                //l.getAction().getAlertDefinition() == null) {
+                
                 _alertVal.addEscalationLog(l);
             }
         }
@@ -244,7 +246,8 @@ public class Alert
         AlertConditionLogDAO aclDao = Bootstrap.getBean(AlertConditionLogDAO.class);
 
         setFixed(false);
-        setAlertDefinition(def);
+        //TODO
+        setAlertDefinition((ResourceAlertDefinition)def);
         setCtime(val.getCtime());
 
         for (Iterator i=val.getAddedConditionLogs().iterator(); i.hasNext(); ){
