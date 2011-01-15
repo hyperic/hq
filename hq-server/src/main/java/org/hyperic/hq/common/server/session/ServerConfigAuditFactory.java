@@ -59,10 +59,9 @@ public class ServerConfigAuditFactory {
     }
 
     private ServerConfigAudit createAudit(AuthzSubject user, String propKey, String newVal, String old) {
-        ServerConfigAudit res = new ServerConfigAudit(user, resourceManager
-            .findResourceById(AuthzConstants.authzHQSystem), CONFIG_UPDATE, AuditImportance.HIGH, AuditNature.UPDATE,
+        ServerConfigAudit res = new ServerConfigAudit(user,null , CONFIG_UPDATE, AuditImportance.HIGH, AuditNature.UPDATE,
             MSGS.format(propKey, newVal, old));
-
+        //TODO resourceManager.findResourceById(AuthzConstants.authzHQSystem)
         res.setStartTime(System.currentTimeMillis());
         res.setEndTime(System.currentTimeMillis());
         res.setFieldName(propKey);

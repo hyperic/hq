@@ -69,10 +69,10 @@ public class PluginAuditFactory {
     public PluginAudit deployAudit(String pluginName, long start, long end) {
         AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
         String msg = MSGS.format("auditMsg.plugin.deploy", pluginName);
-        PluginAudit res = new PluginAudit(resourceManager.findResourceById(AuthzConstants.authzHQSystem), overlord,
+        PluginAudit res = new PluginAudit(null, overlord,
             PLUGIN_DEPLOYED, AuditImportance.HIGH, AuditNature.CREATE, msg, start, end);
 
-        //TODO authzHQSystem resource doesn't exist now
+        //TODO authzHQSystem resource doesn't exist now resourceManager.findResourceById(AuthzConstants.authzHQSystem)
         //auditManager.saveAudit(res);
         return res;
     }
@@ -80,9 +80,9 @@ public class PluginAuditFactory {
     public PluginAudit updateAudit(String pluginName, long start, long end) {
         AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
         String msg = MSGS.format("auditMsg.plugin.update", pluginName);
-        PluginAudit res = new PluginAudit(resourceManager.findResourceById(AuthzConstants.authzHQSystem), overlord,
+        PluginAudit res = new PluginAudit(null, overlord,
             PLUGIN_UPDATED, AuditImportance.HIGH, AuditNature.UPDATE, msg, start, end);
-        //TODO authzHQSystem resource doesn't exist now
+        //TODO authzHQSystem resource doesn't exist now resourceManager.findResourceById(AuthzConstants.authzHQSystem)
         //auditManager.saveAudit(res);
         return res;
     }

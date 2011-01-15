@@ -117,28 +117,29 @@ public class AuditManagerImpl implements AuditManager, ApplicationListener<Appli
      * 
      */
     public void popAll() {
-        Audit a = getCurrentAudit();
-        long now = System.currentTimeMillis();
-
-        try {
-            while (a != null && a.getParent() != null) {
-                if (a.getEndTime() == 0) {
-                    a.setEndTime(now);
-                }
-                a = a.getParent();
-            }
-
-            if (a != null) {
-                log.warn("Unpopped audit container: " + a.getMessage() +
-                         ":  This should be closed manually!");
-                if (a.getEndTime() != 0) {
-                    a.setEndTime(now);
-                }
-                saveRecursively(a);
-            }
-        } finally {
-            CONTAINERS.set(null);
-        }
+        //TODO
+//        Audit a = getCurrentAudit();
+//        long now = System.currentTimeMillis();
+//
+//        try {
+//            while (a != null && a.getParent() != null) {
+//                if (a.getEndTime() == 0) {
+//                    a.setEndTime(now);
+//                }
+//                a = a.getParent();
+//            }
+//
+//            if (a != null) {
+//                log.warn("Unpopped audit container: " + a.getMessage() +
+//                         ":  This should be closed manually!");
+//                if (a.getEndTime() != 0) {
+//                    a.setEndTime(now);
+//                }
+//                saveRecursively(a);
+//            }
+//        } finally {
+//            CONTAINERS.set(null);
+//        }
     }
 
     /**
@@ -150,31 +151,32 @@ public class AuditManagerImpl implements AuditManager, ApplicationListener<Appli
      * 
      */
     public void popContainer(boolean allowEmpty) {
-        Audit a = getCurrentAudit();
-
-        if (a == null) {
-            throw new RuntimeException("Expected to pop a container, but had " + "none");
-        }
-
-        a.setEndTime(System.currentTimeMillis());
-        if (a.getParent() == null) {
-            // Root level container. Save off
-            try {
-                if (!allowEmpty && a.getChildren().isEmpty()) {
-                    deleteRecursively(a);
-                } else {
-                    saveRecursively(a);
-                }
-            } finally {
-                CONTAINERS.set(null);
-            }
-        } else {
-            CONTAINERS.set(a.getParent());
-            if (!allowEmpty && a.getChildren().isEmpty()) {
-                a.getParent().removeChild(a);
-                deleteRecursively(a);
-            }
-        }
+        //TODO
+//        Audit a = getCurrentAudit();
+//
+//        if (a == null) {
+//            throw new RuntimeException("Expected to pop a container, but had " + "none");
+//        }
+//
+//        a.setEndTime(System.currentTimeMillis());
+//        if (a.getParent() == null) {
+//            // Root level container. Save off
+//            try {
+//                if (!allowEmpty && a.getChildren().isEmpty()) {
+//                    deleteRecursively(a);
+//                } else {
+//                    saveRecursively(a);
+//                }
+//            } finally {
+//                CONTAINERS.set(null);
+//            }
+//        } else {
+//            CONTAINERS.set(a.getParent());
+//            if (!allowEmpty && a.getChildren().isEmpty()) {
+//                a.getParent().removeChild(a);
+//                deleteRecursively(a);
+//            }
+//        }
     }
 
     /**
@@ -184,10 +186,11 @@ public class AuditManagerImpl implements AuditManager, ApplicationListener<Appli
      * 
      */
     public void pushContainer(Audit newContainer) {
-        Audit currentContainer = getCurrentAudit();
+        //TODO
+      //  Audit currentContainer = getCurrentAudit();
 
-        newContainer.setStartTime(System.currentTimeMillis());
-        if (currentContainer == null) {
+        //newContainer.setStartTime(System.currentTimeMillis());
+        //if (currentContainer == null) {
             //TODO popAll in beforeCommit running in its own tx causes IllegalStateException when going back to JpaTransManager
             //This is the only place we are doing something in beforeCommit....
 //            TransactionSynchronizationManager
@@ -214,10 +217,10 @@ public class AuditManagerImpl implements AuditManager, ApplicationListener<Appli
 //                    public void afterCommit() {
 //                    }
 //                });
-        } else {
-            currentContainer.addChild(newContainer);
-        }
-        CONTAINERS.set(newContainer);
+//        } else {
+//            currentContainer.addChild(newContainer);
+//        }
+//        CONTAINERS.set(newContainer);
     }
 
     /**
