@@ -61,6 +61,7 @@ public class HQUGroovyPagesTemplateEngine  extends ResourceAwareTemplateEngine i
     private int scriptNameCount;
     private ResourceLoader resourceLoader;
     
+    // TODO: handle below X in BEAN_ID
     public static final String BEAN_ID = "XgroovyPagesTemplateEngine";
     public static final String RESOURCE_LOADER_BEAN_ID = "groovyPagesResourceLoader";
     private boolean reloadEnabled;

@@ -11,6 +11,7 @@ import groovy.util.ConfigObject;
 import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -101,6 +102,17 @@ public class DefaultHQUGrailsApplication extends GroovyObjectSupport implements 
      */
     public DefaultHQUGrailsApplication() {
         this.cl = new GroovyClassLoader();
+        this.applicationMeta = Metadata.getCurrent();
+    }
+
+    public DefaultHQUGrailsApplication(final Class[] classes, ClassLoader classLoader) {
+        if (classes == null) {
+            throw new IllegalArgumentException("Constructor argument 'classes' cannot be null");
+        }
+
+        loadedClasses.addAll(Arrays.asList(classes));
+        this.allClasses = classes;
+        this.cl = classLoader;
         this.applicationMeta = Metadata.getCurrent();
     }
 

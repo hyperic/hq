@@ -92,7 +92,7 @@ public class HQUGrailsViewResolver extends InternalResourceViewResolver implemen
 //            GrailsApplication application = (GrailsApplication) getApplicationContext().getBean(GrailsApplication.APPLICATION_ID);
 
             ResourceLoader resourceLoader = establishResourceLoader(grailsApplication);
-
+//C:\hyperic\server-4.6.0.BUILD-SNAPSHOT\hq-engine\hq-server\webapps\ROOT\WEB-INF\hqu-plugins\testapp1\WEB-INF\grails-app\views\foo
             String format = request.getAttribute(GrailsApplicationAttributes.CONTENT_FORMAT) != null ? request.getAttribute(GrailsApplicationAttributes.CONTENT_FORMAT).toString() : null;
 //            String gspView = localPrefix + viewName + DOT + format + GSP_SUFFIX;
             String gspView = getLocalPrefixPath() + viewName + DOT + format + GSP_SUFFIX;
@@ -180,7 +180,9 @@ public class HQUGrailsViewResolver extends InternalResourceViewResolver implemen
     }
     
     private String getLocalPrefixPath() {
-    	return localPrefix + ((HQUGrailsApplication)grailsApplication).getHQUApplicationId() + "/views";
+//    	return localPrefix + ((HQUGrailsApplication)grailsApplication).getHQUApplicationId() + "/views";
+    	//C:\hyperic\server-4.6.0.BUILD-SNAPSHOT\hq-engine\hq-server\webapps\ROOT\WEB-INF\hqu-plugins\testapp1\WEB-INF\grails-app\views\foo
+    	return localPrefix + ((HQUGrailsApplication)grailsApplication).getHQUApplicationId() + "/WEB-INF/grails-app/views";
     }
 
     private ResourceLoader establishResourceLoader(GrailsApplication application) {

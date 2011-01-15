@@ -27,6 +27,7 @@ import org.codehaus.groovy.grails.web.servlet.WrappedResponseHolder;
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest;
 import org.codehaus.groovy.grails.web.util.WebUtils;
 import org.hyperic.hq.hqu.grails.commons.HQUGrailsApplication;
+import org.hyperic.hq.hqu.grails.web.servlet.view.HQUGrailsViewResolver;
 import org.hyperic.hq.hqu.grails.web.util.HQUGrailsWebUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -52,7 +53,7 @@ public class HQUGrailsUrlMappingsFilter extends OncePerRequestFilter {
     private HandlerInterceptor[] handlerInterceptors = new HandlerInterceptor[0];
 //    private GrailsApplication application;
     private List<HQUGrailsApplication> applications;
-    private ViewResolver viewResolver;
+//    private ViewResolver viewResolver;
 
     protected void initFilterBean() throws ServletException {
         super.initFilterBean();
@@ -61,7 +62,7 @@ public class HQUGrailsUrlMappingsFilter extends OncePerRequestFilter {
         this.handlerInterceptors = WebUtils.lookupHandlerInterceptors(servletContext);       
 //        this.application = WebUtils.lookupApplication(servletContext);
         this.applications = HQUGrailsWebUtils.lookupApplications(servletContext);
-        this.viewResolver = WebUtils.lookupViewResolver(servletContext);
+//        this.viewResolver = WebUtils.lookupViewResolver(servletContext);
     }
 
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -107,6 +108,8 @@ public class HQUGrailsUrlMappingsFilter extends OncePerRequestFilter {
         WebApplicationContext wac =
             WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
         UrlMappingsHolder holder = (UrlMappingsHolder)wac.getBean(application.getHQUApplicationId()+UrlMappingsHolder.BEAN_ID);
+        
+        HQUGrailsViewResolver viewResolver = (HQUGrailsViewResolver)wac.getBean(application.getHQUApplicationId()+"jspViewResolver");
         
         GrailsWebRequest webRequest = (GrailsWebRequest)request.getAttribute(GrailsApplicationAttributes.WEB_REQUEST);
         List<String> excludePatterns = holder.getExcludePatterns();
@@ -217,7 +220,7 @@ public class HQUGrailsUrlMappingsFilter extends OncePerRequestFilter {
 
                     }
                     else {
-                        if(!renderViewForUrlMappingInfo(request, response, info, viewName)) {
+                        if(!renderViewForUrlMappingInfo(request, response, info, viewName, viewResolver)) {
                             dispatched = false;
                         }
                     }
@@ -239,7 +242,7 @@ public class HQUGrailsUrlMappingsFilter extends OncePerRequestFilter {
 
     }
 
-    // XXX: disable comp check
+    // TODO: disable comp check, we might want to enable this check
 //    private void checkForCompilationErrors() {
 //        if(!application.isWarDeployed()) {
 //
@@ -261,7 +264,7 @@ public class HQUGrailsUrlMappingsFilter extends OncePerRequestFilter {
     }
 
 
-    private boolean renderViewForUrlMappingInfo(HttpServletRequest request, HttpServletResponse response, UrlMappingInfo info, String viewName) {
+    private boolean renderViewForUrlMappingInfo(HttpServletRequest request, HttpServletResponse response, UrlMappingInfo info, String viewName, ViewResolver viewResolver) {
         if(viewResolver != null) {
             View v;
             try {
