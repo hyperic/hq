@@ -115,12 +115,13 @@ public class HQServer {
             }
             log.debug("startBuiltinDB completed");
         }
-        log.info("Verifying HQ database schema...");
-        upgradeDB();
-        if (!(verifySchema())) {
-            // Schema is not valid. Something went wrong with the DB upgrade.
-            return;
-        }
+        //TODO put back in later?
+//        log.info("Verifying HQ database schema...");
+//        upgradeDB();
+//        if (!(verifySchema())) {
+//            // Schema is not valid. Something went wrong with the DB upgrade.
+//            return;
+//        }
         List<String> javaOpts = getJavaOpts();
         log.info("Booting the HQ server...");
         engineController.start(javaOpts);

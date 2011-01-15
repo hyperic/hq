@@ -64,26 +64,27 @@ public class AlertDefinitionCleaner implements ZeventListener<ResourceZevent> {
     }
     
     public void processEvents(List<ResourceZevent> events) {
-        final List<Integer> alertDefs = alertDefinitionManager.getAllDeletedAlertDefs();
-        final int batchSize = 500;
-        try {
-            final int size = alertDefs.size();
-            for (int i=0; i< size; i+=batchSize) {
-                final int end = Math.min(size, i+batchSize);
-                final List<Integer> defIds = alertDefs.subList(i, end);
-                final StopWatch watch = new StopWatch();
-                final boolean debug = log.isDebugEnabled();
-                if (defIds.size() == 0) {
-                    continue;
-                }
-                if (debug) watch.markTimeBegin("cleanupAlertDefs");
-                alertDefinitionManager.cleanupAlertDefs(defIds);
-                if (debug) watch.markTimeEnd("cleanupAlertDefs");
-                if (debug) log.debug(watch);
-            }
-        }catch(Exception e) {
-            log.error(e,e);
-        }
+        //TODO impl or remove
+//        final List<Integer> alertDefs = alertDefinitionManager.getAllDeletedAlertDefs();
+//        final int batchSize = 500;
+//        try {
+//            final int size = alertDefs.size();
+//            for (int i=0; i< size; i+=batchSize) {
+//                final int end = Math.min(size, i+batchSize);
+//                final List<Integer> defIds = alertDefs.subList(i, end);
+//                final StopWatch watch = new StopWatch();
+//                final boolean debug = log.isDebugEnabled();
+//                if (defIds.size() == 0) {
+//                    continue;
+//                }
+//                if (debug) watch.markTimeBegin("cleanupAlertDefs");
+//                alertDefinitionManager.cleanupAlertDefs(defIds);
+//                if (debug) watch.markTimeEnd("cleanupAlertDefs");
+//                if (debug) log.debug(watch);
+//            }
+//        }catch(Exception e) {
+//            log.error(e,e);
+//        }
        
     }
 

@@ -320,7 +320,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
         ResourceGroup app = resourceGroupManager.findResourceGroupById(id);
         //TODO perm check
         //permissionManager.checkRemovePermission(subject, app.getEntityId());
+        AppdefEntityID appId = AppdefUtil.newAppdefEntityId(app);
         app.remove();
+        // Send resource delete event
+        ResourceDeletedZevent zevent = new ResourceDeletedZevent(subject, appId);
+        zeventManager.enqueueEventAfterCommit(zevent);
     }
 
     /**

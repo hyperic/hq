@@ -695,7 +695,13 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         AgentConnection conn = null;
         try {
             conn = agentManager.getAgentConnection(method, ctx.getCallerIP(), agentId);
-            LatherValue rtn = runCommand(ctx, method, arg);
+            LatherValue rtn;
+            try {
+               rtn = runCommand(ctx, method, arg);
+            }catch(RuntimeException e) {
+                log.error("Error running command in lather dispatcher: " + e.getMessage(),e);
+                throw e;
+            }
             
             concurrentStatsCollector.addStat(1, LATHER_NUMBER_OF_CONNECTIONS);
             

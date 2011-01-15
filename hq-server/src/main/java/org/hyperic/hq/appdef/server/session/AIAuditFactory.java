@@ -69,20 +69,20 @@ public class AIAuditFactory {
     }
 
     public AIAudit newImportAudit(AuthzSubject user) {
-        AIAudit res = new AIAudit(user, resourceManager.findResourceById(AuthzConstants.authzHQSystem), IMPORT_APPROVE,
+        AIAudit res = new AIAudit(user,null , IMPORT_APPROVE,
             AuditImportance.HIGH, AuditNature.CREATE, MSGS.format("auditMsg.import.approve"));
-        //TODO authzHQSystem resource doesn't exist now
+        //TODO resourceManager.findResourceById(AuthzConstants.authzHQSystem) authzHQSystem resource doesn't exist now
         //auditManager.saveAudit(res);
         return res;
     }
 
     public AIAudit newRuntimeImportAudit(Agent reporter) {
         AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-        AIAudit res = new AIAudit(overlord, resourceManager.findResourceById(AuthzConstants.authzHQSystem),
+        AIAudit res = new AIAudit(overlord, null,
             IMPORT_RUNTIME, AuditImportance.MEDIUM, AuditNature.CREATE, MSGS.format("auditMsg.import.runtime", reporter
                 .getAddress()));
 
-        //TODO authzHQSystem resource doesn't exist now
+        //TODO resourceManager.findResourceById(AuthzConstants.authzHQSystem) authzHQSystem resource doesn't exist now
         //auditManager.saveAudit(res);
         return res;
     }

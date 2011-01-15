@@ -54,10 +54,9 @@ public interface AvailabilityManager {
 
     public List<Integer> getAllAvailIds();
 
-    public List<Measurement> getAvailMeasurementChildren(Resource resource, String resourceRelationType);
+    public List<Measurement> getAvailMeasurementChildren(Resource resource);
 
-    public Map<Integer, List<Measurement>> getAvailMeasurementChildren(List<Integer> resourceIds,
-                                                                       String resourceRelationType);
+    public Map<Integer, List<Measurement>> getAvailMeasurementChildren(List<Integer> resourceIds);
 
     public List<Measurement> getAvailMeasurementParent(Resource resource, String resourceRelationType);
 

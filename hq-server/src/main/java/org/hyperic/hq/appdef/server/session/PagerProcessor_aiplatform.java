@@ -59,9 +59,14 @@ public class PagerProcessor_aiplatform implements PagerProcessorExt {
             // XXX scottmf, this needs to be refactored to not pass Objects
             // around and hide the backend implementation of DAOs from the
             // front end.  Unfortunately it won't be in 3.x, definitely 4.0
-            return AIQSynchronizer.getAIQPlatform(
-                aPlatformDAO, value)
-                .getAIPlatformValue();
+            AIPlatform updated = AIQSynchronizer.getAIQPlatform(
+                aPlatformDAO, value);
+            //TODO why did we never have to do a null check before?
+            if(updated == null) {
+                return null;
+            }
+            return 
+                updated.getAIPlatformValue();
         }
         return o;
     }

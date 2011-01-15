@@ -34,6 +34,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl;
+import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -160,7 +161,12 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         for(ResourceGroup group:groups) {
             group.removeMember(r);
         }
+        AppdefEntityID resourceId = AppdefUtil.newAppdefEntityId(r);
         r.remove();
+        // Send resource delete event
+        ResourceDeletedZevent zevent = new ResourceDeletedZevent(subject, resourceId);
+        zeventManager.enqueueEventAfterCommit(zevent);
+
     }
 
     /**

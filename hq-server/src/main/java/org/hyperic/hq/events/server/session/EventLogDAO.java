@@ -354,8 +354,9 @@ public class EventLogDAO
 
     List<EventLog> findByEntity(AuthzSubject subject, Resource r, long begin, long end,
                                 Collection<String> eventTypes) {
-        EdgePermCheck wherePermCheck = permissionManager.makePermCheckHql("rez", false);
-        String hql = " select l from EventLog l " + "join l.resource rez " + wherePermCheck +
+        //TODO perms?
+        //EdgePermCheck wherePermCheck = permissionManager.makePermCheckHql("rez", false);
+        String hql = " select l from EventLog l " + "where l.resource=:resource "+
                      "and l.timestamp between :begin and :end ";
 
         if (!eventTypes.isEmpty())
@@ -363,12 +364,14 @@ public class EventLogDAO
 
         hql += "order by l.timestamp";
 
-        Query q = createQuery(hql).setLong("begin", begin).setLong("end", end);
+        Query q = createQuery(hql).setLong("begin", begin).setLong("end", end).setParameter("resource",r);
 
         if (!eventTypes.isEmpty())
             q.setParameterList("eventTypes", eventTypes);
 
-        return wherePermCheck.addQueryParameters(q, subject, r, 0, VIEW_PERMISSIONS).list();
+        return q.list();
+        //TODO perms
+        //return wherePermCheck.addQueryParameters(q, subject, r, 0, VIEW_PERMISSIONS).list();
     }
 
     List<EventLog> findByGroup(Resource g, long begin, long end, Collection<String> eventTypes) {

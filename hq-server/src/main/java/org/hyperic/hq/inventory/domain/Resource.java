@@ -312,6 +312,27 @@ public class Resource {
         }
         return children;
     }
+    
+    public Set<Integer> getChildrenIds(boolean recursive) {
+        Set<Integer> children = new HashSet<Integer>();
+        StopEvaluator stopEvaluator;
+        if(recursive) {
+            stopEvaluator = StopEvaluator.END_OF_GRAPH;
+        }else {
+            stopEvaluator = new StopEvaluator() {
+                public boolean isStopNode(TraversalPosition currentPos) {
+                    return currentPos.depth() >= 1;
+                }
+            };
+        }
+        Traverser relationTraverser = getUnderlyingState().traverse(Traverser.Order.BREADTH_FIRST,
+            stopEvaluator, ReturnableEvaluator.ALL_BUT_START_NODE,
+            DynamicRelationshipType.withName(RelationshipTypes.CONTAINS), Direction.OUTGOING.toNeo4jDir());
+        for (Node related : relationTraverser) {
+            children.add((Integer)related.getProperty("foreignId"));
+        }
+        return children;
+    }
      
     public boolean hasChild(Resource resource,boolean recursive) {
         if(getChildren(recursive).contains(resource)) {
