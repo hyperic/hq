@@ -275,10 +275,10 @@ public class ApplicationManagerTest
         holder.service = createService(holder.server.getId(), holder.serviceType, "Service1", "desc",
             "location");
         holder.serviceType2 = createServiceType("TestService2", holder.serverType2);
-        holder.service2 = createService(holder.server2.getId(), holder.serviceType, "Service2", "desc2",
+        holder.service2 = createService(holder.server2.getId(), holder.serviceType2, "Service2", "desc2",
             "location2");
         holder.serviceType3 = createServiceType("TestService3", holder.serverType2);
-        holder.service3 = createService(holder.server3.getId(), holder.serviceType, "Service3", "desc3",
+        holder.service3 = createService(holder.server3.getId(), holder.serviceType3, "Service3", "desc3",
             "location3");
 
         return holder;
