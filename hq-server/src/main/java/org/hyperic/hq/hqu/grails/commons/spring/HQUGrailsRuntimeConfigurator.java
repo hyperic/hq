@@ -22,6 +22,7 @@ import org.codehaus.groovy.grails.exceptions.GrailsConfigurationException;
 import org.codehaus.groovy.grails.plugins.GrailsPluginManager;
 import org.hyperic.hq.hqu.grails.commons.HQUGrailsApplication;
 import org.hyperic.hq.hqu.grails.plugins.DefaultHQUGrailsPluginManager;
+import org.hyperic.hq.hqu.grails.plugins.HQUGrailsPluginManager;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.context.ApplicationContext;
@@ -135,6 +136,11 @@ public class HQUGrailsRuntimeConfigurator implements ApplicationContextAware {
             }
 
 		}
+        
+        // do once
+        HQUGrailsApplication _app = applications.get(0);
+        HQUGrailsPluginManager _pMan = (HQUGrailsPluginManager)pluginManagers.get(_app.getHQUApplicationId());
+        _pMan.doRuntimeConfigurationOnce(springConfig);
 
         reset();
 

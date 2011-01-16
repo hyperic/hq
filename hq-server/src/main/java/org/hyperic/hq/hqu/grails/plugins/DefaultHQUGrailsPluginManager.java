@@ -49,6 +49,7 @@ import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 import org.codehaus.groovy.grails.commons.GrailsResourceUtils;
+import org.codehaus.groovy.grails.commons.spring.RuntimeSpringConfiguration;
 import org.codehaus.groovy.grails.commons.spring.WebRuntimeSpringConfiguration;
 import org.codehaus.groovy.grails.plugins.AbstractGrailsPluginManager;
 import org.codehaus.groovy.grails.plugins.DefaultGrailsPlugin;
@@ -101,7 +102,7 @@ import org.xml.sax.SAXException;
  * depends on and which ones it is incompatable with and should evict
  *
  */
-public class DefaultHQUGrailsPluginManager extends AbstractGrailsPluginManager implements GrailsPluginManager {
+public class DefaultHQUGrailsPluginManager extends AbstractGrailsPluginManager implements HQUGrailsPluginManager {
 
     private static final Log log = LogFactory.getLog(DefaultHQUGrailsPluginManager.class);
     private static final Class[] COMMON_CLASSES =
@@ -366,8 +367,10 @@ public class DefaultHQUGrailsPluginManager extends AbstractGrailsPluginManager i
         while (classesIterator.hasNext()) {
             Class pluginClass = (Class) classesIterator.next();
 
-            if (pluginClass != null && !Modifier.isAbstract(pluginClass.getModifiers()) && pluginClass != DefaultGrailsPlugin.class) {
-                GrailsPlugin plugin = new DefaultGrailsPlugin(pluginClass, application);
+//            if (pluginClass != null && !Modifier.isAbstract(pluginClass.getModifiers()) && pluginClass != DefaultGrailsPlugin.class) {
+            if (pluginClass != null && !Modifier.isAbstract(pluginClass.getModifiers()) && pluginClass != DefaultHQUGrailsPlugin.class) {
+//                GrailsPlugin plugin = new DefaultGrailsPlugin(pluginClass, application);
+                HQUGrailsPlugin plugin = new DefaultHQUGrailsPlugin(pluginClass, application);
                 plugin.setApplicationContext(applicationContext);
                 grailsCorePlugins.add(plugin);
             }
@@ -1949,4 +1952,16 @@ public class DefaultHQUGrailsPluginManager extends AbstractGrailsPluginManager i
 
         }
     }
+
+	public void doRuntimeConfigurationOnce(
+			RuntimeSpringConfiguration springConfig) {
+		checkInitialised();
+		for (int i = 0; i < pluginList.size(); i++) {
+			HQUGrailsPlugin plugin = (HQUGrailsPlugin)pluginList.get(i);
+            if (plugin.supportsCurrentScopeAndEnvironment()) {
+                plugin.doWithRuntimeConfigurationOnce(springConfig);
+            }
+		}
+		
+	}
 }
