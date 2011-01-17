@@ -62,22 +62,6 @@ public class OperationType {
         this.entityManager.flush();
     }
 
-    public Integer getId() {
-        return this.id;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public ResourceType getResourceType() {
-        return this.resourceType;
-    }
-
-    public Integer getVersion() {
-        return this.version;
-    }
-
     @Transactional
     public OperationType merge() {
         OperationType merged = this.entityManager.merge(this);
@@ -106,23 +90,39 @@ public class OperationType {
         }
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+    public Integer getId() {
+		return id;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setId(Integer id) {
+		this.id = id;
+	}
 
-    public void setResourceType(ResourceType resourceType) {
-        this.resourceType = resourceType;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setVersion(Integer version) {
-        this.version = version;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public String toString() {
+	public ResourceType getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(ResourceType resourceType) {
+		this.resourceType = resourceType;
+	}
+
+	public Integer getVersion() {
+		return version;
+	}
+
+	public void setVersion(Integer version) {
+		this.version = version;
+	}
+
+	public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Id: ").append(getId()).append(", ");
         sb.append("Version: ").append(getVersion()).append(", ");

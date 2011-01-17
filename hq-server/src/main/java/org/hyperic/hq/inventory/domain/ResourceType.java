@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -41,7 +40,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Configurable
 @NodeEntity(partial = true)
 public class ResourceType {
-
     @PersistenceContext
     transient EntityManager entityManager;
 
@@ -65,17 +63,17 @@ public class ResourceType {
     private String description;
 
     @RelatedTo(type = RelationshipTypes.HAS_OPERATION_TYPE, direction = Direction.OUTGOING, elementClass = OperationType.class)
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany
     @Transient
     private Set<OperationType> operationTypes;
 
     @RelatedTo(type = RelationshipTypes.HAS_PROPERTY_TYPE, direction = Direction.OUTGOING, elementClass = PropertyType.class)
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany
     @Transient
     private Set<PropertyType> propertyTypes;
 
     @RelatedTo(type = RelationshipTypes.HAS_CONFIG_OPT_TYPE, direction = Direction.OUTGOING, elementClass = ConfigOptionType.class)
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany
     @Transient
     private Set<ConfigOptionType> configTypes;
 
@@ -85,7 +83,7 @@ public class ResourceType {
     private Plugin plugin;
 
     @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.INCOMING, elementClass = Resource.class)
-    @OneToMany(cascade = CascadeType.REMOVE)
+    @OneToMany
     @Transient
     private Set<Resource> resources;
 
@@ -274,10 +272,6 @@ public class ResourceType {
         removePropertyTypes();
         removeOperationTypes();
         removeConfigTypes();
-        for(org.neo4j.graphdb.Relationship relationship: getUnderlyingState().getRelationships()) {
-            relationship.delete();
-        }
-        getUnderlyingState().delete();
         if (this.entityManager.contains(this)) {
             this.entityManager.remove(this);
         } else {
@@ -393,7 +387,11 @@ public class ResourceType {
         propertyTypes.add(propertyType);
     }
 
-    // TODO other config types and setters
+    public void setOperationTypes(Set<OperationType> operationTypes) {
+		this.operationTypes = operationTypes;
+	}
+
+	// TODO other config types and setters
     public Set<ConfigOptionType> getMeasurementConfigTypes() {
         Set<ConfigOptionType> configTypes = new HashSet<ConfigOptionType>();
         Iterable<org.neo4j.graphdb.Relationship> relationships = this.getUnderlyingState()
@@ -414,5 +412,22 @@ public class ResourceType {
 
     public void setPlugin(Plugin plugin) {
         this.plugin = plugin;
+    }
+    
+    public String getRelationshipTypeName(ResourceType otherEntity) {
+    	String result = null;
+
+    	if (otherEntity != null) {
+    		for (org.neo4j.graphdb.Relationship relationship : getUnderlyingState().getRelationships()) {
+    			if (relationship.getStartNode().equals(this.getUnderlyingState()) && 
+    				relationship.getEndNode().equals(otherEntity.getUnderlyingState())) {
+    				result = relationship.getType().name();
+    				
+    				break;
+    			}
+    		}
+    	}
+    	
+    	return result;
     }
 }

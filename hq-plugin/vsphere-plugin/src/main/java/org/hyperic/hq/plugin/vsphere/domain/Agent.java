@@ -1,8 +1,9 @@
-package org.hyperic.hq.api.representation;
+package org.hyperic.hq.plugin.vsphere.domain;
 
-import org.hyperic.hq.appdef.Agent;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
-public class AgentRep {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class Agent {
 	private Integer id;
 	private String address;
 	private Integer port;
@@ -10,17 +11,17 @@ public class AgentRep {
 	private String agentToken;
 	private String agentVersion;
 	private Boolean unidirectional;
+
+	public Agent() {}
 	
-	public AgentRep() {}
-	
-	public AgentRep(Agent agent) {
-		id = agent.getId();
-		address = agent.getAddress();
-		port = agent.getPort();
-		authToken = agent.getAuthToken();
-		agentToken = agent.getAgentToken();
-		agentVersion = agent.getAgentVersion();
-		unidirectional = agent.isUnidirectional();
+	public Agent(Integer id, String address, Integer port, String authToken, String agentToken, String agentVersion, Boolean unidirectional) {
+		this.id = id;
+		this.address = address;
+		this.port = port;
+		this.authToken = authToken;
+		this.agentToken = agentToken;
+		this.agentVersion = agentVersion;
+		this.unidirectional = unidirectional;
 	}
 
 	public Integer getId() {
@@ -79,3 +80,4 @@ public class AgentRep {
 		this.unidirectional = unidirectional;
 	}
 }
+

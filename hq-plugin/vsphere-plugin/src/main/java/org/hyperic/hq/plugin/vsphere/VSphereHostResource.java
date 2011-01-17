@@ -28,10 +28,9 @@ package org.hyperic.hq.plugin.vsphere;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hyperic.hq.hqapi1.types.Resource;
+import org.hyperic.hq.plugin.vsphere.domain.Resource;
 
 public class VSphereHostResource extends VSphereResource {
-
     private List<Resource> vms;
     
     public List<Resource> getVirtualMachines() {

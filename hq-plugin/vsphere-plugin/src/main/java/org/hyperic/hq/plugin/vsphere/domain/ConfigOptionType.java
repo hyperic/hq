@@ -1,40 +1,40 @@
-package org.hyperic.hq.api.representation;
+package org.hyperic.hq.plugin.vsphere.domain;
 
-import org.hyperic.hq.inventory.domain.PropertyType;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
-public class PropertyTypeRep {
-    private Integer id;
-    private String name;
-    private String defaultValue;
-    private String description;
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class ConfigOptionType {
+	private Integer id;
+	private String name;
+	private String defaultValue;
+	private String description;
 	private Boolean optional;
 	private Boolean hidden;
 	private Boolean secret;
-
-    public PropertyTypeRep() {}
 	
-	public PropertyTypeRep(PropertyType propertyType) {
-		id = propertyType.getId();
-		name = propertyType.getName();
-		defaultValue = propertyType.getDefaultValue();
-		description = propertyType.getDescription();
-		optional = propertyType.isOptional();
-		hidden = propertyType.isHidden();
-		secret = propertyType.isSecret();
+	public ConfigOptionType() {}
+	
+	public ConfigOptionType(String name, String description, String defaultValue, Boolean optional, Boolean hidden, Boolean secret) {
+		this.name = name;
+		this.defaultValue = defaultValue;
+		this.description = description;
+		this.optional = optional;
+		this.hidden = hidden;
+		this.secret = secret;
 	}
-
+	
 	public Integer getId() {
 		return id;
 	}
-
+	
 	public void setId(Integer id) {
 		this.id = id;
 	}
-
+	
 	public String getName() {
 		return name;
 	}
-
+	
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -55,7 +55,7 @@ public class PropertyTypeRep {
 		this.description = description;
 	}
 
-	public Boolean isOptional() {
+	public Boolean getOptional() {
 		return optional;
 	}
 
@@ -63,7 +63,7 @@ public class PropertyTypeRep {
 		this.optional = optional;
 	}
 
-	public Boolean isHidden() {
+	public Boolean getHidden() {
 		return hidden;
 	}
 
@@ -71,7 +71,7 @@ public class PropertyTypeRep {
 		this.hidden = hidden;
 	}
 
-	public Boolean isSecret() {
+	public Boolean getSecret() {
 		return secret;
 	}
 

@@ -25,35 +25,28 @@
 
 package org.hyperic.hq.plugin.vsphere;
 
-import org.hyperic.hq.hqapi1.types.Ip;
-import org.hyperic.hq.hqapi1.types.Resource;
-import org.hyperic.hq.hqapi1.types.ResourceConfig;
-import org.hyperic.hq.hqapi1.types.ResourceInfo;
-import org.hyperic.hq.hqapi1.types.ResourceProperty;
+import org.hyperic.hq.plugin.vsphere.domain.Resource;
 import org.hyperic.util.config.ConfigResponse;
 
 //Resource object helpers
 public class VSphereResource extends Resource {
-
+	public static final String FQDN = "fqdn";
+	
     public void addInfo(String key, String val) {
+    	/*
         ResourceInfo info = new ResourceInfo();
         info.setKey(key);
         info.setValue(val);
         getResourceInfo().add(info);
+        */
     }
 
     public void addProperty(String key, String val) {
-        ResourceProperty prop = new ResourceProperty();
-        prop.setKey(key);
-        prop.setValue(val);
-        getResourceProperty().add(prop);
+        getProperties().put(key, val);
     }
 
     public void addConfig(String key, String val) {
-        ResourceConfig prop = new ResourceConfig();
-        prop.setKey(key);
-        prop.setValue(val);
-        getResourceConfig().add(prop);
+        getConfigs().put(key, val);
     }
 
     public void addConfig(ConfigResponse config) {
@@ -71,14 +64,16 @@ public class VSphereResource extends Resource {
     }
 
     public void addIp(String address, String netmask, String mac) {
+    	/*
         Ip ip = new Ip();
         ip.setAddress(address);
         ip.setMac(mac);
         ip.setNetmask(netmask);
         getIp().add(ip);
+        */
     }
 
     public void setFqdn(String fqdn) {
-        addInfo("fqdn", fqdn);
+        addConfig(FQDN, fqdn);
     }
 }

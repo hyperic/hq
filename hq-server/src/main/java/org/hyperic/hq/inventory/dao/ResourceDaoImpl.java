@@ -1,5 +1,6 @@
 package org.hyperic.hq.inventory.dao;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -7,6 +8,8 @@ import javax.persistence.PersistenceContext;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.datastore.graph.neo4j.finder.FinderFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +21,9 @@ public class ResourceDaoImpl implements ResourceDao {
 
     @javax.annotation.Resource
     private FinderFactory finderFactory;
+    
+    @Autowired
+    private ResourceTypeDao resourceTypeDao;
     
     @Transactional(readOnly = true)
 	public Resource findById(Integer id) {
@@ -80,6 +86,22 @@ public class ResourceDaoImpl implements ResourceDao {
         }
         
         return resource;
+    }
+    
+    @Transactional(readOnly = true)
+    public List<Resource> findByTypeName(String typeName) {
+    	ResourceType type = resourceTypeDao.findByName(typeName);
+
+    	// TODO The call to type.getResources() is returning Roles instead of Resources, but only when getting "VMware vSphere Host" type...
+    	List<Resource> resources = new ArrayList<Resource>();
+    	
+    	for (Resource resource : findAll()) {
+    		if (resource.getType().getUnderlyingState().equals(type.getUnderlyingState())) {
+    			resources.add(resource);
+    		}
+    	}
+    	
+    	return resources;
     }
     
     @Transactional(readOnly = true)

@@ -190,7 +190,7 @@ public class Resource {
                                                " is not defined for resource of type " +
                                                type.getName());
         }
-        return getUnderlyingState().getProperty(key, propertyType.getDefaultValue());
+        return getUnderlyingState().getProperty(key);
     }
 
     
@@ -525,6 +525,7 @@ public class Resource {
         setConfig(config, ConfigType.PRODUCT);
     }
 
+    @Transactional
     public Object setProperty(String key, Object value) {
         if (type.getPropertyType(key) == null) {
             throw new IllegalArgumentException("Property " + key +
