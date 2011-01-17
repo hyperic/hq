@@ -20,7 +20,7 @@
   </thead>
   <tbody>
 <% if (members!=null) { %>
-  <%for (member in members.values().sort{a,b -> a.get("name").compareToIgnoreCase b.get("name")} ){%>
+  <%for (member in members.values()){%>
     <tr>
       <td>${member.get("id")}</td>
       <td><a id="${member.get("id")}" class="member" href="#${member.get("id")}">${member.get("name")}</a></td>
