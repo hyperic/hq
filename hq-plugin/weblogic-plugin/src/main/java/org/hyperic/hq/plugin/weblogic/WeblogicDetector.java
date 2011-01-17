@@ -75,7 +75,7 @@ public abstract class WeblogicDetector extends ServerDetector implements AutoSer
 
     @Override
     public RuntimeDiscoverer getRuntimeDiscoverer() {
-        if (WeblogicProductPlugin.NEW_DISCOVERY) {
+        if(WeblogicProductPlugin.NEW_DISCOVERY){
             return super.getRuntimeDiscoverer();
         }
         return new WeblogicRuntimeDiscoverer(this);
@@ -202,13 +202,14 @@ public abstract class WeblogicDetector extends ServerDetector implements AutoSer
 
         String name = getTypeInfo().getName()
                 + " " + srvConfig.domain + " " + srvConfig.name;
-        if (WeblogicProductPlugin.usePlatformName && WeblogicProductPlugin.NEW_DISCOVERY) {
-            name = getPlatformName() + " " + name;
-        }
+		if (WeblogicProductPlugin.usePlatformName && WeblogicProductPlugin.NEW_DISCOVERY) {
+			name = getPlatformName() + " " + name;
+		}
 
         server.setName(name);
-        setIdentifier(server,name);
-
+        if(WeblogicProductPlugin.NEW_DISCOVERY)
+            server.setIdentifier(name);
+        
         setProductConfig(server, productConfig);
         setControlConfig(server, controlConfig);
         //force user to configure by not setting measurement config
@@ -432,8 +433,6 @@ public abstract class WeblogicDetector extends ServerDetector implements AutoSer
 
         return aiservice;
     }
-
-    abstract void setIdentifier(ServerResource server, String name);
 
     public class WLSProc {
 
