@@ -172,7 +172,6 @@ public class WeblogicDiscover {
 
         try {
             scope = new ObjectName(domain + ":" + query.getScope() + ",*");
-            log.debug("[find] scope="+scope);
         }
         catch (MalformedObjectNameException e) {
             // wont happen
