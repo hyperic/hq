@@ -83,8 +83,6 @@ public class WeblogicRuntimeDiscoverer implements RuntimeDiscoverer, PrivilegedA
 
 	private String targetFqdn = null;
 
-	private boolean usePlatformName = false;
-
 	private WeblogicDetector plugin;
 
 	private String version;
@@ -104,9 +102,6 @@ public class WeblogicRuntimeDiscoverer implements RuntimeDiscoverer, PrivilegedA
 		// as the admin server.
 		this.targetFqdn = props.getProperty(PROP_FQDN);
 
-		// XXX cant do this by default because it will ruin DB
-		// make it optional for acotel
-		this.usePlatformName = "true".equals(props.getProperty("weblogic.discover.pname"));
 	}
 
 	public WeblogicDetector getPlugin() {
@@ -448,7 +443,7 @@ public class WeblogicRuntimeDiscoverer implements RuntimeDiscoverer, PrivilegedA
 		aiserver.setServicesAutomanaged(true);
 		aiserver.setServerTypeName(server.getResourceName());
 		String name = server.getResourceFullName();
-		if (this.usePlatformName) {
+		if (WeblogicProductPlugin.usePlatformName) {
 			name = GenericPlugin.getPlatformName() + " " + name;
 		}
 		aiserver.setName(name);
@@ -496,7 +491,7 @@ public class WeblogicRuntimeDiscoverer implements RuntimeDiscoverer, PrivilegedA
 		aiservice.setServiceTypeName(service.getResourceName());
 
 		String name = service.getResourceFullName();
-		if (this.usePlatformName) {
+		if (WeblogicProductPlugin.usePlatformName) {
 			name = GenericPlugin.getPlatformName() + " " + name;
 		}
 		if (name.length() >= 200) {
