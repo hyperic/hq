@@ -38,6 +38,7 @@ import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.Trigger;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * A quartz job class for handling AI scans on a single entity
@@ -46,7 +47,8 @@ public class AIScanJob extends AIJob {
 
     protected Log log = LogFactory.getLog(AIScanJob.class.getName());
 
-    public void executeInSession(JobExecutionContext context)
+    @Transactional
+    public void executeJob(JobExecutionContext context)
      {
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
 

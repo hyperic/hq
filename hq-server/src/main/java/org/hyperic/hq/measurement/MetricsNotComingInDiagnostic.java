@@ -48,8 +48,6 @@ import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.common.DiagnosticsLogger;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.ha.HAUtil;
-import org.hyperic.hq.hibernate.SessionManager;
-import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MetricDataCache;
@@ -60,6 +58,7 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component("metricsNotComingInDiagnostic")
 public class MetricsNotComingInDiagnostic implements DiagnosticObject {
@@ -125,21 +124,14 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
         }
         final StringBuilder rtn = new StringBuilder();
         try {
-            SessionManager.runInSession(new SessionRunner() {
-                public void run() throws Exception {
-                    setStatusBuf(rtn, isVerbose);
-                }
-
-                public String getName() {
-                    return MetricsNotComingInDiagnostic.class.getSimpleName();
-                }
-            });
+            setStatusBuf(rtn, isVerbose);
         } catch (Exception e) {
             log.error(e, e);
         }
         return rtn.toString();
     }
 
+    @Transactional(readOnly=true)
     private void setStatusBuf(StringBuilder buf, boolean isVerbose) {
         StopWatch watch = new StopWatch();
         

@@ -47,8 +47,6 @@ import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.hibernate.SessionManager;
-import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
@@ -57,8 +55,7 @@ import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * This class is used to schedule and unschedule metrics for a given entity. The
@@ -72,26 +69,25 @@ public class AgentScheduleSynchronizer {
     private ZeventEnqueuer zEventManager;
 
     private AgentManager agentManager;
-    
+
     private ResourceManager resourceManager;
 
     private final Map<Integer, Collection<AppdefEntityID>> scheduleAeids = new HashMap<Integer, Collection<AppdefEntityID>>();
 
     private final Map<Integer, Collection<AppdefEntityID>> unscheduleAeids = new HashMap<Integer, Collection<AppdefEntityID>>();
-    
+
     private final Set<Integer> activeAgents = Collections.synchronizedSet(new HashSet<Integer>());
-    
+
     private ConcurrentStatsCollector concurrentStatsCollector;
     private MeasurementProcessor measurementProcessor;
-    
-    
+
     private static final int NUM_WORKERS = 4;
-    
 
     @Autowired
-    public AgentScheduleSynchronizer(ZeventEnqueuer zEventManager, AgentManager agentManager, 
-                                     MeasurementProcessor measurementProcessor, 
-                                     ConcurrentStatsCollector concurrentStatsCollector, ResourceManager resourceManager) {
+    public AgentScheduleSynchronizer(ZeventEnqueuer zEventManager, AgentManager agentManager,
+                                     MeasurementProcessor measurementProcessor,
+                                     ConcurrentStatsCollector concurrentStatsCollector,
+                                     ResourceManager resourceManager) {
         this.zEventManager = zEventManager;
         this.agentManager = agentManager;
         this.measurementProcessor = measurementProcessor;
@@ -101,18 +97,20 @@ public class AgentScheduleSynchronizer {
 
     @PostConstruct
     void initialize() {
-          ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(NUM_WORKERS, new ThreadFactory() {
-              private AtomicLong i = new AtomicLong(0);
-              public Thread newThread(Runnable r) {
-                  return new Thread(r, "AgentScheduler" + i.getAndIncrement());
-              }
-          });
-          for (int i=0; i<NUM_WORKERS; i++) {
-              SchedulerThread worker = new SchedulerThread("AgentScheduler" + i);
-              executor.scheduleWithFixedDelay(worker, i+1, NUM_WORKERS, TimeUnit.SECONDS);
-          }
+        ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(NUM_WORKERS,
+            new ThreadFactory() {
+                private AtomicLong i = new AtomicLong(0);
 
-          ZeventListener<Zevent> l = new ZeventListener<Zevent>() {
+                public Thread newThread(Runnable r) {
+                    return new Thread(r, "AgentScheduler" + i.getAndIncrement());
+                }
+            });
+        for (int i = 0; i < NUM_WORKERS; i++) {
+            SchedulerThread worker = new SchedulerThread("AgentScheduler" + i);
+            executor.scheduleWithFixedDelay(worker, i + 1, NUM_WORKERS, TimeUnit.SECONDS);
+        }
+
+        ZeventListener<Zevent> l = new ZeventListener<Zevent>() {
 
             public void processEvents(List<Zevent> events) {
                 final List<AppdefEntityID> toSchedule = new ArrayList<AppdefEntityID>(events.size());
@@ -143,10 +141,11 @@ public class AgentScheduleSynchronizer {
                 }
 
                 synchronized (scheduleAeids) {
-                    for (AppdefEntityID id: toSchedule) {
+                    for (AppdefEntityID id : toSchedule) {
                         Resource resource = resourceManager.findResourceById(id.getId());
-                        //Resource may have been deleted while we are processing this
-                        if(resource != null) {
+                        // Resource may have been deleted while we are
+                        // processing this
+                        if (resource != null) {
                             Collection<AppdefEntityID> tmp;
                             final int agentId = resource.getAgent().getId();
                             if (null == (tmp = scheduleAeids.get(agentId))) {
@@ -207,10 +206,12 @@ public class AgentScheduleSynchronizer {
                 boolean hasMoreToSchedule = true;
                 boolean hasMoreToUnschedule = true;
                 synchronized (scheduleAeids) {
-                	concurrentStatsCollector.addStat(scheduleAeids.size(), ConcurrentStatsCollector.SCHEDULE_QUEUE_SIZE);
+                    concurrentStatsCollector.addStat(scheduleAeids.size(),
+                        ConcurrentStatsCollector.SCHEDULE_QUEUE_SIZE);
                 }
                 synchronized (unscheduleAeids) {
-                	concurrentStatsCollector.addStat(unscheduleAeids.size(), ConcurrentStatsCollector.UNSCHEDULE_QUEUE_SIZE);
+                    concurrentStatsCollector.addStat(unscheduleAeids.size(),
+                        ConcurrentStatsCollector.UNSCHEDULE_QUEUE_SIZE);
                 }
                 while (hasMoreToSchedule || hasMoreToUnschedule) {
                     hasMoreToUnschedule = syncMetrics(unscheduleAeids, false);
@@ -221,7 +222,8 @@ public class AgentScheduleSynchronizer {
             }
         }
 
-        private boolean syncMetrics(Map<Integer,Collection<AppdefEntityID>> scheduleAeids, final boolean schedule) throws Exception {
+        private boolean syncMetrics(Map<Integer, Collection<AppdefEntityID>> scheduleAeids,
+                                    final boolean schedule) throws Exception {
             Integer agentId = null;
             Collection<AppdefEntityID> aeids = null;
             final boolean debug = log.isDebugEnabled();
@@ -230,9 +232,10 @@ public class AgentScheduleSynchronizer {
                     if (scheduleAeids.isEmpty()) {
                         return false;
                     }
-                    for (Map.Entry<Integer, Collection<AppdefEntityID>> entry : scheduleAeids.entrySet()) {
+                    for (Map.Entry<Integer, Collection<AppdefEntityID>> entry : scheduleAeids
+                        .entrySet()) {
                         agentId = entry.getKey();
-                        aeids =  entry.getValue();
+                        aeids = entry.getValue();
                         boolean added = activeAgents.add(agentId);
                         if (added) {
                             if (debug)
@@ -259,30 +262,25 @@ public class AgentScheduleSynchronizer {
             }
         }
 
+        @Transactional
         private void runSchedule(final boolean schedule, final Integer agentId,
                                  final Collection<AppdefEntityID> aeids) throws Exception {
-            SessionManager.runInSession(new SessionRunner() {
-                public void run() throws Exception {
-                    final Agent agent = agentManager.findAgent(agentId);
-                    if (schedule) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("scheduling " + aeids.size() + " resources to agentid=" +
-                                       agent.getId());
-                        }
-                        measurementProcessor.scheduleEnabled(agent, aeids);
-                    } else {
-                        if (log.isDebugEnabled()) {
-                            log.debug("unscheduling " + aeids.size() + " resources to agentid=" +
-                                       agent.getId());
-                        }
-                        measurementProcessor.unschedule(agent.getAgentToken(), aeids);
-                    }
-                }
 
-                public String getName() {
-                    return _name;
+            final Agent agent = agentManager.findAgent(agentId);
+            if (schedule) {
+                if (log.isDebugEnabled()) {
+                    log.debug("scheduling " + aeids.size() + " resources to agentid=" +
+                              agent.getId());
                 }
-            });
+                measurementProcessor.scheduleEnabled(agent, aeids);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("unscheduling " + aeids.size() + " resources to agentid=" +
+                              agent.getId());
+                }
+                measurementProcessor.unschedule(agent.getAgentToken(), aeids);
+            }
+
         }
     }
 
