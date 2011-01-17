@@ -634,11 +634,14 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     @Transactional(readOnly = true)
     public PageList<PlatformValue> getRecentPlatforms(AuthzSubject subject, long range, int size)
-    throws PermissionException, NotFoundException {
+        throws PermissionException, NotFoundException {
         PageControl pc = new PageControl(0, size);
-        Collection<Platform> platforms = platformDAO.findByCTime(System.currentTimeMillis() - range);
+
+        Collection<Platform> platforms = platformDAO
+            .findByCTime(System.currentTimeMillis() - range);
+
         // now get the list of PKs
-        Collection<Integer> viewable = new HashSet<Integer>(getViewablePlatformPKs(subject));
+        List<Integer> viewable = getViewablePlatformPKs(subject);
         // and iterate over the list to remove any item not viewable
         for (Iterator<Platform> i = platforms.iterator(); i.hasNext();) {
             Platform platform = i.next();
@@ -647,6 +650,7 @@ public class PlatformManagerImpl implements PlatformManager {
                 i.remove();
             }
         }
+
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
         return valuePager.seek(platforms, pc);
@@ -1269,9 +1273,10 @@ public class PlatformManagerImpl implements PlatformManager {
         return rtn;
     }
 
-    protected Collection<Integer> getViewablePlatformPKs(AuthzSubject who)
-    throws PermissionException, NotFoundException {
+    protected List<Integer> getViewablePlatformPKs(AuthzSubject who) throws PermissionException,
+        NotFoundException {
         // now get a list of all the viewable items
+
         Operation op = getOperationByName(resourceManager
             .findResourceTypeByName(AuthzConstants.platformResType),
             AuthzConstants.platformOpViewPlatform);

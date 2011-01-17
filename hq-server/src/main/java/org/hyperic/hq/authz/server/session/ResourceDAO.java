@@ -28,7 +28,6 @@ package org.hyperic.hq.authz.server.session;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -42,11 +41,6 @@ import org.hibernate.FlushMode;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
-import org.hyperic.hq.appdef.shared.ServerManager;
-import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.EdgePermCheck;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -188,7 +182,6 @@ public class ResourceDAO
         }
     }
 
-    @SuppressWarnings("unchecked")
     public List<Resource> findByResource(AuthzSubject subject, Resource r) {
         final String[] VIEW_APPDEFS = new String[] { AuthzConstants.platformOpViewPlatform,
                                                     AuthzConstants.serverOpViewServer,
@@ -208,8 +201,7 @@ public class ResourceDAO
         return getSession().createQuery(sql).setInteger(0, owner.getId().intValue()).list();
     }
 
-    @SuppressWarnings("unchecked")
-    public Collection<Resource> findByOwnerAndType(AuthzSubject owner, ResourceType type) {
+    public Collection findByOwnerAndType(AuthzSubject owner, ResourceType type) {
         String sql = "from Resource where owner.id = ? and resourceType.id = ?";
         return getSession().createQuery(sql).setInteger(0, owner.getId().intValue()).setInteger(1,
             type.getId().intValue()).list();
@@ -247,20 +239,19 @@ public class ResourceDAO
 
     }
 
-    @SuppressWarnings("unchecked")
-    public Collection<Resource> findSvcRes_orderName(Boolean fSystem) {
+    public Collection findSvcRes_orderName(Boolean fSystem) {
         String sql = "select r from Resource r join r.resourceType rt "
                      + "where r.system = :system and " + "(rt.name = :resSvcType or "
                      + "exists (select rg from ResourceGroup rg " + "join rg.resource r2 "
                      + "where r = r2 and rg.groupType = 15)) " + "order by r.sortName ";
 
-        return getSession().createQuery(sql).setBoolean("system", fSystem.booleanValue())
+        List resources = getSession().createQuery(sql).setBoolean("system", fSystem.booleanValue())
             .setString("resSvcType", AuthzConstants.serviceResType).list();
+
+        return resources;
     }
 
-    @SuppressWarnings("unchecked")
-    public Collection<Resource> findInGroupAuthz_orderName(Integer userId, Integer groupId,
-                                                           Boolean fSystem) {
+    public Collection findInGroupAuthz_orderName(Integer userId, Integer groupId, Boolean fSystem) {
         String sql = "select distinct r from Resource r " + " join r.resourceGroups rgg"
                      + " join r.resourceGroups rg " + " join rg.roles role "
                      + " join role.subjects subj " + " join role.operations op " + "where "
@@ -276,8 +267,7 @@ public class ResourceDAO
             .list();
     }
 
-    @SuppressWarnings("unchecked")
-    public Collection<Resource> findInGroup_orderName(Integer groupId, Boolean fSystem) {
+    public Collection findInGroup_orderName(Integer groupId, Boolean fSystem) {
         String sql = "select distinct r from Resource r " + " join r.resourceGroups rgg"
                      + " join r.resourceGroups rg " + " join rg.roles role "
                      + " join role.subjects subj " + " join role.operations op " + "where "
@@ -293,8 +283,7 @@ public class ResourceDAO
             .setInteger("groupId", groupId.intValue()).list();
     }
 
-    @SuppressWarnings("unchecked")
-    public Collection<Resource> findScopeByOperationBatch(AuthzSubject subjLoc, Resource[] resLocArr,
+    public Collection findScopeByOperationBatch(AuthzSubject subjLoc, Resource[] resLocArr,
                                                 Operation[] opLocArr) {
         StringBuffer sb = new StringBuffer();
 
@@ -316,8 +305,7 @@ public class ResourceDAO
     /**
      * Returns an ordered list of instance IDs for a given operation.
      */
-    @SuppressWarnings("unchecked")
-    public List<Integer> findAllResourcesInstancesForOperation(int opId) {
+    public List findAllResourcesInstancesForOperation(int opId) {
         final String sql = "SELECT r.instanceId FROM Resource r, Operation o "
                            + "WHERE     o.resourceType = r.resourceType" + "      AND o.id = :opId";
 
@@ -360,11 +348,10 @@ public class ResourceDAO
         String sql = "select r from Resource r "
                      + "where r.resourceType.id in (:platProto, :svrProto, :svcProto)";
 
-        return getSession().createQuery(sql)
-            .setParameter("platProto", AuthzConstants.authzPlatformProto)
-            .setParameter("svrProto", AuthzConstants.authzServerProto)
-            .setParameter("svcProto", AuthzConstants.authzServiceProto)
-            .list();
+        return (List) getSession().createQuery(sql).setParameter("platProto",
+            AuthzConstants.authzPlatformProto).setParameter("svrProto",
+            AuthzConstants.authzServerProto).setParameter("svcProto",
+            AuthzConstants.authzServiceProto).list();
     }
 
     @SuppressWarnings("unchecked")
@@ -373,9 +360,8 @@ public class ResourceDAO
                      + "where r.resourceType.id in (:platProto, :svrProto, :svcProto) ";
 
         return getSession().createQuery(sql)
-            .setParameter("platProto", AuthzConstants.authzPlatform)
-            .setParameter("svrProto", AuthzConstants.authzServer)
-            .setParameter("svcProto", AuthzConstants.authzService)
+            .setParameter("platProto", AuthzConstants.authzPlatform).setParameter("svrProto",
+                AuthzConstants.authzServer).setParameter("svcProto", AuthzConstants.authzService)
             .list();
     }
 
@@ -385,39 +371,6 @@ public class ResourceDAO
         return ((Number) getSession().createQuery(sql).setInteger("platProto",
             AuthzConstants.authzPlatform.intValue()).setString("vspherevm",
             AuthzConstants.platformPrototypeVmwareVsphereVm).uniqueResult()).intValue();
-    }
-
-    @SuppressWarnings("unchecked")
-    public Collection<Resource> getUnconfiguredResources() {
-        String hql = "from Resource r " +
-                     "where resourceType.id in (:platformType, :serverType, :serviceType) " +
-                     "and r not in (select resource from Measurement) ";
-        Collection<Resource> rtn =
-            getSession().createQuery(hql)
-                        .setParameter("platformType", AuthzConstants.authzPlatform)
-                        .setParameter("serverType", AuthzConstants.authzServer)
-                        .setParameter("serviceType", AuthzConstants.authzService)
-                        .list();
-        final ServerManager sMan = Bootstrap.getBean(ServerManager.class);
-        for (final Iterator<Resource> it=rtn.iterator(); it.hasNext(); ) {
-            final Resource r = it.next();
-            if (r == null || r.isInAsyncDeleteState()) {
-                it.remove();
-                continue;
-            }
-            if (r.getResourceType().getId().equals(AuthzConstants.authzServer)) {
-                try {
-                    final Server server = sMan.findServerById(r.getInstanceId());
-                    if (server.getServerType().isVirtual()) {
-                        it.remove();
-                    }
-                } catch (ServerNotFoundException e) {
-                    _log.debug(e,e);
-                    continue;
-                }
-            }
-        }
-        return rtn;
     }
 
 }
