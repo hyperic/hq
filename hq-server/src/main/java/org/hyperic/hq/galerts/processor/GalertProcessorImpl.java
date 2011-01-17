@@ -37,8 +37,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertDefDAO;
-import org.hyperic.hq.hibernate.SessionManager;
-import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventSourceId;
@@ -123,19 +121,17 @@ public class GalertProcessorImpl implements GalertProcessor {
             // Synchronize around all event processing for a trigger, since
             // they keep state and will need to be flushed
             synchronized(t) {
-                try {
-                   SessionManager.runInSession(new SessionRunner() {
-                       public String getName() {
-                           return "Event Processor";
-                       }
-                       public void run() throws Exception {
-                           t.processEvent(event);
-                       }
-                   });
-                } catch (Exception e) {
-                    _log.warn("Error processing events", e);
-                }
+                processEvent(t,event);
             }
+        }
+    }
+    
+    @Transactional
+    private void processEvent(Gtrigger trigger, Zevent event) {
+        try {  
+            trigger.processEvent(event);
+        } catch (Exception e) {
+            _log.warn("Error processing events", e);
         }
     }
     

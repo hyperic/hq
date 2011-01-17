@@ -29,11 +29,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.hibernate.SessionManager;
 import org.hyperic.util.StringUtil;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -91,20 +89,13 @@ public abstract class BaseJob implements Job {
         throws JobExecutionException    
     {
         try {
-            SessionManager.runInSession(new SessionManager.SessionRunner() {
-                public String getName() {
-                    return "BaseJob";
-                }
-
-                public void run() throws Exception {
-                    executeInSession(context);
-                }
-            });
+            executeJob(context); 
         } catch(Exception e) {
             throw new SystemException(e);
         }
     }
 
-    public abstract void executeInSession(JobExecutionContext context)
+   
+    public abstract void executeJob(JobExecutionContext context)
         throws JobExecutionException;
 }
