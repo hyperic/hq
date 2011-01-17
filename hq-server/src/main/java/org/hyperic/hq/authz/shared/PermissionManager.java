@@ -29,12 +29,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.hibernate.Query;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
@@ -103,8 +105,6 @@ public abstract class PermissionManager {
      */
     public void checkAIScanPermission(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException, GroupNotCompatibleException {
-
-        int type = id.getType();
 
         // Check permissions - subject must have modify platform
         // permission on the platform in question (or, if it's a group, the
@@ -346,46 +346,23 @@ public abstract class PermissionManager {
      * Check the scope of alertable resources for a give subject
      * @return a list of AppdefEntityIds
      */
-    public List checkAlertingScope(AuthzSubject subj) {
-        List entityIds = new ArrayList();
-        try {
-            // ...this method is used to determine which alerts can viewed by a given user,
-            // within the new scheme this is based on the user's ability to view a resource,
-            // if they can view the resource, they can view the alerts...
-            
-            // platforms
-            List platIds = findOperationScopeBySubject(subj, AuthzConstants.platformOpViewPlatform,
-                AuthzConstants.platformResType);
-            for (int i = 0; i < platIds.size(); i++) {
-                Integer id = (Integer) platIds.get(i);
-                entityIds.add(AppdefEntityID.newPlatformID(id));
+    public List<AppdefEntityID> checkAlertingScope(AuthzSubject subj) {
+        final Collection<ResourceType> resourceTypes = new ArrayList<ResourceType>();
+        resourceTypes.add(getResourceTypeDAO().get(AuthzConstants.authzPlatform));
+        resourceTypes.add(getResourceTypeDAO().get(AuthzConstants.authzServer));
+        resourceTypes.add(getResourceTypeDAO().get(AuthzConstants.authzService));
+        resourceTypes.add(getResourceTypeDAO().get(AuthzConstants.authzGroup));
+        resourceTypes.add(getResourceTypeDAO().get(AuthzConstants.authzApplication));
+        final Set<Integer> resourceIds = findViewableResources(subj, resourceTypes);
+        final ResourceDAO dao = getResourceDAO();
+        final List<AppdefEntityID> rtn = new ArrayList<AppdefEntityID>();
+        for (final Integer rid : resourceIds) {
+            Resource resource = dao.get(rid);
+            if (resource != null && !resource.isInAsyncDeleteState()) {
+                rtn.add(AppdefUtil.newAppdefEntityId(resource));
             }
-            // servers
-            List serverIds = findOperationScopeBySubject(subj, AuthzConstants.serverOpViewServer,
-                AuthzConstants.serverResType);
-            for (int i = 0; i < serverIds.size(); i++) {
-                Integer id = (Integer) serverIds.get(i);
-                entityIds.add(AppdefEntityID.newServerID(id));
-            }
-            // services
-            List serviceIds = findOperationScopeBySubject(subj,
-                AuthzConstants.serviceOpViewService, AuthzConstants.serviceResType);
-            for (int i = 0; i < serviceIds.size(); i++) {
-                Integer id = (Integer) serviceIds.get(i);
-                entityIds.add(AppdefEntityID.newServiceID(id));
-            }
-
-            // Groups
-            List groupids = findOperationScopeBySubject(subj, AuthzConstants.groupOpViewResourceGroup,
-                AuthzConstants.groupResType);
-            for (int i = 0; i < groupids.size(); i++) {
-                Integer id = (Integer) groupids.get(i);
-                entityIds.add(AppdefEntityID.newGroupID(id));
-            }
-        } catch (Exception e) {
-            throw new SystemException(e);
         }
-        return entityIds;
+        return rtn;
     }
 
     /**
@@ -678,8 +655,8 @@ public abstract class PermissionManager {
      * operation is valid
      * @return List of integer instance ids
      */
-    public abstract List<Integer> findOperationScopeBySubject(AuthzSubject subj, String opName,
-                                                              String resType)
+    public abstract Collection<Integer> findOperationScopeBySubject(AuthzSubject subj, String opName,
+                                                                    String resType)
         throws PermissionException, NotFoundException;
 
     /**
@@ -687,7 +664,7 @@ public abstract class PermissionManager {
      * operation.
      * @return List of integer instance ids
      */
-    public abstract List<Integer> findOperationScopeBySubject(AuthzSubject subj, Integer opId)
+    public abstract Collection<Integer> findOperationScopeBySubject(AuthzSubject subj, Integer opId)
         throws PermissionException, NotFoundException;
 
     /**
@@ -709,17 +686,10 @@ public abstract class PermissionManager {
         throws ApplicationException;
 
     /**
-     * Get viewable resources of a specific type
-     * @param resType the authz resource type name
-     * @param resName if result should filter by resource name
-     * @param appdefTypeStr the Appdef type name, like 'platform', 'server', etc
-     * @param typeId the appdef type ID, e.g. the platform_type_id
-     * 
-     * @return a list of Integers representing instance ids
+     * @return {@link Set} of {@link Resource}Ids
      */
-    public abstract List<Integer> findViewableResources(AuthzSubject subj, String resType,
-                                                        String resName, String appdefTypeStr,
-                                                        Integer typeId, PageControl pc);
+    public abstract Set<Integer> findViewableResources(AuthzSubject subj,
+                                                       Collection<ResourceType> resourceTypes);
 
     /**
      * Search viewable resources of any type
