@@ -674,11 +674,10 @@ public class ServiceManagerImpl implements ServiceManager {
             ids.add(AppdefEntityID.newServiceID(pk));
         }
 
-        List<Integer> viewableGroups = permissionManager.findOperationScopeBySubject(whoami,
+        Collection<Integer> viewableGroups = permissionManager.findOperationScopeBySubject(whoami,
             AuthzConstants.groupOpViewResourceGroup, AuthzConstants.groupResourceTypeName);
         List<AppdefEntityID> groupIds = new ArrayList<AppdefEntityID>();
-        for (int i = 0; i < viewableGroups.size(); i++) {
-            Integer gid = (Integer) viewableGroups.get(i);
+        for (Integer gid : viewableGroups) {
             groupIds.add(AppdefEntityID.newGroupID(gid));
         }
         ids.addAll(groupIds);
@@ -691,14 +690,12 @@ public class ServiceManagerImpl implements ServiceManager {
      * @return List of ServicePK's for which subject has
      *         AuthzConstants.serviceOpViewService
      */
-    protected List<Integer> getViewableServices(AuthzSubject whoami) throws PermissionException,
-        NotFoundException {
-
-        Operation op = getOperationByName(resourceManager
-            .findResourceTypeByName(AuthzConstants.serviceResType),
+    protected List<Integer> getViewableServices(AuthzSubject whoami)
+    throws PermissionException, NotFoundException {
+        Operation op = getOperationByName(
+            resourceManager.findResourceTypeByName(AuthzConstants.serviceResType),
             AuthzConstants.serviceOpViewService);
-        List<Integer> idList = permissionManager.findOperationScopeBySubject(whoami, op.getId());
-
+        Collection<Integer> idList = permissionManager.findOperationScopeBySubject(whoami, op.getId());
         return new ArrayList<Integer>(idList);
     }
 
