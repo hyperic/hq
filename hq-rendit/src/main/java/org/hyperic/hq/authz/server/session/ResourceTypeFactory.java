@@ -17,7 +17,7 @@ abstract public class ResourceTypeFactory {
         return resourceTypeDto;
     }
     
-    private static int getAppdefType(org.hyperic.hq.inventory.domain.ResourceType resourceType) {
+    public static int getAppdefType(org.hyperic.hq.inventory.domain.ResourceType resourceType) {
         if(resourceType.getName().equals(AppdefEntityConstants.getAppdefGroupTypeName(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP))) {
             return AppdefEntityConstants.APPDEF_TYPE_APPLICATION; 
         }
@@ -50,6 +50,7 @@ abstract public class ResourceTypeFactory {
         prototype.setName(resourceType.getName());
         //TODO for now, ID is the ID of the resource type
         prototype.setId(resourceType.getId());
+        prototype.setInstanceId(resourceType.getId());
         prototype.setResourceType(ResourceTypeFactory.create(resourceType));
         return prototype;
     }

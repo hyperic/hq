@@ -307,6 +307,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
                 //a.getAppdefId()));
         ResourceAlertDefinition alertdef = new ResourceAlertDefinition();
         createAlertDefinition(alertdef,a);
+        availabilityDownAlertDefinitionCache.removeFromCache(alertdef);
         //TODO below not persistent?
         alertdef.setResourceTypeAlertDefinition(typeAlertDef);
         return alertdef;
@@ -422,8 +423,6 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
         // Alert definitions are the root of the cascade relationship, so
         // we must explicitly save them
         alertDefDao.save(res);
-        
-        availabilityDownAlertDefinitionCache.removeFromCache(res);
 
     }
 
@@ -1329,7 +1328,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
 //        }
 //        // TODO:G
 //        return _valuePager.seek(adefs, pc.getPagenum(), pc.getPagesize());
-        return null;
+        return new PageList<AlertDefinitionValue>();
     }
 
     /**

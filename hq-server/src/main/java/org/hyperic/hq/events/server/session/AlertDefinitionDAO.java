@@ -69,13 +69,14 @@ public class AlertDefinitionDAO
     public AlertDefinitionDAO(SessionFactory f, PermissionManager permissionManager,
                               ActionDAO actDAO, TriggerDAO tDAO,
                               AlertConditionDAO alertConditionDAO,
-                              ResourceDao resourceDao) {
+                              ResourceDao resourceDao, ResourceTypeDao resourceTypeDao) {
         super(AlertDefinition.class, f);
         this.permissionManager = permissionManager;
         this.actDAO = actDAO;
         this.tDAO = tDAO;
         this.alertConditionDAO = alertConditionDAO;
         this.resourceDao = resourceDao;
+        this.resourceTypeDao = resourceTypeDao;
     }
 
   
@@ -392,7 +393,8 @@ public class AlertDefinitionDAO
 
     @SuppressWarnings("unchecked")
     List<AlertDefinition> findTypeBased(Boolean enabled, PageInfo pInfo) {
-        String sql = "from AlertDefinition d " + "where d.deleted = false and d.parent.id = 0 ";
+        //TODO this did check d.deleted before
+        String sql = "from ResourceTypeAlertDefinition d";
 
         if (enabled != null) {
             sql += " and d.enabled = " + (enabled.booleanValue() ? "true" : "false");

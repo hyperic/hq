@@ -39,6 +39,7 @@ import org.hyperic.hq.control.shared.ControlScheduleManager;
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceGroup
 import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
+import org.hyperic.hq.authz.server.session.ResourceTypeFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupCreateInfo
 import org.hyperic.hq.appdef.Agent
 import org.hyperic.hq.appdef.shared.AppdefEntityID
@@ -121,18 +122,8 @@ class ResourceCategory {
 	 * which is a prototype.
 	 */
 	static getAppdefType(Resource r) {
-		def typeId = r.resourceType.id
-		
-		if (typeId == AuthzConstants.authzPlatformProto) {
-			return AppdefEntityConstants.APPDEF_TYPE_PLATFORM
-		} else if (typeId == AuthzConstants.authzServerProto) {
-			return AppdefEntityConstants.APPDEF_TYPE_SERVER
-		} else if (typeId == AuthzConstants.authzServiceProto) {
-			return AppdefEntityConstants.APPDEF_TYPE_SERVICE
-		} else {
-			throw new RuntimeException("Resource [${r}] is not an appdef " + 
-			"resource type")
-		}
+        def typeId = r.resourceType.id
+		return ResourceTypeFactory.getAppdefType(Bootstrap.getBean(ResourceManager.class).findResourceTypeById(typeId))
 	}
 	
 	static AppdefEntityID getEntityId(Resource r) {
