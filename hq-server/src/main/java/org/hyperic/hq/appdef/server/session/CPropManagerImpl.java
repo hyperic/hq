@@ -244,8 +244,9 @@ public class CPropManagerImpl implements CPropManager {
         Map<String,Object> propValues = resource.getProperties();
         for(Map.Entry<String, Object> propValue:propValues.entrySet()) {
             PropertyType type = resource.getType().getPropertyType(propValue.getKey());
-            //TODO is this the place to filter hidden?
-            if(!(type.isHidden())) {
+            // TODO is this the place to filter hidden?
+            // TODO should ever be null? (currently it's possible)
+            if(type.isHidden() != null && !(type.isHidden())) {
                 properties.setProperty(propValue.getKey(), propValue.getValue().toString());
             }
         }
@@ -270,7 +271,7 @@ public class CPropManagerImpl implements CPropManager {
         for(Map.Entry<String, Object> propValue:propValues.entrySet()) {
             PropertyType type = resource.getType().getPropertyType(propValue.getKey());
             //TODO is this the place to filter hidden?
-            if(!(type.isHidden())) {
+            if(type.isHidden() != null && !(type.isHidden())) {
                 properties.setProperty(type.getDescription(), propValue.getValue().toString());
             }
         }
