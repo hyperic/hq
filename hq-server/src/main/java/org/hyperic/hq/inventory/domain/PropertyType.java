@@ -186,7 +186,7 @@ public class PropertyType {
         sb.append("Name: ").append(getName()).append(", ");
         sb.append("Description: ").append(getDescription()).append(", ");
         sb.append("Optional: ").append(isOptional()).append(", ");
-        sb.append("HIdden: ").append(isHidden()).append(", ");
+        sb.append("Hidden: ").append(isHidden()).append(", ");
         sb.append("Secret: ").append(isSecret()).append(", ");
         sb.append("DefaultValue: ").append(getDefaultValue());
 

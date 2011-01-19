@@ -16,8 +16,8 @@ import org.hyperic.hq.api.representation.SuccessResponse;
 import org.hyperic.hq.inventory.dao.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.inventory.domain.PropertyType;
-import org.hyperic.hq.inventory.domain.Relationship;
 import org.hyperic.hq.inventory.domain.ResourceType;
+import org.hyperic.hq.inventory.domain.ResourceTypeRelationship;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.server.session.PluginDAO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,10 +112,10 @@ public class ResourceTypeController extends BaseController {
 		
 		if (entity == null) throw new NotFoundException("No entity not found with id [" + id + "]");
 		
-		Set<Relationship<ResourceType>> relationships = entity.getRelationships();
+		Set<ResourceTypeRelationship> relationships = entity.getRelationships();
 		Map<String, List<ResourceTypeRep>> result = new HashMap<String, List<ResourceTypeRep>>();
 		
-		for (Relationship<ResourceType> relation : relationships) {
+		for (ResourceTypeRelationship relation : relationships) {
 			String name = relation.getName();
 			List<ResourceTypeRep> rts;
 			
