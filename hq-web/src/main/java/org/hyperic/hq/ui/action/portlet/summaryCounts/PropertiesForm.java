@@ -31,8 +31,8 @@ import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMapping;
 
 // XXX: remove when ImageBeanButton works
-import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.action.portlet.DashboardBaseForm;
+import org.hyperic.hq.ui.util.RequestUtils;
 
 /**
  * A subclass of <code>ValidatorForm</code> that adds convenience methods for

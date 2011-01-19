@@ -26,6 +26,7 @@
 
 package org.hyperic.hq.ui;
 
+
 public class RequestKeyConstants extends Constants {
 
     /*

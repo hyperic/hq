@@ -37,8 +37,8 @@ import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMapping;
 
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.ui.action.resource.common.monitor.config.MonitoringConfigForm;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.resource.common.monitor.config.MonitoringConfigForm;
 
 /**
  * Form for setting the collection interval for metrics in
