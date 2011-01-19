@@ -43,8 +43,14 @@ import org.hyperic.hq.appdef.shared.AIServiceValue;
 public class ProcessorDetector
     extends SystemServerDetector {
 
+    private static final String PROP_NO_MHZ = "system.cpu.disable_mhz_naming";
+
     protected String getServerType() {
         return SystemPlugin.PROCESS_SERVER_NAME;
+    }
+
+    public boolean isMhzNamingDisabled() {
+        return "true".equals(getManagerProperty(PROP_NO_MHZ));
     }
 
     private ArrayList getSystemCPUValues(Sigar sigar)
@@ -53,13 +59,15 @@ public class ProcessorDetector
 
         CpuInfo[] cpus = sigar.getCpuInfoList();
 
+        boolean isMhzNamingDisabled = isMhzNamingDisabled();
+
         for (int i=0; i<cpus.length; i++) {
             CpuInfo cpu = cpus[i];
             String mhz = "";
             int id = i+1;
 
             //not detectable on some older aix 4.3 models 
-            if (cpu.getMhz() > 0) {
+            if (!isMhzNamingDisabled && cpu.getMhz() > 0) {
                 mhz = cpu.getMhz() + "Mhz ";
             }
 
