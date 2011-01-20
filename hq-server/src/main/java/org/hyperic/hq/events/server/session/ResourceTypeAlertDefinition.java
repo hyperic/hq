@@ -77,8 +77,8 @@ public class ResourceTypeAlertDefinition
 
     @Override
     public AlertDefinitionValue getAlertDefinitionValue() {
-        // TODO Auto-generated method stub
-        return null;
+        //TODO set appdefId and appdefType?
+        return super.getAlertDefinitionValue();
     }
 
     public Resource getResource() {

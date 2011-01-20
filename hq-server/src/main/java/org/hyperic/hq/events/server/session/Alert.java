@@ -241,7 +241,7 @@ public class Alert
 
     protected void setAlertValue(AlertValue val) {
         AlertDefinitionDAO aDao = Bootstrap.getBean(AlertDefinitionDAO.class);
-        AlertDefinition def = aDao.findById(val.getAlertDefId());
+        AlertDefinition def = aDao.findResourceAlertDefById(val.getAlertDefId());
         AlertActionLogDAO alDao = Bootstrap.getBean(AlertActionLogDAO.class);
         AlertConditionLogDAO aclDao = Bootstrap.getBean(AlertConditionLogDAO.class);
 

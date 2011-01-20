@@ -307,8 +307,6 @@ abstract public class AlertDefinition implements AlertDefinitionInterface, Perfo
     public String toString() {
         return "alertDef [" + this.getName() + "]";
     }
-
-    abstract public AlertDefinitionValue getAlertDefinitionValue();
     
     abstract Collection<Action> getActionsBag();
     
@@ -379,6 +377,48 @@ abstract public class AlertDefinition implements AlertDefinitionInterface, Perfo
             }
         }
         return false;
+    }
+    
+    public AlertDefinitionValue getAlertDefinitionValue() {
+        AlertDefinitionValue value = new AlertDefinitionValue();
+        value.setId(getId());
+        value.setName(getName() == null ? "" : getName());
+        value.setCtime(getCtime());
+        value.setMtime(getMtime());
+        value.setDescription(getDescription());
+        value.setEnabled(isEnabled());
+        value.setActive(isActive());
+        value.setWillRecover(isWillRecover());
+        value.setNotifyFiltered(isNotifyFiltered());
+        value.setControlFiltered(isControlFiltered());
+        value.setPriority(getPriority());
+        value.setFrequencyType(getFrequencyType());
+        value.setCount(getCount());
+        value.setRange(getRange());
+        value.setDeleted(isDeleted());
+
+        if (getEscalation() != null) {
+            value.setEscalationId(getEscalation().getId());
+        } else {
+            value.setEscalationId(null);
+        }
+
+        value.removeAllConditions();
+        for (Iterator i = getConditions().iterator(); i.hasNext();) {
+            AlertCondition c = (AlertCondition) i.next();
+
+            value.addCondition(c.getAlertConditionValue());
+        }
+        value.cleanCondition();
+
+        value.removeAllActions();
+        for (Iterator i = getActions().iterator(); i.hasNext();) {
+            Action a = (Action) i.next();
+
+            value.addAction(a.getActionValue());
+        }
+        value.cleanAction();
+        return value;
     }
 
 }

@@ -41,6 +41,7 @@ import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.ResourceAlertDefinition;
 import org.hyperic.hq.events.server.session.ResourceTypeAlertDefinition;
 import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.util.pager.PageList;
 
@@ -128,7 +129,7 @@ public interface AlertDefinitionManager {
     /**
      * Returns the {@link AlertDefinition}s using the passed
      */
-    public Collection<AlertDefinition> getUsing(Escalation e);
+    public Collection<ResourceAlertDefinition> getUsing(Escalation e);
 
     /**
      * Remove alert definitions
@@ -231,7 +232,7 @@ public interface AlertDefinitionManager {
      * @param pInfo Paging The sort field must be a value from
      *        {@link AlertDefSortField}
      */
-    public List<AlertDefinition> findTypeBasedDefinitions(AuthzSubject subj, java.lang.Boolean enabled,
+    public List<ResourceTypeAlertDefinition> findTypeBasedDefinitions(AuthzSubject subj, java.lang.Boolean enabled,
                                                           org.hyperic.hibernate.PageInfo pInfo)
         throws PermissionException;
 
@@ -239,7 +240,7 @@ public interface AlertDefinitionManager {
      * Get list of alert definition POJOs for a resource
      * @throws PermissionException if user cannot manage alerts for resource
      */
-    public List<AlertDefinition> findAlertDefinitions(AuthzSubject subject,
+    public List<ResourceAlertDefinition> findAlertDefinitions(AuthzSubject subject,
                                                       org.hyperic.hq.appdef.shared.AppdefEntityID id)
         throws PermissionException;
 
@@ -251,8 +252,8 @@ public interface AlertDefinitionManager {
     /**
      * Get list of alert definitions for a resource
      */
-    public List<ResourceAlertDefinition> findAlertDefinitions(AuthzSubject subject,
-                                                      Resource prototype)
+    public List<ResourceTypeAlertDefinition> findAlertDefinitionsByType(AuthzSubject subject,
+                                                      int prototype)
         throws PermissionException;
 
     /**

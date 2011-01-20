@@ -53,7 +53,7 @@ public class ResourceAlertDefinition extends AlertDefinition {
     @OrderBy("id")
     private Collection<AlertCondition> conditionsBag = new ArrayList<AlertCondition>();
 
-    @OneToOne
+    @OneToOne(mappedBy="alertDefinition")
     private AlertDefinitionState alertDefinitionState;
 
     @ManyToOne
@@ -161,57 +161,17 @@ public class ResourceAlertDefinition extends AlertDefinition {
     }
 
     public AlertDefinitionValue getAlertDefinitionValue() {
-
-        AlertDefinitionValue _value = new AlertDefinitionValue();
-
-        _value.setId(getId());
-        _value.setName(getName() == null ? "" : getName());
-        _value.setCtime(getCtime());
-        _value.setMtime(getMtime());
-        _value.setDescription(getDescription());
-        _value.setEnabled(isEnabled());
-        _value.setActive(isActive());
-        _value.setWillRecover(isWillRecover());
-        _value.setNotifyFiltered(isNotifyFiltered());
-        _value.setControlFiltered(isControlFiltered());
-        _value.setPriority(getPriority());
-        _value.setAppdefId(getAppdefId());
-        _value.setAppdefType(getAppdefType());
-        _value.setFrequencyType(getFrequencyType());
-        _value.setCount(getCount());
-        _value.setRange(getRange());
-        _value.setDeleted(isDeleted());
-
-        if (getEscalation() != null) {
-            _value.setEscalationId(getEscalation().getId());
-        } else {
-            _value.setEscalationId(null);
-        }
-
-        _value.removeAllTriggers();
+        AlertDefinitionValue value = super.getAlertDefinitionValue();
+        value.setAppdefId(getAppdefId());
+        value.setAppdefType(getAppdefType());
+        value.removeAllTriggers();
         for (Iterator i = getTriggers().iterator(); i.hasNext();) {
             RegisteredTrigger t = (RegisteredTrigger) i.next();
-            _value.addTrigger(t.getRegisteredTriggerValue());
+            value.addTrigger(t.getRegisteredTriggerValue());
         }
-        _value.cleanTrigger();
-
-        _value.removeAllConditions();
-        for (Iterator i = getConditions().iterator(); i.hasNext();) {
-            AlertCondition c = (AlertCondition) i.next();
-
-            _value.addCondition(c.getAlertConditionValue());
-        }
-        _value.cleanCondition();
-
-        _value.removeAllActions();
-        for (Iterator i = getActions().iterator(); i.hasNext();) {
-            Action a = (Action) i.next();
-
-            _value.addAction(a.getActionValue());
-        }
-        _value.cleanAction();
-
-        return _value;
+        value.cleanTrigger();
+        value.setParentId(resourceTypeAlertDefinition.getId());
+        return value;
     }
 
     Collection<Action> getActionsBag() {

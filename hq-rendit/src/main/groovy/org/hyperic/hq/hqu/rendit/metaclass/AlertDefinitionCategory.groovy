@@ -26,7 +26,7 @@
 
 package org.hyperic.hq.hqu.rendit.metaclass
 
-
+import org.hyperic.hq.events.server.session.ResourceTypeAlertDefinition;
 import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.server.session.AlertDefinition
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
@@ -42,6 +42,7 @@ import org.hyperic.hq.appdef.server.session.AppdefResourceType
 import org.hyperic.hq.appdef.server.session.PlatformManagerImpl
 import org.hyperic.hq.appdef.server.session.ServerManagerImpl
 import org.hyperic.hq.appdef.server.session.ServiceManagerImpl
+import org.hyperic.hq.appdef.shared.AppdefUtil
 
 class AlertDefinitionCategory {
 
@@ -93,23 +94,23 @@ class AlertDefinitionCategory {
     static AppdefResourceType getResourceType(AlertDefinition d) {
         def appdefId
         if (d.typeBased)
-            appdefId = d.appdefId
+            appdefId = AppdefUtil.newAppdefEntityId(((ResourceTypeAlertDefinition)d).getResourceType())
         else
-            appdefId = d.resource.prototype.instanceId
+            appdefId = AppdefUtil.newAppdefEntityId(d.resource.type)
             
-        if (d.appdefType == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
-            return Bootstrap.getBean(PlatformManager).findPlatformType(appdefId)
-        } else if (d.appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
-            return Bootstrap.getBean(ServerManager.class).findServerType(appdefId)
-        } else if (d.appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
-            return Bootstrap.getBean(ServiceManager.class).findServiceType(appdefId)
+        if (appdefId.type == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
+            return Bootstrap.getBean(PlatformManager).findPlatformType(appdefId.id)
+        } else if (appdefId.type == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
+            return Bootstrap.getBean(ServerManager.class).findServerType(appdefId.id)
+        } else if (appdefId.type == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
+            return Bootstrap.getBean(ServiceManager.class).findServiceType(appdefId.id)
         } else {
             throw new RuntimeException("Unhandled appdef type: ${appdefId}")
         }
     }
     
     static boolean getTypeBased(AlertDefinition d) {
-        return d.parent != null && d.parent.id == 0;
+        return d instanceof ResourceTypeAlertDefinition;
     }
 
     static void delete(AlertDefinition d, AuthzSubject user) {

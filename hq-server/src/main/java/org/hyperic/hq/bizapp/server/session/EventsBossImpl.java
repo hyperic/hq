@@ -335,7 +335,8 @@ public class EventsBossImpl implements EventsBoss {
         
         // Now create the alert definition
         if (debug) watch.markTimeBegin("createParentAlertDefinition");
-        parent = alertDefinitionManager.createResourceTypeAlertDefinition(subject, adval).getAlertDefinitionValue();
+        ResourceTypeAlertDefinition typeDef = alertDefinitionManager.createResourceTypeAlertDefinition(subject, adval);
+        parent = typeDef.getAlertDefinitionValue();
         if (debug) watch.markTimeEnd("createParentAlertDefinition");
 
         //adval.setParentId(parent.getId());
@@ -388,7 +389,7 @@ public class EventsBossImpl implements EventsBoss {
             // Now create the alert definition
             if (debug) childWatch.markTimeBegin("createAlertDefinition");
             //TODO pass ResourceTypeAlertDef into below method
-            AlertDefinitionValue newAdval = alertDefinitionManager.createResourceAlertDefinition(subject, adval).getAlertDefinitionValue();           
+            AlertDefinitionValue newAdval = alertDefinitionManager.createResourceAlertDefinition(subject, adval,typeDef).getAlertDefinitionValue();           
             if (debug) {
                 childWatch.markTimeEnd("createAlertDefinition");
                 log.debug("createChildAlertDefinition[" + child.getId() + "]: time=" + childWatch);

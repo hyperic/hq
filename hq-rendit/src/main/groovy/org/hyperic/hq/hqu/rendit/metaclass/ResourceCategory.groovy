@@ -74,6 +74,7 @@ import org.hyperic.hq.auth.shared.SessionManager
 import org.hyperic.hq.events.AlertSeverity
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 
 /**
  * This class provides tonnes of abstractions over the Appdef layer.
@@ -123,7 +124,7 @@ class ResourceCategory {
 	 */
 	static getAppdefType(Resource r) {
         def typeId = r.resourceType.id
-		return ResourceTypeFactory.getAppdefType(Bootstrap.getBean(ResourceManager.class).findResourceTypeById(typeId))
+		return AppdefUtil.getAppdefType(Bootstrap.getBean(ResourceManager.class).findResourceTypeById(typeId))
 	}
 	
 	static AppdefEntityID getEntityId(Resource r) {
@@ -200,12 +201,12 @@ class ResourceCategory {
 	
 	static List getAlertDefinitions(Resource r, AuthzSubject user) {
 		def alertDefs
-		if (r.isPlatform() || r.isServer() || r.isService()) {
+		if (r.prototype) {
 			// Individual alert definition
 			alertDefs = defMan.findAlertDefinitions(user, r.entityId)
 		} else {
 			// Resource type alert definition
-			alertDefs = defMan.findAlertDefinitions(user, r)
+			alertDefs = defMan.findAlertDefinitionsByType(user, r.resourceType.id)
 		}
 		alertDefs.findAll { !it.deleted }
 	}
