@@ -406,12 +406,6 @@ public class Neo4jResource implements Resource {
     }
 
     @Transactional
-    public void persist() {
-        this.entityManager.persist(this);
-        getId();
-    }
-
-    @Transactional
     public void remove() {
         removeConfig();
         for(org.neo4j.graphdb.Relationship relationship: getUnderlyingState().getRelationships()) {

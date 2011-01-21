@@ -47,6 +47,7 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.inventory.dao.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
@@ -65,12 +66,15 @@ public class CPropManagerImpl implements CPropManager {
     private Messenger sender;
     
     private ResourceManager resourceManager;
+    
+    private ResourceTypeDao resourceTypeDao;
    
 
     @Autowired
-    public CPropManagerImpl(Messenger sender, ResourceManager resourceManager) {
+    public CPropManagerImpl(Messenger sender, ResourceManager resourceManager, ResourceTypeDao resourceTypeDao) {
         this.sender = sender;
         this.resourceManager = resourceManager;
+        this.resourceTypeDao = resourceTypeDao;
     }
 
     /**
@@ -102,12 +106,9 @@ public class CPropManagerImpl implements CPropManager {
      * @throw CPropKeyExistsException if the key already exists
      */
     public void addKey(ResourceType appdefType, String key, String description) {
-        
-        PropertyType propertyType = new PropertyType();
-        propertyType.setName(key);
+        PropertyType propertyType = resourceTypeDao.createPropertyType(key);
         propertyType.setDescription(description);
-        propertyType.persist();
-        appdefType.getPropertyTypes().add(propertyType);
+        appdefType.addPropertyType(propertyType);
         appdefType.merge();
     }
 

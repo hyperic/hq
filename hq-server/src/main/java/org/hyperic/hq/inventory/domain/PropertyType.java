@@ -4,7 +4,11 @@ public interface PropertyType {
 
     String getDescription();
 
+    void setDescription(String description);
+
     boolean isHidden();
+
+    void setHidden(boolean hidden);
 
     Integer getId();
 

@@ -4,7 +4,7 @@ import org.hyperic.hq.appdef.shared.AppdefUtil;
 
 abstract public class ResourceTypeFactory {
 
-    public static ResourceType create(org.hyperic.hq.inventory.domain.Neo4jResourceType resourceType) {
+    public static ResourceType create(org.hyperic.hq.inventory.domain.ResourceType resourceType) {
         if(resourceType == null) {
             return null;
         }
@@ -16,7 +16,7 @@ abstract public class ResourceTypeFactory {
         return resourceTypeDto;
     }
     
-    public static Resource toPrototype(org.hyperic.hq.inventory.domain.Neo4jResourceType resourceType) {
+    public static Resource toPrototype(org.hyperic.hq.inventory.domain.ResourceType resourceType) {
         if(resourceType == null) {
             return null;
         }

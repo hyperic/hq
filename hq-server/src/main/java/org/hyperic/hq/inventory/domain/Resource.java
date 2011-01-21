@@ -26,10 +26,16 @@ public interface Resource {
     void setConfigUserManaged(boolean userManaged);
 
     void setConfigValidationError(String error);
+    
+    String getConfigValidationError();
 
     Integer getId();
 
     String getName();
+
+    // TODO we either shouldn't allow dynamic change of name, or pick a new
+    // identifier other than id to hash
+    void setName(String name);
 
     Agent getAgent();
 
@@ -70,6 +76,8 @@ public interface Resource {
     ResourceRelationship relateTo(Resource resource, String relationName);
 
     void removeRelationship(Resource resource, String relationName);
+    
+    void removeRelationships(String relationName);
 
     Resource getResourceTo(String relationName);
 

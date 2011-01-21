@@ -259,12 +259,6 @@ public class Neo4jResourceType implements ResourceType {
     }
 
     @Transactional
-    public void persist() {
-        this.entityManager.persist(this);
-        getId();
-    }
-
-    @Transactional
     public void remove() {
         removeResources();
         removePropertyTypes();

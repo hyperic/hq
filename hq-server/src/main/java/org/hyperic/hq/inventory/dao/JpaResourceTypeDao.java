@@ -5,7 +5,9 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.ResourceType;
+import org.hyperic.hq.product.Plugin;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -72,4 +74,24 @@ public class JpaResourceTypeDao implements ResourceTypeDao {
         return entityManager.createQuery("select r from ResourceType r where r.name=:name",ResourceType.class).
             setParameter("name", name).getSingleResult();
     }
+
+    @Transactional
+    public PropertyType createPropertyType(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Transactional
+    public ResourceType create(String name, Plugin plugin) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Transactional
+    public ResourceType create(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    
 }

@@ -88,12 +88,6 @@ public class Neo4jConfig implements Config {
     }
 
     @Transactional
-    public void persist() {
-        this.entityManager.persist(this);
-        getId();
-    }
-
-    @Transactional
     public void remove() {
         for(org.neo4j.graphdb.Relationship relationship: getUnderlyingState().getRelationships()) {
             relationship.delete();

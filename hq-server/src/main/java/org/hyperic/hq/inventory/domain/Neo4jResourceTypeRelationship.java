@@ -7,7 +7,7 @@ import org.springframework.datastore.graph.annotation.StartNode;
 
 @Configurable
 @RelationshipEntity
-public class Neo4jResourceTypeRelationship {
+public class Neo4jResourceTypeRelationship implements ResourceTypeRelationship {
 
     @StartNode
     private Neo4jResourceType from;

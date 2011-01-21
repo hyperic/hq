@@ -20,4 +20,6 @@ public interface ResourceGroup extends Resource {
     
     Set<Role> getRoles();
     
+    boolean isPrivateGroup();
+    
 }

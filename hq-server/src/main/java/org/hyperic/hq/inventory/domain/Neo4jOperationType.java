@@ -82,12 +82,6 @@ public class Neo4jOperationType implements OperationType {
     }
 
     @Transactional
-    public void persist() {
-        this.entityManager.persist(this);
-        getId();
-    }
-
-    @Transactional
     public void remove() {
         for(org.neo4j.graphdb.Relationship relationship: getUnderlyingState().getRelationships()) {
             relationship.delete();

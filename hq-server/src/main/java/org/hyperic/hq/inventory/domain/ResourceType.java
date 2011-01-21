@@ -12,6 +12,8 @@ public interface ResourceType {
     
     String getDescription();
     
+    void setDescription(String description);
+    
     Plugin getPlugin();
     
     Set<Resource> getResources();
@@ -30,6 +32,8 @@ public interface ResourceType {
     
     void removeRelationship(ResourceType entity, String relationName);
     
+    void removeRelationships(String relationName);
+    
     Set<OperationType> getOperationTypes();
     
     PropertyType getPropertyType(String name);
@@ -43,8 +47,6 @@ public interface ResourceType {
     boolean hasResources();
     
     ResourceType merge();
-    
-    void persist();
     
     void remove();
 }

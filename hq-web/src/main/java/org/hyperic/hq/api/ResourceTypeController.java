@@ -47,8 +47,6 @@ public class ResourceTypeController extends BaseController {
 	public @ResponseBody SuccessResponse create(@RequestBody ResourceTypeForm form) throws Exception {
 		ResourceType type = translateFormToDomain(form);
 		
-		type.persist();
-		
 		return new SuccessResponse(new ResourceTypeRep(type));
 	}
 	
@@ -102,17 +100,12 @@ public class ResourceTypeController extends BaseController {
 		ResourceType type;
 		
 		if (form.getId() == null) {
-			type = new ResourceType();
+		    Plugin plugin = pluginDao.findByName(form.getPluginName());
+			type =  resourceTypeDao.create(form.getName(), plugin);
 		} else {
 			type = resourceTypeDao.findById(form.getId());
 		}
-		
-		type.setName(form.getName());
 		type.setDescription(form.getDescription());
-		
-		Plugin plugin = pluginDao.findByName(form.getPluginName());
-		
-		type.setPlugin(plugin);
 		
 		return type;
 	}

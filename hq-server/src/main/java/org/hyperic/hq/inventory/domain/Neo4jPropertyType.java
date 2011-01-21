@@ -125,12 +125,6 @@ public class Neo4jPropertyType implements PropertyType {
     }
 
     @Transactional
-    public void persist() {
-        this.entityManager.persist(this);
-        getId();
-    }
-
-    @Transactional
     public void remove() {
         for(org.neo4j.graphdb.Relationship relationship: getUnderlyingState().getRelationships()) {
             relationship.delete();
@@ -183,7 +177,7 @@ public class Neo4jPropertyType implements PropertyType {
         return hidden;
     }
 
-    public void setHidden(Boolean hidden) {
+    public void setHidden(boolean hidden) {
         this.hidden = hidden;
     }
 

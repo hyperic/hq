@@ -55,8 +55,6 @@ public class ResourceController extends BaseController {
 	public @ResponseBody SuccessResponse create(@RequestBody ResourceForm form) throws Exception {
 		Resource resource = translateFormToDomain(form);
 
-		resource.persist();
-		
 		return new SuccessResponse(new ResourceRep(resource));
 	}
 	
@@ -110,16 +108,14 @@ public class ResourceController extends BaseController {
 		Resource resource;
 		
 		if (form.getId() == null) {
-			resource = new Resource();
+			resource = resourceDao.create(form.getName(), resourceTypeDao.findById(form.getResourceTypeId()));
 		} else {
 			resource = resourceDao.findById(form.getId());
 		}
 		
-		ResourceType type = resourceTypeDao.findById(form.getResourceTypeId());
 		Agent agent = agentDao.findById(form.getAgentId());
 		
 		resource.setAgent(agent);
-		resource.setType(type);
 		resource.setName(form.getName());
 		resource.setDescription(form.getDescription());
 		resource.setLocation(form.getLocation());

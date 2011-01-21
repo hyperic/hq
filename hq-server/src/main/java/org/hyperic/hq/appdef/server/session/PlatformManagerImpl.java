@@ -85,6 +85,8 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.common.shared.AuditManager;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.inventory.dao.ResourceDao;
+import org.hyperic.hq.inventory.dao.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
@@ -148,6 +150,10 @@ public class PlatformManagerImpl implements PlatformManager {
     private ServiceManager serviceManager;
     
     private ServerFactory serverFactory;
+    
+    private ResourceDao resourceDao;
+    
+    private ResourceTypeDao resourceTypeDao;
 
     @Autowired
     public PlatformManagerImpl(
@@ -158,7 +164,8 @@ public class PlatformManagerImpl implements PlatformManager {
                                ZeventEnqueuer zeventManager,
                                ResourceAuditFactory resourceAuditFactory, PluginDAO pluginDAO,
                                ServerManager serverManager, PlatformFactory platformFactory,
-                               ServiceManager serviceManager, ServerFactory serverFactory) {
+                               ServiceManager serviceManager, ServerFactory serverFactory,
+                               ResourceDao resourceDao, ResourceTypeDao resourceTypeDao) {
         this.permissionManager = permissionManager;
         this.agentDAO = agentDAO;
         this.resourceManager = resourceManager;
@@ -172,6 +179,8 @@ public class PlatformManagerImpl implements PlatformManager {
         this.platformFactory = platformFactory;
         this.serviceManager = serviceManager;
         this.serverFactory = serverFactory;
+        this.resourceDao = resourceDao;
+        this.resourceTypeDao  = resourceTypeDao;
     }
     
     private Platform toPlatform(Resource resource) {
@@ -382,13 +391,14 @@ public class PlatformManagerImpl implements PlatformManager {
      
    private Resource create(AuthzSubject subject,AIPlatformValue aip, String initialOwner,Agent agent, ResourceType type) 
    {
-        Resource p = new Resource();  
-        p.setName(aip.getName());
+        String name = aip.getName();
+        if (name == null || "".equals(name.trim())) {
+           name = aip.getFqdn();
+        }
+        Resource p = resourceDao.create(name, type); 
         p.setDescription(aip.getDescription());
         p.setLocation("");
-        fixName(p);
-        p.persist();
-        p.setType(type);
+        
         //TODO abstract creationTime, modifiedTime, and sortName?
         p.setProperty(PlatformFactory.CREATION_TIME, System.currentTimeMillis());
         p.setProperty(PlatformFactory.MODIFIED_TIME,System.currentTimeMillis());
@@ -408,13 +418,10 @@ public class PlatformManagerImpl implements PlatformManager {
     private Resource create(AuthzSubject owner, PlatformValue pv, Agent agent, 
                               ResourceType type) 
     {
-        Resource p = new Resource();
-        p.setName(pv.getName());
+        Resource p = resourceDao.create(pv.getName(), type);
         p.setDescription(pv.getDescription());
         p.setLocation(pv.getLocation());
         p.setModifiedBy(pv.getModifiedBy());
-        p.persist();
-        p.setType(type);
         p.setProperty(PlatformFactory.CERT_DN,pv.getCertdn());
         p.setProperty(PlatformFactory.COMMENT_TEXT,pv.getCommentText());
         p.setProperty(PlatformFactory.CPU_COUNT,pv.getCpuCount());
@@ -433,13 +440,7 @@ public class PlatformManagerImpl implements PlatformManager {
         return p;
     }
   
-    private void fixName(Resource p) {
-        // if name is not set then set it to fqdn (assuming it is set of course)
-        String name = p.getName();
-        if (name == null || "".equals(name.trim())) {
-            p.setName((String)p.getProperty(PlatformFactory.FQDN));
-        }
-    }
+    
   
 
     private void throwDupPlatform(Serializable id, String platName) {
@@ -1545,16 +1546,7 @@ public class PlatformManagerImpl implements PlatformManager {
             // See if this exists
             if (pinfo == null) {
                 deletePlatformType(ptlocal);
-            } else {
-                String curName = ptlocal.getName();
-                String newName = pinfo.getName();
-
-                // Just update it
-                log.debug("Updating PlatformType: " + localName);
-
-                if (!newName.equals(curName))
-                    ptlocal.setName(newName);
-            }
+            } 
         }
 
         // Now create the left-overs
@@ -1565,10 +1557,7 @@ public class PlatformManagerImpl implements PlatformManager {
 
     public PlatformType createPlatformType(String name, String plugin) throws NotFoundException {
         log.debug("Creating new PlatformType: " + name);
-        ResourceType pt = new ResourceType();
-        pt.setName(name);
-        pt.persist();
-        pt.setPlugin(pluginDAO.findByName(plugin));
+        ResourceType pt = resourceTypeDao.create(name,pluginDAO.findByName(plugin));
         pt.addPropertyType(createPropertyType(PlatformFactory.CERT_DN));
         pt.addPropertyType(createPropertyType(PlatformFactory.FQDN));
         pt.addPropertyType(createPropertyType(PlatformFactory.COMMENT_TEXT));
@@ -1582,11 +1571,9 @@ public class PlatformManagerImpl implements PlatformManager {
     }
     
     private PropertyType createPropertyType(String propName) {
-        PropertyType propType = new PropertyType();
-        propType.setName(propName);
+        PropertyType propType = resourceTypeDao.createPropertyType(propName);
         propType.setDescription(propName);
         propType.setHidden(true);
-        propType.persist();
         return propType;
     }
     
@@ -1808,11 +1795,8 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      */
     public Ip addIp(Platform platform, String address, String netmask, String macAddress) {
-        Resource ip = new Resource();
         //TODO unique name for IP?
-        ip.setName(address);
-        ip.persist();
-        ip.setType(resourceManager.findResourceTypeByName(IP_RESOURCE_TYPE_NAME));
+        Resource ip = resourceDao.create(address, resourceManager.findResourceTypeByName(IP_RESOURCE_TYPE_NAME));
         ip.setProperty(PlatformFactory.IP_ADDRESS,address);
         ip.setProperty(PlatformFactory.NETMASK,netmask);
         ip.setProperty(PlatformFactory.MAC_ADDRESS,macAddress);
@@ -1962,11 +1946,9 @@ public class PlatformManagerImpl implements PlatformManager {
         defaultPager = Pager.getDefaultPager();
         //TODO preload some other way?
         if(resourceManager.findResourceTypeByName(IP_RESOURCE_TYPE_NAME) == null) {
-            ResourceType ipType = new ResourceType();
-            ipType.setName(IP_RESOURCE_TYPE_NAME);
+            ResourceType ipType = resourceTypeDao.create(IP_RESOURCE_TYPE_NAME);
             //TODO ipType isn't really getting a plugin here.  
             //Maybe give it System plugin or consider making it a first class citizen in new model?
-            ipType.persist();
             ipType.addPropertyType(createPropertyType(PlatformFactory.IP_ADDRESS));
             ipType.addPropertyType(createPropertyType(PlatformFactory.NETMASK));
             ipType.addPropertyType(createPropertyType(PlatformFactory.MAC_ADDRESS));
