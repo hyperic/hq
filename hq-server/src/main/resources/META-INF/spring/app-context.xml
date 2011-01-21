@@ -107,7 +107,7 @@
 				p:maxWait="${server.database-blockingtimeout}"
                 p:jdbcInterceptors="ConnectionState;StatementFinalizer"
 				p:validationQuery="${server.connection-validation-sql}"
-				p:validationInterval="30000" p:logAbandoned="true" p:testOnBorrow="true" />
+				p:validationInterval="30000" p:logAbandoned="true" p:testOnBorrow="true" p:defaultTransactionIsolation="2"/>
 				
 	 <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
         <property name="dataSource" ref="dataSource"/>
