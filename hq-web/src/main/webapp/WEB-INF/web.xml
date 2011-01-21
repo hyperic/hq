@@ -84,10 +84,6 @@
     <servlet>
         <servlet-name>hqugrails</servlet-name>
         <servlet-class>org.hyperic.hq.hqu.grails.web.servlet.HQUGrailsDispatcherServlet</servlet-class>
-        <init-param>
-            <param-name>contextConfigLocation</param-name>
-            <param-value>/WEB-INF/spring/hqugrails-servlet.xml</param-value>
-        </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
 
