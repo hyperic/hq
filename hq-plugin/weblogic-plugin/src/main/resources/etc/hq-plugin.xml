@@ -971,14 +971,16 @@
 
   <server name="Weblogic"
           version="6.1"
-          description="Application Server Node"
-          platforms="Unix,Win32">
+          description="Application Server Node">
 
     <config include="node"/>
 
     <help include="weblogic-node"/>
 
     <metrics include="server-summary,server-runtime"/>
+
+    <plugin type="autoinventory"
+            class="WeblogicDetectorManaged"/>
 
     <plugin type="measurement"
             class="WeblogicMeasurementPlugin"/>
@@ -1182,8 +1184,7 @@
   <server name="Weblogic Admin"
           include="Weblogic 6.1"
           version="6.1"
-          description="Application Server Node"
-          platforms="Unix,Win32">
+          description="Application Server Node">
 
     <config include="domain"/>
 
@@ -1192,7 +1193,7 @@
     <help include="weblogic-admin"/>
 
     <plugin type="autoinventory"
-            class="WeblogicDetector"/>
+            class="WeblogicDetectorAdmin"/>
 
     <plugin type="control"
             class="WeblogicControlPlugin"/>
@@ -1201,17 +1202,15 @@
             platform="Win32"
             class="WeblogicControlWin32Plugin"/>
 
-    <scan>
-      <include name="/**/.wlstaging/console.war"/>
-    </scan>
   </server>
 
   <server name="Weblogic NodeManager"
           version="6.1"
-          description="Node Manager Agent" 
-          platforms="Unix,Win32">
+          description="Node Manager Agent">
+    <plugin type="autoinventory"
+            class="WeblogicDetectorNodeManager"/>
 
-    <config include="admin-server">
+    <config>
       <option name="nodemgr.address"
               description="Node Manager address"
               default="localhost"/>
@@ -1243,9 +1242,6 @@
 
     <property name="PRODUCT_DIR" value="weblogic700"/>
 
-    <scan>
-      <include name="/**/.internal/console.war"/>
-    </scan>
   </server>
 
   <server name="Weblogic NodeManager"
@@ -1264,9 +1260,6 @@
 
     <property name="PRODUCT_DIR" value="weblogic81"/>
 
-    <scan>
-      <include name="/**/.internal/console.war"/>
-    </scan>
   </server>
 
   <server name="Weblogic NodeManager"

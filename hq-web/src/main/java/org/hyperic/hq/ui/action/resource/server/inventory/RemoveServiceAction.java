@@ -42,6 +42,7 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.action.resource.RemoveResourceForm;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Action which deletes services from the services list within a server
@@ -54,6 +55,11 @@ public class RemoveServiceAction
 
     private AppdefBoss appdefBoss;
 
+    @Autowired
+    public RemoveServiceAction(AppdefBoss appdefBoss) {
+        this.appdefBoss = appdefBoss;
+    }
+    
     /**
      * Removes a server identified by the value of the request parameter
      * <code>Constants.SERVER_PARAM</code> from the BizApp.

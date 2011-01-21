@@ -16,17 +16,17 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Oct 19, 2010 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Dec 20, 2010 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <p><b>Available only in <font color="red">HQ Enterprise</font></b></p>
+				    <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1287519078368 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1287519078368 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1287519078368 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1292878497714 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1292878497714 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1292878497714 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1287519078368'>
+/*]]>*/</style><div class='rbtoc1292878497714'>
 <ul>
     <li><a href='#ui-vSphere-AbouttheHQvSpherePage'>About the HQ vSphere Page</a></li>
 <ul>
@@ -55,15 +55,14 @@ div.rbtoc1287519078368 li {margin-left: 0px;padding-left: 0px;}
 </ul></div>
 
 
-<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
-
+<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
 
 
 <h1><a name="ui-vSphere-AbouttheHQvSpherePage"></a>About the HQ vSphere Page</h1>
 
-<p>This page describes the <b>HQ vSphere</b> page, an interface for monitoring and managing vSphere Hosts and VMs available in HQ Enterprise 4.4 and later.</p>
+<p>This page describes the <b>HQ vSphere</b> page, an interface for monitoring and managing vSphere Hosts and VMs available in HQ Enterprise.</p>
 
-<p>See <a href="http://support.hyperic.com/confluence/display/EVO/Monitoring+vSphere+Components" title="Monitoring vSphere Components">Monitoring vSphere Components</a> for information about the management functions supported for each resource type and configuration instructions.
+<p>See <a href="http://support.hyperic.com/confluence/display/EVO/Monitoring+vSphere+Components+%28Hyperic+4.5.1+and+Later%29" title="Monitoring vSphere Components (Hyperic 4.5.1 and Later)">Monitoring vSphere Components &#40;Hyperic 4.5.1 and Later&#41;</a> for information about the management functions supported for each resource type and configuration instructions.
 <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
 <a name="ui-vSphere-installagent"></a></p>
@@ -71,7 +70,7 @@ div.rbtoc1287519078368 li {margin-left: 0px;padding-left: 0px;}
 
 <h2><a name="ui-vSphere-DisplaytheHQvSpherePage"></a>Display the HQ vSphere Page</h2>
 
-<p>To display the <b>HQ vSphere</b> page, select <b>HQ vSphere</b> from the <b>Resources</b> tab in the Masthead. </p>
+<p>To display the <b>HQ vSphere</b> page, select <b>HQ vSphere</b> from the <b>Resources</b> tab in the Masthead.</p>
 
 <p><b>Note:</b> The <b>HQ vSphere</b> option appears on the <b>Resources</b> tab only in HQ Enterprise, and only if you have vSphere components under management.</p>
 
@@ -309,7 +308,7 @@ div.rbtoc1287519078368 li {margin-left: 0px;padding-left: 0px;}
 
 <h1><a name="ui-vSphere-HQvSphereControlTab"></a>HQ vSphere Control Tab</h1>
 
-<p>The The <b>Control</b> tab appears when a VM is selected (if there is an HQ Agent running in the VM) and allows you to issue a control command to the VM. See <a href="http://support.hyperic.com/confluence/display/EVO/Monitoring+vSphere+Components#MonitoringvSphereComponents-control">Management Functions for VMware VSphere VM</a> for information about the supported control actions.</p>
+<p>The The <b>Control</b> tab appears when a VM is selected (if there is an HQ Agent running in the VM) and allows you to issue a control command to the VM. See <a href="http://support.hyperic.com/confluence/display/EVO/Monitoring+vSphere+Components+%28Hyperic+4.5.1+and+Later%29#MonitoringvSphereComponents%28Hyperic4.5.1andLater%29-control">Management Functions for VMware VSphere VM</a> for information about the supported control actions.</p>
 
 <p>Click the thumbnail to see the an example screenshot.</p>
 
@@ -377,8 +376,8 @@ available CPU = # of physical CPUs × clock rate <br class="atl-forced-newline" 
 <td class='confluenceTd'> <font color="navy">Disk Usage (Average)</font> </td>
 <td class='confluenceTd'> <font color="navy">disk.usage.average</font> </td>
 <td class='confluenceTd'> 1 </td>
-<td class='confluenceTd'>&nbsp;</td>
-<td class='confluenceTd'> <font color="navy">KB</font> </td>
+<td class='confluenceTd'>Aggregated disk I/O rate. For a vSphere host, this includes the rates for all virtual machines running on the host during the collection interval. </td>
+<td class='confluenceTd'> <font color="navy">KB per second</font> </td>
 <td class='confluenceTd'> <font color="navy">UTILIZATION</font> </td>
 <td class='confluenceTd'> <font color="navy">true</font> </td>
 <td class='confluenceTd'> <font color="navy">5 min</font> </td>
@@ -755,8 +754,8 @@ This value is reported with 100% representing all processor cores on the system.
 <td class='confluenceTd'> <font color="navy">Disk Usage (Average)</font> </td>
 <td class='confluenceTd'> <font color="navy">disk.usage.average</font> </td>
 <td class='confluenceTd'> 1 </td>
-<td class='confluenceTd'>&nbsp;</td>
-<td class='confluenceTd'> <font color="navy">KB</font> </td>
+<td class='confluenceTd'>Aggregated disk I/O rate.  </td>
+<td class='confluenceTd'> <font color="navy">KB per second</font> </td>
 <td class='confluenceTd'> <font color="navy">UTILIZATION</font> </td>
 <td class='confluenceTd'> <font color="navy">true</font> </td>
 <td class='confluenceTd'> <font color="navy">5 min</font> </td>
@@ -985,7 +984,7 @@ While a VM may&nbsp;have been configured to use 4 GB of RAM, as an example, it m
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 28, 2010 15:33</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 12, 2011 15:43</font></td>
 		    </tr>
 	    </table>
     </body>

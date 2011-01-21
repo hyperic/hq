@@ -1,7 +1,11 @@
 package com.vmware.springsource.hyperic.plugin.gemfire;
 
 import com.vmware.springsource.hyperic.plugin.gemfire.collectors.MemberCollector;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
@@ -53,11 +57,31 @@ public class GemFireLiveData extends LiveDataPlugin {
         return id;
     }
 
-    private static String[] getMembers(MBeanServerConnection mServer) throws Exception {
+    private static final Map<String,String> namesCache=new Hashtable();
+    private static String[][] getMembers(MBeanServerConnection mServer) throws Exception {
         Object[] args = new Object[0];
         String[] def = new String[0];
-        String[] members = (String[]) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMembers", args, def);
-        return members;
+        List<String> members = Arrays.asList((String[]) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMembers", args, def));
+        List<String[]> names=new ArrayList();
+        for(String member :members){
+            String name=namesCache.get(member);
+            if(name==null){
+                Map detail=getMemberDetails(mServer,member);
+                name=(String) detail.get("name");
+                namesCache.put(member,name);
+            }
+            String res[]=new String[]{name,member};
+            names.add(res);
+        }
+
+        //cleanig olds names.
+        for(String member: namesCache.keySet()){
+            if(!members.contains(member)){
+                namesCache.remove(member);
+            }
+        }
+
+        return names.toArray(new String[0][0]);
     }
 
     private static Map getDetails(MBeanServerConnection mServer) throws Exception {

@@ -123,4 +123,6 @@ public interface HQDialect
      * @return emptyString or a string representing the optimizer hint.  null is not expected here
      */
     public String getMetricDataHint();
+    
+    public Long getSchemaCreationTimestampInMillis(Statement stmt) throws SQLException;
 }

@@ -89,8 +89,9 @@
               FSYSTEM="TRUE"/>
     </table>
 
+	<!-- Licensing is dependent on the CTIME -->
     <table name="EAM_RESOURCE_GROUP">
-        <data ID="0" RESOURCE_ID="%EAM_RESOURCE.ID:5" FSYSTEM="TRUE" HAS_OR_CRITERIA="TRUE" />
+        <data ID="0" RESOURCE_ID="%EAM_RESOURCE.ID:5" FSYSTEM="TRUE" HAS_OR_CRITERIA="TRUE" CTIME="NOW()" />
     </table>
 
     <table name="EAM_RESOURCE">
@@ -129,31 +130,32 @@
     </table>
 
     <!-- dump all reources into authz resource group -->
+    <!-- Licensing is dependent on the ENTRY_TIME -->
     <table name="EAM_RES_GRP_RES_MAP">
         <data ID="0" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
-              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:0"/>
+              ENTRY_TIME="NOW()" RESOURCE_ID="%EAM_RESOURCE.ID:0"/>
         <data ID="1" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
-              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:1"/>
+              ENTRY_TIME="NOW()" RESOURCE_ID="%EAM_RESOURCE.ID:1"/>
         <data ID="2" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
-              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:2"/>
+              ENTRY_TIME="NOW()" RESOURCE_ID="%EAM_RESOURCE.ID:2"/>
         <data ID="3" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
-              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:3"/>
+              ENTRY_TIME="NOW()" RESOURCE_ID="%EAM_RESOURCE.ID:3"/>
         <data ID="4" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
-              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:4"/>
+              ENTRY_TIME="NOW()" RESOURCE_ID="%EAM_RESOURCE.ID:4"/>
         <data ID="5" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
-              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:5"/>
+              ENTRY_TIME="NOW()" RESOURCE_ID="%EAM_RESOURCE.ID:5"/>
         <data ID="6" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
-              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:401"/>
+              ENTRY_TIME="NOW()" RESOURCE_ID="%EAM_RESOURCE.ID:401"/>
         <data ID="7" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
-              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:501"/>
+              ENTRY_TIME="NOW()" RESOURCE_ID="%EAM_RESOURCE.ID:501"/>
         <data ID="8" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
-              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:601"/>
+              ENTRY_TIME="NOW()" RESOURCE_ID="%EAM_RESOURCE.ID:601"/>
         <data ID="9" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
-              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:602"/>
+              ENTRY_TIME="NOW()" RESOURCE_ID="%EAM_RESOURCE.ID:602"/>
         <data ID="10" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
-              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:603"/>
+              ENTRY_TIME="NOW()" RESOURCE_ID="%EAM_RESOURCE.ID:603"/>
         <data ID="11" RESOURCE_GROUP_ID="%EAM_RESOURCE_GROUP.ID:0"
-              ENTRY_TIME="0" RESOURCE_ID="%EAM_RESOURCE.ID:604"/>
+              ENTRY_TIME="NOW()" RESOURCE_ID="%EAM_RESOURCE.ID:604"/>
     </table>
 
     <table name="EAM_OPERATION">

@@ -35,18 +35,19 @@ import org.hyperic.util.jdbc.JDBC;
 class CloudscapeTable extends Table {
     public static final int CLASS_TYPE = JDBC.CLOUDSCAPE_TYPE;
     
-    protected static Collection getTables(DBSetup parent, String username)
+    protected static Collection<Table> getTables(DBSetup parent, String username)
         throws SQLException {
-        Collection coll = new StrongCollection("org.hyperic.tools.db.Table");
+        Collection<Table> coll = new StrongCollection("org.hyperic.tools.db.Table");
 
         String[]         types   = {"TABLE"};
         DatabaseMetaData meta    = parent.getConn().getMetaData();
 	    ResultSet    	 setTabs = meta.getTables(null, null, null, types);
 
         // Find Tables
-        while(setTabs.next() == true)
+        while(setTabs.next() == true) {
             coll.add(new Table(setTabs, meta, parent));
-
+        }
+        
         return coll;
     }
 }
