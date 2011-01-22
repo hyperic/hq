@@ -33,6 +33,10 @@ import org.springframework.aop.target.HotSwappableTargetSource
 import org.springframework.context.ApplicationContext
 import org.springframework.core.io.Resource
 import grails.spring.BeanBuilder
+import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping
+import org.hyperic.hq.hqu.grails.web.servlet.ResourceHttpRequestHandler
+import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter
+import org.springframework.core.Ordered
 
 /**
 * A plug-in that handles the configuration of URL mappings for Grails
@@ -59,6 +63,22 @@ class HQUUrlMappingsGrailsPlugin {
             targetSource = ref("${prefix}urlMappingsTargetSource", false)
             proxyInterfaces = [org.codehaus.groovy.grails.web.mapping.UrlMappingsHolder]
         }
+	}
+	
+	def doWithSpringOnce = {
+		
+		// adding handlers for static content.
+		// order needs to be last man in the line.
+		// static resources should be checked if other mappings doesn't match.
+		httpRequestHandlerAdapter(HttpRequestHandlerAdapter){}
+		
+		staticResourceHandler(ResourceHttpRequestHandler) {
+			locations = ["/WEB-INF/hqu-plugins/"]
+		}
+		def map = ["/*":"staticResourceHandler"]
+		staticResourceMapping(SimpleUrlHandlerMapping) {
+			mappings = map
+		}
 	}
 
 }

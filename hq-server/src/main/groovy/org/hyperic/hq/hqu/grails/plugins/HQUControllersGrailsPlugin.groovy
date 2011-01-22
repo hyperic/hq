@@ -62,6 +62,7 @@ import org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator
 import org.codehaus.groovy.grails.web.servlet.GrailsControllerHandlerMapping
 import org.codehaus.groovy.grails.plugins.GrailsPluginManager
 import org.hyperic.hq.hqu.grails.web.servlet.HQUGrailsControllerHandlerMapping;
+import org.springframework.core.Ordered
 
 /**
 * A plug-in that handles the configuration of controllers for Grails
@@ -94,11 +95,12 @@ class HQUControllersGrailsPlugin {
 	   def handlerInterceptors = springConfig.containsBean("localeChangeInterceptor") ? [ref("localeChangeInterceptor")] : []
 	   def interceptorsClosure = {
 		   interceptors = handlerInterceptors
+		   // setting priority max - 1 to possibly allow other mappings to define lower priority
+		   order = Ordered.LOWEST_PRECEDENCE - 1
 	   }
 	   // allow @Controller annotated beans
 	   "${prefix}annotationHandlerMapping"(DefaultAnnotationHandlerMapping, interceptorsClosure)
 	   // allow default controller mappings
-//	   "${prefix}controllerHandlerMappings"(GrailsControllerHandlerMapping, interceptorsClosure)
 	   "${prefix}controllerHandlerMappings"(HQUGrailsControllerHandlerMapping, interceptorsClosure)
 	   
 
