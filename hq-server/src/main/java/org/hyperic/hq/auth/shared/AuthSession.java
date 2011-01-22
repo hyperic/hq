@@ -26,7 +26,6 @@
 package org.hyperic.hq.auth.shared;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 
 public class AuthSession {
 

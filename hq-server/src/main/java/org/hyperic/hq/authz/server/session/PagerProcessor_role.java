@@ -36,7 +36,7 @@ public class PagerProcessor_role implements PagerProcessor {
         if (o == null) return null;
         try {
             if ( o instanceof Role ) {
-                return ((Role) o).getRoleValue();
+                return o;
             }
         } catch (Exception e) {
             throw new IllegalStateException("Error converting to RoleValue: "

@@ -206,13 +206,13 @@ class ResourceHelper extends BaseHelper {
     }
     
     private Resource findPrototype(Map args) {
-        org.hyperic.hq.inventory.domain.Neo4jResourceType resType = rman.findResourceTypeByName(args.prototype)
+        org.hyperic.hq.inventory.domain.ResourceType resType = rman.findResourceTypeByName(args.prototype)
         return ResourceTypeFactory.toPrototype(resType);
     }
     
     private List findByPrototype(Map args) {
         def proto = args.byPrototype
-        def org.hyperic.hq.inventory.domain.Neo4jResourceType type 
+        def org.hyperic.hq.inventory.domain.ResourceType type 
         if (proto in String) {
             type = rman.findResourceTypeByName(proto)
             if (type == null) {

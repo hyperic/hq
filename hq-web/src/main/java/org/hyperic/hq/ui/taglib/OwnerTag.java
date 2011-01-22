@@ -30,7 +30,6 @@ import javax.servlet.jsp.JspTagException;
 
 import org.apache.struts.util.ResponseUtils;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.BizappUtils;
 
@@ -84,8 +83,8 @@ public class OwnerTag extends VarSetterBaseTag {
 				email = webUser.getEmailAddress();
 				full = BizappUtils.makeSubjectFullName(webUser.getFirstName(),
 						webUser.getLastName());
-			} else if (owner instanceof AuthzSubjectValue) {
-				AuthzSubjectValue subject = (AuthzSubjectValue) owner;
+			} else if (owner instanceof AuthzSubject) {
+				AuthzSubject subject = (AuthzSubject) owner;
 				username = subject.getName();
 				email = subject.getEmailAddress();
 				full = BizappUtils.makeSubjectFullName(subject.getFirstName(),

@@ -37,9 +37,7 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.inventory.domain.OperationType;
@@ -95,23 +93,23 @@ public interface AuthzBoss {
 
     /**
      * Return a sorted, paged <code>List</code> of
-     * <code>AuthzSubjectValue</code> objects representing every resource type
+     * <code>AuthzSubject</code> objects representing every resource type
      * in the system that the user is allowed to view.
      */
-    public PageList<AuthzSubjectValue> getAllSubjects(Integer sessionId, Collection<Integer> excludes, PageControl pc)
+    public PageList<AuthzSubject> getAllSubjects(Integer sessionId, Collection<Integer> excludes, PageControl pc)
         throws  SessionTimeoutException, SessionNotFoundException, PermissionException, NotFoundException;
 
     /**
      * Return a sorted, paged <code>List</code> of
-     * <code>AuthzSubjectValue</code> objects corresponding to the specified id
+     * <code>AuthzSubject</code> objects corresponding to the specified id
      * values.
      */
-    public PageList<AuthzSubjectValue> getSubjectsById(Integer sessionId, Integer[] ids, PageControl pc)
+    public PageList<AuthzSubject> getSubjectsById(Integer sessionId, Integer[] ids, PageControl pc)
         throws PermissionException, SessionTimeoutException, SessionNotFoundException;
 
     /**
      * Return a sorted, paged <code>List</code> of
-     * <code>AuthzSubjectValue</code> objects matching name as substring
+     * <code>AuthzSubject</code> objects matching name as substring
      */
     public PageList<AuthzSubject> getSubjectsByName(Integer sessionId, String name, PageControl pc)
         throws PermissionException, SessionTimeoutException, SessionNotFoundException;

@@ -67,7 +67,6 @@ import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
 import org.hyperic.hq.autoinventory.ScanMethodState;
@@ -672,14 +671,14 @@ public class BizappUtils {
     }
 
     /**
-     * Return a <code>List</code> of <code>AuthzSubjectValue</code>
+     * Return a <code>List</code> of <code>AuthzSubject</code>
      * objects from a list that do <strong>not</strong> appear in
      * a list of matches.
      *
      * @param all the list to operate on
      * @param matches the list to grep out
      */
-    public static List<AuthzSubjectValue> grepSubjects(List all, List matches) {
+    public static List<AuthzSubject> grepSubjects(List all, List matches) {
         if (all == null || matches == null) {
             return new ArrayList(0);
         }
@@ -696,7 +695,7 @@ public class BizappUtils {
         ArrayList objects = new ArrayList();
         Iterator ai = all.iterator();
         while (ai.hasNext()) {
-            AuthzSubjectValue obj = (AuthzSubjectValue) ai.next();
+            AuthzSubject obj = (AuthzSubject) ai.next();
             if (!index.contains(obj.getId())) {
                 objects.add(obj);
             }

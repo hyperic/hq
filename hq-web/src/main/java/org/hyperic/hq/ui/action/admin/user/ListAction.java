@@ -35,7 +35,7 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -72,7 +72,7 @@ public class ListAction
         if (log.isTraceEnabled()) {
             log.trace("getting all subjects");
         }
-        PageList<AuthzSubjectValue> users = authzBoss.getAllSubjects(sessionId, null, pc);
+        PageList<AuthzSubject> users = authzBoss.getAllSubjects(sessionId, null, pc);
         request.setAttribute(Constants.ALL_USERS_ATTR, users);
 
         return null;

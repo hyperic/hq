@@ -756,6 +756,8 @@
 					<module>hq-lather</module>
 					<module>hq-pdk</module>
 					<module>hq-agent</module>
+					<module>hq-domain</module>
+					<module>inventory-neo4j</module>
 					<module>hq-server</module>
 					<module>hq-rendit</module>
 					<module>hq-plugin</module>

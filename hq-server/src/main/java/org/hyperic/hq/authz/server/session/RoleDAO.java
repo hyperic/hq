@@ -34,7 +34,6 @@ import javax.persistence.PersistenceContext;
 
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
-import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.inventory.dao.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,9 +53,11 @@ public class RoleDAO {
         this.resourceTypeDao = resourceTypeDao;
     }
 
-    Role create(AuthzSubject creator, RoleValue createInfo) {
+    Role create(AuthzSubject creator, String name, String description, boolean system) {
         Role role = new Role();
-        role.setRoleValue(createInfo);
+        role.setName(name);
+        role.setDescription(description);
+        role.setSystem(system);
         // Save it at this point to get an ID
         entityManager.persist(role);
 
@@ -126,7 +127,8 @@ public class RoleDAO {
 
     public void remove(Role entity) {
         entity.clearCalendars();
-        entity.clearResourceGroups();
+        //TODO impl?
+        //entity.clearResourceGroups();
         entity.clearSubjects();
         entityManager.remove(entity);
     }

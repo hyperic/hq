@@ -36,7 +36,6 @@ import org.hyperic.hq.auth.server.session.UserAuditFactory;
 import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.common.ApplicationException;
@@ -331,7 +330,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
      * @param excludes the IDs of subjects to exclude from result
      */
     @Transactional(readOnly = true)
-    public PageList<AuthzSubjectValue> getAllSubjects(AuthzSubject whoami,
+    public PageList<AuthzSubject> getAllSubjects(AuthzSubject whoami,
                                                       Collection<Integer> excludes, PageControl pc)
         throws NotFoundException, PermissionException {
 
@@ -353,10 +352,10 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
                 excludes.add(AuthzConstants.guestId);
             }
 //        } catch (PermissionException e) {
-//            PageList<AuthzSubjectValue> plist = new PageList<AuthzSubjectValue>();
+//            PageList<AuthzSubject> plist = new PageList<AuthzSubject>();
 //
 //            // return a list with only the one entry.
-//            plist.add(who.getAuthzSubjectValue());
+//            plist.add(who.getAuthzSubject());
 //            plist.setTotalSize(1);
 //            return plist;
 //        }
@@ -401,14 +400,14 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
      * 
      */
     @Transactional(readOnly = true)
-    public PageList<AuthzSubjectValue> getSubjectsById(AuthzSubject subject, Integer[] ids,
+    public PageList<AuthzSubject> getSubjectsById(AuthzSubject subject, Integer[] ids,
                                                        PageControl pc) throws PermissionException {
 
         // PR7251 - Sometimes and for no good reason, different parts of the UI
         // call this method with an empty ids array. In this case, simply return
         // an empty page list.
         if (ids == null || ids.length == 0) {
-            return new PageList<AuthzSubjectValue>();
+            return new PageList<AuthzSubject>();
         }
 
         // find the requested subjects
@@ -425,7 +424,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
         }
 
         // Need to convert to value objects
-        return new PageList<AuthzSubjectValue>(subjectPager.seek(subjects, PageControl.PAGE_ALL),
+        return new PageList<AuthzSubject>(subjectPager.seek(subjects, PageControl.PAGE_ALL),
             subjects.getTotalSize());
     }
 

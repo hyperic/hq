@@ -91,7 +91,7 @@ public interface AuthzSubjectManager {
      * List all subjects in the system
      * @param excludes the IDs of subjects to exclude from result
      */
-    public PageList<AuthzSubjectValue> getAllSubjects(AuthzSubject whoami,
+    public PageList<AuthzSubject> getAllSubjects(AuthzSubject whoami,
                                                       java.util.Collection<Integer> excludes,
                                                       PageControl pc) throws PermissionException,
         NotFoundException;
@@ -101,7 +101,7 @@ public interface AuthzSubjectManager {
      * empty PageList if a null or empty array of ids is received.
      * @param ids the subject ids
      */
-    public PageList<AuthzSubjectValue> getSubjectsById(AuthzSubject subject,
+    public PageList<AuthzSubject> getSubjectsById(AuthzSubject subject,
                                                        java.lang.Integer[] ids, PageControl pc)
         throws PermissionException;
 

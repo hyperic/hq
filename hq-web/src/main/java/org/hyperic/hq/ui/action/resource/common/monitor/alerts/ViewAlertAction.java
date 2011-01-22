@@ -39,8 +39,6 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
@@ -236,7 +234,7 @@ public class ViewAlertAction
 
         // Get the list of users
 
-        PageList<AuthzSubjectValue> availableUsers = authzBoss.getAllSubjects(new Integer(sessionID), null,
+        PageList<AuthzSubject> availableUsers = authzBoss.getAllSubjects(new Integer(sessionID), null,
             PageControl.PAGE_ALL);
         request.setAttribute(Constants.AVAIL_USERS_ATTR, availableUsers);
         

@@ -47,11 +47,9 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.UserPreferencesUpdatedEvent;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
-import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
@@ -183,13 +181,13 @@ public class AuthzBossImpl implements AuthzBoss {
 
     /**
      * Return a sorted, paged <code>List</code> of
-     * <code>AuthzSubjectValue</code> objects representing every resource type
+     * <code>AuthzSubject</code> objects representing every resource type
      * in the system that the user is allowed to view.
      * 
      * 
      */
     @Transactional(readOnly=true)
-    public PageList<AuthzSubjectValue> getAllSubjects(Integer sessionId, Collection<Integer> excludes, PageControl pc)
+    public PageList<AuthzSubject> getAllSubjects(Integer sessionId, Collection<Integer> excludes, PageControl pc)
         throws  SessionTimeoutException, SessionNotFoundException, PermissionException, NotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return authzSubjectManager.getAllSubjects(subject, excludes, pc);
@@ -197,13 +195,13 @@ public class AuthzBossImpl implements AuthzBoss {
 
     /**
      * Return a sorted, paged <code>List</code> of
-     * <code>AuthzSubjectValue</code> objects corresponding to the specified id
+     * <code>AuthzSubject</code> objects corresponding to the specified id
      * values.
      * 
      * 
      */
     @Transactional(readOnly=true)
-    public PageList<AuthzSubjectValue> getSubjectsById(Integer sessionId, Integer[] ids, PageControl pc)
+    public PageList<AuthzSubject> getSubjectsById(Integer sessionId, Integer[] ids, PageControl pc)
         throws PermissionException, SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return authzSubjectManager.getSubjectsById(subject, ids, pc);
@@ -211,7 +209,7 @@ public class AuthzBossImpl implements AuthzBoss {
 
     /**
      * Return a sorted, paged <code>List</code> of
-     * <code>AuthzSubjectValue</code> objects matching name as substring
+     * <code>AuthzSubject</code> objects matching name as substring
      * 
      * 
      */
