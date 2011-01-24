@@ -113,7 +113,7 @@ public class JBossServerControlPlugin extends ServerControlPlugin {
 
     protected boolean isRunning() {
         try {
-            JBossUtil.getMBeanServer(getConfig().toProperties());
+            JBossUtil.getMBeanServerConnection(getConfig().toProperties());
             return true;
         } catch (NamingException e) {
             return false;

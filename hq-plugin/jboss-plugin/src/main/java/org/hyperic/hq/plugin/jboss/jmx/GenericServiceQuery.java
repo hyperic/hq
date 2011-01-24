@@ -28,11 +28,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import javax.management.MBeanServerConnection;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.hyperic.hq.product.GenericPlugin;
+import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPluginManager;
 
 class GenericServiceQuery extends ServiceQuery {

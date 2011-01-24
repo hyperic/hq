@@ -25,6 +25,9 @@
 
 package org.hyperic.hq.plugin.jboss.jmx;
 
+import javax.management.MBeanServerConnection;
+import org.hyperic.hq.product.PluginException;
+
 public class StatefulSessionBeanQuery extends BeanQuery {
 
     protected String getBeanQueryName() {

@@ -44,11 +44,10 @@ import java.util.jar.JarFile;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.management.MBeanServerConnection;
 
 import javax.management.ObjectName;
 import javax.naming.Context;
-
-import org.jboss.jmx.adaptor.rmi.RMIAdaptor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -356,17 +355,17 @@ public class JBossDetector
 	public Set discoverServiceTypes(ConfigResponse serverConfig) throws PluginException {
 		Set serviceTypes = new HashSet();
 	         
-		RMIAdaptor mServer;
+		MBeanServerConnection mServer;
 	
 	 	try {
-	 		mServer = JBossUtil.getMBeanServer(serverConfig.toProperties());
+	 		mServer = JBossUtil.getMBeanServerConnection(serverConfig.toProperties());
 	 	} catch (Exception e) {
 	 		throw new PluginException(e.getMessage(), e);
 	 	}
 	
 	    try {
 			final Set objectNames = mServer.queryNames(new ObjectName(org.hyperic.hq.product.jmx.MBeanUtil.DYNAMIC_SERVICE_DOMAIN + ":*"), null);
-			//TODO have to instantiate here due to classloading issues with MBeanServerConnection in 1.4 agent.  Can make an instance variable when agent can be 1.5 compliant.
+			//TODO have to instantiate here due to classloading issues with MBeanServerConnectionConnection in 1.4 agent.  Can make an instance variable when agent can be 1.5 compliant.
 			ServiceTypeFactory serviceTypeFactory = new ServiceTypeFactory();
 			serviceTypes = serviceTypeFactory.create(getProductPlugin(), (ServerTypeInfo)getTypeInfo(), mServer, objectNames);
 		} catch (Exception e) {
@@ -623,10 +622,10 @@ public class JBossDetector
             throws PluginException {
 
         String url = serverConfig.getValue(Context.PROVIDER_URL);
-        RMIAdaptor mServer;
+        MBeanServerConnection mServer;
 
         try {
-            mServer = JBossUtil.getMBeanServer(serverConfig.toProperties());
+            mServer = JBossUtil.getMBeanServerConnection(serverConfig.toProperties());
         } catch (Exception e) {
             throw new PluginException(e.getMessage(), e);
         }

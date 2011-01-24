@@ -1596,4 +1596,5 @@
     
     <server name="JBoss" version="5.1" include="5.0"/>
 
+    <server name="JBoss" version="6.0" include="5.0"/>
 </plugin>

@@ -35,13 +35,12 @@ import java.util.Properties;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.InstanceNotFoundException;
+import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerDetector;
-
-import org.jboss.jmx.adaptor.rmi.RMIAdaptor;
 
 public abstract class JBossQuery {
     public static final String PROP_OBJECT_NAME    = "OBJECT_NAME";
@@ -58,7 +57,7 @@ public abstract class JBossQuery {
         
     }
 
-    public abstract void getAttributes(RMIAdaptor mServer)
+    public abstract void getAttributes(MBeanServerConnection mServer)
         throws PluginException;
 
     public void setURL(String url) {
@@ -83,7 +82,7 @@ public abstract class JBossQuery {
         return this.detector;
     }
 
-    public void getAttributes(RMIAdaptor mServer,
+    public void getAttributes(MBeanServerConnection mServer,
                               ObjectName name,
                               String[] attrs)
         throws PluginException {

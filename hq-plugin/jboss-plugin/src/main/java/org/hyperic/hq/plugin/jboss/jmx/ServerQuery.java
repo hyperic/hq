@@ -34,6 +34,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import javax.management.MBeanInfo;
+import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
@@ -44,7 +45,6 @@ import org.hyperic.hq.plugin.jboss.JBossServerControlPlugin;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jboss.jmx.adaptor.rmi.RMIAdaptor;
 
 public class ServerQuery extends JBossQuery {
 
@@ -84,7 +84,7 @@ public class ServerQuery extends JBossQuery {
         return this.services;
     }
 
-    public void getAttributes(RMIAdaptor mServer)
+    public void getAttributes(MBeanServerConnection mServer)
             throws PluginException {
         ObjectName name;
 
@@ -127,7 +127,7 @@ public class ServerQuery extends JBossQuery {
         return getAttribute(ATTR_SERVER_URL);
     }
 
-    public void findServices(RMIAdaptor mServer)
+    public void findServices(MBeanServerConnection mServer)
             throws PluginException {
 
         ServiceQuery[] queries = {
@@ -180,7 +180,7 @@ public class ServerQuery extends JBossQuery {
         }
     }
 
-    private void findServices(RMIAdaptor mServer, ServiceQuery query)
+    private void findServices(MBeanServerConnection mServer, ServiceQuery query)
             throws PluginException {
 
         query.initialize();
@@ -227,7 +227,7 @@ public class ServerQuery extends JBossQuery {
         log.debug("***********************************************");
     }
 
-    private boolean checkClass(RMIAdaptor mServer, ObjectName name, String mbeanClass) {
+    private boolean checkClass(MBeanServerConnection mServer, ObjectName name, String mbeanClass) {
         boolean res = true;
         if (mbeanClass != null) {
             try {

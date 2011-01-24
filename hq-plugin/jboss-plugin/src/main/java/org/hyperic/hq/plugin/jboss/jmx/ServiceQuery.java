@@ -27,13 +27,13 @@ package org.hyperic.hq.plugin.jboss.jmx;
 
 import java.util.ArrayList;
 import java.util.Properties;
+import javax.management.MBeanServerConnection;
 
 import javax.management.ObjectName;
 
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigSchema;
 
-import org.jboss.jmx.adaptor.rmi.RMIAdaptor;
 
 public abstract class ServiceQuery extends JBossQuery {
 
@@ -85,7 +85,8 @@ public abstract class ServiceQuery extends JBossQuery {
         return schema.getOptionNames();
     }
 
-    public void getAttributes(RMIAdaptor mServer)
+    @Override
+    public final void getAttributes(MBeanServerConnection mServer)
         throws PluginException {
 
         String[] names = getAttributeNames();
