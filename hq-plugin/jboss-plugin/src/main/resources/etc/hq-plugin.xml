@@ -1592,7 +1592,8 @@
                   alias="hitsCount"
           template="${OBJECT_NAME}:${alias}"/>
         </service>
-        
-
     </server>
+    
+    <server name="JBoss" version="5.1" include="5.0"/>
+
 </plugin>
