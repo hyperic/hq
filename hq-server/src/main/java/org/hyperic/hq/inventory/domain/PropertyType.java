@@ -76,6 +76,11 @@ public class PropertyType {
         setUnderlyingState(n);
     }
 
+    public PropertyType(org.hyperic.hq.pdk.domain.PropertyType propertyType) {
+    	setName(propertyType.getName());
+    	setDescription(propertyType.getDescription());
+    }
+    
     @Transactional
     public void flush() {
         this.entityManager.flush();

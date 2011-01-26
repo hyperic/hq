@@ -29,9 +29,9 @@ package org.hyperic.hq.plugin.vsphere;
 import java.util.HashMap;
 import java.util.Properties;
 
-import org.hyperic.hq.plugin.vsphere.domain.Agent;
-import org.hyperic.hq.plugin.vsphere.domain.Resource;
-import org.hyperic.hq.plugin.vsphere.domain.ResourceType;
+import org.hyperic.hq.pdk.domain.Agent;
+import org.hyperic.hq.pdk.domain.Resource;
+import org.hyperic.hq.pdk.domain.ResourceType;
 import org.junit.Before;
 import org.junit.Test;
 

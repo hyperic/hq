@@ -12,13 +12,17 @@ public class ResourceTypeRelationships {
 	}
 	
 	public void addRelationship(ResourceType subject, String predicate, ResourceType object) {
+		String subjectName = null;
+		
 		if (subject != null) {
 			// a null value means anchor to root resource type
 			resourceTypes.add(subject);
+			
+			subjectName = subject.getName();
 		}
 		
 		resourceTypes.add(object);
-		relationships.add(new Triple(subject.getName(), predicate, object.getName()));
+		relationships.add(new Triple(subjectName, predicate, object.getName()));
 	}
 	
 	public Set<ResourceType> getResourceTypes() {

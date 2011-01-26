@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.plugin.vsphere;
 
-import org.hyperic.hq.plugin.vsphere.domain.Resource;
+import org.hyperic.hq.pdk.domain.Resource;
 import org.hyperic.util.config.ConfigResponse;
 
 //Resource object helpers

@@ -8,17 +8,18 @@ import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
-import org.hyperic.hq.plugin.vsphere.domain.Agent;
-import org.hyperic.hq.plugin.vsphere.domain.AgentResponse;
-import org.hyperic.hq.plugin.vsphere.domain.ListOfResourcesResponse;
-import org.hyperic.hq.plugin.vsphere.domain.Resource;
-import org.hyperic.hq.plugin.vsphere.domain.ResourceResponse;
-import org.hyperic.hq.plugin.vsphere.domain.ResourceType;
-import org.hyperic.hq.plugin.vsphere.domain.ResourceTypeResponse;
+import org.hyperic.hq.pdk.domain.Agent;
+import org.hyperic.hq.pdk.domain.AgentResponse;
+import org.hyperic.hq.pdk.domain.ListOfResourcesResponse;
+import org.hyperic.hq.pdk.domain.Resource;
+import org.hyperic.hq.pdk.domain.ResourceResponse;
+import org.hyperic.hq.pdk.domain.ResourceType;
+import org.hyperic.hq.pdk.domain.ResourceTypeResponse;
 import org.springframework.http.client.CommonsClientHttpRequestFactory;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplate;
 
@@ -171,5 +172,52 @@ public class RestApi {
 		rest.delete(url, id);
 		
 		System.out.println("SUCCESS");
+	}
+	
+	public ResourceType syncResourceType(ResourceType resourceType) {
+		String url = baseUri + "/resource-types/name:{name}";
+		ResourceTypeResponse response;
+		
+		try {
+			System.out.print("GET " + url + ", name[" + resourceType.getName() + "]...");
+			
+			response = rest.getForObject(url, ResourceTypeResponse.class, resourceType.getName());
+			
+			System.out.println("SUCCESS");
+		} catch(HttpClientErrorException e) {
+			System.out.println("NOT FOUND");
+			
+			url = baseUri + "/resource-types";
+			
+			System.out.print("POST " + url + "...");
+			
+			response = rest.postForObject(url, resourceType, ResourceTypeResponse.class);
+			
+			System.out.println("SUCCESS");
+		}
+		
+		return response.getData();
+	}
+
+	public void makeRelationship(ResourceType from, ResourceType to, String name) {
+		String url = baseUri + "/resource-types/{id}/relationships/{name}/{toId}";
+		
+		System.out.print("PUT " + url + ", id["+ from.getId() + "], name[" + name + "], toId[" + to.getId() + "]...");
+		
+		rest.put(url, null, from.getId(), name, to.getId());
+		
+		System.out.println("SUCCESS");
+	}
+	
+	public ResourceType getResourceTypeRoot() {
+		String url = baseUri + "/resource-types/root";
+		
+		System.out.print("GET " + url + "...");
+		
+		ResourceTypeResponse response = rest.getForObject(url, ResourceTypeResponse.class);
+		
+		System.out.println("SUCCESS");
+		
+		return response.getData();
 	}
 }

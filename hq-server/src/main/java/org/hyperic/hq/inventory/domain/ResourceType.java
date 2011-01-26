@@ -98,6 +98,20 @@ public class ResourceType {
         setUnderlyingState(n);
     }
 
+    public ResourceType(org.hyperic.hq.pdk.domain.ResourceType resourceType, Plugin plugin) {
+    	setName(resourceType.getName());
+    	setDescription(resourceType.getDescription());
+    	setPlugin(plugin);
+    	
+    	for (org.hyperic.hq.pdk.domain.OperationType ot : resourceType.getOperationTypes()) {
+    		addOperationType(new OperationType(ot));
+    	}
+    	
+    	for (org.hyperic.hq.pdk.domain.PropertyType pt : resourceType.getPropertyTypes()) {
+    		addPropertyType(new PropertyType(pt));
+    	}
+    }
+
     @Transactional
     public void flush() {
         this.entityManager.flush();
@@ -136,7 +150,7 @@ public class ResourceType {
     public Set<OperationType> getOperationTypes() {
         return operationTypes;
     }
-
+    
     @SuppressWarnings("unchecked")
     public Set<ResourceTypeRelationship> getRelationships(ResourceType entity, String name,
                                                             Direction direction) {
@@ -384,13 +398,29 @@ public class ResourceType {
     }
     
     public void addPropertyType(PropertyType propertyType) {
-        propertyTypes.add(propertyType);
+    	propertyType.setResourceType(this);
+        
+    	if (propertyTypes == null) {
+    		propertyTypes = new HashSet<PropertyType>();
+    	}
+    	
+    	propertyTypes.add(propertyType);
     }
 
     public void setOperationTypes(Set<OperationType> operationTypes) {
 		this.operationTypes = operationTypes;
 	}
 
+    public void addOperationType(OperationType operationType) {
+    	operationType.setResourceType(this);
+    	
+    	if (operationTypes == null) {
+    		operationTypes = new HashSet<OperationType>();
+    	}
+    	
+    	operationTypes.add(operationType);
+    }
+	
 	// TODO other config types and setters
     public Set<ConfigOptionType> getMeasurementConfigTypes() {
         Set<ConfigOptionType> configTypes = new HashSet<ConfigOptionType>();

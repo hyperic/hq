@@ -1,5 +1,6 @@
 package org.hyperic.hq.pdk.domain;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
@@ -10,9 +11,9 @@ public class ResourceType {
 	private String name;
 	private String description;
 	private String pluginName;
-	private Set<PropertyType> propertyTypes;
-	private Set<ConfigOptionType> configOptionTypes;
-	private Set<OperationType> operationTypes;
+	private Set<PropertyType> propertyTypes = new HashSet<PropertyType>();
+	private Set<ConfigOptionType> configOptionTypes = new HashSet<ConfigOptionType>();
+	private Set<OperationType> operationTypes = new HashSet<OperationType>();
 	
 	public ResourceType() {}
 	
@@ -20,9 +21,10 @@ public class ResourceType {
 		this.name = name;
 		this.description = description;
 		this.pluginName = pluginName;
-		this.propertyTypes = propertyTypes;
-		this.operationTypes = operationTypes;
-		this.configOptionTypes = configOptionTypes;
+		
+		if (propertyTypes != null)	this.propertyTypes = propertyTypes;
+		if (operationTypes != null)	this.operationTypes = operationTypes;
+		if (configOptionTypes != null)	this.configOptionTypes = configOptionTypes;
 	}
 	
 	public Integer getId() {

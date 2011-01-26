@@ -57,6 +57,10 @@ public class OperationType {
         setUnderlyingState(n);
     }
 
+    public OperationType(org.hyperic.hq.pdk.domain.OperationType operationType) {
+    	setName(operationType.getName());    	
+    }
+    
     @Transactional
     public void flush() {
         this.entityManager.flush();
