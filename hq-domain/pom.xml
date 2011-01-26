@@ -310,7 +310,7 @@
 			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
 			</plugin>
-			<plugin>
+			<!--><plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>aspectj-maven-plugin</artifactId>
 				<version>1.0</version>
@@ -352,7 +352,7 @@
 				<configuration>
 					<skip>true</skip>
 				</configuration>
-			</plugin>
+			</plugin>-->
 		</plugins>
 		<resources>
 			<resource>

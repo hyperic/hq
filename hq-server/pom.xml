@@ -126,7 +126,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
-			<artifactId>inventory-neo4j</artifactId>
+			<artifactId>inventory-jpa</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

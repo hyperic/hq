@@ -13,6 +13,12 @@
         <class>org.hyperic.hq.authz.server.session.AuthzSubject</class>
         <class>org.hyperic.hq.authz.server.session.Role</class>
         <class>org.hyperic.hq.product.Plugin</class>
+         <!--  TODO Below are only in JPA project.  Figure out some way to segment persistence contexts -->
+         <class>org.hyperic.hq.inventory.domain.ResourceProperty</class>
+         <class>org.hyperic.hq.inventory.domain.ConfigOption</class>
+         <class>org.hyperic.hq.inventory.domain.ResourceRelationship</class>
+         <class>org.hyperic.hq.inventory.domain.ResourceRelationshipProperty</class>
+         <class>org.hyperic.hq.inventory.domain.ResourceTypeRelationship</class>
         <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
         <properties>
             <property name="hibernate.hbm2ddl.auto" value="create"/>
