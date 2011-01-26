@@ -44,17 +44,7 @@ public class ResourceRelationship  {
         
         return properties;
     }
-    
-    public void setProperties(Map<String,Object> properties) {
-    	for (Map.Entry<String, Object> entry : properties.entrySet()) {
-            String key = entry.getKey();
-    		//Filter out properties that are class fields
-            if(!("from".equals(key)) && !("to".equals(key))) {
-            	setProperty(key, entry.getValue());
-            }
-    	}
-    }
-    
+     
     public Object getProperty(String key) {
         //TODO model default values?  See above
         return getUnderlyingState().getProperty(key);

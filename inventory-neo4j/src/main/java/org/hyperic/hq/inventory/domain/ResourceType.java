@@ -384,21 +384,6 @@ public class ResourceType {
         propertyTypes.add(propertyType);
     }
 
-    // TODO other config types and setters
-    public Set<ConfigOptionType> getMeasurementConfigTypes() {
-        Set<ConfigOptionType> configTypes = new HashSet<ConfigOptionType>();
-        Iterable<org.neo4j.graphdb.Relationship> relationships = this.getUnderlyingState()
-            .getRelationships(DynamicRelationshipType.withName(RelationshipTypes.HAS_CONFIG_OPT_TYPE),
-                org.neo4j.graphdb.Direction.OUTGOING);
-        for (org.neo4j.graphdb.Relationship relationship : relationships) {
-            if (ConfigType.MEASUREMENT.toString().equals(relationship.getProperty("configType"))) {
-                configTypes.add(graphDatabaseContext.createEntityFromState(
-                    relationship.getOtherNode(getUnderlyingState()), ConfigOptionType.class));
-            }
-        }
-        return configTypes;
-    }
-
     public Plugin getPlugin() {
         return plugin;
     }
