@@ -179,7 +179,7 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
 
         VirtualMachineConfigInfo info = vm.getConfig();
 
-        if (info.isTemplate()) {
+        if (info == null || info.isTemplate()) {
             return null; //filter out template VMs
         }
 
@@ -717,11 +717,16 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
             vim.findByUuid(VSphereUtil.HOST_SYSTEM, getFqdn(r));
             
             if (log.isDebugEnabled()) {
-                log.debug(HOST_TYPE + "[name=" + r.getName() 
+                log.debug(HOST_TYPE + "[id=" + r.getId()
+                			  + ", name=" + r.getName() 
                               + "] exists in vCenter. Not removing from HQ.");
             }
         } catch (ManagedEntityNotFoundException me) {
             removeResource(r, hqApi);
+        } catch (Throwable t) {
+        	log.warn("Error removing " + HOST_TYPE 
+        				+ "[id=" + r.getId()
+        				+ ", name=" + r.getName() + "] from HQ", t);
         }
     }
 
@@ -733,11 +738,16 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
             vim.findByUuid(VSphereUtil.VM, getFqdn(r));
             
             if (log.isDebugEnabled()) {
-                log.debug(VM_TYPE + "[name=" + r.getName() 
+                log.debug(VM_TYPE + "[id=" + r.getId()
+                			  + ", name=" + r.getName() 
                               + "] exists in vCenter. Not removing from HQ.");
             }
         } catch (ManagedEntityNotFoundException me) {
             removeResource(r, hqApi);
+        } catch (Throwable t) {
+        	log.warn("Error removing " + VM_TYPE 
+        				+ "[id=" + r.getId()
+        				+ ", name=" + r.getName() + "] from HQ", t);
         }
     }
     
