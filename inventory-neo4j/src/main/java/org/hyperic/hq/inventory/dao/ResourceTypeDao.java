@@ -6,7 +6,7 @@ import org.hyperic.hq.product.Plugin;
 
 public interface ResourceTypeDao extends GenericDao<ResourceType> {
     public ResourceType findRoot();
-    PropertyType createPropertyType(String name);
+    PropertyType createPropertyType(String name,Class<?> type);
     ResourceType create(String name, Plugin plugin);
     ResourceType create(String name);
 }

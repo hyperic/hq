@@ -88,11 +88,12 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
     }
     
     @Transactional
-    public PropertyType createPropertyType(String name) {
+    public PropertyType createPropertyType(String name,Class<?> type) {
         PropertyType propType = new PropertyType();
         propType.setName(name);
         entityManager.persist(propType);
         propType.getId();
+        //TODO care about formalized type?
         return propType;
     }
     

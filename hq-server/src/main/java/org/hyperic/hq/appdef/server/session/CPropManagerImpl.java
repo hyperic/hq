@@ -105,8 +105,8 @@ public class CPropManagerImpl implements CPropManager {
      *        key references could not be found
      * @throw CPropKeyExistsException if the key already exists
      */
-    public void addKey(ResourceType appdefType, String key, String description) {
-        PropertyType propertyType = resourceTypeDao.createPropertyType(key);
+    public void addKey(ResourceType appdefType, String key, String description,Class<?> type) {
+        PropertyType propertyType = resourceTypeDao.createPropertyType(key,type);
         propertyType.setDescription(description);
         appdefType.addPropertyType(propertyType);
         appdefType.merge();

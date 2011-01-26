@@ -1053,23 +1053,23 @@ public class ServerManagerImpl implements ServerManager {
         ResourceType stype = resourceTypeDao.create(sinfo.getName(),pluginDAO.findByName(plugin));
         stype.setDescription(sinfo.getDescription());
        
-        stype.addPropertyType(createServerPropertyType(ServerFactory.WAS_AUTODISCOVERED));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.AUTO_INVENTORY_IDENTIFIER));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.AUTODISCOVERY_ZOMBIE));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.CREATION_TIME));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.MODIFIED_TIME));
-        stype.addPropertyType(createServerPropertyType(AppdefResource.SORT_NAME));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.INSTALL_PATH));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.SERVICES_AUTO_MANAGED));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.RUNTIME_AUTODISCOVERY));
+        stype.addPropertyType(createServerPropertyType(ServerFactory.WAS_AUTODISCOVERED,Boolean.class));
+        stype.addPropertyType(createServerPropertyType(ServerFactory.AUTO_INVENTORY_IDENTIFIER,String.class));
+        stype.addPropertyType(createServerPropertyType(ServerFactory.AUTODISCOVERY_ZOMBIE,Boolean.class));
+        stype.addPropertyType(createServerPropertyType(ServerFactory.CREATION_TIME,Long.class));
+        stype.addPropertyType(createServerPropertyType(ServerFactory.MODIFIED_TIME,Long.class));
+        stype.addPropertyType(createServerPropertyType(AppdefResource.SORT_NAME,String.class));
+        stype.addPropertyType(createServerPropertyType(ServerFactory.INSTALL_PATH,String.class));
+        stype.addPropertyType(createServerPropertyType(ServerFactory.SERVICES_AUTO_MANAGED,Boolean.class));
+        stype.addPropertyType(createServerPropertyType(ServerFactory.RUNTIME_AUTODISCOVERY,Boolean.class));
        
         String newPlats[] = sinfo.getValidPlatformTypes();
         findAndSetPlatformType(newPlats, stype);
         return serverFactory.createServerType(stype);
     }
     
-    private PropertyType createServerPropertyType(String propName) {
-        PropertyType propType = resourceTypeDao.createPropertyType(propName);
+    private PropertyType createServerPropertyType(String propName,Class<?> type) {
+        PropertyType propType = resourceTypeDao.createPropertyType(propName,type);
         propType.setDescription(propName);
         propType.setHidden(true);
         return propType;

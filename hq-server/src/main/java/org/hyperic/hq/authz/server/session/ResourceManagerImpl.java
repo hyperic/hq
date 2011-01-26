@@ -335,22 +335,22 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
             if(resourceTypeDao.findByName(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i])) == null) {
                 ResourceType groupType = resourceTypeDao.create(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i]));
                 if(groupTypes[i] == AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP) {
-                    setPropertyType(groupType,AppdefResource.SORT_NAME);
-                    setPropertyType(groupType,ApplicationManagerImpl.BUSINESS_CONTACT);
-                    setPropertyType(groupType,ApplicationManagerImpl.CREATION_TIME);
-                    setPropertyType(groupType,ApplicationManagerImpl.ENG_CONTACT);
-                    setPropertyType(groupType,ApplicationManagerImpl.MODIFIED_TIME);
-                    setPropertyType(groupType,ApplicationManagerImpl.OPS_CONTACT);
+                    setPropertyType(groupType,AppdefResource.SORT_NAME,String.class);
+                    setPropertyType(groupType,ApplicationManagerImpl.BUSINESS_CONTACT,String.class);
+                    setPropertyType(groupType,ApplicationManagerImpl.CREATION_TIME,Long.class);
+                    setPropertyType(groupType,ApplicationManagerImpl.ENG_CONTACT,String.class);
+                    setPropertyType(groupType,ApplicationManagerImpl.MODIFIED_TIME,Long.class);
+                    setPropertyType(groupType,ApplicationManagerImpl.OPS_CONTACT,String.class);
                 }else {
-                    setPropertyType(groupType,"groupEntType");
-                    setPropertyType(groupType,"groupEntResType");
+                    setPropertyType(groupType,"groupEntType",Integer.class);
+                    setPropertyType(groupType,"groupEntResType",Integer.class);
                 }
             }
         }
     }
     
-    private void setPropertyType(ResourceType groupType, String propTypeName) {
-        PropertyType propType = resourceTypeDao.createPropertyType(propTypeName);
+    private void setPropertyType(ResourceType groupType, String propTypeName, Class<?> type) {
+        PropertyType propType = resourceTypeDao.createPropertyType(propTypeName,type);
         propType.setDescription(propTypeName);
         propType.setHidden(true);
         groupType.addPropertyType(propType);

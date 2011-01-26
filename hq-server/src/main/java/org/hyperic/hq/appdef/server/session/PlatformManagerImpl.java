@@ -1558,20 +1558,20 @@ public class PlatformManagerImpl implements PlatformManager {
     public PlatformType createPlatformType(String name, String plugin) throws NotFoundException {
         log.debug("Creating new PlatformType: " + name);
         ResourceType pt = resourceTypeDao.create(name,pluginDAO.findByName(plugin));
-        pt.addPropertyType(createPropertyType(PlatformFactory.CERT_DN));
-        pt.addPropertyType(createPropertyType(PlatformFactory.FQDN));
-        pt.addPropertyType(createPropertyType(PlatformFactory.COMMENT_TEXT));
-        pt.addPropertyType(createPropertyType(PlatformFactory.CPU_COUNT));
-        pt.addPropertyType(createPropertyType(PlatformFactory.CREATION_TIME));
-        pt.addPropertyType(createPropertyType(PlatformFactory.MODIFIED_TIME));
-        pt.addPropertyType(createPropertyType(AppdefResource.SORT_NAME));
+        pt.addPropertyType(createPropertyType(PlatformFactory.CERT_DN,String.class));
+        pt.addPropertyType(createPropertyType(PlatformFactory.FQDN,String.class));
+        pt.addPropertyType(createPropertyType(PlatformFactory.COMMENT_TEXT,String.class));
+        pt.addPropertyType(createPropertyType(PlatformFactory.CPU_COUNT,Integer.class));
+        pt.addPropertyType(createPropertyType(PlatformFactory.CREATION_TIME,Long.class));
+        pt.addPropertyType(createPropertyType(PlatformFactory.MODIFIED_TIME,Long.class));
+        pt.addPropertyType(createPropertyType(AppdefResource.SORT_NAME,String.class));
         resourceManager.findRootResourceType().relateTo(pt, RelationshipTypes.PLATFORM);
         pt.relateTo(resourceManager.findResourceTypeByName(IP_RESOURCE_TYPE_NAME),RelationshipTypes.IP);
         return platformFactory.createPlatformType(pt);
     }
     
-    private PropertyType createPropertyType(String propName) {
-        PropertyType propType = resourceTypeDao.createPropertyType(propName);
+    private PropertyType createPropertyType(String propName, Class<?> type) {
+        PropertyType propType = resourceTypeDao.createPropertyType(propName,type);
         propType.setDescription(propName);
         propType.setHidden(true);
         return propType;
@@ -1949,11 +1949,11 @@ public class PlatformManagerImpl implements PlatformManager {
             ResourceType ipType = resourceTypeDao.create(IP_RESOURCE_TYPE_NAME);
             //TODO ipType isn't really getting a plugin here.  
             //Maybe give it System plugin or consider making it a first class citizen in new model?
-            ipType.addPropertyType(createPropertyType(PlatformFactory.IP_ADDRESS));
-            ipType.addPropertyType(createPropertyType(PlatformFactory.NETMASK));
-            ipType.addPropertyType(createPropertyType(PlatformFactory.MAC_ADDRESS));
-            ipType.addPropertyType(createPropertyType(PlatformFactory.CREATION_TIME));
-            ipType.addPropertyType(createPropertyType(PlatformFactory.MODIFIED_TIME));
+            ipType.addPropertyType(createPropertyType(PlatformFactory.IP_ADDRESS,String.class));
+            ipType.addPropertyType(createPropertyType(PlatformFactory.NETMASK,String.class));
+            ipType.addPropertyType(createPropertyType(PlatformFactory.MAC_ADDRESS,String.class));
+            ipType.addPropertyType(createPropertyType(PlatformFactory.CREATION_TIME,Long.class));
+            ipType.addPropertyType(createPropertyType(PlatformFactory.MODIFIED_TIME,Long.class));
         }
     }
 

@@ -899,20 +899,20 @@ public class ServiceManagerImpl implements ServiceManager {
         ResourceType serviceType = resourceTypeDao.create(sinfo.getName(), pluginDAO.findByName(plugin));
         serviceType.setDescription(sinfo.getDescription());
         
-        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.AUTO_INVENTORY_IDENTIFIER));
-        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.CREATION_TIME));
-        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.MODIFIED_TIME));
-        serviceType.addPropertyType(createServicePropertyType(AppdefResource.SORT_NAME));
-        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.AUTO_DISCOVERY_ZOMBIE));
-        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.END_USER_RT));
-        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.SERVICE_RT));
+        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.AUTO_INVENTORY_IDENTIFIER,String.class));
+        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.CREATION_TIME,Long.class));
+        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.MODIFIED_TIME,Long.class));
+        serviceType.addPropertyType(createServicePropertyType(AppdefResource.SORT_NAME,String.class));
+        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.AUTO_DISCOVERY_ZOMBIE,Boolean.class));
+        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.END_USER_RT,Boolean.class));
+        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.SERVICE_RT,Boolean.class));
       
         parentType.relateTo(serviceType, RelationshipTypes.SERVICE);
         return serviceFactory.createServiceType(serviceType);
     }
     
-    private PropertyType createServicePropertyType(String propName) {
-        PropertyType propType = resourceTypeDao.createPropertyType(propName);
+    private PropertyType createServicePropertyType(String propName,Class<?> type) {
+        PropertyType propType = resourceTypeDao.createPropertyType(propName,type);
         propType.setDescription(propName);
         propType.setHidden(true);
         return propType;

@@ -427,7 +427,7 @@ public class ProductManagerImpl implements ProductManager {
                 if (debug)
                     watch.markTimeEnd("findByKey");
                 if (c == null) {
-                    cPropManager.addKey(appdefType, opt.getName(), opt.getDescription());
+                    cPropManager.addKey(appdefType, opt.getName(), opt.getDescription(),String.class);
                 }
             }
         }
