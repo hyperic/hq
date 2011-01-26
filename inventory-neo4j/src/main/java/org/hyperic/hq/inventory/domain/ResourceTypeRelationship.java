@@ -37,5 +37,14 @@ public class ResourceTypeRelationship {
     public void setTo(ResourceType to) {
         this.to = to;
     }
+    
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ResourceTypeRelationship[");
+        sb.append("From: ").append(getFrom()).append(", ");
+        sb.append("To: ").append(getTo()).append(", ");
+        sb.append("Name: ").append(getName()).append("]");
+        return sb.toString();
+    }
 
 }

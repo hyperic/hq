@@ -58,4 +58,13 @@ public class ResourceRelationship  {
     public void remove() {
     	getUnderlyingState().delete();
     }
+    
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ResourceRelationship[");
+        sb.append("From: ").append(getFrom()).append(", ");
+        sb.append("To: ").append(getTo()).append(", ");
+        sb.append("Name: ").append(getName()).append("]");
+        return sb.toString();
+    }
 }

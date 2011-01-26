@@ -83,9 +83,10 @@ public class ResourceTypeRelationship {
     
     public String toString() {
         StringBuilder sb = new StringBuilder();
+        sb.append("ResourceTypeRelationship[");
         sb.append("From: ").append(getFrom()).append(", ");
         sb.append("To: ").append(getTo()).append(", ");
-        sb.append("Name: ").append(getName());
+        sb.append("Name: ").append(getName()).append("]");
         return sb.toString();
     }
 }

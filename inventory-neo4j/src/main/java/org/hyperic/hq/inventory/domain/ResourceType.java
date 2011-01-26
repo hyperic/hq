@@ -391,4 +391,12 @@ public class ResourceType {
     public void setPlugin(Plugin plugin) {
         this.plugin = plugin;
     }
+    
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ResourceType[ ");
+        sb.append("Id: ").append(getId()).append(", ");
+        sb.append("Name: ").append(getName()).append(", ").append("]");
+        return sb.toString();
+    }
 }
