@@ -33,7 +33,6 @@ import org.hyperic.hq.authz.server.session.Role
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.RoleManager;
-import org.hyperic.hq.authz.shared.RoleValue
 import org.hyperic.hq.inventory.domain.OperationType
 
 class RoleHelper extends BaseHelper {
@@ -90,17 +89,14 @@ class RoleHelper extends BaseHelper {
                            String[] operations,
                            Integer[] subjectIds, Integer[] groupIds) {
 
-        def role = [name: roleName,
-                    description: roleDescription,
-                    system: false] as RoleValue
-
+      
         def allOps = operationMap
         def ops = []
         operations.each {operation ->
             ops += allOps[operation]
         }
 
-        Integer roleId = roleMan.createOwnedRole(user, role, ops as OperationType[],
+        Integer roleId = roleMan.createOwnedRole(user, roleName,roleDescription,false, ops as OperationType[],
                                                  subjectIds, groupIds)
         getRoleById(roleId)
     }

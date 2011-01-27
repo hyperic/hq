@@ -57,13 +57,14 @@ public class RoleDashboardConfig
     public boolean isEditable(AuthzSubject by) {
         PermissionManager pMan = PermissionManagerFactory.getInstance();
         
-        try {
-            pMan.check(by.getId(), _role.getResource().getType(), 
-                       _role.getId(), AuthzConstants.roleOpModifyRole);
+       // try {
+            //TODO perm check
+//            pMan.check(by.getId(), _role.getResource().getType(), 
+//                       _role.getId(), AuthzConstants.roleOpModifyRole);
             return true;
-        } catch (PermissionException e) {
-            return false;
-        }
+       // } catch (PermissionException e) {
+        //    return false;
+        //}
     }
 
     public int hashCode() {

@@ -92,8 +92,7 @@ public class EditDefinitionConditionsAction
         int sessionID = RequestUtils.getSessionId(request).intValue();
 
         AlertDefinitionValue adv = eventsBoss.getAlertDefinition(sessionID, defForm.getAd());
-        defForm.exportConditionsEnablement(adv, request, sessionID, measurementBoss, EventConstants.TYPE_ALERT_DEF_ID
-            .equals(adv.getParentId()));
+        defForm.exportConditionsEnablement(adv, request, sessionID, measurementBoss, adv.isTypeAlertDefinition());
         
         try {
         	eventsBoss.updateAlertDefinition(sessionID, adv);

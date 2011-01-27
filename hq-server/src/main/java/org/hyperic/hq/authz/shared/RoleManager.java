@@ -61,7 +61,7 @@ public interface RoleManager {
      * @throws PermissionException whoami may not perform createResource on the
      *         covalentAuthzRole ResourceType.
      */
-    public Integer createOwnedRole(AuthzSubject whoami, RoleValue role,
+    public Integer createOwnedRole(AuthzSubject whoami, String name, String description, boolean system,
                                    OperationType[] operations,
                                    java.lang.Integer[] subjectIds, java.lang.Integer[] groupIds)
         throws AuthzDuplicateNameException, PermissionException;
@@ -81,7 +81,7 @@ public interface RoleManager {
      * @throws PermissionException whoami may not perform modifyRole on this
      *         role.
      */
-    public void saveRole(AuthzSubject whoami, RoleValue role)
+    public void saveRole(AuthzSubject whoami, int roleId, String name, String description)
         throws org.hyperic.hq.authz.shared.AuthzDuplicateNameException, PermissionException;
 
     /**
@@ -241,12 +241,12 @@ public interface RoleManager {
     /**
      * List all Roles in the system
      * @param pc Paging information for the request
-     * @return List a list of RoleValues
+     * @return List a list of Roles
      */
-    public List<RoleValue> getAllRoles(AuthzSubject subject, PageControl pc);
+    public List<Role> getAllRoles(AuthzSubject subject, PageControl pc);
 
     /**
-     * List all OwnedRoles in the system
+     * List all OwnedRoleValues in the system
      * @param subject
      * @param pc Paging and sorting information.
      * @return List a list of OwnedRoleValues
@@ -269,7 +269,7 @@ public interface RoleManager {
      * 
      * @throws PermissionException
      */
-    public PageList<RoleValue> getRolesById(AuthzSubject whoami, java.lang.Integer[] ids, PageControl pc)
+    public PageList<Role> getRolesById(AuthzSubject whoami, java.lang.Integer[] ids, PageControl pc)
         throws PermissionException;
 
     /**
@@ -301,7 +301,7 @@ public interface RoleManager {
      * @param pc Paging and sorting information.
      * @return Set of Roles
      */
-    public List<RoleValue> getRoles(AuthzSubject subjectValue, PageControl pc) throws PermissionException;
+    public List<Role> getRoles(AuthzSubject subjectValue, PageControl pc) throws PermissionException;
 
     /**
      * Get the owned roles for a subject.
@@ -358,7 +358,7 @@ public interface RoleManager {
      *         this role.
      * 
      */
-    public PageList<RoleValue> getAvailableRoles(AuthzSubject whoami, boolean system, Integer subjectId,
+    public PageList<Role> getAvailableRoles(AuthzSubject whoami, boolean system, Integer subjectId,
                                                  java.lang.Integer[] roleIds, PageControl pc)
         throws PermissionException, NotFoundException;
 
@@ -375,7 +375,7 @@ public interface RoleManager {
      *         this role.
      * @throws NotFoundException if the sort attribute was not recognized
      */
-    public PageList<RoleValue> getAvailableGroupRoles(AuthzSubject whoami, Integer groupId,
+    public PageList<Role> getAvailableGroupRoles(AuthzSubject whoami, Integer groupId,
                                                       java.lang.Integer[] roleIds, PageControl pc)
         throws PermissionException, NotFoundException;
     
@@ -393,7 +393,7 @@ public interface RoleManager {
      * Return the roles of a group
      * @throws PermissionException
      */
-    public PageList<RoleValue> getResourceGroupRoles(AuthzSubject whoami, Integer groupId, PageControl pc)
+    public PageList<Role> getResourceGroupRoles(AuthzSubject whoami, Integer groupId, PageControl pc)
         throws PermissionException;
 
     /**
@@ -418,7 +418,7 @@ public interface RoleManager {
      *         on this role.
      * @throws NotFoundException if the sort attribute is not recognized
      */
-    public PageList<AuthzSubjectValue> getSubjects(AuthzSubject whoami, Integer roleId, PageControl pc)
+    public PageList<AuthzSubject> getSubjects(AuthzSubject whoami, Integer roleId, PageControl pc)
         throws PermissionException, NotFoundException;
 
     /**
@@ -431,7 +431,7 @@ public interface RoleManager {
      *         on this role.
      * @throws NotFoundException if the sort attribute is not recognized
      */
-    public PageList<AuthzSubjectValue> getAvailableSubjects(AuthzSubject whoami, Integer roleId,
+    public PageList<AuthzSubject> getAvailableSubjects(AuthzSubject whoami, Integer roleId,
                                                             java.lang.Integer[] subjectIds, PageControl pc)
         throws PermissionException, NotFoundException;
 

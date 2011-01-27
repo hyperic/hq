@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.inventory.domain.Resource;
 
 /**
@@ -50,5 +51,26 @@ public abstract class AppdefResource extends AppdefNamedBean
     protected void setResource(Resource resource) {
         _resource = resource;
     }
+    /**
+     * legacy entity bean code
+     * @param obj
+     * @return
+     */
+    public boolean matchesValueObject(AppdefResourceValue obj)
+    {
+        boolean matches = true;
+        if (obj.getId() != null) {
+            matches = (obj.getId().intValue() == this.getId().intValue());
+        } else {
+            matches = (this.getId() == null);
+        }
+        if (obj.getCTime() != null) {
+            matches = (obj.getCTime().floatValue() == getCTime().floatValue());
+        } else {
+            matches = (this.getCreationTime() == 0);
+        }
+        return matches;
+    }
+
       
 }

@@ -37,7 +37,8 @@ public class AlertAudit
     
     AlertAudit(AlertDefinition def, AuthzSubject s, AuditPurpose p, AuditImportance i, AuditNature n, String msg,
                long time) {
-        super(s, def.getResource(), p, n, i, msg);
+        //TODO def.getResource()
+        super(s, null, p, n, i, msg);
         setStartTime(time);
         setEndTime(time);
     }

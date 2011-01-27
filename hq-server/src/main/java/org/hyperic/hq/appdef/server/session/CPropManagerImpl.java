@@ -47,6 +47,7 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.inventory.dao.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
@@ -65,12 +66,15 @@ public class CPropManagerImpl implements CPropManager {
     private Messenger sender;
     
     private ResourceManager resourceManager;
+    
+    private ResourceTypeDao resourceTypeDao;
    
 
     @Autowired
-    public CPropManagerImpl(Messenger sender, ResourceManager resourceManager) {
+    public CPropManagerImpl(Messenger sender, ResourceManager resourceManager, ResourceTypeDao resourceTypeDao) {
         this.sender = sender;
         this.resourceManager = resourceManager;
+        this.resourceTypeDao = resourceTypeDao;
     }
 
     /**
@@ -101,13 +105,10 @@ public class CPropManagerImpl implements CPropManager {
      *        key references could not be found
      * @throw CPropKeyExistsException if the key already exists
      */
-    public void addKey(ResourceType appdefType, String key, String description) {
-        
-        PropertyType propertyType = new PropertyType();
-        propertyType.setName(key);
+    public void addKey(ResourceType appdefType, String key, String description,Class<?> type) {
+        PropertyType propertyType = resourceTypeDao.createPropertyType(key,type);
         propertyType.setDescription(description);
-        propertyType.persist();
-        appdefType.getPropertyTypes().add(propertyType);
+        appdefType.addPropertyType(propertyType);
         appdefType.merge();
     }
 
@@ -244,9 +245,8 @@ public class CPropManagerImpl implements CPropManager {
         Map<String,Object> propValues = resource.getProperties();
         for(Map.Entry<String, Object> propValue:propValues.entrySet()) {
             PropertyType type = resource.getType().getPropertyType(propValue.getKey());
-            // TODO is this the place to filter hidden?
-            // TODO should ever be null? (currently it's possible)
-            if(type.isHidden() != null && !(type.isHidden())) {
+            //TODO is this the place to filter hidden?
+            if(!(type.isHidden())) {
                 properties.setProperty(propValue.getKey(), propValue.getValue().toString());
             }
         }
@@ -271,7 +271,7 @@ public class CPropManagerImpl implements CPropManager {
         for(Map.Entry<String, Object> propValue:propValues.entrySet()) {
             PropertyType type = resource.getType().getPropertyType(propValue.getKey());
             //TODO is this the place to filter hidden?
-            if(type.isHidden() != null && !(type.isHidden())) {
+            if(!(type.isHidden())) {
                 properties.setProperty(type.getDescription(), propValue.getValue().toString());
             }
         }

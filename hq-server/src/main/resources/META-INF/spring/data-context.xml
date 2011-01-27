@@ -36,33 +36,6 @@
 		<property name="dataSource" ref="dataSource" />
 	</bean>
 
-	<bean id="transactionManager"
-		class="org.springframework.persistence.transaction.NaiveDoubleTransactionManager">
-		<constructor-arg>
-			<bean class="org.springframework.orm.jpa.JpaTransactionManager"
-				id="jpaTransactionManager">
-				<property name="entityManagerFactory" ref="entityManagerFactory" />
-			</bean>
-		</constructor-arg>
-		<constructor-arg>
-			<bean class="org.springframework.transaction.jta.JtaTransactionManager">
-				<property name="transactionManager" ref="neo4jTransactionManagerService" />
-				<property name="userTransaction" ref="neo4jUserTransactionService" />
-			</bean>
-		</constructor-arg>
-	</bean>
-
-	<bean
-		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
-		id="entityManagerFactory" depends-on="neo4jNodeBacking,neo4jRelationshipBacking">
-		<property name="dataSource" ref="dataSource" />
-		<!--  HibernateJpaDialect necessary for RequiresNew txs created by our id generator, HQMultipleHiLoPerTableGenerator -->
-		<property name="jpaDialect">
-			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
-		</property>
-		<property name="persistenceProvider" ref="persistenceProvider"/>
-	</bean>
-	
 	<bean id="persistenceProvider" class="org.hyperic.hibernate.HibernateConfigHolder"/>
 
 	<bean class="org.springframework.orm.hibernate3.HibernateTemplate">

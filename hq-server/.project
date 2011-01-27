@@ -4,9 +4,11 @@
 	<comment>NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
 	<projects>
 		<project>hq-common</project>
+		<project>hq-domain</project>
 		<project>hq-lather</project>
 		<project>hq-pdk</project>
 		<project>hq-util</project>
+		<project>inventory-neo4j</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

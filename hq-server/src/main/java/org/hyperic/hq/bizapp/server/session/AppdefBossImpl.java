@@ -2387,6 +2387,13 @@ public class AppdefBossImpl implements AppdefBoss {
         AppdefEntityTypeID appdefResType, String resourceName,
         AppdefEntityID grpId, int grpEntId, int[] groupTypes,
         int appdefTypeId, boolean matchOwn, boolean matchUnavail, PageControl pc) {
+        
+        if(appdefResType != null && (appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_PLATFORM || 
+                appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVER || appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVICE)) {
+            ResourceType resourceType = resourceManager.findResourceTypeById(appdefResType.getId());
+            Set<Resource> resources = resourceType.getResources();
+            return new PageList<Resource>(resources,resources.size());
+        }
         //TODO critters from getCritterList used to order by name in CritterTranslator
         switch (appdefTypeId) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:

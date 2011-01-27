@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
@@ -67,7 +66,7 @@ public class WebUser {
     // preference key namespace delimiter
     private static final String DOT = ".";
 
-    private AuthzSubjectValue _subject;
+    private AuthzSubject _subject;
     private Integer _sessionId;
     private ConfigResponse _preferences;
     /** Indicates whether or not the user has an entry in the
@@ -78,20 +77,13 @@ public class WebUser {
         _sessionId = null;
     }
     
-    public WebUser(AuthzSubjectValue subject) {
+    public WebUser(AuthzSubject subject) {
         _subject = subject;
         _sessionId = null;
         _hasPrincipal = false;
     }
     
     public WebUser(AuthzSubject subject, Integer sessionId,
-                   ConfigResponse preferences, boolean hasPrincipal) {
-                       
-        this(subject.getAuthzSubjectValue(), sessionId, preferences,
-             hasPrincipal);
-    }
-
-    public WebUser(AuthzSubjectValue subject, Integer sessionId,
                    ConfigResponse preferences, boolean hasPrincipal) {
                        
         _subject = subject;
@@ -101,9 +93,9 @@ public class WebUser {
     }
 
     /**
-     * Return the AuthzSubjectValue represented by this web user.
+     * Return the AuthzSubject represented by this web user.
      */
-    public AuthzSubjectValue getSubject() {
+    public AuthzSubject getSubject() {
         return _subject;
     }
 
@@ -148,19 +140,11 @@ public class WebUser {
         return _subject.getSMSAddress();
     }
     
-    public void setSmsaddress(String s) {
-        _subject.setSMSAddress(s);
-    }
-
     public String getFirstName() {
         if (_subject == null) {
             return null;
         }
         return _subject.getFirstName();
-    }
-
-    public void setFirstName(String name) {
-        _subject.setFirstName(name);
     }
 
     public String getLastName() {
@@ -170,19 +154,12 @@ public class WebUser {
         return _subject.getLastName();
     }
 
-    public void setLastName(String name) {
-        _subject.setLastName(name);
-    }
 
     public String getEmailAddress(){
         if (_subject == null) {
             return null;
         }
         return _subject.getEmailAddress();
-    }
-
-    public void setEmailAddress(String emailAddress) {
-        _subject.setEmailAddress(emailAddress);
     }
     
     public boolean isHtmlEmail() {
@@ -192,10 +169,7 @@ public class WebUser {
         return _subject.isHtmlEmail();
     }
     
-    public void setHtmlEmail(boolean htmlEmail) {
-        _subject.setHtmlEmail(htmlEmail);
-    }
-
+   
     public String getAuthDsn() {
         if (_subject == null) {
             return null;
@@ -203,9 +177,7 @@ public class WebUser {
         return _subject.getAuthDsn();
     }
 
-    public void setAuthDsn(String phoneNumber) {
-        _subject.setAuthDsn(phoneNumber);
-    }
+    
 
     public String getPhoneNumber() {
         if (_subject == null) {
@@ -214,19 +186,13 @@ public class WebUser {
         return _subject.getPhoneNumber();
     }
 
-    public void setPhoneNumber(String phoneNumber) {
-        _subject.setPhoneNumber(phoneNumber);
-    }
+   
 
     public String getDepartment() {
         if (_subject == null) {
             return null;
         }
         return _subject.getDepartment();
-    }
-
-    public void setDepartment(String department) {
-        _subject.setDepartment(department);
     }
 
     public boolean getActive() {
@@ -236,9 +202,7 @@ public class WebUser {
         return _subject.getActive();
     }
 
-    public void setActive(boolean active) {
-        _subject.setActive(active);
-    }
+   
     
     /** Return a human readable serialization of this object */
     public String toString() {

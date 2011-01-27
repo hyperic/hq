@@ -52,6 +52,7 @@ import org.hyperic.hq.events.AlertPermissionManager;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
+import org.hyperic.hq.events.server.session.ResourceAlertDefinition;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
@@ -190,7 +191,8 @@ public class PortalAction
                 request.setAttribute(Constants.TITLE_PARAM2_ATTR, alertDefinition.getName());
 
                 if (aeid == null) {
-                    aeid = setResource(request, new AppdefEntityID(alertDefinition.getAppdefType(), alertDefinition
+                    //TODO better way?
+                    aeid = setResource(request, new AppdefEntityID(((ResourceAlertDefinition)alertDefinition).getAppdefType(), ((ResourceAlertDefinition)alertDefinition)
                         .getAppdefId()), false);
                 }
 

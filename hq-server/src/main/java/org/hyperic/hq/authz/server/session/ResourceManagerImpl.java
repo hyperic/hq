@@ -157,10 +157,6 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         //TODO audit
         //resourceAuditFactory.deleteResource(findResourceById(AuthzConstants.authzHQSystem),
           //  subject, now, now);
-        Collection<ResourceGroup> groups = r.getResourceGroups();
-        for(ResourceGroup group:groups) {
-            group.removeMember(r);
-        }
         AppdefEntityID resourceId = AppdefUtil.newAppdefEntityId(r);
         r.remove();
         // Send resource delete event
@@ -331,41 +327,32 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     public void initializeResourceTypes() {
         //TODO Is this the place for this?
         if(resourceTypeDao.findRoot() == null) {
-            ResourceType system=new ResourceType();
-            system.setName("System");
-            system.persist();
-            Resource root = new Resource();
-            root.setName("Root");
-            root.persist();
-            root.setType(system);
+            ResourceType system= resourceTypeDao.create("System");
+            resourceDao.create("Root", system);
         }
         int[] groupTypes = AppdefEntityConstants.getAppdefGroupTypes();
         for(int i=0;i< groupTypes.length;i++) {
             if(resourceTypeDao.findByName(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i])) == null) {
-                ResourceType groupType = new ResourceType();
-                groupType.setName(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i]));
-                groupType.persist();
+                ResourceType groupType = resourceTypeDao.create(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i]));
                 if(groupTypes[i] == AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP) {
-                    setPropertyType(groupType,AppdefResource.SORT_NAME);
-                    setPropertyType(groupType,ApplicationManagerImpl.BUSINESS_CONTACT);
-                    setPropertyType(groupType,ApplicationManagerImpl.CREATION_TIME);
-                    setPropertyType(groupType,ApplicationManagerImpl.ENG_CONTACT);
-                    setPropertyType(groupType,ApplicationManagerImpl.MODIFIED_TIME);
-                    setPropertyType(groupType,ApplicationManagerImpl.OPS_CONTACT);
+                    setPropertyType(groupType,AppdefResource.SORT_NAME,String.class);
+                    setPropertyType(groupType,ApplicationManagerImpl.BUSINESS_CONTACT,String.class);
+                    setPropertyType(groupType,ApplicationManagerImpl.CREATION_TIME,Long.class);
+                    setPropertyType(groupType,ApplicationManagerImpl.ENG_CONTACT,String.class);
+                    setPropertyType(groupType,ApplicationManagerImpl.MODIFIED_TIME,Long.class);
+                    setPropertyType(groupType,ApplicationManagerImpl.OPS_CONTACT,String.class);
                 }else {
-                    setPropertyType(groupType,"groupEntType");
-                    setPropertyType(groupType,"groupEntResType");
+                    setPropertyType(groupType,"groupEntType",Integer.class);
+                    setPropertyType(groupType,"groupEntResType",Integer.class);
                 }
             }
         }
     }
     
-    private void setPropertyType(ResourceType groupType, String propTypeName) {
-        PropertyType propType = new PropertyType();
-        propType.setName(propTypeName);
+    private void setPropertyType(ResourceType groupType, String propTypeName, Class<?> type) {
+        PropertyType propType = resourceTypeDao.createPropertyType(propTypeName,type);
         propType.setDescription(propTypeName);
         propType.setHidden(true);
-        propType.persist();
         groupType.addPropertyType(propType);
     }
 

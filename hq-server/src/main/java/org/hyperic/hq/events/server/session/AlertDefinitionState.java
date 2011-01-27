@@ -28,21 +28,21 @@ package org.hyperic.hq.events.server.session;
 import org.hyperic.hibernate.PersistedObject;
 
 public class AlertDefinitionState extends PersistedObject {
-    private AlertDefinition _alertDefinition;
+    private ResourceAlertDefinition _alertDefinition;
     private long _lastFired;
 
     AlertDefinitionState() {}
     
-    AlertDefinitionState(AlertDefinition def) {
+    AlertDefinitionState(ResourceAlertDefinition def) {
         _alertDefinition = def;
         _lastFired = 0;
     }
     
-    public AlertDefinition getAlertDefinition() {
+    public ResourceAlertDefinition getAlertDefinition() {
         return _alertDefinition;
     }
     
-    void setAlertDefinition(AlertDefinition def) { 
+    void setAlertDefinition(ResourceAlertDefinition def) { 
         _alertDefinition = def;
     }
     

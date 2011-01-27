@@ -27,8 +27,6 @@
 package org.hyperic.hq.ui.security;
 
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -45,13 +43,11 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.util.config.ConfigResponse;
@@ -120,13 +116,13 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
             }
 
             userAuditFactory.loginAudit(subj);
-            AuthzSubjectValue subject = subj.getAuthzSubjectValue();
+           
             
             // figure out if the user has a principal
-            boolean hasPrincipal = authBoss.isUser(sessionId, subject.getName());
+            boolean hasPrincipal = authBoss.isUser(sessionId, subj.getName());
             ConfigResponse preferences = needsRegistration ?
-                new ConfigResponse() : getUserPreferences(ctx, sessionId, subject.getId(), authzBoss);
-            WebUser webUser = new WebUser(subject, sessionId, preferences, hasPrincipal);
+                new ConfigResponse() : getUserPreferences(ctx, sessionId, subj.getId(), authzBoss);
+            WebUser webUser = new WebUser(subj, sessionId, preferences, hasPrincipal);
 
             // Add WebUser to Session
             session.setAttribute(Constants.WEBUSER_SES_ATTR, webUser);

@@ -203,12 +203,13 @@ public class DefaultAlertPermissionManager implements AlertPermissionManager {
 
         if (adi instanceof AlertDefinition) {
             AlertDefinition ad = (AlertDefinition) adi;
-            parentId = ad.getParent() != null ? ad.getParent().getId() : null;
+            //parentId = ad.getParent() != null ? ad.getParent().getId() : null;
         }
         
-        if (!EventConstants.TYPE_ALERT_DEF_ID.equals(parentId)) {
+        //TODO for group alerts?
+        //if (!EventConstants.TYPE_ALERT_DEF_ID.equals(parentId)) {
             canFixAcknowledgeAlerts(who, AppdefUtil.newAppdefEntityId(adi.getResource()));
-        }
+        //}
     }
     
     /**
@@ -235,16 +236,18 @@ public class DefaultAlertPermissionManager implements AlertPermissionManager {
     }
     
     public  AppdefEntityID getAppdefEntityID(AlertDefinitionInterface adi) {
-        try {
-            return AppdefUtil.newAppdefEntityId(adi.getResource());
-        } catch (IllegalArgumentException e) {
-            if (adi instanceof AlertDefinition) {
-                AlertDefinition ad = (AlertDefinition) adi;
-                return new AppdefEntityTypeID(ad.getAppdefType(), ad.getAppdefId());
-            } else {
-                throw e;
-            }
-        }
+        //TODO impl?
+//        try {
+//            return AppdefUtil.newAppdefEntityId(adi.getResource());
+//        } catch (IllegalArgumentException e) {
+//            if (adi instanceof AlertDefinition) {
+//                AlertDefinition ad = (AlertDefinition) adi;
+//                return new AppdefEntityTypeID(ad.getAppdefType(), ad.getAppdefId());
+//            } else {
+//                throw e;
+//            }
+//        }
+        return null;
     }
 
     private  void checkEscalation(Integer subjectId,

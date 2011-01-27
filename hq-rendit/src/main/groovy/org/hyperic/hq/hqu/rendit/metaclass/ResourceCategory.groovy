@@ -39,6 +39,7 @@ import org.hyperic.hq.control.shared.ControlScheduleManager;
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceGroup
 import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
+import org.hyperic.hq.authz.server.session.ResourceTypeFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupCreateInfo
 import org.hyperic.hq.appdef.Agent
 import org.hyperic.hq.appdef.shared.AppdefEntityID
@@ -73,6 +74,7 @@ import org.hyperic.hq.auth.shared.SessionManager
 import org.hyperic.hq.events.AlertSeverity
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 
 /**
  * This class provides tonnes of abstractions over the Appdef layer.
@@ -121,18 +123,8 @@ class ResourceCategory {
 	 * which is a prototype.
 	 */
 	static getAppdefType(Resource r) {
-		def typeId = r.resourceType.id
-		
-		if (typeId == AuthzConstants.authzPlatformProto) {
-			return AppdefEntityConstants.APPDEF_TYPE_PLATFORM
-		} else if (typeId == AuthzConstants.authzServerProto) {
-			return AppdefEntityConstants.APPDEF_TYPE_SERVER
-		} else if (typeId == AuthzConstants.authzServiceProto) {
-			return AppdefEntityConstants.APPDEF_TYPE_SERVICE
-		} else {
-			throw new RuntimeException("Resource [${r}] is not an appdef " + 
-			"resource type")
-		}
+        def typeId = r.resourceType.id
+		return AppdefUtil.getAppdefType(Bootstrap.getBean(ResourceManager.class).findResourceTypeById(typeId))
 	}
 	
 	static AppdefEntityID getEntityId(Resource r) {
@@ -209,12 +201,12 @@ class ResourceCategory {
 	
 	static List getAlertDefinitions(Resource r, AuthzSubject user) {
 		def alertDefs
-		if (r.isPlatform() || r.isServer() || r.isService()) {
+		if (r.prototype) {
 			// Individual alert definition
 			alertDefs = defMan.findAlertDefinitions(user, r.entityId)
 		} else {
 			// Resource type alert definition
-			alertDefs = defMan.findAlertDefinitions(user, r)
+			alertDefs = defMan.findAlertDefinitionsByType(user, r.resourceType.id)
 		}
 		alertDefs.findAll { !it.deleted }
 	}

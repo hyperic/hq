@@ -153,7 +153,7 @@ public interface ResourceGroupManager
     Number getGroupCountOfType(ResourceType groupType);
     
     PageList<Resource> findGroupsOfType(AuthzSubject subject, Set<ResourceType> groupTypes, PageControl pc);
-
+    
     /**
      * Temporary method to convert a ResourceGroup into an AppdefGroupValue
      */

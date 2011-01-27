@@ -36,7 +36,7 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
@@ -106,7 +106,7 @@ public class AddUsersFormPrepareAction
         Integer[] userIds = getNotificationIds(request, addForm, aeid, EmailActionConfig.TYPE_USERS);
 
         PageControl pcp = RequestUtils.getPageControl(request, "psp", "pnp", "sop", "scp");
-        PageList<AuthzSubjectValue> pendingUsers = authzBoss.getSubjectsById(sessionId, pendingUserIds, pcp);
+        PageList<AuthzSubject> pendingUsers = authzBoss.getSubjectsById(sessionId, pendingUserIds, pcp);
 
         // available users are all users in the system that are
         // _not_ associated with the definition and are not
@@ -117,7 +117,7 @@ public class AddUsersFormPrepareAction
         excludes.addAll(Arrays.asList(pendingUserIds));
         excludes.addAll(Arrays.asList(userIds));
 
-        PageList<AuthzSubjectValue> availableUsers = authzBoss.getAllSubjects(sessionId, excludes, pca);
+        PageList<AuthzSubject> availableUsers = authzBoss.getAllSubjects(sessionId, excludes, pca);
 
         request.setAttribute(Constants.PENDING_USERS_ATTR, pendingUsers);
         request.setAttribute(Constants.AVAIL_USERS_ATTR, availableUsers);

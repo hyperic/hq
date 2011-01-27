@@ -38,7 +38,7 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.WorkflowPrepareAction;
@@ -107,12 +107,12 @@ public class ChangeResourceOwnerFormPrepareAction
         PageControl pc = RequestUtils.getPageControl(request);
 
         log.trace("getting all users");
-        PageList<AuthzSubjectValue> allUsers = authzBoss.getAllSubjects(sessionId, null, pc);
+        PageList<AuthzSubject> allUsers = authzBoss.getAllSubjects(sessionId, null, pc);
 
         // remove the resource's owner from the list of users
         ArrayList<Object> owner = new ArrayList<Object>();
         owner.add(resourceOwner);
-        List<AuthzSubjectValue> users = BizappUtils.grepSubjects(allUsers, owner);
+        List<AuthzSubject> users = BizappUtils.grepSubjects(allUsers, owner);
 
         request.setAttribute(Constants.ALL_USERS_ATTR, users);
         request.setAttribute(Constants.NUM_USERS_ATTR, new Integer(allUsers.getTotalSize() - 1));

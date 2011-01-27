@@ -55,8 +55,6 @@ public class ResourceGroupController extends BaseController {
 	public @ResponseBody SuccessResponse create(@RequestBody ResourceGroupForm form) throws Exception {
 		ResourceGroup group = translateFormToDomain(form);
 		
-		group.persist();
-		
 		return new SuccessResponse(new ResourceGroupRep(group));
 	}
 	
@@ -113,18 +111,15 @@ public class ResourceGroupController extends BaseController {
 		ResourceGroup group;
 		
 		if (form.getId() == null) {
-			group = new ResourceGroup();
+		    ResourceType type = resourceTypeDao.findById(form.getResourceTypeId());
+			group = resourceGroupDao.create(form.getName(), type,form.isPrivateGroup());
 		} else {
 			group = resourceGroupDao.findById(form.getId());
 		}
-		
-		ResourceType type = resourceTypeDao.findById(form.getResourceTypeId());
-		
-		group.setType(type);
+	
 		group.setName(form.getName());
 		group.setDescription(form.getDescription());
 		group.setLocation(form.getLocation());
-		group.setPrivateGroup(form.isPrivateGroup());
 		
 		// TODO Owner and modifiedby can be set based on the authenticated user, for hardcoding to HQAdmin...
 		AuthzSubject subject = authzSubjectDao.findById(1);

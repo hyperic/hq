@@ -149,17 +149,17 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
             throw new GroupDuplicateNameException("Group by the name [" + cInfo.getName() +
                                                   "] already exists");
         }
-        ResourceGroup res = new ResourceGroup();
-        res.setName(cInfo.getName());
+        ResourceType groupType = resourceTypeDao.findByName(AppdefEntityConstants.getAppdefGroupTypeName(cInfo.getGroupTypeId()));
+        ResourceGroup res = resourceGroupDao.create(cInfo.getName(), groupType,cInfo.isPrivateGroup());
         res.setLocation(cInfo.getLocation());
-        res.setPrivateGroup(cInfo.isPrivateGroup());
         res.setDescription(cInfo.getDescription());
         res.setModifiedBy(whoami.getName());
-        ResourceType groupType = resourceTypeDao.findByName(AppdefEntityConstants.getAppdefGroupTypeName(cInfo.getGroupTypeId()));
-        res.persist();
-        res.setType(groupType);
-        res.setMembers(resources);
-        res.setRoles(roles);
+        for(Resource resource : resources) {
+            res.addMember(resource);
+        }
+        for(Role role: roles) {
+            res.addRole(role);
+        }
         res.setOwner(whoami);
         res.setProperty(GROUP_ENT_RES_TYPE, cInfo.getGroupEntResType());
         res.setProperty(GROUP_ENT_TYPE, cInfo.getGroupEntType());

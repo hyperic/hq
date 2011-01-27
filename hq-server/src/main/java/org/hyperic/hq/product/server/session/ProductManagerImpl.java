@@ -33,7 +33,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -52,7 +51,6 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.shared.AuditManager;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.inventory.dao.ResourceTypeDao;
@@ -79,7 +77,6 @@ import org.hyperic.hq.product.ServiceType;
 import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.hq.product.pluginxml.PluginData;
-import org.hyperic.hq.product.shared.PluginValue;
 import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
@@ -266,17 +263,17 @@ public class ProductManagerImpl implements ProductManager {
         NotFoundException {
       
         ProductPlugin pplugin = (ProductPlugin) getProductPluginManager().getPlugin(pluginName);
-        PluginValue pluginVal;
+        
         PluginInfo pInfo;
         boolean created = false;
         long start = System.currentTimeMillis();
 
         pInfo = getProductPluginManager().getPluginInfo(pluginName);
         Plugin plugin = pluginDao.findByName(pluginName);
-        pluginVal = plugin != null ? plugin.getPluginValue() : null;
+       
 
-        if (pluginVal != null && pInfo.name.equals(pluginVal.getName()) &&
-            pInfo.md5.equals(pluginVal.getMD5())) {
+        if (plugin != null && pInfo.name.equals(plugin.getName()) &&
+            pInfo.md5.equals(plugin.getMD5())) {
             log.info(pluginName + " plugin up to date");
             if (forceUpdate(pluginName)) {
                 log.info(pluginName + " configured to force update");
@@ -286,7 +283,7 @@ public class ProductManagerImpl implements ProductManager {
             }
         } else {
             log.info(pluginName + " unknown -- registering");
-            created = (pluginVal == null);
+            created = (plugin == null);
         }
 
         // Get the Appdef entities
@@ -341,9 +338,7 @@ public class ProductManagerImpl implements ProductManager {
     		
     		if (entity == null) {
     			Plugin plugin = pluginDao.findByName(rt.getPluginName());
-    			entity = new ResourceType(rt, plugin);
-    			
-    			entity.persist();
+    			entity = resourceTypeDao.create(rt, plugin);
     		}
     		
     		lookup.put(rt.getName(), entity);
@@ -478,7 +473,7 @@ public class ProductManagerImpl implements ProductManager {
                 if (debug)
                     watch.markTimeEnd("findByKey");
                 if (c == null) {
-                    cPropManager.addKey(appdefType, opt.getName(), opt.getDescription());
+                    cPropManager.addKey(appdefType, opt.getName(), opt.getDescription(),String.class);
                 }
             }
         }
@@ -504,17 +499,19 @@ public class ProductManagerImpl implements ProductManager {
                 try {
                     final AppdefEntityID id = new AppdefEntityID(alertDefinition.getAppdefType(),
                         alertDefinition.getAppdefId());
-                    final SortedMap<String, Integer> existingAlertDefinitions = alertDefinitionManager
-                        .findAlertDefinitionNames(id, EventConstants.TYPE_ALERT_DEF_ID);
+                    
+                    //final SortedMap<String, Integer> existingAlertDefinitions = alertDefinitionManager
+                      //  .findAlertDefinitionNames(id, EventConstants.TYPE_ALERT_DEF_ID);
                     // TODO update existing alert defs - for now, just create if
                     // one does not exist. Be aware that this method is also
                     // called
                     // when new service type metadata is discovered (from
                     // updateServiceTypes method), as well as when a new or
                     // modified plugin jar is detected
-                    if (!(existingAlertDefinitions.keySet().contains(alertDefinition.getName()))) {
-                        alertDefinitionManager.createAlertDefinition(alertDefinition);
-                    }
+                    //TODO check existing later, resource or resource type alerts?
+                    //if (!(existingAlertDefinitions.keySet().contains(alertDefinition.getName()))) {
+                        alertDefinitionManager.createResourceTypeAlertDefinition(alertDefinition);
+                    //}
                 } catch (Exception e) {
                     log.error("Unable to load some or all of alert definitions for plugin " +
                               pInfo.name + ".  Cause: " + e.getMessage());

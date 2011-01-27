@@ -595,6 +595,10 @@ public class AlertDefinitionValue
 	  // TODO Clone the List ????
 	  this.Actions = from.Actions;
    }
+   
+   public boolean isTypeAlertDefinition() {
+       return parentId == null;
+   }
 
    public String toString()
    {

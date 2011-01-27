@@ -118,6 +118,5 @@ public class EventConstants {
      * Constant for removing a control action from an alert definition.
      */
     public static final String CONTROL_ACTION_NONE = "none";
-
-    public static final Integer TYPE_ALERT_DEF_ID = new Integer(0);
+    
 }

@@ -129,7 +129,7 @@ public class ViewDefinitionAction
         }
         request.setAttribute("canEditConditions", new Boolean(canEditConditions));
         List<AlertConditionBean> alertDefConditions = AlertDefUtil.getAlertConditionBeanList(sessionID, request,
-            measurementBoss, acvList, EventConstants.TYPE_ALERT_DEF_ID.equals(adv.getParentId()));
+            measurementBoss, acvList, adv.isTypeAlertDefinition());
         request.setAttribute("alertDefConditions", alertDefConditions);
         request.setAttribute("openNMSEnabled", OpenNMSAction.isLoaded());
         if (recoverId > 0) {

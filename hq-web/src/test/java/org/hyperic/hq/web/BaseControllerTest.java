@@ -26,17 +26,15 @@
 
 package org.hyperic.hq.web;
 
-import static org.easymock.EasyMock.*;
+import static org.easymock.EasyMock.createMock;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.web.SessionParameterKeys;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 public abstract class BaseControllerTest {
@@ -50,9 +48,7 @@ public abstract class BaseControllerTest {
 	
 	protected void setUp() {
 		// Set up a mock authz subect value object...
-		AuthzSubjectValue subject = new AuthzSubjectValue();
-
-		subject.setId(AUTHZ_SUBJECT_VALUE_ID);
+		AuthzSubject subject = new AuthzSubject(AUTHZ_SUBJECT_VALUE_ID);
 
 		// ...so we can create a web user object...
 		WebUser webUser = new WebUser(subject);

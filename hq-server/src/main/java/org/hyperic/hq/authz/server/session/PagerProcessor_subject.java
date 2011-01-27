@@ -35,7 +35,7 @@ public class PagerProcessor_subject implements PagerProcessor {
         if (o == null) return null;
         try {
             if (o instanceof AuthzSubject) {
-                return ((AuthzSubject) o).getAuthzSubjectValue();
+                return o;
             }
         } catch (Exception e) {
             throw new IllegalStateException("Error converting to Subject: "

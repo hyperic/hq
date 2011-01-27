@@ -39,8 +39,6 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
@@ -51,6 +49,8 @@ import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertActionLog;
 import org.hyperic.hq.events.server.session.AlertConditionLog;
 import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.events.server.session.ResourceAlertDefinition;
+import org.hyperic.hq.events.server.session.ResourceTypeAlertDefinition;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.measurement.UnitsConvert;
@@ -128,12 +128,13 @@ public class ViewAlertAction
         }
 
         boolean template = false;
-        AlertDefinition parentAlertDefinition = alertDefinition.getParent();
-
-        if (parentAlertDefinition != null) {
-            template = EventConstants.TYPE_ALERT_DEF_ID.equals(parentAlertDefinition.getId());
+        //TODO better way?
+        if(alertDefinition instanceof ResourceAlertDefinition) {
+            ResourceTypeAlertDefinition parentAlertDefinition = ((ResourceAlertDefinition)alertDefinition).getResourceTypeAlertDefinition();
+            if (parentAlertDefinition != null) {
+                template = true;
+            }
         }
-
         List<AlertConditionBean> conditionBeans = AlertDefUtil.getAlertConditionBeanList(sessionID, request,
             measurementBoss, conditionValues, template);
 
@@ -233,19 +234,20 @@ public class ViewAlertAction
 
         // Get the list of users
 
-        PageList<AuthzSubjectValue> availableUsers = authzBoss.getAllSubjects(new Integer(sessionID), null,
+        PageList<AuthzSubject> availableUsers = authzBoss.getAllSubjects(new Integer(sessionID), null,
             PageControl.PAGE_ALL);
         request.setAttribute(Constants.AVAIL_USERS_ATTR, availableUsers);
         
         // ...check to see if user has the ability to fix/acknowledge...
-        try {
+        //try {
             AuthzSubject subject = authzBoss.getCurrentSubject(sessionID);
-            alertPermissionManager.canFixAcknowledgeAlerts(subject, alertDefinition.getAppdefEntityId());
+            //TODO perm check
+            //alertPermissionManager.canFixAcknowledgeAlerts(subject, alertDefinition.getAppdefEntityId());
             request.setAttribute(Constants.CAN_TAKE_ACTION_ON_ALERT_ATTR, true);
-        } catch(PermissionException e) {
+       // } catch(PermissionException e) {
             // We can view it, but can't take action on it
-            request.setAttribute(Constants.CAN_TAKE_ACTION_ON_ALERT_ATTR, false);
-        }
+            //request.setAttribute(Constants.CAN_TAKE_ACTION_ON_ALERT_ATTR, false);
+        //}
 
         return null;
     }

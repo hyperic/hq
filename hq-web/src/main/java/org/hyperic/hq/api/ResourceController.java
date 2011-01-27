@@ -54,8 +54,6 @@ public class ResourceController extends BaseController {
 	public @ResponseBody SuccessResponse create(@RequestBody ResourceRep form) throws Exception {
 		Resource resource = translateFormToDomain(form);
 
-		resource.persist();
-		
 		for (Map.Entry<String, Object> entry : form.getProperties().entrySet()) {
 			resource.setProperty(entry.getKey(), entry.getValue());
 		}
@@ -128,13 +126,13 @@ public class ResourceController extends BaseController {
 	private Resource translateFormToDomain(ResourceRep form) {
 		Resource resource;
 		
+		ResourceType type = resourceTypeDao.findById(form.getType().getId());
 		if (form.getId() == null) {
-			resource = new Resource();
+			resource = resourceDao.create(form.getName(), type);
 		} else {
 			resource = resourceDao.findById(form.getId());
 		}
-		
-		ResourceType type = resourceTypeDao.findById(form.getType().getId());
+	
 		Agent agent = agentDao.findById(form.getAgent().getId());
 		
 		resource.setAgent(agent);

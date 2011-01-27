@@ -68,9 +68,10 @@ public class ActionDAO
     }
 
     void removeAction(Action action) {
-        if (action.getAlertDefinition() != null) {
+        //TODO anything to remove action from alert def?
+        /*if (action.getAlertDefinition() != null) {
             action.getAlertDefinition().getActionsBag().remove(action);
-        }
+        }*/
         if (action.getParent() != null) {
             action.getParent().getChildrenBag().remove(action);
         }       

@@ -216,7 +216,6 @@ public class AlertDefinitionXmlParser {
         alertDefValue.setDescription(definition.getDescription());
         alertDefValue.setAppdefType(aeid.getType());
         alertDefValue.setAppdefId(aeid.getId());
-        alertDefValue.setParentId(EventConstants.TYPE_ALERT_DEF_ID);
         alertDefValue.setPriority(definition.getPriority());
         alertDefValue.setActive(definition.isActive());
         alertDefValue.setWillRecover(definition.isWillRecover());
@@ -273,13 +272,14 @@ public class AlertDefinitionXmlParser {
             throw new AlertDefinitionXmlParserException("Required attribute recover not found for condition of alert definition " +
                                                         definition.getName());
         }
-        List resourceDefs;
-        try {
-            resourceDefs = alertDefinitionManager.findAlertDefinitions(subject, resource);
-        } catch (PermissionException e) {
-            throw new AlertDefinitionXmlParserException("Error obtaining resource type alerts.  Cause: " +
-                                                        e.getMessage());
-        }
+        List resourceDefs=null;
+        //TODO impl for regular or type
+//        try {
+//            resourceDefs = alertDefinitionManager.findAlertDefinitions(subject, resource);
+//        } catch (PermissionException e) {
+//            throw new AlertDefinitionXmlParserException("Error obtaining resource type alerts.  Cause: " +
+//                                                        e.getMessage());
+//        }
         boolean foundDefinition = false;
         for (Iterator resourceAlerts = resourceDefs.iterator(); resourceAlerts.hasNext();) {
             org.hyperic.hq.events.server.session.AlertDefinition resourceDef = (org.hyperic.hq.events.server.session.AlertDefinition) resourceAlerts.next();

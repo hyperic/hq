@@ -109,40 +109,47 @@ public class AppdefUtil {
                      !server.isServicesAutomanaged()) ));
     }
     
-    public static AppdefEntityID newAppdefEntityId(Resource rv) {
-      
-            ResourceType resType = rv.getType();
+    public static AppdefEntityID newAppdefEntityId(Resource rv) {   
+        ResourceType resType = rv.getType();
          
-            if (resType == null) {
+        if (resType == null) {
                 throw new IllegalArgumentException(rv.getName() + 
                     " does not have a Resource Type");
-            }
-            int entityID = rv.getId();
-            int entityType;
-            if(rv.getResourceTo(RelationshipTypes.PLATFORM) !=null) {
-                entityType = AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
-            }
-            else if(rv.getResourceTo(RelationshipTypes.SERVER) !=null) {
-                entityType = AppdefEntityConstants.APPDEF_TYPE_SERVER;
-            }
-            else if(rv.getResourceTo(RelationshipTypes.SERVICE) !=null) {
-                entityType = AppdefEntityConstants.APPDEF_TYPE_SERVICE;
-            }
-            else if(rv instanceof ResourceGroup && ((ResourceGroup)rv).getType().getName().
-                equals(AppdefEntityConstants.getAppdefGroupTypeName(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP))){
-                entityType = AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
-            }
-            else if(rv instanceof ResourceGroup) {
-                entityType = AppdefEntityConstants.APPDEF_TYPE_GROUP;
-            } 
-            else {
-                throw new IllegalArgumentException(resType.getName() + 
-                    " is not a valid Appdef Resource Type");
-            }
-            return new AppdefEntityID(entityType, entityID);
-        
+        }
+        int entityID = rv.getId();
+            
+        return new AppdefEntityID(getAppdefType(resType), entityID);
     }
-
+    
+    public static int getAppdefType(ResourceType rv) {
+        if(rv.getResourceTypeTo(RelationshipTypes.PLATFORM) !=null) {
+            return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
+        }
+        if(rv.getResourceTypeTo(RelationshipTypes.SERVER) !=null) {
+            return AppdefEntityConstants.APPDEF_TYPE_SERVER;
+        }
+        if(rv.getResourceTypeTo(RelationshipTypes.SERVICE) !=null) {
+            return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
+        }
+        if(rv.getName().equals(AppdefEntityConstants.getAppdefGroupTypeName(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP))){
+            return AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
+        }
+    
+        int[] groupTypes = AppdefEntityConstants.getAppdefGroupTypes();
+        for(int i=0;i< groupTypes.length;i++) {
+            if(rv.getName().equals(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i]))) {
+                return AppdefEntityConstants.APPDEF_TYPE_GROUP;
+            }
+        }
+    
+        throw new IllegalArgumentException(rv.getName() + 
+            " is not a valid Appdef Resource Type");
+    }
+    
+    public static AppdefEntityID newAppdefEntityId(ResourceType resourceType) {
+        return new AppdefEntityID(getAppdefType(resourceType), resourceType.getId());
+    }
+    
     public static Map groupByAppdefType(AppdefEntityID[] ids) {
         HashMap m = new HashMap();
         for (int i = 0; i < ids.length; i++) {

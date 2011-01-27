@@ -631,7 +631,7 @@ class ResourceHelper extends BaseHelper {
      * Find a prototype by name.
      */
     Resource findResourcePrototype(String name) {
-        rman.findResourcePrototypeByName(name)
+        return ResourceTypeFactory.toPrototype(rman.findResourceTypeByName(name))
     }
     
     /**

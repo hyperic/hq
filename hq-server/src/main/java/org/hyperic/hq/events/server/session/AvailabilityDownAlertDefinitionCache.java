@@ -83,14 +83,16 @@ public class AvailabilityDownAlertDefinitionCache  {
      public void removeFromCache(AlertDefinition def) {
          synchronized (_cacheLock) {
              if (isOkToRemove(def)) {
-                 remove(def.getAppdefEntityId());
+                 //TODO change above method sig
+                 remove(((ResourceAlertDefinition)def).getAppdefEntityId());
              }
 
-             for (AlertDefinition childDef : def.getChildren()) {
-                 if (isOkToRemove(childDef)) {
-                     remove(childDef.getAppdefEntityId());
-                 }
-             }
+             //TODO was this for groups?
+//             for (AlertDefinition childDef : def.getChildren()) {
+//                 if (isOkToRemove(childDef)) {
+//                     remove(childDef.getAppdefEntityId());
+//                 }
+//             }
          }
      }
      

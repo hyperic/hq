@@ -63,8 +63,7 @@ public class ResourceTypeController extends BaseController {
 	public @ResponseBody SuccessResponse create(@RequestBody ResourceTypeRep form) throws Exception {
 		ResourceType type = translateFormToDomain(form);
 		
-		type.persist();
-		
+	
 		return new SuccessResponse(new ResourceTypeRep(type));
 	}
 	
@@ -191,7 +190,7 @@ public class ResourceTypeController extends BaseController {
 		ResourceType type;
 		
 		if (form.getId() == null) {
-			type = new ResourceType();
+			type = resourceTypeDao.create(form.getName());
 		} else {
 			type = resourceTypeDao.findById(form.getId());
 		}
@@ -207,11 +206,7 @@ public class ResourceTypeController extends BaseController {
 			Set<OperationType> operationTypes = new HashSet<OperationType>();
 			
 			for (OperationTypeRep opRep : form.getOperationTypes()) {
-				OperationType opType = new OperationType();
-				
-				opType.setName(opRep.getName());
-				opType.setResourceType(type);
-				opType.persist();
+				OperationType opType = resourceTypeDao.createOperationType(opRep.getName(),type);
 				
 				operationTypes.add(opType);
 			}
@@ -223,16 +218,14 @@ public class ResourceTypeController extends BaseController {
 			Set<PropertyType> propertyTypes = new HashSet<PropertyType>();
 			
 			for (PropertyTypeRep propRep : form.getPropertyTypes()) {
-				PropertyType propType = new PropertyType();
+				PropertyType propType = resourceTypeDao.createPropertyType(propRep.getName(),String.class);
 				
 				propType.setDefaultValue(propRep.getDefaultValue());
 				propType.setDescription(propRep.getDescription());
 				propType.setHidden(propRep.isHidden());
-				propType.setName(propRep.getName());
 				propType.setOptional(propRep.isOptional());
 				propType.setSecret(propRep.isSecret());
 				propType.setResourceType(type);
-				propType.persist();
 				
 				propertyTypes.add(propType);
 			}

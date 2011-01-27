@@ -207,7 +207,7 @@ public class UserAdminPortalAction
         // users logging in with JDBC. the only way we can
         // distinguish these users is by checking to see
         // if they have an entry in the principals table.
-        WebUser webUser = new WebUser(user.getAuthzSubjectValue());
+        WebUser webUser = new WebUser(user);
         boolean hasPrincipal = authBoss.isUser(sessionId.intValue(), user.getName());
         webUser.setHasPrincipal(hasPrincipal);
 

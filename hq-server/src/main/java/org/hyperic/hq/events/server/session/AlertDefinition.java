@@ -17,18 +17,16 @@
 
 package org.hyperic.hq.events.server.session;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
 
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
-import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
@@ -38,36 +36,56 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertValue;
-import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.hq.measurement.MeasurementConstants;
 
-public class AlertDefinition
-    extends PersistedObject implements AlertDefinitionInterface, PerformsEscalations,
+@MappedSuperclass
+abstract public class AlertDefinition implements AlertDefinitionInterface, PerformsEscalations,
     ContainerManagedTimestampTrackable {
-    private String _name;
-    private long _ctime;
-    private long _mtime;
-    private AlertDefinition _parent;
-    private Collection _children = new ArrayList();
-    private String _description;
-    private int _priority; // XXX -- Needs to default to 1
-    private boolean _active; // XXX -- Needs to default to true
-    private boolean _enabled; // XXX -- Needs to default to true
-    private int _frequencyType;
-    private Long _count; // can't use primitive.
-    private Long _range; // can't use primitive.
-    private boolean _willRecover; // XXX -- Default to false
-    private boolean _notifyFiltered; // XXX - default to false
-    private boolean _controlFiltered; // XXX -- default to false
-    private boolean _deleted; // XXX -- default to false
-    private Collection _conditions = new ArrayList();
-    private Collection _triggers = new ArrayList();
-    private Collection<Action> _actions = new ArrayList<Action>();
-    private Escalation _escalation;
-    private Resource _resource;
-    private AlertDefinitionState _state;
 
-    private AlertDefinitionValue _value;
+    @Column(name = "NAME", length = 255, nullable = false)
+    private String name;
+
+    @Column(name = "CTIME", nullable = false)
+    private long ctime;
+
+    @Column(name = "MTIME", nullable = false)
+    private long mtime;
+
+    @Column(name = "DESCRIPTION", length = 250)
+    private String description;
+
+    @Column(name = "PRIORITY", nullable = false)
+    private int priority; // XXX -- Needs to default to 1
+
+    @Column(name = "ACTIVE", nullable = false)
+    private boolean active; // XXX -- Needs to default to true
+
+    @Column(name = "ENABLED", nullable = false)
+    private boolean enabled; // XXX -- Needs to default to true
+
+    @Column(name = "FREQUENCY_TYPE", nullable = false)
+    private int frequencyType;
+
+    @Column(name = "COUNT")
+    private Long count;
+
+    @Column(name = "TRANGE")
+    private Long range;
+
+    @Column(name = "WILL_RECOVER", nullable = false)
+    private boolean willRecover;
+
+    @Column(name = "NOTIFY_FILTERED", nullable = false)
+    private boolean notifyFiltered;
+
+    @Column(name = "CONTROL_FILTERED", nullable = false)
+    private boolean controlFiltered;
+
+    @Column(name = "DELETED", nullable = false)
+    private boolean deleted;
+
+    @ManyToOne
+    @JoinColumn(name = "ESCALATION_ID")
+    private Escalation escalation;
 
     public AlertDefinition() {
     }
@@ -88,112 +106,41 @@ public class AlertDefinition
         return false;
     }
 
-    AlertCondition createCondition(AlertConditionValue condVal, RegisteredTrigger trigger) {
-        AlertCondition res = new AlertCondition(this, condVal, trigger);
-        _conditions.add(res);
-        return res;
-    }
-
-    Action createAction(String className, byte[] config, Action parent) {
-        Action res = new Action(this, className, config, parent);
-        _actions.add(res);
-        return res;
-    }
-
     Alert createAlert(AlertValue val) {
         Alert res = new Alert(this, val);
         return res;
     }
 
-    void addTrigger(RegisteredTrigger t) {
-        _triggers.add(t);
-    }
-
-    void removeTrigger(RegisteredTrigger t) {
-        _triggers.remove(t);
-    }
-
-    void addCondition(AlertCondition c) {
-        _conditions.add(c);
-    }
-
-    void removeCondition(AlertCondition c) {
-        _conditions.remove(c);
-    }
-
-    void addAction(Action a) {
-        _actions.add(a);
-    }
-
-    void removeAction(Action a) {
-        _actions.remove(a);
-    }
-
     public String getName() {
-        return _name;
+        return name;
     }
 
     public void setName(String name) {
-        _name = name;
+        this.name = name;
     }
 
     public long getCtime() {
-        return _ctime;
+        return ctime;
     }
 
     void setCtime(long ctime) {
-        _ctime = ctime;
+        this.ctime = ctime;
     }
 
     public long getMtime() {
-        return _mtime;
+        return mtime;
     }
 
     void setMtime(long mtime) {
-        _mtime = mtime;
-    }
-
-    public AlertDefinition getParent() {
-        return _parent;
-    }
-
-    void setParent(AlertDefinition parent) {
-        _parent = parent;
-    }
-
-    public Collection<AlertDefinition> getChildren() {
-        List children = new ArrayList();
-        for (Iterator it = _children.iterator(); it.hasNext();) {
-            AlertDefinition child = (AlertDefinition) it.next();
-            if (child.isDeleted() || child.getResource() == null)
-                continue;
-            children.add(child);
-        }
-        return Collections.unmodifiableCollection(children);
-    }
-
-    Collection<AlertDefinition> getChildrenBag() {
-        return _children;
-    }
-
-    void setChildrenBag(Collection c) {
-        _children = c;
-    }
-
-    void removeChild(AlertDefinition child) {
-        _children.remove(child);
-    }
-
-    void clearChildren() {
-        _children.clear();
+        this.mtime = mtime;
     }
 
     public String getDescription() {
-        return _description;
+        return description;
     }
 
     void setDescription(String description) {
-        _description = description;
+        this.description = description;
     }
 
     /**
@@ -204,41 +151,11 @@ public class AlertDefinition
     }
 
     public int getPriority() {
-        return _priority;
+        return priority;
     }
 
     void setPriority(int priority) {
-        _priority = priority;
-    }
-
-    public Integer getAppdefId() {
-        return getResource().getId();
-    }
-
-    public int getAppdefType() {
-        String rtName = getResource().getType().getName();
-        AppdefEntityID resourceId = AppdefUtil.newAppdefEntityId(getResource());
-        
-        if (resourceId.isPlatform()) {
-            return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
-        } else if (resourceId.isServer()) {
-            return AppdefEntityConstants.APPDEF_TYPE_SERVER;
-        } else if (resourceId.isService()) {
-            return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
-        } else if (resourceId.isApplication()) {
-            return AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
-        } else if (resourceId.isGroup()) {
-            return AppdefEntityConstants.APPDEF_TYPE_GROUP;
-            //TODO Type based alerts need to be handled in a new way
-//        } else if (rtName.equals(AuthzConstants.platformPrototypeTypeName)) {
-//            return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
-//        } else if (rtName.equals(AuthzConstants.serverPrototypeTypeName)) {
-//            return AppdefEntityConstants.APPDEF_TYPE_SERVER;
-//        } else if (rtName.equals(AuthzConstants.servicePrototypeTypeName)) {
-//            return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
-        } else {
-            throw new IllegalArgumentException(rtName + " is not a valid Appdef Resource Type");
-        }
+        this.priority = priority;
     }
 
     /**
@@ -248,7 +165,7 @@ public class AlertDefinition
      *         <code>false</code> if disabled.
      */
     public boolean isEnabled() {
-        return _enabled;
+        return enabled;
     }
 
     /**
@@ -258,20 +175,7 @@ public class AlertDefinition
      *         <code>false</code> if inactive.
      */
     public boolean isActive() {
-        return _active;
-    }
-
-    /**
-     * Check if the alert definition is a recovery alert
-     */
-    public boolean isRecoveryDefinition() {
-        for (Iterator it = getConditionsBag().iterator(); it.hasNext();) {
-            AlertCondition cond = (AlertCondition) it.next();
-            if (cond.getType() == EventConstants.TYPE_ALERT) {
-                return true;
-            }
-        }
-        return false;
+        return active;
     }
 
     /**
@@ -309,301 +213,83 @@ public class AlertDefinition
      * For Hibernate persistence only. Do not call directly.
      */
     void setActive(boolean active) {
-        _active = active;
+        this.active = active;
     }
 
     /**
      * For Hibernate persistence only. Do not call directly.
      */
     void setEnabled(boolean enabled) {
-        _enabled = enabled;
+        this.enabled = enabled;
     }
 
     public int getFrequencyType() {
-        return _frequencyType;
+        return frequencyType;
     }
 
     void setFrequencyType(int frequencyType) {
-        _frequencyType = frequencyType;
+        this.frequencyType = frequencyType;
     }
 
     public long getCount() {
-        return _count != null ? _count.longValue() : 0;
+        return count != null ? count.longValue() : 0;
     }
 
     void setCount(Long count) {
-        _count = count;
+        this.count = count;
     }
 
     public long getRange() {
-        return _range != null ? _range.longValue() : 0;
+        return range != null ? range.longValue() : 0;
     }
 
     void setRange(Long range) {
-        _range = range;
+        this.range = range;
     }
 
     public boolean willRecover() {
-        return _willRecover;
+        return willRecover;
     }
 
     public boolean isWillRecover() {
-        return _willRecover;
+        return willRecover;
     }
 
     void setWillRecover(boolean willRecover) {
-        _willRecover = willRecover;
+        this.willRecover = willRecover;
     }
 
     public boolean isNotifyFiltered() {
-        return _notifyFiltered;
+        return notifyFiltered;
     }
 
     void setNotifyFiltered(boolean notifyFiltered) {
-        _notifyFiltered = notifyFiltered;
+        this.notifyFiltered = notifyFiltered;
     }
 
     public boolean isControlFiltered() {
-        return _controlFiltered;
+        return controlFiltered;
     }
 
     void setControlFiltered(boolean controlFiltered) {
-        _controlFiltered = controlFiltered;
+        this.controlFiltered = controlFiltered;
     }
 
     public Escalation getEscalation() {
-        return _escalation;
+        return escalation;
     }
 
     void setEscalation(Escalation escalation) {
-        _escalation = escalation;
+        this.escalation = escalation;
     }
 
+    //TODO is deleted only applicable to Resource alert defs?
     public boolean isDeleted() {
-        return _deleted;
+        return deleted;
     }
 
     void setDeleted(boolean deleted) {
-        _deleted = deleted;
-    }
-
-    public Resource getResource() {
-        return _resource;
-    }
-
-    void setResource(Resource resource) {
-        _resource = resource;
-    }
-
-    public Collection<Action> getActions() {
-        return Collections.unmodifiableCollection(_actions);
-    }
-
-    Collection<Action> getActionsBag() {
-        return _actions;
-    }
-
-    void setActionsBag(Collection<Action> actions) {
-        _actions = actions;
-    }
-
-    void clearActions() {
-        for (Action act : _actions) {
-            act.setAlertDefinition(null);
-        }
-        _actions.clear();
-    }
-
-    public Collection<AlertCondition> getConditions() {
-        return Collections.unmodifiableCollection(_conditions);
-    }
-
-    Collection<AlertCondition> getConditionsBag() {
-        return _conditions;
-    }
-
-    void setConditionsBag(Collection conditions) {
-        _conditions = conditions;
-    }
-
-    void clearConditions() {
-        for (Iterator it = _conditions.iterator(); it.hasNext();) {
-            AlertCondition cond = (AlertCondition) it.next();
-            cond.setAlertDefinition(null);
-            cond.setTrigger(null);
-        }
-        _conditions.clear();
-    }
-
-    public Collection<RegisteredTrigger> getTriggers() {
-        return Collections.unmodifiableCollection(_triggers);
-    }
-
-    Collection getTriggersBag() {
-        return _triggers;
-    }
-
-    void setTriggersBag(Collection triggers) {
-        _triggers = triggers;
-    }
-
-    void clearTriggers() {
-        for (Iterator it = _conditions.iterator(); it.hasNext();) {
-            AlertCondition cond = (AlertCondition) it.next();
-            cond.setTrigger(null);
-        }
-        // the triggersBag parent-child relationship is set to
-        // cascade="all-delete-orphan", so clearing the triggers
-        // collection will also delete the triggers from the db
-        _triggers.clear();
-    }
-
-    public boolean isResourceTypeDefinition() {
-        return getParent() != null && getParent().getId().equals(new Integer(0));
-    }
-
-    /**
-     * Check if an alert definition is configured for only availability.
-     * 
-     * @param up Indicates where the availability condition is up (true) or down
-     *        (false)
-     * @return <code>true</code> if the alert definition has an availability
-     *         condition.
-     */
-    public boolean isAvailability(boolean up) {
-        boolean isAvail = false;
-
-        // ignore multi-conditional alert definitions
-        if (_conditions.size() == 1) {
-            for (Iterator cit = _conditions.iterator(); cit.hasNext();) {
-                AlertCondition cond = (AlertCondition) cit.next();
-
-                if (cond != null
-                    && MeasurementConstants.CAT_AVAILABILITY.equalsIgnoreCase(cond.getName())) {
-
-                    if ("=".equals(cond.getComparator())) {
-                        if (up) {
-                            if (cond.getThreshold() == MeasurementConstants.AVAIL_UP) {
-                                isAvail = true;
-                                break;
-                            }
-                        } else {
-                            if (cond.getThreshold() == MeasurementConstants.AVAIL_DOWN) {
-                                isAvail = true;
-                                break;
-                            }
-                        }
-                    } else if ("!=".equals(cond.getComparator())) {
-                        if (up) {
-                            if (cond.getThreshold() == MeasurementConstants.AVAIL_DOWN) {
-                                isAvail = true;
-                                break;
-                            }
-                        } else {
-                            if (cond.getThreshold() == MeasurementConstants.AVAIL_UP) {
-                                isAvail = true;
-                                break;
-                            }
-                        }
-                    } else if ("<".equals(cond.getComparator())) {
-                        if (!up) {
-                            if (cond.getThreshold() <= MeasurementConstants.AVAIL_UP
-                                && cond.getThreshold() > MeasurementConstants.AVAIL_DOWN) {
-                                isAvail = true;
-                                break;
-                            }
-                        }
-                    } else if (">".equals(cond.getComparator())) {
-                        if (up) {
-                            if (cond.getThreshold() >= MeasurementConstants.AVAIL_DOWN
-                                && cond.getThreshold() < MeasurementConstants.AVAIL_UP) {
-                                isAvail = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return isAvail;
-    }
-
-    public AppdefEntityID getAppdefEntityId() {
-        return new AppdefEntityID(getAppdefType(), getAppdefId());
-    }
-
-    /**
-     * Get the time that the alert definition last fired.
-     */
-    public long getLastFired() {
-        return getAlertDefinitionState().getLastFired();
-    }
-
-    void setLastFired(long lastFired) {
-        getAlertDefinitionState().setLastFired(lastFired);
-    }
-
-    public AlertDefinitionState getAlertDefinitionState() {
-        return _state;
-    }
-
-    void setAlertDefinitionState(AlertDefinitionState state) {
-        _state = state;
-    }
-
-    public AlertDefinitionValue getAlertDefinitionValue() {
-        if (_value == null)
-            _value = new AlertDefinitionValue();
-
-        _value.setId(getId());
-        _value.setName(getName() == null ? "" : getName());
-        _value.setCtime(getCtime());
-        _value.setMtime(getMtime());
-        _value.setParentId(getParent() == null ? null : getParent().getId());
-        _value.setDescription(getDescription());
-        _value.setEnabled(isEnabled());
-        _value.setActive(isActive());
-        _value.setWillRecover(isWillRecover());
-        _value.setNotifyFiltered(isNotifyFiltered());
-        _value.setControlFiltered(isControlFiltered());
-        _value.setPriority(getPriority());
-        _value.setAppdefId(getAppdefId());
-        _value.setAppdefType(getAppdefType());
-        _value.setFrequencyType(getFrequencyType());
-        _value.setCount(getCount());
-        _value.setRange(getRange());
-        _value.setDeleted(isDeleted());
-
-        if (getEscalation() != null) {
-            _value.setEscalationId(getEscalation().getId());
-        } else {
-            _value.setEscalationId(null);
-        }
-
-        _value.removeAllTriggers();
-        for (Iterator i = getTriggers().iterator(); i.hasNext();) {
-            RegisteredTrigger t = (RegisteredTrigger) i.next();
-            _value.addTrigger(t.getRegisteredTriggerValue());
-        }
-        _value.cleanTrigger();
-
-        _value.removeAllConditions();
-        for (Iterator i = getConditions().iterator(); i.hasNext();) {
-            AlertCondition c = (AlertCondition) i.next();
-
-            _value.addCondition(c.getAlertConditionValue());
-        }
-        _value.cleanCondition();
-
-        _value.removeAllActions();
-        for (Iterator i = getActions().iterator(); i.hasNext();) {
-            Action a = (Action) i.next();
-
-            _value.addAction(a.getActionValue());
-        }
-        _value.cleanAction();
-
-        return _value;
+        this.deleted = deleted;
     }
 
     public EscalationAlertType getAlertType() {
@@ -621,4 +307,118 @@ public class AlertDefinition
     public String toString() {
         return "alertDef [" + this.getName() + "]";
     }
+    
+    abstract Collection<Action> getActionsBag();
+    
+    abstract Collection<AlertCondition> getConditionsBag();
+    
+    void addCondition(AlertCondition c) {
+        getConditionsBag().add(c);
+    }
+    
+    void removeCondition(AlertCondition c) {
+        getConditionsBag().remove(c);
+    }
+    
+    void addAction(Action a) {
+        getActionsBag().add(a);
+    }
+
+    void removeAction(Action a) {
+        getActionsBag().remove(a);
+    }
+    
+    public Collection<AlertCondition> getConditions() {
+        return Collections.unmodifiableCollection(getConditionsBag());
+    }
+    
+    public Collection<Action> getActions() {
+        return Collections.unmodifiableCollection(getActionsBag());
+    }
+     
+    Action createAction(String className, byte[] config, Action parent) {
+        Action res = new Action(className, config, parent);
+        getActionsBag().add(res);
+        return res;
+    }
+
+    AlertCondition createCondition(AlertConditionValue condVal, RegisteredTrigger trigger) {
+        AlertCondition res = new AlertCondition(condVal, trigger);
+        getConditionsBag().add(res);
+        return res;
+    }
+    
+    void clearActions() {
+        //TODO was this necessary?
+//        for (Action act : getActionsBag()) {
+//            act.setAlertDefinition(null);
+//        }
+        getActionsBag().clear();
+    }
+    
+    void clearConditions() {
+        for (Iterator it = getConditionsBag().iterator(); it.hasNext();) {
+            AlertCondition cond = (AlertCondition) it.next();
+            //TODO was this necessary?
+            //cond.setAlertDefinition(null);
+            cond.setTrigger(null);
+        }
+        getConditionsBag().clear();
+    }
+    
+    /**
+     * Check if the alert definition is a recovery alert
+     */
+    public boolean isRecoveryDefinition() {
+        for (Iterator it = getConditionsBag().iterator(); it.hasNext();) {
+            AlertCondition cond = (AlertCondition) it.next();
+            if (cond.getType() == EventConstants.TYPE_ALERT) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public AlertDefinitionValue getAlertDefinitionValue() {
+        AlertDefinitionValue value = new AlertDefinitionValue();
+        value.setId(getId());
+        value.setName(getName() == null ? "" : getName());
+        value.setCtime(getCtime());
+        value.setMtime(getMtime());
+        value.setDescription(getDescription());
+        value.setEnabled(isEnabled());
+        value.setActive(isActive());
+        value.setWillRecover(isWillRecover());
+        value.setNotifyFiltered(isNotifyFiltered());
+        value.setControlFiltered(isControlFiltered());
+        value.setPriority(getPriority());
+        value.setFrequencyType(getFrequencyType());
+        value.setCount(getCount());
+        value.setRange(getRange());
+        value.setDeleted(isDeleted());
+
+        if (getEscalation() != null) {
+            value.setEscalationId(getEscalation().getId());
+        } else {
+            value.setEscalationId(null);
+        }
+
+        value.removeAllConditions();
+        for (Iterator i = getConditions().iterator(); i.hasNext();) {
+            AlertCondition c = (AlertCondition) i.next();
+
+            value.addCondition(c.getAlertConditionValue());
+        }
+        value.cleanCondition();
+
+        value.removeAllActions();
+        for (Iterator i = getActions().iterator(); i.hasNext();) {
+            Action a = (Action) i.next();
+
+            value.addAction(a.getActionValue());
+        }
+        value.cleanAction();
+        return value;
+    }
+
 }

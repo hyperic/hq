@@ -65,6 +65,7 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
+import org.hyperic.hq.inventory.dao.ResourceGroupDao;
 import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
@@ -95,6 +96,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
     private ResourceManager resourceManager;
     
     private ResourceGroupManager resourceGroupManager;
+    
+    private ResourceGroupDao resourceGroupDao;
 
     private PermissionManager permissionManager;
 
@@ -135,12 +138,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
                                   ResourceManager resourceManager,
                                   PermissionManager permissionManager,
                                   ZeventEnqueuer zeventManager,
-                                  ResourceGroupManager resourceGroupManager, ServiceFactory serviceFactory) {
+                                  ResourceGroupManager resourceGroupManager, ServiceFactory serviceFactory,
+                                  ResourceGroupDao resourceGroupDao) {
         this.resourceManager = resourceManager;
         this.permissionManager = permissionManager;
         this.zeventManager = zeventManager;
         this.resourceGroupManager = resourceGroupManager;
         this.serviceFactory = serviceFactory;
+        this.resourceGroupDao = resourceGroupDao;
     }
 
     /**
@@ -239,10 +244,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
     
     private ResourceGroup create(AuthzSubject owner, ApplicationValue appV) {
-        ResourceGroup app =  new ResourceGroup();
-        app.setName(appV.getName());
-        app.persist();
-        app.setType(resourceManager.findResourceTypeByName(AppdefEntityConstants.
+        ResourceGroup app =  resourceGroupDao.create(appV.getName(),resourceManager.findResourceTypeByName(AppdefEntityConstants.
             getAppdefGroupTypeName(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP)));
         app.setOwner(owner);
         updateApplication(app, appV);
@@ -646,13 +648,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
     
     private Set<Application> findByService(Resource service) {
+         ResourceType appType = resourceManager.findResourceTypeByName(AppdefEntityConstants.
+           getAppdefGroupTypeName(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP));
         Set<Application> applications = new HashSet<Application>();
-        Set<ResourceGroup> groups = service.getResourceGroups();
-        for(ResourceGroup group: groups) {
-            if(group.getType().getName().equals(AppdefEntityConstants.
-                getAppdefGroupTypeName(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP))) {
-                applications.add(toApplication(group));
-            }
+        for(Resource group: appType.getResources()) {
+                applications.add(toApplication((ResourceGroup)group));
         }
         return applications;
     }

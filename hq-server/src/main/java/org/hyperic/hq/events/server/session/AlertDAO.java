@@ -324,7 +324,7 @@ public class AlertDAO
          * @param {@link List} of {@link AlertDefinition}s
          * Deletes all {@link Alert}s associated with the {@link AlertDefinition}s
          */
-        int deleteByAlertDefinitions(List<AlertDefinition> alertDefs) {
+        int deleteByAlertDefinitions(List<ResourceAlertDefinition> alertDefs) {
             String sql = "DELETE FROM Alert WHERE alertDefinition in (:alertDefs)";
             int rtn = 0;
             for (int i=0; i<alertDefs.size(); i+=BATCH_SIZE) {
@@ -359,7 +359,8 @@ public class AlertDAO
     public void save(Alert alert) {
         super.save(alert);
 
-        AlertDefinition def = alert.getAlertDefinition();
+        //TODO better way
+        ResourceAlertDefinition def = (ResourceAlertDefinition)alert.getAlertDefinition();
 
         // Update the last fired time
         if (def.getLastFired() < alert.getCtime())

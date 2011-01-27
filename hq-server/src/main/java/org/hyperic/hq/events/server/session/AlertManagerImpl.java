@@ -161,7 +161,8 @@ public class AlertManagerImpl implements AlertManager,
      */
     public Alert createAlert(AlertDefinition def, long ctime) {
         Alert alert = new Alert();
-        alert.setAlertDefinition(def);
+        //TODO better way
+        alert.setAlertDefinition((ResourceAlertDefinition)def);
         alert.setCtime(ctime);
         alertDAO.save(alert);
         return alert;
@@ -222,7 +223,8 @@ public class AlertManagerImpl implements AlertManager,
      */
     public int deleteAlerts(AuthzSubject subj, AlertDefinition ad) throws PermissionException {
         // ...check that user has delete permission on alert definition's resource...
-        alertPermissionManager.canDeleteAlertDefinition(subj, ad.getAppdefEntityId());
+        //TODO perm check
+        //alertPermissionManager.canDeleteAlertDefinition(subj, ad.getAppdefEntityId());
         return alertDAO.deleteByAlertDefinition(ad);
     }
 
@@ -528,9 +530,12 @@ public class AlertManagerImpl implements AlertManager,
                     AlertDefinition alertdef = alert.getAlertDefinition();
 
                     // Filter by appdef entity
-                    AppdefEntityID aeid = alertdef.getAppdefEntityId();
-                    if (!inclSet.contains(aeid)) {
-                        continue;
+                    //TODO resources of type
+                    if(alertdef instanceof ResourceAlertDefinition) {
+                        AppdefEntityID aeid = ((ResourceAlertDefinition)alertdef).getAppdefEntityId();
+                        if (!inclSet.contains(aeid)) {
+                            continue;
+                        }
                     }
 
                     // Add it
@@ -588,7 +593,9 @@ public class AlertManagerImpl implements AlertManager,
 
         for (Alert a : alerts) {
             // due to async deletes this could be null. just ignore and continue
-            if (a.getAlertDefinition().getResource().isInAsyncDeleteState()) {
+            //TODO anyting with type alerts?
+            if (a.getAlertDefinition() instanceof ResourceAlertDefinition && 
+                    ((ResourceAlertDefinition)a.getAlertDefinition()).getResource().isInAsyncDeleteState()) {
                 continue;
             }
             Escalatable e = ClassicEscalatableCreator.createEscalatable(a, getShortReason(a),

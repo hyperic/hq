@@ -64,6 +64,8 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.common.shared.AuditManager;
+import org.hyperic.hq.inventory.dao.ResourceDao;
+import org.hyperic.hq.inventory.dao.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
@@ -106,6 +108,8 @@ public class ServerManagerImpl implements ServerManager {
     private ServerFactory serverFactory;
     private ServiceManager serviceManager;
     private ServiceFactory serviceFactory;
+    private ResourceDao resourceDao;
+    private ResourceTypeDao resourceTypeDao;
 
     @Autowired
     public ServerManagerImpl(PermissionManager permissionManager,  ResourceManager resourceManager,
@@ -113,8 +117,8 @@ public class ServerManagerImpl implements ServerManager {
                              AuthzSubjectManager authzSubjectManager, ResourceGroupManager resourceGroupManager,
                              ZeventEnqueuer zeventManager, ResourceAuditFactory resourceAuditFactory,
                              PluginDAO pluginDAO, ServerFactory serverFactory,
-                             ServiceManager serviceManager, ServiceFactory serviceFactory) {
-
+                             ServiceManager serviceManager, ServiceFactory serviceFactory, ResourceDao resourceDao,
+                             ResourceTypeDao resourceTypeDao) {
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
         this.auditManager = auditManager;
@@ -126,6 +130,8 @@ public class ServerManagerImpl implements ServerManager {
         this.serverFactory = serverFactory;
         this.serviceManager = serviceManager;
         this.serviceFactory = serviceFactory;
+        this.resourceDao =resourceDao;
+        this.resourceTypeDao = resourceTypeDao;
     }
     
     private Server toServer(Resource resource) {
@@ -230,14 +236,11 @@ public class ServerManagerImpl implements ServerManager {
     }
     
     private Resource create(AuthzSubject owner, ServerValue sv, Resource p) {
-        Resource s = new Resource();
-        s.setName(sv.getName());
+        ResourceType st = resourceManager.findResourceTypeById(sv.getServerType().getId());
+        Resource s = resourceDao.create(sv.getName(), st);
         s.setDescription(sv.getDescription());
         s.setLocation(sv.getLocation());
         s.setModifiedBy(sv.getModifiedBy());
-        s.persist();
-        ResourceType st = resourceManager.findResourceTypeById(sv.getServerType().getId());
-        s.setType(st);
         s.setProperty(ServerFactory.INSTALL_PATH,sv.getInstallPath());
         String aiid = sv.getAutoinventoryIdentifier();
         if (aiid != null) {
@@ -1047,33 +1050,28 @@ public class ServerManagerImpl implements ServerManager {
     
     public ServerType createServerType(ServerTypeInfo sinfo, String plugin) throws NotFoundException {
         log.debug("Creating new ServerType: " + sinfo.getName());
-        ResourceType stype = new ResourceType();
-        stype.setName(sinfo.getName());
+        ResourceType stype = resourceTypeDao.create(sinfo.getName(),pluginDAO.findByName(plugin));
         stype.setDescription(sinfo.getDescription());
-        stype.persist();
-        stype.setPlugin(pluginDAO.findByName(plugin));
        
-        stype.addPropertyType(createServerPropertyType(ServerFactory.WAS_AUTODISCOVERED));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.AUTO_INVENTORY_IDENTIFIER));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.AUTODISCOVERY_ZOMBIE));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.CREATION_TIME));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.MODIFIED_TIME));
-        stype.addPropertyType(createServerPropertyType(AppdefResource.SORT_NAME));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.INSTALL_PATH));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.SERVICES_AUTO_MANAGED));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.RUNTIME_AUTODISCOVERY));
+        stype.addPropertyType(createServerPropertyType(ServerFactory.WAS_AUTODISCOVERED,Boolean.class));
+        stype.addPropertyType(createServerPropertyType(ServerFactory.AUTO_INVENTORY_IDENTIFIER,String.class));
+        stype.addPropertyType(createServerPropertyType(ServerFactory.AUTODISCOVERY_ZOMBIE,Boolean.class));
+        stype.addPropertyType(createServerPropertyType(ServerFactory.CREATION_TIME,Long.class));
+        stype.addPropertyType(createServerPropertyType(ServerFactory.MODIFIED_TIME,Long.class));
+        stype.addPropertyType(createServerPropertyType(AppdefResource.SORT_NAME,String.class));
+        stype.addPropertyType(createServerPropertyType(ServerFactory.INSTALL_PATH,String.class));
+        stype.addPropertyType(createServerPropertyType(ServerFactory.SERVICES_AUTO_MANAGED,Boolean.class));
+        stype.addPropertyType(createServerPropertyType(ServerFactory.RUNTIME_AUTODISCOVERY,Boolean.class));
        
         String newPlats[] = sinfo.getValidPlatformTypes();
         findAndSetPlatformType(newPlats, stype);
         return serverFactory.createServerType(stype);
     }
     
-    private PropertyType createServerPropertyType(String propName) {
-        PropertyType propType = new PropertyType();
-        propType.setName(propName);
+    private PropertyType createServerPropertyType(String propName,Class<?> type) {
+        PropertyType propType = resourceTypeDao.createPropertyType(propName,type);
         propType.setDescription(propName);
         propType.setHidden(true);
-        propType.persist();
         return propType;
     }
 

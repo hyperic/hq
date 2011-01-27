@@ -47,6 +47,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.autoinventory.AICompare;
+import org.hyperic.hq.inventory.dao.ResourceDao;
 import org.hyperic.hq.inventory.domain.Config;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.product.ProductPlugin;
@@ -65,19 +66,21 @@ public class ConfigManagerImpl implements ConfigManager {
     private ServerManager serverManager;
     private PlatformManager platformManager;
     private ResourceManager resourceManager;
+    private ResourceDao resourceDao;
 
     @Autowired
     public ConfigManagerImpl(ServiceManager serviceManager,
-                             ServerManager serverManager, PlatformManager platformManager, ResourceManager resourceManager) {
+                             ServerManager serverManager, PlatformManager platformManager, ResourceManager resourceManager,
+                             ResourceDao resourceDao) {
         this.serviceManager = serviceManager;
         this.serverManager = serverManager;
         this.platformManager = platformManager;
         this.resourceManager = resourceManager;
+        this.resourceDao = resourceDao;
     }
 
     private Config createConfig(byte[] configBytes) {
-        Config config = new Config();
-        config.persist();
+        Config config = resourceDao.createConfig();
         try {
             ConfigResponse configResponse = ConfigResponse.decode(configBytes);
             

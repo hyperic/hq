@@ -53,7 +53,7 @@ public interface CPropManager {
 	 * @throw CPropKeyExistsException if the key already exists
 	 */
 	public void addKey(ResourceType appdefType, String key,
-			String description);
+			String description, Class<?> type);
 
 
 	/**

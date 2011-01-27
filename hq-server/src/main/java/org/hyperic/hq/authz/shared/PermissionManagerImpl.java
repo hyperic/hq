@@ -208,11 +208,11 @@ public class PermissionManagerImpl
                 ret.add(vals[i]);
             } else if (vals[i] instanceof ResourceValue) {
                 ret.add(lookupResource((ResourceValue) vals[i]));
-            } else if (vals[i] instanceof RoleValue) {
+            } else if (vals[i] instanceof Role) {
                 if (roleDao == null) {
                     roleDao = getRoleDAO();
                 }
-                ret.add(roleDao.findById(((RoleValue) vals[i]).getId()));
+                ret.add(roleDao.findById(((Role) vals[i]).getId()));
             } else if (vals[i] instanceof ResourceGroupValue) {
                 
                 ret.add(resourceGroupDao.findById(((ResourceGroupValue) vals[i]).getId()));
@@ -366,7 +366,8 @@ public class PermissionManagerImpl
     public List getAllOperations(AuthzSubject subject, PageControl pc) throws PermissionException {
         Role rootRole = getRoleDAO().findById(AuthzConstants.rootRoleId);
         Set ops = new HashSet();
-        ops.addAll(rootRole.getOperations());
+        //TODO impl?
+        //ops.addAll(rootRole.getOperations());
         pc = PageControl.initDefaults(pc, SortAttribute.OPERATION_NAME);
         Pager operationPager;
         try {

@@ -1,0 +1,30 @@
+From ef65ff6d8da74e8d8a8c21f523aeffac89479cad Mon Sep 17 00:00:00 2001
+From: Jennifer Hickey <jennifer.hickey@springsource.com>
+Date: Wed, 26 Jan 2011 15:16:02 -0800
+Subject: [PATCH] Made introduced properties transient so JPA entities wouldn't attempt to persist them
+
+---
+ .../relationship/Neo4jRelationshipBacking.aj       |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/spring-data-neo4j/src/main/java/org/springframework/data/graph/neo4j/support/relationship/Neo4jRelationshipBacking.aj b/spring-data-neo4j/src/main/java/org/springframework/data/graph/neo4j/support/relationship/Neo4jRelationshipBacking.aj
+index c39744f..beee958 100644
+--- a/spring-data-neo4j/src/main/java/org/springframework/data/graph/neo4j/support/relationship/Neo4jRelationshipBacking.aj
++++ b/spring-data-neo4j/src/main/java/org/springframework/data/graph/neo4j/support/relationship/Neo4jRelationshipBacking.aj
+@@ -57,11 +57,11 @@ public aspect Neo4jRelationshipBacking extends AbstractTypeAnnotatingMixinFields
+     /**
+      * field for underlying relationship
+      */
+-	private Relationship RelationshipBacked.underlyingRelationship;
++	private transient Relationship RelationshipBacked.underlyingRelationship;
+     /**
+      * field for {@link EntityStateAccessors} that takes care of all entity operations
+      */
+-    private EntityStateAccessors<RelationshipBacked,Relationship> RelationshipBacked.stateAccessors;
++    private transient EntityStateAccessors<RelationshipBacked,Relationship> RelationshipBacked.stateAccessors;
+ 
+     /**
+      * creates a new {@link EntityStateAccessors} instance with the relationship parameter or updates an existing one
+-- 
+1.6.4.4
+

@@ -28,5 +28,7 @@ package org.hyperic.hq.events.server.session;
 
 public interface AlertDefinitionDAOInterface {
     
+    ResourceAlertDefinition findResourceAlertDefById(Integer id);
+    //TODO remove below
     AlertDefinition findById(Integer id);
 }

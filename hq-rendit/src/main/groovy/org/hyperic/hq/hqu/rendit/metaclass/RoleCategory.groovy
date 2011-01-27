@@ -31,7 +31,7 @@ import org.hyperic.hq.inventory.domain.OperationType
 import org.hyperic.hq.authz.server.session.Role
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.authz.shared.RoleManager;
-import org.hyperic.hq.authz.shared.RoleValue
+
 
 class RoleCategory {
     private static roleMan = Bootstrap.getBean(RoleManager.class)
@@ -55,15 +55,7 @@ class RoleCategory {
     static void update(Role role, AuthzSubject user,
                        String name, String description) {
 
-        RoleValue rv = role.getRoleValue()
-        if (name) {
-            rv.setName(name)
-        }
-        if (description) {
-            rv.setDescription(description)
-        }
-
-        roleMan.saveRole(user, rv)
+        roleMan.saveRole(user, role.id,name,description)
     }
 
     /**

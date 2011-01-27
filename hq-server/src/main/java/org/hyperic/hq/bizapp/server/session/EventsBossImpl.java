@@ -95,9 +95,12 @@ import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertSortField;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
+import org.hyperic.hq.events.server.session.ResourceAlertDefinition;
+import org.hyperic.hq.events.server.session.ResourceTypeAlertDefinition;
 import org.hyperic.hq.events.server.session.TriggersCreatedZevent;
 import org.hyperic.hq.events.shared.ActionManager;
 import org.hyperic.hq.events.shared.ActionValue;
+import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertManager;
@@ -261,7 +264,8 @@ public class EventsBossImpl implements EventsBoss {
 
         ArrayList<RegisteredTriggerValue> triggers = new ArrayList<RegisteredTriggerValue>();
 
-        AlertDefinitionValue parent = null;
+       AlertConditionValue[] groupConditions = null;
+       AlertDefinitionValue created = null;
 
         // Iterate through to create the appropriate triggers and alertdef
         for (AppdefEntityID id : appdefIds) {
@@ -275,11 +279,10 @@ public class EventsBossImpl implements EventsBoss {
             if (!id.isGroup()) {
                 // If this is for the members of a group, we need to
                 // scrub and copy the parent's conditions
-                if (parent != null) {
-                    adval.setParentId(parent.getId());
+                if (groupConditions != null) {
+                    //TODO adval.setParentId() to AlertDef of group.  Needed?
                     try {
-                        alertDefinitionManager.cloneParentConditions(subject, id, adval, parent
-                            .getConditions(), false, true);
+                        alertDefinitionManager.cloneParentConditions(subject, id, adval, groupConditions, false, true);
                     } catch (MeasurementNotFoundException e) {
                         throw new AlertConditionCreateException(e);
                     }
@@ -291,15 +294,16 @@ public class EventsBossImpl implements EventsBoss {
             }
 
             // Now create the alert definition
-            AlertDefinitionValue created = alertDefinitionManager.createAlertDefinition(subject,
-                adval);
+            ResourceTypeAlertDefinition parent = alertDefinitionManager.findResourceTypeAlertDefinitionById(adval.getParentId());
+            created = alertDefinitionManager.createResourceAlertDefinition(subject,
+                adval, parent).getAlertDefinitionValue();
 
-            if (parent == null) {
-                parent = created;
+            if (groupConditions == null) {
+                groupConditions = created.getConditions();
             }
         }
 
-        return parent;
+        return created;
     }
 
     /**
@@ -327,53 +331,41 @@ public class EventsBossImpl implements EventsBoss {
         // Create the parent alert definition
         adval.setAppdefType(aetid.getType());
         adval.setAppdefId(aetid.getId());
-        adval.setParentId(EventConstants.TYPE_ALERT_DEF_ID);
+       
         
         // Now create the alert definition
         if (debug) watch.markTimeBegin("createParentAlertDefinition");
-        parent = alertDefinitionManager.createAlertDefinition(subject, adval);
+        ResourceTypeAlertDefinition typeDef = alertDefinitionManager.createResourceTypeAlertDefinition(subject, adval);
+        parent = typeDef.getAlertDefinitionValue();
         if (debug) watch.markTimeEnd("createParentAlertDefinition");
 
-        adval.setParentId(parent.getId());
+        //adval.setParentId(parent.getId());
         
         if (debug) watch.markTimeBegin("lookupResources");
 
         // Lookup resources
-        Integer[] entIds;
-        switch (aetid.getType()) {
-            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                entIds = platformManager.getPlatformIds(subject, aetid.getId());
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                entIds = serverManager.getServerIds(subject, aetid.getId());
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                entIds = serviceManager.getServiceIds(subject, aetid.getId());
-                break;
-            default:
-                throw new InvalidOptionException("Alerts cannot be defined on appdef entity type " +
-                                                 aetid.getType());
-        }
+        Set<Resource> resources = resourceManager.findResourceTypeById(aetid.getId()).getResources();
+       
 
         if (debug) watch.markTimeEnd("lookupResources");
-        List zevents = new ArrayList(entIds.length);
-        if (debug) watch.markTimeBegin("createChildAlertDefinitions[" + entIds.length + "]");
+        List zevents = new ArrayList(resources.size());
+        if (debug) watch.markTimeBegin("createChildAlertDefinitions[" + resources.size() + "]");
          
 
         // Iterate through to create the appropriate triggers and alertdef
 
-        for (int ei = 0; ei < entIds.length; ei++) {
+        for (Resource child: resources) {
             StopWatch childWatch = new StopWatch();
-            AppdefEntityID id = new AppdefEntityID(aetid.getType(), entIds[ei]);
+           
 
             // Reset the value object with this entity ID
-            adval.setAppdefId(id.getId());
+            adval.setAppdefId(child.getId());
 
             // Scrub the triggers just in case
             adval.removeAllTriggers();
-
+            AppdefEntityID childId = AppdefUtil.newAppdefEntityId(child);
             try {
-                boolean succeeded = alertDefinitionManager.cloneParentConditions(subject, id,
+                boolean succeeded = alertDefinitionManager.cloneParentConditions(subject, childId,
                     adval, parent.getConditions(), true, true);
 
                 if (!succeeded) {
@@ -392,19 +384,20 @@ public class EventsBossImpl implements EventsBoss {
             if (debug) childWatch.markTimeEnd("createTriggers");
 
             // Make sure the actions have the proper parentId
-            alertDefinitionManager.cloneParentActions(id, adval, parent.getActions());
+            alertDefinitionManager.cloneParentActions(childId, adval, parent.getActions());
 
             // Now create the alert definition
             if (debug) childWatch.markTimeBegin("createAlertDefinition");
-            AlertDefinitionValue newAdval = alertDefinitionManager.createAlertDefinition(subject, adval);           
+            //TODO pass ResourceTypeAlertDef into below method
+            AlertDefinitionValue newAdval = alertDefinitionManager.createResourceAlertDefinition(subject, adval,typeDef).getAlertDefinitionValue();           
             if (debug) {
                 childWatch.markTimeEnd("createAlertDefinition");
-                log.debug("createChildAlertDefinition[" + id + "]: time=" + childWatch);
+                log.debug("createChildAlertDefinition[" + child.getId() + "]: time=" + childWatch);
             }
             zevents.add(new TriggersCreatedZevent(newAdval.getId()));
         }
         
-        if (debug) watch.markTimeEnd("createChildAlertDefinitions[" + entIds.length + "]");
+        if (debug) watch.markTimeEnd("createChildAlertDefinitions[" + resources.size() + "]");
         // HHQ-3423: Add the TransactionListener after all the triggers are created
         if (!zevents.isEmpty()) {
             if (debug) watch.markTimeBegin("addTriggersCreatedTxListener");
@@ -416,6 +409,7 @@ public class EventsBossImpl implements EventsBoss {
         }
 
         return parent;
+
     }
 
     /**
@@ -432,8 +426,8 @@ public class EventsBossImpl implements EventsBoss {
         AlertDefinition ad = alertDefinitionManager.getByIdAndCheck(subject, adid);
         alertdefs.add(ad);
 
-        // If there are any children
-        alertdefs.addAll(ad.getChildren());
+        // TODO children for ResourceType alerts?
+        //alertdefs.addAll(ad.getChildren());
 
         Action root = null;
 
@@ -450,6 +444,7 @@ public class EventsBossImpl implements EventsBoss {
         }
 
         return root;
+
     }
 
     /**
@@ -551,9 +546,9 @@ public class EventsBossImpl implements EventsBoss {
             throw new InvalidOptionValueException("Conditions cannot be null or empty");
         }
 
-       
-        if (EventConstants.TYPE_ALERT_DEF_ID.equals(adval.getParentId()) ||
-            adval.getAppdefType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+       //TODO group
+        //|| adval.getAppdefType() == AppdefEntityConstants.APPDEF_TYPE_GROUP
+        if (adval.isTypeAlertDefinition() ) {
             // A little more work to do for group and type alert definition
             if (debug) watch.markTimeBegin("updateParentAlertDefinition");
             adval = alertDefinitionManager.updateAlertDefinition(adval);
@@ -562,8 +557,11 @@ public class EventsBossImpl implements EventsBoss {
                 watch.markTimeBegin("findAlertDefinitionChildren");
             }
 
-            List<AlertDefinitionValue> children = alertDefinitionManager
-                .findAlertDefinitionChildren(adval.getId());
+            //TODO group children?
+            //List<AlertDefinitionValue> children = alertDefinitionManager
+              //  .findAlertDefinitionChildren(adval.getId());
+            
+            List<AlertDefinitionValue> children = alertDefinitionManager.findResourceAlertDefinitions(adval.getId());
             
             if (debug) {
                 watch.markTimeEnd("findAlertDefinitionChildren");
@@ -637,6 +635,7 @@ public class EventsBossImpl implements EventsBoss {
         if (debug) {           
             log.debug("updateAlertDefinition: time=" + watch);
         }
+
     }
 
     /**
@@ -703,13 +702,15 @@ public class EventsBossImpl implements EventsBoss {
             AlertDefinition def = alertDefinitionManager.getByIdAndCheck(subject, adids[i]);
             count += alertManager.deleteAlerts(subject, def);
 
-            Collection<AlertDefinition> children = def.getChildren();
+            //TODO handle type-based or group
+            //Collection<AlertDefinition> children = def.getChildren();
 
-            for (AlertDefinition child : children) {
-                count += alertManager.deleteAlerts(subject, child);
-            }
+            //for (AlertDefinition child : children) {
+              //  count += alertManager.deleteAlerts(subject, child);
+            //}
         }
         return count;
+
     }
 
     /**
@@ -777,20 +778,6 @@ public class EventsBossImpl implements EventsBoss {
         throws SessionNotFoundException, SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return alertDefinitionManager.findAlertDefinitions(subject, id, pc);
-    }
-
-    /**
-     * Find all alert definition names for a resource
-     * @return Map of AlertDefinition names and IDs
-     * 
-     */
-    @Transactional(readOnly = true)
-    public Map<String, Integer> findAlertDefinitionNames(int sessionID, AppdefEntityID id,
-                                                         Integer parentId)
-        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException,
-        PermissionException {
-        AuthzSubject subject = sessionManager.getSubject(sessionID);
-        return alertDefinitionManager.findAlertDefinitionNames(subject, id, parentId);
     }
 
     /**
@@ -883,31 +870,33 @@ public class EventsBossImpl implements EventsBoss {
             Escalatable alert = i.next();
             PerformsEscalations def = alert.getDefinition();
             AlertDefinitionInterface defInfo = def.getDefinitionInfo();
-            AppdefEntityID aeid;
-
-            aeid = AppdefUtil.newAppdefEntityId(defInfo.getResource());
-
-            if (badIds.contains(aeid))
-                continue;
-
-            // Check to see if we already have the resource in the hash map
-            if (!goodIds.contains(aeid)) {
-                AppdefEntityValue entVal = new AppdefEntityValue(aeid, subject);
-
-                try {
-                    entVal.getName();
-                    goodIds.add(aeid);
-                } catch (Exception e) {
-                    // Probably because the resource does not exist
-                    badIds.add(aeid);
-                    continue;
-                }
-            }
+            //TODO I have no idea what this was for
+//            AppdefEntityID aeid;
+//
+//            aeid = AppdefUtil.newAppdefEntityId(defInfo.getResource());
+//
+//            if (badIds.contains(aeid))
+//                continue;
+//
+//            // Check to see if we already have the resource in the hash map
+//            if (!goodIds.contains(aeid)) {
+//                AppdefEntityValue entVal = new AppdefEntityValue(aeid, subject);
+//
+//                try {
+//                    entVal.getName();
+//                    goodIds.add(aeid);
+//                } catch (Exception e) {
+//                    // Probably because the resource does not exist
+//                    badIds.add(aeid);
+//                    continue;
+//                }
+//            }
 
             res.add(alert);
         }
 
         return res;
+
     }
 
     /**
