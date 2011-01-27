@@ -1143,7 +1143,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
         throws PermissionException, NotFoundException {
         // finally scope down to only the ones the user can see
 
-        Collection<Integer> viewable = permissionManager.findOperationScopeBySubject(who,
+        List<Integer> viewable = permissionManager.findOperationScopeBySubject(who,
             AuthzConstants.groupOpViewResourceGroup, AuthzConstants.groupResourceTypeName);
 
         for (Iterator<ResourceGroup> i = groups.iterator(); i.hasNext();) {

@@ -79,12 +79,6 @@ public class OperationDAO
     }
 
     @SuppressWarnings("unchecked")
-    public Collection<Operation> findByResourceType(Collection<ResourceType> resourceTypes) {
-        String sql = "from Operation where resourceType in (:types)";
-        return getSession().createQuery(sql).setParameterList("types", resourceTypes).list();
-    }
-
-    @SuppressWarnings("unchecked")
     public Collection<Role> findByRole(Integer roleId) {
         String sql = "select o from Role r join r.operations o where r.id = ?";
         return getSession().createQuery(sql).setParameter(0, roleId).list();

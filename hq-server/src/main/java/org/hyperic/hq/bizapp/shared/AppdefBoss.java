@@ -33,7 +33,6 @@ import java.util.Properties;
 
 
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.ApplicationType;
@@ -82,13 +81,10 @@ import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.shared.GroupCreationException;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.bizapp.shared.uibeans.SearchResult;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
@@ -817,11 +813,5 @@ public interface AppdefBoss {
      * 
      */
     public boolean hasVirtualResourceRelation(Resource resource);
-
-    void setAllConfigResponses(AuthzSubject subject,
-        AllConfigResponses allConfigs, AllConfigResponses allConfigsRollback)
-        throws PermissionException, EncodingException, PluginException,
-        ApplicationException, AutoinventoryException,
-        ScheduleWillNeverFireException, AgentConnectionException;
     
 }
