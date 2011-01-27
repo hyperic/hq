@@ -25,9 +25,7 @@
 
 package org.hyperic.hq.plugin.jboss.jmx;
 
-import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-import org.hyperic.hq.product.PluginException;
 
 public class StatelessSessionBeanQuery extends BeanQuery {
 
@@ -39,6 +37,7 @@ public class StatelessSessionBeanQuery extends BeanQuery {
         return "Stateless Session EJB";
     }
 
+    @Override
     public boolean apply(ObjectName name) {
         return applyWithoutHashCode(name);
     }

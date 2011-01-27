@@ -119,6 +119,7 @@ public abstract class ServiceQuery extends JBossQuery {
 
     protected abstract String getPropertyName();
     
+    @Override
     public Properties getResourceConfig() {
         Properties props = new Properties();
         if (getName() != null) {
@@ -127,6 +128,7 @@ public abstract class ServiceQuery extends JBossQuery {
         return props;
     }
 
+    @Override
     public Properties getCustomProperties() {
         return this.cprops;
     }
@@ -136,7 +138,7 @@ public abstract class ServiceQuery extends JBossQuery {
     }
 
     public String getQualifiedName() {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
 
         ArrayList names = new ArrayList();
         String name = getName();
@@ -170,6 +172,7 @@ public abstract class ServiceQuery extends JBossQuery {
     // intermediate service query) and an explicit ref to the root
     // server query.
 
+    @Override
     public JBossQuery getParent() {
         return this.parent;
     }

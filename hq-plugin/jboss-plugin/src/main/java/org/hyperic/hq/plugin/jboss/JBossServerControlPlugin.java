@@ -47,7 +47,7 @@ import org.hyperic.util.config.ConfigResponse;
 public class JBossServerControlPlugin extends ServerControlPlugin {
 
     // JBoss server control timeout defaults to 10 minutes
-    protected static final int DEFAULT_TIMEOUT = 10 * 60;
+    protected static final int TIMEOUT = 10 * 60;
 
     public static final String PROP_CONFIGSET = "configSet";
     static final String PROP_STOP_PROGRAM = "stop.program";
@@ -65,9 +65,10 @@ public class JBossServerControlPlugin extends ServerControlPlugin {
     public JBossServerControlPlugin() {
         super();
         //give waitForState enough time
-        setTimeout(DEFAULT_TIMEOUT);
+        setTimeout(TIMEOUT);
     }
 
+    @Override
     public void configure(ConfigResponse config)
         throws PluginException {
 
@@ -111,6 +112,7 @@ public class JBossServerControlPlugin extends ServerControlPlugin {
         return this.serverMetric;
     }
 
+    @Override
     protected boolean isRunning() {
         try {
             JBossUtil.getMBeanServerConnection(getConfig().toProperties());
@@ -122,10 +124,12 @@ public class JBossServerControlPlugin extends ServerControlPlugin {
         }
     }
 
+    @Override
     protected File getWorkingDirectory() {
         return new File(getInstallPrefix(), "bin");
     }
 
+    @Override
     protected boolean isBackgroundCommand() {
         return !this.isStopProgramAction;
     }
@@ -145,6 +149,7 @@ public class JBossServerControlPlugin extends ServerControlPlugin {
         return "bin" + sep + "run." + ext;
     }
 
+    @Override
     protected void getServerConfigSchema(TypeInfo info,
                                          ConfigSchema schema,
                                          ConfigResponse response) {
@@ -179,6 +184,7 @@ public class JBossServerControlPlugin extends ServerControlPlugin {
                           installpath + sep + getControlProgram());
     }
 
+    @Override
     public ConfigSchema getConfigSchema(TypeInfo info, ConfigResponse config) {
         //XXX re-order for UI display
         ConfigSchema schema = super.getConfigSchema(info, config);
@@ -190,6 +196,7 @@ public class JBossServerControlPlugin extends ServerControlPlugin {
         return schema;
     }
 
+    @Override
     protected String[] getCommandEnv() {
         return new String[] {
             "JBOSS_HOME=" + getJBossHome(),
@@ -228,13 +235,13 @@ public class JBossServerControlPlugin extends ServerControlPlugin {
         String[] args = getProgramArgs(PROP_START_ARGS);
 
         if (args == null) {
-            String config = getConfigSet();
+            String _config = getConfigSet();
 
-            if ((config == null) || (config.length() == 0)) {
+            if ((_config == null) || (_config.length() == 0)) {
                 args = new String[0];
             }
             else {
-                args = new String[] { "-c", config };
+                args = new String[] { "-c", _config };
             }
         }
 

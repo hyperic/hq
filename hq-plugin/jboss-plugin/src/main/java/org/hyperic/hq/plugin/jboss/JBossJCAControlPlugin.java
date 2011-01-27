@@ -27,6 +27,7 @@ package org.hyperic.hq.plugin.jboss;
 
 public class JBossJCAControlPlugin extends JBossServiceControlPlugin {
 
+    @Override
     protected String getObjectName() {
         //defined in hq-plugin.xml
         return getPluginProperty("JCAConnectionPool");

@@ -149,7 +149,7 @@ public class ServerQuery extends JBossQuery {
 
         for (Iterator it = servicePlugins.entrySet().iterator(); it.hasNext();) {
             Map.Entry entry = (Map.Entry) it.next();
-            String type = (String) entry.getKey();
+            String _type = (String) entry.getKey();
             String name = (String) entry.getValue();
 
             GenericServiceQuery query;
@@ -165,17 +165,16 @@ public class ServerQuery extends JBossQuery {
                 }
             }
 
-            query.setType(type);
+            query.setType(_type);
             query.setParent(this);
-            log.debug("[findServices] type='" + type + "'");
+            log.debug("[findServices] type='" + _type + "'");
             try {
                 findServices(mServer, query);
             } catch (IllegalArgumentException e) {
                 String msg =
-                        "Error running query for " + type + ": " +
+                        "Error running query for " + _type + ": " +
                         e.getMessage();
-                e.printStackTrace();
-                System.out.println(msg);
+                log.error(msg, e);
             }
         }
     }
@@ -258,6 +257,7 @@ public class ServerQuery extends JBossQuery {
         return getInstallPath();
     }
 
+    @Override
     public Properties getControlConfig() {
         Properties config = new Properties();
         config.put(JBossServerControlPlugin.PROP_CONFIGSET,
