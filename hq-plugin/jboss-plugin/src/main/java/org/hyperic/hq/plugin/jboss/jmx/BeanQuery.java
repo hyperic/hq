@@ -48,6 +48,7 @@ public abstract class BeanQuery extends ServiceQuery {
         return "ejb.name";
     }
     
+    @Override
     public Properties getResourceConfig() {
         Properties props = super.getResourceConfig();
 
@@ -59,6 +60,7 @@ public abstract class BeanQuery extends ServiceQuery {
         return props;
     }
 
+    @Override
     public boolean hasControl() {
         return false;
     }

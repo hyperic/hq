@@ -1596,4 +1596,64 @@
     
     <server name="JBoss" version="5.1" include="5.0"/>
 
+    <server name="JBoss" version="6.0" include="5.0">
+        <service name="JMS HornetQ QUEUE" internal="true">
+            <config>
+                <option name="name" description="JMS Destination" default=""/>
+            </config>
+
+            <property name="OBJECT_NAME"  value="org.hornetq:module=JMS,type=Queue,name=%name%"/>
+
+            <plugin type="autoinventory"/>
+            <plugin type="measurement" class="JBoss5MeasurementPlugin"/>
+            <plugin type="control" class="JBoss5ServiceControlPlugin"/>
+
+            <actions include="pause,resume"/>
+
+            <properties>
+                <property name="Address" description="Address"/>
+                <property name="DeadLetterAddress" description="DeadLetter Address"/>
+                <property name="ExpiryAddress" description="Expiry Address"/>
+                <property name="JNDIBindings" description="JNDI Bindings"/>
+            </properties>
+
+            <filter name="template" value="${OBJECT_NAME}:${alias}"/>
+
+            <metric name="Availability"  indicator="true"/>
+            <metric name="Messages in Queue" alias="MessageCount" category="THROUGHPUT" indicator="true"/>
+            <metric name="Messages Add" alias="MessagesAdded" collectionType="trendsup" indicator="true"/>
+            <metric name="Delivering Count" alias="DeliveringCount" indicator="true"/>
+            <metric name="Consumer Count" alias="ConsumerCount" indicator="true"/>
+            <metric name="Scheduled Message Count" alias="ScheduledCount"/>
+        </service>
+
+        <service name="JMS HornetQ Topic" internal="true">
+            <config>
+                <option name="name" description="JMS Topic" default=""/>
+            </config>
+
+            <property name="OBJECT_NAME" value="org.hornetq:module=JMS,type=Topic,name=%name%"/>
+
+            <plugin type="autoinventory"/>
+            <plugin type="control" class="JBoss5ServiceControlPlugin"/>
+
+            <actions include="stop,start,removeAllMessages"/>
+
+            <properties>
+                <property name="Address" description="Address"/>
+                <property name="JNDIBindings" description="JNDI Bindings"/>
+            </properties>
+        
+            <filter name="template" value="${OBJECT_NAME}:${alias}"/>
+
+            <metric name="Availability" indicator="true"/>
+            <metric name="Subscriptions Count" alias="SubscriptionCount" category="UTILIZATION" indicator="true"/>
+            <metric name="Non Durable Subscriptions Count" alias="NonDurableSubscriptionCount" category="UTILIZATION"/>
+            <metric name="Durable Subscriptions Count" alias="DurableSubscriptionCount" category="UTILIZATION" indicator="true"/>
+            <metric name="Message Count" alias="MessageCount" category="THROUGHPUT" indicator="true"/>
+            <metric name="Durable Message Count" alias="DurableMessageCount" category="THROUGHPUT" indicator="true"/>
+            <metric name="NonDurableMessageCount" alias="NonDurableMessageCount" category="THROUGHPUT"/>
+        </service>
+
+    </server>
 </plugin>

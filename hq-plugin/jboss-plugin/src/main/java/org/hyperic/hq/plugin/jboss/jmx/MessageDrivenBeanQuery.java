@@ -37,6 +37,7 @@ public class MessageDrivenBeanQuery extends BeanQuery {
         return "Message Driven EJB";
     }
 
+    @Override
     public boolean apply(ObjectName name) {
         return applyWithoutHashCode(name);
     }
