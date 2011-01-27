@@ -61,7 +61,7 @@ public interface ProblemMetricManager {
      * @return ProblemResourceInfo[]
      * @see AppdefEntityConstants#typeIsValid(int)
      */
-    public ProblemResourceInfo[] getProblemResourcesByTypeAndInstances(int appdefType, Integer[] instanceIds, long begin,
+    public ProblemResourceInfo[] getProblemResourcesByTypeAndInstances(int appdefType, int[] instanceIds, long begin,
                                                                        long end, PageControl pc);
 
     public void removeProblems(Collection<Integer> mids);

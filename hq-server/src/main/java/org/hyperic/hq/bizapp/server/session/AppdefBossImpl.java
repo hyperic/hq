@@ -2214,60 +2214,53 @@ public class AppdefBossImpl implements AppdefBoss {
 
     // Return a PageList of authz resources.
     private List<AppdefEntityID> findViewableEntityIds(AuthzSubject subject, int appdefTypeId,
-                                                       String rName, Integer protoFilterId,
+                                                       String rName, Integer filterType,
                                                        PageControl pc) {
         List<AppdefEntityID> appentResources = new ArrayList<AppdefEntityID>();
 
         if (appdefTypeId != APPDEF_TYPE_UNDEFINED) {
-            Integer protoType = null;
-            Collection<ResourceType> resourceTypes = new ArrayList<ResourceType>();
-            switch (appdefTypeId) {
-                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                    protoType = AuthzConstants.authzPlatformProto;
-                    resourceTypes.add(resourceManager.findResourceTypeById(AuthzConstants.authzPlatform));
-                    break;
-                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                    protoType = AuthzConstants.authzServerProto;
-                    resourceTypes.add(resourceManager.findResourceTypeById(AuthzConstants.authzServer));
-                    break;
-                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                    protoType = AuthzConstants.authzServiceProto;
-                    resourceTypes.add(resourceManager.findResourceTypeById(AuthzConstants.authzService));
-                    break;
-                default:
-                    break;
-            }
-            final Collection<Integer> resourceIds =
-                resourceManager.findAllViewableResourceIds(subject, resourceTypes);
-            for (final Integer resourceId : resourceIds) {
-                final Resource r = resourceManager.findResourceById(resourceId);
-                if (r == null || r.isInAsyncDeleteState()) {
-                    continue;
+            ResourceType resourceType = null;
+            if (filterType != null) {
+                switch (appdefTypeId) {
+                    case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                        resourceType = resourceManager.findResourceTypeById(AuthzConstants.authzPlatform);
+                        break;
+                    case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                        resourceType = resourceManager.findResourceTypeById(AuthzConstants.authzServer);
+                        break;
+                    case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                        resourceType = resourceManager.findResourceTypeById(AuthzConstants.authzService);
+                        break;
+                    default:
+                        break;
                 }
-                try {
-                    if (protoFilterId != null && protoType != null) {
-                        final Resource proto = r.getPrototype();
-                        if (proto.getInstanceId().equals(protoFilterId) &&
-                                proto.getResourceType().getId().equals(protoType)) {
-                            appentResources.add(AppdefUtil.newAppdefEntityId(r));
-                        }
-                    } else {
-                        appentResources.add(AppdefUtil.newAppdefEntityId(r));
-                    }
-                } catch (IllegalArgumentException e) {
+            }
+            Map<String, Collection<Integer>> instanceIds =
+                resourceManager.findAllViewableInstances(subject, resourceType);
+
+            for (final Entry<String, Collection<Integer>> entry : instanceIds.entrySet()) {
+                for (final Integer instanceId : entry.getValue()) {
+                    appentResources.add(new AppdefEntityID(appdefTypeId, instanceId));
                 }
             }
         } else {
-            final Collection<Integer> resourceIds =
-                resourceManager.findAllViewableResourceIds(subject, null);
-            for (final Integer resourceId : resourceIds) {
-                final Resource r = resourceManager.findResourceById(resourceId);
-                if (r == null || r.isInAsyncDeleteState()) {
+            Map<String, Collection<Integer>> authzResources =
+                resourceManager.findAllViewableInstances(subject, null);
+            for (Map.Entry<String, Collection<Integer>> entry : authzResources.entrySet()) {
+
+                int appdefType;
+                try {
+                    String typeName = (String) entry.getKey();
+                    appdefType = AppdefUtil.resNameToAppdefTypeId(typeName);
+                } catch (InvalidAppdefTypeException e) {
+                    // ignore type
                     continue;
                 }
-                try {
-                    appentResources.add(AppdefUtil.newAppdefEntityId(r));
-                } catch (IllegalArgumentException e) {
+
+                Collection<Integer> instIds = entry.getValue();
+
+                for (Integer instId : instIds) {
+                    appentResources.add(new AppdefEntityID(appdefType, instId));
                 }
             }
         }
@@ -2342,17 +2335,11 @@ public class AppdefBossImpl implements AppdefBoss {
 
                 if (appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
                     Server server = serverManager.findServerById(res.getId());
-                    Platform platform = server.getPlatform();
-                    if (platform != null) {
-                        res.setHostName(platform.getName());
-                    }
+                    res.setHostName(server.getPlatform().getName());
 
                 } else {
                     Service service = serviceManager.findServiceById(res.getId());
-                    Server server = service.getServer();
-                    if (server != null) {
-                        res.setHostName(server.getName());
-                    }
+                    res.setHostName(service.getServer().getName());
                 }
             }
         }

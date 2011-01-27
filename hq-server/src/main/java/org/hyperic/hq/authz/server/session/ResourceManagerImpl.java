@@ -621,21 +621,6 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         return resources;
     }
 
-    @Transactional(readOnly = true)
-    public Collection<Integer> findAllViewableResourceIds(AuthzSubject subject,
-                                                          Collection<ResourceType> resourceTypes) {
-        final PermissionManager pm = PermissionManagerFactory.getInstance();
-        final Set<Integer> resources = (resourceTypes == null || resourceTypes.size() == 0) ?
-            pm.findViewableResources(subject, resourceTypeDAO.findAll()) :
-            pm.findViewableResources(subject, resourceTypes);
-        return resources;
-    }
-    
-    @Transactional(readOnly = true)
-    public ResourceType getResourceTypeById(Integer resourceTypeId) {
-        return resourceTypeDAO.get(resourceTypeId);
-    }
-
     /**
      * Get viewable resources either by "type" OR "resource name" OR
      * "type AND resource name".
@@ -649,8 +634,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
                                                                      ResourceType resourceType) {
         final Map<String, Collection<Integer>> rtn = new HashMap<String, Collection<Integer>>();
         final PermissionManager pm = PermissionManagerFactory.getInstance();
-        final Set<Integer> resources = (resourceType == null) ?
-            pm.findViewableResources(subject, resourceTypeDAO.findAll()) :
+        final Set<Integer> resources =
             pm.findViewableResources(subject, Collections.singletonList(resourceType));
         for (final Integer resId : resources) {
             final Resource res = findResourceById(resId);
