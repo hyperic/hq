@@ -3,10 +3,12 @@ package org.hyperic.hq.api.representation;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.hyperic.hq.api.LinkHelper;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.springframework.util.Assert;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ResourceRep implements SimpleRepresentation, LinkedRepresentation {
 	private Integer id;
 	private String name;
@@ -142,6 +144,14 @@ public class ResourceRep implements SimpleRepresentation, LinkedRepresentation {
 
 	public void setType(SimpleRep type) {
 		this.type = type;
+	}
+
+	public Map<String, Object> getConfigs() {
+		return configs;
+	}
+
+	public void setConfigs(Map<String, Object> configs) {
+		this.configs = configs;
 	}
 
 	public Map<String, String> getLinks() {

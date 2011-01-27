@@ -7,23 +7,38 @@ import java.util.List;
 import java.util.Map;
 
 import org.hyperic.hq.api.LinkHelper;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.springframework.util.Assert;
 
-public class ListRep implements LinkedRepresentation {
-	private List<SimpleRep> list = new ArrayList<SimpleRep>();
+public class ListRep<T> implements LinkedRepresentation {
+	private List<T> list = new ArrayList<T>();
 	private Map<String, String> links = new HashMap<String, String>();
 	
 	public ListRep() {}
 	
-	public ListRep(List<SimpleRep> list, Map<String, String> links) {
+	public ListRep(List<T> list, Map<String, String> links) {
 		this.list = list;
 		this.links = links;
 	}
 	
-	public static ListRep createListRepFromResources(Collection<Resource> entities) {
+	public static ListRep<AgentRep> createListRepFromAgents(Collection<Agent> entities) {
+		Assert.notNull(entities, "Entities argument can't be null");
+		List<AgentRep> list = new ArrayList<AgentRep>();
+		Map<String, String> links = new HashMap<String, String>();
+		
+		for (Agent agent : entities) {
+			list.add(new AgentRep(agent));
+		}
+		
+		links.put(AGENTS_LABEL, LinkHelper.getDomainUri(AGENTS_LABEL));
+
+		return new ListRep<AgentRep>(list, links);
+	}
+	
+	public static ListRep<SimpleRep> createListRepFromResources(Collection<Resource> entities) {
 		Assert.notNull(entities, "Entities argument can't be null");
 		List<SimpleRep> list = new ArrayList<SimpleRep>();
 		Map<String, String> links = new HashMap<String, String>();
@@ -34,10 +49,10 @@ public class ListRep implements LinkedRepresentation {
 		
 		links.put(RESOURCES_LABEL, LinkHelper.getDomainUri(RESOURCES_LABEL));
 		
-		return new ListRep(list, links);
+		return new ListRep<SimpleRep>(list, links);
 	}
 	
-	public static ListRep createListRepFromResourceGroups(Collection<ResourceGroup> entities) {
+	public static ListRep<SimpleRep> createListRepFromResourceGroups(Collection<ResourceGroup> entities) {
 		Assert.notNull(entities, "Entities argument can't be null");
 		List<SimpleRep> list = new ArrayList<SimpleRep>();
 		Map<String, String> links = new HashMap<String, String>();
@@ -48,10 +63,10 @@ public class ListRep implements LinkedRepresentation {
 		
 		links.put(RESOURCE_GROUPS_LABEL, LinkHelper.getDomainUri(RESOURCE_GROUPS_LABEL));
 		
-		return new ListRep(list, links);
+		return new ListRep<SimpleRep>(list, links);
 	}
 	
-	public static ListRep createListRepFromResourceTypes(Collection<ResourceType> entities) {
+	public static ListRep<SimpleRep> createListRepFromResourceTypes(Collection<ResourceType> entities) {
 		Assert.notNull(entities, "Entities argument can't be null");
 		List<SimpleRep> list = new ArrayList<SimpleRep>();
 		Map<String, String> links = new HashMap<String, String>();
@@ -62,10 +77,10 @@ public class ListRep implements LinkedRepresentation {
 
 		links.put(RESOURCE_TYPES_LABEL, LinkHelper.getDomainUri(RESOURCE_TYPES_LABEL));
 		
-		return new ListRep(list, links);
+		return new ListRep<SimpleRep>(list, links);
 	}
 	
-	public List<SimpleRep> getList() {
+	public List<T> getList() {
 		return list;
 	}
 	

@@ -1,17 +1,20 @@
 package org.hyperic.hq.inventory.dao;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.inventory.domain.Config;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.graph.neo4j.finder.FinderFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 
 @Repository
 public class Neo4jResourceDao implements ResourceDao {
@@ -21,6 +24,9 @@ public class Neo4jResourceDao implements ResourceDao {
     
     @PersistenceContext
     protected EntityManager entityManager;
+    
+    @Autowired
+    private ResourceTypeDao resourceTypeDao;
 
     @Transactional(readOnly = true)
     public Resource findById(Integer id) {
@@ -75,6 +81,23 @@ public class Neo4jResourceDao implements ResourceDao {
         // TODO best way to implement cutting across to AuthzSubject
         return null;
     }
+    
+    @Transactional(readOnly = true)
+    public List<Resource> findByTypeName(String typeName) {
+        ResourceType type = resourceTypeDao.findByName(typeName);
+        
+        // TODO The call to type.getResources() is returning Roles instead of Resources, but only when getting "VMware vSphere Host" type...
+        List<Resource> resources = new ArrayList<Resource>();
+        
+        for (Resource resource : findAll()) {
+            if (resource.getType().getUnderlyingState().equals(type.getUnderlyingState())) {
+                resources.add(resource);
+            }
+        }
+        
+        return resources;
+    }
+        
 
     @Transactional(readOnly = true)
     public Resource findRoot() {

@@ -2,11 +2,11 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <div id="headerLogo">
 	<a href="<html:rewrite action="/Dashboard" />">
-		<img alt="<fmt:message key="header.Dashboard" />" src="<hq:staticContentBaseUrl />images/hqlogo.jpg" border="0" />
+		<img alt="<fmt:message key="header.Dashboard" />" src="<spring:url value="/static/images/hqlogo.jpg"/>" border="0" />
 	</a>
 </div>
 <div id="headerLinks">
@@ -15,11 +15,11 @@
 			<li>
 				<span><fmt:message key="header.Welcome"/></span>
 				<a href="<html:rewrite action="/admin/user/UserAdmin" />?mode=view&u=${sessionScope.webUser.id}">
-	            	<c:out value="${sessionScope.webUser.firstName}" />
+	            	${sessionScope.webUser.firstName}
 				</a>
 			</li>
 			<li>
-				<a id="signOutLink" href="<html:rewrite page="/j_spring_security_logout" />" title="<fmt:message key="header.SignOut" />">
+				<a id="signOutLink" href="<spring:url value="/j_spring_security_logout" />" title="<fmt:message key="header.SignOut" />">
 					<fmt:message key="header.SignOut" />
 				</a>
 			</li>

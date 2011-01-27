@@ -53,11 +53,15 @@ import org.hyperic.hq.common.shared.AuditManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
+import org.hyperic.hq.inventory.dao.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.server.session.MonitorableMeasurementInfo;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.shared.TemplateManager;
+import org.hyperic.hq.pdk.domain.ResourceTypeRelationships;
+import org.hyperic.hq.pdk.domain.ResourceTypeRelationships.Triple;
+import org.hyperic.hq.product.FlexibleProductPlugin;
 import org.hyperic.hq.product.MeasurementInfo;
 import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.hq.product.Plugin;
@@ -100,7 +104,8 @@ public class ProductManagerImpl implements ProductManager {
     private AlertDefinitionXmlParser alertDefinitionXmlParser;
     private PluginAuditFactory pluginAuditFactory;
     private ResourceManager resourceManager;
-
+    private ResourceTypeDao resourceTypeDao;
+	
     @Autowired
     public ProductManagerImpl(PluginDAO pluginDao, AlertDefinitionManager alertDefinitionManager,
                               CPropManager cPropManager, TemplateManager templateManager,
@@ -108,7 +113,7 @@ public class ProductManagerImpl implements ProductManager {
                               ServiceManager serviceManager, PlatformManager platformManager,
                               AlertDefinitionXmlParser alertDefinitionXmlParser,
                               PluginAuditFactory pluginAuditFactory,
-                              ResourceManager resourceManager) {        
+                              ResourceManager resourceManager, ResourceTypeDao resourceTypeDao) {        
         this.pluginDao = pluginDao;
         this.alertDefinitionManager = alertDefinitionManager;
         this.cPropManager = cPropManager;
@@ -120,6 +125,7 @@ public class ProductManagerImpl implements ProductManager {
         this.alertDefinitionXmlParser = alertDefinitionXmlParser;
         this.pluginAuditFactory = pluginAuditFactory;
         this.resourceManager = resourceManager;
+        this.resourceTypeDao = resourceTypeDao;
     }
 
     /**
@@ -282,37 +288,77 @@ public class ProductManagerImpl implements ProductManager {
 
         // Get the Appdef entities
         TypeInfo[] entities = pplugin.getTypes();
-        if (entities == null) {
-            log.info(pluginName + " does not define any resource types");
+        
+        if (entities != null && entities.length == 0) {
+            log.info(pluginName + " does not define any resource types in xml");
+
             updatePlugin(pluginDao, pInfo);
+            
+            if (pplugin instanceof FlexibleProductPlugin) {
+            	processResourceTypeRelationships(((FlexibleProductPlugin) pplugin).generateResourceTypeHierarchy());
+            }
+
             if (created) {
                 pluginAuditFactory.deployAudit(pluginName, start, System.currentTimeMillis());
             } else {
                 pluginAuditFactory.updateAudit(pluginName, start, System.currentTimeMillis());
             }
+            
             return;
-        }
-
-        Audit audit;
-        boolean pushed = false;
-
-        if (created) {
-            audit = pluginAuditFactory.deployAudit(pluginName, start, start);
         } else {
-            audit = pluginAuditFactory.updateAudit(pluginName, start, start);
-        }
-
-        try {
-            auditManager.pushContainer(audit);
-            pushed = true;
-            updatePlugin(pluginName);
-        } finally {
-            if (pushed) {
-                auditManager.popContainer(true);
-            }
-        }
+	        Audit audit;
+	        boolean pushed = false;
+	     
+	        if (created) {
+	            audit = pluginAuditFactory.deployAudit(pluginName, start, System.currentTimeMillis());
+	        } else {
+	            audit = pluginAuditFactory.updateAudit(pluginName, start, System.currentTimeMillis());
+	        }
+	        
+	        try {
+	            auditManager.pushContainer(audit);
+	            pushed = true;
+	            updatePlugin(pluginName);
+	        } catch(Exception e) {
+	        	e.printStackTrace();
+	        } finally {
+	            if (pushed) {
+	                auditManager.popContainer(true);
+	            }
+	        }
+        }        
     }
 
+    @Transactional
+    private void processResourceTypeRelationships(ResourceTypeRelationships relationships) {
+    	Map<String, ResourceType> lookup = new HashMap<String, ResourceType>();
+    	
+    	for (org.hyperic.hq.pdk.domain.ResourceType rt : relationships.getResourceTypes()) {
+    		ResourceType entity = resourceTypeDao.findByName(rt.getName());
+    		
+    		if (entity == null) {
+    			Plugin plugin = pluginDao.findByName(rt.getPluginName());
+    			entity = resourceTypeDao.create(rt, plugin);
+    		}
+    		
+    		lookup.put(rt.getName(), entity);
+    	}
+    	
+    	for (Triple triple : relationships.getRelationships()) {
+    		ResourceType subject;
+    		
+    		if (triple.getSubject() == null) {
+    			subject = resourceTypeDao.findRoot();
+    		} else {
+    			subject = lookup.get(triple.getSubject());
+    		}
+    		
+    		ResourceType object = lookup.get(triple.getObject());
+    		
+    		subject.relateTo(object, triple.getPredicate());
+    	}
+    }
+    
     /**
      * @param pluginName The name of the product plugin
      * @param serviceTypes The Set of {@link ServiceType}s to update

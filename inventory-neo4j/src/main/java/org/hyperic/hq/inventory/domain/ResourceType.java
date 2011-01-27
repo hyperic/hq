@@ -64,17 +64,17 @@ public class ResourceType {
     private String description;
 
     @RelatedTo(type = RelationshipTypes.HAS_OPERATION_TYPE, direction = Direction.OUTGOING, elementClass = OperationType.class)
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany
     @Transient
     private Set<OperationType> operationTypes;
 
     @RelatedTo(type = RelationshipTypes.HAS_PROPERTY_TYPE, direction = Direction.OUTGOING, elementClass = PropertyType.class)
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany
     @Transient
     private Set<PropertyType> propertyTypes;
 
     @RelatedTo(type = RelationshipTypes.HAS_CONFIG_OPT_TYPE, direction = Direction.OUTGOING, elementClass = ConfigOptionType.class)
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany
     @Transient
     private Set<ConfigOptionType> configTypes;
 
@@ -84,7 +84,7 @@ public class ResourceType {
     private Plugin plugin;
 
     @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.INCOMING, elementClass = Resource.class)
-    @OneToMany(cascade = CascadeType.REMOVE)
+    @OneToMany
     @Transient
     private Set<Resource> resources;
 
@@ -94,7 +94,7 @@ public class ResourceType {
 
     public ResourceType() {
     }
-
+    
     @Transactional
     public void flush() {
         this.entityManager.flush();
@@ -379,7 +379,27 @@ public class ResourceType {
     }
     
     public void addPropertyType(PropertyType propertyType) {
+        propertyType.setResourceType(this);
+        
+        if (propertyTypes == null) {
+            propertyTypes = new HashSet<PropertyType>();
+        }
+        
         propertyTypes.add(propertyType);
+    }
+    
+    public void addOperationType(OperationType operationType) {
+        operationType.setResourceType(this);
+        
+        if (operationTypes == null) {
+            operationTypes = new HashSet<OperationType>();
+        }
+        
+        operationTypes.add(operationType);
+    }
+    
+    public void setOperationTypes(Set<OperationType> operationTypes) {
+        this.operationTypes = operationTypes;
     }
 
     public Plugin getPlugin() {
@@ -388,6 +408,23 @@ public class ResourceType {
 
     public void setPlugin(Plugin plugin) {
         this.plugin = plugin;
+    }
+    
+    public String getRelationshipTypeName(ResourceType otherEntity) {
+        String result = null;
+      
+        if (otherEntity != null) {
+            for (org.neo4j.graphdb.Relationship relationship : getUnderlyingState().getRelationships()) {
+                if (relationship.getStartNode().equals(this.getUnderlyingState()) && 
+                    relationship.getEndNode().equals(otherEntity.getUnderlyingState())) {
+                    result = relationship.getType().name();
+                    
+                    break;
+                }
+            }
+        }
+        
+        return result;
     }
     
     public String toString() {

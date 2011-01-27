@@ -1,11 +1,9 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
-<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <div id="loginPanel" dojoType="dijit.Dialog">
-	<form id="loginForm" name="loginForm" action="<html:rewrite page="/j_spring_security_check" />" method="POST">
+	<form id="loginForm" name="loginForm" action="<spring:url value="/j_spring_security_check" />" method="POST">
 		<div class="fieldsetTitle"><fmt:message key="login.signin.message" /></div>
 		<div class="fieldsetNote"><fmt:message key="login.signin.instructions" /></div>
 		<fieldset>
@@ -14,7 +12,7 @@
 					<div class="msgPanel msgError">
 						<c:choose>
 							<c:when test="${not empty errorMessage}">
-								<c:out value="${errorMessage}" />
+								${errorMessage}
 							</c:when>
 							<c:otherwise>
 								<fmt:message key="login.error.login" />								
@@ -42,8 +40,7 @@
 		</fieldset>
 	</form>
 </div>
-<script src="http://ajax.googleapis.com/ajax/libs/dojo/1.5/dojo/dojo.xd.js" type="text/javascript"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" type="text/javascript"></script>
+<script src="<spring:url value="/static/js/dojo/1.5/dojo/dojo.js" />" type="text/javascript"></script>
 <script>
 	dojo.require("dijit.Dialog");
 	
@@ -66,7 +63,7 @@
 				var username = dojo.byId("usernameInput");
 				var password = dojo.byId("passwordInput");
 
-				username.value = "<c:out value="${guestUsername}" />";
+				username.value = "${guestUsername}";
 				document.forms["loginForm"]["submit"].click();
 				username.disabled = true;
 				password.disabled = true;

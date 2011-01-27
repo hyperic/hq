@@ -28,7 +28,6 @@ package org.hyperic.hq.plugin.vsphere;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,28 +35,10 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.hqapi1.AgentApi;
-import org.hyperic.hq.hqapi1.HQApi;
-import org.hyperic.hq.hqapi1.ResourceApi;
-import org.hyperic.hq.hqapi1.ResourceEdgeApi;
-import org.hyperic.hq.hqapi1.XmlUtil;
-import org.hyperic.hq.hqapi1.types.Agent;
-import org.hyperic.hq.hqapi1.types.AgentResponse;
-import org.hyperic.hq.hqapi1.types.AgentsResponse;
-import org.hyperic.hq.hqapi1.types.Resource;
-import org.hyperic.hq.hqapi1.types.ResourceConfig;
-import org.hyperic.hq.hqapi1.types.ResourceEdge;
-import org.hyperic.hq.hqapi1.types.ResourceFrom;
-import org.hyperic.hq.hqapi1.types.ResourceInfo;
-import org.hyperic.hq.hqapi1.types.ResourceProperty;
-import org.hyperic.hq.hqapi1.types.ResourcePrototype;
-import org.hyperic.hq.hqapi1.types.ResourcePrototypeResponse;
-import org.hyperic.hq.hqapi1.types.ResourceTo;
-import org.hyperic.hq.hqapi1.types.ResourcesResponse;
-import org.hyperic.hq.hqapi1.types.Response;
-import org.hyperic.hq.hqapi1.types.ResponseStatus;
-import org.hyperic.hq.hqapi1.types.StatusResponse;
+
+import org.hyperic.hq.pdk.domain.Agent;
+import org.hyperic.hq.pdk.domain.Resource;
+import org.hyperic.hq.pdk.domain.ResourceType;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
@@ -87,19 +68,10 @@ import com.vmware.vim25.mo.VirtualMachine;
  * HQApi based auto-discovery for vSphere Host and VM platform types. 
  */
 public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector {
-
-    //duplicating these constants as our build only depends on the pdk
-   
+    //duplicating these constants as our build only depends on the pdk   
     static final String AGENT_IP = "agent.setup.agentIP";
     static final String AGENT_PORT = "agent.setup.agentPort";
     static final String AGENT_UNIDIRECTIONAL = "agent.setup.unidirectional";
-
-   // static final String VC_TYPE = AuthzConstants.serverPrototypeVmwareVcenter;
-    //static final String VM_TYPE = AuthzConstants.platformPrototypeVmwareVsphereVm;
-    //static final String HOST_TYPE = AuthzConstants.platformPrototypeVmwareVsphereHost;
-    static final String VC_TYPE = "VMware vCenter";
-    static final String VM_TYPE = "VMware vSphere VM";
-    static final String HOST_TYPE = "VMware vSphere Host";
     static final String ESX_HOST = "esxHost";
 
     private static final Log log =
@@ -107,69 +79,16 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
     private static final boolean isDump =
         "true".equals(System.getProperty("vsphere.dump"));
 
-    private void assertSuccess(Response response, String msg, boolean abort)
-        throws PluginException {
-
-        if (ResponseStatus.SUCCESS.equals(response.getStatus())) {
-            return;
-        }
-        String reason;
-        if (response.getError() == null) {
-            reason = "unknown";
-        }
-        else {
-            reason = response.getError().getReasonText();
-        }
-        msg += ": " + reason;
-        if (abort) {
-            throw new PluginException(msg);
-        }
-        else {
-            log.error(msg);
-        }
-    }
-
-
-    private Agent getAgent(HQApi hqApi, Properties props)
-        throws IOException, PluginException {
-
-        AgentApi api = hqApi.getAgentApi();
+    private Agent getAgent(RestApi api, Properties props) throws IOException, PluginException {
         String host = props.getProperty(AGENT_IP);
-        String port = props.getProperty(AGENT_PORT, "2144");
-        String unidirectional = props.getProperty(AGENT_UNIDIRECTIONAL, "NO").toUpperCase();
-
-        if (host != null) {
-            if (unidirectional.equals("Y")
-                    || unidirectional.equals("YES")) {
-                port = "-1";
-            }
-            String msg = "getAgent(" + host + "," + port + ")";
-            AgentResponse response = api.getAgent(host, Integer.parseInt(port));
-            assertSuccess(response, msg, true);
-            log.debug(msg + ": ok");
-            return response.getAgent();
+        Integer port = Integer.valueOf(props.getProperty(AGENT_PORT, "2144"));
+        String unidirectional = props.getProperty(AGENT_UNIDIRECTIONAL, "NO");
+        
+        if (unidirectional.equalsIgnoreCase("Y") || unidirectional.equalsIgnoreCase("YES")) {
+            port = -1;
         }
-        else { //XXX try harder to find the agent running this plugin.
-            AgentsResponse response = api.getAgents();
-            assertSuccess(response, "getAgents()", true);
-            List<Agent> agents = response.getAgent();
-            if (agents.size() == 0) {
-                throw new PluginException("No agents available");
-            }
-            Agent agent = agents.get(0);
-            log.debug("Using agent: " + agent.getAddress() + ":" + agent.getPort());
-            return agents.get(0);
-        }
-    }
-
-    private void dump(Collection<? extends Resource> resources) {
-        ResourcesResponse rr = new ResourcesResponse();
-        rr.getResource().addAll(resources);
-        try {
-            XmlUtil.serialize(rr, System.out, Boolean.TRUE);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        
+        return api.getAgent(host, port);
     }
 
     //XXX might want to store these in memory rather than
@@ -188,21 +107,7 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
         }
     }
 
-    private ResourcePrototype getResourceType(String name, HQApi hqApi)
-        throws IOException, PluginException {
-
-        ResourceApi api = hqApi.getResourceApi();
-        ResourcePrototypeResponse rpr =
-            api.getResourcePrototype(name);
-        assertSuccess(rpr, "getResourcePrototype(" + name + ")", true);
-        ResourcePrototype type = rpr.getResourcePrototype();
-        log.debug("'" + name + "' id=" + type.getId());
-        return type;
-    }
-
-    private VSphereResource discoverVM(VirtualMachine vm)
-        throws Exception {
-
+    private VSphereResource discoverVM(VirtualMachine vm) throws Exception {
         VirtualMachineConfigInfo info = vm.getConfig();
 
         if (info.isTemplate()) {
@@ -212,56 +117,71 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
         VirtualMachineRuntimeInfo runtime = vm.getRuntime();
         GuestInfo guest = vm.getGuest();
         ResourcePool pool = vm.getResourcePool();
-
         VSphereResource platform = new VSphereResource();
         String uuid = info.getUuid();
+        
         platform.setName(generatePlatformName(info.getName(), uuid));
         platform.setFqdn(uuid);
         platform.setDescription(info.getGuestFullName());
 
         ConfigResponse config = new ConfigResponse();
+        
         config.setValue(VSphereVmCollector.PROP_VM, info.getName());
         config.setValue(VSphereCollector.PROP_UUID, uuid);
         platform.addConfig(config);
+        
         //ConfigInfo
         ConfigResponse cprops = new ConfigResponse();
         VirtualMachineFileInfo files = info.getFiles();
+        
         cprops.setValue(ProductPlugin.PROP_INSTALLPATH, files.getVmPathName());
         cprops.setValue("guestOS", info.getGuestFullName());
         cprops.setValue("version", info.getVersion());
+        
         //HardwareInfo
         VirtualHardware hw = info.getHardware();
+        
         cprops.setValue("numvcpus", hw.getNumCPU());
         cprops.setValue("memsize", hw.getMemoryMB());
+        
         //ToolsInfo
         ToolsConfigInfo tools = info.getTools();
         Integer toolsVersion = tools.getToolsVersion();
+        
         if (toolsVersion != null) {
             cprops.setValue("toolsVersion", toolsVersion.toString());
         }
+        
         //PoolInfo
         cprops.setValue("pool", (String)pool.getPropertyByPath("name"));
 
         String state = runtime.getPowerState().toString();
+        
         if ("poweredOn".equalsIgnoreCase(state)) {
             String name;
+        
             if ((name = guest.getHostName()) != null) {
                 cprops.setValue("hostName", name);
             }
+            
             //NetInfo
             GuestNicInfo[] nics = guest.getNet();
+            
             if (nics != null) {
                 for (int i=0; i<nics.length; i++) {
                     String mac = nics[i].getMacAddress();
+            
                     if (mac.equals("00:00:00:00:00:00")) {
-                        log.info("Skipping " + VM_TYPE + "[name=" + info.getName()
+                        log.info("Skipping " + Constants.VMWARE_VSPHERE_VM + "[name=" + info.getName()
                           + ", UUID=" + uuid
                           + ", NIC=" + nics[i].getIpAddress()
                           + ", MAC=" + mac
                           + "]. Will be re-discovered when the MAC address is valid.");
                         return null;
                     }
+                    
                     String[] ips = nics[i].getIpAddress();
+                    
                     if ((mac != null) && (ips != null) && (ips.length != 0)) {
                         cprops.setValue("macAddress", mac);
                         cprops.setValue("ip", ips[0]);
@@ -269,16 +189,19 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
                     }
                 }
             }
+            
+            /*
             if (platform.getIp().isEmpty()) {
-                log.info("Skipping " + VM_TYPE + "[name=" + info.getName()
+                log.info("Skipping " + Constants.VMWARE_VSPHERE_VM + "[name=" + info.getName()
                     + ", UUID=" + uuid
                     + "] because the MAC address does not exist. "
                     + "Will be re-discovered when the MAC address is valid.");
                 return null;
             }
+            */
         }
         else {
-            log.info("Skipping " + VM_TYPE + "[name=" + info.getName() 
+            log.info("Skipping " + Constants.VMWARE_VSPHERE_VM + "[name=" + info.getName() 
                 + ", UUID=" + uuid
                 + ", powerState=" + state + "]. "
                 + "Will be re-discovered when it is powered on.");
@@ -286,6 +209,7 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
         }
 
         ManagedObjectReference hmor = runtime.getHost();
+
         if (hmor != null) {
             HostSystem host = new HostSystem(vm.getServerConnection(), hmor);
             cprops.setValue(ESX_HOST, host.getName());
@@ -294,7 +218,7 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
         platform.addProperties(cprops);
         
         if (log.isDebugEnabled()) {
-            log.debug("Discovered " + VM_TYPE + "[name=" + info.getName()
+            log.debug("Discovered " + Constants.VMWARE_VSPHERE_VM + "[name=" + info.getName()
                           + ", UUID=" + uuid
                           + ", powerState=" + state + "]");
         }
@@ -302,11 +226,7 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
         return platform;
     }
     
-   
-
-    private VSphereHostResource discoverHost(HostSystem host)
-        throws Exception {
-
+    private VSphereHostResource discoverHost(HostSystem host) throws Exception {
         HostRuntimeInfo runtime = host.getRuntime();
         String powerState = runtime.getPowerState().toString();
         
@@ -314,9 +234,10 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
             // an unknown power state could indicate that the host
             // is disconnected from vCenter
             if (log.isDebugEnabled()) {
-                log.debug("Skipping " + HOST_TYPE + "[name=" + host.getName() 
+                log.debug("Skipping " + Constants.VMWARE_VSPHERE_HOST + "[name=" + host.getName() 
                               + ", powerState=" + powerState + "]");
             }
+            
             return null;
         }
         
@@ -326,8 +247,8 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
         HostHardwareSummary hw = host.getSummary().getHardware();
         String address = null;
         VSphereHostResource platform = new VSphereHostResource();
-
         String uuid = hw.getUuid();
+        
         platform.setName(generatePlatformName(host.getName(), uuid));
         platform.setDescription(about.getFullName());
         platform.setFqdn(uuid);
@@ -336,6 +257,7 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
             try {
                 // Host name may be the IP address
                 InetAddress inet = InetAddress.getByName(host.getName());
+        
                 address = inet.getHostAddress();
             } catch (Exception e) {
                 if (log.isDebugEnabled()) {
@@ -346,7 +268,9 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
             for (HostVirtualNic nic : netinfo.getVnic()) {
                 HostVirtualNicSpec spec = nic.getSpec();
                 HostIpConfig ip = spec.getIp();
+                
                 platform.addIp(ip.getIpAddress(), ip.getSubnetMask(), spec.getMac());
+                
                 if (address == null) {
                     address = ip.getIpAddress();
                 }
@@ -354,20 +278,26 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
         }
 
         ConfigResponse cprops = new ConfigResponse();
+
         cprops.setValue("version", about.getVersion());
         cprops.setValue("build", about.getBuild());
+        
         if (address != null) {
             cprops.setValue("ip", address);
         }
+        
         cprops.setValue("defaultGateway", netinfo.getIpRouteConfig().getDefaultGateway());
 
         String[] dns = netinfo.getDnsConfig().getAddress();
+        
         if (dns != null) {
             String[] dnsProps = { "primaryDNS", "secondaryDNS" };
+        
             for (int i=0; i<dnsProps.length; i++) {
                 if (i >= dns.length) {
                     break;
                 }
+            
                 cprops.setValue(dnsProps[i], dns[i]);
             }
         }
@@ -380,11 +310,11 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
 
         ManagedEntity mor = host.getParent();
         String prev = null;
+
         while (true) {
             if (mor.getName().equals("Datacenters")) {
                 cprops.setValue("parent", prev); //Data Center
-            }
-            else {
+            } else {
                 prev = mor.getName();
             }
 
@@ -398,7 +328,7 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
         platform.addConfig(VSphereCollector.PROP_UUID, uuid);
 
         if (log.isDebugEnabled()) {
-            log.debug("Discovered " + HOST_TYPE + "[name=" + host.getName() 
+            log.debug("Discovered " + Constants.VMWARE_VSPHERE_HOST + "[name=" + host.getName() 
                           + ", UUID=" + uuid
                           + ", powerState=" + powerState + "]");
         }
@@ -406,12 +336,11 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
         return platform;
     }
 
-    private List<Resource> discoverHosts(Agent agent, HQApi hqApi, VSphereUtil vim, Properties props)
-        throws IOException, PluginException {
-
+    private List<Resource> discoverHosts(RestApi api, Agent agent, VSphereUtil vim, Properties props)
+    throws IOException, PluginException {
         List<Resource> resources = new ArrayList<Resource>();
-        ResourcePrototype hostType = getResourceType(HOST_TYPE, hqApi);
-        ResourcePrototype vmType = getResourceType(VM_TYPE, hqApi);
+        ResourceType hostType =  api.getResourceType(Constants.VMWARE_VSPHERE_HOST);
+        ResourceType vmType = api.getResourceType(Constants.VMWARE_VSPHERE_VM);
 
         try {
             ManagedEntity[] hosts = vim.find(VSphereUtil.HOST_SYSTEM);
@@ -424,23 +353,28 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
                 }
 
                 HostSystem host = (HostSystem)hosts[i];
+                
                 try {
                     VSphereHostResource platform = discoverHost(host);
-                    if (platform == null) {
-                        continue;
-                    }
-                    platform.setResourcePrototype(hostType);
+                    
+                    if (platform == null) continue;
+                    
+                    platform.setType(hostType);
                     platform.setAgent(agent);
+                    
                     mergeVSphereConfig(platform, props);
                     
                     VirtualMachine[] hostVms = host.getVms();
                    
                     for (int v=0; v<hostVms.length; v++) {
                         VSphereResource vm = discoverVM(hostVms[v]);
+                        
                         if (vm != null) {
-                            vm.setResourcePrototype(vmType);
+                            vm.setType(vmType);
                             vm.setAgent(agent);
+                            
                             mergeVSphereConfig(vm, props);
+                            
                             platform.getVirtualMachines().add(vm);
                         }
                     }
@@ -457,11 +391,9 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
         return resources;
     }
 
-    public void discoverPlatforms(Properties props, HQApi hqApi, VSphereUtil vim)
-        throws IOException, PluginException {
-        
+    public void discoverPlatforms(RestApi api, Properties props, VSphereUtil vim) throws IOException, PluginException {
         String vCenterUrl = VSphereUtil.getURL(props);
-        Resource vCenter = getVCenterServer(vCenterUrl,hqApi);
+        Resource vCenter = getVCenterServer(api, vCenterUrl);
         
         if (vCenter == null) {
             if (log.isDebugEnabled()) {
@@ -469,53 +401,44 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
                             + "No VMware vCenter server found with url=" 
                             + vCenterUrl);
             }
+            
             return;
         }
-        
-   
-            Agent agent = getAgent(hqApi, props);
-            List<Resource> hosts = discoverHosts(agent,hqApi, vim, props);
-          
-            List<Resource> vms = new ArrayList<Resource>();
-            Map<String, List<Resource>> vcHostVms = new HashMap<String, List<Resource>>();
+       
+        Agent agent = getAgent(api, props);
+        List<Resource> hosts = discoverHosts(api, agent, vim, props);
+        List<Resource> vms = new ArrayList<Resource>();
+        Map<String, List<Resource>> vcHostVms = new HashMap<String, List<Resource>>();
             
-            
-            for (Resource r : hosts) {
-                VSphereHostResource h = (VSphereHostResource) r;
-                vms.addAll(h.getVirtualMachines());
-               
-                String esxHost = getEsxHost(r);
-                if (esxHost != null) {
-                    vcHostVms.put(esxHost, h.getVirtualMachines());
-                }
-            }
-            
-            if (isDump) {
-                dump(vms);
-                dump(hosts);
-            }
-            else {
-                ResourceApi api = hqApi.getResourceApi();
-
-                StatusResponse response;
-                response = api.syncResources(vms);
-                assertSuccess(response, "sync " + vms.size() + " VMs", false);
-                response = api.syncResources(hosts);
-                assertSuccess(response, "sync " + hosts.size() + " Hosts", false);
+        for (Resource resource : hosts) {
+        	VSphereHostResource host = (VSphereHostResource) resource;
                 
-              	Map<String, Resource> existingHosts = new HashMap<String, Resource>();
-                Map<String, List<Resource>> existingHostVms = new HashMap<String, List<Resource>>();
-                syncResourceEdges(existingHosts,existingHostVms, props,hqApi);
-                removePlatformsFromInventory(vcHostVms, existingHosts, existingHostVms,vim,hqApi);
+            vms.addAll(host.getVirtualMachines());
+               
+            String esxHost = getEsxHost(resource);
+
+            if (esxHost != null) {
+            	vcHostVms.put(esxHost, host.getVirtualMachines());
             }
-        
+            
+            // Create host
+            api.createResource(resource);
+        }
+
+        // Create vms
+        api.createResources(vms);
+            
+        Map<String, Resource> existingHosts = new HashMap<String, Resource>();
+        Map<String, List<Resource>> existingHostVms = new HashMap<String, List<Resource>>();
+
+        syncResourceEdges(api, existingHosts, existingHostVms, props);
+        removePlatformsFromInventory(api, vcHostVms, existingHosts, existingHostVms, vim);
     }
      
-    private void syncResourceEdges(Map<String, Resource> existingHosts, Map<String, List<Resource>> existingHostVms, Properties props, HQApi hqApi ) 
-        throws IOException, PluginException {
-
+    private void syncResourceEdges(RestApi api, Map<String, Resource> existingHosts, Map<String, List<Resource>> existingHostVms, Properties props) 
+    throws IOException, PluginException {
         String vCenterUrl = VSphereUtil.getURL(props);
-        Resource vCenter = getVCenterServer(vCenterUrl,hqApi);
+        Resource vCenter = getVCenterServer(api, vCenterUrl);
 
         if (vCenter == null) {
             if (log.isDebugEnabled()) {
@@ -523,209 +446,153 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
                             + "No VMware vCenter server found with url=" 
                             + vCenterUrl);
             }
+            
             return;
         }
-        synchVCenterServerToHostResourceEdges(vCenter, existingHosts,props,hqApi);
-        ResourcePrototype vmType = getResourceType(VM_TYPE,hqApi);
-        ResourcesResponse vmResponse = hqApi.getResourceApi().getResources(vmType, true, false);
-        assertSuccess(vmResponse, "Getting all " + VM_TYPE, false);
-
-        synchHostToVmResourceEdges(existingHostVms, existingHosts, vmResponse.getResource(),props,hqApi); 
+        
+        synchVCenterServerToHostResourceEdges(api, vCenter, existingHosts, props);
+        
+        List<Resource> resources = api.getResourcesByTypeName(Constants.VMWARE_VSPHERE_VM);
+        
+        synchHostToVmResourceEdges(api, existingHostVms, existingHosts, resources, props); 
     }
     
-    private void synchVCenterServerToHostResourceEdges(Resource vCenter, Map<String, Resource> existingHosts, Properties props, HQApi hqApi ) throws IOException, PluginException{
+    private void synchVCenterServerToHostResourceEdges(RestApi api, Resource vCenter, Map<String, Resource> existingHosts, Properties props) 
+    throws IOException, PluginException{
         String vCenterUrl = VSphereUtil.getURL(props);
-        ResourceApi rApi = hqApi.getResourceApi();
-        ResourceEdgeApi reApi = hqApi.getResourceEdgeApi();
-        ResourcePrototype hostType = getResourceType(HOST_TYPE,hqApi);
-        ResourcesResponse hostResponse = rApi.getResources(hostType, true, false);
-        assertSuccess(hostResponse, "Getting all " + HOST_TYPE, false);
+        List<Resource> hosts = new ArrayList<Resource>();
 
-        List<ResourceEdge> edges = new ArrayList<ResourceEdge>();
-        ResourceEdge edge = new ResourceEdge();
-        ResourceFrom fromVcenter = new ResourceFrom();
-        ResourceTo toHosts = new ResourceTo();
-       
+        for (Resource resource : api.getResourcesByTypeName(Constants.VMWARE_VSPHERE_HOST)) {
+            if (isVCenterManagedEntity(vCenterUrl, resource)) {
+                Resource full = api.getResourceById(resource.getId());
 
-        for (Resource r : hostResponse.getResource()) {
-            if (isVCenterManagedEntity(vCenterUrl, r)) {
-                toHosts.getResource().add(r);
-                String esxHost = getEsxHost(r);
+            	hosts.add(full);
+
+                String esxHost = getEsxHost(full);
+                
                 if (esxHost != null) {
-                    existingHosts.put(esxHost, r);
+                    existingHosts.put(esxHost, full);
                 }
             }
         }
         
-        fromVcenter.setResource(vCenter);
-        edge.setRelation("virtual");
-        edge.setResourceFrom(fromVcenter);
-        edge.setResourceTo(toHosts);
-        edges.add(edge);
-
-        if (log.isDebugEnabled()) {
-            log.debug("Syncing resource edges for vCenter[name=" + vCenter.getName()
-                        + ", resourceId=" + vCenter.getId()
-                        + "] with " + toHosts.getResource().size() + " hosts.");
-        }
-
-        StatusResponse syncResponse = reApi.syncResourceEdges(edges);
-        assertSuccess(syncResponse, "Sync vCenter and host edges", false);
+        api.makeRelationship(vCenter, hosts);
     }
      
-    private void synchHostToVmResourceEdges( Map<String, List<Resource>> existingHostVms,  Map<String, Resource> existingHosts, List<Resource> vms, Properties props, HQApi hqApi) throws IOException, PluginException {
+    private void synchHostToVmResourceEdges(RestApi api, Map<String, List<Resource>> existingHostVms,  Map<String, Resource> existingHosts, List<Resource> vms, Properties props) 
+    throws IOException, PluginException {
         String vCenterUrl = VSphereUtil.getURL(props);
-        List<ResourceEdge> hostToVmEdges  = new ArrayList<ResourceEdge>();
+        
+        for (Resource resource : vms) {
+            if (isVCenterManagedEntity(vCenterUrl, resource)) {
+            	Resource full = api.getResourceById(resource.getId());
 
-        for (Resource r : vms) {
-            if (isVCenterManagedEntity(vCenterUrl, r)) {
-                String esxHost = getEsxHost(r);
+            	String esxHost = getEsxHost(full);
                 List<Resource> vmResources = existingHostVms.get(esxHost);
+                
                 if (vmResources == null) {
                     vmResources = new ArrayList<Resource>();
                     existingHostVms.put(esxHost, vmResources);
                 }
-                vmResources.add(r);
+                
+                vmResources.add(full);
             }
         }
                 
-        for (Resource r : existingHosts.values()) {
-            ResourceFrom parent = new ResourceFrom();
-            parent.setResource(r);
-            
-            ResourceTo children = new ResourceTo();
-            String esxHost = getEsxHost(r);
-            List<Resource> vmResources = existingHostVms.get(esxHost);
-            if (vmResources != null) {
-                children.getResource().addAll(vmResources);
-            }
+        for (Resource host : existingHosts.values()) {
+            List<Resource> vmResources = existingHostVms.get(getEsxHost(host));
 
-            ResourceEdge rEdge = new ResourceEdge();
-            rEdge.setRelation("virtual");
-            rEdge.setResourceFrom(parent);
-            rEdge.setResourceTo(children);
-            hostToVmEdges.add(rEdge);
-            
-            if (log.isDebugEnabled()) {
-                log.debug("Syncing resource edges for host[name=" + r.getName()
-                            + ", resourceId=" + r.getId()
-                            + "] with " + children.getResource().size() + " VMs.");
+            if (vmResources != null) {
+            	api.makeRelationship(host, vmResources);
             }
         }
-        
-        StatusResponse syncResponse = hqApi.getResourceEdgeApi().syncResourceEdges(hostToVmEdges);
-        assertSuccess(syncResponse, "Sync host and VM edges", false);
     }
     
     /**
      *  Delete resources that have been manually removed from vCenter
      */
-    private void removePlatformsFromInventory(Map<String, List<Resource>> vcHosts, 
-                                    Map<String, Resource> existingHosts, Map<String, List<Resource>> existingHostVms, VSphereUtil vim, HQApi hqApi)  throws IOException, PluginException {
-        //
-        for (String hostName : existingHostVms.keySet()) {
+    private void removePlatformsFromInventory(RestApi api,
+    	Map<String, List<Resource>> vcHosts, 
+        Map<String, Resource> existingHosts, 
+        Map<String, List<Resource>> existingHostVms, 
+        VSphereUtil vim)  
+    throws IOException, PluginException {
+    	for (String hostName : existingHostVms.keySet()) {
             List<Resource> hqVms = existingHostVms.get(hostName);
             List<Resource> vcVms = vcHosts.get(hostName);
             
             if (vcVms == null) {
                 // not one of the hosts in vCenter
-                Resource r = existingHosts.get(hostName);
-                if (r != null) {
-                    removeHost(r,vim,hqApi);
+                Resource resource = existingHosts.get(hostName);
+                
+                if (resource != null) {
+                    removeHost(api, resource, vim);
                 }
             } else {
                 // vm names may be the same, so use fqdn (uuid) to
                 // determine whether vms should be deleted from hq
-                
                 List<String> vcVmFqdns = new ArrayList<String>();
-                for (Resource r : vcVms) {
-                    String fqdn = getFqdn(r);
+                
+                for (Resource resource : vcVms) {
+                    String fqdn = getFqdn(resource);
+                    
                     if (fqdn != null) {
                         vcVmFqdns.add(fqdn);
                     }
                 }
                 
-                for (Resource r : hqVms) {
-                    String fqdn = getFqdn(r);
+                for (Resource resource : hqVms) {
+                    String fqdn = getFqdn(resource);
+                    
                     if (fqdn != null && !vcVmFqdns.contains(fqdn)) {
                         // Not one of the powered-on VMs from vCenter
-                        removeVM(r,vim,hqApi);
+                        removeVM(api, resource, vim);
                     }
                 }
             }
         }
     }
 
-    private boolean isVCenterManagedEntity(String vCenterUrl, Resource r) {
-        boolean result = false;
+    private boolean isVCenterManagedEntity(String vCenterUrl, Resource resource) {
+        String vcUrl = (String) resource.getConfigs().get(VSphereUtil.PROP_URL);
         
-        for (ResourceConfig c : r.getResourceConfig()) {
-            if (VSphereUtil.PROP_URL.equals(c.getKey())) {
-                if (c.getValue().equals(vCenterUrl)) {
-                    result = true;
-                    break;
-                }
-            }
-        }
-        
-        return result;
+        // TODO get configs working...
+        return true; //vCenterUrl != null && vCenterUrl.equals(vcUrl);
     }
     
-    private Resource getVCenterServer(String vCenterUrl, HQApi hqApi)
-        throws IOException, PluginException {
+    private Resource getVCenterServer(RestApi api, String vCenterUrl) throws IOException, PluginException {
+    	Resource vCenter = null;        
         
-        if (vCenterUrl == null) {
-            return null;
-        }
-        
-        Resource vCenter = null;        
-        ResourceApi rApi = hqApi.getResourceApi();
-        ResourcePrototype vcType = getResourceType(VC_TYPE,hqApi);
-        ResourcesResponse vcResponse = rApi.getResources(vcType, true, false);
-        assertSuccess(vcResponse, "Getting all " + VC_TYPE, false);
-        
-        for (Resource r : vcResponse.getResource()) {
-            if (isVCenterManagedEntity(vCenterUrl, r)) {
-                vCenter = r;
-                break;
-            }
-        }
-        
+    	if (vCenterUrl != null) {
+	        List<Resource> resources = api.getResourcesByTypeName(Constants.VMWARE_VCENTER);
+	        
+	        for (Resource resource : resources) {
+	            if (isVCenterManagedEntity(vCenterUrl, resource)) {
+	                vCenter = resource;
+	                
+	                break;
+	            }
+	        }
+    	}        
+    	
         return vCenter;
     }
     
-    private String getEsxHost(Resource r) {
+    private String getEsxHost(Resource resource) {
         String esxHost = null;
-        String prototype = r.getResourcePrototype().getName();
+        String typeName = resource.getType().getName();
         
-        if (VM_TYPE.equals(prototype)) {
-            for (ResourceProperty p : r.getResourceProperty()) {
-                if (ESX_HOST.equals(p.getKey())) {
-                    esxHost = p.getValue();
-                    break;
-                }
-            }
-        } else if (HOST_TYPE.equals(prototype)) {
-            for (ResourceConfig c : r.getResourceConfig()) {
-                if (VSphereUtil.PROP_HOSTNAME.equals(c.getKey())) {
-                    esxHost = c.getValue();
-                    break;
-                }
-            }
+        if (Constants.VMWARE_VSPHERE_VM.equals(typeName)) {
+        	esxHost = (String) resource.getProperties().get(ESX_HOST);
+        } else if (Constants.VMWARE_VSPHERE_HOST.equals(typeName)) {
+        	esxHost = (String) resource.getConfigs().get(VSphereUtil.PROP_HOSTNAME);
         }
         
         return esxHost;
     }
 
-    private String getFqdn(Resource r) {
-        String fqdn = null;
-        for (ResourceInfo ri : r.getResourceInfo()) {
-            if ("fqdn".equals(ri.getKey())) {
-                fqdn = ri.getValue();
-                break;
-            }
-        }
-        return fqdn;
+    private String getFqdn(Resource resource) {
+        return (String) resource.getProperties().get(VSphereResource.FQDN);
     }
     
     /**
@@ -735,43 +602,40 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
         return name + " {" + uuid + "}";
     }
     
-    private void removeHost(Resource r, VSphereUtil vim, HQApi hqApi)
-        throws IOException, PluginException {
-        
+    private void removeHost(RestApi api, Resource resource, VSphereUtil vim) 
+    throws IOException, PluginException {
         try {
             // verify to see if it exists in vCenter
-            vim.findByUuid(VSphereUtil.HOST_SYSTEM, getFqdn(r));
+            vim.findByUuid(VSphereUtil.HOST_SYSTEM, getFqdn(resource));
             
             if (log.isDebugEnabled()) {
-                log.debug(HOST_TYPE + "[name=" + r.getName() 
+                log.debug(Constants.VMWARE_VSPHERE_HOST + "[name=" + resource.getName() 
                               + "] exists in vCenter. Not removing from HQ.");
             }
         } catch (ManagedEntityNotFoundException me) {
-            removeResource(r, hqApi);
+            removeResource(api, resource);
         }
     }
 
-    private void removeVM(Resource r, VSphereUtil vim, HQApi hqApi)
-        throws IOException, PluginException {
-    
+    private void removeVM(RestApi api, Resource resource, VSphereUtil vim) 
+    throws IOException, PluginException {
         try {
             // verify to see if it exists in vCenter
-            vim.findByUuid(VSphereUtil.VM, getFqdn(r));
+            vim.findByUuid(VSphereUtil.VM, getFqdn(resource));
             
             if (log.isDebugEnabled()) {
-                log.debug(VM_TYPE + "[name=" + r.getName() 
+                log.debug(Constants.VMWARE_VSPHERE_VM + "[name=" + resource.getName() 
                               + "] exists in vCenter. Not removing from HQ.");
             }
         } catch (ManagedEntityNotFoundException me) {
-            removeResource(r, hqApi);
+            removeResource(api, resource);
         }
     }
     
-    private void removeResource(Resource r, HQApi hqApi) 
-        throws IOException, PluginException {
-
+    private void removeResource(RestApi api, Resource resource) 
+    throws IOException, PluginException {
         if (log.isDebugEnabled()) {
-            log.debug("Managed entity (" + r.getName() + ") no longer exists in vCenter. "
+            log.debug("Managed entity (" + resource.getName() + ") no longer exists in vCenter. "
                          + " Removing from HQ inventory.");
         }
         
@@ -783,12 +647,9 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
             // Ignore
         }
 
-        ResourceApi rApi = hqApi.getResourceApi();
-
         // TODO: As a final step, need to check resource availability
         // (must be DOWN) before deleting.
         
-        StatusResponse deleteResponse = rApi.deleteResource(r.getId());
-        assertSuccess(deleteResponse, "Delete resource id=" + r.getId(), false);
+        api.deleteResource(resource.getId());
     }
 }
