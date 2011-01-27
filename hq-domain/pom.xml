@@ -14,11 +14,6 @@
 	<packaging>jar</packaging>
 	<name>Hyperic HQ - Domain Model</name>
 
-	<properties>
-		<datastore-graph.version>1.0.0.BUILD-SNAPSHOT</datastore-graph.version>
-	</properties>
-
-
 	<dependencies>
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
@@ -95,8 +90,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-datastore-neo4j</artifactId>
-			<version>${datastore-graph.version}</version>
+			<artifactId>spring-data-neo4j</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
@@ -310,7 +304,7 @@
 			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
 			</plugin>
-			<!--><plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>aspectj-maven-plugin</artifactId>
 				<version>1.0</version>
@@ -339,7 +333,7 @@
 					<aspectLibraries>
 						<aspectLibrary>
 							<groupId>org.springframework.data</groupId>
-							<artifactId>spring-datastore-neo4j</artifactId>
+							<artifactId>spring-data-neo4j</artifactId>
 						</aspectLibrary>
 					</aspectLibraries>
 					<source>1.5</source>
@@ -352,7 +346,7 @@
 				<configuration>
 					<skip>true</skip>
 				</configuration>
-			</plugin>-->
+			</plugin>
 		</plugins>
 		<resources>
 			<resource>

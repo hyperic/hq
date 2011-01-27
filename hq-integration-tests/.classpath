@@ -102,9 +102,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="var" path="M2_REPO/org/hibernate/javax/persistence/hibernate-jpa-2.0-api/1.0.0.Final/hibernate-jpa-2.0-api-1.0.0.Final.jar" sourcepath="M2_REPO/org/hibernate/javax/persistence/hibernate-jpa-2.0-api/1.0.0.Final/hibernate-jpa-2.0-api-1.0.0.Final-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-datastore-neo4j/1.0.0.BUILD-SNAPSHOT/spring-datastore-neo4j-1.0.0.BUILD-SNAPSHOT.jar" sourcepath="M2_REPO/org/springframework/data/spring-datastore-neo4j/1.0.0.BUILD-SNAPSHOT/spring-datastore-neo4j-1.0.0.BUILD-SNAPSHOT-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-commons-core/1.0.0.BUILD-SNAPSHOT/spring-data-commons-core-1.0.0.BUILD-SNAPSHOT.jar" sourcepath="M2_REPO/org/springframework/data/spring-data-commons-core/1.0.0.BUILD-SNAPSHOT/spring-data-commons-core-1.0.0.BUILD-SNAPSHOT-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-domain"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/inventory-jpa"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/inventory-neo4j"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

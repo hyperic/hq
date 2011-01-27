@@ -46,7 +46,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.OptimisticLock;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.server.session.Crispo;
-import org.springframework.datastore.graph.annotation.NodeEntity;
+import org.springframework.data.graph.annotation.NodeEntity;
 
 @Entity
 @Table(name="EAM_SUBJECT")

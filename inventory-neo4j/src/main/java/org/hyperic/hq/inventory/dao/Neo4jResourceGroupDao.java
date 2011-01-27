@@ -8,7 +8,7 @@ import javax.persistence.PersistenceContext;
 
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
-import org.springframework.datastore.graph.neo4j.finder.FinderFactory;
+import org.springframework.data.graph.neo4j.finder.FinderFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,8 +74,8 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
 
     @Transactional(readOnly = true)
     public ResourceGroup findByName(String name) {
-        ResourceGroup group = finderFactory.getFinderForClass(ResourceGroup.class)
-            .findByPropertyValue("name", name);
+        ResourceGroup group = finderFactory.createNodeEntityFinder(ResourceGroup.class)
+            .findByPropertyValue(null, "name",name);
 
         if (group != null) {
             group.getId();

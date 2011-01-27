@@ -1,9 +1,9 @@
 package org.hyperic.hq.inventory.domain;
 
 import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.datastore.graph.annotation.EndNode;
-import org.springframework.datastore.graph.annotation.RelationshipEntity;
-import org.springframework.datastore.graph.annotation.StartNode;
+import org.springframework.data.graph.annotation.EndNode;
+import org.springframework.data.graph.annotation.RelationshipEntity;
+import org.springframework.data.graph.annotation.StartNode;
 
 @Configurable
 @RelationshipEntity

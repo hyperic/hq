@@ -37,7 +37,7 @@ import javax.persistence.Version;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
-import org.springframework.datastore.graph.annotation.NodeEntity;
+import org.springframework.data.graph.annotation.NodeEntity;
 
 @Entity
 @Table(name="EAM_AGENT")

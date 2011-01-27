@@ -19,7 +19,6 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.product.Plugin;
-import org.hyperic.hq.reference.ConfigType;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
@@ -28,14 +27,13 @@ import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.TraversalPosition;
 import org.neo4j.graphdb.Traverser;
 import org.springframework.beans.factory.annotation.Configurable;
-
-import org.springframework.datastore.annotation.Indexed;
-import org.springframework.datastore.graph.annotation.GraphProperty;
-import org.springframework.datastore.graph.annotation.NodeEntity;
-import org.springframework.datastore.graph.annotation.RelatedTo;
-import org.springframework.datastore.graph.api.Direction;
-import org.springframework.datastore.graph.neo4j.support.GraphDatabaseContext;
-import org.springframework.datastore.graph.neo4j.support.SubReferenceNodeTypeStrategy;
+import org.springframework.data.annotation.Indexed;
+import org.springframework.data.graph.annotation.GraphProperty;
+import org.springframework.data.graph.annotation.NodeEntity;
+import org.springframework.data.graph.annotation.RelatedTo;
+import org.springframework.data.graph.core.Direction;
+import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
+import org.springframework.data.graph.neo4j.support.SubReferenceNodeTypeStrategy;
 import org.springframework.transaction.annotation.Transactional;
 
 @Entity

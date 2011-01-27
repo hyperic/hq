@@ -8,10 +8,10 @@ import javax.persistence.Transient;
 
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.reference.RelationshipTypes;
-import org.springframework.datastore.graph.annotation.GraphProperty;
-import org.springframework.datastore.graph.annotation.NodeEntity;
-import org.springframework.datastore.graph.annotation.RelatedTo;
-import org.springframework.datastore.graph.api.Direction;
+import org.springframework.data.graph.annotation.GraphProperty;
+import org.springframework.data.graph.annotation.NodeEntity;
+import org.springframework.data.graph.annotation.RelatedTo;
+import org.springframework.data.graph.core.Direction;
 
 @Entity
 @NodeEntity(partial = true)

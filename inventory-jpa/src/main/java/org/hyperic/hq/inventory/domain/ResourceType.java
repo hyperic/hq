@@ -21,7 +21,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.product.Plugin;
 import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.datastore.graph.api.Direction;
+import org.springframework.data.graph.core.Direction;
 import org.springframework.transaction.annotation.Transactional;
 
 @Entity

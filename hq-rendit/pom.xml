@@ -53,13 +53,13 @@
 					<skip>false</skip>
 				</configuration>
 			</plugin>
-			<plugin>
+			<!--><plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-eclipse-plugin</artifactId>
 				<configuration>
 					<skip>true</skip>
 				</configuration>
-			</plugin>
+			</plugin>-->
 			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
 			</plugin>

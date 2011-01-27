@@ -30,7 +30,7 @@ import org.hyperic.hq.reference.RelationshipTypes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.datastore.graph.api.Direction;
+import org.springframework.data.graph.core.Direction;
 import org.springframework.transaction.annotation.Transactional;
 
 @Configurable

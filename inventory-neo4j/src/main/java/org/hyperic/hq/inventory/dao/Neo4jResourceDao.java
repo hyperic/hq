@@ -9,7 +9,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.inventory.domain.Config;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
-import org.springframework.datastore.graph.neo4j.finder.FinderFactory;
+import org.springframework.data.graph.neo4j.finder.FinderFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -86,9 +86,7 @@ public class Neo4jResourceDao implements ResourceDao {
     @Transactional(readOnly = true)
     public Resource findByName(String name) {
         // Can't do JPA-style queries on property values that are only in graph
-        Resource resource = finderFactory.getFinderForClass(Resource.class)
-            .findByPropertyValue("name", name);
-
+        Resource resource = finderFactory.createNodeEntityFinder(Resource.class).findByPropertyValue(null, "name", name);
         if (resource != null) {
             resource.getId();
         }

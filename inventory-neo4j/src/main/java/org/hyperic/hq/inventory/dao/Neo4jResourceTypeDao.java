@@ -9,7 +9,7 @@ import javax.persistence.PersistenceContext;
 import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.product.Plugin;
-import org.springframework.datastore.graph.neo4j.finder.FinderFactory;
+import org.springframework.data.graph.neo4j.finder.FinderFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -77,8 +77,8 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
     @Transactional(readOnly = true)
     public ResourceType findByName(String name) {
         // Can't do JPA-style queries on property values that are only in graph
-        ResourceType type = finderFactory.getFinderForClass(ResourceType.class)
-            .findByPropertyValue("name", name);
+        ResourceType type = finderFactory.createNodeEntityFinder(ResourceType.class)
+            .findByPropertyValue(null, "name",name);
 
         if (type != null) {
             type.getId();

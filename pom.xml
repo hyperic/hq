@@ -52,6 +52,7 @@
 		<mail.version>1.4</mail.version>
 		<mx4j.version>3.0.1</mx4j.version>
 		<mysql.connector.version>5.1.10</mysql.connector.version>
+		<neo4j.version>1.2</neo4j.version>
 		<oro.version>2.0.8</oro.version>
 		<poi.version>3.0.1-FINAL</poi.version>
 		<postgresql.agent.driver.version>7.4.3</postgresql.agent.driver.version>
@@ -62,6 +63,7 @@
 		<sigar.version>1.6.4</sigar.version>
 		<slf4j.version>1.6.1</slf4j.version>
 		<snmp.version>1.11</snmp.version>
+		<spring-datastore-graph.version>1.0.0-Chrysalis</spring-datastore-graph.version>
 		<spring-framework.version>3.0.5.RELEASE</spring-framework.version>
 		<spring-security.version>3.0.0.RELEASE</spring-security.version>
 		<struts.version>1.3.10</struts.version>
@@ -222,6 +224,11 @@
             	<version>${hibernate.version}</version>
         	</dependency>
 			<dependency>
+				<groupId>org.neo4j</groupId>
+				<artifactId>neo4j</artifactId>
+				<version>${neo4j.version}</version>
+			</dependency>
+			<dependency>
             	<groupId>org.slf4j</groupId>
             	<artifactId>slf4j-api</artifactId>
             	<version>${slf4j.version}</version>
@@ -352,6 +359,11 @@
 				<groupId>org.springframework.roo</groupId>
 				<artifactId>org.springframework.roo.file.monitor.polling</artifactId>
 				<version>${roo.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.data</groupId>
+				<artifactId>spring-data-neo4j</artifactId>
+				<version>${spring-datastore-graph.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>oro</groupId>

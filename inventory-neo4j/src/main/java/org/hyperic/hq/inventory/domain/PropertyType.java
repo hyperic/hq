@@ -14,10 +14,10 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.datastore.graph.annotation.GraphProperty;
-import org.springframework.datastore.graph.annotation.NodeEntity;
-import org.springframework.datastore.graph.annotation.RelatedTo;
-import org.springframework.datastore.graph.api.Direction;
+import org.springframework.data.graph.annotation.GraphProperty;
+import org.springframework.data.graph.annotation.NodeEntity;
+import org.springframework.data.graph.annotation.RelatedTo;
+import org.springframework.data.graph.core.Direction;
 import org.springframework.transaction.annotation.Transactional;
 
 @Entity

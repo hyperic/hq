@@ -19,9 +19,9 @@ import org.neo4j.graphdb.ReturnableEvaluator;
 import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.TraversalPosition;
 import org.neo4j.graphdb.Traverser;
-import org.springframework.datastore.graph.annotation.NodeEntity;
-import org.springframework.datastore.graph.api.Direction;
-import org.springframework.datastore.graph.neo4j.support.GraphDatabaseContext;
+import org.springframework.data.graph.annotation.NodeEntity;
+import org.springframework.data.graph.core.Direction;
+import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
 import org.springframework.transaction.annotation.Transactional;
 
 @Entity

@@ -12,8 +12,8 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.datastore.graph.annotation.GraphProperty;
-import org.springframework.datastore.graph.annotation.NodeEntity;
+import org.springframework.data.graph.annotation.GraphProperty;
+import org.springframework.data.graph.annotation.NodeEntity;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
