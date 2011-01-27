@@ -27,6 +27,7 @@ package org.hyperic.hq.plugin.jboss;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -38,6 +39,7 @@ import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanInfo;
 import javax.management.MalformedObjectNameException;
 import javax.management.MBeanException;
+import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.management.RuntimeMBeanException;
@@ -59,8 +61,6 @@ import org.hyperic.hq.product.PluginException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.jboss.jmx.adaptor.rmi.RMIAdaptor;
 
 public class JBossUtil {
 
@@ -117,9 +117,9 @@ public class JBossUtil {
 
     private static Log log = LogFactory.getLog("JBossUtil");
 
-    public static RMIAdaptor getMBeanServer(Properties config)
+    public static MBeanServerConnection getMBeanServerConnection(Properties config)
         throws NamingException, RemoteException {
-        RMIAdaptor adaptor;
+        MBeanServerConnection adaptor;
 
         Properties props = new Properties();
 
@@ -138,8 +138,9 @@ public class JBossUtil {
         InitialContext ctx = new InitialContext(props);
 
         try {
-            adaptor = (RMIAdaptor)
-                ctx.lookup(props.getProperty(PROP_NAMING_CONNECTOR));
+            Object o=ctx.lookup(props.getProperty(PROP_NAMING_CONNECTOR));
+            log.debug("=> "+Arrays.asList(o.getClass().getInterfaces()));
+            adaptor = (MBeanServerConnection)o;
         } finally {
             ctx.close();
         }
@@ -150,25 +151,25 @@ public class JBossUtil {
     /*
      * @deprecated
      */
-    public static RMIAdaptor getMBeanServer(String url)
+    public static MBeanServerConnection getMBeanServerConnection(String url)
         throws NamingException, RemoteException {
 
         Properties config = new Properties();
         config.setProperty(Context.PROVIDER_URL, url);
-        return getMBeanServer(config);
+        return getMBeanServerConnection(config);
     }
 
     private static String getServerURL(Metric metric) {
         return metric.getProperties().getProperty(Context.PROVIDER_URL);
     }
 
-    public static RMIAdaptor getMBeanServer(Metric metric)
+    public static MBeanServerConnection getMBeanServerConnection(Metric metric)
         throws NamingException, RemoteException {
                     
-        return getMBeanServer(metric.getProperties());
+        return getMBeanServerConnection(metric.getProperties());
     }
 
-    //we only cache RemoteMBeanServer handles for measurements.
+    //we only cache RemoteMBeanServerConnection handles for measurements.
     //jndi lookup won't have much impact for control or discovery
     private static HashMap serverCache = new HashMap();
     // Maps attrNames to their lowercase equivalents.  After static initialization,
@@ -202,7 +203,7 @@ public class JBossUtil {
     private static MetricUnreachableException unreachable(Metric metric,
                                                           Exception e) {
         String msg =
-            "Can't connect to MBeanServer [" +
+            "Can't connect to MBeanServerConnection [" +
             metric.getPropString() + "]: " + e;
         return new MetricUnreachableException(msg, e);
     }
@@ -233,7 +234,7 @@ public class JBossUtil {
     //dealing with the attribute case change had been done with the HQ server
     //types JBoss 3.2 and JBoss 4.0, but then 3.2.8 threw that off by making
     //the same changes as 4.0
-    static void determineJSR77Case(String url, RMIAdaptor mServer) {
+    static void determineJSR77Case(String url, MBeanServerConnection mServer) {
         try {
             ObjectName server =
                 new ObjectName(ServerQuery.SERVER_NAME);
@@ -275,18 +276,18 @@ public class JBossUtil {
                MetricUnreachableException,
                PluginException {
 
-        RMIAdaptor mServer = null;
+        MBeanServerConnection mServer = null;
         boolean cached = true;
         String url = getServerURL(metric);
         
         synchronized (serverCache) {
-            mServer = (RMIAdaptor)serverCache.get(url);
+            mServer = (MBeanServerConnection)serverCache.get(url);
         }
 
         if (mServer == null) {
             cached = false;
             try {
-                mServer = getMBeanServer(metric); //jndi lookup
+                mServer = getMBeanServerConnection(metric); //jndi lookup
             } catch (NamingException e) {
                 throw unreachable(metric, e);
             } catch (RemoteException e) {
@@ -364,7 +365,7 @@ public class JBossUtil {
             	synchronized (serverCache) {
             		serverCache.remove(url);
             	}
-                log.debug("MBeanServer cache cleared for " + url); 
+                log.debug("MBeanServerConnection cache cleared for " + url);
                 return getRemoteMBeanValue(metric);
             }
             else {
@@ -373,7 +374,7 @@ public class JBossUtil {
         }
     }
 
-    static Double getJSR77Statistic(RMIAdaptor mServer,
+    static Double getJSR77Statistic(MBeanServerConnection mServer,
                                     ObjectName objName,
                                     Metric metric, boolean lc) 
         throws MetricNotFoundException,
@@ -396,7 +397,7 @@ public class JBossUtil {
                 (Boolean) mServer.getAttribute(objName, attrs[0]);
             if ((provider == null) || !provider.booleanValue()) {
                 String msg = 
-                    "MBeanServer does not provide statistics";
+                    "MBeanServerConnection does not provide statistics";
                 throw new PluginException(msg);
             }
 
@@ -416,7 +417,7 @@ public class JBossUtil {
         }
 
         if (stats == null) {
-            throw new PluginException("MBeanServer has no stats");
+            throw new PluginException("MBeanServerConnection has no stats");
         }
 
         String statName = metric.getAttributeName().substring(9);
@@ -452,7 +453,7 @@ public class JBossUtil {
         return invoke(metric, method, new Object[0], new String[0]);
     }
 
-    private static Object setAttribute(RMIAdaptor mServer, ObjectName obj,
+    private static Object setAttribute(MBeanServerConnection mServer, ObjectName obj,
                                        String name, Object value)
         throws MetricUnreachableException,
                MetricNotFoundException,
@@ -485,7 +486,7 @@ public class JBossUtil {
                MetricNotFoundException,
                PluginException {
         try {
-            RMIAdaptor mServer = getMBeanServer(metric);
+            MBeanServerConnection mServer = getMBeanServerConnection(metric);
             ObjectName obj = new ObjectName(metric.getObjectName());
             MBeanInfo info = mServer.getMBeanInfo(obj);
 

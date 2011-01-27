@@ -37,12 +37,14 @@ public class JBossProductPlugin
 
     private static boolean ignoreHashCodes = false;
 
+    @Override
     public void init(PluginManager manager) throws PluginException {
         super.init(manager);
         ignoreHashCodes =
             "true".equals(manager.getProperty("jboss.ignoreHashCodes"));
     }
 
+    @Override
     protected void adjustClassPath(String installpath) {
         //super.init will call this if jboss.installpath is configured
         File servers = new File(installpath, "server");
@@ -74,6 +76,7 @@ public class JBossProductPlugin
         return ignoreHashCodes;
     }
 
+    @Override
     public String[] getClassPath(ProductPluginManager manager) {
         String prop = getName() + "." + ProductPlugin.PROP_INSTALLPATH;
         String sysval = System.getProperty(prop);

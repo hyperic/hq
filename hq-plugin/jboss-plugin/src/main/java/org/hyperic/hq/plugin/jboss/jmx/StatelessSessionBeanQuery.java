@@ -37,6 +37,7 @@ public class StatelessSessionBeanQuery extends BeanQuery {
         return "Stateless Session EJB";
     }
 
+    @Override
     public boolean apply(ObjectName name) {
         return applyWithoutHashCode(name);
     }
