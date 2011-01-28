@@ -187,10 +187,10 @@ public class ProductBossImpl implements ProductBoss {
      *        are tried.
      */
     @Transactional(readOnly=true)
-    public ConfigResponse getMergedConfigResponse(int sessionId, String productType,
-                                                  AppdefEntityID id, boolean required)
-    throws AppdefEntityNotFoundException, EncodingException, PermissionException,
-           ConfigFetchException, SessionNotFoundException, SessionTimeoutException {
+    
+    public ConfigResponse getMergedConfigResponse(int sessionId, String productType, AppdefEntityID id, boolean required)
+        throws AppdefEntityNotFoundException, EncodingException, PermissionException, ConfigFetchException,
+        SessionNotFoundException, SessionTimeoutException {
         // validate the session
         sessionManager.authenticate(sessionId);
         // use the overlord to pull the merge
@@ -201,10 +201,10 @@ public class ProductBossImpl implements ProductBoss {
     /**
      */
     @Transactional(readOnly=true)
-    public ConfigResponse getMergedConfigResponse(AuthzSubject subject, String productType,
-                                                  AppdefEntityID id, boolean required)
-    throws AppdefEntityNotFoundException, PermissionException, ConfigFetchException,
-           EncodingException {
+    
+    public ConfigResponse getMergedConfigResponse(AuthzSubject subject, String productType, AppdefEntityID id,
+                                                  boolean required) throws AppdefEntityNotFoundException,
+        PermissionException, ConfigFetchException, EncodingException {
         // Get the merged config
         return configManager.getMergedConfigResponse(subject, productType, id, required);
     }
@@ -212,8 +212,8 @@ public class ProductBossImpl implements ProductBoss {
     /**
      */
     @Transactional(readOnly=true)
-    public ConfigResponseDB getConfigResponse(int sessionId, AppdefEntityID id)
-    throws AppdefEntityNotFoundException,
+    
+    public ConfigResponseDB getConfigResponse(int sessionId, AppdefEntityID id) throws AppdefEntityNotFoundException,
         SessionNotFoundException, SessionTimeoutException {
         sessionManager.authenticate(sessionId);
         return configManager.getConfigResponse(id);

@@ -168,6 +168,16 @@ public interface ResourceManager {
     public List<ResourceType> getAllResourceTypes(AuthzSubject subject, PageControl pc);
 
     /**
+     * Get viewable resources either by "type" OR "resource name" OR
+     * "type AND resource name".
+     * @param subject
+     * @return Map of resource values
+     */
+    public List<Integer> findViewableInstances(AuthzSubject subject, String typeName,
+                                               String resName, String appdefTypeStr,
+                                               Integer typeId, PageControl pc);
+
+    /**
      * Get viewable resources by "type" OR "resource name"
      * @param subject
      * @return Map of resource values
@@ -180,8 +190,7 @@ public interface ResourceManager {
      * @param subject
      * @return Map of resource values
      */
-    public Map<String, Collection<Integer>> findAllViewableInstances(AuthzSubject subject,
-                                                                     ResourceType resourceType);
+    public Map<String, List<Integer>> findAllViewableInstances(AuthzSubject subject);
 
     /**
      * Find all the resources which are descendents of the given resource
@@ -293,13 +302,4 @@ public interface ResourceManager {
     public int getPlatformCountMinusVsphereVmPlatforms();
     
     ResourceRelation getVirtualRelation();
-
-    public ResourceType findResourceTypeById(Integer authzplatform);
-
-    public Collection<Resource> getUnconfiguredResources();
-
-    Collection<Integer> findAllViewableResourceIds(AuthzSubject subject,
-                                                   Collection<ResourceType> resourceTypes);
-
-    ResourceType getResourceTypeById(Integer resourceTypeId);
 }

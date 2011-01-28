@@ -659,7 +659,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         throws PermissionException {
         // first get the list of groups subject can view
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        Collection<Integer> groupIds;
+        List<Integer> groupIds;
 
         /**
          * XXX: Seems this could be optimized to actually get the real list of
@@ -677,8 +677,8 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
 
         // now build a collection for all of them
         Collection<ResourceGroup> groups = new ArrayList<ResourceGroup>();
-        for (Integer groupId : groupIds) {
-            ResourceGroup rgloc = resourceGroupDAO.findById(groupId);
+        for (int i = 0; i < groupIds.size(); i++) {
+            ResourceGroup rgloc = resourceGroupDAO.findById((Integer) groupIds.get(i));
             if (excludeRoot) {
                 String name = rgloc.getName();
                 if (!name.equals(AuthzConstants.groupResourceTypeName) &&
@@ -714,9 +714,11 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         throws PermissionException, NotFoundException {
         // first get the list of groups subject can view
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        Collection<Integer> groupIds =
-            pm.findOperationScopeBySubject(subject, AuthzConstants.groupOpViewResourceGroup,
-                                           AuthzConstants.groupResourceTypeName);
+        List<Integer> groupIds =
+        // TODO: G
+        pm.findOperationScopeBySubject(subject, AuthzConstants.groupOpViewResourceGroup,
+            AuthzConstants.groupResourceTypeName);
+
         Collection<ResourceGroup> groups = resourceGroupDAO.findCompatible(resProto);
         for (Iterator<ResourceGroup> i = groups.iterator(); i.hasNext();) {
             ResourceGroup g = (ResourceGroup) i.next();
