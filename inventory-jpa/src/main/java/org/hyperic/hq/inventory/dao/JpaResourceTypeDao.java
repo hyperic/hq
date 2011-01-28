@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.product.Plugin;
@@ -68,6 +69,34 @@ public class JpaResourceTypeDao implements ResourceTypeDao {
         propType.setType(type);
         return propType;
     }
+    
+    
+    @Transactional
+    public PropertyType createPropertyType(org.hyperic.hq.pdk.domain.PropertyType propertyType) {
+        PropertyType propType = new PropertyType();
+        propType.setName(propertyType.getName());
+        propType.setDescription(propertyType.getDescription());
+        entityManager.persist(propType);
+        //TODO care about formalized type?
+        return propType;
+    }
+    
+    @Transactional
+    public OperationType createOperationType(org.hyperic.hq.pdk.domain.OperationType operationType) {
+        OperationType opType = new OperationType();
+        opType.setName(operationType.getName());
+        entityManager.persist(opType);
+        return opType;
+    }
+    
+    @Transactional
+    public OperationType createOperationType(String name, ResourceType resourceType) {
+        OperationType opType = new OperationType();
+        opType.setName(name);
+        entityManager.persist(opType);
+        opType.setResourceType(resourceType);
+        return opType;
+    }
 
     @Transactional
     public ResourceType create(String name, Plugin plugin) {
@@ -76,6 +105,22 @@ public class JpaResourceTypeDao implements ResourceTypeDao {
         entityManager.persist(resourceType);
         resourceType.setPlugin(plugin);
         return resourceType;
+    }
+    
+    @Transactional
+    public ResourceType create(org.hyperic.hq.pdk.domain.ResourceType resourceType, Plugin plugin) {
+        ResourceType resType = new ResourceType();
+        resType.setName(resourceType.getName());
+        resType.setDescription(resourceType.getDescription());
+        entityManager.persist(resType);
+        resType.setPlugin(plugin);
+        for (org.hyperic.hq.pdk.domain.OperationType ot : resourceType.getOperationTypes()) {
+            resType.addOperationType(createOperationType(ot));
+        }
+        for (org.hyperic.hq.pdk.domain.PropertyType pt : resourceType.getPropertyTypes()) {
+            resType.addPropertyType(createPropertyType(pt));
+        }
+        return resType;
     }
 
     @Transactional
