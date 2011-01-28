@@ -139,6 +139,7 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
         return resourceType;
     }
     
+    @Transactional
     public ResourceType create(org.hyperic.hq.pdk.domain.ResourceType resourceType, Plugin plugin) {
         ResourceType resType = new ResourceType();
         resType.setName(resourceType.getName());
