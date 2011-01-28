@@ -73,6 +73,7 @@ public class MySqlServerDetector
                                 VERSION_4_1_x = "4.1.x",
                                 VERSION_5_0_x = "5.0.x",
                                 VERSION_5_1_x = "5.1.x",
+                                VERSION_5_5_x = "5.5.x",
                                 TABLE_SERVICE = "Table",
                                 SLAVE_STATUS  = "Slave Status",
                                 SHOW_SLAVE_STATUS  = "Show Slave Status";
@@ -80,7 +81,8 @@ public class MySqlServerDetector
         REGEX_VER_4_0 = Pattern.compile("Ver 4.0.[0-9]+"),
         REGEX_VER_4_1 = Pattern.compile("Ver 4.1.[0-9]+"),
         REGEX_VER_5_0 = Pattern.compile("Ver 5.0.[0-9]+"),
-        REGEX_VER_5_1 = Pattern.compile("Ver 5.1.[0-9]+");
+        REGEX_VER_5_1 = Pattern.compile("Ver 5.1.[0-9]+"),
+        REGEX_VER_5_5 = Pattern.compile("Ver 5.5.[0-9]+");
 
     public List getServerResources(ConfigResponse platformConfig)
         throws PluginException
@@ -357,6 +359,8 @@ public class MySqlServerDetector
             if (_log.isDebugEnabled()) {
                 _log.debug("Version detected from output of " + executable + " " + arg +":\n" + out);
             }
+            // 12/17/2008, did not test with 4.0.x.  Can't download from mysql
+            // archives anymore
             if (REGEX_VER_4_0.matcher(out).find()) {
                 return VERSION_4_0_x;
             } else if (REGEX_VER_4_1.matcher(out).find()) {
@@ -365,6 +369,8 @@ public class MySqlServerDetector
                 return VERSION_5_0_x;
             } else if (REGEX_VER_5_1.matcher(out).find()) {
                 return VERSION_5_1_x;
+            } else if (REGEX_VER_5_5.matcher(out).find()) {
+                return VERSION_5_5_x;
             }
         } catch (Exception e) {
             _log.warn("Could not get the version of mysql: " + e.getMessage(), e);

@@ -1885,6 +1885,8 @@
                 collectionType="dynamic"/>
     </metrics>
 
+    <metrics name="global-5.5" include="global-5.1"/>
+
   <!--
     TODO:  Add metric groups for InnoDB-specific status metrics
     to be used in an 'InnoDB' service
@@ -1976,6 +1978,9 @@
 
     <metrics name="MySQL Status 5.1.x Replication"
              include="MySQL Status 5.0.x Replication"/>
+
+    <metrics name="MySQL Status 5.5.x Replication"
+             include="MySQL Status 5.1.x Replication"/>
 
     <filter name="template"
             value="${domain}:Type=Table,database=%database%,table=%table%:${alias}"/>
@@ -2102,6 +2107,13 @@
         </service>
     </server>
 
+    <server name="MySQL Stats" version="5.5.x" include="baseWithTable">
+        <metrics include="global-5.5"/>
+        <service name="Show Slave Status">
+            <metrics include="MySQL Status 5.5.x Replication"/>
+        </service>
+    </server>
+
     <help name="mysql">
   <![CDATA[
   <p>
@@ -2153,5 +2165,7 @@
     <help name="MySQL Stats 5.0.x" include="mysql"/>
 
     <help name="MySQL Stats 5.1.x" include="mysql"/>
+
+    <help name="MySQL Stats 5.5.x" include="mysql"/>
 </plugin>
 
