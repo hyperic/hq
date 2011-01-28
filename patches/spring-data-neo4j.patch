@@ -1,7 +1,7 @@
 From ef65ff6d8da74e8d8a8c21f523aeffac89479cad Mon Sep 17 00:00:00 2001
 From: Jennifer Hickey <jennifer.hickey@springsource.com>
 Date: Wed, 26 Jan 2011 15:16:02 -0800
-Subject: [PATCH] Made introduced properties transient so JPA entities wouldn't attempt to persist them
+Subject: [PATCH 1/2] Made introduced properties transient so JPA entities wouldn't attempt to persist them
 
 ---
  .../relationship/Neo4jRelationshipBacking.aj       |    4 ++--
@@ -25,6 +25,46 @@ index c39744f..beee958 100644
  
      /**
       * creates a new {@link EntityStateAccessors} instance with the relationship parameter or updates an existing one
+-- 
+1.6.4.4
+
+
+From 89a09d7af564500caf026f265daabf0f0ba50c90 Mon Sep 17 00:00:00 2001
+From: Jennifer Hickey <jennifer.hickey@springsource.com>
+Date: Thu, 27 Jan 2011 17:31:49 -0800
+Subject: [PATCH 2/2] Temp hack to remove getValue()'s call to get id if a tx is running (since we always initialize the id by calling getId() immediately after a new object is persisted). Profiling results showed the isAnnotationPresent reflection call was causing huge bottlenecks.
+
+---
+ .../DetachableEntityStateAccessors.java            |    2 +-
+ .../NodeEntityStateAccessorsFactory.java           |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/spring-data-neo4j/src/main/java/org/springframework/data/graph/neo4j/fieldaccess/DetachableEntityStateAccessors.java b/spring-data-neo4j/src/main/java/org/springframework/data/graph/neo4j/fieldaccess/DetachableEntityStateAccessors.java
+index 53faf90..0c3a512 100644
+--- a/spring-data-neo4j/src/main/java/org/springframework/data/graph/neo4j/fieldaccess/DetachableEntityStateAccessors.java
++++ b/spring-data-neo4j/src/main/java/org/springframework/data/graph/neo4j/fieldaccess/DetachableEntityStateAccessors.java
+@@ -83,7 +83,7 @@ public class DetachableEntityStateAccessors<ENTITY extends GraphBacked<STATE>, S
+ 
+     @Override
+     public Object setValue(final Field field, final Object newVal) {
+-        if (!transactionIsRunning()) {
++        if (!transactionIsRunning()  || PartialNodeEntityStateAccessors.getId(getEntity(),getEntity().getClass()) == null) {
+             final ENTITY entity = getEntity();
+             if (!isDirty(field) && isWritable(field)) {
+                 Object existingValue;
+diff --git a/spring-data-neo4j/src/main/java/org/springframework/data/graph/neo4j/fieldaccess/NodeEntityStateAccessorsFactory.java b/spring-data-neo4j/src/main/java/org/springframework/data/graph/neo4j/fieldaccess/NodeEntityStateAccessorsFactory.java
+index 3ce36ad..35eca5f 100644
+--- a/spring-data-neo4j/src/main/java/org/springframework/data/graph/neo4j/fieldaccess/NodeEntityStateAccessorsFactory.java
++++ b/spring-data-neo4j/src/main/java/org/springframework/data/graph/neo4j/fieldaccess/NodeEntityStateAccessorsFactory.java
+@@ -40,7 +40,7 @@ public class NodeEntityStateAccessorsFactory {
+                     new PartialNodeEntityStateAccessors<NodeBacked>(null, entity, entity.getClass(), graphDatabaseContext, finderFactory), graphDatabaseContext) {
+                 @Override
+                 protected boolean transactionIsRunning() {
+-                    return super.transactionIsRunning() && getId(entity, entity.getClass()) != null;
++                    return super.transactionIsRunning();
+                 }
+             };
+         } else {
 -- 
 1.6.4.4
 
