@@ -28,6 +28,7 @@ package org.hyperic.hq.authz.shared;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -87,6 +88,8 @@ public interface ResourceManager {
      * @param pc Paging information for the request
      */
     public List<ResourceType> getAllResourceTypes(AuthzSubject subject, PageControl pc);
+    
+    Set<ResourceType> findResourceTypesWithResources();
 
     /**
      * Get viewable resources either by "type" OR "resource name" OR

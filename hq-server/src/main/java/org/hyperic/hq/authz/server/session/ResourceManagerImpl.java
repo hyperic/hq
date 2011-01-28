@@ -24,6 +24,7 @@ package org.hyperic.hq.authz.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,7 +52,6 @@ import org.hyperic.hq.inventory.dao.ResourceDao;
 import org.hyperic.hq.inventory.dao.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.pager.PageControl;
@@ -355,6 +355,20 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         propType.setHidden(true);
         groupType.addPropertyType(propType);
     }
+    
+    
+
+    public Set<ResourceType> findResourceTypesWithResources() {
+        final Set<ResourceType> typesWithResources = new HashSet<ResourceType>();
+        Collection<ResourceType> resTypes = resourceTypeDao.findAll();
+        for(ResourceType resType: resTypes) {
+            if(!(resType.getResources().isEmpty())) {
+                typesWithResources.add(resType);
+            }
+        }
+        return typesWithResources;
+    }
+
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;

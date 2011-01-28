@@ -62,6 +62,8 @@ public interface PlatformManager {
      * Find a PlatformType by id
      */
     public PlatformType findPlatformType(Integer id) throws ObjectNotFoundException;
+    
+    Platform getPlatformByName(String name);
 
     /**
      * Find a platform type by name
