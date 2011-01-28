@@ -33,7 +33,6 @@ import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.hyperic.hq.product.AutoServerDetector;
@@ -85,13 +84,14 @@ public class PostgreSQLServerDetector
     static final String VERSION_81 = "8.1";
     static final String VERSION_82 = "8.2";
     static final String VERSION_83 = "8.3";
-    static final String VERSION_84 = "8.4";
+    static final String VERSION_90 = "9.0";
 
     static final String HQ_SERVER_DB = "HQ PostgreSQL";
     static final String HQ_SERVER_DB81 = "HQ PostgreSQL 8.1";
     static final String HQ_SERVER_DB82 = "HQ PostgreSQL 8.2";
     static final String HQ_SERVER_DB83 = "HQ PostgreSQL 8.3";
-    static final String HQ_SERVER_DB84 = "HQ PostgreSQL 8.4";
+    static final String HQ_SERVER_DB90 = "HQ PostgreSQL 9.0";
+
 
     private static List getServerProcessList() {
         ArrayList servers = new ArrayList();
@@ -326,6 +326,16 @@ public class PostgreSQLServerDetector
                         SERVER_NAME + " " + version;
                 }
 
+            }
+        } else if (getTypeInfo().getVersion().equals(VERSION_90)) {
+            if (version.indexOf(VERSION_90) != -1) {
+                String name;
+                if (installPath.indexOf("hqdb") != -1) {
+                    name = getPlatformName() + " " + HQ_SERVER_DB90;
+                    server.setIdentifier(HQ_SERVER_DB90);
+                } else {
+                    name = getPlatformName() + " " + SERVER_NAME + " " + version;
+                }
                 server.setName(name);
                 servers.add(server);
             }
