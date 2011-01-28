@@ -53,7 +53,7 @@
 					<skip>false</skip>
 				</configuration>
 			</plugin>
-			<<plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-eclipse-plugin</artifactId>
 				<configuration>
