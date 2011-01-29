@@ -40,6 +40,7 @@
 			<useProjectArtifact>true</useProjectArtifact>
 			<outputDirectory>/pdk/lib</outputDirectory>
 			<excludes>
+                <exclude>jboss*</exclude>
 				<exclude>org.hyperic.hq:hq-lather</exclude>
 			</excludes>
 			<fileMode>0644</fileMode>
