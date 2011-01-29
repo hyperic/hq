@@ -2,6 +2,8 @@ package org.hyperic.hq.hqu.grails.plugins
 
 import org.hyperic.hq.hqu.grails.hqugapi.AgentHQUGApi
 import org.hyperic.hq.hqu.grails.hqugapi.AlertDefinitionHQUGApi
+import org.hyperic.hq.hqu.grails.hqugapi.ResourceHQUGApi
+import org.hyperic.hq.hqu.grails.hqugapi.MeasurementHQUGApi
 
 
 class HQUGApiGrailsPlugin {
@@ -13,6 +15,8 @@ class HQUGApiGrailsPlugin {
 		
 		agentHQUGApi(AgentHQUGApi)
 		alertDefHQUGApi(AlertDefinitionHQUGApi)
+		resourceHQUGApi(ResourceHQUGApi)
+		measurementHQUGApi(MeasurementHQUGApi)
 	}
 
 }
