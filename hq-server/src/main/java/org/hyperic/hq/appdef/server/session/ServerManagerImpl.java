@@ -374,11 +374,7 @@ public class ServerManagerImpl implements ServerManager {
         if (log.isDebugEnabled()) {
             log.debug("There are: " + idList.size() + " viewable servers");
         }
-        List<Integer> keyList = new ArrayList<Integer>(idList.size());
-        for (Integer id : idList) {
-            keyList.add(id);
-        }
-        return keyList;
+        return new ArrayList<Integer>(idList);
     }
 
     /**
