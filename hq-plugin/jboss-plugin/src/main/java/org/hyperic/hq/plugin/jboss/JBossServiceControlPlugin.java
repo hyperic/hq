@@ -79,6 +79,7 @@ public class JBossServiceControlPlugin extends ControlPlugin {
         return objectName;
     }
     
+    @Override
     public void doAction(String action, String[] args)
         throws PluginException {
 

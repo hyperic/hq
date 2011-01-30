@@ -36,11 +36,13 @@ package org.hyperic.hq.plugin.jboss;
  */
 public class JBoss5ServiceControlPlugin extends JBossStateServiceControlPlugin {
 
+    @Override
     void start() {
         invokeMethod("start");
         setResult(getResult());
     }
 
+    @Override
     void stop() {
         invokeMethod("stop");
         setResult(getResult());

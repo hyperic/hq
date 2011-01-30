@@ -62,6 +62,7 @@ import org.hyperic.hq.hqapi1.types.StatusResponse;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.timer.StopWatch;
 
 import com.vmware.vim25.AboutInfo;
 import com.vmware.vim25.GuestInfo;
@@ -179,7 +180,7 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
 
         VirtualMachineConfigInfo info = vm.getConfig();
 
-        if (info.isTemplate()) {
+        if (info == null || info.isTemplate()) {
             return null; //filter out template VMs
         }
 
@@ -434,11 +435,14 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
     public void discoverPlatforms(Properties props, HQApi hqApi, VSphereUtil vim)
         throws IOException, PluginException {
         
+        StopWatch watch = new StopWatch();
+        final boolean debug = log.isDebugEnabled();
+
         String vCenterUrl = VSphereUtil.getURL(props);
         Resource vCenter = getVCenterServer(vCenterUrl,hqApi);
         
         if (vCenter == null) {
-            if (log.isDebugEnabled()) {
+            if (debug) {
                 log.debug("Skip discovering hosts and VMs. "
                             + "No VMware vCenter server found with url=" 
                             + vCenterUrl);
@@ -447,8 +451,13 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
         }
         
    
+        	if (debug) watch.markTimeBegin("getAgent");
             Agent agent = getAgent(hqApi, props);
+            if (debug) watch.markTimeEnd("getAgent");
+            
+            if (debug) watch.markTimeBegin("discoverHosts");
             List<Resource> hosts = discoverHosts(agent,hqApi, vim, props);
+            if (debug) watch.markTimeEnd("discoverHosts");
           
             List<Resource> vms = new ArrayList<Resource>();
             Map<String, List<Resource>> vcHostVms = new HashMap<String, List<Resource>>();
@@ -470,17 +479,32 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
             }
             else {
                 ResourceApi api = hqApi.getResourceApi();
-
                 StatusResponse response;
+
+                if (debug) watch.markTimeBegin("syncVms");
                 response = api.syncResources(vms);
+                if (debug) watch.markTimeEnd("syncVms");
                 assertSuccess(response, "sync " + vms.size() + " VMs", false);
+
+                if (debug) watch.markTimeBegin("syncHosts");
                 response = api.syncResources(hosts);
+                if (debug) watch.markTimeEnd("syncHosts");
                 assertSuccess(response, "sync " + hosts.size() + " Hosts", false);
                 
               	Map<String, Resource> existingHosts = new HashMap<String, Resource>();
                 Map<String, List<Resource>> existingHostVms = new HashMap<String, List<Resource>>();
+                
+                if (debug) watch.markTimeBegin("syncResourceEdges");
                 syncResourceEdges(existingHosts,existingHostVms, props,hqApi);
+                if (debug) watch.markTimeEnd("syncResourceEdges");
+                
+                if (debug) watch.markTimeBegin("removePlatformsFromInventory");
                 removePlatformsFromInventory(vcHostVms, existingHosts, existingHostVms,vim,hqApi);
+                if (debug) watch.markTimeEnd("removePlatformsFromInventory");
+            }
+            
+            if (debug) {
+            	log.debug("discoverPlatforms: time=" + watch);
             }
         
     }
@@ -717,11 +741,16 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
             vim.findByUuid(VSphereUtil.HOST_SYSTEM, getFqdn(r));
             
             if (log.isDebugEnabled()) {
-                log.debug(HOST_TYPE + "[name=" + r.getName() 
+                log.debug(HOST_TYPE + "[id=" + r.getId()
+                			  + ", name=" + r.getName() 
                               + "] exists in vCenter. Not removing from HQ.");
             }
         } catch (ManagedEntityNotFoundException me) {
             removeResource(r, hqApi);
+        } catch (Throwable t) {
+        	log.warn("Error removing " + HOST_TYPE 
+        				+ "[id=" + r.getId()
+        				+ ", name=" + r.getName() + "] from HQ", t);
         }
     }
 
@@ -733,11 +762,16 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
             vim.findByUuid(VSphereUtil.VM, getFqdn(r));
             
             if (log.isDebugEnabled()) {
-                log.debug(VM_TYPE + "[name=" + r.getName() 
+                log.debug(VM_TYPE + "[id=" + r.getId()
+                			  + ", name=" + r.getName() 
                               + "] exists in vCenter. Not removing from HQ.");
             }
         } catch (ManagedEntityNotFoundException me) {
             removeResource(r, hqApi);
+        } catch (Throwable t) {
+        	log.warn("Error removing " + VM_TYPE 
+        				+ "[id=" + r.getId()
+        				+ ", name=" + r.getName() + "] from HQ", t);
         }
     }
     

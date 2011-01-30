@@ -369,16 +369,12 @@ public class ServerManagerImpl implements ServerManager {
 
         Operation op = getOperationByName(resourceManager.findResourceTypeByName(AuthzConstants.serverResType),
             AuthzConstants.serverOpViewServer);
-        List<Integer> idList = permissionManager.findOperationScopeBySubject(whoami, op.getId());
+        Collection<Integer> idList = permissionManager.findOperationScopeBySubject(whoami, op.getId());
 
         if (log.isDebugEnabled()) {
             log.debug("There are: " + idList.size() + " viewable servers");
         }
-        List<Integer> keyList = new ArrayList<Integer>(idList.size());
-        for (int i = 0; i < idList.size(); i++) {
-            keyList.add(idList.get(i));
-        }
-        return keyList;
+        return new ArrayList<Integer>(idList);
     }
 
     /**

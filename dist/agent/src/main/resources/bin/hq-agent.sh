@@ -248,7 +248,7 @@ then
 fi
 
 # Resolve the os
-DIST_OS=`uname -s | tr [:upper:] [:lower:] | tr -d [:blank:]`
+DIST_OS=`uname -s | tr "[A-Z]" "[a-z]" |tr -d ' '`
 DIST_BITS="32"
 case "$DIST_OS" in
     'sunos')
@@ -281,14 +281,14 @@ then
     DIST_ARCH="universal"
 else
     DIST_ARCH=
-    DIST_ARCH=`uname -p 2>/dev/null | tr [:upper:] [:lower:] | tr -d [:blank:]`
+    DIST_ARCH=`uname -p 2>/dev/null | tr "[A-Z]" "[a-z]" |tr -d ' '`
     if [ "X$DIST_ARCH" = "X" ]
     then
         DIST_ARCH="unknown"
     fi
     if [ "$DIST_ARCH" = "unknown" ]
     then
-        DIST_ARCH=`uname -m 2>/dev/null | tr [:upper:] [:lower:] | tr -d [:blank:]`
+        DIST_ARCH=`uname -m 2>/dev/null | tr "[A-Z]" "[a-z]" |tr -d ' '`
     fi
 
     case "$DIST_ARCH" in
