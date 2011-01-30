@@ -27,7 +27,8 @@ package org.hyperic.hq.hqu.grails.plugins
 
 
 import org.codehaus.groovy.grails.commons.UrlMappingsArtefactHandler
-import org.codehaus.groovy.grails.web.mapping.UrlMappingsHolderFactoryBean
+//import org.codehaus.groovy.grails.web.mapping.UrlMappingsHolderFactoryBean
+import org.hyperic.hq.hqu.grails.web.mapping.HQUUrlMappingsHolderFactoryBean
 import org.springframework.aop.framework.ProxyFactoryBean
 import org.springframework.aop.target.HotSwappableTargetSource
 import org.springframework.context.ApplicationContext
@@ -55,7 +56,7 @@ class HQUUrlMappingsGrailsPlugin {
 
 		log.info("HQUUrlMappingsGrailsPlugin plugin prefix: " + application.getHQUApplicationId())
 		
-		"${prefix}grailsUrlMappingsHolderBean"(UrlMappingsHolderFactoryBean) {
+		"${prefix}grailsUrlMappingsHolderBean"(HQUUrlMappingsHolderFactoryBean) {
             grailsApplication = ref("${prefix}grailsApplication", true)
         }
         "${prefix}urlMappingsTargetSource"(org.springframework.aop.target.HotSwappableTargetSource, ref("${prefix}grailsUrlMappingsHolderBean", false))
