@@ -339,6 +339,15 @@ public class ResourceType {
         propertyTypes.add(propertyType);
         propertyType.setResourceType(this);
     }
+    
+    public void addOperationType(OperationType operationType) {
+        operationType.setResourceType(this);
+        operationTypes.add(operationType);
+    }
+    
+    public void setOperationTypes(Set<OperationType> operationTypes) {
+        this.operationTypes = operationTypes;
+    }
 
     public Plugin getPlugin() {
         return plugin;
@@ -346,6 +355,15 @@ public class ResourceType {
 
     public void setPlugin(Plugin plugin) {
         this.plugin = plugin;
+    }
+    
+    public String getRelationshipTypeName(ResourceType otherEntity) {
+        for(ResourceTypeRelationship relationship: fromRelationships) {
+            if(relationship.getTo().equals(otherEntity)) {
+                return relationship.getName();
+            }
+        }
+        return null;
     }
     
     @Override

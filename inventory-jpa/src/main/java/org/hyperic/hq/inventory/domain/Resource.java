@@ -510,6 +510,7 @@ public class Resource {
         setConfig((Config)config, ConfigType.PRODUCT);
     }
 
+    @Transactional
     public Object setProperty(String key, Object value) {
         if (type.getPropertyType(key) == null) {
             throw new IllegalArgumentException("Property " + key +

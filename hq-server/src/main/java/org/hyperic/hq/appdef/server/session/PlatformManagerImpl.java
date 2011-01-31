@@ -1939,6 +1939,17 @@ public class PlatformManagerImpl implements PlatformManager {
             throw new SystemException("Internal inconsistancy finding " + "resources for agent");
         }
     }
+    
+    
+
+    public Platform getPlatformByName(String name) {
+        //TODO this used to find by sortName = toUpper(name)
+        Resource resource = resourceDao.findByName(name);
+        if(resource == null) {
+            return null;
+        }
+        return toPlatform(resource);
+    }
 
     @PostConstruct
     public void afterPropertiesSet() throws Exception {

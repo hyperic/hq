@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
@@ -36,10 +37,33 @@ public class ConfigOptionType  {
 
     @NotNull
     private String name;
+    
+   
+   
+    private String defaultValue;
+    
+   
+    
+    private String description;
+        
+    
+  
+    private Boolean optional;
+        
+   
+    
+    private Boolean hidden;
+        
+    
+   
+    private Boolean secret;
 
     @Version
     @Column(name = "version")
     private Integer version;
+    
+    @ManyToOne
+    private ResourceType resourceType;
 
     public ConfigOptionType() {
     }
@@ -91,12 +115,68 @@ public class ConfigOptionType  {
     public void setVersion(Integer version) {
         this.version = version;
     }
+    
+    
+
+    public String getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setDefaultValue(String defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Boolean isOptional() {
+        return optional;
+    }
+
+    public void setOptional(Boolean optional) {
+        this.optional = optional;
+    }
+
+    public Boolean isHidden() {
+        return hidden;
+    }
+
+    public void setHidden(Boolean hidden) {
+        this.hidden = hidden;
+    }
+
+    public Boolean isSecret() {
+        return secret;
+    }
+
+    public void setSecret(Boolean secret) {
+        this.secret = secret;
+    }
+
+    public ResourceType getResourceType() {
+        return resourceType;
+    }
+
+    public void setResourceType(ResourceType resourceType) {
+        this.resourceType = resourceType;
+    }
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Id: ").append(getId()).append(", ");
         sb.append("Version: ").append(getVersion()).append(", ");
-        sb.append("Name: ").append(getName());
+        sb.append("ResourceType: ").append(getResourceType()).append(", ");
+        sb.append("Name: ").append(getName()).append(", ");
+        sb.append("Description: ").append(getDescription()).append(", ");
+        sb.append("Optional: ").append(isOptional()).append(", ");
+        sb.append("Hidden: ").append(isHidden()).append(", ");
+        sb.append("Secret: ").append(isSecret()).append(", ");
+        sb.append("DefaultValue: ").append(getDefaultValue());
         return sb.toString();
     }
     

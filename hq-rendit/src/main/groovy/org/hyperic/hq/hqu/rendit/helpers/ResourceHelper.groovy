@@ -585,7 +585,11 @@ class ResourceHelper extends BaseHelper {
      * Find all {@link ResourceGroup}s viewable to the passed user.
      */
     List findViewableGroups() {
-        groupMan.getAllResourceGroups(user, true).grep { !it.system }
+        List<ResourceGroup> groups = new ArrayList<ResourceGroup>();
+        for(org.hyperic.hq.inventory.domain.ResourceGroup group: groupMan.getAllResourceGroups(user)) {
+            groups.add(ResourceGroupFactory.create(group));
+        }
+        return groups;
     }
     
     ResourceGroup createGroup(String name, String description, String location,
@@ -650,7 +654,15 @@ class ResourceHelper extends BaseHelper {
      * @return a list of {@link Resource}s which are prototypes.
      */
     List findAppdefPrototypes() {
-        rman.findAppdefPrototypes()
+        List<Resource> prototypes = new ArrayList<Resource>();
+        Set<org.hyperic.hq.inventory.domain.ResourceType> resTypes = rman.findResourceTypesWithResources();
+        for(org.hyperic.hq.inventory.domain.ResourceType resType: resTypes) {
+            Resource proto = ResourceTypeFactory.toPrototype(resType);
+            if(proto != null) {
+                prototypes.add(proto);
+            }
+        }
+        return prototypes;
     }
     
     /**

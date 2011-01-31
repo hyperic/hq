@@ -1,5 +1,6 @@
 package org.hyperic.hq.inventory.dao;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -9,6 +10,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.inventory.domain.Config;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,9 @@ public class JpaResourceDao implements ResourceDao {
 
     @PersistenceContext
     protected EntityManager entityManager;
+    
+    @Autowired
+    private ResourceTypeDao resourceTypeDao;
 
     @Transactional(readOnly = true)
     public Resource findById(Integer id) {
@@ -48,6 +53,12 @@ public class JpaResourceDao implements ResourceDao {
     public List<Resource> findByOwner(AuthzSubject owner) {
         // TODO best way to implement cutting across to AuthzSubject
         return null;
+    }
+    
+    @Transactional(readOnly = true)
+    public List<Resource> findByTypeName(String typeName) {
+        ResourceType type = resourceTypeDao.findByName(typeName);
+        return new ArrayList<Resource>(type.getResources());
     }
 
     @Transactional(readOnly = true)
