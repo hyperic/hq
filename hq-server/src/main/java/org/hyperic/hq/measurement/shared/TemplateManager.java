@@ -31,6 +31,7 @@ import java.util.Map;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplateSortField;
@@ -127,7 +128,7 @@ public interface TemplateManager {
      * @return A map of measurement info's that are new and will need to be
      *         created.
      */
-    public Map<String, MeasurementInfo> updateTemplates(String pluginName, TypeInfo ownerEntity,
+    public Map<String, MeasurementInfo> updateTemplates(String pluginName,
                                                         MonitorableType monitorableType,
                                                         MeasurementInfo[] tmpls);
 
@@ -145,6 +146,8 @@ public interface TemplateManager {
     public void setDesignatedTemplates(String mType, Integer[] desigIds);
 
     public MonitorableType createMonitorableType(String pluginName, TypeInfo info);
+
+    public MonitorableType createMonitorableType(String pluginName, ResourceType resourceType);
 
     public Map<String, MonitorableType> getMonitorableTypesByName(String pluginName);
 

@@ -436,4 +436,8 @@
             indicator="true"/>
   </server>
 -->
+
+	<server name="VMware vCenter Dummy">
+		<plugin type="autoinventory" class="org.hyperic.hq.plugin.vsphere.VCenterDetector" />
+	</server>
 </plugin>

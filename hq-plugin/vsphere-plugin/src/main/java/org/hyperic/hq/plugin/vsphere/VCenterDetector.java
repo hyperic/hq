@@ -37,6 +37,7 @@ import org.hyperic.hq.agent.server.AgentDaemon;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
 import org.hyperic.hq.agent.server.ConfigStorage;
 import org.hyperic.hq.agent.server.ConfigStorage.Key;
+import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.DaemonDetector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;

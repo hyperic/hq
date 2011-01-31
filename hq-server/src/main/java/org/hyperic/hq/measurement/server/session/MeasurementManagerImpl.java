@@ -64,7 +64,6 @@ import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceDeleteRequestedEvent;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -1571,7 +1570,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         try {
             dm = measurementDAO.get(event.getInstanceId());
-            int resourceType = dm.getTemplate().getMonitorableType().getAppdefType();
+            int resourceType = dm.getTemplate().getMonitorableType().getResourceTypeId();
             event.setResource(new AppdefEntityID(resourceType, dm.getInstanceId()));
             event.setUnits(dm.getTemplate().getUnits());
         } catch (Exception e) {
