@@ -43,11 +43,11 @@ public class ResourceType {
 
     private String description;
 
-    @OneToMany(cascade = CascadeType.ALL,mappedBy="resourceType")
+    @OneToMany(cascade = CascadeType.REMOVE,mappedBy="resourceType")
     @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
     private Set<OperationType> operationTypes = new HashSet<OperationType>();
 
-    @OneToMany(cascade = CascadeType.ALL,mappedBy="resourceType")
+    @OneToMany(cascade = CascadeType.REMOVE,mappedBy="resourceType")
     private Set<PropertyType> propertyTypes = new HashSet<PropertyType>();
     
     @ManyToOne

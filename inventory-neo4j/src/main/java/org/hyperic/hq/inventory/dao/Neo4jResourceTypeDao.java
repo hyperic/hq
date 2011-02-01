@@ -98,8 +98,7 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
         return propType;
     }
     
-    @Transactional
-    public PropertyType createPropertyType(org.hyperic.hq.pdk.domain.PropertyType propertyType) {
+    private PropertyType createPropertyType(org.hyperic.hq.pdk.domain.PropertyType propertyType) {
         PropertyType propType = new PropertyType();
         propType.setName(propertyType.getName());
         propType.setDescription(propertyType.getDescription());
@@ -109,8 +108,8 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
         return propType;
     }
     
-    @Transactional
-    public OperationType createOperationType(org.hyperic.hq.pdk.domain.OperationType operationType) {
+   
+    private OperationType createOperationType(org.hyperic.hq.pdk.domain.OperationType operationType) {
         OperationType opType = new OperationType();
         opType.setName(operationType.getName());
         entityManager.persist(opType);

@@ -69,22 +69,21 @@ public class JpaResourceTypeDao implements ResourceTypeDao {
         propType.setType(type);
         return propType;
     }
-    
-    
-    @Transactional
-    public PropertyType createPropertyType(org.hyperic.hq.pdk.domain.PropertyType propertyType) {
+   
+    private PropertyType createPropertyType(org.hyperic.hq.pdk.domain.PropertyType propertyType, ResourceType resourceType) {
         PropertyType propType = new PropertyType();
         propType.setName(propertyType.getName());
         propType.setDescription(propertyType.getDescription());
+        propType.setResourceType(resourceType);
         entityManager.persist(propType);
         //TODO care about formalized type?
         return propType;
     }
     
-    @Transactional
-    public OperationType createOperationType(org.hyperic.hq.pdk.domain.OperationType operationType) {
+    private OperationType createOperationType(org.hyperic.hq.pdk.domain.OperationType operationType, ResourceType resourceType) {
         OperationType opType = new OperationType();
         opType.setName(operationType.getName());
+        opType.setResourceType(resourceType);
         entityManager.persist(opType);
         return opType;
     }
@@ -115,10 +114,10 @@ public class JpaResourceTypeDao implements ResourceTypeDao {
         entityManager.persist(resType);
         resType.setPlugin(plugin);
         for (org.hyperic.hq.pdk.domain.OperationType ot : resourceType.getOperationTypes()) {
-            resType.addOperationType(createOperationType(ot));
+            resType.addOperationType(createOperationType(ot,resType));
         }
         for (org.hyperic.hq.pdk.domain.PropertyType pt : resourceType.getPropertyTypes()) {
-            resType.addPropertyType(createPropertyType(pt));
+            resType.addPropertyType(createPropertyType(pt, resType));
         }
         return resType;
     }
