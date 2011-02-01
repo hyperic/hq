@@ -1,7 +1,7 @@
-From 76167e272219562217f5c2957f1a6c109d7cd094 Mon Sep 17 00:00:00 2001
+From 14bfcc5803db3abd5570f66ceb8278cb311fdc68 Mon Sep 17 00:00:00 2001
 From: Jennifer Hickey <jennifer.hickey@springsource.com>
 Date: Mon, 13 Dec 2010 15:43:47 -0800
-Subject: [PATCH 1/2] Added commit only if new tx (to support nested @Transactional)
+Subject: [PATCH 1/3] Added commit only if new tx (to support nested @Transactional)
 
 ---
  .../transaction/NaiveDoubleTransactionManager.java |   30 ++++++++++---------
@@ -52,10 +52,10 @@ index 60bd3c2..f18d251 100644
 1.6.4.4
 
 
-From 059fc761366f0664beed54f524dbdc1561624ead Mon Sep 17 00:00:00 2001
+From d2ce39e706167e9814646383fbcf734e5f7b7fbd Mon Sep 17 00:00:00 2001
 From: Jennifer Hickey <jennifer.hickey@springsource.com>
 Date: Thu, 6 Jan 2011 10:40:53 -0800
-Subject: [PATCH 2/2] Activate transaction synchronizations only after the second tx is committed
+Subject: [PATCH 2/3] Activate transaction synchronizations only after the second tx is committed
 
 ---
  .../transaction/NaiveDoubleTransactionManager.java |   22 ++++++++++++++-----
@@ -113,6 +113,39 @@ index f18d251..b3456b3 100644
  		}
  		catch (Throwable t) {
  			System.err.println("Continuing to rollback tx despite this:" + t);
+-- 
+1.6.4.4
+
+
+From 4245606bcaf7f19e77a125251bd9de2fb048b808 Mon Sep 17 00:00:00 2001
+From: Jennifer Hickey <jennifer.hickey@springsource.com>
+Date: Wed, 26 Jan 2011 11:38:42 -0800
+Subject: [PATCH 3/3] Tx map made thread-safe. Causing occasional NPEs and non-release of DS connections in multi-threaded env.
+
+---
+ .../transaction/NaiveDoubleTransactionManager.java |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+diff --git a/spring-data-commons-core/src/main/java/org/springframework/persistence/transaction/NaiveDoubleTransactionManager.java b/spring-data-commons-core/src/main/java/org/springframework/persistence/transaction/NaiveDoubleTransactionManager.java
+index b3456b3..a6631e9 100644
+--- a/spring-data-commons-core/src/main/java/org/springframework/persistence/transaction/NaiveDoubleTransactionManager.java
++++ b/spring-data-commons-core/src/main/java/org/springframework/persistence/transaction/NaiveDoubleTransactionManager.java
+@@ -1,5 +1,6 @@
+ package org.springframework.persistence.transaction;
+ 
++import java.util.Collections;
+ import java.util.IdentityHashMap;
+ import java.util.Map;
+ 
+@@ -10,7 +11,7 @@ import org.springframework.transaction.TransactionStatus;
+ import org.springframework.transaction.support.DefaultTransactionStatus;
+ 
+ public class NaiveDoubleTransactionManager implements PlatformTransactionManager {
+-	Map<TransactionStatus,TransactionStatus> status=new IdentityHashMap<TransactionStatus, TransactionStatus>();
++	Map<TransactionStatus,TransactionStatus> status=Collections.synchronizedMap(new IdentityHashMap<TransactionStatus, TransactionStatus>());
+ 	private final PlatformTransactionManager a;
+ 	
+ 	private final PlatformTransactionManager b;
 -- 
 1.6.4.4
 
