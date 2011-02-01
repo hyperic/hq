@@ -66,10 +66,10 @@ public class ScheduleRevNumDAO
      *         the Integer id, and the Long collection interval.
      */
     public Collection<Object[]> getMinIntervals() {
-        String sql = "select mt.appdefType, m.instanceId, min(m.interval) "
+        String sql = "select mt.resourceTypeId, m.instanceId, min(m.interval) "
                      + "from Measurement m, " + "MonitorableType mt, " + "MeasurementTemplate t "
                      + "where m.enabled = true and " + "m.template.id = t.id and "
-                     + "t.monitorableType.id = mt.id " + "group by appdef_type, instance_id";
+                     + "t.monitorableType.id = mt.id " + "group by mt.resourceTypeId, m.instanceId";
         return getSession().createQuery(sql).list();
     }
 
@@ -81,8 +81,8 @@ public class ScheduleRevNumDAO
         String sql = "select min(m.interval) " + "from Measurement m, " + "MonitorableType mt, "
                      + "MeasurementTemplate t " + "where m.enabled = true and "
                      + "m.instanceId = ? and " + "m.template.id = t.id and "
-                     + "t.monitorableType.id = mt.id and " + "mt.appdefType = ? "
-                     + "group by appdef_type, instance_id";
+                     + "t.monitorableType.id = mt.id and " + "mt.resourceTypeId = ? "
+                     + "group by mt.resourceTypeId, m.instanceId";
 
         return (Long) getSession().createQuery(sql).setInteger(0, id.getID()).setInteger(1,
             id.getType()).uniqueResult();

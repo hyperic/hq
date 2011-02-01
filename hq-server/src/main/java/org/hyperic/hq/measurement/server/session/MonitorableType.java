@@ -27,43 +27,41 @@ package org.hyperic.hq.measurement.server.session;
 
 import org.hyperic.hibernate.PersistedObject;
 
-public class MonitorableType 
-    extends PersistedObject
-{
-    private String     _name;
-    private int        _appdefType;
-    private String     _plugin;
+public class MonitorableType extends PersistedObject {
+    private String name;
+    private int    resourceTypeId;
+    private String pluginName;
     
     protected MonitorableType() {
     }
     
-    public MonitorableType(String name, int appdefType, String plugin) {
-        _name       = name;
-        _appdefType = appdefType;
-        _plugin     = plugin;
+    public MonitorableType(String name, int resourceTypeId, String pluginName) {
+        this.name           = name;
+        this.resourceTypeId = resourceTypeId;
+        this.pluginName     = pluginName;
     }
 
     public String getName() {
-        return _name;
+        return name;
     }
     
     protected void setName(String name) {
-        _name = name;
+        this.name = name;
     }
 
-    public int getAppdefType() {
-        return _appdefType;
+    public int getResourceTypeId() {
+        return resourceTypeId;
     }
     
-    protected void setAppdefType(int appdefType) {
-        _appdefType = appdefType;
+    protected void setResourceTypeId(int resourceTypeId) {
+    	this.resourceTypeId = resourceTypeId;
     }
 
-    public String getPlugin() {
-        return _plugin;
+    public String getPluginName() {
+        return pluginName;
     }
     
-    protected void setPlugin(String plugin) {
-        _plugin = plugin;
+    protected void setPluginName(String pluginName) {
+    	this.pluginName = pluginName;
     }
 }

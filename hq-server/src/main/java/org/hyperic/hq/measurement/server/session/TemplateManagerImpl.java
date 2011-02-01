@@ -41,6 +41,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.shared.SRNManager;
@@ -409,6 +410,11 @@ public class TemplateManagerImpl implements TemplateManager {
         return monitorableTypeDAO.create(info.getName(), a, pluginName);
     }
 
+    @Transactional
+    public MonitorableType createMonitorableType(String pluginName, ResourceType resourceType) {
+        return monitorableTypeDAO.create(resourceType.getName(), resourceType.getId(), pluginName);
+    }
+    
     @Transactional(readOnly = true)
     public Map<String, MonitorableType> getMonitorableTypesByName(String pluginName) {
         return monitorableTypeDAO.findByPluginName(pluginName);
@@ -434,7 +440,7 @@ public class TemplateManagerImpl implements TemplateManager {
      * @return A map of measurement info's that are new and will need to be
      *         created.
      */
-    public Map<String, MeasurementInfo> updateTemplates(String pluginName, TypeInfo ownerEntity,
+    public Map<String, MeasurementInfo> updateTemplates(String pluginName,
                                                         MonitorableType monitorableType,
                                                         MeasurementInfo[] tmpls) {
         // Organize the templates first
@@ -459,7 +465,7 @@ public class TemplateManagerImpl implements TemplateManager {
         }
         return tmap;
     }
-
+    
     /**
      * Add new measurement templates for a plugin.
      * 

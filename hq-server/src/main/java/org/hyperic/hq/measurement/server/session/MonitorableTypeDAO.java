@@ -43,8 +43,8 @@ public class MonitorableTypeDAO
         super(MonitorableType.class, f);
     }
 
-    MonitorableType create(String name, int appdefType, String plugin) {
-        MonitorableType mt = new MonitorableType(name, appdefType, plugin);
+    MonitorableType create(String name, int resourceTypId, String pluginName) {
+        MonitorableType mt = new MonitorableType(name, resourceTypId, pluginName);
 
         save(mt);
         return mt;

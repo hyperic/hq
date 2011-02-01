@@ -194,7 +194,7 @@ public class MeasurementDAO
      */
     @SuppressWarnings("unchecked")
     List<AppdefEntityID> findAppdefEntityIdsByTemplate(Integer id) {
-        String sql = "select distinct mt.appdefType, m.instanceId from "
+        String sql = "select distinct mt.resourceTypeId, m.instanceId from "
                      + "Measurement m join m.template t "
                      + "join t.monitorableType mt where t.id=?";
 
@@ -311,7 +311,7 @@ public class MeasurementDAO
     List<Measurement> findByInstanceForCategory(int type, int id, String cat) {
         String sql = "select m from Measurement m " + "join m.template t "
                      + "join t.monitorableType mt " + "join t.category c "
-                     + "where mt.appdefType = ? and " + "m.instanceId = ? and " + "c.name = ?";
+                     + "where mt.resourceTypeId = ? and " + "m.instanceId = ? and " + "c.name = ?";
 
         return getSession().createQuery(sql).setInteger(0, type).setInteger(1, id)
             .setString(2, cat).list();
@@ -655,7 +655,7 @@ public class MeasurementDAO
         boolean checkIds = (ids != null && ids.length > 0);
         String sql = new StringBuilder().append("select m from Measurement m ").append(
             "join m.template t ").append("join t.monitorableType mt ").append(
-            "where mt.appdefType = :type and ").append("m.resource is not null and ").append(
+            "where mt.resourceTypeId = :type and ").append("m.resource is not null and ").append(
             (checkIds ? "m.instanceId in (:ids) and " : "")).append(ALIAS_CLAUSE).toString();
 
         Query q = getSession().createQuery(sql).setInteger("type", type);

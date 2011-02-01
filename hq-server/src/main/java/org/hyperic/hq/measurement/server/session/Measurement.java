@@ -182,7 +182,7 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
     }
 
     public int getAppdefType() {
-        return getTemplate().getMonitorableType().getAppdefType();
+        return getTemplate().getMonitorableType().getResourceTypeId();
     }
 
     protected void setBaselinesBag(Collection<Baseline> baselines) {

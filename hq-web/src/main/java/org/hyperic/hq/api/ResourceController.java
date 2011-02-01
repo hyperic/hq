@@ -129,6 +129,8 @@ public class ResourceController extends BaseController {
 		ResourceType type = resourceTypeDao.findById(form.getType().getId());
 		if (form.getId() == null) {
 			resource = resourceDao.create(form.getName(), type);
+			
+			// TODO schedule measurement processor...
 		} else {
 			resource = resourceDao.findById(form.getId());
 		}

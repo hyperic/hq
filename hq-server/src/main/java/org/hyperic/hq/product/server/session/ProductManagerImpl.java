@@ -59,8 +59,9 @@ import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.server.session.MonitorableMeasurementInfo;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.shared.TemplateManager;
-import org.hyperic.hq.pdk.domain.ResourceTypeRelationships;
-import org.hyperic.hq.pdk.domain.ResourceTypeRelationships.Triple;
+import org.hyperic.hq.pdk.domain.MetricInfo;
+import org.hyperic.hq.pdk.domain.PluginDefinition;
+import org.hyperic.hq.pdk.domain.PluginDefinition.Triple;
 import org.hyperic.hq.product.FlexibleProductPlugin;
 import org.hyperic.hq.product.MeasurementInfo;
 import org.hyperic.hq.product.PlatformTypeInfo;
@@ -289,16 +290,12 @@ public class ProductManagerImpl implements ProductManager {
         // Get the Appdef entities
         TypeInfo[] entities = pplugin.getTypes();
         
-        if (entities != null && entities.length == 0) {
-            log.info(pluginName + " does not define any resource types in xml");
+        if (entities == null) {
+        	log.info(pluginName + " does not define any resource types");
+        	
+        	updatePlugin(pluginDao, pInfo);
 
-            updatePlugin(pluginDao, pInfo);
-            
-            if (pplugin instanceof FlexibleProductPlugin) {
-            	processResourceTypeRelationships(((FlexibleProductPlugin) pplugin).generateResourceTypeHierarchy());
-            }
-
-            if (created) {
+        	if (created) {
                 pluginAuditFactory.deployAudit(pluginName, start, System.currentTimeMillis());
             } else {
                 pluginAuditFactory.updateAudit(pluginName, start, System.currentTimeMillis());
@@ -308,7 +305,16 @@ public class ProductManagerImpl implements ProductManager {
         } else {
 	        Audit audit;
 	        boolean pushed = false;
-	     
+	        PluginDefinition pluginDefinition = null;
+	        
+	        if (pplugin instanceof FlexibleProductPlugin) {
+	        	log.info(pluginName + " is self registering...");
+
+	        	pluginDefinition = ((FlexibleProductPlugin) pplugin).generateResourceTypeHierarchy();
+	        	
+	           	processPluginDefinition(pluginDefinition);
+	        }
+
 	        if (created) {
 	            audit = pluginAuditFactory.deployAudit(pluginName, start, System.currentTimeMillis());
 	        } else {
@@ -317,8 +323,10 @@ public class ProductManagerImpl implements ProductManager {
 	        
 	        try {
 	            auditManager.pushContainer(audit);
+	            
 	            pushed = true;
-	            updatePlugin(pluginName);
+	            
+	            updatePlugin(pluginName, pluginDefinition);
 	        } catch(Exception e) {
 	        	e.printStackTrace();
 	        } finally {
@@ -330,18 +338,19 @@ public class ProductManagerImpl implements ProductManager {
     }
 
     @Transactional
-    private void processResourceTypeRelationships(ResourceTypeRelationships relationships) {
+    private void processPluginDefinition(PluginDefinition relationships) {
     	Map<String, ResourceType> lookup = new HashMap<String, ResourceType>();
     	
-    	for (org.hyperic.hq.pdk.domain.ResourceType rt : relationships.getResourceTypes()) {
-    		ResourceType entity = resourceTypeDao.findByName(rt.getName());
+    	for (org.hyperic.hq.pdk.domain.ResourceType resourceType : relationships.getResourceTypes()) {
+    		ResourceType entity = resourceTypeDao.findByName(resourceType.getName());
     		
     		if (entity == null) {
-    			Plugin plugin = pluginDao.findByName(rt.getPluginName());
-    			entity = resourceTypeDao.create(rt, plugin);
+    			Plugin plugin = pluginDao.findByName(resourceType.getPluginName());
+    			
+    			entity = resourceTypeDao.create(resourceType, plugin);
     		}
     		
-    		lookup.put(rt.getName(), entity);
+    		lookup.put(resourceType.getName(), entity);
     	}
     	
     	for (Triple triple : relationships.getRelationships()) {
@@ -373,120 +382,165 @@ public class ProductManagerImpl implements ProductManager {
             pluginName);
         try {
             pluginUpdater.updateServiceTypes(productPlugin, serviceTypes);
-            updatePlugin(pluginName);
+            updatePlugin(pluginName, null);
         } catch (PluginException e) {
             log.error("Error updating service types.  Cause: " + e.getMessage());
         }
     }
 
-    private void updatePlugin(String pluginName) throws VetoException, PluginNotFoundException,
+    private void updatePlugin(String pluginName, PluginDefinition pluginDefinition) throws VetoException, PluginNotFoundException,
         NotFoundException {
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
         ProductPluginManager ppm = getProductPluginManager();
         ProductPlugin pplugin = (ProductPlugin) ppm.getPlugin(pluginName);
-
         PluginInfo pInfo = getProductPluginManager().getPluginInfo(pluginName);
         
         updatePlugin(pluginDao, pInfo);
 
-        TypeInfo[] entities = pplugin.getTypes();
-
-        if (debug)
-            watch.markTimeBegin("updateAppdefEntities");
-        updateAppdefEntities(pluginName, entities);
-        if (debug)
-            watch.markTimeEnd("updateAppdefEntities");
-
         // Get the measurement templates
         // Keep a list of templates to add
-       Map<MonitorableType,List<MonitorableMeasurementInfo>> toAdd = new HashMap<MonitorableType,List<MonitorableMeasurementInfo>>();
-
+        Map<MonitorableType, List<MonitorableMeasurementInfo>> toAdd = new HashMap<MonitorableType, List<MonitorableMeasurementInfo>>();
         Map<String, MonitorableType> types = new HashMap<String,MonitorableType>(templateManager.getMonitorableTypesByName(pluginName));
-        if (debug)
-            watch.markTimeBegin("loop0");
-        for (TypeInfo info : Arrays.asList(entities)) {
-            MeasurementInfo[] measurements;
-            try {
-                measurements = ppm.getMeasurementPluginManager().getMeasurements(info);
-            } catch (PluginNotFoundException e) {
-                if (!isVirtualServer(info)) {
-                    log.info(info.getName() + " does not support measurement");
-                }
-                continue;
-            }
-            if (measurements != null && measurements.length > 0) {
-                if (debug)
-                    watch.markTimeBegin("getMonitorableType");
-                MonitorableType monitorableType = types.get(info.getName());
-                if (monitorableType == null) {
-                    monitorableType = templateManager.createMonitorableType(pluginName, info);
-                    types.put(info.getName(), monitorableType);
-                }
-                if (debug)
-                    watch.markTimeEnd("getMonitorableType");
-                if (debug)
-                    watch.markTimeBegin("updateTemplates");
-                Map<String, MeasurementInfo> newMeasurements = templateManager.updateTemplates(
-                    pluginName, info, monitorableType, measurements);
-                if (debug)
-                    watch.markTimeEnd("updateTemplates");
-                final List<MonitorableMeasurementInfo> infos = new ArrayList<MonitorableMeasurementInfo>();
-                for(MeasurementInfo measurementInfo: newMeasurements.values()) {
-                    infos.add(new MonitorableMeasurementInfo(monitorableType, measurementInfo));
-                }
-                //we may encounter the same set of templates twice.  Last one wins
-                toAdd.put(monitorableType,infos);
-            }
-        }
-        if (debug)
-            watch.markTimeEnd("loop0");
+        TypeInfo[] entities = pplugin.getTypes();
+
+        if (pluginDefinition == null) {
+        	
+	        if (debug) watch.markTimeBegin("updateAppdefEntities");
+	        
+	        updateAppdefEntities(pluginName, entities);
+	
+	        if (debug) watch.markTimeEnd("updateAppdefEntities");
+	        if (debug) watch.markTimeBegin("loop0");
         
+	        for (TypeInfo info : Arrays.asList(entities)) {
+	        	MeasurementInfo[] measurements;
+
+	        	try {
+	        		measurements = ppm.getMeasurementPluginManager().getMeasurements(info);
+	        	} catch (PluginNotFoundException e) {
+	        		if (!isVirtualServer(info)) {
+	        			log.info(info.getName() + " does not support measurement");
+	        		}
+
+	        		continue;
+	        	}
+
+	        	if (measurements != null && measurements.length > 0) {
+	        		if (debug) watch.markTimeBegin("getMonitorableType");
+
+	        		MonitorableType monitorableType = types.get(info.getName());
+
+	        		if (monitorableType == null) {
+	        			monitorableType = templateManager.createMonitorableType(pluginName, info);
+	        			types.put(info.getName(), monitorableType);
+	        		}
+
+	        		if (debug) watch.markTimeEnd("getMonitorableType");
+	        		if (debug) watch.markTimeBegin("updateTemplates");
+
+	        		Map<String, MeasurementInfo> newMeasurements = templateManager.updateTemplates(pluginName, monitorableType, measurements);
+
+	        		if (debug) watch.markTimeEnd("updateTemplates");
+	        		
+	        		final List<MonitorableMeasurementInfo> infos = new ArrayList<MonitorableMeasurementInfo>();
+
+	        		for(MeasurementInfo measurementInfo: newMeasurements.values()) {
+	        			infos.add(new MonitorableMeasurementInfo(monitorableType, measurementInfo));
+	        		}
+
+	        		//we may encounter the same set of templates twice.  Last one wins
+	        		toAdd.put(monitorableType,infos);
+	        	}
+	        }
+	        
+	        if (debug) watch.markTimeEnd("loop0");
+        } else {
+        	for (org.hyperic.hq.pdk.domain.ResourceType rt : pluginDefinition.getResourceTypes()) {
+        		ResourceType resourceType = resourceTypeDao.findByName(rt.getName());
+        		Set<MetricInfo> metricInfos = pluginDefinition.getMetricMappings().get(resourceType.getName());
+        		
+        		if (metricInfos.size() > 0) {
+	        		MonitorableType monitorableType = types.get(resourceType.getName());
+	
+	        		if (monitorableType == null) {
+	        			monitorableType = templateManager.createMonitorableType(pluginName, resourceType);
+	        			
+	        			types.put(resourceType.getName(), monitorableType);
+	        		}
+        		
+	        		MeasurementInfo[] measurements = new MeasurementInfo[metricInfos.size()];
+	        		int index = 0;
+	        		
+	        		// TODO clean this up, this translation is needless...
+	        		for (MetricInfo metricInfo : metricInfos) {
+	        			MeasurementInfo info = new MeasurementInfo();
+	        			
+	        			info.setAlias(metricInfo.getAlias());
+	        			info.setCategory(metricInfo.getCategory());
+	        			info.setDefaultOn(metricInfo.isDefaultOn());
+	        			info.setIndicator(metricInfo.isIndicator());
+	        			info.setName(metricInfo.getMetricName());
+	        			info.setTemplate(metricInfo.getTemplateName());
+	        			info.setUnits(metricInfo.getUnits());
+	        			
+	        			measurements[index++] = info;
+	        		}
+	        	
+	        		Map<String, MeasurementInfo> newMeasurements = templateManager.updateTemplates(pluginName, monitorableType, measurements);
+	        		List<MonitorableMeasurementInfo> infos = new ArrayList<MonitorableMeasurementInfo>();
+
+	        		for(MeasurementInfo measurementInfo: newMeasurements.values()) {
+	        			infos.add(new MonitorableMeasurementInfo(monitorableType, measurementInfo));
+	        		}
+
+	        		//we may encounter the same set of templates twice.  Last one wins
+	        		toAdd.put(monitorableType,infos);
+        		}        		
+        	}
+        }
+	    
         pluginDao.getEntityManager().flush();
 
-        // For performance reasons, we add all the new measurements at once.
-        if (debug)
-            watch.markTimeBegin("createTemplates");
-        templateManager.createTemplates(pluginName, toAdd);
-        if (debug)
-            watch.markTimeEnd("createTemplates");
+	    // For performance reasons, we add all the new measurements at once.
+	    if (debug) watch.markTimeBegin("createTemplates");
 
-        // Add any custom properties.
-        if (debug)
-            watch.markTimeBegin("findResourceType");
-       
-        if (debug)
-            watch.markTimeEnd("findResourceType");
+	    templateManager.createTemplates(pluginName, toAdd);
+	        
+	    if (debug) watch.markTimeEnd("createTemplates");
+        
+        if (pluginDefinition == null) {
+	        // Add any custom properties.
+	        if (debug) watch.markTimeBegin("loop");
 
-        if (debug)
-            watch.markTimeBegin("loop");
-        for (int i = 0; i < entities.length; i++) {
-            TypeInfo info = entities[i];
-            ConfigSchema schema = pplugin.getCustomPropertiesSchema(info);
-            List<ConfigOption> options = schema.getOptions();
-            
-            ResourceType appdefType = resourceManager.findResourceTypeByName(info.getName());
-            for (ConfigOption opt : options) {
-                if (debug)
-                    watch.markTimeBegin("findByKey");
-                PropertyType c = cPropManager.findByKey(appdefType, opt.getName());
-                if (debug)
-                    watch.markTimeEnd("findByKey");
-                if (c == null) {
-                    cPropManager.addKey(appdefType, opt.getName(), opt.getDescription(),String.class);
-                }
-            }
+	        for (int i = 0; i < entities.length; i++) {
+	        	TypeInfo info = entities[i];
+	        	ConfigSchema schema = pplugin.getCustomPropertiesSchema(info);
+	        	List<ConfigOption> options = schema.getOptions();            
+	        	ResourceType appdefType = resourceManager.findResourceTypeByName(info.getName());
+
+	        	for (ConfigOption opt : options) {
+	        		if (debug) watch.markTimeBegin("findByKey");
+
+	        		PropertyType c = cPropManager.findByKey(appdefType, opt.getName());
+
+	        		if (debug) watch.markTimeEnd("findByKey");
+
+	        		if (c == null) {
+	        			cPropManager.addKey(appdefType, opt.getName(), opt.getDescription(),String.class);
+	        		}
+	        	}
+	        }
+
+	        if (debug) watch.markTimeEnd("loop");
         }
-        if (debug)
-            watch.markTimeEnd("loop");
-
+        
         createAlertDefinitions(pInfo);
         pluginDeployed(pInfo);
        
-        if (debug)
-            log.debug(watch);
+	    if (debug) log.debug(watch);
     }
-
+    
     private void createAlertDefinitions(final PluginInfo pInfo) throws VetoException {
         final InputStream alertDefns = pInfo.resourceLoader
             .getResourceAsStream(ALERT_DEFINITIONS_XML_FILE);

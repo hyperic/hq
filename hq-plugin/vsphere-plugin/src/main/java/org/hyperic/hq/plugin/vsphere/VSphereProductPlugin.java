@@ -30,12 +30,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.hyperic.hq.pdk.domain.ConfigOptionType;
+import org.hyperic.hq.pdk.domain.MetricInfo;
 import org.hyperic.hq.pdk.domain.OperationType;
 import org.hyperic.hq.pdk.domain.PropertyType;
 import org.hyperic.hq.pdk.domain.ResourceType;
-import org.hyperic.hq.pdk.domain.ResourceTypeRelationships;
+import org.hyperic.hq.pdk.domain.PluginDefinition;
 import org.hyperic.hq.product.FlexibleProductPlugin;
 import org.hyperic.hq.product.GenericPlugin;
+import org.hyperic.hq.product.MeasurementPlugin;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.TypeInfo;
 
@@ -50,7 +52,7 @@ public class VSphereProductPlugin extends ProductPlugin implements FlexibleProdu
         return super.getPlugin(type, entity);
     }
 
-	public ResourceTypeRelationships generateResourceTypeHierarchy() {
+	public PluginDefinition generateResourceTypeHierarchy() {
 		// Define the plugin
 		String plugin = "vsphere";
 		
@@ -66,7 +68,7 @@ public class VSphereProductPlugin extends ProductPlugin implements FlexibleProdu
 		// Define property types
 		Set<PropertyType> vmPropertyTypes = setupVMProperties();
 		Set<PropertyType> hostPropertyTypes = setupHostProperties();
-		ResourceTypeRelationships result = new ResourceTypeRelationships();
+		PluginDefinition result = new PluginDefinition();
 		
 		// Define resource types
 		ResourceType vCenterRT = new ResourceType("VMware vCenter", "", plugin, null, null, vcenterConfig);
@@ -80,6 +82,91 @@ public class VSphereProductPlugin extends ProductPlugin implements FlexibleProdu
 		ResourceType vmRT = new ResourceType("VMware vSphere VM", "", plugin, vmPropertyTypes, vmOperationTypes, vmConfig);
 		
 		result.addRelationship(hostRT, "HOSTS", vmRT);
+
+		// Define Plugin Classes
+		result.addPluginClassMapping(vCenterRT, ProductPlugin.TYPE_MEASUREMENT, VSphereMeasurementPlugin.class.getName());
+		
+		result.addPluginClassMapping(hostRT, ProductPlugin.TYPE_MEASUREMENT, MeasurementPlugin.class.getName());
+		result.addPluginClassMapping(hostRT, "collector", VSphereHostCollector.class.getName());
+		result.addPluginClassMapping(hostRT, ProductPlugin.TYPE_LOG_TRACK, VSphereHostEventPlugin.class.getName());
+		
+		result.addPluginClassMapping(vmRT, ProductPlugin.TYPE_MEASUREMENT, MeasurementPlugin.class.getName());
+		result.addPluginClassMapping(vmRT, "collector", VSphereVmCollector.class.getName());
+		result.addPluginClassMapping(vmRT, ProductPlugin.TYPE_LOG_TRACK, VSphereHostEventPlugin.class.getName());
+		result.addPluginClassMapping(vmRT, ProductPlugin.TYPE_CONTROL, VSphereVmControlPlugin.class.getName());
+		
+		// Define Metrics
+		String templateName = "vcenter:url=%url%,user=%user%,pass=%pass%:";
+		
+		result.addMetricMapping(vCenterRT, new MetricInfo(templateName, "Availability", "availability", "", "", true, false));
+		result.addMetricMapping(vCenterRT, new MetricInfo(templateName, "Connection Validation Time", "connectionvalidationtime", "ms", "", true, false));
+		
+		templateName = "VMware vSphere Host:host:url=%url%,user=%user%,pass=%pass%,hostname=%hostname%,uuid=%uuid%:";
+		
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "Availability", "", "", "", true, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "Uptime", "sys.uptime.latest", "sec", "AVAILABILITY", false, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "CPU Usage (Average)", "cpu.usage.average", "percent", "", true, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "Disk Usage (Average)", "disk.usage.average", "KB", "", true, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "Highest Disk Latency", "disk.maxTotalLatency.latest", "ms", "", true, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "Memory Usage (Average)", "mem.usage.average", "percent", "", true, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "Network Usage (Average)", "net.usage.average", "KB", "", false, true));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "CPU Reserved Capacity", "cpu.reservedCapacity.average", "", "", false, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "CPU Throttled (1 min. Average)", "rescpu.maxLimited1.latest", "percent", "", false, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "CPU Throttled (5 min. Average)", "rescpu.maxLimited5.latest", "percent", "", false, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "CPU Throttled (15 min. Average)", "rescpu.maxLimited15.latest", "percent", "", false, false));		
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "CPU Running (1 min. Average)", "rescpu.runav1.latest", "percent", "", false, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "CPU Running (5 min. Average)", "rescpu.runav5.latest", "percent", "", false, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "CPU Running (15 min. Average)", "rescpu.runav15.latest", "percent", "", false, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "CPU Active (1 min. Average)", "rescpu.actav1.latest", "percent", "", false, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "CPU Active (5 min. Average)", "rescpu.actav5.latest", "percent", "", false, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "CPU Active (15 min. Average)", "rescpu.actav15.latest", "percent", "", false, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "Memory Swap In", "mem.swapin.average", "KB", "", false, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "Memory Swap Out", "mem.swapout.average", "KB", "", false, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "Memory Swap Used", "mem.swapused.average", "KB", "", false, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "Memory Balloon", "mem.vmmemctl.average", "KB", "", false, true));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "Memory Unreserved", "mem.unreserved.average", "KB", "", false, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "Memory Heap", "mem.heap.average", "KB", "", false, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "Memory Heap Free", "mem.heapfree.average", "KB", "", false, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "Memory Overhead", "mem.overhead.average", "KB", "", false, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "Memory Zero", "mem.zero.average", "KB", "", false, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "Memory Reserved Capacity", "mem.reservedCapacity.average", "MB", "", false, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "Memory Active", "mem.active.average", "KB", "", false, true));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "Memory Shared", "mem.shared.average", "KB", "", false, true));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "Memory Granted", "mem.granted.average", "KB", "", false, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "Memory Consumed", "mem.consumed.average", "KB", "", false, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "Memory State", "mem.state.latest", "", "", false, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "Memory Shared Common", "mem.sharedcommon.average", "KB", "", false, false));
+		result.addMetricMapping(hostRT, new MetricInfo(templateName, "Memory Used by vmkernel", "mem.sysUsage.average", "KB", "", false, false));
+
+		templateName = "VMware vSphere VM:vm:url=%url%,user=%user%,pass=%pass%,vm=%vm%,uuid=%uuid%:";
+		
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "Availability", "", "", "", true, false));
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "Uptime", "sys.uptime.latest", "sec", "AVAILABILITY", false, false));
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "CPU Usage (Average)", "cpu.usage.average", "percent", "", true, false));
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "Disk Usage (Average)", "disk.usage.average", "KB", "", true, false));
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "Memory Usage (Average)", "mem.usage.average", "percent", "", true, false));
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "Network Usage (Average)", "net.usage.average", "KB", "", false, true));
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "CPU Throttled (1 min. Average)", "rescpu.maxLimited1.latest", "percent", "", false, false));
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "CPU Throttled (5 min. Average)", "rescpu.maxLimited5.latest", "percent", "", false, false));
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "CPU Throttled (15 min. Average)", "rescpu.maxLimited15.latest", "percent", "", false, false));		
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "CPU Running (1 min. Average)", "rescpu.runav1.latest", "percent", "", false, false));
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "CPU Running (5 min. Average)", "rescpu.runav5.latest", "percent", "", false, false));
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "CPU Running (15 min. Average)", "rescpu.runav15.latest", "percent", "", false, false));
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "CPU Active (1 min. Average)", "rescpu.actav1.latest", "percent", "", false, false));
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "CPU Active (5 min. Average)", "rescpu.actav5.latest", "percent", "", false, false));
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "CPU Active (15 min. Average)", "rescpu.actav15.latest", "percent", "", false, false));
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "Memory Swap In", "mem.swapin.average", "KB", "", false, false));
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "Memory Swap Out", "mem.swapout.average", "KB", "", false, false));
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "Memory Swap Target", "mem.swaptarget.average", "KB", "", false, false));
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "Memory Swapped", "mem.swapped.average", "KB", "", false, false));
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "Memory Overhead", "mem.overhead.average", "KB", "", false, false));
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "Memory Balloon", "mem.vmmemctl.average", "KB", "", false, true));
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "Memory Balloon Target", "mem.vmmemctltarget.average", "KB", "", false, false));
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "Memory Zero", "mem.zero.average", "KB", "", false, false));
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "Memory Active", "mem.active.average", "KB", "", false, false));
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "Memory Shared", "mem.shared.average", "KB", "", false, false));
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "Memory Granted", "mem.granted.average", "KB", "", false, false));
+		result.addMetricMapping(vmRT, new MetricInfo(templateName, "Memory Consumed", "mem.consumed.average", "KB", "", false, false));
 		
 		return result;
 	}
