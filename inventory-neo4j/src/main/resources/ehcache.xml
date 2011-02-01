@@ -662,5 +662,7 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-
+  <cache name="org.hyperic.hq.product.Plugin" maxElementsInMemory="200" eternal="true" timeToIdleSeconds="0"
+		timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
+		
 </ehcache>

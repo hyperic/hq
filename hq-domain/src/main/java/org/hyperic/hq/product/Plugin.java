@@ -32,6 +32,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.springframework.data.graph.annotation.NodeEntity;
@@ -42,6 +44,7 @@ import org.springframework.data.graph.annotation.NodeEntity;
 @Entity
 @Table(name="EAM_PLUGIN")
 @NodeEntity(partial=true)
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Plugin  implements ContainerManagedTimestampTrackable
 {
 
