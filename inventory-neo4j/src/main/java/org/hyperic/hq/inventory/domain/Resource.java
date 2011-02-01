@@ -19,6 +19,7 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.PropertyNotFoundException;
 import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -180,7 +181,11 @@ public class Resource {
                                                " is not defined for resource of type " +
                                                type.getName());
         }
-        return getUnderlyingState().getProperty(key);
+        try {
+            return getUnderlyingState().getProperty(key);
+        }catch(NotFoundException e) {
+            return null;
+        }
     }
 
     
