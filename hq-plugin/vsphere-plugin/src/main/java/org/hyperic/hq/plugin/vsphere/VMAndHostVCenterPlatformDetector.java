@@ -39,6 +39,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.pdk.domain.Agent;
 import org.hyperic.hq.pdk.domain.Resource;
 import org.hyperic.hq.pdk.domain.ResourceType;
+import org.hyperic.hq.product.PlatformDetector;
+import org.hyperic.hq.product.PlatformResource;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;

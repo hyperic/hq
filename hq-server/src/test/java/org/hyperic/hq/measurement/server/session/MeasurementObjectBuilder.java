@@ -52,7 +52,7 @@ public class MeasurementObjectBuilder {
     
     private MonitorableType buildMonitorableType(int appdefType) {
         MonitorableType mt = new MonitorableType();
-        mt.setAppdefType(appdefType);
+        mt.setResourceTypeId(appdefType);
         
         return mt;
     }

@@ -1865,7 +1865,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         // Let's get the templates to see what resources to gather
         List<MeasurementTemplate> templates = templateManager.getTemplates(mtids);
         for (MeasurementTemplate templ : templates) {
-            int type = templ.getMonitorableType().getAppdefType();
+            int type = templ.getMonitorableType().getResourceTypeId();
             bPlatforms |= type == AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
             bServers |= type == AppdefEntityConstants.APPDEF_TYPE_SERVER;
             bServices |= type == AppdefEntityConstants.APPDEF_TYPE_SERVICE;

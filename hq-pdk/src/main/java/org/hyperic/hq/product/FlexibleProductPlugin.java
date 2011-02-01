@@ -1,8 +1,8 @@
 package org.hyperic.hq.product;
 
-import org.hyperic.hq.pdk.domain.ResourceTypeRelationships;
+import org.hyperic.hq.pdk.domain.PluginDefinition;
 
 public interface FlexibleProductPlugin {
-	public ResourceTypeRelationships generateResourceTypeHierarchy();
+	public PluginDefinition generateResourceTypeHierarchy();
 }
 
