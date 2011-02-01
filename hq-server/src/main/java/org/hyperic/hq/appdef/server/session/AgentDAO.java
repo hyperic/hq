@@ -58,12 +58,13 @@ public class AgentDAO {
         jpaTemplate.execute(new JpaCallback() {
             public Object doInJpa(EntityManager entityManager)  {
                 List<String> tokens = entityManager.createQuery("select a.agentToken from Agent a",String.class).getResultList();
-                final String sql = "select a from Agent a where a.agentToken=?";
                 for(String token : tokens) {
                     //HQ-2575 Preload findByAgentToken query cache to minimize DB connections when multiple agents
                     //send measurement reports to a restarted server 
-                    entityManager.createQuery(sql).setParameter(1,token).setHint("org.hibernate.cacheable", true).
-                    setHint("org.hibernate.cacheRegion", "Agent.findByAgentToken").getSingleResult();
+                    entityManager.createQuery("SELECT a FROM Agent a WHERE a.agentToken = :agentToken",Agent.class).
+                    setHint("org.hibernate.cacheable", true).setHint("org.hibernate.cacheRegion", "Agent.findByAgentToken").
+                    setParameter("agentToken", token).
+                    getSingleResult();
                 }
                 return null;
             }
