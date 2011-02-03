@@ -22,12 +22,6 @@ public class PlatformType extends AppdefResourceType{
     }
 
     @Override
-    public int getAuthzType() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
     public AppdefResourceTypeValue getAppdefResourceTypeValue() {
        return getPlatformTypeValue();
     }

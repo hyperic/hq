@@ -118,12 +118,6 @@ public class Server
         return getServerValue();
     }
 
-    @Override
-    protected String _getAuthzOp(String op) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
     public AppdefEntityID getEntityId() { // TODO remove this method
         return AppdefEntityID.newServerID(getId());
     }

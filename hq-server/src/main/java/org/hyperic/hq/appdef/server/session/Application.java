@@ -49,12 +49,6 @@ public class Application
         return getApplicationValue();
     }
 
-    @Override
-    protected String _getAuthzOp(String op) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
     public String getEngContact() {
         return engContact;
     }

@@ -81,12 +81,6 @@ public class Service
         return getServiceValue();
     }
 
-    @Override
-    protected String _getAuthzOp(String op) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
     /**
      * legacy DTO pattern
      * @deprecated use (this) Service object instead

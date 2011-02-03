@@ -104,12 +104,6 @@ public class Platform
         return getPlatformValue();
     }
 
-    @Override
-    protected String _getAuthzOp(String op) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
     public AppdefEntityID getEntityId() { // TODO remove this - entity ID has no
                                           // place in new Resource model
         return AppdefEntityID.newPlatformID(getId());

@@ -24,12 +24,6 @@ public class ServiceType
     }
 
     @Override
-    public int getAuthzType() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
     public AppdefResourceTypeValue getAppdefResourceTypeValue() {
         return getServiceTypeValue();
     }

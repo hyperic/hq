@@ -25,12 +25,13 @@
 
 package org.hyperic.hq.autoinventory;
 
-import org.hyperic.hq.appdef.ServerBase;
+import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.shared.AIServerValue;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 
-public class AIServer extends ServerBase
+public class AIServer extends AppdefResource
 {
     private AIPlatform aIPlatform;
     private Character active;
@@ -43,6 +44,9 @@ public class AIServer extends ServerBase
     private Integer queueStatus;
     private long diff;
     private boolean ignored;
+    private String autoinventoryIdentifier;
+    private String installPath;
+    private boolean servicesAutomanaged;
 
     /**
      * default constructor
@@ -56,6 +60,50 @@ public class AIServer extends ServerBase
     {
         super();
         setAIServerValue(sv);
+    }
+    
+    public String getAutoinventoryIdentifier()
+    {
+        return this.autoinventoryIdentifier;
+    }
+
+    public void setAutoinventoryIdentifier(String autoinventoryIdentifier)
+    {
+        this.autoinventoryIdentifier = autoinventoryIdentifier;
+    }
+
+    public String getInstallPath()
+    {
+        return this.installPath;
+    }
+
+    public void setInstallPath(String installPath)
+    {
+        this.installPath = installPath;
+    }
+
+    public boolean isServicesAutomanaged()
+    {
+        return this.servicesAutomanaged;
+    }
+
+    public void setServicesAutomanaged(boolean servicesAutomanaged)
+    {
+        this.servicesAutomanaged = servicesAutomanaged;
+    }
+
+    public AppdefEntityID getEntityId()
+    {
+        return AppdefEntityID.newServerID(getId());
+    }
+
+    /**
+     * @deprecated use isServicesAutomanaged()
+     * @return
+     */
+    public boolean getServicesAutomanaged()
+    {
+        return isServicesAutomanaged();
     }
 
     public AIPlatform getAIPlatform()
@@ -273,10 +321,6 @@ public class AIServer extends ServerBase
    public AppdefResourceValue getAppdefResourceValue() {
         return null;
     }
-   
-   protected String _getAuthzOp(String op) {
-       throw new IllegalArgumentException("No supported operations");
-   }
-   
+    
 }
 

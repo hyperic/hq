@@ -113,15 +113,4 @@ public abstract class AppdefNamedBean extends AppdefBean
     public abstract AppdefResourceType getAppdefResourceType();
     public abstract AppdefResourceValue getAppdefResourceValue();
     
-
-    protected abstract String _getAuthzOp(String op);
-    
-    public String getAuthzOp(String op) {
-        String res = _getAuthzOp(op);
-        
-        if (res == null) {
-            throw new IllegalArgumentException("Unsupported op, [" + op + "]");
-        }
-        return res;
-    }
 }

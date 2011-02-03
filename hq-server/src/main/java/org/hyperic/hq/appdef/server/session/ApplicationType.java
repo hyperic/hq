@@ -12,12 +12,6 @@ public class ApplicationType
     }
 
     @Override
-    public int getAuthzType() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
     public AppdefResourceTypeValue getAppdefResourceTypeValue() {
         return new AppdefResourceTypeValue() {
             public int getAppdefType() {

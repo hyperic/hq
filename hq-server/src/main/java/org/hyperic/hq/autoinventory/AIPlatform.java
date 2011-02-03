@@ -29,13 +29,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
-import org.hyperic.hq.appdef.server.session.PlatformBase;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.product.PlatformDetector;
 
-public class AIPlatform extends PlatformBase
+public class AIPlatform extends AppdefResource
 {
     private String platformTypeName;
     private String osversion;
@@ -56,6 +57,9 @@ public class AIPlatform extends PlatformBase
     private byte[] measurementConfig;
     private Collection aiips = new ArrayList();
     private Collection aiservers =  new ArrayList();
+    private String fqdn;
+    private String certdn;
+    private Integer cpuCount;
 
     public AIPlatform()
     {
@@ -80,6 +84,54 @@ public class AIPlatform extends PlatformBase
         setProductConfig(apv.getProductConfig());
         setMeasurementConfig(apv.getMeasurementConfig());
         setControlConfig(apv.getControlConfig());
+    }
+    
+    public String getFqdn()
+    {
+        return this.fqdn;
+    }
+
+    public void setFqdn(String fqDN)
+    {
+        this.fqdn = fqDN;
+        if (getName() == null) {
+            setName(fqDN);
+        }
+    }
+
+    public AppdefEntityID getEntityId()
+    {
+        return AppdefEntityID.newPlatformID(getId());
+    }
+
+    public String getCertdn()
+    {
+        return this.certdn;
+    }
+
+    public void setCertdn(String certDN)
+    {
+        this.certdn = certDN;
+    }
+
+    public Integer getCpuCount()
+    {
+        return this.cpuCount;
+    }
+
+    public void setCpuCount(Integer cpuCount)
+    {
+        this.cpuCount = cpuCount;
+    }
+
+    public int hashCode()
+    {
+        int result = super.hashCode();
+
+        result = 37*result + (fqdn != null ? fqdn.hashCode() : 0);
+        result = 37*result + (certdn != null ? certdn.hashCode() : 0);
+
+        return result;
     }
 
     public String getPlatformTypeName()
@@ -362,7 +414,4 @@ public class AIPlatform extends PlatformBase
         return null;
     }
 
-    protected String _getAuthzOp(String op) {
-        throw new IllegalArgumentException("No supported operations");
-    }
 }
