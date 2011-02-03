@@ -72,19 +72,10 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
 
     private AuthzSubjectManager authzSubjectManager;
 
-    private static final String[] APPDEF_TABLES = { "EAM_PLATFORM",
-                                                   "EAM_SERVER",
-                                                   "EAM_SERVICE",
-                                                   "EAM_CONFIG_RESPONSE",
-                                                   "EAM_AGENT",
-                                                   "EAM_IP",
-                                                   "EAM_RESOURCE",
-                                                   "EAM_CPROP_KEY",
+    private static final String[] APPDEF_TABLES = {"EAM_AGENT",
                                                    "EAM_AUDIT",
                                                    "EAM_AIQ_SERVER",
-                                                   "EAM_AIQ_PLATFORM",
-                                                   "EAM_RESOURCE_EDGE",
-                                                   "EAM_RES_GRP_RES_MAP" };
+                                                   "EAM_AIQ_PLATFORM"};
 
     private static final String[] DATA_TABLES = { "EAM_MEASUREMENT_DATA_1D",
                                                  "EAM_MEASUREMENT_DATA_6H",
@@ -96,7 +87,6 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
                                                  "EAM_ALERT_CONDITION_LOG",
                                                  "EAM_ALERT",
                                                  "EAM_EVENT_LOG",
-                                                 "EAM_CPROP",
                                                  "EAM_MEASUREMENT",
                                                  "EAM_SRN",
                                                  "HQ_AVAIL_DATA_RLE" };
