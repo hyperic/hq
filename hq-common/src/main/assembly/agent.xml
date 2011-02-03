@@ -37,22 +37,11 @@
 
 	<dependencySets>
 		<dependencySet>
-            <excludes>
-                <exclude>jboss*</exclude>
-            </excludes>
 				<useProjectArtifact>true</useProjectArtifact>
 				<outputDirectory>/pdk/lib</outputDirectory>
 				<fileMode>0644</fileMode>
 				<directoryMode>0755</directoryMode>
 		</dependencySet>
-		<dependencySet>
-            <includes>
-                <include>jboss*</include>
-            </includes>
-				<useProjectArtifact>true</useProjectArtifact>
-				<outputDirectory>/lib/handlers/lib</outputDirectory>
-				<fileMode>0644</fileMode>
-				<directoryMode>0755</directoryMode>
-		</dependencySet>
 	</dependencySets>
+
 </assembly>
