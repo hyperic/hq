@@ -11,6 +11,8 @@ import javax.persistence.Id;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.DynamicRelationshipType;
@@ -26,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Entity
 @NodeEntity(partial = true)
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Config  {
 
     @PersistenceContext

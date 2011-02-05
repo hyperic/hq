@@ -662,7 +662,26 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  <cache name="org.hyperic.hq.product.Plugin" maxElementsInMemory="200" eternal="true" timeToIdleSeconds="0"
+  	<cache name="org.hyperic.hq.product.Plugin" maxElementsInMemory="200" eternal="true" timeToIdleSeconds="0"
+		timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
+		
+	<cache name="org.hyperic.hq.inventory.domain.ResourceGroup"
+		maxElementsInMemory="100" eternal="true" timeToIdleSeconds="0"
+		timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
+	
+	<!-- TODO There are 12000+ resources in multi-agent env.  Re-adjust numbers based on old cache size? -->	
+	<cache name="org.hyperic.hq.inventory.domain.Resource"
+		maxElementsInMemory="15000" eternal="true" timeToIdleSeconds="0"
+		timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
+	<cache name="org.hyperic.hq.inventory.domain.Config"
+		maxElementsInMemory="15000" eternal="true" timeToIdleSeconds="0"
+		timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
+	<cache name="org.hyperic.hq.inventory.domain.ResourceType"
+		maxElementsInMemory="1000" eternal="true" timeToIdleSeconds="0"
+		timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
+	<!-- TODO add ConfigOptionType and resize OperationType once plugin deployment fully implemented -->
+	<cache name="org.hyperic.hq.inventory.domain.OperationType"
+		maxElementsInMemory="100" eternal="true" timeToIdleSeconds="0"
 		timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
 		
 </ehcache>

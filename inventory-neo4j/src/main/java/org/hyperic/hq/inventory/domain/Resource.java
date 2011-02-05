@@ -19,7 +19,8 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.PropertyNotFoundException;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -44,6 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Entity
 @NodeEntity(partial = true)
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class Resource {
     @Transient

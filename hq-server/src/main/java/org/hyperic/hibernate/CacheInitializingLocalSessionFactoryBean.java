@@ -59,6 +59,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
 import org.springframework.orm.hibernate3.SessionFactoryUtils;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Preloads the 2nd level
@@ -125,6 +126,7 @@ public class CacheInitializingLocalSessionFactoryBean implements FactoryBean<Ses
     }
 
     @SuppressWarnings("unchecked")
+    @Transactional
     private void preloadCache(SessionFactory sessionFactory) {
         Session session = SessionFactoryUtils.getSession(sessionFactory, true);
         for (String className : classesForCache) {

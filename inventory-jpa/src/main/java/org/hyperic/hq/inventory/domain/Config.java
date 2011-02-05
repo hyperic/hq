@@ -15,12 +15,15 @@ import javax.persistence.OneToMany;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.transaction.annotation.Transactional;
 
 @Entity
 @Configurable
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Config  {
 
     @PersistenceContext

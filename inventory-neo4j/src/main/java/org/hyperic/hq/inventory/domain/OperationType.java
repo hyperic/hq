@@ -11,6 +11,8 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Entity
 @Configurable
 @NodeEntity(partial = true)
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class OperationType {
     @PersistenceContext
     transient EntityManager entityManager;

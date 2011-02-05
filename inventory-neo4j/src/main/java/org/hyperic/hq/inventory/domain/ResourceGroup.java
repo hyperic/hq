@@ -6,6 +6,8 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.springframework.data.graph.annotation.GraphProperty;
@@ -15,6 +17,7 @@ import org.springframework.data.graph.core.Direction;
 
 @Entity
 @NodeEntity(partial = true)
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class ResourceGroup extends Resource {
     @RelatedTo(type = RelationshipTypes.HAS_MEMBER, direction = Direction.OUTGOING, elementClass = Resource.class)
     @ManyToMany(targetEntity = Resource.class)

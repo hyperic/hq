@@ -380,39 +380,41 @@
 		timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
 
 	<cache name="org.hyperic.hq.inventory.domain.Resource"
-		maxElementsInMemory="10000" eternal="true" timeToIdleSeconds="0"
+		maxElementsInMemory="15000" eternal="true" timeToIdleSeconds="0"
+		timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
+	<cache name="org.hyperic.hq.inventory.domain.Config"
+		maxElementsInMemory="15000" eternal="true" timeToIdleSeconds="0"
 		timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
 	<cache name="org.hyperic.hq.inventory.domain.ResourceRelationship"
-		maxElementsInMemory="10000" eternal="true" timeToIdleSeconds="0"
+		maxElementsInMemory="15000" eternal="true" timeToIdleSeconds="0"
 		timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
 	<cache name="org.hyperic.hq.inventory.domain.Resource.fromRelationships"
-		maxElementsInMemory="10000" eternal="true" timeToIdleSeconds="0"
+		maxElementsInMemory="15000" eternal="true" timeToIdleSeconds="0"
 		timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
 	<cache name="org.hyperic.hq.inventory.domain.Resource.toRelationships"
-		maxElementsInMemory="10000" eternal="true" timeToIdleSeconds="0"
+		maxElementsInMemory="15000" eternal="true" timeToIdleSeconds="0"
 		timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
 
 	<!-- 4 configs per Resource (Product, Control, AutoInv, Meas) -->
 	<cache name="org.hyperic.hq.inventory.domain.Resource.configs"
-		maxElementsInMemory="40000" eternal="true" timeToIdleSeconds="0"
+		maxElementsInMemory="60000" eternal="true" timeToIdleSeconds="0"
 		timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
 
-	<!-- below is old PlatformType + ServerType + ServiceType, rounded down 
-		to 700 -->
+	
 	<cache name="org.hyperic.hq.inventory.domain.ResourceType"
-		maxElementsInMemory="700" eternal="true" timeToIdleSeconds="0"
+		maxElementsInMemory="1000" eternal="true" timeToIdleSeconds="0"
 		timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
 	<cache name="org.hyperic.hq.inventory.domain.ResourceType.fromRelationships"
-		maxElementsInMemory="700" eternal="true" timeToIdleSeconds="0"
+		maxElementsInMemory="1000" eternal="true" timeToIdleSeconds="0"
 		timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
 	<cache name="org.hyperic.hq.inventory.domain.ResourceType.toRelationships"
-		maxElementsInMemory="700" eternal="true" timeToIdleSeconds="0"
+		maxElementsInMemory="1000" eternal="true" timeToIdleSeconds="0"
 		timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
 	<cache name="org.hyperic.hq.inventory.domain.ResourceTypeRelationship"
-		maxElementsInMemory="700" eternal="true" timeToIdleSeconds="0"
+		maxElementsInMemory="1000" eternal="true" timeToIdleSeconds="0"
 		timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />	
 	<cache name="org.hyperic.hq.inventory.domain.ResourceType.operationTypes"
-		maxElementsInMemory="700" eternal="true" timeToIdleSeconds="0"
+		maxElementsInMemory="1000" eternal="true" timeToIdleSeconds="0"
 		timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
 	<cache name="org.hyperic.hq.inventory.domain.OperationType"
 		maxElementsInMemory="100" eternal="true" timeToIdleSeconds="0"
