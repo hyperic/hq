@@ -413,10 +413,7 @@ public class Resource {
     @Transactional
     public void remove() {
         removeConfig();
-        for(org.neo4j.graphdb.Relationship relationship: getUnderlyingState().getRelationships()) {
-            relationship.delete();
-        }
-        getUnderlyingState().delete();
+        graphDatabaseContext.removeNodeEntity(this);
         if (this.entityManager.contains(this)) {
             this.entityManager.remove(this);
         } else {

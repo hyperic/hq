@@ -110,10 +110,10 @@
 	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-context/3.0.5.RELEASE/spring-context-3.0.5.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-context/3.0.5.RELEASE/spring-context-3.0.5.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-context-support/3.0.5.RELEASE/spring-context-support-3.0.5.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-context-support/3.0.5.RELEASE/spring-context-support-3.0.5.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-core/3.0.5.RELEASE/spring-core-3.0.5.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-core/3.0.5.RELEASE/spring-core-3.0.5.RELEASE-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-commons-aspects/1.0.0-Chrysalis/spring-data-commons-aspects-1.0.0-Chrysalis.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-commons-core/1.0.0-Chrysalis/spring-data-commons-core-1.0.0-Chrysalis.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-graph-core/1.0.0-Chrysalis/spring-data-graph-core-1.0.0-Chrysalis.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-neo4j/1.0.0-Chrysalis/spring-data-neo4j-1.0.0-Chrysalis.jar">
+	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-commons-aspects/1.0.0.M2-Chrysalis/spring-data-commons-aspects-1.0.0.M2-Chrysalis.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-commons-core/1.0.0.M2-Chrysalis/spring-data-commons-core-1.0.0.M2-Chrysalis.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-graph-core/1.0.0.M2-Chrysalis/spring-data-graph-core-1.0.0.M2-Chrysalis.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-neo4j/1.0.0.M2-Chrysalis/spring-data-neo4j-1.0.0.M2-Chrysalis.jar">
 		<attributes>
 			<attribute name="org.eclipse.ajdt.aspectpath" value="org.eclipse.ajdt.aspectpath"/>
 		</attributes>

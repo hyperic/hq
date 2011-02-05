@@ -18,6 +18,7 @@ import org.springframework.data.graph.annotation.GraphProperty;
 import org.springframework.data.graph.annotation.NodeEntity;
 import org.springframework.data.graph.annotation.RelatedTo;
 import org.springframework.data.graph.core.Direction;
+import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
 import org.springframework.transaction.annotation.Transactional;
 
 @Entity
@@ -26,6 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class OperationType {
     @PersistenceContext
     transient EntityManager entityManager;
+    
+    @javax.annotation.Resource
+    private transient GraphDatabaseContext graphDatabaseContext;
 
     @Id
     @GenericGenerator(name = "mygen1", strategy = "increment")
@@ -83,10 +87,7 @@ public class OperationType {
 
     @Transactional
     public void remove() {
-        for(org.neo4j.graphdb.Relationship relationship: getUnderlyingState().getRelationships()) {
-            relationship.delete();
-        }
-        getUnderlyingState().delete();
+        graphDatabaseContext.removeNodeEntity(this);
         if (this.entityManager.contains(this)) {
             this.entityManager.remove(this);
         } else {
