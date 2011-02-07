@@ -205,7 +205,7 @@ public class ResourceType {
                                     Direction direction) {
         // TODO getRelationships only does one direction
         for (ResourceTypeRelationship relation : getRelationships(entity, name, direction)) {
-            relation.getUnderlyingState().delete();
+            relation.remove();
         }
     }
 
@@ -265,10 +265,7 @@ public class ResourceType {
         removePropertyTypes();
         removeOperationTypes();
         removeConfigTypes();
-        for(org.neo4j.graphdb.Relationship relationship: getUnderlyingState().getRelationships()) {
-            relationship.delete();
-        }
-        getUnderlyingState().delete();
+        graphDatabaseContext.removeNodeEntity(this);
         if (this.entityManager.contains(this)) {
             this.entityManager.remove(this);
         } else {

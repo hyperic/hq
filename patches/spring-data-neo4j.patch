@@ -1,7 +1,7 @@
-From a2d2861896838f1ed7d0a2ea1bec9ae40045437b Mon Sep 17 00:00:00 2001
+From 96bc60b09f30386e8f8ae3f1ee5f6e6acd42543c Mon Sep 17 00:00:00 2001
 From: Jennifer Hickey <jennifer.hickey@springsource.com>
 Date: Mon, 31 Jan 2011 16:11:54 -0800
-Subject: [PATCH] Temp hack to remove getValue()'s call to get id if a tx is running (since we always initialize the id by calling getId() immediately after a new object is persisted). Profiling results showed the isAnnotationPresent reflection call was causing huge bottlenecks.
+Subject: [PATCH 1/2] Temp hack to remove getValue()'s call to get id if a tx is running (since we always initialize the id by calling getId() immediately after a new object is persisted). Profiling results showed the isAnnotationPresent reflection call was causing huge bottlenecks.
 
 ---
  .../DetachableEntityStateAccessors.java            |    2 +-
@@ -34,6 +34,31 @@ index 3ce36ad..35eca5f 100644
                  }
              };
          } else {
+-- 
+1.6.4.4
+
+
+From 0ce688b06ce92979cafff1b3accdfc4187063d49 Mon Sep 17 00:00:00 2001
+From: Jennifer Hickey <jennifer.hickey@springsource.com>
+Date: Fri, 4 Feb 2011 16:08:53 -0800
+Subject: [PATCH 2/2] Removed System.out.println
+
+---
+ .../fieldaccess/PropertyFieldAccessorFactory.java  |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+diff --git a/spring-data-neo4j/src/main/java/org/springframework/data/graph/neo4j/fieldaccess/PropertyFieldAccessorFactory.java b/spring-data-neo4j/src/main/java/org/springframework/data/graph/neo4j/fieldaccess/PropertyFieldAccessorFactory.java
+index 2668124..e5f6ec1 100644
+--- a/spring-data-neo4j/src/main/java/org/springframework/data/graph/neo4j/fieldaccess/PropertyFieldAccessorFactory.java
++++ b/spring-data-neo4j/src/main/java/org/springframework/data/graph/neo4j/fieldaccess/PropertyFieldAccessorFactory.java
+@@ -73,7 +73,6 @@ public class PropertyFieldAccessorFactory implements FieldAccessorFactory<GraphB
+ 
+         @Override
+         public final Object getValue(final GraphBacked<PropertyContainer> graphBacked) {
+-            System.out.println("### getValue "+field.getDeclaringClass().getSimpleName()+"."+field.getName());
+             return doReturn(doGetValue(graphBacked));
+         }
+ 
 -- 
 1.6.4.4
 

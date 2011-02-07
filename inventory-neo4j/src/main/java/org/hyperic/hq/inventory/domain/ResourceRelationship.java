@@ -54,11 +54,7 @@ public class ResourceRelationship  {
         //TODO give a way to model properties on a type relation to validate creation of properties on the relation?  What about pre-defined types?
         getUnderlyingState().setProperty(key, value);    	
     }
-   
-    public void remove() {
-    	getUnderlyingState().delete();
-    }
-    
+     
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("ResourceRelationship[");
