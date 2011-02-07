@@ -723,6 +723,16 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     }
 
     /**
+     * Find all the resources by plugin
+     * @return a list of {@link Resource}s
+     * 
+     */
+    @Transactional(readOnly = true)
+    public List<Resource> findResourcesByPlugin(String pluginName) {
+        return resourceDAO.findByPlugin(pluginName);
+    }
+    
+    /**
      * Get viewable service resources. Service resources include individual
      * cluster unassigned services as well as service clusters.
      * 

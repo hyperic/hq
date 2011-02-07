@@ -378,6 +378,16 @@ public class ResourceDAO
             .setParameter("svcProto", AuthzConstants.authzService)
             .list();
     }
+    
+    @SuppressWarnings("unchecked")
+    List<Resource> findByPlugin(String pluginName) {
+    	String sql = "select s.resource from Server s "
+    				+ "where s.serverType.plugin = :pluginName";
+    	
+    	return getSession().createQuery(sql)
+    		.setParameter("pluginName", pluginName)
+    		.list();
+    }
 
     public int getPlatformCountMinusVsphereVmPlatforms() {
         String sql = "select count(*) from Resource r " + "where r.resourceType.id = :platProto "

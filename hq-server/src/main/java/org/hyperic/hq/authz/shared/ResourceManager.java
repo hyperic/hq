@@ -215,6 +215,13 @@ public interface ResourceManager {
     public List<Resource> findAllAppdefPrototypes();
 
     /**
+     * Find all the resources by plugin
+     * @return a list of {@link Resource}s
+     * 
+     */
+    public List<Resource> findResourcesByPlugin(String pluginName);
+    
+    /**
      * Get viewable service resources. Service resources include individual
      * cluster unassigned services as well as service clusters.
      * @param subject
