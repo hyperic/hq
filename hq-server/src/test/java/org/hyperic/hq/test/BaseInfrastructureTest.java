@@ -25,6 +25,7 @@
 package org.hyperic.hq.test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -254,7 +255,7 @@ abstract public class BaseInfrastructureTest {
             AppdefEntityConstants.APPDEF_TYPE_PLATFORM, platforms.iterator().next()
                 .getPlatformType().getId());
 
-        return createResourceGroup(groupName, appDefEntTypeId, roles, resources);
+        return createResourceGroup(groupName, appDefEntTypeId, roles, resources,AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS);
     }
 
     protected ResourceGroup createServerResourceGroup(Set<Server> servers, String groupName)
@@ -274,7 +275,7 @@ abstract public class BaseInfrastructureTest {
             AppdefEntityConstants.APPDEF_TYPE_SERVER, servers.iterator().next().getServerType()
                 .getId());
 
-        return createResourceGroup(groupName, appDefEntTypeId, roles, resources);
+        return createResourceGroup(groupName, appDefEntTypeId, roles, resources,AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS);
     }
 
     protected ResourceGroup createServiceResourceGroup(Set<Service> services, String groupName)
@@ -294,14 +295,22 @@ abstract public class BaseInfrastructureTest {
             AppdefEntityConstants.APPDEF_TYPE_SERVICE, services.iterator().next().getServiceType()
                 .getId());
 
-        return createResourceGroup(groupName, appDefEntTypeId, roles, resources);
+        return createResourceGroup(groupName, appDefEntTypeId, roles, resources,AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC);
+    }
+    
+    protected ResourceGroup createMixedGroup(String groupName, int groupType) throws GroupDuplicateNameException, GroupCreationException {
+        ResourceGroupCreateInfo gCInfo = new ResourceGroupCreateInfo(groupName, "",
+            "", false,groupType);
+        ResourceGroup resGrp = resourceGroupManager.createResourceGroup(
+            authzSubjectManager.getOverlordPojo(), gCInfo, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+        return resGrp;
     }
 
     private ResourceGroup createResourceGroup(String groupName, AppdefEntityTypeID appDefEntTypeId,
-                                              List<Role> roles, List<Resource> resources)
+                                              List<Role> roles, List<Resource> resources, int groupType)
         throws GroupDuplicateNameException, GroupCreationException {
         ResourceGroupCreateInfo gCInfo = new ResourceGroupCreateInfo(groupName, "",
-            "", false,AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS);
+            "", false,groupType);
         gCInfo.setGroupEntType(appDefEntTypeId.getType());
         gCInfo.setGroupEntResType(appDefEntTypeId.getId());
         ResourceGroup resGrp = resourceGroupManager.createResourceGroup(

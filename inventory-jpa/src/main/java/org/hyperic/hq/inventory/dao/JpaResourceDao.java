@@ -10,6 +10,8 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.inventory.domain.Config;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
+import org.hyperic.hq.paging.PageInfo;
+import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Repository;
@@ -56,12 +58,6 @@ public class JpaResourceDao implements ResourceDao {
     }
     
     @Transactional(readOnly = true)
-    public List<Resource> findByTypeName(String typeName) {
-        ResourceType type = resourceTypeDao.findByName(typeName);
-        return new ArrayList<Resource>(type.getResources());
-    }
-
-    @Transactional(readOnly = true)
     public Resource findRoot() {
         return findById(1);
     }
@@ -77,6 +73,12 @@ public class JpaResourceDao implements ResourceDao {
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
+    }
+    
+    public PageList<Resource> findByIndexedProperty(String propertyName, Object propertyValue,
+                                                    PageInfo pageInfo) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Transactional

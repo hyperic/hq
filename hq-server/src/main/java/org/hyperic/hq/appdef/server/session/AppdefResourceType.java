@@ -34,6 +34,7 @@ public abstract class AppdefResourceType extends AppdefBean
     protected String name;
     protected String sortName;
     protected String description;
+    public static String APPDEF_TYPE_ID="AppdefTypeId";
 
     public abstract int getAppdefType();
   

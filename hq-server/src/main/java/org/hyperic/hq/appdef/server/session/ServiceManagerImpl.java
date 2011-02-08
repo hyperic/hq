@@ -42,6 +42,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
@@ -64,6 +65,7 @@ import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
+import org.hyperic.hq.paging.PageInfo;
 import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.hq.product.server.session.PluginDAO;
 import org.hyperic.hq.reference.RelationshipTypes;
@@ -131,10 +133,10 @@ public class ServiceManagerImpl implements ServiceManager {
         s.setProperty(ServiceFactory.AUTO_DISCOVERY_ZOMBIE,false);
         s.setProperty(ServiceFactory.SERVICE_RT,false);
         s.setProperty(ServiceFactory.END_USER_RT,false);
-        //TODO abstract creationTime, modifiedTime, and sortName?
         s.setProperty(ServiceFactory.CREATION_TIME, System.currentTimeMillis());
         s.setProperty(ServiceFactory.MODIFIED_TIME,System.currentTimeMillis());
         s.setProperty(AppdefResource.SORT_NAME, name.toUpperCase());
+        s.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVICE);
         s.setOwner(subject);
         s.setAgent(parent.getAgent());
         parent.relateTo(s, RelationshipTypes.SERVICE);
@@ -185,30 +187,30 @@ public class ServiceManagerImpl implements ServiceManager {
     public Integer[] getServiceIds(AuthzSubject subject, Integer servTypeId)
         throws PermissionException {
 
-        try {
+        //try {
             Collection<Service> services = findByServiceType(servTypeId, true);
             if (services.size() == 0) {
                 return new Integer[0];
             }
             List<Integer> serviceIds = new ArrayList<Integer>(services.size());
 
-            
-            Set<Integer> viewable = new HashSet<Integer>(getViewableServices(subject));
+            //TODO perm check
+            //Set<Integer> viewable = new HashSet<Integer>(getViewableServices(subject));
             // and iterate over the List to remove any item not in the
             // viewable list
             int i = 0;
             for (Iterator<Service> it = services.iterator(); it.hasNext(); i++) {
                 Service service = it.next();
-                if (viewable.contains(service.getId())) {
+                //if (viewable.contains(service.getId())) {
                     // add the item, user can see it
                     serviceIds.add(service.getId());
-                }
+                //}
             }
             return (Integer[]) serviceIds.toArray(new Integer[0]);
-        } catch (NotFoundException e) {
+        //} catch (NotFoundException e) {
              //There are no viewable servers
-            return new Integer[0];
-        }
+          //  return new Integer[0];
+       // }
     }
 
     /**
@@ -301,8 +303,8 @@ public class ServiceManagerImpl implements ServiceManager {
     
     @Transactional(readOnly=true)
     public PageList<Resource> getAllServiceResources(AuthzSubject subject, PageControl pc) {
-        Collection<Resource> services = findAllServiceResources();
-        return defaultPager.seek(services, pc);
+        PageInfo pageInfo = new PageInfo(pc.getPagenum(),pc.getPagesize(),pc.getSortorder(),"name",String.class);
+        return resourceDao.findByIndexedProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVICE,pageInfo);
     }
     
     private Set<ServiceType> getAllServiceTypes() {
@@ -420,21 +422,22 @@ public class ServiceManagerImpl implements ServiceManager {
 
     private List<Service> filterUnviewable(AuthzSubject subject, Collection<Service> services)
         throws PermissionException, ServiceNotFoundException {
-       
-        List<Integer> viewableEntityIds;
-        try {
-            viewableEntityIds = getViewableServices(subject);
-        } catch (NotFoundException e) {
-            throw new ServiceNotFoundException("no viewable services for " + subject);
-        }
-
-        List<Service> retVal = new ArrayList<Service>();
-        for (Service aService: services) {
-           if (viewableEntityIds.contains(aService.getId())) {
-               retVal.add(aService);
-           }
-        }
-        return retVal;
+       //TODO perm checking
+//        List<Integer> viewableEntityIds;
+//        try {
+//            viewableEntityIds = getViewableServices(subject);
+//        } catch (NotFoundException e) {
+//            throw new ServiceNotFoundException("no viewable services for " + subject);
+//        }
+//
+//        List<Service> retVal = new ArrayList<Service>();
+//        for (Service aService: services) {
+//           if (viewableEntityIds.contains(aService.getId())) {
+//               retVal.add(aService);
+//           }
+//        }
+//        return retVal;
+        return new ArrayList<Service>(services);
     }
 
     /**
@@ -906,7 +909,9 @@ public class ServiceManagerImpl implements ServiceManager {
         serviceType.addPropertyType(createServicePropertyType(ServiceFactory.AUTO_DISCOVERY_ZOMBIE,Boolean.class));
         serviceType.addPropertyType(createServicePropertyType(ServiceFactory.END_USER_RT,Boolean.class));
         serviceType.addPropertyType(createServicePropertyType(ServiceFactory.SERVICE_RT,Boolean.class));
-      
+        PropertyType appdefType = createServicePropertyType(AppdefResourceType.APPDEF_TYPE_ID, Integer.class);
+        appdefType.setIndexed(true);
+        serviceType.addPropertyType(appdefType);
         parentType.relateTo(serviceType, RelationshipTypes.SERVICE);
         return serviceFactory.createServiceType(serviceType);
     }

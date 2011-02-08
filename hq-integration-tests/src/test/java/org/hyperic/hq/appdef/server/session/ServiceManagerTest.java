@@ -37,8 +37,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
@@ -83,11 +85,13 @@ public class ServiceManagerTest
 
     private AuthzSubject subject;
 
+    private String agentToken = "agentToken123";
+
     private List<Platform> createPlatforms(String agentToken) throws ApplicationException {
         List<Platform> platforms = new ArrayList<Platform>(2);
         for (int i = 1; i <= 2; i++) {
-            platforms.add(i - 1, createPlatform(agentToken, "Linux", "Test Platform" + i,
-                "Test Platform" + i,2));
+            platforms.add(i - 1,
+                createPlatform(agentToken, "Linux", "Test Platform" + i, "Test Platform" + i, 2));
         }
         return platforms;
     }
@@ -106,9 +110,7 @@ public class ServiceManagerTest
     @Before
     public void initializeTestData() throws ApplicationException, NotFoundException {
         subject = authzSubjectManager.getOverlordPojo();
-        String agentToken = "agentToken123";
-        agentManager.createLegacyAgent("127.0.0.1", 2144, "authToken", agentToken,
-            "4.5");
+        agentManager.createLegacyAgent("127.0.0.1", 2144, "authToken", agentToken, "4.5");
         createPlatformType("Linux");
         testPlatforms = createPlatforms(agentToken);
         // Create ServerType
@@ -130,11 +132,11 @@ public class ServiceManagerTest
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription("Test ServiceType Desc");
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test",
-            testServers.get(0).getServerType());
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServers
+            .get(0).getServerType());
         assertEquals(serviceType.getName(), "Test ServiceType Name");
         assertEquals(serviceType.getDescription(), "Test ServiceType Desc");
-        assertEquals("test",serviceType.getPlugin());
+        assertEquals("test", serviceType.getPlugin());
     }
 
     /**
@@ -147,8 +149,7 @@ public class ServiceManagerTest
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription("Test ServiceType Desc");
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test",
-            testServerType);
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
         Service service = serviceManager.createService(subject, testServers.get(0).getId(),
             serviceType.getId(), "Test Service Name", "Test Service Desc", "my computer");
         assertEquals(service.getName(), "Test Service Name");
@@ -171,10 +172,9 @@ public class ServiceManagerTest
     public void testGetServiceIds() throws ApplicationException, NotFoundException {
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription("Test ServiceType Desc");
-       
+
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test",
-            testServerType);
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
         List<Integer> serviceIds = new ArrayList<Integer>(10);
         for (int i = 1; i < 10; i++) {
             serviceIds.add(serviceManager.createService(subject, testServers.get(0).getId(),
@@ -184,7 +184,7 @@ public class ServiceManagerTest
         Integer[] ids = serviceManager.getServiceIds(subject, serviceType.getId());
         Set<Integer> expectedIds = new HashSet<Integer>(serviceIds);
         Set<Integer> actualIds = new HashSet<Integer>(Arrays.asList(ids));
-        assertEquals(expectedIds,actualIds);
+        assertEquals(expectedIds, actualIds);
     }
 
     /**
@@ -197,8 +197,7 @@ public class ServiceManagerTest
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription("Test ServiceType Desc");
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test",
-            testServerType);
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
         Service service = serviceManager.createService(subject, testServers.get(0).getId(),
             serviceType.getId(), "Test Service Name", "Test Service Desc", "my computer");
         assertEquals(service, serviceManager.findServiceById(service.getId()));
@@ -218,10 +217,9 @@ public class ServiceManagerTest
     public void testGetServiceByIdInteger() throws ApplicationException, NotFoundException {
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription("Test ServiceType Desc");
-       
+
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test",
-            testServerType);
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
         Service service = serviceManager.createService(subject, testServers.get(0).getId(),
             serviceType.getId(), "Test Service Name", "Test Service Desc", "my computer");
         assertEquals(service, serviceManager.getServiceById(service.getId()));
@@ -242,10 +240,9 @@ public class ServiceManagerTest
         NotFoundException {
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription("Test ServiceType Desc");
-       
+
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test",
-            testServerType);
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
         Service service = serviceManager.createService(subject, testServers.get(0).getId(),
             serviceType.getId(), "Test Service Name", "Test Service Desc", "my computer");
         assertEquals(service, serviceManager.getServiceById(subject, service.getId()));
@@ -261,17 +258,17 @@ public class ServiceManagerTest
         // AutoInventory Identifier is same as that of the service name
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription("Test ServiceType Desc");
-       
+
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test",
-            testServerType);
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
         Service service = serviceManager.createService(subject, testServers.get(0).getId(),
             serviceType.getId(), "Test Service Name", "Test Service Desc", "my computer");
-        assertEquals(service, serviceManager.getServicesByAIID(testServers.get(0),
-            service.getAutoinventoryIdentifier()).get(0));
+        assertEquals(
+            service,
+            serviceManager.getServicesByAIID(testServers.get(0),
+                service.getAutoinventoryIdentifier()).get(0));
     }
 
-   
     /**
      * Test method for
      * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#findServiceType(java.lang.Integer)}
@@ -282,8 +279,7 @@ public class ServiceManagerTest
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription("Test ServiceType Desc");
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test",
-            testServerType);
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
         assertEquals(serviceType, serviceManager.findServiceType(serviceType.getId()));
     }
 
@@ -297,8 +293,7 @@ public class ServiceManagerTest
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription("Test ServiceType Desc");
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test",
-            testServerType);
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
         assertEquals(serviceType, serviceManager.findServiceTypeByName(serviceType.getName()));
     }
 
@@ -314,8 +309,8 @@ public class ServiceManagerTest
         for (int i = 1; i <= 5; i++) {
             sinfo.setDescription("Test ServiceType Desc");
             sinfo.setName("Test ServiceType Name");
-            pgList.add(serviceManager.createServiceType(sinfo, "test",
-                testServerType).getServiceTypeValue());
+            pgList.add(serviceManager.createServiceType(sinfo, "test", testServerType)
+                .getServiceTypeValue());
         }
         PageControl pc = new PageControl();
         assertTrue(serviceManager.getAllServiceTypes(subject, pc).containsAll(pgList));
@@ -331,17 +326,17 @@ public class ServiceManagerTest
         PageList<ServiceTypeValue> pgList = new PageList<ServiceTypeValue>();
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         ServiceType serviceType = null;
-      
+
         for (int i = 1; i <= 5; i++) {
             sinfo.setDescription("Test ServiceType Desc");
-          
+
             sinfo.setName("Test ServiceType Name" + i);
-            serviceType = serviceManager.createServiceType(sinfo, "test",
-                testServerType);
+            serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
             pgList.add(serviceType.getServiceTypeValue());
-            //This method only returns service types which have services instantiated
-            serviceManager.createService(authzSubjectManager.getOverlordPojo(), testServers.get(0).getId(), 
-                serviceType.getId(), "Test Service"+i, "A svc", "Somewhere");
+            // This method only returns service types which have services
+            // instantiated
+            serviceManager.createService(authzSubjectManager.getOverlordPojo(), testServers.get(0)
+                .getId(), serviceType.getId(), "Test Service" + i, "A svc", "Somewhere");
         }
         assertEquals(serviceManager.getViewableServiceTypes(subject, PageControl.PAGE_ALL), pgList);
     }
@@ -357,12 +352,15 @@ public class ServiceManagerTest
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         for (int i = 1; i <= 5; i++) {
             sinfo.setDescription("Test ServiceType Desc");
-           
+
             sinfo.setName("Test ServiceType Name");
-            pgList.add(serviceManager.createServiceType(sinfo, "test",
-                testServerType).getServiceTypeValue());
+            pgList.add(serviceManager.createServiceType(sinfo, "test", testServerType)
+                .getServiceTypeValue());
         }
-        assertEquals(pgList,new HashSet<ServiceTypeValue>(serviceManager.getServiceTypesByServerType(subject, testServerType.getId())));
+        assertEquals(
+            pgList,
+            new HashSet<ServiceTypeValue>(serviceManager.getServiceTypesByServerType(subject,
+                testServerType.getId())));
     }
 
     @Test
@@ -371,10 +369,10 @@ public class ServiceManagerTest
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         for (int i = 1; i <= 5; i++) {
             sinfo.setDescription("Test ServiceType Desc");
-           
+
             sinfo.setName("Test ServiceType Name");
-            pgList.add(serviceManager.createServiceType(sinfo, "test",
-                testServerType).getServiceTypeValue());
+            pgList.add(serviceManager.createServiceType(sinfo, "test", testServerType)
+                .getServiceTypeValue());
         }
         PageControl pc = new PageControl();
         assertTrue(serviceManager.getServiceTypesByServerType(subject, 435878).isEmpty());
@@ -390,17 +388,15 @@ public class ServiceManagerTest
         Set<Service> svalues = new HashSet<Service>(5);
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription("Test ServiceType Desc");
-      
+
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test",
-            testServerType);
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
         for (int i = 1; i <= 5; i++) {
             svalues.add(serviceManager.createService(subject, testServers.get(0).getId(),
                 serviceType.getId(), "Test Service Name" + i, "Test Service From Server" + i,
                 "my computer"));
         }
-        List<Service> svalues1 = serviceManager.getServicesByServer(subject,
-            testServers.get(0));
+        List<Service> svalues1 = serviceManager.getServicesByServer(subject, testServers.get(0));
         assertEquals(svalues, new HashSet<Service>(svalues1));
     }
 
@@ -415,10 +411,9 @@ public class ServiceManagerTest
         PageList<ServiceValue> svalues = new PageList<ServiceValue>();
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription("Test ServiceType Desc");
-        
+
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test",
-            testServerType);
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
         for (int i = 1; i <= 5; i++) {
             svalues.add(serviceManager.createService(subject, testServers.get(0).getId(),
                 serviceType.getId(), "Test Service Name" + i, "Test Service From Server" + i,
@@ -439,10 +434,9 @@ public class ServiceManagerTest
         List<Integer> svalues = new ArrayList<Integer>(5);
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription("Test ServiceType Desc");
-      
+
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test",
-            testServerType);
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
         for (int i = 1; i <= 5; i++) {
             svalues.add(serviceManager.createService(subject, testServers.get(0).getId(),
                 serviceType.getId(), "Test Service Name" + i, "Test Service From Server" + i,
@@ -460,15 +454,15 @@ public class ServiceManagerTest
      */
     @Test
     public void testGetPlatformServices() throws ApplicationException, NotFoundException {
-      
+
         PageList<ServiceValue> svalues = new PageList<ServiceValue>();
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription("Test ServiceType Desc");
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test",
-            testPlatforms.get(0).getPlatformType());
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testPlatforms
+            .get(0).getPlatformType());
         for (int i = 1; i <= 5; i++) {
-            svalues.add(serviceManager.createService(subject,testPlatforms.get(0).getId(),
+            svalues.add(serviceManager.createService(subject, testPlatforms.get(0).getId(),
                 serviceType.getId(), "Test Service Name" + i, "Test Service From Server" + i,
                 "my computer").getServiceValue());
         }
@@ -484,13 +478,13 @@ public class ServiceManagerTest
      */
     @Test
     public void testGetPlatformServicesAddServiceType() throws ApplicationException,
-        NotFoundException {   
+        NotFoundException {
         PageList<ServiceValue> svalues = new PageList<ServiceValue>();
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription("Test ServiceType Desc");
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test",
-            testPlatforms.get(0).getPlatformType());
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testPlatforms
+            .get(0).getPlatformType());
         for (int i = 1; i <= 5; i++) {
             svalues.add(serviceManager.createService(subject, testPlatforms.get(0).getId(),
                 serviceType.getId(), "Test Service Name" + i, "Test Service From Server" + i,
@@ -501,7 +495,6 @@ public class ServiceManagerTest
         assertEquals(svalues, svalues1);
     }
 
-    
     /**
      * Test method for
      * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#getPlatformServices(org.hyperic.hq.authz.server.session.AuthzSubject, java.lang.Integer)}
@@ -510,17 +503,18 @@ public class ServiceManagerTest
     @Test
     public void testGetPlatformServicesByPlatformId() throws ApplicationException,
         NotFoundException {
-       
+
         List<Service> svalues = new ArrayList<Service>();
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription("Test ServiceType Desc");
-        
+
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test",
-            testPlatforms.get(0).getPlatformType());
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testPlatforms
+            .get(0).getPlatformType());
         for (int i = 1; i <= 5; i++) {
-            svalues.add(serviceManager.createService(subject, testPlatforms.get(0).getId(), serviceType
-                .getId(), "Test Service Name" + i, "Test Service From Server" + i, "my computer"));
+            svalues.add(serviceManager.createService(subject, testPlatforms.get(0).getId(),
+                serviceType.getId(), "Test Service Name" + i, "Test Service From Server" + i,
+                "my computer"));
         }
         List<Service> svalues1 = (List<Service>) serviceManager.getPlatformServices(subject,
             testPlatforms.get(0).getId());
@@ -537,8 +531,7 @@ public class ServiceManagerTest
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription("Test ServiceType Desc");
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test",
-            testServerType);
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
         Service service = serviceManager.createService(subject, testServers.get(0).getId(),
             serviceType.getId(), "Test Service Name", "Test Service From Server", "my computer");
         assertFalse(service.isAutodiscoveryZombie());
@@ -557,8 +550,7 @@ public class ServiceManagerTest
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription("Test ServiceType Desc");
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test",
-            testServerType);
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
         Service service = serviceManager.createService(subject, testServers.get(0).getId(),
             serviceType.getId(), "Test Service Name", "Test Service From Server", "my computer");
         ServiceValue sValue = new ServiceValue();
@@ -584,17 +576,18 @@ public class ServiceManagerTest
      * Test method for
      * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#removeService(org.hyperic.hq.authz.server.session.AuthzSubject, org.hyperic.hq.appdef.server.session.Service)}
      * .
-     * @throws VetoException 
-     * @throws PermissionException 
-     * @throws ValidationException 
-     * @throws AppdefDuplicateNameException 
-     * @throws ServerNotFoundException 
-     * @throws NotFoundException 
-     * @throws ServiceNotFoundException 
+     * @throws VetoException
+     * @throws PermissionException
+     * @throws ValidationException
+     * @throws AppdefDuplicateNameException
+     * @throws ServerNotFoundException
+     * @throws NotFoundException
+     * @throws ServiceNotFoundException
      */
-    @Test(expected=ServiceNotFoundException.class)
-    public void testRemoveService() throws PermissionException, VetoException, ServerNotFoundException, AppdefDuplicateNameException, 
-        ValidationException, NotFoundException, ServiceNotFoundException {
+    @Test(expected = ServiceNotFoundException.class)
+    public void testRemoveService() throws PermissionException, VetoException,
+        ServerNotFoundException, AppdefDuplicateNameException, ValidationException,
+        NotFoundException, ServiceNotFoundException {
         ServiceType serviceType = createServiceType("My ServiceType", testServerType);
         Service service = serviceManager.createService(subject, testServers.get(0).getId(),
             serviceType.getId(), "Test Service Name", "Test Service Desc", "my computer");
@@ -609,27 +602,23 @@ public class ServiceManagerTest
      */
     @Test
     public void testGetServiceTypeCounts() throws NotFoundException, ApplicationException {
-        List<Object[]> actuals = new ArrayList<Object[]>(10);
+        Map<String, Integer> actuals = new HashMap<String, Integer>(10);
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         ServiceType serviceType;
-        actuals.add(new Object[] {"PluginTestServer 1.0 Web Module Stats",0l});
+        actuals.put("PluginTestServer 1.0 Web Module Stats", 0);
         for (int i = 1; i <= 9; i++) {
             sinfo.setDescription("Test ServiceType Desc" + i);
-          
+
             sinfo.setName("Test ServiceType Name" + i);
-            serviceType = serviceManager.createServiceType(sinfo, "test",
-                testServerType);
+            serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
             // Create Services as well here as the query uses join from Service
             serviceManager.createService(subject, testServers.get(0).getId(), serviceType.getId(),
                 "Test Service Name" + i, "Test Service From Server" + i, "my computer");
-            actuals.add(i, new Object[] { "Test ServiceType Name" + i, Long.valueOf("1") });
+            actuals.put("Test ServiceType Name" + i, 1);
         }
 
-        List<Object[]> counts = serviceManager.getServiceTypeCounts();
-        for (int i = 0; i < 10; i++) {
-            assertEquals((String) counts.get(i)[0], ((String) actuals.get(i)[0]));
-            assertEquals((Long) counts.get(i)[1], ((Long) actuals.get(i)[1]));
-        }
+        Map<String, Integer> counts = serviceManager.getServiceTypeCounts();
+        assertEquals(actuals, counts);
     }
 
 }

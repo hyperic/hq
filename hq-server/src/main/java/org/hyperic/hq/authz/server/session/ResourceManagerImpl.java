@@ -33,11 +33,8 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.server.session.AppdefResource;
-import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -50,9 +47,9 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.inventory.dao.ResourceDao;
 import org.hyperic.hq.inventory.dao.ResourceTypeDao;
-import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
+import org.hyperic.hq.paging.PageInfo;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -329,35 +326,10 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         if(resourceTypeDao.findRoot() == null) {
             ResourceType system= resourceTypeDao.create("System");
             resourceDao.create("Root", system);
-        }
-        int[] groupTypes = AppdefEntityConstants.getAppdefGroupTypes();
-        for(int i=0;i< groupTypes.length;i++) {
-            if(resourceTypeDao.findByName(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i])) == null) {
-                ResourceType groupType = resourceTypeDao.create(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i]));
-                if(groupTypes[i] == AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP) {
-                    setPropertyType(groupType,AppdefResource.SORT_NAME,String.class);
-                    setPropertyType(groupType,ApplicationManagerImpl.BUSINESS_CONTACT,String.class);
-                    setPropertyType(groupType,ApplicationManagerImpl.CREATION_TIME,Long.class);
-                    setPropertyType(groupType,ApplicationManagerImpl.ENG_CONTACT,String.class);
-                    setPropertyType(groupType,ApplicationManagerImpl.MODIFIED_TIME,Long.class);
-                    setPropertyType(groupType,ApplicationManagerImpl.OPS_CONTACT,String.class);
-                }else {
-                    setPropertyType(groupType,"groupEntType",Integer.class);
-                    setPropertyType(groupType,"groupEntResType",Integer.class);
-                }
-            }
-        }
-    }
-    
-    private void setPropertyType(ResourceType groupType, String propTypeName, Class<?> type) {
-        PropertyType propType = resourceTypeDao.createPropertyType(propTypeName,type);
-        propType.setDescription(propTypeName);
-        propType.setHidden(true);
-        groupType.addPropertyType(propType);
+        }     
     }
     
     
-
     public Set<ResourceType> findResourceTypesWithResources() {
         final Set<ResourceType> typesWithResources = new HashSet<ResourceType>();
         Collection<ResourceType> resTypes = resourceTypeDao.findAll();
@@ -367,6 +339,11 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
             }
         }
         return typesWithResources;
+    }
+    
+    public PageList<Resource> getResourcesOfType(ResourceType resourceType, PageControl pc) {
+        PageInfo pageInfo = new PageInfo(pc.getPagenum(),pc.getPagesize(),pc.getSortorder(),"name",String.class);
+        return resourceDao.findByIndexedProperty("type", resourceType.getId(),pageInfo);
     }
 
 

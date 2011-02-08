@@ -42,6 +42,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
@@ -70,6 +71,7 @@ import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
+import org.hyperic.hq.paging.PageInfo;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.server.session.PluginDAO;
 import org.hyperic.hq.reference.RelationshipTypes;
@@ -260,6 +262,7 @@ public class ServerManagerImpl implements ServerManager {
         s.setProperty(ServerFactory.CREATION_TIME, System.currentTimeMillis());
         s.setProperty(ServerFactory.MODIFIED_TIME,System.currentTimeMillis());
         s.setProperty(AppdefResource.SORT_NAME, sv.getName().toUpperCase());
+        s.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVER);
         s.setOwner(owner);
         s.setAgent(p.getAgent());
         p.relateTo(s,RelationshipTypes.SERVER);
@@ -360,8 +363,8 @@ public class ServerManagerImpl implements ServerManager {
     
     @Transactional(readOnly=true)
     public PageList<Resource> getAllServerResources(AuthzSubject subject, PageControl pc) {
-        Collection<Resource> servers = getAllServers();
-        return defaultPager.seek(servers, pc);
+        PageInfo pageInfo = new PageInfo(pc.getPagenum(),pc.getPagesize(),pc.getSortorder(),"name",String.class);
+        return resourceDao.findByIndexedProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVER,pageInfo);
     }
     
     private Set<ServerType> getAllServerTypes() {
@@ -1062,7 +1065,9 @@ public class ServerManagerImpl implements ServerManager {
         stype.addPropertyType(createServerPropertyType(ServerFactory.INSTALL_PATH,String.class));
         stype.addPropertyType(createServerPropertyType(ServerFactory.SERVICES_AUTO_MANAGED,Boolean.class));
         stype.addPropertyType(createServerPropertyType(ServerFactory.RUNTIME_AUTODISCOVERY,Boolean.class));
-       
+        PropertyType appdefType = createServerPropertyType(AppdefResourceType.APPDEF_TYPE_ID, Integer.class);
+        appdefType.setIndexed(true);
+        stype.addPropertyType(appdefType);
         String newPlats[] = sinfo.getValidPlatformTypes();
         findAndSetPlatformType(newPlats, stype);
         return serverFactory.createServerType(stype);

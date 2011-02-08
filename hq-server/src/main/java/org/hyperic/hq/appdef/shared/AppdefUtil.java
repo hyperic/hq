@@ -131,7 +131,7 @@ public class AppdefUtil {
         if(rv.getResourceTypeTo(RelationshipTypes.SERVICE) !=null) {
             return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
         }
-        if(rv.getName().equals(AppdefEntityConstants.getAppdefGroupTypeName(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP))){
+        if(rv.getName().equals(AppdefEntityConstants.APPDEF_NAME_APPLICATION)){
             return AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
         }
     

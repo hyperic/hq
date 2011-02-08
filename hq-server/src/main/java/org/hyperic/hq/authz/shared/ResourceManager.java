@@ -107,6 +107,8 @@ public interface ResourceManager {
      * @return Map of resource values
      */
     public PageList<Resource> findViewables(AuthzSubject subject, String searchFor, PageControl pc);
+    
+    PageList<Resource> getResourcesOfType(ResourceType resourceType, PageControl pc);
 
     /**
      * Get viewable resources either by "type" OR "resource name" OR

@@ -67,6 +67,10 @@ public class PropertyType {
     @GraphProperty
     @Transient
     private Boolean hidden;
+    
+    @GraphProperty
+    @Transient
+    private boolean indexed;
 
     @Version
     @Column(name = "version")
@@ -118,6 +122,14 @@ public class PropertyType {
 
     public Integer getVersion() {
         return this.version;
+    }
+
+    public boolean isIndexed() {
+        return indexed;
+    }
+
+    public void setIndexed(boolean indexed) {
+        this.indexed = indexed;
     }
 
     @Transactional

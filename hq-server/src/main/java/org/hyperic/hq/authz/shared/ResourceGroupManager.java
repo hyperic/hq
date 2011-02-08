@@ -151,9 +151,7 @@ public interface ResourceGroupManager
     public int getNumMembers(ResourceGroup g);
     
     Number getGroupCountOfType(ResourceType groupType);
-    
-    PageList<Resource> findGroupsOfType(AuthzSubject subject, Set<ResourceType> groupTypes, PageControl pc);
-    
+     
     /**
      * Temporary method to convert a ResourceGroup into an AppdefGroupValue
      */
@@ -186,7 +184,11 @@ public interface ResourceGroupManager
      */
     public PageList<ResourceGroup> findGroupsContaining(AuthzSubject subject, Resource member,
                                                         Collection<ResourceGroup> excludeGroups,
-                                                        PageInfo pInfo);
+                                                        org.hyperic.hibernate.PageInfo pInfo);
+    
+    PageList<Resource> getCompatibleGroups(PageControl pageControl);
+    
+    PageList<Resource> getMixedGroups(PageControl pageControl);
 
     /**
      * Get all the resource groups excluding the root resource group.
@@ -201,5 +203,7 @@ public interface ResourceGroupManager
         throws PermissionException;
     
     Collection<ResourceGroup> getGroups(Resource r);
+    
+    PageList<Resource> getCompatibleGroupsContainingType(int resourceTypeId, PageControl pageControl);
  
 }
