@@ -42,6 +42,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
@@ -64,6 +65,7 @@ import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
+import org.hyperic.hq.paging.PageInfo;
 import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.hq.product.server.session.PluginDAO;
 import org.hyperic.hq.reference.RelationshipTypes;
@@ -135,6 +137,7 @@ public class ServiceManagerImpl implements ServiceManager {
         s.setProperty(ServiceFactory.CREATION_TIME, System.currentTimeMillis());
         s.setProperty(ServiceFactory.MODIFIED_TIME,System.currentTimeMillis());
         s.setProperty(AppdefResource.SORT_NAME, name.toUpperCase());
+        s.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVICE);
         s.setOwner(subject);
         s.setAgent(parent.getAgent());
         parent.relateTo(s, RelationshipTypes.SERVICE);
@@ -301,8 +304,8 @@ public class ServiceManagerImpl implements ServiceManager {
     
     @Transactional(readOnly=true)
     public PageList<Resource> getAllServiceResources(AuthzSubject subject, PageControl pc) {
-        Collection<Resource> services = findAllServiceResources();
-        return defaultPager.seek(services, pc);
+        PageInfo pageInfo = new PageInfo(pc.getPagenum(),pc.getPagesize(),pc.getSortorder(),"name",String.class);
+        return resourceDao.findByIndexedProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVICE,pageInfo);
     }
     
     private Set<ServiceType> getAllServiceTypes() {
@@ -906,7 +909,9 @@ public class ServiceManagerImpl implements ServiceManager {
         serviceType.addPropertyType(createServicePropertyType(ServiceFactory.AUTO_DISCOVERY_ZOMBIE,Boolean.class));
         serviceType.addPropertyType(createServicePropertyType(ServiceFactory.END_USER_RT,Boolean.class));
         serviceType.addPropertyType(createServicePropertyType(ServiceFactory.SERVICE_RT,Boolean.class));
-      
+        PropertyType appdefType = createServicePropertyType(AppdefResourceType.APPDEF_TYPE_ID, Integer.class);
+        appdefType.setIndexed(true);
+        serviceType.addPropertyType(appdefType);
         parentType.relateTo(serviceType, RelationshipTypes.SERVICE);
         return serviceFactory.createServiceType(serviceType);
     }

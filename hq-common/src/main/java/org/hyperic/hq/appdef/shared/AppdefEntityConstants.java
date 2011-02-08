@@ -41,7 +41,7 @@ public final class AppdefEntityConstants {
     private static final String APPDEF_NAME_PLATFORM    = "platform";
     private static final String APPDEF_NAME_SERVER      = "server";
     private static final String APPDEF_NAME_SERVICE     = "service";
-    private static final String APPDEF_NAME_APPLICATION = "application";
+    public static final String APPDEF_NAME_APPLICATION = "application";
     private static final String APPDEF_NAME_GROUP       = "group";
     private static final String APPDEF_NAME_AIPLATFORM  = "aiplatform";
     private static final String APPDEF_NAME_AISERVER    = "aiserver";

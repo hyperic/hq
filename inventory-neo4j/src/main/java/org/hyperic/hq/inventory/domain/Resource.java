@@ -514,7 +514,8 @@ public class Resource {
 
     @Transactional
     public Object setProperty(String key, Object value) {
-        if (type.getPropertyType(key) == null) {
+        PropertyType propertyType = type.getPropertyType(key);
+        if ( propertyType == null) {
             throw new IllegalArgumentException("Property " + key +
                                                " is not defined for resource of type " +
                                                type.getName());
@@ -533,12 +534,18 @@ public class Resource {
         } catch (NotFoundException e) {
             // could be first time
         }
+        //TODO remove?  and do this before/after setProperty?
+        if(propertyType.isIndexed()) {
+            graphDatabaseContext.getNodeIndex(null).add(getUnderlyingState(), key, value);
+        }
         getUnderlyingState().setProperty(key, value);
         return oldValue;
     }
+    
 
     public void setType(ResourceType type) {
         this.type = type;
+        graphDatabaseContext.getNodeIndex(null).add(getUnderlyingState(), "type", type.getId());
     }
 
     public void setVersion(Integer version) {

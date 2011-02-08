@@ -2355,16 +2355,11 @@ public class AppdefBossImpl implements AppdefBoss {
         }
 
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        PageList<AppdefResourceValue> res = new PageList<AppdefResourceValue>();
-
        
-        //CritterTranslationContext ctx = new CritterTranslationContext(subject);
-        //CritterList cList = getCritterList(subject, matchAny, appdefResType, searchFor, grpId,
-          //  grpEntId, groupSubType, appdefTypeId, matchOwn, matchUnavail);
     
         PageList<Resource> children = getResources(subject, matchAny, appdefResType, searchFor, grpId,
           grpEntId, groupSubType, appdefTypeId, matchOwn, matchUnavail,pc);
-        res.ensureCapacity(children.size());
+        PageList<AppdefResourceValue> res = new PageList<AppdefResourceValue>(children.size());
         res.setTotalSize(children.getTotalSize());
         for (Resource child : children) {
             try {
@@ -2391,13 +2386,10 @@ public class AppdefBossImpl implements AppdefBoss {
         if(appdefResType != null && (appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_PLATFORM || 
                 appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVER || appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVICE)) {
             ResourceType resourceType = resourceManager.findResourceTypeById(appdefResType.getId());
-            Set<Resource> resources = resourceType.getResources();
-            return new PageList<Resource>(resources,resources.size());
+            return resourceManager.getResourcesOfType(resourceType, pc);
         }
-        //TODO critters from getCritterList used to order by name in CritterTranslator
         switch (appdefTypeId) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                //TODO the max results and first results used to be set on query by CritterTranslator.  Not seeing how next batch was picked up
                 return platformManager.getAllPlatformResources(subj,pc);
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                 return serverManager.getAllServerResources(subj, pc);
@@ -2409,11 +2401,17 @@ public class AppdefBossImpl implements AppdefBoss {
                 
         }
         //TODO Not handling ResourceName, GrpMem,Own, and Unavail critters yet
-        Set<ResourceType> groupResTypes = new HashSet<ResourceType>();
-        for(int groupType: groupTypes) {
-            groupResTypes.add(resourceManager.findResourceTypeByName(AppdefEntityConstants.getAppdefGroupTypeName(groupType)));
+        if (groupTypes.length > 1 && AppdefEntityConstants.isGroupCompat(groupTypes[0])) {
+            if(appdefResType != null) {
+                return resourceGroupManager.getCompatibleGroupsContainingType(appdefResType.getId(), pc);
+            }
+            //look for all compat groups
+            return resourceGroupManager.getCompatibleGroups(pc);
+        }else if(groupTypes.length > 1) {
+            //look for all mixed groups
+            return resourceGroupManager.getMixedGroups(pc);
         }
-        return resourceGroupManager.findGroupsOfType(subj, groupResTypes, pc);
+        return resourceManager.getResourcesOfType(resourceManager.findResourceTypeByName(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[0])), pc);
     }
 
     /**

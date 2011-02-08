@@ -49,13 +49,15 @@ public class PageList<T> extends ArrayList<T> implements Serializable {
 
     public PageList() {
         super();
-        this.isUnbounded = false;
+    }
+    
+    public PageList(int initialCapacity) {
+        super(initialCapacity);
     }
 
     public PageList(Collection<T> c, int totalSize) {
         super(c);
         this.totalSize   = totalSize;
-        this.isUnbounded = false;
     }
     
     public String toString() {

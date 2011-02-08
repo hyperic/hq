@@ -65,11 +65,15 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
+import org.hyperic.hq.inventory.dao.ResourceDao;
 import org.hyperic.hq.inventory.dao.ResourceGroupDao;
+import org.hyperic.hq.inventory.dao.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.OperationType;
+import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
+import org.hyperic.hq.paging.PageInfo;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.pager.PageControl;
@@ -105,6 +109,10 @@ public class ApplicationManagerImpl implements ApplicationManager {
     
     private ServiceFactory serviceFactory;
     
+    private ResourceDao resourceDao;
+    
+    private ResourceTypeDao resourceTypeDao;
+    
     public static final String MODIFIED_TIME = "ModifiedTime";
 
     public static final String CREATION_TIME = "CreationTime";
@@ -139,13 +147,15 @@ public class ApplicationManagerImpl implements ApplicationManager {
                                   PermissionManager permissionManager,
                                   ZeventEnqueuer zeventManager,
                                   ResourceGroupManager resourceGroupManager, ServiceFactory serviceFactory,
-                                  ResourceGroupDao resourceGroupDao) {
+                                  ResourceGroupDao resourceGroupDao, ResourceDao resourceDao,ResourceTypeDao resourceTypeDao) {
         this.resourceManager = resourceManager;
         this.permissionManager = permissionManager;
         this.zeventManager = zeventManager;
         this.resourceGroupManager = resourceGroupManager;
         this.serviceFactory = serviceFactory;
         this.resourceGroupDao = resourceGroupDao;
+        this.resourceDao = resourceDao;
+        this.resourceTypeDao = resourceTypeDao;
     }
 
     /**
@@ -244,8 +254,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
     
     private ResourceGroup create(AuthzSubject owner, ApplicationValue appV) {
-        ResourceGroup app =  resourceGroupDao.create(appV.getName(),resourceManager.findResourceTypeByName(AppdefEntityConstants.
-            getAppdefGroupTypeName(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP)));
+        ResourceGroup app =  resourceGroupDao.create(appV.getName(),resourceManager.findResourceTypeByName(AppdefEntityConstants.APPDEF_NAME_APPLICATION));
         app.setOwner(owner);
         updateApplication(app, appV);
         return app;
@@ -648,8 +657,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
     
     private Set<Application> findByService(Resource service) {
-         ResourceType appType = resourceManager.findResourceTypeByName(AppdefEntityConstants.
-           getAppdefGroupTypeName(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP));
+        ResourceType appType = resourceManager.findResourceTypeByName(AppdefEntityConstants.APPDEF_NAME_APPLICATION);
         Set<Application> applications = new HashSet<Application>();
         for(Resource group: appType.getResources()) {
                 applications.add(toApplication((ResourceGroup)group));
@@ -854,19 +862,38 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
     
     private Set<Resource> getAllApplications() {
-        return resourceManager.findResourceTypeByName(AppdefEntityConstants.getAppdefGroupTypeName(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP)).
+        return resourceManager.findResourceTypeByName(AppdefEntityConstants.APPDEF_NAME_APPLICATION).
             getResources();
     }
     
     public PageList<Resource> getAllApplicationResources(AuthzSubject subject, PageControl pc) {
-        Collection<Resource> applications = getAllApplications();
-        return defaultPager.seek(applications, pc);
+        int appGroupTypeId = resourceManager.findResourceTypeByName(AppdefEntityConstants.APPDEF_NAME_APPLICATION).getId();
+        PageInfo pageInfo = new PageInfo(pc.getPagenum(),pc.getPagesize(),pc.getSortorder(),"name",String.class);
+        return resourceDao.findByIndexedProperty("type", appGroupTypeId,pageInfo);
     }
 
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
         valuePager = Pager.getPager(VALUE_PROCESSOR);
         defaultPager = Pager.getDefaultPager();
+        //TODO move init logic?
+        if(resourceTypeDao.findByName(AppdefEntityConstants.APPDEF_NAME_APPLICATION) == null) {
+            ResourceType groupType = resourceTypeDao.create(AppdefEntityConstants.APPDEF_NAME_APPLICATION);
+            setPropertyType(groupType,AppdefResource.SORT_NAME,String.class);
+            setPropertyType(groupType,ApplicationManagerImpl.BUSINESS_CONTACT,String.class);
+            setPropertyType(groupType,ApplicationManagerImpl.CREATION_TIME,Long.class);
+            setPropertyType(groupType,ApplicationManagerImpl.ENG_CONTACT,String.class);
+            setPropertyType(groupType,ApplicationManagerImpl.MODIFIED_TIME,Long.class);
+            setPropertyType(groupType,ApplicationManagerImpl.OPS_CONTACT,String.class);
+        }
+       
+    }
+        
+    private void setPropertyType(ResourceType groupType, String propTypeName, Class<?> type) {
+        PropertyType propType = resourceTypeDao.createPropertyType(propTypeName,type);
+        propType.setDescription(propTypeName);
+        propType.setHidden(true);
+        groupType.addPropertyType(propType);
     }
 
     private void trimStrings(ApplicationValue app) {
@@ -883,7 +910,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
 
     public boolean isApplication(ResourceGroup group) {
-        return group.getType().getName().equals(AppdefEntityConstants.getAppdefGroupTypeName(AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP));
+        return group.getType().getName().equals(AppdefEntityConstants.APPDEF_NAME_APPLICATION);
     }
     
 }

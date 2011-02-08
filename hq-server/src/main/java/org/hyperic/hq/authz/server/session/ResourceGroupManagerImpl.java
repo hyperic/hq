@@ -42,8 +42,6 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -62,7 +60,6 @@ import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.shared.EventLogManager;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
@@ -70,9 +67,11 @@ import org.hyperic.hq.grouping.shared.GroupEntry;
 import org.hyperic.hq.inventory.dao.ResourceDao;
 import org.hyperic.hq.inventory.dao.ResourceGroupDao;
 import org.hyperic.hq.inventory.dao.ResourceTypeDao;
+import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
+import org.hyperic.hq.paging.PageInfo;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -94,6 +93,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Service
 public class ResourceGroupManagerImpl implements ResourceGroupManager, ApplicationContextAware {
+    private static final String MIXED = "mixed";
+
     private static final String GROUP_ENT_RES_TYPE = "groupEntResType";
 
     private static final String GROUP_ENT_TYPE = "groupEntType";
@@ -123,8 +124,26 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     @PostConstruct
     public void initialize() {
         this.defaultPager = Pager.getDefaultPager();
+        //TODO move init logic?
+        int[] groupTypes = AppdefEntityConstants.getAppdefGroupTypes();
+        for(int i=0;i< groupTypes.length;i++) {
+            if(resourceTypeDao.findByName(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i])) == null) {
+                ResourceType groupType = resourceTypeDao.create(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i]));
+                setPropertyType(groupType,"groupEntType",Integer.class,false);
+                setPropertyType(groupType,"groupEntResType",Integer.class,true);
+                setPropertyType(groupType,"mixed",Boolean.class,true);
+            }
+        }
     }
-
+    
+    private void setPropertyType(ResourceType groupType, String propTypeName, Class<?> type,boolean indexed) {
+        PropertyType propType = resourceTypeDao.createPropertyType(propTypeName,type);
+        propType.setDescription(propTypeName);
+        propType.setHidden(true);
+        propType.setIndexed(indexed);
+        groupType.addPropertyType(propType);
+    }
+    
     /**
      * Create a resource group. Currently no permission checking.
      * 
@@ -161,6 +180,12 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
             res.addRole(role);
         }
         res.setOwner(whoami);
+        if(cInfo.getGroupTypeId() == AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS || 
+            cInfo.getGroupTypeId() == AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC) {
+            res.setProperty(MIXED,false);
+        }else {
+            res.setProperty(MIXED,true);
+        }
         res.setProperty(GROUP_ENT_RES_TYPE, cInfo.getGroupEntResType());
         res.setProperty(GROUP_ENT_TYPE, cInfo.getGroupEntType());
         return res;
@@ -476,7 +501,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     public PageList<ResourceGroup> findGroupsNotContaining(AuthzSubject subject, Resource member,
                                                            ResourceType prototype,
                                                            Collection<ResourceGroup> excGrps,
-                                                           PageInfo pInfo) {
+                                                           org.hyperic.hibernate.PageInfo pInfo) {
         return findGroupsClusionary(subject, member, prototype, excGrps, pInfo,
             false);
     }
@@ -499,7 +524,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     @Transactional(readOnly = true)
     public PageList<ResourceGroup> findGroupsContaining(AuthzSubject subject, Resource member,
                                                         Collection<ResourceGroup> excludeGroups,
-                                                        PageInfo pInfo) {
+                                                        org.hyperic.hibernate.PageInfo pInfo) {
         return findGroupsClusionary(subject, member, null, excludeGroups, pInfo,
             true);
     }
@@ -507,7 +532,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     private PageList<ResourceGroup> findGroupsClusionary(AuthzSubject subject, Resource member,
           ResourceType prototype,
           Collection<ResourceGroup> excludeGroups,
-          PageInfo pInfo, boolean inclusive) {
+          org.hyperic.hibernate.PageInfo pInfo, boolean inclusive) {
         //TODO
 //        ResourceGroupSortField sort = (ResourceGroupSortField) pInfo.getSort();
 //        String hql = "from ResourceGroup g where g.system = false and ";
@@ -640,20 +665,27 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     public Number getGroupCountOfType(ResourceType groupType) {
         return groupType.getResources().size();
     }
+    
+    public PageList<Resource> getCompatibleGroups(PageControl pageControl) {
+        PageInfo pageInfo = new PageInfo(pageControl.getPagenum(),pageControl.getPagesize(),pageControl.getSortorder(),"name",String.class);
+        return resourceDao.findByIndexedProperty(MIXED, false,pageInfo);
+    }
+
+    public PageList<Resource> getMixedGroups(PageControl pageControl) {
+        PageInfo pageInfo = new PageInfo(pageControl.getPagenum(),pageControl.getPagesize(),pageControl.getSortorder(),"name",String.class);
+        return resourceDao.findByIndexedProperty(MIXED, true,pageInfo);
+    }
+    
+    public PageList<Resource> getCompatibleGroupsContainingType(int resourceTypeId, PageControl pageControl) {
+        PageInfo pageInfo = new PageInfo(pageControl.getPagenum(),pageControl.getPagesize(),pageControl.getSortorder(),"name",String.class);
+        return resourceDao.findByIndexedProperty(GROUP_ENT_RES_TYPE, resourceTypeId,pageInfo);
+    }
 
     @Transactional(readOnly=true)
     public ResourceGroup findResourceGroupByName(String name) {
        return resourceGroupDao.findByName(name);
     }
     
-    public PageList<Resource> findGroupsOfType(AuthzSubject subject, Set<ResourceType> groupTypes, PageControl pc) {
-        Set<Resource> groups = new HashSet<Resource>();
-        for(ResourceType groupType: groupTypes) {
-            groups.addAll(groupType.getResources());
-        }
-        return defaultPager.seek(groups, pc);
-    }
-
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }

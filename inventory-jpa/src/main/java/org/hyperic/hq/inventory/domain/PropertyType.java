@@ -170,6 +170,15 @@ public class PropertyType {
     public void setType(Class<?> type) {
         this.type = type;
     }
+    
+    public boolean isIndexed() {
+        //TODO add indexed?
+        return false;
+    }
+
+    public void setIndexed(boolean indexed) {
+        //TODO add indexed?
+    }
 
     public String toString() {
         StringBuilder sb = new StringBuilder();

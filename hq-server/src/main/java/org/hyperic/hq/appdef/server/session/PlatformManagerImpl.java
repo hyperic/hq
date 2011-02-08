@@ -56,6 +56,7 @@ import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
@@ -93,6 +94,7 @@ import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
+import org.hyperic.hq.paging.PageInfo;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.hq.product.server.session.PluginDAO;
@@ -407,6 +409,7 @@ public class PlatformManagerImpl implements PlatformManager {
         p.setProperty(PlatformFactory.FQDN,aip.getFqdn());
         p.setProperty(PlatformFactory.COMMENT_TEXT,"");
         p.setProperty(PlatformFactory.CPU_COUNT,aip.getCpuCount());
+        p.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_PLATFORM);
         p.setModifiedBy(initialOwner);
         p.setAgent(agent);
         p.setOwner(subject);
@@ -582,9 +585,8 @@ public class PlatformManagerImpl implements PlatformManager {
     }
     
     public PageList<Resource> getAllPlatformResources(AuthzSubject subject, PageControl pc) {
-        Collection<Resource> platforms = getAllPlatforms();
-
-        return defaultPager.seek(platforms, pc);
+        PageInfo pageInfo = new PageInfo(pc.getPagenum(),pc.getPagesize(),pc.getSortorder(),"name",String.class);
+        return resourceDao.findByIndexedProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_PLATFORM,pageInfo);
     }
     
     private Set<Resource> findByCreationTime(long creationTime) {
@@ -1565,6 +1567,9 @@ public class PlatformManagerImpl implements PlatformManager {
         pt.addPropertyType(createPropertyType(PlatformFactory.CREATION_TIME,Long.class));
         pt.addPropertyType(createPropertyType(PlatformFactory.MODIFIED_TIME,Long.class));
         pt.addPropertyType(createPropertyType(AppdefResource.SORT_NAME,String.class));
+        PropertyType appdefType = createPropertyType(AppdefResourceType.APPDEF_TYPE_ID, Integer.class);
+        appdefType.setIndexed(true);
+        pt.addPropertyType(appdefType);
         resourceManager.findRootResourceType().relateTo(pt, RelationshipTypes.PLATFORM);
         pt.relateTo(resourceManager.findResourceTypeByName(IP_RESOURCE_TYPE_NAME),RelationshipTypes.IP);
         return platformFactory.createPlatformType(pt);
