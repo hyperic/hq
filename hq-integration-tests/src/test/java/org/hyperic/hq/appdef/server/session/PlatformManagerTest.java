@@ -34,7 +34,6 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -61,13 +60,13 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.util.StopWatch;
 
 
 /**
@@ -95,6 +94,8 @@ public class PlatformManagerTest
     private Service testService;
     
     private ServiceType serviceType;
+    
+    private String agentToken = "agentToken123";
 
     private List<Platform> createPlatforms(String agentToken) throws ApplicationException {
         List<Platform> platforms = new ArrayList<Platform>(10);
@@ -121,7 +122,6 @@ public class PlatformManagerTest
 
     @Before
     public void initializeTestData() throws ApplicationException, NotFoundException {
-        String agentToken = "agentToken123";
         testAgent = createAgent("127.0.0.1", 2144, "authToken", agentToken, "4.5");
         flushSession();
         testPlatformTypes = createTestPlatformTypes();
@@ -505,7 +505,7 @@ public class PlatformManagerTest
         AppdefEntityID serviceId= testService.getEntityId();
         List<AppdefEntityID> services = new ArrayList<AppdefEntityID>();
         services.add(serviceId);
-        Application app = createApplication("Test Application", "testing", GENERIC_APPLICATION_TYPE, services);
+        Application app = createApplication("Test Application", "testing", services);
         flushSession();
         //clear the session to update the bi-directional app to app service relationship
         clearSession();
