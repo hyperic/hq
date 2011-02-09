@@ -659,8 +659,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
     private Set<Application> findByService(Resource service) {
         ResourceType appType = resourceManager.findResourceTypeByName(AppdefEntityConstants.APPDEF_NAME_APPLICATION);
         Set<Application> applications = new HashSet<Application>();
-        for(Resource group: appType.getResources()) {
-                applications.add(toApplication((ResourceGroup)group));
+        for(Resource groupResource: appType.getResources()) {
+            ResourceGroup group = (ResourceGroup)groupResource;
+            if(group.getMembers().contains(service)) {
+                applications.add(toApplication(group));
+            }
         }
         return applications;
     }
