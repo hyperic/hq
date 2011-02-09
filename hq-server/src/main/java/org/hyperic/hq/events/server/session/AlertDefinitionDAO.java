@@ -372,7 +372,7 @@ public class AlertDefinitionDAO implements AlertDefinitionDAOInterface {
     }
 
     List<ResourceAlertDefinition> getUsing(Escalation e) {
-        String sql = "select d from ResourceAlertDefinition where d.escalation=:escalation";
+        String sql = "select d from ResourceAlertDefinition d where d.escalation=:escalation";
         return entityManager.createQuery(sql,ResourceAlertDefinition.class).setParameter("escalation", e).getResultList();
     }
 
