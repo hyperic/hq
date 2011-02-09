@@ -105,8 +105,8 @@ public class DataManagerTest
     private List<Measurement> createMeasurements() throws ApplicationException {
         AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
         Platform platform = platformManager.findPlatformByFqdn(overlord, "Test Platform");
-        int appDefType = platform.getResource().getResourceType().getAppdefType();
-        MonitorableType monitor_Type = new MonitorableType("Platform monitor", appDefType, "test");
+       
+        MonitorableType monitor_Type = new MonitorableType("Platform monitor",  "test");
         Category cate = new Category("Test Category");
         getCurrentSession().save(monitor_Type);
         getCurrentSession().save(cate);

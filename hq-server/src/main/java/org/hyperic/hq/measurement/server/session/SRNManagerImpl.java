@@ -36,8 +36,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
@@ -95,17 +97,18 @@ public class SRNManagerImpl implements SRNManager {
             log.info("Fetched " + entities.size() + " intervals.");
             final boolean debug = log.isDebugEnabled();
             for (Object[] ent : entities) {
-                SrnId id = new SrnId(((Integer) ent[0]).intValue(), ((Integer) ent[1]).intValue());
+                AppdefEntityID entityId = AppdefUtil.newAppdefEntityId((Resource)ent[0]);
+                SrnId id = new SrnId(entityId.getType(),entityId.getID());
                 ScheduleRevNum srn = srnCache.get(id);
                 if (srn == null) {
                     // Create the SRN if it does not exist.
-                    srn = scheduleRevNumDAO.create(((Integer) ent[0]).intValue(), ((Integer) ent[1]).intValue());
+                    srn = scheduleRevNumDAO.create(entityId.getType(),entityId.getID());
                     srnCache.put(srn);
                 }
                 if (debug) {
-                    log.debug("Setting min interval to " + ((Long) ent[2]).longValue() + " for ent " + id);
+                    log.debug("Setting min interval to " + ((Long) ent[1]).longValue() + " for ent " + id);
                 }
-                srn.setMinInterval(((Long) ent[2]).longValue());
+                srn.setMinInterval(((Long) ent[1]).longValue());
             }
         }
         log.info("SRN Cache initialized");

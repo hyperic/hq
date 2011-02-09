@@ -405,32 +405,17 @@ public class TemplateManagerImpl implements TemplateManager {
 
     @Transactional
     public MonitorableType createMonitorableType(String pluginName, TypeInfo info) {
-        int e = info.getType();
-        int a = entityInfoTypeToAppdefType(e);
-        return monitorableTypeDAO.create(info.getName(), a, pluginName);
+        return monitorableTypeDAO.create(info.getName(), pluginName);
     }
 
     @Transactional
     public MonitorableType createMonitorableType(String pluginName, ResourceType resourceType) {
-        return monitorableTypeDAO.create(resourceType.getName(), resourceType.getId(), pluginName);
+        return monitorableTypeDAO.create(resourceType.getName(), pluginName);
     }
     
     @Transactional(readOnly = true)
     public Map<String, MonitorableType> getMonitorableTypesByName(String pluginName) {
         return monitorableTypeDAO.findByPluginName(pluginName);
-    }
-
-    private int entityInfoTypeToAppdefType(int entityInfoType) {
-        switch (entityInfoType) {
-            case TypeInfo.TYPE_PLATFORM:
-                return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
-            case TypeInfo.TYPE_SERVER:
-                return AppdefEntityConstants.APPDEF_TYPE_SERVER;
-            case TypeInfo.TYPE_SERVICE:
-                return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
-            default:
-                throw new IllegalArgumentException("Unknown TypeInfo type");
-        }
     }
 
     /**

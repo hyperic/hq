@@ -1860,16 +1860,11 @@ public class MeasurementBossImpl implements MeasurementBoss {
         AppdefEntityNotFoundException, AppdefCompatException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
 
-        boolean bPlatforms = false, bServers = false, bServices = false;
+       
 
         // Let's get the templates to see what resources to gather
         List<MeasurementTemplate> templates = templateManager.getTemplates(mtids);
-        for (MeasurementTemplate templ : templates) {
-            int type = templ.getMonitorableType().getResourceTypeId();
-            bPlatforms |= type == AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
-            bServers |= type == AppdefEntityConstants.APPDEF_TYPE_SERVER;
-            bServices |= type == AppdefEntityConstants.APPDEF_TYPE_SERVICE;
-        }
+        
 
         AppdefEntityValue rv = new AppdefEntityValue(entId, subject);
         List platforms = null, servers = null, services = null;
@@ -1881,16 +1876,13 @@ public class MeasurementBossImpl implements MeasurementBoss {
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                 // Get the platforms
-                if (bPlatforms)
-                    platforms = rv.getAssociatedPlatforms(PageControl.PAGE_ALL);
+               platforms = rv.getAssociatedPlatforms(PageControl.PAGE_ALL);
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                 // Get the servers
-                if (bServers)
-                    servers = rv.getAssociatedServers(PageControl.PAGE_ALL);
+                servers = rv.getAssociatedServers(PageControl.PAGE_ALL);
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                 // Get the services
-                if (bServices)
-                    services = rv.getAssociatedServices(PageControl.PAGE_ALL);
+                services = rv.getAssociatedServices(PageControl.PAGE_ALL);
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                 // Does not matter what kind of group this is, just use platform
@@ -1907,11 +1899,11 @@ public class MeasurementBossImpl implements MeasurementBoss {
 
         // Look up the metric summaries of all associated resources
         Map<String, Set<MetricDisplaySummary>> results = new HashMap<String, Set<MetricDisplaySummary>>();
-        if (bPlatforms)
+        if (platforms != null)
             results.putAll(getResourceMetrics(subject, platforms, mtids, begin, end, Boolean.TRUE));
-        if (bServers)
+        if (servers != null)
             results.putAll(getResourceMetrics(subject, servers, mtids, begin, end, Boolean.TRUE));
-        if (bServices)
+        if (services != null)
             results.putAll(getResourceMetrics(subject, services, mtids, begin, end, Boolean.TRUE));
         return results;
     }
