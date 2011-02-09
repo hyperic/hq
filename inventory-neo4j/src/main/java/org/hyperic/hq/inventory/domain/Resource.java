@@ -518,8 +518,10 @@ public class Resource {
                                                type.getName());
         }
         if (value == null) {
-            // TODO log a warning?
-            // Neo4J doesn't accept null values
+            getUnderlyingState().removeProperty(key);
+            if(propertyType.isIndexed()) {
+                graphDatabaseContext.getNodeIndex(null).remove(getUnderlyingState(), key, value);
+            }
             return null;
         }
         // TODO check other stuff? Should def check optional param and maybe
@@ -531,11 +533,10 @@ public class Resource {
         } catch (NotFoundException e) {
             // could be first time
         }
-        //TODO remove?  and do this before/after setProperty?
+        getUnderlyingState().setProperty(key, value);
         if(propertyType.isIndexed()) {
             graphDatabaseContext.getNodeIndex(null).add(getUnderlyingState(), key, value);
         }
-        getUnderlyingState().setProperty(key, value);
         return oldValue;
     }
     

@@ -26,19 +26,20 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Properties;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.CPropManager;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 /**
  * Integration test of {@link CPropManagerImpl}
  * @author jhickey
@@ -51,21 +52,22 @@ public class CPropManagerTest
     @Autowired
     private CPropManager cPropManager;
 
-    private PlatformType platformType;
+    private ResourceType platformType;
 
     private Platform platform;
 
     @Before
     public void setUp() throws Exception {
         createAgent("127.0.0.1", 2144, "authToken", "agent123", "5.0");
-        this.platformType = createPlatformType("FakeLinux", "test plugin");
-        this.platform = createPlatform("agent123", "FakeLinux", "platform1","platform1");
+        PlatformType platType = createPlatformType("FakeLinux");
+        this.platformType = resourceManager.findResourceTypeById(platType.getId());
+        this.platform = createPlatform("agent123", "FakeLinux", "platform1","platform1",4);
         flushSession();
     }
 
     @Test
     public void testSetValueFirstTime() throws Exception {
-        cPropManager.addKey(platformType, "userName", "A user name");
+        cPropManager.addKey(platformType, "userName", "A user name",String.class);
         flushSession();
         cPropManager.setValue(platform.getEntityId(), platformType.getId(), "userName", "bob");
         AppdefEntityValue appdefVal = new AppdefEntityValue(platform.getEntityId(),
@@ -76,7 +78,7 @@ public class CPropManagerTest
 
     @Test
     public void testSetValueUpdate() throws Exception {
-        cPropManager.addKey(platformType, "userName", "A user name");
+        cPropManager.addKey(platformType, "userName", "A user name",String.class);
         flushSession();
         AppdefEntityValue appdefVal = new AppdefEntityValue(platform.getEntityId(),
             authzSubjectManager.getOverlordPojo());
@@ -91,7 +93,7 @@ public class CPropManagerTest
 
     @Test
     public void testSetValueUpdateToNull() throws Exception {
-        cPropManager.addKey(platformType, "userName", "A user name");
+        cPropManager.addKey(platformType, "userName", "A user name",String.class);
         flushSession();
         AppdefEntityValue appdefVal = new AppdefEntityValue(platform.getEntityId(),
             authzSubjectManager.getOverlordPojo());
@@ -106,7 +108,7 @@ public class CPropManagerTest
 
     @Test
     public void testSetValueToNullNoChange() throws Exception {
-        cPropManager.addKey(platformType, "userName", "A user name");
+        cPropManager.addKey(platformType, "userName", "A user name",String.class);
         flushSession();
         AppdefEntityValue appdefVal = new AppdefEntityValue(platform.getEntityId(),
             authzSubjectManager.getOverlordPojo());
@@ -121,7 +123,7 @@ public class CPropManagerTest
 
     @Test
     public void testSetValueUpdateNoChange() throws Exception {
-        cPropManager.addKey(platformType, "userName", "A user name");
+        cPropManager.addKey(platformType, "userName", "A user name",String.class);
         flushSession();
         AppdefEntityValue appdefVal = new AppdefEntityValue(platform.getEntityId(),
             authzSubjectManager.getOverlordPojo());
@@ -136,7 +138,7 @@ public class CPropManagerTest
     
     @Test
     public void testGetEntries() throws Exception {
-        cPropManager.addKey(platformType, "something", "A thing");
+        cPropManager.addKey(platformType, "something", "A thing",String.class);
         flushSession();
         cPropManager.setValue(platform.getEntityId(), platformType.getId(), "something", "nothing");
        
@@ -148,8 +150,8 @@ public class CPropManagerTest
     
     @Test
     public void testGetEntriesMultipleChunks() throws Exception {
-        cPropManager.addKey(platformType, "something", "A thing");
-        cPropManager.addKey(platformType, "securityPolicy", "A policy");
+        cPropManager.addKey(platformType, "something", "A thing",String.class);
+        cPropManager.addKey(platformType, "securityPolicy", "A policy",String.class);
         flushSession();
         final StringBuffer giantString = new StringBuffer();
         for(int i=0;i < 1003;i++)  {
@@ -166,8 +168,8 @@ public class CPropManagerTest
     
     @Test
     public void testGetDescEntries() throws Exception {
-        cPropManager.addKey(platformType, "something", "A thing");
-        cPropManager.addKey(platformType, "securityPolicy", "A policy");
+        cPropManager.addKey(platformType, "something", "A thing",String.class);
+        cPropManager.addKey(platformType, "securityPolicy", "A policy",String.class);
         flushSession();
         final StringBuffer giantString = new StringBuffer();
         for(int i=0;i < 1003;i++)  {
@@ -184,7 +186,7 @@ public class CPropManagerTest
     
     @Test
     public void testDeleteValues() throws Exception {
-        cPropManager.addKey(platformType, "something", "A thing");
+        cPropManager.addKey(platformType, "something", "A thing",String.class);
         flushSession();
         cPropManager.setValue(platform.getEntityId(), platformType.getId(), "something", "nothing");
         cPropManager.deleteValues(platform.getEntityId().getType(), platform.getEntityId().getID());
