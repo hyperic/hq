@@ -420,9 +420,9 @@ public class MeasurementDAO
     @SuppressWarnings("unchecked")
     public List<Measurement> getMetricsCollecting(ResourceGroup g, Integer templateId) {
         String sql = "select m from Measurement m where m.resource in (:resources) "
-                     + "and m.template.id = ? and m.enabled = true";
+                     + "and m.template.id = :template and m.enabled = true";
 
-        return (List<Measurement>) getSession().createQuery(sql).setParameterList("resources", new ArrayList<Resource>(g.getMembers())).setInteger(0,
+        return (List<Measurement>) getSession().createQuery(sql).setParameterList("resources", new ArrayList<Resource>(g.getMembers())).setParameter("template",
             templateId.intValue()).setCacheable(true).setCacheRegion(
             "ResourceGroup.getMetricsCollecting").list();
     }
