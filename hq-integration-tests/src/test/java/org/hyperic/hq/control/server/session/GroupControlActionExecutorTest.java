@@ -29,7 +29,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -45,21 +44,16 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.appdef.shared.ConfigManager;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.Role;
-import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
-import org.hyperic.hq.authz.shared.GroupCreationException;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.control.GroupControlActionResult;
 import org.hyperic.hq.control.agent.client.ControlCommandsClient;
 import org.hyperic.hq.control.agent.client.ControlCommandsClientFactory;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlManager;
 import org.hyperic.hq.control.shared.ControlScheduleManager;
-import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.ControlPluginManager;
 import org.hyperic.hq.product.PluginException;
@@ -95,9 +89,6 @@ public class GroupControlActionExecutorTest
 
     @Autowired
     private ProductPluginDeployer productPluginDeployer;
-
-    @Autowired
-    private ConfigManager configManager;
 
     private ResourceGroup resourceGroup;
 
@@ -160,14 +151,11 @@ public class GroupControlActionExecutorTest
         // any integration test
 
         Platform platform = createPlatform(agentToken, "PluginTestPlatform", "Platform1",
-            "Platform1");
+            "Platform1",4);
         serverType = serverManager.findServerTypeByName("PluginTestServer 1.0");
         server = createServer(platform, serverType, "Server1");
         server2 = createServer(platform, serverType, "Server2");
-        configManager.configureResponse(authzSubjectManager.getOverlordPojo(), server
-            .getConfigResponse(), server.getEntityId(), new ConfigResponse().encode(),
-            new ConfigResponse().encode(), new ConfigResponse().encode(), null, null, false);
-
+       
         Set<Server> servers = new HashSet<Server>(2);
         servers.add(server);
         servers.add(server2);
@@ -181,16 +169,9 @@ public class GroupControlActionExecutorTest
     }
 
     @Test
-    public void testExecuteGroupControlActionNoResources() throws GroupDuplicateNameException,
-        GroupCreationException, AppdefEntityNotFoundException, GroupNotCompatibleException,
-        PermissionException {
-        AppdefEntityTypeID appDefEntTypeId = new AppdefEntityTypeID(
-            AppdefEntityConstants.APPDEF_TYPE_SERVER, serverType.getId());
-        ResourceGroupCreateInfo gCInfo = new ResourceGroupCreateInfo("Empty Group", "",
-            AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS, resourceManager
-                .findResourcePrototype(appDefEntTypeId), "", 0, false, false);
-        ResourceGroup resGrp = resourceGroupManager.createResourceGroup(authzSubjectManager
-            .getOverlordPojo(), gCInfo, new ArrayList<Role>(0), new ArrayList<Resource>(0));
+    public void testExecuteGroupControlActionNoResources() throws ApplicationException {
+        AppdefEntityTypeID groupEntTypeId = new AppdefEntityTypeID(AppdefEntityConstants.APPDEF_TYPE_SERVER,serverType.getId());
+        ResourceGroup resGrp = createServerResourceGroup(groupEntTypeId, "Empty Group");
         AppdefEntityID groupId = AppdefEntityID.newGroupID(resGrp.getId());
 
         GroupControlActionResult result = groupControlActionExecutor.executeGroupControlAction(
