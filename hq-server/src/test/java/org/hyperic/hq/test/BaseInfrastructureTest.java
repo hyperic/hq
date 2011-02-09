@@ -209,7 +209,7 @@ abstract public class BaseInfrastructureTest {
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription(serviceTypeName);
         sinfo.setName(serviceTypeName);
-        return serviceManager.createServiceType(sinfo, TEST_PLUGIN_NAME, serverType);
+        return serviceManager.createServiceType(sinfo, TEST_PLUGIN_NAME, resourceManager.findResourceTypeById(serverType.getId()));
     }
     
     protected ServiceType createServiceType(String serviceTypeName,
@@ -217,7 +217,7 @@ abstract public class BaseInfrastructureTest {
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription(serviceTypeName);
         sinfo.setName(serviceTypeName);
-        return serviceManager.createServiceType(sinfo, TEST_PLUGIN_NAME, platformType);
+        return serviceManager.createServiceType(sinfo, TEST_PLUGIN_NAME, new String[] {platformType.getName()});
     }
 
     protected Service createService(Integer parentId, ServiceType serviceType, String serviceName,

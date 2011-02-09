@@ -1047,7 +1047,9 @@ public class ServerManagerImpl implements ServerManager {
 
         // Now create the left-overs
         for (ServerTypeInfo sinfo : infoMap.values()) {
-            createServerType(sinfo,plugin);
+            if(!(sinfo.isVirtual())) {
+                createServerType(sinfo,plugin);
+            }
         }
     }
     
