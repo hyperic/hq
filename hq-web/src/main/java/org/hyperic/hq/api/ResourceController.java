@@ -70,16 +70,8 @@ public class ResourceController extends BaseController {
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/type:{name}")
 	public @ResponseBody SuccessResponse getByTypeName(@PathVariable String name) throws Exception {
-		List<Resource> resources = resourceDao.findByTypeName(name);
-		ResourceType type = resourceTypeDao.findByName(name);
-		
-		// TODO for some reason, resource type is not being set when retrieving resources on a type
-		for (Resource resource : resources) {
-			if (resource.getType() == null) {
-				resource.setType(type);
-			}
-		}
-		
+	    ResourceType type = resourceTypeDao.findByName(name);
+	    Set<Resource> resources = type.getResources();
 		return new SuccessResponse(ListRep.createListRepFromResources(resources));
 	}
 	
