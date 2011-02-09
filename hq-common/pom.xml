@@ -59,11 +59,6 @@
 			<version>2.2.2.SP8</version>
 		</dependency>
 		<dependency>
-			<groupId>jboss</groupId>
-			<artifactId>jboss-common-logging-spi</artifactId>
-			<version>2.0.4.GA</version>
-		</dependency>
-		<dependency>
 			<groupId>tanukisoft</groupId>
 			<artifactId>wrapper</artifactId>
 		</dependency>
