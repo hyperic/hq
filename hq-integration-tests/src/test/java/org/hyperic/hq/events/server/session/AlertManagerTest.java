@@ -190,7 +190,7 @@ public class AlertManagerTest
         // Setup Agent
         String agentToken = "agentToken123";
         agentManager.createLegacyAgent("127.0.0.1", 2144, "authToken", agentToken, "5.0");
-        Platform testPlatform = createResources(agentToken);
+        createResources(agentToken);
         this.resGrp = createResourceGroup();
         createResourceAlertDefs();
         // createResourceAlerts();

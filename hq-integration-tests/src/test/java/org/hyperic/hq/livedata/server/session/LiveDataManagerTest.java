@@ -29,10 +29,8 @@ package org.hyperic.hq.livedata.server.session;
 import org.easymock.classextension.EasyMock;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.PlatformTypeDAO;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerType;
-import org.hyperic.hq.appdef.server.session.ServerTypeDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.livedata.agent.client.LiveDataCommandsClient;
 import org.hyperic.hq.livedata.agent.client.LiveDataCommandsClientFactory;
@@ -55,11 +53,7 @@ import com.thoughtworks.xstream.XStream;
 public class LiveDataManagerTest
     extends BaseInfrastructureTest {
 
-    @Autowired
-    private ServerTypeDAO serverTypeDAO;
-
-    @Autowired
-    private PlatformTypeDAO platformTypeDAO;
+  
 
     @Autowired
     private LiveDataManagerImpl liveDataManager;
@@ -107,9 +101,8 @@ public class LiveDataManagerTest
         // This plugin should be deployed automatically by the
         // ProductPluginDeployer during
         // any integration test
-        platformTypeDAO.findByName("PluginTestPlatform");
-        Platform platform = createPlatform(agentToken, "PluginTestPlatform", "Platform1", "Platform1");
-        ServerType serverType = serverTypeDAO.findByName("PluginTestServer 1.0");
+        Platform platform = createPlatform(agentToken, "PluginTestPlatform", "Platform1", "Platform1",4);
+        ServerType serverType = serverManager.findServerTypeByName("PluginTestServer 1.0");
         server = createServer(platform, serverType, "Server1");
         clientFactory = EasyMock.createMock(LiveDataCommandsClientFactory.class);
         commandsClient = new MockLiveDataCommandsClient();

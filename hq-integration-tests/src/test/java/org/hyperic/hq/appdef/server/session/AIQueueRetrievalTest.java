@@ -3,7 +3,6 @@ package org.hyperic.hq.appdef.server.session;
 import static org.junit.Assert.assertEquals;
 
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueManager;
@@ -234,8 +233,8 @@ public class AIQueueRetrievalTest {
             authzSubjectManager.getOverlordPojo(), platformType.getId(), platform, agent.getId());
 
         // always add loopback
-        Ip ip1 = platformManager.addIp(newPlatform, "127.0.0.1", "255.0.0.0", "00:00:00:00:00:00");
-        Ip ip2 = platformManager.addIp(newPlatform, remoteIp, "255.0.0.0", "00:00:00:00:00:00");
+        platformManager.addIp(newPlatform, "127.0.0.1", "255.0.0.0", "00:00:00:00:00:00");
+        platformManager.addIp(newPlatform, remoteIp, "255.0.0.0", "00:00:00:00:00:00");
 
         return newPlatform;
     }

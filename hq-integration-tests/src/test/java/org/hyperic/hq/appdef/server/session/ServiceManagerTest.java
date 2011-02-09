@@ -374,7 +374,6 @@ public class ServiceManagerTest
             pgList.add(serviceManager.createServiceType(sinfo, "test", testServerType)
                 .getServiceTypeValue());
         }
-        PageControl pc = new PageControl();
         assertTrue(serviceManager.getServiceTypesByServerType(subject, 435878).isEmpty());
     }
 

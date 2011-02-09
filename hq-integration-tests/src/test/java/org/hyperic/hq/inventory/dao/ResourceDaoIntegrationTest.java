@@ -1,6 +1,7 @@
 package org.hyperic.hq.inventory.dao;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,14 +14,13 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
+import org.hyperic.hq.paging.PageInfo;
 import org.hyperic.hq.test.BaseInfrastructureTest;
-import org.hyperic.util.pager.PageInfo;
 import org.hyperic.util.pager.PageList;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
-import static org.junit.Assert.assertTrue;
 
 @DirtiesContext
 public class ResourceDaoIntegrationTest extends BaseInfrastructureTest {

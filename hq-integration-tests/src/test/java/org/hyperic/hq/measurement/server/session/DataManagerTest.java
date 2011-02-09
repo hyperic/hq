@@ -78,15 +78,9 @@ public class DataManagerTest
     @Autowired
     private MeasurementManager measurementManager;
     
-    private Platform testPlatform;
-
     private List<Measurement> measurements;
 
     private List<DataPoint> randomDataPoints;
-
-    private List<DataPoint> measDataPoints;
-
-    private List<DataPoint> availDataPoints;
 
     private List<DataPoint> pointsToClean;
 
@@ -98,7 +92,7 @@ public class DataManagerTest
         String platformType = "Linux";
         platformManager.createPlatformType(platformType, "Test Plugin");
         // Create test platform
-        createPlatform(agentToken,platformType,"Test Platform","Test Platform");
+        createPlatform(agentToken,platformType,"Test Platform","Test Platform",4);
         flushSession();
     }
 
@@ -172,7 +166,7 @@ public class DataManagerTest
         createTestPlatform();
         measurements = createMeasurements();
         randomDataPoints = createRandomDataPoints();
-        measDataPoints = createRealisticDataPoints();
+        createRealisticDataPoints();
     }
 
     // Cleanup the datapoints committed in a separate transaction by

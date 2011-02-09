@@ -66,7 +66,6 @@ import org.hyperic.util.pager.PageList;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.util.StopWatch;
 
 
 /**

@@ -25,19 +25,14 @@
  */
 package org.hyperic.hq.measurement.server.session;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 
-import java.util.Arrays;
 import java.util.List;
 
-import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerType;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ServerManager;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.hyperic.util.config.ConfigResponse;
@@ -58,13 +53,6 @@ public class MeasurementManagerTest
     @Autowired
     private MeasurementManager measurementManager;
 
-    private Agent agent;
-
-    private AppdefEntityID[] servers;
-
-    @Autowired
-    private ResourceManager resourceManager;
-
     @Autowired
     private ServerManager serverManager;
     
@@ -73,14 +61,13 @@ public class MeasurementManagerTest
     @Before
     public void setUp() throws Exception {
         String agentToken = "agentToken123";
-        agent = createAgent("127.0.0.1", 2144, "authToken", agentToken, "5.0");
+        createAgent("127.0.0.1", 2144, "authToken", agentToken, "5.0");
         // Using the automatically deployed test plugin
         Platform platform = createPlatform(agentToken, "PluginTestPlatform","Platform1",
             "Platform1",3);
         ServerType serverType = serverManager.findServerTypeByName("PluginTestServer 1.0");
         Server server = createServer(platform, serverType, "Server1");
         Server server2 = createServer(platform, serverType, "Server2");
-        servers = new AppdefEntityID[] { server.getEntityId(), server2.getEntityId() };
         List<Measurement> defaultMeasurements = measurementManager.createDefaultMeasurements(authzSubjectManager.getOverlordPojo(), server
             .getEntityId(), "PluginTestServer 1.0", new ConfigResponse());
         measId = defaultMeasurements.get(0).getId();
@@ -90,28 +77,9 @@ public class MeasurementManagerTest
     }
     
     @Test
-    public void testGetMeasurements() {
+    public void testGetMeasurement() {
         Measurement m = measurementManager.getMeasurement(measId);
-        System.out.println("YO!");
+        assertNotNull(m);
     }
 
-    @Test
-    public void testDisableMeasurementsForDeletion() throws PermissionException {
-        measurementManager.disableMeasurementsForDeletion(authzSubjectManager.getOverlordPojo(),
-            agent, servers);
-        flushSession();
-        clearSession();
-        List<Measurement> server1Measurements = measurementManager.findMeasurements(
-            authzSubjectManager.getOverlordPojo(), resourceManager.findResource(servers[0]));
-        // The test is not valid unless the test plugin has defined at least 1
-        // measurement for the server type
-        assertTrue(server1Measurements.size() > 0);
-        List<Measurement> server2Measurements = measurementManager.findMeasurements(
-            authzSubjectManager.getOverlordPojo(), resourceManager.findResource(servers[1]));
-        // The test is not valid unless the test plugin has defined at least 1
-        // measurement for the server type
-        assertTrue(server2Measurements.size() > 0);
-        // verify all metrics were disabled
-        assertTrue(measurementManager.findEnabledMeasurements(Arrays.asList(servers)).isEmpty());
-    }
 }
