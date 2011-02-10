@@ -1,5 +1,6 @@
 package com.vmware.springsource.hyperic.plugin.gemfire.collectors;
 
+import com.vmware.springsource.hyperic.plugin.gemfire.GemFireUtils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -28,7 +29,7 @@ public class MemberCollector extends Collector {
         try {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(props);
             log.debug("mServer=" + mServer);
-            String memberID = props.getProperty("memberID");
+            String memberID = GemFireUtils.memberNameToMemberID(props.getProperty("member.name"), mServer);
             addValues(getMetrics(memberID, mServer, false));
             setAvailability(true);
         } catch (Exception ex) {
@@ -50,7 +51,7 @@ public class MemberCollector extends Collector {
         }
 
         log.debug("[getMetrics] memberDetails=" + memberDetails);
-        if ((memberDetails==null) || memberDetails.isEmpty()) {
+        if ((memberDetails == null) || memberDetails.isEmpty()) {
             throw new PluginException("Member '" + memberID + "' not found!!!");
         }
 
