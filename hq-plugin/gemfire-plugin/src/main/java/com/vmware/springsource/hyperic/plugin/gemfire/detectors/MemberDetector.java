@@ -1,5 +1,6 @@
 package com.vmware.springsource.hyperic.plugin.gemfire.detectors;
 
+import com.vmware.springsource.hyperic.plugin.gemfire.GemFireUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -52,7 +53,7 @@ public abstract class MemberDetector extends ServerDetector implements AutoServe
                     server.setName(getTypeInfo().getName() + " " + name);
                     server.setIdentifier("GFDS server.name " + name);
                     ConfigResponse c = new ConfigResponse();
-                    c.setValue("memberID", menber);
+                    c.setValue("member.name", name);
                     setMeasurementConfig(server, c);
                     setProductConfig(server, new ConfigResponse());
                     setCustomProperties(server, getAtributtes(memberDetails));
@@ -74,8 +75,8 @@ public abstract class MemberDetector extends ServerDetector implements AutoServe
             MBeanServerConnection mServer = MxUtil.getMBeanServer(config.toProperties());
             log.debug("mServer=" + mServer);
 
-            String memberId = config.getValue("memberID");
-            Object[] args2 = {memberId};
+            String memberID = GemFireUtils.memberNameToMemberID(config.getValue("member.name"), mServer);
+            Object[] args2 = {memberID};
             String[] def2 = {String.class.getName()};
             ObjectName statsMBean = new ObjectName("GemFire:type=MemberInfoWithStatsMBean");
 
@@ -113,7 +114,6 @@ public abstract class MemberDetector extends ServerDetector implements AutoServe
                     service.setName(memberDetails.get("gemfire.member.name.string") + " Gateway " + id);
 
                     ConfigResponse c = new ConfigResponse();
-                    c.setValue("memberID", memberId);
                     c.setValue("gatewayID", id);
                     log.debug("[discoverServices] gateway -> c=" + c);
 

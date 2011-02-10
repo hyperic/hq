@@ -1,5 +1,6 @@
 package com.vmware.springsource.hyperic.plugin.gemfire.collectors;
 
+import com.vmware.springsource.hyperic.plugin.gemfire.GemFireUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -15,6 +16,7 @@ public class GatewayHubCollector extends Collector {
 
     static Log log = LogFactory.getLog(GatewayHubCollector.class);
 
+    @Override
     protected void init() throws PluginException {
         Properties props = getProperties();
         log.debug("[init] props=" + props);
@@ -27,7 +29,7 @@ public class GatewayHubCollector extends Collector {
         try {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(props);
             log.debug("mServer=" + mServer);
-            String memberID = props.getProperty("memberID");
+            String memberID = GemFireUtils.memberNameToMemberID(props.getProperty("member.name"), mServer);
             Object[] args2 = {memberID};
             String[] def2 = {String.class.getName()};
             Map memberDetails = (Map) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMemberDetails", args2, def2);

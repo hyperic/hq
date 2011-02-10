@@ -1,5 +1,6 @@
 package com.vmware.springsource.hyperic.plugin.gemfire.collectors;
 
+import com.vmware.springsource.hyperic.plugin.gemfire.GemFireUtils;
 import java.util.Map;
 import java.util.Properties;
 import javax.management.MBeanServerConnection;
@@ -29,7 +30,7 @@ public class RegionCollector extends Collector {
         log.debug("[collect] props=" + props);
         try {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(props);
-            String memberID = props.getProperty("memberID");
+            String memberID = GemFireUtils.memberNameToMemberID(props.getProperty("member.name"), mServer);
             Object[] args2 = {memberID};
             String[] def2 = {String.class.getName()};
             Map memberDetails = (Map) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMemberDetails", args2, def2);
@@ -58,7 +59,7 @@ public class RegionCollector extends Collector {
             if (res.getValue() != Metric.AVAIL_UP) {
                 res=new MetricValue(Metric.AVAIL_DOWN, System.currentTimeMillis());
             }
-            log.debug("[getValue] Member="+metric.getObjectProperty("memberID")+" metric=" + metric.getAttributeName() + " res=" + res.getValue());
+            log.debug("[getValue] Member="+metric.getObjectProperty("member.name")+" metric=" + metric.getAttributeName() + " res=" + res.getValue());
         }
         return res;
     }
