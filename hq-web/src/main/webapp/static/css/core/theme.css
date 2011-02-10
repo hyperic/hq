@@ -1,0 +1,46 @@
+body { background: #EFEFEF; }
+
+#header { 
+	background: #ececec url('../../images/header_background.jpg') repeat-x scroll;
+    border-bottom: 3px solid #2D6EBE;
+}
+
+#headerLogo {
+	cursor: pointer;	
+}
+
+#headerLinks { color: #FFF; }
+#headerLinks ul li a { 
+	text-decoration: none;
+	color: #88C7FC; 
+}
+
+#loginPanel {
+    border: 3px solid #B0F6FF;
+    background: #fff;
+    -moz-box-shadow: 0 3px 3px #999;
+	-webkit-box-shadow: 0 3px 3px #999;
+	-moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+}
+
+#loginPanel .fieldsetTitle {
+	font-size: 1.25em;
+	font-weight: bold;
+}
+
+#loginPanel form fieldset {
+	border: 0;
+}
+
+#loginPanel .fieldRow label {
+	font-weight: normal;
+}
+
+#loginPanel .guestUser {
+	color: #45A8DF;
+}
+
+#loginPanel .fieldRow.active input {
+	background-color: #FFFFBF;
+}
