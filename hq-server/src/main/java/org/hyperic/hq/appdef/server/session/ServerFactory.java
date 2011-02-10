@@ -31,7 +31,7 @@ public class ServerFactory {
     public ServerFactory(PlatformFactory platformFactory) {
         this.platformFactory = platformFactory;
     }
-
+  
     public Server createServer(Resource serverResource) {
         Server server = new Server(serverResource.getId());
         server.setAutoinventoryIdentifier((String)serverResource.getProperty(AUTO_INVENTORY_IDENTIFIER));
@@ -42,7 +42,6 @@ public class ServerFactory {
         server.setModifiedBy(serverResource.getModifiedBy());
         server.setModifiedTime((Long)serverResource.getProperty(MODIFIED_TIME));
         server.setName(serverResource.getName());
-        server.setPlatform(platformFactory.createPlatform(serverResource.getResourceTo(RelationshipTypes.SERVER)));
         server.setResource(serverResource);
         server.setRuntimeAutodiscovery((Boolean)serverResource.getProperty(RUNTIME_AUTODISCOVERY));
         server.setServerType(createServerType(serverResource.getType()));
@@ -50,6 +49,12 @@ public class ServerFactory {
         server.setWasAutodiscovered((Boolean)serverResource.getProperty(WAS_AUTODISCOVERED));
         server.setAutodiscoveryZombie((Boolean)serverResource.getProperty(AUTODISCOVERY_ZOMBIE));
         server.setSortName((String) serverResource.getProperty(AppdefResource.SORT_NAME));
+        Resource platform = serverResource.getResourceTo(RelationshipTypes.SERVER);
+        if(platform != null) {
+            server.setPlatform(platformFactory.createPlatform(platform));
+        }else {
+            server.setPlatform(platformFactory.createPlatform(serverResource.getResourceTo(RelationshipTypes.VIRTUAL)));
+        }
         return server;
     }
     
@@ -64,9 +69,12 @@ public class ServerFactory {
         serverType.setPlugin(serverResType.getPlugin().getName());
         //TODO for types, we just fake out sort name for now.  Can't do setProperty on ResourceType
         serverType.setSortName(serverResType.getName().toUpperCase());
+        if(serverResType.getResourceTypeTo(RelationshipTypes.VIRTUAL) != null) {
+            serverType.setVirtual(true);
+        }else {
+            serverType.setVirtual(false);
+        }
         return serverType;
     }
-
-    
     
 }

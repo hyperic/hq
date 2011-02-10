@@ -256,16 +256,16 @@ public class ServiceManagerImpl implements ServiceManager {
         return service;
     }
     
-    /**
-     * @param server {@link Server}
-     * @param aiid service autoinventory identifier
-     * @return {@link List} of {@link Service}
-     */
     @Transactional(readOnly = true)
     public List<Service> getServicesByAIID(Server server, String aiid) {
         List<Service> aiidServices = new ArrayList<Service>();
         Resource serverResource = resourceManager.findResourceById(server.getId());
-        Set<Resource> services = serverResource.getResourcesFrom(RelationshipTypes.SERVICE);
+        Set<Resource> services;
+        if(server.getServerType().isVirtual()) {
+            services = serverResource.getResourceTo(RelationshipTypes.VIRTUAL).getResourcesFrom(RelationshipTypes.SERVICE);
+        }else {
+            services = serverResource.getResourcesFrom(RelationshipTypes.SERVICE);
+        }
         for(Resource service: services) {
             if(aiid.equals(service.getProperty(ServiceFactory.AUTO_INVENTORY_IDENTIFIER))) {
                 aiidServices.add(serviceFactory.createService(service));

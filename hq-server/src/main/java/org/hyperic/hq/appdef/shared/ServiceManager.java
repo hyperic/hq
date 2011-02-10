@@ -29,9 +29,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -83,6 +81,13 @@ public interface ServiceManager {
     public Service getServiceById(AuthzSubject subject, Integer id) throws ServiceNotFoundException,
         PermissionException;
 
+    /**
+     * @param server {@link Server}
+     * @param aiid service autoinventory identifier
+     * @return {@link List} of {@link Service}
+     * This method also returns services of a virtual server (b/c it's AI related), 
+     * while other getServicesByServer methods will not do that
+     */
     public List<Service> getServicesByAIID(Server server, String aiid);
 
     /**

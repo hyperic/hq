@@ -219,6 +219,15 @@ public class ConfigManagerImpl implements ConfigManager {
                 origReq = required;
                 required = false;
                 isServerOrService = true;
+            }else {
+                platform = getPlatformStuffForService(id.getId());
+                if (platform != null) {
+                    platformId = AppdefEntityID.newPlatformID(new Integer(platform.id));
+                }
+                serviceId = id;
+                origReq = required;
+                required = false;
+                isServerOrService = true;
             }
         } else if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
             platform = getPlatformStuffForServer(id.getId());
@@ -529,7 +538,6 @@ public class ConfigManagerImpl implements ConfigManager {
     private ServerConfigStuff getServerStuffForService(Integer id) throws AppdefEntityNotFoundException {
 
         org.hyperic.hq.appdef.server.session.Service service = serviceManager.findServiceById(id);
-        //TODO handle parent platforms
         AppdefResource server = service.getParent();
         if (server == null || !(server instanceof Server)) {
             return null;
@@ -543,6 +551,21 @@ public class ConfigManagerImpl implements ConfigManager {
 
         return new ServerConfigStuff(server.getId().intValue(), server.getInstallPath());
     }
+    
+    private PlatformConfigStuff getPlatformStuffForService(Integer id) throws AppdefEntityNotFoundException {
+
+        org.hyperic.hq.appdef.server.session.Service service = serviceManager.findServiceById(id);
+        AppdefResource platRes = service.getParent();
+        if (platRes == null || !(platRes instanceof Platform)) {
+            return null;
+        }
+        Platform platform = (Platform)platRes;
+        PlatformConfigStuff pConfig = new PlatformConfigStuff(platform.getId().intValue(), platform.getName(), platform
+            .getFqdn(), platform.getPlatformType().getName());
+        loadPlatformIp(platform, pConfig);
+        return pConfig;
+    }
+
 
     private PlatformConfigStuff getPlatformStuffForServer(Integer id) throws AppdefEntityNotFoundException {
 

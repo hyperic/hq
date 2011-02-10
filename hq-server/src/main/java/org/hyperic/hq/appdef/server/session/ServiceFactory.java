@@ -1,5 +1,6 @@
 package org.hyperic.hq.appdef.server.session;
 
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.reference.RelationshipTypes;
@@ -46,10 +47,9 @@ public class ServiceFactory {
         service.setName(resource.getName());
         service.setResource(resource);
         Resource parent = resource.getResourceTo(RelationshipTypes.SERVICE);
-        Resource grandParent = parent.getResourceTo(RelationshipTypes.SERVER);
-        if (grandParent != null) {
+        if(parent.getProperty(AppdefResourceType.APPDEF_TYPE_ID).equals(AppdefEntityConstants.APPDEF_TYPE_SERVER)) {
             service.setParent(serverFactory.createServer(parent));
-        } else {
+        }else {
             service.setParent(platformFactory.createPlatform(parent));
         }
         service.setServiceRt((Boolean) resource.getProperty(SERVICE_RT));

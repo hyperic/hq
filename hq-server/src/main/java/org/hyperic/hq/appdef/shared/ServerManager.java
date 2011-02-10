@@ -54,6 +54,28 @@ public interface ServerManager {
     public Server createServer(AuthzSubject subject, Integer platformId, Integer serverTypeId, ServerValue sValue)
         throws ValidationException, PermissionException, PlatformNotFoundException,
         org.hyperic.hq.appdef.shared.AppdefDuplicateNameException, NotFoundException;
+    
+    /**
+     * The same as a regular server, but association to Platform is through a "virtual" relation. 
+     *  We keep this purely to handle legacy AI runtime reports that report platform services under a "virtual" server
+     *  that has a unique ID but is invisible to the user
+     *  We also don't set the AppdefType so these won't get picked up on queries for all servers.
+     * A virtual server should only exist in the system if queried specifically by ID or name
+     * @param subject
+     * @param platformId
+     * @param serverTypeId
+     * @param sValue
+     * @return
+     * @throws ValidationException
+     * @throws PermissionException
+     * @throws PlatformNotFoundException
+     * @throws AppdefDuplicateNameException
+     * @throws NotFoundException
+     */
+    
+    public Server createVirtualServer(AuthzSubject subject, Integer platformId, Integer serverTypeId, ServerValue sValue) 
+        throws ValidationException, PermissionException, PlatformNotFoundException, AppdefDuplicateNameException,
+        NotFoundException;
 
     /**
      * A removeServer method that takes a ServerLocal. Used by
@@ -68,6 +90,8 @@ public interface ServerManager {
 
     
     ServerType createServerType(ServerTypeInfo sinfo, String plugin) throws NotFoundException;
+    
+    ServerType createVirtualServerType(ServerTypeInfo sinfo, String plugin) throws NotFoundException;
 
     /**
      * Find all server types
