@@ -41,27 +41,7 @@ public class AIServerDAO
     public AIServerDAO(SessionFactory f) {
         super(AIServer.class, f);
     }
-
-    public AIServer create(AIServerValue server) {
-        AIServer as = new AIServer();
-
-        as.setInstallPath(server.getInstallPath());
-        as.setAutoinventoryIdentifier(server.getAutoinventoryIdentifier());
-        as.setServicesAutomanaged(server.getServicesAutomanaged());
-        as.setName(server.getName());
-        as.setQueueStatus(server.getQueueStatus());
-        as.setDescription(server.getDescription());
-        as.setDiff(server.getDiff());
-        as.setIgnored(server.getIgnored());
-        as.setServerTypeName(server.getServerTypeName());
-        as.setProductConfig(server.getProductConfig());
-        as.setMeasurementConfig(server.getMeasurementConfig());
-        as.setControlConfig(server.getControlConfig());
-        as.setCustomProperties(server.getCustomProperties());
-        save(as);
-        return as;
-    }
-
+   
     public AIServer findByName(String name) {
         String sql = "from AIServer where name=?";
         return (AIServer) getSession().createQuery(sql).setString(0, name).uniqueResult();

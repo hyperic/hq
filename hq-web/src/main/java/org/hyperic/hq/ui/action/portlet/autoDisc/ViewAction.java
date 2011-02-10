@@ -129,7 +129,7 @@ public class ViewAction
             // Add all non-virtual servers on this platform
             aiServers = aiPlatform.getAIServerValues();
             for (int j = 0; j < aiServers.length; j++) {
-                if (!BizappUtils.isAutoApprovedServer(sessionId, appdefBoss, aiServers[j])) {
+                if (!(aiServers[j].isVirtual())) {
                     serversToProcess.add(aiServers[j].getId());
                 }
             }

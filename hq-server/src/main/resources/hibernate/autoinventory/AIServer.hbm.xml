@@ -72,6 +72,10 @@
     <property name="servicesAutomanaged" type="boolean">
       <column name="SERVICESAUTOMANAGED" not-null="false"/>
     </property>
+    
+   	<property name="virtual" type="boolean">
+      <column name="VIRTUAL" not-null="false"/>
+    </property>
 
     <property lazy="true" name="customProperties" type="binary">
       <column name="CUSTOM_PROPERTIES" not-null="false"/>

@@ -666,9 +666,11 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
                 try {
                     serverManager.findServerTypeByName(aiServer.getServerTypeName());
                 } catch (NotFoundException e) {
-                    log.error("Ignoring non-existent server type: " + aiServer.getServerTypeName(),
-                        e);
-                    continue;
+                    aiServer.setVirtual(true);
+                    //TODO distinguish virtuals?
+                  //  log.error("Ignoring non-existent server type: " + aiServer.getServerTypeName(),
+                    //    e);
+                   // continue;
                 }
 
                 aiPlatform.addAIServerValue(aiServer);

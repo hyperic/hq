@@ -145,7 +145,7 @@ public class ProcessQueueAction
 
                         request.getSession().setAttribute(Constants.IMPORT_IGNORE_ERROR_ATTR, Boolean.TRUE);
                     }
-                } else if (isApproval && BizappUtils.isAutoApprovedServer(sessionId, appdefBoss, aiServers[j])) {
+                } else if (isApproval && aiServers[j].isVirtual()) {
                     // All virtual servers are approved when their platform
                     // is approved. The HQ agent is also auto-approved.
                     aiServerList.add(aiServers[j].getId());
