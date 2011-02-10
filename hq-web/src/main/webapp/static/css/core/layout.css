@@ -63,10 +63,17 @@
     position: absolute;
     text-align:left;
     float:none;
+    padding: 0.15em;
+    margin: 0.5em 0
+}
+
+#loginPanel .fieldsetNote {
+	padding-bottom: 0.25em;
 }
 
 #loginPanel form fieldset {
 	padding: 0 5px;
+	margin-bottom: 1em;
 }
 
 #loginPanel form fieldset p {
@@ -88,10 +95,17 @@
 
 #loginPanel input[type="password"], 
 #loginPanel input[type="text"] {
+	padding: 0.25em;
     margin-right:5px;
 }
 
 #loginPanel .submitButtonContainer {
-	text-align: right; 
+	text-align: right;
+	margin-top: 10px;
 	margin-right: 10px;
+}
+
+#loginPanel .msgPanel {
+	margin-bottom: 9px;
+	padding: 5px 2px 5px 28px;
 }
