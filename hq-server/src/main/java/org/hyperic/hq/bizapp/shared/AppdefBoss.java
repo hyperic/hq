@@ -64,7 +64,6 @@ import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
@@ -145,7 +144,7 @@ public interface AppdefBoss {
         throws SessionTimeoutException, SessionNotFoundException, PermissionException, NotFoundException;
 
     public PageList<ServiceTypeValue> findViewablePlatformServiceTypes(int sessionID, Integer platId)
-        throws SessionTimeoutException, SessionNotFoundException, PermissionException;
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException, PlatformNotFoundException;
 
     public ApplicationValue findApplicationById(int sessionID, Integer id) throws AppdefEntityNotFoundException,
         PermissionException, SessionTimeoutException, SessionNotFoundException;
@@ -196,25 +195,12 @@ public interface AppdefBoss {
     public PageList<ServiceValue> findServicesByServer(int sessionID, Integer serverId, PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException, SessionException;
 
-    /**
-     * Find the platform by service.
-     */
-    public PlatformValue findPlatformByDependentID(int sessionID, AppdefEntityID entityId)
-        throws AppdefEntityNotFoundException, SessionTimeoutException, SessionNotFoundException, PermissionException;
-
     public ServerValue findServerByService(int sessionID, Integer serviceID) throws AppdefEntityNotFoundException,
         SessionTimeoutException, SessionNotFoundException, PermissionException;
 
     public PageList<ServerValue> findServersByTypeAndPlatform(int sessionId, Integer platformId, int adResTypeId,
                                                               PageControl pc) throws AppdefEntityNotFoundException,
         PermissionException, SessionTimeoutException, SessionNotFoundException;
-
-    /**
-     * Get the virtual server for a given platform and service type
-     */
-    public ServerValue findVirtualServerByPlatformServiceType(int sessionID, Integer platId, Integer svcTypeId)
-        throws ServerNotFoundException, PlatformNotFoundException, PermissionException, SessionNotFoundException,
-        SessionTimeoutException;
 
     /**
      * Find all servers on a given platform
@@ -224,7 +210,7 @@ public interface AppdefBoss {
         throws AppdefEntityNotFoundException, SessionTimeoutException, SessionNotFoundException, PermissionException;
 
     /**
-     * Get the virtual servers for a given platform
+     * Get the servers for a given platform
      */
     public PageList<ServerValue> findViewableServersByPlatform(int sessionID, Integer platformId, PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException, SessionTimeoutException, SessionNotFoundException;
@@ -234,6 +220,9 @@ public interface AppdefBoss {
 
     public PageList<ServerTypeValue> findServerTypesByPlatformType(int sessionID, Integer platformId, PageControl pc)
         throws AppdefEntityNotFoundException, SessionTimeoutException, SessionNotFoundException;
+    
+    PageList<ServiceTypeValue> findServiceTypesByPlatformType(int sessionID, int platformTypeId)
+        throws SessionTimeoutException, SessionNotFoundException;
 
     /**
      * Get all platforms in the inventory.
@@ -339,12 +328,12 @@ public interface AppdefBoss {
     /**
      * Create a service with CProps
      * @param serviceTypePK - the type of service
-     * @param serverPK - the server host
+     * @param parentPK - the platform or server host
      * @param cProps - the map with Custom Properties for the service
      * @return Service - the saved Service
      */
     public Service createService(AuthzSubject subject, ServiceValue serviceVal, Integer serviceTypePK,
-                                 Integer serverPK, Map<String, String> cProps) throws SessionNotFoundException,
+                                 Integer parentPK, Map<String, String> cProps) throws SessionNotFoundException,
         SessionTimeoutException, AppdefDuplicateNameException, ValidationException, PermissionException,
         CPropKeyNotFoundException;
 

@@ -71,6 +71,7 @@ public class AIServerValue
    private boolean mTimeHasBeenSet = false;
    private java.lang.Long cTime;
    private boolean cTimeHasBeenSet = false;
+   private boolean virtual=false;
 
    public AIServerValue()
    {
@@ -415,6 +416,16 @@ public class AIServerValue
 
    public boolean cTimeHasBeenSet(){
 	  return cTimeHasBeenSet;
+   }
+   
+   
+
+   public boolean isVirtual() {
+       return virtual;
+   }
+
+   public void setVirtual(boolean virtual) {
+       this.virtual = virtual;
    }
 
    public String toString()

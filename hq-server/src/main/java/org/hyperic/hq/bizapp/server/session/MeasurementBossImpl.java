@@ -3203,7 +3203,8 @@ public class MeasurementBossImpl implements MeasurementBoss {
         throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException,
         GroupNotCompatibleException, PermissionException {
         return new ArrayList<ResourceDisplaySummary>();
-
+        
+//   TODO what was this used for?
 //        final AuthzSubject subject = sessionManager.getSubject(sessionId);
 //
 //        List<AppdefResourceValue> resources = virtualManager.findVirtualResourcesByPhysical(

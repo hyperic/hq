@@ -432,16 +432,13 @@ public class AppdefBossImpl implements AppdefBoss {
         return serviceManager.getViewableServiceTypes(subject, pc);
     }
 
-    /**
-     * 
-     */
+    
     @Transactional(readOnly = true)
     public PageList<ServiceTypeValue> findViewablePlatformServiceTypes(int sessionID, Integer platId)
-        throws SessionTimeoutException, SessionNotFoundException, PermissionException {
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException, PlatformNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
-        //TODO
-        return new PageList<ServiceTypeValue>();
-        //return serviceManager.findVirtualServiceTypesByPlatform(subject, platId);
+        int platformTypeId = platformManager.findPlatformById(platId).getPlatformType().getId();
+        return serviceManager.getServiceTypesByPlatformType(subject, platformTypeId);
     }
 
     /**
@@ -610,28 +607,6 @@ public class AppdefBossImpl implements AppdefBoss {
     }
 
     /**
-     * Find the platform by service.
-     * 
-     */
-    @Transactional(readOnly = true)
-    public PlatformValue findPlatformByDependentID(int sessionID, AppdefEntityID entityId)
-        throws AppdefEntityNotFoundException, SessionTimeoutException, SessionNotFoundException,
-        PermissionException {
-        AuthzSubject subject = sessionManager.getSubject(sessionID);
-        Integer id = entityId.getId();
-        switch (entityId.getType()) {
-            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                return findPlatformById(sessionID, id);
-            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                return platformManager.getPlatformByServer(subject, id);
-            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                return platformManager.getPlatformByService(subject, id);
-            default:
-                throw new IllegalArgumentException("Invalid entity type: " + entityId.getType());
-        }
-    }
-
-    /**
      * 
      */
     @Transactional(readOnly = true)
@@ -653,23 +628,6 @@ public class AppdefBossImpl implements AppdefBoss {
     }
 
     /**
-     * Get the virtual server for a given platform and service type
-     * 
-     * 
-     */
-    public ServerValue findVirtualServerByPlatformServiceType(int sessionID, Integer platId,
-                                                              Integer svcTypeId)
-        throws ServerNotFoundException, PlatformNotFoundException, PermissionException,
-        SessionNotFoundException, SessionTimeoutException {
-        AuthzSubject subject = sessionManager.getSubject(sessionID);
-        List<ServerValue> servers = serverManager.getServersByPlatformServiceType(subject, platId,
-            svcTypeId);
-
-        // There should only be one
-        return servers.get(0);
-    }
-
-    /**
      * Find all servers on a given platform
      * 
      * @return A list of ServerValue objects
@@ -683,7 +641,7 @@ public class AppdefBossImpl implements AppdefBoss {
     }
 
     /**
-     * Get the virtual servers for a given platform
+     * Get the servers for a given platform
      * 
      * 
      */
@@ -739,7 +697,6 @@ public class AppdefBossImpl implements AppdefBoss {
                 if (servTypeId == APPDEF_RES_TYPE_UNDEFINED) {
                     res = serverManager.getServersByPlatform(subject, aeid.getId(),  pc);
                 } else {
-                    // exclude virtual servers
                     res = serverManager.getServersByPlatform(subject, aeid.getId(), new Integer(
                         servTypeId),  pc);
                 }
@@ -1082,6 +1039,13 @@ public class AppdefBossImpl implements AppdefBoss {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return serviceManager.getServiceTypesByServerType(subject, serverTypeId);
     }
+    
+    @Transactional(readOnly = true)
+    public PageList<ServiceTypeValue> findServiceTypesByPlatformType(int sessionID, int platformTypeId)
+        throws SessionTimeoutException, SessionNotFoundException {
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
+        return serviceManager.getServiceTypesByPlatformType(subject, platformTypeId);
+    }
 
     /**
      * 
@@ -1170,19 +1134,7 @@ public class AppdefBossImpl implements AppdefBoss {
         ValidationException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         try {
-            Integer serverPK;
-            if (aeid.isPlatform()) {
-                // Look up the platform's virtual server
-                List<ServerValue> servers = serverManager.getServersByPlatformServiceType(subject,
-                    aeid.getId(), serviceTypePK);
-
-                // There should only be 1 virtual server of this type
-                ServerValue server = servers.get(0);
-                serverPK = server.getId();
-            } else {
-                serverPK = aeid.getId();
-            }
-            Service newSvc = createService(subject, serviceVal, serviceTypePK, serverPK, null);
+            Service newSvc=createService(subject, serviceVal, serviceTypePK, aeid.getId(), null);  
             return newSvc.getServiceValue();
         } catch (CPropKeyNotFoundException exc) {
             log.error("Error setting no properties for new service");
@@ -1194,18 +1146,18 @@ public class AppdefBossImpl implements AppdefBoss {
      * Create a service with CProps
      * 
      * @param serviceTypePK - the type of service
-     * @param serverPK - the server host
+     * @param parentPK - the server or platform host
      * @param cProps - the map with Custom Properties for the service
      * @return Service - the saved Service
      * 
      */
     public Service createService(AuthzSubject subject, ServiceValue serviceVal,
-                                 Integer serviceTypePK, Integer serverPK, Map<String, String> cProps)
+                                 Integer serviceTypePK, Integer parentPK, Map<String, String> cProps)
         throws SessionNotFoundException, SessionTimeoutException, AppdefDuplicateNameException,
         ValidationException, PermissionException, CPropKeyNotFoundException {
         try {
 
-            Service savedService = serviceManager.createService(subject, serverPK, serviceTypePK,
+            Service savedService = serviceManager.createService(subject, parentPK, serviceTypePK,
                 serviceVal.getName(), serviceVal.getDescription(), serviceVal.getLocation());
             if (cProps != null) {
                 AppdefEntityID entityId = savedService.getEntityId();

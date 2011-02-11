@@ -112,6 +112,7 @@ public class AgentScheduleSynchronizer {
 
         ZeventListener<Zevent> l = new ZeventListener<Zevent>() {
 
+            @Transactional(readOnly=true)
             public void processEvents(List<Zevent> events) {
                 final List<AppdefEntityID> toSchedule = new ArrayList<AppdefEntityID>(events.size());
                 final Map<String, Collection<AppdefEntityID>> unscheduleMap = new HashMap<String, Collection<AppdefEntityID>>(

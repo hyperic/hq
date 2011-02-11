@@ -42,5 +42,7 @@ abstract public class RelationshipTypes {
     public static final String SERVICE = "SERVICE";
     
     public static final String IP="IP";
+    
+    public static final String VIRTUAL="VIRTUAL";
 
 }

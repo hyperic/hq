@@ -7,6 +7,8 @@ import org.hyperic.hq.appdef.shared.ServerTypeValue;
 public class ServerType extends AppdefResourceType {
 
     private String plugin;
+    
+    private boolean virtual;
 
     public String getPlugin() {
         return plugin;
@@ -16,6 +18,13 @@ public class ServerType extends AppdefResourceType {
         this.plugin = plugin;
     }
     
+    public boolean isVirtual() {
+        return virtual;
+    }
+
+    public void setVirtual(boolean virtual) {
+        this.virtual = virtual;
+    }
 
     @Override
     public int getAppdefType() {

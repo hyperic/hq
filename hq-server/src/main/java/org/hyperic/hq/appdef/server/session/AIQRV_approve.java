@@ -31,11 +31,14 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIServerValue;
+import org.hyperic.hq.appdef.shared.AgentNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
@@ -49,9 +52,12 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
+import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
+import org.hyperic.hq.autoinventory.agent.client.AICommandsClientFactory;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -355,20 +361,24 @@ public class AIQRV_approve implements AIQResourceVisitor {
             serverValue = AIConversionUtil.mergeAIServerIntoServer(aiserverValue, serverValue);
 
             Integer serverTypePK = serverValue.getServerType().getId();
-            server = serverManager.createServer(subject, platform.getId(), serverTypePK,
-                serverValue);
-
+            if(aiserverValue.isVirtual()) {
+                server = serverManager.createVirtualServer(subject, platform.getId(), serverTypePK,
+                    serverValue);
+            } else {   
+                server = serverManager.createServer(subject, platform.getId(), serverTypePK,
+                    serverValue);
+            }
             try {
                 configMgr.configureResponse(subject,  server
-                    .getEntityId(), aiserver.getProductConfig(), aiserver.getMeasurementConfig(),
-                    aiserver.getControlConfig(), null, /* RT config */
-                    null, false);
+                        .getEntityId(), aiserver.getProductConfig(), aiserver.getMeasurementConfig(),
+                        aiserver.getControlConfig(), null, /* RT config */
+                        null, false);
             } catch (Exception e) {
                 log.warn("Error configuring server: " + e, e);
             }
-
+    
             setCustomProperties(aiserver, server);
-
+    
             createdResources.add(server);
             log.info("Created server (" + serverValue.getId() + "): " + serverValue);
         } catch (PermissionException e) {

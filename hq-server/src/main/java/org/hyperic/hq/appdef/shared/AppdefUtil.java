@@ -125,7 +125,7 @@ public class AppdefUtil {
         if(rv.getResourceTypeTo(RelationshipTypes.PLATFORM) !=null) {
             return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
         }
-        if(rv.getResourceTypeTo(RelationshipTypes.SERVER) !=null) {
+        if(rv.getResourceTypeTo(RelationshipTypes.SERVER) !=null || rv.getResourceTypeTo(RelationshipTypes.VIRTUAL) != null) {
             return AppdefEntityConstants.APPDEF_TYPE_SERVER;
         }
         if(rv.getResourceTypeTo(RelationshipTypes.SERVICE) !=null) {

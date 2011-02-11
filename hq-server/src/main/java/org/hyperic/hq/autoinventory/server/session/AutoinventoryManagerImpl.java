@@ -45,6 +45,7 @@ import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.shared.AIAppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
@@ -664,10 +665,12 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
             for (AIServerValue aiServer : serverSet) {
                 // Ensure the server reported has a valid appdef type
                 try {
-                    serverManager.findServerTypeByName(aiServer.getServerTypeName());
+                    ServerType serverType = serverManager.findServerTypeByName(aiServer.getServerTypeName());
+                    if(serverType.isVirtual()) {
+                        aiServer.setVirtual(true);
+                    }
                 } catch (NotFoundException e) {
-                    log.error("Ignoring non-existent server type: " + aiServer.getServerTypeName(),
-                        e);
+                    log.error("Ignoring non-existent server type: " + aiServer.getServerTypeName(),e);
                     continue;
                 }
 

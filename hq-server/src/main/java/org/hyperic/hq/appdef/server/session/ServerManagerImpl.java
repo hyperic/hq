@@ -65,6 +65,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.common.shared.AuditManager;
+import org.hyperic.hq.inventory.InvalidRelationshipException;
 import org.hyperic.hq.inventory.dao.ResourceDao;
 import org.hyperic.hq.inventory.dao.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.PropertyType;
@@ -90,8 +91,6 @@ import org.springframework.transaction.annotation.Transactional;
 @org.springframework.stereotype.Service
 @Transactional
 public class ServerManagerImpl implements ServerManager {
-
-   
 
     private final Log log = LogFactory.getLog(ServerManagerImpl.class);
 
@@ -178,26 +177,10 @@ public class ServerManagerImpl implements ServerManager {
      * required to succesfully add a server instance to a platform
      */
     private void validateNewServer(Resource p, ServerValue sv) throws ValidationException {
-        String msg = null;
         if (sv.getServerType() == null) {
-            msg = "Server has no ServiceType";
+            throw new ValidationException("Server has no ServerType");
         } else if (sv.idHasBeenSet()) {
-            msg = "This server is not new, it has ID:" + sv.getId();
-        }
-        if (msg == null) {
-            Integer id = sv.getServerType().getId();
-            Collection<ResourceType> stypes = p.getType().getResourceTypesFrom(RelationshipTypes.SERVER);
-            for (ResourceType sVal : stypes) {
-
-                if (sVal.getId().equals(id)) {
-                    return;
-                }
-            }
-            msg = "Servers of type '" + sv.getServerType().getName() + "' cannot be created on platforms of type '" +
-                  p.getType().getName() + "'";
-        }
-        if (msg != null) {
-            throw new ValidationException(msg);
+           throw new ValidationException("This server is not new, it has ID:" + sv.getId());
         }
     }
 
@@ -237,7 +220,7 @@ public class ServerManagerImpl implements ServerManager {
         return servers;
     }
     
-    private Resource create(AuthzSubject owner, ServerValue sv, Resource p) {
+    private Resource create(AuthzSubject owner, ServerValue sv, Resource p)  {
         ResourceType st = resourceManager.findResourceTypeById(sv.getServerType().getId());
         Resource s = resourceDao.create(sv.getName(), st);
         s.setDescription(sv.getDescription());
@@ -262,13 +245,53 @@ public class ServerManagerImpl implements ServerManager {
         s.setProperty(ServerFactory.CREATION_TIME, System.currentTimeMillis());
         s.setProperty(ServerFactory.MODIFIED_TIME,System.currentTimeMillis());
         s.setProperty(AppdefResource.SORT_NAME, sv.getName().toUpperCase());
-        s.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVER);
+        
         s.setOwner(owner);
         s.setAgent(p.getAgent());
-        p.relateTo(s,RelationshipTypes.SERVER);
-        p.relateTo(s,RelationshipTypes.CONTAINS);
         return s;
    }
+    
+  public Server createVirtualServer(AuthzSubject subject, Integer platformId, Integer serverTypeId, ServerValue sValue) throws ValidationException, 
+      PermissionException, PlatformNotFoundException, AppdefDuplicateNameException, NotFoundException {
+        //try {
+        trimStrings(sValue);
+        
+        //TODO perm checking
+        //permissionManager
+        //.checkPermission(subject, resourceManager.findResourceTypeByName(AuthzConstants.platformResType), platformId, 
+          //  AuthzConstants.platformOpAddServer);
+
+        Resource platform = resourceManager.findResourceById(platformId);
+        ResourceType serverType = resourceManager.findResourceTypeById(serverTypeId);
+
+        sValue.setServerType(serverFactory.createServerType(serverType).getServerTypeValue());
+        sValue.setModifiedBy(subject.getName());
+
+        // validate the object
+        validateNewServer(platform, sValue);
+
+        // create it
+        Resource server = create(subject,sValue, platform);
+        try {
+            platform.relateTo(server,RelationshipTypes.VIRTUAL);
+        }catch(InvalidRelationshipException e) {
+            throw new ValidationException("Servers of type '" + serverType.getName() + "' cannot be created on platforms of type '" +
+                platform.getType().getName());
+        }
+        //TODO abstract to ResourceManager when we can send events w/out AppdefEntityIDs
+        Server serv = toServer(server);
+        ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, serv.getEntityId());
+        zeventManager.enqueueEventAfterCommit(zevent);
+
+        return serv;
+        // } catch (CreateException e) {
+        // throw e;
+    //} catch (NotFoundException e) {
+    //    throw new NotFoundException("Unable to find platform=" + platformId + " or server type=" + serverTypeId +
+     //                               ":" + e.getMessage());
+    //}
+        
+    }
     
     /**
      * Create a Server on the given platform.
@@ -296,10 +319,17 @@ public class ServerManagerImpl implements ServerManager {
 
             // validate the object
             validateNewServer(platform, sValue);
-
-            // create it
             Resource server = create(subject,sValue, platform);
-
+            // create it
+            try {
+                platform.relateTo(server,RelationshipTypes.SERVER);
+                platform.relateTo(server,RelationshipTypes.CONTAINS);
+            }catch(InvalidRelationshipException e) {
+                throw new ValidationException("Servers of type '" + serverType.getName() + "' cannot be created on platforms of type '" +
+                    platform.getType().getName());
+            }
+            server.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVER);
+            
             //TODO abstract to ResourceManager when we can send events w/out AppdefEntityIDs
             Server serv = toServer(server);
             ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, serv.getEntityId());
@@ -632,8 +662,7 @@ public class ServerManagerImpl implements ServerManager {
     }
 
     /**
-     * Get server by service. The virtual servers are not filtere out of
-     * returned list.
+     * Get server by service.
      * 
      */
     @Transactional(readOnly=true)
@@ -643,7 +672,7 @@ public class ServerManagerImpl implements ServerManager {
         for (AppdefEntityID svcId : sIDs) {
 
             Resource svc = resourceManager.findResourceById(svcId.getId());
-
+            //TODO svc parent might not be a server
             servers.add(svc.getResourceTo(RelationshipTypes.SERVICE));
         }
 
@@ -696,18 +725,7 @@ public class ServerManagerImpl implements ServerManager {
         return servers;
     }
 
-    /**
-     * Get servers by platform.
-     * 
-     * 
-     * @param subject The subject trying to list servers.
-     * @param platId platform id.
-     * @param excludeVirtual true if you dont want virtual (fake container)
-     *        servers in the returned list
-     * @param pc The page control.
-     * @return A PageList of ServerValue objects representing servers on the
-     *         specified platform that the subject is allowed to view.
-     */
+   
     @Transactional(readOnly=true)
     public PageList<ServerValue> getServersByPlatform(AuthzSubject subject, Integer platId, 
                                                       PageControl pc) throws ServerNotFoundException,
@@ -754,6 +772,7 @@ public class ServerManagerImpl implements ServerManager {
         Integer servTypeId;
         try {
             ResourceType typeV = resourceManager.findResourceTypeById(svcTypeId);
+            //TODO this might be a platform, not a server
             servTypeId = typeV.getResourceTypeTo(RelationshipTypes.SERVICE).getId();
         } catch (ObjectNotFoundException e) {
             throw new ServerNotFoundException("Service Type not found", e);
@@ -1043,16 +1062,36 @@ public class ServerManagerImpl implements ServerManager {
             }
         }
 
-       
-
         // Now create the left-overs
         for (ServerTypeInfo sinfo : infoMap.values()) {
-            createServerType(sinfo,plugin);
+            if(sinfo.isVirtual()) {
+                createVirtualServerType(sinfo, plugin);
+            }else {
+                createServerType(sinfo,plugin);
+            }
         }
     }
     
     public ServerType createServerType(ServerTypeInfo sinfo, String plugin) throws NotFoundException {
         log.debug("Creating new ServerType: " + sinfo.getName());
+        ResourceType stype = createServerResourceType(sinfo, plugin);
+        PropertyType appdefType = createServerPropertyType(AppdefResourceType.APPDEF_TYPE_ID, Integer.class);
+        appdefType.setIndexed(true);
+        stype.addPropertyType(appdefType);
+        String newPlats[] = sinfo.getValidPlatformTypes();
+        findAndSetPlatformType(newPlats, stype);
+        return serverFactory.createServerType(stype);
+    }
+    
+    public ServerType createVirtualServerType(ServerTypeInfo sinfo, String plugin) throws NotFoundException {
+        log.debug("Creating new Virtual ServerType: " + sinfo.getName());
+        ResourceType stype = createServerResourceType(sinfo, plugin);
+        String newPlats[] = sinfo.getValidPlatformTypes();
+        findAndSetVirtualPlatformType(newPlats, stype);
+        return serverFactory.createServerType(stype);
+    }
+    
+    private ResourceType createServerResourceType(ServerTypeInfo sinfo, String plugin)  {
         ResourceType stype = resourceTypeDao.create(sinfo.getName(),pluginDAO.findByName(plugin));
         stype.setDescription(sinfo.getDescription());
        
@@ -1065,12 +1104,7 @@ public class ServerManagerImpl implements ServerManager {
         stype.addPropertyType(createServerPropertyType(ServerFactory.INSTALL_PATH,String.class));
         stype.addPropertyType(createServerPropertyType(ServerFactory.SERVICES_AUTO_MANAGED,Boolean.class));
         stype.addPropertyType(createServerPropertyType(ServerFactory.RUNTIME_AUTODISCOVERY,Boolean.class));
-        PropertyType appdefType = createServerPropertyType(AppdefResourceType.APPDEF_TYPE_ID, Integer.class);
-        appdefType.setIndexed(true);
-        stype.addPropertyType(appdefType);
-        String newPlats[] = sinfo.getValidPlatformTypes();
-        findAndSetPlatformType(newPlats, stype);
-        return serverFactory.createServerType(stype);
+        return stype;
     }
     
     private PropertyType createServerPropertyType(String propName,Class<?> type) {
@@ -1155,8 +1189,16 @@ public class ServerManagerImpl implements ServerManager {
            pType.relateTo(stype, RelationshipTypes.SERVER);
         }
     }
-
-   
+    
+    private void findAndSetVirtualPlatformType(String[] platNames, ResourceType stype) throws NotFoundException {
+        for (int i = 0; i < platNames.length; i++) {
+            ResourceType pType = resourceManager.findResourceTypeByName(platNames[i]);
+            if (pType == null) {
+                throw new NotFoundException("Could not find platform type '" + platNames[i] + "'");
+            }
+           pType.relateTo(stype, RelationshipTypes.VIRTUAL);
+        }
+    }
 
     /**
      * Trim all string attributes
