@@ -230,7 +230,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
             return null;
         }
         try {
-            String plugin = productPluginManager.registerPluginJar(pluginJar, null);
+            String plugin = productPluginManager.registerPluginJar(pluginJar, null).name;
             return plugin;
         } catch (Exception e) {
             log.error("Unable to deploy plugin '" + pluginJar + "'", e);

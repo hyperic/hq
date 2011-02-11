@@ -41,6 +41,8 @@ import org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.lather.PluginReport_args;
+import org.hyperic.hq.product.Plugin;
 import org.hyperic.util.ConfigPropertyException;
 
 /**
@@ -381,7 +383,7 @@ public interface AgentManager {
     /**
      * Restarts the specified agent using the Java Service Wrapper.
      * @param subject The subject issuing the request.
-     * @param aid The agent id.
+     * @param agentId The agent id.
      * @throws PermissionException if the subject does not have proper
      *         permissions to issue an agent bundle transfer.
      * @throws FileNotFoundException if the agent bundle is not found on the HQ
@@ -396,7 +398,11 @@ public interface AgentManager {
      * @throws ConfigPropertyException if the server configuration cannot be
      *         retrieved.
      */
-    public void restartAgent(AuthzSubject subject, AppdefEntityID aid) throws PermissionException,
+    public void restartAgent(AuthzSubject subject, Integer agentId) throws PermissionException,
+        AgentNotFoundException, AgentConnectionException, AgentRemoteException, FileNotFoundException, IOException,
+        ConfigPropertyException;
+
+    public void restartAgent(AuthzSubject subject, AppdefEntityID aeid) throws PermissionException,
         AgentNotFoundException, AgentConnectionException, AgentRemoteException, FileNotFoundException, IOException,
         ConfigPropertyException;
 
@@ -429,5 +435,22 @@ public interface AgentManager {
      */
     public long pingAgent(AuthzSubject subject, Agent agent) throws PermissionException, AgentNotFoundException,
         AgentConnectionException, AgentRemoteException, IOException, ConfigPropertyException;
+
+// XXX javadoc!
+    public void updateAgentPluginStatus(PluginReport_args arg);
+
+// XXX javadoc!
+    public void updateAgentPluginStatusInBackground(PluginReport_args arg);
+
+// XXX javadoc!
+    public void transferAgentPlugins(AuthzSubject subj, Integer agentId, Collection<String> jarNames)
+    throws PermissionException, AgentConnectionException, AgentNotFoundException,
+           AgentRemoteException, FileNotFoundException, IOException, ConfigPropertyException;
+    
+// XXX javadoc!
+    public int getNumAutoUpdatingAgents();
+    
+// XXX javadoc!
+    public List<Plugin> getAllPlugins();
 
 }

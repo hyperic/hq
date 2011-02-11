@@ -54,4 +54,15 @@ public class PluginDAO
         String sql = "from Plugin where name=?";
         return (Plugin) getSession().createQuery(sql).setString(0, name).uniqueResult();
     }
+
+    // XXX do i need this?
+    public Plugin getByMd5(String md5) {
+        String hql = "from Plugin where MD5 = :md5";
+        return (Plugin) getSession().createQuery(hql).setString("md5", md5).uniqueResult();
+    }
+
+    public Plugin getByJarName(String jarName) {
+        String hql = "from Plugin where path = :jarName";
+        return (Plugin) getSession().createQuery(hql).setString("jarName", jarName).uniqueResult();
+    }
 }
