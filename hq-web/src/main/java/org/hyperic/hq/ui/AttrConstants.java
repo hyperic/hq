@@ -705,11 +705,6 @@ public interface AttrConstants {
         "serverBasedAutoInventoryValue";
 
     /**
-     * Attribute name to store the status of the sbai flag
-     */
-    public static final String AUTO_INVENTORY = "autoInventory";
-
-    /**
      * Attribute name to allow/disallow edit of Config Properties
      */
     public static final String EDIT_CONFIG = "editConfig";

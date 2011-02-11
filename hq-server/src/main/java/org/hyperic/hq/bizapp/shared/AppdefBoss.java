@@ -234,6 +234,9 @@ public interface AppdefBoss {
 
     public PageList<ServerTypeValue> findServerTypesByPlatformType(int sessionID, Integer platformId, PageControl pc)
         throws AppdefEntityNotFoundException, SessionTimeoutException, SessionNotFoundException;
+    
+    PageList<ServiceTypeValue> findServiceTypesByPlatformType(int sessionID, int platformTypeId)
+        throws SessionTimeoutException, SessionNotFoundException;
 
     /**
      * Get all platforms in the inventory.

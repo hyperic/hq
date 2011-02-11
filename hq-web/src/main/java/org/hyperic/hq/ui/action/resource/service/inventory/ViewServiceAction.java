@@ -41,6 +41,7 @@ import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
+import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
@@ -94,12 +95,13 @@ public class ViewServiceAction
 
             List<AppdefGroupValue> groups = appdefBoss.findAllGroupsMemberInclusive(sessionId.intValue(), pcg, service
                 .getEntityId());
-            // TODO check to see if this thing is a platform service
-//            if (service.getServer().getServerType().getVirtual()) {
-//                // find the platform resource and add it to the request scope
-//                try {
-//                    PlatformValue pv = appdefBoss.findPlatformByDependentID(sessionId.intValue(), entityId);
-//                    request.setAttribute(Constants.PARENT_RESOURCE_ATTR, pv);
+           
+            if (service.getParent() instanceof PlatformValue ) {
+                // find the platform resource and add it to the request scope
+                //TODO perm check?
+                //try {
+                    PlatformValue pv = (PlatformValue) service.getParent();
+                    request.setAttribute(Constants.PARENT_RESOURCE_ATTR, pv);
 //                } catch (PermissionException pe) {
 //                    // TODO Would like to able to fall back and grab the name
 //                    // through other means
@@ -115,7 +117,7 @@ public class ViewServiceAction
 //                    request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS_COUNT, new Integer(0));
 //                    return null;
 //                }
-//            }
+            }
             request.setAttribute(Constants.ALL_RESGRPS_ATTR, groups);
             if (service == null) {
                 RequestUtils.setError(request, "resource.service.error.ServiceNotFound");
@@ -187,9 +189,6 @@ public class ViewServiceAction
 
             request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS, uiControlOptions);
             request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS_COUNT, new Integer(uiControlOptions.size()));
-
-            //TODO assuming service parent is Server
-            request.setAttribute(Constants.AUTO_INVENTORY, new Boolean(((ServerValue)service.getParent()).getRuntimeAutodiscovery()));
 
             if (!editConfig)
                 RequestUtils.setError(request, "resource.common.inventory.error.serverConfigNotSet", "configServer");

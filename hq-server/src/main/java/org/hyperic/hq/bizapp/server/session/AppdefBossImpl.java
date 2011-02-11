@@ -1079,6 +1079,13 @@ public class AppdefBossImpl implements AppdefBoss {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return serviceManager.getServiceTypesByServerType(subject, serverTypeId);
     }
+    
+    @Transactional(readOnly = true)
+    public PageList<ServiceTypeValue> findServiceTypesByPlatformType(int sessionID, int platformTypeId)
+        throws SessionTimeoutException, SessionNotFoundException {
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
+        return serviceManager.getServiceTypesByPlatformType(subject, platformTypeId);
+    }
 
     /**
      * 

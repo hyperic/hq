@@ -304,8 +304,12 @@ public class PlatformManagerImpl implements PlatformManager {
             if (service == null) {
                 throw new ServiceNotFoundException(id);
             }
-            p=service.getResourceTo(RelationshipTypes.SERVICE).getResourceTo(RelationshipTypes.SERVER);
-          
+            Resource parent = service.getResourceTo(RelationshipTypes.SERVICE);
+            if(parent.getProperty(AppdefResourceType.APPDEF_TYPE_ID).equals(AppdefEntityConstants.APPDEF_TYPE_SERVER)) {
+                p = parent.getResourceTo(RelationshipTypes.SERVER);
+            }else {
+                p = parent;
+            }
             typeName = service.getType().getName();
         } else if (id.isServer()) {
             // look up the server

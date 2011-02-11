@@ -140,17 +140,17 @@ public class ConfigAction
             ServerTypeValue stv = serverTypes.get(i);
             List<ServiceTypeValue> serviceTypes = appdefBoss.findServiceTypesByServerType(session, stv.getId()
                 .intValue());
-            //TODO get platform services another way
-//            if (stv.getVirtual()) {
-//                if (stv.getName().startsWith("Win")) {
-//                    winServices.addAll(serviceTypes);
-//                } else {
-//                    platServices.addAll(serviceTypes);
-//                }
-//            } else {
-                serverTypesMap.put(stv, serviceTypes);
-            //}
+            serverTypesMap.put(stv, serviceTypes);
         }
+        for(PlatformTypeValue platformType: platTypes) {
+            List<ServiceTypeValue> serviceTypes = appdefBoss.findServiceTypesByPlatformType(session,platformType.getId());
+            if (platformType.getName().startsWith("Win")) {
+                winServices.addAll(serviceTypes);
+            } else {
+                platServices.addAll(serviceTypes);
+            }
+        }
+        
         request.setAttribute(Constants.ALL_SERVER_TYPES_ATTR, serverTypesMap);
         request.setAttribute(Constants.ALL_PLATFORM_SERVICE_TYPES_ATTR, platServices);
         request.setAttribute(Constants.ALL_WINDOWS_SERVICE_TYPES_ATTR, winServices);

@@ -673,7 +673,7 @@ public class ServerManagerImpl implements ServerManager {
         for (AppdefEntityID svcId : sIDs) {
 
             Resource svc = resourceManager.findResourceById(svcId.getId());
-
+            //TODO svc parent might not be a server
             servers.add(svc.getResourceTo(RelationshipTypes.SERVICE));
         }
 
@@ -784,6 +784,7 @@ public class ServerManagerImpl implements ServerManager {
         Integer servTypeId;
         try {
             ResourceType typeV = resourceManager.findResourceTypeById(svcTypeId);
+            //TODO this might be a platform, not a server
             servTypeId = typeV.getResourceTypeTo(RelationshipTypes.SERVICE).getId();
         } catch (ObjectNotFoundException e) {
             throw new ServerNotFoundException("Service Type not found", e);
