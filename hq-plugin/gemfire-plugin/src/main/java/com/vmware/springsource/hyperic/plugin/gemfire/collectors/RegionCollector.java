@@ -4,7 +4,6 @@ import com.vmware.springsource.hyperic.plugin.gemfire.GemFireUtils;
 import java.util.Map;
 import java.util.Properties;
 import javax.management.MBeanServerConnection;
-import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.Collector;
@@ -31,9 +30,7 @@ public class RegionCollector extends Collector {
         try {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(props);
             String memberID = GemFireUtils.memberNameToMemberID(props.getProperty("member.name"), mServer);
-            Object[] args2 = {memberID};
-            String[] def2 = {String.class.getName()};
-            Map memberDetails = (Map) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMemberDetails", args2, def2);
+            Map memberDetails = GemFireUtils.getMemberDetails(memberID, mServer);
             if (!memberDetails.isEmpty()) {
                 Map<Object, Map> regions = (Map) memberDetails.get("gemfire.member.regions.map");
                 for (Map region : regions.values()) {
@@ -45,7 +42,7 @@ public class RegionCollector extends Collector {
                     setValue(name + ".entry_count", ((Integer) region.get("gemfire.region.entrycount.int")).intValue());
                 }
             } else {
-                log.debug("Member '" + memberID + "' nof found!!!");
+                log.debug("[collect] Member '" + memberID + "' nof found!!!");
             }
         } catch (Exception ex) {
             log.debug(ex, ex);

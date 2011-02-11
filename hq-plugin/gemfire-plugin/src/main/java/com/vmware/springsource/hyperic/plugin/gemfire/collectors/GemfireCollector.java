@@ -1,12 +1,13 @@
 package com.vmware.springsource.hyperic.plugin.gemfire.collectors;
 
 import com.vmware.springsource.hyperic.plugin.gemfire.GemFireLiveData;
+import com.vmware.springsource.hyperic.plugin.gemfire.GemFireUtils;
 import com.vmware.springsource.hyperic.plugin.gemfire.detectors.GemfirePlatformDetector;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import javax.management.MBeanServerConnection;
-import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.Collector;
@@ -33,24 +34,18 @@ public class GemfireCollector extends Collector {
         Properties props = getProperties();
         try {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(props);
-            log.debug("mServer=" + mServer);
 
             String id=GemFireLiveData.getSystemID(mServer);
 
-            Object[] args = {};
-            String[] def = {};
-            String[] members = (String[]) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMembers", args, def);
-
+            List<String> members=GemFireUtils.getMembers(mServer);
             String signature = Arrays.asList(members).toString();
             if (!signature.equals(last_signature)) {
                 last_signature=signature;
                 GemfirePlatformDetector.runAutoDiscovery(id);
             }
 
-            for (String menber : members) {
-                Object[] args2 = {menber};
-                String[] def2 = {String.class.getName()};
-                Map memberDetails = (Map) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMemberDetails", args2, def2);
+            for (String memberID : members) {
+                Map memberDetails = GemFireUtils.getMemberDetails(memberID, mServer);
                 if ("true".equalsIgnoreCase(memberDetails.get("gemfire.member.isgateway.boolean").toString())) {
                     ++g;
                 } else if ("true".equalsIgnoreCase(memberDetails.get("gemfire.member.isserver.boolean").toString())) {
@@ -58,7 +53,6 @@ public class GemfireCollector extends Collector {
                 } else {
                     ++a;
                 }
-                log.debug("---> isserver=" + memberDetails.get("gemfire.member.isserver.boolean"));
             }
             setAvailability(true);
             setValue("n_gateways", new Double(g).doubleValue());
@@ -66,7 +60,7 @@ public class GemfireCollector extends Collector {
             setValue("n_caches", new Double(c).doubleValue());
         } catch (Exception ex) {
             setAvailability(false);
-            log.debug(ex, ex);
+            log.debug("[collect] "+ex.getMessage(), ex);
         }
     }
 }

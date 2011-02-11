@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import javax.management.MBeanServerConnection;
-import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.Collector;
@@ -28,11 +27,8 @@ public class GatewayCollector extends Collector {
         log.debug("[collect] props=" + props);
         try {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(props);
-            log.debug("mServer=" + mServer);
             String memberID = GemFireUtils.memberNameToMemberID(props.getProperty("member.name"), mServer);
-            Object[] args2 = {memberID};
-            String[] def2 = {String.class.getName()};
-            Map memberDetails = (Map) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMemberDetails", args2, def2);
+            Map memberDetails = GemFireUtils.getMemberDetails(memberID, mServer);
             if (!memberDetails.isEmpty()) {
                 List<Map> gateways = (List) memberDetails.get("gemfire.member.gatewayhub.gateways.collection");
                 String id = (String) props.get("gatewayID");
@@ -43,12 +39,12 @@ public class GatewayCollector extends Collector {
                     }
                 }
             } else {
-                log.debug("Member '" + memberID + "' nof found!!!");
+                log.debug("[collect] Member '" + memberID + "' nof found!!!");
                 setAvailability(false);
             }
         } catch (Exception ex) {
             setAvailability(false);
-            log.debug(ex, ex);
+            log.debug("[collect] "+ex.getMessage(), ex);
         }
     }
 }
