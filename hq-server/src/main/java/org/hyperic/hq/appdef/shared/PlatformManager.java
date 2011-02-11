@@ -28,6 +28,7 @@ package org.hyperic.hq.appdef.shared;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.Agent;
@@ -126,6 +127,8 @@ public interface PlatformManager {
         throws PermissionException, NotFoundException;
     
     PageList<Resource> getAllPlatformResources(AuthzSubject subject, PageControl pc);
+    
+    Set<Integer> getAllPlatformIds();
 
     /**
      * Get platforms created within a given time range.

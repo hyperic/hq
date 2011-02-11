@@ -29,7 +29,10 @@
 		value="org.hyperic.hq.plugin.test.TestMeasurementPlugin" />
 	<property name="control-class" value="org.hyperic.hq.plugin.test.TestControlPlugin" />
 
-	<platform name="PluginTestPlatform" />
+	<platform name="PluginTestPlatform">
+		<plugin type="measurement" class="org.hyperic.hq.plugin.test.TestMeasurementPlugin" />
+		<metric name="Availability" indicator="true"/>
+	</platform>
 
 	<server name="PluginTestServer" version="1.0" platforms="PluginTestPlatform">
 		<config type="control">
@@ -41,6 +44,7 @@
 
 		<actions include="stop" />
 
+		<metric name="Availability" indicator="true"/>
 		<metric name="Free Swap Space Size" alias="FreeSwapSpaceSize"
 			template="${OBJECT_NAME}:${alias}" units="B" collectionType="dynamic" />
 		<metric name="Free Physical Memory Size" alias="FreePhysicalMemorySize"
@@ -62,6 +66,8 @@
 
 		<service name="Web Module Stats">
 			<actions include="stop,start,reload" />
+			<plugin type="measurement" class="org.hyperic.hq.plugin.test.TestMeasurementPlugin" />
+			<metric name="Availability" indicator="true"/>
 		</service>
 
 	</server>
