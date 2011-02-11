@@ -145,7 +145,7 @@ public interface AppdefBoss {
         throws SessionTimeoutException, SessionNotFoundException, PermissionException, NotFoundException;
 
     public PageList<ServiceTypeValue> findViewablePlatformServiceTypes(int sessionID, Integer platId)
-        throws SessionTimeoutException, SessionNotFoundException, PermissionException;
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException, PlatformNotFoundException;
 
     public ApplicationValue findApplicationById(int sessionID, Integer id) throws AppdefEntityNotFoundException,
         PermissionException, SessionTimeoutException, SessionNotFoundException;

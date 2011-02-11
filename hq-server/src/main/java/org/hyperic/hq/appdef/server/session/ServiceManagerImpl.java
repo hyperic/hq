@@ -342,9 +342,9 @@ public class ServiceManagerImpl implements ServiceManager {
 
     }
     
-    private Collection<ServiceType> findByServerTypeOrderName(Integer serverTypeId, boolean asc) {
+    private Collection<ServiceType> findByParentTypeOrderName(Integer parentTypeId, boolean asc) {
         List<ServiceType> serviceTypes = new ArrayList<ServiceType>();
-        ResourceType serverType = resourceManager.findResourceTypeById(serverTypeId);
+        ResourceType serverType = resourceManager.findResourceTypeById(parentTypeId);
         if(serverType ==  null) {
             return serviceTypes;
         }
@@ -387,8 +387,19 @@ public class ServiceManagerImpl implements ServiceManager {
     @Transactional(readOnly = true)
     public PageList<ServiceTypeValue> getServiceTypesByServerType(AuthzSubject subject,
                                                                   int serverTypeId) {
-        Collection<ServiceType> serviceTypes = findByServerTypeOrderName(
+        Collection<ServiceType> serviceTypes = findByParentTypeOrderName(
             serverTypeId, true);
+        if (serviceTypes.size() == 0) {
+            return new PageList<ServiceTypeValue>();
+        }
+        return valuePager.seek(serviceTypes, PageControl.PAGE_ALL);
+    }
+    
+    @Transactional(readOnly = true)
+    public PageList<ServiceTypeValue> getServiceTypesByPlatformType(AuthzSubject subject,
+                                                                    Integer platformTypeId) {
+        Collection<ServiceType> serviceTypes = findByParentTypeOrderName(
+            platformTypeId, true);
         if (serviceTypes.size() == 0) {
             return new PageList<ServiceTypeValue>();
         }

@@ -432,16 +432,13 @@ public class AppdefBossImpl implements AppdefBoss {
         return serviceManager.getViewableServiceTypes(subject, pc);
     }
 
-    /**
-     * 
-     */
+    
     @Transactional(readOnly = true)
     public PageList<ServiceTypeValue> findViewablePlatformServiceTypes(int sessionID, Integer platId)
-        throws SessionTimeoutException, SessionNotFoundException, PermissionException {
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException, PlatformNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
-        //TODO
-        return new PageList<ServiceTypeValue>();
-        //return serviceManager.findVirtualServiceTypesByPlatform(subject, platId);
+        int platformTypeId = platformManager.findPlatformById(platId).getPlatformType().getId();
+        return serviceManager.getServiceTypesByPlatformType(subject, platformTypeId);
     }
 
     /**

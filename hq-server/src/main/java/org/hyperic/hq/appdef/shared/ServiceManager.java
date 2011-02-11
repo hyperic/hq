@@ -108,6 +108,9 @@ public interface ServiceManager {
         throws PermissionException, NotFoundException;
 
     public PageList<ServiceTypeValue> getServiceTypesByServerType(AuthzSubject subject, int serverTypeId);
+    
+    PageList<ServiceTypeValue> getServiceTypesByPlatformType(AuthzSubject subject,
+        Integer platformTypeId);
 
     /**
      * Get services by server and type.
