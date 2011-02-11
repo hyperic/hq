@@ -83,13 +83,7 @@ public class NewServiceFormPrepareAction
                 // look for the correct server parent
                 svrVal = (ServerValue) servers.get(0);
                 svrType = svrVal.getServerType();
-            } else {
-                // Just get the service type
-                serviceTypeVals.add(appdefBoss.findServiceTypeById(sessionId, atid.getId()));
-                newForm.setResourceType(atid.getId());
-
-                svrVal = appdefBoss.findVirtualServerByPlatformServiceType(sessionId, parentId, atid.getId());
-            }
+            } 
         } catch (ParameterNotFoundException e) {
             if (aeid.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
                 svrVal = appdefBoss.findServerById(sessionId, parentId);

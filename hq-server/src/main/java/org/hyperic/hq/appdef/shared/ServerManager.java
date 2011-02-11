@@ -170,8 +170,7 @@ public interface ServerManager {
         org.hyperic.hq.appdef.shared.ServiceNotFoundException, PermissionException;
 
     /**
-     * Get server by service. The virtual servers are not filtere out of
-     * returned list.
+     * Get server by service
      */
     public PageList<ServerValue> getServersByServices(AuthzSubject subject, List<AppdefEntityID> sIDs)
         throws PermissionException, ServerNotFoundException;
@@ -215,7 +214,7 @@ public interface ServerManager {
   
 
     /**
-     * Get non-virtual server IDs by server type and platform.
+     * Get server IDs by server type and platform.
      * @param subject The subject trying to list servers.
      * @param servTypeId server type id.
      * @param platId platform id.

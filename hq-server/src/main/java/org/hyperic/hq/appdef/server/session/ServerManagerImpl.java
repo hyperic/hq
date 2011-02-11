@@ -662,8 +662,7 @@ public class ServerManagerImpl implements ServerManager {
     }
 
     /**
-     * Get server by service. The virtual servers are not filtere out of
-     * returned list.
+     * Get server by service.
      * 
      */
     @Transactional(readOnly=true)
@@ -726,18 +725,7 @@ public class ServerManagerImpl implements ServerManager {
         return servers;
     }
 
-    /**
-     * Get servers by platform.
-     * 
-     * 
-     * @param subject The subject trying to list servers.
-     * @param platId platform id.
-     * @param excludeVirtual true if you dont want virtual (fake container)
-     *        servers in the returned list
-     * @param pc The page control.
-     * @return A PageList of ServerValue objects representing servers on the
-     *         specified platform that the subject is allowed to view.
-     */
+   
     @Transactional(readOnly=true)
     public PageList<ServerValue> getServersByPlatform(AuthzSubject subject, Integer platId, 
                                                       PageControl pc) throws ServerNotFoundException,
