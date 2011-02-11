@@ -52,6 +52,7 @@ import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.jdbc.DBUtil;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
@@ -63,6 +64,7 @@ import org.springframework.test.context.transaction.AfterTransaction;
  * 
  */
 @DirtiesContext
+@Ignore("This test can't be run until the explicit commits come out of DataManager.addData().  Otherwise test data ends up actually written to test DB.")
 public class DataManagerTest
     extends BaseInfrastructureTest {
 
@@ -90,7 +92,7 @@ public class DataManagerTest
         createAgent("127.0.0.1", 2144, "authToken", agentToken, "5.0");
         // Create PlatformType
         String platformType = "Linux";
-        platformManager.createPlatformType(platformType, "Test Plugin");
+        createPlatformType(platformType);
         // Create test platform
         createPlatform(agentToken,platformType,"Test Platform","Test Platform",4);
         flushSession();
