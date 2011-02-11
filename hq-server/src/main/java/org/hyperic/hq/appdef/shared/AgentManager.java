@@ -453,4 +453,7 @@ public interface AgentManager {
 // XXX javadoc!
     public List<Plugin> getAllPlugins();
 
+// XXX javadoc!
+    public Map<Plugin, Collection<Agent>> getOutOfSyncAgentsByPlugin();
+
 }
