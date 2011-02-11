@@ -163,18 +163,7 @@ public abstract class AppdefResourceValue
      * of ServerLightValues matching that type
      */
     public static Map<String,Integer> getServerTypeCountMap(Collection<? extends AppdefResourceValue> serverColl) {
-        // remove any virtual servers
-        Collection<AppdefResourceValue> nonVirtual = new ArrayList<AppdefResourceValue>(serverColl.size());
-        
-        for (AppdefResourceValue av : serverColl) {
-            ServerTypeValue st =
-                (ServerTypeValue) av.getAppdefResourceTypeValue();
-           
-                nonVirtual.add(av);
-           
-        }
-
-        return getResourceTypeCountMap(nonVirtual);
+        return getResourceTypeCountMap(serverColl);
     }
 
     /**

@@ -132,13 +132,13 @@ public interface ServiceManager {
         throws ServiceNotFoundException, PermissionException;
 
     /**
-     * Get platform services (children of virtual servers)
+     * Get platform services
      */
     public PageList<ServiceValue> getPlatformServices(AuthzSubject subject, Integer platId, PageControl pc)
         throws org.hyperic.hq.appdef.shared.PlatformNotFoundException, PermissionException, ServiceNotFoundException;
 
     /**
-     * Get platform services (children of virtual servers) of a specified type
+     * Get platform services of a specified type
      */
     public PageList<ServiceValue> getPlatformServices(AuthzSubject subject, Integer platId, Integer typeId,
                                                       PageControl pc)

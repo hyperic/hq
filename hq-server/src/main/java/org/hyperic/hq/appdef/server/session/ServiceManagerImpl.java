@@ -584,7 +584,7 @@ public class ServiceManagerImpl implements ServiceManager {
     }
     
     /**
-     * Get platform services (children of virtual servers)
+     * Get platform services
      */
     @Transactional(readOnly = true)
     public PageList<ServiceValue> getPlatformServices(AuthzSubject subject, Integer platId, PageControl pc)
@@ -616,7 +616,7 @@ public class ServiceManagerImpl implements ServiceManager {
     }
 
     /**
-     * Get platform services (children of virtual servers) of a specified type
+     * Get platform services of a specified type
      */
     @Transactional(readOnly = true)
     public PageList<ServiceValue> getPlatformServices(AuthzSubject subject, Integer platId, Integer typeId,

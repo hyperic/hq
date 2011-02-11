@@ -881,7 +881,7 @@ public class PlatformManagerImpl implements PlatformManager {
     }
 
     /**
-     * @return non-virtual, physical, {@link Platform} associated with the
+     * @return the {@link Platform} associated with the
      *         agentToken or null if one does not exist.
      * 
      */

@@ -498,7 +498,6 @@ public class AppdefEntityValue {
                 sManager.getServersByApplication(getSubject(), iId, typeId, pc);
             break;
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            // default to exclude virtual servers
             res = sManager.getServersByPlatform(getSubject(), iId, typeId, 
                                                 pc);
             break;
