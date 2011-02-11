@@ -78,10 +78,10 @@ public class AlertsPlugin extends LogTrackPlugin implements NotificationListener
                     String msg = m.group(5);
                     reportEvent(date.getTime(), LOGLEVEL_ERROR, menberID, msg);
                 } catch (Exception ex) {
-                    log.debug("BAD FORMAT!!!! " + ex.getMessage(), ex);
+                    log.debug("[handleNotification] BAD FORMAT!!!! " + ex.getMessage(), ex);
                 }
             } else {
-                log.debug("BAD FORMAT!!!!");
+                log.debug("[handleNotification] BAD FORMAT!!!!");
             }
         }
     }

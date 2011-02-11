@@ -88,7 +88,7 @@ public class GemFireDetector extends ServerDetector implements AutoServerDetecto
                     log.debug("[isInstallTypeVersion] (" + version + ") verison=" + v);
                 }
             } catch (IOException ex) {
-                log.error("Error!!!", ex);
+                log.error("[isInstallTypeVersion] Error!!!", ex);
             }
         }
         return res;

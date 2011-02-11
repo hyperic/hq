@@ -1,6 +1,5 @@
 package com.vmware.springsource.hyperic.plugin.gemfire.detectors;
 
-import com.vmware.springsource.hyperic.plugin.gemfire.detectors.MemberDetector;
 import java.util.Map;
 import org.hyperic.util.config.ConfigResponse;
 
