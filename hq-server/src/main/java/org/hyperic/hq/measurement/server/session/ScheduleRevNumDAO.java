@@ -62,14 +62,13 @@ public class ScheduleRevNumDAO
     /**
      * Get the minimum collection intervals for all entities with metrics
      * enabled.
-     * @return A Collection of Object arrays with 3 entries, the Integer type,
-     *         the Integer id, and the Long collection interval.
+     * @return A Collection of Object arrays with 2 entries, the Resource and the Long collection interval.
      */
     public Collection<Object[]> getMinIntervals() {
-        String sql = "select mt.resourceTypeId, m.instanceId, min(m.interval) "
-                     + "from Measurement m, " + "MonitorableType mt, " + "MeasurementTemplate t "
-                     + "where m.enabled = true and " + "m.template.id = t.id and "
-                     + "t.monitorableType.id = mt.id " + "group by mt.resourceTypeId, m.instanceId";
+        String sql = "select m.resource, min(m.interval) "
+                     + "from Measurement m, " +  "MeasurementTemplate t "
+                     + "where m.enabled = true and " + "m.template.id = t.id "
+                     + "group by m.instanceId";
         return getSession().createQuery(sql).list();
     }
 
@@ -78,11 +77,10 @@ public class ScheduleRevNumDAO
      * @return The minimum collection interval for the given entity.
      */
     public Long getMinInterval(AppdefEntityID id) {
-        String sql = "select min(m.interval) " + "from Measurement m, " + "MonitorableType mt, "
+        String sql = "select min(m.interval) " + "from Measurement m, "
                      + "MeasurementTemplate t " + "where m.enabled = true and "
-                     + "m.instanceId = ? and " + "m.template.id = t.id and "
-                     + "t.monitorableType.id = mt.id and " + "mt.resourceTypeId = ? "
-                     + "group by mt.resourceTypeId, m.instanceId";
+                     + "m.instanceId = ? and " + "m.template.id = t.id  "
+                     + "group by m.instanceId";
 
         return (Long) getSession().createQuery(sql).setInteger(0, id.getID()).setInteger(1,
             id.getType()).uniqueResult();

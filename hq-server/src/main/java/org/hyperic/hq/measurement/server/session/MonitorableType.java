@@ -29,15 +29,13 @@ import org.hyperic.hibernate.PersistedObject;
 
 public class MonitorableType extends PersistedObject {
     private String name;
-    private int    resourceTypeId;
     private String pluginName;
     
     protected MonitorableType() {
     }
     
-    public MonitorableType(String name, int resourceTypeId, String pluginName) {
+    public MonitorableType(String name, String pluginName) {
         this.name           = name;
-        this.resourceTypeId = resourceTypeId;
         this.pluginName     = pluginName;
     }
 
@@ -47,14 +45,6 @@ public class MonitorableType extends PersistedObject {
     
     protected void setName(String name) {
         this.name = name;
-    }
-
-    public int getResourceTypeId() {
-        return resourceTypeId;
-    }
-    
-    protected void setResourceTypeId(int resourceTypeId) {
-    	this.resourceTypeId = resourceTypeId;
     }
 
     public String getPluginName() {

@@ -46,12 +46,11 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
-import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
@@ -125,12 +124,13 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     private RegisteredTriggers registeredTriggers;
     private AvailabilityCache availabilityCache;
     private ConcurrentStatsCollector concurrentStatsCollector;
+    private PlatformManager platformManager;
     
     @Autowired
     public AvailabilityManagerImpl(ResourceManager resourceManager, ResourceGroupManager groupManager, MessagePublisher messenger,
                                    AvailabilityDataDAO availabilityDataDAO, MeasurementDAO measurementDAO,
                                    MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers, AvailabilityCache availabilityCache,
-                                   ConcurrentStatsCollector concurrentStatsCollector) {
+                                   ConcurrentStatsCollector concurrentStatsCollector,PlatformManager platformManager) {
         this.resourceManager = resourceManager;
         this.groupManager = groupManager;
         this.messenger = messenger;
@@ -140,6 +140,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         this.registeredTriggers = registeredTriggers;
         this.availabilityCache = availabilityCache;
         this.concurrentStatsCollector = concurrentStatsCollector;
+        this.platformManager = platformManager;
     }
 
     @PostConstruct
@@ -168,7 +169,8 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      */
     @Transactional(readOnly = true)
     public List<Measurement> getPlatformResources() {
-        return measurementDAO.findAvailMeasurementsByInstances(AppdefEntityConstants.APPDEF_TYPE_PLATFORM, null);
+        Set<Integer> platformIds = platformManager.getAllPlatformIds();
+        return measurementDAO.findAvailMeasurementsByInstances(platformIds.toArray(new Integer[platformIds.size()]));
     }
 
     /**
@@ -234,8 +236,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      */
     @Transactional(readOnly = true)
     public Map<Integer, List<Measurement>> getAvailMeasurementChildren(List<Integer> resourceIds) {
-        final List<Object[]> objects = measurementDAO.findRelatedAvailMeasurements(resourceIds);
-        return convertAvailMeasurementListToMap(objects);
+        return measurementDAO.findRelatedAvailMeasurements(resourceIds);
     }
 
     /**

@@ -72,10 +72,10 @@ public class ControlActionResultsCollectorTest
     public void setUp() throws Exception {
         String agentToken = "agentToken123";
         createAgent("127.0.0.1", 2144, "authToken", agentToken, "5.0");
-        createPlatformType("TestPlatform", "test");
-        Platform platform = createPlatform(agentToken, "TestPlatform", "Platform1", "Platform1");
+        createPlatformType("TestPlatform");
+        Platform platform = createPlatform(agentToken, "TestPlatform", "Platform1", "Platform1",4);
         ServerType serverType = createServerType("TestServer", "6.0",
-            new String[] { "TestPlatform" }, "test", false);
+            new String[] { "TestPlatform" });
         server = createServer(platform, serverType, "Server1");
         server2 = createServer(platform, serverType, "Server2");
         server3 = createServer(platform, serverType, "Server3");

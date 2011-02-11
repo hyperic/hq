@@ -25,6 +25,7 @@
 package org.hyperic.hq.test;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -258,11 +259,16 @@ abstract public class BaseInfrastructureTest {
         return createResourceGroup(groupName, appDefEntTypeId, roles, resources,AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS);
     }
 
-    protected ResourceGroup createServerResourceGroup(Set<Server> servers, String groupName)
+    protected ResourceGroup createServerResourceGroup(AppdefEntityTypeID appDefEntTypeId, String groupName)
         throws ApplicationException, PermissionException {
-        return createServerResourceGroup(servers, groupName, new ArrayList<Role>(0));
+        return createResourceGroup(groupName, appDefEntTypeId, new ArrayList<Role>(0), new ArrayList<Resource>(0),
+            AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS);
     }
 
+    protected ResourceGroup createServerResourceGroup(Set<Server> servers, String groupName)
+    throws ApplicationException, PermissionException {
+        return createServerResourceGroup(servers, groupName, new ArrayList<Role>(0));
+    }
     protected ResourceGroup createServerResourceGroup(Set<Server> servers, String groupName,
                                                       List<Role> roles)
         throws ApplicationException, PermissionException {
@@ -277,6 +283,8 @@ abstract public class BaseInfrastructureTest {
 
         return createResourceGroup(groupName, appDefEntTypeId, roles, resources,AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS);
     }
+    
+    
 
     protected ResourceGroup createServiceResourceGroup(Set<Service> services, String groupName)
         throws ApplicationException, PermissionException {
@@ -303,6 +311,14 @@ abstract public class BaseInfrastructureTest {
             "", false,groupType);
         ResourceGroup resGrp = resourceGroupManager.createResourceGroup(
             authzSubjectManager.getOverlordPojo(), gCInfo, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+        return resGrp;
+    }
+    
+    protected ResourceGroup createMixedGroup(String groupName, int groupType,Collection<Resource> resources) throws GroupDuplicateNameException, GroupCreationException {
+        ResourceGroupCreateInfo gCInfo = new ResourceGroupCreateInfo(groupName, "",
+            "", false,groupType);
+        ResourceGroup resGrp = resourceGroupManager.createResourceGroup(
+            authzSubjectManager.getOverlordPojo(), gCInfo, Collections.EMPTY_LIST, resources);
         return resGrp;
     }
 

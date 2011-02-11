@@ -593,6 +593,15 @@ public class PlatformManagerImpl implements PlatformManager {
         return resourceDao.findByIndexedProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_PLATFORM,pageInfo);
     }
     
+    public Set<Integer> getAllPlatformIds() {
+        Set<Integer> platformIds = new HashSet<Integer>();
+        Collection<Resource> platforms = getAllPlatforms();
+        for(Resource platform:platforms) {
+            platformIds.add(platform.getId());
+        }
+        return platformIds;
+    }
+    
     private Set<Resource> findByCreationTime(long creationTime) {
         //TODO this would be more performant with a JPA or Graph query,
         //but not sure yet if we need creationTime as a concept for all Resources

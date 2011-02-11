@@ -56,6 +56,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.hyperic.util.pager.PageControl;
@@ -86,6 +87,8 @@ public class ServiceManagerTest
     private AuthzSubject subject;
 
     private String agentToken = "agentToken123";
+    
+    private ResourceType serverResType;
 
     private List<Platform> createPlatforms(String agentToken) throws ApplicationException {
         List<Platform> platforms = new ArrayList<Platform>(2);
@@ -115,6 +118,7 @@ public class ServiceManagerTest
         testPlatforms = createPlatforms(agentToken);
         // Create ServerType
         testServerType = createServerType("Test Server", "6.0", new String[] { "Linux" });
+        serverResType = resourceManager.findResourceTypeById(testServerType.getId());
         // Create test server
         testServers = createServers(testPlatforms, testServerType);
         Set<Platform> platforms = new HashSet<Platform>(1);
@@ -132,8 +136,7 @@ public class ServiceManagerTest
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription("Test ServiceType Desc");
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServers
-            .get(0).getServerType());
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", serverResType);
         assertEquals(serviceType.getName(), "Test ServiceType Name");
         assertEquals(serviceType.getDescription(), "Test ServiceType Desc");
         assertEquals("test", serviceType.getPlugin());
@@ -149,7 +152,7 @@ public class ServiceManagerTest
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription("Test ServiceType Desc");
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", serverResType);
         Service service = serviceManager.createService(subject, testServers.get(0).getId(),
             serviceType.getId(), "Test Service Name", "Test Service Desc", "my computer");
         assertEquals(service.getName(), "Test Service Name");
@@ -174,7 +177,7 @@ public class ServiceManagerTest
         sinfo.setDescription("Test ServiceType Desc");
 
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", serverResType);
         List<Integer> serviceIds = new ArrayList<Integer>(10);
         for (int i = 1; i < 10; i++) {
             serviceIds.add(serviceManager.createService(subject, testServers.get(0).getId(),
@@ -197,7 +200,7 @@ public class ServiceManagerTest
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription("Test ServiceType Desc");
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", serverResType);
         Service service = serviceManager.createService(subject, testServers.get(0).getId(),
             serviceType.getId(), "Test Service Name", "Test Service Desc", "my computer");
         assertEquals(service, serviceManager.findServiceById(service.getId()));
@@ -219,7 +222,7 @@ public class ServiceManagerTest
         sinfo.setDescription("Test ServiceType Desc");
 
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", serverResType);
         Service service = serviceManager.createService(subject, testServers.get(0).getId(),
             serviceType.getId(), "Test Service Name", "Test Service Desc", "my computer");
         assertEquals(service, serviceManager.getServiceById(service.getId()));
@@ -242,7 +245,7 @@ public class ServiceManagerTest
         sinfo.setDescription("Test ServiceType Desc");
 
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", serverResType);
         Service service = serviceManager.createService(subject, testServers.get(0).getId(),
             serviceType.getId(), "Test Service Name", "Test Service Desc", "my computer");
         assertEquals(service, serviceManager.getServiceById(subject, service.getId()));
@@ -260,7 +263,7 @@ public class ServiceManagerTest
         sinfo.setDescription("Test ServiceType Desc");
 
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", serverResType);
         Service service = serviceManager.createService(subject, testServers.get(0).getId(),
             serviceType.getId(), "Test Service Name", "Test Service Desc", "my computer");
         assertEquals(
@@ -279,7 +282,7 @@ public class ServiceManagerTest
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription("Test ServiceType Desc");
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", serverResType);
         assertEquals(serviceType, serviceManager.findServiceType(serviceType.getId()));
     }
 
@@ -293,7 +296,7 @@ public class ServiceManagerTest
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription("Test ServiceType Desc");
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", serverResType);
         assertEquals(serviceType, serviceManager.findServiceTypeByName(serviceType.getName()));
     }
 
@@ -309,7 +312,7 @@ public class ServiceManagerTest
         for (int i = 1; i <= 5; i++) {
             sinfo.setDescription("Test ServiceType Desc");
             sinfo.setName("Test ServiceType Name");
-            pgList.add(serviceManager.createServiceType(sinfo, "test", testServerType)
+            pgList.add(serviceManager.createServiceType(sinfo, "test", serverResType)
                 .getServiceTypeValue());
         }
         PageControl pc = new PageControl();
@@ -331,7 +334,7 @@ public class ServiceManagerTest
             sinfo.setDescription("Test ServiceType Desc");
 
             sinfo.setName("Test ServiceType Name" + i);
-            serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
+            serviceType = serviceManager.createServiceType(sinfo, "test", serverResType);
             pgList.add(serviceType.getServiceTypeValue());
             // This method only returns service types which have services
             // instantiated
@@ -354,7 +357,7 @@ public class ServiceManagerTest
             sinfo.setDescription("Test ServiceType Desc");
 
             sinfo.setName("Test ServiceType Name");
-            pgList.add(serviceManager.createServiceType(sinfo, "test", testServerType)
+            pgList.add(serviceManager.createServiceType(sinfo, "test", serverResType)
                 .getServiceTypeValue());
         }
         assertEquals(
@@ -371,10 +374,9 @@ public class ServiceManagerTest
             sinfo.setDescription("Test ServiceType Desc");
 
             sinfo.setName("Test ServiceType Name");
-            pgList.add(serviceManager.createServiceType(sinfo, "test", testServerType)
+            pgList.add(serviceManager.createServiceType(sinfo, "test", serverResType)
                 .getServiceTypeValue());
         }
-        PageControl pc = new PageControl();
         assertTrue(serviceManager.getServiceTypesByServerType(subject, 435878).isEmpty());
     }
 
@@ -390,7 +392,7 @@ public class ServiceManagerTest
         sinfo.setDescription("Test ServiceType Desc");
 
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", serverResType);
         for (int i = 1; i <= 5; i++) {
             svalues.add(serviceManager.createService(subject, testServers.get(0).getId(),
                 serviceType.getId(), "Test Service Name" + i, "Test Service From Server" + i,
@@ -413,7 +415,7 @@ public class ServiceManagerTest
         sinfo.setDescription("Test ServiceType Desc");
 
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", serverResType);
         for (int i = 1; i <= 5; i++) {
             svalues.add(serviceManager.createService(subject, testServers.get(0).getId(),
                 serviceType.getId(), "Test Service Name" + i, "Test Service From Server" + i,
@@ -436,7 +438,7 @@ public class ServiceManagerTest
         sinfo.setDescription("Test ServiceType Desc");
 
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", serverResType);
         for (int i = 1; i <= 5; i++) {
             svalues.add(serviceManager.createService(subject, testServers.get(0).getId(),
                 serviceType.getId(), "Test Service Name" + i, "Test Service From Server" + i,
@@ -459,8 +461,8 @@ public class ServiceManagerTest
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription("Test ServiceType Desc");
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testPlatforms
-            .get(0).getPlatformType());
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", new String[] {testPlatforms
+            .get(0).getPlatformType().getName()});
         for (int i = 1; i <= 5; i++) {
             svalues.add(serviceManager.createService(subject, testPlatforms.get(0).getId(),
                 serviceType.getId(), "Test Service Name" + i, "Test Service From Server" + i,
@@ -483,8 +485,8 @@ public class ServiceManagerTest
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription("Test ServiceType Desc");
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testPlatforms
-            .get(0).getPlatformType());
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", new String[] {testPlatforms
+            .get(0).getPlatformType().getName()});
         for (int i = 1; i <= 5; i++) {
             svalues.add(serviceManager.createService(subject, testPlatforms.get(0).getId(),
                 serviceType.getId(), "Test Service Name" + i, "Test Service From Server" + i,
@@ -509,8 +511,8 @@ public class ServiceManagerTest
         sinfo.setDescription("Test ServiceType Desc");
 
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testPlatforms
-            .get(0).getPlatformType());
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", new String[] {testPlatforms
+            .get(0).getPlatformType().getName()});
         for (int i = 1; i <= 5; i++) {
             svalues.add(serviceManager.createService(subject, testPlatforms.get(0).getId(),
                 serviceType.getId(), "Test Service Name" + i, "Test Service From Server" + i,
@@ -531,7 +533,7 @@ public class ServiceManagerTest
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription("Test ServiceType Desc");
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", serverResType);
         Service service = serviceManager.createService(subject, testServers.get(0).getId(),
             serviceType.getId(), "Test Service Name", "Test Service From Server", "my computer");
         assertFalse(service.isAutodiscoveryZombie());
@@ -550,7 +552,7 @@ public class ServiceManagerTest
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription("Test ServiceType Desc");
         sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
+        ServiceType serviceType = serviceManager.createServiceType(sinfo, "test", serverResType);
         Service service = serviceManager.createService(subject, testServers.get(0).getId(),
             serviceType.getId(), "Test Service Name", "Test Service From Server", "my computer");
         ServiceValue sValue = new ServiceValue();
@@ -610,7 +612,7 @@ public class ServiceManagerTest
             sinfo.setDescription("Test ServiceType Desc" + i);
 
             sinfo.setName("Test ServiceType Name" + i);
-            serviceType = serviceManager.createServiceType(sinfo, "test", testServerType);
+            serviceType = serviceManager.createServiceType(sinfo, "test", serverResType);
             // Create Services as well here as the query uses join from Service
             serviceManager.createService(subject, testServers.get(0).getId(), serviceType.getId(),
                 "Test Service Name" + i, "Test Service From Server" + i, "my computer");

@@ -44,10 +44,6 @@
       		<column name="NAME" not-null="true" length="100" index="TYPE_NAME_IDX"/>
     	</property>
 
-    	<property name="resourceTypeId" type="integer">
-      		<column name="RESOURCE_TYPE_ID" not-null="true"/>
-    	</property>
-
     	<property name="pluginName" type="string">
       		<column name="PLUGIN" not-null="true" length="250"/>
     	</property>

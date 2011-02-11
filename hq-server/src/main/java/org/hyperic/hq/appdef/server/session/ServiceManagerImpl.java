@@ -908,9 +908,9 @@ public class ServiceManagerImpl implements ServiceManager {
     }
 
     public ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin,
-                                          ResourceType servType) throws NotFoundException {
+                                          ResourceType parentType) throws NotFoundException {
         ResourceType serviceType = createServiceType(sinfo, plugin);
-        servType.relateTo(serviceType, RelationshipTypes.SERVICE);
+        parentType.relateTo(serviceType, RelationshipTypes.SERVICE);
         return serviceFactory.createServiceType(serviceType);
     }
     

@@ -80,23 +80,24 @@ public class AuthzSubjectDAO {
         entityManager.persist(subject);
 
         // XXX create resource for owner
-      
-        ResourceType rt = resourceTypeDao.findByName(AuthzConstants.subjectResourceTypeName);
-        if (rt == null) {
-            throw new IllegalArgumentException("resource type not found " +
-                                               AuthzConstants.subjectResourceTypeName);
-        }
+        //TODO need this?
+        //ResourceType rt = resourceTypeDao.findByName(AuthzConstants.subjectResourceTypeName);
+        //if (rt == null) {
+          //  throw new IllegalArgumentException("resource type not found " +
+                                               //AuthzConstants.subjectResourceTypeName);
+        //}
 
         //TODO
         //Resource r = resourceDAO.create(rt, resourceDAO.findRootResource(), null, /* No Name? */
         //creator, subject.getId(), false);
 
+        //TODO put back Roles?  Current NPE issue initializing Roles set in AuthzSubject...
         //subject.setResource(r);
-        Role role = roleDAO.findByName(AuthzConstants.creatorRoleName);
-        if (role == null) {
-            throw new IllegalArgumentException("role not found " + AuthzConstants.creatorRoleName);
-        }
-        subject.addRole(role);
+        //Role role = roleDAO.findByName(AuthzConstants.creatorRoleName);
+        //if (role == null) {
+          //  throw new IllegalArgumentException("role not found " + AuthzConstants.creatorRoleName);
+        //}
+        //subject.addRole(role);
 
         // Insert an empty config response
         Crispo c = Crispo.create(new ConfigResponse());

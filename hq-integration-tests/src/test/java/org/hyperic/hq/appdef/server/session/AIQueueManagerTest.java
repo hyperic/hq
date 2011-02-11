@@ -64,7 +64,7 @@ public class AIQueueManagerTest
         createAgent("127.0.0.1", 2144, "hqadmin", "agentToken", "4.5");
         PlatformType platformType = createPlatformType("JenOS");
         
-        cPropManager.addKey(resourceManager.findResourceTypeById(platformType.getId()), "numCpus", "Number of CPUs");
+        cPropManager.addKey(resourceManager.findResourceTypeById(platformType.getId()), "numCpus", "Number of CPUs",Integer.class);
 
         // Add the platform to AI Queue with custom prop value of 4 CPUs
         AIPlatformValue aiPlatform = new AIPlatformValue();

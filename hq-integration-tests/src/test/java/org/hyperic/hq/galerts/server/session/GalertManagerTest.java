@@ -33,12 +33,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.escalation.server.session.Escalation;
-import org.hyperic.hq.escalation.server.session.EscalationStateDAO;
 import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.galerts.processor.GalertProcessor;
@@ -46,6 +43,7 @@ import org.hyperic.hq.galerts.shared.GalertManager;
 import org.hyperic.hq.galerts.shared.GtriggerManager;
 import org.hyperic.hq.galerts.strategies.NoneStrategyType;
 import org.hyperic.hq.galerts.strategies.SimpleStrategyType;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.measurement.galerts.ComparisonOperator;
 import org.hyperic.hq.measurement.galerts.MeasurementGtriggerType;
 import org.hyperic.hq.measurement.galerts.SizeComparator;
@@ -104,9 +102,6 @@ public class GalertManagerTest
 
     private GalertDef alertDef;
 
-    @Autowired
-    private EscalationStateDAO escalationStateDAO;
-
     @Before
     public void setUp() throws Exception {
         createPlatform();
@@ -117,9 +112,8 @@ public class GalertManagerTest
 
     private void createPlatform() throws Exception {
         // Metadata
-        createPlatformType(TEST_PLATFORM_TYPE, "test");
-        MonitorableType monitorType = new MonitorableType("Platform monitor",
-            AppdefEntityConstants.APPDEF_TYPE_PLATFORM, "test");
+        createPlatformType(TEST_PLATFORM_TYPE);
+        MonitorableType monitorType = new MonitorableType("Platform monitor", "test");
         Category cate = new Category("Test Category");
         getCurrentSession().save(monitorType);
         getCurrentSession().save(cate);
@@ -130,7 +124,7 @@ public class GalertManagerTest
         // Instance Data
         createAgent("127.0.0.1", 2344, "authToken", "agentToken", "4.5");
         this.testPlatform = createPlatform("agentToken", TEST_PLATFORM_TYPE, "Platform1",
-            "Platform1");
+            "Platform1",4);
 
         List<Measurement> measurements = measurementManager.createMeasurements(testPlatform
             .getEntityId(), new Integer[] { template.getId() },

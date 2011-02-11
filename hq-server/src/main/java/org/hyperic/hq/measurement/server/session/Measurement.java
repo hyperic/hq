@@ -46,6 +46,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.inventory.domain.Resource;
 
 @Entity
@@ -177,12 +178,13 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
         this.dsn = dsn;
     }
 
+    //TODO remove the Appdef Entity stuff from domain obj
     public AppdefEntityID getEntityId() {
-        return new AppdefEntityID(getAppdefType(), getInstanceId());
+        return AppdefUtil.newAppdefEntityId(resource);
     }
 
     public int getAppdefType() {
-        return getTemplate().getMonitorableType().getResourceTypeId();
+        return AppdefUtil.newAppdefEntityId(resource).getType();
     }
 
     protected void setBaselinesBag(Collection<Baseline> baselines) {

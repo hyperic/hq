@@ -367,7 +367,7 @@ public class AvailabilityDataDAO
                 new IntegerType()).list();
     }
 
-    AvailabilityDataRLE create(Measurement meas, long startime, long endtime, double availVal) {
+    public AvailabilityDataRLE create(Measurement meas, long startime, long endtime, double availVal) {
         AvailabilityDataRLE availObj = new AvailabilityDataRLE(meas, startime, endtime, availVal);
         getSession().save(availObj);
         return availObj;

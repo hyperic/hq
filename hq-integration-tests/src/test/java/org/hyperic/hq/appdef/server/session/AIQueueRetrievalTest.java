@@ -3,35 +3,18 @@ package org.hyperic.hq.appdef.server.session;
 import static org.junit.Assert.assertEquals;
 
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AIServerValue;
-import org.hyperic.hq.appdef.shared.AgentManager;
-import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
-import org.hyperic.hq.appdef.shared.PlatformManager;
-import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.ServerManager;
-import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.authz.shared.AuthzSubjectManager;
-import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.common.NotFoundException;
-import org.hyperic.hq.context.IntegrationTestContextLoader;
-import org.hyperic.hq.product.ServerTypeInfo;
+import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
 
 /**
@@ -42,22 +25,10 @@ import org.springframework.util.StopWatch;
  * 
  */
 @DirtiesContext
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = "classpath*:META-INF/spring/*-context.xml", loader = IntegrationTestContextLoader.class)
-@Transactional
-public class AIQueueRetrievalTest {
-    @Autowired
-    private AgentManager agentManager;
-    @Autowired
-    private ServerManager serverManager;
-
-    @Autowired
-    private PlatformManager platformManager;
+public class AIQueueRetrievalTest extends BaseInfrastructureTest {
     @Autowired
     private AIQueueManager aiQueueManager;
-    @Autowired
-    private AuthzSubjectManager authzSubjectManager;
-
+   
     // =902 in perf test env
     private static final int NUM_AGENTS = 4;
 
@@ -76,9 +47,8 @@ public class AIQueueRetrievalTest {
         for (int i = 1; i <= NUM_AGENTS; i++) {
             agentManager.createLegacyAgent("127.0.0.1", 2144, "hqadmin", "agentToken" + i, "4.5");
         }
-        platformType = platformManager.createPlatformType("JenOS", "testit");
-        ServerType serverType = createServerType("JenServer", "6.0", new String[] { "JenOS" },
-            "testit", false);
+        platformType = createPlatformType("JenOS");
+        ServerType serverType = createServerType("JenServer", "6.0", new String[] { "JenOS" });
 
         // create 2 IPs for each platform (localhost and same IP to emulate
         // multi-agent) and NUM_SERVERS servers each
@@ -86,8 +56,7 @@ public class AIQueueRetrievalTest {
             Platform platform = createPlatform(platformType, "Platform" + i, "Platform" + i,
                 IP_ADDRESS, agentManager.getAgent("agentToken" + i));
             for (int j = 1; j <= NUM_SERVERS_PER_AGENT; j++) {
-                createServer(platform, serverType, "Server" + j, "Platform" + i + ".Server" + j,
-                    "/foo/some" + j);
+                createServer(platform, serverType, "Server" + j);
             }
         }
     }
@@ -223,45 +192,15 @@ public class AIQueueRetrievalTest {
     private Platform createPlatform(PlatformType platformType, String fqdn, String name,
                                     String remoteIp, Agent agent) throws ApplicationException {
 
-        PlatformValue platform = new PlatformValue();
-        platform.setCpuCount(2);
-        platform.setPlatformType(platformType.getPlatformTypeValue());
-        platform.setAgent(agent);
-        platform.setFqdn(fqdn);
-        platform.setName(name);
-
-        Platform newPlatform = platformManager.createPlatform(
-            authzSubjectManager.getOverlordPojo(), platformType.getId(), platform, agent.getId());
+        Platform newPlatform = createPlatform(agent.getAgentToken(),platformType.getName(),fqdn,name,2);
 
         // always add loopback
-        Ip ip1 = platformManager.addIp(newPlatform, "127.0.0.1", "255.0.0.0", "00:00:00:00:00:00");
-        Ip ip2 = platformManager.addIp(newPlatform, remoteIp, "255.0.0.0", "00:00:00:00:00:00");
+        platformManager.addIp(newPlatform, "127.0.0.1", "255.0.0.0", "00:00:00:00:00:00");
+        platformManager.addIp(newPlatform, remoteIp, "255.0.0.0", "00:00:00:00:00:00");
 
         return newPlatform;
     }
 
-    private ServerType createServerType(String serverTypeName, String serverVersion,
-                                        String[] validPlatformTypes, String plugin, boolean virtual)
-        throws NotFoundException {
-        ServerTypeInfo serverTypeInfo = new ServerTypeInfo();
-        serverTypeInfo.setDescription(serverTypeName);
-        serverTypeInfo.setName(serverTypeName);
-        serverTypeInfo.setVersion(serverVersion);
-        serverTypeInfo.setVirtual(virtual);
-        serverTypeInfo.setValidPlatformTypes(validPlatformTypes);
-        return serverManager.createServerType(serverTypeInfo, plugin);
-    }
-
-    private Server createServer(Platform platform, ServerType serverType, String name,
-                                String autoInvId, String installpath)
-        throws PlatformNotFoundException, AppdefDuplicateNameException, ValidationException,
-        PermissionException, NotFoundException {
-        ServerValue server = new ServerValue();
-        server.setName(name);
-        server.setAutoinventoryIdentifier(autoInvId);
-        server.setInstallPath(installpath);
-        return serverManager.createServer(authzSubjectManager.getOverlordPojo(), platform.getId(),
-            serverType.getId(), server);
-    }
+   
 
 }

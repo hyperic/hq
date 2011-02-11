@@ -30,10 +30,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -420,9 +418,9 @@ public class MeasurementDAO
     @SuppressWarnings("unchecked")
     public List<Measurement> getMetricsCollecting(ResourceGroup g, Integer templateId) {
         String sql = "select m from Measurement m where m.resource in (:resources) "
-                     + "and m.template.id = ? and m.enabled = true";
+                     + "and m.template.id = :template and m.enabled = true";
 
-        return (List<Measurement>) getSession().createQuery(sql).setParameterList("resources", new ArrayList<Resource>(g.getMembers())).setInteger(0,
+        return (List<Measurement>) getSession().createQuery(sql).setParameterList("resources", new ArrayList<Resource>(g.getMembers())).setParameter("template",
             templateId.intValue()).setCacheable(true).setCacheRegion(
             "ResourceGroup.getMetricsCollecting").list();
     }
@@ -573,38 +571,43 @@ public class MeasurementDAO
 
     /**
      * @param {@link List} of {@link Integer} resource ids
-     * @return {@link Object[]} 0 = {@link Integer} 1 = {@link List} of
+     * @return {@link Map of resource id to a {@link List} of
      *         Availability {@link Measurement}s Measurements which are children
      *         of the resource
      */
     @SuppressWarnings("unchecked")
-    final List<Object[]> findRelatedAvailMeasurements(final List<Integer> resourceIds) {
+    final Map<Integer, List<Measurement>> findRelatedAvailMeasurements(final List<Integer> resourceIds) {
         if (resourceIds.isEmpty()) {
-            return Collections.EMPTY_LIST;
+            return new HashMap<Integer,List<Measurement>>(0);
         }
-        Set<Integer> childrenIds = new HashSet<Integer>();
+        //TODO this query used to batch by children IDs of all resources, but can't do that now since
+        //resource hierarchy info is not in relational DB. If this becomes a perf issue, investigate other ways to optimize
+        Map<Integer,List<Integer>> childrenIds = new HashMap<Integer,List<Integer>>();
         for(Integer resourceId : resourceIds) {
-            childrenIds.addAll(resourceDao.findById(resourceId).getChildrenIds(true));
+            List<Integer> sortedChildrenIds = new ArrayList<Integer>();
+            sortedChildrenIds.addAll(resourceDao.findById(resourceId).getChildrenIds(true));
+            Collections.sort(sortedChildrenIds);
+            childrenIds.put(resourceId, sortedChildrenIds);
         }
-        final String sql = new StringBuilder().append("select m.instanceId,m from Measurement m ")
+        final String sql = new StringBuilder().append("select m from Measurement m ")
                .append("join m.template t ").append(
                 "where m.resource in (:childrenIds) and ").append(ALIAS_CLAUSE).toString();
 
-        // create a new list so that the original list is not modified
-        // and sort the resource ids so that the results are more cacheable
-        final List sortedChildrenIds = new ArrayList(childrenIds);
-        Collections.sort(sortedChildrenIds);
-
+       
         final HQDialect dialect = getHQDialect();
         final int max = (dialect.getMaxExpressions() <= 0) ? Integer.MAX_VALUE : dialect
             .getMaxExpressions();
-        final List rtn = new ArrayList(sortedChildrenIds.size());
-        for (int i = 0; i < sortedChildrenIds.size(); i += max) {
-            final int end = Math.min(i + max, sortedChildrenIds.size());
-            final List list = sortedChildrenIds.subList(i, end);
-            rtn.addAll(getSession().createQuery(sql).setParameterList("childrenIds", list,
-                new IntegerType()).setCacheable(
-                true).setCacheRegion("Measurement.findRelatedAvailMeasurements").list());
+        final Map<Integer,List<Measurement>> rtn = new HashMap<Integer,List<Measurement>>(childrenIds.size());
+        for(Map.Entry<Integer,List<Integer>> entry: childrenIds.entrySet()) {
+            List<Measurement> childMeasurements = new ArrayList<Measurement>();
+            for (int i = 0; i < entry.getValue().size(); i += max) {
+                final int end = Math.min(i + max, entry.getValue().size());
+                final List<Integer> list = entry.getValue().subList(i, end);
+                childMeasurements.addAll(getSession().createQuery(sql).setParameterList("childrenIds", list,
+                    new IntegerType()).setCacheable(
+                        true).setCacheRegion("Measurement.findRelatedAvailMeasurements").list());
+            }
+            rtn.put(entry.getKey(),childMeasurements);
         }
         return rtn;
     }
@@ -651,19 +654,12 @@ public class MeasurementDAO
     }
 
     @SuppressWarnings("unchecked")
-    List<Measurement> findAvailMeasurementsByInstances(int type, Integer[] ids) {
-        boolean checkIds = (ids != null && ids.length > 0);
+    List<Measurement> findAvailMeasurementsByInstances( Integer[] ids) {
         String sql = new StringBuilder().append("select m from Measurement m ").append(
-            "join m.template t ").append("join t.monitorableType mt ").append(
-            "where mt.resourceTypeId = :type and ").append("m.resource is not null and ").append(
-            (checkIds ? "m.instanceId in (:ids) and " : "")).append(ALIAS_CLAUSE).toString();
-
-        Query q = getSession().createQuery(sql).setInteger("type", type);
-
-        if (checkIds) {
-            q.setParameterList("ids", ids);
-        }
-
+            "join m.template t ").append("where m.resource is not null and ").append(
+            "m.instanceId in (:ids) and ").append(ALIAS_CLAUSE).toString();
+        Query q = getSession().createQuery(sql);
+        q.setParameterList("ids", ids);
         q.setCacheable(true);
         q.setCacheRegion("Measurement.findAvailMeasurementsByInstances");
         return q.list();

@@ -52,6 +52,7 @@ import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.jdbc.DBUtil;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
@@ -63,6 +64,7 @@ import org.springframework.test.context.transaction.AfterTransaction;
  * 
  */
 @DirtiesContext
+@Ignore("This test can't be run until the explicit commits come out of DataManager.addData().  Otherwise test data ends up actually written to test DB.")
 public class DataManagerTest
     extends BaseInfrastructureTest {
 
@@ -78,15 +80,9 @@ public class DataManagerTest
     @Autowired
     private MeasurementManager measurementManager;
     
-    private Platform testPlatform;
-
     private List<Measurement> measurements;
 
     private List<DataPoint> randomDataPoints;
-
-    private List<DataPoint> measDataPoints;
-
-    private List<DataPoint> availDataPoints;
 
     private List<DataPoint> pointsToClean;
 
@@ -96,17 +92,17 @@ public class DataManagerTest
         createAgent("127.0.0.1", 2144, "authToken", agentToken, "5.0");
         // Create PlatformType
         String platformType = "Linux";
-        platformManager.createPlatformType(platformType, "Test Plugin");
+        createPlatformType(platformType);
         // Create test platform
-        createPlatform(agentToken,platformType,"Test Platform","Test Platform");
+        createPlatform(agentToken,platformType,"Test Platform","Test Platform",4);
         flushSession();
     }
 
     private List<Measurement> createMeasurements() throws ApplicationException {
         AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
         Platform platform = platformManager.findPlatformByFqdn(overlord, "Test Platform");
-        int appDefType = platform.getResource().getResourceType().getAppdefType();
-        MonitorableType monitor_Type = new MonitorableType("Platform monitor", appDefType, "test");
+       
+        MonitorableType monitor_Type = new MonitorableType("Platform monitor",  "test");
         Category cate = new Category("Test Category");
         getCurrentSession().save(monitor_Type);
         getCurrentSession().save(cate);
@@ -172,7 +168,7 @@ public class DataManagerTest
         createTestPlatform();
         measurements = createMeasurements();
         randomDataPoints = createRandomDataPoints();
-        measDataPoints = createRealisticDataPoints();
+        createRealisticDataPoints();
     }
 
     // Cleanup the datapoints committed in a separate transaction by
