@@ -45,6 +45,7 @@ import org.hyperic.hq.appdef.server.session.AIAuditFactory;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.ServerFactory;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
@@ -83,6 +84,7 @@ import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
 import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.product.RuntimeResourceReport;
 import org.hyperic.hq.product.ServiceType;
+import org.hyperic.hq.reference.RelationshipTypes;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
@@ -357,7 +359,11 @@ public class RuntimeReportProcessor {
             return new ArrayList();
         }
 
-        List appdefServers = new ArrayList(appdefPlatform.getServers());
+        List<Server> appdefServers = new ArrayList<Server>(appdefPlatform.getServers());
+        Set<Resource> virtualServerResources = appdefPlatform.getResource().getResourcesFrom(RelationshipTypes.VIRTUAL);
+        for(Resource virtualServerResource: virtualServerResources) {
+            appdefServers.add(serverManager.findServerById(virtualServerResource.getId()));
+        }
 
         for (int i = 0; i < aiservers.length; i++) {
             if (aiservers[i] != null) {
@@ -410,7 +416,7 @@ public class RuntimeReportProcessor {
      * @param reportingServer The server that reported the aiserver.
      */
     private void mergeServerIntoInventory(AuthzSubject subject, Platform platform, AIPlatformValue aiplatform,
-                                          AIServerValue aiserver, List appdefServers, Server reportingServer)
+                                          AIServerValue aiserver, List<Server> appdefServers, Server reportingServer)
         throws PermissionException, ValidationException {
         Integer serverTypePK;
 
@@ -430,9 +436,9 @@ public class RuntimeReportProcessor {
                  "," + " name=" + aiserver.getName() + "," + " AIIdentifier=" + aiserver.getAutoinventoryIdentifier());
 
         Server server = null;
-
+      
         for (int i = 0; i < appdefServers.size(); i++) {
-            Server appdefServer = (Server) appdefServers.get(i);
+            Server appdefServer = appdefServers.get(i);
 
             // We can match either on autoinventory identifier, or if
             // this is the reporting server, we can match on its appdef ID
@@ -452,6 +458,8 @@ public class RuntimeReportProcessor {
                 break;
             }
         }
+       
+        
 
         boolean update;
 
@@ -542,17 +550,18 @@ public class RuntimeReportProcessor {
             log.info("Updating services for server: " + server.getName());
 
             updateServiceTypes(aiserverExt, server);
-
-            List appdefServices;
-
-            // ServerValue.getServiceValues not working here for some reason,
-            // get the services explicitly from the ServiceManager.
+            List appdefServices; 
             try {
-                appdefServices = serviceManager.getServicesByServer(subject, server.getId(), PageControl.PAGE_ALL);
+                if(server.getServerType().isVirtual()) {
+                    appdefServices = serviceManager.getPlatformServices(subject, platform.getId(),PageControl.PAGE_ALL);
+                }else{ 
+                    // ServerValue.getServiceValues not working here for some reason,
+                    // get the services explicitly from the ServiceManager.
+                   appdefServices = serviceManager.getServicesByServer(subject, server.getId(), PageControl.PAGE_ALL); 
+                }
             } catch (Exception e) {
                 appdefServices = new ArrayList();
             }
-
             List aiServices = aiserverExt.getAIServiceValuesAsList();
 
             // Change the service names if they require expansion.

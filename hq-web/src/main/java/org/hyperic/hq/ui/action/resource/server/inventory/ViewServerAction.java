@@ -196,7 +196,7 @@ public class ViewServerAction
 
             request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS, uiControlOptions);
             request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS_COUNT, new Integer(uiControlOptions.size()));
-            request.setAttribute(Constants.AUTO_INVENTORY, new Boolean(server.getRuntimeAutodiscovery()));
+           
 
             request.setAttribute(Constants.EDIT_CONFIG, new Boolean(platformWithAgent));
             if (!platformWithAgent)

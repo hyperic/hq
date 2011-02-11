@@ -256,16 +256,16 @@ public class ServiceManagerImpl implements ServiceManager {
         return service;
     }
     
-    /**
-     * @param server {@link Server}
-     * @param aiid service autoinventory identifier
-     * @return {@link List} of {@link Service}
-     */
     @Transactional(readOnly = true)
     public List<Service> getServicesByAIID(Server server, String aiid) {
         List<Service> aiidServices = new ArrayList<Service>();
         Resource serverResource = resourceManager.findResourceById(server.getId());
-        Set<Resource> services = serverResource.getResourcesFrom(RelationshipTypes.SERVICE);
+        Set<Resource> services;
+        if(server.getServerType().isVirtual()) {
+            services = serverResource.getResourceTo(RelationshipTypes.VIRTUAL).getResourcesFrom(RelationshipTypes.SERVICE);
+        }else {
+            services = serverResource.getResourcesFrom(RelationshipTypes.SERVICE);
+        }
         for(Resource service: services) {
             if(aiid.equals(service.getProperty(ServiceFactory.AUTO_INVENTORY_IDENTIFIER))) {
                 aiidServices.add(serviceFactory.createService(service));
@@ -342,9 +342,9 @@ public class ServiceManagerImpl implements ServiceManager {
 
     }
     
-    private Collection<ServiceType> findByServerTypeOrderName(Integer serverTypeId, boolean asc) {
+    private Collection<ServiceType> findByParentTypeOrderName(Integer parentTypeId, boolean asc) {
         List<ServiceType> serviceTypes = new ArrayList<ServiceType>();
-        ResourceType serverType = resourceManager.findResourceTypeById(serverTypeId);
+        ResourceType serverType = resourceManager.findResourceTypeById(parentTypeId);
         if(serverType ==  null) {
             return serviceTypes;
         }
@@ -387,8 +387,19 @@ public class ServiceManagerImpl implements ServiceManager {
     @Transactional(readOnly = true)
     public PageList<ServiceTypeValue> getServiceTypesByServerType(AuthzSubject subject,
                                                                   int serverTypeId) {
-        Collection<ServiceType> serviceTypes = findByServerTypeOrderName(
+        Collection<ServiceType> serviceTypes = findByParentTypeOrderName(
             serverTypeId, true);
+        if (serviceTypes.size() == 0) {
+            return new PageList<ServiceTypeValue>();
+        }
+        return valuePager.seek(serviceTypes, PageControl.PAGE_ALL);
+    }
+    
+    @Transactional(readOnly = true)
+    public PageList<ServiceTypeValue> getServiceTypesByPlatformType(AuthzSubject subject,
+                                                                    Integer platformTypeId) {
+        Collection<ServiceType> serviceTypes = findByParentTypeOrderName(
+            platformTypeId, true);
         if (serviceTypes.size() == 0) {
             return new PageList<ServiceTypeValue>();
         }
@@ -573,7 +584,7 @@ public class ServiceManagerImpl implements ServiceManager {
     }
     
     /**
-     * Get platform services (children of virtual servers)
+     * Get platform services
      */
     @Transactional(readOnly = true)
     public PageList<ServiceValue> getPlatformServices(AuthzSubject subject, Integer platId, PageControl pc)
@@ -605,7 +616,7 @@ public class ServiceManagerImpl implements ServiceManager {
     }
 
     /**
-     * Get platform services (children of virtual servers) of a specified type
+     * Get platform services of a specified type
      */
     @Transactional(readOnly = true)
     public PageList<ServiceValue> getPlatformServices(AuthzSubject subject, Integer platId, Integer typeId,
@@ -839,6 +850,7 @@ public class ServiceManagerImpl implements ServiceManager {
                         serviceType.merge();
                     }
 
+                    //TODO  update platform association
                     // Could be null if servertype was deleted/updated by plugin
                     ResourceType svrtype = serviceType.getResourceTypeTo(RelationshipTypes.SERVICE);
 
@@ -863,24 +875,32 @@ public class ServiceManagerImpl implements ServiceManager {
             // Now create the left-overs
             final Set<String> creates = new HashSet<String>();
             for (final ServiceTypeInfo sinfo : infoMap.values()) {
-                ResourceType servType;
-                if (null == (servType = serverTypes.get(sinfo.getServerName()))) {
-                    servType = resourceManager.findResourceTypeByName(sinfo.getServerName());
-                    if (servType == null) {
-                        throw new NotFoundException("Unable to find server " +
-                                                        sinfo.getServerName() +
-                                                        " on which service '" +
-                                                        sinfo.getName() + "' relies");
-                    }
-                    serverTypes.put(servType.getName(), servType);
-                }
                 if (creates.contains(sinfo.getName())) {
                     continue;
                 }
+                if(sinfo.getServerTypeInfo().isVirtual()) {
+                    String[] platformTypes = sinfo.getPlatformTypes();
+                    creates.add(sinfo.getName());
+                    if (debug) watch.markTimeBegin("create");
+                    createServiceType(sinfo, plugin, platformTypes);
+                    if (debug) watch.markTimeEnd("create");
+                } else {
+                    ResourceType servType;
+                    if (null == (servType = serverTypes.get(sinfo.getServerName()))) {
+                        servType = resourceManager.findResourceTypeByName(sinfo.getServerName());
+                        if (servType == null) {
+                            throw new NotFoundException("Unable to find server " +
+                                                        sinfo.getServerName() +
+                                                        " on which service '" +
+                                                        sinfo.getName() + "' relies");
+                        }
+                        serverTypes.put(servType.getName(), servType);
+                    }
+                    if (debug) watch.markTimeBegin("create");
+                    createServiceType(sinfo, plugin, servType);
+                    if (debug) watch.markTimeEnd("create");
+                }
                 creates.add(sinfo.getName());
-                if (debug) watch.markTimeBegin("create");
-                createServiceType(sinfo, plugin, servType);
-                if (debug) watch.markTimeEnd("create");
             }
         } finally {
             if (debug) log.debug(watch);
@@ -888,20 +908,33 @@ public class ServiceManagerImpl implements ServiceManager {
     }
 
     public ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin,
-                                          ServerType servType) throws NotFoundException {
-        return createServiceType(sinfo, plugin, resourceManager.findResourceTypeById(servType.getId()));
+                                          ResourceType servType) throws NotFoundException {
+        ResourceType serviceType = createServiceType(sinfo, plugin);
+        servType.relateTo(serviceType, RelationshipTypes.SERVICE);
+        return serviceFactory.createServiceType(serviceType);
     }
     
     public ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin,
-                                         PlatformType platformType) throws NotFoundException {
-       return createServiceType(sinfo, plugin, resourceManager.findResourceTypeById(platformType.getId()));
+                                         String[] platformTypes) throws NotFoundException {
+        ResourceType serviceType = createServiceType(sinfo, plugin);
+        findAndSetPlatformType(platformTypes, serviceType);
+        return serviceFactory.createServiceType(serviceType);
    }
     
-    private ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin,
-                                          ResourceType parentType) throws NotFoundException {
+    private void findAndSetPlatformType(String[] platNames, ResourceType stype) throws NotFoundException {
+        for (int i = 0; i < platNames.length; i++) {
+            ResourceType pType = resourceManager.findResourceTypeByName(platNames[i]);
+            if (pType == null) {
+                throw new NotFoundException("Could not find platform type '" + platNames[i] + "'");
+            }
+           pType.relateTo(stype, RelationshipTypes.SERVICE);
+        }
+    }
+
+    
+    private ResourceType createServiceType(ServiceTypeInfo sinfo, String plugin) throws NotFoundException {
         ResourceType serviceType = resourceTypeDao.create(sinfo.getName(), pluginDAO.findByName(plugin));
         serviceType.setDescription(sinfo.getDescription());
-        
         serviceType.addPropertyType(createServicePropertyType(ServiceFactory.AUTO_INVENTORY_IDENTIFIER,String.class));
         serviceType.addPropertyType(createServicePropertyType(ServiceFactory.CREATION_TIME,Long.class));
         serviceType.addPropertyType(createServicePropertyType(ServiceFactory.MODIFIED_TIME,Long.class));
@@ -912,8 +945,7 @@ public class ServiceManagerImpl implements ServiceManager {
         PropertyType appdefType = createServicePropertyType(AppdefResourceType.APPDEF_TYPE_ID, Integer.class);
         appdefType.setIndexed(true);
         serviceType.addPropertyType(appdefType);
-        parentType.relateTo(serviceType, RelationshipTypes.SERVICE);
-        return serviceFactory.createServiceType(serviceType);
+        return serviceType;
     }
     
     private PropertyType createServicePropertyType(String propName,Class<?> type) {

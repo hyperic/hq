@@ -70,9 +70,8 @@ public class ResourceController extends BaseController {
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/type:{name}")
 	public @ResponseBody SuccessResponse getByTypeName(@PathVariable String name) throws Exception {
-	    ResourceType type = resourceTypeDao.findByName(name);
-	    Set<Resource> resources = type.getResources();
-		return new SuccessResponse(ListRep.createListRepFromResources(resources));
+		ResourceType type = resourceTypeDao.findByName(name);
+		return new SuccessResponse(ListRep.createListRepFromResources(type.getResources()));
 	}
 	
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")

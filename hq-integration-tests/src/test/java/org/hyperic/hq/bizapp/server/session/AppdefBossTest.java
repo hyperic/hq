@@ -9,6 +9,7 @@ import java.util.regex.PatternSyntaxException;
 
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
+import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
@@ -18,6 +19,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
+import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
@@ -38,6 +40,7 @@ public class AppdefBossTest
     extends BaseInfrastructureTest {
 
     private ServiceType platServiceType;
+    private ServiceType testServiceType;
     private PlatformType testPlatformType;
     private ServerType testServerType;
     private String agentToken;
@@ -56,6 +59,7 @@ public class AppdefBossTest
         testPlatformType = createPlatformType("Linux");
         testServerType = createServerType("Tomcat", "6.0", new String[] { "Linux" });
         platServiceType = createServiceType("HTTP Check", testPlatformType);
+        testServiceType = createServiceType("Servlet",testServerType);
     }
 
     @Test
@@ -255,6 +259,17 @@ public class AppdefBossTest
         assertEquals(1, appdefs.size());
         assertEquals(1, appdefs.getTotalSize());
         assertEquals("AllPlatformGroup",appdefs.get(0).getName());
+    }
+    
+    @Test
+    public void testFindViewablePlatformServiceTypes() throws ApplicationException, NotFoundException {
+        Platform testPlatform = createPlatform(agentToken, "Linux", "MyPlat", "MyPlat", 2);
+        Server testServer = createServer(testPlatform, testServerType, "Server1" );
+        createService(testPlatform.getId(), platServiceType, "Service1", "Service1","my computer");
+        createService(testServer.getId(), testServiceType, "Service2", "Service2","my computer");
+        PageList<ServiceTypeValue> serviceTypes = appdefBoss.findViewablePlatformServiceTypes(sessionId, testPlatform.getId());
+        assertEquals(1,serviceTypes.size());
+        assertEquals(platServiceType.getName(),serviceTypes.get(0).getName());
     }
 
 }

@@ -29,9 +29,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -39,6 +37,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -82,6 +81,13 @@ public interface ServiceManager {
     public Service getServiceById(AuthzSubject subject, Integer id) throws ServiceNotFoundException,
         PermissionException;
 
+    /**
+     * @param server {@link Server}
+     * @param aiid service autoinventory identifier
+     * @return {@link List} of {@link Service}
+     * This method also returns services of a virtual server (b/c it's AI related), 
+     * while other getServicesByServer methods will not do that
+     */
     public List<Service> getServicesByAIID(Server server, String aiid);
 
     /**
@@ -102,6 +108,9 @@ public interface ServiceManager {
         throws PermissionException, NotFoundException;
 
     public PageList<ServiceTypeValue> getServiceTypesByServerType(AuthzSubject subject, int serverTypeId);
+    
+    PageList<ServiceTypeValue> getServiceTypesByPlatformType(AuthzSubject subject,
+        Integer platformTypeId);
 
     /**
      * Get services by server and type.
@@ -123,13 +132,13 @@ public interface ServiceManager {
         throws ServiceNotFoundException, PermissionException;
 
     /**
-     * Get platform services (children of virtual servers)
+     * Get platform services
      */
     public PageList<ServiceValue> getPlatformServices(AuthzSubject subject, Integer platId, PageControl pc)
         throws org.hyperic.hq.appdef.shared.PlatformNotFoundException, PermissionException, ServiceNotFoundException;
 
     /**
-     * Get platform services (children of virtual servers) of a specified type
+     * Get platform services of a specified type
      */
     public PageList<ServiceValue> getPlatformServices(AuthzSubject subject, Integer platId, Integer typeId,
                                                       PageControl pc)
@@ -180,9 +189,9 @@ public interface ServiceManager {
     Number getServiceCount();
     
     ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin,
-                                  ServerType servType) throws NotFoundException;
+                                  ResourceType servType) throws NotFoundException;
     
     ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin,
-                                  PlatformType platformType) throws NotFoundException;
+                                  String[] platformTypes) throws NotFoundException;
 
 }

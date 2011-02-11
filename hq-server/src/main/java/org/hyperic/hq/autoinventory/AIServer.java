@@ -47,6 +47,7 @@ public class AIServer extends AppdefResource
     private String autoinventoryIdentifier;
     private String installPath;
     private boolean servicesAutomanaged;
+    private boolean virtual;
 
     /**
      * default constructor
@@ -233,6 +234,16 @@ public class AIServer extends AppdefResource
     {
         this.ignored = ignored;
     }
+    
+    public boolean isVirtual() {
+        return virtual;
+    }
+
+    public void setVirtual(boolean virtual) {
+        this.virtual = virtual;
+    }
+
+
 
     private AIServerValue aIServerValue = new AIServerValue();
     /**
@@ -260,6 +271,7 @@ public class AIServer extends AppdefResource
         aIServerValue.setId(getId());
         aIServerValue.setMTime(getMTime());
         aIServerValue.setCTime(getCTime());
+        aIServerValue.setVirtual(isVirtual());
         return aIServerValue;
     }
 
@@ -279,6 +291,7 @@ public class AIServer extends AppdefResource
         setInstallPath( valueHolder.getInstallPath() );
         setDescription( valueHolder.getDescription() );
         setServicesAutomanaged( valueHolder.getServicesAutomanaged() );
+        setVirtual(valueHolder.isVirtual());
     }
 
     public boolean equals(Object obj)

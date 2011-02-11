@@ -1077,47 +1077,6 @@ public class BizappUtils {
         return num.getScaledValue(scale).doubleValue();
     }
 
-    // A map of ServerType.name -> Boolean (true for auto-approved server types)
-    private static Map serverTypeCache = new HashMap();
-
-    private synchronized static void loadServerTypeCache(int sessionId,
-                                                         AppdefBoss appdefBoss){
-        if (serverTypeCache.size() > 0) return;
-        PageList types;
-        try {
-            types = appdefBoss.findAllServerTypes(sessionId, 
-                                                  PageControl.PAGE_ALL);
-        } catch (Exception e) {
-            throw new IllegalStateException("Error loading server types: " + e);
-        }
-        ServerTypeValue stValue;
-        String name;
-        for (int i=0; i<types.size(); i++) {
-            stValue = (ServerTypeValue) types.get(i);
-            name = stValue.getName();
-            serverTypeCache.put(name, Boolean.FALSE);
-            
-        }
-    }
-    
-    public static boolean isAutoApprovedServer(int sessionId,
-                                               AppdefBoss appdefBoss,
-                                               AIServerValue aiServer) {
-        // Load the server type cache if it's not loaded already
-        synchronized(serverTypeCache) {
-            if (serverTypeCache.size() == 0) {
-                loadServerTypeCache(sessionId, appdefBoss);
-            }
-        }
-        Boolean isAutoApproved
-            = (Boolean) serverTypeCache.get(aiServer.getServerTypeName());
-        if (isAutoApproved == null) {
-            // Should never happen
-            return false;
-        }
-        return isAutoApproved.booleanValue();
-    }
-
     public static void populateAgentConnections(int sessionId,
                                                AppdefBoss appdefBoss,
                                                HttpServletRequest request,
