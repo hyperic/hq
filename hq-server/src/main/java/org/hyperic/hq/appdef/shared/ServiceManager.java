@@ -189,7 +189,7 @@ public interface ServiceManager {
     Number getServiceCount();
     
     ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin,
-                                  ResourceType servType) throws NotFoundException;
+                                  ResourceType parentType) throws NotFoundException;
     
     ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin,
                                   String[] platformTypes) throws NotFoundException;
