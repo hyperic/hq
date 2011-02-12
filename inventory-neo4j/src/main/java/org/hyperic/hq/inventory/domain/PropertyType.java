@@ -1,88 +1,55 @@
 package org.hyperic.hq.inventory.domain;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Transient;
-import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.data.graph.annotation.GraphProperty;
+import org.springframework.data.graph.annotation.GraphId;
 import org.springframework.data.graph.annotation.NodeEntity;
 import org.springframework.data.graph.annotation.RelatedTo;
 import org.springframework.data.graph.core.Direction;
-import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
-import org.springframework.transaction.annotation.Transactional;
 
-@Entity
 @Configurable
-@NodeEntity(partial = true)
+@NodeEntity
 public class PropertyType {
-    @GraphProperty
-    @Transient
+   
     private String defaultValue;
 
     @NotNull
-    @GraphProperty
-    @Transient
     private String description;
-
-    @PersistenceContext
-    transient EntityManager entityManager;
     
-    @javax.annotation.Resource
-    private transient GraphDatabaseContext graphDatabaseContext;
-
-    @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")
-    @GeneratedValue(generator = "mygen1")
-    @Column(name = "id")
+    @GraphId
     private Integer id;
 
     @NotNull
-    @GraphProperty
-    @Transient
     private String name;
 
-    @GraphProperty
-    @Transient
-    private Boolean optional;
+    private boolean optional;
 
-    @ManyToOne
-    @Transient
     @RelatedTo(type = RelationshipTypes.HAS_PROPERTY_TYPE, direction = Direction.INCOMING, elementClass = ResourceType.class)
     private ResourceType resourceType;
 
-    @GraphProperty
-    @Transient
-    private Boolean secret;
+    private boolean secret;
     
-    @GraphProperty
-    @Transient
-    private Boolean hidden;
-    
-    @GraphProperty
-    @Transient
+    private boolean hidden;
+       
     private boolean indexed;
-
-    @Version
-    @Column(name = "version")
-    private Integer version;
+    
+    //TODO use type?  Had to in JPA impl
+    private Class<?> type;
 
     public PropertyType() {
 
     }
-
-    @Transactional
-    public void flush() {
-        this.entityManager.flush();
+    
+    public PropertyType(String name,String description) {
+        this.description = description;
+        this.name = name;
+    }
+    
+    public PropertyType(String name,Class<?> type) {
+        this.name=name;
+        this.type=type;
     }
 
     public String getDefaultValue() {
@@ -101,11 +68,7 @@ public class PropertyType {
         return this.name;
     }
 
-    public Boolean isOptional() {
-        //TODO proper way to do default value?
-       if(this.optional == null) {
-           return false;
-       }
+    public boolean isOptional() {
        return this.optional;
     }
 
@@ -113,15 +76,8 @@ public class PropertyType {
         return this.resourceType;
     }
 
-    public Boolean isSecret() {
-        if(this.secret == null) {
-            return false;
-        }
+    public boolean isSecret() {
         return this.secret;
-    }
-
-    public Integer getVersion() {
-        return this.version;
     }
 
     public boolean isIndexed() {
@@ -130,25 +86,6 @@ public class PropertyType {
 
     public void setIndexed(boolean indexed) {
         this.indexed = indexed;
-    }
-
-    @Transactional
-    public PropertyType merge() {
-        PropertyType merged = this.entityManager.merge(this);
-        this.entityManager.flush();
-        merged.getId();
-        return merged;
-    }
-
-    @Transactional
-    public void remove() {
-        graphDatabaseContext.removeNodeEntity(this);
-        if (this.entityManager.contains(this)) {
-            this.entityManager.remove(this);
-        } else {
-            PropertyType attached = this.entityManager.find(this.getClass(), this.id);
-            this.entityManager.remove(attached);
-        }
     }
 
     public void setDefaultValue(String defaultValue) {
@@ -167,7 +104,7 @@ public class PropertyType {
         this.name = name;
     }
 
-    public void setOptional(Boolean optional) {
+    public void setOptional(boolean optional) {
         this.optional = optional;
     }
 
@@ -175,29 +112,29 @@ public class PropertyType {
         this.resourceType = resourceType;
     }
 
-    public void setSecret(Boolean secret) {
+    public void setSecret(boolean secret) {
         this.secret = secret;
     }
-
-    public void setVersion(Integer version) {
-        this.version = version;
-    }
-    
+ 
     public boolean isHidden() {
-        if(this.hidden == null) {
-            return false;
-        }
         return hidden;
     }
 
     public void setHidden(boolean hidden) {
         this.hidden = hidden;
     }
+    
+    public Class<?> getType() {
+        return type;
+    }
+
+    public void setType(Class<?> type) {
+        this.type = type;
+    }
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Id: ").append(getId()).append(", ");
-        sb.append("Version: ").append(getVersion()).append(", ");
         sb.append("ResourceType: ").append(getResourceType()).append(", ");
         sb.append("Name: ").append(getName()).append(", ");
         sb.append("Description: ").append(getDescription()).append(", ");

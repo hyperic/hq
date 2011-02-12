@@ -128,7 +128,8 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         int[] groupTypes = AppdefEntityConstants.getAppdefGroupTypes();
         for(int i=0;i< groupTypes.length;i++) {
             if(resourceTypeDao.findByName(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i])) == null) {
-                ResourceType groupType = resourceTypeDao.create(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i]));
+                ResourceType groupType = new ResourceType(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i]));
+                resourceTypeDao.persist(groupType);
                 setPropertyType(groupType,"groupEntType",Integer.class,false);
                 setPropertyType(groupType,"groupEntResType",Integer.class,true);
                 setPropertyType(groupType,"mixed",Boolean.class,true);
@@ -137,7 +138,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     }
     
     private void setPropertyType(ResourceType groupType, String propTypeName, Class<?> type,boolean indexed) {
-        PropertyType propType = resourceTypeDao.createPropertyType(propTypeName,type);
+        PropertyType propType = new PropertyType(propTypeName,type);
         propType.setDescription(propTypeName);
         propType.setHidden(true);
         propType.setIndexed(indexed);
@@ -169,7 +170,8 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
                                                   "] already exists");
         }
         ResourceType groupType = resourceTypeDao.findByName(AppdefEntityConstants.getAppdefGroupTypeName(cInfo.getGroupTypeId()));
-        ResourceGroup res = resourceGroupDao.create(cInfo.getName(), groupType,cInfo.isPrivateGroup());
+        ResourceGroup res = new ResourceGroup(cInfo.getName(), groupType,cInfo.isPrivateGroup());
+        resourceGroupDao.persist(res);
         res.setLocation(cInfo.getLocation());
         res.setDescription(cInfo.getDescription());
         res.setModifiedBy(whoami.getName());

@@ -1,10 +1,9 @@
 package org.hyperic.hq.inventory.dao;
 
 import org.hyperic.hq.inventory.domain.ResourceGroup;
-import org.hyperic.hq.inventory.domain.ResourceType;
 
 public interface ResourceGroupDao extends GenericDao<ResourceGroup> {
-    ResourceGroup create(String name, ResourceType type, boolean privateGroup);
+    void persist(ResourceGroup resourceGroup);
 
-    ResourceGroup create(String name, ResourceType type);
+    ResourceGroup merge(ResourceGroup resourceGroup);
 }

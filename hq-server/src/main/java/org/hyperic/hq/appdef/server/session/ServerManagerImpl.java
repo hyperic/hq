@@ -222,7 +222,8 @@ public class ServerManagerImpl implements ServerManager {
     
     private Resource create(AuthzSubject owner, ServerValue sv, Resource p)  {
         ResourceType st = resourceManager.findResourceTypeById(sv.getServerType().getId());
-        Resource s = resourceDao.create(sv.getName(), st);
+        Resource s = new Resource(sv.getName(), st);
+        resourceDao.persist(s);
         s.setDescription(sv.getDescription());
         s.setLocation(sv.getLocation());
         s.setModifiedBy(sv.getModifiedBy());
@@ -948,7 +949,7 @@ public class ServerManagerImpl implements ServerManager {
         server.setProperty(ServerFactory.AUTO_INVENTORY_IDENTIFIER, existing.getAutoinventoryIdentifier() );
         server.setProperty(ServerFactory.INSTALL_PATH, existing.getInstallPath() );
         server.setProperty(ServerFactory.SERVICES_AUTO_MANAGED, existing.getServicesAutomanaged() );
-        server.merge();
+        resourceDao.merge(server);
     }
 
     /**
@@ -1092,7 +1093,9 @@ public class ServerManagerImpl implements ServerManager {
     }
     
     private ResourceType createServerResourceType(ServerTypeInfo sinfo, String plugin)  {
-        ResourceType stype = resourceTypeDao.create(sinfo.getName(),pluginDAO.findByName(plugin));
+        ResourceType stype = new ResourceType(sinfo.getName());
+        resourceTypeDao.persist(stype);
+        stype.setPlugin(pluginDAO.findByName(plugin));
         stype.setDescription(sinfo.getDescription());
        
         stype.addPropertyType(createServerPropertyType(ServerFactory.WAS_AUTODISCOVERED,Boolean.class));
@@ -1108,7 +1111,7 @@ public class ServerManagerImpl implements ServerManager {
     }
     
     private PropertyType createServerPropertyType(String propName,Class<?> type) {
-        PropertyType propType = resourceTypeDao.createPropertyType(propName,type);
+        PropertyType propType = new PropertyType(propName,type);
         propType.setDescription(propName);
         propType.setHidden(true);
         return propType;

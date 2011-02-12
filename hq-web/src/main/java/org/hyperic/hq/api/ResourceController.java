@@ -78,7 +78,7 @@ public class ResourceController extends BaseController {
 	public @ResponseBody SuccessResponse update(@PathVariable Integer id, @RequestBody ResourceRep form) throws Exception {
 		Resource resource = translateFormToDomain(form);
 
-		resource.merge();
+		resourceDao.merge(resource);
 		
 		return new SuccessResponse(new ResourceRep(resource));
 	}
@@ -119,8 +119,8 @@ public class ResourceController extends BaseController {
 		
 		ResourceType type = resourceTypeDao.findById(form.getType().getId());
 		if (form.getId() == null) {
-			resource = resourceDao.create(form.getName(), type);
-			
+			resource = new Resource(form.getName(), type);
+			resourceDao.persist(resource);
 			// TODO schedule measurement processor...
 		} else {
 			resource = resourceDao.findById(form.getId());

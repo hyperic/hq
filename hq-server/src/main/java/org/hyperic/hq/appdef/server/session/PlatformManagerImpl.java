@@ -401,7 +401,8 @@ public class PlatformManagerImpl implements PlatformManager {
         if (name == null || "".equals(name.trim())) {
            name = aip.getFqdn();
         }
-        Resource p = resourceDao.create(name, type); 
+        Resource p = new Resource(name, type);
+        resourceDao.persist(p);
         p.setDescription(aip.getDescription());
         p.setLocation("");
         
@@ -425,7 +426,8 @@ public class PlatformManagerImpl implements PlatformManager {
     private Resource create(AuthzSubject owner, PlatformValue pv, Agent agent, 
                               ResourceType type) 
     {
-        Resource p = resourceDao.create(pv.getName(), type);
+        Resource p = new Resource(pv.getName(), type);
+        resourceDao.persist(p);
         p.setDescription(pv.getDescription());
         p.setLocation(pv.getLocation());
         p.setModifiedBy(pv.getModifiedBy());
@@ -1506,7 +1508,7 @@ public class PlatformManagerImpl implements PlatformManager {
             // get the agent token and set the agent to the platform
             platform.setAgent(existing.getAgent());
         }
-        platform.merge();
+        resourceDao.merge(platform);
     }
 
     /**
@@ -1572,7 +1574,9 @@ public class PlatformManagerImpl implements PlatformManager {
 
     public PlatformType createPlatformType(String name, String plugin) throws NotFoundException {
         log.debug("Creating new PlatformType: " + name);
-        ResourceType pt = resourceTypeDao.create(name,pluginDAO.findByName(plugin));
+        ResourceType pt = new ResourceType(name);
+        resourceTypeDao.persist(pt);
+        pt.setPlugin(pluginDAO.findByName(plugin));
         pt.addPropertyType(createPropertyType(PlatformFactory.CERT_DN,String.class));
         pt.addPropertyType(createPropertyType(PlatformFactory.FQDN,String.class));
         pt.addPropertyType(createPropertyType(PlatformFactory.COMMENT_TEXT,String.class));
@@ -1589,7 +1593,7 @@ public class PlatformManagerImpl implements PlatformManager {
     }
     
     private PropertyType createPropertyType(String propName, Class<?> type) {
-        PropertyType propType = resourceTypeDao.createPropertyType(propName,type);
+        PropertyType propType = new PropertyType(propName,type);
         propType.setDescription(propName);
         propType.setHidden(true);
         return propType;
@@ -1612,7 +1616,7 @@ public class PlatformManagerImpl implements PlatformManager {
          resource.setModifiedBy(owner);
          resource.setProperty(PlatformFactory.CPU_COUNT,aiplatform.getCpuCount());
          resource.setDescription(aiplatform.getDescription());
-         resource.merge();
+         resourceDao.merge(resource);
     }
 
     /**
@@ -1814,7 +1818,8 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     public Ip addIp(Platform platform, String address, String netmask, String macAddress) {
         //TODO unique name for IP?
-        Resource ip = resourceDao.create(address, resourceManager.findResourceTypeByName(IP_RESOURCE_TYPE_NAME));
+        Resource ip = new Resource(address, resourceManager.findResourceTypeByName(IP_RESOURCE_TYPE_NAME));
+        resourceDao.persist(ip);
         ip.setProperty(PlatformFactory.IP_ADDRESS,address);
         ip.setProperty(PlatformFactory.NETMASK,netmask);
         ip.setProperty(PlatformFactory.MAC_ADDRESS,macAddress);
@@ -1844,7 +1849,7 @@ public class PlatformManagerImpl implements PlatformManager {
     private void updateIp(Resource ip, String netmask, String macAddress) {
         ip.setProperty(PlatformFactory.NETMASK,netmask);
         ip.setProperty(PlatformFactory.MAC_ADDRESS,macAddress);
-        ip.merge();
+        resourceDao.merge(ip);
     }
 
     /**
@@ -1975,7 +1980,8 @@ public class PlatformManagerImpl implements PlatformManager {
         defaultPager = Pager.getDefaultPager();
         //TODO preload some other way?
         if(resourceManager.findResourceTypeByName(IP_RESOURCE_TYPE_NAME) == null) {
-            ResourceType ipType = resourceTypeDao.create(IP_RESOURCE_TYPE_NAME);
+            ResourceType ipType = new ResourceType(IP_RESOURCE_TYPE_NAME);
+            resourceTypeDao.persist(ipType);
             //TODO ipType isn't really getting a plugin here.  
             //Maybe give it System plugin or consider making it a first class citizen in new model?
             ipType.addPropertyType(createPropertyType(PlatformFactory.IP_ADDRESS,String.class));

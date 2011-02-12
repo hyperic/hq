@@ -13,7 +13,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.ManyToOne;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -48,8 +47,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class Resource {
+    
     @Transient
-    @ManyToOne
     @RelatedTo(type = RelationshipTypes.MANAGED_BY, direction = Direction.OUTGOING, elementClass = Agent.class)
     private Agent agent;
 
@@ -83,13 +82,11 @@ public class Resource {
     @Transient
     private String name;
 
-    @ManyToOne
     @Transient
     @RelatedTo(type = RelationshipTypes.OWNS, direction = Direction.INCOMING, elementClass = AuthzSubject.class)
     private AuthzSubject owner;
 
     @Transient
-    @ManyToOne
     @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.OUTGOING, elementClass = ResourceType.class)
     private ResourceType type;
 
@@ -99,12 +96,12 @@ public class Resource {
 
     public Resource() {
     }
- 
-    @Transactional
-    public void flush() {
-        this.entityManager.flush();
+    
+    public Resource(String name, ResourceType type) {
+        this.name=name;
+        this.type=type;
     }
-
+ 
     public Agent getAgent() {
         return agent;
     }
@@ -403,15 +400,7 @@ public class Resource {
         // TODO some overlord checking, then check owner's ID
         return true;
     }
-
-    @Transactional
-    public Resource merge() {
-        Resource merged = this.entityManager.merge(this);
-        this.entityManager.flush();
-        merged.getId();
-        return merged;
-    }
-
+    
     @Transactional
     public void remove() {
         removeConfig();

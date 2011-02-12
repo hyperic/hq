@@ -80,7 +80,7 @@ public class ConfigManagerImpl implements ConfigManager {
     }
 
     private Config createConfig(byte[] configBytes) {
-        Config config = resourceDao.createConfig();
+        Config config = new Config();
         try {
             ConfigResponse configResponse = ConfigResponse.decode(configBytes);
             

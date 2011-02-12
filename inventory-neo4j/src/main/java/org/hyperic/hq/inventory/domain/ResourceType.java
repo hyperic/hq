@@ -9,8 +9,6 @@ import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Transient;
 import javax.persistence.Version;
@@ -66,27 +64,22 @@ public class ResourceType {
     private String description;
 
     @RelatedTo(type = RelationshipTypes.HAS_OPERATION_TYPE, direction = Direction.OUTGOING, elementClass = OperationType.class)
-    @OneToMany
     @Transient
     private Set<OperationType> operationTypes;
 
     @RelatedTo(type = RelationshipTypes.HAS_PROPERTY_TYPE, direction = Direction.OUTGOING, elementClass = PropertyType.class)
-    @OneToMany
     @Transient
     private Set<PropertyType> propertyTypes;
 
     @RelatedTo(type = RelationshipTypes.HAS_CONFIG_OPT_TYPE, direction = Direction.OUTGOING, elementClass = ConfigOptionType.class)
-    @OneToMany
     @Transient
     private Set<ConfigOptionType> configTypes;
 
     @Transient
-    @ManyToOne
     @RelatedTo(type = RelationshipTypes.DEFINED_BY, direction = Direction.OUTGOING, elementClass = Plugin.class)
     private Plugin plugin;
 
     @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.INCOMING, elementClass = Resource.class)
-    @OneToMany
     @Transient
     private Set<Resource> resources;
 
@@ -97,11 +90,24 @@ public class ResourceType {
     public ResourceType() {
     }
     
-    @Transactional
-    public void flush() {
-        this.entityManager.flush();
+    public ResourceType(String name) {
+        this.name=name;
     }
-
+    
+    public ResourceType(org.hyperic.hq.pdk.domain.ResourceType resourceType) {
+        setName(resourceType.getName());
+        setDescription(resourceType.getDescription());
+        for (org.hyperic.hq.pdk.domain.OperationType ot : resourceType.getOperationTypes()) {
+            OperationType opType = new OperationType(ot.getName());
+            addOperationType(opType);
+        }
+        
+        for (org.hyperic.hq.pdk.domain.PropertyType pt : resourceType.getPropertyTypes()) {
+            PropertyType propType = new PropertyType(pt.getName(),pt.getDescription());
+            addPropertyType(propType);
+        }
+    }
+  
     public Integer getId() {
         return this.id;
     }
@@ -250,15 +256,7 @@ public class ResourceType {
     public Integer getVersion() {
         return this.version;
     }
-
-    @Transactional
-    public ResourceType merge() {
-        ResourceType merged = this.entityManager.merge(this);
-        this.entityManager.flush();
-        merged.getId();
-        return merged;
-    }
-
+    
     @Transactional
     public void remove() {
         removeResources();
@@ -372,35 +370,17 @@ public class ResourceType {
         }
         return resourceTypes;
     }
-
-    public void setPropertyTypes(Set<PropertyType> propertyTypes) {
-        this.propertyTypes = propertyTypes;
-    }
-    
+ 
     public void addPropertyType(PropertyType propertyType) {
-        propertyType.setResourceType(this);
-        
-        if (propertyTypes == null) {
-            propertyTypes = new HashSet<PropertyType>();
-        }
-        
-        propertyTypes.add(propertyType);
+       propertyType.getId();
+       relateTo(propertyType,DynamicRelationshipType.withName(RelationshipTypes.HAS_PROPERTY_TYPE));
     }
     
-    public void addOperationType(OperationType operationType) {
-        operationType.setResourceType(this);
-        
-        if (operationTypes == null) {
-            operationTypes = new HashSet<OperationType>();
-        }
-        
-        operationTypes.add(operationType);
+    public void addOperationType(OperationType operationType) { 
+        operationType.getId();
+        relateTo(operationType,DynamicRelationshipType.withName(RelationshipTypes.HAS_OPERATION_TYPE));
     }
     
-    public void setOperationTypes(Set<OperationType> operationTypes) {
-        this.operationTypes = operationTypes;
-    }
-
     public Plugin getPlugin() {
         return plugin;
     }
