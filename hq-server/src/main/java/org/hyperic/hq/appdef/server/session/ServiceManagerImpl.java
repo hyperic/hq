@@ -772,7 +772,7 @@ public class ServiceManagerImpl implements ServiceManager {
         resourceDao.merge(service);
         Resource parent = service.getResourceTo(RelationshipTypes.SERVICE);
         if(valueHolder.getParent() != null && !(parent.getId().equals(valueHolder.getParent().getId()))) {
-            service.removeRelationship(parent, RelationshipTypes.SERVICE);
+            service.removeRelationships(parent, RelationshipTypes.SERVICE);
             Resource newParent = resourceManager.findResourceById(valueHolder.getParent().getId());
             newParent.relateTo(service, RelationshipTypes.SERVICE);
             newParent.relateTo(service, RelationshipTypes.CONTAINS);

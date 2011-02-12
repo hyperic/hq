@@ -97,16 +97,7 @@ public class ResourceController extends BaseController {
 		
 		return new SuccessResponse(ListRep.createListRepFromResources(resources));
 	}
-	
-	@RequestMapping(method = RequestMethod.PUT, value = "/{id}/relationships/{toId}")
-	public @ResponseBody void createNamedRelationshipTo(@PathVariable Integer id, @PathVariable Integer toId) {
-		Resource entity = resourceDao.findById(id);
-		Resource otherEntity = resourceDao.findById(toId);
-		String name = entity.getType().getRelationshipTypeName(otherEntity.getType());
-		
-		entity.relateTo(otherEntity, name);
-	}
-	
+
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}/relationships/{name}")
 	public @ResponseBody void deleteAllNamedRelationships(@PathVariable Integer id, @PathVariable String name) {
 		Resource entity = resourceDao.findById(id);

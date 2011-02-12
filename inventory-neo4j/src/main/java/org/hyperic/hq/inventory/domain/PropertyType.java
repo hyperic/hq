@@ -2,13 +2,17 @@ package org.hyperic.hq.inventory.domain;
 
 import javax.validation.constraints.NotNull;
 
-import org.hyperic.hq.reference.RelationshipTypes;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.graph.annotation.GraphId;
 import org.springframework.data.graph.annotation.NodeEntity;
-import org.springframework.data.graph.annotation.RelatedTo;
-import org.springframework.data.graph.core.Direction;
 
+/**
+ * Represents a property that can be set against Resources of the
+ * associated ResourceType
+ * @author jhickey
+ * @author dcrutchfield
+ * 
+ */
 @Configurable
 @NodeEntity
 public class PropertyType {
@@ -25,9 +29,6 @@ public class PropertyType {
     private String name;
 
     private boolean optional;
-
-    @RelatedTo(type = RelationshipTypes.HAS_PROPERTY_TYPE, direction = Direction.INCOMING, elementClass = ResourceType.class)
-    private ResourceType resourceType;
 
     private boolean secret;
     
@@ -72,9 +73,7 @@ public class PropertyType {
        return this.optional;
     }
 
-    public ResourceType getResourceType() {
-        return this.resourceType;
-    }
+    
 
     public boolean isSecret() {
         return this.secret;
@@ -108,9 +107,6 @@ public class PropertyType {
         this.optional = optional;
     }
 
-    public void setResourceType(ResourceType resourceType) {
-        this.resourceType = resourceType;
-    }
 
     public void setSecret(boolean secret) {
         this.secret = secret;
@@ -134,14 +130,14 @@ public class PropertyType {
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
+        sb.append("PropertyType[");
         sb.append("Id: ").append(getId()).append(", ");
-        sb.append("ResourceType: ").append(getResourceType()).append(", ");
         sb.append("Name: ").append(getName()).append(", ");
         sb.append("Description: ").append(getDescription()).append(", ");
         sb.append("Optional: ").append(isOptional()).append(", ");
         sb.append("Secret: ").append(isSecret()).append(", ");
         sb.append("DefaultValue: ").append(getDefaultValue());
-        sb.append("Hidden: ").append(isHidden());
+        sb.append("Hidden: ").append(isHidden()).append("]");
         return sb.toString();
     }
 }

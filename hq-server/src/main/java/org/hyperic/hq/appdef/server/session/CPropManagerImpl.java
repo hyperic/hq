@@ -163,7 +163,7 @@ public class CPropManagerImpl implements CPropManager {
         }
 
         // cascade on delete to remove Cprop as well
-        cpKey.remove();
+        //TODO remove property type?
     }
 
     /**

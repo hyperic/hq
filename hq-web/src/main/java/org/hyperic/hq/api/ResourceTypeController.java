@@ -220,7 +220,6 @@ public class ResourceTypeController extends BaseController {
 				propType.setHidden(propRep.isHidden());
 				propType.setOptional(propRep.isOptional());
 				propType.setSecret(propRep.isSecret());
-				propType.setResourceType(type);
 				type.addPropertyType(propType);
 			}
 		}

@@ -1,0 +1,82 @@
+package org.hyperic.hq.inventory.domain;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import org.hyperic.hq.inventory.dao.ResourceDao;
+import org.hyperic.hq.inventory.dao.ResourceGroupDao;
+import org.hyperic.hq.inventory.dao.ResourceTypeDao;
+import org.hyperic.hq.test.BaseInfrastructureTest;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+public class ResourceGroupIntegrationTest
+    extends BaseInfrastructureTest {
+
+    @Autowired
+    private ResourceGroupDao resourceGroupDao;
+
+    @Autowired
+    private ResourceDao resourceDao;
+
+    @Autowired
+    private ResourceTypeDao resourceTypeDao;
+
+    private ResourceGroup group;
+
+    private Resource vm;
+
+    @Before
+    public void setUp() {
+        ResourceType vApp = new ResourceType("vApp");
+        resourceTypeDao.persist(vApp);
+        ResourceType vmType = new ResourceType("VM");
+        resourceTypeDao.persist(vmType);
+        group = new ResourceGroup("Group1", vApp);
+        resourceGroupDao.persist(group);
+        vm = new Resource("VM1", vmType);
+        resourceDao.persist(vm);
+    }
+
+    @Test
+    public void testAddMember() {
+        group.addMember(vm);
+        assertEquals(1, group.getMembers().size());
+        assertEquals(vm, group.getMembers().iterator().next());
+    }
+
+    @Test
+    public void testAddMemberTwice() {
+        group.addMember(vm);
+        group.addMember(vm);
+        assertEquals(1, group.getMembers().size());
+    }
+
+    @Test
+    public void testRemoveMember() {
+        group.addMember(vm);
+        group.removeMember(vm);
+        assertEquals(0, group.getMembers().size());
+    }
+
+    @Test
+    public void testRemoveMemberTwice() {
+        group.addMember(vm);
+        group.removeMember(vm);
+        group.removeMember(vm);
+        assertEquals(0, group.getMembers().size());
+    }
+
+    @Test
+    public void testIsMember() {
+        group.addMember(vm);
+        assertTrue(group.isMember(vm));
+    }
+
+    @Test
+    public void testIsMemberNotMember() {
+        assertFalse(group.isMember(vm));
+    }
+
+}
