@@ -3030,7 +3030,15 @@ public class AppdefBossImpl implements AppdefBoss {
     }
 
     public void setAllConfigResponses(AuthzSubject subject, AllConfigResponses allConfigs,
-                                      AllConfigResponses allConfigsRollback)
+            						  AllConfigResponses allConfigsRollback)
+    throws PermissionException, EncodingException, PluginException, ApplicationException,
+    	   AutoinventoryException, ScheduleWillNeverFireException, AgentConnectionException {
+    	setAllConfigResponses(subject, allConfigs, allConfigsRollback, Boolean.TRUE);
+    }
+
+    public void setAllConfigResponses(AuthzSubject subject, AllConfigResponses allConfigs,
+                                      AllConfigResponses allConfigsRollback,
+                                      Boolean isUserManaged)
     throws PermissionException, EncodingException, PluginException, ApplicationException,
            AutoinventoryException, ScheduleWillNeverFireException, AgentConnectionException {
         boolean doRollback = true;
@@ -3038,7 +3046,7 @@ public class AppdefBossImpl implements AppdefBoss {
         AppdefEntityID id = allConfigs.getResource();
 
         try {
-            doSetAll(subject, allConfigs, doValidation, false);
+            doSetAll(subject, allConfigs, doValidation, false, isUserManaged);
 
             if (doValidation) {
                 configManager.clearValidationError(subject, id);
@@ -3067,13 +3075,14 @@ public class AppdefBossImpl implements AppdefBoss {
             throw e;
         } finally {
             if (doRollback && doValidation) {
-                doSetAll(subject, allConfigsRollback, false, true);
+                doSetAll(subject, allConfigsRollback, false, true, isUserManaged);
             }
         }
     }
 
     private void doSetAll(AuthzSubject subject, AllConfigResponses allConfigs,
-                          boolean doValidation, boolean force) throws EncodingException,
+                          boolean doValidation, boolean force,
+                          Boolean isUserManaged) throws EncodingException,
         PermissionException, ConfigFetchException, PluginException, ApplicationException {
         AppdefEntityID entityId = allConfigs.getResource();
         Set<AppdefEntityID> ids = new HashSet<AppdefEntityID>();
@@ -3085,7 +3094,7 @@ public class AppdefBossImpl implements AppdefBoss {
                 ConfigResponse.safeEncode(allConfigs.getProductConfig()), ConfigResponse
                     .safeEncode(allConfigs.getMetricConfig()), ConfigResponse.safeEncode(allConfigs
                     .getControlConfig()), ConfigResponse.safeEncode(allConfigs.getRtConfig()),
-                Boolean.TRUE, force);
+                    isUserManaged, force);
             if (wasUpdated) {
                 ids.add(entityId);
             }

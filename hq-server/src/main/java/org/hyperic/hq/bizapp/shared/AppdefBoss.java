@@ -823,5 +823,10 @@ public interface AppdefBoss {
         throws PermissionException, EncodingException, PluginException,
         ApplicationException, AutoinventoryException,
         ScheduleWillNeverFireException, AgentConnectionException;
-    
+
+    void setAllConfigResponses(AuthzSubject subject, AllConfigResponses allConfigs, 
+    						   AllConfigResponses allConfigsRollback, Boolean isUserManaged)
+    	throws PermissionException, EncodingException, PluginException,
+               ApplicationException, AutoinventoryException,
+               ScheduleWillNeverFireException, AgentConnectionException;
 }
