@@ -120,7 +120,6 @@ public class ResourceController extends BaseController {
 		Agent agent = agentDao.findById(form.getAgent().getId());
 		
 		resource.setAgent(agent);
-		resource.setType(type);
 		resource.setName(form.getName());
 		resource.setDescription(form.getDescription());
 		resource.setLocation(form.getLocation());

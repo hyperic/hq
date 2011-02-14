@@ -867,7 +867,7 @@ public class ServiceManagerImpl implements ServiceManager {
                             }
                             serverTypes.put(svrtype.getName(), svrtype);
                         }
-                        serviceType.removeRelationship(svrtype, RelationshipTypes.SERVICE);
+                        serviceType.removeRelationships(svrtype, RelationshipTypes.SERVICE);
                         svrtype.relateTo(serviceType, RelationshipTypes.SERVICE);
                     }
                 }

@@ -30,14 +30,11 @@ public class ConfigOptionType {
     private Integer id;
 
     @NotNull
-    private String name;
+    private final String name;
 
     private boolean optional;
 
     private boolean secret;
-
-    public ConfigOptionType() {
-    }
 
     /**
      * 
@@ -133,14 +130,6 @@ public class ConfigOptionType {
      */
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    /**
-     * 
-     * @param name The name of the Config Option
-     */
-    public void setName(String name) {
-        this.name = name;
     }
 
     /**

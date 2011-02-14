@@ -35,6 +35,13 @@ import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
 import org.springframework.data.graph.neo4j.support.SubReferenceNodeTypeStrategy;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 
+ * Metadata for Resources that can be created
+ * @author jhickey
+ * @author dcrutchfield
+ * 
+ */
 @Entity
 @Configurable
 @NodeEntity(partial = true)
@@ -83,6 +90,7 @@ public class ResourceType {
     @Transient
     private Set<Resource> resources;
 
+    @SuppressWarnings("unused")
     @Version
     @Column(name = "version")
     private Integer version;
@@ -90,9 +98,14 @@ public class ResourceType {
     public ResourceType() {
     }
 
+    /**
+     * 
+     * @param resourceType The PDK ResourceType to use for creating this
+     *        ResourceType
+     */
     public ResourceType(org.hyperic.hq.pdk.domain.ResourceType resourceType) {
-        setName(resourceType.getName());
-        setDescription(resourceType.getDescription());
+        this.name=resourceType.getName();
+        this.description=resourceType.getDescription();
         for (org.hyperic.hq.pdk.domain.OperationType ot : resourceType.getOperationTypes()) {
             OperationType opType = new OperationType(ot.getName());
             addOperationType(opType);
@@ -104,16 +117,28 @@ public class ResourceType {
         }
     }
 
+    /**
+     * 
+     * @param name The name of this ResourceType
+     */
     public ResourceType(String name) {
         this.name = name;
     }
 
+    /**
+     * 
+     * @param operationType The OperationType to add
+     */
     public void addOperationType(OperationType operationType) {
         operationType.getId();
         relateTo(operationType,
             DynamicRelationshipType.withName(RelationshipTypes.HAS_OPERATION_TYPE));
     }
 
+    /**
+     * 
+     * @param propertyType The PropertyType to add
+     */
     public void addPropertyType(PropertyType propertyType) {
         propertyType.getId();
         relateTo(propertyType,
@@ -121,7 +146,7 @@ public class ResourceType {
     }
 
     private Set<ResourceTypeRelationship> convertRelationships(ResourceType entity,
-                                                           Iterable<org.neo4j.graphdb.Relationship> relationships) {
+                                                               Iterable<org.neo4j.graphdb.Relationship> relationships) {
         Set<ResourceTypeRelationship> relations = new HashSet<ResourceTypeRelationship>();
         for (org.neo4j.graphdb.Relationship relationship : relationships) {
             // Don't include Neo4J relationship b/w Node and its Java type
@@ -139,18 +164,35 @@ public class ResourceType {
         return relations;
     }
 
+    /**
+     * 
+     * @return The description of the ResourceType
+     */
     public String getDescription() {
         return description;
     }
 
+    /**
+     * 
+     * @return The ID of the ResourceType
+     */
     public Integer getId() {
         return this.id;
     }
 
+    /**
+     * 
+     * @return The name of the ResourceType
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * 
+     * @param name The name of the OperationType
+     * @return The OperationType or null if it doesn't exist
+     */
     public OperationType getOperationType(String name) {
         for (OperationType operationType : operationTypes) {
             if (name.equals(operationType.getName())) {
@@ -160,14 +202,27 @@ public class ResourceType {
         return null;
     }
 
+    /**
+     * 
+     * @return The OperationTypes
+     */
     public Set<OperationType> getOperationTypes() {
         return operationTypes;
     }
 
+    /**
+     * 
+     * @return The Plugin that defined this ResourceType
+     */
     public Plugin getPlugin() {
         return plugin;
     }
 
+    /**
+     * 
+     * @param name The name of the PropertyType
+     * @return The PropertyType or null if none exists
+     */
     public PropertyType getPropertyType(String name) {
         for (PropertyType propertyType : propertyTypes) {
             if (name.equals(propertyType.getName())) {
@@ -177,6 +232,10 @@ public class ResourceType {
         return null;
     }
 
+    /**
+     * 
+     * @return The PropertyTypes
+     */
     public Set<PropertyType> getPropertyTypes() {
         return propertyTypes;
     }
@@ -200,10 +259,22 @@ public class ResourceType {
         return resourceTypes;
     }
 
+    /**
+     * 
+     * @return All relationships this ResourceType is involved in
+     */
     public Set<ResourceTypeRelationship> getRelationships() {
         return convertRelationships(null, getUnderlyingState().getRelationships());
     }
 
+    /**
+     * 
+     * @param entity The possibly related entity
+     * @param name The relationship name
+     * @param direction The direction of the relationship
+     * @return A single relationship, 2 relationships if the Direction is BOTH,
+     *         or null if no relationship exists
+     */
     public Set<ResourceTypeRelationship> getRelationships(ResourceType entity, String name,
                                                           Direction direction) {
         return convertRelationships(
@@ -212,26 +283,55 @@ public class ResourceType {
                 direction.toNeo4jDir()));
     }
 
+    /**
+     * 
+     * @param relationName The relationship name
+     * @return The relationships of specified name OUTGOING from this
+     *         ResourceTYpe
+     */
     public Set<ResourceTypeRelationship> getRelationshipsFrom(String relationName) {
         return getRelationships(null, relationName, Direction.OUTGOING);
     }
 
+    /**
+     * 
+     * @param relationName The relationship name
+     * @return The relationships of specified name INCOMING to this ResourceTYpe
+     */
     public Set<ResourceTypeRelationship> getRelationshipsTo(String relationName) {
         return getRelationships(null, relationName, Direction.INCOMING);
     }
 
+    /**
+     * 
+     * @param entity The possibly related ResourceType
+     * @param relationName The relationship name
+     * @return The single relationship of specified name with direction INCOMING
+     * @throws NotUniqueException If multiple relationships exist
+     */
     public ResourceTypeRelationship getRelationshipTo(ResourceType entity, String relationName) {
-        Set<ResourceTypeRelationship> relations = getRelationships(entity, relationName, null);
+        Set<ResourceTypeRelationship> relations = getRelationships(entity, relationName,
+            Direction.INCOMING);
         if (relations.isEmpty()) {
-           return null;
+            return null;
         }
         return relations.iterator().next();
     }
 
+    /**
+     * 
+     * @return All Resources of this type
+     */
     public Set<Resource> getResources() {
         return resources;
     }
 
+    /**
+     * 
+     * @param relationName The relationship name
+     * @return The single relationship of specified name with direction OUTGOING
+     * @throws NotUniqueException If multiple relationships exist
+     */
     public ResourceType getResourceTypeFrom(String relationName) {
         Set<ResourceType> resourceTypes = getRelatedResourceTypes(relationName,
             org.neo4j.graphdb.Direction.OUTGOING);
@@ -244,14 +344,33 @@ public class ResourceType {
         return resourceTypes.iterator().next();
     }
 
+    /**
+     * 
+     * @param relationName The relationship name
+     * @return The ResourceTypes related by specified relationship OUTGOING from
+     *         this ResourceTYpe
+     */
     public Set<ResourceType> getResourceTypesFrom(String relationName) {
         return getRelatedResourceTypes(relationName, org.neo4j.graphdb.Direction.OUTGOING);
     }
 
+    /**
+     * 
+     * @param relationName The relationship name
+     * @return The ResourceTypes related by specified relationship INCOMING from
+     *         this ResourceTYpe
+     */
     public Set<ResourceType> getResourceTypesTo(String relationName) {
         return getRelatedResourceTypes(relationName, org.neo4j.graphdb.Direction.INCOMING);
     }
 
+    /**
+     * 
+     * @param relationName The relationship name
+     * @return A single ResourceType related by specified relationship OUTGOING
+     *         from this ResourceType or null if none exists
+     * @throws NotUniqueException If multiple relationships exist
+     */
     public ResourceType getResourceTypeTo(String relationName) {
         Set<ResourceType> resourceTypes = getRelatedResourceTypes(relationName,
             org.neo4j.graphdb.Direction.INCOMING);
@@ -264,14 +383,21 @@ public class ResourceType {
         return resourceTypes.iterator().next();
     }
 
-    public Integer getVersion() {
-        return this.version;
-    }
-
+    /**
+     * 
+     * @return true if resources exist of this type
+     */
     public boolean hasResources() {
         return resources.size() > 0;
     }
 
+    /**
+     * 
+     * @param entity The ResourceType to test relation to
+     * @param relationName The name of the relationship
+     * @return true if this resource type is directly related to the supplied
+     *         ResourceType by Outgoing relationship
+     */
     public boolean isRelatedTo(ResourceType entity, String name) {
         Traverser relationTraverser = getUnderlyingState().traverse(Traverser.Order.BREADTH_FIRST,
             new StopEvaluator() {
@@ -288,18 +414,28 @@ public class ResourceType {
         return false;
     }
 
+    /**
+     * 
+     * @param entity The entity to relate to
+     * @param relationName The name of the relationship
+     * @return The created relationship
+     */
     @Transactional
     public ResourceTypeRelationship relateTo(ResourceType entity, String relationName) {
         return (ResourceTypeRelationship) this.relateTo(entity, ResourceTypeRelationship.class,
             relationName);
     }
 
+    /**
+     * Removes this ResourceType, including all Resources of this type and all
+     * relationships
+     */
     @Transactional
     public void remove() {
         removeResources();
         removePropertyTypes();
         removeOperationTypes();
-        removeConfigTypes();
+        removeConfigOptionTypes();
         graphDatabaseContext.removeNodeEntity(this);
         if (this.entityManager.contains(this)) {
             this.entityManager.remove(this);
@@ -309,7 +445,7 @@ public class ResourceType {
         }
     }
 
-    private void removeConfigTypes() {
+    private void removeConfigOptionTypes() {
         for (ConfigOptionType configType : configTypes) {
             configType.remove();
         }
@@ -327,27 +463,49 @@ public class ResourceType {
         }
     }
 
-    @Transactional
-    public void removeRelationship(ResourceType entity, String relationName) {
-        removeRelationships(entity, relationName, Direction.BOTH);
-    }
-
+    /**
+     * Removes all relationships
+     */
     @Transactional
     public void removeRelationships() {
-        removeRelationships(null, null, Direction.BOTH);
-    }
-
-    @Transactional
-    public void removeRelationships(ResourceType entity, String name, Direction direction) {
-        // TODO getRelationships only does one direction
-        for (ResourceTypeRelationship relation : getRelationships(entity, name, direction)) {
-            relation.remove();
+        for (org.neo4j.graphdb.Relationship relationship : getUnderlyingState().getRelationships()) {
+            relationship.delete();
         }
     }
 
+    /**
+     * Removes relationships
+     * @param entity The related ResourceType
+     * @param relationName The name of the relationship
+     */
+    @Transactional
+    public void removeRelationships(ResourceType entity, String relationName) {
+        removeRelationships(entity, relationName, Direction.BOTH);
+    }
+
+    /**
+     * Removes relationships
+     * @param entity The related ResourceType
+     * @param name The name of the relationship
+     * @param direction The Direction of the relationship
+     */
+    @Transactional
+    public void removeRelationships(ResourceType entity, String name, Direction direction) {
+        for (ResourceTypeRelationship relation : getRelationships(entity, name, direction)) {
+            relation.getUnderlyingState().delete();
+        }
+    }
+
+    /**
+     * Removes relationships
+     * @param relationName The name of the relationship
+     */
     @Transactional
     public void removeRelationships(String relationName) {
-        removeRelationships(null, relationName, Direction.BOTH);
+        for (org.neo4j.graphdb.Relationship relationship : getUnderlyingState().getRelationships(
+            DynamicRelationshipType.withName(relationName), Direction.BOTH.toNeo4jDir())) {
+            relationship.delete();
+        }
     }
 
     private void removeResources() {
@@ -356,24 +514,28 @@ public class ResourceType {
         }
     }
 
+    /**
+     * 
+     * @param description The ResourceType decscription
+     */
     public void setDescription(String description) {
         this.description = description;
     }
 
+    /**
+     * 
+     * @param id The ID (Hibernate internal)
+     */
     public void setId(Integer id) {
         this.id = id;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
+    /**
+     * 
+     * @param plugin The plugin that defines this ResourceType
+     */
     public void setPlugin(Plugin plugin) {
         this.plugin = plugin;
-    }
-
-    public void setVersion(Integer version) {
-        this.version = version;
     }
 
     public String toString() {

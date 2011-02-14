@@ -95,6 +95,7 @@ public class Resource {
     @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.OUTGOING, elementClass = ResourceType.class)
     private ResourceType type;
 
+    @SuppressWarnings("unused")
     @Version
     @Column(name = "version")
     private Integer version;
@@ -453,14 +454,6 @@ public class Resource {
 
     /**
      * 
-     * @return The version. Used for Hibernate versioning only
-     */
-    public Integer getVersion() {
-        return this.version;
-    }
-
-    /**
-     * 
      * @param resource The potential child
      * @param recursive true if we should consider deep ancestry
      * @return true if the specified relationship is a child
@@ -729,23 +722,6 @@ public class Resource {
             graphDatabaseContext.getNodeIndex(null).add(getUnderlyingState(), key, value);
         }
         return oldValue;
-    }
-
-    /**
-     * 
-     * @param type The resource type
-     */
-    public void setType(ResourceType type) {
-        this.type = type;
-        graphDatabaseContext.getNodeIndex(null).add(getUnderlyingState(), "type", type.getId());
-    }
-
-    /**
-     * 
-     * @param version The version (used internally by Hibernate)
-     */
-    public void setVersion(Integer version) {
-        this.version = version;
     }
 
     public String toString() {

@@ -14,38 +14,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public class Neo4jResourceTypeDao implements ResourceTypeDao {
 
-    @Resource
-    private FinderFactory finderFactory;
-    
     @PersistenceContext
     protected EntityManager entityManager;
-
-    @Transactional(readOnly = true)
-    public ResourceType findById(Integer id) {
-        if (id == null) return null;
-        
-        ResourceType result = entityManager.find(ResourceType.class, id);
-        
-        // TODO workaround to trigger Neo4jNodeBacking's around advice for the getter
-        if(result != null) {
-            result.getId();
-        }
-        
-        return result;
-    }
     
-    @Transactional(readOnly = true)
-    public List<ResourceType> findAll() {
-        List<ResourceType> result =  entityManager.createQuery("select o from ResourceType o",ResourceType.class).getResultList();
-        
-        // TODO workaround to trigger Neo4jNodeBacking's around advice for the getter
-        for (ResourceType resourceType : result) {
-            resourceType.getId();
-        }
-        
-        return result;
-    }
+    @Resource
+    private FinderFactory finderFactory;
 
+    @Transactional(readOnly = true)
+    public Long count() {
+        return (Long) entityManager.createQuery("select count(o) from ResourceType o").getSingleResult();
+    }
     
     @Transactional(readOnly = true)
     public List<ResourceType> find(Integer firstResult, Integer maxResults) {
@@ -62,14 +40,31 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
         return result;
     }
 
-    @Transactional(readOnly = true)
-    public Long count() {
-        return (Long) entityManager.createQuery("select count(o) from ResourceType o").getSingleResult();
-    }
     
     @Transactional(readOnly = true)
-    public ResourceType findRoot() {
-        return findById(1);
+    public List<ResourceType> findAll() {
+        List<ResourceType> result =  entityManager.createQuery("select o from ResourceType o",ResourceType.class).getResultList();
+        
+        // TODO workaround to trigger Neo4jNodeBacking's around advice for the getter
+        for (ResourceType resourceType : result) {
+            resourceType.getId();
+        }
+        
+        return result;
+    }
+
+    @Transactional(readOnly = true)
+    public ResourceType findById(Integer id) {
+        if (id == null) return null;
+        
+        ResourceType result = entityManager.find(ResourceType.class, id);
+        
+        // TODO workaround to trigger Neo4jNodeBacking's around advice for the getter
+        if(result != null) {
+            result.getId();
+        }
+        
+        return result;
     }
     
     @Transactional(readOnly = true)
@@ -85,10 +80,9 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
         return type;
     }
     
-    @Transactional
-    public void persist(ResourceType resourceType) {
-        entityManager.persist(resourceType);
-        resourceType.getId();
+    @Transactional(readOnly = true)
+    public ResourceType findRoot() {
+        return findById(1);
     }
     
     @Transactional
@@ -97,5 +91,11 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
         ResourceType merged = entityManager.merge(resourceType);
         entityManager.flush();
         return merged;
+    }
+    
+    @Transactional
+    public void persist(ResourceType resourceType) {
+        entityManager.persist(resourceType);
+        resourceType.getId();
     }  
 }

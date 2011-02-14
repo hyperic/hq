@@ -7,8 +7,8 @@ import org.springframework.data.graph.annotation.GraphId;
 import org.springframework.data.graph.annotation.NodeEntity;
 
 /**
- * Represents a property that can be set against Resources of the
- * associated ResourceType
+ * Represents a property that can be set against Resources of the associated
+ * ResourceType
  * @author jhickey
  * @author dcrutchfield
  * 
@@ -16,114 +16,183 @@ import org.springframework.data.graph.annotation.NodeEntity;
 @Configurable
 @NodeEntity
 public class PropertyType {
-   
+
     private String defaultValue;
 
     @NotNull
     private String description;
-    
+
+    private boolean hidden;
+
     @GraphId
     private Integer id;
 
+    private boolean indexed;
+
     @NotNull
-    private String name;
+    private final String name;
 
     private boolean optional;
 
     private boolean secret;
-    
-    private boolean hidden;
-       
-    private boolean indexed;
-    
-    //TODO use type?  Had to in JPA impl
+
+    // TODO use type? Had to in JPA impl
     private Class<?> type;
 
-    public PropertyType() {
-
+    /**
+     * 
+     * @param name The name of the property
+     * @param type The type of property values
+     */
+    public PropertyType(String name, Class<?> type) {
+        this.name = name;
+        this.type = type;
     }
-    
-    public PropertyType(String name,String description) {
+
+    /**
+     * 
+     * @param name The name of the property
+     * @param description The description of the property
+     */
+    public PropertyType(String name, String description) {
         this.description = description;
         this.name = name;
     }
-    
-    public PropertyType(String name,Class<?> type) {
-        this.name=name;
-        this.type=type;
-    }
 
+    /**
+     * 
+     * @return The default value for the property
+     */
     public String getDefaultValue() {
+        // TODO default value should be Object
         return this.defaultValue;
     }
 
+    /**
+     * 
+     * @return The property description
+     */
     public String getDescription() {
         return this.description;
     }
 
+    /**
+     * 
+     * @return The ID
+     */
     public Integer getId() {
         return this.id;
     }
 
+    /**
+     * 
+     * @return The property name
+     */
     public String getName() {
         return this.name;
     }
 
-    public boolean isOptional() {
-       return this.optional;
-    }
-
-    
-
-    public boolean isSecret() {
-        return this.secret;
-    }
-
-    public boolean isIndexed() {
-        return indexed;
-    }
-
-    public void setIndexed(boolean indexed) {
-        this.indexed = indexed;
-    }
-
-    public void setDefaultValue(String defaultValue) {
-        this.defaultValue = defaultValue;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setOptional(boolean optional) {
-        this.optional = optional;
-    }
-
-
-    public void setSecret(boolean secret) {
-        this.secret = secret;
-    }
- 
-    public boolean isHidden() {
-        return hidden;
-    }
-
-    public void setHidden(boolean hidden) {
-        this.hidden = hidden;
-    }
-    
+    /**
+     * 
+     * @return The class type of the property
+     */
     public Class<?> getType() {
         return type;
     }
 
+    /**
+     * 
+     * @return true if the property should be hidden from users
+     */
+    public boolean isHidden() {
+        return hidden;
+    }
+
+    /**
+     * 
+     * @return true if the property should be indexed for lookup when set
+     */
+    public boolean isIndexed() {
+        return indexed;
+    }
+
+    /**
+     * 
+     * @return true if property does not need to be set
+     */
+    public boolean isOptional() {
+        return this.optional;
+    }
+
+    /**
+     * 
+     * @return true if value should be obscured (like a password)
+     */
+    public boolean isSecret() {
+        return this.secret;
+    }
+
+    /**
+     * 
+     * @param defaultValue The default value for the property
+     */
+    public void setDefaultValue(String defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
+    /**
+     * 
+     * @param description The property description
+     */
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    /**
+     * 
+     * @param hidden true if the property should be hidden from users
+     */
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
+    }
+
+    /**
+     * 
+     * @param id The ID
+     */
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    /**
+     * 
+     * @param indexed true if the property should be indexed for lookup when set
+     */
+    public void setIndexed(boolean indexed) {
+        this.indexed = indexed;
+    }
+
+    /**
+     * 
+     * @param optional true if this property does not need to be set
+     */
+    public void setOptional(boolean optional) {
+        this.optional = optional;
+    }
+
+    /**
+     * 
+     * @param secret true if the property value should be obscured (like a
+     *        password)
+     */
+    public void setSecret(boolean secret) {
+        this.secret = secret;
+    }
+
+    /**
+     * 
+     * @param type The class type of the property
+     */
     public void setType(Class<?> type) {
         this.type = type;
     }

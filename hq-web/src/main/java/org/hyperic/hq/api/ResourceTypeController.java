@@ -173,7 +173,7 @@ public class ResourceTypeController extends BaseController {
 		
 		if (otherEntity == null) throw new NotFoundException("No (other)entity not found with id [" + toId + "]");
 		
-		entity.removeRelationship(otherEntity, name);
+		entity.removeRelationships(otherEntity, name);
 	}
 	
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}/relationships/{name}")
@@ -195,7 +195,6 @@ public class ResourceTypeController extends BaseController {
 			type = resourceTypeDao.findById(form.getId());
 		}
 		
-		type.setName(form.getName());
 		type.setDescription(form.getDescription());
 		
 		Plugin plugin = pluginDao.findByName(form.getPluginName());

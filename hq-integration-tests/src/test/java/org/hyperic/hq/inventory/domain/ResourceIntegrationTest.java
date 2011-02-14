@@ -22,7 +22,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.graph.core.Direction;
+import org.springframework.test.annotation.DirtiesContext;
 
+@DirtiesContext
 public class ResourceIntegrationTest
     extends BaseInfrastructureTest {
 

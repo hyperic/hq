@@ -21,11 +21,7 @@ public class OperationType {
     private Integer id;
 
     @NotNull
-    private String name;
-
-    public OperationType() {
-
-    }
+    private final String name;
 
     /**
      * 
@@ -57,14 +53,6 @@ public class OperationType {
      */
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    /**
-     * 
-     * @param name The operation name
-     */
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String toString() {

@@ -41,9 +41,6 @@ public class ResourceGroup
     @Transient
     private Set<Role> roles;
 
-    public ResourceGroup() {
-    }
-
     /**
      * 
      * @param name The name of the Group

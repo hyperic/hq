@@ -3,6 +3,8 @@ package org.hyperic.hq.inventory.domain;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hyperic.hq.inventory.NotUniqueException;
+import org.hyperic.hq.inventory.dao.ResourceDao;
 import org.hyperic.hq.inventory.dao.ResourceTypeDao;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.hyperic.hq.test.BaseInfrastructureTest;
@@ -10,14 +12,22 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.graph.core.Direction;
+import org.springframework.test.annotation.DirtiesContext;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+
+@DirtiesContext
 public class ResourceTypeIntegrationTest
     extends BaseInfrastructureTest {
 
     @Autowired
     private ResourceTypeDao resourceTypeDao;
+    
+    @Autowired
+    private ResourceDao resourceDao;
 
     private ResourceType store;
 
@@ -142,6 +152,116 @@ public class ResourceTypeIntegrationTest
         ResourceTypeRelationship relationship = produceDept.getRelationshipTo(store,RelationshipTypes.CONTAINS);
         assertEquals(store, relationship.getFrom());
         assertEquals(produceDept, relationship.getTo());
+    }
+    
+    @Test
+    public void testGetResourceTypesFrom() {
+        Set<ResourceType> resourceTypes = store.getResourceTypesFrom(RelationshipTypes.CONTAINS);
+        assertEquals(1, resourceTypes.size());
+        assertEquals(produceDept, resourceTypes.iterator().next());
+    }
+    
+    @Test
+    public void testGetResourceTypeFrom() {
+        ResourceType resourceType = store.getResourceTypeFrom(RelationshipTypes.CONTAINS);
+        assertEquals(produceDept, resourceType);
+    }
+    
+    @Test
+    public void testGetResourceTypeFromNone() {
+        assertNull(produceDept.getResourceTypeFrom(RelationshipTypes.CONTAINS));
+    }
+    
+    @Test(expected=NotUniqueException.class)
+    public void testGetResourceTypeFromMultiple() {
+        ResourceType dairyDept = new ResourceType("Dairy");
+        resourceTypeDao.persist(dairyDept);
+        store.relateTo(dairyDept,RelationshipTypes.CONTAINS);
+        store.getResourceTypeFrom(RelationshipTypes.CONTAINS);
+    }
+    
+    @Test
+    public void testGetResourceTypesTo() {
+        Set<ResourceType> resourceTypes = produceDept.getResourceTypesTo(RelationshipTypes.CONTAINS);
+        assertEquals(1, resourceTypes.size());
+        assertEquals(store, resourceTypes.iterator().next());
+    }
+    
+    @Test
+    public void testGetResourceTypeTo() {
+        ResourceType resourceType = produceDept.getResourceTypeTo(RelationshipTypes.CONTAINS);
+        assertEquals(store, resourceType);
+    }
+    
+    @Test
+    public void testGetResourceTypeToNone() {
+        assertNull(store.getResourceTypeTo(RelationshipTypes.CONTAINS));
+    }
+    
+    @Test(expected=NotUniqueException.class)
+    public void testGetResourceTypeToMultiple() {
+        ResourceType region = new ResourceType("Region");
+        resourceTypeDao.persist(region);
+        region.relateTo(produceDept,RelationshipTypes.CONTAINS);
+        produceDept.getResourceTypeTo(RelationshipTypes.CONTAINS);
+    }
+    
+    @Test
+    public void testHasResourcesNone() {
+        assertFalse(store.hasResources());
+    }
+    
+    @Test
+    public void testHasResources() {
+        Resource safeway = new Resource("Safeway",store);
+        resourceDao.persist(safeway);
+        assertTrue(store.hasResources());
+    }
+    
+    @Test
+    public void testIsRelatedTo() {
+        assertTrue(store.isRelatedTo(produceDept,RelationshipTypes.CONTAINS));
+    }
+    
+    @Test
+    public void testIsRelatedToIncoming() {
+        assertFalse(produceDept.isRelatedTo(store,RelationshipTypes.CONTAINS));
+    }
+    
+    @Test
+    public void testRemove() {
+        Resource safeway = new Resource("Safeway",store);
+        resourceDao.persist(safeway);
+        store.remove();
+        assertNull(resourceTypeDao.findById(store.getId()));
+        assertNull(resourceDao.findById(safeway.getId()));
+        assertTrue(store.getRelationships().isEmpty());
+    }
+    
+    @Test
+    public void testRemoveRelationshipsEntityName() {
+        store.removeRelationships(produceDept,RelationshipTypes.CONTAINS);
+        assertTrue(store.getRelationships().isEmpty());
+    }
+    
+    @Test
+    public void testRemoveRelationships() {
+        store.removeRelationships();
+        assertTrue(store.getRelationships().isEmpty()); 
+    }
+    
+    @Test
+    public void testRemoveRelationshipsEntityNameDir() {
+        store.removeRelationships(produceDept,RelationshipTypes.CONTAINS,Direction.INCOMING);
+        assertEquals(1,store.getRelationships().size());  
+        store.removeRelationships(produceDept,RelationshipTypes.CONTAINS,Direction.OUTGOING);
+        assertTrue(store.getRelationships().isEmpty()); 
+    }
+    
+    @Test
+    public void testRemoveRelationshipName() {
+        store.removeRelationships(RelationshipTypes.CONTAINS);
+        assertTrue(store.getRelationships().isEmpty()); 
     }
 
 }
