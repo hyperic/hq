@@ -5,7 +5,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -63,6 +63,10 @@
     <tr>
 		<td class="BlockLabel"></td>
 		<td class="BlockContent"><html:link page="/admin/config/Config.do?mode=escalate"><fmt:message key="admin.home.EscalationSchemes"/></html:link> <span class="italicInfo"><fmt:message key="inform.config.admin.EscalationScheme"/></span></td>
+	</tr>
+    <tr>
+		<td class="BlockLabel"></td>
+		<td class="BlockContent"><a href="<spring:url value="/app/admin/managers/plugin" />"><fmt:message key="admin.managers.plugin.title"/></a> <span class="italicInfo"><fmt:message key="admin.managers.plugin.description"/></span></td>
 	</tr>
 </table>
 <!--  /  -->

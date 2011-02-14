@@ -1243,7 +1243,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     
 // XXX needs javadoc!
     @Transactional(readOnly=true)
-    public int getNumAutoUpdatingAgents() {
+    public long getNumAutoUpdatingAgents() {
         return agentPluginStatusDAO.getNumAutoUpdatingAgents();
     }
     
