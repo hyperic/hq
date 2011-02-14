@@ -125,7 +125,8 @@ public class ServiceManagerImpl implements ServiceManager {
         //permissionManager.checkPermission(subject, resourceManager
         //  .findResourceTypeByName(AuthzConstants.serverResType), server.getId(),
         //AuthzConstants.serverOpAddService);
-        Resource s = resourceDao.create(name, type);
+        Resource s = new Resource(name, type);
+        resourceDao.persist(s);
         s.setDescription(desc);
         s.setModifiedBy(subject.getName());
         s.setLocation(location);
@@ -756,7 +757,7 @@ public class ServiceManagerImpl implements ServiceManager {
         Resource resource = resourceManager.findResourceById(svc.getId());
         resource.setModifiedBy(subject.getName());
         resource.setProperty(ServiceFactory.AUTO_DISCOVERY_ZOMBIE,zombieStatus);
-        resource.merge();
+        resourceDao.merge(resource);
     }
     
     private void updateService(ServiceValue valueHolder, Resource service) {
@@ -768,10 +769,10 @@ public class ServiceManagerImpl implements ServiceManager {
         service.setModifiedBy( valueHolder.getModifiedBy() );
         service.setLocation( valueHolder.getLocation() );
         service.setName( valueHolder.getName() );
-        service.merge();
+        resourceDao.merge(service);
         Resource parent = service.getResourceTo(RelationshipTypes.SERVICE);
         if(valueHolder.getParent() != null && !(parent.getId().equals(valueHolder.getParent().getId()))) {
-            service.removeRelationship(parent, RelationshipTypes.SERVICE);
+            service.removeRelationships(parent, RelationshipTypes.SERVICE);
             Resource newParent = resourceManager.findResourceById(valueHolder.getParent().getId());
             newParent.relateTo(service, RelationshipTypes.SERVICE);
             newParent.relateTo(service, RelationshipTypes.CONTAINS);
@@ -847,7 +848,7 @@ public class ServiceManagerImpl implements ServiceManager {
                     // Just update it
                     if (!sinfo.getDescription().equals(serviceType.getDescription())) {
                         serviceType.setDescription(sinfo.getDescription());
-                        serviceType.merge();
+                        resourceTypeDao.merge(serviceType);
                     }
 
                     //TODO  update platform association
@@ -866,7 +867,7 @@ public class ServiceManagerImpl implements ServiceManager {
                             }
                             serverTypes.put(svrtype.getName(), svrtype);
                         }
-                        serviceType.removeRelationship(svrtype, RelationshipTypes.SERVICE);
+                        serviceType.removeRelationships(svrtype, RelationshipTypes.SERVICE);
                         svrtype.relateTo(serviceType, RelationshipTypes.SERVICE);
                     }
                 }
@@ -933,7 +934,9 @@ public class ServiceManagerImpl implements ServiceManager {
 
     
     private ResourceType createServiceType(ServiceTypeInfo sinfo, String plugin) throws NotFoundException {
-        ResourceType serviceType = resourceTypeDao.create(sinfo.getName(), pluginDAO.findByName(plugin));
+        ResourceType serviceType = new ResourceType(sinfo.getName());
+        resourceTypeDao.persist(serviceType);
+        serviceType.setPlugin(pluginDAO.findByName(plugin));
         serviceType.setDescription(sinfo.getDescription());
         serviceType.addPropertyType(createServicePropertyType(ServiceFactory.AUTO_INVENTORY_IDENTIFIER,String.class));
         serviceType.addPropertyType(createServicePropertyType(ServiceFactory.CREATION_TIME,Long.class));
@@ -949,7 +952,7 @@ public class ServiceManagerImpl implements ServiceManager {
     }
     
     private PropertyType createServicePropertyType(String propName,Class<?> type) {
-        PropertyType propType = resourceTypeDao.createPropertyType(propName,type);
+        PropertyType propType = new PropertyType(propName,type);
         propType.setDescription(propName);
         propType.setHidden(true);
         return propType;

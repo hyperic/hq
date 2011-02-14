@@ -347,7 +347,9 @@ public class ProductManagerImpl implements ProductManager {
     		if (entity == null) {
     			Plugin plugin = pluginDao.findByName(resourceType.getPluginName());
     			
-    			entity = resourceTypeDao.create(resourceType, plugin);
+    			entity = new ResourceType(resourceType);
+    			resourceTypeDao.persist(entity);
+    			entity.setPlugin(plugin);
     		}
     		
     		lookup.put(resourceType.getName(), entity);

@@ -3,68 +3,62 @@ package org.hyperic.hq.inventory.domain;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Version;
-
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.ReturnableEvaluator;
 import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.TraversalPosition;
 import org.neo4j.graphdb.Traverser;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.data.graph.annotation.GraphId;
 import org.springframework.data.graph.annotation.NodeEntity;
 import org.springframework.data.graph.core.Direction;
 import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
 import org.springframework.transaction.annotation.Transactional;
 
-@Entity
-@NodeEntity(partial = true)
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-public class Config  {
+/**
+ * Config for a Resource. Config values are used to help manage the Resource.
+ * For example, user name/pw/connection URL
+ * @author jhickey
+ * @author dcrutchfield
+ */
+@Configurable
+@NodeEntity
+public class Config {
 
-    @PersistenceContext
-    transient EntityManager entityManager;
-    
     @javax.annotation.Resource
     private transient GraphDatabaseContext graphDatabaseContext;
 
-    @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")
-    @GeneratedValue(generator = "mygen1")
-    @Column(name = "id")
+    @GraphId
     private Integer id;
 
-    @Version
-    @Column(name = "version")
-    private Integer version;
-    
-    
     public Config() {
     }
 
-    @Transactional
-    public void flush() {
-        this.entityManager.flush();
-    }
-
+    /**
+     * 
+     * @return The config ID
+     */
     public Integer getId() {
         return this.id;
     }
 
+    /**
+     * 
+     * @param key The config key
+     * @return The config value
+     */
     public Object getValue(String key) {
         // TODO default values
         return getUnderlyingState().getProperty(key);
     }
 
+    /**
+     * 
+     * @return All config values
+     */
     public Map<String, Object> getValues() {
         Map<String, Object> properties = new HashMap<String, Object>();
         for (String key : getUnderlyingState().getPropertyKeys()) {
@@ -78,47 +72,6 @@ public class Config  {
         return properties;
     }
 
-    public Integer getVersion() {
-        return this.version;
-    }
-
-    @Transactional
-    public Config merge() {
-        Config merged = this.entityManager.merge(this);
-        this.entityManager.flush();
-        merged.getId();
-        return merged;
-    }
-
-    @Transactional
-    public void remove() {
-        graphDatabaseContext.removeNodeEntity(this);
-        if (this.entityManager.contains(this)) {
-            this.entityManager.remove(this);
-        } else {
-            Config attached = this.entityManager.find(this.getClass(), this.id);
-            this.entityManager.remove(attached);
-        }
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public void setValue(String key, Object value) {
-        if (value == null) {
-            // TODO log a warning?
-            // Neo4J doesn't accept null values
-            return;
-        }
-        //TODO re-enable when product plugin deployment actually creates ConfigOptionTypes
-//        if (!(isAllowableConfigValue(key, value))) {
-//            throw new IllegalArgumentException("Config option " + key +
-//                                               " is not defined");
-//        }
-        getUnderlyingState().setProperty(key, value);
-    }
-    
     private boolean isAllowableConfigValue(String key, Object value) {
         Traverser relationTraverser = getUnderlyingState().traverse(Traverser.Order.BREADTH_FIRST,
             new StopEvaluator() {
@@ -126,18 +79,58 @@ public class Config  {
                     return currentPos.depth() >= 1;
                 }
             }, ReturnableEvaluator.ALL_BUT_START_NODE,
-            DynamicRelationshipType.withName(RelationshipTypes.ALLOWS_CONFIG_OPTS), Direction.OUTGOING.toNeo4jDir());
+            DynamicRelationshipType.withName(RelationshipTypes.ALLOWS_CONFIG_OPTS),
+            Direction.OUTGOING.toNeo4jDir());
         for (Node related : relationTraverser) {
-            ConfigOptionType optionType = graphDatabaseContext.createEntityFromState(related, ConfigOptionType.class);
-            if(optionType.getName().equals(key)) {
-                //TODO check more than just option name?
+            ConfigOptionType optionType = graphDatabaseContext.createEntityFromState(related,
+                ConfigOptionType.class);
+            if (optionType.getName().equals(key)) {
+                // TODO check more than just option name?
                 return true;
             }
         }
         return false;
     }
 
-    public void setVersion(Integer version) {
-        this.version = version;
+    /**
+     * 
+     * @param id The Config id
+     */
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    /**
+     * Sets the Config value
+     * @param key The config key
+     * @param value The config value
+     * @return The previous value or null if there was none
+     */
+    @Transactional
+    public Object setValue(String key, Object value) {
+        // TODO re-enable when product plugin deployment actually creates
+        // ConfigOptionTypes
+        // if (!(isAllowableConfigValue(key, value))) {
+        // throw new IllegalArgumentException("Config option " + key +
+        // " is not defined");
+        // }
+        if (value == null) {
+            return getUnderlyingState().removeProperty(key);
+        }
+        Object oldValue = null;
+        try {
+            oldValue = getUnderlyingState().getProperty(key);
+        } catch (NotFoundException e) {
+            // could be first time
+        }
+        getUnderlyingState().setProperty(key, value);
+        return oldValue;
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Config[");
+        sb.append("Id: ").append(getId()).append("]");
+        return sb.toString();
     }
 }

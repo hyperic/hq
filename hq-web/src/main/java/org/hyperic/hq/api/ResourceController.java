@@ -78,7 +78,7 @@ public class ResourceController extends BaseController {
 	public @ResponseBody SuccessResponse update(@PathVariable Integer id, @RequestBody ResourceRep form) throws Exception {
 		Resource resource = translateFormToDomain(form);
 
-		resource.merge();
+		resourceDao.merge(resource);
 		
 		return new SuccessResponse(new ResourceRep(resource));
 	}
@@ -97,16 +97,7 @@ public class ResourceController extends BaseController {
 		
 		return new SuccessResponse(ListRep.createListRepFromResources(resources));
 	}
-	
-	@RequestMapping(method = RequestMethod.PUT, value = "/{id}/relationships/{toId}")
-	public @ResponseBody void createNamedRelationshipTo(@PathVariable Integer id, @PathVariable Integer toId) {
-		Resource entity = resourceDao.findById(id);
-		Resource otherEntity = resourceDao.findById(toId);
-		String name = entity.getType().getRelationshipTypeName(otherEntity.getType());
-		
-		entity.relateTo(otherEntity, name);
-	}
-	
+
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}/relationships/{name}")
 	public @ResponseBody void deleteAllNamedRelationships(@PathVariable Integer id, @PathVariable String name) {
 		Resource entity = resourceDao.findById(id);
@@ -119,8 +110,8 @@ public class ResourceController extends BaseController {
 		
 		ResourceType type = resourceTypeDao.findById(form.getType().getId());
 		if (form.getId() == null) {
-			resource = resourceDao.create(form.getName(), type);
-			
+			resource = new Resource(form.getName(), type);
+			resourceDao.persist(resource);
 			// TODO schedule measurement processor...
 		} else {
 			resource = resourceDao.findById(form.getId());
@@ -129,7 +120,6 @@ public class ResourceController extends BaseController {
 		Agent agent = agentDao.findById(form.getAgent().getId());
 		
 		resource.setAgent(agent);
-		resource.setType(type);
 		resource.setName(form.getName());
 		resource.setDescription(form.getDescription());
 		resource.setLocation(form.getLocation());

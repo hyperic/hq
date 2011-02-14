@@ -106,10 +106,10 @@ public class CPropManagerImpl implements CPropManager {
      * @throw CPropKeyExistsException if the key already exists
      */
     public void addKey(ResourceType appdefType, String key, String description,Class<?> type) {
-        PropertyType propertyType = resourceTypeDao.createPropertyType(key,type);
+        PropertyType propertyType = new PropertyType(key,type);
         propertyType.setDescription(description);
         appdefType.addPropertyType(propertyType);
-        appdefType.merge();
+        resourceTypeDao.merge(appdefType);
     }
 
     /**
@@ -163,7 +163,7 @@ public class CPropManagerImpl implements CPropManager {
         }
 
         // cascade on delete to remove Cprop as well
-        cpKey.remove();
+        //TODO remove property type?
     }
 
     /**

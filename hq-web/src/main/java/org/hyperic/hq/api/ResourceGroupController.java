@@ -69,7 +69,7 @@ public class ResourceGroupController extends BaseController {
 	public @ResponseBody SuccessResponse update(@PathVariable Integer id, @RequestBody ResourceGroupForm form) throws Exception {
 		ResourceGroup group = translateFormToDomain(form);
 		
-		group.merge();
+		resourceGroupDao.merge(group);
 		
 		return new SuccessResponse(new ResourceGroupRep(group));
 	}
@@ -95,7 +95,7 @@ public class ResourceGroupController extends BaseController {
 		Resource member = resourceDao.findById(memberId);
 		
 		entity.addMember(member);
-		entity.merge();
+		resourceGroupDao.merge(entity);
 	}
 	
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}/members/{memberId}")
@@ -104,7 +104,7 @@ public class ResourceGroupController extends BaseController {
 		Resource member = resourceDao.findById(memberId);
 		
 		entity.removeMember(member);
-		entity.merge();
+		resourceGroupDao.merge(entity);
 	}
 	
 	private ResourceGroup translateFormToDomain(ResourceGroupForm form) {
@@ -112,7 +112,8 @@ public class ResourceGroupController extends BaseController {
 		
 		if (form.getId() == null) {
 		    ResourceType type = resourceTypeDao.findById(form.getResourceTypeId());
-			group = resourceGroupDao.create(form.getName(), type,form.isPrivateGroup());
+			group = new ResourceGroup(form.getName(), type,form.isPrivateGroup());
+			resourceGroupDao.persist(group);
 		} else {
 			group = resourceGroupDao.findById(form.getId());
 		}

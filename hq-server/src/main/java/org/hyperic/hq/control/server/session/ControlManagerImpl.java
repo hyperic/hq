@@ -78,6 +78,7 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.shared.ProductManager;
+import org.hyperic.hq.reference.ConfigTypes;
 import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -443,7 +444,7 @@ public class ControlManagerImpl implements ControlManager {
      */
     @Transactional(readOnly=true)
     public void checkControlEnabled(AuthzSubject subject, AppdefEntityID id) throws PluginException {
-        Config config = resourceManager.findResourceById(id.getId()).getControlConfig();
+        Config config = resourceManager.findResourceById(id.getId()).getConfig(ConfigTypes.CONTROL);
         if (config == null) {
             throw new PluginException("Control not " + "configured for " + id);
         }

@@ -254,7 +254,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
     
     private ResourceGroup create(AuthzSubject owner, ApplicationValue appV) {
-        ResourceGroup app =  resourceGroupDao.create(appV.getName(),resourceManager.findResourceTypeByName(AppdefEntityConstants.APPDEF_NAME_APPLICATION));
+        ResourceGroup app =  new ResourceGroup(appV.getName(),resourceManager.findResourceTypeByName(AppdefEntityConstants.APPDEF_NAME_APPLICATION));
+        resourceGroupDao.persist(app);
         app.setOwner(owner);
         updateApplication(app, appV);
         return app;
@@ -281,7 +282,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 app.removeMember(resourceManager.findResourceById(o.getId()));
             }
         }
-        app.merge();
+        resourceGroupDao.merge(app);
     }
 
     /**
@@ -881,7 +882,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
         defaultPager = Pager.getDefaultPager();
         //TODO move init logic?
         if(resourceTypeDao.findByName(AppdefEntityConstants.APPDEF_NAME_APPLICATION) == null) {
-            ResourceType groupType = resourceTypeDao.create(AppdefEntityConstants.APPDEF_NAME_APPLICATION);
+            ResourceType groupType = new ResourceType(AppdefEntityConstants.APPDEF_NAME_APPLICATION);
+            resourceTypeDao.persist(groupType);
             setPropertyType(groupType,AppdefResource.SORT_NAME,String.class);
             setPropertyType(groupType,ApplicationManagerImpl.BUSINESS_CONTACT,String.class);
             setPropertyType(groupType,ApplicationManagerImpl.CREATION_TIME,Long.class);
@@ -893,7 +895,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
         
     private void setPropertyType(ResourceType groupType, String propTypeName, Class<?> type) {
-        PropertyType propType = resourceTypeDao.createPropertyType(propTypeName,type);
+        PropertyType propType = new PropertyType(propTypeName,type);
         propType.setDescription(propTypeName);
         propType.setHidden(true);
         groupType.addPropertyType(propType);

@@ -171,7 +171,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         if (pm.hasAdminPermission(whoami.getId()) || resource.isOwner(whoami.getId())) {
             resource.setOwner(newOwner);
             resource.setModifiedBy(whoami.getName());
-            resource.merge();
+            resourceDao.merge(resource);
         } else {
             throw new PermissionException("Only an owner or admin may " + "reassign ownership.");
         }
@@ -324,8 +324,10 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     public void initializeResourceTypes() {
         //TODO Is this the place for this?
         if(resourceTypeDao.findRoot() == null) {
-            ResourceType system= resourceTypeDao.create("System");
-            resourceDao.create("Root", system);
+            ResourceType system= new ResourceType("System");
+            resourceTypeDao.persist(system);
+            Resource root = new Resource("Root", system);
+            resourceDao.persist(root);
         }     
     }
     

@@ -60,11 +60,13 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.inventory.dao.ResourceDao;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 
 
@@ -95,6 +97,9 @@ public class PlatformManagerTest
     private ServiceType serviceType;
     
     private String agentToken = "agentToken123";
+    
+    @Autowired
+    private ResourceDao resourceDao;
 
     private List<Platform> createPlatforms(String agentToken) throws ApplicationException {
         List<Platform> platforms = new ArrayList<Platform>(10);
@@ -320,16 +325,16 @@ public class PlatformManagerTest
         for (Platform p : testPlatforms) {
             // Set Platforms creation time 20 minutes before the current time.
             p.getResource().setProperty(PlatformFactory.CREATION_TIME,setTime - 20 * 60000l);
-            p.getResource().merge();
+            resourceDao.merge(p.getResource());
             i++;
         }
         // Change two of the platform's creation time to recent
         testPlatforms.get(0).getResource().setProperty(PlatformFactory.CREATION_TIME,setTime);
-        testPlatforms.get(0).getResource().merge();
+        resourceDao.merge(testPlatforms.get(0).getResource());
         testPlatforms.get(1).getResource().setProperty(PlatformFactory.CREATION_TIME,setTime - 2 * 60000l);
-        testPlatforms.get(1).getResource().merge();
+        resourceDao.merge(testPlatforms.get(1).getResource());
         testPlatforms.get(2).getResource().setProperty(PlatformFactory.CREATION_TIME,setTime - 3 * 60000l);
-        testPlatforms.get(2).getResource().merge();
+        resourceDao.merge(testPlatforms.get(2).getResource());
         PageList<PlatformValue> pValues = platformManager.getRecentPlatforms(authzSubjectManager
             .getOverlordPojo(), 5 * 60000l, 10);
         assertEquals(3, pValues.size());

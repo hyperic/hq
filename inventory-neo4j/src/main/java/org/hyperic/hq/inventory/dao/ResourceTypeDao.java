@@ -1,15 +1,33 @@
 package org.hyperic.hq.inventory.dao;
 
-import org.hyperic.hq.inventory.domain.OperationType;
-import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.ResourceType;
-import org.hyperic.hq.product.Plugin;
 
+/**
+ * 
+ * Repository for lookup of {@link ResourceType}s
+ * @author jhickey
+ * @author dcruchfield
+ * 
+ */
 public interface ResourceTypeDao extends GenericDao<ResourceType> {
-    public ResourceType findRoot();
-    PropertyType createPropertyType(String name,Class<?> type);
-    OperationType createOperationType(String name, ResourceType resourceType);
-    ResourceType create(String name, Plugin plugin);
-    ResourceType create(org.hyperic.hq.pdk.domain.ResourceType resourceType, Plugin plugin);
-    ResourceType create(String name);
+
+    /**
+     * 
+     * @return The root ResourceType to use when making associations (for
+     *         traversal of rootless objs)
+     */
+    ResourceType findRoot();
+
+    /**
+     * Saves changes to an existing ResourceType
+     * @param resourceType The changed ResourceType
+     * @return The merged ResourceType
+     */
+    ResourceType merge(ResourceType resourceType);
+
+    /**
+     * Persists a new ResourceType
+     * @param resourceType The new resource type
+     */
+    void persist(ResourceType resourceType);
 }

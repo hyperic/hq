@@ -1,210 +1,212 @@
 package org.hyperic.hq.inventory.domain;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Transient;
-import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.hyperic.hq.reference.RelationshipTypes;
 import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.data.graph.annotation.GraphProperty;
+import org.springframework.data.graph.annotation.GraphId;
 import org.springframework.data.graph.annotation.NodeEntity;
-import org.springframework.data.graph.annotation.RelatedTo;
-import org.springframework.data.graph.core.Direction;
-import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
-import org.springframework.transaction.annotation.Transactional;
 
-@Entity
+/**
+ * Represents a property that can be set against Resources of the associated
+ * ResourceType
+ * @author jhickey
+ * @author dcrutchfield
+ * 
+ */
 @Configurable
-@NodeEntity(partial = true)
+@NodeEntity
 public class PropertyType {
-    @GraphProperty
-    @Transient
+
     private String defaultValue;
 
     @NotNull
-    @GraphProperty
-    @Transient
     private String description;
 
-    @PersistenceContext
-    transient EntityManager entityManager;
-    
-    @javax.annotation.Resource
-    private transient GraphDatabaseContext graphDatabaseContext;
+    private boolean hidden;
 
-    @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")
-    @GeneratedValue(generator = "mygen1")
-    @Column(name = "id")
+    @GraphId
     private Integer id;
 
-    @NotNull
-    @GraphProperty
-    @Transient
-    private String name;
-
-    @GraphProperty
-    @Transient
-    private Boolean optional;
-
-    @ManyToOne
-    @Transient
-    @RelatedTo(type = RelationshipTypes.HAS_PROPERTY_TYPE, direction = Direction.INCOMING, elementClass = ResourceType.class)
-    private ResourceType resourceType;
-
-    @GraphProperty
-    @Transient
-    private Boolean secret;
-    
-    @GraphProperty
-    @Transient
-    private Boolean hidden;
-    
-    @GraphProperty
-    @Transient
     private boolean indexed;
 
-    @Version
-    @Column(name = "version")
-    private Integer version;
+    @NotNull
+    private final String name;
 
-    public PropertyType() {
+    private boolean optional;
 
+    private boolean secret;
+
+    // TODO use type? Had to in JPA impl
+    private Class<?> type;
+
+    /**
+     * 
+     * @param name The name of the property
+     * @param type The type of property values
+     */
+    public PropertyType(String name, Class<?> type) {
+        this.name = name;
+        this.type = type;
     }
 
-    @Transactional
-    public void flush() {
-        this.entityManager.flush();
+    /**
+     * 
+     * @param name The name of the property
+     * @param description The description of the property
+     */
+    public PropertyType(String name, String description) {
+        this.description = description;
+        this.name = name;
     }
 
+    /**
+     * 
+     * @return The default value for the property
+     */
     public String getDefaultValue() {
+        // TODO default value should be Object
         return this.defaultValue;
     }
 
+    /**
+     * 
+     * @return The property description
+     */
     public String getDescription() {
         return this.description;
     }
 
+    /**
+     * 
+     * @return The ID
+     */
     public Integer getId() {
         return this.id;
     }
 
+    /**
+     * 
+     * @return The property name
+     */
     public String getName() {
         return this.name;
     }
 
-    public Boolean isOptional() {
-        //TODO proper way to do default value?
-       if(this.optional == null) {
-           return false;
-       }
-       return this.optional;
+    /**
+     * 
+     * @return The class type of the property
+     */
+    public Class<?> getType() {
+        return type;
     }
 
-    public ResourceType getResourceType() {
-        return this.resourceType;
+    /**
+     * 
+     * @return true if the property should be hidden from users
+     */
+    public boolean isHidden() {
+        return hidden;
     }
 
-    public Boolean isSecret() {
-        if(this.secret == null) {
-            return false;
-        }
-        return this.secret;
-    }
-
-    public Integer getVersion() {
-        return this.version;
-    }
-
+    /**
+     * 
+     * @return true if the property should be indexed for lookup when set
+     */
     public boolean isIndexed() {
         return indexed;
     }
 
-    public void setIndexed(boolean indexed) {
-        this.indexed = indexed;
+    /**
+     * 
+     * @return true if property does not need to be set
+     */
+    public boolean isOptional() {
+        return this.optional;
     }
 
-    @Transactional
-    public PropertyType merge() {
-        PropertyType merged = this.entityManager.merge(this);
-        this.entityManager.flush();
-        merged.getId();
-        return merged;
+    /**
+     * 
+     * @return true if value should be obscured (like a password)
+     */
+    public boolean isSecret() {
+        return this.secret;
     }
 
-    @Transactional
-    public void remove() {
-        graphDatabaseContext.removeNodeEntity(this);
-        if (this.entityManager.contains(this)) {
-            this.entityManager.remove(this);
-        } else {
-            PropertyType attached = this.entityManager.find(this.getClass(), this.id);
-            this.entityManager.remove(attached);
-        }
-    }
-
+    /**
+     * 
+     * @param defaultValue The default value for the property
+     */
     public void setDefaultValue(String defaultValue) {
         this.defaultValue = defaultValue;
     }
 
+    /**
+     * 
+     * @param description The property description
+     */
     public void setDescription(String description) {
         this.description = description;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setOptional(Boolean optional) {
-        this.optional = optional;
-    }
-
-    public void setResourceType(ResourceType resourceType) {
-        this.resourceType = resourceType;
-    }
-
-    public void setSecret(Boolean secret) {
-        this.secret = secret;
-    }
-
-    public void setVersion(Integer version) {
-        this.version = version;
-    }
-    
-    public boolean isHidden() {
-        if(this.hidden == null) {
-            return false;
-        }
-        return hidden;
-    }
-
+    /**
+     * 
+     * @param hidden true if the property should be hidden from users
+     */
     public void setHidden(boolean hidden) {
         this.hidden = hidden;
     }
 
+    /**
+     * 
+     * @param id The ID
+     */
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    /**
+     * 
+     * @param indexed true if the property should be indexed for lookup when set
+     */
+    public void setIndexed(boolean indexed) {
+        this.indexed = indexed;
+    }
+
+    /**
+     * 
+     * @param optional true if this property does not need to be set
+     */
+    public void setOptional(boolean optional) {
+        this.optional = optional;
+    }
+
+    /**
+     * 
+     * @param secret true if the property value should be obscured (like a
+     *        password)
+     */
+    public void setSecret(boolean secret) {
+        this.secret = secret;
+    }
+
+    /**
+     * 
+     * @param type The class type of the property
+     */
+    public void setType(Class<?> type) {
+        this.type = type;
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
+        sb.append("PropertyType[");
         sb.append("Id: ").append(getId()).append(", ");
-        sb.append("Version: ").append(getVersion()).append(", ");
-        sb.append("ResourceType: ").append(getResourceType()).append(", ");
         sb.append("Name: ").append(getName()).append(", ");
         sb.append("Description: ").append(getDescription()).append(", ");
         sb.append("Optional: ").append(isOptional()).append(", ");
         sb.append("Secret: ").append(isSecret()).append(", ");
         sb.append("DefaultValue: ").append(getDefaultValue());
-        sb.append("Hidden: ").append(isHidden());
+        sb.append("Hidden: ").append(isHidden()).append("]");
         return sb.toString();
     }
 }

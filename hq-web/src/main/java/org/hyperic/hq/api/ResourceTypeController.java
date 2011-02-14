@@ -2,7 +2,6 @@ package org.hyperic.hq.api;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -91,7 +90,7 @@ public class ResourceTypeController extends BaseController {
 	public @ResponseBody SuccessResponse update(@PathVariable Integer id, @RequestBody ResourceTypeRep form) throws Exception {
 		ResourceType type = translateFormToDomain(form);
 
-		type.merge();
+		resourceTypeDao.merge(type);
 		
 		return new SuccessResponse(new ResourceTypeRep(type));
 	}
@@ -174,7 +173,7 @@ public class ResourceTypeController extends BaseController {
 		
 		if (otherEntity == null) throw new NotFoundException("No (other)entity not found with id [" + toId + "]");
 		
-		entity.removeRelationship(otherEntity, name);
+		entity.removeRelationships(otherEntity, name);
 	}
 	
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}/relationships/{name}")
@@ -190,12 +189,12 @@ public class ResourceTypeController extends BaseController {
 		ResourceType type;
 		
 		if (form.getId() == null) {
-			type = resourceTypeDao.create(form.getName());
+			type = new ResourceType(form.getName());
+			resourceTypeDao.persist(type);
 		} else {
 			type = resourceTypeDao.findById(form.getId());
 		}
 		
-		type.setName(form.getName());
 		type.setDescription(form.getDescription());
 		
 		Plugin plugin = pluginDao.findByName(form.getPluginName());
@@ -203,34 +202,25 @@ public class ResourceTypeController extends BaseController {
 		type.setPlugin(plugin);
 		
 		if (form.getOperationTypes() != null) {
-			Set<OperationType> operationTypes = new HashSet<OperationType>();
 			
 			for (OperationTypeRep opRep : form.getOperationTypes()) {
-				OperationType opType = resourceTypeDao.createOperationType(opRep.getName(),type);
-				
-				operationTypes.add(opType);
+				OperationType opType = new OperationType(opRep.getName());
+				type.addOperationType(opType);
 			}
 			
-			type.setOperationTypes(operationTypes);
 		}
 		
 		if (form.getPropertyTypes() != null) {
-			Set<PropertyType> propertyTypes = new HashSet<PropertyType>();
-			
 			for (PropertyTypeRep propRep : form.getPropertyTypes()) {
-				PropertyType propType = resourceTypeDao.createPropertyType(propRep.getName(),String.class);
+				PropertyType propType = new PropertyType(propRep.getName(),String.class);
 				
 				propType.setDefaultValue(propRep.getDefaultValue());
 				propType.setDescription(propRep.getDescription());
 				propType.setHidden(propRep.isHidden());
 				propType.setOptional(propRep.isOptional());
 				propType.setSecret(propRep.isSecret());
-				propType.setResourceType(type);
-				
-				propertyTypes.add(propType);
+				type.addPropertyType(propType);
 			}
-			
-			type.setPropertyTypes(propertyTypes);
 		}
 		
 		return type;
