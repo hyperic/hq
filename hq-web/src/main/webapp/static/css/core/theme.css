@@ -1,7 +1,7 @@
 body { background: #EFEFEF; }
 
 #header { 
-	background: #ececec url('../../images/header_background.jpg') repeat-x scroll;
+	background: #000 url('../../images/header_background.jpg') repeat-x scroll;
     border-bottom: 3px solid #2D6EBE;
 }
 
@@ -13,6 +13,69 @@ body { background: #EFEFEF; }
 #headerLinks ul li a { 
 	text-decoration: none;
 	color: #88C7FC; 
+}
+
+#headerTabs li.tab {
+	background: url('../../images/tab-main-background.png') repeat-x 0 0;
+}
+
+#headerTabs li.tab.active {
+	background: url('../../images/tab-main-active-background.png') repeat-x 0 0;
+}
+
+#headerTabs li.tab > a {
+	color: #444;
+	text-decoration: none;
+	font-weight: bold;
+}
+
+#headerTabs li.tab.active > a {
+	color: #fff;
+}
+
+#headerTabs li ul {
+	display: none;
+}
+
+#searchBox {
+	background: url("../../images/search.png") no-repeat 3px center #fff;
+	color: #444;
+}
+
+#searchClose {
+	background: url("../../images/close.png") repeat scroll 0 0 transparent;
+    cursor: pointer;
+    height: 16px;
+    width: 16px;
+    margin-top: 3px;
+}
+
+#headerSearchResults {
+   	background-color: #fff;
+    border: 1px solid #3179D4;
+}
+
+#headerSearchResults .category {
+    background: none repeat scroll 0 0 #92C1FD;
+    color: #FFFFFF;
+    margin-bottom: 3px;
+    padding: 2px;
+}
+
+#headerSearchResults ul {
+    list-style: none;
+    margin: 0;
+    padding: 4px;
+}
+
+#headerSearchResults li.service {
+    background: url("../../images/service.png") no-repeat scroll 0 50% transparent;
+}
+
+#headerSearchResults li {
+    border: 1px solid #fff;
+    margin: 2px 0;
+    padding: 1px 0 1px 22px;
 }
 
 #loginPanel {

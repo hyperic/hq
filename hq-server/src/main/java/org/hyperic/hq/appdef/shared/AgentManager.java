@@ -448,9 +448,13 @@ public interface AgentManager {
            AgentRemoteException, FileNotFoundException, IOException, ConfigPropertyException;
     
 // XXX javadoc!
-    public int getNumAutoUpdatingAgents();
+    public long getNumAutoUpdatingAgents();
     
 // XXX javadoc!
     public List<Plugin> getAllPlugins();
 
+ // XXX javadoc!    
+    public Map<Plugin, Collection<Agent>> getOutOfSyncAgentsByPlugin();
+
+ 
 }

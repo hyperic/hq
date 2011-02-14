@@ -43,7 +43,7 @@
 <script>
 	dojo.require("dijit.Dialog");
 	
-	dojo.addOnLoad(function() {
+	dojo.ready(function() {
 		var username = dojo.byId("usernameInput");
 		var password = dojo.byId("passwordInput");
 

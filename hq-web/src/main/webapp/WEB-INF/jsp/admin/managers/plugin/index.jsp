@@ -59,7 +59,6 @@
 		background-color: #eee;
 	}
 </style>
-
 <section id="pluginManagerPanel" class="container top">
 	<span class="span-4 append-20">
 		<a href="/Admin.do"><fmt:message key="admin.managers.plugin.back.to.administration" /></a>
@@ -74,22 +73,16 @@
 		<li class="gridheader clear">
 			<!-- span class="first column span-1">&nbsp;</span -->
 			<span class="column span-4"><fmt:message key="admin.managers.plugin.column.header.product.plugin" /></span>
-			<span class="column span-4"><fmt:message key="admin.managers.plugin.column.header.version" /></span>
-			<span class="column span-6"><fmt:message key="admin.managers.plugin.column.header.last.sync.date" /></span>
-			<span class="last column span-8"><fmt:message key="admin.managers.plugin.column.header.status" /></span>
+			<span class="column span-4"><fmt:message key="admin.managers.plugin.column.header.jar.name" /></span>
+			<span class="column span-5"><fmt:message key="admin.managers.plugin.column.header.initial.deploy.date" /></span>
+			<span class="last column span-5"><fmt:message key="admin.managers.plugin.column.header.status" /></span>
 		</li>
 		<c:forEach var="pluginSummary" items="${pluginSummaries}" varStatus="index">
 			<li class="gridrow clear<c:if test="${index.count % 2 == 0}"> even</c:if>">
-				<!--span class="first column span-1 header">&nbsp;
-					checkbox func when we add ability to remove plugins, right now only add and status func avail
-					<input typ="checkbox" value="${pluginSummary.id}" /> 
-				</span-->
-				<span class="column span-4 header">${pluginSummary.name}</span>
-				<span class="column span-4 header">${pluginSummary.version}&nbsp;</span>
-				<span class="column span-6 header">${pluginSummary.lastSyncDate}</span>
-				<span class="last column span-8 header">&nbsp;
-					<!-- Some dynamic status display or command options or something -->
-				</span>
+				<span class="column span-4 header">${pluginSummary.name}&nbsp;</span>
+				<span class="column span-4 header">${pluginSummary.jarName}&nbsp;</span>
+				<span class="column span-5 header">${pluginSummary.initialDeployDate}&nbsp;</span>
+				<span class="last column span-5 header">${pluginSummary.status}&nbsp;</span>
 			</li>
 		</c:forEach>
 	</ul>
@@ -110,7 +103,7 @@
 	dojo.require("dojo.io.iframe");
 	dojo.require("dijit.Dialog");
 
-	dojo.addOnLoad(function() {
+	dojo.ready(function() {
 		var dialog = new dijit.Dialog({
 			id: "uploadPanelDialog",
 			title: "<fmt:message key="admin.managers.plugin.upload.dialog.title" />"

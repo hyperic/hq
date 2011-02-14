@@ -3,12 +3,17 @@ package org.hyperic.hq.web.admin.managers;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.shared.AgentManager;
+import org.hyperic.hq.product.Plugin;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Controller;
@@ -22,19 +27,40 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/admin/managers/plugin")
 public class PluginManagerController implements ApplicationContextAware {
 	private ApplicationContext applicationContext;
+	private AgentManager agentManager;
+	
+	@Autowired
+	public PluginManagerController(AgentManager agentManager) {
+		this.agentManager = agentManager;
+	}
 	
 	@RequestMapping(method = RequestMethod.GET)
 	public String index(Model model) {
 		List<Map<String, Object>> pluginSummaries = new ArrayList<Map<String,Object>>();
-		String[] plugins = new String[] { "mysql", "vsphere", "some custom plugin" };
-		int index = 1;
+		List<Plugin> plugins = agentManager.getAllPlugins();
+		Map<Plugin, Collection<Agent>> pluginAgentMap = agentManager.getOutOfSyncAgentsByPlugin();
+		long agentCount = agentManager.getNumAutoUpdatingAgents();
+		int pluginCount = plugins.size();
 		
-		for (String plugin : plugins) {
+		for (Plugin plugin : plugins) {
 			Map<String, Object> pluginSummary = new HashMap<String, Object>();
 			
-			pluginSummary.put("id", index++);
-			pluginSummary.put("name", plugin);
-			pluginSummary.put("lastSyncDate", new Date());
+			pluginSummary.put("id", plugin.getId());
+			pluginSummary.put("name", plugin.getName());
+			pluginSummary.put("jarName", plugin.getPath());
+			pluginSummary.put("initialDeployDate", new Date(plugin.getCreationTime()));
+			pluginSummary.put("lastSyncDate", "n/a");
+			
+			String status = "Successfully deployed";
+			
+			if (pluginAgentMap.containsKey(plugin)) {
+				int undeployedCount = pluginAgentMap.get(plugin).size();
+				
+				status = "In Progress -- " + (100 * (agentCount/undeployedCount)) + "% deployed";
+			}
+			
+			pluginSummary.put("status", status);
+			
 			pluginSummaries.add(pluginSummary);
 		}
 		
