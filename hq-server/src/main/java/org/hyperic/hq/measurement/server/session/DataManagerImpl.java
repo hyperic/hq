@@ -241,8 +241,6 @@ public class DataManagerImpl implements DataManager {
      * 
      * 
      */
-    //TODO this used to be requires new propagation, which only matters w/path from SyncDataInserter
-    //may need to re-organize ReportProcessor handleMeasurementReport
     public boolean addData(List<DataPoint> data) {
         if (shouldAbortDataInsertion(data)) {
             return true;
