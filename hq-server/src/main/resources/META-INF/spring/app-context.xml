@@ -146,7 +146,7 @@
 		<bean class="org.hyperic.hq.bizapp.server.action.integrate.OpenNMSAction" />
 	</util:list>
 
-	<task:scheduler id="scheduler" />
+	<task:scheduler id="scheduler" pool-size="2"/>
 
 	<!-- Executor that ControlManager uses to run tasks that wait for control 
 		action results -->
