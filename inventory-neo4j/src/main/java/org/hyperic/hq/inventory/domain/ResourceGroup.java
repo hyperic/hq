@@ -40,6 +40,9 @@ public class ResourceGroup
     @RelatedTo(type = RelationshipTypes.HAS_ROLE, direction = Direction.OUTGOING, elementClass = Role.class)
     @Transient
     private Set<Role> roles;
+    
+    public ResourceGroup() {
+    }
 
     /**
      * 

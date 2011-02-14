@@ -21,7 +21,10 @@ public class OperationType {
     private Integer id;
 
     @NotNull
-    private final String name;
+    private String name;
+    
+    public OperationType() {
+    }
 
     /**
      * 

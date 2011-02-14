@@ -30,7 +30,7 @@ public class PropertyType {
     private boolean indexed;
 
     @NotNull
-    private final String name;
+    private String name;
 
     private boolean optional;
 
@@ -38,6 +38,9 @@ public class PropertyType {
 
     // TODO use type? Had to in JPA impl
     private Class<?> type;
+    
+    public PropertyType() {
+    }
 
     /**
      * 
