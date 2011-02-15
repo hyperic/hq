@@ -1,10 +1,21 @@
 package org.hyperic.hq.inventory.domain;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Transient;
+import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.GenericGenerator;
 import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.data.graph.annotation.GraphId;
+import org.springframework.data.graph.annotation.GraphProperty;
 import org.springframework.data.graph.annotation.NodeEntity;
+import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Represents a property that can be set against Resources of the associated
@@ -14,30 +25,61 @@ import org.springframework.data.graph.annotation.NodeEntity;
  * 
  */
 @Configurable
-@NodeEntity
+@NodeEntity(partial=true)
+@Entity
 public class PropertyType {
 
+    @Transient
+    @GraphProperty
     private String defaultValue;
 
     @NotNull
+    @Transient
+    @GraphProperty
     private String description;
 
+    @Transient
+    @GraphProperty
     private boolean hidden;
-
-    @GraphId
+    
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
+    @Column(name = "id")
     private Integer id;
 
+    @Transient
+    @GraphProperty
     private boolean indexed;
 
+    @Transient
+    @GraphProperty
     @NotNull
     private String name;
 
+    @Transient
+    @GraphProperty
     private boolean optional;
 
+    @Transient
+    @GraphProperty
     private boolean secret;
 
+    @Transient
+    @GraphProperty
     // TODO use type? Had to in JPA impl
     private Class<?> type;
+    
+    @SuppressWarnings("unused")
+    @Version
+    @Column(name = "version")
+    private Integer version;
+    
+    @javax.annotation.Resource
+    private transient GraphDatabaseContext graphDatabaseContext;
+    
+    @PersistenceContext
+    transient EntityManager entityManager;
     
     public PropertyType() {
     }
@@ -133,6 +175,17 @@ public class PropertyType {
      */
     public boolean isSecret() {
         return this.secret;
+    }
+    
+    @Transactional
+    public void remove() {
+        graphDatabaseContext.removeNodeEntity(this);
+        if (this.entityManager.contains(this)) {
+            this.entityManager.remove(this);
+        } else {
+            PropertyType attached = this.entityManager.find(this.getClass(), this.id);
+            this.entityManager.remove(attached);
+        }
     }
 
     /**

@@ -381,6 +381,13 @@ public class ResourceIntegrationTest
     }
     
     @Test
+    public void testSetConfigNotYetPersisted() {
+        Config product = new Config();
+        traderJoes.setConfig(ConfigTypes.PRODUCT,product);
+        assertEquals(product,traderJoes.getConfig(ConfigTypes.PRODUCT));
+    }
+    
+    @Test
     public void testGetConfigNoConfig() {
         assertNull(traderJoes.getConfig(ConfigTypes.PRODUCT));
     }

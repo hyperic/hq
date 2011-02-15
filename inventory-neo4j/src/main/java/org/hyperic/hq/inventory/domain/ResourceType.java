@@ -16,7 +16,6 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
-import org.hyperic.hq.inventory.NotUniqueException;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.DynamicRelationshipType;
@@ -121,6 +120,7 @@ public class ResourceType {
      * @param operationType The OperationType to add
      */
     public void addOperationType(OperationType operationType) {
+        entityManager.persist(operationType);
         operationType.getId();
         relateTo(operationType,
             DynamicRelationshipType.withName(RelationshipTypes.HAS_OPERATION_TYPE));
@@ -131,6 +131,7 @@ public class ResourceType {
      * @param propertyType The PropertyType to add
      */
     public void addPropertyType(PropertyType propertyType) {
+        entityManager.persist(propertyType);
         propertyType.getId();
         relateTo(propertyType,
             DynamicRelationshipType.withName(RelationshipTypes.HAS_PROPERTY_TYPE));

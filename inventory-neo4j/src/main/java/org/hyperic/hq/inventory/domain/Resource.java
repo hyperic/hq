@@ -623,8 +623,12 @@ public class Resource {
      */
     @Transactional
     public void setConfig(String configType, Config config) {
+        //Config may not be persisted yet since we don't provide a direct way to persist via API
+        if(!config.hasUnderlyingNode()) {
+            entityManager.persist(config);
+            config.getId();
+        }
         // TODO change config after set?
-        config.getId();
         org.neo4j.graphdb.Relationship rel = this.getUnderlyingState().createRelationshipTo(
             config.getUnderlyingState(),
             DynamicRelationshipType.withName(RelationshipTypes.HAS_CONFIG));

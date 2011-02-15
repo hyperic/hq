@@ -3,6 +3,14 @@ package org.hyperic.hq.inventory.domain;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.PersistenceContext;
+
+import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
@@ -12,7 +20,6 @@ import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.TraversalPosition;
 import org.neo4j.graphdb.Traverser;
 import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.data.graph.annotation.GraphId;
 import org.springframework.data.graph.annotation.NodeEntity;
 import org.springframework.data.graph.core.Direction;
 import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
@@ -25,14 +32,21 @@ import org.springframework.transaction.annotation.Transactional;
  * @author dcrutchfield
  */
 @Configurable
-@NodeEntity
+@NodeEntity(partial=true)
+@Entity
 public class Config {
 
     @javax.annotation.Resource
     private transient GraphDatabaseContext graphDatabaseContext;
 
-    @GraphId
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
+    @Column(name = "id")
     private Integer id;
+    
+    @PersistenceContext
+    transient EntityManager entityManager;
 
     public Config() {
     }
@@ -91,6 +105,17 @@ public class Config {
         }
         return false;
     }
+    
+    @Transactional
+    public void remove() {
+        graphDatabaseContext.removeNodeEntity(this);
+        if (this.entityManager.contains(this)) {
+            this.entityManager.remove(this);
+        } else {
+            Config attached = this.entityManager.find(this.getClass(), this.id);
+            this.entityManager.remove(attached);
+        }
+    }
 
     /**
      * 
@@ -114,6 +139,10 @@ public class Config {
         // throw new IllegalArgumentException("Config option " + key +
         // " is not defined");
         // }
+        if(getUnderlyingState() == null) {
+            entityManager.persist(this);
+            getId();
+        }
         if (value == null) {
             return getUnderlyingState().removeProperty(key);
         }
