@@ -655,6 +655,9 @@ public class MeasurementDAO
 
     @SuppressWarnings("unchecked")
     List<Measurement> findAvailMeasurementsByInstances( Integer[] ids) {
+        if(ids.length == 0) {
+            return Collections.EMPTY_LIST;
+        }
         String sql = new StringBuilder().append("select m from Measurement m ").append(
             "join m.template t ").append("where m.resource is not null and ").append(
             "m.instanceId in (:ids) and ").append(ALIAS_CLAUSE).toString();
