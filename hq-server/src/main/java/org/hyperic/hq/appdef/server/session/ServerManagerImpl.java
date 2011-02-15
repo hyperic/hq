@@ -756,36 +756,7 @@ public class ServerManagerImpl implements ServerManager {
         // as it pages through them.
         return valuePager.seek(servers, pc);
     }
-
-    /**
-     * Get servers by server type and platform.
-     * 
-     * 
-     * @param subject The subject trying to list servers.
-     * @param platId platform id.
-     * @return A PageList of ServerValue objects representing servers on the
-     *         specified platform that the subject is allowed to view.
-     */
-    @Transactional(readOnly=true)
-    public PageList<ServerValue> getServersByPlatformServiceType(AuthzSubject subject, Integer platId, Integer svcTypeId)
-        throws ServerNotFoundException, PlatformNotFoundException, PermissionException {
-        PageControl pc = PageControl.PAGE_ALL;
-        Integer servTypeId;
-        try {
-            ResourceType typeV = resourceManager.findResourceTypeById(svcTypeId);
-            //TODO this might be a platform, not a server
-            servTypeId = typeV.getResourceTypeTo(RelationshipTypes.SERVICE).getId();
-        } catch (ObjectNotFoundException e) {
-            throw new ServerNotFoundException("Service Type not found", e);
-        }
-
-        Collection<Server> servers = getServersByPlatformImpl(subject, platId, servTypeId,  pc);
-
-        // valuePager converts local/remote interfaces to value objects
-        // as it pages through them.
-        return valuePager.seek(servers, pc);
-    }
-    
+ 
     
     /**
      * Get server IDs by server type and platform.

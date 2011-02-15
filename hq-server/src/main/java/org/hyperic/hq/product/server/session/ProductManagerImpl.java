@@ -54,6 +54,7 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.inventory.dao.ResourceTypeDao;
+import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.server.session.MonitorableMeasurementInfo;
@@ -347,9 +348,18 @@ public class ProductManagerImpl implements ProductManager {
     		if (entity == null) {
     			Plugin plugin = pluginDao.findByName(resourceType.getPluginName());
     			
-    			entity = new ResourceType(resourceType);
+    			entity = new ResourceType(resourceType.getName(),resourceType.getDescription());
     			resourceTypeDao.persist(entity);
     			entity.setPlugin(plugin);
+    			for (org.hyperic.hq.pdk.domain.OperationType ot : resourceType.getOperationTypes()) {
+    	            OperationType opType = new OperationType(ot.getName());
+    	            entity.addOperationType(opType);
+    	        }
+
+    	        for (org.hyperic.hq.pdk.domain.PropertyType pt : resourceType.getPropertyTypes()) {
+    	            PropertyType propType = new PropertyType(pt.getName(), pt.getDescription());
+    	            entity.addPropertyType(propType);
+    	        }
     		}
     		
     		lookup.put(resourceType.getName(), entity);

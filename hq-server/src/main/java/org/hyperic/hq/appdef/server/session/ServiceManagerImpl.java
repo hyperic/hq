@@ -853,7 +853,11 @@ public class ServiceManagerImpl implements ServiceManager {
 
                     //TODO  update platform association
                     // Could be null if servertype was deleted/updated by plugin
-                    ResourceType svrtype = serviceType.getResourceTypeTo(RelationshipTypes.SERVICE);
+                    ResourceType svrtype = null;
+                    Set<ResourceType> parentTypes = serviceType.getResourceTypesTo(RelationshipTypes.SERVICE);
+                    if(!(parentTypes.isEmpty())) {
+                        svrtype= parentTypes.iterator().next();
+                    }
 
                     if (svrtype == null || !sinfo.getServerName().equals(svrtype.getName())) {
                         // Lookup the new server type

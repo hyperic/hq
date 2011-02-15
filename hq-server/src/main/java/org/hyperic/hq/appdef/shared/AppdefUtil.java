@@ -122,13 +122,13 @@ public class AppdefUtil {
     }
     
     public static int getAppdefType(ResourceType rv) {
-        if(rv.getResourceTypeTo(RelationshipTypes.PLATFORM) !=null) {
+        if(!(rv.getResourceTypesTo(RelationshipTypes.PLATFORM).isEmpty())) {
             return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
         }
-        if(rv.getResourceTypeTo(RelationshipTypes.SERVER) !=null || rv.getResourceTypeTo(RelationshipTypes.VIRTUAL) != null) {
+        if(!(rv.getResourceTypesTo(RelationshipTypes.SERVER).isEmpty()) || !(rv.getResourceTypesTo(RelationshipTypes.VIRTUAL).isEmpty())) {
             return AppdefEntityConstants.APPDEF_TYPE_SERVER;
         }
-        if(rv.getResourceTypeTo(RelationshipTypes.SERVICE) !=null) {
+        if(!(rv.getResourceTypesTo(RelationshipTypes.SERVICE)).isEmpty()) {
             return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
         }
         if(rv.getName().equals(AppdefEntityConstants.APPDEF_NAME_APPLICATION)){

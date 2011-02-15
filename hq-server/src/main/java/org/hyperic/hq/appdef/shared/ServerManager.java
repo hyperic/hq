@@ -201,17 +201,6 @@ public interface ServerManager {
     public PageList<ServerValue> getServersByPlatform(AuthzSubject subject, Integer platId, Integer servTypeId, PageControl pc)
         throws ServerNotFoundException, PlatformNotFoundException, PermissionException;
 
-    /**
-     * Get servers by server type and platform.
-     * @param subject The subject trying to list servers.
-     * @param platId platform id.
-     * @return A PageList of ServerValue objects representing servers on the
-     *         specified platform that the subject is allowed to view.
-     */
-    public PageList<ServerValue> getServersByPlatformServiceType(AuthzSubject subject, Integer platId, Integer svcTypeId)
-        throws ServerNotFoundException, PlatformNotFoundException, PermissionException;
-
-  
 
     /**
      * Get server IDs by server type and platform.

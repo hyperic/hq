@@ -100,21 +100,12 @@ public class ResourceType {
 
     /**
      * 
-     * @param resourceType The PDK ResourceType to use for creating this
-     *        ResourceType
+     * @param name The name of this ResourceType
+     * @param description The description of this ResourceType
      */
-    public ResourceType(org.hyperic.hq.pdk.domain.ResourceType resourceType) {
-        this.name=resourceType.getName();
-        this.description=resourceType.getDescription();
-        for (org.hyperic.hq.pdk.domain.OperationType ot : resourceType.getOperationTypes()) {
-            OperationType opType = new OperationType(ot.getName());
-            addOperationType(opType);
-        }
-
-        for (org.hyperic.hq.pdk.domain.PropertyType pt : resourceType.getPropertyTypes()) {
-            PropertyType propType = new PropertyType(pt.getName(), pt.getDescription());
-            addPropertyType(propType);
-        }
+    public ResourceType(String name, String description) {
+        this.name = name;
+        this.description = description;
     }
 
     /**
@@ -304,44 +295,10 @@ public class ResourceType {
 
     /**
      * 
-     * @param entity The possibly related ResourceType
-     * @param relationName The relationship name
-     * @return The single relationship of specified name with direction INCOMING
-     * @throws NotUniqueException If multiple relationships exist
-     */
-    public ResourceTypeRelationship getRelationshipTo(ResourceType entity, String relationName) {
-        Set<ResourceTypeRelationship> relations = getRelationships(entity, relationName,
-            Direction.INCOMING);
-        if (relations.isEmpty()) {
-            return null;
-        }
-        return relations.iterator().next();
-    }
-
-    /**
-     * 
      * @return All Resources of this type
      */
     public Set<Resource> getResources() {
         return resources;
-    }
-
-    /**
-     * 
-     * @param relationName The relationship name
-     * @return The single relationship of specified name with direction OUTGOING
-     * @throws NotUniqueException If multiple relationships exist
-     */
-    public ResourceType getResourceTypeFrom(String relationName) {
-        Set<ResourceType> resourceTypes = getRelatedResourceTypes(relationName,
-            org.neo4j.graphdb.Direction.OUTGOING);
-        if (resourceTypes.isEmpty()) {
-            return null;
-        }
-        if (resourceTypes.size() > 1) {
-            throw new NotUniqueException();
-        }
-        return resourceTypes.iterator().next();
     }
 
     /**
@@ -362,25 +319,6 @@ public class ResourceType {
      */
     public Set<ResourceType> getResourceTypesTo(String relationName) {
         return getRelatedResourceTypes(relationName, org.neo4j.graphdb.Direction.INCOMING);
-    }
-
-    /**
-     * 
-     * @param relationName The relationship name
-     * @return A single ResourceType related by specified relationship OUTGOING
-     *         from this ResourceType or null if none exists
-     * @throws NotUniqueException If multiple relationships exist
-     */
-    public ResourceType getResourceTypeTo(String relationName) {
-        Set<ResourceType> resourceTypes = getRelatedResourceTypes(relationName,
-            org.neo4j.graphdb.Direction.INCOMING);
-        if (resourceTypes.isEmpty()) {
-            return null;
-        }
-        if (resourceTypes.size() > 1) {
-            throw new NotUniqueException();
-        }
-        return resourceTypes.iterator().next();
     }
 
     /**

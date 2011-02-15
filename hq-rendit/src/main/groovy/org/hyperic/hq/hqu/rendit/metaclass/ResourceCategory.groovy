@@ -559,19 +559,20 @@ class ResourceCategory {
 			if (serverType.isVirtual() && parent.isPlatform()) {
 				// Parent points at the 'resource' version of the Platform, so
 				// we use the instanceId here, not the Resource.id
-				def servers = svrMan.getServersByPlatformServiceType(subject,
-						parent.instanceId,
-						proto.instanceId)
-				assert servers.size() == 1, "Cannot create any platform services of " + proto.name + " for " + parent.name + 
-				                                          ".  This is because the virtual server which relates " +
-		                                                  parent.name + " to the service does not exist in the database." +
-		                                                  "  To find out which virtual server is missing, find the " +
-		                                                  "plugin where the platform service exists and get the server " +
-		                                                  "that it should belong to.  From there either remove the agent's datadir " +
-		                                                  "and re-initialize it or contact support for further options." +
-		                                                  "  (instanceId=" + parent.instanceId + ")"
-				
-				server = svrMan.findServerById(servers[0].id) // value -> pojo
+                //TODO handle platform service creation
+//				def servers = svrMan.getServersByPlatformServiceType(subject,
+//						parent.instanceId,
+//						proto.instanceId)
+//				assert servers.size() == 1, "Cannot create any platform services of " + proto.name + " for " + parent.name + 
+//				                                          ".  This is because the virtual server which relates " +
+//		                                                  parent.name + " to the service does not exist in the database." +
+//		                                                  "  To find out which virtual server is missing, find the " +
+//		                                                  "plugin where the platform service exists and get the server " +
+//		                                                  "that it should belong to.  From there either remove the agent's datadir " +
+//		                                                  "and re-initialize it or contact support for further options." +
+//		                                                  "  (instanceId=" + parent.instanceId + ")"
+//				
+//				server = svrMan.findServerById(servers[0].id) // value -> pojo
 			} else if (parent.isServer()) {
 				// Normal case, create service on a server
 				server = toServer(parent)
@@ -588,8 +589,8 @@ class ResourceCategory {
 				" on " + server.getServerType().name)
 			}
 			
-			def res = svcMan.createService(subject, server,  serviceType, name,
-					"", "", null).resource
+			def res = svcMan.createService(subject, server.getId(),  serviceType, name,
+					"", "").resource
 			setConfig(res, cfg, subject)
 			return res
 		} else if (proto.isServerPrototype() && parent.isPlatform()) {

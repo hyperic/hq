@@ -2,8 +2,10 @@ package org.hyperic.hq.inventory.domain;
 
 import java.util.HashSet;
 import java.util.Set;
-
-import org.hyperic.hq.inventory.NotUniqueException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import org.hyperic.hq.inventory.dao.ResourceDao;
 import org.hyperic.hq.inventory.dao.ResourceTypeDao;
 import org.hyperic.hq.reference.RelationshipTypes;
@@ -13,11 +15,6 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.graph.core.Direction;
 import org.springframework.test.annotation.DirtiesContext;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
 
 @DirtiesContext
 public class ResourceTypeIntegrationTest
@@ -146,66 +143,21 @@ public class ResourceTypeIntegrationTest
         assertEquals(store, relationship.getFrom());
         assertEquals(produceDept, relationship.getTo());
     }
-
-    @Test
-    public void testGetRelationshipTo() {
-        ResourceTypeRelationship relationship = produceDept.getRelationshipTo(store,RelationshipTypes.CONTAINS);
-        assertEquals(store, relationship.getFrom());
-        assertEquals(produceDept, relationship.getTo());
-    }
-    
+  
     @Test
     public void testGetResourceTypesFrom() {
         Set<ResourceType> resourceTypes = store.getResourceTypesFrom(RelationshipTypes.CONTAINS);
         assertEquals(1, resourceTypes.size());
         assertEquals(produceDept, resourceTypes.iterator().next());
     }
-    
-    @Test
-    public void testGetResourceTypeFrom() {
-        ResourceType resourceType = store.getResourceTypeFrom(RelationshipTypes.CONTAINS);
-        assertEquals(produceDept, resourceType);
-    }
-    
-    @Test
-    public void testGetResourceTypeFromNone() {
-        assertNull(produceDept.getResourceTypeFrom(RelationshipTypes.CONTAINS));
-    }
-    
-    @Test(expected=NotUniqueException.class)
-    public void testGetResourceTypeFromMultiple() {
-        ResourceType dairyDept = new ResourceType("Dairy");
-        resourceTypeDao.persist(dairyDept);
-        store.relateTo(dairyDept,RelationshipTypes.CONTAINS);
-        store.getResourceTypeFrom(RelationshipTypes.CONTAINS);
-    }
-    
+     
     @Test
     public void testGetResourceTypesTo() {
         Set<ResourceType> resourceTypes = produceDept.getResourceTypesTo(RelationshipTypes.CONTAINS);
         assertEquals(1, resourceTypes.size());
         assertEquals(store, resourceTypes.iterator().next());
     }
-    
-    @Test
-    public void testGetResourceTypeTo() {
-        ResourceType resourceType = produceDept.getResourceTypeTo(RelationshipTypes.CONTAINS);
-        assertEquals(store, resourceType);
-    }
-    
-    @Test
-    public void testGetResourceTypeToNone() {
-        assertNull(store.getResourceTypeTo(RelationshipTypes.CONTAINS));
-    }
-    
-    @Test(expected=NotUniqueException.class)
-    public void testGetResourceTypeToMultiple() {
-        ResourceType region = new ResourceType("Region");
-        resourceTypeDao.persist(region);
-        region.relateTo(produceDept,RelationshipTypes.CONTAINS);
-        produceDept.getResourceTypeTo(RelationshipTypes.CONTAINS);
-    }
-    
+      
     @Test
     public void testHasResourcesNone() {
         assertFalse(store.hasResources());
