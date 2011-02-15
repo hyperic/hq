@@ -147,6 +147,12 @@
 	</util:list>
 
 	<task:scheduler id="scheduler" pool-size="3"/>
+	
+	<bean class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler" id="concurrentStatsScheduler" p:poolSize="8">
+		<property name="threadFactory">
+			<bean class="org.hyperic.hq.stats.ConcurrentStatsCollectorThreadFactory"/>
+		</property>
+	</bean>
 
 	<!-- Executor that ControlManager uses to run tasks that wait for control 
 		action results -->
