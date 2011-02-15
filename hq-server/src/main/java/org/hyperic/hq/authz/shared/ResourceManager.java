@@ -297,4 +297,9 @@ public interface ResourceManager {
     public ResourceType findResourceTypeById(Integer authzplatform);
 
     public Collection<Resource> getUnconfiguredResources();
+
+    Collection<Integer> findAllViewableResourceIds(AuthzSubject subject,
+                                                   Collection<ResourceType> resourceTypes);
+
+    ResourceType getResourceTypeById(Integer resourceTypeId);
 }
