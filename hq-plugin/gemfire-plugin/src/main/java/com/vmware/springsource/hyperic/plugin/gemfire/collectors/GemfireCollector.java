@@ -42,6 +42,7 @@ public class GemfireCollector extends Collector {
             if (!signature.equals(last_signature)) {
                 last_signature=signature;
                 GemfirePlatformDetector.runAutoDiscovery(id);
+                GemFireUtils.clearNameCache();
             }
 
             for (String memberID : members) {

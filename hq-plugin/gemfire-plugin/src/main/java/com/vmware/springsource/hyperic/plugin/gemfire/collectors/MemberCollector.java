@@ -41,11 +41,6 @@ public class MemberCollector extends Collector {
         Map res = new java.util.HashMap<String, Object>();
         Map<String, Object> memberDetails = GemFireUtils.getMemberDetails(memberID, mServer);
 
-        log.debug("[getMetrics] memberDetails=" + memberDetails);
-        if ((memberDetails == null) || memberDetails.isEmpty()) {
-            throw new PluginException("Member '" + memberID + "' not found!!!");
-        }
-
         for (String k : memberDetails.keySet()) {
             res.put(k.substring(prefixLength, k.lastIndexOf('.')), memberDetails.get(k));
             if (log.isDebugEnabled()) {

@@ -31,18 +31,15 @@ public class RegionCollector extends Collector {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(props);
             String memberID = GemFireUtils.memberNameToMemberID(props.getProperty("member.name"), mServer);
             Map memberDetails = GemFireUtils.getMemberDetails(memberID, mServer);
-            if (!memberDetails.isEmpty()) {
-                Map<Object, Map> regions = (Map) memberDetails.get("gemfire.member.regions.map");
-                for (Map region : regions.values()) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("[collect] region=" + region);
-                    }
-                    String name = (String) region.get("gemfire.region.name.string");
-                    setValue(name + "." + Metric.ATTR_AVAIL, Metric.AVAIL_UP);
-                    setValue(name + ".entry_count", ((Integer) region.get("gemfire.region.entrycount.int")).intValue());
+
+            Map<Object, Map> regions = (Map) memberDetails.get("gemfire.member.regions.map");
+            for (Map region : regions.values()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("[collect] region=" + region);
                 }
-            } else {
-                log.debug("[collect] Member '" + memberID + "' nof found!!!");
+                String name = (String) region.get("gemfire.region.name.string");
+                setValue(name + "." + Metric.ATTR_AVAIL, Metric.AVAIL_UP);
+                setValue(name + ".entry_count", ((Integer) region.get("gemfire.region.entrycount.int")).intValue());
             }
         } catch (Exception ex) {
             log.debug(ex, ex);
@@ -54,9 +51,9 @@ public class RegionCollector extends Collector {
         MetricValue res = result.getMetricValue(metric.getAttributeName());
         if (metric.getAttributeName().endsWith(Metric.ATTR_AVAIL)) {
             if (res.getValue() != Metric.AVAIL_UP) {
-                res=new MetricValue(Metric.AVAIL_DOWN, System.currentTimeMillis());
+                res = new MetricValue(Metric.AVAIL_DOWN, System.currentTimeMillis());
             }
-            log.debug("[getValue] Member="+metric.getObjectProperty("member.name")+" metric=" + metric.getAttributeName() + " res=" + res.getValue());
+            log.debug("[getValue] Member=" + metric.getObjectProperty("member.name") + " metric=" + metric.getAttributeName() + " res=" + res.getValue());
         }
         return res;
     }
