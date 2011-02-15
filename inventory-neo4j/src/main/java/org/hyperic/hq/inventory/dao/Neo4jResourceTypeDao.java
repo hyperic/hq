@@ -95,6 +95,7 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
     
     @Transactional
     public void persist(ResourceType resourceType) {
+        //TODO need a way to keep ResourceType unique by name.  Can't do getName() before persist() or we get NPE on flushDirty
         entityManager.persist(resourceType);
         resourceType.getId();
     }  

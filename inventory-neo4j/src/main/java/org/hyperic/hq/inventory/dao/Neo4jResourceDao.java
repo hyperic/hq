@@ -181,9 +181,12 @@ public class Neo4jResourceDao implements ResourceDao {
 
     @Transactional
     public void persist(Resource resource) {
+        // TODO need a way to keep Resource unique by name. Can't do getName()
+        // before persist() or we get NPE on flushDirty
         entityManager.persist(resource);
         resource.getId();
-        //Set the type index here b/c Resource needs an ID before we can access the underlying node
+        // Set the type index here b/c Resource needs an ID before we can access
+        // the underlying node
         graphDatabaseContext.getNodeIndex(null).add(resource.getUnderlyingState(), "type",
             resource.getType().getId());
     }

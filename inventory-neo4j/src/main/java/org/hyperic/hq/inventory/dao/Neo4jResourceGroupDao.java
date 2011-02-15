@@ -18,10 +18,10 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
 
     @PersistenceContext
     protected EntityManager entityManager;
-    
+
     @Resource
     private FinderFactory finderFactory;
-    
+
     @Autowired
     private GraphDatabaseContext graphDatabaseContext;
 
@@ -67,7 +67,7 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
     @Transactional(readOnly = true)
     public ResourceGroup findByName(String name) {
         ResourceGroup group = finderFactory.createNodeEntityFinder(ResourceGroup.class)
-            .findByPropertyValue(null, "name",name);
+            .findByPropertyValue(null, "name", name);
 
         if (group != null) {
             group.getId();
@@ -75,7 +75,7 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
 
         return group;
     }
-    
+
     @Transactional
     public ResourceGroup merge(ResourceGroup resourceGroup) {
         resourceGroup.getId();
@@ -83,13 +83,16 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
         entityManager.flush();
         return merged;
     }
-    
+
     @Transactional
     public void persist(ResourceGroup resourceGroup) {
+        // TODO need a way to keep ResourceGroup unique by name. Can't do
+        // getName() before persist() or we get NPE on flushDirty
         entityManager.persist(resourceGroup);
         resourceGroup.getId();
-        //Set the type index here b/c ResourceGroup needs an ID before we can access the underlying node
+        // Set the type index here b/c ResourceGroup needs an ID before we can
+        // access the underlying node
         graphDatabaseContext.getNodeIndex(null).add(resourceGroup.getUnderlyingState(), "type",
             resourceGroup.getType().getId());
-    }  
+    }
 }
