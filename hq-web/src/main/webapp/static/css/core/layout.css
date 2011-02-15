@@ -5,7 +5,7 @@
 #header {
 	width: 100%;
     position: relative;
-    height: 70px;
+    height: 64px;
 }
 
 #headerLinks {
@@ -29,6 +29,11 @@
 
 #headerLinks ul {
 	margin: 0;
+}
+
+#updateLink {
+	position: absolute;
+	left: 8px;
 }
 
 #header #loading {
@@ -68,6 +73,7 @@
     z-index: 9;
     position: absolute;
     right: 10px;
+    top: 60px;
 	-moz-border-radius-bottomleft: 5px;
 	-moz-border-radius-bottomright: 5px;
 	-moz-box-shadow: 0 3px 3px;
