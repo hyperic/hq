@@ -1402,7 +1402,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         throws AppdefEntityNotFoundException, PermissionException {
         String mType = (new AppdefEntityValue(id, s)).getMonitorableType();
         List<MeasurementTemplate> templates = measurementTemplateDAO.findDefaultsByMonitorableType(
-            mType, id.getType());
+            mType);
         List<String> dsnList = new ArrayList<String>(SAMPLE_SIZE);
         int idx = 0;
         int availIdx = -1;

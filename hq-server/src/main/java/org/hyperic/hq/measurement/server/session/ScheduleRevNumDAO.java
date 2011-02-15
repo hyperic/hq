@@ -64,10 +64,11 @@ public class ScheduleRevNumDAO
      * enabled.
      * @return A Collection of Object arrays with 2 entries, the Resource and the Long collection interval.
      */
+    @SuppressWarnings("unchecked")
     public Collection<Object[]> getMinIntervals() {
         String sql = "select m.resource, min(m.interval) "
-                     + "from Measurement m, " +  "MeasurementTemplate t "
-                     + "where m.enabled = true and " + "m.template.id = t.id "
+                     + "from Measurement m "
+                     + "where m.enabled = true "
                      + "group by m.instanceId";
         return getSession().createQuery(sql).list();
     }
@@ -77,13 +78,11 @@ public class ScheduleRevNumDAO
      * @return The minimum collection interval for the given entity.
      */
     public Long getMinInterval(AppdefEntityID id) {
-        String sql = "select min(m.interval) " + "from Measurement m, "
-                     + "MeasurementTemplate t " + "where m.enabled = true and "
-                     + "m.instanceId = ? and " + "m.template.id = t.id  "
+        String sql = "select min(m.interval) " + "from Measurement m " + "where m.enabled = true and "
+                     + "m.instanceId = ? "
                      + "group by m.instanceId";
 
-        return (Long) getSession().createQuery(sql).setInteger(0, id.getID()).setInteger(1,
-            id.getType()).uniqueResult();
+        return (Long) getSession().createQuery(sql).setInteger(0, id.getID()).uniqueResult();
     }
 
     /**

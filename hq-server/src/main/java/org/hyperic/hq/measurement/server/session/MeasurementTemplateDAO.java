@@ -179,21 +179,21 @@ public class MeasurementTemplateDAO
     }
 
     @SuppressWarnings("unchecked")
-    List<MeasurementTemplate> findDefaultsByMonitorableType(String mt, int appdefType) {
+    List<MeasurementTemplate> findDefaultsByMonitorableType(String mt) {
         String sql = "select t from MeasurementTemplate t " + "join fetch t.monitorableType mt "
-                     + "where mt.name=? and mt.resourceTypeId=? " + "and t.defaultOn = true "
+                     + "where mt.name=? " + "and t.defaultOn = true "
                      + "order by mt.name";
 
-        return getSession().createQuery(sql).setString(0, mt).setInteger(1, appdefType).list();
+        return getSession().createQuery(sql).setString(0, mt).list();
     }
 
     @SuppressWarnings("unchecked")
-    List<MeasurementTemplate> findDesignatedByMonitorableType(String mt, int appdefType) {
+    List<MeasurementTemplate> findDesignatedByMonitorableType(String mt) {
         String sql = "select t from MeasurementTemplate t " + "join fetch t.monitorableType mt "
-                     + "where mt.name=? and mt.resourceTypeId=? " + "and t.designate = true "
+                     + "where mt.name=? " + "and t.designate = true "
                      + "order by mt.name";
 
-        return getSession().createQuery(sql).setString(0, mt).setInteger(1, appdefType).list();
+        return getSession().createQuery(sql).setString(0, mt).list();
     }
 
     @SuppressWarnings("unchecked")
