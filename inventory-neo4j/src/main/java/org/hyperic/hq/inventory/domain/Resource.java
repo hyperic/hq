@@ -95,11 +95,6 @@ public class Resource {
     @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.OUTGOING, elementClass = ResourceType.class)
     private ResourceType type;
 
-    @SuppressWarnings("unused")
-    @Version
-    @Column(name = "version")
-    private Integer version;
-
     public Resource() {
     }
 
@@ -623,8 +618,9 @@ public class Resource {
      */
     @Transactional
     public void setConfig(String configType, Config config) {
-        //Config may not be persisted yet since we don't provide a direct way to persist via API
-        if(!config.hasUnderlyingNode()) {
+        // Config may not be persisted yet since we don't provide a direct way
+        // to persist via API
+        if (!config.hasUnderlyingNode()) {
             entityManager.persist(config);
             config.getId();
         }

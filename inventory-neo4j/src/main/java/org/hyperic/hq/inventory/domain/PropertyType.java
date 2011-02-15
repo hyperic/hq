@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
  * 
  */
 @Configurable
-@NodeEntity(partial=true)
+@NodeEntity(partial = true)
 @Entity
 public class PropertyType {
 
@@ -41,7 +41,7 @@ public class PropertyType {
     @Transient
     @GraphProperty
     private boolean hidden;
-    
+
     @Id
     @GenericGenerator(name = "mygen1", strategy = "increment")
     @GeneratedValue(generator = "mygen1")
@@ -69,18 +69,13 @@ public class PropertyType {
     @GraphProperty
     // TODO use type? Had to in JPA impl
     private Class<?> type;
-    
-    @SuppressWarnings("unused")
-    @Version
-    @Column(name = "version")
-    private Integer version;
-    
+
     @javax.annotation.Resource
     private transient GraphDatabaseContext graphDatabaseContext;
-    
+
     @PersistenceContext
     transient EntityManager entityManager;
-    
+
     public PropertyType() {
     }
 
@@ -176,7 +171,7 @@ public class PropertyType {
     public boolean isSecret() {
         return this.secret;
     }
-    
+
     @Transactional
     public void remove() {
         graphDatabaseContext.removeNodeEntity(this);

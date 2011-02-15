@@ -89,11 +89,6 @@ public class ResourceType {
     @Transient
     private Set<Resource> resources;
 
-    @SuppressWarnings("unused")
-    @Version
-    @Column(name = "version")
-    private Integer version;
-
     public ResourceType() {
     }
 
