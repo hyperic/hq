@@ -25,7 +25,6 @@ public class JMXAgentCollector extends Collector {
         Properties props = getProperties();
         try {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(props);
-            log.debug("mServer=" + mServer);
             ObjectName obj = new ObjectName("GemFire:type=Agent");
             mServer.getAttribute(obj, "version");
             setAvailability(true);
