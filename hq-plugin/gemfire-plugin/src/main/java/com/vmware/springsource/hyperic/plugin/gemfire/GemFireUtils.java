@@ -44,23 +44,44 @@ public class GemFireUtils {
         } catch (Exception ex) {
             throw new PluginException(ex.getMessage(), ex);
         }
+
+        if ((memberDetails == null) || memberDetails.isEmpty()) {
+            String msg = "Member '" + memberID + "' not found!!!";
+            if (log.isDebugEnabled()) {
+                log.debug("[getMemberDetails] " + msg);
+            }
+            throw new PluginException(msg);
+        }
         return memberDetails;
     }
 
+    public static void clearNameCache() {
+        membersIDCache.clear();
+    }
+
     public static String memberNameToMemberID(String memberName, MBeanServerConnection mServer) throws PluginException {
-        String memberID = membersIDCache.get(memberName);
-        synchronized (membersIDCache) {
-            if (memberID == null) {
+        if (membersIDCache.isEmpty()) {
+            synchronized (membersIDCache) {
                 membersIDCache.clear();
                 List<String> members = GemFireUtils.getMembers(mServer);
                 for (String member : members) {
                     Map<String, Object> memberDetails = getMemberDetails(member, mServer);
                     membersIDCache.put((String) memberDetails.get("gemfire.member.name.string"), member);
                 }
-                memberID = membersIDCache.get(memberName);
             }
+            log.debug("[memberNameToMemberID] membersIDCache.size() => " + membersIDCache.size());
+        }
+
+        String memberID = membersIDCache.get(memberName);
+        if (memberID == null) {
+            String msg = "Member named '" + memberName + "' not found!!!";
+            if (log.isDebugEnabled()) {
+                log.debug("[memberNameToMemberID] " + msg);
+            }
+            throw new PluginException(msg);
         }
         log.debug("[memberNameToMemberID] " + memberName + "=" + memberID);
+
         return memberID;
     }
 }

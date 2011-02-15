@@ -29,22 +29,18 @@ public class GatewayCollector extends Collector {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(props);
             String memberID = GemFireUtils.memberNameToMemberID(props.getProperty("member.name"), mServer);
             Map memberDetails = GemFireUtils.getMemberDetails(memberID, mServer);
-            if (!memberDetails.isEmpty()) {
-                List<Map> gateways = (List) memberDetails.get("gemfire.member.gatewayhub.gateways.collection");
-                String id = (String) props.get("gatewayID");
-                for (Map gateway : gateways) {
-                    if (((String) gateway.get("gemfire.member.gateway.id.string")).equals(id)) {
-                        setAvailability(((Boolean)gateway.get("gemfire.member.gateway.isconnected.boolean")));
-                        setValue("queuesize", (Integer)gateway.get("gemfire.member.gateway.queuesize.int"));
-                    }
+
+            List<Map> gateways = (List) memberDetails.get("gemfire.member.gatewayhub.gateways.collection");
+            String id = (String) props.get("gatewayID");
+            for (Map gateway : gateways) {
+                if (((String) gateway.get("gemfire.member.gateway.id.string")).equals(id)) {
+                    setAvailability(((Boolean) gateway.get("gemfire.member.gateway.isconnected.boolean")));
+                    setValue("queuesize", (Integer) gateway.get("gemfire.member.gateway.queuesize.int"));
                 }
-            } else {
-                log.debug("[collect] Member '" + memberID + "' nof found!!!");
-                setAvailability(false);
             }
         } catch (Exception ex) {
             setAvailability(false);
-            log.debug("[collect] "+ex.getMessage(), ex);
+            log.debug("[collect] " + ex.getMessage(), ex);
         }
     }
 }
