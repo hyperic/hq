@@ -28,7 +28,7 @@
 
 #headerAlerts {
     height: 38px;
-    left: 310px;
+    left: 382px;
     position: absolute;
     top: 0;
     width: 360px;
@@ -36,8 +36,33 @@
     font-size: 10px;
     font-weight: bold;
     overflow: hidden;
-    padding-left: 72px;
     z-index: 1;
+}
+
+#headerTabs {
+	left: 360px;
+	margin: 0;
+}
+
+#headerTabs ul li.tab {
+	background: url('../../images/tab_main.gif') no-repeat left top;
+	margin-right: 6px;
+    padding: 5px;
+}
+
+#headerTabs ul li.tab a {
+	background: url('../../images/tab_cap.gif') no-repeat right top;
+	margin-left: 5px;
+    margin-right: -10px;
+    padding: 7px 8px 7px 0;
+}
+
+#headerTabs ul li.tab.active {
+	background: url('../../images/tab_main_active.gif') no-repeat left top;
+}
+
+#headerTabs ul li.tab.active a {
+	background: url('../../images/tab_cap_active.gif') no-repeat right top;
 }
 
 #recentText {

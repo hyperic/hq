@@ -43,14 +43,19 @@
 	right: 5px;
 }
 
-#headerTabs ul {
-	list-style: none;
-    margin: 0 0 0 -200px;
-    padding: 0;
-    position: absolute;
+#headerTabs {
+	position: absolute;
     width: 400px;
     left: 50%;
     bottom: 0;
+    margin: 0 0 0 -200px;
+}
+
+#headerTabs ul {
+	overflow: hidden;
+	list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
 #headerTabs ul li.tab {
