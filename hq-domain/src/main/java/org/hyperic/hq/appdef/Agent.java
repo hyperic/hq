@@ -37,51 +37,54 @@ import javax.persistence.Version;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
+import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.springframework.data.graph.annotation.NodeEntity;
 
 @Entity
-@Table(name="EAM_AGENT")
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+@Table(name = "EAM_AGENT")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @NodeEntity(partial = true)
-public class Agent {
-    
-    @Column(name="ADDRESS",length=255,nullable=false)
+public class Agent implements ContainerManagedTimestampTrackable {
+
+    @Column(name = "ADDRESS", length = 255, nullable = false)
     private String address;
-    
-    @Column(name="PORT", nullable=false)
+
+    @Column(name = "PORT", nullable = false)
     private Integer port;
-    
-    @Column(name="AUTHTOKEN",length=100,nullable=false)
+
+    @Column(name = "AUTHTOKEN", length = 100, nullable = false)
     private String authToken;
-    
-    @Column(name="AGENTTOKEN",length=100,nullable=false,unique=true)
+
+    @Column(name = "AGENTTOKEN", length = 100, nullable = false, unique = true)
     private String agentToken;
-    
-    @Column(name="VERSION",length=20)
+
+    @Column(name = "VERSION", length = 20)
     private String agentVersion;
-    
-    @Column(name="UNIDIRECTIONAL",nullable=false)
+
+    @Column(name = "UNIDIRECTIONAL", nullable = false)
     private boolean unidirectional;
-    
+
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "ID")
     private Integer id;
-    
+
     @ManyToOne
-    @JoinColumn(name="AGENT_TYPE_ID")
+    @JoinColumn(name = "AGENT_TYPE_ID")
+    @Index(name = "AGENT_TYPE_ID_IDX")
     private AgentType agentType;
-    
-    @Column(name="CTIME")
+
+    @Column(name = "CTIME")
     private Long creationTime;
-    
-    @Column(name="MTIME")
+
+    @Column(name = "MTIME")
     private Long modifiedTime;
-    
-    @Column(name="VERSION_COL")
+
+    @Column(name = "VERSION_COL")
     @Version
-    private Long    version;
+    private Long version;
 
     public Agent() {
     }
@@ -120,7 +123,7 @@ public class Agent {
     public void setPort(Integer port) {
         this.port = port;
     }
-    
+
     public String getAuthToken() {
         return authToken;
     }
@@ -190,7 +193,7 @@ public class Agent {
     public void setModifiedTime(Long modifiedTime) {
         this.modifiedTime = modifiedTime;
     }
-      
+
     public long getVersion() {
         return version != null ? version.longValue() : 0;
     }
@@ -206,4 +209,13 @@ public class Agent {
             .append(" ").append("authToken=").append(getAuthToken()).append(" ");
         return (str.toString());
     }
+
+    public boolean allowContainerManagedCreationTime() {
+        return true;
+    }
+
+    public boolean allowContainerManagedLastModifiedTime() {
+        return true;
+    }
+
 }

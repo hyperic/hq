@@ -26,17 +26,33 @@
 package org.hyperic.hq.common.server.session;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OrderColumn;
+import javax.persistence.Table;
+import javax.persistence.Version;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hibernate.PersistedObject;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
 
+@Entity
+@Table(name="EAM_CRISPO_OPT")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class CrispoOption 
-    extends PersistedObject
 {
-    Log _log = LogFactory.getLog(CrispoOption.class.getName());
+    private transient final Log log = LogFactory.getLog(CrispoOption.class.getName());
     
     private static final String[] ARRAY_DESCRIMINATORS = {".resources",
                                                           ".portlets.",
@@ -45,54 +61,93 @@ public class CrispoOption
                                                           ".groups"};
     private static final String ARRAY_DELIMITER = "|";
     
-    private Crispo _crispo;
-    private String _key;
-    private String _val;
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
     
-    private List _array = new ArrayList(0);
+    @Column(name="VERSION_COL")
+    @Version
+    private Long    version;
+    
+    @ManyToOne(optional=false)
+    @JoinColumn(name="CRISPO_ID")
+    @Index(name="CRISPO_IDX")
+    private Crispo crispo;
+    
+    @Column(name="PROPKEY",nullable=false)
+    private String key;
+    
+    @Column(name="VAL",length=4000)
+    private String val;
+    
+    @ElementCollection
+    @CollectionTable(
+          name="EAM_CRISPO_ARRAY",
+          joinColumns=@JoinColumn(name="OPT_ID")
+    )
+    @Column(name="VAL",nullable=false,length=4000)
+    @OrderColumn(name="IDX",nullable=false)
+    @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+    private List<String> array = new ArrayList<String>(0);
     
     protected CrispoOption() {}
     
     CrispoOption(Crispo crispo, String key, String val) {
-        _crispo = crispo;
-        _key    = key;
+        this.crispo = crispo;
+        this.key    = key;
         setValue(val);
+    }
+    
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 
     public Crispo getCrispo() {
-        return _crispo;
+        return crispo;
     }
     
     protected void setCrispo(Crispo crispo) {
-        _crispo = crispo;
+        this.crispo = crispo;
     }
     
     public String getKey() {
-        return _key == null ? "" : _key;
+        return key == null ? "" : key;
     }
     
     protected void setKey(String key) {
-        _key = key;
+        this.key = key;
     }
     
     protected String getOptionValue() {
-        return _val == null ? "" : _val;
+        return val == null ? "" : val;
     }
     
     protected void setOptionValue(String val) {
-        _val = val;
+        this.val = val;
     }
     
     public String getValue() {
-        if (_val != null && _val.trim().length() > 0) {
-            return _val;
-        } else if (_val == null && _array.size() == 0) {
+        if (val != null && val.trim().length() > 0) {
+            return val;
+        } else if (val == null && array.size() == 0) {
             return "";
         } else {
-            Iterator itr = _array.iterator();
             StringBuffer val = new StringBuffer();
-            while (itr.hasNext()) {
-                String item = (String) itr.next();
+            for (String item : array) {
                 if (item != null && item.length() > 0) {
                     val.append(ARRAY_DELIMITER).append(item);
                 }
@@ -103,40 +158,40 @@ public class CrispoOption
     
     protected void setValue(String val) {
         for (int i = 0; i < ARRAY_DESCRIMINATORS.length; i++) {
-            if (_key.indexOf(ARRAY_DESCRIMINATORS[i]) > -1) {
+            if (key.indexOf(ARRAY_DESCRIMINATORS[i]) > -1) {
                 if (val != null && val.trim().length() > 0) {
-                    _array = new ArrayList();
+                    array = new ArrayList<String>();
                     String[] elem = val.split("\\" + ARRAY_DELIMITER);
                     for (int j = 0; j < elem.length; j++) {
                         if (elem[j] != null && elem[j].trim().length() > 0)
-                            _array.add(elem[j]);
+                            array.add(elem[j]);
                         
-                        if (_log.isDebugEnabled())
-                            _log.debug("Adding: {"+elem[j]+"}");
+                        if (log.isDebugEnabled())
+                            log.debug("Adding: {"+elem[j]+"}");
                     }
                 }
-                _val = null;
+                val = null;
                 return;
             }
         }
 
-        _val = val;
+        this.val = val;
     }
     
-    protected void setArray(List array) {
-        _array = array;
+    protected void setArray(List<String> array) {
+        this.array = array;
     }
     
-    protected List getArray() {
-        return _array;
+    protected List<String> getArray() {
+        return array;
     }
     
     public int hashCode() {
         int result = 17;
         
-        result = 37*result + _crispo.hashCode();
-        result = 37*result + _key.hashCode();
-        result = 37*result + _array.hashCode();
+        result = 37*result + crispo.hashCode();
+        result = 37*result + key.hashCode();
+        result = 37*result + array.hashCode();
         return result;
     }
 
@@ -148,8 +203,8 @@ public class CrispoOption
             return false;
         
         CrispoOption opt = (CrispoOption)obj;
-        return opt.getKey().equals(_key) && opt.getCrispo().equals(_crispo) 
-               && opt.getArray().equals(_array);
+        return opt.getKey().equals(key) && opt.getCrispo().equals(crispo) 
+               && opt.getArray().equals(array);
     }
     
 }

@@ -44,6 +44,7 @@ import javax.persistence.Version;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
@@ -60,12 +61,14 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
     
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "TEMPLATE_ID")
+    @Index(name="MEAS_TEMPLATE_ID")
     private MeasurementTemplate template;
 
     @Column(name = "MTIME", nullable = false)
     private long mtime;
 
     @Column(name = "ENABLED", nullable = false)
+    @Index(name="MEAS_ENABLED_IDX")
     private boolean enabled=true;
 
     @Column(name = "COLL_INTERVAL", nullable = false)
@@ -74,7 +77,7 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
     @Column(name = "DSN", nullable = false, length = 2048)
     private String dsn;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL,orphanRemoval=true)
     @JoinColumn(name="MEASUREMENT_ID")
     @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
     private Collection<Baseline> baselinesBag;
@@ -85,6 +88,7 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
 
     @ManyToOne
     @JoinColumn(name = "RESOURCE_ID")
+    @Index(name="MEAS_RES_IDX")
     private Resource resource;
 
     @Id

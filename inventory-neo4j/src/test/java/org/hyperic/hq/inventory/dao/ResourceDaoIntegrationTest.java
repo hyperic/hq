@@ -10,24 +10,32 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.hyperic.hq.appdef.server.session.AppdefResourceType;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.paging.PageInfo;
-import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.hyperic.util.pager.PageList;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 @DirtiesContext
-public class ResourceDaoIntegrationTest
-    extends BaseInfrastructureTest {
+@Transactional
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = { "classpath:META-INF/spring/neo4j-context.xml",
+                                   "classpath:org/hyperic/hq/inventory/InventoryIntegrationTest-context.xml" })
+public class ResourceDaoIntegrationTest {
 
     @Autowired
     private ResourceDao resourceDao;
@@ -37,11 +45,18 @@ public class ResourceDaoIntegrationTest
 
     private ResourceType type;
 
+    private static final String SKU = "SKU";
+
+    private static final String SKU1 = "1234";
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
     @Before
     public void initializeTestData() throws ApplicationException, NotFoundException {
         type = new ResourceType("TestType");
         resourceTypeDao.persist(type);
-        PropertyType propType = new PropertyType(AppdefResourceType.APPDEF_TYPE_ID, Integer.class);
+        PropertyType propType = new PropertyType(SKU, "A SKU Number");
         propType.setIndexed(true);
         type.addPropertyType(propType);
     }
@@ -50,17 +65,14 @@ public class ResourceDaoIntegrationTest
     public void testFindByIndexedPropertySortAsc() {
         Resource resource1 = new Resource("Some Resource", type);
         resourceDao.persist(resource1);
-        resource1.setProperty(AppdefResourceType.APPDEF_TYPE_ID,
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        resource1.setProperty(SKU, SKU1);
         Resource resource2 = new Resource("Another Resource", type);
         resourceDao.persist(resource2);
-        resource2.setProperty(AppdefResourceType.APPDEF_TYPE_ID,
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        resource2.setProperty(SKU, SKU1);
         Resource resource3 = new Resource("Not a service", type);
         resourceDao.persist(resource3);
         PageInfo pageInfo = new PageInfo(0, 15, PageInfo.SORT_ASC, "name", String.class);
-        PageList<Resource> actual = resourceDao.findByIndexedProperty(
-            AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVICE, pageInfo);
+        PageList<Resource> actual = resourceDao.findByIndexedProperty(SKU, SKU1, pageInfo);
         List<Resource> expected = Arrays.asList(new Resource[] { resource2, resource1 });
         assertEquals(expected, actual);
     }
@@ -69,17 +81,14 @@ public class ResourceDaoIntegrationTest
     public void testFindByIndexedPropertySortDesc() {
         Resource resource1 = new Resource("Some Resource", type);
         resourceDao.persist(resource1);
-        resource1.setProperty(AppdefResourceType.APPDEF_TYPE_ID,
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        resource1.setProperty(SKU, SKU1);
         Resource resource2 = new Resource("Another Resource", type);
         resourceDao.persist(resource2);
-        resource2.setProperty(AppdefResourceType.APPDEF_TYPE_ID,
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        resource2.setProperty(SKU, SKU1);
         Resource resource3 = new Resource("Not a service", type);
         resourceDao.persist(resource3);
         PageInfo pageInfo = new PageInfo(0, 15, PageInfo.SORT_DESC, "name", String.class);
-        PageList<Resource> actual = resourceDao.findByIndexedProperty(
-            AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVICE, pageInfo);
+        PageList<Resource> actual = resourceDao.findByIndexedProperty(SKU, SKU1, pageInfo);
         List<Resource> expected = Arrays.asList(new Resource[] { resource1, resource2 });
         assertEquals(expected, actual);
     }
@@ -88,19 +97,15 @@ public class ResourceDaoIntegrationTest
     public void testFindByIndexedPropertyTotalResultsLargerThanPage() {
         Resource resource1 = new Resource("Some Resource", type);
         resourceDao.persist(resource1);
-        resource1.setProperty(AppdefResourceType.APPDEF_TYPE_ID,
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        resource1.setProperty(SKU, SKU1);
         Resource resource2 = new Resource("Another Resource", type);
         resourceDao.persist(resource2);
-        resource2.setProperty(AppdefResourceType.APPDEF_TYPE_ID,
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        resource2.setProperty(SKU, SKU1);
         Resource resource3 = new Resource("Ummm", type);
         resourceDao.persist(resource3);
-        resource3.setProperty(AppdefResourceType.APPDEF_TYPE_ID,
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        resource3.setProperty(SKU, SKU1);
         PageInfo pageInfo = new PageInfo(0, 2, PageInfo.SORT_ASC, "name", String.class);
-        PageList<Resource> actual = resourceDao.findByIndexedProperty(
-            AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVICE, pageInfo);
+        PageList<Resource> actual = resourceDao.findByIndexedProperty(SKU, SKU1, pageInfo);
         List<Resource> expected = Arrays.asList(new Resource[] { resource2, resource1 });
         assertEquals(expected, actual);
         assertEquals(3, actual.getTotalSize());
@@ -118,15 +123,13 @@ public class ResourceDaoIntegrationTest
             }
             Resource resource = new Resource(resourceName, type);
             resourceDao.persist(resource);
-            resource.setProperty(AppdefResourceType.APPDEF_TYPE_ID,
-                AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+            resource.setProperty(SKU, SKU1);
             if (i >= 6 && i < 11) {
                 expected.add(resource);
             }
         }
         PageInfo pageInfo = new PageInfo(1, 5, PageInfo.SORT_ASC, "name", String.class);
-        PageList<Resource> actual = resourceDao.findByIndexedProperty(
-            AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVICE, pageInfo);
+        PageList<Resource> actual = resourceDao.findByIndexedProperty(SKU, SKU1, pageInfo);
         assertEquals(expected, actual);
         assertEquals(11, actual.getTotalSize());
     }
@@ -150,12 +153,10 @@ public class ResourceDaoIntegrationTest
             }
             Resource resource = new Resource(resourceName, type);
             resourceDao.persist(resource);
-            resource.setProperty(AppdefResourceType.APPDEF_TYPE_ID,
-                AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+            resource.setProperty(SKU, SKU1);
         }
         PageInfo pageInfo = new PageInfo(2, 5);
-        PageList<Resource> actual = resourceDao.findByIndexedProperty(
-            AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVICE, pageInfo);
+        PageList<Resource> actual = resourceDao.findByIndexedProperty(SKU, SKU1, pageInfo);
         assertEquals(1, actual.size());
         assertEquals(11, actual.getTotalSize());
     }
@@ -163,20 +164,17 @@ public class ResourceDaoIntegrationTest
     @Test(expected = IllegalArgumentException.class)
     public void testFindByIndexedPropertyInvalidSortType() {
         PageInfo pageInfo = new PageInfo(2, 5, PageInfo.SORT_ASC, "name", String[].class);
-        resourceDao.findByIndexedProperty(AppdefResourceType.APPDEF_TYPE_ID,
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE, pageInfo);
+        resourceDao.findByIndexedProperty(SKU, SKU1, pageInfo);
     }
 
     @Test
     public void testFindById() {
         Resource resource1 = new Resource("Some Resource", type);
         resourceDao.persist(resource1);
-        resource1.setProperty(AppdefResourceType.APPDEF_TYPE_ID,
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        resource1.setProperty(SKU, SKU1);
         Resource resource2 = new Resource("Another Resource", type);
         resourceDao.persist(resource2);
-        resource2.setProperty(AppdefResourceType.APPDEF_TYPE_ID,
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        resource2.setProperty(SKU, SKU1);
         Resource resource3 = new Resource("Not a service", type);
         resourceDao.persist(resource3);
         assertEquals(resource1, resourceDao.findById(resource1.getId()));
@@ -196,19 +194,16 @@ public class ResourceDaoIntegrationTest
     public void testFindAll() {
         Resource resource1 = new Resource("Some Resource", type);
         resourceDao.persist(resource1);
-        resource1.setProperty(AppdefResourceType.APPDEF_TYPE_ID,
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        resource1.setProperty(SKU, SKU1);
         Resource resource2 = new Resource("Another Resource", type);
         resourceDao.persist(resource2);
-        resource2.setProperty(AppdefResourceType.APPDEF_TYPE_ID,
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        resource2.setProperty(SKU, SKU1);
         Resource resource3 = new Resource("Not a service", type);
         resourceDao.persist(resource3);
         Set<Resource> expected = new HashSet<Resource>();
         expected.add(resource1);
         expected.add(resource2);
         expected.add(resource3);
-        expected.add(resourceDao.findRoot());
         Set<Resource> actual = new HashSet<Resource>(resourceDao.findAll());
         assertEquals(expected, actual);
     }
@@ -217,12 +212,10 @@ public class ResourceDaoIntegrationTest
     public void testFindPaged() {
         Resource resource1 = new Resource("Some Resource", type);
         resourceDao.persist(resource1);
-        resource1.setProperty(AppdefResourceType.APPDEF_TYPE_ID,
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        resource1.setProperty(SKU, SKU1);
         Resource resource2 = new Resource("Another Resource", type);
         resourceDao.persist(resource2);
-        resource2.setProperty(AppdefResourceType.APPDEF_TYPE_ID,
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        resource2.setProperty(SKU, SKU1);
         Resource resource3 = new Resource("Not a service", type);
         resourceDao.persist(resource3);
         // Assumes we are filtering root resource as well
@@ -234,29 +227,24 @@ public class ResourceDaoIntegrationTest
     public void testFindPagedBigMaxResult() {
         Resource resource1 = new Resource("Some Resource", type);
         resourceDao.persist(resource1);
-        resource1.setProperty(AppdefResourceType.APPDEF_TYPE_ID,
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        resource1.setProperty(SKU, SKU1);
         Resource resource2 = new Resource("Another Resource", type);
         resourceDao.persist(resource2);
-        resource2.setProperty(AppdefResourceType.APPDEF_TYPE_ID,
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        resource2.setProperty(SKU, SKU1);
         Resource resource3 = new Resource("Not a service", type);
         resourceDao.persist(resource3);
-        // Assumes we are filtering root resource as well
         List<Resource> resources = resourceDao.find(1, 10);
-        assertEquals(3, resources.size());
+        assertEquals(2, resources.size());
     }
 
     @Test
     public void testFindPagedFirstResultLargerThanSize() {
         Resource resource1 = new Resource("Some Resource", type);
         resourceDao.persist(resource1);
-        resource1.setProperty(AppdefResourceType.APPDEF_TYPE_ID,
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        resource1.setProperty(SKU, SKU1);
         Resource resource2 = new Resource("Another Resource", type);
         resourceDao.persist(resource2);
-        resource2.setProperty(AppdefResourceType.APPDEF_TYPE_ID,
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        resource2.setProperty(SKU, SKU1);
         Resource resource3 = new Resource("Not a service", type);
         resourceDao.persist(resource3);
         // Assumes we are filtering root resource as well
@@ -268,41 +256,40 @@ public class ResourceDaoIntegrationTest
     public void testCount() {
         Resource resource1 = new Resource("Some Resource", type);
         resourceDao.persist(resource1);
-        resource1.setProperty(AppdefResourceType.APPDEF_TYPE_ID,
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        resource1.setProperty(SKU, SKU1);
         Resource resource2 = new Resource("Another Resource", type);
         resourceDao.persist(resource2);
-        resource2.setProperty(AppdefResourceType.APPDEF_TYPE_ID,
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        resource2.setProperty(SKU, SKU1);
         Resource resource3 = new Resource("Not a service", type);
         resourceDao.persist(resource3);
-        assertEquals(new Long(4), resourceDao.count());
+        assertEquals(new Long(3), resourceDao.count());
     }
 
     @Test
     public void testFindByOwner() {
         Resource resource1 = new Resource("Some Resource", type);
         resourceDao.persist(resource1);
-        resource1.setOwner(authzSubjectManager.getOverlordPojo());
+        AuthzSubject bob = new AuthzSubject(true, "bob", "dev", "bob@bob.com", true, "Bob",
+            "Bobbins", "Bob", "123123123", "123123123", false);
+        entityManager.persist(bob);
+        bob.getId();
+        resource1.setOwner(bob);
         Resource resource2 = new Resource("Another Resource", type);
         resourceDao.persist(resource2);
-        resource2.setProperty(AppdefResourceType.APPDEF_TYPE_ID,
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        resource2.setProperty(SKU, SKU1);
         Resource resource3 = new Resource("Not a service", type);
         resourceDao.persist(resource3);
-        assertEquals(1, resourceDao.findByOwner(authzSubjectManager.getOverlordPojo()).size());
+        assertEquals(1, resourceDao.findByOwner(bob).size());
     }
 
     @Test
     public void testFindByName() {
         Resource resource1 = new Resource("Some Resource", type);
         resourceDao.persist(resource1);
-        resource1.setProperty(AppdefResourceType.APPDEF_TYPE_ID,
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        resource1.setProperty(SKU, SKU1);
         Resource resource2 = new Resource("Another Resource", type);
         resourceDao.persist(resource2);
-        resource2.setProperty(AppdefResourceType.APPDEF_TYPE_ID,
-            AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        resource2.setProperty(SKU, SKU1);
         Resource resource3 = new Resource("Not a service", type);
         resourceDao.persist(resource3);
         assertEquals(resource1, resourceDao.findByName("Some Resource"));

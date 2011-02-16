@@ -37,6 +37,11 @@
 	</bean>
 
 	<bean id="persistenceProvider" class="org.hyperic.hibernate.HibernateConfigHolder"/>
+	
+	<bean id="persistenceUnitMgr"
+		class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager">
+		<property name="defaultDataSource" ref="dataSource"/>
+	</bean>
 
 	<bean class="org.springframework.orm.hibernate3.HibernateTemplate">
 		<constructor-arg ref="sessionFactory" />

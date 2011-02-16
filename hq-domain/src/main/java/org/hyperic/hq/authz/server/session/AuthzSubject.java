@@ -43,6 +43,7 @@ import javax.persistence.Version;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OptimisticLock;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.server.session.Crispo;
@@ -92,6 +93,7 @@ public class AuthzSubject  {
     
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="PREF_CRISPO_ID")
+    @Index(name="PREF_CRISPO_ID_IDX")
     private Crispo     prefs;
     
     @Column(name="NAME",length=100,nullable=false)

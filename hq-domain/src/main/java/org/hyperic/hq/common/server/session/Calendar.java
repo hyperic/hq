@@ -28,59 +28,101 @@ package org.hyperic.hq.common.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 
-import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.authz.server.session.RoleCalendar;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.persistence.Version;
 
-public class Calendar
-    extends PersistedObject
-{
-    private String     _name;
-    private Collection _entries = new ArrayList();
-    
-    protected Calendar() {}
-    
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
+
+@Entity
+@Table(name = "EAM_CALENDAR", uniqueConstraints = { @UniqueConstraint(name = "calendar_name_idx", columnNames = { "NAME" }) })
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public class Calendar {
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name = "VERSION_COL")
+    @Version
+    private Long version;
+
+    @Column(name = "NAME", nullable = false)
+    private String name;
+
+    @OneToMany(cascade = { CascadeType.ALL }, mappedBy = "calendar", orphanRemoval = true)
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    private Collection<CalendarEntry> entries = new ArrayList<CalendarEntry>();
+
+    protected Calendar() {
+    }
+
     Calendar(String name) {
-        _name = name;
+        this.name = name;
     }
-    
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
     public String getName() {
-        return _name;
+        return name;
     }
-    
+
     protected void setName(String name) {
-        _name = name;
+        this.name = name;
     }
-    
+
     public Collection<CalendarEntry> getEntries() {
-        return Collections.unmodifiableCollection(_entries);
+        return Collections.unmodifiableCollection(entries);
     }
-    
-    protected Collection getEntriesBag() {
-        return _entries;
+
+    protected Collection<CalendarEntry> getEntriesBag() {
+        return entries;
     }
-    
+
     boolean removeEntry(CalendarEntry ent) {
         return getEntriesBag().remove(ent);
     }
-    
-    protected void setEntriesBag(Collection entries) {
-        _entries = entries;
+
+    protected void setEntriesBag(Collection<CalendarEntry> entries) {
+        this.entries = entries;
     }
-    
+
     WeekEntry addWeekEntry(int weekDay, int startTime, int endTime) {
         WeekEntry res = new WeekEntry(this, weekDay, startTime, endTime);
-        
+
         getEntriesBag().add(res);
         return res;
     }
 
     public boolean containsTime(long time) {
-        for (Iterator i = getEntries().iterator(); i.hasNext(); ) {
-            CalendarEntry ent = (CalendarEntry)i.next();
-            if (ent.containsTime(time))
+        for (CalendarEntry ent : getEntries()) {
+            if (ent.containsTime(time)) {
                 return true;
+            }
         }
         return false;
     }
@@ -96,15 +138,15 @@ public class Calendar
         if (obj == null || !(obj instanceof Calendar)) {
             return false;
         }
-        Calendar o = (Calendar)obj;
-        
+        Calendar o = (Calendar) obj;
+
         return o.getName().equals(getName());
     }
 
     public int hashCode() {
         int result = 17;
 
-        result = 37*result + _name.hashCode();
+        result = 37 * result + name.hashCode();
 
         return result;
     }

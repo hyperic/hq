@@ -2,7 +2,6 @@ package org.hyperic.hq.inventory.dao;
 
 import java.util.List;
 
-import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
@@ -19,7 +18,7 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
     @PersistenceContext
     protected EntityManager entityManager;
 
-    @Resource
+    @Autowired
     private FinderFactory finderFactory;
 
     @Autowired

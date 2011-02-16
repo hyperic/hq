@@ -10,6 +10,7 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.graph.annotation.GraphProperty;
 import org.springframework.data.graph.annotation.NodeEntity;
@@ -39,11 +40,11 @@ public class OperationType {
     @NotNull
     private String name;
     
-    @javax.annotation.Resource
+    @Autowired
     private transient GraphDatabaseContext graphDatabaseContext;
     
     @PersistenceContext
-    transient EntityManager entityManager;
+    private transient EntityManager entityManager;
     
     public OperationType() {
     }

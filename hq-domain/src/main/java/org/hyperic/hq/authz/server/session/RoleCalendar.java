@@ -25,55 +25,109 @@
 
 package org.hyperic.hq.authz.server.session;
 
-import org.hyperic.hibernate.PersistedObject;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
 import org.hyperic.hq.common.server.session.Calendar;
 
-public class RoleCalendar
-    extends PersistedObject
-{
-    private Role             _role;
-    private Calendar         _calendar;
-    private RoleCalendarType _type;
+@Entity
+@Table(name = "EAM_ROLE_CALENDAR", uniqueConstraints = { @UniqueConstraint(name = "role_cal_uniq", columnNames = { "CALENDAR_ID",
+                                                                                                                  "CALTYPE" }) })
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public class RoleCalendar {
+
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name = "VERSION_COL")
+    @Version
+    private Long version;
+
+    @ManyToOne
+    @JoinColumn(name = "ROLE_ID", nullable = false)
+    private Role role;
+
+    @ManyToOne
+    @JoinColumn(name = "CALENDAR_ID", nullable = false)
+    @Index(name = "ROLE_CAL_ID_IDX")
+    private Calendar calendar;
+
+    private transient RoleCalendarType type;
     
-    protected RoleCalendar() {}
-    
+    @SuppressWarnings("unused")
+    @Column(name = "CALTYPE", nullable = false)
+    private Integer typeEnum;
+
+    protected RoleCalendar() {
+    }
+
     RoleCalendar(Role role, Calendar calendar, RoleCalendarType type) {
-        _role     = role;
-        _calendar = calendar;
-        _type     = type;
+        this.role = role;
+        this.calendar = calendar;
+        this.type = type;
     }
-    
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
     public Role getRole() {
-        return _role;
+        return role;
     }
-    
+
     protected void setRole(Role r) {
-        _role = r;
+        role = r;
     }
-    
+
     public Calendar getCalendar() {
-        return _calendar;
+        return calendar;
     }
-    
+
     protected void setCalendar(Calendar c) {
-        _calendar = c;
+        calendar = c;
     }
-    
+
     public RoleCalendarType getType() {
-        return _type;
+        return type;
     }
     
     protected int getTypeEnum() {
-        return _type.getCode();
+        return type.getCode();
     }
-    
-    protected void setTypeEnum(int type) {
-        _type = RoleCalendarType.findByCode(type);
+
+    protected void setTypeEnum(int typeCode) {
+        type = RoleCalendarType.findByCode(typeCode);
     }
-    
+
     public String toString() {
-        return "RoleCalendar[role=" + getRole().getName() + " cal=" + 
-               getCalendar().getName() + " type=" + getType() + "]";
+        return "RoleCalendar[role=" + getRole().getName() + " cal=" + getCalendar().getName() +
+               " type=" + getType() + "]";
     }
 
     public boolean equals(Object obj) {
@@ -84,10 +138,9 @@ public class RoleCalendar
             return false;
         }
 
-        RoleCalendar o = (RoleCalendar)obj;
-        
-        return o.getRole().equals(getRole()) && 
-               o.getCalendar().equals(getCalendar()) &&
+        RoleCalendar o = (RoleCalendar) obj;
+
+        return o.getRole().equals(getRole()) && o.getCalendar().equals(getCalendar()) &&
                o.getType().equals(getType());
     }
 

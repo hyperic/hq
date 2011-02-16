@@ -10,7 +10,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Transient;
-import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Cache;
@@ -24,6 +23,7 @@ import org.neo4j.graphdb.ReturnableEvaluator;
 import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.TraversalPosition;
 import org.neo4j.graphdb.Traverser;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.annotation.Indexed;
 import org.springframework.data.graph.annotation.GraphProperty;
@@ -56,9 +56,9 @@ public class ResourceType {
     private String description;
 
     @PersistenceContext
-    transient EntityManager entityManager;
+    private transient EntityManager entityManager;
 
-    @javax.annotation.Resource
+    @Autowired
     private transient GraphDatabaseContext graphDatabaseContext;
 
     @Id

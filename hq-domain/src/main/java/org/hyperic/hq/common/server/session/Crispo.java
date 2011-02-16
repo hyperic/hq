@@ -31,7 +31,18 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.hyperic.hibernate.PersistedObject;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.util.config.ConfigResponse;
 
 /**
@@ -40,26 +51,62 @@ import org.hyperic.util.config.ConfigResponse;
  * The motivation behind its creation is to provide a real database storage
  * mechanism for {@link ConfigResponse} objects.
  */
-public class Crispo
-    extends PersistedObject {
-    private Collection<CrispoOption> _opts = new HashSet<CrispoOption>();
+@Entity
+@Table(name="EAM_CRISPO")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+public class Crispo {
+    
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+    
+    @Column(name="VERSION_COL")
+    @Version
+    private Long    version;
+    
+    @OneToMany(cascade=CascadeType.ALL,mappedBy="crispo")
+    @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+    private Collection<CrispoOption> opts = new HashSet<CrispoOption>();
 
-    protected Crispo() {
+    public Crispo() {
     }
+
+    
+    public Integer getId() {
+        return id;
+    }
+
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+
+    public Long getVersion() {
+        return version;
+    }
+
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
 
     /**
      * Return a collection of {@link CrispoOption}s
      */
     public Collection<CrispoOption> getOptions() {
-        return Collections.unmodifiableCollection(_opts);
+        return Collections.unmodifiableCollection(opts);
     }
 
     protected Collection<CrispoOption> getOptsSet() {
-        return _opts;
+        return opts;
     }
 
     protected void setOptsSet(Collection<CrispoOption> opts) {
-        _opts = opts;
+        this.opts = opts;
     }
 
     void addOption(String key, String val) {
@@ -104,7 +151,7 @@ public class Crispo
             String val = cfg.getValue(key);
 
             boolean needToAdd = true;
-            for (CrispoOption opt : _opts) {
+            for (CrispoOption opt : opts) {
                 if (opt.getKey().equals(key)) {
                     if (!opt.getValue().equals(val)) {
                         opt.setValue(val);
@@ -120,7 +167,7 @@ public class Crispo
         }
 
         // Now remove any keys not contained within the cfg
-        for (Iterator<CrispoOption> i = _opts.iterator(); i.hasNext();) {
+        for (Iterator<CrispoOption> i = opts.iterator(); i.hasNext();) {
             CrispoOption opt = (CrispoOption) i.next();
 
             if (cfg.getValue(opt.getKey()) == null ||

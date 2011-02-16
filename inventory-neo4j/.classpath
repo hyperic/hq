@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry including="**/*.java" kind="src" path="src/main/java"/>
+	<classpathentry kind="src" path="src/test/resources"/>
+	<classpathentry kind="src" path="src/test/java"/>
 	<classpathentry excluding="**/*.java" kind="src" path="src/main/resources"/>
 	<classpathentry kind="var" path="M2_REPO/javax/activation/activation/1.1/activation-1.1.jar" sourcepath="M2_REPO/javax/activation/activation/1.1/activation-1.1-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/javax/jms/jms/1.1/jms-1.1.jar"/>
@@ -50,11 +52,7 @@
 	<classpathentry kind="var" path="M2_REPO/org/hibernate/hibernate-jmx/3.5.6-Final/hibernate-jmx-3.5.6-Final.jar" sourcepath="M2_REPO/org/hibernate/hibernate-jmx/3.5.6-Final/hibernate-jmx-3.5.6-Final-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/hibernate/javax/persistence/hibernate-jpa-2.0-api/1.0.0.Final/hibernate-jpa-2.0-api-1.0.0.Final.jar" sourcepath="M2_REPO/org/hibernate/javax/persistence/hibernate-jpa-2.0-api/1.0.0.Final/hibernate-jpa-2.0-api-1.0.0.Final-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/hibernate/hibernate-validator/4.1.0.Final/hibernate-validator-4.1.0.Final.jar" sourcepath="M2_REPO/org/hibernate/hibernate-validator/4.1.0.Final/hibernate-validator-4.1.0.Final-sources.jar"/>
-	<classpathentry kind="src" path="/hq-common"/>
 	<classpathentry kind="src" path="/hq-domain"/>
-	<classpathentry kind="src" path="/hq-lather"/>
-	<classpathentry kind="src" path="/hq-pdk"/>
-	<classpathentry kind="src" path="/hq-util"/>
 	<classpathentry kind="var" path="M2_REPO/org/codehaus/jackson/jackson-core-asl/1.5.5/jackson-core-asl-1.5.5.jar" sourcepath="M2_REPO/org/codehaus/jackson/jackson-core-asl/1.5.5/jackson-core-asl-1.5.5-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/codehaus/jackson/jackson-mapper-asl/1.5.5/jackson-mapper-asl-1.5.5.jar" sourcepath="M2_REPO/org/codehaus/jackson/jackson-mapper-asl/1.5.5/jackson-mapper-asl-1.5.5-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/jasypt/jasypt/1.6/jasypt-1.6.jar" sourcepath="M2_REPO/org/jasypt/jasypt/1.6/jasypt-1.6-sources.jar"/>
@@ -139,5 +137,8 @@
 	<classpathentry kind="var" path="M2_REPO/org/apache/zookeeper/zookeeper/3.3.2/zookeeper-3.3.2.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.ajdt.core.ASPECTJRT_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hq-util"/>
+	<classpathentry kind="var" path="M2_REPO/org/hsqldb/hsqldb/1.8.0.10/hsqldb-1.8.0.10.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hq-common"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

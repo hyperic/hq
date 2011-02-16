@@ -27,58 +27,136 @@ package org.hyperic.hq.appdef;
 
 import java.util.Collection;
 
-public class AgentType extends AppdefBean
-{
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.OptimisticLock;
+import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
+
+@Entity
+@Table(name = "EAM_AGENT_TYPE")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public class AgentType implements ContainerManagedTimestampTrackable {
+    @SuppressWarnings("unused")
     private static final Integer TYPE_LEGACY_TRANSPORT = new Integer(1);
     private static final Integer TYPE_NEW_TRANSPORT = new Integer(2);
-    
-    
-    private String _name;
-    private Collection _agents;
+
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name = "VERSION_COL")
+    @Version
+    private Long version;
+
+    @Column(name = "NAME", length = 80)
+    private String name;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, mappedBy = "agentType")
+    @OptimisticLock(excluded = true)
+    private Collection<Agent> agents;
+
+    @Column(name = "CTIME")
+    private Long creationTime;
+
+    @Column(name = "MTIME")
+    private Long modifiedTime;
 
     public AgentType() {
-        super();
     }
 
     public String getName() {
-        return _name;
+        return name;
     }
 
     public void setName(String name) {
-        _name = name;
+        this.name = name;
     }
-    
+
     public boolean isNewTransportType() {
         Integer id = getId();
-        
+
         if (id != null) {
             return id.equals(TYPE_NEW_TRANSPORT);
         }
-        
+
         return false;
     }
 
-    public Collection getAgents() {
-        return _agents;
+    public Collection<Agent> getAgents() {
+        return agents;
     }
 
-    public void setAgents(Collection agents) {
-        _agents = agents;
+    public void setAgents(Collection<Agent> agents) {
+        this.agents = agents;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    public Long getCreationTime() {
+        return creationTime;
+    }
+
+    public void setCreationTime(Long creationTime) {
+        this.creationTime = creationTime;
+    }
+
+    public Long getModifiedTime() {
+        return modifiedTime;
+    }
+
+    public void setModifiedTime(Long modifiedTime) {
+        this.modifiedTime = modifiedTime;
+    }
+
+    public boolean allowContainerManagedCreationTime() {
+        return true;
+    }
+
+    public boolean allowContainerManagedLastModifiedTime() {
+        return true;
     }
 
     public boolean equals(Object obj) {
         if (!(obj instanceof AgentType) || !super.equals(obj)) {
             return false;
         }
-        AgentType o = (AgentType)obj;
-        return (_name == o.getName() || (_name != null && o.getName() != null &&
-                                         _name.equals(o.getName())));
+        AgentType o = (AgentType) obj;
+        return (name == o.getName() || (name != null && o.getName() != null && name.equals(o
+            .getName())));
     }
 
     public int hashCode() {
         int result = super.hashCode();
 
-        result = 37*result + (_name != null ? _name.hashCode() : 0);
+        result = 37 * result + (name != null ? name.hashCode() : 0);
 
         return result;
     }

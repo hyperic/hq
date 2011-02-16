@@ -5,9 +5,8 @@ import org.hyperic.hq.inventory.domain.PropertyType;
 public class PropertyTypeRep {
     private Integer id;
     private String name;
-    private String defaultValue;
+    private Object defaultValue;
     private String description;
-	private Boolean optional;
 	private Boolean hidden;
 	private Boolean secret;
 
@@ -18,7 +17,6 @@ public class PropertyTypeRep {
 		name = propertyType.getName();
 		defaultValue = propertyType.getDefaultValue();
 		description = propertyType.getDescription();
-		optional = propertyType.isOptional();
 		hidden = propertyType.isHidden();
 		secret = propertyType.isSecret();
 	}
@@ -39,11 +37,11 @@ public class PropertyTypeRep {
 		this.name = name;
 	}
 
-	public String getDefaultValue() {
+	public Object getDefaultValue() {
 		return defaultValue;
 	}
 
-	public void setDefaultValue(String defaultValue) {
+	public void setDefaultValue(Object defaultValue) {
 		this.defaultValue = defaultValue;
 	}
 
@@ -53,14 +51,6 @@ public class PropertyTypeRep {
 
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	public Boolean isOptional() {
-		return optional;
-	}
-
-	public void setOptional(Boolean optional) {
-		this.optional = optional;
 	}
 
 	public Boolean isHidden() {

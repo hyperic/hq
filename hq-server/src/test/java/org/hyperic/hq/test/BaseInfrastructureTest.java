@@ -191,6 +191,7 @@ abstract public class BaseInfrastructureTest {
         PermissionException, NotFoundException {
         ServerValue server = new ServerValue();
         server.setName(name);
+        server.setInstallPath("/somwhere/over/rainbow");
         return serverManager.createServer(authzSubjectManager.getOverlordPojo(), platform.getId(),
             serverType.getId(), server);
     }
