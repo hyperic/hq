@@ -74,6 +74,9 @@ public class WeblogicConfig {
             props.setProperty(WeblogicMetric.PROP_ADMIN_URL,
                               this.url);
 
+            props.setProperty(WeblogicMetric.PROP_SERVER_URL,
+                              this.url);
+
             props.setProperty(WeblogicMetric.PROP_SERVER,
                               this.name);
 
@@ -92,6 +95,11 @@ public class WeblogicConfig {
                             String addr,
                             String port) {
             this.url = protocol + "://" + addr + ":" + port;
+        }
+
+        @Override
+        public String toString(){
+            return "[domain='"+domain+"' name='"+name+"' version='"+version+"' url='"+url+"']";
         }
     }
 

@@ -37,6 +37,11 @@ import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.SigarMeasurementPlugin;
+import org.hyperic.sigar.ProcState;
+import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.SigarException;
+import org.hyperic.sigar.ptql.ProcessQuery;
+import org.hyperic.sigar.ptql.ProcessQueryFactory;
 
 public class SystemMeasurementPlugin
     extends SigarMeasurementPlugin
@@ -69,6 +74,9 @@ public class SystemMeasurementPlugin
                 //back-compat w/ old template
                 String arg = props.getProperty("Arg");
                 return new MetricValue(getDiskUsage(arg));
+            } else if (type.equals("ChildProcesses")) {
+                String arg = props.getProperty("Arg");
+                return new MetricValue(getChildProcessCount(arg));
             }
         }
         //else better be "system.avail"
@@ -145,6 +153,33 @@ public class SystemMeasurementPlugin
             }
         }
         throw new MetricNotFoundException(metric.toString());
+    }
+
+    private double getChildProcessCount(String arg)
+        throws MetricNotFoundException {
+
+        try {
+            Sigar s = getSigar();
+            long processIds[] = s.getProcList();
+            ProcessQuery query = ProcessQueryFactory.getInstance().getQuery(arg);
+            long parentPid = query.findProcess(s);
+
+            double count = 0;
+            for (long pid : processIds) {
+                ProcState state;
+                try {
+                    state = s.getProcState(pid);
+                    if (parentPid == state.getPpid()) {
+                        count++;
+                    }
+                } catch (SigarException e) {
+                    //ok, Process likely went away
+                }
+            }
+            return count;
+        } catch (Exception e) {
+            throw new MetricNotFoundException(e.getMessage(), e);
+        }
     }
 
     private double getNumCpus()

@@ -44,6 +44,9 @@ public class WeblogicProductPlugin extends ProductPlugin {
     private static boolean useJAAS = true;
     private static boolean autoRT  = false;
 
+    public static boolean NEW_DISCOVERY=false;
+    public static boolean usePlatformName=false;
+
     private static boolean ssl2ways = false;
     private static String ssl2ways_cert;
     private static String ssl2ways_key;
@@ -107,6 +110,12 @@ public class WeblogicProductPlugin extends ProductPlugin {
         //just in case.
         String auth =
             props.getProperty("weblogic.auth.method", "jaas").toLowerCase();
+
+        NEW_DISCOVERY = props.getProperty("weblogic.discovery.new", "false").equalsIgnoreCase("true");
+        log.debug("[getClassPath] weblogic.discovery.new=" + NEW_DISCOVERY);
+
+        usePlatformName = props.getProperty("weblogic.discover.pname","false").equalsIgnoreCase("true");
+        log.debug("[getClassPath] usePlatformName=" + usePlatformName);
 
         // SSL2WAYS CERTs
         ssl2ways_key=props.getProperty("weblogic.ssl2ways.key");

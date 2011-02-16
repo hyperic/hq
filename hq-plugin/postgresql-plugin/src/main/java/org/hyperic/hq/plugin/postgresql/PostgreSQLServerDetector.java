@@ -29,13 +29,15 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.FileServerDetector;
 import org.hyperic.hq.product.PluginException;
@@ -43,15 +45,10 @@ import org.hyperic.hq.product.RegistryServerDetector;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
-
+import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.jdbc.DBUtil;
-
-import org.hyperic.sigar.win32.RegistryKey;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class PostgreSQLServerDetector
     extends ServerDetector
@@ -86,12 +83,15 @@ public class PostgreSQLServerDetector
     static final String VERSION_82 = "8.2";
     static final String VERSION_83 = "8.3";
     static final String VERSION_84 = "8.4";
+    static final String VERSION_90 = "9.0";
 
     static final String HQ_SERVER_DB = "HQ PostgreSQL";
     static final String HQ_SERVER_DB81 = "HQ PostgreSQL 8.1";
     static final String HQ_SERVER_DB82 = "HQ PostgreSQL 8.2";
     static final String HQ_SERVER_DB83 = "HQ PostgreSQL 8.3";
     static final String HQ_SERVER_DB84 = "HQ PostgreSQL 8.4";
+    static final String HQ_SERVER_DB90 = "HQ PostgreSQL 9.0";
+
 
     private static List getServerProcessList() {
         ArrayList servers = new ArrayList();
@@ -326,6 +326,16 @@ public class PostgreSQLServerDetector
                         SERVER_NAME + " " + version;
                 }
 
+            }
+        } else if (getTypeInfo().getVersion().equals(VERSION_90)) {
+            if (version.indexOf(VERSION_90) != -1) {
+                String name;
+                if (installPath.indexOf("hqdb") != -1) {
+                    name = getPlatformName() + " " + HQ_SERVER_DB90;
+                    server.setIdentifier(HQ_SERVER_DB90);
+                } else {
+                    name = getPlatformName() + " " + SERVER_NAME + " " + version;
+                }
                 server.setName(name);
                 servers.add(server);
             }

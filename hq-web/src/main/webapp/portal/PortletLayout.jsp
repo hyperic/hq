@@ -29,8 +29,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-<link rel="stylesheet" href="<html:rewrite page="/js/dojo/1.1.2/dojo/resources/dojo.css"/>" type="text/css"/>
-<link rel="stylesheet" href="<html:rewrite page="/js/dojo/1.1.2/dijit/themes/tundra/tundra.css"/>" type="text/css"/>
+<link rel="stylesheet" href="<html:rewrite page="/static/js/dojo/1.5/dojo/resources/dojo.css"/>" type="text/css"/>
+<link rel="stylesheet" href="<html:rewrite page="/static/js/dojo/1.5/dijit/themes/tundra/tundra.css"/>" type="text/css"/>
 <link rel="shortcut icon" href="<html:rewrite page="/images/4.0/icons/favicon.ico"/>"/>
 <link rel="stylesheet" href="<html:rewrite page="/css/win.css"/>" type="text/css"/>
 <link rel="stylesheet" href="<html:rewrite page="/css/HQ_40.css"/>" type="text/css"/>
@@ -41,14 +41,14 @@ djConfig = { isDebug: false, locale: 'en-us' }
 <script type="text/javascript" src="<html:rewrite page='/js/dojo/0.4.4/dojo.js'/>"></script> 
 <script type="text/javascript">
 djConfig.parseOnLoad = true;
-djConfig.baseUrl = '/js/dojo/1.1.2/dojo/';
+djConfig.baseUrl = '/static/js/dojo/1.5/dojo/';
 djConfig.scopeMap = [
         ["dojo", "dojo11"],
         ["dijit", "dijit11"],
         ["dojox", "dojox11"]
     ];
 </script>
-<script src="<html:rewrite page='/js/dojo/1.1.2/dojo/dojo.js'/>" type="text/javascript"></script>
+<script src="<html:rewrite page='/static/js/dojo/1.5/dojo/dojo.js'/>" type="text/javascript"></script>
 <script type="text/javascript">
     var imagePath = "<html:rewrite page="/images/"/>";
     dojo11.require('dojo.date');

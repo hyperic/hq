@@ -20,11 +20,6 @@
 			<version>${project.version}</version>
 		</dependency>
 	<dependency>
-  		<groupId>org.jboss.client</groupId>
-  		<artifactId>jbossall-client</artifactId>
-  		<version>4.2.3.GA</version>
-	</dependency>
-	<dependency>
   				<groupId>com.cenqua.clover</groupId>
   				<artifactId>clover</artifactId>
   				<version>${clover2.version}</version>

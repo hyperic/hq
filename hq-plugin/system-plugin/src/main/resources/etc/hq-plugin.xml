@@ -1021,6 +1021,14 @@
 
     <metric name="Threads"
             template="sigar:Type=ProcState,Arg=%process.query%:Threads"/>
+
+    <metric name="Child Processes"
+            alias="ChildProcesses"
+            template="sigar.ext:Type=ChildProcesses,Arg=%process.query%:ChildProcesses"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+
   </metrics>
 
   <metrics name="MultiProcess">

@@ -47,6 +47,7 @@ public class CommandInfo {
         "controlGetPluginConfig";
     public static final String CMD_CONTROL_SEND_COMMAND_RESULT =
         "controlSendCommandResult";
+    public static final String CMD_PLUGIN_SEND_REPORT = "pluginSendReport";
 
     public static final String[] SECURE_COMMANDS = {
         CMD_MEASUREMENT_GET_SERVER_TIME,

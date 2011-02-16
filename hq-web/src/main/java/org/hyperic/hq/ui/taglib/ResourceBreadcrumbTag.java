@@ -386,7 +386,7 @@ public class ResourceBreadcrumbTag extends TagSupport {
             Resource parentResource = resourceManager.findResource(parent.getAppdefEntityId());
             Resource parentOfAutoGroupResource = resourceManager.findResource(new AppdefEntityID(group.getResourceId()));
     
-            result = parentResource.equals(parentOfAutoGroupResource);
+            result = parentResource != null && parentResource.equals(parentOfAutoGroupResource);
         }
         
         return result;

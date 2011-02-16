@@ -1,10 +1,10 @@
 package com.vmware.springsource.hyperic.plugin.gemfire.collectors;
 
+import com.vmware.springsource.hyperic.plugin.gemfire.GemFireUtils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import javax.management.MBeanServerConnection;
-import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.Collector;
@@ -27,8 +27,7 @@ public class MemberCollector extends Collector {
         Properties props = getProperties();
         try {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(props);
-            log.debug("mServer=" + mServer);
-            String memberID = props.getProperty("memberID");
+            String memberID = GemFireUtils.memberNameToMemberID(props.getProperty("member.name"), mServer);
             addValues(getMetrics(memberID, mServer, false));
             setAvailability(true);
         } catch (Exception ex) {
@@ -40,19 +39,7 @@ public class MemberCollector extends Collector {
 
     public static Map getMetrics(String memberID, MBeanServerConnection mServer, boolean hqu) throws PluginException {
         Map res = new java.util.HashMap<String, Object>();
-        Map<String, Object> memberDetails = null;
-        try {
-            Object[] args2 = {memberID};
-            String[] def2 = {String.class.getName()};
-            memberDetails = (Map) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMemberDetails", args2, def2);
-        } catch (Exception ex) {
-            throw new PluginException(ex.getMessage(), ex);
-        }
-
-        log.debug("[getMetrics] memberDetails=" + memberDetails);
-        if ((memberDetails==null) || memberDetails.isEmpty()) {
-            throw new PluginException("Member '" + memberID + "' not found!!!");
-        }
+        Map<String, Object> memberDetails = GemFireUtils.getMemberDetails(memberID, mServer);
 
         for (String k : memberDetails.keySet()) {
             res.put(k.substring(prefixLength, k.lastIndexOf('.')), memberDetails.get(k));

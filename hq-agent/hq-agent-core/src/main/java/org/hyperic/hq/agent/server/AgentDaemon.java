@@ -31,9 +31,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.jar.JarFile;
@@ -52,8 +56,13 @@ import org.hyperic.hq.agent.AgentUpgradeManager;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorInterface;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
+import org.hyperic.hq.bizapp.client.AgentCallbackClient;
+import org.hyperic.hq.bizapp.client.AgentCallbackClientException;
+import org.hyperic.hq.bizapp.client.PlugininventoryCallbackClient;
+import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.PluginInfo;
 import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.util.PluginLoader;
@@ -674,22 +683,23 @@ public class AgentDaemon
         this.listener.setConnectionListener(newListener);
     }
 
-    private void startPluginManagers()
-        throws AgentStartException
-    {
+    private void startPluginManagers() throws AgentStartException {
         try {
             Properties bootProps = this.bootConfig.getBootProperties();
             String pluginDir;
 
             this.ppm = new ProductPluginManager(bootProps);
+
             this.ppm.init();
 
             pluginDir = 
                 bootProps.getProperty(AgentConfig.PROP_PDK_PLUGIN_DIR[0]);
 
-            this.ppm.registerPlugins(pluginDir);
+            Collection<PluginInfo> plugins = new ArrayList<PluginInfo>();
+            plugins.addAll(this.ppm.registerPlugins(pluginDir));
             //check .. and higher for hq-plugins
-            this.ppm.registerCustomPlugins("..");
+            plugins.addAll(this.ppm.registerCustomPlugins(".."));
+            sendPluginStatusToServer(plugins);
             
             logger.info("Product Plugin Manager initalized");
         } catch(Exception e){
@@ -699,6 +709,41 @@ public class AgentDaemon
             throw new AgentStartException("Unable to initialize plugin " +
                                           "manager: " + e.getMessage());
         }
+    }
+
+    private void sendPluginStatusToServer(final Collection<PluginInfo> plugins) {
+        // server may be down or Provider may not be setup.  Either way we want to retry until
+        // the data is sent
+        Thread thread = new Thread("PluginStatusSender") {
+            public void run() {
+                while (true) {
+                    try {
+                        AgentStorageProvider provider = getStorageProvider();
+                        if (provider == null) {
+                            logger.debug("trying to send plugin status to the server but " +
+                                         "provider has not been setup, will sleep 5 seconds and retry");
+                            Thread.sleep(5000);
+                            continue;
+                        }
+                        PlugininventoryCallbackClient client = new PlugininventoryCallbackClient(
+                            new StorageProviderFetcher(provider), plugins);
+                        logger.info("Sending plugin status to server");
+                        client.sendPluginReportToServer();
+                        logger.info("Successfully sent plugin status to server");
+                        break;
+                    } catch (Exception e) {
+                        logger.warn("could not send plugin status to server, will retry:  " + e);
+                        logger.debug(e,e);
+                    }
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                        logger.debug(e,e);
+                    }
+                }
+            }
+        };
+        thread.start();
     }
 
     private void startHandlers()

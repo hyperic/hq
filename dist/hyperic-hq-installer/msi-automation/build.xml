@@ -2,7 +2,8 @@
 <project name="test-replace" default="all" xmlns:ac="antlib:net.sf.antcontrib">
   <description>Builds MSI packages from HQ bundles.</description>
 
-  <property file="${basedir}/build.properties" />
+  <property file="${basedir}/build1.properties" />
+  <property file="${basedir}/build2.properties" />
   <import file="msi-macros.xml" />
 
   <!-- Figure out what kind of build we have; release builds have no text at all

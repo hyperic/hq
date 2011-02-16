@@ -33,6 +33,8 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -363,19 +365,64 @@ public class MySQL5InnoDBDialect
 
 	public Long getSchemaCreationTimestampInMillis(Statement stmt) throws SQLException {
         ResultSet rs = null;
-           
+        Date installDate = null;
+    	
         try {
+        	String[] sqls = new String[] {
+        		"select CTIME from EAM_AGENT_TYPE where ID = 1",
+        		"select CTIME from EAM_APPLICATION_TYPE where ID = 2",
+        		"select CTIME from EAM_RESOURCE_GROUP where ID = 0",
+        		"select CTIME from EAM_ALERT_DEFINITION where ID = 0",
+        		"select CTIME from EAM_ESCALATION where ID = 100"
+        	};
+            
+        	for (String sql : sqls) {
+        		rs = stmt.executeQuery(sql);
+            
+	        	if (rs.next()) {
+	        		Date date = new Date(rs.getLong(1));
+	        		
+	        		if (installDate == null) {
+	        			installDate = date;
+	        		} else {
+	        			Calendar cal1 = Calendar.getInstance();
+	        			Calendar cal2 = Calendar.getInstance();
+	        			
+	        			cal1.setTime(installDate);
+	        			cal2.setTime(date);
+	        			
+	        			// Compare date with previous one (they should all be the same date)...
+	        			if (cal1.get(Calendar.YEAR) != cal2.get(Calendar.YEAR) || cal1.get(Calendar.DAY_OF_YEAR) != cal2.get(Calendar.DAY_OF_YEAR)) {
+	        				// ...Something has been tampered with!...
+	        				return null;
+	        			}
+	        		}
+	        	}
+        	}
+        	
+        	// Extra insurance, check the db schema creation timstamp...
         	String sql = "select min(CREATE_TIME) from information_schema.tables where table_schema = database()";
-            
+        	
         	rs = stmt.executeQuery(sql);
-            
+        	
         	if (rs.next()) {
-        		return rs.getDate(1).getTime();
+        		Date date = rs.getDate(1);
+        		Calendar cal1 = Calendar.getInstance();
+    			Calendar cal2 = Calendar.getInstance();
+    			
+    			cal1.setTime(installDate);
+    			cal2.setTime(date);
+    			
+    			// Compare date with previous one (they should all be the same date)...
+    			if (cal1.get(Calendar.YEAR) != cal2.get(Calendar.YEAR) || cal1.get(Calendar.DAY_OF_YEAR) != cal2.get(Calendar.DAY_OF_YEAR)) {
+    				// ...Something has been tampered with!...
+    				return null;
+    			}
         	}
         } finally {
         	DBUtil.closeResultSet(logCtx, rs);
         }
         
-        return null;
+        return installDate.getTime();
 	}
 }

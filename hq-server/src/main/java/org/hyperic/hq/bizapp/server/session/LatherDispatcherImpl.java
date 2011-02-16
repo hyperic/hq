@@ -41,12 +41,12 @@ import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
 import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection;
 import org.hyperic.hq.appdef.shared.AgentCreateException;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
@@ -79,6 +79,7 @@ import org.hyperic.hq.bizapp.shared.lather.MeasurementGetConfigs_args;
 import org.hyperic.hq.bizapp.shared.lather.MeasurementGetConfigs_result;
 import org.hyperic.hq.bizapp.shared.lather.MeasurementSendReport_args;
 import org.hyperic.hq.bizapp.shared.lather.MeasurementSendReport_result;
+import org.hyperic.hq.bizapp.shared.lather.PluginReport_args;
 import org.hyperic.hq.bizapp.shared.lather.RegisterAgent_args;
 import org.hyperic.hq.bizapp.shared.lather.RegisterAgent_result;
 import org.hyperic.hq.bizapp.shared.lather.SecureAgentLatherValue;
@@ -106,6 +107,7 @@ import org.hyperic.hq.measurement.shared.ResourceLogEvent;
 import org.hyperic.hq.product.ConfigTrackPlugin;
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.PluginInfo;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.TrackEvent;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
@@ -732,11 +734,18 @@ public class LatherDispatcherImpl implements LatherDispatcher {
             return cmdControlGetPluginConfig((ControlGetPluginConfig_args) arg);
         } else if (method.equals(CommandInfo.CMD_CONTROL_SEND_COMMAND_RESULT)) {
             return cmdControlSendCommandResult((ControlSendCommandResult_args) arg);
+        } else if (method.equals(CommandInfo.CMD_PLUGIN_SEND_REPORT)) {
+            return cmdAgentPluginReport((PluginReport_args) arg);
         } else {
             log.warn(ctx.getCallerIP() + " attempted to invoke '" + method +
                      "' which could not be found");
             throw new LatherRemoteException("Unknown method, '" + method + "'");
         }
+    }
+    
+    private LatherValue cmdAgentPluginReport(PluginReport_args arg) {
+        agentManager.updateAgentPluginStatusInBackground(arg);
+        return new NullLatherValue();
     }
 
     /**

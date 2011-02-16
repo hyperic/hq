@@ -48,6 +48,7 @@ public class JBossMeasurementPlugin
         return attr.equalsIgnoreCase(ATTR_STATE_MANAGEABLE);
     }
 
+    @Override
     public MetricValue getValue(Metric metric)
         throws PluginException,
                MetricNotFoundException,

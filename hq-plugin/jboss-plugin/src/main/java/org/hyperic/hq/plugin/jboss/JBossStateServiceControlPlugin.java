@@ -35,6 +35,7 @@ import org.hyperic.hq.product.PluginException;
 public class JBossStateServiceControlPlugin
     extends JBossServiceControlPlugin {
 
+    @Override
     protected boolean isRunning() {
         Metric metric = getConfiguredMetric();
         Object value;
@@ -58,6 +59,7 @@ public class JBossStateServiceControlPlugin
         return true;
     }
 
+    @Override
     public void doAction(String action, String[] args)
         throws PluginException {
 

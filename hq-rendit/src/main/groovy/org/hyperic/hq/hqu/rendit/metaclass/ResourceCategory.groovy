@@ -380,7 +380,14 @@ class ResourceCategory {
 	static void setConfig(Resource r, Map m, AuthzSubject subject) {
 		(new ResourceConfig(r)).setProperties(m, subject)
 	}
-	
+
+	/**
+	 * @see ResourceConfig
+	 */
+	static void setConfig(Resource r, Map m, AuthzSubject subject, Boolean isUserManaged) {
+		(new ResourceConfig(r)).setProperties(m, subject, isUserManaged)
+	}
+		
 	/**
 	 * Get all the children of a resource, viewable by the passed user.
 	 *

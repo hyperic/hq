@@ -37,7 +37,6 @@ import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
-import org.hyperic.hq.auth.shared.SessionManager
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.server.session.Resource
@@ -246,12 +245,20 @@ class ResourceConfig {
         }
         res
     }
-    
+
     /**
      * Set properties of the resource backing this configuration.  Only  
      * existing properties can be set -- new properties will be discarded.
      */
     void setProperties(Map props, AuthzSubject subject) {
+    	setProperties(props, subject, Boolean.TRUE)
+    }
+    
+    /**
+     * Set properties of the resource backing this configuration.  Only  
+     * existing properties can be set -- new properties will be discarded.
+     */
+    void setProperties(Map props, AuthzSubject subject, Boolean isUserManaged) {
         populate()
 
         def entityID   = resource.entityId
@@ -322,9 +329,7 @@ class ResourceConfig {
         
         appdefHandler.populateAllCfg(allConfigs, targetForGet)
         // XXX:  Undo this rollback crap when Appdef gets itself figured out.
-        def mgr = SessionManager.instance
-        def sessionId = mgr.put(subject)
-        appBoss.setAllConfigResponses(sessionId, allConfigs, allConfigsRoll)
+        appBoss.setAllConfigResponses(subject, allConfigs, allConfigsRoll, isUserManaged)
 
     }
     

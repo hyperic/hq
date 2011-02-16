@@ -2,7 +2,8 @@
 <project name="build-rpms" default="all" xmlns:ac="antlib:net.sf.antcontrib">
   <description>Creates RPM's from the HQ bundles.</description>
 
-  <property file="${basedir}/build.properties"/>
+  <property file="${basedir}/build1.properties"/>
+  <property file="${basedir}/build2.properties"/>
   <import file="rpm-macros.xml" />
 
   <!-- Figure out what kind of build we have; release builds have no text at all
@@ -61,7 +62,7 @@
         </ac:if>
       </ac:else>
     </ac:if>
-    <property file="${basedir}/build2.properties"/>
+    <property file="${basedir}/build3.properties"/>
   </target>
 
   <!-- Ensure all folders we need are there. -->

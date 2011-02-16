@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -122,9 +123,10 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
-import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
+import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -2212,53 +2214,60 @@ public class AppdefBossImpl implements AppdefBoss {
 
     // Return a PageList of authz resources.
     private List<AppdefEntityID> findViewableEntityIds(AuthzSubject subject, int appdefTypeId,
-                                                       String rName, Integer filterType,
+                                                       String rName, Integer protoFilterId,
                                                        PageControl pc) {
         List<AppdefEntityID> appentResources = new ArrayList<AppdefEntityID>();
 
         if (appdefTypeId != APPDEF_TYPE_UNDEFINED) {
-            String authzResType = AppdefUtil.appdefTypeIdToAuthzTypeStr(appdefTypeId);
-
-            String appdefTypeStr;
-            if (filterType != null) {
-                switch (appdefTypeId) {
-                    case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                    case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                    case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                        appdefTypeStr = AppdefEntityConstants.typeToString(appdefTypeId);
-                        break;
-                    default:
-                        appdefTypeStr = null;
-                        break;
-                }
-            } else {
-                appdefTypeStr = null;
+            Integer protoType = null;
+            Collection<ResourceType> resourceTypes = new ArrayList<ResourceType>();
+            switch (appdefTypeId) {
+                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                    protoType = AuthzConstants.authzPlatformProto;
+                    resourceTypes.add(resourceManager.findResourceTypeById(AuthzConstants.authzPlatform));
+                    break;
+                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                    protoType = AuthzConstants.authzServerProto;
+                    resourceTypes.add(resourceManager.findResourceTypeById(AuthzConstants.authzServer));
+                    break;
+                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                    protoType = AuthzConstants.authzServiceProto;
+                    resourceTypes.add(resourceManager.findResourceTypeById(AuthzConstants.authzService));
+                    break;
+                default:
+                    break;
             }
-
-            List<Integer> instanceIds = resourceManager.findViewableInstances(subject,
-                authzResType, rName, appdefTypeStr, filterType, pc);
-
-            for (Integer instanceId : instanceIds) {
-                appentResources.add(new AppdefEntityID(appdefTypeId, instanceId));
-            }
-        } else {
-            Map<String, List<Integer>> authzResources = resourceManager
-                .findAllViewableInstances(subject);
-            for (Map.Entry<String, List<Integer>> entry : authzResources.entrySet()) {
-
-                int appdefType;
-                try {
-                    String typeName = (String) entry.getKey();
-                    appdefType = AppdefUtil.resNameToAppdefTypeId(typeName);
-                } catch (InvalidAppdefTypeException e) {
-                    // ignore type
+            final Collection<Integer> resourceIds =
+                resourceManager.findAllViewableResourceIds(subject, resourceTypes);
+            for (final Integer resourceId : resourceIds) {
+                final Resource r = resourceManager.findResourceById(resourceId);
+                if (r == null || r.isInAsyncDeleteState()) {
                     continue;
                 }
-
-                List<Integer> instIds = entry.getValue();
-
-                for (Integer instId : instIds) {
-                    appentResources.add(new AppdefEntityID(appdefType, instId));
+                try {
+                    if (protoFilterId != null && protoType != null) {
+                        final Resource proto = r.getPrototype();
+                        if (proto.getInstanceId().equals(protoFilterId) &&
+                                proto.getResourceType().getId().equals(protoType)) {
+                            appentResources.add(AppdefUtil.newAppdefEntityId(r));
+                        }
+                    } else {
+                        appentResources.add(AppdefUtil.newAppdefEntityId(r));
+                    }
+                } catch (IllegalArgumentException e) {
+                }
+            }
+        } else {
+            final Collection<Integer> resourceIds =
+                resourceManager.findAllViewableResourceIds(subject, null);
+            for (final Integer resourceId : resourceIds) {
+                final Resource r = resourceManager.findResourceById(resourceId);
+                if (r == null || r.isInAsyncDeleteState()) {
+                    continue;
+                }
+                try {
+                    appentResources.add(AppdefUtil.newAppdefEntityId(r));
+                } catch (IllegalArgumentException e) {
                 }
             }
         }
@@ -2333,11 +2342,17 @@ public class AppdefBossImpl implements AppdefBoss {
 
                 if (appdefTypeId == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
                     Server server = serverManager.findServerById(res.getId());
-                    res.setHostName(server.getPlatform().getName());
+                    Platform platform = server.getPlatform();
+                    if (platform != null) {
+                        res.setHostName(platform.getName());
+                    }
 
                 } else {
                     Service service = serviceManager.findServiceById(res.getId());
-                    res.setHostName(service.getServer().getName());
+                    Server server = service.getServer();
+                    if (server != null) {
+                        res.setHostName(server.getName());
+                    }
                 }
             }
         }
@@ -3008,15 +3023,30 @@ public class AppdefBossImpl implements AppdefBoss {
      */
     public void setAllConfigResponses(int sessionInt, AllConfigResponses allConfigs,
                                       AllConfigResponses allConfigsRollback)
-        throws PermissionException, EncodingException, PluginException, ApplicationException,
-        AutoinventoryException, ScheduleWillNeverFireException, AgentConnectionException {
+    throws PermissionException, EncodingException, PluginException, ApplicationException,
+           AutoinventoryException, ScheduleWillNeverFireException, AgentConnectionException {
         AuthzSubject subject = sessionManager.getSubject(sessionInt);
+        setAllConfigResponses(subject, allConfigs, allConfigsRollback);
+    }
+
+    public void setAllConfigResponses(AuthzSubject subject, AllConfigResponses allConfigs,
+            						  AllConfigResponses allConfigsRollback)
+    throws PermissionException, EncodingException, PluginException, ApplicationException,
+    	   AutoinventoryException, ScheduleWillNeverFireException, AgentConnectionException {
+    	setAllConfigResponses(subject, allConfigs, allConfigsRollback, Boolean.TRUE);
+    }
+
+    public void setAllConfigResponses(AuthzSubject subject, AllConfigResponses allConfigs,
+                                      AllConfigResponses allConfigsRollback,
+                                      Boolean isUserManaged)
+    throws PermissionException, EncodingException, PluginException, ApplicationException,
+           AutoinventoryException, ScheduleWillNeverFireException, AgentConnectionException {
         boolean doRollback = true;
         boolean doValidation = (allConfigsRollback != null);
         AppdefEntityID id = allConfigs.getResource();
 
         try {
-            doSetAll(subject, allConfigs, doValidation, false);
+            doSetAll(subject, allConfigs, doValidation, false, isUserManaged);
 
             if (doValidation) {
                 configManager.clearValidationError(subject, id);
@@ -3045,13 +3075,14 @@ public class AppdefBossImpl implements AppdefBoss {
             throw e;
         } finally {
             if (doRollback && doValidation) {
-                doSetAll(subject, allConfigsRollback, false, true);
+                doSetAll(subject, allConfigsRollback, false, true, isUserManaged);
             }
         }
     }
 
     private void doSetAll(AuthzSubject subject, AllConfigResponses allConfigs,
-                          boolean doValidation, boolean force) throws EncodingException,
+                          boolean doValidation, boolean force,
+                          Boolean isUserManaged) throws EncodingException,
         PermissionException, ConfigFetchException, PluginException, ApplicationException {
         AppdefEntityID entityId = allConfigs.getResource();
         Set<AppdefEntityID> ids = new HashSet<AppdefEntityID>();
@@ -3063,7 +3094,7 @@ public class AppdefBossImpl implements AppdefBoss {
                 ConfigResponse.safeEncode(allConfigs.getProductConfig()), ConfigResponse
                     .safeEncode(allConfigs.getMetricConfig()), ConfigResponse.safeEncode(allConfigs
                     .getControlConfig()), ConfigResponse.safeEncode(allConfigs.getRtConfig()),
-                Boolean.TRUE, force);
+                    isUserManaged, force);
             if (wasUpdated) {
                 ids.add(entityId);
             }

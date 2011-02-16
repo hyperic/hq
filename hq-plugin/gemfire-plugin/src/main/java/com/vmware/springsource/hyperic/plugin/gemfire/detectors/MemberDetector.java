@@ -1,11 +1,12 @@
 package com.vmware.springsource.hyperic.plugin.gemfire.detectors;
 
+import com.vmware.springsource.hyperic.plugin.gemfire.GemFireUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.management.MBeanServerConnection;
-import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.PluginException;
@@ -22,27 +23,29 @@ public abstract class MemberDetector extends ServerDetector implements AutoServe
     public List getServerResources(ConfigResponse pc) throws PluginException {
         log.debug("[getServerResources] pc=" + pc);
         List servers = new ArrayList();
+        Map<String, String> names = new HashMap();
         try {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(pc.toProperties());
-            log.debug("mServer=" + mServer);
-
-            Object[] args = {};
-            String[] def = {};
-            ObjectName statsMBean = new ObjectName("GemFire:type=MemberInfoWithStatsMBean");
-            String[] members = (String[]) mServer.invoke(statsMBean, "getMembers", args, def);
+            List<String> members=GemFireUtils.getMembers(mServer);
             log.debug("[getServerResources] members=" + Arrays.asList(members));
-            for (String menber : members) {
-                Object[] args2 = {menber};
-                String[] def2 = {String.class.getName()};
-                Map<String, Object> memberDetails = (Map) mServer.invoke(statsMBean, "getMemberDetails", args2, def2);
-                log.debug("[getServerResources] memberDetails.size()=" + memberDetails.size());
+            for (String memberID : members) {
+                Map memberDetails = GemFireUtils.getMemberDetails(memberID, mServer);
+                if (log.isDebugEnabled()) {
+                    log.debug("[getServerResources] memberDetails=" + memberDetails);
+                }
 
                 if (isValidMember(memberDetails)) {
+                    String name = (String) memberDetails.get("gemfire.member.name.string");
+                    if (names.get(name) != null) {
+                        log.error("[getServerResources] There is 2 of more '" + getTypeInfo().getName() + "' with the same name '" + name + "'");
+                    }
+                    names.put(name, name);
+
                     ServerResource server = createServerResource("");
-                    server.setName(getTypeInfo().getName() + " " + menber);
-                    server.setIdentifier(menber);
+                    server.setName(getTypeInfo().getName() + " " + name);
+                    server.setIdentifier("GFDS server.name " + name);
                     ConfigResponse c = new ConfigResponse();
-                    c.setValue("memberID", menber);
+                    c.setValue("member.name", name);
                     setMeasurementConfig(server, c);
                     setProductConfig(server, new ConfigResponse());
                     setCustomProperties(server, getAtributtes(memberDetails));
@@ -62,25 +65,17 @@ public abstract class MemberDetector extends ServerDetector implements AutoServe
         List services = new ArrayList();
         try {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(config.toProperties());
-            log.debug("mServer=" + mServer);
-
-            String memberId = config.getValue("memberID");
-            Object[] args2 = {memberId};
-            String[] def2 = {String.class.getName()};
-            ObjectName statsMBean = new ObjectName("GemFire:type=MemberInfoWithStatsMBean");
-
-            Map<String, Object> memberDetails = (Map) mServer.invoke(statsMBean, "getMemberDetails", args2, def2);
+            String memberID = GemFireUtils.memberNameToMemberID(config.getValue("member.name"), mServer);
+            Map memberDetails = GemFireUtils.getMemberDetails(memberID, mServer);
             Map<String, Map> regions = (Map) memberDetails.get("gemfire.member.regions.map");
 
             if (regions != null) {
                 for (Map region : regions.values()) {
                     String name = (String) region.get("gemfire.region.name.string");
                     ServiceResource service = createServiceResource("Region");
-                    service.setName(memberId + " Region " + name);
+                    service.setName(memberDetails.get("gemfire.member.name.string") + " Region " + name);
                     ConfigResponse c = new ConfigResponse();
-                    c.setValue("regionID", (String) region.get("gemfire.region.name.string"));
-                    c.setValue("name", name);
-                    c.setValue("memberID", memberId);
+                    c.setValue("regionID", name);
                     log.debug("[discoverServices] region -> c=" + c);
 
                     ConfigResponse attr = new ConfigResponse();
@@ -102,10 +97,9 @@ public abstract class MemberDetector extends ServerDetector implements AutoServe
                 for (Map gateway : gateways) {
                     String id = (String) gateway.get("gemfire.member.gateway.id.string");
                     ServiceResource service = createServiceResource("Gateway");
-                    service.setName(memberId + " Gateway " + id);
+                    service.setName(memberDetails.get("gemfire.member.name.string") + " Gateway " + id);
 
                     ConfigResponse c = new ConfigResponse();
-                    c.setValue("memberID", memberId);
                     c.setValue("gatewayID", id);
                     log.debug("[discoverServices] gateway -> c=" + c);
 
