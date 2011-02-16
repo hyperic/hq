@@ -563,6 +563,7 @@ public class ServiceManagerTest
         sValue.setServiceRt(true);
         sValue.setEndUserRt(true);
         sValue.setId(service.getId());
+        sValue.setAutoinventoryIdentifier("Test Service Name");
         serviceManager.updateService(subject, sValue);
         Service updatedService = serviceManager.findServiceById(sValue.getId());
         assertEquals(updatedService.getName(), "Changed Name");

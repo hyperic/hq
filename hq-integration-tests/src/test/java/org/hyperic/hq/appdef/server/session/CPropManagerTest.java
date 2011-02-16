@@ -92,36 +92,6 @@ public class CPropManagerTest
     }
 
     @Test
-    public void testSetValueUpdateToNull() throws Exception {
-        cPropManager.addKey(platformType, "userName", "A user name",String.class);
-        flushSession();
-        AppdefEntityValue appdefVal = new AppdefEntityValue(platform.getEntityId(),
-            authzSubjectManager.getOverlordPojo());
-
-        cPropManager.setValue(platform.getEntityId(), platformType.getId(), "userName", "bob");
-        String val = cPropManager.getValue(appdefVal, "userName");
-        assertEquals("bob", val);
-        cPropManager.setValue(platform.getEntityId(), platformType.getId(), "userName", null);
-        String updatedVal = cPropManager.getValue(appdefVal, "userName");
-        assertNull(updatedVal);
-    }
-
-    @Test
-    public void testSetValueToNullNoChange() throws Exception {
-        cPropManager.addKey(platformType, "userName", "A user name",String.class);
-        flushSession();
-        AppdefEntityValue appdefVal = new AppdefEntityValue(platform.getEntityId(),
-            authzSubjectManager.getOverlordPojo());
-
-        cPropManager.setValue(platform.getEntityId(), platformType.getId(), "userName", null);
-        String val = cPropManager.getValue(appdefVal, "userName");
-        assertNull(val);
-        cPropManager.setValue(platform.getEntityId(), platformType.getId(), "userName", null);
-        String updatedVal = cPropManager.getValue(appdefVal, "userName");
-        assertNull(updatedVal);
-    }
-
-    @Test
     public void testSetValueUpdateNoChange() throws Exception {
         cPropManager.addKey(platformType, "userName", "A user name",String.class);
         flushSession();

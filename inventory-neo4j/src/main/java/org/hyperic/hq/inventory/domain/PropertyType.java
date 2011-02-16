@@ -83,6 +83,11 @@ public class PropertyType {
         this.name = name;
     }
     
+    //TODO remove
+    public PropertyType(String name, Class<?> type) {
+        this.name = name;
+    }
+    
     /**
      * 
      * @return The default value for the property

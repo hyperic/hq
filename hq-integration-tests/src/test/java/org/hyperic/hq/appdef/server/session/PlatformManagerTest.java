@@ -271,6 +271,7 @@ public class PlatformManagerTest
         aiPlatform.setPlatformTypeName(testPlatformType.getName());
         aiPlatform.setAgentToken(agentToken);
         aiPlatform.setFqdn("Test Platform Creation");
+        aiPlatform.setCertdn("CertDN");
         platformManager.createPlatform(authzSubjectManager.getOverlordPojo(), aiPlatform);
         platformManager.createPlatform(authzSubjectManager.getOverlordPojo(), aiPlatform);
     }
@@ -558,6 +559,7 @@ public class PlatformManagerTest
         aiPlatform.setFqdn(testPlatform.getFqdn());
         // Now set the name & CPU count of the platform
         aiPlatform.setName("Updated PlatformName");
+        aiPlatform.setCertdn("CertDn");
         aiPlatform.setCpuCount(4);
         platformManager.updateWithAI(aiPlatform, authzSubjectManager.getOverlordPojo());
         Platform updatedPlatform = platformManager.findPlatformById(testPlatform.getId());
@@ -578,6 +580,8 @@ public class PlatformManagerTest
         newIp.setMACAddress("10");
         newIp.setNetmask("100");
         platform.addIpValue(newIp);
+        platform.setCommentText("A comment");
+        platform.setCertdn("Certdn");
         platformManager.updatePlatform(authzSubjectManager.getOverlordPojo(), platform);
         Platform updatedPlatform = platformManager.findPlatformById(testPlatform.getId());
         assertEquals("Updated Name",updatedPlatform.getName());
