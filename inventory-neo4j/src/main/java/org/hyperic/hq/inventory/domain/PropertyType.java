@@ -76,15 +76,6 @@ public class PropertyType {
     /**
      * 
      * @param name The name of the property
-     * @param type The type of property values
-     */
-    public PropertyType(String name) {
-        this.name = name;
-    }
-
-    /**
-     * 
-     * @param name The name of the property
      * @param description The description of the property
      */
     public PropertyType(String name, String description) {
