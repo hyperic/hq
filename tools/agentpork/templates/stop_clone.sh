@@ -4,7 +4,7 @@
 
 cd clones/clone_$1
 # Stop the agent
-./hq-agent-nowrapper.sh stop
+nohup ./hq-agent-nowrapper.sh stop 2>&1 > console_stop.out &
 
 # Cleanup in case agent nohup process is still running
 # kill child process forked by hq-agent-nowrapper.sh

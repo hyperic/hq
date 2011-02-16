@@ -16,18 +16,13 @@ then
    cdir=$PWD
    mkdir -p $AGENT_BASE_DIR
    cd $AGENT_BASE_DIR
-   wget http://10.0.0.58/raid/release/candidates/hq/hyperic-hqee-agent-$AGENT_BUILD_VERSION.BUILD-$AGENT_BUILD_NUMBER-noJRE.tar.gz
+   wget http://private.maven.hyperic.com/snapshot/com/hyperic/hq/dist/hyperic-hqee-agent/$AGENT_BUILD_VERSION.BUILD-SNAPSHOT/hyperic-hqee-agent-$AGENT_BUILD_VERSION.BUILD-$AGENT_BUILD_NUMBER-noJRE.tar.gz
    if [ -d $AGENT_HOME ]
    then
      rm -rf $AGENT_HOME
    fi
    tar -zxf hyperic-hqee-agent-$AGENT_BUILD_VERSION.BUILD-$AGENT_BUILD_NUMBER-noJRE.tar.gz
-   # Deploy JMX Test Data Cache Plugin under Agent
-   wget -r -l2 -nH -np -nd -Pmbeanserver  http://10.0.0.58/raid/release/candidates.restore/qatools/mbeanserver/
-   chmod +x mbeanserver/*.sh
-   wget http://10.0.0.58/raid/release/candidates.restore/qatools/testserver-plugin.xml
-   cp mbeanserver/jmx-testdata-plugin.xml $AGENT_BUNDLE_HOME/pdk/plugins
-   cp testserver-plugin.xml $AGENT_BUNDLE_HOME/pdk/plugins
+   cp ../testdata-plugin.jar $AGENT_BUNDLE_HOME/pdk/plugins
    cd $cdir
 fi
 }    
@@ -49,5 +44,6 @@ ln -s clones/lib lib
 
 cat etc/clone.properties | \
     sed -e  s:@AGENT_BUNDLE_HOME@:${AGENT_BUNDLE_HOME}:g | \
+    sed -e  s:@AGENT_BUILD_VERSION@:${AGENT_BUILD_VERSION}:g | \
     sed -e  s:@NUM_CLONES@:${NUM_CLONES}:g > clone.properties
 
