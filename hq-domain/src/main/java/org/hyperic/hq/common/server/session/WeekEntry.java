@@ -27,20 +27,31 @@ package org.hyperic.hq.common.server.session;
 
 import java.util.Calendar;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
 /**
  * Represents time during a single week .. any week of the year.
  * 
  * WeekDay:              0->6  (0 being Sunday)
  * startTime & endTime:  minutes since 00:00 (midnight)
  */
+@Entity
+@Table(name = "EAM_CALENDAR_WEEK")
 public class WeekEntry
     extends CalendarEntry
 {
     private static final int MINUTES_IN_DAY = 60 * 24;
     
-    private int _weekDay;
-    private int _startTime;
-    private int _endTime;
+    @Column(nullable=false)
+    private int weekDay;
+    
+    @Column(nullable=false)
+    private int startTime;
+    
+    @Column(nullable=false)
+    private int endTime;
     
     protected WeekEntry() {}
 
@@ -63,42 +74,42 @@ public class WeekEntry
         if (endTime <= startTime) 
             throw new IllegalArgumentException("endTime must be > startTime");
 
-        _weekDay   = weekDay;
-        _startTime = startTime;
-        _endTime   = endTime;
+        this.weekDay   = weekDay;
+        this.startTime = startTime;
+        this.endTime   = endTime;
     }
 
     public int getWeekDay() {
-        return _weekDay;
+        return weekDay;
     }
     
     protected void setWeekDay(int weekDay) {
-        _weekDay = weekDay;
+        this.weekDay = weekDay;
     }
     
     public int getStartTime() {
-        return _startTime;
+        return startTime;
     }
     
     protected void setStartTime(int startTime) {
-        _startTime = startTime;
+        this.startTime = startTime;
     }
     
     public int getEndTime() {
-        return _endTime;
+        return endTime;
     }
     
     protected void setEndTime(int endTime) {
-        _endTime = endTime;
+        this.endTime = endTime;
     }
     
     public boolean containsTime(long time) {
         Calendar c = Calendar.getInstance();
         
         c.setTimeInMillis(time);
-        c.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY + _weekDay);
-        c.set(Calendar.HOUR_OF_DAY, _startTime / 60);
-        c.set(Calendar.MINUTE, _startTime % 60);
+        c.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY + weekDay);
+        c.set(Calendar.HOUR_OF_DAY, startTime / 60);
+        c.set(Calendar.MINUTE, startTime % 60);
         c.set(Calendar.SECOND, 0);
               
         if (c.getTimeInMillis() > time)
@@ -106,16 +117,16 @@ public class WeekEntry
 
         c = Calendar.getInstance();
         c.setTimeInMillis(time);
-        c.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY + _weekDay);
-        c.set(Calendar.HOUR_OF_DAY, _endTime / 60);
-        c.set(Calendar.MINUTE, _endTime % 60);
+        c.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY + weekDay);
+        c.set(Calendar.HOUR_OF_DAY, endTime / 60);
+        c.set(Calendar.MINUTE, endTime % 60);
         c.set(Calendar.SECOND, 0);
         
         return c.getTimeInMillis() >= time;
     }
 
     public String toString() {
-        return "WeekEntry[weekday=" + _weekDay + ", startTime=" + _startTime + 
-               ", endTime=" + _endTime + "]";
+        return "WeekEntry[weekday=" + weekDay + ", startTime=" + startTime + 
+               ", endTime=" + endTime + "]";
     }
 }

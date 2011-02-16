@@ -25,34 +25,80 @@
 
 package org.hyperic.hq.common.server.session;
 
-import org.hyperic.hibernate.PersistedObject;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Version;
 
-public abstract class CalendarEntry
-    extends PersistedObject
-{
-    private Calendar _calendar;
-    
-    protected CalendarEntry() {}
-    
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
+
+@Entity
+@Table(name = "EAM_CALENDAR_ENT")
+@Inheritance(strategy = InheritanceType.JOINED)
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public abstract class CalendarEntry {
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name = "VERSION_COL")
+    @Version
+    private Long version;
+
+    @ManyToOne
+    @JoinColumn(name = "CALENDAR_ID", nullable = false)
+    @Index(name = "CALENDAR_ID_IDX")
+    private Calendar calendar;
+
+    protected CalendarEntry() {
+    }
+
     CalendarEntry(Calendar c) {
-        _calendar = c;
+        calendar = c;
     }
-    
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
     public Calendar getCalendar() {
-        return _calendar;
+        return calendar;
     }
-    
+
     protected void setCalendar(Calendar c) {
-        _calendar = c;
+        calendar = c;
     }
 
     public abstract boolean containsTime(long time);
-    
+
     public int hashCode() {
         int result = 17;
-        
-        result = 37*result + super.hashCode();
-        result = 37*result + _calendar.hashCode();
+
+        result = 37 * result + super.hashCode();
+        result = 37 * result + calendar.hashCode();
         return result;
     }
 
@@ -62,8 +108,8 @@ public abstract class CalendarEntry
 
         if (obj == null || obj instanceof CalendarEntry == false)
             return false;
-        
-        CalendarEntry ent = (CalendarEntry)obj;
-        return ent.getCalendar().equals(_calendar) && super.equals(obj);
+
+        CalendarEntry ent = (CalendarEntry) obj;
+        return ent.getCalendar().equals(calendar) && super.equals(obj);
     }
 }

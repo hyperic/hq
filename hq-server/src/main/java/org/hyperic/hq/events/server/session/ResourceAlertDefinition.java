@@ -21,6 +21,7 @@ import javax.persistence.Version;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
@@ -33,9 +34,10 @@ public class ResourceAlertDefinition extends AlertDefinition {
     
     @ManyToOne
     @JoinColumn(name="RESOURCE_ID")
+    @Index(name="ALERT_DEF_RES_ID_IDX")
     private Resource resource;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL,orphanRemoval=true)
     @JoinColumn(name = "ALERT_DEFINITION_ID")
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     private Collection<RegisteredTrigger> triggersBag = new ArrayList<RegisteredTrigger>();

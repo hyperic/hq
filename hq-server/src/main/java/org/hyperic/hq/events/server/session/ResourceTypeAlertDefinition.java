@@ -18,6 +18,7 @@ import javax.persistence.Version;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
@@ -28,6 +29,7 @@ public class ResourceTypeAlertDefinition
     extends AlertDefinition {
 
     @OneToOne
+    @Index(name="ALERT_DEF_RES_TYPE_ID_IDX")
     private ResourceType resourceType;
 
     @Id

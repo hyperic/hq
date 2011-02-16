@@ -37,6 +37,7 @@ import javax.persistence.Version;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
 import org.springframework.data.graph.annotation.NodeEntity;
 
 @Entity
@@ -71,6 +72,7 @@ public class Agent {
     
     @ManyToOne
     @JoinColumn(name="AGENT_TYPE_ID")
+    @Index(name="AGENT_TYPE_ID_IDX")
     private AgentType agentType;
     
     @Column(name="CTIME")
