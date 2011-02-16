@@ -14,7 +14,6 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Transient;
-import javax.persistence.Version;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Cache;
@@ -32,6 +31,7 @@ import org.neo4j.graphdb.ReturnableEvaluator;
 import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.TraversalPosition;
 import org.neo4j.graphdb.Traverser;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.Indexed;
 import org.springframework.data.graph.annotation.GraphProperty;
 import org.springframework.data.graph.annotation.NodeEntity;
@@ -62,9 +62,9 @@ public class Resource {
     private String description;
 
     @PersistenceContext
-    transient EntityManager entityManager;
+    private transient EntityManager entityManager;
 
-    @javax.annotation.Resource
+    @Autowired
     private transient GraphDatabaseContext graphDatabaseContext;
 
     @Id
@@ -299,7 +299,7 @@ public class Resource {
         try {
             return getUnderlyingState().getProperty(key);
         } catch (NotFoundException e) {
-            return null;
+            return propertyType.getDefaultValue();
         }
     }
 
@@ -697,20 +697,22 @@ public class Resource {
      */
     @Transactional
     public Object setProperty(String key, Object value) {
+        if (value == null) {
+            // You can't set null property values in Neo4j, so we won't know if
+            // a missing property means explicit set to null or to return
+            // default value
+            throw new IllegalArgumentException("Null property values are not allowed");
+        }
         PropertyType propertyType = type.getPropertyType(key);
         if (propertyType == null) {
             throw new IllegalArgumentException("Property " + key +
                                                " is not defined for resource of type " +
                                                type.getName());
         }
-        if (value == null) {
-            Object oldValue = getUnderlyingState().removeProperty(key);
-            if (propertyType.isIndexed()) {
-                graphDatabaseContext.getNodeIndex(null).remove(getUnderlyingState(), key, value);
-            }
-            return oldValue;
+        if (propertyType.getPropertyValidator() != null) {
+            // TODO validation
+            // propertyType.getPropertyValidator().validate()
         }
-        // TODO check other stuff? Should def check optional param
         Object oldValue = null;
         try {
             oldValue = getUnderlyingState().getProperty(key);
