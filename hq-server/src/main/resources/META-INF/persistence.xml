@@ -9,9 +9,16 @@
         <class>org.hyperic.hq.inventory.domain.Resource</class>
         <class>org.hyperic.hq.inventory.domain.ResourceGroup</class>
         <class>org.hyperic.hq.inventory.domain.ResourceType</class>
+        <class>org.hyperic.hq.appdef.AgentType</class>
         <class>org.hyperic.hq.appdef.Agent</class>
         <class>org.hyperic.hq.authz.server.session.AuthzSubject</class>
         <class>org.hyperic.hq.authz.server.session.Role</class>
+        <class>org.hyperic.hq.authz.server.session.RoleCalendar</class>
+        <class>org.hyperic.hq.common.server.session.Calendar</class>
+        <class>org.hyperic.hq.common.server.session.CalendarEntry</class>
+        <class>org.hyperic.hq.common.server.session.WeekEntry</class>
+        <class>org.hyperic.hq.common.server.session.Crispo</class>
+        <class>org.hyperic.hq.common.server.session.CrispoOption</class>
         <class>org.hyperic.hq.product.Plugin</class>
          <!--  TODO Below are only in JPA project.  Figure out some way to segment persistence contexts 
          <class>org.hyperic.hq.inventory.domain.ResourceProperty</class>

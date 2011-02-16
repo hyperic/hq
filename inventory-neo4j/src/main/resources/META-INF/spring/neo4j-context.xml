@@ -104,6 +104,7 @@
 			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
 		</property>
 		<property name="persistenceProvider" ref="persistenceProvider"/>
+		<property name="persistenceUnitManager" ref="persistenceUnitMgr"/>
 	</bean>
 
 </beans>
