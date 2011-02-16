@@ -79,7 +79,7 @@ public class CrispoOption
     @Column(name="PROPKEY",nullable=false)
     private String key;
     
-    @Column(name="VAL",nullable=false,length=4000)
+    @Column(name="VAL",length=4000)
     private String val;
     
     @ElementCollection
