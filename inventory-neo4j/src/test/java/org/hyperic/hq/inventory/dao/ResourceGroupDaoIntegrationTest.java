@@ -12,14 +12,21 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
-import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 @DirtiesContext
-public class ResourceGroupDaoIntegrationTest extends BaseInfrastructureTest{
+@Transactional
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = { "classpath:META-INF/spring/neo4j-context.xml",
+                                   "classpath:org/hyperic/hq/inventory/InventoryIntegrationTest-context.xml" })
+public class ResourceGroupDaoIntegrationTest {
 
     @Autowired
     private ResourceGroupDao resourceGroupDao;

@@ -1,14 +1,19 @@
 package org.hyperic.hq.inventory.domain;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.inventory.InvalidRelationshipException;
@@ -17,16 +22,22 @@ import org.hyperic.hq.inventory.dao.ResourceDao;
 import org.hyperic.hq.inventory.dao.ResourceTypeDao;
 import org.hyperic.hq.reference.ConfigTypes;
 import org.hyperic.hq.reference.RelationshipTypes;
-import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.graph.core.Direction;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 @DirtiesContext
-public class ResourceIntegrationTest
-    extends BaseInfrastructureTest {
+@Transactional
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = { "classpath:META-INF/spring/neo4j-context.xml",
+                                   "classpath:org/hyperic/hq/inventory/InventoryIntegrationTest-context.xml" })
+public class ResourceIntegrationTest {
 
     private Resource iceberg;
 
@@ -39,15 +50,20 @@ public class ResourceIntegrationTest
     private ResourceTypeDao resourceTypeDao;
 
     private Resource traderJoes;
+    
+    private ResourceType store;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Before
     public void initializeTestData() throws ApplicationException, NotFoundException {
-        ResourceType store = new ResourceType("Grocery Store");
+        store = new ResourceType("Grocery Store");
         resourceTypeDao.persist(store);
         ResourceType produceDept = new ResourceType("Produce Dept");
         resourceTypeDao.persist(produceDept);
         store.relateTo(produceDept, RelationshipTypes.CONTAINS);
-        store.addPropertyType(new PropertyType("Address", String.class));
+        store.addPropertyType(new PropertyType("Address", "Store location"));
         ResourceType lettuce = new ResourceType("Lettuce");
         resourceTypeDao.persist(lettuce);
         produceDept.relateTo(lettuce, RelationshipTypes.CONTAINS);
@@ -122,6 +138,12 @@ public class ResourceIntegrationTest
     @Test
     public void testGetPropertyNotSet() {
         assertNull(traderJoes.getProperty("Address"));
+    }
+    
+    @Test
+    public void testGetPropertyNotSetDefaultValue() {
+        store.getPropertyType("Address").setDefaultValue("Jones St");
+        assertEquals("Jones St",traderJoes.getProperty("Address"));
     }
 
     @Test
@@ -250,18 +272,26 @@ public class ResourceIntegrationTest
 
     @Test
     public void testIsOwner() {
-        traderJoes.setOwner(authzSubjectManager.getOverlordPojo());
-        assertTrue(traderJoes.isOwner(authzSubjectManager.getOverlordPojo().getId()));
+        AuthzSubject bob = new AuthzSubject(true, "bob", "dev", "bob@bob.com", true, "Bob",
+            "Bobbins", "Bob", "123123123", "123123123", false);
+        entityManager.persist(bob);
+        bob.getId();
+        traderJoes.setOwner(bob);
+        assertTrue(traderJoes.isOwner(bob.getId()));
     }
 
     @Test
     public void testIsOwnerNoOwner() {
-        assertFalse(traderJoes.isOwner(authzSubjectManager.getOverlordPojo().getId()));
+        assertFalse(traderJoes.isOwner(7899));
     }
 
     @Test
     public void testIsOwnerNotOwner() {
-        traderJoes.setOwner(authzSubjectManager.getOverlordPojo());
+        AuthzSubject bob = new AuthzSubject(true, "bob", "dev", "bob@bob.com", true, "Bob",
+            "Bobbins", "Bob", "123123123", "123123123", false);
+        entityManager.persist(bob);
+        bob.getId();
+        traderJoes.setOwner(bob);
         assertFalse(traderJoes.isOwner(967));
     }
 
@@ -282,7 +312,7 @@ public class ResourceIntegrationTest
         assertEquals(traderJoes, relationship.getTo());
         assertEquals(produce, relationship.getFrom());
     }
-    
+
     @Test(expected = InvalidRelationshipException.class)
     public void testRelateToInvalidRelationship() {
         produce.relateTo(traderJoes, "ManagedBy");
@@ -291,8 +321,8 @@ public class ResourceIntegrationTest
     @Test
     public void testRemove() {
         traderJoes.remove();
-        //verify relationship removed
-        assertEquals(1,produce.getRelationships().size());
+        // verify relationship removed
+        assertEquals(1, produce.getRelationships().size());
         assertNull(resourceDao.findById(traderJoes.getId()));
     }
 
@@ -302,13 +332,13 @@ public class ResourceIntegrationTest
         traderJoes.removeProperties();
         assertTrue(traderJoes.getProperties().isEmpty());
     }
-    
+
     @Test
     public void testRemoveRelationships() {
         produce.removeRelationships();
         assertTrue(produce.getRelationships().isEmpty());
     }
-    
+
     @Test
     public void testRemoveRelationshipsBothDirections() {
         produce.relateTo(traderJoes, RelationshipTypes.CONTAINS);
@@ -316,7 +346,7 @@ public class ResourceIntegrationTest
         assertFalse(produce.isRelatedTo(traderJoes, RelationshipTypes.CONTAINS));
         assertFalse(traderJoes.isRelatedTo(produce, RelationshipTypes.CONTAINS));
     }
-    
+
     @Test
     public void testRemoveRelationshipsByName() {
         traderJoes.getType().relateTo(produce.getType(), "Manages");
@@ -325,7 +355,7 @@ public class ResourceIntegrationTest
         assertTrue(traderJoes.isRelatedTo(produce, RelationshipTypes.CONTAINS));
         assertFalse(traderJoes.isRelatedTo(produce, "Manages"));
     }
-    
+
     @Test
     public void testRemoveRelationshipsIncoming() {
         produce.relateTo(traderJoes, RelationshipTypes.CONTAINS);
@@ -333,7 +363,7 @@ public class ResourceIntegrationTest
         assertTrue(produce.isRelatedTo(traderJoes, RelationshipTypes.CONTAINS));
         assertFalse(traderJoes.isRelatedTo(produce, RelationshipTypes.CONTAINS));
     }
-    
+
     @Test
     public void testRemoveRelationshipsOutgoing() {
         produce.relateTo(traderJoes, RelationshipTypes.CONTAINS);
@@ -341,52 +371,42 @@ public class ResourceIntegrationTest
         assertFalse(produce.isRelatedTo(traderJoes, RelationshipTypes.CONTAINS));
         assertTrue(traderJoes.isRelatedTo(produce, RelationshipTypes.CONTAINS));
     }
-    
+
     @Test
     public void testSetProperty() {
         traderJoes.setProperty("Address", "123 My Street");
-        assertEquals("123 My Street",traderJoes.getProperty("Address"));
+        assertEquals("123 My Street", traderJoes.getProperty("Address"));
         Object oldValue = traderJoes.setProperty("Address", "123 Some Other Street");
-        assertEquals("123 My Street",oldValue);
-        assertEquals("123 Some Other Street",traderJoes.getProperty("Address"));
+        assertEquals("123 My Street", oldValue);
+        assertEquals("123 Some Other Street", traderJoes.getProperty("Address"));
     }
-    
-    @Test(expected=IllegalArgumentException.class)
+
+    @Test(expected = IllegalArgumentException.class)
     public void testSetPropertyNotDefined() {
         traderJoes.setProperty("Hours", "9-5");
     }
-    
-    @Test
+
+    @Test(expected = IllegalArgumentException.class)
     public void testSetPropertyToNull() {
-        traderJoes.setProperty("Address", "123 My Street");
-        assertEquals("123 My Street",traderJoes.getProperty("Address"));
-        Object oldValue = traderJoes.setProperty("Address", null);
-        assertEquals("123 My Street",oldValue);
-        assertNull(traderJoes.getProperty("Address"));
+        traderJoes.setProperty("Address", null);
     }
-    
-    @Test
-    public void testSetPropertyToNullFirstTime() {
-        traderJoes.setProperty("Address",null);
-        assertNull(traderJoes.getProperty("Address"));
-    }
-    
+
     @Test
     public void testSetAndGetConfig() {
         Config product = new Config();
         product.setValue("user", "bob");
-        traderJoes.setConfig(ConfigTypes.PRODUCT,product);
+        traderJoes.setConfig(ConfigTypes.PRODUCT, product);
         Config config = traderJoes.getConfig(ConfigTypes.PRODUCT);
-        assertEquals("bob",config.getValue("user"));
+        assertEquals("bob", config.getValue("user"));
     }
-    
+
     @Test
     public void testSetConfigNotYetPersisted() {
         Config product = new Config();
-        traderJoes.setConfig(ConfigTypes.PRODUCT,product);
-        assertEquals(product,traderJoes.getConfig(ConfigTypes.PRODUCT));
+        traderJoes.setConfig(ConfigTypes.PRODUCT, product);
+        assertEquals(product, traderJoes.getConfig(ConfigTypes.PRODUCT));
     }
-    
+
     @Test
     public void testGetConfigNoConfig() {
         assertNull(traderJoes.getConfig(ConfigTypes.PRODUCT));

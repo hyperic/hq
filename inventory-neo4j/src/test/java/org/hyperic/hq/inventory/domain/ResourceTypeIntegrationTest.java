@@ -1,24 +1,32 @@
 package org.hyperic.hq.inventory.domain;
 
-import java.util.HashSet;
-import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
+import java.util.HashSet;
+import java.util.Set;
+
 import org.hyperic.hq.inventory.dao.ResourceDao;
 import org.hyperic.hq.inventory.dao.ResourceTypeDao;
 import org.hyperic.hq.reference.RelationshipTypes;
-import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.graph.core.Direction;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 @DirtiesContext
-public class ResourceTypeIntegrationTest
-    extends BaseInfrastructureTest {
+@Transactional
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = { "classpath:META-INF/spring/neo4j-context.xml",
+                                   "classpath:org/hyperic/hq/inventory/InventoryIntegrationTest-context.xml" })
+public class ResourceTypeIntegrationTest {
 
     @Autowired
     private ResourceTypeDao resourceTypeDao;
@@ -60,7 +68,7 @@ public class ResourceTypeIntegrationTest
 
     @Test
     public void testAddPropertyType() {
-        PropertyType address = new PropertyType("Address", String.class);
+        PropertyType address = new PropertyType("Address", "The store location");
         store.addPropertyType(address);
         Set<PropertyType> expected = new HashSet<PropertyType>(1);
         expected.add(address);
@@ -69,7 +77,7 @@ public class ResourceTypeIntegrationTest
 
     @Test
     public void testAddPropertyTypeTwice() {
-        PropertyType address = new PropertyType("Address", String.class);
+        PropertyType address = new PropertyType("Address", "The store location");
         store.addPropertyType(address);
         store.addPropertyType(address);
         Set<PropertyType> expected = new HashSet<PropertyType>(1);
@@ -91,7 +99,7 @@ public class ResourceTypeIntegrationTest
 
     @Test
     public void testGetPropertyType() {
-        PropertyType address = new PropertyType("Address", String.class);
+        PropertyType address = new PropertyType("Address", "The store location");
         store.addPropertyType(address);
         assertEquals(address, store.getPropertyType("Address"));
     }
@@ -182,7 +190,7 @@ public class ResourceTypeIntegrationTest
     
     @Test
     public void testRemove() {
-        store.addPropertyType(new PropertyType("address"));
+        store.addPropertyType(new PropertyType("address","The store location"));
         Resource safeway = new Resource("Safeway",store);
         resourceDao.persist(safeway);
         safeway.setProperty("address","123 My Street");
