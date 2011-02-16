@@ -98,19 +98,9 @@
 			<artifactId>neo4j</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.hyperic.hq</groupId>
-			<artifactId>hq-common</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-aspects</artifactId>
 			<version>${spring-framework.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq</groupId>
-			<artifactId>hq-lather</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
@@ -120,11 +110,6 @@
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-util</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq</groupId>
-			<artifactId>hq-pdk</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -276,19 +261,12 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
 		</dependency>
-
-		<!-- We use a version of dbunit that we patched -->
 		<dependency>
-			<groupId>org.hyperic</groupId>
-			<artifactId>dbunit</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq</groupId>
-			<artifactId>hq-util</artifactId>
-			<version>${project.version}</version>
-			<classifier>tests</classifier>
-			<scope>test</scope>
-		</dependency>
+            <groupId>hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <version>1.8.0.10</version>
+            <scope>test</scope>
+        </dependency>
 	</dependencies>
 
 	<build>
