@@ -182,8 +182,10 @@ public class ResourceTypeIntegrationTest
     
     @Test
     public void testRemove() {
+        store.addPropertyType(new PropertyType("address"));
         Resource safeway = new Resource("Safeway",store);
         resourceDao.persist(safeway);
+        safeway.setProperty("address","123 My Street");
         store.remove();
         assertNull(resourceTypeDao.findById(store.getId()));
         assertNull(resourceDao.findById(safeway.getId()));

@@ -34,7 +34,7 @@ public class Neo4jResourceDao implements ResourceDao {
     @PersistenceContext
     protected EntityManager entityManager;
 
-    @javax.annotation.Resource
+    @Autowired
     private FinderFactory finderFactory;
 
     @Autowired

@@ -19,6 +19,7 @@ import org.neo4j.graphdb.ReturnableEvaluator;
 import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.TraversalPosition;
 import org.neo4j.graphdb.Traverser;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.graph.annotation.NodeEntity;
 import org.springframework.data.graph.core.Direction;
@@ -36,7 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Entity
 public class Config {
 
-    @javax.annotation.Resource
+    @Autowired
     private transient GraphDatabaseContext graphDatabaseContext;
 
     @Id
@@ -46,7 +47,7 @@ public class Config {
     private Integer id;
     
     @PersistenceContext
-    transient EntityManager entityManager;
+    private transient EntityManager entityManager;
 
     public Config() {
     }

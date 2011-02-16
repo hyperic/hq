@@ -2,11 +2,11 @@ package org.hyperic.hq.inventory.dao;
 
 import java.util.List;
 
-import javax.annotation.Resource;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import org.hyperic.hq.inventory.domain.ResourceType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.graph.neo4j.finder.FinderFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +17,7 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
     @PersistenceContext
     protected EntityManager entityManager;
     
-    @Resource
+    @Autowired
     private FinderFactory finderFactory;
 
     @Transactional(readOnly = true)
