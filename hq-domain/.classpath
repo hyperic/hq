@@ -49,15 +49,6 @@
 	<classpathentry kind="var" path="M2_REPO/org/hibernate/hibernate-jmx/3.5.6-Final/hibernate-jmx-3.5.6-Final.jar" sourcepath="M2_REPO/org/hibernate/hibernate-jmx/3.5.6-Final/hibernate-jmx-3.5.6-Final-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/hibernate/javax/persistence/hibernate-jpa-2.0-api/1.0.0.Final/hibernate-jpa-2.0-api-1.0.0.Final.jar" sourcepath="M2_REPO/org/hibernate/javax/persistence/hibernate-jpa-2.0-api/1.0.0.Final/hibernate-jpa-2.0-api-1.0.0.Final-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/hibernate/hibernate-validator/4.1.0.Final/hibernate-validator-4.1.0.Final.jar" sourcepath="M2_REPO/org/hibernate/hibernate-validator/4.1.0.Final/hibernate-validator-4.1.0.Final-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/hyperic/hq/hq-common/5.0.0.BUILD-SNAPSHOT/hq-common-5.0.0.BUILD-SNAPSHOT.jar" sourcepath="M2_REPO/org/hyperic/hq/hq-common/5.0.0.BUILD-SNAPSHOT/hq-common-5.0.0.BUILD-SNAPSHOT-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/hyperic/hq/hq-lather/5.0.0.BUILD-SNAPSHOT/hq-lather-5.0.0.BUILD-SNAPSHOT.jar" sourcepath="M2_REPO/org/hyperic/hq/hq-lather/5.0.0.BUILD-SNAPSHOT/hq-lather-5.0.0.BUILD-SNAPSHOT-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/hyperic/hq/hq-pdk/5.0.0.BUILD-SNAPSHOT/hq-pdk-5.0.0.BUILD-SNAPSHOT.jar" sourcepath="M2_REPO/org/hyperic/hq/hq-pdk/5.0.0.BUILD-SNAPSHOT/hq-pdk-5.0.0.BUILD-SNAPSHOT-sources.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:file:/Users/administrator/.m2/repository/org/hyperic/hq/hq-pdk/5.0.0.BUILD-SNAPSHOT/hq-pdk-5.0.0.BUILD-SNAPSHOT-javadoc.jar!/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="var" path="M2_REPO/org/hyperic/hq/hq-util/5.0.0.BUILD-SNAPSHOT/hq-util-5.0.0.BUILD-SNAPSHOT.jar" sourcepath="M2_REPO/org/hyperic/hq/hq-util/5.0.0.BUILD-SNAPSHOT/hq-util-5.0.0.BUILD-SNAPSHOT-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/hyperic/hq/hq-util/5.0.0.BUILD-SNAPSHOT/hq-util-5.0.0.BUILD-SNAPSHOT-tests.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/codehaus/jackson/jackson-core-asl/1.5.5/jackson-core-asl-1.5.5.jar" sourcepath="M2_REPO/org/codehaus/jackson/jackson-core-asl/1.5.5/jackson-core-asl-1.5.5-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/codehaus/jackson/jackson-mapper-asl/1.5.5/jackson-mapper-asl-1.5.5.jar" sourcepath="M2_REPO/org/codehaus/jackson/jackson-mapper-asl/1.5.5/jackson-mapper-asl-1.5.5-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/jasypt/jasypt/1.6/jasypt-1.6.jar" sourcepath="M2_REPO/org/jasypt/jasypt/1.6/jasypt-1.6-sources.jar"/>
@@ -138,5 +129,8 @@
 	<classpathentry kind="var" path="M2_REPO/org/apache/zookeeper/zookeeper/3.3.2/zookeeper-3.3.2.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.ajdt.core.ASPECTJRT_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hq-common"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hq-util"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hq-pdk"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
