@@ -27,6 +27,7 @@ package org.hyperic.hq.events.server.session;
 import java.util.Arrays;
 import java.util.List;
 
+import org.hibernate.CacheMode;
 import org.hibernate.FlushMode;
 import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Query;
@@ -202,8 +203,10 @@ public class AlertDefinitionDAO
             .append("' ")
             .append("and (ad.parent is null or ad.parent.id != 0) ")
             .toString();
-        
-        return getSession().createQuery(hql).list();
+
+        // setCacheMode(CacheMode.GET) to prevent objects with incomplete collections from
+        // getting cached in the 2nd level cache.
+        return getSession().createQuery(hql).setCacheMode(CacheMode.GET).list();
     }
 
     /**

@@ -19,9 +19,11 @@
 package org.hyperic.hq.plugin.netdevice;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,9 +41,12 @@ import org.hyperic.snmp.SNMPValue;
 public class SNMPCollector
     extends Collector
 {
-    protected static final String PROP_COLUMN = "snmpColumn";
+    protected static final String AVAILABLE_VALUES = "AvailableValues";
+    protected static final Double DEFAULT_AVAILABLE_VALUE = 1d;
+	protected static final String PROP_COLUMN = "snmpColumn";
     protected Properties _props;
     protected SNMPClient _client;
+    protected Set<Double> availableValues = new HashSet<Double>();
 
     private static final String[][] DEFAULT_PROPS = { { SNMPClient.PROP_IP, SNMPClient.DEFAULT_IP },
                                                      { SNMPClient.PROP_PORT, SNMPClient.DEFAULT_PORT_STRING },
@@ -89,6 +94,31 @@ public class SNMPCollector
 
         return isEmpty;
     }
+    
+    /**
+     * These values represent the Availability metric values that constitute an AVAIL_UP value.
+     * Default value of 1 is added to the set if the property is not specified. 
+     */
+	protected void initAvailableValues() {
+		String delimitedValueString = getPlugin().getTypeProperty(
+				AVAILABLE_VALUES);
+		if (delimitedValueString == null) {
+			// in most cases 1 means Availability metric is available.
+			availableValues.add(DEFAULT_AVAILABLE_VALUE);
+		} else {
+			String[] values = delimitedValueString.split(",");
+			for (String value : values) {
+				try {
+					availableValues.add(Double.parseDouble(value.trim()));
+				} catch (Exception e) {
+					getLog().error(
+							"Invalid value set for " + AVAILABLE_VALUES + ": "
+									+ value);
+				}
+			}
+
+		}
+	}
 
     protected boolean isAvailability() {
         String availName = getPlugin().getTypeProperty(Metric.ATTR_AVAIL);
@@ -233,12 +263,18 @@ public class SNMPCollector
                 }
 
                 setValue(name + "." + counterName, value);
+                
+                if (isAvail) {
+					if (availableValues.contains(value)) {
+						setValue(name + "." + Metric.ATTR_AVAIL,
+								Metric.AVAIL_UP);
+					} else {
+						setValue(name + "." + Metric.ATTR_AVAIL,
+								Metric.AVAIL_DOWN);
+					}
+                }
             } catch (Exception e) {
                 getLog().warn(columnName + ".convert failed for " + name + "@" + getInfo());
-            }
-
-            if (isAvail) {
-                setValue(name + "." + Metric.ATTR_AVAIL, Metric.AVAIL_UP);
             }
         }
 
@@ -249,8 +285,8 @@ public class SNMPCollector
 
     public void init() throws PluginException {
         _client = new SNMPClient();
-
         _props = getProperties();
+        initAvailableValues();
 
         for (int i = 0; i < DEFAULT_PROPS.length; i++) {
             String key = DEFAULT_PROPS[i][0];

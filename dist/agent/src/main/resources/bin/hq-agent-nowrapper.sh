@@ -67,7 +67,7 @@ do
 done
 
 
-CLIENT_CLASSPATH = "${CLIENT_CLASSPATH}:${AGENT_LIB}"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}"
 
 CLIENT_CLASS=org.hyperic.hq.bizapp.agent.client.AgentClient
 

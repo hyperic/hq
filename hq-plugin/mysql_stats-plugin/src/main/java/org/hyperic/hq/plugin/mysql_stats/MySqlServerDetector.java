@@ -307,7 +307,7 @@ public class MySqlServerDetector
         String version = getVersion(path, "--version");
         
         if (version == null) {
-            _log.debug("Version returned null, looking for version in --version output. Trying --help");
+        	_log.debug("Version returned null, looking for version in --version output. Trying --help");
             version = getVersion(path, "--help");
         }
         
@@ -357,10 +357,8 @@ public class MySqlServerDetector
             }
             String out = output.toString();
             if (_log.isDebugEnabled()) {
-                _log.debug("Version detected from output of " + executable + " " + arg +":\n" + out);
+            	_log.debug("Version detected from output of " + executable + " " + arg +":\n" + out);
             }
-            // 12/17/2008, did not test with 4.0.x.  Can't download from mysql
-            // archives anymore
             if (REGEX_VER_4_0.matcher(out).find()) {
                 return VERSION_4_0_x;
             } else if (REGEX_VER_4_1.matcher(out).find()) {

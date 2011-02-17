@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerResource;
+import org.hyperic.hq.product.SigarMeasurementPlugin;
 import org.hyperic.hq.product.Win32ControlPlugin;
 import org.hyperic.hq.product.jmx.MxServerDetector;
 import org.hyperic.hq.product.jmx.MxUtil;
@@ -51,10 +52,7 @@ public class TomcatServerDetector
 
     private static final String TOMCAT_DEFAULT_URL = "service:jmx:rmi:///jndi/rmi://localhost:6969/jmxrmi";
 
-    // use hard-coded ptql instead of SigarMeasurementPlugin.PTQL_CONFIG for
-    // backward
-    // compatibility with pre-4.0 tomcat plugin
-    private static final String PTQL_CONFIG_OPTION = "ptql";
+    private static final String PTQL_CONFIG_OPTION = SigarMeasurementPlugin.PTQL_CONFIG;
 
     private static final String CATALINA_HOME_PROP = "-Dcatalina.home=";
 
