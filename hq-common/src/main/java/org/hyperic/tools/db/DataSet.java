@@ -125,12 +125,15 @@ abstract class DataSet
         for(int i = 0;i < iCols;i++)
         {
             Data data = this.getData(i);
-
-            if(i > 0)
-                strCmd.append(',');
-                
-            strCmd.append(data.getColumnName());
-            strCmd.append(" = ?");
+            String colName = data.getColumnName();
+            
+            if (!colName.equals("CTIME") && !colName.equals("ENTRY_TIME")) {
+	            if(i > 0)
+	                strCmd.append(',');
+	                
+	            strCmd.append(colName);
+	            strCmd.append(" = ?");
+            }
         }
         
         strCmd.append(" WHERE ").append(strCol).append(" = ?");
@@ -146,8 +149,8 @@ abstract class DataSet
         ResultSet   results = null;
         String      strSelect;
         String      cid = "0";
+        int 		iCols = this.getNumberColumns();
         
-        int iCols = this.getNumberColumns();
         // This may seem kludgy, but beats the alternative
         for(int i = 0; i < iCols; i++) {
 
@@ -167,10 +170,8 @@ abstract class DataSet
                 try {
                     stmtQuery = m_parent.getConn().createStatement();
                     results   = stmtQuery.executeQuery(strSelect);
-                
-                    boolean bExists = results.next();
 
-                    if(bExists) {           // If the row exists already, we update
+                    if(results.next()) {           // If the row exists already, we update
                         bResult = false;    // Return false in the end
                         cid = strValue;
                         String strCmd = this.getUpdateCommand(strCol);
@@ -194,6 +195,13 @@ abstract class DataSet
         for(int i = 0;i < iCols;i++)
         {
             Data   data     = this.getData(i);
+            String colName	= data.getColumnName();
+            
+            // We don't want to update CTIME or ENTRY_TIME as they represent creation times...
+            if (!bResult && (colName.equals("CTIME") || colName.equals("ENTRY_TIME"))) {
+            	continue;
+            }
+            
             String strValue = data.getValue();
             
             //////////////////////////////////////////////////////////
@@ -243,6 +251,11 @@ abstract class DataSet
                     stmt.setBoolean(i + 1, false);
                     continue;
                 }
+                else if (strValue.equals("NOW()")) {
+                	stmt.setLong(i + 1, System.currentTimeMillis());
+                	continue;
+                }
+                
                 
                 stmt.setString(i + 1, strValue);
             }

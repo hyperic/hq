@@ -369,9 +369,9 @@ class Table {
         return this.m_strName.toUpperCase();
     }
 
-    protected static Collection getTables(Node node, int dbtype, DBSetup parent)
+    protected static Collection<Table> getTables(Node node, int dbtype, DBSetup parent)
     {
-        Collection colResult =
+        Collection<Table> colResult =
             new StrongCollection("org.hyperic.tools.db.Table");
         NodeList listTabs    = node.getChildNodes();
 
@@ -403,7 +403,7 @@ class Table {
         return colResult;
     }
 
-    protected static Collection getTables(DBSetup parent, String username)
+    protected static Collection<Table> getTables(DBSetup parent, String username)
         throws SQLException
     {
 		int dbtype = JDBC.toType(parent.getConn().getMetaData().getURL());
@@ -413,13 +413,13 @@ class Table {
             case OracleTable.CLASS_TYPE:
                 return OracleTable.getTables(parent, username);
             case CloudscapeTable.CLASS_TYPE:
-            return CloudscapeTable.getTables(parent, username);
+            	return CloudscapeTable.getTables(parent, username);
         }
 
         if(username != null)
             username = username.toUpperCase();
 
-        Collection coll = new StrongCollection("org.hyperic.tools.db.Table");
+        Collection<Table> coll = new StrongCollection("org.hyperic.tools.db.Table");
         DatabaseMetaData meta    = parent.getConn().getMetaData();
         String[]         types   = {"TABLE"};
         // there doesn't seem to be a general case for this but we
