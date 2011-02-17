@@ -1579,12 +1579,6 @@ public class PlatformManagerImpl implements PlatformManager {
             log.debug("No changes found between value object and entity");
             return plat;
         } else {
-            int newCount = existing.getCpuCount().intValue();
-            int prevCpuCount = plat.getCpuCount().intValue();
-            if (newCount > prevCpuCount) {
-                getCounter().addCPUs(newCount - prevCpuCount);
-            }
-
             if (!(existing.getName().equals(plat.getName()))) {
                 if (platformDAO.findByName(existing.getName()) != null)
                     // duplicate found, throw a duplicate object exception
@@ -1811,11 +1805,6 @@ public class PlatformManagerImpl implements PlatformManager {
         if (platform == null) {
             throw new PlatformNotFoundException("Platform not found with either FQDN: " + fqdn +
                                                 " nor CertDN: " + certdn);
-        }
-        int prevCpuCount = platform.getCpuCount().intValue();
-        Integer count = aiplatform.getCpuCount();
-        if ((count != null) && (count.intValue() > prevCpuCount)) {
-            getCounter().addCPUs(aiplatform.getCpuCount().intValue() - prevCpuCount);
         }
 
         // Get the FQDN before we update
