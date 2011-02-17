@@ -50,21 +50,15 @@
     }
     var resourceURL = '<html:rewrite action="/Resource" />';
 	var userURL = '<html:rewrite action="/admin/user/UserAdmin" />';
-    var searchWidget = new hyperic.widget.search({search:'/app/search'}, 3, {keyCode: 83, ctrl: true});
+    var searchWidget = new hyperic.widget.search(dojo11, {search:'/app/search'}, 3, {keyCode: 83, ctrl: true});
     dojo.require("dojo.lfx.html");
     dojo.event.connect(window, "onload",function(){ 
-        activateHeaderTab();
+        activateHeaderTab(dojo11);
         searchWidget.create();
         //Connect the events for the box, cancel and search buttons
-        dojo.event.connect(searchWidget.searchBox, "onkeypress", searchWidget, "search");
+        dojo11.connect(searchWidget.searchBox, "onkeypress", searchWidget, "search");
          // What should the hot-keys do?
         dojo11.subscribe('enter', searchWidget, "search");
-        // Render Search Tooltip
-        if (dojo.render.os.mac) {
-            dojo.byId('headerSearch').title = "<fmt:message key="header.searchTip.mac"/>";
-        } else if (dojo.render.os.win) {
-            dojo.byId('headerSearch').title = "<fmt:message key="header.searchTip.win"/>";
-        }
     });
     
     <!--
@@ -237,27 +231,4 @@
        		</div>
     	</div>
     </div>
-    <!--
-    <div id="headerSearch"><fmt:message key="header.Search"/></div>
-        <div id="headerSearchBox" style="display:none">
-            <div style="float:left;margin:3px 0px 3px 5px;">
-            <input type="text" id="searchBox" value=""/>
-        </div>
-    </div>
-    <div id="headerSearchResults" style="display:none">
-        <div id="searchClose" class="cancelButton right"></div>
-        <div class="resultsGroup">
-            <div class="category"><fmt:message key="header.Resources"/> (<span id="resourceResultsCount"></span>)</div>
-            <ul id="resourceResults">
-                <li></li>
-            </ul>
-        </div>
-        <div class="resultsGroup">
-            <div class="category"><fmt:message key="header.users"/> (<span id="usersResultsCount"></span>)</div>
-            <ul id="usersResults">
-                <li></li>
-            </ul>
-        </div>        
-    </div> 
-    -->
 </div>

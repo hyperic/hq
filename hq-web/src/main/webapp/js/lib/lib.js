@@ -171,13 +171,7 @@ hyperic.utils.getUniqueId = function(/*String*/ prefix){
  * Example: addKeyListener(window, {keyCode: 83, ctrl :true}, 'search');
  * which registers a 'ctrl-s' key listener on the window
  */
-hyperic.utils.addKeyListener = function(/*Node*/node, /*Object*/ keyComb, /*String*/topic){
-	var dojo = window.dojo;
-	
-	if (window.dojo11 !== undefined) {
-		dojo = dojo11; // mapping to 1.5
-	}
-		
+hyperic.utils.addKeyListener = function(dojo, /*Node*/node, /*Object*/ keyComb, /*String*/topic){
 	this.node = node;
     this.keyComb = keyComb;
     this.topic = topic;
@@ -267,13 +261,7 @@ hyperic.utils.passwd = {
     }
 };
 
-hyperic.widget.search = function(/*Object*/ urls, /*number*/ minStrLenth, /*Object*/ keyCode){
-	var dojo = window.dojo;
-	
-	if (window.dojo11 !== undefined) {
-		dojo = dojo11; // mapping to 1.5
-	}
-	
+hyperic.widget.search = function(dojo, /*Object*/ urls, /*number*/ minStrLenth, /*Object*/ keyCode){
 	this.opened     = false;
     this.minStrLen  = minStrLenth; 
     this.resourceURL= urls.resource;
@@ -290,9 +278,9 @@ hyperic.widget.search = function(/*Object*/ urls, /*number*/ minStrLenth, /*Obje
         this.nodeCancel         = dojo.byId('searchClose');
         this.nodeSearchButton   = dojo.byId("headerSearch");
         //Set up the key listeners for the search feature
-        this.listeners.push( new hyperic.utils.addKeyListener(window.document, this.keyCode, 'search') );
-        this.listeners.push( new hyperic.utils.addKeyListener(this.searchContainer, { keyCode: 13 }, 'enter') );
-        this.listeners.push( new hyperic.utils.addKeyListener(dojo.byId('header'), { keyCode: 27 }, 'escape') );
+        this.listeners.push( new hyperic.utils.addKeyListener(dojo, window.document, this.keyCode, 'search') );
+        this.listeners.push( new hyperic.utils.addKeyListener(dojo, this.searchContainer, { keyCode: 13 }, 'enter') );
+        this.listeners.push( new hyperic.utils.addKeyListener(dojo, dojo.byId('header'), { keyCode: 27 }, 'escape') );
         dojo.connect(this.nodeCancel, "onclick", function(e) {
         	dojo.style("headerSearchResults", "display", "none");
         	dojo.byId("searchBox").value = "";
@@ -765,33 +753,35 @@ function createInputFieldsFromJSON(jsonArray){
 /**
  * @deprecated used only for the struts header
  */
-function activateHeaderTab(){
+function activateHeaderTab(dojo){
     var l = document.location;
     if (document.navTabCat) {
         //This is a plugin
         if (document.navTabCat == "Resource") {
-            dojo11.addClass("resTab", "activeTab");
+            dojo.addClass("resTab", "activeTab");
         } else if(document.navTabCat == "Admin") {
-            dojo11.addClass("adminTab", "activeTab");
+            dojo.addClass("adminTab", "activeTab");
         }
         return;
     }
     l = l+""; // force string cast
     if ( l.indexOf("Dash")!=-1 || 
          l.indexOf("dash")!=-1 ) {
-    	dojo11.addClass("dashTab", "activeTab");
+    	dojo.addClass("dashTab", "activeTab");
     } else if( l.indexOf("Resou")!=-1 ||
                l.indexOf("resource")!=-1 || 
                l.indexOf("alerts/")!=-1 || 
                l.indexOf("TabBodyAttach.do")!=-1 ) {
-    	dojo11.addClass("resTab", "activeTab");
+    	dojo.addClass("resTab", "activeTab");
     } else if( l.indexOf("rep")!=-1 || 
                l.indexOf("Rep")!=-1 || 
                l.indexOf("masth")!=-1 ) {
-    	dojo11.addClass("analyzeTab", "activeTab");
+    	dojo.addClass("analyzeTab", "activeTab");
     } else if( l.indexOf("admin.do")!=-1 || 
                l.indexOf("Admin.do")!=-1 ) {
-    	dojo11.addClass("adminTab", "activeTab");
+    	dojo.addClass("adminTab", "activeTab");
+    } else if ( l.indexOf("/admin/") != -1 ) {
+    	dojo.addClass("adminTab", "active");
     }
 }
 

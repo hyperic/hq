@@ -15,28 +15,6 @@ body { background: #EFEFEF; }
 	color: #88C7FC; 
 }
 
-#headerTabs li.tab {
-	background: url('../../images/tab-main-background.png') repeat-x 0 0;
-}
-
-#headerTabs li.tab.active {
-	background: url('../../images/tab-main-active-background.png') repeat-x 0 0;
-}
-
-#headerTabs li.tab > a {
-	color: #444;
-	text-decoration: none;
-	font-weight: bold;
-}
-
-#headerTabs li.tab.active > a {
-	color: #fff;
-}
-
-#headerTabs li ul {
-	display: none;
-}
-
 #searchBox {
 	background: url("../../images/search.png") no-repeat 3px center #fff;
 	color: #444;

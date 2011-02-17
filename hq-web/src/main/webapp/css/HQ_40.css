@@ -75,7 +75,7 @@ a:visited,a:hover,a {
 	background: url("../images/4.0/icons/search.png") no-repeat 3px center #fff;
 	color: #444;
 	margin: 0.5em 0;
-	padding: 0.25em 0.25em 0.25em 20px;
+	padding: 0.3em 0.25em 0.25em 20px;
 	width: 275px;
 }
 
@@ -198,6 +198,7 @@ a:visited,a:hover,a {
 	padding:5px;
 	margin:0;
 	background-image:none;
+	white-space: nowrap;
 }
 		
 #navTabContainer ul.root {
@@ -222,7 +223,11 @@ a:visited,a:hover,a {
 #navTabContainer li.hasSubMenu {
 	background: url("/images/4.0/icons/resultset_next.gif") no-repeat scroll right #fff;
 }
-		
+
+#navTabContainer li.hasSubMenu ul {
+	width:auto;
+}
+
 #navTabContainer li ul {
 	position: absolute;
 	left:149px;
@@ -606,6 +611,8 @@ a.buttonInactive:active span {
 
 #header {
 	border-bottom: 3px solid #2D6EBE;
+	background-color: #000;
+	overflow:hidden;
 }
 
 #header,#footer {
@@ -614,8 +621,7 @@ a.buttonInactive:active span {
     so that header menus drop down on TOP of the main content */
 	z-index: 2;
 	height: 64px;
-	background: transparent
-		url(/images/4.0/backgrounds/header_background.jpg) repeat-x scroll
+	background: url(/images/4.0/backgrounds/header_background.jpg) repeat-x scroll
 }
 
 .right {

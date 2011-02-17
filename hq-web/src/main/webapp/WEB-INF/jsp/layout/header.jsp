@@ -71,21 +71,45 @@
 	        	<a href="<html:rewrite action="/ResourceHub" />">
 	        		<fmt:message key="header.resources"/>
 	        	</a>
-	           	<ul>
+	           	<ul class="root">
 	               	<li>
 	               		<a href="<html:rewrite action="/ResourceHub" />">
 	               			<fmt:message key="header.Browse"/>
 	               		</a>
 	               	</li>
-	                	
-	               	
-	               	<li>
+	                <c:forEach var="attachment" items="${mastheadResourceAttachments}">
+					<li>
+ 						<a href="<html:rewrite page="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>">${attachment.HTML}</a>
+ 					</li>
+					</c:forEach>
+	               	<li class="subMenu">
 	               		<a><fmt:message key=".dashContent.recentResources"/></a>
+	               		<ul>
+	               			<c:choose>
+  								<c:when test="${not empty resources}">
+  									<c:forEach var="resource" items="${resources}">
+    									<li>
+    										<a href="<html:rewrite page="/Resource.do?eid=${resource.key}"/>">${resource.value.name}</a>
+    									</li>
+  									</c:forEach>
+  								</c:when>
+  								<c:otherwise>
+    								<li><a href=""><fmt:message key="common.label.None"/></a></li>
+  								</c:otherwise>
+							</c:choose>
+	               		</ul>
 			        </li>
 				</ul>
 			</li>
 	        <li id="analyzeTab" class="tab">
 				<a><fmt:message key="header.analyze"/></a>
+				<ul class="root">
+					<c:forEach var="attachment" items="${mastheadTrackerAttachments}">
+					<li>
+ 						<a href="<html:rewrite page="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>">${attachment.HTML}</a>
+ 					</li>
+					</c:forEach>
+				</ul>
 	        </li>
 		    <li id="adminTab" class="tab">
 		    	<a href="<html:rewrite action="/Admin" />">
@@ -119,13 +143,18 @@
    	 	
     	var resourceURL = '<html:rewrite action="/Resource" />';
 		var userURL = '<html:rewrite action="/admin/user/UserAdmin" />';
-    	var searchWidget = new hyperic.widget.search({ search: '<spring:url value="/app/search" />' }, 3, { keyCode: 83, ctrl: true });
+    	var searchWidget = new hyperic.widget.search(dojo, { search: '<spring:url value="/app/search" />' }, 3, { keyCode: 83, ctrl: true });
     	var refreshCount = 0;
     	var refreshAlerts = function() {
       		dojo.xhrGet({
 	    	  	url: "<html:rewrite page="/common/RecentAlerts.jsp"/>",
 	    	  	load: function(response, args) {
-	    	        dojo.style("headerAlerts", "display" , "");
+	    	        dojo.style("headerAlerts", {
+	    	        	"display": "",
+	    	        	"top": 0,
+	    	        	"left": "310px",
+	    	        	"paddingLeft": "72px"
+	    	        });
 	    	        dojo.byId("recentAlerts").innerHTML = response;
 	    	  	} 
 	      	});
@@ -133,7 +162,7 @@
    	 	
 	    dojo.ready(function() { 
 	    	refreshAlerts();
-        	activateHeaderTab();
+        	activateHeaderTab(dojo);
         	searchWidget.create();
         
         	dojo.subscribe("refreshAlerts", function(data) {
@@ -160,6 +189,16 @@
         	// Render Search Tooltip
         	dojo.byId('headerSearch').title = "<fmt:message key="header.searchTip.mac" />";
         	
+        	dojo.query(".tab", dojo.byId("headerTabs")).onmouseenter(function(e) {
+        		dojo.addClass(e.currentTarget, "hover");
+        	}).onmouseleave(function(e) {
+        		dojo.removeClass(e.currentTarget, "hover");
+        	});
+        	dojo.query(".subMenu", dojo.byId("headerTabs")).onmouseenter(function(e) {
+        		dojo.addClass(e.currentTarget, "hover");
+        	}).onmouseleave(function(e) {
+        		dojo.removeClass(e.currentTarget, "hover");
+        	});
     		if (dojo.byId("updateLink")) {
     			new dijit.Dialog({
         	 	 		id: 'update_popup',

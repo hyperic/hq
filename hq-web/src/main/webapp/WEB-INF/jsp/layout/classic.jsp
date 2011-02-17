@@ -23,9 +23,9 @@
 		<link rel="stylesheet" type="text/css" href="<spring:url value="/static/css/core/layout.css" />">
 		<link rel="stylesheet" type="text/css" href="<spring:url value="/static/css/core/type.css" />">
 		<link rel="stylesheet" type="text/css" href="<spring:url value="/static/css/core/theme.css" />">
-		<!--[if lt IE 8]><link rel="stylesheet" href="<spring:url value="/static/css/core/ie.css" />"><![endif]-->
 		<link rel="stylesheet" type="text/css" href="<spring:url value="/static/css/xstyle/overrides.css" />">
-		<script src="<spring:url value="/static/js/dojo/1.5/dojo/dojo.js" />" type="text/javascript" djConfig="parseOnLoad: true"></script>
+		<!--[if lt IE 8]><link rel="stylesheet" href="<spring:url value="/static/css/core/ie.css" />"><![endif]-->
+		<script src="<spring:url value="/static/js/dojo/1.5/dojo/dojo.js" />" type="text/javascript"></script>
 		<script src="<spring:url value="/static/js/html5.js" />" type="text/javascript"></script>
 	</head>
 	<body class="tundra">
