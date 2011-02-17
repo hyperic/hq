@@ -32,9 +32,9 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.common.DiagnosticObject;
-import org.hyperic.hq.common.DiagnosticsLogger;
 import org.hyperic.hq.common.shared.ServerConfigManager;
+import org.hyperic.hq.diagnostics.DiagnosticObject;
+import org.hyperic.hq.diagnostics.DiagnosticsLogger;
 import org.hyperic.util.PrintfFormat;
 import org.hyperic.util.stats.StatsCollector;
 import org.springframework.beans.factory.annotation.Autowired;

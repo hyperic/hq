@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.common;
+package org.hyperic.hq.diagnostics;
 
 /**
  * Interface for diagnostic objects.  Implementing classes are registered with

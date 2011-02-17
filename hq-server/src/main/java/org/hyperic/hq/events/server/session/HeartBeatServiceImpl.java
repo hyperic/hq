@@ -29,9 +29,9 @@ import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.common.util.MessagePublisher;
 import org.hyperic.hq.events.HeartBeatEvent;
 import org.hyperic.hq.events.shared.HeartBeatService;
+import org.hyperic.hq.messaging.MessagePublisher;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

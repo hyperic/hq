@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.common.util;
+package org.hyperic.hq.messaging;
 
 import java.io.Serializable;
 import java.util.ArrayList;
