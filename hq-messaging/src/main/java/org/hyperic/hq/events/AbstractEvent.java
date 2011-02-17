@@ -32,7 +32,17 @@ public abstract class AbstractEvent implements Serializable, Cloneable {
     private static final long serialVersionUID = 1300452915258577781L;
 
     private long _timestamp = System.currentTimeMillis();
+    
+    private Integer instanceId;
 
+    public Integer getInstanceId() {
+        return instanceId;
+    }
+    
+    public void setInstanceId(Integer instanceId) {
+        this.instanceId = instanceId;
+    }
+    
     public long getTimestamp() {
         return _timestamp;
     }
