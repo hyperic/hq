@@ -29,11 +29,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
 import org.hyperic.util.config.ConfigResponse;
-import org.springframework.amqp.rabbit.admin.QueueInfo;
 
-import java.util.List;
 import java.util.Properties;
-import org.hyperic.hq.product.Metric;
+import org.hyperic.hq.plugin.rabbitmq.core.QueueInfo;
 
 /**
  * QueueCollector
@@ -51,21 +49,21 @@ public class QueueCollector extends RabbitMQListCollector {
             logger.debug("[collect] vhost=" + vhost + " node=" + node);
         }
 
-        List<QueueInfo> queues = rabbitAdmin.getQueues(vhost);
-        if (queues != null) {
-            for (QueueInfo q : queues) {
-                logger.debug("[collect] QueueInfo="+q.getName());
-                setValue(q.getName() + "." + Metric.ATTR_AVAIL, Metric.AVAIL_UP);
-                setValue(q.getName() + ".messages", q.getMessages());
-                setValue(q.getName() + ".consumers", q.getConsumers());
-                setValue(q.getName() + ".transactions", q.getTransactions());
-                setValue(q.getName() + ".acksUncommitted", q.getAcksUncommitted());
-                setValue(q.getName() + ".messagesReady", q.getMessagesReady());
-                setValue(q.getName() + ".messagesUnacknowledged", q.getMessagesUnacknowledged());
-                setValue(q.getName() + ".messagesUncommitted", q.getMessageUncommitted());
-                setValue(q.getName() + ".memory", q.getMemory());
-            }
-        }
+//        List<QueueInfo> queues = rabbitAdmin.getQueues(vhost);
+//        if (queues != null) {
+//            for (QueueInfo q : queues) {
+//                logger.debug("[collect] QueueInfo="+q.getName());
+//                setValue(q.getName() + "." + Metric.ATTR_AVAIL, Metric.AVAIL_UP);
+//                setValue(q.getName() + ".messages", q.getMessages());
+//                setValue(q.getName() + ".consumers", q.getConsumers());
+//                setValue(q.getName() + ".transactions", q.getTransactions());
+//                setValue(q.getName() + ".acksUncommitted", q.getAcksUncommitted());
+//                setValue(q.getName() + ".messagesReady", q.getMessagesReady());
+//                setValue(q.getName() + ".messagesUnacknowledged", q.getMessagesUnacknowledged());
+//                setValue(q.getName() + ".messagesUncommitted", q.getMessageUncommitted());
+//                setValue(q.getName() + ".memory", q.getMemory());
+//            }
+//        }
     }
 
     /**
@@ -76,12 +74,7 @@ public class QueueCollector extends RabbitMQListCollector {
      * @return
      */
     public static ConfigResponse getAttributes(QueueInfo queue) {
-        String durable = queue.isDurable() ? "durable" : "not durable";
-        ConfigResponse res = new ConfigResponse();
-        res.setValue("durable", durable);
-        res.setValue("name", queue.getName());
-        res.setValue("pid", queue.getPid().substring(5, queue.getPid().length() - 1));
-        return res;
+        throw new RuntimeException("XXXXXXXXXX");
     }
 
     @Override

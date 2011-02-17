@@ -49,9 +49,6 @@ import org.hyperic.hq.plugin.rabbitmq.validate.ConfigurationValidator;
 import org.hyperic.hq.product.*;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.util.config.ConfigResponse;
-import org.springframework.amqp.core.Exchange;
-import org.springframework.amqp.rabbit.admin.QueueInfo;
-import org.springframework.util.Assert;
 
 /**
  * RabbitServerDetector
@@ -133,14 +130,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
     }
 
     private static List<String> formatNames(List rabbitObjects, String vHost) {
-        List<String> res = new ArrayList();
-        if (rabbitObjects != null) {
-            IdentityBuilder builder = new ObjectIdentityBuilder();
-            for (Object obj : rabbitObjects) {
-                res.add(builder.buildIdentity(obj, vHost));
-            }
-        }
-        return res;
+        throw new RuntimeException("XXXXXXXXXX");
     }
 
     public void runAutoDiscovery(ConfigResponse cf) {
@@ -337,11 +327,9 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         if (rabbitObjects != null) {
             serviceResources = new ArrayList<ServiceResource>();
 
-            IdentityBuilder builder = new ObjectIdentityBuilder();
-
             for (Object obj : rabbitObjects) {
                 ServiceResource service = createServiceResource(rabbitType);
-                String name = builder.buildIdentity(obj, vHost); // the hq inventory name
+                String name=null;
 
                 ConfigResponse c = new ConfigResponse();
                 if(vHost!=null){
@@ -401,8 +389,6 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      */
     private ServerResource doCreateServerResource(String nodeName, String nodePath, long nodePid, String[] nodeArgs) throws PluginException {
         logger.debug("doCreateServerResource");
-        Assert.hasText(nodeName);
-        Assert.hasText(nodePath);
 
         ServerResource node = createServerResource(nodePath);
         node.setIdentifier(nodePath);
@@ -413,10 +399,6 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         conf.setValue(DetectorConstants.SERVER_NAME, nodeName);
 
         final String home = getProcessHome(nodePid);
-        final String auth = ErlangCookieHandler.configureCookie(home);
-        if (auth != null) {
-            conf.setValue(DetectorConstants.AUTHENTICATION, auth);
-        }
 
         logger.debug("ProductConfig[" + conf + "]");
 
@@ -548,7 +530,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                 String homepath = sigar.getProcEnv(nodePid, "HOMEPATH");
                 if ((homedrive != null) && (homepath != null)) {
                     home = new File(homedrive, homepath).getAbsolutePath();
-                }
+}
                 if (home == null) {
                     home = sigar.getProcEnv(nodePid, "windir");
                     logger.debug("[getProcessHome] home==null -> windir");

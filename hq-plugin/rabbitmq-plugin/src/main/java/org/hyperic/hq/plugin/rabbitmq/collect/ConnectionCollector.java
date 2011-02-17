@@ -78,8 +78,6 @@ public class ConnectionCollector extends RabbitMQListCollector {
         res.setValue("vHost", conn.getVhost());
         res.setValue("pid", conn.getPid());
         res.setValue("frameMax", conn.getFrameMax());
-        res.setValue("selfNode", conn.getAddress().getHost() + ":" + conn.getAddress().getPort());
-        res.setValue("peerNode", conn.getPeerAddress().getHost() + ":" + conn.getPeerAddress().getPort());
         res.setValue("state", conn.getState());
 
         return res;

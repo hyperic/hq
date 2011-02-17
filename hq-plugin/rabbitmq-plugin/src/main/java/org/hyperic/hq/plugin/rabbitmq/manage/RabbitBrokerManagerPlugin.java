@@ -31,7 +31,6 @@ import org.hyperic.hq.plugin.rabbitmq.core.AMQPStatus;
 import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
-import org.springframework.amqp.core.Queue;
 
 /**
  * RabbitBrokerManagerPlugin
@@ -42,10 +41,12 @@ public class RabbitBrokerManagerPlugin extends ControlPlugin {
 
     private static final Log logger = LogFactory.getLog(RabbitBrokerManagerPlugin.class);
 
+    @Override
     public void configure(ConfigResponse config) throws PluginException {
         super.configure(config);
     }
 
+    @Override
     public void doAction(String action, String[] args) throws PluginException {
         setResult(ControlPlugin.RESULT_FAILURE);
         logger.debug("Received " + args.length + " args");

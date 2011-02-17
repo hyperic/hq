@@ -41,10 +41,6 @@ public class DetectorConstants {
 
     public static final String PASSWORD = "password";
 
-    public static final String NODE_COOKIE_LOCATION = "node.cookie.location";
-
-    public static final String AUTHENTICATION = "authentication";
-
     public static final String NODE_PID = "node.pid";
 
     public static final String ERLANG_PROCESS = "erlang.process";

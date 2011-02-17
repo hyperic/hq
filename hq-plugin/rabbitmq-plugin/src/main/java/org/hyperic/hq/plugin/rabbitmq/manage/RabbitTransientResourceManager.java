@@ -60,7 +60,6 @@ public class RabbitTransientResourceManager implements TransientResourceManager 
 
 	private static final String NODE_PATH_PROPERTY = "node.path";
 	private static final String NODE_CONFIG = "node";
-	private static final String AUTH_CONFIG = "authentication";
 
 	private HQApiCommandsClient commandsClient;
 	private Properties props;
@@ -165,10 +164,6 @@ public class RabbitTransientResourceManager implements TransientResourceManager 
 			if (NODE_CONFIG.equals(c.getKey())) {
 				if (c.getValue().equals(props.get(NODE_CONFIG))) {
 					usernameMatches = true;
-				}
-			} else if (AUTH_CONFIG.equals(c.getKey())) {
-				if (c.getValue().equals(props.get(AUTH_CONFIG))) {
-					passwordMatches = true;
 				}
 			}
 		}

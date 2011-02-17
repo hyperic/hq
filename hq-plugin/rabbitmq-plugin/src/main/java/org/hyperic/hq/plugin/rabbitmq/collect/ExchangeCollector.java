@@ -29,11 +29,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
 import org.hyperic.util.config.ConfigResponse;
-import org.springframework.amqp.core.Exchange;
 
-import java.util.List;
 import java.util.Properties;
-import org.hyperic.hq.product.Metric;
+import org.hyperic.hq.plugin.rabbitmq.core.Exchange;
 
 /**
  * ExchangeCollector
@@ -51,13 +49,13 @@ public class ExchangeCollector extends RabbitMQListCollector {
             logger.debug("[collect] vhost=" + vhost + " node=" + node);
         }
 
-        List<Exchange> exchanges = rabbitAdmin.getExchanges(vhost);
-        if (exchanges != null) {
-            for (Exchange e : exchanges) {
-                logger.debug("[collect] Exchange="+e.getName());
-                setValue(e.getName() + "." + Metric.ATTR_AVAIL, Metric.AVAIL_UP);
-            }
-        }
+//        List<Exchange> exchanges = rabbitAdmin.getExchanges(vhost);
+//        if (exchanges != null) {
+//            for (Exchange e : exchanges) {
+//                logger.debug("[collect] Exchange="+e.getName());
+//                setValue(e.getName() + "." + Metric.ATTR_AVAIL, Metric.AVAIL_UP);
+//            }
+//        }
     }
 
     /**
@@ -68,12 +66,7 @@ public class ExchangeCollector extends RabbitMQListCollector {
      * @return
      */
     public static ConfigResponse getAttributes(Exchange e) {
-        String durable = e.isDurable() ? "durable" : "not durable";
-        ConfigResponse res = new ConfigResponse();
-        res.setValue("durable", durable);
-        res.setValue("exchangeType", e.getType());
-        res.setValue("autoDelete", e.isAutoDelete());
-        return res;
+        throw new RuntimeException("XXXXXXXXXX");
     }
 
     @Override

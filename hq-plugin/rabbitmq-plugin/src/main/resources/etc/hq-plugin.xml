@@ -29,7 +29,7 @@
 
 <plugin class="org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin">
 
-    <filter name="server-connection" value="node=%node%,authentication=%authentication%"/>
+    <filter name="server-connection" value="node=%node%"/>
 
     <server name="RabbitMQ" description="RabbitMQ">
 
@@ -71,7 +71,6 @@
 
         <config>
             <option name="node" description="node"/>
-            <option name="authentication" description=".erlang.cookie value"/>
             <option name="process.query" default="State.Name.re=[beam|erl],Args.*.eq=-sname,Args.*.eq=%node%"
                     description="PTQL Query"/>
         </config>
@@ -80,7 +79,6 @@
             <property description="Node Name" name="node.name"/>
             <property description="Node Path" name="node.path"/>
             <property description="Node PID" name="node.pid"/>
-            <property description="Erlang Process" name="erlang.process"/>
             <property description="Rabbit -boot" name="rabbit.boot"/>
         </properties>
 

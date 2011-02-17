@@ -25,9 +25,6 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
 
-import org.springframework.amqp.core.Exchange;
-import org.springframework.amqp.rabbit.admin.QueueInfo;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 

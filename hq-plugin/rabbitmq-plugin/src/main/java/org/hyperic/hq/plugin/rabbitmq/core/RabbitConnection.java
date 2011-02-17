@@ -25,8 +25,6 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
 
-import com.rabbitmq.client.Address;
-
 import java.util.Map;
 
 /**
@@ -37,10 +35,6 @@ public class RabbitConnection {
  
     private String pid;
    
-    private Address address;
-
-    private Address peerAddress;
-
     private long octetsReceived;
 
     private long receiveCount;
@@ -67,7 +61,7 @@ public class RabbitConnection {
 
     @Override
     public String toString() {
-        return new StringBuilder("Connection[pid=").append(pid).append(" address=").append(address).append(" peerAddress=").append(peerAddress)
+        return new StringBuilder("Connection[pid=").append(pid)
                .append(" octetsReceived=").append(octetsReceived).append(" receiveCount=").append(receiveCount).append(" octetsSent=").append(octetsSent)
                  .append(" sendCount=").append(sendCount).append(" pendingSends=").append(pendingSends).append(" state=").append(state)
                     .append(" channels=").append(channels).append(" username=").append(username).append(" vhost=").append(vhost).append(" timeout=")
@@ -89,22 +83,6 @@ public class RabbitConnection {
 
     public void setPid(String pid) {
         this.pid = pid;
-    }
-
-    public Address getAddress() {
-        return address;
-    }
-
-    public void setAddress(String host, int port) {
-        this.address = new Address(host, port);
-    }
-
-    public Address getPeerAddress() {
-        return peerAddress;
-    }
-
-    public void setPeerAddress(String host, int port) {
-        this.peerAddress = new Address(host, port);
     }
 
     public long getOctetsReceived() {

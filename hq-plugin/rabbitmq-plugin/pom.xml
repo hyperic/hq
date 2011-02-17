@@ -13,144 +13,22 @@
     <packaging>jar</packaging>
     <name>Hyperic HQ Plugin - RabbitMQ Plugin</name>
 
-    <properties>
-        <org.springframework.amqp.version>1.0.0.20101001.003011-82</org.springframework.amqp.version>
-        <org.springframework.amqp.erlang.version>1.0.0.20101001.003011-75</org.springframework.amqp.erlang.version>
-        <org.springframework.amqp.rabbit.version>1.0.0.20101001.003011-94</org.springframework.amqp.rabbit.version>
-        <com.rabbitmq.version>1.8.1</com.rabbitmq.version>
-        <commons-io.version>1.3.2</commons-io.version>
-        <org.mockito.version>1.8.4</org.mockito.version>
-        <org.slf4j.version>1.5.10</org.slf4j.version>
-    </properties>
-
     <dependencies>
         <dependency>
-            <groupId>com.rabbitmq</groupId>
-            <artifactId>amqp-client</artifactId>
-            <version>${com.rabbitmq.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.amqp</groupId>
-            <artifactId>spring-amqp</artifactId>
-            <version>${org.springframework.amqp.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.amqp</groupId>
-            <artifactId>spring-rabbit</artifactId>
-            <version>${org.springframework.amqp.rabbit.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.amqp</groupId>
-            <artifactId>spring-rabbit-admin</artifactId>
-            <version>${org.springframework.amqp.rabbit.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.amqp</groupId>
-            <artifactId>spring-erlang</artifactId>
-            <version>${org.springframework.amqp.erlang.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hyperic.hq</groupId>
-            <artifactId>hq-pdk</artifactId>
+            <groupId>org.hyperic.hq.agent</groupId>
+            <artifactId>hq-agent-core</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.agent</groupId>
-			<artifactId>hq-agent-core</artifactId>
-			<version>${project.version}</version>
+        <dependency>
+            <groupId>org.hyperic.hq.hqapi</groupId>
+            <artifactId>hqapi1</artifactId>
             <scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.hqapi</groupId>
-			<artifactId>hqapi1</artifactId>
-            <scope>compile</scope>
-		</dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>${commons-io.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <!-- Testing -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test</artifactId>
-		</dependency>		
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>${org.mockito.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.cenqua.clover</groupId>
-            <artifactId>clover</artifactId>
-            <version>${clover2.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>${log4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${org.slf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-            <version>${org.slf4j.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>${org.slf4j.version}</version>
-            <scope>runtime</scope>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <includeGroupIds>com.rabbitmq,org.springframework.amqp,org.erlang.otp,commons-io</includeGroupIds>
-                            <outputDirectory>${project.build.directory}/classes/lib</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <useFile>false</useFile>
-                    <includes>
-                        <include>**/*Tests*.java</include>
-                    </includes>
-                    <excludes>
-                        <exclude>**/Abstract*.java</exclude>
-                        <exclude>**/*Configuration.java</exclude>
-                    </excludes>
-                    <junitArtifactName>junit:junit</junitArtifactName>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -160,44 +38,29 @@
 
     <repositories>
         <repository>
-            <id>repository.springframework.maven.release</id>
-            <name>Spring Framework Maven Release Repository</name>
-            <url>http://maven.springframework.org/release</url>
+            <id>hqapi-snapshot</id>
+            <name>HQApi Snapshot Repository</name>
+            <url>http://maven.hyperic.org/hqapi/snapshot</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
         <repository>
-            <id>repository.springframework.maven.milestone</id>
-            <name>Spring Framework Maven Milestone Repository</name>
-            <url>http://maven.springframework.org/milestone</url>
+            <id>hqapi-release</id>
+            <name>HQApi Release Repository</name>
+            <url>http://maven.hyperic.org/hqapi/release</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
         <repository>
-            <id>repository.springframework.maven.snapshot</id>
-            <name>Spring Framework Maven Snapshot Repository</name>
-            <url>http://maven.springframework.org/snapshot</url>
+            <id>hqapi-milestone</id>
+            <name>HQApi Milestone Repository</name>
+            <url>http://maven.hyperic.org/hqapi/milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
-		<repository>
-			<id>hqapi-snapshot</id>
-			<name>HQApi Snapshot Repository</name>
-			<url>http://maven.hyperic.org/hqapi/snapshot</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>hqapi-release</id>
-			<name>HQApi Release Repository</name>
-			<url>http://maven.hyperic.org/hqapi/release</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>hqapi-milestone</id>
-			<name>HQApi Milestone Repository</name>
-			<url>http://maven.hyperic.org/hqapi/milestone</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
     </repositories>
 
 </project>
