@@ -72,7 +72,6 @@ public class VirtualHostCollector extends RabbitMQDefaultCollector {
         ConfigResponse res = new ConfigResponse();
         res.setValue("name", vh.getName());
         res.setValue("node", vh.getNode());
-        res.setValue("users", vh.getUsers());
         return res;
     }
 

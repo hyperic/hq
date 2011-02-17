@@ -48,6 +48,8 @@ public class HypericRabbitAdmin {
     private static final Log logger = LogFactory.getLog(HypericRabbitAdmin.class);
     private HypericErlangTemplate customErlangTemplate;
     private String peerNodeName;
+    private static boolean NEW = false;
+    private static boolean MAKE_TEST = true;
 
     public HypericRabbitAdmin(Properties props) {
         this(new ConfigResponse(props));
@@ -58,21 +60,36 @@ public class HypericRabbitAdmin {
     }
 
     private HypericRabbitAdmin(String peerNodeName, String cookie) {
-        logger.debug("[HypericRabbitAdmin] init("+peerNodeName+","+cookie+")");
+        logger.debug("[HypericRabbitAdmin] init(" + peerNodeName + "," + cookie + ")");
         this.peerNodeName = peerNodeName;
         SingleConnectionFactory otpConnectionFactory = new SingleConnectionFactory("rabbit-monitor", cookie, peerNodeName);
         otpConnectionFactory.afterPropertiesSet();
         this.customErlangTemplate = new HypericErlangTemplate(otpConnectionFactory);
         this.customErlangTemplate.afterPropertiesSet();
+
+        if (MAKE_TEST) {
+            try {
+                customErlangTemplate.executeRpcAndConvert("rabbit_access_control", "list_vhosts", new ErlangArgs(null, String.class));
+                logger.debug("old 'list_vhosts' detected.");
+            } catch (ErlangBadRpcException ex) {
+                NEW = true;
+                logger.debug("new 'list_vhosts' detected. ('" + ex.getMessage() + "')");
+            }
+            MAKE_TEST=false;
+        }
     }
 
     public void destroy() {
         logger.debug("[HypericRabbitAdmin] destroy()");
-        ((SingleConnectionFactory)customErlangTemplate.getConnectionFactory()).destroy();
+        ((SingleConnectionFactory) customErlangTemplate.getConnectionFactory()).destroy();
     }
 
     public List<String> getVirtualHosts() throws PluginException {
-        return (List<String>) customErlangTemplate.executeRpcAndConvert("rabbit_access_control", "list_vhosts", new ErlangArgs(null, String.class));
+        if (NEW) {
+            return (List<String>) customErlangTemplate.executeRpcAndConvert("rabbit_vhost", "list", new ErlangArgs(null, String.class));
+        } else {
+            return (List<String>) customErlangTemplate.executeRpcAndConvert("rabbit_access_control", "list_vhosts", new ErlangArgs(null, String.class));
+        }
     }
 
     public List<QueueInfo> getQueues(String virtualHost) throws ErlangBadRpcException {
