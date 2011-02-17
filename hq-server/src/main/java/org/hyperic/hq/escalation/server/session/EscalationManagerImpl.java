@@ -44,7 +44,6 @@ import org.hyperic.hq.escalation.EscalationEvent;
 import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.ActionConfigInterface;
 import org.hyperic.hq.events.AlertPermissionManager;
-import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.AlertRegulator;
@@ -713,7 +712,7 @@ public class EscalationManagerImpl implements EscalationManager {
         }
 
         // Send event to be logged
-        messagePublisher.publishMessage(EventConstants.EVENTS_TOPIC, new EscalationEvent(alert,
+        messagePublisher.publishMessage(MessagePublisher.EVENTS_TOPIC, new EscalationEvent(alert,
             notificationMessage));
     }
 

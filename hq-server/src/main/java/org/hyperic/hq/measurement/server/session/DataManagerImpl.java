@@ -57,7 +57,6 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.common.util.MessagePublisher;
-import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
@@ -471,7 +470,7 @@ public class DataManagerImpl implements DataManager {
         }
 
         if (!events.isEmpty()) {
-            messagePublisher.publishMessage(EventConstants.EVENTS_TOPIC, events);
+            messagePublisher.publishMessage(MessagePublisher.EVENTS_TOPIC, events);
         }
 
         if (!zevents.isEmpty()) {

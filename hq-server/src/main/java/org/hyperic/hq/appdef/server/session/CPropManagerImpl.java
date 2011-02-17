@@ -45,8 +45,8 @@ import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.util.MessagePublisher;
 import org.hyperic.hq.common.util.Messenger;
-import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.inventory.dao.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
@@ -200,7 +200,7 @@ public class CPropManagerImpl implements CPropManager {
         }
         // Send cprop value changed event
         CPropChangeEvent event = new CPropChangeEvent(aID, key, oldval, val);
-        sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
+        sender.publishMessage(MessagePublisher.EVENTS_TOPIC, event);
     }
 
     /**

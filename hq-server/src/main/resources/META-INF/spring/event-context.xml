@@ -34,25 +34,6 @@
 		http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-3.0.xsd
 		http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
 
-	<amq:broker brokerName="localhost">
-		<amq:systemUsage>
-			<amq:systemUsage>
-				<amq:memoryUsage>
-					<amq:memoryUsage limit="${server.jms.maxmemory} mb" />
-				</amq:memoryUsage>
-			</amq:systemUsage>
-		</amq:systemUsage>
-		<amq:transportConnectors>
-			<amq:transportConnector uri="tcp://localhost:0" />
-		</amq:transportConnectors>
-	</amq:broker>
-
-	<amq:connectionFactory id="jmsFactory" brokerURL="vm://localhost?create=false" />
-
-	<bean id="connectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory">
-		<property name="connectionFactory" ref="jmsFactory" />
-	</bean>
-
 	<bean id="loggingDispatcher" class="org.hyperic.hq.bizapp.server.mdb.LoggingDispatcherImpl" />
 	<bean id="serverRestartHandler"
 		class="org.hyperic.hq.bizapp.server.mdb.ServerRestartedListener" />
@@ -70,17 +51,6 @@
 		concurrency="1" acknowledge="dups-ok">
 		<jms:listener destination="topic/eventsTopic" ref="registeredDispatcher" />
 	</jms:listener-container>
-
-	<bean id="eventsJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
-		<property name="connectionFactory" ref="connectionFactory" />
-		<property name="defaultDestinationName" value="topic/eventsTopic" />
-		<property name="pubSubDomain" value="true" />
-	</bean>
-
-	<bean id="jmsTransactionManager"
-		class="org.springframework.jms.connection.JmsTransactionManager">
-		<property name="connectionFactory" ref="connectionFactory" />
-	</bean>
 
 
 </beans>

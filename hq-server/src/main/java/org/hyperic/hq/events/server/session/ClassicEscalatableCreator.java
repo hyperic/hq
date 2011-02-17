@@ -194,7 +194,7 @@ public class ClassicEscalatableCreator implements EscalatableCreator {
                         // TODO HE-565 Possibly have MessagePublisher always
                         // wait until successful tx commit before publishing
                         // messages
-                        messagePublisher.publishMessage(EventConstants.EVENTS_TOPIC,
+                        messagePublisher.publishMessage(MessagePublisher.EVENTS_TOPIC,
                             new AlertFiredEvent(alertId, _def.getId(), AppdefUtil
                                 .newAppdefEntityId(_def.getResource()), _def.getName(), payload
                                 .getTimestamp(), payload.getMessage()));

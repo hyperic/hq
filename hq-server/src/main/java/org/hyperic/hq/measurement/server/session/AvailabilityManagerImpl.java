@@ -56,7 +56,6 @@ import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.MessagePublisher;
-import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.inventory.domain.Resource;
@@ -1391,7 +1390,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         }
 
         if (!events.isEmpty()) {
-            messenger.publishMessage(EventConstants.EVENTS_TOPIC, events);
+            messenger.publishMessage(MessagePublisher.EVENTS_TOPIC, events);
         }
 
         if (!zevents.isEmpty()) {
@@ -1435,7 +1434,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             // be suppressed as part of hierarchical alerting
             PermissionManagerFactory.getInstance().getHierarchicalAlertingManager().suppressMeasurementEvents(events,
                 false);
-            messagePublisher.publishMessage(EventConstants.EVENTS_TOPIC, new ArrayList<MeasurementEvent>(events
+            messagePublisher.publishMessage(MessagePublisher.EVENTS_TOPIC, new ArrayList<MeasurementEvent>(events
                 .values()));
         }
         if (!zevents.isEmpty()) {

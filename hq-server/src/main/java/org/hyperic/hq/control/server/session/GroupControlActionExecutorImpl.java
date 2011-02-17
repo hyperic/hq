@@ -22,7 +22,6 @@ import org.hyperic.hq.control.GroupControlActionResult;
 import org.hyperic.hq.control.shared.ControlActionTimeoutException;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlScheduleManager;
-import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.product.PluginException;
@@ -172,7 +171,7 @@ public class GroupControlActionExecutorImpl implements GroupControlActionExecuto
                         .booleanValue(), cv.getDateScheduled(), status);
                     event.setMessage(errMsg);
 
-                    sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
+                    sender.publishMessage(MessagePublisher.EVENTS_TOPIC, event);
                 } catch (Exception e) {
                     this.log.error("Unable to update control history: " + e.getMessage());
                 }
