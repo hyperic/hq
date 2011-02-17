@@ -16,10 +16,13 @@ import javax.persistence.PersistenceContext;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
+import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.inventory.InvalidRelationshipException;
 import org.hyperic.hq.inventory.NotUniqueException;
 import org.hyperic.hq.inventory.dao.ResourceDao;
 import org.hyperic.hq.inventory.dao.ResourceTypeDao;
+import org.hyperic.hq.inventory.events.CPropChangeEvent;
+import org.hyperic.hq.messaging.MockMessagePublisher;
 import org.hyperic.hq.reference.ConfigTypes;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.junit.Before;
@@ -52,6 +55,9 @@ public class ResourceIntegrationTest {
     private Resource traderJoes;
     
     private ResourceType store;
+    
+    @Autowired
+    private MockMessagePublisher messagePublisher;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -75,6 +81,7 @@ public class ResourceIntegrationTest {
         resourceDao.persist(iceberg);
         traderJoes.relateTo(produce, RelationshipTypes.CONTAINS);
         produce.relateTo(iceberg, RelationshipTypes.CONTAINS);
+        messagePublisher.clearReceivedEvents();
     }
 
     @Test
@@ -376,9 +383,16 @@ public class ResourceIntegrationTest {
     public void testSetProperty() {
         traderJoes.setProperty("Address", "123 My Street");
         assertEquals("123 My Street", traderJoes.getProperty("Address"));
+        Set<AbstractEvent> expectedEvents = new HashSet<AbstractEvent>(1);
+        expectedEvents.add(new CPropChangeEvent(traderJoes.getId(), "Address", null, "123 My Street"));
+        assertEquals(expectedEvents,messagePublisher.getReceivedEvents());
+        messagePublisher.clearReceivedEvents();
         Object oldValue = traderJoes.setProperty("Address", "123 Some Other Street");
         assertEquals("123 My Street", oldValue);
         assertEquals("123 Some Other Street", traderJoes.getProperty("Address"));
+        expectedEvents = new HashSet<AbstractEvent>(1);
+        expectedEvents.add(new CPropChangeEvent(traderJoes.getId(), "Address", "123 My Street", "123 Some Other Street"));
+        assertEquals(expectedEvents,messagePublisher.getReceivedEvents());
     }
 
     @Test(expected = IllegalArgumentException.class)

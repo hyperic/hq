@@ -20,7 +20,6 @@ package org.hyperic.hq.bizapp.server.trigger.conditional;
 import java.text.MessageFormat;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.CPropChangeEvent;
 import org.hyperic.hq.bizapp.shared.ConditionalTriggerSchema;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.EventConstants;
@@ -31,6 +30,7 @@ import org.hyperic.hq.events.ext.AbstractTrigger;
 import org.hyperic.hq.events.server.session.AlertConditionEvaluator;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
+import org.hyperic.hq.inventory.events.CPropChangeEvent;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;

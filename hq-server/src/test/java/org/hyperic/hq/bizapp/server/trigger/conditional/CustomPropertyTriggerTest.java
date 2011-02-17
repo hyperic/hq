@@ -31,13 +31,13 @@ import junit.framework.TestCase;
 import org.easymock.EasyMock;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.CPropChangeEvent;
 import org.hyperic.hq.events.EventTypeException;
 import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.MockEvent;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.server.session.AlertConditionEvaluator;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
+import org.hyperic.hq.inventory.events.CPropChangeEvent;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 
