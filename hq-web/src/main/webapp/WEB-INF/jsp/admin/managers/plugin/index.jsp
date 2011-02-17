@@ -25,33 +25,37 @@
 		list-style: none;
 		background-color: #fff;
 		border: 1px solid gray;
-		overflow: hidden;
+		border-top: 0;
+		overflow-y: scroll;
+		height: 500px;
 	}
 	
-	#pluginManagerPanel li.gridheader {
+	#pluginManagerPanel .gridheader {
 		background: url("/images/4.0/backgrounds/table_header_large.png") repeat scroll 0 0 transparent;
 		overflow: hidden;
 		font-weight: bold;
 		font-size: 1.1em;
 		color: #444;
+		border: 1px solid gray;
+		border-bottom: 0;
 	}
 	
-	#pluginManagerPanel li.gridheader span.column {
+	#pluginManagerPanel .gridheader span.column {
 		padding-top: 0.5em;
 		padding-left: 0.5em;
 		height: 25px;	
 	}
 	
-	#pluginManagerPanel li.gridrow {
+	#pluginManagerPanel .gridrow {
 		overflow: hidden;
 	}
 	
-	#pluginManagerPanel li.gridrow span.column {
+	#pluginManagerPanel .gridrow span.column {
 		padding: 0.5em 0;
 		padding-left: 0.5em;
 	}
 	
-	#pluginManagerPanel li.gridrow span.first {
+	#pluginManagerPanel .gridrow span.first {
 		text-align: center;
 	}
 	
@@ -69,14 +73,15 @@
 	<span class="last span-24 actionbar">
 		<input id="showUploadFormButton" type="button" value="<fmt:message key="admin.managers.plugin.button.add.plugin" />" />
 	</span>
+	
+	<div class="gridheader clear">
+		<!-- span class="first column span-1">&nbsp;</span -->
+		<span class="column span-4"><fmt:message key="admin.managers.plugin.column.header.product.plugin" /></span>
+		<span class="column span-4"><fmt:message key="admin.managers.plugin.column.header.jar.name" /></span>
+		<span class="column span-5"><fmt:message key="admin.managers.plugin.column.header.initial.deploy.date" /></span>
+		<span class="last column span-5"><fmt:message key="admin.managers.plugin.column.header.status" /></span>
+	</div>
 	<ul>
-		<li class="gridheader clear">
-			<!-- span class="first column span-1">&nbsp;</span -->
-			<span class="column span-4"><fmt:message key="admin.managers.plugin.column.header.product.plugin" /></span>
-			<span class="column span-4"><fmt:message key="admin.managers.plugin.column.header.jar.name" /></span>
-			<span class="column span-5"><fmt:message key="admin.managers.plugin.column.header.initial.deploy.date" /></span>
-			<span class="last column span-5"><fmt:message key="admin.managers.plugin.column.header.status" /></span>
-		</li>
 		<c:forEach var="pluginSummary" items="${pluginSummaries}" varStatus="index">
 			<li class="gridrow clear<c:if test="${index.count % 2 == 0}"> even</c:if>">
 				<span class="column span-4 header">${pluginSummary.name}&nbsp;</span>

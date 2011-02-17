@@ -5,7 +5,7 @@
 #header {
 	width: 100%;
     position: relative;
-    height: 70px;
+    height: 64px;
 }
 
 #headerLinks {
@@ -31,27 +31,16 @@
 	margin: 0;
 }
 
+#updateLink {
+	position: absolute;
+	left: 8px;
+}
+
 #header #loading {
 	display: none;
 	position: absolute;
 	bottom: 0;
 	right: 5px;
-}
-
-#headerTabs ul {
-	list-style: none;
-    margin: 0 0 0 -200px;
-    padding: 0;
-    position: absolute;
-    width: 400px;
-    left: 50%;
-    bottom: 0;
-}
-
-#headerTabs ul li.tab {
-	float: left;
-	margin-right: 0.25em;
-    padding: 0.5em;
 }
 
 #headerSearch {
@@ -68,6 +57,7 @@
     z-index: 9;
     position: absolute;
     right: 10px;
+    top: 60px;
 	-moz-border-radius-bottomleft: 5px;
 	-moz-border-radius-bottomright: 5px;
 	-moz-box-shadow: 0 3px 3px;
@@ -80,7 +70,8 @@
 }
 
 #headerLogo {
-    padding-left: 10px;
+	position: absolute;
+    left: 10px;
 }
 
 #loginPanel {

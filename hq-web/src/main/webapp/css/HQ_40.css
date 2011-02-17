@@ -71,141 +71,66 @@ a:visited,a:hover,a {
 }
 
 /* HEADER SEARCH */
-#headerSearch {
-	position: absolute;
-	top: 46px;
-	right: 0;
-	width: 65px;
-	height: 13px;
-	background: #666 url(/images/4.0/icons/search.gif) no-repeat scroll 1%
-		50%;
-	color: #FFF;
-	padding: 2px 8px 3px 0px;
-	text-align: right;
-	cursor: pointer;
-	font-weight: bold
+#searchBox {
+	background: url("../images/4.0/icons/search.png") no-repeat 3px center #fff;
+	color: #444;
+	margin: 0.5em 0;
+	padding: 0.3em 0.25em 0.25em 20px;
+	width: 275px;
 }
 
-#headerSearch a:hover {
-	color: #88C7FC
-}
-
-#headerSearch a,
-#headerSearch a:visited {
-	color: #FFF
-}
-
-#headerSearchBox {
-	position: absolute;
-	top: 64px;
-	right: 0px;
-	height: 24px;
-	width: 260px;
-	background-color: #F96115;
-	color: #FFF;
-	padding: 0 1px 0 -1px;
-	text-align: right;
-	cursor: pointer
-}
-
-#headerSearchBox #searchBox {
-	color: gray;
-	padding: 1px 30px 1px 0px;
-	width: 248px
-}
-
-#headerSearchResults {
-	position: absolute;
-	top: 86px;
-	right: 0px;
-	height: auto;
-	border: solid 1px #3179D4;
-	background-color: #FFF;
-	width: 250px;
-	padding: 4px;
-	z-index: 9;
+#searchClose {
+	background: url("../images/4.0/icons/close.png") repeat scroll 0 0 transparent;
+    cursor: pointer;
+    height: 16px;
+    width: 16px;
+    margin-top: 3px;
 }
 
 #headerSearchResults .category {
-	margin-bottom: 3px;
-	background: #92C1FD;
-	color: #FFF;
-	height: 12px;
-	padding: 2px
-}
-
-#headerSearchResults a,
-#headerSearchResults a:visited,
-#headerSearchResults a:hover {
-	color: #88C7FC
-}
-
-#headerSearchResults .all {
-	margin-top: 3px;
-	margin-bottom: 4px
-}
-
-#headerSearchResults li {
-	margin: 2px 0px;
-	padding: 1px 0px 1px 22px; /* 22px to leave room for icons */
-	border: 1px solid #FFF;
-}
-
-#headerSearchResults li:hover {
-	border: 1px dotted gray;
+    background: none repeat scroll 0 0 #92C1FD;
+    color: #FFFFFF;
+    margin-bottom: 3px;
+    padding: 2px;
 }
 
 #headerSearchResults ul {
-	margin: 0px;
-	padding: 4px;
-	list-style: none
-}
-
-#headerSearchResults li a {
-	color: #666;
-	text-decoration: none
-}
-
-#headerSearchResults li a:hover {
-	color: #666
-}
-
-.searchActive {
-	background: #FFF url('/images/4.0/icons/progress2.gif') no-repeat 99%
-		50%
-}
-
-.searchComplete {
-	background: #FFF
-}
-
-#headerSearchResults li.platform {
-	background: transparent url('/images/4.0/icons/platform.png') no-repeat
-		0% 50%;
-}
-
-#headerSearchResults li.server {
-	background: transparent url('/images/4.0/icons/server.png') no-repeat 0%
-		50%;
+    list-style: none;
+    margin: 0;
+    padding: 4px;
 }
 
 #headerSearchResults li.service {
-	background: transparent url('/images/4.0/icons/service.png') no-repeat
-		0% 50%;
+    background: url("../images/4.0/icons/service.png") no-repeat scroll 0 50% transparent;
 }
 
-#headerSearchResults li.application {
-	background: transparent url('/images/4.0/icons/application.png')
-		no-repeat 0% 50%;
+#headerSearchResults li {
+    border: 1px solid #fff;
+    margin: 2px 0;
+    padding: 1px 0 1px 22px;
 }
 
-#headerSearchResults li.group {
-	background: transparent url('/images/4.0/icons/group.png') no-repeat 0%
-		50%;
+#headerSearch {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	padding: 0 10px;
 }
 
-#headerSearchResults li.user {
-	background: transparent url('/images/group_key.gif') no-repeat 0% 50%;
+#headerSearchResults {
+   	background-color: #fff;
+    border: 1px solid #3179D4;
+    border-top: 0;
+    height: auto;
+    padding: 4px;
+    width: 265px;
+    z-index: 9;
+    position: absolute;
+    right: 10px;
+    top: 60px;
+	-moz-border-radius-bottomleft: 5px;
+	-moz-border-radius-bottomright: 5px;
+	-moz-box-shadow: 0 3px 3px;
 }
 
 /* Navigation Tabs */
@@ -273,6 +198,7 @@ a:visited,a:hover,a {
 	padding:5px;
 	margin:0;
 	background-image:none;
+	white-space: nowrap;
 }
 		
 #navTabContainer ul.root {
@@ -297,7 +223,11 @@ a:visited,a:hover,a {
 #navTabContainer li.hasSubMenu {
 	background: url("/images/4.0/icons/resultset_next.gif") no-repeat scroll right #fff;
 }
-		
+
+#navTabContainer li.hasSubMenu ul {
+	width:auto;
+}
+
 #navTabContainer li ul {
 	position: absolute;
 	left:149px;
@@ -681,6 +611,8 @@ a.buttonInactive:active span {
 
 #header {
 	border-bottom: 3px solid #2D6EBE;
+	background-color: #000;
+	overflow:hidden;
 }
 
 #header,#footer {
@@ -689,8 +621,7 @@ a.buttonInactive:active span {
     so that header menus drop down on TOP of the main content */
 	z-index: 2;
 	height: 64px;
-	background: transparent
-		url(/images/4.0/backgrounds/header_background.jpg) repeat-x scroll
+	background: url(/images/4.0/backgrounds/header_background.jpg) repeat-x scroll
 }
 
 .right {

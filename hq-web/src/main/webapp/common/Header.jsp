@@ -50,25 +50,15 @@
     }
     var resourceURL = '<html:rewrite action="/Resource" />';
 	var userURL = '<html:rewrite action="/admin/user/UserAdmin" />';
-    var searchWidget = new hyperic.widget.search({search:'/app/search'}, 3, {keyCode: 83, ctrl: true});
+    var searchWidget = new hyperic.widget.search(dojo11, {search:'/app/search'}, 3, {keyCode: 83, ctrl: true});
     dojo.require("dojo.lfx.html");
     dojo.event.connect(window, "onload",function(){ 
-        activateHeaderTab();
+        activateHeaderTab(dojo11);
         searchWidget.create();
         //Connect the events for the box, cancel and search buttons
-        dojo.event.connect(searchWidget.searchBox, "onkeypress", searchWidget, "search");
-        dojo.event.connect(searchWidget.nodeCancel, "onclick", searchWidget, "toggleSearchBox");
-        dojo.event.connect(searchWidget.nodeSearchButton, "onclick", searchWidget,  "toggleSearchBox");
-        // What should the hot-keys do?
+        dojo11.connect(searchWidget.searchBox, "onkeypress", searchWidget, "search");
+         // What should the hot-keys do?
         dojo11.subscribe('enter', searchWidget, "search");
-        dojo.event.topic.subscribe('search', searchWidget, "toggleSearchBox");
-        dojo.event.topic.subscribe('escape', searchWidget, "toggleSearchBox");
-        // Render Search Tooltip
-        if (dojo.render.os.mac) {
-            dojo.byId('headerSearch').title = "<fmt:message key="header.searchTip.mac"/>";
-        } else if (dojo.render.os.win) {
-            dojo.byId('headerSearch').title = "<fmt:message key="header.searchTip.win"/>";
-        }
     });
     
     <!--
@@ -222,43 +212,23 @@
         <span><html:link href="javascript:void(0)" onclick="tutorialWin=window.open('http://www.hyperic.com/demo/screencasts.html','tutorials','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');tutorialWin.focus();return false;"><fmt:message key="header.Screencasts"/></html:link></span>
         <span><a id="hqHelpLink" href="<hq:help/>" onclick="helpWin=window.open((typeof help != 'undefined' ? help : this.href),'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;"><fmt:message key="header.Help"/></a></span>
     </div>
-    <div id="headerSearch"><fmt:message key="header.Search"/></div>
-        <div id="headerSearchBox" style="display:none">
-            <div style="float:left;margin:3px 0px 3px 5px;">
-            <input type="text" id="searchBox" value=""/>
-        </div>
+    <div id="headerSearch">
+		<input type="text" id="searchBox" value=""/>
     </div>
-    <div id="headerSearchResults" style="display:none">
-        <div id="searchClose" class="cancelButton right"></div>
-        <!--
-        <a class="all left" href="/resource/Hub.html"><fmt:message key="header.SearchShowAll"/></a>
-        <div class="clear">&nbsp;</div>
-        -->
-        <div class="resultsGroup">
-            <div class="category"><fmt:message key="header.Resources"/> (<span id="resourceResultsCount"></span>)</div>
-            <ul id="resourceResults">
-                <li></li>
-            </ul>
-        </div>
-        <div class="resultsGroup">
-            <div class="category"><fmt:message key="header.users"/> (<span id="usersResultsCount"></span>)</div>
-            <ul id="usersResults">
-                <li></li>
-            </ul>
-        </div>
-        <!--
-        <div class="resultsGroup">
-            <div class="category"><fmt:message key="header.Alerts"/> (0)</div>
-            <ul>
-                <li></li>
-            </ul>
-        </div>
-        <div class="resultsGroup">
-            <div class="category"><fmt:message key="header.Events"/> (0)</div>
-            <ul>
-                <li></li>
-            </ul>
-        </div>
-        -->
-    </div>     
+	<div id="headerSearchResults" style="display:none">
+      	<div id="searchClose" class="cancelButton right"></div>
+	        <div class="resultsGroup">
+       		    <div class="category"><fmt:message key="header.Resources"/> (<span id="resourceResultsCount"></span>)</div>
+	           	<ul id="resourceResults">
+           		    <li></li>
+		        </ul>
+		    </div>
+		    <div class="resultsGroup">
+           		<div class="category"><fmt:message key="header.users"/> (<span id="usersResultsCount"></span>)</div>
+		        <ul id="usersResults">
+               		<li></li>
+           		</ul>
+       		</div>
+    	</div>
+    </div>
 </div>

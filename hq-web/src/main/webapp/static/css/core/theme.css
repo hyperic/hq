@@ -15,31 +15,13 @@ body { background: #EFEFEF; }
 	color: #88C7FC; 
 }
 
-#headerTabs li.tab {
-	background: url('../../images/tab-main-background.png') repeat-x 0 0;
-}
-
-#headerTabs li.tab.active {
-	background: url('../../images/tab-main-active-background.png') repeat-x 0 0;
-}
-
-#headerTabs li.tab > a {
-	color: #444;
-	text-decoration: none;
-	font-weight: bold;
-}
-
-#headerTabs li.tab.active > a {
-	color: #fff;
-}
-
-#headerTabs li ul {
-	display: none;
-}
-
 #searchBox {
 	background: url("../../images/search.png") no-repeat 3px center #fff;
 	color: #444;
+}
+
+#searchBox .searchActive {
+	background: url("../../images/ajax-loading.gif") no-repeat 3px center #fff;
 }
 
 #searchClose {
@@ -53,6 +35,7 @@ body { background: #EFEFEF; }
 #headerSearchResults {
    	background-color: #fff;
     border: 1px solid #3179D4;
+    border-top: 0;
 }
 
 #headerSearchResults .category {
@@ -76,6 +59,12 @@ body { background: #EFEFEF; }
     border: 1px solid #fff;
     margin: 2px 0;
     padding: 1px 0 1px 22px;
+}
+
+#headerSearchResults li a {
+	color: #88C7FC;
+    text-decoration: none;
+    font-weight: bold;
 }
 
 #loginPanel {
@@ -112,7 +101,17 @@ body { background: #EFEFEF; }
 	background-color: #D9E4F1;
 }
 
-#loginPanel input[type="submit"] {
+#loginPanel .msgError {
+	background: url('../../images/exclamation.png') no-repeat scroll 6px 40% transparent;
+	border: 1px solid red;
+	color: red;
+}
+
+.dijitDialogUnderlay {
+    background-color: #000000;
+}
+
+input[type="submit"], input[type="button"] {
 	color: #fff;
 	border: 1px solid #84B96D;
 	background: #2DBF3D url('../../images/button-green-background.jpg') repeat-x bottom;
@@ -121,10 +120,4 @@ body { background: #EFEFEF; }
 	border-radius: 3px;
 	padding: 3px 15px;
 	cursor: pointer;
-}
-
-#loginPanel .msgError {
-	background: url('../../images/exclamation.png') no-repeat scroll 6px 40% transparent;
-	border: 1px solid red;
-	color: red;
 }

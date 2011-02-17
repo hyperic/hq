@@ -41,8 +41,6 @@
 	</form>
 </div>
 <script>
-	dojo.require("dijit.Dialog");
-	
 	dojo.ready(function() {
 		var username = dojo.byId("usernameInput");
 		var password = dojo.byId("passwordInput");
@@ -66,11 +64,5 @@
 				password.disabled = true;
 			});
 		</c:if>
-
-		var dialog = new dijit.Dialog("loginPanel");
-		
-		dojo.style(dialog.closeButtonNode, "visibility", "hidden");
-		dialog.setContent(dojo.byId("loginPanel"));
-		dialog.show();
 	});
 </script>

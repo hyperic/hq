@@ -171,43 +171,38 @@ hyperic.utils.getUniqueId = function(/*String*/ prefix){
  * Example: addKeyListener(window, {keyCode: 83, ctrl :true}, 'search');
  * which registers a 'ctrl-s' key listener on the window
  */
-hyperic.utils.addKeyListener = function(/*Node*/node, /*Object*/ keyComb, /*String*/topic){
+hyperic.utils.addKeyListener = function(dojo, /*Node*/node, /*Object*/ keyComb, /*String*/topic){
 	this.node = node;
     this.keyComb = keyComb;
     this.topic = topic;
     this.canceled = false;
     this.keyListener = function(e){
-        if(!e) { e = window.event; }
-        if(e.keyCode == this.keyComb.keyCode && !this.canceled){
-            if(this.keyComb.ctrl || this.keyComb.alt || this.keyComb.shift){
-                if((this.keyComb.ctrl && e.ctrlKey)
-                		|| (this.keyComb.alt && e.altKey)
-                		|| (this.keyComb.shift && e.shiftKey)){
-                    this.publish(e);
-                }else{
-                    return;
-                }
-            }else{
-                this.publish(e);
-            }            
+        if (e &&                                  // event exists and,                
+        	e.keyCode == this.keyComb.keyCode &&  // event keyCode matches expected keyCode and,
+        	!this.canceled &&                     // listener isn't cancelled and,
+        	(!(this.keyComb.ctrl ||               // No modifier key required or,
+        	   this.keyComb.alt  || 
+        	   this.keyComb.shift) ||
+            ((this.keyComb.ctrl && e.ctrlKey) ||  // event modifier matches expected modifier
+             (this.keyComb.alt && e.altKey) ||
+             (this.keyComb.shift && e.shiftKey)))) {
+            this.publish(e);                      // publish event
         }
     };
     this.publish = function(e){
-        if(window.event){
-            e.cancelBubble = true;
-            e.returnValue = false;
-        }else{
-            e.preventDefault();
-            e.stopPropagation();
-        }
-        dojo.event.topic.publish(this.topic, [e]);
+        e.preventDefault();
+        e.stopPropagation();
+        
+        dojo.publish(this.topic, [e]);
     };
     this.cancel = function(){
         this.canceled = true;
-        dojo.event.disconnect(node, "onkeyup", this, this.keyListener);
+        
+        dojo.disconnect(node, "onkeyup", this, "keyListener");
     };
-    //dojo.connect(node, "onkeyup", this, this.keyListener);
-    dojo.event.connect(node, "onkeyup", this, this.keyListener);
+
+    dojo.connect(node, "onkeyup", this, "keyListener");
+
     return this;
 };
 
@@ -266,10 +261,8 @@ hyperic.utils.passwd = {
     }
 };
 
-hyperic.widget.search = function(/*Object*/ urls, /*number*/ minStrLenth, /*Object*/ keyCode){
-    dojo.require('dojo.io');
-    dojo.require('dojo.lfx.html');
-    this.opened     = false;
+hyperic.widget.search = function(dojo, /*Object*/ urls, /*number*/ minStrLenth, /*Object*/ keyCode){
+	this.opened     = false;
     this.minStrLen  = minStrLenth; 
     this.resourceURL= urls.resource;
     this.searchURL  = urls.search;
@@ -285,24 +278,78 @@ hyperic.widget.search = function(/*Object*/ urls, /*number*/ minStrLenth, /*Obje
         this.nodeCancel         = dojo.byId('searchClose');
         this.nodeSearchButton   = dojo.byId("headerSearch");
         //Set up the key listeners for the search feature
-        this.listeners.push( new hyperic.utils.addKeyListener(window.document, this.keyCode, 'search') );
-        this.listeners.push( new hyperic.utils.addKeyListener(this.searchContainer, {keyCode: 13}, 'enter') );
-        this.listeners.push( new hyperic.utils.addKeyListener(dojo.byId('header'), {keyCode: 27}, 'escape') );
+        this.listeners.push( new hyperic.utils.addKeyListener(dojo, window.document, this.keyCode, 'search') );
+        this.listeners.push( new hyperic.utils.addKeyListener(dojo, this.searchContainer, { keyCode: 13 }, 'enter') );
+        this.listeners.push( new hyperic.utils.addKeyListener(dojo, dojo.byId('header'), { keyCode: 27 }, 'escape') );
+        dojo.connect(this.nodeCancel, "onclick", function(e) {
+        	dojo.style("headerSearchResults", "display", "none");
+        	dojo.byId("searchBox").value = "";
+        });
     };
     this.search = function(e){
         var string = e.target.value;
         if(this.searchBox.value.length >= this.minStrLen){
             this.searchStarted();
-            dojo11.xhrGet({
+            dojo.xhrGet({
                 url: this.searchURL+'?q='+string, 
                 handleAs: "json",
-                headers: { "Content-Type": "application/json"},
+                headers: { 
+                	"Content-Type": "application/json" 
+                },
                 timeout: 5000, 
-                load: loadSearchData,
+                load: function(response, args) {
+                	var resURL = resourceURL + "?eid=";
+    	            var usrURL = userURL + "?mode=view&u=";
+    	            var template = "<li class='type'><a href='link' title='fullname'>text<\/a><\/li>";
+    	            var count = 0;
+    	            var res = "";
+    	            var relink = new RegExp("link", "g");
+    	            var retext = new RegExp("text", "g");
+    	            var refulltext = new RegExp("fullname", "g");
+    	            var retype = new RegExp("type", "g");
+    	            var resources = response.resources;
+    	            
+    	            for (var i = 0; i < resources.length; i++) {
+    	            	var length = resources[i].name.length;
+    	                var fullname = resources[i].name;
+    	                
+    	                if (length >= 37){
+    	                	resources[i].name = resources[i].name.substring(0,4) + "..." + resources[i].name.substring(length-28, length);
+    	                }
+    	                
+    	                res += template.replace(relink, resURL+resources[i].id)
+    	                	.replace(retext, resources[i].name)
+    	                    .replace(retype, resources[i].resType)
+    	                    .replace(refulltext, fullname);
+    	                    
+    	                count++;
+    	            }
+    	            
+    	            dojo.byId("resourceResults").innerHTML = res;
+    	            dojo.byId("resourceResultsCount").innerHTML = count;
+
+    	            count = 0;
+    	            res = "";
+    	             
+    	            var users = response.users;
+    	             
+    	            for (var i = 0; i < users.length; i++) {
+    	                var fullname = users[i].name;
+    	             
+    	                res += template.replace(relink, usrURL+users[i].id)
+    	                    .replace(retype, "user")
+    	                    .replace(retext, users[i].name);
+    	            
+    	                count++;
+    	            }
+    	             
+    	            dojo.byId("usersResults").innerHTML = res;
+    	            dojo.byId("usersResultsCount").innerHTML = count;
+    	            dojo.style("headerSearchResults", "display", "");
+    	            dojo.removeClass("searchBox", "searchActive");
+                },
                 error: this.error
             });
-            
-           
         }else{
             this.searchEnded();
             this.nodeSearchResults.style.display = 'none';
@@ -310,35 +357,17 @@ hyperic.widget.search = function(/*Object*/ urls, /*number*/ minStrLenth, /*Obje
     };
     this.error = function(){
         this.searchEnded();
-        alert("foo");
     };
     this.loadResults = function(response){
         this.searchEnded();
-        
-    };
-    this.toggleSearchBox = function() {
-        if(this.opened) {
-            this.nodeSearchResults.style.display = 'none';
-            dojo.lfx.html.wipeOut([this.searchContainer], 400).play();
-            //dojo.fx.wipeOut({node:this.searchContainer, duration: 400}).play();
-            this.opened = false;
-            this.searchEnded();
-            this.searchBox.value = '';
-        }
-        else {
-            window.scrollTo(0,0);
-            dojo.lfx.html.wipeIn([this.searchContainer], 400).play();
-            //dojo.fx.wipeIn({node:this.searchContainer, duration: 400}).play();
-            this.opened = true;
-            this.searchBox.focus();
-        }
     };
     this.searchStarted = function(){
-        this.searchBox.className = "searchActive";
+    	dojo.addClass("searchBox", "searchActive");
     };
     this.searchEnded = function(){
-        this.searchBox.className = "";
+    	dojo.removeClass("searchBox", "searchActive");
     };
+
     return this;
 };
 
@@ -724,33 +753,35 @@ function createInputFieldsFromJSON(jsonArray){
 /**
  * @deprecated used only for the struts header
  */
-function activateHeaderTab(){
+function activateHeaderTab(dojo){
     var l = document.location;
     if (document.navTabCat) {
         //This is a plugin
         if (document.navTabCat == "Resource") {
-            dojo11.addClass("resTab", "activeTab");
+            dojo.addClass("resTab", "activeTab");
         } else if(document.navTabCat == "Admin") {
-            dojo11.addClass("adminTab", "activeTab");
+            dojo.addClass("adminTab", "activeTab");
         }
         return;
     }
     l = l+""; // force string cast
     if ( l.indexOf("Dash")!=-1 || 
          l.indexOf("dash")!=-1 ) {
-    	dojo11.addClass("dashTab", "activeTab");
+    	dojo.addClass("dashTab", "activeTab");
     } else if( l.indexOf("Resou")!=-1 ||
                l.indexOf("resource")!=-1 || 
                l.indexOf("alerts/")!=-1 || 
                l.indexOf("TabBodyAttach.do")!=-1 ) {
-    	dojo11.addClass("resTab", "activeTab");
+    	dojo.addClass("resTab", "activeTab");
     } else if( l.indexOf("rep")!=-1 || 
                l.indexOf("Rep")!=-1 || 
                l.indexOf("masth")!=-1 ) {
-    	dojo11.addClass("analyzeTab", "activeTab");
+    	dojo.addClass("analyzeTab", "activeTab");
     } else if( l.indexOf("admin.do")!=-1 || 
                l.indexOf("Admin.do")!=-1 ) {
-    	dojo11.addClass("adminTab", "activeTab");
+    	dojo.addClass("adminTab", "activeTab");
+    } else if ( l.indexOf("/admin/") != -1 ) {
+    	dojo.addClass("adminTab", "active");
     }
 }
 
