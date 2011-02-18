@@ -19,18 +19,16 @@ package org.hyperic.hq.measurement.ext;
 
 import java.io.Serializable;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ResourceEventInterface;
 
 /**
  * delivers baseline change events to any registered consumer.
- *
- *
+ * 
+ * 
  */
 public class BaselineChangeEvent
-    extends AbstractEvent implements Serializable, ResourceEventInterface
-{
+    extends AbstractEvent implements Serializable, ResourceEventInterface {
 
     private static final long serialVersionUID = 1620737031667245999L;
     private Double mean;
@@ -44,7 +42,8 @@ public class BaselineChangeEvent
      * @param minExpectedVal The min expected value after the change
      * @param maxExpectedVal The max expected value after the change
      */
-    public BaselineChangeEvent(Integer measurementId, Double mean, Double minExpectedVal, Double maxExpectedVal) {
+    public BaselineChangeEvent(Integer measurementId, Double mean, Double minExpectedVal,
+                               Double maxExpectedVal) {
         setInstanceId(measurementId);
         this.mean = mean;
         this.minExpectedVal = minExpectedVal;
@@ -52,7 +51,7 @@ public class BaselineChangeEvent
     }
 
     /**
-     *
+     * 
      * @return The expected max after the change
      */
     public Double getMaxExpectedVal() {
@@ -60,7 +59,7 @@ public class BaselineChangeEvent
     }
 
     /**
-     *
+     * 
      * @return The baseline mean after the change
      */
     public Double getMean() {
@@ -68,7 +67,7 @@ public class BaselineChangeEvent
     }
 
     /**
-     *
+     * 
      * @return The expected min after the change
      */
     public Double getMinExpectedVal() {
@@ -78,7 +77,8 @@ public class BaselineChangeEvent
     /**
      * @see org.hyperic.hq.events.ResourceEventInterface#getResource()
      */
-    public AppdefEntityID getResource() {
+    public Integer getResource() {
         return null;
     }
+
 }

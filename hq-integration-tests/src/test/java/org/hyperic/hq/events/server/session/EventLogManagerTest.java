@@ -4,7 +4,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ResourceEventInterface;
 import org.hyperic.hq.events.shared.EventLogManager;
@@ -32,8 +31,8 @@ public class EventLogManagerTest
             this.resource = resource;
         }
 
-        public AppdefEntityID getResource() {
-            return resource.getEntityId();
+        public Integer getResource() {
+            return resource.getId();
         }
 
         @Override

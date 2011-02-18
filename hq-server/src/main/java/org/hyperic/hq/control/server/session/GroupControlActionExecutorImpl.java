@@ -15,16 +15,15 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.common.util.MessagePublisher;
 import org.hyperic.hq.control.ControlActionResult;
 import org.hyperic.hq.control.ControlEvent;
 import org.hyperic.hq.control.GroupControlActionResult;
 import org.hyperic.hq.control.shared.ControlActionTimeoutException;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlScheduleManager;
-import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
+import org.hyperic.hq.messaging.MessagePublisher;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.pager.PageControl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -167,12 +166,11 @@ public class GroupControlActionExecutorImpl implements GroupControlActionExecuto
                     ControlHistory cv = controlScheduleManager.getJobHistoryValue(groupJobId);
 
                     // Send a control event
-                    ControlEvent event = new ControlEvent(cv.getSubject(), cv.getEntityType()
-                        .intValue(), cv.getEntityId(), cv.getAction(), cv.getScheduled()
+                    ControlEvent event = new ControlEvent(cv.getSubject(),cv.getEntityId(), cv.getAction(), cv.getScheduled()
                         .booleanValue(), cv.getDateScheduled(), status);
                     event.setMessage(errMsg);
 
-                    sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
+                    sender.publishMessage(MessagePublisher.EVENTS_TOPIC, event);
                 } catch (Exception e) {
                     this.log.error("Unable to update control history: " + e.getMessage());
                 }

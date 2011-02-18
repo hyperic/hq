@@ -31,11 +31,10 @@
 
 package org.hyperic.hq.events;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 
 /** Interface implemented by Events that correspond to resources
  *
  */
 public interface ResourceEventInterface {
-    public AppdefEntityID getResource();
+    public Integer getResource();
 }

@@ -20,7 +20,6 @@ package org.hyperic.hq.bizapp.server.trigger.conditional;
 import java.text.MessageFormat;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.CPropChangeEvent;
 import org.hyperic.hq.bizapp.shared.ConditionalTriggerSchema;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.EventConstants;
@@ -31,6 +30,7 @@ import org.hyperic.hq.events.ext.AbstractTrigger;
 import org.hyperic.hq.events.server.session.AlertConditionEvaluator;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
+import org.hyperic.hq.inventory.events.CPropChangeEvent;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
@@ -144,7 +144,8 @@ public class CustomPropertyTrigger
         TriggerFiredEvent tfe = prepareTriggerFiredEvent(event);
         StringBuffer sb = new StringBuffer();
 
-        MESSAGE_FMT.format(new String[] { event.getKey(), event.getNewValue(), event.getOldValue() }, sb, null);
+        MESSAGE_FMT.format(new String[] { event.getKey(), event.getNewValue()!=null?event.getNewValue().toString():null, 
+                                                                                   event.getOldValue() !=null?event.getOldValue().toString():null}, sb, null);
 
         tfe.setMessage(sb.toString());
         super.fireActions(tfe);

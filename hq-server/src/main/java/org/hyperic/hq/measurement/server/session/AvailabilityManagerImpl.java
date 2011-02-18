@@ -55,8 +55,6 @@ import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.util.MessagePublisher;
-import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.inventory.domain.Resource;
@@ -69,6 +67,7 @@ import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
+import org.hyperic.hq.messaging.MessagePublisher;
 import org.hyperic.hq.product.AvailabilityMetricValue;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
@@ -1367,7 +1366,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             if (registeredTriggers.isTriggerInterested(event) || allEventsInteresting) {
                 measurementManager.buildMeasurementEvent(event);
                 if (event.getValue().getValue() == AVAIL_DOWN) {
-                    Resource r = resourceManager.findResource(event.getResource());
+                    Resource r = resourceManager.findResourceById(event.getResource());
                     if (r != null && !r.isInAsyncDeleteState()) {
                         downEvents.put(r.getId(), event);
                     }
@@ -1391,7 +1390,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         }
 
         if (!events.isEmpty()) {
-            messenger.publishMessage(EventConstants.EVENTS_TOPIC, events);
+            messenger.publishMessage(MessagePublisher.EVENTS_TOPIC, events);
         }
 
         if (!zevents.isEmpty()) {
@@ -1435,7 +1434,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             // be suppressed as part of hierarchical alerting
             PermissionManagerFactory.getInstance().getHierarchicalAlertingManager().suppressMeasurementEvents(events,
                 false);
-            messagePublisher.publishMessage(EventConstants.EVENTS_TOPIC, new ArrayList<MeasurementEvent>(events
+            messagePublisher.publishMessage(MessagePublisher.EVENTS_TOPIC, new ArrayList<MeasurementEvent>(events
                 .values()));
         }
         if (!zevents.isEmpty()) {

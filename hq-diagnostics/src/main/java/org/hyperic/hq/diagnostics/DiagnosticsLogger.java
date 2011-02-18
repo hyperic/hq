@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.common;
+package org.hyperic.hq.diagnostics;
 
 import java.util.ArrayList;
 import java.util.Collection;

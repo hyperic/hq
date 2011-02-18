@@ -27,7 +27,6 @@ package org.hyperic.hq.measurement.ext;
 
 import java.io.Serializable;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ResourceEventInterface;
 import org.hyperic.hq.measurement.UnitsConvert;
@@ -41,7 +40,7 @@ public class MeasurementEvent extends AbstractEvent
     implements Serializable, ResourceEventInterface {
 
     private static final long serialVersionUID = -4805198063892667418L;
-    private AppdefEntityID _resource;
+    private Integer _resource;
     private MetricValue    _value;
     private String         _units;
 
@@ -51,7 +50,7 @@ public class MeasurementEvent extends AbstractEvent
         _value = value;
     }
 
-    public AppdefEntityID getResource(){
+    public Integer getResource(){
         return _resource;
     }
 
@@ -67,7 +66,7 @@ public class MeasurementEvent extends AbstractEvent
         return _units;
     }
 
-    public void setResource(AppdefEntityID resource) {
+    public void setResource(int resource) {
         this._resource = resource;
     }
 

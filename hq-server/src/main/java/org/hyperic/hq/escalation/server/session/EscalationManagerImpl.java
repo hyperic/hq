@@ -39,12 +39,10 @@ import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.DuplicateObjectException;
-import org.hyperic.hq.common.util.MessagePublisher;
 import org.hyperic.hq.escalation.EscalationEvent;
 import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.ActionConfigInterface;
 import org.hyperic.hq.events.AlertPermissionManager;
-import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.AlertRegulator;
@@ -52,6 +50,7 @@ import org.hyperic.hq.events.server.session.AlertableRoleCalendarType;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.events.shared.ActionManager;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
+import org.hyperic.hq.messaging.MessagePublisher;
 import org.hyperic.util.units.FormattedNumber;
 import org.hyperic.util.units.UnitNumber;
 import org.hyperic.util.units.UnitsConstants;
@@ -713,7 +712,7 @@ public class EscalationManagerImpl implements EscalationManager {
         }
 
         // Send event to be logged
-        messagePublisher.publishMessage(EventConstants.EVENTS_TOPIC, new EscalationEvent(alert,
+        messagePublisher.publishMessage(MessagePublisher.EVENTS_TOPIC, new EscalationEvent(alert,
             notificationMessage));
     }
 

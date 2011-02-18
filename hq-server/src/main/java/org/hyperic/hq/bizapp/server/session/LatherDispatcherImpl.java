@@ -41,12 +41,12 @@ import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
 import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection;
 import org.hyperic.hq.appdef.shared.AgentCreateException;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
@@ -90,9 +90,7 @@ import org.hyperic.hq.bizapp.shared.lather.UserIsValid_result;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.common.util.MessagePublisher;
 import org.hyperic.hq.control.shared.ControlManager;
-import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.ha.HAService;
 import org.hyperic.hq.ha.HAUtil;
 import org.hyperic.hq.measurement.data.TrackEventReport;
@@ -103,6 +101,7 @@ import org.hyperic.hq.measurement.shared.MeasurementConfigList;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.ReportProcessor;
 import org.hyperic.hq.measurement.shared.ResourceLogEvent;
+import org.hyperic.hq.messaging.MessagePublisher;
 import org.hyperic.hq.product.ConfigTrackPlugin;
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.PluginException;
@@ -620,7 +619,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
                 logEvents.add(rle);
             }
 
-            sendTopicMessage(EventConstants.EVENTS_TOPIC, logEvents);
+            sendTopicMessage(MessagePublisher.EVENTS_TOPIC, logEvents);
         }
 
         return new NullLatherValue();
@@ -645,7 +644,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
                 ccEvents.add(cce);
             }
 
-            sendTopicMessage(EventConstants.EVENTS_TOPIC, ccEvents);
+            sendTopicMessage(MessagePublisher.EVENTS_TOPIC, ccEvents);
         }
 
         return new NullLatherValue();

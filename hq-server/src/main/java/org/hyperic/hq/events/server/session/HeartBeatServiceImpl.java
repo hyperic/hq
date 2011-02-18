@@ -29,14 +29,12 @@ import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.common.util.MessagePublisher;
-import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.HeartBeatEvent;
 import org.hyperic.hq.events.shared.HeartBeatService;
+import org.hyperic.hq.messaging.MessagePublisher;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The service that dispatches heart beats.
@@ -45,7 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 //@Transactional
 public class HeartBeatServiceImpl implements HeartBeatService {
     private final Log log = LogFactory.getLog(HeartBeatServiceImpl.class);
-    private String topicName = EventConstants.EVENTS_TOPIC;
+    private String topicName = MessagePublisher.EVENTS_TOPIC;
     private MessagePublisher messagePublisher;
     
 

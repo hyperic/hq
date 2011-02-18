@@ -32,7 +32,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.common.DiagnosticObject;
+import org.hyperic.hq.diagnostics.DiagnosticObject;
 import org.hyperic.hq.events.server.session.AlertConditionEvaluator;
 import org.hyperic.hq.events.server.session.AlertConditionEvaluatorRepository;
 import org.hyperic.hq.events.server.session.RecoveryConditionEvaluator;

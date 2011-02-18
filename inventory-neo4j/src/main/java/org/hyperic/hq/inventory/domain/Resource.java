@@ -20,9 +20,11 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.inventory.events.CPropChangeEvent;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.inventory.InvalidRelationshipException;
 import org.hyperic.hq.inventory.NotUniqueException;
+import org.hyperic.hq.messaging.MessagePublisher;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
@@ -66,6 +68,9 @@ public class Resource {
 
     @Autowired
     private transient GraphDatabaseContext graphDatabaseContext;
+    
+    @Autowired
+    private transient MessagePublisher messagePublisher;
 
     @Id
     @GenericGenerator(name = "mygen1", strategy = "increment")
@@ -723,6 +728,8 @@ public class Resource {
         if (propertyType.isIndexed()) {
             graphDatabaseContext.getNodeIndex(null).add(getUnderlyingState(), key, value);
         }
+        CPropChangeEvent event = new CPropChangeEvent(getId(), key, oldValue, value);
+        messagePublisher.publishMessage(MessagePublisher.EVENTS_TOPIC, event);
         return oldValue;
     }
 

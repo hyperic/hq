@@ -46,7 +46,6 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
-import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationManagerImpl;
 import org.hyperic.hq.escalation.server.session.EscalationState;
@@ -65,6 +64,7 @@ import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
+import org.hyperic.hq.messaging.Messenger;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Before;
 import org.junit.Test;
@@ -245,7 +245,7 @@ public class EscalationManagerTest
         aDefManager.updateAlertDefinitionActiveStatus(authzSubjectManager.getOverlordPojo(), def,
             true);
 
-        AlertFiredEvent event = new AlertFiredEvent(123, def.getId(), def.getAppdefEntityId(),
+        AlertFiredEvent event = new AlertFiredEvent(123, def.getId(), def.getAppdefEntityId().getId(),
             "Platform Down", System.currentTimeMillis(), "Firing Alert-123");
         TriggerFiredEvent triggerFired = new TriggerFiredEvent(15, event);
         AlertConditionsSatisfiedZEvent alertZEvent = new AlertConditionsSatisfiedZEvent(

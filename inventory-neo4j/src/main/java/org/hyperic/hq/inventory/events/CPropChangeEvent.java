@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.appdef.shared;
+package org.hyperic.hq.inventory.events;
 
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ResourceEventInterface;
@@ -31,15 +31,15 @@ import org.hyperic.hq.events.ResourceEventInterface;
 /**
  * Event sent when a resource's custom property value changes
  */
-public class CPropChangeEvent extends AbstractEvent
-    implements java.io.Serializable, ResourceEventInterface {
+public class CPropChangeEvent
+    extends AbstractEvent implements java.io.Serializable, ResourceEventInterface {
 
     private static final long serialVersionUID = -856543980977047083L;
-    
-    private AppdefEntityID resource;
+
+    private Integer resource;
     private String key;
-    private String oldValue;
-    private String newValue;
+    private Object oldValue;
+    private Object newValue;
 
     /**
      * @param resource
@@ -47,50 +47,47 @@ public class CPropChangeEvent extends AbstractEvent
      * @param oldValue
      * @param newValue
      */
-    public CPropChangeEvent(AppdefEntityID resource, String key,
-                            String oldValue, String newValue) {
+    public CPropChangeEvent(Integer resource, String key, Object oldValue, Object newValue) {
         super();
-        // Use the resource ID as instance ID
-        this.setInstanceId(resource.getId());
-        
+        setInstanceId(resource);
         this.resource = resource;
         this.key = key;
         this.oldValue = oldValue;
         this.newValue = newValue;
     }
-    
+
     public String getKey() {
         return key;
     }
-    
+
     public void setKey(String key) {
         this.key = key;
     }
-    
-    public String getNewValue() {
+
+    public Object getNewValue() {
         return newValue;
     }
-    
-    public void setNewValue(String newValue) {
+
+    public void setNewValue(Object newValue) {
         this.newValue = newValue;
     }
-    
-    public String getOldValue() {
+
+    public Object getOldValue() {
         return oldValue;
     }
-    
-    public void setOldValue(String oldValue) {
+
+    public void setOldValue(Object oldValue) {
         this.oldValue = oldValue;
     }
-    
-    public AppdefEntityID getResource() {
+
+    public Integer getResource() {
         return resource;
     }
-    
-    public void setResource(AppdefEntityID resource) {
+
+    public void setResource(int resource) {
         this.resource = resource;
     }
-    
+
     public String toString() {
         return "Changed from " + oldValue + " to " + newValue;
     }

@@ -38,19 +38,19 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
-import org.hyperic.hq.appdef.shared.CPropChangeEvent;
 import org.hyperic.hq.appdef.shared.CPropKeyExistsException;
 import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.util.Messenger;
-import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.inventory.dao.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
+import org.hyperic.hq.inventory.events.CPropChangeEvent;
+import org.hyperic.hq.messaging.MessagePublisher;
+import org.hyperic.hq.messaging.Messenger;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -199,8 +199,8 @@ public class CPropManagerImpl implements CPropManager {
                       " to " + val);
         }
         // Send cprop value changed event
-        CPropChangeEvent event = new CPropChangeEvent(aID, key, oldval, val);
-        sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
+        CPropChangeEvent event = new CPropChangeEvent(aID.getId(), key, oldval, val);
+        sender.publishMessage(MessagePublisher.EVENTS_TOPIC, event);
     }
 
     /**

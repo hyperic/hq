@@ -86,7 +86,6 @@ public class ControlEventTriggerTest
     public void testProcessControlEvent() throws EncodingException, InvalidTriggerDataException, EventTypeException {
         initTrigger("start", "Success");
         ControlEvent event = new ControlEvent("admin",
-                                              RESOURCE.getType(),
                                               RESOURCE.getId(),
                                               "start",
                                               false,
@@ -113,7 +112,6 @@ public class ControlEventTriggerTest
     {
         initTrigger("start", "Success");
         ControlEvent event = new ControlEvent("admin",
-                                              RESOURCE.getType(),
                                               RESOURCE.getId(),
                                               "stop",
                                               false,
@@ -135,7 +133,7 @@ public class ControlEventTriggerTest
                                                       EventTypeException
     {
         initTrigger("start", "Success");
-        ControlEvent event = new ControlEvent("admin", RESOURCE.getType(), 78945, "start", false, 0l, "Success");
+        ControlEvent event = new ControlEvent("admin", 78945, "start", false, 0l, "Success");
         EasyMock.replay(alertConditionEvaluator);
         trigger.processEvent(event);
         EasyMock.verify(alertConditionEvaluator);
@@ -154,7 +152,6 @@ public class ControlEventTriggerTest
     {
         initTrigger("start", "Success");
         ControlEvent event = new ControlEvent("admin",
-                                              RESOURCE.getType(),
                                               RESOURCE.getId(),
                                               "start",
                                               false,

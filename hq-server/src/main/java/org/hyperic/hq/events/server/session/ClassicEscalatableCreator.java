@@ -33,9 +33,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
-import org.hyperic.hq.common.util.MessagePublisher;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
 import org.hyperic.hq.events.ActionExecutionInfo;
@@ -48,6 +46,7 @@ import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEventPayload;
+import org.hyperic.hq.messaging.MessagePublisher;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -194,9 +193,8 @@ public class ClassicEscalatableCreator implements EscalatableCreator {
                         // TODO HE-565 Possibly have MessagePublisher always
                         // wait until successful tx commit before publishing
                         // messages
-                        messagePublisher.publishMessage(EventConstants.EVENTS_TOPIC,
-                            new AlertFiredEvent(alertId, _def.getId(), AppdefUtil
-                                .newAppdefEntityId(_def.getResource()), _def.getName(), payload
+                        messagePublisher.publishMessage(MessagePublisher.EVENTS_TOPIC,
+                            new AlertFiredEvent(alertId, _def.getId(), _def.getResource().getId(), _def.getName(), payload
                                 .getTimestamp(), payload.getMessage()));
                     }
                 });

@@ -23,7 +23,7 @@
 
 	<context:spring-configured />
 
-	<context:component-scan base-package="org.hyperic.hq" />
+	<context:component-scan base-package="org.hyperic.hq.inventory" />
 
 	<tx:annotation-driven mode="aspectj"
 		transaction-manager="transactionManager" />
@@ -37,5 +37,7 @@
 	</bean>
 
 	<bean id="persistenceProvider" class="org.hibernate.ejb.HibernatePersistence" />
+	
+	<bean id="messagePublisher" class="org.hyperic.hq.messaging.MockMessagePublisher"/>
 
 </beans>

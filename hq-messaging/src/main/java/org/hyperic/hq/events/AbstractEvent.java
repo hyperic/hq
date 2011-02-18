@@ -31,45 +31,37 @@ public abstract class AbstractEvent implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 1300452915258577781L;
 
-    private Long _id;
-    private Integer _instanceId;
-    private long _timestamp = System.currentTimeMillis();
-
-    public Long getId() {
-        return _id;
-    }
-
-    public void setId(Long id) {
-        _id = id;
-    }
+    private long timestamp = System.currentTimeMillis();
+    
+    private Integer instanceId;
 
     public Integer getInstanceId() {
-        return _instanceId;
+        return instanceId;
     }
-
+    
     public void setInstanceId(Integer instanceId) {
-        _instanceId = instanceId;
+        this.instanceId = instanceId;
     }
-
+    
     public long getTimestamp() {
-        return _timestamp;
+        return timestamp;
     }
 
     public void setTimestamp(long timestamp) {
-        _timestamp = timestamp;
+        this.timestamp = timestamp;
     }
 
     public boolean isLoggingSupported() {
         return this instanceof LoggableInterface;
     }
-
+    
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((_id == null) ? 0 : _id.hashCode());
+        result = prime * result + ((getInstanceId() == null) ? 0 : getInstanceId().hashCode());
         return result;
     }
-
+    
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
@@ -78,14 +70,13 @@ public abstract class AbstractEvent implements Serializable, Cloneable {
             return false;
         }
         AbstractEvent other = (AbstractEvent) obj;
-        if (_id == null) {
-            if (other._id != null) {
+        if (getInstanceId() == null) {
+            if (other.getInstanceId() != null) {
                 return false;
             }
-        } else if (!_id.equals(other._id)) {
+        } else if (!getInstanceId().equals(other.getInstanceId())) {
             return false;
         }
         return true;
     }
-
 }

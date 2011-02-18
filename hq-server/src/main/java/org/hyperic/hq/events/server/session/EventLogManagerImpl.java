@@ -38,7 +38,6 @@ import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.AlertFiredEvent;
@@ -108,10 +107,10 @@ public class EventLogManagerImpl implements EventLogManager {
 
         Resource r = null;
         if (event instanceof ResourceEventInterface) {
-            AppdefEntityID aeId = ((ResourceEventInterface) event).getResource();
-            r = resourceManager.findResource(aeId);
+            Integer id = ((ResourceEventInterface) event).getResource();
+            r = resourceManager.findResourceById(id);
             if (r == null || r.isInAsyncDeleteState()) {
-                final String m = aeId + " has already been deleted";
+                final String m = id + " has already been deleted";
                 throw new ResourceDeletedException(m);
             }
         }

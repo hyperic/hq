@@ -140,5 +140,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-util"/>
 	<classpathentry kind="var" path="M2_REPO/org/hsqldb/hsqldb/1.8.0.10/hsqldb-1.8.0.10.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-common"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hq-messaging"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

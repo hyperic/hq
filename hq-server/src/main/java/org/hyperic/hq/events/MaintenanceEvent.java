@@ -85,7 +85,7 @@ public class MaintenanceEvent
     }
 
     public Integer getGroupId() {
-        return getResource().getId();
+        return getResource();
     }
 
     public String getState() {

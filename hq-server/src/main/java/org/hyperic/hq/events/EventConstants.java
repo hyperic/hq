@@ -112,7 +112,7 @@ public class EventConstants {
         return PRIORITIES[pri - 1];
     }
 
-    public static final String EVENTS_TOPIC     = "topic/eventsTopic";
+   
 
     /**
      * Constant for removing a control action from an alert definition.

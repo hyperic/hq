@@ -34,6 +34,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -505,7 +506,7 @@ public class AlertManagerTest
     public void testFireAlert() {
         testPlatformAlertDef.setEnabled(true);
         AlertFiredEvent event = new AlertFiredEvent(123, testPlatformAlertDef.getId(),
-            testPlatformAlertDef.getAppdefEntityId(), "Platform Down", System.currentTimeMillis(),
+            testPlatformAlertDef.getAppdefEntityId().getId(), "Platform Down", System.currentTimeMillis(),
             "Firing Alert-123");
         TriggerFiredEvent triggerFired = new TriggerFiredEvent(15, event);
         AlertConditionsSatisfiedZEvent alertZEvent = new AlertConditionsSatisfiedZEvent(
@@ -514,8 +515,8 @@ public class AlertManagerTest
         List<TransactionSynchronization> synchs = TransactionSynchronizationManager
             .getSynchronizations();
         for (TransactionSynchronization sync : synchs) {
-            String enclosingMethod = sync.getClass().getEnclosingMethod().getName();
-            if (enclosingMethod.equalsIgnoreCase("registerAlertFiredEvent")) {
+            Method enclosingMethod = sync.getClass().getEnclosingMethod();
+            if (enclosingMethod != null && enclosingMethod.getName().equalsIgnoreCase("registerAlertFiredEvent")) {
                 Class<ClassicEscalatableCreator> c = (Class<ClassicEscalatableCreator>) sync
                     .getClass().getEnclosingClass();
                 assertEquals("Enclosing class is not ClassicEscalatableCreator", c
@@ -668,7 +669,7 @@ public class AlertManagerTest
         List<AppdefEntityID> platformAppDef = new ArrayList<AppdefEntityID>();
         platformAppDef.add(this.testPlatformAlertDef.getAppdefEntityId());
         AlertFiredEvent event = new AlertFiredEvent(123, testPlatformAlertDef.getId(),
-            testPlatformAlertDef.getAppdefEntityId(), "Platform Down", time1, "Firing Alert-123");
+            testPlatformAlertDef.getAppdefEntityId().getId(), "Platform Down", time1, "Firing Alert-123");
         TriggerFiredEvent triggerFired = new TriggerFiredEvent(15, event);
         AlertConditionsSatisfiedZEvent alertZEvent = new AlertConditionsSatisfiedZEvent(
             testPlatformAlertDef.getId(), new TriggerFiredEvent[] { triggerFired });

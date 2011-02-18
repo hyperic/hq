@@ -56,9 +56,7 @@ import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.util.MessagePublisher;
 import org.hyperic.hq.control.ControlActionResult;
 import org.hyperic.hq.control.ControlEvent;
 import org.hyperic.hq.control.GroupControlActionResult;
@@ -67,12 +65,11 @@ import org.hyperic.hq.control.agent.client.ControlCommandsClientFactory;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlManager;
 import org.hyperic.hq.control.shared.ControlScheduleManager;
-import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.inventory.domain.Config;
 import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.hq.inventory.domain.ResourceType;
+import org.hyperic.hq.messaging.MessagePublisher;
 import org.hyperic.hq.product.ControlPluginManager;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
@@ -518,10 +515,10 @@ public class ControlManagerImpl implements ControlManager {
         cLocal.setMessage(msg);
 
         // Send a control event
-        ControlEvent event = new ControlEvent(cLocal.getSubject(), cLocal.getEntityType().intValue(), cLocal
+        ControlEvent event = new ControlEvent(cLocal.getSubject(),  cLocal
             .getEntityId(), cLocal.getAction(), cLocal.getScheduled().booleanValue(), cLocal.getDateScheduled(), status);
         event.setMessage(msg);
-        messagePublisher.publishMessage(EventConstants.EVENTS_TOPIC, event);
+        messagePublisher.publishMessage(MessagePublisher.EVENTS_TOPIC, event);
     }
 
     /**
