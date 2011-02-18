@@ -29,8 +29,6 @@ package org.hyperic.hq.bizapp.server.trigger.conditional;
 import junit.framework.TestCase;
 
 import org.easymock.EasyMock;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.EventTypeException;
 import org.hyperic.hq.events.MockEvent;
@@ -56,8 +54,7 @@ public class AlertTriggerTest
 
     private static final Integer ALERT_DEFINITION_ID = Integer.valueOf(45);
 
-    private static final AppdefEntityID ALERTING_RESOURCE = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVER,
-                                                                               9999);
+    private static final Integer ALERTING_RESOURCE = 9999;
 
     public void setUp() throws Exception {
         super.setUp();

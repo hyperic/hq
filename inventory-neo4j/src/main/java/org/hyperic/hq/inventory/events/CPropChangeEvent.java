@@ -49,6 +49,7 @@ public class CPropChangeEvent
      */
     public CPropChangeEvent(Integer resource, String key, Object oldValue, Object newValue) {
         super();
+        setInstanceId(resource);
         this.resource = resource;
         this.key = key;
         this.oldValue = oldValue;
@@ -79,33 +80,12 @@ public class CPropChangeEvent
         this.oldValue = oldValue;
     }
 
-    public int getResource() {
+    public Integer getResource() {
         return resource;
     }
 
     public void setResource(int resource) {
         this.resource = resource;
-    }
-
-    @Override
-    public int hashCode() {
-        return resource.hashCode() + key.hashCode() + (oldValue != null ? oldValue.hashCode() : 0) +
-               newValue.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (!(obj instanceof CPropChangeEvent)) {
-            return false;
-        }
-        CPropChangeEvent otherEvent = (CPropChangeEvent) obj;
-        return resource == otherEvent.getResource() &&
-               ((oldValue == null && otherEvent.getOldValue() == null) || (oldValue != null && oldValue
-                   .equals(otherEvent.getOldValue()))) &&
-               newValue.equals(otherEvent.getNewValue()) && key.equals(otherEvent.getKey());
     }
 
     public String toString() {

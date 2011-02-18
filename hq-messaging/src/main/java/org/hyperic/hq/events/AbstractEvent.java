@@ -31,7 +31,7 @@ public abstract class AbstractEvent implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 1300452915258577781L;
 
-    private long _timestamp = System.currentTimeMillis();
+    private long timestamp = System.currentTimeMillis();
     
     private Integer instanceId;
 
@@ -44,18 +44,39 @@ public abstract class AbstractEvent implements Serializable, Cloneable {
     }
     
     public long getTimestamp() {
-        return _timestamp;
+        return timestamp;
     }
 
     public void setTimestamp(long timestamp) {
-        _timestamp = timestamp;
+        this.timestamp = timestamp;
     }
 
     public boolean isLoggingSupported() {
         return this instanceof LoggableInterface;
     }
-
-    abstract public int hashCode();
-
-    abstract public boolean equals(Object obj);
+    
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((getInstanceId() == null) ? 0 : getInstanceId().hashCode());
+        return result;
+    }
+    
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        AbstractEvent other = (AbstractEvent) obj;
+        if (getInstanceId() == null) {
+            if (other.getInstanceId() != null) {
+                return false;
+            }
+        } else if (!getInstanceId().equals(other.getInstanceId())) {
+            return false;
+        }
+        return true;
+    }
 }

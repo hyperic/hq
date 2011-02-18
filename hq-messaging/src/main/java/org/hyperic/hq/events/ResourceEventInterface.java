@@ -36,5 +36,5 @@ package org.hyperic.hq.events;
  *
  */
 public interface ResourceEventInterface {
-    public int getResource();
+    public Integer getResource();
 }

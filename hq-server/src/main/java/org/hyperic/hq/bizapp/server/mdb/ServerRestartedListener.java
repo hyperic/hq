@@ -9,6 +9,10 @@ import javax.jms.ObjectMessage;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.control.ControlEvent;
 import org.hyperic.hq.control.server.session.ServerRestartHandler;
 import org.hyperic.hq.control.shared.ControlConstants;
@@ -21,14 +25,16 @@ public class ServerRestartedListener implements MessageListener {
 
     private ServerRestartHandler serverRestartHandler;
 
+    private ResourceManager resourceManager;
+
     private final Log log = LogFactory.getLog(ServerRestartedListener.class);
 
     @Autowired
-    public ServerRestartedListener(ServerRestartHandler serverRestartHandler) {
+    public ServerRestartedListener(ServerRestartHandler serverRestartHandler,
+                                   ResourceManager resourceManager) {
         this.serverRestartHandler = serverRestartHandler;
+        this.resourceManager = resourceManager;
     }
-
-
 
     public void onMessage(Message message) {
         if (message instanceof ObjectMessage) {
@@ -37,11 +43,15 @@ public class ServerRestartedListener implements MessageListener {
                 if (messageObject instanceof ControlEvent) {
                     ControlEvent event = (ControlEvent) messageObject;
                     if ((event.getAction().equals("restart") || event.getAction().equals("start")) &&
-                        event.getStatus().equals(ControlConstants.STATUS_COMPLETED) && event.getResource().isServer()) {
-                        try {
-                            serverRestartHandler.serverRestarted(event.getResource());
-                        } catch (Exception e) {
-                            log.error("Error processing possible server restart event", e);
+                        event.getStatus().equals(ControlConstants.STATUS_COMPLETED)) {
+                        final AppdefEntityID resource = AppdefUtil
+                            .newAppdefEntityId(resourceManager.findResourceById(event.getResource()));
+                        if (AppdefEntityConstants.APPDEF_TYPE_SERVER == resource.getType()) {
+                            try {
+                                serverRestartHandler.serverRestarted(resource);
+                            } catch (Exception e) {
+                                log.error("Error processing possible server restart event", e);
+                            }
                         }
                     }
                 }

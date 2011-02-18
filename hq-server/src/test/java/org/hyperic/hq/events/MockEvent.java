@@ -26,15 +26,51 @@
 
 package org.hyperic.hq.events;
 
-public class MockEvent extends AbstractEvent {
+public class MockEvent
+    extends AbstractEvent {
 
-	public MockEvent(long id, int instanceId) {
-		setId(Long.valueOf(id));
-		setInstanceId(Integer.valueOf(instanceId));
-	}
+    private static final long serialVersionUID = -6195953425265160494L;
+    private Long id;
 
-	public String toString() {
-		return "[MockEvent: id=" + getId() + ", instanceid=" + getInstanceId() + "]";
-	}
+    public MockEvent(long id, int instanceId) {
+        setId(Long.valueOf(id));
+        setInstanceId(Integer.valueOf(instanceId));
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((getId() == null) ? 0 : getId().hashCode());
+        return result;
+    }
+
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        MockEvent other = (MockEvent) obj;
+        if (getId() == null) {
+            if (other.getInstanceId() != null) {
+                return false;
+            }
+        } else if (!getId().equals(other.getId())) {
+            return false;
+        }
+        return true;
+    }
+
+    public String toString() {
+        return "[MockEvent: id=" + getId() + ", instanceid=" + getInstanceId() + "]";
+    }
 }
-

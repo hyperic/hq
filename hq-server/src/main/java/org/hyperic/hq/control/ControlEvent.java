@@ -25,14 +25,14 @@
 
 package org.hyperic.hq.control;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.LoggableInterface;
 import org.hyperic.hq.events.ResourceEventInterface;
 
-public class ControlEvent extends AbstractEvent
-    implements java.io.Serializable, ResourceEventInterface, LoggableInterface {
-        
+public class ControlEvent
+    extends AbstractEvent implements java.io.Serializable, ResourceEventInterface,
+    LoggableInterface {
+
     private static final long serialVersionUID = -1075300624374755881L;
 
     /** Holds value of property action. */
@@ -41,73 +41,69 @@ public class ControlEvent extends AbstractEvent
     /** Holds value of property subject. */
     private String subject;
 
-    private AppdefEntityID resource;
+    private Integer resource;
 
     private boolean scheduled;
-    private long    dateScheduled;
-    private String  status;
+    private long dateScheduled;
+    private String status;
     private String message;
 
     /** Creates a new instance of ControlEvent */
-    public ControlEvent(String subject, int resourcetype, Integer resourceId,
-                        String action, boolean scheduled, long dateScheduled,
-                        String status) {
+    public ControlEvent(String subject, Integer resourceId, String action,
+                        boolean scheduled, long dateScheduled, String status) {
         super.setInstanceId(resourceId);
         super.setTimestamp(System.currentTimeMillis());
-        this.subject  = subject;
-        this.resource = new AppdefEntityID(resourcetype, resourceId);
-        this.action        = action;
-        this.scheduled     = scheduled;
+        this.subject = subject;
+        this.resource = resourceId;
+        this.action = action;
+        this.scheduled = scheduled;
         this.dateScheduled = dateScheduled;
-        this.status        = status;
+        this.status = status;
     }
-    
-    /** Getter for property action.
+
+    /**
+     * Getter for property action.
      * @return Value of property action.
-     *
+     * 
      */
     public String getAction() {
         return this.action;
     }
 
-	/** Setter for property action.
+    /**
+     * Setter for property action.
      * @param action New value of property action.
-     *
+     * 
      */
     public void setAction(String action) {
         this.action = action;
     }
-    
-    /** Getter for property subject.
+
+    /**
+     * Getter for property subject.
      * @return Value of property subject.
-     *
+     * 
      */
     public String getSubject() {
         return this.subject;
     }
-    
-    /** Setter for property subject.
+
+    /**
+     * Setter for property subject.
      * @param subject New value of property subject.
-     *
+     * 
      */
     public void setSubject(String subject) {
         this.subject = subject;
     }
-    
-    /** Getter for property resource.
-     * @return Value of property resource.
-     *
-     */
-    public AppdefEntityID getResource(){
-        return this.resource;
-    }
 
-    /** Getter for property resource.
+    /**
+     * Getter for property resource.
      * @return Value of property resource.
-     *
+     * 
      */
-    private void setResource(AppdefEntityID resource) {
-        this.resource = resource;
+    public Integer getResource() {
+        return this.resource;
     }
 
     /**
@@ -152,27 +148,6 @@ public class ControlEvent extends AbstractEvent
         this.status = status;
     }
 
-    /** Returns a string representation of the object. In general, the
-     * <code>toString</code> method returns a string that
-     * "textually represents" this object. The result should
-     * be a concise but informative representation that is easy for a
-     * person to read.
-     * It is recommended that all subclasses override this method.
-     * <p>
-     * The <code>toString</code> method for class <code>Object</code>
-     * returns a string consisting of the name of the class of which the
-     * object is an instance, the at-sign character `<code>@</code>', and
-     * the unsigned hexadecimal representation of the hash code of the
-     * object. In other words, this method returns a string equal to the
-     * value of:
-     * <blockquote>
-     * <pre>
-     * getClass().getName() + '@' + Integer.toHexString(hashCode())
-     * </pre></blockquote>
-     *
-     * @return  a string representation of the object.
-     *
-     */
     public String toString() {
         return getAction();
     }
@@ -180,20 +155,22 @@ public class ControlEvent extends AbstractEvent
     public String getLevelString() {
         return getStatus();
     }
-    
-    /**
-     * 
-     * @return The message associated with the result (status) of the control action
-     */
-    public String getMessage() {
-		return message;
-	}
 
     /**
      * 
-     * @param message The message associated with the result (status) of the control action
+     * @return The message associated with the result (status) of the control
+     *         action
      */
-	public void setMessage(String message) {
-		this.message = message;
-	}
+    public String getMessage() {
+        return message;
+    }
+
+    /**
+     * 
+     * @param message The message associated with the result (status) of the
+     *        control action
+     */
+    public void setMessage(String message) {
+        this.message = message;
+    }
 }

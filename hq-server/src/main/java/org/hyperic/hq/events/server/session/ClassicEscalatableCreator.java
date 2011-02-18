@@ -33,7 +33,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
@@ -195,8 +194,7 @@ public class ClassicEscalatableCreator implements EscalatableCreator {
                         // wait until successful tx commit before publishing
                         // messages
                         messagePublisher.publishMessage(MessagePublisher.EVENTS_TOPIC,
-                            new AlertFiredEvent(alertId, _def.getId(), AppdefUtil
-                                .newAppdefEntityId(_def.getResource()), _def.getName(), payload
+                            new AlertFiredEvent(alertId, _def.getId(), _def.getResource().getId(), _def.getName(), payload
                                 .getTimestamp(), payload.getMessage()));
                     }
                 });

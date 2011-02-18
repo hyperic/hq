@@ -1570,7 +1570,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         try {
             dm = measurementDAO.get(event.getInstanceId());
-            event.setResource(AppdefUtil.newAppdefEntityId(dm.getResource()));
+            event.setResource(dm.getResource().getId());
             event.setUnits(dm.getTemplate().getUnits());
         } catch (Exception e) {
             if (event == null) {

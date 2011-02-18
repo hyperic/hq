@@ -20,7 +20,6 @@ package org.hyperic.hq.events.server.session;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,7 +33,6 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.server.trigger.conditional.ConditionalTriggerInterface;
 import org.hyperic.hq.events.AlertFiredEvent;
@@ -256,7 +254,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
                     initialState = 
                         new AlertFiredEvent(alert.getId(), 
                                             ad.getId(), 
-                                            AppdefUtil.newAppdefEntityId(ad.getResource()), 
+                                            ad.getResource().getId(), 
                                             ad.getName(),
                                             alert.getTimestamp(), 
                                             null);

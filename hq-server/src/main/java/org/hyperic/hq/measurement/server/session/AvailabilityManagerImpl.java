@@ -1366,7 +1366,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             if (registeredTriggers.isTriggerInterested(event) || allEventsInteresting) {
                 measurementManager.buildMeasurementEvent(event);
                 if (event.getValue().getValue() == AVAIL_DOWN) {
-                    Resource r = resourceManager.findResource(event.getResource());
+                    Resource r = resourceManager.findResourceById(event.getResource());
                     if (r != null && !r.isInAsyncDeleteState()) {
                         downEvents.put(r.getId(), event);
                     }

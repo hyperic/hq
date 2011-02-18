@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.measurement.shared;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.LoggableInterface;
 import org.hyperic.hq.events.ResourceEventInterface;
@@ -35,35 +34,36 @@ import org.hyperic.hq.product.TrackEvent;
 /**
  * This event type represents a change in the resource configuration
  */
-public class ConfigChangedEvent extends AbstractEvent
-    implements java.io.Serializable, ResourceEventInterface, LoggableInterface {
-    
+public class ConfigChangedEvent
+    extends AbstractEvent implements java.io.Serializable, ResourceEventInterface,
+    LoggableInterface {
+
     private static final long serialVersionUID = 426300401969414549L;
-    
-    private AppdefEntityID resource;
+
+    private Integer resource;
     private String message;
     private String source;
-    
+
     public ConfigChangedEvent(TrackEvent te) {
         super.setTimestamp(te.getTime());
         super.setInstanceId(te.getAppdefId().getId());
-        setResource(te.getAppdefId());
+        setResource(te.getAppdefId().getID());
         setMessage(te.getMessage());
         setSource(te.getSource());
     }
 
-    public AppdefEntityID getResource() {
+    public Integer getResource() {
         return resource;
     }
-    
-    public void setResource(AppdefEntityID aid) {
-        this.resource = aid;
+
+    public void setResource(int id) {
+        this.resource = id;
     }
-    
+
     public String getMessage() {
         return message;
     }
-    
+
     public void setMessage(String msg) {
         this.message = msg;
     }
@@ -71,11 +71,11 @@ public class ConfigChangedEvent extends AbstractEvent
     public String getSource() {
         return source;
     }
-    
+
     public void setSource(String src) {
         this.source = src;
     }
-    
+
     public String toString() {
         // More clear than the default toString()
         String message = getMessage();

@@ -27,8 +27,6 @@ package org.hyperic.hq.escalation;
 
 import java.io.Serializable;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.LoggableInterface;
@@ -36,26 +34,25 @@ import org.hyperic.hq.events.ResourceEventInterface;
 import org.hyperic.hq.measurement.shared.ResourceLogEvent;
 import org.hyperic.hq.product.LogTrackPlugin;
 
-public class EscalationEvent extends AbstractEvent
-    implements Serializable, ResourceEventInterface, LoggableInterface {
+public class EscalationEvent
+    extends AbstractEvent implements Serializable, ResourceEventInterface, LoggableInterface {
 
     private static final long serialVersionUID = -1512758076642974170L;
 
-    private AppdefEntityID _aeid;
+    private Integer resource;
     private String _msg;
     private String _alertName;
-    
+
     public EscalationEvent(Escalatable alert, String msg) {
         super();
         setTimestamp(System.currentTimeMillis());
-        _aeid = AppdefUtil.newAppdefEntityId(
-            alert.getDefinition().getDefinitionInfo().getResource());
+        resource = alert.getDefinition().getDefinitionInfo().getResource().getId();
         _alertName = alert.getDefinition().getName();
         _msg = msg;
     }
 
-    public AppdefEntityID getResource() {
-        return _aeid;
+    public Integer getResource() {
+        return resource;
     }
 
     public String toString() {

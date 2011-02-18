@@ -245,7 +245,7 @@ public class EscalationManagerTest
         aDefManager.updateAlertDefinitionActiveStatus(authzSubjectManager.getOverlordPojo(), def,
             true);
 
-        AlertFiredEvent event = new AlertFiredEvent(123, def.getId(), def.getAppdefEntityId(),
+        AlertFiredEvent event = new AlertFiredEvent(123, def.getId(), def.getAppdefEntityId().getId(),
             "Platform Down", System.currentTimeMillis(), "Firing Alert-123");
         TriggerFiredEvent triggerFired = new TriggerFiredEvent(15, event);
         AlertConditionsSatisfiedZEvent alertZEvent = new AlertConditionsSatisfiedZEvent(

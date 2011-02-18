@@ -28,7 +28,6 @@ package org.hyperic.hq.measurement.shared;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.LoggableInterface;
 import org.hyperic.hq.events.ResourceEventInterface;
@@ -43,7 +42,7 @@ public class ResourceLogEvent extends AbstractEvent
     
     private static final long serialVersionUID = 2981297729726736244L;
 
-    private static Map levelStrs = new HashMap();
+    private static Map<Integer,String> levelStrs = new HashMap<Integer,String>();
     
     static {
         levelStrs.put(new Integer(LogTrackPlugin.LOGLEVEL_ANY),   "ANY");
@@ -53,7 +52,7 @@ public class ResourceLogEvent extends AbstractEvent
         levelStrs.put(new Integer(LogTrackPlugin.LOGLEVEL_DEBUG), "DBG");
     }
 
-    private AppdefEntityID resource;
+    private Integer resource;
     private String logSrc;
     private String logMsg;
     private int logLevel;
@@ -61,17 +60,17 @@ public class ResourceLogEvent extends AbstractEvent
     public ResourceLogEvent(TrackEvent te) {
         super.setTimestamp(te.getTime());
         super.setInstanceId(te.getAppdefId().getId());
-        this.setResource(te.getAppdefId());
+        this.setResource(te.getAppdefId().getId());
         this.setSource(te.getSource());
         this.setMessage(te.getMessage());
         this.setLevel(te.getLevel());
     }
 
-    public AppdefEntityID getResource() {
+    public Integer getResource() {
         return this.resource;
     }
     
-    public void setResource(AppdefEntityID aid) {
+    public void setResource(Integer aid) {
         this.resource = aid;
     }
     

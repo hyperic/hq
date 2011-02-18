@@ -41,7 +41,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hibernate.dialect.HQDialect;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.EdgePermCheck;
@@ -336,7 +335,7 @@ public class EventLogDAO
                                                         Integer alertId,
                                                         EventLog eventLog) {
         return new AlertFiredEvent(alertId, alertDefId, 
-            AppdefUtil.newAppdefEntityId(eventLog.getResource()), eventLog.getSubject(),
+            eventLog.getResource().getId(), eventLog.getSubject(),
             eventLog.getTimestamp(), eventLog.getDetail());
     }
 

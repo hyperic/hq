@@ -17,14 +17,12 @@
 
 package org.hyperic.hq.events;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-
 /**
  * Event sent when alerts have fired
  */
 public class AlertFiredEvent
-    extends AbstractEvent implements java.io.Serializable, ResourceEventInterface, LoggableInterface
-{
+    extends AbstractEvent implements java.io.Serializable, ResourceEventInterface,
+    LoggableInterface {
 
     private static final long serialVersionUID = -3740509119080501003L;
 
@@ -34,7 +32,7 @@ public class AlertFiredEvent
     /** Holds value of property message. */
     private String message;
 
-    private AppdefEntityID resource;
+    private Integer resource;
 
     private String alertDefName;
 
@@ -47,13 +45,8 @@ public class AlertFiredEvent
      * @param timestamp The time the alert was fired
      * @param message The message associated with the event
      * */
-    public AlertFiredEvent(Integer alertId,
-                           Integer alertDefinitionId,
-                           AppdefEntityID resource,
-                           String alertDefName,
-                           long timestamp,
-                           String message)
-    {
+    public AlertFiredEvent(Integer alertId, Integer alertDefinitionId, Integer resource,
+                           String alertDefName, long timestamp, String message) {
         setTimestamp(timestamp);
         setMessage(message);
         setInstanceId(alertDefinitionId);
@@ -65,7 +58,7 @@ public class AlertFiredEvent
     /**
      * Getter for property message.
      * @return Value of property message.
-     *
+     * 
      */
     public String getMessage() {
         return this.message;
@@ -74,7 +67,7 @@ public class AlertFiredEvent
     /**
      * Setter for property message.
      * @param message New value of property message.
-     *
+     * 
      */
     public void setMessage(String message) {
         this.message = message;
@@ -94,11 +87,11 @@ public class AlertFiredEvent
         this.alertId = alertId;
     }
 
-    public AppdefEntityID getResource() {
+    public Integer getResource() {
         return resource;
     }
 
-    public void setResource(AppdefEntityID resource) {
+    public void setResource(int resource) {
         this.resource = resource;
     }
 

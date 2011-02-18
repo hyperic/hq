@@ -515,7 +515,7 @@ public class ControlManagerImpl implements ControlManager {
         cLocal.setMessage(msg);
 
         // Send a control event
-        ControlEvent event = new ControlEvent(cLocal.getSubject(), cLocal.getEntityType().intValue(), cLocal
+        ControlEvent event = new ControlEvent(cLocal.getSubject(),  cLocal
             .getEntityId(), cLocal.getAction(), cLocal.getScheduled().booleanValue(), cLocal.getDateScheduled(), status);
         event.setMessage(msg);
         messagePublisher.publishMessage(MessagePublisher.EVENTS_TOPIC, event);

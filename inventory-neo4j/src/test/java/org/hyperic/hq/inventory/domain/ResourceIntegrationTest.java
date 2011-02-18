@@ -16,7 +16,6 @@ import javax.persistence.PersistenceContext;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
-import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.inventory.InvalidRelationshipException;
 import org.hyperic.hq.inventory.NotUniqueException;
 import org.hyperic.hq.inventory.dao.ResourceDao;
@@ -383,16 +382,24 @@ public class ResourceIntegrationTest {
     public void testSetProperty() {
         traderJoes.setProperty("Address", "123 My Street");
         assertEquals("123 My Street", traderJoes.getProperty("Address"));
-        Set<AbstractEvent> expectedEvents = new HashSet<AbstractEvent>(1);
-        expectedEvents.add(new CPropChangeEvent(traderJoes.getId(), "Address", null, "123 My Street"));
-        assertEquals(expectedEvents,messagePublisher.getReceivedEvents());
+        assertEquals(1,messagePublisher.getReceivedEvents().size());
+        CPropChangeEvent actual = (CPropChangeEvent) messagePublisher.getReceivedEvents().iterator().next();
+        assertEquals(traderJoes.getId(),actual.getResource());
+        assertEquals("Address",actual.getKey());
+        assertEquals("123 My Street",actual.getNewValue());
+        assertNull(actual.getOldValue());
+        assertEquals(traderJoes.getId(),actual.getInstanceId());
         messagePublisher.clearReceivedEvents();
         Object oldValue = traderJoes.setProperty("Address", "123 Some Other Street");
         assertEquals("123 My Street", oldValue);
         assertEquals("123 Some Other Street", traderJoes.getProperty("Address"));
-        expectedEvents = new HashSet<AbstractEvent>(1);
-        expectedEvents.add(new CPropChangeEvent(traderJoes.getId(), "Address", "123 My Street", "123 Some Other Street"));
-        assertEquals(expectedEvents,messagePublisher.getReceivedEvents());
+        assertEquals(1,messagePublisher.getReceivedEvents().size());
+        actual = (CPropChangeEvent) messagePublisher.getReceivedEvents().iterator().next();
+        assertEquals(traderJoes.getId(),actual.getResource());
+        assertEquals("Address",actual.getKey());
+        assertEquals("123 Some Other Street",actual.getNewValue());
+        assertEquals("123 My Street",actual.getOldValue());
+        assertEquals(traderJoes.getId(),actual.getInstanceId());
     }
 
     @Test(expected = IllegalArgumentException.class)

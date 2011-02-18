@@ -505,7 +505,7 @@ public class AlertManagerTest
     public void testFireAlert() {
         testPlatformAlertDef.setEnabled(true);
         AlertFiredEvent event = new AlertFiredEvent(123, testPlatformAlertDef.getId(),
-            testPlatformAlertDef.getAppdefEntityId(), "Platform Down", System.currentTimeMillis(),
+            testPlatformAlertDef.getAppdefEntityId().getId(), "Platform Down", System.currentTimeMillis(),
             "Firing Alert-123");
         TriggerFiredEvent triggerFired = new TriggerFiredEvent(15, event);
         AlertConditionsSatisfiedZEvent alertZEvent = new AlertConditionsSatisfiedZEvent(
@@ -668,7 +668,7 @@ public class AlertManagerTest
         List<AppdefEntityID> platformAppDef = new ArrayList<AppdefEntityID>();
         platformAppDef.add(this.testPlatformAlertDef.getAppdefEntityId());
         AlertFiredEvent event = new AlertFiredEvent(123, testPlatformAlertDef.getId(),
-            testPlatformAlertDef.getAppdefEntityId(), "Platform Down", time1, "Firing Alert-123");
+            testPlatformAlertDef.getAppdefEntityId().getId(), "Platform Down", time1, "Firing Alert-123");
         TriggerFiredEvent triggerFired = new TriggerFiredEvent(15, event);
         AlertConditionsSatisfiedZEvent alertZEvent = new AlertConditionsSatisfiedZEvent(
             testPlatformAlertDef.getId(), new TriggerFiredEvent[] { triggerFired });

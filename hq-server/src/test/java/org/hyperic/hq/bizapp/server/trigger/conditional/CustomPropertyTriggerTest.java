@@ -30,7 +30,6 @@ import junit.framework.TestCase;
 
 import org.easymock.EasyMock;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.EventTypeException;
 import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.MockEvent;
@@ -56,12 +55,12 @@ public class CustomPropertyTriggerTest
 
     private CustomPropertyTrigger trigger = new CustomPropertyTrigger();
 
-    private static final AppdefEntityID RESOURCE = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVER, 9999);
+    private static final Integer RESOURCE = 9999;
 
     private void initTrigger(String customProperty) throws EncodingException, InvalidTriggerDataException {
         ConfigResponse config = new ConfigResponse();
-        config.setValue(ConditionalTriggerInterface.CFG_ID, RESOURCE.getID());
-        config.setValue(ConditionalTriggerInterface.CFG_TYPE, RESOURCE.getType());
+        config.setValue(ConditionalTriggerInterface.CFG_ID, RESOURCE);
+        config.setValue(ConditionalTriggerInterface.CFG_TYPE, AppdefEntityConstants.APPDEF_TYPE_SERVER);
         config.setValue(ConditionalTriggerInterface.CFG_NAME, customProperty);
         RegisteredTriggerValue regTrigger = new RegisteredTriggerValue();
         regTrigger.setId(TRIGGER_ID);
@@ -136,8 +135,7 @@ public class CustomPropertyTriggerTest
                                                EventTypeException
     {
         initTrigger("myProp");
-        CPropChangeEvent event = new CPropChangeEvent(new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVER,
-                                                                         987555), "myProp", "old", "new");
+        CPropChangeEvent event = new CPropChangeEvent(987555, "myProp", "old", "new");
         EasyMock.replay(alertConditionEvaluator);
         trigger.processEvent(event);
         EasyMock.verify(alertConditionEvaluator);

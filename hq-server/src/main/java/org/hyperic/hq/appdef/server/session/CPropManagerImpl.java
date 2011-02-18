@@ -199,7 +199,7 @@ public class CPropManagerImpl implements CPropManager {
                       " to " + val);
         }
         // Send cprop value changed event
-        CPropChangeEvent event = new CPropChangeEvent(aID, key, oldval, val);
+        CPropChangeEvent event = new CPropChangeEvent(aID.getId(), key, oldval, val);
         sender.publishMessage(MessagePublisher.EVENTS_TOPIC, event);
     }
 

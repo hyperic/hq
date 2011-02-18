@@ -144,7 +144,8 @@ public class CustomPropertyTrigger
         TriggerFiredEvent tfe = prepareTriggerFiredEvent(event);
         StringBuffer sb = new StringBuffer();
 
-        MESSAGE_FMT.format(new String[] { event.getKey(), event.getNewValue(), event.getOldValue() }, sb, null);
+        MESSAGE_FMT.format(new String[] { event.getKey(), event.getNewValue()!=null?event.getNewValue().toString():null, 
+                                                                                   event.getOldValue() !=null?event.getOldValue().toString():null}, sb, null);
 
         tfe.setMessage(sb.toString());
         super.fireActions(tfe);

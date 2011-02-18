@@ -88,6 +88,7 @@ public class TriggerFiredEvent
         }
     }
 
+    @Override
     public long getTimestamp() {
         long timestamp = 0;
         for (int i = 0; i < events.length; i++) {

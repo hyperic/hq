@@ -66,8 +66,6 @@ public class TriggerFiredEventMatcher implements IArgumentMatcher {
         buffer.append(expected.getClass().getName());
         buffer.append(" with message \"");
         buffer.append(expected.getMessage());
-        buffer.append(" with id \"");
-        buffer.append(expected.getId());
         buffer.append(" with instance id \"");
         buffer.append(expected.getInstanceId());
         buffer.append("\")");
