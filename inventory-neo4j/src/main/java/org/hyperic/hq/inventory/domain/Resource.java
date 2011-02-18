@@ -68,7 +68,7 @@ public class Resource {
 
     @Autowired
     private transient GraphDatabaseContext graphDatabaseContext;
-    
+
     @Autowired
     private transient MessagePublisher messagePublisher;
 
@@ -271,12 +271,20 @@ public class Resource {
     }
 
     /**
-     * 
-     * @return A Map of property keys and values
+     * @param includeHidden true if properties whose types are marked as
+     *        "hidden" should be returned
+     * @return A Map of property keys and values, possibly not including those
+     *         marked as "hidden"
      */
-    public Map<String, Object> getProperties() {
+    public Map<String, Object> getProperties(boolean includeHidden) {
         Map<String, Object> properties = new HashMap<String, Object>();
         for (String key : getUnderlyingState().getPropertyKeys()) {
+            if (!(includeHidden)) {
+                PropertyType propType = type.getPropertyType(key);
+                if(propType != null && propType.isHidden()) {
+                    continue;
+                }
+            }
             try {
                 properties.put(key, getProperty(key));
             } catch (IllegalArgumentException e) {
@@ -285,6 +293,15 @@ public class Resource {
             }
         }
         return properties;
+    }
+
+    /**
+     * 
+     * @return A Map of property keys and values, including those whose type is
+     *         marked as hidden
+     */
+    public Map<String, Object> getProperties() {
+        return getProperties(true);
     }
 
     /**

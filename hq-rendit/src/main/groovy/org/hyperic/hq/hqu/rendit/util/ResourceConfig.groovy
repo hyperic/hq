@@ -29,7 +29,6 @@ package org.hyperic.hq.hqu.rendit.util
 import org.hyperic.hq.appdef.Agent
 
 import org.hyperic.hq.appdef.shared.AgentManager;
-import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
@@ -59,7 +58,6 @@ import org.hyperic.util.config.ConfigResponse
  */
 class ResourceConfig {
     private static authzMan  = Bootstrap.getBean(AuthzSubjectManager.class)
-    private static cpropMan  = Bootstrap.getBean(CPropManager.class)
     private static appBoss   = Bootstrap.getBean(AppdefBoss.class)
     private static prodBoss  = Bootstrap.getBean(ProductBoss.class)
     private static configMan = Bootstrap.getBean(ConfigManager.class)
@@ -194,14 +192,14 @@ class ResourceConfig {
         def proto  = resource.prototype
         def typeId = proto.appdefType
         
-        // Fill out cprops
-        for (cpropKey in cpropMan.getKeys(typeId, proto.instanceId)) {
-            cprops.put(cpropKey.key, [key: cpropKey])
-        }
-        
-        cpropMan.getEntries(entityID).each { key, val ->
-            cprops[key].value = val
-        }
+        // TODO Fill out cprops
+//        for (cpropKey in cpropMan.getKeys(typeId, proto.instanceId)) {
+//            cprops.put(cpropKey.key, [key: cpropKey])
+//        }
+//        
+//        cpropMan.getEntries(entityID).each { key, val ->
+//            cprops[key].value = val
+//        }
 
         // Fill out pojo.field props
         def appdefHandler = getAppdefHandler(resource)
@@ -261,7 +259,8 @@ class ResourceConfig {
         def typeId   = proto.appdefType
         cprops.each { key, val ->
             if (props.containsKey(key) && val != props[key]) {
-                cpropMan.setValue(entityID, proto.instanceId, key, props[key])
+                //TODO implement set custom properties value
+                //cpropMan.setValue(entityID, proto.instanceId, key, props[key])
             }
         }
         
