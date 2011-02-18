@@ -221,10 +221,28 @@ public class ResourceType {
 
     /**
      * 
-     * @return The PropertyTypes
+     * @return The PropertyTypes, including those marked as hidden
      */
     public Set<PropertyType> getPropertyTypes() {
         return propertyTypes;
+    }
+    
+    /**
+     * 
+     * @param includeHidden true to include PropertyTypes marked as  hidden
+     * @return The PropertyTypes, possibly excluding those that are hidden
+     */
+    public Set<PropertyType> getPropertyTypes(boolean includeHidden) {
+        if(!(includeHidden)) {
+            Set<PropertyType> propTypes = new HashSet<PropertyType>();
+            for(PropertyType propType: propertyTypes) {
+                if(!(propType.isHidden())) {
+                    propTypes.add(propType);
+                }
+            }
+            return propTypes;
+        }
+        return getPropertyTypes();
     }
 
     private Set<ResourceType> getRelatedResourceTypes(String relationName,

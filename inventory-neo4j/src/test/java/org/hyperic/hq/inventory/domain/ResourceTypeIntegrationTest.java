@@ -108,6 +108,18 @@ public class ResourceTypeIntegrationTest {
     public void testGetPropertyTypeNotExistent() {
         assertNull(store.getPropertyType("Address"));
     }
+    
+    @Test
+    public void testGetPropertyTypesFilterHidden() {
+        PropertyType address = new PropertyType("Address", "The store location");
+        store.addPropertyType(address);
+        PropertyType ssn = new PropertyType("SSN", "Social Security Num");
+        ssn.setHidden(true);
+        store.addPropertyType(ssn);
+        Set<PropertyType> expected = new HashSet<PropertyType>();
+        expected.add(address);
+        assertEquals(expected,store.getPropertyTypes(false));
+    }
 
     @Test
     public void testGetRelationships() {

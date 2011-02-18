@@ -39,7 +39,6 @@ import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
-import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
@@ -49,10 +48,13 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.autoinventory.server.session.RuntimeReportProcessor.ServiceMergeInfo;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventManager;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.EncodingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,7 +71,6 @@ public class ServiceMergerImpl implements ServiceMerger {
 
     private final Log log = LogFactory.getLog(ServiceMergerImpl.class);
 
-    private CPropManager cPropManager;
     private ServiceManager serviceManager;
     private ServerManager serverManager;
     private ConfigManager configManager;
@@ -80,11 +81,10 @@ public class ServiceMergerImpl implements ServiceMerger {
    
 
     @Autowired
-    public ServiceMergerImpl(CPropManager cPropManager, ServiceManager serviceManager,
+    public ServiceMergerImpl(ServiceManager serviceManager,
                              ServerManager serverManager, ConfigManager configManager,
                              ResourceManager resourceManager,
                              ZeventEnqueuer zEventManager, AuthzSubjectManager authzSubjectManager) {
-        this.cPropManager = cPropManager;
         this.serviceManager = serviceManager;
         this.serverManager = serverManager;
         this.configManager = configManager;
@@ -181,8 +181,25 @@ public class ServiceMergerImpl implements ServiceMerger {
             // SET CUSTOM PROPERTIES FOR SERVICE
             if (aiservice.getCustomProperties() != null) {
                 int typeId = service.getServiceType().getId().intValue();
-                cPropManager.setConfigResponse(service.getEntityId(), typeId, aiservice
-                    .getCustomProperties());
+                ConfigResponse cprops;
+                try {
+                    cprops = ConfigResponse.decode(aiservice
+                        .getCustomProperties());
+                } catch (EncodingException e) {
+                    throw new SystemException(e);
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("cprops=" + cprops);
+                    log.debug("Resource Id: " + service.getId());
+                }
+                for (String key: cprops.getKeys()) {
+                    String val = cprops.getValue(key);
+                    try {
+                        service.getResource().setProperty(key, val);
+                    }catch (Exception e) {
+                        log.error(e.getMessage(), e);
+                    }
+                }
             }
         }
         if (!toSchedule.isEmpty()) {

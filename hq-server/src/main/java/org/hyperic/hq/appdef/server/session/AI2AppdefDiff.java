@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,7 +39,6 @@ import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -73,7 +72,6 @@ public class AI2AppdefDiff {
     public AIPlatformValue diffAgainstAppdef(AuthzSubject subject,
                                              PlatformManager pmLH,
                                              ConfigManager cmLocal,
-                                             CPropManager cpropMgr,
                                              AIPlatformValue aiplatform)
     {
         AIPlatformValue revisedAIplatform;
@@ -155,17 +153,15 @@ public class AI2AppdefDiff {
         
         // Compare servers
         doServerDiffs(appdefPlatform, cmLocal,
-                      cpropMgr, aiplatform, revisedAIplatform);
+                      aiplatform, revisedAIplatform);
 
         // Compare platform attributes
         doPlatformAttrDiff(appdefPlatform, revisedAIplatform);
 
         if (aiplatform.customPropertiesHasBeenSet()) {
-            AppdefEntityID aid =
-                AppdefEntityID.newPlatformID(appdefPlatform.getId());
             int type =
                 appdefPlatform.getPlatformType().getId().intValue();
-            updateCprops(cpropMgr, aid, type,
+            updateCprops(appdefPlatform.getResource(), type,
                          aiplatform.getCustomProperties());
         }
 
@@ -329,7 +325,6 @@ public class AI2AppdefDiff {
 
     private void doServerDiffs(Platform appdefPlatform,
                                ConfigManager cmLocal,
-                               CPropManager cpropMgr,
                                AIPlatformValue aiPlatform,
                                AIPlatformValue revisedAIplatform) {
 
@@ -421,7 +416,7 @@ public class AI2AppdefDiff {
 
                 if (scannedServer.customPropertiesHasBeenSet()) {
                     int type = appdefServer.getServerType().getId().intValue();
-                    updateCprops(cpropMgr, aID, type,
+                    updateCprops(appdefServer.getResource(), type,
                                  scannedServer.getCustomProperties());
                 }
 
@@ -521,49 +516,46 @@ public class AI2AppdefDiff {
     //that is checking for differences.  however, at this point
     //we have the ai object, the existing appdef object and the cpropMgr.
     //this is simply the easiest place until server AI code is refactored.
-    private void updateCprops(CPropManager cpropMgr,
-                              AppdefEntityID id, int type, byte[] data)
+    private void updateCprops(Resource resource, int type, byte[] data)
     {
         if (data == null) {
             return;
         }
 
         ConfigResponse aicprops;
-        Properties existing;
+        
         try {
             aicprops = ConfigResponse.decode(data);
         } catch (EncodingException e) {
-            _log.error("Error decoding cprops for: " + id);
+            _log.error("Error decoding cprops for: " + resource.getId());
             return;
         }
 
+        Map<String,Object> existing;
         try {
-            existing = cpropMgr.getEntries(id);
+            existing = resource.getProperties(false);
         } catch (Exception e) {
-            _log.error("Error looking up cprops for: " + id, e);
+            _log.error("Error looking up cprops for: " + resource.getId(), e);
             return;
         }
 
         boolean isChanged = false;
-        for (Iterator it=aicprops.getKeys().iterator(); it.hasNext();) {
-            String key = (String)it.next();
+        for (String key : aicprops.getKeys()) {
             String value = aicprops.getValue(key);
-            String current = existing.getProperty(key);
+            Object current = existing.get(key);
 
-            //modified version of cpropMgr.setConfigResponse
-            //here only setValue() for new or changed values
             if ((current == null) || !value.equals(current)) {
                 try {
-                    cpropMgr.setValue(id, type, key, value);
+                    resource.setProperty(key, value);
                     isChanged = true;
                 } catch (Exception e) {
                     _log.error("Error updating custom properties for: " +
-                               id, e);
+                               resource.getId(), e);
                 }
             }
         }
         String un = isChanged ? "" : "un";
-        _log.debug("Custom Properties " + un + "changed for: " + id);
+        _log.debug("Custom Properties " + un + "changed for: " + resource.getId());
     }
 
     private static boolean configsEqual(byte[] c1, byte[] c2)  {

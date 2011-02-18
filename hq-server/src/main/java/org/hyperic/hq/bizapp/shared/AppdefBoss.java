@@ -55,7 +55,6 @@ import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
-import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
 import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
@@ -309,7 +308,7 @@ public interface AppdefBoss {
      */
     public ServerValue createServer(int sessionID, ServerValue serverVal, Integer platformPK, Integer serverTypePK,
                                     Map<String, String> cProps) throws ValidationException, SessionTimeoutException,
-        SessionNotFoundException, PermissionException, AppdefDuplicateNameException, CPropKeyNotFoundException,
+        SessionNotFoundException, PermissionException, AppdefDuplicateNameException,
         NotFoundException;
 
     /**
@@ -334,8 +333,7 @@ public interface AppdefBoss {
      */
     public Service createService(AuthzSubject subject, ServiceValue serviceVal, Integer serviceTypePK,
                                  Integer parentPK, Map<String, String> cProps) throws SessionNotFoundException,
-        SessionTimeoutException, AppdefDuplicateNameException, ValidationException, PermissionException,
-        CPropKeyNotFoundException;
+        SessionTimeoutException, AppdefDuplicateNameException, ValidationException, PermissionException;
 
     /**
      * Removes an appdef entity by nulling out any reference from its children
@@ -359,7 +357,7 @@ public interface AppdefBoss {
      */
     public ServerValue updateServer(int sessionId, ServerValue aServer, Map<String, String> cProps)
         throws ValidationException, SessionTimeoutException, SessionNotFoundException, PermissionException,
-        UpdateException, AppdefDuplicateNameException, CPropKeyNotFoundException;
+        UpdateException, AppdefDuplicateNameException;
 
     public ServiceValue updateService(int sessionId, ServiceValue aService) throws PermissionException,
         ValidationException, SessionTimeoutException, SessionNotFoundException, UpdateException,
@@ -371,7 +369,7 @@ public interface AppdefBoss {
      */
     public ServiceValue updateService(int sessionId, ServiceValue aService, Map<String, String> cProps)
         throws ValidationException, SessionTimeoutException, SessionNotFoundException, PermissionException,
-        UpdateException, AppdefDuplicateNameException, CPropKeyNotFoundException, NotFoundException;
+        UpdateException, AppdefDuplicateNameException, NotFoundException;
 
     /**
      * Update a service with cProps.
@@ -379,7 +377,7 @@ public interface AppdefBoss {
      */
     public ServiceValue updateService(AuthzSubject subject, ServiceValue aService, Map<String, String> cProps)
         throws ValidationException, SessionTimeoutException, SessionNotFoundException, PermissionException,
-        UpdateException, AppdefDuplicateNameException, CPropKeyNotFoundException, NotFoundException;
+        UpdateException, AppdefDuplicateNameException, NotFoundException;
 
     public PlatformValue updatePlatform(int sessionId, PlatformValue aPlatform) throws ValidationException,
         PermissionException, SessionTimeoutException, SessionNotFoundException, UpdateException, ApplicationException,
@@ -683,8 +681,7 @@ public interface AppdefBoss {
      *        value will simply be removed.
      */
     public void setCPropValue(int sessionId, AppdefEntityID id, String key, String val)
-        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException, PermissionException,
-        CPropKeyNotFoundException;
+        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException, PermissionException;
     
     
     List<PropertyType> getCPropKeys(int sessionId, int appdefType, int appdefTypeId) throws SessionNotFoundException, SessionTimeoutException;

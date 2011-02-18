@@ -45,7 +45,6 @@ import org.hyperic.hq.appdef.server.session.AIAuditFactory;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.ServerFactory;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
@@ -54,9 +53,7 @@ import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AIServiceTypeValue;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
 import org.hyperic.hq.appdef.shared.AgentManager;
-import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
@@ -66,7 +63,6 @@ import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceTypeFactory;
 import org.hyperic.hq.appdef.shared.ServiceValue;
-import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -77,6 +73,7 @@ import org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.shared.AuditManager;
 import org.hyperic.hq.inventory.domain.Resource;
@@ -87,6 +84,8 @@ import org.hyperic.hq.product.ServiceType;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.StringUtil;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
@@ -104,8 +103,6 @@ public class RuntimeReportProcessor {
     private final ConfigManager configManager;
 
     private final AuthzSubjectManager subjectManager;
-
-    private final CPropManager cpropManager;
 
     private final AgentManager agentManager;
     
@@ -128,7 +125,7 @@ public class RuntimeReportProcessor {
     @Autowired
     public RuntimeReportProcessor(AutoinventoryManager aiMgr, PlatformManager platformMgr, ServerManager serverMgr,
                                   ServiceManager serviceMgr, ConfigManager configMgr, AuthzSubjectManager subjectMgr,
-                                  CPropManager cpropMgr, AgentManager agentManager,
+                                  AgentManager agentManager,
                                   ServiceTypeFactory serviceTypeFactory, AIAuditFactory aiAuditFactory, AuditManager auditManager,
                                   ResourceManager resourceManager, MeasurementProcessor measurementProcessor, ZeventEnqueuer zEventManager,
                                   EntityManagerFactory entityManagerFactory) {
@@ -138,7 +135,6 @@ public class RuntimeReportProcessor {
         serviceManager = serviceMgr;
         configManager = configMgr;
         subjectManager = subjectMgr;
-        cpropManager = cpropMgr;
         this.agentManager = agentManager;
         this.serviceTypeFactory = serviceTypeFactory;
         this.aiAuditFactory = aiAuditFactory;
@@ -539,8 +535,25 @@ public class RuntimeReportProcessor {
         // runtime-ai
         try {
             // SET CUSTOM PROPERTIES FOR SERVER
-            int typeId = server.getServerType().getId().intValue();
-            cpropManager.setConfigResponse(server.getEntityId(), typeId, aiserver.getCustomProperties());
+            ConfigResponse cprops;
+            try {
+                cprops = ConfigResponse.decode(aiserver
+                    .getCustomProperties());
+            } catch (EncodingException e) {
+                throw new SystemException(e);
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("cprops=" + cprops);
+                log.debug("Resource Id: " + platform.getId());
+            }
+            for (String key: cprops.getKeys()) {
+                String val = cprops.getValue(key);
+                try {
+                    server.getResource().setProperty(key, val);
+                }catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
+            }
         } catch (Exception e) {
             log.warn("Error setting server custom properties: " + e, e);
         }

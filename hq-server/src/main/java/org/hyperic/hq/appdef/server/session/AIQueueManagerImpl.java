@@ -50,7 +50,6 @@ import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
@@ -97,7 +96,6 @@ public class AIQueueManagerImpl implements AIQueueManager {
     private AIIpDAO aiIpDAO;
     private AIPlatformDAO aiPlatformDAO;
     private ConfigManager configManager;
-    private CPropManager cPropManager;
     private PlatformManager platformManager;
     private PermissionManager permissionManager;
     private AuditManager auditManager;
@@ -112,7 +110,6 @@ public class AIQueueManagerImpl implements AIQueueManager {
     @Autowired
     public AIQueueManagerImpl(AIServerDAO aIServerDAO, AIIpDAO aiIpDAO,
                               AIPlatformDAO aiPlatformDAO, ConfigManager configManager,
-                              CPropManager cPropManager, 
                               PlatformManager platformManager, PermissionManager permissionManager,
                               AuditManager auditManager, AuthzSubjectManager authzSubjectManager,
                               AgentCommandsClientFactory agentCommandsClientFactory,
@@ -123,7 +120,6 @@ public class AIQueueManagerImpl implements AIQueueManager {
         this.aiIpDAO = aiIpDAO;
         this.aiPlatformDAO = aiPlatformDAO;
         this.configManager = configManager;
-        this.cPropManager = cPropManager;
         this.platformManager = platformManager;
         this.permissionManager = permissionManager;
         this.auditManager = auditManager;
@@ -151,7 +147,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
         // First, calculate queuestatus and diff with respect to
         // existing appdef data.
         AIPlatformValue revisedAIplatform = appdefDiffProcessor.diffAgainstAppdef(subject,
-            platformManager, configManager, cPropManager, aiplatform);
+            platformManager, configManager, aiplatform);
 
         // A null return from diffAgainstAppdef means that
         // the platform no longer exists in appdef, AND that the aiplatform
@@ -766,4 +762,9 @@ public class AIQueueManagerImpl implements AIQueueManager {
         throws PermissionException, GroupNotCompatibleException {
         permissionManager.checkAIScanPermission(subject, id);
     }
+
+    public void setAgentCommandsClientFactory(AgentCommandsClientFactory agentCommandsClientFactory) {
+        this.agentCommandsClientFactory = agentCommandsClientFactory;
+    }
+    
 }

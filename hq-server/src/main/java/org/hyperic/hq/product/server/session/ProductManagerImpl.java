@@ -40,7 +40,6 @@ import org.hyperic.hq.alerts.AlertDefinitionXmlParser;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
@@ -93,7 +92,6 @@ public class ProductManagerImpl implements ProductManager {
 
     private Log log = LogFactory.getLog(ProductManagerImpl.class);
 
-    private CPropManager cPropManager;
     private TemplateManager templateManager;
     private AuditManager auditManager;
     private PluginUpdater pluginUpdater = new PluginUpdater();
@@ -110,7 +108,7 @@ public class ProductManagerImpl implements ProductManager {
 	
     @Autowired
     public ProductManagerImpl(PluginDAO pluginDao, AlertDefinitionManager alertDefinitionManager,
-                              CPropManager cPropManager, TemplateManager templateManager,
+                              TemplateManager templateManager,
                               AuditManager auditManager, ServerManager serverManager,
                               ServiceManager serviceManager, PlatformManager platformManager,
                               AlertDefinitionXmlParser alertDefinitionXmlParser,
@@ -118,7 +116,6 @@ public class ProductManagerImpl implements ProductManager {
                               ResourceManager resourceManager, ResourceTypeDao resourceTypeDao) {        
         this.pluginDao = pluginDao;
         this.alertDefinitionManager = alertDefinitionManager;
-        this.cPropManager = cPropManager;
         this.templateManager = templateManager;
         this.auditManager = auditManager;
         this.serverManager = serverManager;
@@ -534,12 +531,12 @@ public class ProductManagerImpl implements ProductManager {
 	        	for (ConfigOption opt : options) {
 	        		if (debug) watch.markTimeBegin("findByKey");
 
-	        		PropertyType c = cPropManager.findByKey(appdefType, opt.getName());
+	        		PropertyType c = appdefType.getPropertyType(opt.getName());
 
 	        		if (debug) watch.markTimeEnd("findByKey");
 
 	        		if (c == null) {
-	        			cPropManager.addKey(appdefType, opt.getName(), opt.getDescription(),String.class);
+	        			appdefType.addPropertyType(new PropertyType(opt.getName(), opt.getDescription()));
 	        		}
 	        	}
 	        }

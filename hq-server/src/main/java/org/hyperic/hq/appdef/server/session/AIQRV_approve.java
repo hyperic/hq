@@ -31,16 +31,12 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIServerValue;
-import org.hyperic.hq.appdef.shared.AgentNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
@@ -52,12 +48,11 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
-import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
-import org.hyperic.hq.autoinventory.agent.client.AICommandsClientFactory;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.EncodingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -75,17 +70,15 @@ public class AIQRV_approve implements AIQResourceVisitor {
     private static final int Q_STATUS_PLACEHOLDER = AIQueueConstants.Q_STATUS_PLACEHOLDER;
     private PlatformManager platformManager;
     private ConfigManager configMgr;
-    private CPropManager cpropMgr;
     private ServerManager serverManager;
     private ResourceManager resourceManager;
 
     
     @Autowired
     public AIQRV_approve(PlatformManager platformManager, ConfigManager configMgr,
-                         CPropManager cpropMgr, ServerManager serverManager, ResourceManager resourceManager) {
+                        ServerManager serverManager, ResourceManager resourceManager) {
         this.platformManager = platformManager;
         this.configMgr = configMgr;
-        this.cpropMgr = cpropMgr;
         this.serverManager = serverManager;
         this.resourceManager = resourceManager;
     }
@@ -420,9 +413,25 @@ public class AIQRV_approve implements AIQResourceVisitor {
 
     private void setCustomProperties(AIPlatform aiplatform, Platform platform) {
         try {
-            int typeId = platform.getPlatformType().getId().intValue();
-            cpropMgr.setConfigResponse(platform.getEntityId(), typeId, aiplatform
-                .getCustomProperties());
+            ConfigResponse cprops;
+            try {
+                cprops = ConfigResponse.decode(aiplatform
+                    .getCustomProperties());
+            } catch (EncodingException e) {
+                throw new SystemException(e);
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("cprops=" + cprops);
+                log.debug("Resource Id: " + platform.getId());
+            }
+            for (String key: cprops.getKeys()) {
+                String val = cprops.getValue(key);
+                try {
+                    platform.getResource().setProperty(key, val);
+                }catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
+            }
         } catch (Exception e) {
             log.warn("Error setting platform custom properties: " + e, e);
         }
@@ -430,9 +439,25 @@ public class AIQRV_approve implements AIQResourceVisitor {
 
     private void setCustomProperties(AIServer aiserver, Server server) {
         try {
-            int typeId = server.getServerType().getId().intValue();
-            cpropMgr
-                .setConfigResponse(server.getEntityId(), typeId, aiserver.getCustomProperties());
+            ConfigResponse cprops;
+            try {
+                cprops = ConfigResponse.decode(aiserver
+                    .getCustomProperties());
+            } catch (EncodingException e) {
+                throw new SystemException(e);
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("cprops=" + cprops);
+                log.debug("Resource Id: " + server.getId());
+            }
+            for (String key: cprops.getKeys()) {
+                String val = cprops.getValue(key);
+                try {
+                    server.getResource().setProperty(key, val);
+                }catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
+            }
         } catch (Exception e) {
             log.warn("Error setting server custom properties: " + e, e);
         }

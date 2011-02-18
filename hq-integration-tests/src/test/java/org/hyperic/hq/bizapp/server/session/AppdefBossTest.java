@@ -3,7 +3,9 @@ package org.hyperic.hq.bizapp.server.session;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.PatternSyntaxException;
 
@@ -11,6 +13,7 @@ import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerType;
+import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -19,7 +22,9 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
+import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
+import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
@@ -27,6 +32,8 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
+import org.hyperic.hq.inventory.domain.PropertyType;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -49,6 +56,7 @@ public class AppdefBossTest
     @Autowired
     private SessionManager sessionManager;
     private int sessionId;
+    private ResourceType testPlatformResType;
 
     @Before
     public void initializeTestData() throws ApplicationException, NotFoundException {
@@ -57,8 +65,14 @@ public class AppdefBossTest
         createAgent("127.0.0.1", 2144, "authToken", agentToken, "4.5");
         flushSession();
         testPlatformType = createPlatformType("Linux");
+        testPlatformResType = resourceManager.findResourceTypeByName("Linux");
+        testPlatformResType.addPropertyType(new PropertyType("BiosUUID","The UUID of BIOS"));
         testServerType = createServerType("Tomcat", "6.0", new String[] { "Linux" });
+        ResourceType testServerResType = resourceManager.findResourceTypeByName("Tomcat");
+        testServerResType.addPropertyType(new PropertyType("PermGen","Perm gen"));
         platServiceType = createServiceType("HTTP Check", testPlatformType);
+        ResourceType platformResType = resourceManager.findResourceTypeByName("HTTP Check");
+        platformResType.addPropertyType(new PropertyType("Something","Something"));
         testServiceType = createServiceType("Servlet",testServerType);
     }
 
@@ -270,6 +284,62 @@ public class AppdefBossTest
         PageList<ServiceTypeValue> serviceTypes = appdefBoss.findViewablePlatformServiceTypes(sessionId, testPlatform.getId());
         assertEquals(1,serviceTypes.size());
         assertEquals(platServiceType.getName(),serviceTypes.get(0).getName());
+    }
+    
+    @Test
+    public void testCreateAndUpdateServer() throws ApplicationException, NotFoundException {
+        Platform testPlatform = createPlatform(agentToken, "Linux", "MyPlat", "MyPlat", 2);
+        Map<String,String> props =  new HashMap<String,String>();
+        props.put("PermGen", "192");
+        ServerValue serverValue = new ServerValue();
+        serverValue.setName("Server1");
+        serverValue.setInstallPath("/some/place");
+        ServerValue createdServer = appdefBoss.createServer(sessionId, serverValue, testPlatform.getId(), testServerType.getId(), props);
+        assertEquals(props,resourceManager.findResourceByName("Server1").getProperties(false));
+        Map<String,String> newProps =  new HashMap<String,String>();
+        newProps.put("PermGen", "256");
+        appdefBoss.updateServer(sessionId, createdServer,newProps);
+        assertEquals(newProps,resourceManager.findResourceByName("Server1").getProperties(false));
+    }
+    
+    @Test
+    public void testCreateAndUpdateService() throws ApplicationException, NotFoundException {
+        Platform testPlatform = createPlatform(agentToken, "Linux", "MyPlat", "MyPlat", 2);
+        createServer(testPlatform, testServerType, "Server1" );
+        Map<String,String> props =  new HashMap<String,String>();
+        props.put("Something", "Else");
+        ServiceValue serviceValue = new ServiceValue();
+        serviceValue.setName("Service1");
+        Service createdService = appdefBoss.createService(authzSubjectManager.getOverlordPojo(),serviceValue,platServiceType.getId(),testPlatform.getId(),props);
+        assertEquals(props,resourceManager.findResourceByName("Service1").getProperties(false));
+        Map<String,String> newProps =  new HashMap<String,String>();
+        newProps.put("Something", "Other");
+        appdefBoss.updateService(sessionId,createdService.getServiceValue(),newProps);
+        assertEquals(newProps,resourceManager.findResourceByName("Service1").getProperties(false));
+    }
+    
+    @Test
+    public void testSetCpropValue() throws ApplicationException {
+        Platform testPlatform = createPlatform(agentToken, "Linux", "MyPlat", "MyPlat", 2);
+        appdefBoss.setCPropValue(sessionId, testPlatform.getEntityId(), "BiosUUID", "586998283");
+        assertEquals("586998283",resourceManager.findResourceByName("MyPlat").getProperty("BiosUUID"));
+    }
+    
+    @Test
+    public void testGetCPropDescEntries() throws ApplicationException {
+        Platform testPlatform = createPlatform(agentToken, "Linux", "MyPlat", "MyPlat", 2);
+        appdefBoss.setCPropValue(sessionId, testPlatform.getEntityId(), "BiosUUID", "586998283");
+        Map<String,String> expected = new HashMap<String,String>();
+        expected.put("The UUID of BIOS","586998283");
+        assertEquals(expected,appdefBoss.getCPropDescEntries(sessionId, testPlatform.getEntityId()));
+    }
+    
+    @Test
+    public void testGetCPropKeys() throws ApplicationException {
+        Platform testPlatform = createPlatform(agentToken, "Linux", "MyPlat", "MyPlat", 2);
+        Set<PropertyType> expected = new HashSet<PropertyType>();
+        expected.add(testPlatformResType.getPropertyType("BiosUUID"));
+        assertEquals(expected,new HashSet<PropertyType>(appdefBoss.getCPropKeys(sessionId, testPlatform.getEntityId())));
     }
 
 }

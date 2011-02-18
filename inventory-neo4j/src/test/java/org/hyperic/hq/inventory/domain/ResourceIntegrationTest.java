@@ -129,6 +129,18 @@ public class ResourceIntegrationTest {
     public void testGetPropertiesNoneSet() {
         assertTrue(traderJoes.getProperties().isEmpty());
     }
+    
+    @Test
+    public void testGetPropertiesFilterHidden() {
+        PropertyType internalProp = new PropertyType("SSN","Social Security Number");
+        internalProp.setHidden(true);
+        store.addPropertyType(internalProp);
+        traderJoes.setProperty("Address", "123 My Street");
+        traderJoes.setProperty("SSN", "123-456-7890");
+        Map<String, Object> expected = new HashMap<String, Object>(1);
+        expected.put("Address", "123 My Street");
+        assertEquals(expected,traderJoes.getProperties(false));
+    }
 
     @Test
     public void testGetProperty() {
