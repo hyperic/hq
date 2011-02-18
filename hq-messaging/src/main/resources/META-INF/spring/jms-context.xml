@@ -59,10 +59,4 @@
 		<property name="pubSubDomain" value="true" />
 	</bean>
 
-	<bean id="jmsTransactionManager"
-		class="org.springframework.jms.connection.JmsTransactionManager">
-		<property name="connectionFactory" ref="connectionFactory" />
-	</bean>
-
-
 </beans>
