@@ -49,16 +49,16 @@ public class VirtualHostCollector extends RabbitMQDefaultCollector {
             logger.debug("[collect] vhost=" + vhost + " node=" + node);
         }
 
-        RabbitVirtualHost virtualHost = new RabbitVirtualHost(vhost, rabbitAdmin);
-
-        if (virtualHost != null) {
-            setAvailability(virtualHost.isAvailable());
-            setValue("queueCount", virtualHost.getQueueCount());
-            setValue("exchangeCount", virtualHost.getExchangeCount());
-            setValue("connectionCount", virtualHost.getConnectionCount());
-            setValue("channelCount", virtualHost.getChannelCount());
-            setValue("consumerCount", virtualHost.getConsumerCount());
-        }
+//        RabbitVirtualHost virtualHost = new RabbitVirtualHost(vhost, rabbitAdmin);
+//
+//        if (virtualHost != null) {
+//            setAvailability(virtualHost.isAvailable());
+//            setValue("queueCount", virtualHost.getQueueCount());
+//            setValue("exchangeCount", virtualHost.getExchangeCount());
+//            setValue("connectionCount", virtualHost.getConnectionCount());
+//            setValue("channelCount", virtualHost.getChannelCount());
+//            setValue("consumerCount", virtualHost.getConsumerCount());
+//        }
     }
 
     /**
@@ -71,7 +71,7 @@ public class VirtualHostCollector extends RabbitMQDefaultCollector {
     public static ConfigResponse getAttributes(RabbitVirtualHost vh) {
         ConfigResponse res = new ConfigResponse();
         res.setValue("name", vh.getName());
-        res.setValue("node", vh.getNode());
+//        res.setValue("node", vh.getNode());
         return res;
     }
 

@@ -8,9 +8,7 @@ package org.hyperic.hq.plugin.rabbitmq.core;
  *
  * @author administrator
  */
-public class QueueInfo {
+public interface RabbitObject {
 
-    public String getName() {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
+    public String getName();
 }

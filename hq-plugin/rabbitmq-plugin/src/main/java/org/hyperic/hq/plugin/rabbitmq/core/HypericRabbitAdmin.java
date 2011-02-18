@@ -25,8 +25,15 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
 
+import com.google.gson.Gson;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.util.config.ConfigResponse;
@@ -39,8 +46,16 @@ import org.hyperic.util.config.ConfigResponse;
 public class HypericRabbitAdmin {
 
     private static final Log logger = LogFactory.getLog(HypericRabbitAdmin.class);
+    private final HttpClient client;
 
     public HypericRabbitAdmin(Properties props) {
+         client = new HttpClient();
+
+        client.getState().setCredentials(
+                new AuthScope("192.168.183.140", 55672, "Management: Web UI"),
+                new UsernamePasswordCredentials("guest", "guest"));
+
+        client.getHttpConnectionManager().getParams().setConnectionTimeout(5000);
     }
 
     public HypericRabbitAdmin(ConfigResponse props) {
@@ -51,15 +66,43 @@ public class HypericRabbitAdmin {
         logger.debug("[HypericRabbitAdmin] destroy()");
     }
 
-    public List<String> getVirtualHosts() {
-        throw new RuntimeException("XXXXXXXXXX");
+    public List<RabbitVirtualHost> getVirtualHosts() {
+        List<RabbitVirtualHost> res = null;
+        GetMethod get = new GetMethod("http://192.168.183.140:55672/api/vhosts");
+        get.setDoAuthentication(true);
+
+        try {
+            int r = client.executeMethod(get);
+            String responseBody = get.getResponseBodyAsString();
+            logger.debug("-(" + r + ")-> " + responseBody);
+            Gson gson = new Gson();
+            res = Arrays.asList(gson.fromJson(responseBody, RabbitVirtualHost[].class));
+        } catch (IOException ex) {
+            logger.error(ex);
+        }
+
+        return res;
     }
 
-    public List getQueues(String virtualHost) {
-        throw new RuntimeException("XXXXXXXXXX");
+    public List getQueues(RabbitVirtualHost vh) {
+        List<RabbitQueue> res = null;
+        GetMethod get = new GetMethod("http://192.168.183.140:55672/api/queues/"+vh.getName());
+        get.setDoAuthentication(true);
+
+        try {
+            int r = client.executeMethod(get);
+            String responseBody = get.getResponseBodyAsString();
+            logger.debug("-(" + r + ")-> " + responseBody);
+            Gson gson = new Gson();
+            res = Arrays.asList(gson.fromJson(responseBody, RabbitQueue[].class));
+        } catch (IOException ex) {
+            logger.error(ex);
+        }
+
+        return res;
     }
 
-    public List getExchanges(String virtualHost) {
+    public List getExchanges(RabbitVirtualHost virtualHost) {
         throw new RuntimeException("XXXXXXXXXX");
     }
 
@@ -72,7 +115,8 @@ public class HypericRabbitAdmin {
     }
 
     public List<RabbitChannel> getChannels() {
-        throw new RuntimeException("XXXXXXXXXX");
+        List res = null;
+        return res;
     }
 
     public boolean getStatus() {

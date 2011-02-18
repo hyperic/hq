@@ -25,112 +25,26 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
 
-
-import java.util.List;
-
 /**
  * RabbitVirtualHost
  * @author Helena Edelson
  */
-public class RabbitVirtualHost {
+public class RabbitVirtualHost implements RabbitObject{
 
     private String name;
 
-    private String node;
-
-    private long connectionCount;
-
-    private long channelCount;
-
-    private long consumerCount;
-
-    private long queueCount;
-
-    private long exchangeCount;
-
-    private boolean isAvailable;
-
-    public RabbitVirtualHost(String vHostName, HypericRabbitAdmin rabbitAdmin) {
-        this.name = vHostName;
-        this.node = rabbitAdmin.getPeerNodeName();
-        setChannels(rabbitAdmin.getChannels());
-        setConnectionCount(rabbitAdmin.getConnections());
-        setAvailable(rabbitAdmin.virtualHostAvailable(name, node));
-        setQueueCount(rabbitAdmin.getQueues(name));
-        setExchangeCount(rabbitAdmin.getExchanges(name));
+    public RabbitVirtualHost() {
     }
-
 
     @Override
     public String toString() {
-        return new StringBuilder("[name=").append(name).append(" node=").append(node)
-                .append(" connectionCount=").append(connectionCount).append(" channelCount=").append(channelCount)
-                .append(" consumerCount=").append(consumerCount).append(" queueCount=").append(queueCount)
-                .append(" exchangeCount=").append(exchangeCount).append(" isAvailable=").append(isAvailable)
-                .append("]").toString();
+        return super.toString()+"[name="+getName()+"]";
     }
 
-    public long getQueueCount() {
-        return queueCount;
-    }
-
-    private void setQueueCount(List<QueueInfo> queues) {
-        this.queueCount = queues != null ? queues.size() : 0;
-    }
-
-    public long getExchangeCount() {
-        return exchangeCount;
-    }
-
-    private void setExchangeCount(List<Exchange> exchanges) {
-        this.exchangeCount = exchanges != null ? exchanges.size() : 0;
-    }
-
-    public boolean isAvailable() {
-        return isAvailable;
-    }
-
-    private void setAvailable(boolean available) {
-        isAvailable = available;
-    }
-
+    /**
+     * @return the name
+     */
     public String getName() {
         return name;
-    }
-
-    public long getConnectionCount() {
-        return connectionCount;
-    }
-
-    private void setConnectionCount(List<RabbitConnection> connections) {
-        this.connectionCount = connections != null ? connections.size() : 0;
-    }
-
-    private void setChannels(List<RabbitChannel> channels) {
-        if (channels != null) {
-            this.channelCount = channels.size();
-
-            long count = 0;
-
-            for (RabbitChannel c : channels) {
-                count += c.getConsumerCount();
-            }
-            this.consumerCount = count;
-        } else {
-            this.channelCount = 0;
-            this.consumerCount = 0;
-        }
-    }
-
-    public String getNode() {
-        return node;
-    }
-
-    public long getChannelCount() {
-        return channelCount;
-    }
-
-    public long getConsumerCount() {
-        return consumerCount;
     }
 }

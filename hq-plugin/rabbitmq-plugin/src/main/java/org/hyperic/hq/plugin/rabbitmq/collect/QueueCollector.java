@@ -31,7 +31,7 @@ import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
 import org.hyperic.util.config.ConfigResponse;
 
 import java.util.Properties;
-import org.hyperic.hq.plugin.rabbitmq.core.QueueInfo;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitQueue;
 
 /**
  * QueueCollector
@@ -49,10 +49,10 @@ public class QueueCollector extends RabbitMQListCollector {
             logger.debug("[collect] vhost=" + vhost + " node=" + node);
         }
 
-//        List<QueueInfo> queues = rabbitAdmin.getQueues(vhost);
+//        List<RabbitQueue> queues = rabbitAdmin.getQueues(vhost);
 //        if (queues != null) {
-//            for (QueueInfo q : queues) {
-//                logger.debug("[collect] QueueInfo="+q.getName());
+//            for (RabbitQueue q : queues) {
+//                logger.debug("[collect] RabbitQueue="+q.getName());
 //                setValue(q.getName() + "." + Metric.ATTR_AVAIL, Metric.AVAIL_UP);
 //                setValue(q.getName() + ".messages", q.getMessages());
 //                setValue(q.getName() + ".consumers", q.getConsumers());
@@ -73,7 +73,7 @@ public class QueueCollector extends RabbitMQListCollector {
      * @param queue
      * @return
      */
-    public static ConfigResponse getAttributes(QueueInfo queue) {
+    public static ConfigResponse getAttributes(RabbitQueue queue) {
         throw new RuntimeException("XXXXXXXXXX");
     }
 
