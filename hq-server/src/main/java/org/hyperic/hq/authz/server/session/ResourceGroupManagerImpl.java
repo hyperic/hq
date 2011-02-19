@@ -95,7 +95,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ResourceGroupManagerImpl implements ResourceGroupManager, ApplicationContextAware {
     private static final String MIXED = "mixed";
 
-    private static final String GROUP_ENT_RES_TYPE = "groupEntResType";
+    public static final String GROUP_ENT_RES_TYPE = "groupEntResType";
 
     private static final String GROUP_ENT_TYPE = "groupEntType";
 

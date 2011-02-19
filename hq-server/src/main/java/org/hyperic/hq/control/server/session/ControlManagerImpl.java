@@ -28,6 +28,7 @@ package org.hyperic.hq.control.server.session;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
@@ -48,6 +49,7 @@ import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -68,6 +70,7 @@ import org.hyperic.hq.control.shared.ControlScheduleManager;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.inventory.domain.Config;
+import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.messaging.MessagePublisher;
 import org.hyperic.hq.product.ControlPluginManager;
@@ -301,36 +304,46 @@ public class ControlManagerImpl implements ControlManager {
     }
 
     /**
-     * Get the supported actions for an appdef entity from the local
-     * ControlPluginManager
+     * Get the supported actions for an appdef entity
      */
     @Transactional(readOnly=true)
     public List<String> getActions(AuthzSubject subject, AppdefEntityID id) throws PermissionException,
         PluginNotFoundException, AppdefEntityNotFoundException, GroupNotCompatibleException {
+        Set<OperationType> opTypes;
         if (id.isGroup()) {
-            List<AppdefEntityID> groupMembers = GroupUtil
-                .getCompatGroupMembers(subject, id, null, PageControl.PAGE_ALL);
+            //List<AppdefEntityID> groupMembers = GroupUtil
+              //  .getCompatGroupMembers(subject, id, null, PageControl.PAGE_ALL);
 
-            // For each entity in the list, sanity check permissions
-            for (AppdefEntityID entity : groupMembers) {
-                checkControlPermission(subject, entity);
-            }
+            // TODO perm check For each entity in the list, sanity check permissions
+//            for (AppdefEntityID entity : groupMembers) {
+//                checkControlPermission(subject, entity);
+//            }
+              //Assume we are dealing with a compatible group
+             int groupResourceTypeId = (Integer)resourceManager.findResourceById(id.getId()).getProperty(ResourceGroupManagerImpl.GROUP_ENT_RES_TYPE);
+             opTypes = resourceManager.findResourceTypeById(groupResourceTypeId).getOperationTypes();
         } else {
-            checkControlPermission(subject, id);
+            //TODO perm check
+            //checkControlPermission(subject, id);
+            opTypes = resourceManager.findResourceById(id.getId()).getType().getOperationTypes();
         }
-
-        String pluginName = platformManager.getPlatformPluginName(id);
-        return controlPluginManager.getActions(pluginName);
+        List<String> actions = new ArrayList<String>(opTypes.size());
+        for(OperationType opType: opTypes) {
+            actions.add(opType.getName());
+        }
+        return actions;
     }
 
     /**
-     * Get the supported actions for an appdef entity from the local
-     * ControlPluginManager
+     * Get the supported actions for an appdef entity type
      */
     @Transactional(readOnly=true)
     public List<String> getActions(AuthzSubject subject, AppdefEntityTypeID aetid) throws PluginNotFoundException {
-        String pluginName = aetid.getAppdefResourceType().getName();
-        return controlPluginManager.getActions(pluginName);
+        Set<OperationType> opTypes = resourceManager.findResourceTypeById(aetid.getId()).getOperationTypes();
+        List<String> actions = new ArrayList<String>(opTypes.size());
+        for(OperationType opType: opTypes) {
+            actions.add(opType.getName());
+        }
+        return actions;
     }
 
     /**
