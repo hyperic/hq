@@ -41,6 +41,9 @@
 		<plugin type="livedata" class="org.hyperic.hq.plugin.test.TestLiveDataPlugin" />
 		<plugin type="control" class="org.hyperic.hq.plugin.test.TestControlPlugin" />
 		<plugin type="measurement" class="org.hyperic.hq.plugin.test.TestMeasurementPlugin" />
+		<properties>
+			<property name="Vendor" description="The Vendor"/>
+		</properties>
 
 		<actions include="stop" />
 
@@ -67,6 +70,7 @@
 		<service name="Web Module Stats">
 			<actions include="stop,start,reload" />
 			<plugin type="measurement" class="org.hyperic.hq.plugin.test.TestMeasurementPlugin" />
+			<plugin type="control" class="org.hyperic.hq.plugin.test.TestControlPlugin" />
 			<metric name="Availability" indicator="true"/>
 		</service>
 

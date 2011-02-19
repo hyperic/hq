@@ -51,9 +51,15 @@ public class ResourceTypeIntegrationTest {
     public void testAddOperationType() {
         OperationType inventory = new OperationType("inventory");
         store.addOperationType(inventory);
+        OperationArgType lettuceCount = new OperationArgType("LettuceCount", Integer.class);
+        inventory.addOperationArgType(lettuceCount);
+        inventory.setReturnType(String.class);
         Set<OperationType> expected = new HashSet<OperationType>(1);
         expected.add(inventory);
         assertEquals(expected, store.getOperationTypes());
+        assertEquals(1,store.getOperationTypes().iterator().next().getOperationArgTypes().size());
+        assertEquals(lettuceCount,store.getOperationTypes().iterator().next().getOperationArgTypes().iterator().next());
+        assertEquals(String.class,store.getOperationTypes().iterator().next().getReturnType());
     }
 
     @Test
@@ -203,6 +209,10 @@ public class ResourceTypeIntegrationTest {
     @Test
     public void testRemove() {
         store.addPropertyType(new PropertyType("address","The store location"));
+        OperationType inventory = new OperationType("inventory");
+        store.addOperationType(inventory);
+        OperationArgType lettuceCount = new OperationArgType("LettuceCount", Integer.class);
+        inventory.addOperationArgType(lettuceCount);
         Resource safeway = new Resource("Safeway",store);
         resourceDao.persist(safeway);
         safeway.setProperty("address","123 My Street");

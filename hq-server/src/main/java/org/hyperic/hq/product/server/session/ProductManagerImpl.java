@@ -519,7 +519,7 @@ public class ProductManagerImpl implements ProductManager {
 	    if (debug) watch.markTimeEnd("createTemplates");
         
         if (pluginDefinition == null) {
-	        // Add any custom properties.
+	        // Add any custom properties and actions.
 	        if (debug) watch.markTimeBegin("loop");
 
 	        for (int i = 0; i < entities.length; i++) {
@@ -539,6 +539,19 @@ public class ProductManagerImpl implements ProductManager {
 	        			appdefType.addPropertyType(new PropertyType(opt.getName(), opt.getDescription()));
 	        		}
 	        	}
+	        	
+	        	try {
+    	        	List<String> actions = ppm.getControlPluginManager().getActions(info.getName());
+        	        for(String action: actions) {
+        	            OperationType existing = appdefType.getOperationType(action);
+        	            if(existing == null) {
+        	                appdefType.addOperationType(new OperationType(action));
+        	            }
+        	        }
+	        	}catch(PluginNotFoundException e) {
+	        	    //Expected if control actions not defined
+	        	}
+	        	
 	        }
 
 	        if (debug) watch.markTimeEnd("loop");
