@@ -31,7 +31,6 @@ import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
 import org.hyperic.util.config.ConfigResponse;
 
 import java.util.Properties;
-import org.hyperic.hq.plugin.rabbitmq.core.Exchange;
 
 /**
  * ExchangeCollector
@@ -65,9 +64,9 @@ public class ExchangeCollector extends RabbitMQListCollector {
      * @param e
      * @return
      */
-    public static ConfigResponse getAttributes(Exchange e) {
-        throw new RuntimeException("XXXXXXXXXX");
-    }
+//    public static ConfigResponse getAttributes(RabbitExchange e) {
+//        throw new RuntimeException("XXXXXXXXXX");
+//    }
 
     @Override
     public Log getLog() {

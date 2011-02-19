@@ -95,30 +95,30 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                             logger.debug(sb.toString());
                         }
 
-                        List<String> names = new ArrayList();
-                        HypericRabbitAdmin admin = new HypericRabbitAdmin(server.getProductConfig());
-                        try {
-//                            names.addAll(formatNames(admin.getChannels(), null));
-//                            names.addAll(formatNames(admin.getConnections(), null));
-                            List<RabbitVirtualHost> vhs = admin.getVirtualHosts();
-                            for (RabbitVirtualHost vh : vhs) {
-                                names.addAll(formatNames(admin.getQueues(vh), vh));
-                                names.addAll(formatNames(admin.getExchanges(vh), vh));
-                            }
-                        } finally {
-                            admin.destroy();
-                        }
-
-                        Collections.sort(names);
-                        String node = server.getProductConfig().getValue(DetectorConstants.NODE);
-                        String new_signature = names.toString();
-                        String signature = signatures.get(node);
-                        if (!new_signature.equalsIgnoreCase(signature)) {
-                            if (signature != null) {
-                                runAutoDiscovery(server.getProductConfig());
-                            }
-                            signatures.put(node, new_signature);
-                        }
+//                        List<String> names = new ArrayList();
+//                        HypericRabbitAdmin admin = new HypericRabbitAdmin(server.getProductConfig());
+//                        try {
+////                            names.addAll(formatNames(admin.getChannels(), null));
+////                            names.addAll(formatNames(admin.getConnections(), null));
+//                            List<RabbitVirtualHost> vhs = admin.getVirtualHosts();
+//                            for (RabbitVirtualHost vh : vhs) {
+//                                names.addAll(formatNames(admin.getQueues(vh), vh));
+//                                names.addAll(formatNames(admin.getExchanges(vh), vh));
+//                            }
+//                        } finally {
+//                            admin.destroy();
+//                        }
+//
+//                        Collections.sort(names);
+//                        String node = server.getProductConfig().getValue(DetectorConstants.NODE);
+//                        String new_signature = names.toString();
+//                        String signature = signatures.get(node);
+//                        if (!new_signature.equalsIgnoreCase(signature)) {
+//                            if (signature != null) {
+//                                runAutoDiscovery(server.getProductConfig());
+//                            }
+//                            signatures.put(node, new_signature);
+//                        }
 
                     }
                 }
@@ -224,7 +224,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                         }
                     }
 
-//                    rabbitResources.addAll(doCreateServiceResources(virtualHostList, AMQPTypes.VIRTUAL_HOST, serviceConfig.getValue(DetectorConstants.NODE)));
+                    rabbitResources.addAll(doCreateServiceResources(vhosts, AMQPTypes.VIRTUAL_HOST, serviceConfig.getValue(DetectorConstants.NODE)));
                 } finally {
                     admin.destroy();
                 }
@@ -265,7 +265,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @throws PluginException
      */
     protected List<ServiceResource> createQueueServiceResources(HypericRabbitAdmin rabbitAdmin, RabbitVirtualHost vhost) throws PluginException {
-        List<RabbitQueue> queues = rabbitAdmin.getQueues(vhost);
+        List queues = rabbitAdmin.getQueues(vhost);
 
         return queues != null ? doCreateServiceResources(queues, AMQPTypes.QUEUE,
                 rabbitAdmin.getPeerNodeName(), vhost) : null;
@@ -305,7 +305,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @throws PluginException
      */
     protected List<ServiceResource> createExchangeServiceResources(HypericRabbitAdmin rabbitAdmin, RabbitVirtualHost vhost) throws PluginException {
-        List<Exchange> exchanges = rabbitAdmin.getExchanges(vhost);
+        List exchanges = rabbitAdmin.getExchanges(vhost);
 
         return exchanges != null ? doCreateServiceResources(exchanges, AMQPTypes.EXCHANGE,
                 rabbitAdmin.getPeerNodeName(), vhost) : null;
@@ -324,15 +324,15 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @param vHost
      * @return
      */
-    private List<ServiceResource> doCreateServiceResources(List rabbitObjects, String rabbitType, String node, RabbitVirtualHost vHost) {
+    private List<ServiceResource> doCreateServiceResources(List<RabbitObject> rabbitObjects, String rabbitType, String node, RabbitVirtualHost vHost) {
         List<ServiceResource> serviceResources = null;
 
         if (rabbitObjects != null) {
             serviceResources = new ArrayList<ServiceResource>();
 
-            for (Object obj : rabbitObjects) {
+            for (RabbitObject obj : rabbitObjects) {
                 ServiceResource service = createServiceResource(rabbitType);
-                String name = null;
+                String name = obj.getName();
 
                 ConfigResponse c = new ConfigResponse();
                 if (vHost != null) {
@@ -342,19 +342,19 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                 if (obj instanceof RabbitQueue) {
                     RabbitQueue queue = (RabbitQueue) obj;
                     c.setValue(MetricConstants.QUEUE, queue.getName());
-                    service.setCustomProperties(QueueCollector.getAttributes(queue));
+//                    service.setCustomProperties(QueueCollector.getAttributes(queue));
                 } else if (obj instanceof RabbitConnection) {
                     RabbitConnection conn = (RabbitConnection) obj;
                     c.setValue(MetricConstants.CONNECTION, conn.getPid());
                     service.setCustomProperties(ConnectionCollector.getAttributes(conn));
-                } else if (obj instanceof Exchange) {
-                    Exchange exchange = (Exchange) obj;
-                    if (exchange.getName() == null) {
+                } else if (obj instanceof RabbitExchange) {
+                    RabbitExchange exchange = (RabbitExchange) obj;
+                    if (exchange.getName().equals("")) {
                         name = AMQPTypes.DEFAULT_EXCHANGE_NAME;
                     }
                     c.setValue(MetricConstants.EXCHANGE, exchange.getName() == null
                             ? AMQPTypes.DEFAULT_EXCHANGE_NAME : exchange.getName());
-                    service.setCustomProperties(ExchangeCollector.getAttributes((Exchange) obj));
+//                    service.setCustomProperties(ExchangeCollector.getAttributes((RabbitExchange) obj));
                 } else if (obj instanceof RabbitChannel) {
                     RabbitChannel channel = (RabbitChannel) obj;
                     c.setValue(MetricConstants.CHANNEL, channel.getPid());

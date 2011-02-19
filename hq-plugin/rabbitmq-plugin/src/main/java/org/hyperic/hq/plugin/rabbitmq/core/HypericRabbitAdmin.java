@@ -27,9 +27,13 @@ package org.hyperic.hq.plugin.rabbitmq.core;
 
 import com.google.gson.Gson;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
@@ -47,15 +51,18 @@ public class HypericRabbitAdmin {
 
     private static final Log logger = LogFactory.getLog(HypericRabbitAdmin.class);
     private final HttpClient client;
+    private String node;
 
     public HypericRabbitAdmin(Properties props) {
-         client = new HttpClient();
+        client = new HttpClient();
 
         client.getState().setCredentials(
                 new AuthScope("192.168.183.140", 55672, "Management: Web UI"),
                 new UsernamePasswordCredentials("guest", "guest"));
 
         client.getHttpConnectionManager().getParams().setConnectionTimeout(5000);
+
+        this.node=props.getProperty("node");
     }
 
     public HypericRabbitAdmin(ConfigResponse props) {
@@ -67,43 +74,23 @@ public class HypericRabbitAdmin {
     }
 
     public List<RabbitVirtualHost> getVirtualHosts() {
-        List<RabbitVirtualHost> res = null;
-        GetMethod get = new GetMethod("http://192.168.183.140:55672/api/vhosts");
-        get.setDoAuthentication(true);
-
-        try {
-            int r = client.executeMethod(get);
-            String responseBody = get.getResponseBodyAsString();
-            logger.debug("-(" + r + ")-> " + responseBody);
-            Gson gson = new Gson();
-            res = Arrays.asList(gson.fromJson(responseBody, RabbitVirtualHost[].class));
-        } catch (IOException ex) {
-            logger.error(ex);
-        }
-
-        return res;
+        return Arrays.asList(get("/api/vhosts", RabbitVirtualHost[].class));
     }
 
-    public List getQueues(RabbitVirtualHost vh) {
-        List<RabbitQueue> res = null;
-        GetMethod get = new GetMethod("http://192.168.183.140:55672/api/queues/"+vh.getName());
-        get.setDoAuthentication(true);
-
+    public List<RabbitQueue> getQueues(RabbitVirtualHost vh) {
         try {
-            int r = client.executeMethod(get);
-            String responseBody = get.getResponseBodyAsString();
-            logger.debug("-(" + r + ")-> " + responseBody);
-            Gson gson = new Gson();
-            res = Arrays.asList(gson.fromJson(responseBody, RabbitQueue[].class));
-        } catch (IOException ex) {
-            logger.error(ex);
+            return Arrays.asList(get("/api/queues/" + URLEncoder.encode(vh.getName(), "UTF-8"), RabbitQueue[].class));
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex);
         }
-
-        return res;
     }
 
-    public List getExchanges(RabbitVirtualHost virtualHost) {
-        throw new RuntimeException("XXXXXXXXXX");
+    public List<RabbitExchange> getExchanges(RabbitVirtualHost vh) {
+        try {
+            return Arrays.asList(get("/api/exchanges/" + URLEncoder.encode(vh.getName(), "UTF-8"), RabbitExchange[].class));
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     public List getBindings(String virtualHost) {
@@ -111,23 +98,39 @@ public class HypericRabbitAdmin {
     }
 
     public List<RabbitConnection> getConnections() {
-        throw new RuntimeException("XXXXXXXXXX");
+        return Arrays.asList(get("/api/connections", RabbitConnection[].class));
     }
 
     public List<RabbitChannel> getChannels() {
-        List res = null;
-        return res;
+        return Arrays.asList(get("/api/channels", RabbitChannel[].class));
     }
 
     public boolean getStatus() {
-        throw new RuntimeException("XXXXXXXXXX");
+        RabbitNode n = get("/api/nodes/"+node, RabbitNode.class);
+        return (n!=null) && n.isRunning();
     }
 
     public String getPeerNodeName() {
-        throw new RuntimeException("XXXXXXXXXX");
+        return node;
     }
 
     public boolean virtualHostAvailable(String virtualHost, String node) {
         throw new RuntimeException("XXXXXXXXXX");
+    }
+
+    private <T extends Object> T get(String api, Class<T> classOfT) {
+        T res = null;
+        try {
+            GetMethod get = new GetMethod("http://192.168.183.140:55672" + api);
+            get.setDoAuthentication(true);
+            int r = client.executeMethod(get);
+            String responseBody = get.getResponseBodyAsString();
+            logger.debug("[" + api + "] -(" + r + ")-> " + responseBody);
+            Gson gson = new Gson();
+            res = gson.fromJson(responseBody, classOfT);
+        } catch (IOException ex) {
+            logger.error(ex);
+        }
+        return res;
     }
 }
