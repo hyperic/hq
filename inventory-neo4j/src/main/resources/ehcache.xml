@@ -279,7 +279,7 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  <cache name="org.hyperic.hq.common.server.session.Crispo.optsSet"
+  <cache name="org.hyperic.hq.common.server.session.Crispo.opts"
          maxElementsInMemory="1000"
          eternal="true"
          timeToIdleSeconds="0"
@@ -381,25 +381,18 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-   <cache name="org.hyperic.hq.events.server.session.ResourceTypeAlertDefinition.actionsBag"
+   <cache name="org.hyperic.hq.events.server.session.ResourceTypeAlertDefinition.actions"
          maxElementsInMemory="5000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  <cache name="org.hyperic.hq.events.server.session.ResourceTypeAlertDefinition.conditionsBag"
+  <cache name="org.hyperic.hq.events.server.session.ResourceTypeAlertDefinition.conditions"
          maxElementsInMemory="5000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
-         memoryStoreEvictionPolicy="LRU"/>
-  <cache name="org.hyperic.hq.events.server.session.ResourceTypeAlertDefinition.triggersBag"
-         maxElementsInMemory="5000"
-         eternal="true"
-         timeToIdleSeconds="0"
-         timeToLiveSeconds="0"
-         memoryStoreEvictionPolicy="LRU"/>  
-         
+         memoryStoreEvictionPolicy="LRU"/>        
          
   <cache name="org.hyperic.hq.events.server.session.AlertConditionLog"
          maxElementsInMemory="1000"
@@ -624,7 +617,7 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  <cache name="org.hyperic.hq.common.server.session.Calendar.entriesBag"
+  <cache name="org.hyperic.hq.common.server.session.Calendar.entries"
          maxElementsInMemory="20"
          eternal="true"
          timeToIdleSeconds="0"
@@ -636,7 +629,7 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  <cache name="org.hyperic.hq.authz.server.session.Role.calendarBag"
+  <cache name="org.hyperic.hq.authz.server.session.Role.calendars"
          maxElementsInMemory="200"
          eternal="true"
          timeToIdleSeconds="0"

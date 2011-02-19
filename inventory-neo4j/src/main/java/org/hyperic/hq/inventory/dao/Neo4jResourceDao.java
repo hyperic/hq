@@ -189,5 +189,7 @@ public class Neo4jResourceDao implements ResourceDao {
         // the underlying node
         graphDatabaseContext.getNodeIndex(null).add(resource.getUnderlyingState(), "type",
             resource.getType().getId());
+        //flush to get the JSR-303 validation done sooner
+        entityManager.flush();
     }
 }

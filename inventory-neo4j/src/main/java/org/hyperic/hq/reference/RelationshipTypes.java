@@ -17,6 +17,8 @@ abstract public class RelationshipTypes {
     
     public static final String HAS_OPERATION_TYPE ="HAS_OPERATION_TYPE";
     
+    public static final String OPERATION_ARG_TYPE="OPERATION_ARG_TYPE";
+    
     public static final String HAS_PROPERTY_TYPE ="HAS_PROPERTY_TYPE";
     
     public static final String OWNS ="OWNS";
