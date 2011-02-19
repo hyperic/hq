@@ -16,6 +16,9 @@ public class RabbitExchange implements RabbitObject {
      * @return the name
      */
     public String getName() {
+        if (name.equals("")) {
+            name = AMQPTypes.DEFAULT_EXCHANGE_NAME;
+        }
         return name;
     }
 }

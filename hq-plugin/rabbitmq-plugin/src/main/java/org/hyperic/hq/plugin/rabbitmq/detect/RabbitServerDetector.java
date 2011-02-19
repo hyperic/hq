@@ -342,6 +342,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                 if (obj instanceof RabbitQueue) {
                     RabbitQueue queue = (RabbitQueue) obj;
                     c.setValue(MetricConstants.QUEUE, queue.getName());
+                    name+=" @ "+vHost.getName();
 //                    service.setCustomProperties(QueueCollector.getAttributes(queue));
                 } else if (obj instanceof RabbitConnection) {
                     RabbitConnection conn = (RabbitConnection) obj;
@@ -349,11 +350,8 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                     service.setCustomProperties(ConnectionCollector.getAttributes(conn));
                 } else if (obj instanceof RabbitExchange) {
                     RabbitExchange exchange = (RabbitExchange) obj;
-                    if (exchange.getName().equals("")) {
-                        name = AMQPTypes.DEFAULT_EXCHANGE_NAME;
-                    }
-                    c.setValue(MetricConstants.EXCHANGE, exchange.getName() == null
-                            ? AMQPTypes.DEFAULT_EXCHANGE_NAME : exchange.getName());
+                    c.setValue(MetricConstants.EXCHANGE, exchange.getName());
+                    name+=" @ "+vHost.getName();
 //                    service.setCustomProperties(ExchangeCollector.getAttributes((RabbitExchange) obj));
                 } else if (obj instanceof RabbitChannel) {
                     RabbitChannel channel = (RabbitChannel) obj;
