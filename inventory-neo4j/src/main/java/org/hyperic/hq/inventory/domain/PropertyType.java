@@ -219,7 +219,7 @@ public class PropertyType {
         sb.append("Name: ").append(getName()).append(", ");
         sb.append("Description: ").append(getDescription()).append(", ");
         sb.append("Secret: ").append(isSecret()).append(", ");
-        sb.append("DefaultValue: ").append(getDefaultValue());
+        sb.append("DefaultValue: ").append(getDefaultValue()).append(", ");
         sb.append("Hidden: ").append(isHidden()).append("]");
         return sb.toString();
     }
