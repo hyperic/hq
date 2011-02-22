@@ -612,7 +612,6 @@ a.buttonInactive:active span {
 #header {
 	border-bottom: 3px solid #2D6EBE;
 	background-color: #000;
-	overflow:hidden;
 }
 
 #header,#footer {
