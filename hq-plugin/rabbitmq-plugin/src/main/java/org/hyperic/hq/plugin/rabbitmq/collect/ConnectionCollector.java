@@ -50,19 +50,25 @@ public class ConnectionCollector extends RabbitMQListCollector {
             logger.debug("[collect] node=" + node);
         }
 
-        List<RabbitConnection> connections = rabbitAdmin.getConnections();
-        if (connections != null) {
-            for (RabbitConnection conn : connections) {
-                logger.debug("[collect] RabbitConnection="+conn.getPid());
-                setValue(conn.getPid() + ".Availability", Metric.AVAIL_UP);
-                setValue(conn.getPid() + ".packetsReceived", conn.getReceiveCount());
-                setValue(conn.getPid() + ".packetsSent", conn.getSendCount());
-                setValue(conn.getPid() + ".channelCount", conn.getChannels());
-                setValue(conn.getPid() + ".octetsReceived", conn.getOctetsReceived());
-                setValue(conn.getPid() + ".octetsSent", conn.getOctetsSent());
-                setValue(conn.getPid() + ".pendingSends", conn.getPendingSends());
+        try {
+            List<RabbitConnection> connections = rabbitAdmin.getConnections();
+            if (connections != null) {
+                for (RabbitConnection conn : connections) {
+                    logger.debug("[collect] RabbitConnection=" + conn.getPid());
+                    setValue(conn.getPid() + ".Availability", Metric.AVAIL_UP);
+                    setValue(conn.getPid() + ".packetsReceived", conn.getReceiveCount());
+                    setValue(conn.getPid() + ".packetsSent", conn.getSendCount());
+                    setValue(conn.getPid() + ".channelCount", conn.getChannels());
+                    setValue(conn.getPid() + ".octetsReceived", conn.getOctetsReceived());
+                    setValue(conn.getPid() + ".octetsSent", conn.getOctetsSent());
+                    setValue(conn.getPid() + ".pendingSends", conn.getPendingSends());
+                }
             }
+        } catch (Exception ex) {
+            setAvailability(false);
+            logger.debug(ex.getMessage(), ex);
         }
+
     }
 
     /**

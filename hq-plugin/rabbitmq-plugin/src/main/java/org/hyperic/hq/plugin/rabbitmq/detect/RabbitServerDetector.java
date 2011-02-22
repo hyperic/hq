@@ -360,7 +360,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                 } else if (obj instanceof RabbitVirtualHost) {
                     RabbitVirtualHost vh = (RabbitVirtualHost) obj;
                     c.setValue(MetricConstants.VHOST, vh.getName());
-                    service.setCustomProperties(VirtualHostCollector.getAttributes(vh));
+//                    service.setCustomProperties(VirtualHostCollector.getAttributes(vh));
                 }
 
                 service.setName(node + " " + name);

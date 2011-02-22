@@ -4,60 +4,18 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
 
-import java.util.Date;
-
 /**
  *
  * @author administrator
  */
 public class RabbitQueue implements RabbitObject {
 
-    private int messages;
-    private int messages_ready;
-    private int messages_unacknowledged;
     private String name;
-
-    /**
-     * @return the messages
-     */
-    public int getMessages() {
-        return messages;
-    }
-
-    /**
-     * @param messages the messages to set
-     */
-    public void setMessages(int messages) {
-        this.messages = messages;
-    }
-
-    /**
-     * @return the messages_ready
-     */
-    public int getMessages_ready() {
-        return messages_ready;
-    }
-
-    /**
-     * @param messages_ready the messages_ready to set
-     */
-    public void setMessages_ready(int messages_ready) {
-        this.messages_ready = messages_ready;
-    }
-
-    /**
-     * @return the messages_unacknowledged
-     */
-    public int getMessages_unacknowledged() {
-        return messages_unacknowledged;
-    }
-
-    /**
-     * @param messages_unacknowledged the messages_unacknowledged to set
-     */
-    public void setMessages_unacknowledged(int messages_unacknowledged) {
-        this.messages_unacknowledged = messages_unacknowledged;
-    }
+    private Integer messages;
+    private Integer consumers;
+    private Integer messagesReady;
+    private Integer messagesUnacknowledged;
+    private Integer memory;
 
     /**
      * @return the name
@@ -67,14 +25,84 @@ public class RabbitQueue implements RabbitObject {
     }
 
     /**
+     * @return the messages
+     */
+    public Integer getMessages() {
+        return messages;
+    }
+
+    /**
+     * @return the consumers
+     */
+    public Integer getConsumers() {
+        return consumers;
+    }
+
+    /**
+     * @return the messagesReady
+     */
+    public Integer getMessagesReady() {
+        return messagesReady;
+    }
+
+    /**
+     * @return the messagesUnacknowledged
+     */
+    public Integer getMessagesUnacknowledged() {
+        return messagesUnacknowledged;
+    }
+
+    /**
+     * @return the memory
+     */
+    public Integer getMemory() {
+        return memory;
+    }
+
+    /**
      * @param name the name to set
      */
     public void setName(String name) {
         this.name = name;
     }
 
+    /**
+     * @param messages the messages to set
+     */
+    public void setMessages(Integer messages) {
+        this.messages = messages;
+    }
+
+    /**
+     * @param consumers the consumers to set
+     */
+    public void setConsumers(Integer consumers) {
+        this.consumers = consumers;
+    }
+
+    /**
+     * @param messagesReady the messagesReady to set
+     */
+    public void setMessagesReady(Integer messagesReady) {
+        this.messagesReady = messagesReady;
+    }
+
+    /**
+     * @param messagesUnacknowledged the messagesUnacknowledged to set
+     */
+    public void setMessagesUnacknowledged(Integer messagesUnacknowledged) {
+        this.messagesUnacknowledged = messagesUnacknowledged;
+    }
+
+    /**
+     * @param memory the memory to set
+     */
+    public void setMemory(Integer memory) {
+        this.memory = memory;
+    }
+
     @Override
     public String toString() {
-        return super.toString() + "[name=" + getName() + "]";
+        return "RabbitQueue{name=" + getName() + ", messages=" + getMessages() + ", consumers=" + getConsumers() + ", messagesReady=" + getMessagesReady() + ", messagesUnacknowledged=" + getMessagesUnacknowledged() + ", memory=" + getMemory() + '}';
     }
 }

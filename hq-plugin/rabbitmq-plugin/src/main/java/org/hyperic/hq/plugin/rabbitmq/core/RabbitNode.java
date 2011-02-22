@@ -8,7 +8,7 @@ package org.hyperic.hq.plugin.rabbitmq.core;
  *
  * @author administrator
  */
-class RabbitNode implements RabbitObject{
+class RabbitNode implements RabbitObject {
 
     private String name;
     private boolean running;
@@ -39,5 +39,10 @@ class RabbitNode implements RabbitObject{
      */
     public void setRunning(boolean running) {
         this.running = running;
+    }
+
+    @Override
+    public String toString() {
+        return "RabbitNode{" + "name=" + name + ", running=" + running + '}';
     }
 }

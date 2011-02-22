@@ -44,37 +44,25 @@ public class QueueCollector extends RabbitMQListCollector {
     public void collect(HypericRabbitAdmin rabbitAdmin) {
         Properties props = getProperties();
         String vhost = (String) props.get(MetricConstants.VHOST);
+        String queue = (String) props.get(MetricConstants.QUEUE);
         if (logger.isDebugEnabled()) {
             String node = (String) props.get(MetricConstants.NODE);
-            logger.debug("[collect] vhost=" + vhost + " node=" + node);
+            logger.debug("[collect] queue='" + queue + "' vhost='" + vhost + "' node='" + node + "'");
         }
 
-//        List<RabbitQueue> queues = rabbitAdmin.getQueues(vhost);
-//        if (queues != null) {
-//            for (RabbitQueue q : queues) {
-//                logger.debug("[collect] RabbitQueue="+q.getName());
-//                setValue(q.getName() + "." + Metric.ATTR_AVAIL, Metric.AVAIL_UP);
-//                setValue(q.getName() + ".messages", q.getMessages());
-//                setValue(q.getName() + ".consumers", q.getConsumers());
-//                setValue(q.getName() + ".transactions", q.getTransactions());
-//                setValue(q.getName() + ".acksUncommitted", q.getAcksUncommitted());
-//                setValue(q.getName() + ".messagesReady", q.getMessagesReady());
-//                setValue(q.getName() + ".messagesUnacknowledged", q.getMessagesUnacknowledged());
-//                setValue(q.getName() + ".messagesUncommitted", q.getMessageUncommitted());
-//                setValue(q.getName() + ".memory", q.getMemory());
-//            }
-//        }
-    }
-
-    /**
-     * Assemble custom key/value data for each object to set
-     * as custom properties in the ServiceResource to display
-     * in the UI.
-     * @param queue
-     * @return
-     */
-    public static ConfigResponse getAttributes(RabbitQueue queue) {
-        throw new RuntimeException("XXXXXXXXXX");
+        try {
+            HypericRabbitAdmin admin = new HypericRabbitAdmin(props);
+            RabbitQueue q = admin.getVirtualQueue(vhost, queue);
+            setAvailability(true);
+            setValue("messages", q.getMessages());
+            setValue("consumers", q.getConsumers());
+            setValue("messagesReady", q.getMessagesReady());
+            setValue("messagesUnacknowledged", q.getMessagesUnacknowledged());
+            setValue("memory", q.getMemory());
+        } catch (Exception ex) {
+            setAvailability(false);
+            logger.debug(ex.getMessage(), ex);
+        }
     }
 
     @Override

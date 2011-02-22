@@ -49,17 +49,23 @@ public class ChannelCollector extends RabbitMQListCollector {
             logger.debug("[collect] node=" + node);
         }
 
-        List<RabbitChannel> channels = rabbitAdmin.getChannels();
-        if (channels != null) {
-            for (RabbitChannel c : channels) {
-                logger.debug("[collect] RabbitChannel=" + c.getPid());
-                setValue(c.getPid() + ".Availability", Metric.AVAIL_UP);
-                setValue(c.getPid() + ".consumerCount", c.getConsumerCount());
-                setValue(c.getPid() + ".prefetchCount", c.getPrefetchCount());
-                setValue(c.getPid() + ".acksUncommitted", c.getAcksUncommitted());
-                setValue(c.getPid() + ".messagesUnacknowledged", c.getMessagesUnacknowledged());
+        try {
+            List<RabbitChannel> channels = rabbitAdmin.getChannels();
+            if (channels != null) {
+                for (RabbitChannel c : channels) {
+                    logger.debug("[collect] RabbitChannel=" + c.getPid());
+                    setValue(c.getPid() + ".Availability", Metric.AVAIL_UP);
+                    setValue(c.getPid() + ".consumerCount", c.getConsumerCount());
+                    setValue(c.getPid() + ".prefetchCount", c.getPrefetchCount());
+                    setValue(c.getPid() + ".acksUncommitted", c.getAcksUncommitted());
+                    setValue(c.getPid() + ".messagesUnacknowledged", c.getMessagesUnacknowledged());
+                }
             }
+        } catch (Exception ex) {
+            setAvailability(false);
+            logger.debug(ex.getMessage(), ex);
         }
+
     }
 
     /**

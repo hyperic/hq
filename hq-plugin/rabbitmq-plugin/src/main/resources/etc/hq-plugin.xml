@@ -96,7 +96,7 @@
 
         <service name="Queue">
             <property name="template"
-                      value="rabbitmq:vhost=%vhost%,${server-connection}:%queue%.${alias}"/>
+                      value="rabbitmq:queue=%queue%,vhost=%vhost%,${server-connection}:${alias}"/>
 
             <config>
                 <option name="vhost" description="rabbit node-vhost name"/>
@@ -305,7 +305,7 @@
 
         <service name="Exchange">
             <property name="template"
-                      value="rabbitmq:vhost=%vhost%,${server-connection}:%exchange%.${alias}"/>
+                      value="rabbitmq:exchange=%exchange%,vhost=%vhost%,${server-connection}:${alias}"/>
 
             <config>
                 <option name="vhost" description="rabbit node-vhost name"/>

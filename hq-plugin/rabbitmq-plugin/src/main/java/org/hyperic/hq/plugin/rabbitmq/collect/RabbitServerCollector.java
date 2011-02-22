@@ -46,8 +46,6 @@ public class RabbitServerCollector extends RabbitMQDefaultCollector {
         if (logger.isDebugEnabled()) {
             logger.debug("[collect] node=" + node);
         }
-
-        setAvailability(rabbitAdmin.getStatus());
     }
 
     @Override

@@ -25,10 +25,13 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.collect;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitVirtualHost;
+import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 
 import java.util.Properties;
@@ -37,6 +40,7 @@ import java.util.Properties;
  * VirtualHostCollector
  * @author Helena Edelson
  */
+// XXX cambiar a Measurement plugin 
 public class VirtualHostCollector extends RabbitMQDefaultCollector {
 
     private static final Log logger = LogFactory.getLog(VirtualHostCollector.class);
@@ -49,6 +53,15 @@ public class VirtualHostCollector extends RabbitMQDefaultCollector {
             logger.debug("[collect] vhost=" + vhost + " node=" + node);
         }
 
+        try {
+            HypericRabbitAdmin admin = new HypericRabbitAdmin(props);
+            admin.getVirtualHost(vhost);
+            setAvailability(true);
+        } catch (PluginException ex) {
+            setAvailability(false);
+            logger.debug(ex.getMessage(),ex);
+        }
+
 //        RabbitVirtualHost virtualHost = new RabbitVirtualHost(vhost, rabbitAdmin);
 //
 //        if (virtualHost != null) {
@@ -59,20 +72,6 @@ public class VirtualHostCollector extends RabbitMQDefaultCollector {
 //            setValue("channelCount", virtualHost.getChannelCount());
 //            setValue("consumerCount", virtualHost.getConsumerCount());
 //        }
-    }
-
-    /**
-     * Assemble custom key/value data for each object to set
-     * as custom properties in the ServiceResource to display
-     * in the UI.
-     * @param vh
-     * @return
-     */
-    public static ConfigResponse getAttributes(RabbitVirtualHost vh) {
-        ConfigResponse res = new ConfigResponse();
-        res.setValue("name", vh.getName());
-//        res.setValue("node", vh.getNode());
-        return res;
     }
 
     @Override

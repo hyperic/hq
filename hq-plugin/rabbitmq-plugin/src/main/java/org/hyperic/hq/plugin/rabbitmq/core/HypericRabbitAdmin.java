@@ -25,21 +25,22 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
 
+import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 
 /**
@@ -62,7 +63,7 @@ public class HypericRabbitAdmin {
 
         client.getHttpConnectionManager().getParams().setConnectionTimeout(5000);
 
-        this.node=props.getProperty("node");
+        this.node = props.getProperty("node");
     }
 
     public HypericRabbitAdmin(ConfigResponse props) {
@@ -73,11 +74,11 @@ public class HypericRabbitAdmin {
         logger.debug("[HypericRabbitAdmin] destroy()");
     }
 
-    public List<RabbitVirtualHost> getVirtualHosts() {
+    public List<RabbitVirtualHost> getVirtualHosts() throws PluginException {
         return Arrays.asList(get("/api/vhosts", RabbitVirtualHost[].class));
     }
 
-    public List<RabbitQueue> getQueues(RabbitVirtualHost vh) {
+    public List<RabbitQueue> getQueues(RabbitVirtualHost vh) throws PluginException {
         try {
             return Arrays.asList(get("/api/queues/" + URLEncoder.encode(vh.getName(), "UTF-8"), RabbitQueue[].class));
         } catch (UnsupportedEncodingException ex) {
@@ -85,7 +86,7 @@ public class HypericRabbitAdmin {
         }
     }
 
-    public List<RabbitExchange> getExchanges(RabbitVirtualHost vh) {
+    public List<RabbitExchange> getExchanges(RabbitVirtualHost vh) throws PluginException {
         try {
             return Arrays.asList(get("/api/exchanges/" + URLEncoder.encode(vh.getName(), "UTF-8"), RabbitExchange[].class));
         } catch (UnsupportedEncodingException ex) {
@@ -93,41 +94,72 @@ public class HypericRabbitAdmin {
         }
     }
 
-    public List getBindings(String virtualHost) {
-        throw new RuntimeException("XXXXXXXXXX");
-    }
-
-    public List<RabbitConnection> getConnections() {
+    public List<RabbitConnection> getConnections() throws PluginException {
         return Arrays.asList(get("/api/connections", RabbitConnection[].class));
     }
 
-    public List<RabbitChannel> getChannels() {
+    public List<RabbitChannel> getChannels() throws PluginException {
         return Arrays.asList(get("/api/channels", RabbitChannel[].class));
     }
 
-    public boolean getStatus() {
-        RabbitNode n = get("/api/nodes/"+node, RabbitNode.class);
-        return (n!=null) && n.isRunning();
+    public boolean getStatus() throws PluginException {
+        RabbitNode n = get("/api/nodes/" + node, RabbitNode.class);
+        return (n != null) && n.isRunning();
     }
 
     public String getPeerNodeName() {
         return node;
     }
 
-    public boolean virtualHostAvailable(String virtualHost, String node) {
-        throw new RuntimeException("XXXXXXXXXX");
+    public RabbitVirtualHost getVirtualHost(String vhName) throws PluginException {
+        try {
+            vhName = URLEncoder.encode(vhName, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex);
+        }
+        return get("/api/vhosts/" + vhName, RabbitVirtualHost.class);
     }
 
-    private <T extends Object> T get(String api, Class<T> classOfT) {
+    public RabbitQueue getVirtualQueue(String vhName, String qName) throws PluginException {
+        try {
+            vhName = URLEncoder.encode(vhName, "UTF-8");
+            qName = URLEncoder.encode(qName, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex);
+        }
+
+        return get("/api/queues/" + vhName + "/" + qName, RabbitQueue.class);
+    }
+
+    public RabbitExchange getExchange(String vhost, String exch) throws PluginException {
+        try {
+            vhost = URLEncoder.encode(vhost, "UTF-8");
+            exch = URLEncoder.encode(exch, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex);
+        }
+
+        return get("/api/exchanges/" + vhost + "/" + exch, RabbitExchange.class);
+    }
+
+    private <T extends Object> T get(String api, Class<T> classOfT) throws PluginException {
         T res = null;
         try {
             GetMethod get = new GetMethod("http://192.168.183.140:55672" + api);
             get.setDoAuthentication(true);
             int r = client.executeMethod(get);
+            if (r != 200) {
+                throw new PluginException("[" + api + "] http error code: '" + r + "'");
+            }
             String responseBody = get.getResponseBodyAsString();
-            logger.debug("[" + api + "] -(" + r + ")-> " + responseBody);
-            Gson gson = new Gson();
+            if (logger.isDebugEnabled()) {
+                logger.debug("[" + api + "] -(" + r + ")-> " + responseBody);
+            }
+            Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
             res = gson.fromJson(responseBody, classOfT);
+            if (logger.isDebugEnabled()) {
+                logger.debug("[" + api + "] -(" + r + ")-> " + res);
+            }
         } catch (IOException ex) {
             logger.error(ex);
         }
