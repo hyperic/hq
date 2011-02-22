@@ -63,6 +63,7 @@
 		<spring-framework.version>3.0.5.RELEASE</spring-framework.version>
 		<spring-security.version>3.0.5.RELEASE</spring-security.version>
 		<struts.version>1.3.10</struts.version>
+		<surefire.version>2.6</surefire.version>
 		<tapestry.version>4.1.5</tapestry.version>
 		<tomcat-jdbc.version>1.0.8.5</tomcat-jdbc.version>
 		<tomcat-juli.version>6.0.20</tomcat-juli.version>
@@ -614,6 +615,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
+					<version>${surefire.version}</version>
 					<configuration>
 						<argLine>-Xmx512m -XX:MaxPermSize=192m -XX:-UseGCOverheadLimit</argLine>
 						<enableAssertions>false</enableAssertions>
