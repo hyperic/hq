@@ -22,7 +22,6 @@ import org.hyperic.hq.inventory.dao.ResourceDao;
 import org.hyperic.hq.inventory.dao.ResourceTypeDao;
 import org.hyperic.hq.inventory.events.CPropChangeEvent;
 import org.hyperic.hq.messaging.MockMessagePublisher;
-import org.hyperic.hq.reference.ConfigTypes;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.junit.Before;
 import org.junit.Test;
@@ -69,7 +68,7 @@ public class ResourceIntegrationTest {
         resourceTypeDao.persist(produceDept);
         store.relateTo(produceDept, RelationshipTypes.CONTAINS);
         store.addPropertyType(new PropertyType("Address", "Store location"));
-        ConfigType product = new ConfigType(ConfigTypes.PRODUCT);
+        ConfigType product = new ConfigType("Product");
         store.addConfigType(product);
         product.addConfigOptionType(new ConfigOptionType("user", "User"));
         ResourceType lettuce = new ResourceType("Lettuce");
@@ -342,7 +341,7 @@ public class ResourceIntegrationTest {
     @Test
     public void testRemove() {
         Config product = new Config();
-        product.setType(store.getConfigType(ConfigTypes.PRODUCT));
+        product.setType(store.getConfigType("Product"));
         product.setValue("user", "bob");
         traderJoes.addConfig(product);
         traderJoes.remove();
@@ -435,10 +434,10 @@ public class ResourceIntegrationTest {
     @Test
     public void testAddAndGetConfig() {
         Config product = new Config();
-        product.setType(store.getConfigType(ConfigTypes.PRODUCT));
+        product.setType(store.getConfigType("Product"));
         product.setValue("user", "bob");
         traderJoes.addConfig(product);
-        Config config = traderJoes.getConfig(ConfigTypes.PRODUCT);
+        Config config = traderJoes.getConfig("Product");
         assertEquals("bob", config.getValue("user"));
     }
 
@@ -454,12 +453,12 @@ public class ResourceIntegrationTest {
 
     @Test
     public void testGetConfigNoConfig() {
-        assertNull(traderJoes.getConfig(ConfigTypes.PRODUCT));
+        assertNull(traderJoes.getConfig("Product"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testGetConfigInvalidType() {
-        traderJoes.getConfig(ConfigTypes.MEASUREMENT);
+        traderJoes.getConfig("Measurement");
     }
 
 }

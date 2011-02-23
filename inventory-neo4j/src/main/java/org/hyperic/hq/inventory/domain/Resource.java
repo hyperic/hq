@@ -238,6 +238,10 @@ public class Resource {
         }
         return null;
     }
+    
+    public Set<Config> getConfigs() {
+        return this.configs;
+    }
 
     /**
      * 

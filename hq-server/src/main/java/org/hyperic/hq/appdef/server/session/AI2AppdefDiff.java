@@ -48,7 +48,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.inventory.dao.ResourceDao;
 import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.hq.reference.ConfigTypes;
+import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -113,22 +113,22 @@ public class AI2AppdefDiff {
             
             //if the plugin did not set a config, apply the existing config.
             if (revisedAIplatform.getProductConfig() == null) {
-                revisedAIplatform.setProductConfig(cmLocal.toConfigResponse(resource.getConfig(ConfigTypes.PRODUCT)));
+                revisedAIplatform.setProductConfig(cmLocal.toConfigResponse(resource.getConfig(ProductPlugin.TYPE_PRODUCT)));
             }
             if (revisedAIplatform.getControlConfig() == null) {
-                revisedAIplatform.setControlConfig(cmLocal.toConfigResponse(resource.getConfig(ConfigTypes.CONTROL)));
+                revisedAIplatform.setControlConfig(cmLocal.toConfigResponse(resource.getConfig(ProductPlugin.TYPE_CONTROL)));
             }
             if (revisedAIplatform.getMeasurementConfig() == null) {
-                revisedAIplatform.setMeasurementConfig(cmLocal.toConfigResponse(resource.getConfig(ConfigTypes.MEASUREMENT)));
+                revisedAIplatform.setMeasurementConfig(cmLocal.toConfigResponse(resource.getConfig(ProductPlugin.TYPE_MEASUREMENT)));
             }
 
             //XXX might want to do this for all platforms, just checking devices for now.
             if (!configsEqual(revisedAIplatform.getProductConfig(),
-                cmLocal.toConfigResponse(resource.getConfig(ConfigTypes.PRODUCT))) ||
+                cmLocal.toConfigResponse(resource.getConfig(ProductPlugin.TYPE_PRODUCT))) ||
                 !configsEqual(revisedAIplatform.getControlConfig(),
-                    cmLocal.toConfigResponse(resource.getConfig(ConfigTypes.CONTROL))) ||
+                    cmLocal.toConfigResponse(resource.getConfig(ProductPlugin.TYPE_CONTROL))) ||
                 !configsEqual(revisedAIplatform.getMeasurementConfig(),
-                    cmLocal.toConfigResponse(resource.getConfig(ConfigTypes.MEASUREMENT))))
+                    cmLocal.toConfigResponse(resource.getConfig(ProductPlugin.TYPE_MEASUREMENT))))
             {
                 revisedAIplatform.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
                 addDiff(revisedAIplatform,
@@ -398,9 +398,9 @@ public class AI2AppdefDiff {
                Resource resource = Bootstrap.getBean(ResourceDao.class).findById(aID.getId());
                 
                 if (
-                    !configsEqual(scannedServer.getProductConfig(), cmLocal.toConfigResponse(resource.getConfig(ConfigTypes.PRODUCT))) ||
-                    !configsEqual(scannedServer.getControlConfig(), cmLocal.toConfigResponse(resource.getConfig(ConfigTypes.CONTROL))) ||
-                    !configsEqual(scannedServer.getMeasurementConfig(), cmLocal.toConfigResponse(resource.getConfig(ConfigTypes.MEASUREMENT))))
+                    !configsEqual(scannedServer.getProductConfig(), cmLocal.toConfigResponse(resource.getConfig(ProductPlugin.TYPE_PRODUCT))) ||
+                    !configsEqual(scannedServer.getControlConfig(), cmLocal.toConfigResponse(resource.getConfig(ProductPlugin.TYPE_CONTROL))) ||
+                    !configsEqual(scannedServer.getMeasurementConfig(), cmLocal.toConfigResponse(resource.getConfig(ProductPlugin.TYPE_MEASUREMENT))))
                 {
                     // config was changed (and is NOT user-managed)
                     configChanged = true;

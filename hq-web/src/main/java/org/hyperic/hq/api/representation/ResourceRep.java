@@ -5,8 +5,8 @@ import java.util.Map;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.hyperic.hq.api.LinkHelper;
+import org.hyperic.hq.inventory.domain.Config;
 import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.hq.reference.ConfigTypes;
 import org.springframework.util.Assert;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -54,21 +54,8 @@ public class ResourceRep implements SimpleRepresentation, LinkedRepresentation {
 		}
 		
 		configs = new HashMap<String, Object>();
-		
-		if (resource.getConfig(ConfigTypes.AUTO_INVENTORY) != null) {
-			configs.put("autoinventory", new ConfigRep(resource.getConfig(ConfigTypes.AUTO_INVENTORY)));
-		}
-		
-		if (resource.getConfig(ConfigTypes.CONTROL) != null) {
-			configs.put("control", new ConfigRep(resource.getConfig(ConfigTypes.CONTROL)));
-		}
-		
-		if (resource.getConfig(ConfigTypes.MEASUREMENT) != null) {
-			configs.put("measurement", new ConfigRep(resource.getConfig(ConfigTypes.MEASUREMENT)));
-		}
-		
-		if (resource.getConfig(ConfigTypes.PRODUCT) != null) {
-			configs.put("product", new ConfigRep(resource.getConfig(ConfigTypes.PRODUCT)));
+		for(Config config: resource.getConfigs()) {
+		    configs.put(config.getType().getName(), new ConfigRep(config));
 		}
 	}
 	

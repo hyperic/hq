@@ -43,7 +43,7 @@ import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlScheduleManager;
 import org.hyperic.hq.product.ControlPlugin;
 import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.reference.ConfigTypes;
+import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -174,7 +174,7 @@ public class ControlActionResultsCollectorImpl implements ControlActionResultsCo
 
     private ConfigResponse getConfigResponse(AuthzSubject subject, AppdefEntityID id)
         throws PluginException {
-        byte[] controlResponse = configManager.toConfigResponse(resourceManager.findResourceById(id.getId()).getConfig(ConfigTypes.CONTROL));
+        byte[] controlResponse = configManager.toConfigResponse(resourceManager.findResourceById(id.getId()).getConfig(ProductPlugin.TYPE_CONTROL));
         ConfigResponse configResponse;
         try {
             configResponse = ConfigResponse.decode(controlResponse);

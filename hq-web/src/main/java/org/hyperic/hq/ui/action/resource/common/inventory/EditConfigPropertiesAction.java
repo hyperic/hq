@@ -50,7 +50,6 @@ import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.reference.ConfigTypes;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.BizappUtils;
@@ -148,11 +147,11 @@ public class EditConfigPropertiesAction
                 try {
                     byte[] oldCfgBytes = null;
                     if (cfgTypes[i].equals(ProductPlugin.TYPE_PRODUCT)) {
-                        oldCfgBytes = configManager.toConfigResponse(resource.getConfig(ConfigTypes.PRODUCT));
+                        oldCfgBytes = configManager.toConfigResponse(resource.getConfig(ProductPlugin.TYPE_PRODUCT));
                     } else if (cfgTypes[i].equals(ProductPlugin.TYPE_MEASUREMENT)) {
-                        oldCfgBytes = configManager.toConfigResponse(resource.getConfig(ConfigTypes.MEASUREMENT));
+                        oldCfgBytes = configManager.toConfigResponse(resource.getConfig(ProductPlugin.TYPE_MEASUREMENT));
                     } else if (cfgTypes[i].equals(ProductPlugin.TYPE_CONTROL)) {
-                        oldCfgBytes =configManager.toConfigResponse(resource.getConfig(ConfigTypes.CONTROL));
+                        oldCfgBytes =configManager.toConfigResponse(resource.getConfig(ProductPlugin.TYPE_CONTROL));
                     } 
 
                     if (oldCfgBytes == null) {

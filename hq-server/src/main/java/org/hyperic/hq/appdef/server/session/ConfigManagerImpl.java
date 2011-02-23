@@ -50,7 +50,6 @@ import org.hyperic.hq.inventory.domain.Config;
 import org.hyperic.hq.inventory.domain.ConfigType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.reference.ConfigTypes;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -382,32 +381,32 @@ public class ConfigManagerImpl implements ConfigManager {
         byte[] configBytes;
         Resource resource = resourceManager.findResourceById(appdefID.getId());
 
-        configBytes = mergeConfig(toConfigResponse(resource.getConfig(ConfigTypes.PRODUCT)),
+        configBytes = mergeConfig(toConfigResponse(resource.getConfig(ProductPlugin.TYPE_PRODUCT)),
             productConfig, true, force);
         // TODO might just be updating product config, don't create a whole new
         // one and associate it. Check if resource.getProductConfig() null first
         if (!AICompare.configsEqual(configBytes,
-            toConfigResponse(resource.getConfig(ConfigTypes.PRODUCT)))) {
+            toConfigResponse(resource.getConfig(ProductPlugin.TYPE_PRODUCT)))) {
             resource.addConfig(createConfig(configBytes,
-                resource.getType().getConfigType(ConfigTypes.PRODUCT)));
+                resource.getType().getConfigType(ProductPlugin.TYPE_PRODUCT)));
             wasUpdated = true;
         }
 
-        configBytes = mergeConfig(toConfigResponse(resource.getConfig(ConfigTypes.MEASUREMENT)),
+        configBytes = mergeConfig(toConfigResponse(resource.getConfig(ProductPlugin.TYPE_MEASUREMENT)),
             measurementConfig, true, force);
         if (!AICompare.configsEqual(configBytes,
-            toConfigResponse(resource.getConfig(ConfigTypes.MEASUREMENT)))) {
+            toConfigResponse(resource.getConfig(ProductPlugin.TYPE_MEASUREMENT)))) {
             resource.addConfig(createConfig(configBytes,
-                resource.getType().getConfigType(ConfigTypes.MEASUREMENT)));
+                resource.getType().getConfigType(ProductPlugin.TYPE_MEASUREMENT)));
             wasUpdated = true;
         }
 
-        configBytes = mergeConfig(toConfigResponse(resource.getConfig(ConfigTypes.CONTROL)),
+        configBytes = mergeConfig(toConfigResponse(resource.getConfig(ProductPlugin.TYPE_CONTROL)),
             controlConfig, true, false);
         if (!AICompare.configsEqual(configBytes,
-            toConfigResponse(resource.getConfig(ConfigTypes.CONTROL)))) {
+            toConfigResponse(resource.getConfig(ProductPlugin.TYPE_CONTROL)))) {
             resource.addConfig(createConfig(configBytes,
-                resource.getType().getConfigType(ConfigTypes.CONTROL)));
+                resource.getType().getConfigType(ProductPlugin.TYPE_CONTROL)));
             wasUpdated = true;
         }
 
@@ -420,13 +419,13 @@ public class ConfigManagerImpl implements ConfigManager {
         Resource resource = resourceManager.findResourceById(id.getId());
         // TODO resource null?
         if (productType.equals(ProductPlugin.TYPE_PRODUCT)) {
-            config = resource.getConfig(ConfigTypes.PRODUCT);
+            config = resource.getConfig(ProductPlugin.TYPE_PRODUCT);
         } else if (productType.equals(ProductPlugin.TYPE_CONTROL)) {
-            config = resource.getConfig(ConfigTypes.CONTROL);
+            config = resource.getConfig(ProductPlugin.TYPE_CONTROL);
         } else if (productType.equals(ProductPlugin.TYPE_MEASUREMENT)) {
-            config = resource.getConfig(ConfigTypes.MEASUREMENT);
+            config = resource.getConfig(ProductPlugin.TYPE_MEASUREMENT);
         } else if (productType.equals(ProductPlugin.TYPE_AUTOINVENTORY)) {
-            config = resource.getConfig(ConfigTypes.AUTO_INVENTORY);
+            config = resource.getConfig(ProductPlugin.TYPE_AUTOINVENTORY);
         } else {
             throw new IllegalArgumentException("Unknown product type");
         }
