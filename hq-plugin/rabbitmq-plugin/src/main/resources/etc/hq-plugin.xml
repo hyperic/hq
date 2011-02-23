@@ -83,6 +83,7 @@
             <property description="Node Path" name="node.path"/>
             <property description="Node PID" name="node.pid"/>
             <property description="Rabbit -boot" name="rabbit.boot"/>
+            <property description="erlang.process" name="erlang.process"/>
         </properties>
 
         <metric name="Availability"

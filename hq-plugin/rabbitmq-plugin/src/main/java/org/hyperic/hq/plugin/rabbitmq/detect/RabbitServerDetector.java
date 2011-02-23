@@ -45,7 +45,6 @@ import org.hyperic.hq.plugin.rabbitmq.collect.*;
 import org.hyperic.hq.plugin.rabbitmq.core.*;
 import org.hyperic.hq.plugin.rabbitmq.manage.RabbitTransientResourceManager;
 import org.hyperic.hq.plugin.rabbitmq.manage.TransientResourceManager;
-import org.hyperic.hq.plugin.rabbitmq.validate.ConfigurationValidator;
 import org.hyperic.hq.product.*;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.util.config.ConfigResponse;
@@ -202,32 +201,30 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         }
 
         try {
-            if (ConfigurationValidator.isValidOtpConnection(serviceConfig)) {
-                rabbitResources = new ArrayList<ServiceResource>();
-                HypericRabbitAdmin admin = new HypericRabbitAdmin(serviceConfig);
-                try {
-                    List<ServiceResource> connections = createConnectionServiceResources(admin);
-                    if (connections != null) {
-                        rabbitResources.addAll(connections);
-                    }
-
-                    List<ServiceResource> channels = createChannelServiceResources(admin);
-                    if (channels != null) {
-                        rabbitResources.addAll(channels);
-                    }
-
-                    List<RabbitVirtualHost> vhosts = admin.getVirtualHosts();
-                    for (RabbitVirtualHost vhost : vhosts) {
-                        List<ServiceResource> resources = createResourcesPerVirtualHost(admin, vhost);
-                        if (resources != null) {
-                            rabbitResources.addAll(resources);
-                        }
-                    }
-
-                    rabbitResources.addAll(doCreateServiceResources(vhosts, AMQPTypes.VIRTUAL_HOST, serviceConfig.getValue(DetectorConstants.NODE)));
-                } finally {
-                    admin.destroy();
+            rabbitResources = new ArrayList<ServiceResource>();
+            HypericRabbitAdmin admin = new HypericRabbitAdmin(serviceConfig);
+            try {
+                List<ServiceResource> connections = createConnectionServiceResources(admin);
+                if (connections != null) {
+                    rabbitResources.addAll(connections);
                 }
+
+                List<ServiceResource> channels = createChannelServiceResources(admin);
+                if (channels != null) {
+                    rabbitResources.addAll(channels);
+                }
+
+                List<RabbitVirtualHost> vhosts = admin.getVirtualHosts();
+                for (RabbitVirtualHost vhost : vhosts) {
+                    List<ServiceResource> resources = createResourcesPerVirtualHost(admin, vhost);
+                    if (resources != null) {
+                        rabbitResources.addAll(resources);
+                    }
+                }
+
+                rabbitResources.addAll(doCreateServiceResources(vhosts, AMQPTypes.VIRTUAL_HOST, serviceConfig.getValue(DetectorConstants.NODE)));
+            } finally {
+                admin.destroy();
             }
         } catch (RuntimeException ex) {
             logger.debug(ex, ex);
@@ -342,21 +339,21 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                 if (obj instanceof RabbitQueue) {
                     RabbitQueue queue = (RabbitQueue) obj;
                     c.setValue(MetricConstants.QUEUE, queue.getName());
-                    name+=" @ "+vHost.getName();
+                    name += " @ " + vHost.getName();
 //                    service.setCustomProperties(QueueCollector.getAttributes(queue));
                 } else if (obj instanceof RabbitConnection) {
                     RabbitConnection conn = (RabbitConnection) obj;
                     c.setValue(MetricConstants.CONNECTION, conn.getPid());
-                    service.setCustomProperties(ConnectionCollector.getAttributes(conn));
+//                    service.setCustomProperties(ConnectionCollector.getAttributes(conn));
                 } else if (obj instanceof RabbitExchange) {
                     RabbitExchange exchange = (RabbitExchange) obj;
                     c.setValue(MetricConstants.EXCHANGE, exchange.getName());
-                    name+=" @ "+vHost.getName();
+                    name += " @ " + vHost.getName();
 //                    service.setCustomProperties(ExchangeCollector.getAttributes((RabbitExchange) obj));
                 } else if (obj instanceof RabbitChannel) {
                     RabbitChannel channel = (RabbitChannel) obj;
                     c.setValue(MetricConstants.CHANNEL, channel.getPid());
-                    service.setCustomProperties(ChannelCollector.getAttributes(channel));
+//                    service.setCustomProperties(ChannelCollector.getAttributes(channel));
                 } else if (obj instanceof RabbitVirtualHost) {
                     RabbitVirtualHost vh = (RabbitVirtualHost) obj;
                     c.setValue(MetricConstants.VHOST, vh.getName());
@@ -403,7 +400,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         ConfigResponse conf = new ConfigResponse();
         for (int n = 0; n < nodeArgs.length; n++) {
             if (nodeArgs[n].equalsIgnoreCase("-rabbit_mochiweb") && nodeArgs[n + 1].equalsIgnoreCase("port")) {
-                conf.setValue("port",nodeArgs[n + 2]);
+                conf.setValue("port", nodeArgs[n + 2]);
             }
         }
         conf.setValue(DetectorConstants.SERVER_NAME, nodeName);
@@ -412,10 +409,10 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
 
         logger.debug("ProductConfig[" + conf + "]");
 
-        ConfigResponse custom = createCustomConfig(nodeName, nodePath, nodePid, nodeArgs);
-        if (custom != null) {
-            node.setCustomProperties(custom);
-        }
+//        ConfigResponse custom = createCustomConfig(nodeName, nodePath, nodePid, nodeArgs);
+//        if (custom != null) {
+//            node.setCustomProperties(custom);
+//        }
 
         ConfigResponse log = createLogConfig(nodeArgs);
         if (log != null) {
@@ -462,24 +459,23 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @param nodeArgs
      * @return
      */
-    private ConfigResponse createCustomConfig(String nodeName, String nodePath, long nodePid, String[] nodeArgs) {
-        ConfigResponse custom = new ConfigResponse();
-        custom.setValue(DetectorConstants.NODE_NAME, nodeName);
-        custom.setValue(DetectorConstants.NODE_PATH, nodePath);
-        custom.setValue(DetectorConstants.NODE_PID, nodePid);
-
-        for (int n = 0; n < nodeArgs.length; n++) {
-            if (nodeArgs[n].contains("beam")) {
-                custom.setValue(DetectorConstants.ERLANG_PROCESS, nodeArgs[n]);
-            }
-            if (nodeArgs[n].contains("boot")) {
-                custom.setValue(DetectorConstants.RABBIT_BOOT, nodeArgs[n + 1]);
-            }
-        }
-
-        return custom;
-    }
-
+//    private ConfigResponse createCustomConfig(String nodeName, String nodePath, long nodePid, String[] nodeArgs) {
+//        ConfigResponse custom = new ConfigResponse();
+//        custom.setValue(DetectorConstants.NODE_NAME, nodeName);
+//        custom.setValue(DetectorConstants.NODE_PATH, nodePath);
+//        custom.setValue(DetectorConstants.NODE_PID, nodePid);
+//
+//        for (int n = 0; n < nodeArgs.length; n++) {
+//            if (nodeArgs[n].contains("beam")) {
+//                custom.setValue(DetectorConstants.ERLANG_PROCESS, nodeArgs[n]);
+//            }
+//            if (nodeArgs[n].contains("boot")) {
+//                custom.setValue(DetectorConstants.RABBIT_BOOT, nodeArgs[n + 1]);
+//            }
+//        }
+//
+//        return custom;
+//    }
     /**
      * Create the server name
      * @param args

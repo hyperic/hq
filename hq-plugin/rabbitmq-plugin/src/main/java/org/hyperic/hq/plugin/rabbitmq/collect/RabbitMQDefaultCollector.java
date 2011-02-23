@@ -7,7 +7,6 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
-import org.hyperic.hq.plugin.rabbitmq.validate.ConfigurationValidator;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
 
@@ -27,17 +26,7 @@ public abstract class RabbitMQDefaultCollector extends Collector {
             getLog().debug("[init] props=" + props);
         }
 
-        try {
-            if (ConfigurationValidator.isValidOtpConnection(props)) {
-                if (admin != null) {
-                    admin.destroy();
-                }
-                admin = new HypericRabbitAdmin(props);
-            }
-        } catch (RuntimeException ex) {
-            getLog().debug(ex.getMessage(), ex);
-            throw new PluginException(ex.getMessage(), ex);
-        }
+        admin = new HypericRabbitAdmin(props);
     }
 
     public final void collect() {
