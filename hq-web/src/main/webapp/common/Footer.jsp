@@ -30,7 +30,7 @@
 <script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/footer.js"/>" type="text/javascript"></script>
 
-<table id="footerContent" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top:60px;">
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
 	<tr>
 		<td class="FooterBold" nowrap="nowrap" style="padding-left: 30px;" width="20%"><tiles:insert definition=".footer.current.time" /></td>
 		<td class="FooterRegular" nowrap="nowrap" align="center" width="60%">
