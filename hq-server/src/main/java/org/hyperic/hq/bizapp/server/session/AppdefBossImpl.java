@@ -2707,10 +2707,6 @@ public class AppdefBossImpl implements AppdefBoss {
         try {
             doSetAll(subject, allConfigs, doValidation, false);
 
-            if (doValidation) {
-                configManager.clearValidationError(subject, id);
-            }
-
             doRollback = false;
 
             // run an auto-scan for platforms

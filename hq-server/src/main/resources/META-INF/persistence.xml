@@ -3,6 +3,7 @@
 <persistence-unit name="persistenceUnit" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.ejb.HibernatePersistence</provider>
         <class>org.hyperic.hq.inventory.domain.Config</class>
+        <class>org.hyperic.hq.inventory.domain.ConfigType</class>
         <class>org.hyperic.hq.inventory.domain.ConfigOptionType</class>
         <class>org.hyperic.hq.inventory.domain.OperationType</class>
         <class>org.hyperic.hq.inventory.domain.OperationArgType</class>

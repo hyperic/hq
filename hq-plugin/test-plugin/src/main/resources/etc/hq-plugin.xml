@@ -31,6 +31,13 @@
 
 	<platform name="PluginTestPlatform">
 		<plugin type="measurement" class="org.hyperic.hq.plugin.test.TestMeasurementPlugin" />
+		<config type="measurement">
+			<option name="url" type="hidden" description="The URL"/>
+			<option name="password" type="secret" description="User Password"/>
+		</config>
+		<config>
+			<option name="DisplayName" description="Display Name"/>
+		</config>
 		<metric name="Availability" indicator="true"/>
 	</platform>
 
@@ -43,6 +50,8 @@
 		<plugin type="measurement" class="org.hyperic.hq.plugin.test.TestMeasurementPlugin" />
 		<properties>
 			<property name="Vendor" description="The Vendor"/>
+			<property name="Internal" type="hidden"/>
+			<property name="Admin Password" type="secret"/>
 		</properties>
 
 		<actions include="stop" />

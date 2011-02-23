@@ -62,20 +62,7 @@ public interface ConfigManager {
     public ConfigResponse getMergedConfigResponse(AuthzSubject subject, String productType, AppdefEntityID id,
                                                   boolean required) throws AppdefEntityNotFoundException,
         ConfigFetchException, EncodingException, PermissionException;
-
-    /**
-     * Clear the validation error string for a config response, indicating that
-     * the current config is valid
-     */
-    public void clearValidationError(AuthzSubject subject, AppdefEntityID id);
-
-    /**
-     * Update the validation error string for a config response
-     * @param validationError The error string that occured during validation.
-     *        If this is null, that means that no error occurred and the config
-     *        is valid.
-     */
-    public void setValidationError(AuthzSubject subject, AppdefEntityID id, String validationError);
+  
 
     /**
      * Set the config response for an entity/type combination.

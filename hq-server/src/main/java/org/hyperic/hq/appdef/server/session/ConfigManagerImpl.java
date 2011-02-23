@@ -47,8 +47,8 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.autoinventory.AICompare;
-import org.hyperic.hq.inventory.dao.ResourceDao;
 import org.hyperic.hq.inventory.domain.Config;
+import org.hyperic.hq.inventory.domain.ConfigType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.reference.ConfigTypes;
@@ -61,27 +61,25 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @org.springframework.stereotype.Service
 public class ConfigManagerImpl implements ConfigManager {
-    private static final int MAX_VALIDATION_ERR_LEN = 512;
     protected final Log log = LogFactory.getLog(ConfigManagerImpl.class.getName());
     private ServiceManager serviceManager;
     private ServerManager serverManager;
     private PlatformManager platformManager;
     private ResourceManager resourceManager;
-    private ResourceDao resourceDao;
+   
 
     @Autowired
     public ConfigManagerImpl(ServiceManager serviceManager,
-                             ServerManager serverManager, PlatformManager platformManager, ResourceManager resourceManager,
-                             ResourceDao resourceDao) {
+                             ServerManager serverManager, PlatformManager platformManager, ResourceManager resourceManager) {
         this.serviceManager = serviceManager;
         this.serverManager = serverManager;
         this.platformManager = platformManager;
         this.resourceManager = resourceManager;
-        this.resourceDao = resourceDao;
     }
 
-    private Config createConfig(byte[] configBytes) {
+    private Config createConfig(byte[] configBytes, ConfigType configType) {
         Config config = new Config();
+        config.setType(configType);
         try {
             ConfigResponse configResponse = ConfigResponse.decode(configBytes);
             
@@ -338,15 +336,6 @@ public class ConfigManagerImpl implements ConfigManager {
     }
 
     /**
-     * Clear the validation error string for a config response, indicating that
-     * the current config is valid
-     * 
-     */
-    public void clearValidationError(AuthzSubject subject, AppdefEntityID id) {
-        resourceManager.findResourceById(id.getId()).setConfigValidationError(null);
-    }
-
-    /**
      * Method to merge configs, maintaining any existing values that are not
      * present in the AI config (e.g. log/config track enablement)
      * 
@@ -378,24 +367,7 @@ public class ConfigManagerImpl implements ConfigManager {
         }
     }
 
-    /**
-     * Update the validation error string for a config response
-     * @param validationError The error string that occured during validation.
-     *        If this is null, that means that no error occurred and the config
-     *        is valid.
-     * 
-     * 
-     */
-    @Transactional
-    public void setValidationError(AuthzSubject subject, AppdefEntityID id, String validationError) {
-        if (validationError != null) {
-            if (validationError.length() > MAX_VALIDATION_ERR_LEN) {
-                validationError = validationError.substring(0, MAX_VALIDATION_ERR_LEN - 3) + "...";
-            }
-        }
-
-        resourceManager.findResourceById(id.getId()).setConfigValidationError(validationError);
-    }
+   
 
     /**
      * Set the config response for an entity/type combination.
@@ -457,36 +429,24 @@ public class ConfigManagerImpl implements ConfigManager {
         boolean wasUpdated = false;
         byte[] configBytes;
         Resource resource = resourceManager.findResourceById(appdefID.getId());
-        boolean overwrite = ((userManaged != null) && userManaged.booleanValue()) || // via
-                            // UI
-                            // or
-                            // CLI
-                            !resource.isConfigUserManaged(); // via AI, dont
-        // overwrite
-        // changes made via
-        // UI or CLI
+       
 
-        configBytes = mergeConfig(toConfigResponse(resource.getConfig(ConfigTypes.PRODUCT)), productConfig, overwrite, force);
+        configBytes = mergeConfig(toConfigResponse(resource.getConfig(ConfigTypes.PRODUCT)), productConfig, true, force);
         //TODO might just be updating product config, don't create a whole new one and associate it.  Check if resource.getProductConfig() null first
         if (!AICompare.configsEqual(configBytes, toConfigResponse(resource.getConfig(ConfigTypes.PRODUCT)))) {
-            resource.setConfig(ConfigTypes.PRODUCT,createConfig(configBytes));
+            resource.addConfig(createConfig(configBytes,resource.getType().getConfigType(ConfigTypes.PRODUCT)));
             wasUpdated = true;
         }
 
-        configBytes = mergeConfig(toConfigResponse(resource.getConfig(ConfigTypes.MEASUREMENT)), measurementConfig, overwrite, force);
+        configBytes = mergeConfig(toConfigResponse(resource.getConfig(ConfigTypes.MEASUREMENT)), measurementConfig, true, force);
         if (!AICompare.configsEqual(configBytes, toConfigResponse(resource.getConfig(ConfigTypes.MEASUREMENT)))) {
-            resource.setConfig(ConfigTypes.MEASUREMENT,createConfig(configBytes));
+            resource.addConfig(createConfig(configBytes,resource.getType().getConfigType(ConfigTypes.MEASUREMENT)));
             wasUpdated = true;
         }
 
-        configBytes = mergeConfig(toConfigResponse(resource.getConfig(ConfigTypes.CONTROL)), controlConfig, overwrite, false);
+        configBytes = mergeConfig(toConfigResponse(resource.getConfig(ConfigTypes.CONTROL)), controlConfig, true, false);
         if (!AICompare.configsEqual(configBytes, toConfigResponse(resource.getConfig(ConfigTypes.CONTROL)))) {
-            resource.setConfig(ConfigTypes.CONTROL,createConfig(configBytes));
-            wasUpdated = true;
-        }
-
-        if (userManaged != null && resource.isConfigUserManaged() != userManaged.booleanValue()) {
-            resource.setConfigUserManaged(userManaged.booleanValue());
+            resource.addConfig(createConfig(configBytes,resource.getType().getConfigType(ConfigTypes.CONTROL)));
             wasUpdated = true;
         }
 

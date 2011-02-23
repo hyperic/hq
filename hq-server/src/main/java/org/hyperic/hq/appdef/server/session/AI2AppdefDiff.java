@@ -397,10 +397,10 @@ public class AI2AppdefDiff {
                 // Look at configs
                Resource resource = Bootstrap.getBean(ResourceDao.class).findById(aID.getId());
                 
-                if (!resource.isConfigUserManaged() && (
+                if (
                     !configsEqual(scannedServer.getProductConfig(), cmLocal.toConfigResponse(resource.getConfig(ConfigTypes.PRODUCT))) ||
                     !configsEqual(scannedServer.getControlConfig(), cmLocal.toConfigResponse(resource.getConfig(ConfigTypes.CONTROL))) ||
-                    !configsEqual(scannedServer.getMeasurementConfig(), cmLocal.toConfigResponse(resource.getConfig(ConfigTypes.MEASUREMENT)))))
+                    !configsEqual(scannedServer.getMeasurementConfig(), cmLocal.toConfigResponse(resource.getConfig(ConfigTypes.MEASUREMENT))))
                 {
                     // config was changed (and is NOT user-managed)
                     configChanged = true;
