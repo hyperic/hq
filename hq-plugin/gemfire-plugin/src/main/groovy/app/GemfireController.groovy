@@ -34,9 +34,10 @@ class GemfireController extends BaseController {
         def members = getMembersList(params)
         def member=((Map)members).get(mid)
         if(member!=null){
-            render(locals:[member:member])
+            render(locals:[member:member,mid:mid])
         }else{
-            log.error("member==null mid="+mid)
+            log.error("member=="+member+" mid="+mid)
+            render(locals:[member:null,mid:mid])
         }
     }
 
