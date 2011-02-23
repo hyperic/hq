@@ -180,7 +180,6 @@ public class ServiceMergerImpl implements ServiceMerger {
 
             // SET CUSTOM PROPERTIES FOR SERVICE
             if (aiservice.getCustomProperties() != null) {
-                int typeId = service.getServiceType().getId().intValue();
                 ConfigResponse cprops;
                 try {
                     cprops = ConfigResponse.decode(aiservice

@@ -412,6 +412,9 @@ public class AIQRV_approve implements AIQResourceVisitor {
     }
 
     private void setCustomProperties(AIPlatform aiplatform, Platform platform) {
+        if(aiplatform.getCustomProperties() == null) {
+            return;
+        }
         try {
             ConfigResponse cprops;
             try {
@@ -438,6 +441,9 @@ public class AIQRV_approve implements AIQResourceVisitor {
     }
 
     private void setCustomProperties(AIServer aiserver, Server server) {
+        if(aiserver.getCustomProperties() == null) {
+            return;
+        }
         try {
             ConfigResponse cprops;
             try {
