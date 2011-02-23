@@ -134,7 +134,7 @@ public class ConfigChangedTrigger
         // If we didn't fulfill the condition, then don't fire
         event = (ConfigChangedEvent) e;
 
-        if (!event.getResource().equals(id)) {
+        if (!event.getResource().equals(id.getId())) {
             return;
         }
 

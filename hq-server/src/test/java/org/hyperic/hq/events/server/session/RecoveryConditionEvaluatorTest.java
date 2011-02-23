@@ -70,13 +70,12 @@ public class RecoveryConditionEvaluatorTest
      */
     public void testInitialize() {
         Integer alertTriggerId = Integer.valueOf(5678);
-        Integer trigger2Id = Integer.valueOf(55);
-
+       
         List conditions = new ArrayList();
         MockEvent mockEvent = new MockEvent(2l, 3);
         // Recovery condition occurred 3 minutes ago
         mockEvent.setTimestamp(System.currentTimeMillis() - (3 * 60 * 1000));
-        TriggerFiredEvent triggerFired = new TriggerFiredEvent(trigger2Id, mockEvent);
+        TriggerFiredEvent triggerFired = new TriggerFiredEvent(alertTriggerId, mockEvent);
         RecoveryConditionEvaluator evaluator = new RecoveryConditionEvaluator(TEST_ALERT_DEF_ID,
                                                                               alertTriggerId, TEST_RECOVERING_FROM_ALERT_DEF_ID,
                                                                               conditions,

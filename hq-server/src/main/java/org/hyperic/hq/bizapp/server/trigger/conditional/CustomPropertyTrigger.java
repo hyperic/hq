@@ -137,7 +137,7 @@ public class CustomPropertyTrigger
         // If we didn't fulfill the condition, then don't fire
         CPropChangeEvent event = (CPropChangeEvent) e;
 
-        if (!event.getResource().equals(id) || !event.getKey().equals(customProperty) || event.getOldValue() == null) {
+        if (!event.getResource().equals(id.getId()) || !event.getKey().equals(customProperty) || event.getOldValue() == null) {
             return;
         }
 

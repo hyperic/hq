@@ -136,7 +136,7 @@ public class LogEventTrigger
         // If we didn't fulfill the condition, then don't fire
         ResourceLogEvent event = (ResourceLogEvent) e;
 
-        if (!event.getResource().equals(id)) {
+        if (!event.getResource().equals(id.getId())) {
             return;
         }
 

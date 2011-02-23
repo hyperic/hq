@@ -138,7 +138,7 @@ public class ControlEventTrigger
         // If we didn't fulfill the condition, then don't fire
         event = (ControlEvent) e;
 
-        if (!event.getResource().equals(id) || !event.getAction().equals(action)) {
+        if (!event.getResource().equals(id.getId()) || !event.getAction().equals(action)) {
             return;
         }
 
