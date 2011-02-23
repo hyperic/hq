@@ -29,7 +29,7 @@
 
 <plugin class="org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin">
 
-    <filter name="server-connection" value="node=%node%"/>
+    <filter name="server-connection" value="node=%node%,addr=%addr%,port=%port%,user=%user%,pass=%pass%"/>
 
     <server name="RabbitMQ" description="RabbitMQ">
 
@@ -71,8 +71,11 @@
 
         <config>
             <option name="node" description="node"/>
-            <option name="process.query" default="State.Name.re=[beam|erl],Args.*.eq=-sname,Args.*.eq=%node%"
-                    description="PTQL Query"/>
+            <option name="process.query" default="State.Name.re=[beam|erl],Args.*.eq=-sname,Args.*.eq=%node%" description="PTQL Query"/>
+            <option name="addr" description="" default="localhost"/>
+            <option name="port" description="" default="55672"/>
+            <option name="user" description="" default="guest"/>
+            <option name="pass" description="" default="guest"/>
         </config>
 
         <properties>

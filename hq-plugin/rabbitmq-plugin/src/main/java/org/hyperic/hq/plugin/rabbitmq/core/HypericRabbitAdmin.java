@@ -53,17 +53,24 @@ public class HypericRabbitAdmin {
     private static final Log logger = LogFactory.getLog(HypericRabbitAdmin.class);
     private final HttpClient client;
     private String node;
+    private String addr;
+    private String user;
+    private String pass;
+    private int port;
 
     public HypericRabbitAdmin(Properties props) {
+        this.node = props.getProperty("node");
+        this.port = Integer.parseInt(props.getProperty("port"));
+        this.addr = props.getProperty("addr");
+        this.user = props.getProperty("user");
+        this.pass = props.getProperty("pass");
+
         client = new HttpClient();
-
         client.getState().setCredentials(
-                new AuthScope("192.168.183.140", 55672, "Management: Web UI"),
-                new UsernamePasswordCredentials("guest", "guest"));
-
+                new AuthScope(addr, port, "Management: Web UI"),
+                new UsernamePasswordCredentials(user, pass));
         client.getHttpConnectionManager().getParams().setConnectionTimeout(5000);
 
-        this.node = props.getProperty("node");
     }
 
     public HypericRabbitAdmin(ConfigResponse props) {
@@ -145,7 +152,7 @@ public class HypericRabbitAdmin {
     private <T extends Object> T get(String api, Class<T> classOfT) throws PluginException {
         T res = null;
         try {
-            GetMethod get = new GetMethod("http://192.168.183.140:55672" + api);
+            GetMethod get = new GetMethod("http://" + addr + ":" + port + api);
             get.setDoAuthentication(true);
             int r = client.executeMethod(get);
             if (r != 200) {

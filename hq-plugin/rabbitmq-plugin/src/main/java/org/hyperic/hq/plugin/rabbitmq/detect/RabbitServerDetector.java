@@ -399,7 +399,13 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         node.setName(getPlatformName() + " " + getTypeInfo().getName() + " Node " + nodeName);
         node.setDescription(getTypeInfo().getName() + " Node " + nodePid);
 
+
         ConfigResponse conf = new ConfigResponse();
+        for (int n = 0; n < nodeArgs.length; n++) {
+            if (nodeArgs[n].equalsIgnoreCase("-rabbit_mochiweb") && nodeArgs[n + 1].equalsIgnoreCase("port")) {
+                conf.setValue("port",nodeArgs[n + 2]);
+            }
+        }
         conf.setValue(DetectorConstants.SERVER_NAME, nodeName);
 
         final String home = getProcessHome(nodePid);
