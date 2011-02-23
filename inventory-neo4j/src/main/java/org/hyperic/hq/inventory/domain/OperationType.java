@@ -117,7 +117,7 @@ public class OperationType {
     }
 
     /**
-     * Removes the OperationType
+     * Removes the OperationType.  Only supported as part of ResourceType removal
      */
     @Transactional
     public void remove() {

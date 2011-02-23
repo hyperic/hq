@@ -52,9 +52,9 @@ public class ResourceIntegrationTest {
     private ResourceTypeDao resourceTypeDao;
 
     private Resource traderJoes;
-    
+
     private ResourceType store;
-    
+
     @Autowired
     private MockMessagePublisher messagePublisher;
 
@@ -69,6 +69,9 @@ public class ResourceIntegrationTest {
         resourceTypeDao.persist(produceDept);
         store.relateTo(produceDept, RelationshipTypes.CONTAINS);
         store.addPropertyType(new PropertyType("Address", "Store location"));
+        ConfigType product = new ConfigType(ConfigTypes.PRODUCT);
+        store.addConfigType(product);
+        product.addConfigOptionType(new ConfigOptionType("user", "User"));
         ResourceType lettuce = new ResourceType("Lettuce");
         resourceTypeDao.persist(lettuce);
         produceDept.relateTo(lettuce, RelationshipTypes.CONTAINS);
@@ -129,17 +132,17 @@ public class ResourceIntegrationTest {
     public void testGetPropertiesNoneSet() {
         assertTrue(traderJoes.getProperties().isEmpty());
     }
-    
+
     @Test
     public void testGetPropertiesFilterHidden() {
-        PropertyType internalProp = new PropertyType("SSN","Social Security Number");
+        PropertyType internalProp = new PropertyType("SSN", "Social Security Number");
         internalProp.setHidden(true);
         store.addPropertyType(internalProp);
         traderJoes.setProperty("Address", "123 My Street");
         traderJoes.setProperty("SSN", "123-456-7890");
         Map<String, Object> expected = new HashMap<String, Object>(1);
         expected.put("Address", "123 My Street");
-        assertEquals(expected,traderJoes.getProperties(false));
+        assertEquals(expected, traderJoes.getProperties(false));
     }
 
     @Test
@@ -157,11 +160,11 @@ public class ResourceIntegrationTest {
     public void testGetPropertyNotSet() {
         assertNull(traderJoes.getProperty("Address"));
     }
-    
+
     @Test
     public void testGetPropertyNotSetDefaultValue() {
         store.getPropertyType("Address").setDefaultValue("Jones St");
-        assertEquals("Jones St",traderJoes.getProperty("Address"));
+        assertEquals("Jones St", traderJoes.getProperty("Address"));
     }
 
     @Test
@@ -338,6 +341,10 @@ public class ResourceIntegrationTest {
 
     @Test
     public void testRemove() {
+        Config product = new Config();
+        product.setType(store.getConfigType(ConfigTypes.PRODUCT));
+        product.setValue("user", "bob");
+        traderJoes.addConfig(product);
         traderJoes.remove();
         // verify relationship removed
         assertEquals(1, produce.getRelationships().size());
@@ -394,24 +401,25 @@ public class ResourceIntegrationTest {
     public void testSetProperty() {
         traderJoes.setProperty("Address", "123 My Street");
         assertEquals("123 My Street", traderJoes.getProperty("Address"));
-        assertEquals(1,messagePublisher.getReceivedEvents().size());
-        CPropChangeEvent actual = (CPropChangeEvent) messagePublisher.getReceivedEvents().iterator().next();
-        assertEquals(traderJoes.getId(),actual.getResource());
-        assertEquals("Address",actual.getKey());
-        assertEquals("123 My Street",actual.getNewValue());
+        assertEquals(1, messagePublisher.getReceivedEvents().size());
+        CPropChangeEvent actual = (CPropChangeEvent) messagePublisher.getReceivedEvents()
+            .iterator().next();
+        assertEquals(traderJoes.getId(), actual.getResource());
+        assertEquals("Address", actual.getKey());
+        assertEquals("123 My Street", actual.getNewValue());
         assertNull(actual.getOldValue());
-        assertEquals(traderJoes.getId(),actual.getInstanceId());
+        assertEquals(traderJoes.getId(), actual.getInstanceId());
         messagePublisher.clearReceivedEvents();
         Object oldValue = traderJoes.setProperty("Address", "123 Some Other Street");
         assertEquals("123 My Street", oldValue);
         assertEquals("123 Some Other Street", traderJoes.getProperty("Address"));
-        assertEquals(1,messagePublisher.getReceivedEvents().size());
+        assertEquals(1, messagePublisher.getReceivedEvents().size());
         actual = (CPropChangeEvent) messagePublisher.getReceivedEvents().iterator().next();
-        assertEquals(traderJoes.getId(),actual.getResource());
-        assertEquals("Address",actual.getKey());
-        assertEquals("123 Some Other Street",actual.getNewValue());
-        assertEquals("123 My Street",actual.getOldValue());
-        assertEquals(traderJoes.getId(),actual.getInstanceId());
+        assertEquals(traderJoes.getId(), actual.getResource());
+        assertEquals("Address", actual.getKey());
+        assertEquals("123 Some Other Street", actual.getNewValue());
+        assertEquals("123 My Street", actual.getOldValue());
+        assertEquals(traderJoes.getId(), actual.getInstanceId());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -425,23 +433,33 @@ public class ResourceIntegrationTest {
     }
 
     @Test
-    public void testSetAndGetConfig() {
+    public void testAddAndGetConfig() {
         Config product = new Config();
+        product.setType(store.getConfigType(ConfigTypes.PRODUCT));
         product.setValue("user", "bob");
-        traderJoes.setConfig(ConfigTypes.PRODUCT, product);
+        traderJoes.addConfig(product);
         Config config = traderJoes.getConfig(ConfigTypes.PRODUCT);
         assertEquals("bob", config.getValue("user"));
     }
 
-    @Test
-    public void testSetConfigNotYetPersisted() {
-        Config product = new Config();
-        traderJoes.setConfig(ConfigTypes.PRODUCT, product);
-        assertEquals(product, traderJoes.getConfig(ConfigTypes.PRODUCT));
+    @Test(expected = IllegalArgumentException.class)
+    public void testAddConfigInvalidType() {
+        Config measurement = new Config();
+        ConfigType measType = new ConfigType("Measurement");
+        entityManager.persist(measType);
+        measType.getId();
+        measurement.setType(measType);
+        traderJoes.addConfig(measurement);
     }
 
     @Test
     public void testGetConfigNoConfig() {
         assertNull(traderJoes.getConfig(ConfigTypes.PRODUCT));
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetConfigInvalidType() {
+        traderJoes.getConfig(ConfigTypes.MEASUREMENT);
+    }
+
 }

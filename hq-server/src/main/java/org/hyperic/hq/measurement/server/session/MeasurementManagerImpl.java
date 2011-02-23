@@ -1539,11 +1539,9 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             } catch (InvalidConfigException e) {
                 log.warn("Error turning on default metrics, configuration (" + config + ") " +
                          "couldn't be validated", e);
-                configManager.setValidationError(subj, id, e.getMessage());
                 return rtn;
             } catch (Exception e) {
                 log.warn("Error turning on default metrics, " + "error in validation", e);
-                configManager.setValidationError(subj, id, e.getMessage());
                 return rtn;
             }
         }
@@ -1551,8 +1549,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         // Enable the metrics
         try {
             rtn = createDefaultMeasurements(subj, id, mtype, config);
-            configManager.clearValidationError(subj, id);
-
+           
             // Publish the event so other people can do things when the
             // metrics have been created (like create type-based alerts)
             applicationContext.publishEvent(new MetricsEnabledEvent(id));

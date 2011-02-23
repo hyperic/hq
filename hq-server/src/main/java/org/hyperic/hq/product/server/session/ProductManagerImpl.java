@@ -53,6 +53,8 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.inventory.dao.ResourceTypeDao;
+import org.hyperic.hq.inventory.domain.ConfigOptionType;
+import org.hyperic.hq.inventory.domain.ConfigType;
 import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.ResourceType;
@@ -82,6 +84,7 @@ import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
+import org.hyperic.util.config.HiddenConfigOption;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -524,34 +527,28 @@ public class ProductManagerImpl implements ProductManager {
 
 	        for (int i = 0; i < entities.length; i++) {
 	        	TypeInfo info = entities[i];
-	        	ConfigSchema schema = pplugin.getCustomPropertiesSchema(info);
-	        	List<ConfigOption> options = schema.getOptions();            
+	        	ConfigSchema schema = pplugin.getCustomPropertiesSchema(info);          
 	        	ResourceType appdefType = resourceManager.findResourceTypeByName(info.getName());
-
-	        	for (ConfigOption opt : options) {
-	        		if (debug) watch.markTimeBegin("findByKey");
-
-	        		PropertyType c = appdefType.getPropertyType(opt.getName());
-
-	        		if (debug) watch.markTimeEnd("findByKey");
-
-	        		if (c == null) {
-	        			appdefType.addPropertyType(new PropertyType(opt.getName(), opt.getDescription()));
-	        		}
-	        	}
-	        	
+	        	updatePropertyTypes(appdefType, schema);
 	        	try {
-    	        	List<String> actions = ppm.getControlPluginManager().getActions(info.getName());
-        	        for(String action: actions) {
-        	            OperationType existing = appdefType.getOperationType(action);
-        	            if(existing == null) {
-        	                appdefType.addOperationType(new OperationType(action));
-        	            }
-        	        }
+	        	    List<String> actions = ppm.getControlPluginManager().getActions(info.getName());
+	        	    updateOperationTypes(appdefType, actions);
 	        	}catch(PluginNotFoundException e) {
-	        	    //Expected if control actions not defined
+	                //Expected if control actions not defined
+	            }
+	        	try {
+	        	    updateConfigType(appdefType,ProductPlugin.TYPE_CONTROL,
+	        	        ppm.getControlPluginManager().getConfigSchema(info.getName(), info, null));
+	        	}catch(PluginNotFoundException e) {
+	        	  //Expected if control actions not defined 
 	        	}
-	        	
+	        	try {
+	        	    updateConfigType(appdefType,ProductPlugin.TYPE_MEASUREMENT,
+	        	        ppm.getMeasurementPluginManager().getConfigSchema(info.getName(), info, null));
+	        	}catch(PluginNotFoundException e) {
+	                  //Expected if measurement not defined 
+	        	}
+	        	updateConfigType(appdefType,ProductPlugin.TYPE_PRODUCT,pplugin.getConfigSchema(info, null));
 	        }
 
 	        if (debug) watch.markTimeEnd("loop");
@@ -561,6 +558,47 @@ public class ProductManagerImpl implements ProductManager {
         pluginDeployed(pInfo);
        
 	    if (debug) log.debug(watch);
+    }
+    
+    private void updateConfigType(ResourceType appdefType, String configTypeName, ConfigSchema configSchema) {
+        List<ConfigOption> options = configSchema.getOptions();
+        if(options.isEmpty()) {
+            return;
+        }
+        ConfigType configType = new ConfigType(configTypeName);
+        appdefType.addConfigType(configType);
+        for(ConfigOption option: options) {
+            ConfigOptionType configOptType = new ConfigOptionType(option.getName(), option.getDescription());
+            configOptType.setDefaultValue(option.getDefault());
+            configOptType.setSecret(ConfigSchema.isSecret(option.getName()));
+            if(option instanceof HiddenConfigOption) {
+                configOptType.setHidden(true);
+            }
+            configType.addConfigOptionType(configOptType);
+        }
+    }
+    
+    private void updatePropertyTypes(ResourceType appdefType, ConfigSchema customPropertiesSchema) {
+        for (ConfigOption opt : customPropertiesSchema.getOptions()) {
+            if (appdefType.getPropertyType(opt.getName()) == null) {
+                PropertyType propertyType = new PropertyType(opt.getName(), opt.getDescription());
+                propertyType.setSecret(ConfigSchema.isSecret(opt.getName()));
+                propertyType.setDefaultValue(opt.getDefault());
+                if(opt instanceof HiddenConfigOption) {
+                    propertyType.setHidden(true);
+                }
+                appdefType.addPropertyType(propertyType);
+            }
+        }
+    }
+    
+    private void updateOperationTypes(ResourceType appdefType,List<String> actions) {
+        for(String action: actions) {
+            OperationType existing = appdefType.getOperationType(action);
+            if(existing == null) {
+                appdefType.addOperationType(new OperationType(action));
+            }
+        }
     }
     
     private void createAlertDefinitions(final PluginInfo pInfo) throws VetoException {

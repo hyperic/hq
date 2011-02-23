@@ -47,9 +47,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class ResourceType {
 
-    @RelatedTo(type = RelationshipTypes.HAS_CONFIG_OPT_TYPE, direction = Direction.OUTGOING, elementClass = ConfigOptionType.class)
+    @RelatedTo(type = RelationshipTypes.HAS_CONFIG_TYPE, direction = Direction.OUTGOING, elementClass = ConfigType.class)
     @Transient
-    private Set<ConfigOptionType> configTypes;
+    private Set<ConfigType> configTypes;
 
     @GraphProperty
     @Transient
@@ -95,6 +95,14 @@ public class ResourceType {
     /**
      * 
      * @param name The name of this ResourceType
+     */
+    public ResourceType(String name) {
+        this.name = name;
+    }
+
+    /**
+     * 
+     * @param name The name of this ResourceType
      * @param description The description of this ResourceType
      */
     public ResourceType(String name, String description) {
@@ -104,10 +112,12 @@ public class ResourceType {
 
     /**
      * 
-     * @param name The name of this ResourceType
+     * @param configType The ConfigType to add
      */
-    public ResourceType(String name) {
-        this.name = name;
+    public void addConfigType(ConfigType configType) {
+        entityManager.persist(configType);
+        configType.getId();
+        relateTo(configType, DynamicRelationshipType.withName(RelationshipTypes.HAS_CONFIG_TYPE));
     }
 
     /**
@@ -153,6 +163,28 @@ public class ResourceType {
 
     /**
      * 
+     * @param name The name of the ConfigType
+     * @return The ConfigType or null if it doesn't exist
+     */
+    public ConfigType getConfigType(String name) {
+        for (ConfigType configType : configTypes) {
+            if (name.equals(configType.getName())) {
+                return configType;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 
+     * @return The ConfigTypes for this ResourceType
+     */
+    public Set<ConfigType> getConfigTypes() {
+        return configTypes;
+    }
+
+    /**
+     * 
      * @return The description of the ResourceType
      */
     public String getDescription() {
@@ -174,7 +206,7 @@ public class ResourceType {
     public String getName() {
         return name;
     }
-
+    
     /**
      * 
      * @param name The name of the OperationType
@@ -226,17 +258,17 @@ public class ResourceType {
     public Set<PropertyType> getPropertyTypes() {
         return propertyTypes;
     }
-    
+
     /**
      * 
-     * @param includeHidden true to include PropertyTypes marked as  hidden
+     * @param includeHidden true to include PropertyTypes marked as hidden
      * @return The PropertyTypes, possibly excluding those that are hidden
      */
     public Set<PropertyType> getPropertyTypes(boolean includeHidden) {
-        if(!(includeHidden)) {
+        if (!(includeHidden)) {
             Set<PropertyType> propTypes = new HashSet<PropertyType>();
-            for(PropertyType propType: propertyTypes) {
-                if(!(propType.isHidden())) {
+            for (PropertyType propType : propertyTypes) {
+                if (!(propType.isHidden())) {
                     propTypes.add(propType);
                 }
             }
@@ -387,7 +419,7 @@ public class ResourceType {
         removeResources();
         removePropertyTypes();
         removeOperationTypes();
-        removeConfigOptionTypes();
+        removeConfigTypes();
         graphDatabaseContext.removeNodeEntity(this);
         if (this.entityManager.contains(this)) {
             this.entityManager.remove(this);
@@ -397,8 +429,8 @@ public class ResourceType {
         }
     }
 
-    private void removeConfigOptionTypes() {
-        for (ConfigOptionType configType : configTypes) {
+    private void removeConfigTypes() {
+        for (ConfigType configType : configTypes) {
             configType.remove();
         }
     }

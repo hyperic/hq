@@ -32,7 +32,6 @@ import java.util.Map;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
-import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -125,25 +124,6 @@ public interface ProductBoss {
 
     public ConfigSchema getConfigSchema(AuthzSubject subject, AppdefEntityID id, String type, boolean validateFlow)
         throws ConfigFetchException, EncodingException, PluginNotFoundException, PluginException, PermissionException,
-        AppdefEntityNotFoundException;
-
-    /**
-     * Set the config response for an entity/type combination. Note that setting
-     * the config response for any entity may cause a chain reaction of things
-     * to occur. For instance, agents may get updated with new measurements for
-     * entities which were affected by the configuration change.
-     * @param id ID of the object to set the repsonse fo
-     * @param response The response
-     * @param type One of ProductPTYPE_*
-     * @throws SessionTimeoutException
-     * @throws SessionNotFoundException
-     */
-    public void setConfigResponse(int sessionId, AppdefEntityID id, ConfigResponse response, String type)
-        throws InvalidConfigException, SessionTimeoutException, EncodingException, PermissionException,
-        ConfigFetchException, AppdefEntityNotFoundException, SessionNotFoundException;
-
-    public void setConfigResponse(AuthzSubject subject, AppdefEntityID id, ConfigResponse response, String type)
-        throws EncodingException, PermissionException, InvalidConfigException, ConfigFetchException,
         AppdefEntityNotFoundException;
 
     /**

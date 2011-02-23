@@ -93,5 +93,7 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
         // access the underlying node
         graphDatabaseContext.getNodeIndex(null).add(resourceGroup.getUnderlyingState(), "type",
             resourceGroup.getType().getId());
+        //flush to get the JSR-303 validation done sooner
+        entityManager.flush();
     }
 }

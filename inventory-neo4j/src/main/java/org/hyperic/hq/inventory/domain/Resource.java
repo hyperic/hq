@@ -55,6 +55,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class Resource {
 
+    @RelatedTo(type = RelationshipTypes.HAS_CONFIG, direction = Direction.OUTGOING, elementClass = Config.class)
+    @Transient
+    private Set<Config> configs;
+
     @Transient
     @RelatedTo(type = RelationshipTypes.MANAGED_BY, direction = Direction.OUTGOING, elementClass = Agent.class)
     private Agent agent;
@@ -111,6 +115,23 @@ public class Resource {
     public Resource(String name, ResourceType type) {
         this.name = name;
         this.type = type;
+    }
+
+    /**
+     * Adds config for this resource
+     * @param config The config, whose ConfigType should be one supported by
+     *        this Resource's ResourceType
+     */
+    @Transactional
+    public void addConfig(Config config) {
+        String cfgType = config.getType().getName();
+        if (type.getConfigType(cfgType) == null) {
+            throw new IllegalArgumentException("Config " + cfgType +
+                                               " is not defined for resource of type " +
+                                               type.getName());
+        }
+        getUnderlyingState().createRelationshipTo(config.getUnderlyingState(),
+            DynamicRelationshipType.withName(RelationshipTypes.HAS_CONFIG));
     }
 
     private Set<ResourceRelationship> convertRelationships(Resource entity,
@@ -203,22 +224,18 @@ public class Resource {
      * @return The Config or null if this resource has no config of specified
      *         type
      */
-    public Config getConfig(String type) {
-        Iterable<org.neo4j.graphdb.Relationship> relationships = this.getUnderlyingState()
-            .getRelationships(DynamicRelationshipType.withName(RelationshipTypes.HAS_CONFIG),
-                Direction.OUTGOING.toNeo4jDir());
-        for (org.neo4j.graphdb.Relationship relationship : relationships) {
-            if (type.toString().equals(relationship.getProperty("configType"))) {
-                // TODO enforce no more than one?
-                return graphDatabaseContext.createEntityFromState(
-                    relationship.getOtherNode(getUnderlyingState()), Config.class);
+    public Config getConfig(String configType) {
+        ConfigType cfgType = type.getConfigType(configType);
+        if (cfgType == null) {
+            throw new IllegalArgumentException("Config " + configType +
+                                               " is not defined for resource of type " +
+                                               type.getName());
+        }
+        for (Config config : configs) {
+            if (config.getType().getName().equals(configType)) {
+                return config;
             }
         }
-        return null;
-    }
-
-    public String getConfigValidationError() {
-        // TODO from ConfigResponseDB. remove?
         return null;
     }
 
@@ -271,6 +288,15 @@ public class Resource {
     }
 
     /**
+     * 
+     * @return A Map of property keys and values, including those whose type is
+     *         marked as hidden
+     */
+    public Map<String, Object> getProperties() {
+        return getProperties(true);
+    }
+
+    /**
      * @param includeHidden true if properties whose types are marked as
      *        "hidden" should be returned
      * @return A Map of property keys and values, possibly not including those
@@ -281,7 +307,7 @@ public class Resource {
         for (String key : getUnderlyingState().getPropertyKeys()) {
             if (!(includeHidden)) {
                 PropertyType propType = type.getPropertyType(key);
-                if(propType != null && propType.isHidden()) {
+                if (propType != null && propType.isHidden()) {
                     continue;
                 }
             }
@@ -293,15 +319,6 @@ public class Resource {
             }
         }
         return properties;
-    }
-
-    /**
-     * 
-     * @return A Map of property keys and values, including those whose type is
-     *         marked as hidden
-     */
-    public Map<String, Object> getProperties() {
-        return getProperties(true);
     }
 
     /**
@@ -482,11 +499,6 @@ public class Resource {
         return false;
     }
 
-    public boolean isConfigUserManaged() {
-        // TODO from ConfigResponseDB. remove?
-        return true;
-    }
-
     public boolean isInAsyncDeleteState() {
         // TODO remove
         return false;
@@ -631,34 +643,6 @@ public class Resource {
      */
     public void setAgent(Agent agent) {
         this.agent = agent;
-    }
-
-    /**
-     * Sets config for this resource
-     * @param configType The type of config (example "measurement" or "control")
-     * @param config The config
-     */
-    @Transactional
-    public void setConfig(String configType, Config config) {
-        // Config may not be persisted yet since we don't provide a direct way
-        // to persist via API
-        if (!config.hasUnderlyingNode()) {
-            entityManager.persist(config);
-            config.getId();
-        }
-        // TODO change config after set?
-        org.neo4j.graphdb.Relationship rel = this.getUnderlyingState().createRelationshipTo(
-            config.getUnderlyingState(),
-            DynamicRelationshipType.withName(RelationshipTypes.HAS_CONFIG));
-        rel.setProperty("configType", configType);
-    }
-
-    public void setConfigUserManaged(boolean userManaged) {
-        // TODO from ConfigResponseDB. remove?
-    }
-
-    public void setConfigValidationError(String error) {
-        // TODO from ConfigResponseDB. remove?
     }
 
     /**

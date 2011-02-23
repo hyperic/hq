@@ -29,6 +29,8 @@ abstract public class RelationshipTypes {
     
     public static final String HAS_CONFIG_OPT_TYPE="HAS_CONFIG_OPT_TYPE";
     
+    public static final String HAS_CONFIG_TYPE="HAS_CONFIG_TYPE";
+    
     public static final String ALLOWS_CONFIG_OPTS="ALLOWS_CONFIG_OPTS";
     
     public static final String HAS_ROLE="HAS_ROLE";
