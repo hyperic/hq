@@ -535,17 +535,17 @@ public class ProductManagerImpl implements ProductManager {
 	            }
 	        	try {
 	        	    updateConfigType(appdefType,ProductPlugin.TYPE_CONTROL,
-	        	        ppm.getControlPluginManager().getConfigSchema(info.getName(), info, null));
+	        	        ppm.getControlPluginManager().getConfigSchema(info.getName(), info, ConfigResponse.EMPTY_CONFIG_RESPONSE));
 	        	}catch(PluginNotFoundException e) {
 	        	  //Expected if control actions not defined 
 	        	}
 	        	try {
 	        	    updateConfigType(appdefType,ProductPlugin.TYPE_MEASUREMENT,
-	        	        ppm.getMeasurementPluginManager().getConfigSchema(info.getName(), info, null));
+	        	        ppm.getMeasurementPluginManager().getConfigSchema(info.getName(), info, ConfigResponse.EMPTY_CONFIG_RESPONSE));
 	        	}catch(PluginNotFoundException e) {
 	                  //Expected if measurement not defined 
 	        	}
-	        	updateConfigType(appdefType,ProductPlugin.TYPE_PRODUCT,pplugin.getConfigSchema(info, null));
+	        	updateConfigType(appdefType,ProductPlugin.TYPE_PRODUCT,pplugin.getConfigSchema(info, ConfigResponse.EMPTY_CONFIG_RESPONSE));
 	        }
 
 	        if (debug) watch.markTimeEnd("loop");

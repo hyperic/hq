@@ -53,6 +53,8 @@ public class ConfigResponse implements GenericValueMap, Serializable  {
      * Empty, encoded ConfigResponse.
      */
     public static final byte[] EMPTY_CONFIG;
+    
+    public static final ConfigResponse EMPTY_CONFIG_RESPONSE = new ConfigResponse();
 
     static {
         try {
