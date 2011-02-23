@@ -9,19 +9,16 @@ import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.DynamicRelationshipType;
-import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotFoundException;
-import org.neo4j.graphdb.ReturnableEvaluator;
-import org.neo4j.graphdb.StopEvaluator;
-import org.neo4j.graphdb.TraversalPosition;
-import org.neo4j.graphdb.Traverser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.graph.annotation.NodeEntity;
+import org.springframework.data.graph.annotation.RelatedTo;
 import org.springframework.data.graph.core.Direction;
 import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author dcrutchfield
  */
 @Configurable
-@NodeEntity(partial=true)
+@NodeEntity(partial = true)
 @Entity
 public class Config {
 
@@ -45,7 +42,11 @@ public class Config {
     @GeneratedValue(generator = "mygen1")
     @Column(name = "id")
     private Integer id;
-    
+
+    @Transient
+    @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.OUTGOING, elementClass = ConfigType.class)
+    private ConfigType type;
+
     @PersistenceContext
     private transient EntityManager entityManager;
 
@@ -62,12 +63,29 @@ public class Config {
 
     /**
      * 
-     * @param key The config key
-     * @return The config value
+     * @return The ConfigType of this Config
+     */
+    public ConfigType getType() {
+        return type;
+    }
+    
+    /**
+     * 
+     * @param key The config option key
+     * @return The config option value
      */
     public Object getValue(String key) {
-        // TODO default values
-        return getUnderlyingState().getProperty(key);
+        ConfigOptionType optionType = type.getConfigOptionType(key);
+        if (optionType == null) {
+            throw new IllegalArgumentException("Config option " + key +
+                                               " is not defined for config of type " +
+                                               type.getName());
+        }
+        try {
+            return getUnderlyingState().getProperty(key);
+        } catch (NotFoundException e) {
+            return optionType.getDefaultValue();
+        }
     }
 
     /**
@@ -87,26 +105,9 @@ public class Config {
         return properties;
     }
 
-    private boolean isAllowableConfigValue(String key, Object value) {
-        Traverser relationTraverser = getUnderlyingState().traverse(Traverser.Order.BREADTH_FIRST,
-            new StopEvaluator() {
-                public boolean isStopNode(TraversalPosition currentPos) {
-                    return currentPos.depth() >= 1;
-                }
-            }, ReturnableEvaluator.ALL_BUT_START_NODE,
-            DynamicRelationshipType.withName(RelationshipTypes.ALLOWS_CONFIG_OPTS),
-            Direction.OUTGOING.toNeo4jDir());
-        for (Node related : relationTraverser) {
-            ConfigOptionType optionType = graphDatabaseContext.createEntityFromState(related,
-                ConfigOptionType.class);
-            if (optionType.getName().equals(key)) {
-                // TODO check more than just option name?
-                return true;
-            }
-        }
-        return false;
-    }
-    
+    /**
+     *  Removes this Config.  Only supported as part of Resource removal
+     */
     @Transactional
     public void remove() {
         graphDatabaseContext.removeNodeEntity(this);
@@ -126,6 +127,16 @@ public class Config {
         this.id = id;
     }
 
+    public void setType(ConfigType configType) {
+        //TODO can't set type on constructor b/c failure to flush dirty on persist of Config later. Here is where we persist Config
+        if(getUnderlyingState() == null) {
+            entityManager.persist(this);
+            getId();
+        }
+        relateTo(configType,
+            DynamicRelationshipType.withName(RelationshipTypes.IS_A));
+    }
+
     /**
      * Sets the Config value
      * @param key The config key
@@ -134,19 +145,17 @@ public class Config {
      */
     @Transactional
     public Object setValue(String key, Object value) {
-        // TODO re-enable when product plugin deployment actually creates
-        // ConfigOptionTypes
-        // if (!(isAllowableConfigValue(key, value))) {
-        // throw new IllegalArgumentException("Config option " + key +
-        // " is not defined");
-        // }
-        if(getUnderlyingState() == null) {
-            entityManager.persist(this);
-            getId();
-        }
         if (value == null) {
-            return getUnderlyingState().removeProperty(key);
+            // You can't set null property values in Neo4j, so we won't know if
+            // a missing property means explicit set to null or to return
+            // default value
+            throw new IllegalArgumentException("Null config values are not allowed");
         }
+       
+        if ( type.getConfigOptionType(key) == null) {
+            throw new IllegalArgumentException("Config option " + key + " is not defined");
+        }
+        //TODO validation
         Object oldValue = null;
         try {
             oldValue = getUnderlyingState().getProperty(key);
@@ -160,7 +169,8 @@ public class Config {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Config[");
-        sb.append("Id: ").append(getId()).append("]");
+        sb.append("Id: ").append(getId()).append(", ");
+        sb.append("Type: ").append(getType()).append("]");
         return sb.toString();
     }
 }

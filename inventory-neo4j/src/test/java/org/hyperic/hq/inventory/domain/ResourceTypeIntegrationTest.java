@@ -71,6 +71,29 @@ public class ResourceTypeIntegrationTest {
         expected.add(inventory);
         assertEquals(expected, store.getOperationTypes());
     }
+    
+    @Test
+    public void testAddConfigType() {
+        ConfigType security = new ConfigType("security");
+        store.addConfigType(security);
+        ConfigOptionType securityCode = new ConfigOptionType("SecurityCode", "The security code");
+        security.addConfigOptionType(securityCode);
+        Set<ConfigType> expected = new HashSet<ConfigType>(1);
+        expected.add(security);
+        assertEquals(expected,store.getConfigTypes());
+        assertEquals(1,store.getConfigTypes().iterator().next().getConfigOptionTypes().size());
+        assertEquals(securityCode,store.getConfigTypes().iterator().next().getConfigOptionTypes().iterator().next());
+    }
+    
+    @Test
+    public void testAddConfigTypeTwice() {
+        ConfigType security = new ConfigType("security");
+        store.addConfigType(security);
+        store.addConfigType(security);
+        Set<ConfigType> expected = new HashSet<ConfigType>(1);
+        expected.add(security);
+        assertEquals(expected,store.getConfigTypes());
+    }
 
     @Test
     public void testAddPropertyType() {
@@ -101,6 +124,18 @@ public class ResourceTypeIntegrationTest {
     @Test
     public void testGetOperationTypeNotExistent() {
         assertNull(store.getOperationType("inventory"));
+    }
+    
+    @Test
+    public void testGetConfigType() {
+        ConfigType measurement = new ConfigType("Measurement");
+        store.addConfigType(measurement);
+        assertEquals(measurement, store.getConfigType("Measurement"));
+    }
+
+    @Test
+    public void testGetConfigTypeNotExistent() {
+        assertNull(store.getConfigType("Measurement"));
     }
 
     @Test
@@ -213,9 +248,16 @@ public class ResourceTypeIntegrationTest {
         store.addOperationType(inventory);
         OperationArgType lettuceCount = new OperationArgType("LettuceCount", Integer.class);
         inventory.addOperationArgType(lettuceCount);
+        ConfigType security = new ConfigType("security");
+        store.addConfigType(security);
+        ConfigOptionType securityCode = new ConfigOptionType("SecurityCode", "The security code");
+        security.addConfigOptionType(securityCode);
         Resource safeway = new Resource("Safeway",store);
         resourceDao.persist(safeway);
         safeway.setProperty("address","123 My Street");
+        Config securityConfig = new Config();
+        securityConfig.setType(security);
+        safeway.addConfig(securityConfig);
         store.remove();
         assertNull(resourceTypeDao.findById(store.getId()));
         assertNull(resourceDao.findById(safeway.getId()));

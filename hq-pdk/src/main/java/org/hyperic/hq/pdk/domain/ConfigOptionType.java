@@ -55,14 +55,6 @@ public class ConfigOptionType {
 		this.description = description;
 	}
 
-	public Boolean getOptional() {
-		return optional;
-	}
-
-	public void setOptional(Boolean optional) {
-		this.optional = optional;
-	}
-
 	public Boolean getHidden() {
 		return hidden;
 	}

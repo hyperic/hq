@@ -1,63 +1,99 @@
 package org.hyperic.hq.inventory.domain;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.GenericGenerator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.data.graph.annotation.GraphId;
+import org.springframework.data.graph.annotation.GraphProperty;
 import org.springframework.data.graph.annotation.NodeEntity;
+import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.Validator;
 
 /**
- * ConfigSchema is not currently stored in DB. Read from plugin file and
- * initialized in-memory (PluginData) on
- * ProductPluginDeployer.registerPluginJar() See ConfigOptionTag for the
- * supported value types for Config. May need custom Converter to make some of
- * them graph properties
+ * Metadata for configuration options supported by a particular ConfigType for a
+ * particular ResourceType. For example, "username" might be a config option for
+ * config of type "product".
  * @author jhickey
  * @author dcrutchfield
  * 
  */
 @Configurable
-@NodeEntity
+@NodeEntity(partial = true)
+@Entity
 public class ConfigOptionType {
 
-    private String defaultValue;
-
-    private String description;
-
-    private boolean hidden;
-
-    @GraphId
-    private Integer id;
+    @Transient
+    @GraphProperty
+    private Object defaultValue;
 
     @NotNull
-    private final String name;
+    @Transient
+    @GraphProperty
+    private String description;
 
-    private boolean optional;
+    @Transient
+    @GraphProperty
+    private boolean hidden;
 
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
+    @Column(name = "id")
+    private Integer id;
+
+    @Transient
+    @GraphProperty
+    @NotNull
+    private String name;
+
+    @Transient
+    @GraphProperty
     private boolean secret;
+
+    @Autowired
+    private transient GraphDatabaseContext graphDatabaseContext;
+
+    @PersistenceContext
+    private transient EntityManager entityManager;
+
+    private transient Validator propertyValidator;
+
+    public ConfigOptionType() {
+    }
 
     /**
      * 
-     * @param name The name of the Config Option
+     * @param name The name of the config option
+     * @param description The description of the config option
      */
-    public ConfigOptionType(String name) {
+    public ConfigOptionType(String name, String description) {
+        this.description = description;
         this.name = name;
     }
 
     /**
-     * TODO should be Object?
-     * @return The default value for the config
+     * 
+     * @return The default value for the config option
      */
-    public String getDefaultValue() {
-        return defaultValue;
+    public Object getDefaultValue() {
+        return this.defaultValue;
     }
 
     /**
      * 
-     * @return The description
+     * @return The config option description
      */
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     /**
@@ -70,10 +106,14 @@ public class ConfigOptionType {
 
     /**
      * 
-     * @return The name of the Config Option
+     * @return The config option name
      */
     public String getName() {
         return this.name;
+    }
+
+    public Validator getPropertyValidator() {
+        return propertyValidator;
     }
 
     /**
@@ -86,31 +126,37 @@ public class ConfigOptionType {
 
     /**
      * 
-     * @return true if the config option is not required
-     */
-    public boolean isOptional() {
-        return optional;
-    }
-
-    /**
-     * 
-     * @return true if the value should be obscured (like a password)
+     * @return true if value should be obscured (like a password)
      */
     public boolean isSecret() {
-        return secret;
+        return this.secret;
+    }
+
+    /**
+     * Removes this ConfigOptionType, only supported on removal of ResourceType
+     */
+    @Transactional
+    public void remove() {
+        graphDatabaseContext.removeNodeEntity(this);
+        if (this.entityManager.contains(this)) {
+            this.entityManager.remove(this);
+        } else {
+            ConfigOptionType attached = this.entityManager.find(this.getClass(), this.id);
+            this.entityManager.remove(attached);
+        }
     }
 
     /**
      * 
-     * @param defaultValue The default value for the config
+     * @param defaultValue The default value for the config option
      */
-    public void setDefaultValue(String defaultValue) {
+    public void setDefaultValue(Object defaultValue) {
         this.defaultValue = defaultValue;
     }
 
     /**
      * 
-     * @param description The description
+     * @param description The config option description
      */
     public void setDescription(String description) {
         this.description = description;
@@ -132,17 +178,14 @@ public class ConfigOptionType {
         this.id = id;
     }
 
-    /**
-     * 
-     * @param optional true if the config option is not required
-     */
-    public void setOptional(boolean optional) {
-        this.optional = optional;
+    public void setPropertyValidator(Validator propertyValidator) {
+        this.propertyValidator = propertyValidator;
     }
 
     /**
      * 
-     * @param secret true if the value should be obscured (like a password)
+     * @param secret true if the config option value should be obscured (like a
+     *        password)
      */
     public void setSecret(boolean secret) {
         this.secret = secret;
@@ -154,10 +197,9 @@ public class ConfigOptionType {
         sb.append("Id: ").append(getId()).append(", ");
         sb.append("Name: ").append(getName()).append(", ");
         sb.append("Description: ").append(getDescription()).append(", ");
-        sb.append("Optional: ").append(isOptional()).append(", ");
-        sb.append("Hidden: ").append(isHidden()).append(", ");
         sb.append("Secret: ").append(isSecret()).append(", ");
-        sb.append("DefaultValue: ").append(getDefaultValue()).append("]");
+        sb.append("DefaultValue: ").append(getDefaultValue()).append(", ");
+        sb.append("Hidden: ").append(isHidden()).append("]");
         return sb.toString();
     }
 }
