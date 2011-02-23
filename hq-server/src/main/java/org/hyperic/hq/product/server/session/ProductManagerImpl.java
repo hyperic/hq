@@ -186,10 +186,7 @@ public class ProductManagerImpl implements ProductManager {
         return Bootstrap.getBean(ProductPluginDeployer.class).getProductPluginManager();
     }
 
-    /**
-     */
-    @Transactional(readOnly = true)
-    public TypeInfo getTypeInfo(AppdefEntityValue value) throws PermissionException,
+    private TypeInfo getTypeInfo(AppdefEntityValue value) throws PermissionException,
         AppdefEntityNotFoundException {
         return getProductPluginManager().getTypeInfo(value.getBasePlatformName(),
             value.getTypeName());

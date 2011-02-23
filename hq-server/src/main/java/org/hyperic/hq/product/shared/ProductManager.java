@@ -37,7 +37,6 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ServiceType;
-import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 
@@ -45,8 +44,6 @@ import org.hyperic.util.config.ConfigSchema;
  * Local interface for ProductManager.
  */
 public interface ProductManager {
-
-    public TypeInfo getTypeInfo(AppdefEntityValue value) throws PermissionException, AppdefEntityNotFoundException;
 
     public PluginManager getPluginManager(String type) throws PluginException;
 

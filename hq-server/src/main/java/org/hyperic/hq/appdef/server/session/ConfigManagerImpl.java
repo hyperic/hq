@@ -26,7 +26,6 @@
 package org.hyperic.hq.appdef.server.session;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -58,6 +57,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
+ * This Manager exists purely to provide a conversion layer that deals in
+ * ConfigResponse instead of Config.
+ * 
  */
 @org.springframework.stereotype.Service
 public class ConfigManagerImpl implements ConfigManager {
