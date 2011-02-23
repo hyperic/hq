@@ -67,5 +67,8 @@
 		<value>org.hyperic.hq.inventory.domain.Config</value>
 		<value>org.hyperic.hq.product.Plugin</value>
 		<value>org.hyperic.hq.inventory.domain.OperationType</value>
+		<value>org.hyperic.hq.inventory.domain.PropertyType</value>
+		<value>org.hyperic.hq.inventory.domain.ConfigType</value>
+		<value>org.hyperic.hq.inventory.domain.ConfigOptionType</value>
 	</util:list>
 </beans>

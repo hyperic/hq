@@ -9,6 +9,8 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -28,6 +30,7 @@ import org.springframework.validation.Validator;
 @Configurable
 @NodeEntity(partial = true)
 @Entity
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class PropertyType {
 
     @Transient
