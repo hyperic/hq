@@ -71,10 +71,19 @@ public class GemFireLiveData extends LiveDataPlugin {
         }
 
         //cleanig olds names.
-        for(String member: namesCache.keySet()){
-            if(!members.contains(member)){
+        List <String> idsToRemove = new ArrayList<String>();
+        for (String member : namesCache.keySet()) {
+            if (!members.contains(member)) {
+                idsToRemove.add(member);
+            }
+        }
+        if (idsToRemove.size() > 0) {
+            log.debug("[getMembers] namesCache.size="+namesCache.size());
+            log.debug("[getMembers] idsToRemove.size="+idsToRemove.size());
+            for (String member : idsToRemove) {
                 namesCache.remove(member);
             }
+            log.debug("[getMembers] namesCache.size="+namesCache.size());
         }
 
         return names.toArray(new String[0][0]);
