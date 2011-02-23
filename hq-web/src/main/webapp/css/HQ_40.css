@@ -198,7 +198,6 @@ a:visited,a:hover,a {
 	padding:5px;
 	margin:0;
 	background-image:none;
-	white-space: nowrap;
 }
 		
 #navTabContainer ul.root {
@@ -225,7 +224,7 @@ a:visited,a:hover,a {
 }
 
 #navTabContainer li.hasSubMenu ul {
-	width:auto;
+	width:300%;
 }
 
 #navTabContainer li ul {

@@ -5,6 +5,30 @@ body { background: #EFEFEF; }
     border-bottom: 3px solid #2D6EBE;
 }
 
+#footer span {
+	text-align: center;
+	font-weight: bold;
+	font-size: 0.9em;
+	padding-bottom: 5px;
+}
+
+#footer span#processUser {
+	text-align: left;
+}
+
+#footer .footerWarning {
+    background-color: orange;
+    font-weight: bold;
+    padding: 5px 0;
+    text-align: center;
+    width: 100%;
+}
+
+#footer span a {
+	text-decoration: none;
+	cursor: pointer;
+}
+
 #headerLogo {
 	cursor: pointer;	
 }
