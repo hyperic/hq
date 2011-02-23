@@ -7,7 +7,6 @@ public class ConfigOptionTypeRep {
     private String name;
     private String defaultValue;
     private String description;
-	private Boolean optional;
 	private Boolean hidden;
 	private Boolean secret;
 
@@ -16,9 +15,8 @@ public class ConfigOptionTypeRep {
 	public ConfigOptionTypeRep(ConfigOptionType configType) {
 		id = configType.getId();
 		name = configType.getName();
-		defaultValue = configType.getDefaultValue();
+		defaultValue = (String)configType.getDefaultValue();
 		description = configType.getDescription();
-		optional = configType.isOptional();
 		hidden = configType.isHidden();
 		secret = configType.isSecret();
 	}
@@ -53,14 +51,6 @@ public class ConfigOptionTypeRep {
 
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	public Boolean isOptional() {
-		return optional;
-	}
-
-	public void setOptional(Boolean optional) {
-		this.optional = optional;
 	}
 
 	public Boolean isHidden() {

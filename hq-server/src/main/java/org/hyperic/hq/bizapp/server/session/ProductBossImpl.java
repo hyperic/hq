@@ -40,7 +40,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
-import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
@@ -327,63 +326,6 @@ public class ProductBossImpl implements ProductBoss {
         AppdefEntityValue aval = new AppdefEntityValue(id, getOverlord());
 
         return productManager.getConfigSchema(type, name, aval, baseResponse);
-    }
-
-    /**
-     * Set the config response for an entity/type combination. Note that setting
-     * the config response for any entity may cause a chain reaction of things
-     * to occur. For instance, agents may get updated with new measurements for
-     * entities which were affected by the configuration change.
-     * 
-     * @param id ID of the object to set the repsonse fo
-     * @param response The response
-     * @param type One of ProductPlugin.TYPE_*
-     * @throws SessionTimeoutException
-     * @throws SessionNotFoundException
-     */
-    public void setConfigResponse(int sessionId, AppdefEntityID id, ConfigResponse response, String type)
-        throws InvalidConfigException, SessionTimeoutException, EncodingException, PermissionException,
-        ConfigFetchException, AppdefEntityNotFoundException, SessionNotFoundException {
-        AuthzSubject subject = sessionManager.getSubject(sessionId);
-        this.setConfigResponse(subject, id, response, type);
-    }
-
-    /**
-     */
-    public void setConfigResponse(AuthzSubject subject, AppdefEntityID id, ConfigResponse response, String type)
-        throws EncodingException, PermissionException, InvalidConfigException, ConfigFetchException,
-        AppdefEntityNotFoundException {
-        this.setConfigResponse(subject, id, response, type, true);
-    }
-
-    /**
-     * @return The array of IDs affected.
-     */
-    private AppdefEntityID[] setConfigResponse(AuthzSubject subject, AppdefEntityID id, ConfigResponse response,
-                                               String type, boolean shouldValidate) throws EncodingException,
-        PermissionException, InvalidConfigException, ConfigFetchException, AppdefEntityNotFoundException {
-        boolean doRollback = true;
-        try {
-            if (configManager.setConfigResponse(subject, id, response, type, true) != null) {
-                AppdefEntityID[] ids = new AppdefEntityID[] { id };
-
-                ConfigValidator configValidator = (ConfigValidator) org.hyperic.hq.common.ProductProperties
-                    .getPropertyInstance(ConfigValidator.PDT_PROP);
-
-                if (shouldValidate) {
-                    configValidator.validate(subject, type, ids);
-                }
-            }
-
-            doRollback = false;
-            return new AppdefEntityID[0];
-
-        } finally {
-            if (doRollback) {
-                // FIXME: HE-215
-                throw new IllegalStateException("Exception to cause rollback");
-            }
-        }
     }
 
     /**

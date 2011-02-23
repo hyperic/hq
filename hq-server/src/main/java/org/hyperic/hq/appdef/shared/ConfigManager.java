@@ -64,21 +64,6 @@ public interface ConfigManager {
         ConfigFetchException, EncodingException, PermissionException;
   
 
-    /**
-     * Set the config response for an entity/type combination.
-     * @param id ID of the object to set the repsonse fo
-     * @param response The response
-     * @param type One of ProductPlugin.TYPE_*
-     * @return an array of entities which may be affected by the change in
-     *         configuration. For updates to platform and service configs, there
-     *         are no other entities other than the given ID returned. If a
-     *         server is updated, the associated services may require changes.
-     *         The passed entity will always be returned in the array.
-     */
-    public AppdefEntityID setConfigResponse(AuthzSubject subject, AppdefEntityID id, ConfigResponse response,
-                                            String type, boolean sendConfigEvent) throws ConfigFetchException,
-        AppdefEntityNotFoundException, PermissionException, EncodingException;
-
     public boolean configureResponse(AuthzSubject subject, 
                                      AppdefEntityID appdefID, byte[] productConfig, byte[] measurementConfig,
                                      byte[] controlConfig, byte[] rtConfig, Boolean userManaged,

@@ -258,7 +258,9 @@ public abstract class InventoryHelper {
 
         // only check where the config is invalid
         
-        String validationError = Bootstrap.getBean(ResourceManager.class).findResourceById(entityId.getId()).getConfigValidationError();
+        String validationError = null;
+        //TODO validation error?
+        //Bootstrap.getBean(ResourceManager.class).findResourceById(entityId.getId()).getConfigValidationError();
 
         if (validationError == null) {
             request.setAttribute(CONFIG_ATTR, Boolean.FALSE);
