@@ -456,9 +456,9 @@ public class ResourceIntegrationTest {
         assertNull(traderJoes.getConfig("Product"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testGetConfigInvalidType() {
-        traderJoes.getConfig("Measurement");
+        assertNull(traderJoes.getConfig("Measurement"));
     }
 
 }

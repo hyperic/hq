@@ -225,12 +225,6 @@ public class Resource {
      *         type
      */
     public Config getConfig(String configType) {
-        ConfigType cfgType = type.getConfigType(configType);
-        if (cfgType == null) {
-            throw new IllegalArgumentException("Config " + configType +
-                                               " is not defined for resource of type " +
-                                               type.getName());
-        }
         for (Config config : configs) {
             if (config.getType().getName().equals(configType)) {
                 return config;
