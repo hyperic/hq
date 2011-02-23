@@ -67,7 +67,7 @@ public class PropertyType {
 
     @PersistenceContext
     private transient EntityManager entityManager;
-    
+
     private transient Validator propertyValidator;
 
     public PropertyType() {
@@ -82,12 +82,12 @@ public class PropertyType {
         this.description = description;
         this.name = name;
     }
-    
-    //TODO remove
+
+    // TODO remove
     public PropertyType(String name, Class<?> type) {
         this.name = name;
     }
-    
+
     /**
      * 
      * @return The default value for the property
@@ -144,8 +144,12 @@ public class PropertyType {
         return this.secret;
     }
 
+    /**
+     * Removes this PropertyType. Only supported as part of ResourceType removal
+     */
     @Transactional
     public void remove() {
+        // TODO remove property instances?
         graphDatabaseContext.removeNodeEntity(this);
         if (this.entityManager.contains(this)) {
             this.entityManager.remove(this);
@@ -203,7 +207,7 @@ public class PropertyType {
     public void setSecret(boolean secret) {
         this.secret = secret;
     }
-    
+
     public Validator getPropertyValidator() {
         return propertyValidator;
     }

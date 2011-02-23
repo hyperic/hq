@@ -87,7 +87,7 @@ public class OperationArgType {
     }
 
     /**
-     * Removes this arg type
+     * Removes this arg type.  Only supported with removal of entire encapsulating ResourceType
      */
     @Transactional
     public void remove() {
