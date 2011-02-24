@@ -39,7 +39,7 @@ import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
-import org.hyperic.hq.inventory.dao.ResourceDao;
+import org.hyperic.hq.inventory.data.ResourceDao;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;

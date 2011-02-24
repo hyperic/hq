@@ -12,7 +12,7 @@ import org.hyperic.hq.api.representation.OperationTypeRep;
 import org.hyperic.hq.api.representation.PropertyTypeRep;
 import org.hyperic.hq.api.representation.ResourceTypeRep;
 import org.hyperic.hq.api.representation.SuccessResponse;
-import org.hyperic.hq.inventory.dao.ResourceTypeDao;
+import org.hyperic.hq.inventory.data.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.ResourceType;

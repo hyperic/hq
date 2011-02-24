@@ -52,7 +52,7 @@ import org.hyperic.hq.common.shared.AuditManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
-import org.hyperic.hq.inventory.dao.ResourceTypeDao;
+import org.hyperic.hq.inventory.data.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.ConfigOptionType;
 import org.hyperic.hq.inventory.domain.ConfigType;
 import org.hyperic.hq.inventory.domain.OperationType;

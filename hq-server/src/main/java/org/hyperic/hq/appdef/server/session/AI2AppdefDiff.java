@@ -46,7 +46,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AICompare;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.inventory.dao.ResourceDao;
+import org.hyperic.hq.inventory.data.ResourceDao;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.StringUtil;

@@ -1,4 +1,4 @@
-package org.hyperic.hq.inventory.dao;
+package org.hyperic.hq.inventory.data;
 
 import org.hyperic.hq.inventory.domain.ResourceType;
 

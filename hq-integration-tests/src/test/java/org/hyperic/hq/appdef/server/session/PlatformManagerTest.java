@@ -55,7 +55,7 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.inventory.dao.ResourceDao;
+import org.hyperic.hq.inventory.data.ResourceDao;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;

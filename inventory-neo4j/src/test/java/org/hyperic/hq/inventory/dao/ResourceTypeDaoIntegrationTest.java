@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
+import org.hyperic.hq.inventory.data.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.junit.Before;
 import org.junit.Test;

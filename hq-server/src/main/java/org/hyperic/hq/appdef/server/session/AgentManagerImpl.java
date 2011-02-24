@@ -63,7 +63,7 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
-import org.hyperic.hq.inventory.dao.ResourceDao;
+import org.hyperic.hq.inventory.data.ResourceDao;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;

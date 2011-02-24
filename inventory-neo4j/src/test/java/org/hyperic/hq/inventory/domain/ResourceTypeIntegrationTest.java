@@ -8,8 +8,8 @@ import static org.junit.Assert.assertTrue;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.hyperic.hq.inventory.dao.ResourceDao;
-import org.hyperic.hq.inventory.dao.ResourceTypeDao;
+import org.hyperic.hq.inventory.data.ResourceDao;
+import org.hyperic.hq.inventory.data.ResourceTypeDao;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

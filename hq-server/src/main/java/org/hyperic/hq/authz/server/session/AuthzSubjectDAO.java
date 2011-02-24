@@ -37,7 +37,7 @@ import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.server.session.CrispoDAO;
 import org.hyperic.hq.config.domain.Crispo;
-import org.hyperic.hq.inventory.dao.ResourceTypeDao;
+import org.hyperic.hq.inventory.data.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;

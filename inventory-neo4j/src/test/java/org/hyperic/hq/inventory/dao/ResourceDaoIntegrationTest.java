@@ -16,6 +16,8 @@ import javax.persistence.PersistenceContext;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
+import org.hyperic.hq.inventory.data.ResourceDao;
+import org.hyperic.hq.inventory.data.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
