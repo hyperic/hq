@@ -45,7 +45,7 @@ import javax.persistence.Version;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
-import org.hyperic.hq.common.server.session.Calendar;
+import org.hyperic.hq.calendar.domain.Calendar;
 import org.springframework.data.graph.annotation.NodeEntity;
 
 @NodeEntity(partial=true)

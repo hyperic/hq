@@ -27,6 +27,9 @@ package org.hyperic.hq.common.server.session;
 
 import java.util.Collection;
 
+import org.hyperic.hq.calendar.domain.Calendar;
+import org.hyperic.hq.calendar.domain.CalendarEntry;
+import org.hyperic.hq.calendar.domain.WeekEntry;
 import org.hyperic.hq.common.shared.CalendarManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

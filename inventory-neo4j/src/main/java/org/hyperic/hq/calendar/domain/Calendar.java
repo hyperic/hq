@@ -23,29 +23,30 @@
  * USA.
  */
 
-package org.hyperic.hq.common.server.session;
+package org.hyperic.hq.calendar.domain;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Index;
 
 @Entity
-@Table(name = "EAM_CALENDAR_ENT")
-@Inheritance(strategy = InheritanceType.JOINED)
+@Table(name = "EAM_CALENDAR", uniqueConstraints = { @UniqueConstraint(name = "calendar_name_idx", columnNames = { "NAME" }) })
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public abstract class CalendarEntry {
+public class Calendar {
     @Id
     @GenericGenerator(name = "mygen1", strategy = "increment")
     @GeneratedValue(generator = "mygen1")
@@ -56,16 +57,18 @@ public abstract class CalendarEntry {
     @Version
     private Long version;
 
-    @ManyToOne
-    @JoinColumn(name = "CALENDAR_ID", nullable = false)
-    @Index(name = "CALENDAR_ID_IDX")
-    private Calendar calendar;
+    @Column(name = "NAME", nullable = false)
+    private String name;
 
-    protected CalendarEntry() {
+    @OneToMany(cascade = { CascadeType.ALL }, mappedBy = "calendar", orphanRemoval = true)
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    private Collection<CalendarEntry> entries = new ArrayList<CalendarEntry>();
+
+    protected Calendar() {
     }
 
-    CalendarEntry(Calendar c) {
-        calendar = c;
+    Calendar(String name) {
+        this.name = name;
     }
 
     public Integer getId() {
@@ -84,32 +87,67 @@ public abstract class CalendarEntry {
         this.version = version;
     }
 
-    public Calendar getCalendar() {
-        return calendar;
+    public String getName() {
+        return name;
     }
 
-    protected void setCalendar(Calendar c) {
-        calendar = c;
+    protected void setName(String name) {
+        this.name = name;
     }
 
-    public abstract boolean containsTime(long time);
+    public Collection<CalendarEntry> getEntries() {
+        return Collections.unmodifiableCollection(entries);
+    }
+
+    protected Collection<CalendarEntry> getEntriesBag() {
+        return entries;
+    }
+
+    boolean removeEntry(CalendarEntry ent) {
+        return getEntriesBag().remove(ent);
+    }
+
+    protected void setEntriesBag(Collection<CalendarEntry> entries) {
+        this.entries = entries;
+    }
+
+    WeekEntry addWeekEntry(int weekDay, int startTime, int endTime) {
+        WeekEntry res = new WeekEntry(this, weekDay, startTime, endTime);
+
+        getEntriesBag().add(res);
+        return res;
+    }
+
+    public boolean containsTime(long time) {
+        for (CalendarEntry ent : getEntries()) {
+            if (ent.containsTime(time)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public String toString() {
+        return "Calendar[" + getName() + "]";
+    }
+
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof Calendar)) {
+            return false;
+        }
+        Calendar o = (Calendar) obj;
+
+        return o.getName().equals(getName());
+    }
 
     public int hashCode() {
         int result = 17;
 
-        result = 37 * result + super.hashCode();
-        result = 37 * result + calendar.hashCode();
+        result = 37 * result + name.hashCode();
+
         return result;
-    }
-
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-
-        if (obj == null || obj instanceof CalendarEntry == false)
-            return false;
-
-        CalendarEntry ent = (CalendarEntry) obj;
-        return ent.getCalendar().equals(calendar) && super.equals(obj);
     }
 }
