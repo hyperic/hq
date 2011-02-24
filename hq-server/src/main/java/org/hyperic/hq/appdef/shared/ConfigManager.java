@@ -36,8 +36,6 @@ import org.hyperic.util.config.EncodingException;
  */
 public interface ConfigManager {
 
-    public String getPluginName(AppdefEntityID id) throws AppdefEntityNotFoundException;
-
     /**
      * Get a config response object merged through the hierarchy. All entities
      * are merged with the product's config response, and any entity lower than
@@ -66,8 +64,7 @@ public interface ConfigManager {
 
     public boolean configureResponse(AuthzSubject subject, 
                                      AppdefEntityID appdefID, byte[] productConfig, byte[] measurementConfig,
-                                     byte[] controlConfig, byte[] rtConfig, Boolean userManaged,
-                                     boolean force);
+                                     byte[] controlConfig);
     
     public byte[] toConfigResponse(Config config);
     
