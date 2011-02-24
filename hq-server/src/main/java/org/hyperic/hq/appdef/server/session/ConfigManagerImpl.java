@@ -75,38 +75,39 @@ public class ConfigManagerImpl implements ConfigManager {
         this.resourceManager = resourceManager;
     }
 
-    private void setConfig(byte[] configBytes, String configType, Resource resource)  {
+    private void setConfig(byte[] configBytes, String configType, Resource resource) {
         ConfigResponse configResponse;
         try {
             configResponse = ConfigResponse.decode(configBytes);
         } catch (EncodingException e) {
-           log.error("Error decoding config of type: " + configType + " for Resource: ",e);
-           return;
+            log.error("Error decoding config of type: " + configType + " for Resource: ", e);
+            return;
         }
-        //Plugins may send config options that weren't configured in schema.  Add config type here if missing
+        // Plugins may send config options that weren't configured in schema.
+        // Add config type here if missing
         ConfigType type = resource.getType().getConfigType(configType);
-        if(type == null) {
+        if (type == null) {
             type = new ConfigType(configType);
             resource.getType().addConfigType(type);
         }
-        Config config =  resource.getConfig(configType);
-        if(config == null) {
+        Config config = resource.getConfig(configType);
+        if (config == null) {
             config = new Config();
             config.setType(type);
             resource.addConfig(config);
         }
         for (String key : configResponse.getKeys()) {
             String value = configResponse.getValue(key);
-            if(type.getConfigOptionType(key) == null) {
-                //Sigh we let plugins send config options that aren't defined in schema.  Add them here w/what we know
-                ConfigOptionType optionType = new ConfigOptionType(key,key);
+            if (type.getConfigOptionType(key) == null) {
+                // Sigh we let plugins send config options that aren't defined
+                // in schema. Add them here w/what we know
+                ConfigOptionType optionType = new ConfigOptionType(key, key);
                 type.addConfigOptionType(optionType);
             }
             config.setValue(key, value);
         }
-        //Remove removed config props
-        
-       
+        // Remove removed config props
+
     }
 
     /**
@@ -335,35 +336,32 @@ public class ConfigManagerImpl implements ConfigManager {
         boolean wasUpdated = false;
         byte[] configBytes;
         Resource resource = resourceManager.findResourceById(appdefID.getId());
-        
-            configBytes = mergeConfig(toConfigResponse(resource.getConfig(ProductPlugin.TYPE_PRODUCT)),
-                productConfig, true);
-            if (!AICompare.configsEqual(configBytes,
-                toConfigResponse(resource.getConfig(ProductPlugin.TYPE_PRODUCT)))) {
-                setConfig(configBytes,ProductPlugin.TYPE_PRODUCT,resource);
-                wasUpdated = true;
-            }
-        
 
-       
-            configBytes = mergeConfig(toConfigResponse(resource.getConfig(ProductPlugin.TYPE_MEASUREMENT)),
-                measurementConfig, true);
-            if (!AICompare.configsEqual(configBytes,
-                toConfigResponse(resource.getConfig(ProductPlugin.TYPE_MEASUREMENT)))) {
-                setConfig(configBytes,ProductPlugin.TYPE_MEASUREMENT,resource);
-                wasUpdated = true;
-            }
-       
+        configBytes = mergeConfig(toConfigResponse(resource.getConfig(ProductPlugin.TYPE_PRODUCT)),
+            productConfig, true);
+        if (!AICompare.configsEqual(configBytes,
+            toConfigResponse(resource.getConfig(ProductPlugin.TYPE_PRODUCT)))) {
+            setConfig(configBytes, ProductPlugin.TYPE_PRODUCT, resource);
+            wasUpdated = true;
+        }
 
-       
-            configBytes = mergeConfig(toConfigResponse(resource.getConfig(ProductPlugin.TYPE_CONTROL)),
-                controlConfig, true);
-            if (!AICompare.configsEqual(configBytes,
-                toConfigResponse(resource.getConfig(ProductPlugin.TYPE_CONTROL)))) {
-                setConfig(configBytes,ProductPlugin.TYPE_CONTROL,resource);
-                wasUpdated = true;
-            }
-        
+        configBytes = mergeConfig(
+            toConfigResponse(resource.getConfig(ProductPlugin.TYPE_MEASUREMENT)),
+            measurementConfig, true);
+        if (!AICompare.configsEqual(configBytes,
+            toConfigResponse(resource.getConfig(ProductPlugin.TYPE_MEASUREMENT)))) {
+            setConfig(configBytes, ProductPlugin.TYPE_MEASUREMENT, resource);
+            wasUpdated = true;
+        }
+
+        configBytes = mergeConfig(toConfigResponse(resource.getConfig(ProductPlugin.TYPE_CONTROL)),
+            controlConfig, true);
+        if (!AICompare.configsEqual(configBytes,
+            toConfigResponse(resource.getConfig(ProductPlugin.TYPE_CONTROL)))) {
+            setConfig(configBytes, ProductPlugin.TYPE_CONTROL, resource);
+            wasUpdated = true;
+        }
+
         return wasUpdated;
     }
 
@@ -389,7 +387,7 @@ public class ConfigManagerImpl implements ConfigManager {
         return res;
     }
 
-    public byte[] toConfigResponse(Config config)  {
+    public byte[] toConfigResponse(Config config) {
         ConfigResponse configResponse = new ConfigResponse();
         if (config != null) {
             for (Map.Entry<String, Object> entry : config.getValues().entrySet()) {
@@ -399,8 +397,8 @@ public class ConfigManagerImpl implements ConfigManager {
         try {
             return configResponse.encode();
         } catch (EncodingException e) {
-           log.error(e);
-           return new byte[0];
+            log.error(e);
+            return new byte[0];
         }
     }
 
