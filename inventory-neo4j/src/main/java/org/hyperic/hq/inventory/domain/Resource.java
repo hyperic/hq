@@ -25,7 +25,6 @@ import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.inventory.InvalidRelationshipException;
 import org.hyperic.hq.inventory.NotUniqueException;
 import org.hyperic.hq.messaging.MessagePublisher;
-import org.hyperic.hq.reference.RelationshipTypes;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotFoundException;

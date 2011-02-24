@@ -1,4 +1,4 @@
-package org.hyperic.hq.reference;
+package org.hyperic.hq.inventory.domain;
 
 abstract public class RelationshipTypes {
 

@@ -22,7 +22,6 @@ import org.hyperic.hq.inventory.dao.ResourceDao;
 import org.hyperic.hq.inventory.dao.ResourceTypeDao;
 import org.hyperic.hq.inventory.events.CPropChangeEvent;
 import org.hyperic.hq.messaging.MockMessagePublisher;
-import org.hyperic.hq.reference.RelationshipTypes;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
