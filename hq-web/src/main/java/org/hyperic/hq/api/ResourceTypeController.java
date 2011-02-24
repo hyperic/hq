@@ -17,7 +17,7 @@ import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.inventory.domain.ResourceTypeRelationship;
-import org.hyperic.hq.product.Plugin;
+import org.hyperic.hq.plugin.domain.Plugin;
 import org.hyperic.hq.product.server.session.PluginDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

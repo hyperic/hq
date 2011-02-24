@@ -23,7 +23,7 @@
 * USA.
 */
 
-package org.hyperic.hq.product;
+package org.hyperic.hq.plugin.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
