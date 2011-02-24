@@ -748,7 +748,6 @@
 					<module>hq-diagnostics</module>
 					<module>hq-messaging</module>
 					<module>inventory-neo4j</module>
-					<module>inventory-jpa</module>
 					<module>hq-server</module>
 					<module>hq-rendit</module>
 					<module>hq-plugin</module>
@@ -774,7 +773,6 @@
 					<module>hq-diagnostics</module>
 					<module>hq-messaging</module>
 					<module>inventory-neo4j</module>
-					<module>inventory-jpa</module>
 					<module>hq-server</module>
 					<module>hq-rendit</module>
 					<module>hq-plugin</module>
@@ -797,7 +795,6 @@
 					<module>hq-diagnostics</module>
 					<module>hq-messaging</module>
 					<module>inventory-neo4j</module>
-					<module>inventory-jpa</module>
 					<module>hq-server</module>
 					<module>hq-rendit</module>
 					<module>hq-plugin</module>
@@ -817,7 +814,6 @@
 					<module>hq-diagnostics</module>
 					<module>hq-messaging</module>
 					<module>inventory-neo4j</module>
-					<module>inventory-jpa</module>
 					<module>hq-server</module>
 					<module>hq-rendit</module>
 					<module>hq-web</module>
