@@ -78,4 +78,12 @@ public class ConfigIntegrationTest {
         assertNull(config.setValue("user", "bob"));
         assertEquals("bob",config.setValue("user", "Jim"));
     }
+    
+    @Test
+    public void testGetConfigTypeDefaultValues() {
+        config.getType().getConfigOptionType("user").setDefaultValue("mark");
+        Map<String,Object> expected = new HashMap<String,Object>();
+        expected.put("user", "mark");
+        assertEquals(expected,config.getType().getDefaultConfigValues());
+    }
 }
