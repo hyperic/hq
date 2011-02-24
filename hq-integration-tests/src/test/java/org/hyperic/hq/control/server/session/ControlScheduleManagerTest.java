@@ -26,6 +26,8 @@
 
 package org.hyperic.hq.control.server.session;
 
+import static org.junit.Assert.assertEquals;
+
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerType;
@@ -38,7 +40,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
-import static org.junit.Assert.assertEquals;
 /**
  * Integration test of {@link ControlScheduleManagerImpl}
  * 

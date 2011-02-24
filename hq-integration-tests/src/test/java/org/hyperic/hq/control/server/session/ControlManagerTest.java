@@ -1,5 +1,7 @@
 package org.hyperic.hq.control.server.session;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,7 +20,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
-import static org.junit.Assert.assertEquals;
 
 @DirtiesContext
 public class ControlManagerTest

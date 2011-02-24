@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.measurement.shared.DataManager;

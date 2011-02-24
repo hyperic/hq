@@ -42,7 +42,7 @@ import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;

@@ -24,7 +24,8 @@
  */
 package org.hyperic.hq.monitor.aop;
 
-import static junit.framework.Assert.*; 
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 
 import org.hyperic.hq.monitor.MockService;
 import org.hyperic.hq.monitor.Pojo;

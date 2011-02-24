@@ -37,7 +37,7 @@ import java.util.Set;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefManager;
-import org.hyperic.hq.authz.server.session.Role;
+import org.hyperic.hq.auth.domain.Role;
 import org.hyperic.hq.authz.server.session.RoleDAO;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Before;
