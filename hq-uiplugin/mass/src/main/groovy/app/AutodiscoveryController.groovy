@@ -31,7 +31,7 @@ import org.hyperic.hq.appdef.shared.AIPlatformValue
 import org.hyperic.hq.appdef.shared.AIQueueConstants
 import org.hyperic.hq.appdef.server.session.Platform
 import org.hyperic.hq.appdef.server.session.Server
-import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.auth.domain.AuthzSubject
 import org.hyperic.hq.context.Bootstrap;
 
 class AutodiscoveryController extends BaseController {

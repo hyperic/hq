@@ -24,7 +24,7 @@
  *
  */
 
-import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.auth.domain.AuthzSubject
 import org.hyperic.hq.inventory.domain.Resource
 import org.hyperic.hq.hqu.server.session.Attachment
 import org.hyperic.hq.hqu.rendit.HQUPlugin

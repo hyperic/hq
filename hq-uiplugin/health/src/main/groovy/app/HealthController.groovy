@@ -28,10 +28,9 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.appdef.server.session.Server
 import org.hyperic.hq.appdef.shared.AppdefEntityID
-import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue
 import org.hyperic.hq.appdef.server.session.AgentSortField
-import org.hyperic.hq.appdef.Agent
+import org.hyperic.hq.agent.domain.Agent
 import org.hyperic.util.PrintfFormat
 import org.hyperic.util.units.UnitsFormat
 import org.hyperic.util.units.UnitsConstants
@@ -41,7 +40,7 @@ import org.hyperic.hq.hqu.rendit.html.DojoUtil
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.hq.hqu.rendit.util.HQUtil
 import org.hyperic.hq.bizapp.shared.ProductBoss;
-import org.hyperic.hq.common.DiagnosticsLogger;
+import org.hyperic.hq.diagnostics.DiagnosticsLogger;
 import org.hyperic.hq.common.Humidor
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.util.jdbc.DBUtil

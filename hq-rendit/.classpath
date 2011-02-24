@@ -43,15 +43,14 @@
 	<classpathentry kind="var" path="M2_REPO/org/apache/geronimo/specs/geronimo-jta_1.1_spec/1.1.1/geronimo-jta_1.1_spec-1.1.1.jar" sourcepath="M2_REPO/org/apache/geronimo/specs/geronimo-jta_1.1_spec/1.1.1/geronimo-jta_1.1_spec-1.1.1-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/gnu-getopt/getopt/1.0.13/getopt-1.0.13.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/codehaus/groovy/groovy-all/1.6.7/groovy-all-1.6.7.jar" sourcepath="M2_REPO/org/codehaus/groovy/groovy-all/1.6.7/groovy-all-1.6.7-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/hibernate/hibernate-annotations/3.5.6-Final/hibernate-annotations-3.5.6-Final.jar" sourcepath="M2_REPO/org/hibernate/hibernate-annotations/3.5.6-Final/hibernate-annotations-3.5.6-Final-sources.jar"/>
+	<classpathentry exported="true" kind="var" path="M2_REPO/org/hibernate/hibernate-annotations/3.5.6-Final/hibernate-annotations-3.5.6-Final.jar" sourcepath="M2_REPO/org/hibernate/hibernate-annotations/3.5.6-Final/hibernate-annotations-3.5.6-Final-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/hibernate/hibernate-commons-annotations/3.2.0.Final/hibernate-commons-annotations-3.2.0.Final.jar" sourcepath="M2_REPO/org/hibernate/hibernate-commons-annotations/3.2.0.Final/hibernate-commons-annotations-3.2.0.Final-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/hibernate/hibernate-core/3.5.6-Final/hibernate-core-3.5.6-Final.jar" sourcepath="M2_REPO/org/hibernate/hibernate-core/3.5.6-Final/hibernate-core-3.5.6-Final-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/hibernate/hibernate-entitymanager/3.5.6-Final/hibernate-entitymanager-3.5.6-Final.jar" sourcepath="M2_REPO/org/hibernate/hibernate-entitymanager/3.5.6-Final/hibernate-entitymanager-3.5.6-Final-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/hibernate/hibernate-jmx/3.5.6-Final/hibernate-jmx-3.5.6-Final.jar" sourcepath="M2_REPO/org/hibernate/hibernate-jmx/3.5.6-Final/hibernate-jmx-3.5.6-Final-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/hibernate/javax/persistence/hibernate-jpa-2.0-api/1.0.0.Final/hibernate-jpa-2.0-api-1.0.0.Final.jar" sourcepath="M2_REPO/org/hibernate/javax/persistence/hibernate-jpa-2.0-api/1.0.0.Final/hibernate-jpa-2.0-api-1.0.0.Final-sources.jar"/>
+	<classpathentry exported="true" kind="var" path="M2_REPO/org/hibernate/javax/persistence/hibernate-jpa-2.0-api/1.0.0.Final/hibernate-jpa-2.0-api-1.0.0.Final.jar" sourcepath="M2_REPO/org/hibernate/javax/persistence/hibernate-jpa-2.0-api/1.0.0.Final/hibernate-jpa-2.0-api-1.0.0.Final-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/hibernate/hibernate-validator/4.1.0.Final/hibernate-validator-4.1.0.Final.jar" sourcepath="M2_REPO/org/hibernate/hibernate-validator/4.1.0.Final/hibernate-validator-4.1.0.Final-sources.jar"/>
 	<classpathentry kind="src" path="/hq-common"/>
-	<classpathentry kind="src" path="/hq-domain"/>
 	<classpathentry kind="src" path="/hq-lather"/>
 	<classpathentry kind="src" path="/hq-pdk"/>
 	<classpathentry kind="src" path="/hq-server"/>
@@ -72,11 +71,11 @@
 	<classpathentry kind="var" path="M2_REPO/org/apache/activemq/kahadb/5.3.0/kahadb-5.3.0.jar" sourcepath="M2_REPO/org/apache/activemq/kahadb/5.3.0/kahadb-5.3.0-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/log4j/log4j/1.2.16/log4j-1.2.16.jar" sourcepath="M2_REPO/log4j/log4j/1.2.16/log4j-1.2.16-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/mysql/mysql-connector-java/5.1.10/mysql-connector-java-5.1.10.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/neo4j/neo4j/1.2/neo4j-1.2.jar"/>
+	<classpathentry exported="true" kind="var" path="M2_REPO/org/neo4j/neo4j/1.2/neo4j-1.2.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/neo4j/neo4j-graph-algo/0.7-1.2/neo4j-graph-algo-0.7-1.2.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/neo4j/neo4j-ha/0.5-1.2/neo4j-ha-0.5-1.2.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/neo4j/neo4j-index/1.2-1.2/neo4j-index-1.2-1.2.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/neo4j/neo4j-kernel/1.2-1.2/neo4j-kernel-1.2-1.2.jar"/>
+	<classpathentry exported="true" kind="var" path="M2_REPO/org/neo4j/neo4j-kernel/1.2-1.2/neo4j-kernel-1.2-1.2.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/neo4j/neo4j-lucene-index/0.2-1.2/neo4j-lucene-index-0.2-1.2.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/neo4j/neo4j-management/1.2-1.2/neo4j-management-1.2-1.2.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/neo4j/neo4j-online-backup/0.7-1.2/neo4j-online-backup-0.7-1.2.jar"/>
@@ -101,14 +100,14 @@
 	<classpathentry kind="var" path="M2_REPO/org/slf4j/slf4j-log4j12/1.6.1/slf4j-log4j12-1.6.1.jar" sourcepath="M2_REPO/org/slf4j/slf4j-log4j12/1.6.1/slf4j-log4j12-1.6.1-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/snmp4j/snmp4j/1.11/snmp4j-1.11.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-asm/3.0.5.RELEASE/spring-asm-3.0.5.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-asm/3.0.5.RELEASE/spring-asm-3.0.5.RELEASE-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-aspects/3.0.5.RELEASE/spring-aspects-3.0.5.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-aspects/3.0.5.RELEASE/spring-aspects-3.0.5.RELEASE-sources.jar"/>
+	<classpathentry exported="true" kind="var" path="M2_REPO/org/springframework/spring-aspects/3.0.5.RELEASE/spring-aspects-3.0.5.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-aspects/3.0.5.RELEASE/spring-aspects-3.0.5.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-beans/3.0.5.RELEASE/spring-beans-3.0.5.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-beans/3.0.5.RELEASE/spring-beans-3.0.5.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-context/3.0.5.RELEASE/spring-context-3.0.5.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-context/3.0.5.RELEASE/spring-context-3.0.5.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-context-support/3.0.5.RELEASE/spring-context-support-3.0.5.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-context-support/3.0.5.RELEASE/spring-context-support-3.0.5.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-commons-aspects/1.0.0.M2-Chrysalis/spring-data-commons-aspects-1.0.0.M2-Chrysalis.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-commons-core/1.0.0.M2-Chrysalis/spring-data-commons-core-1.0.0.M2-Chrysalis.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-graph-core/1.0.0.M2-Chrysalis/spring-data-graph-core-1.0.0.M2-Chrysalis.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-neo4j/1.0.0.M2-Chrysalis/spring-data-neo4j-1.0.0.M2-Chrysalis.jar"/>
+	<classpathentry exported="true" kind="var" path="M2_REPO/org/springframework/data/spring-data-neo4j/1.0.0.M2-Chrysalis/spring-data-neo4j-1.0.0.M2-Chrysalis.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-jdbc/3.0.5.RELEASE/spring-jdbc-3.0.5.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-jdbc/3.0.5.RELEASE/spring-jdbc-3.0.5.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-jms/3.0.5.RELEASE/spring-jms-3.0.5.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-jms/3.0.5.RELEASE/spring-jms-3.0.5.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-orm/3.0.5.RELEASE/spring-orm-3.0.5.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-orm/3.0.5.RELEASE/spring-orm-3.0.5.RELEASE-sources.jar"/>
