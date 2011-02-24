@@ -514,9 +514,7 @@ public class RuntimeReportProcessor {
                 // Configure resource, telling the config manager to send
                 // an update event if this resource has been updated.
                 boolean wasUpdated = configManager.configureResponse(subject, server.getEntityId(), aiserver
-                    .getProductConfig(), aiserver.getMeasurementConfig(), aiserver.getControlConfig(), null, // RT
-                    // config
-                    null, false);
+                    .getProductConfig(), aiserver.getMeasurementConfig(), aiserver.getControlConfig());
                 if (update && wasUpdated) {
                     Resource r = server.getResource();
                     resourceManager.resourceHierarchyUpdated(subject, Collections.singletonList(r));

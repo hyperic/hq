@@ -128,7 +128,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                 try {
                     configMgr.configureResponse(subject, aid,
                         aiplatform.getProductConfig(), aiplatform.getMeasurementConfig(),
-                        aiplatform.getControlConfig(), null, null, false);
+                        aiplatform.getControlConfig());
                 } catch (Exception e) {
                     log.warn("Error configuring platform: " + e, e);
                 }
@@ -155,8 +155,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                     try {
                         configMgr.configureResponse(subject, 
                             existingPlatform.getEntityId(), aiplatform.getProductConfig(),
-                            aiplatform.getMeasurementConfig(), aiplatform.getControlConfig(), null,
-                            null, false);
+                            aiplatform.getMeasurementConfig(), aiplatform.getControlConfig());
                          resourceManager.resourceHierarchyUpdated(
                              subject, Collections.singletonList(existingPlatform.getResource()));
                     } catch (Exception e) {
@@ -311,7 +310,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
             try {
                 configMgr.configureResponse(subject,  serverValue
                     .getEntityId(), aiserver.getProductConfig(), aiserver.getMeasurementConfig(),
-                    aiserver.getControlConfig(), null, null, false);
+                    aiserver.getControlConfig());
                 resourceManager.resourceHierarchyUpdated(
                     subject, Collections.singletonList(server.getResource()));
             } catch (Exception configE) {
@@ -364,8 +363,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
             try {
                 configMgr.configureResponse(subject,  server
                         .getEntityId(), aiserver.getProductConfig(), aiserver.getMeasurementConfig(),
-                        aiserver.getControlConfig(), null, /* RT config */
-                        null, false);
+                        aiserver.getControlConfig());
             } catch (Exception e) {
                 log.warn("Error configuring server: " + e, e);
             }

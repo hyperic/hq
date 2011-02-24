@@ -168,8 +168,7 @@ public class ServiceMergerImpl implements ServiceMerger {
 
             // CONFIGURE SERVICE
             final boolean wasUpdated = configManager.configureResponse(sInfo.subject,service.getEntityId(), aiservice.getProductConfig(),
-                aiservice.getMeasurementConfig(), aiservice.getControlConfig(), aiservice
-                    .getResponseTimeConfig(), null, false);
+                aiservice.getMeasurementConfig(), aiservice.getControlConfig());
             if (update && wasUpdated) {
                 updatedResources.add(service.getResource());
             } else {

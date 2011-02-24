@@ -2705,7 +2705,7 @@ public class AppdefBossImpl implements AppdefBoss {
         AppdefEntityID id = allConfigs.getResource();
 
         try {
-            doSetAll(subject, allConfigs, doValidation, false);
+            doSetAll(subject, allConfigs, doValidation);
 
             doRollback = false;
 
@@ -2730,13 +2730,13 @@ public class AppdefBossImpl implements AppdefBoss {
             throw e;
         } finally {
             if (doRollback && doValidation) {
-                doSetAll(subject, allConfigsRollback, false, true);
+                doSetAll(subject, allConfigsRollback, false);
             }
         }
     }
 
     private void doSetAll(AuthzSubject subject, AllConfigResponses allConfigs,
-                          boolean doValidation, boolean force) throws EncodingException,
+                          boolean doValidation) throws EncodingException,
         PermissionException, ConfigFetchException, PluginException, ApplicationException {
         AppdefEntityID entityId = allConfigs.getResource();
         Set<AppdefEntityID> ids = new HashSet<AppdefEntityID>();
@@ -2747,8 +2747,7 @@ public class AppdefBossImpl implements AppdefBoss {
             boolean wasUpdated = configManager.configureResponse(subject, entityId,
                 ConfigResponse.safeEncode(allConfigs.getProductConfig()),
                 ConfigResponse.safeEncode(allConfigs.getMetricConfig()),
-                ConfigResponse.safeEncode(allConfigs.getControlConfig()),
-                ConfigResponse.safeEncode(allConfigs.getRtConfig()), Boolean.TRUE, force);
+                ConfigResponse.safeEncode(allConfigs.getControlConfig()));
             if (wasUpdated) {
                 ids.add(entityId);
             }

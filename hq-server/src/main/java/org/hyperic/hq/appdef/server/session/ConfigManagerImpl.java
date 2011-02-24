@@ -37,11 +37,8 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
-import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerManager;
-import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceManager;
-import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
@@ -50,7 +47,6 @@ import org.hyperic.hq.inventory.domain.Config;
 import org.hyperic.hq.inventory.domain.ConfigOptionType;
 import org.hyperic.hq.inventory.domain.ConfigType;
 import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -79,87 +75,38 @@ public class ConfigManagerImpl implements ConfigManager {
         this.resourceManager = resourceManager;
     }
 
-    private Config createConfig(byte[] configBytes, String configType, ResourceType resourceType) {
-        //Plugins may send config options that weren't configured in schema.  Add config here if missing
-        ConfigType type = resourceType.getConfigType(configType);
+    private void setConfig(byte[] configBytes, String configType, Resource resource)  {
+        ConfigResponse configResponse;
+        try {
+            configResponse = ConfigResponse.decode(configBytes);
+        } catch (EncodingException e) {
+           log.error("Error decoding config of type: " + configType + " for Resource: ",e);
+           return;
+        }
+        //Plugins may send config options that weren't configured in schema.  Add config type here if missing
+        ConfigType type = resource.getType().getConfigType(configType);
         if(type == null) {
             type = new ConfigType(configType);
-            resourceType.addConfigType(type);
+            resource.getType().addConfigType(type);
         }
-        Config config = new Config();
-        config.setType(type);
-        try {
-            ConfigResponse configResponse = ConfigResponse.decode(configBytes);
-
-            for (String key : configResponse.getKeys()) {
-                String value = configResponse.getValue(key);
-                if(type.getConfigOptionType(key) == null) {
-                    //Sigh we let plugins send config options that aren't defined in schema.  Add them here w/what we know
-                    ConfigOptionType optionType = new ConfigOptionType(key,key);
-                    type.addConfigOptionType(optionType);
-                    config.setValue(key, value);
-                }
-                config.setValue(key, value);
+        Config config =  resource.getConfig(configType);
+        if(config == null) {
+            config = new Config();
+            config.setType(type);
+            resource.addConfig(config);
+        }
+        for (String key : configResponse.getKeys()) {
+            String value = configResponse.getValue(key);
+            if(type.getConfigOptionType(key) == null) {
+                //Sigh we let plugins send config options that aren't defined in schema.  Add them here w/what we know
+                ConfigOptionType optionType = new ConfigOptionType(key,key);
+                type.addConfigOptionType(optionType);
             }
-        } catch (EncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } 
-        return config;
-    }
-
-    private Platform findPlatformById(Integer id) throws PlatformNotFoundException {
-        Platform platform = platformManager.findPlatformById(id);
-
-        if (platform == null) {
-            throw new PlatformNotFoundException(id);
+            config.setValue(key, value);
         }
-
-        // Make sure that resource is loaded as to not get
-        // LazyInitializationException
-        platform.getName();
-
-        return platform;
-    }
-
-    /**
-     * 
-     */
-    @Transactional(readOnly = true)
-    public String getPluginName(AppdefEntityID id) throws AppdefEntityNotFoundException {
-        Integer intID = id.getId();
-        String pname;
-
-        switch (id.getType()) {
-            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                Platform plat = findPlatformById(intID);
-                pname = plat.getPlatformType().getPlugin();
-                break;
-
-            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                Server serv = serverManager.findServerById(intID);
-                if (serv == null) {
-                    throw new ServerNotFoundException(intID);
-                }
-                pname = serv.getServerType().getPlugin();
-                break;
-
-            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                org.hyperic.hq.appdef.server.session.Service service = serviceManager
-                    .findServiceById(intID);
-                if (service == null) {
-                    throw new ServiceNotFoundException(intID);
-                }
-                pname = service.getServiceType().getPlugin();
-                break;
-
-            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-            default:
-                throw new IllegalArgumentException("The passed entity type "
-                                                   + "does not support config responses");
-        }
-
-        return pname;
+        //Remove removed config props
+        
+       
     }
 
     /**
@@ -359,9 +306,8 @@ public class ConfigManagerImpl implements ConfigManager {
      * @param force TODO
      * @return The newly merged configuration
      */
-    private static byte[] mergeConfig(byte[] existingBytes, byte[] newBytes, boolean overwrite,
-                                      boolean force) {
-        if (force || (existingBytes == null) || (existingBytes.length == 0)) {
+    private static byte[] mergeConfig(byte[] existingBytes, byte[] newBytes, boolean overwrite) {
+        if ((existingBytes == null) || (existingBytes.length == 0)) {
             return newBytes;
         }
 
@@ -382,55 +328,49 @@ public class ConfigManagerImpl implements ConfigManager {
         }
     }
 
-    /**
-     * 
-     *
-     */
     @Transactional
     public boolean configureResponse(AuthzSubject subject, AppdefEntityID appdefID,
                                      byte[] productConfig, byte[] measurementConfig,
-                                     byte[] controlConfig, byte[] rtConfig, Boolean userManaged,
-                                     boolean force) {
+                                     byte[] controlConfig) {
         boolean wasUpdated = false;
         byte[] configBytes;
         Resource resource = resourceManager.findResourceById(appdefID.getId());
+        
+            configBytes = mergeConfig(toConfigResponse(resource.getConfig(ProductPlugin.TYPE_PRODUCT)),
+                productConfig, true);
+            if (!AICompare.configsEqual(configBytes,
+                toConfigResponse(resource.getConfig(ProductPlugin.TYPE_PRODUCT)))) {
+                setConfig(configBytes,ProductPlugin.TYPE_PRODUCT,resource);
+                wasUpdated = true;
+            }
+        
 
-        configBytes = mergeConfig(toConfigResponse(resource.getConfig(ProductPlugin.TYPE_PRODUCT)),
-            productConfig, true, force);
-        // TODO might just be updating product config, don't create a whole new
-        // one and associate it. Check if resource.getProductConfig() null first
-        if (!AICompare.configsEqual(configBytes,
-            toConfigResponse(resource.getConfig(ProductPlugin.TYPE_PRODUCT)))) {
-            resource.addConfig(createConfig(configBytes,ProductPlugin.TYPE_PRODUCT,resource.getType()));
-            wasUpdated = true;
-        }
+       
+            configBytes = mergeConfig(toConfigResponse(resource.getConfig(ProductPlugin.TYPE_MEASUREMENT)),
+                measurementConfig, true);
+            if (!AICompare.configsEqual(configBytes,
+                toConfigResponse(resource.getConfig(ProductPlugin.TYPE_MEASUREMENT)))) {
+                setConfig(configBytes,ProductPlugin.TYPE_MEASUREMENT,resource);
+                wasUpdated = true;
+            }
+       
 
-        configBytes = mergeConfig(toConfigResponse(resource.getConfig(ProductPlugin.TYPE_MEASUREMENT)),
-            measurementConfig, true, force);
-        if (!AICompare.configsEqual(configBytes,
-            toConfigResponse(resource.getConfig(ProductPlugin.TYPE_MEASUREMENT)))) {
-            resource.addConfig(createConfig(configBytes,ProductPlugin.TYPE_MEASUREMENT,
-                resource.getType()));
-            wasUpdated = true;
-        }
-
-        configBytes = mergeConfig(toConfigResponse(resource.getConfig(ProductPlugin.TYPE_CONTROL)),
-            controlConfig, true, false);
-        if (!AICompare.configsEqual(configBytes,
-            toConfigResponse(resource.getConfig(ProductPlugin.TYPE_CONTROL)))) {
-            resource.addConfig(createConfig(configBytes,ProductPlugin.TYPE_CONTROL,
-                resource.getType()));
-            wasUpdated = true;
-        }
-
+       
+            configBytes = mergeConfig(toConfigResponse(resource.getConfig(ProductPlugin.TYPE_CONTROL)),
+                controlConfig, true);
+            if (!AICompare.configsEqual(configBytes,
+                toConfigResponse(resource.getConfig(ProductPlugin.TYPE_CONTROL)))) {
+                setConfig(configBytes,ProductPlugin.TYPE_CONTROL,resource);
+                wasUpdated = true;
+            }
+        
         return wasUpdated;
     }
 
     private byte[] getConfigForType(String productType, AppdefEntityID id, boolean fail)
-        throws ConfigFetchException {
+        throws ConfigFetchException, EncodingException {
         Config config;
         Resource resource = resourceManager.findResourceById(id.getId());
-        // TODO resource null?
         if (productType.equals(ProductPlugin.TYPE_PRODUCT)) {
             config = resource.getConfig(ProductPlugin.TYPE_PRODUCT);
         } else if (productType.equals(ProductPlugin.TYPE_CONTROL)) {
@@ -449,22 +389,19 @@ public class ConfigManagerImpl implements ConfigManager {
         return res;
     }
 
-    public byte[] toConfigResponse(Config config) {
+    public byte[] toConfigResponse(Config config)  {
         ConfigResponse configResponse = new ConfigResponse();
         if (config != null) {
             for (Map.Entry<String, Object> entry : config.getValues().entrySet()) {
-                // TODO not all values will be Strings
                 configResponse.setValue(entry.getKey(), entry.getValue().toString());
             }
         }
-        byte[] res = null;
         try {
-            res = configResponse.encode();
+            return configResponse.encode();
         } catch (EncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+           log.error(e);
+           return new byte[0];
         }
-        return res;
     }
 
     private ServerConfigStuff getServerStuffForService(Integer id)
