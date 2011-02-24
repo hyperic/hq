@@ -736,7 +736,7 @@ public abstract class PermissionManager {
                                            String opListManageAlertsParam); 
 
     public abstract String getAlertsHQL(boolean inEscalation, boolean notFixed, Integer groupId,
-                                        Integer alertDefId, boolean count);
+                                        Integer resourceId, Integer alertDefId, boolean count);
 
     public abstract String getAlertDefsHQL();
 

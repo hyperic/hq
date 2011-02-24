@@ -229,6 +229,13 @@ class ResourceCategory {
 	}
 	
 	/**
+	 * Get the unfixed alert count for a Resouce
+	 */
+	static int getUnfixedAlertCount(Resource r, AuthzSubject user, long timeRange, long end) {
+		alertMan.getUnfixedCount(user.id, timeRange, end, r)
+	}
+	
+	/**
 	 * Get the event logs for a Resource
 	 */
 	static List getLogs(Resource r, AuthzSubject user, long begin, long end) {

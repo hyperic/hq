@@ -1,15 +1,15 @@
 /**
- * NOTE: This copyright does *not* cover user programs that use HQ
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  *  "derived work".
  *
- *  Copyright (C) [2009-2010], VMware, Inc.
- *  This file is part of HQ.
+ *  Copyright (C) [2009-2011], VMware, Inc.
+ *  This file is part of Hyperic.
  *
- *  HQ is free software; you can redistribute it and/or modify
+ *  Hyperic is free software; you can redistribute it and/or modify
  *  it under the terms version 2 of the GNU General Public License as
  *  published by the Free Software Foundation. This program is distributed
  *  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -173,9 +173,15 @@ public interface AlertManager {
         throws PermissionException;
 
     /**
-     * A more optimized look up which includes the permission checking
+     * A more optimized look up for a group which includes the permission checking
      */
     public int getUnfixedCount(Integer subj, long timeRange, long endTime, Integer groupId)
+        throws PermissionException;
+
+    /**
+     * A more optimized look up a resource which includes the permission checking
+     */
+    public int getUnfixedCount(Integer subj, long timeRange, long endTime, Resource r)
         throws PermissionException;
 
     /**

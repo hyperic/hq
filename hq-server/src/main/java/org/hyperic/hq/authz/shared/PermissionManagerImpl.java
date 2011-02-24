@@ -336,7 +336,7 @@ public class PermissionManagerImpl
     }
 
     public String getAlertsHQL(boolean inEscalation, boolean notFixed, Integer groupId,
-                               Integer alertDefId, boolean count) {
+                               Integer resourceId, Integer alertDefId, boolean count) {
         // Join with Resource for sorting
         return "select " +
                (count ? "count(a)" : "a") +
@@ -348,6 +348,7 @@ public class PermissionManagerImpl
                "where r.resourceType is not null and " +
                (groupId == null ? "" : "exists (select rg from r.groupBag rg " +
                                        "where rg.group.id = " + groupId + ") and ") +
+               (resourceId == null ? "" : "r.id = " + resourceId + " and ") +
                "a.ctime between :begin and :end and " + (notFixed ? " a.fixed = false and " : "") +
                (alertDefId == null ? "" : "d.id = " + alertDefId + " and ") +
                "d.priority >= :priority " +
