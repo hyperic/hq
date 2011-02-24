@@ -29,8 +29,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.hyperic.hq.common.server.session.Crispo;
-import org.hyperic.hq.common.server.session.CrispoOption;
+import org.hyperic.hq.config.domain.Crispo;
+import org.hyperic.hq.config.domain.CrispoOption;
 import org.hyperic.util.config.ConfigResponse;
 
 /**

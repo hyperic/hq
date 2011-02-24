@@ -26,7 +26,7 @@
 package org.hyperic.hq.ui.server.session;
 
 import org.hyperic.hq.auth.domain.AuthzSubject;
-import org.hyperic.hq.common.server.session.Crispo;
+import org.hyperic.hq.config.domain.Crispo;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 
 public class UserDashboardConfig

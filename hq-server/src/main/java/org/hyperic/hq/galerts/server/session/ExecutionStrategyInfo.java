@@ -30,7 +30,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.common.server.session.Crispo;
+import org.hyperic.hq.config.domain.Crispo;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.util.config.ConfigResponse;
 

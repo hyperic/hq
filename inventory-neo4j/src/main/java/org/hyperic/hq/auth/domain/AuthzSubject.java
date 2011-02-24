@@ -46,7 +46,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OptimisticLock;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.common.server.session.Crispo;
+import org.hyperic.hq.config.domain.Crispo;
 import org.springframework.data.graph.annotation.NodeEntity;
 
 @Entity

@@ -27,7 +27,7 @@ package org.hyperic.hq.ui.server.session;
 
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.auth.domain.AuthzSubject;
-import org.hyperic.hq.common.server.session.Crispo;
+import org.hyperic.hq.config.domain.Crispo;
 import org.hyperic.util.config.ConfigResponse;
 
 public abstract class DashboardConfig

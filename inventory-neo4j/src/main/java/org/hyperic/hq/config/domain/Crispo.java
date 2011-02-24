@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.common.server.session;
+package org.hyperic.hq.config.domain;
 
 import java.util.Collection;
 import java.util.Collections;
