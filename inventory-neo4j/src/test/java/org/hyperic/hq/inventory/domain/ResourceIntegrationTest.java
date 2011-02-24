@@ -13,7 +13,7 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.inventory.InvalidRelationshipException;

@@ -28,7 +28,7 @@ package org.hyperic.hq.web.dashboard;
 
 import org.easymock.EasyMock;
 import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.DashboardPortletBoss;
 import org.hyperic.hq.ui.server.session.DashboardConfig;

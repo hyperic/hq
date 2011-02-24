@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.authz.server.session;
+package org.hyperic.hq.auth.domain;
 
 import java.util.ArrayList;
 import java.util.Collection;

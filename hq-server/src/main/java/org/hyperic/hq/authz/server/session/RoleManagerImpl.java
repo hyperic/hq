@@ -39,6 +39,10 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.auth.domain.AuthzSubject;
+import org.hyperic.hq.auth.domain.Role;
+import org.hyperic.hq.auth.domain.RoleCalendar;
+import org.hyperic.hq.auth.domain.RoleCalendarType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzDuplicateNameException;
 import org.hyperic.hq.authz.shared.PermissionException;

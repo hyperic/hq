@@ -27,7 +27,7 @@
 package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.hq.agent.domain.Agent;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;

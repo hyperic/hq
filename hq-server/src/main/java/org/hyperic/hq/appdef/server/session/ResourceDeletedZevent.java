@@ -26,7 +26,7 @@
 package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.zevents.ZeventManager;
 
 /**

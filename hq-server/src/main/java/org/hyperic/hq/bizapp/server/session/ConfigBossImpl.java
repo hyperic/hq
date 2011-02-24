@@ -27,8 +27,8 @@ package org.hyperic.hq.bizapp.server.session;
 
 import java.util.Properties;
 
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.auth.shared.SessionManager;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.common.ApplicationException;

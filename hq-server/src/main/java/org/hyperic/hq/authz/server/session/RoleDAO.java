@@ -32,6 +32,8 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.hyperic.hq.auth.domain.AuthzSubject;
+import org.hyperic.hq.auth.domain.Role;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.inventory.dao.ResourceTypeDao;

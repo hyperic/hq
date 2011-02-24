@@ -26,7 +26,7 @@
 package org.hyperic.hq.events.server.session;
 
 import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 
 public class AlertActionLog  

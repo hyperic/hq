@@ -27,10 +27,10 @@ package org.hyperic.hq.ui.util;
 
 import javax.servlet.http.HttpSession;
 
+import org.hyperic.hq.auth.domain.AuthzSubject;
+import org.hyperic.hq.auth.domain.Role;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.ApplicationException;

@@ -10,7 +10,7 @@ import org.hyperic.hq.api.representation.ListRep;
 import org.hyperic.hq.api.representation.ResourceRep;
 import org.hyperic.hq.api.representation.SuccessResponse;
 import org.hyperic.hq.appdef.server.session.AgentDAO;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectDAO;
 import org.hyperic.hq.inventory.dao.ResourceDao;
 import org.hyperic.hq.inventory.dao.ResourceTypeDao;

@@ -57,7 +57,7 @@ import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentUnauthorizedException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.common.SystemException;
@@ -872,7 +872,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
 
     /**
      * Pings the specified agent.
-     * @see org.hyperic.hq.appdef.server.session.AgentManagerImpl#pingAgent(org.hyperic.hq.authz.server.session.AuthzSubject,
+     * @see org.hyperic.hq.appdef.server.session.AgentManagerImpl#pingAgent(org.hyperic.hq.auth.domain.AuthzSubject,
      *      org.hyperic.hq.agent.domain.Agent)
      */
     @Transactional(readOnly=true)

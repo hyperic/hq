@@ -32,7 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.AlertDefinitionInterface;

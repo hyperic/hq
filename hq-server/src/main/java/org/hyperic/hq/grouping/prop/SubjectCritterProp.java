@@ -24,7 +24,7 @@
  
 package org.hyperic.hq.grouping.prop;
 
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 
 public class SubjectCritterProp implements CritterProp {
     private final AuthzSubject _subject;

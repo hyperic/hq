@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.Query;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterDump;
 import org.hyperic.hq.grouping.CritterTranslationContext;

@@ -24,7 +24,7 @@
  */
 package org.hyperic.hq.common.server.session;
 
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.inventory.domain.Resource;
 
 public class ResourceAudit

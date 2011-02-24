@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.SortedMap;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.events.ActionCreateException;

@@ -28,7 +28,7 @@ package org.hyperic.hq.control.server.session;
 import java.util.List;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.control.ControlActionResult;
 import org.hyperic.hq.control.GroupControlActionResult;

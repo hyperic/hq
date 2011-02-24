@@ -29,7 +29,7 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 
 import org.apache.struts.util.ResponseUtils;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.BizappUtils;
 

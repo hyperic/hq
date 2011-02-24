@@ -25,8 +25,8 @@
 
 package org.hyperic.hq.ui.server.session;
 
-import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Role;
+import org.hyperic.hq.auth.domain.AuthzSubject;
+import org.hyperic.hq.auth.domain.Role;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;

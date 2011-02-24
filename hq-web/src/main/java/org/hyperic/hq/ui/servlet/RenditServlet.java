@@ -34,8 +34,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.auth.shared.SessionException;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hqu.RenditServer;

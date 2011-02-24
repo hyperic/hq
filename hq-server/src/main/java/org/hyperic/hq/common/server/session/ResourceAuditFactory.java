@@ -26,7 +26,7 @@
 
 package org.hyperic.hq.common.server.session;
 
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.common.shared.AuditManager;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.util.i18n.MessageBundle;

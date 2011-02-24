@@ -21,7 +21,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.agent.domain.Agent;
 import org.hyperic.hq.inventory.events.CPropChangeEvent;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.inventory.InvalidRelationshipException;
 import org.hyperic.hq.inventory.NotUniqueException;
 import org.hyperic.hq.messaging.MessagePublisher;

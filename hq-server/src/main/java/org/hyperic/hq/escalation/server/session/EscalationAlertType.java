@@ -28,7 +28,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.util.HypericEnum;
 

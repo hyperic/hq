@@ -26,6 +26,8 @@
 
 package org.hyperic.hq.authz.server.session;
 
+import org.hyperic.hq.auth.domain.Role;
+
 /**
  * Sent before a role is deleted
  * @author jhickey

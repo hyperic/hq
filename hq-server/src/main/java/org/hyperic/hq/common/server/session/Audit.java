@@ -30,7 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.inventory.domain.Resource;
 
 public abstract class Audit

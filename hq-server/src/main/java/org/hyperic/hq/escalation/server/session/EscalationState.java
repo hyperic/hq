@@ -25,7 +25,7 @@
 package org.hyperic.hq.escalation.server.session;
 
 import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 
 /**
  * The escalation state ties an escalation chain to an alert definition. 

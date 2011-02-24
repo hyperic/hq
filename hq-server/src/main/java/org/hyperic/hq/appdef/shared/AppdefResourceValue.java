@@ -37,7 +37,7 @@ import org.hyperic.hq.appdef.server.session.ApplicationType;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.ServiceType;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.inventory.domain.ResourceGroup;

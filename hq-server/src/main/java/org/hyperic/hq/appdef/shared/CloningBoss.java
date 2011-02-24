@@ -29,10 +29,10 @@ import java.rmi.RemoteException;
 import java.util.List;
 
 import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;

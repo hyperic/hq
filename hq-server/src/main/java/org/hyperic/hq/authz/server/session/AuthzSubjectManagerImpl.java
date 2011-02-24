@@ -32,6 +32,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.auth.server.session.UserAuditFactory;
 import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzConstants;

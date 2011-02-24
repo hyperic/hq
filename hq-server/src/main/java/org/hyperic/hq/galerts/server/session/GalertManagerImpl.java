@@ -40,7 +40,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.ApplicationEvent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.server.session.GroupDeleteRequestedEvent;
 import org.hyperic.hq.authz.server.session.GroupMembersChangedEvent;
 import org.hyperic.hq.authz.server.session.SubjectDeleteRequestedEvent;
