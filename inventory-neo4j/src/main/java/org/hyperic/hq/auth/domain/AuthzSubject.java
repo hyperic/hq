@@ -169,7 +169,7 @@ public class AuthzSubject  {
         return dsn;
     }
 
-    protected void setAuthDsn(String val) {
+    public void setAuthDsn(String val) {
         dsn = val;
     }
 
@@ -177,7 +177,7 @@ public class AuthzSubject  {
         return firstName;
     }
 
-    protected void setFirstName(String val) {
+    public void setFirstName(String val) {
         firstName = val;
     }
 
@@ -185,7 +185,7 @@ public class AuthzSubject  {
         return lastName;
     }
 
-    protected void setLastName(String val) {
+    public void setLastName(String val) {
         lastName = val;
     }
 
@@ -197,7 +197,7 @@ public class AuthzSubject  {
         return emailAddress;
     }
 
-    protected void setEmailAddress(String val) {
+    public void setEmailAddress(String val) {
         emailAddress = val;
     }
 
@@ -205,7 +205,7 @@ public class AuthzSubject  {
         return smsAddress;
     }
 
-    protected void setSMSAddress(String val) {
+    public void setSMSAddress(String val) {
         smsAddress = val;
     }
 
@@ -213,7 +213,7 @@ public class AuthzSubject  {
         return phoneNumber;
     }
 
-    protected void setPhoneNumber(String val) {
+    public void setPhoneNumber(String val) {
         phoneNumber = val;
     }
 
@@ -221,7 +221,7 @@ public class AuthzSubject  {
         return department;
     }
 
-    protected void setDepartment(String val) {
+    public void setDepartment(String val) {
         department = val;
     }
 
@@ -233,7 +233,7 @@ public class AuthzSubject  {
         return isActive();
     }
 
-    protected void setActive(boolean val) {
+    public void setActive(boolean val) {
         active = val;
     }
 
@@ -253,11 +253,11 @@ public class AuthzSubject  {
         return isHtmlEmail();
     }
 
-    protected void setHtmlEmail(boolean useHtml) {
+    public void setHtmlEmail(boolean useHtml) {
         htmlEmail = useHtml;
     }
 
-    protected void setSystem(boolean val) {
+    public void setSystem(boolean val) {
         system = val;
     }
     
@@ -265,7 +265,7 @@ public class AuthzSubject  {
         return roles;
     }
 
-    protected void setRoles(Set<Role> val) {
+    public void setRoles(Set<Role> val) {
         roles = val;
     }
 
@@ -285,7 +285,7 @@ public class AuthzSubject  {
         return prefs;
     }
     
-    protected void setPrefs(Crispo c) {
+    public void setPrefs(Crispo c) {
         prefs = c;
     }
     

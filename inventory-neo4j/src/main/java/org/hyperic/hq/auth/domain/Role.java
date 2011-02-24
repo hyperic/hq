@@ -121,7 +121,7 @@ public class Role  {
         return description;
     }
     
-    void setDescription(String val) {
+    public void setDescription(String val) {
         this.description = val;
     }
 
@@ -129,7 +129,7 @@ public class Role  {
         return system;
     }
     
-    void setSystem(boolean fsystem) {
+    public void setSystem(boolean fsystem) {
         this.system = fsystem;
     }
     //TODO - possibly model allowable operations such as create/modify/delete etc
@@ -151,7 +151,7 @@ public class Role  {
         return subjects;
     }
     
-    void setSubjects(Collection<AuthzSubject> val) {
+    public void setSubjects(Collection<AuthzSubject> val) {
         this.subjects = val;
     }
     
@@ -181,19 +181,19 @@ public class Role  {
         return Collections.unmodifiableCollection(calendars);
     }
     
-    void addCalendar(RoleCalendar c) {
+    public void addCalendar(RoleCalendar c) {
         getCalendarBag().add(c);
     }
     
-    void clearCalendars() {
+    public void clearCalendars() {
         getCalendarBag().clear();
     }
     
-    boolean removeCalendar(RoleCalendar c) {
+    public boolean removeCalendar(RoleCalendar c) {
         return getCalendarBag().remove(c);
     }
 
-    void clearSubjects() {
+    public void clearSubjects() {
         for (AuthzSubject s : getSubjects() ) { 
             s.removeRole(this);
         }

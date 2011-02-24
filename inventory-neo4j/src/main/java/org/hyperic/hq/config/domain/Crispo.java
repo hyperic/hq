@@ -101,7 +101,7 @@ public class Crispo {
         return Collections.unmodifiableCollection(opts);
     }
 
-    protected Collection<CrispoOption> getOptsSet() {
+    public Collection<CrispoOption> getOptsSet() {
         return opts;
     }
 
@@ -144,7 +144,7 @@ public class Crispo {
         return res;
     }
 
-    void updateWith(ConfigResponse cfg) {
+    public void updateWith(ConfigResponse cfg) {
         // First, make any modifications to existing values, and add any
         // values not contained within the crispo
         for (String key : cfg.getKeys()) {
@@ -178,7 +178,7 @@ public class Crispo {
         }
     }
 
-    static Crispo create(Map<String, String> keyVals) {
+    public static Crispo create(Map<String, String> keyVals) {
         Crispo res = new Crispo();
 
         for (Map.Entry<String, String> ent : keyVals.entrySet()) {

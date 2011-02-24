@@ -156,7 +156,7 @@ public class CrispoOption
         }
     }
     
-    protected void setValue(String val) {
+    public void setValue(String val) {
         for (int i = 0; i < ARRAY_DESCRIMINATORS.length; i++) {
             if (key.indexOf(ARRAY_DESCRIMINATORS[i]) > -1) {
                 if (val != null && val.trim().length() > 0) {

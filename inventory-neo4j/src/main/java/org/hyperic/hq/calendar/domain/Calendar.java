@@ -67,7 +67,7 @@ public class Calendar {
     protected Calendar() {
     }
 
-    Calendar(String name) {
+    public Calendar(String name) {
         this.name = name;
     }
 
@@ -99,11 +99,11 @@ public class Calendar {
         return Collections.unmodifiableCollection(entries);
     }
 
-    protected Collection<CalendarEntry> getEntriesBag() {
+    public Collection<CalendarEntry> getEntriesBag() {
         return entries;
     }
 
-    boolean removeEntry(CalendarEntry ent) {
+    public boolean removeEntry(CalendarEntry ent) {
         return getEntriesBag().remove(ent);
     }
 
@@ -111,7 +111,7 @@ public class Calendar {
         this.entries = entries;
     }
 
-    WeekEntry addWeekEntry(int weekDay, int startTime, int endTime) {
+    public WeekEntry addWeekEntry(int weekDay, int startTime, int endTime) {
         WeekEntry res = new WeekEntry(this, weekDay, startTime, endTime);
 
         getEntriesBag().add(res);

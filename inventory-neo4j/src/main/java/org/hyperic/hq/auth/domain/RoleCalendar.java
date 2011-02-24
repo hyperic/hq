@@ -75,7 +75,7 @@ public class RoleCalendar {
     protected RoleCalendar() {
     }
 
-    RoleCalendar(Role role, Calendar calendar, RoleCalendarType type) {
+    public RoleCalendar(Role role, Calendar calendar, RoleCalendarType type) {
         this.role = role;
         this.calendar = calendar;
         this.type = type;
