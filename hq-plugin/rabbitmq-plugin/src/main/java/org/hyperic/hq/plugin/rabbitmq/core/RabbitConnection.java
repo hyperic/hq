@@ -25,159 +25,146 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
 
-import java.util.Map;
-
 /**
  * ErlangConnection is a simple POJO reflecting the response <connectioninfoitem>
  * @author Helena Edelson
  */
-public class RabbitConnection {
+public class RabbitConnection implements RabbitObject{
  
-    private String pid;
+    private String name;
    
-    private long octetsReceived;
+    private long recvOct;
 
-    private long receiveCount;
+    private long recvCnt;
 
-    private long octetsSent;
+    private long sendOct;
 
-    private long sendCount;
+    private long sendCnt;
 
-    private long pendingSends;
+    private long sendPend;
 
     private String state; // running
 
     private long channels;
 
-    private String username;
-
-    private String vhost;
-
-    private long timeout;
-
-    private long frameMax;
-
-    private Map clientProperties;
-
-    @Override
-    public String toString() {
-        return new StringBuilder("Connection[pid=").append(pid)
-               .append(" octetsReceived=").append(octetsReceived).append(" receiveCount=").append(receiveCount).append(" octetsSent=").append(octetsSent)
-                 .append(" sendCount=").append(sendCount).append(" pendingSends=").append(pendingSends).append(" state=").append(state)
-                    .append(" channels=").append(channels).append(" username=").append(username).append(" vhost=").append(vhost).append(" timeout=")
-                       .append(timeout).append(" frameMax=").append(frameMax).toString(); //.append(" clientProperties=").append(clientProperties)
-
-    }
-
     public RabbitConnection() {
 
     }
-    
-    public RabbitConnection(String pid) {
-        this.pid = pid;
+
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
     }
 
-    public String getPid() {
-        return pid;
+    /**
+     * @param pid the name to set
+     */
+    public void setName(String pid) {
+        this.name = pid;
     }
 
-    public void setPid(String pid) {
-        this.pid = pid;
+    /**
+     * @return the recvOct
+     */
+    public long getRecvOct() {
+        return recvOct;
     }
 
-    public long getOctetsReceived() {
-        return octetsReceived;
+    /**
+     * @param recvOct the recvOct to set
+     */
+    public void setRecvOct(long recvOct) {
+        this.recvOct = recvOct;
     }
 
-    public void setOctetsReceived(long octetsReceived) {
-        this.octetsReceived = octetsReceived;
+    /**
+     * @return the recvCnt
+     */
+    public long getRecvCnt() {
+        return recvCnt;
     }
 
-    public long getReceiveCount() {
-        return receiveCount;
+    /**
+     * @param recvCnt the recvCnt to set
+     */
+    public void setRecvCnt(long recvCnt) {
+        this.recvCnt = recvCnt;
     }
 
-    public void setReceiveCount(long receiveCount) {
-        this.receiveCount = receiveCount;
+    /**
+     * @return the sendOct
+     */
+    public long getSendOct() {
+        return sendOct;
     }
 
-    public long getOctetsSent() {
-        return octetsSent;
+    /**
+     * @param sendOct the sendOct to set
+     */
+    public void setSendOct(long sendOct) {
+        this.sendOct = sendOct;
     }
 
-    public void setOctetsSent(long octetsSent) {
-        this.octetsSent = octetsSent;
+    /**
+     * @return the sendCnt
+     */
+    public long getSendCnt() {
+        return sendCnt;
     }
 
-    public long getSendCount() {
-        return sendCount;
+    /**
+     * @param sendCnt the sendCnt to set
+     */
+    public void setSendCnt(long sendCnt) {
+        this.sendCnt = sendCnt;
     }
 
-    public void setSendCount(long sendCount) {
-        this.sendCount = sendCount;
+    /**
+     * @return the sendPend
+     */
+    public long getSendPend() {
+        return sendPend;
     }
 
-    public long getPendingSends() {
-        return pendingSends;
+    /**
+     * @param sendPend the sendPend to set
+     */
+    public void setSendPend(long sendPend) {
+        this.sendPend = sendPend;
     }
 
-    public void setPendingSends(long pendingSends) {
-        this.pendingSends = pendingSends;
-    }
-
+    /**
+     * @return the state
+     */
     public String getState() {
         return state;
     }
 
+    /**
+     * @param state the state to set
+     */
     public void setState(String state) {
         this.state = state;
     }
 
+    /**
+     * @return the channels
+     */
     public long getChannels() {
         return channels;
     }
 
+    /**
+     * @param channels the channels to set
+     */
     public void setChannels(long channels) {
         this.channels = channels;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getVhost() {
-        return vhost;
-    }
-
-    public void setVhost(String vhost) {
-        this.vhost = vhost;
-    }
-
-    public long getTimeout() {
-        return timeout;
-    }
-
-    public void setTimeout(long timeout) {
-        this.timeout = timeout;
-    }
-
-    public long getFrameMax() {
-        return frameMax;
-    }
-
-    public void setFrameMax(long frameMax) {
-        this.frameMax = frameMax;
-    }
-
-    public Map getClientProperties() {
-        return clientProperties;
-    }
-
-    public void setClientProperties(Map clientProperties) {
-        this.clientProperties = clientProperties;
+    @Override
+    public String toString() {
+        return "RabbitConnection{pid=" + name + ", recvOct=" + recvOct + ", recvCnt=" + recvCnt + ", sendOct=" + sendOct + ", sendCnt=" + sendCnt + ", sendPend=" + sendPend + ", state=" + state + ", channels=" + channels + '}';
     }
 }

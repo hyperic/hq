@@ -181,7 +181,7 @@
         </service>
 
         <service name="Channel">
-            <property name="template" value="rabbitmq:vhost=%vhost%,${server-connection}:%channel%.${alias}"/>
+            <property name="template" value="rabbitmq:channel=%channel%,${server-connection}:${alias}"/>
 
             <config>
                 <option name="vhost" description="rabbit node-vhost name"/>
@@ -238,7 +238,7 @@
 
         <service name="Connection">
             <property name="template"
-                      value="rabbitmq:${server-connection}:%connection%.${alias}"/>
+                      value="rabbitmq:connection=%connection%,${server-connection}:${alias}"/>
 
             <config>
                 <option name="connection" description="connection name"/>

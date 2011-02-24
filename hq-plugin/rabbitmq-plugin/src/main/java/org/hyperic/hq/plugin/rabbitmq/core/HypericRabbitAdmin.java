@@ -28,12 +28,23 @@ package org.hyperic.hq.plugin.rabbitmq.core;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
 import java.net.URLEncoder;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
@@ -105,8 +116,26 @@ public class HypericRabbitAdmin {
         return Arrays.asList(get("/api/connections", RabbitConnection[].class));
     }
 
+    public RabbitConnection getConnection(String cName) throws PluginException {
+        try {
+            cName = URLEncoder.encode(cName, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex);
+        }
+        return get("/api/connections/" + cName, RabbitConnection.class);
+    }
+
     public List<RabbitChannel> getChannels() throws PluginException {
         return Arrays.asList(get("/api/channels", RabbitChannel[].class));
+    }
+
+    public RabbitChannel getChannel(String chName) throws PluginException {
+        try {
+            chName = URLEncoder.encode(chName, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex);
+        }
+        return get("/api/channels/" + chName, RabbitChannel.class);
     }
 
     public boolean getStatus() throws PluginException {
@@ -162,7 +191,12 @@ public class HypericRabbitAdmin {
             if (logger.isDebugEnabled()) {
                 logger.debug("[" + api + "] -(" + r + ")-> " + responseBody);
             }
-            Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+
+            GsonBuilder gsb = new GsonBuilder();
+            gsb.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+            gsb.registerTypeAdapter(Date.class, new DateTimeDeserializer());
+            Gson gson = gsb.create();
+
             res = gson.fromJson(responseBody, classOfT);
             if (logger.isDebugEnabled()) {
                 logger.debug("[" + api + "] -(" + r + ")-> " + res);
@@ -171,5 +205,17 @@ public class HypericRabbitAdmin {
             logger.error(ex);
         }
         return res;
+    }
+
+    private class DateTimeDeserializer implements JsonDeserializer<Date> {
+
+        public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            try {
+                return (Date) formatter.parse(json.getAsString());
+            } catch (ParseException ex) {
+                throw new JsonParseException(ex.getMessage(), ex);
+            }
+        }
     }
 }

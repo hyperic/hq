@@ -44,47 +44,21 @@ public class ChannelCollector extends RabbitMQListCollector {
 
     public void collect(HypericRabbitAdmin rabbitAdmin) {
         Properties props = getProperties();
-        if (logger.isDebugEnabled()) {
-            String node = (String) props.get(MetricConstants.NODE);
-            logger.debug("[collect] node=" + node);
-        }
+        String chName = props.getProperty(MetricConstants.CHANNEL);
 
         try {
-            List<RabbitChannel> channels = rabbitAdmin.getChannels();
-            if (channels != null) {
-                for (RabbitChannel c : channels) {
-                    logger.debug("[collect] RabbitChannel=" + c.getPid());
-                    setValue(c.getPid() + ".Availability", Metric.AVAIL_UP);
-                    setValue(c.getPid() + ".consumerCount", c.getConsumerCount());
-                    setValue(c.getPid() + ".prefetchCount", c.getPrefetchCount());
-                    setValue(c.getPid() + ".acksUncommitted", c.getAcksUncommitted());
-                    setValue(c.getPid() + ".messagesUnacknowledged", c.getMessagesUnacknowledged());
-                }
-            }
+            RabbitChannel c = rabbitAdmin.getChannel(chName);
+            logger.debug("[collect] RabbitChannel=" + c.getName());
+            setValue("Availability", Metric.AVAIL_UP);
+            setValue("consumerCount", c.getConsumerCount());
+            setValue("prefetchCount", c.getPrefetchCount());
+            setValue("acksUncommitted", c.getAcksUncommitted());
+            setValue("messagesUnacknowledged", c.getMessagesUnacknowledged());
         } catch (Exception ex) {
             setAvailability(false);
             logger.debug(ex.getMessage(), ex);
         }
 
-    }
-
-    /**
-     * Assemble custom key/value data for each object to set
-     * as custom properties in the ServiceResource to display
-     * in the UI.
-     * @param channel
-     * @return
-     */
-    public static ConfigResponse getAttributes(RabbitChannel channel) {
-        ConfigResponse res = new ConfigResponse();
-        res.setValue("pid", channel.getPid());
-        res.setValue("connection", channel.getConnection().getPid());
-        res.setValue("number", channel.getNumber());
-        res.setValue("user", channel.getUser());
-        res.setValue("transactional", channel.getTransactional());
-
-
-        return res;
     }
 
     @Override
