@@ -30,7 +30,7 @@ import org.hyperic.hq.context.Bootstrap;
 
 import java.util.Collection
 
-import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.auth.domain.AuthzSubject
 import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.escalation.server.session.Escalation
 import org.hyperic.hq.events.ActionInterface

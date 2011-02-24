@@ -30,7 +30,7 @@ import org.hyperic.hq.events.server.session.ResourceTypeAlertDefinition;
 import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.server.session.AlertDefinition
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
-import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.auth.domain.AuthzSubject
 import org.hyperic.hq.escalation.server.session.Escalation
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;

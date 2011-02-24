@@ -25,10 +25,10 @@
  */
 
 package org.hyperic.hq.hqu.rendit.metaclass
-import org.hyperic.hq.appdef.Agent
+import org.hyperic.hq.agent.domain.Agent
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.auth.domain.AuthzSubject
 import org.hyperic.hq.authz.shared.PermissionException
 
 class AgentCategory {

@@ -28,7 +28,7 @@ package org.hyperic.hq.hqu.rendit.metaclass
 
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants
-import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.auth.domain.AuthzSubject
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.context.Bootstrap;
@@ -41,7 +41,7 @@ import org.hyperic.hq.authz.server.session.ResourceGroup
 import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
 import org.hyperic.hq.authz.server.session.ResourceTypeFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupCreateInfo
-import org.hyperic.hq.appdef.Agent
+import org.hyperic.hq.agent.domain.Agent
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.appdef.shared.ServerManager;

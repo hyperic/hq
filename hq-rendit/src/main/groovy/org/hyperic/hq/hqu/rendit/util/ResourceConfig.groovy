@@ -26,7 +26,7 @@
 
 package org.hyperic.hq.hqu.rendit.util
 
-import org.hyperic.hq.appdef.Agent
+import org.hyperic.hq.agent.domain.Agent
 
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
@@ -37,7 +37,7 @@ import org.hyperic.hq.appdef.shared.PlatformNotFoundException
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.auth.shared.SessionManager
-import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.auth.domain.AuthzSubject
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.context.Bootstrap;

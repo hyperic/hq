@@ -36,7 +36,7 @@ import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hibernate.PageInfo
-import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.auth.domain.AuthzSubject
 import org.hyperic.hq.authz.server.session.ResourceFactory;
 import org.hyperic.hq.authz.server.session.ResourceGroupFactory;
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl
