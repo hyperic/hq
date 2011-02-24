@@ -50,20 +50,19 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.AttachType;
 import org.hyperic.hq.hqu.server.session.View;
 import org.hyperic.hq.hqu.server.session.ViewResourceCategory;
 import org.hyperic.hq.hqu.shared.UIPluginManager;
+import org.hyperic.hq.inventory.domain.ConfigType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
-import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
-import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -223,109 +222,10 @@ public class ProductBossImpl implements ProductBoss {
      * indicating which resource must be configured.
      */
     @Transactional(readOnly=true)
-    
-    public ConfigSchema getConfigSchema(int sessionId, AppdefEntityID id, String type, ConfigResponse resp)
-        throws SessionTimeoutException, SessionNotFoundException, PluginException, PermissionException,
-        AppdefEntityNotFoundException {
+    public ConfigType getConfigSchema(int sessionId, Integer id, String type)
+        throws SessionTimeoutException, SessionNotFoundException, NotFoundException {
         sessionManager.authenticate(sessionId);
-        return getConfigSchema(id, type, resp);
-    }
-
-    /**
-     */
-    @Transactional(readOnly=true)
-    
-    public ConfigSchema getConfigSchema(int sessionId, AppdefEntityID id, String type) throws ConfigFetchException,
-        EncodingException, PluginNotFoundException, PluginException, SessionTimeoutException, SessionNotFoundException,
-        PermissionException, AppdefEntityNotFoundException {
-        AuthzSubject subject = sessionManager.getSubject(sessionId);
-        return getConfigSchema(subject, id, type, true);
-    }
-
-    public static class ConfigSchemaAndBaseResponse {
-        private ConfigSchema schema;
-        private ConfigResponse response;
-
-        ConfigSchemaAndBaseResponse(ConfigSchema schema, ConfigResponse resp) {
-            this.schema = schema;
-            this.response = resp;
-        }
-
-        public ConfigSchema getSchema() {
-            return schema;
-        }
-
-        public ConfigResponse getResponse() {
-            return response;
-        }
-    }
-
-    /**
-     * Get a configuration schema.
-     * 
-     * @param id Entity to be configured
-     * @param type One of ProductPlugin.TYPE_*
-     * @param validateFlow If true a ConfigFetchException will be thrown if the
-     *        appropriate base entities are not already configured.
-     */
-    @Transactional(readOnly=true)
-    
-    public ConfigSchemaAndBaseResponse getConfigSchemaAndBaseResponse(AuthzSubject subject, AppdefEntityID id,
-                                                                      String type, boolean validateFlow)
-        throws ConfigFetchException, EncodingException, PluginNotFoundException, PluginException, PermissionException,
-        AppdefEntityNotFoundException {
-        ConfigResponse baseResponse = null;
-
-        AuthzSubject overlord = getOverlord();
-        if (validateFlow == true) {
-            try {
-                baseResponse = configManager.getMergedConfigResponse(overlord, type, id, true);
-            } catch (ConfigFetchException exc) {
-                // If the thing that failed is the thing we are trying to
-                // configure, then everything is okey-dokey ... else
-                if (!exc.matchesQuery(id, type)) {
-                    throw exc;
-                }
-            }
-        }
-
-        if (baseResponse == null)
-            baseResponse = configManager.getMergedConfigResponse(overlord, type, id, false);
-
-        return new ConfigSchemaAndBaseResponse(getConfigSchema(id, type, baseResponse), baseResponse);
-    }
-
-    /**
-     */
-    @Transactional(readOnly=true)
-    
-    public ConfigSchema getConfigSchema(AuthzSubject subject, AppdefEntityID id, String type, boolean validateFlow)
-        throws ConfigFetchException, EncodingException, PluginNotFoundException, PluginException, PermissionException,
-        AppdefEntityNotFoundException {
-        return getConfigSchemaAndBaseResponse(subject, id, type, validateFlow).getSchema();
-    }
-
-    /**
-     * Get a configuration schema.
-     * 
-     * @param id Entity to be configured
-     * @param type One of ProductPlugin.TYPE_*
-     * @param baseResponse the response object of the given type
-     */
-    @Transactional(readOnly=true)
-    private ConfigSchema getConfigSchema(AppdefEntityID id, String type, ConfigResponse baseResponse)
-        throws PluginException, PermissionException, AppdefEntityNotFoundException {
-
-        String name;
-        if (type.equals(ProductPlugin.TYPE_PRODUCT)) {
-            name = configManager.getPluginName(id);
-        } else {
-            name = platformManager.getPlatformPluginName(id);
-        }
-
-        AppdefEntityValue aval = new AppdefEntityValue(id, getOverlord());
-
-        return productManager.getConfigSchema(type, name, aval, baseResponse);
+        return productManager.getConfigSchema(id,type);
     }
 
     /**

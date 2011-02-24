@@ -48,37 +48,37 @@ public abstract class BaseTilesAction
 
     protected void checkModifyPermission(HttpServletRequest request) throws ParameterNotFoundException,
         PermissionException {
-
-        AppdefEntityID aeid = RequestUtils.getEntityId(request);
-        String opName = null;
-
-        switch (aeid.getType()) {
-            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                opName = AuthzConstants.platformOpModifyPlatform;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                opName = AuthzConstants.serverOpModifyServer;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                opName = AuthzConstants.serviceOpModifyService;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                opName = AuthzConstants.groupOpModifyResourceGroup;
-                break;
-            default:
-                throw new InvalidAppdefTypeException("Unknown type: " + aeid.getType());
-        }
-
-        checkPermission(request, opName);
+//TODO auth checking
+//        AppdefEntityID aeid = RequestUtils.getEntityId(request);
+//        String opName = null;
+//
+//        switch (aeid.getType()) {
+//            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+//                opName = AuthzConstants.platformOpModifyPlatform;
+//                break;
+//            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+//                opName = AuthzConstants.serverOpModifyServer;
+//                break;
+//            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+//                opName = AuthzConstants.serviceOpModifyService;
+//                break;
+//            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+//                opName = AuthzConstants.groupOpModifyResourceGroup;
+//                break;
+//            default:
+//                throw new InvalidAppdefTypeException("Unknown type: " + aeid.getType());
+//        }
+//
+//        checkPermission(request, opName);
     }
 
     protected void checkPermission(HttpServletRequest request, String opName) throws PermissionException {
-
-        // See if user can access this action
-        Map userOpsMap = (Map) request.getSession().getAttribute(Constants.USER_OPERATIONS_ATTR);
-
-        if (userOpsMap == null || !userOpsMap.containsKey(opName)) {
-            throw new PermissionException("User does not have permission [" + opName + "] to access this page.");
-        }
+//TODO auth checking
+//        // See if user can access this action
+//        Map userOpsMap = (Map) request.getSession().getAttribute(Constants.USER_OPERATIONS_ATTR);
+//
+//        if (userOpsMap == null || !userOpsMap.containsKey(opName)) {
+//            throw new PermissionException("User does not have permission [" + opName + "] to access this page.");
+//        }
     }
 }

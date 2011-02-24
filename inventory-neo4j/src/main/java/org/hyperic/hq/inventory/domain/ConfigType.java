@@ -1,5 +1,7 @@
 package org.hyperic.hq.inventory.domain;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -59,9 +61,9 @@ public class ConfigType {
     @Transient
     private Set<ConfigOptionType> configOptionTypes;
 
-    
     public ConfigType() {
     }
+
     /**
      * 
      * @param name The name of the config type
@@ -108,6 +110,21 @@ public class ConfigType {
 
     /**
      * 
+     * @return A Map of @{link {@link ConfigOptionType} names that have default
+     *         values and their default values
+     */
+    public Map<String, Object> getDefaultConfigValues() {
+        Map<String, Object> defaultValues = new HashMap<String, Object>();
+        for (ConfigOptionType optType : configOptionTypes) {
+            if (optType.getDefaultValue() != null) {
+                defaultValues.put(optType.getName(), optType.getDefaultValue());
+            }
+        }
+        return defaultValues;
+    }
+
+    /**
+     * 
      * @return The ID
      */
     public Integer getId() {
@@ -123,8 +140,9 @@ public class ConfigType {
     }
 
     /**
-     * Removes the ConfigType, including all of its ConfigOptionTypes.  Does not remove config instances since this should only be called
-     * upon removal of a ResourceType
+     * Removes the ConfigType, including all of its ConfigOptionTypes. Does not
+     * remove config instances since this should only be called upon removal of
+     * a ResourceType
      */
     @Transactional
     public void remove() {

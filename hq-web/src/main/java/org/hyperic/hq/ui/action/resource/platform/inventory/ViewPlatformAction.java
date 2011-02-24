@@ -51,6 +51,7 @@ import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
+import org.hyperic.hq.inventory.domain.ConfigType;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.ui.Constants;
@@ -212,26 +213,22 @@ public class ViewPlatformAction
                 entityId, false);
             log.debug(oldResponse);
 
-            ConfigSchema config = productBoss.getConfigSchema(sessionInt, entityId, ProductPlugin.TYPE_PRODUCT,
-                oldResponse);
-            log.debug("configSchema = " + config.getOptions().toString());
+            ConfigType config = productBoss.getConfigSchema(sessionInt, entityId.getId(), ProductPlugin.TYPE_PRODUCT);
+            log.debug("configSchema = " + config.getConfigOptionTypes());
 
             List<ConfigValues> uiResourceOptions = ActionUtils.getConfigValues(config, oldResponse);
 
-            config = new ConfigSchema();
+           
             oldResponse = new ConfigResponse();
 
             try {
                 oldResponse = productBoss.getMergedConfigResponse(sessionInt, ProductPlugin.TYPE_MEASUREMENT, entityId,
                     false);
-                config = productBoss.getConfigSchema(sessionInt, entityId, ProductPlugin.TYPE_MEASUREMENT, oldResponse);
+                config = productBoss.getConfigSchema(sessionInt, entityId.getId(), ProductPlugin.TYPE_MEASUREMENT);
             } catch (ConfigFetchException e) {
                 // do nothing as this could happen when the prodyct config is
                 // not set
-            } catch (PluginNotFoundException e) {
-                // do nothing as this could happen when the prodyct config is
-                // not set
-            }
+            } 
 
             List<ConfigValues> uiMonitorOptions = ActionUtils.getConfigValues(config, oldResponse);
 

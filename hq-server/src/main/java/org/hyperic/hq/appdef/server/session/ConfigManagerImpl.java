@@ -47,8 +47,10 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.autoinventory.AICompare;
 import org.hyperic.hq.inventory.domain.Config;
+import org.hyperic.hq.inventory.domain.ConfigOptionType;
 import org.hyperic.hq.inventory.domain.ConfigType;
 import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -77,20 +79,32 @@ public class ConfigManagerImpl implements ConfigManager {
         this.resourceManager = resourceManager;
     }
 
-    private Config createConfig(byte[] configBytes, ConfigType configType) {
+    private Config createConfig(byte[] configBytes, String configType, ResourceType resourceType) {
+        //Plugins may send config options that weren't configured in schema.  Add config here if missing
+        ConfigType type = resourceType.getConfigType(configType);
+        if(type == null) {
+            type = new ConfigType(configType);
+            resourceType.addConfigType(type);
+        }
         Config config = new Config();
-        config.setType(configType);
+        config.setType(type);
         try {
             ConfigResponse configResponse = ConfigResponse.decode(configBytes);
 
             for (String key : configResponse.getKeys()) {
                 String value = configResponse.getValue(key);
+                if(type.getConfigOptionType(key) == null) {
+                    //Sigh we let plugins send config options that aren't defined in schema.  Add them here w/what we know
+                    ConfigOptionType optionType = new ConfigOptionType(key,key);
+                    type.addConfigOptionType(optionType);
+                    config.setValue(key, value);
+                }
                 config.setValue(key, value);
             }
         } catch (EncodingException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        }
+        } 
         return config;
     }
 
@@ -387,8 +401,7 @@ public class ConfigManagerImpl implements ConfigManager {
         // one and associate it. Check if resource.getProductConfig() null first
         if (!AICompare.configsEqual(configBytes,
             toConfigResponse(resource.getConfig(ProductPlugin.TYPE_PRODUCT)))) {
-            resource.addConfig(createConfig(configBytes,
-                resource.getType().getConfigType(ProductPlugin.TYPE_PRODUCT)));
+            resource.addConfig(createConfig(configBytes,ProductPlugin.TYPE_PRODUCT,resource.getType()));
             wasUpdated = true;
         }
 
@@ -396,8 +409,8 @@ public class ConfigManagerImpl implements ConfigManager {
             measurementConfig, true, force);
         if (!AICompare.configsEqual(configBytes,
             toConfigResponse(resource.getConfig(ProductPlugin.TYPE_MEASUREMENT)))) {
-            resource.addConfig(createConfig(configBytes,
-                resource.getType().getConfigType(ProductPlugin.TYPE_MEASUREMENT)));
+            resource.addConfig(createConfig(configBytes,ProductPlugin.TYPE_MEASUREMENT,
+                resource.getType()));
             wasUpdated = true;
         }
 
@@ -405,8 +418,8 @@ public class ConfigManagerImpl implements ConfigManager {
             controlConfig, true, false);
         if (!AICompare.configsEqual(configBytes,
             toConfigResponse(resource.getConfig(ProductPlugin.TYPE_CONTROL)))) {
-            resource.addConfig(createConfig(configBytes,
-                resource.getType().getConfigType(ProductPlugin.TYPE_CONTROL)));
+            resource.addConfig(createConfig(configBytes,ProductPlugin.TYPE_CONTROL,
+                resource.getType()));
             wasUpdated = true;
         }
 

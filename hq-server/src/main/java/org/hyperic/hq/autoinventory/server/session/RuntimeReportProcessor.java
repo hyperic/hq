@@ -533,29 +533,31 @@ public class RuntimeReportProcessor {
         // if cprops == null, this is a no-op. else, JBoss for example will get
         // the majority of its cprops via JMX, which it doesnt use until
         // runtime-ai
-        try {
-            // SET CUSTOM PROPERTIES FOR SERVER
-            ConfigResponse cprops;
+        if(aiserver.getCustomProperties() != null) {
             try {
-                cprops = ConfigResponse.decode(aiserver
-                    .getCustomProperties());
-            } catch (EncodingException e) {
-                throw new SystemException(e);
-            }
-            if (log.isDebugEnabled()) {
-                log.debug("cprops=" + cprops);
-                log.debug("Resource Id: " + platform.getId());
-            }
-            for (String key: cprops.getKeys()) {
-                String val = cprops.getValue(key);
+                // SET CUSTOM PROPERTIES FOR SERVER
+                ConfigResponse cprops;
                 try {
-                    server.getResource().setProperty(key, val);
-                }catch (Exception e) {
-                    log.error(e.getMessage(), e);
+                    cprops = ConfigResponse.decode(aiserver
+                        .getCustomProperties());
+                } catch (EncodingException e) {
+                    throw new SystemException(e);
                 }
+                if (log.isDebugEnabled()) {
+                    log.debug("cprops=" + cprops);
+                    log.debug("Resource Id: " + platform.getId());
+                }
+                for (String key: cprops.getKeys()) {
+                    String val = cprops.getValue(key);
+                    try {
+                        server.getResource().setProperty(key, val);
+                    }catch (Exception e) {
+                        log.error(e.getMessage(), e);
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Error setting server custom properties: " + e, e);
             }
-        } catch (Exception e) {
-            log.warn("Error setting server custom properties: " + e, e);
         }
 
         if (aiserverExt != null) {

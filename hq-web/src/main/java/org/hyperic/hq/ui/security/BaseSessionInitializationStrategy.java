@@ -164,6 +164,9 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
     throws SessionTimeoutException, SessionNotFoundException, PermissionException {
         Map<String, Boolean> userOperationsMap = new HashMap<String, Boolean>();
         userOperationsMap.put("createApplication", true);
+        userOperationsMap.put("modifyServer", true);
+        userOperationsMap.put("modifyService", true);
+        userOperationsMap.put("modifyPlatform", true);
         //TODO look up permissions relative to the ResourceTypes
 //        List<OperationType> userOperations = authzBoss.getAllOperations(sessionId);
 //        

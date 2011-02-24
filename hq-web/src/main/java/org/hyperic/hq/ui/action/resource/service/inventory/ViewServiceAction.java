@@ -42,12 +42,11 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.product.PluginNotFoundException;
+import org.hyperic.hq.inventory.domain.ConfigType;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.common.inventory.RemoveResourceGroupsForm;
@@ -55,7 +54,6 @@ import org.hyperic.hq.ui.beans.ConfigValues;
 import org.hyperic.hq.ui.util.ActionUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.pager.PageControl;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -136,54 +134,45 @@ public class ViewServiceAction
 
             log.debug("AppdefEntityID = " + entityId.toString());
 
-            ConfigSchema config = new ConfigSchema();
+            ConfigType config=null;
             ConfigResponse oldResponse = new ConfigResponse();
             boolean editConfig = false;
 
             try {
                 oldResponse = productBoss.getMergedConfigResponse(sessionId.intValue(), ProductPlugin.TYPE_PRODUCT,
                     entityId, false);
-                config = productBoss.getConfigSchema(sessionId.intValue(), entityId, ProductPlugin.TYPE_PRODUCT,
-                    oldResponse);
+                config = productBoss.getConfigSchema(sessionId.intValue(), entityId.getId(), ProductPlugin.TYPE_PRODUCT);
 
                 editConfig = true;
             } catch (ConfigFetchException e) {
                 log.warn("Managed Exception ConfigFetchException caught " + e.toString());
-            } catch (PluginNotFoundException e) {
-                log.warn("Managed Exception PluginNotFoundException caught " + e.toString());
-            }
+            } 
 
             List<ConfigValues> uiProductOptions = ActionUtils.getConfigValues(config, oldResponse);
 
             request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS, uiProductOptions);
             request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS_COUNT, new Integer(uiProductOptions.size()));
 
-            config = new ConfigSchema();
+           
             oldResponse = new ConfigResponse();
 
             try {
                 oldResponse = productBoss.getMergedConfigResponse(sessionId.intValue(), ProductPlugin.TYPE_MEASUREMENT,
                     entityId, false);
-                config = productBoss.getConfigSchema(sessionId.intValue(), entityId, ProductPlugin.TYPE_MEASUREMENT,
-                    oldResponse);
+                config = productBoss.getConfigSchema(sessionId.intValue(), entityId.getId(), ProductPlugin.TYPE_MEASUREMENT);
             } catch (ConfigFetchException e) {
                 // do nothing
-            } catch (PluginNotFoundException e) {
-                // do nothing
-            }
+            } 
 
             setUIOptions(service, request, config, oldResponse);
 
-            config = new ConfigSchema();
+            
 
             oldResponse = productBoss.getMergedConfigResponse(sessionId.intValue(), ProductPlugin.TYPE_CONTROL,
                 entityId, false);
-            try {
-                config = productBoss.getConfigSchema(sessionId.intValue(), entityId, ProductPlugin.TYPE_CONTROL,
-                    oldResponse);
-            } catch (PluginNotFoundException e) {
-                // do nothing
-            }
+           
+            config = productBoss.getConfigSchema(sessionId.intValue(), entityId.getId(), ProductPlugin.TYPE_CONTROL);
+            
 
             List<ConfigValues> uiControlOptions = ActionUtils.getConfigValues(config, oldResponse);
 
@@ -207,7 +196,7 @@ public class ViewServiceAction
         }
     }
 
-    protected void setUIOptions(ServiceValue service, HttpServletRequest request, ConfigSchema config,
+    protected void setUIOptions(ServiceValue service, HttpServletRequest request, ConfigType config,
                                 ConfigResponse oldResponse) {
         List<ConfigValues> uiMonitorOptions = ActionUtils.getConfigValues(config, oldResponse);
 

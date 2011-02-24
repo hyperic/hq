@@ -46,6 +46,7 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
+import org.hyperic.hq.inventory.domain.ConfigType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
@@ -55,7 +56,6 @@ import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.config.InvalidOptionValueException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,7 +130,7 @@ public class EditConfigPropertiesAction
 
             String[] cfgTypes = ProductPlugin.CONFIGURABLE_TYPES;
             int i, numConfigs = cfgTypes.length;
-            ConfigSchema[] schemas = new ConfigSchema[cfgTypes.length];
+            ConfigType[] schemas = new ConfigType[cfgTypes.length];
             ConfigResponse[] oldConfigs = new ConfigResponse[cfgTypes.length];
             ConfigResponse[] newConfigs = new ConfigResponse[cfgTypes.length];
 
@@ -144,7 +144,6 @@ public class EditConfigPropertiesAction
 
             // get the configSchemas and existing configs
             for (i = 0; i < numConfigs; i++) {
-                try {
                     byte[] oldCfgBytes = null;
                     if (cfgTypes[i].equals(ProductPlugin.TYPE_PRODUCT)) {
                         oldCfgBytes = configManager.toConfigResponse(resource.getConfig(ProductPlugin.TYPE_PRODUCT));
@@ -160,23 +159,18 @@ public class EditConfigPropertiesAction
                         oldConfigs[i] = ConfigResponse.decode(oldCfgBytes);
                     }
 
-                    schemas[i] = productBoss.getConfigSchema(sessionInt, aeid, cfgTypes[i], oldConfigs[i]);
+                    schemas[i] = productBoss.getConfigSchema(sessionInt, aeid.getId(), cfgTypes[i]);
                     allConfigsRollback.setConfig(i, oldConfigs[i]);
                     allConfigsRollback.setSupports(i, true);
                     allConfigs.setSupports(i, true);
-                } catch (PluginNotFoundException e) {
-                    // No plugin support for this config type - skip ahead to
-                    // the next type.
-                    log.debug(cfgTypes[i] + " PluginNotFound for " + aeid + " : " + e);
-                    log.debug("Blanking for " + cfgTypes[i] + "->(not supported)");
-                    blankoutConfig(i, allConfigs, allConfigsRollback);
-                }
+               
             }
 
             AppdefResourceValue updatedResource = appdefBoss.findById(sessionInt, aeid);
 
             // get the new configs based on UI form fields
-            for (i = 0; i < numConfigs; i++) {
+            // intentionally skipping RT config
+            for (i = 0; i < numConfigs - 1; i++) {
 
                 // Don't bother configuring things that aren't supported.
                 if (!allConfigs.getSupports(i))
@@ -195,28 +189,13 @@ public class EditConfigPropertiesAction
                     allConfigsRollback.setShouldConfig(i, true);
 
                 } else {
-                    if (i == ProductPlugin.CFGTYPE_IDX_RESPONSE_TIME) {
-                        if (aeid.isServer() || aeid.isPlatform()) {
-                            // On servers, RT always gets an empty config
-                            allConfigs.setConfig(i, new ConfigResponse());
-                            allConfigs.setShouldConfig(i, true);
-                            allConfigsRollback.setShouldConfig(i, true);
-
-                        } else if (!aeid.isService() || !allConfigs.supportsMetricConfig()) {
-                            // Otherwise, only configure response time for
-                            // services, and only if the plugin has metric
-                            // support.
-                            blankoutConfig(i, allConfigs, allConfigsRollback);
-                            continue;
-                        }
-                    }
                     if (i == ProductPlugin.CFGTYPE_IDX_CONTROL &&  !aeid.isService() && !aeid.isServer() && !aeid.isPlatform() ) {
                         // Control is only supported on platforms, servers and services
                         blankoutConfig(i, allConfigs, allConfigsRollback);
                         continue;
                     }
 
-                    newConfigs[i] = new ConfigResponse(schemas[i]);
+                    newConfigs[i] = new ConfigResponse();
                     allConfigs.setConfig(i, newConfigs[i]);
                     prefix = cfgTypes[i] + ".";
                     Boolean wereChanges = BizappUtils.populateConfig(request, prefix, schemas[i], newConfigs[i],
@@ -287,14 +266,6 @@ public class EditConfigPropertiesAction
 
                         case ProductPlugin.CFGTYPE_IDX_CONTROL:
                             cfgForm.setControlConfigOptions(BizappUtils.buildLoadConfigOptions(prefix, schemas[i],
-                                newConfigs[i]));
-                            break;
-
-                        case ProductPlugin.CFGTYPE_IDX_RESPONSE_TIME:
-                            // enable the RT metrics based on input from ui
-                            allConfigs.setEnableServiceRT(cfgForm.getServiceRTEnabled());
-                            allConfigs.setEnableEuRT(cfgForm.getEuRTEnabled());
-                            cfgForm.setRtConfigOptions(BizappUtils.buildLoadConfigOptions(prefix, schemas[i],
                                 newConfigs[i]));
                             break;
                     }

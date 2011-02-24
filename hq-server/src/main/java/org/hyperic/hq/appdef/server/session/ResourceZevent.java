@@ -43,9 +43,10 @@ public abstract class ResourceZevent extends Zevent {
         this.appdefEntityID = id;
     }
 
-    public ResourceZevent(ResourceZeventSource source,
+    public ResourceZevent(AppdefEntityID id,ResourceZeventSource source,
                           ResourceZeventPayload payload) {
         super(source, payload);
+        this.appdefEntityID = id;
     }
 
     public Integer getId() {

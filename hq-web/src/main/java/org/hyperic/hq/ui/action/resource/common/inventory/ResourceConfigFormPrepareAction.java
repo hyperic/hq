@@ -46,6 +46,7 @@ import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
+import org.hyperic.hq.inventory.domain.ConfigType;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.ui.Constants;
@@ -80,9 +81,13 @@ public class ResourceConfigFormPrepareAction
     // if this resource has help text, build up a map of all
     // configuration values which can then be applied to variables
     // in the help text.
-    protected void addHelpProperties(Map helpProps, ConfigSchema schema, ConfigResponse config) {
-
-        helpProps.putAll(schema.getDefaultProperties());
+    protected void addHelpProperties(Map helpProps, ConfigType schema, ConfigResponse config) {
+        if(schema != null) {
+             Map<String,Object> defaultValues = schema.getDefaultConfigValues();
+            for(Map.Entry<String, Object> entry:defaultValues.entrySet()) {
+                helpProps.put(entry.getKey(), entry.getValue().toString());
+            }
+        }
         helpProps.putAll(config.toProperties());
     }
 
@@ -130,14 +135,14 @@ public class ResourceConfigFormPrepareAction
         RequestUtils.setResource(request, resource);
 
         ConfigResponse oldResponse = new ConfigResponse();
-        ConfigSchema config = new ConfigSchema();
+        ConfigType config;
         String help = null;
         Map<String, String> helpProps = new HashMap<String, String>();
 
         try {
             oldResponse = productBoss.getMergedConfigResponse(sessionId, ProductPlugin.TYPE_PRODUCT, aeid, false);
 
-            config = productBoss.getConfigSchema(sessionId, aeid, ProductPlugin.TYPE_PRODUCT, oldResponse);
+            config = productBoss.getConfigSchema(sessionId, aeid.getId(), ProductPlugin.TYPE_PRODUCT);
 
             addHelpProperties(helpProps, config, oldResponse);
         } catch (ConfigFetchException e) {
@@ -151,16 +156,6 @@ public class ResourceConfigFormPrepareAction
             request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS_COUNT, new Integer(0));
             return null;
 
-        } catch (PluginNotFoundException e) {
-            log.error("Plugin not found for the resource ", e);
-            RequestUtils.setError(request, "resource.common.inventory.error.PluginNotFound");
-            resourceForm.setResourceConfigOptions(new ArrayList());
-            request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS_COUNT, new Integer(0));
-            resourceForm.setControlConfigOptions(new ArrayList());
-            request.setAttribute(Constants.CONTROL_CONFIG_OPTIONS_COUNT, new Integer(0));
-            resourceForm.setMonitorConfigOptions(new ArrayList());
-            request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS_COUNT, new Integer(0));
-            return null;
         }
 
         // XXX add the options through the builder and get them
@@ -172,12 +167,12 @@ public class ResourceConfigFormPrepareAction
 
         prefix = ProductPlugin.TYPE_MEASUREMENT + ".";
 
-        config = new ConfigSchema();
+        
         oldResponse = new ConfigResponse();
 
-        try {
+       
             oldResponse = productBoss.getMergedConfigResponse(sessionId, ProductPlugin.TYPE_MEASUREMENT, aeid, false);
-            config = productBoss.getConfigSchema(sessionId, aeid, ProductPlugin.TYPE_MEASUREMENT, oldResponse);
+            config = productBoss.getConfigSchema(sessionId, aeid.getId(), ProductPlugin.TYPE_MEASUREMENT);
 
             addHelpProperties(helpProps, config, oldResponse);
 
@@ -192,9 +187,7 @@ public class ResourceConfigFormPrepareAction
                 BizappUtils.setRuntimeAIMessage(sessionId, request, server, appdefBoss);
             }
 
-        } catch (PluginNotFoundException e) {
-            // do nothing
-        }
+        
 
         List<ConfigValues> uiMonitorOptions = BizappUtils.buildLoadConfigOptions(prefix, config, oldResponse);
 
@@ -216,17 +209,15 @@ public class ResourceConfigFormPrepareAction
         request.setAttribute(Constants.MONITOR_HELP, help);
 
         prefix = ProductPlugin.TYPE_CONTROL + ".";
-        config = new ConfigSchema();
+        
         oldResponse = new ConfigResponse();
 
-        try {
+       
             oldResponse = productBoss.getMergedConfigResponse(sessionId, ProductPlugin.TYPE_CONTROL, aeid, false);
-            config = productBoss.getConfigSchema(sessionId, aeid, ProductPlugin.TYPE_CONTROL, oldResponse);
+            config = productBoss.getConfigSchema(sessionId, aeid.getId(), ProductPlugin.TYPE_CONTROL);
 
             addHelpProperties(helpProps, config, oldResponse);
-        } catch (PluginNotFoundException e) {
-            // do nothing
-        }
+       
 
         List<ConfigValues> uiControlOptions = BizappUtils.buildLoadConfigOptions(prefix, config, oldResponse);
 

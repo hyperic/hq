@@ -45,7 +45,7 @@ public class ResourceUpdatedZevent extends ResourceZevent {
     
     public ResourceUpdatedZevent(AuthzSubject subject, AppdefEntityID id,
                                  AllConfigResponses allConfgs) {
-        super(new ResourceZeventSource(id.getId()),
+        super(id,new ResourceZeventSource(id.getId()),
               new ResourceConfigZeventPayload(subject.getId(), id.getId(), allConfgs));
     }
     

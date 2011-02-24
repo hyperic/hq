@@ -33,12 +33,11 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.inventory.domain.ConfigType;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ServiceType;
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.ConfigSchema;
 
 /**
  * Local interface for ProductManager.
@@ -50,9 +49,7 @@ public interface ProductManager {
     public String getMonitoringHelp(AppdefEntityValue entityVal, Map<?, ?> props) throws PluginNotFoundException,
         PermissionException, AppdefEntityNotFoundException;
 
-    public ConfigSchema getConfigSchema(String type, String name, AppdefEntityValue entityVal,
-                                        ConfigResponse baseResponse) throws PluginException,
-        AppdefEntityNotFoundException, PermissionException;
+    public ConfigType getConfigSchema(Integer resourceId, String type) throws NotFoundException;
 
     public void deploymentNotify(String pluginName) throws PluginNotFoundException, VetoException, NotFoundException;
 
