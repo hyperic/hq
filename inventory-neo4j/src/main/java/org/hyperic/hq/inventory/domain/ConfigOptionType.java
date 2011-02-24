@@ -43,6 +43,12 @@ public class ConfigOptionType {
     @GraphProperty
     private String description;
 
+    @PersistenceContext
+    private transient EntityManager entityManager;
+
+    @Autowired
+    private transient GraphDatabaseContext graphDatabaseContext;
+
     @Transient
     @GraphProperty
     private boolean hidden;
@@ -60,15 +66,13 @@ public class ConfigOptionType {
 
     @Transient
     @GraphProperty
-    private boolean secret;
-
-    @Autowired
-    private transient GraphDatabaseContext graphDatabaseContext;
-
-    @PersistenceContext
-    private transient EntityManager entityManager;
+    private boolean optional;
 
     private transient Validator propertyValidator;
+
+    @Transient
+    @GraphProperty
+    private boolean secret;
 
     public ConfigOptionType() {
     }
@@ -129,6 +133,14 @@ public class ConfigOptionType {
 
     /**
      * 
+     * @return true If this config option does not need to have a value set
+     */
+    public boolean isOptional() {
+        return optional;
+    }
+
+    /**
+     * 
      * @return true if value should be obscured (like a password)
      */
     public boolean isSecret() {
@@ -181,6 +193,15 @@ public class ConfigOptionType {
         this.id = id;
     }
 
+    /**
+     * 
+     * @param optional true If this config option does not need to have a value
+     *        set
+     */
+    public void setOptional(boolean optional) {
+        this.optional = optional;
+    }
+
     public void setPropertyValidator(Validator propertyValidator) {
         this.propertyValidator = propertyValidator;
     }
@@ -202,6 +223,7 @@ public class ConfigOptionType {
         sb.append("Description: ").append(getDescription()).append(", ");
         sb.append("Secret: ").append(isSecret()).append(", ");
         sb.append("DefaultValue: ").append(getDefaultValue()).append(", ");
+        sb.append("Optional: ").append(isOptional()).append(", ");
         sb.append("Hidden: ").append(isHidden()).append("]");
         return sb.toString();
     }

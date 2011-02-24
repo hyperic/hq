@@ -568,6 +568,7 @@ public class ProductManagerImpl implements ProductManager {
             ConfigOptionType configOptType = new ConfigOptionType(option.getName(), option.getDescription());
             configOptType.setDefaultValue(option.getDefault());
             configOptType.setSecret(ConfigSchema.isSecret(option.getName()));
+            configOptType.setOptional(option.isOptional());
             if(option instanceof HiddenConfigOption) {
                 configOptType.setHidden(true);
             }

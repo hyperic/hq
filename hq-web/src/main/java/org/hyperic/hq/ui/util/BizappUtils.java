@@ -862,7 +862,7 @@ public class BizappUtils {
             ConfigValues configValue = new ConfigValues();
             configValue.setOption(prefix + option.getName());
             configValue.setPrefix(prefix);
-            configValue.setOptional(false);
+            configValue.setOptional(option.isOptional());
             configValue.setValue(oldKeys.contains(option.getName()) ? oldResponse.getValue(option
                 .getName()) : getDefaultConfigValue(option, oldResponse));
             configValue.setDescription(option.getDescription());
