@@ -77,6 +77,8 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.ObjectNotFoundException;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.inventory.domain.ConfigOptionType;
+import org.hyperic.hq.inventory.domain.ConfigType;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.Baseline;
@@ -111,8 +113,8 @@ import org.hyperic.util.units.UnitsFormat;
 /* XXX: use reflection to combine some of these methods? */
 
 /**
- * Utilities class that provides convenience methods for operating on
- * bizapp objects.
+ * Utilities class that provides convenience methods for operating on bizapp
+ * objects.
  */
 
 public class BizappUtils {
@@ -120,11 +122,11 @@ public class BizappUtils {
     private static Log log = LogFactory.getLog(BizappUtils.class.getName());
 
     /**
-     * Replace the word 'platform' in the input string with the correct
-     * object type as specified by the entity ID.  
+     * Replace the word 'platform' in the input string with the correct object
+     * type as specified by the entity ID.
      * 
-     * For instance, if the string is "events.config.platform", and id
-     * specifies a server, the result will be "events.config.server"
+     * For instance, if the string is "events.config.platform", and id specifies
+     * a server, the result will be "events.config.server"
      */
     public static String replacePlatform(String inStr, AppdefEntityID id) {
         if (id.isPlatform()) {
@@ -140,67 +142,61 @@ public class BizappUtils {
         } else {
             return StringUtil.replace(inStr, "platform.", "");
         }
-     }
-    
+    }
+
     /** A helper method used by setRuntimeAIMessage */
-    private static String getServiceName(PageList serviceTypes, int index, 
-                                         String stName) {
-        String baseName
-            = ((ServiceTypeValue) serviceTypes.get(index)).getName();
+    private static String getServiceName(PageList serviceTypes, int index, String stName) {
+        String baseName = ((ServiceTypeValue) serviceTypes.get(index)).getName();
         return StringUtil.pluralize(StringUtil.removePrefix(baseName, stName));
     }
 
     /**
      * Return the full name of the subject.
-     *
+     * 
      * @param fname the subject's first name
      * @param lname the subject's last name
      */
     public static String makeSubjectFullName(String fname, String lname) {
         // XXX: what about Locales that display last name first?
-    
+
         StringBuffer full = new StringBuffer();
         if (fname == null || fname.equals("")) {
-            if (lname != null && ! lname.equals("")) {
+            if (lname != null && !lname.equals("")) {
                 full.append(lname);
             }
-        }
-        else {
+        } else {
             if (lname == null || lname.equals("")) {
                 full.append(fname);
-            }
-            else {
+            } else {
                 full.append(fname);
                 full.append(" ");
                 full.append(lname);
             }
         }
-    
+
         return full.toString();
     }
 
     /**
-     * filter on a list of AIAppdefResourceValue.  Either get the ignored
+     * filter on a list of AIAppdefResourceValue. Either get the ignored
      * resources or non-ignored.
      * 
      * @param resources List of AIAppdefResources to filter
      */
-    public static List<AIAppdefResourceValue> filterAIResourcesByStatus(List resources, Integer status)
-    {
+    public static List<AIAppdefResourceValue> filterAIResourcesByStatus(List resources,
+                                                                        Integer status) {
         if (status == null || status.intValue() == -1)
             return resources;
-            
+
         List resourceList = new PageList();
 
         Iterator sIterator = resources.iterator();
-        while (sIterator.hasNext())
-        {   
-            AIAppdefResourceValue rValue = (AIAppdefResourceValue)sIterator.next();     
-            if (rValue.getQueueStatus() == status.intValue() )
-            {
-                resourceList.add(rValue);        
+        while (sIterator.hasNext()) {
+            AIAppdefResourceValue rValue = (AIAppdefResourceValue) sIterator.next();
+            if (rValue.getQueueStatus() == status.intValue()) {
+                resourceList.add(rValue);
             }
-        
+
         }
 
         return resourceList;
@@ -209,148 +205,127 @@ public class BizappUtils {
     /**
      * filter on a list of AIAppdefResourceValue by Server Type.
      */
-    public static List<AIServerValue> filterAIResourcesByServerType(List resources, String name)
-    {
-        if (name == null || name.equals("") )
+    public static List<AIServerValue> filterAIResourcesByServerType(List resources, String name) {
+        if (name == null || name.equals(""))
             return resources;
-            
+
         List resourceList = new PageList();
 
         Iterator sIterator = resources.iterator();
-        while (sIterator.hasNext())
-        {   
-            AIServerValue rValue = (AIServerValue)sIterator.next();     
-            if (rValue.getServerTypeName().equals(name) )
-            {
-                resourceList.add(rValue);        
+        while (sIterator.hasNext()) {
+            AIServerValue rValue = (AIServerValue) sIterator.next();
+            if (rValue.getServerTypeName().equals(name)) {
+                resourceList.add(rValue);
             }
-        
+
         }
 
         return resourceList;
     }
 
     /**
-     * When displaying the config options (both in the ViewXXX and EditXXX 
-     * tiles), we display a message "Auto-Discover foo, bar, and other 
-     * services?" next to the checkbox.  The "foo, bar, and other" part
-     * is what gets generated here and stuck in the request attributes
-     * as the Constants.SERVICE_TYPE_EXAMPLE_LIST attribute.
+     * When displaying the config options (both in the ViewXXX and EditXXX
+     * tiles), we display a message "Auto-Discover foo, bar, and other
+     * services?" next to the checkbox.  The "foo, bar, and other" part is what
+     * gets generated here and stuck in the request attributes as the
+     * Constants.SERVICE_TYPE_EXAMPLE_LIST attribute.
      */
-    public static void setRuntimeAIMessage (int sessionId,
-                                            HttpServletRequest request,
-                                            ServerValue server,
-                                            AppdefBoss appdefBoss) 
-        throws SessionTimeoutException, SessionNotFoundException, 
-               RemoteException {
+    public static void setRuntimeAIMessage(int sessionId, HttpServletRequest request,
+                                           ServerValue server, AppdefBoss appdefBoss)
+        throws SessionTimeoutException, SessionNotFoundException, RemoteException {
 
         // Find a couple of sample services
         int serverTypeId = server.getServerType().getId().intValue();
-        PageList serviceTypes
-            = appdefBoss.findServiceTypesByServerType(sessionId, serverTypeId);
+        PageList serviceTypes = appdefBoss.findServiceTypesByServerType(sessionId, serverTypeId);
         String serviceNameList;
         int numServiceTypes = serviceTypes.size();
         String stName = server.getServerType().getName();
-        
+
         if (numServiceTypes == 0) {
             // Should not really happen
             serviceNameList = "services";
-            
+
         } else if (numServiceTypes == 1) {
             serviceNameList = getServiceName(serviceTypes, 0, stName);
-            
+
         } else if (numServiceTypes == 2) {
-            serviceNameList
-                = getServiceName(serviceTypes, 0, stName)
-                + " and "
-                + getServiceName(serviceTypes, 1, stName);
+            serviceNameList = getServiceName(serviceTypes, 0, stName) + " and " +
+                              getServiceName(serviceTypes, 1, stName);
         } else {
-            serviceNameList 
-                = getServiceName(serviceTypes, 0, stName)
-                + ", "
-                + getServiceName(serviceTypes, 1, stName)
-                + ", and other services";
+            serviceNameList = getServiceName(serviceTypes, 0, stName) + ", " +
+                              getServiceName(serviceTypes, 1, stName) + ", and other services";
         }
         // System.err.println("serviceNameList---->" + serviceNameList);
-        request.setAttribute(Constants.AI_SAMPLE_SERVICETYPE_LIST, 
-                             serviceNameList);
+        request.setAttribute(Constants.AI_SAMPLE_SERVICETYPE_LIST, serviceNameList);
     }
-    
+
     /**
-     * builds a list of ids of ai resources for resources which are not
-     * ignored.
+     * builds a list of ids of ai resources for resources which are not ignored.
      */
     public static List<Integer> buildAIResourceIds(AIAppdefResourceValue[] aiResources,
-                                          boolean ignored) {
+                                                   boolean ignored) {
         List<Integer> listServerIds = new ArrayList<Integer>();
-        
+
         for (int i = 0; i < aiResources.length; i++)
-            if (aiResources[i].getIgnored() == ignored )
+            if (aiResources[i].getIgnored() == ignored)
                 listServerIds.add(aiResources[i].getId());
-        
+
         return listServerIds;
     }
 
     /**
      * build a list of supported server types for ai subsystem
      */
-    public static AppdefResourceTypeValue[] buildSupportedAIServerTypes
-        (ServletContext ctx,
-         HttpServletRequest request,
-         String platType, AppdefBoss appdefBoss, AIBoss aiBoss) throws Exception {
+    public static AppdefResourceTypeValue[] buildSupportedAIServerTypes(ServletContext ctx,
+                                                                        HttpServletRequest request,
+                                                                        String platType,
+                                                                        AppdefBoss appdefBoss,
+                                                                        AIBoss aiBoss)
+        throws Exception {
 
         int sessionId = RequestUtils.getSessionIdInt(request);
 
         // Build support ai server types
-        PlatformType ptv =
-            appdefBoss.findPlatformTypeByName(sessionId, platType);
-        List serverTypes =
-            appdefBoss.findServerTypesByPlatformType(sessionId,
-                                                     ptv.getId(),
-                                                     PageControl.PAGE_ALL);
+        PlatformType ptv = appdefBoss.findPlatformTypeByName(sessionId, platType);
+        List serverTypes = appdefBoss.findServerTypesByPlatformType(sessionId, ptv.getId(),
+            PageControl.PAGE_ALL);
         List serverTypeVals = new ArrayList();
-        for (Iterator i = serverTypes.iterator(); i.hasNext(); ) {
-            ServerTypeValue stv = (ServerTypeValue)i.next();
+        for (Iterator i = serverTypes.iterator(); i.hasNext();) {
+            ServerTypeValue stv = (ServerTypeValue) i.next();
             serverTypeVals.add(stv);
         }
 
-        Map serverSigs = aiBoss.getServerSignatures(sessionId,
-                                                    serverTypeVals);
+        Map serverSigs = aiBoss.getServerSignatures(sessionId, serverTypeVals);
 
-        ServerTypeValue[] typeArray =
-            (ServerTypeValue[])serverTypeVals.toArray(new ServerTypeValue[0]);
-        List filteredServerTypes = BizappUtils.
-            buildServerTypesFromServerSig(typeArray,
-                                          serverSigs.values().iterator());
+        ServerTypeValue[] typeArray = (ServerTypeValue[]) serverTypeVals
+            .toArray(new ServerTypeValue[0]);
+        List filteredServerTypes = BizappUtils.buildServerTypesFromServerSig(typeArray, serverSigs
+            .values().iterator());
 
-        AppdefResourceTypeValue[] sType =
-            new AppdefResourceTypeValue[filteredServerTypes.size()];
-        
-        filteredServerTypes.toArray(sType);                                         
+        AppdefResourceTypeValue[] sType = new AppdefResourceTypeValue[filteredServerTypes.size()];
+
+        filteredServerTypes.toArray(sType);
 
         return sType;
     }
 
     /**
-     * build a list of server types extracted from the ai server list 
+     * build a list of server types extracted from the ai server list
      */
-    public static AppdefResourceTypeValue[] buildfilteredAIServerTypes(
-            AppdefResourceTypeValue[] supportedResTypes,
-            AIServerValue[] sValues) {
+    public static AppdefResourceTypeValue[] buildfilteredAIServerTypes(AppdefResourceTypeValue[] supportedResTypes,
+                                                                       AIServerValue[] sValues) {
         List filteredServerTypes = new ArrayList();
-        for (int i = 0; i < sValues.length; i++)
-        {
+        for (int i = 0; i < sValues.length; i++) {
             String sTypeName = sValues[i].getServerTypeName();
-            AppdefResourceTypeValue appdefType = 
-                    findResourceTypeValue(supportedResTypes, sTypeName);
-           if (appdefType != null)
-            filteredServerTypes.add(appdefType);
+            AppdefResourceTypeValue appdefType = findResourceTypeValue(supportedResTypes, sTypeName);
+            if (appdefType != null)
+                filteredServerTypes.add(appdefType);
         }
-        
+
         filteredServerTypes = sortAppdefResourceType(filteredServerTypes);
         AppdefResourceTypeValue[] sType = new AppdefResourceTypeValue[filteredServerTypes.size()];
-        
-        filteredServerTypes.toArray(sType);                                         
+
+        filteredServerTypes.toArray(sType);
         return sType;
     }
 
@@ -359,41 +334,44 @@ public class BizappUtils {
      */
     private static Comparator COMPARE_NAME = new Comparator() {
         public int compare(Object obj1, Object obj2) {
-            
-            AppdefResourceTypeValue resType1 = (AppdefResourceTypeValue)obj1;
-            AppdefResourceTypeValue resType2 = (AppdefResourceTypeValue)obj2;
+
+            AppdefResourceTypeValue resType1 = (AppdefResourceTypeValue) obj1;
+            AppdefResourceTypeValue resType2 = (AppdefResourceTypeValue) obj2;
 
             if (resType1 == null) {
-                if (resType2 == null) return 0;
-                else return Integer.MAX_VALUE;
+                if (resType2 == null)
+                    return 0;
+                else
+                    return Integer.MAX_VALUE;
             }
-            if (resType2 == null) return Integer.MIN_VALUE;
+            if (resType2 == null)
+                return Integer.MIN_VALUE;
 
             return resType1.getName().compareToIgnoreCase(resType2.getName());
         }
     };
-    
+
     /**
-     * use this class to sort pending AppdefResourceTypeValue objects
-     * for groups.  case-sensitive sort.
+     * use this class to sort pending AppdefResourceTypeValue objects for
+     * groups. case-sensitive sort.
      */
-    private class AppdefResourceNameComparator implements Comparator
-    {
+    private class AppdefResourceNameComparator implements Comparator {
         private PageControl pc = null;
-        
-        public AppdefResourceNameComparator(PageControl pc)
-        {
+
+        public AppdefResourceNameComparator(PageControl pc) {
             this.pc = pc;
         }
-        
-            /* (non-Javadoc)
+
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
          */
         public int compare(Object obj1, Object obj2) {
-            
-            AppdefResourceValue res1 = (AppdefResourceValue)obj1;
-            AppdefResourceValue res2 = (AppdefResourceValue)obj2;
-            
+
+            AppdefResourceValue res1 = (AppdefResourceValue) obj1;
+            AppdefResourceValue res2 = (AppdefResourceValue) obj2;
+
             // Case insensitive compare
             String name1 = res1.getName().toLowerCase();
             String name2 = res2.getName().toLowerCase();
@@ -404,57 +382,54 @@ public class BizappUtils {
         }
 
     }
-    
+
     /**
      * use this class to sort the AppdefResourceTypeValue objects
      */
-    private class AIResourceIdComparator implements Comparator
-    {
-            /* (non-Javadoc)
+    private class AIResourceIdComparator implements Comparator {
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
          */
         public int compare(Object obj1, Object obj2) {
-            
-            AIAppdefResourceValue res1 = (AIAppdefResourceValue)obj1;
-            AIAppdefResourceValue res2 = (AIAppdefResourceValue)obj2;
-            
+
+            AIAppdefResourceValue res1 = (AIAppdefResourceValue) obj1;
+            AIAppdefResourceValue res2 = (AIAppdefResourceValue) obj2;
+
             return res1.getId().compareTo(res2.getId());
         }
 
     }
-    
-    public static List sortAppdefResourceType(List resourceType)
-    {
+
+    public static List sortAppdefResourceType(List resourceType) {
         List sortedList = new ArrayList();
         SortedSet sSet = new TreeSet(COMPARE_NAME);
         sSet.addAll(resourceType);
-        CollectionUtils.addAll(sortedList, sSet.iterator());        
-        return sortedList;    
+        CollectionUtils.addAll(sortedList, sSet.iterator());
+        return sortedList;
     }
-    
-    public static List sortAIResource(List resource)
-    {
+
+    public static List sortAIResource(List resource) {
         List sortedList = new ArrayList();
-        SortedSet sSet =
-            new TreeSet(new BizappUtils().new AIResourceIdComparator());
+        SortedSet sSet = new TreeSet(new BizappUtils().new AIResourceIdComparator());
         sSet.addAll(resource);
-        CollectionUtils.addAll(sortedList, sSet.iterator());        
-        return sortedList;    
+        CollectionUtils.addAll(sortedList, sSet.iterator());
+        return sortedList;
     }
-    
+
     /**
      * builds a list of server types from ServerSignature objects
      */
-    public static List<AppdefResourceTypeValue> buildServerTypesFromServerSig(AppdefResourceTypeValue[] sTypes, 
-                                                     Iterator<ServerSignature> sigIterator) 
-    {
+    public static List<AppdefResourceTypeValue> buildServerTypesFromServerSig(AppdefResourceTypeValue[] sTypes,
+                                                                              Iterator<ServerSignature> sigIterator) {
         List<AppdefResourceTypeValue> serverTypes = new ArrayList<AppdefResourceTypeValue>();
-        synchronized(serverTypes) {
+        synchronized (serverTypes) {
             while (sigIterator.hasNext()) {
-                ServerSignature st = (ServerSignature)sigIterator.next();
+                ServerSignature st = (ServerSignature) sigIterator.next();
 
-                AppdefResourceTypeValue stype = 
-                        BizappUtils.findResourceTypeValue(sTypes, st.getServerTypeName());
+                AppdefResourceTypeValue stype = BizappUtils.findResourceTypeValue(sTypes,
+                    st.getServerTypeName());
                 serverTypes.add(stype);
             }
         }
@@ -464,79 +439,71 @@ public class BizappUtils {
 
     /**
      * find a ResourceTypeValue object from a list of ResourceTypeValue obects.
-     *
+     * 
      * @return a ResourceTypeValue or null
      */
-    public static AppdefResourceTypeValue findResourceTypeValue(
-        AppdefResourceTypeValue[] resourceTypes, String name) {
-        for(int i = 0; i < resourceTypes.length; i++)
-        {
+    public static AppdefResourceTypeValue findResourceTypeValue(AppdefResourceTypeValue[] resourceTypes,
+                                                                String name) {
+        for (int i = 0; i < resourceTypes.length; i++) {
             AppdefResourceTypeValue resourceType = resourceTypes[i];
-            if (resourceType != null && resourceType.getName().equals(name) )
+            if (resourceType != null && resourceType.getName().equals(name))
                 return resourceType;
         }
-        
+
         return null;
     }
 
     /**
-     * This method builds a list of AppdefResourceValue objects 
-     * from a list of AppdefEntityID.  
+     * This method builds a list of AppdefResourceValue objects from a list of
+     * AppdefEntityID.
      * 
-     * This function should be moved into bizapp layer if possible 
-     * later.  I am leaving it until I have an api which provides 
-     * similar functionality.
+     * This function should be moved into bizapp layer if possible later. I am
+     * leaving it until I have an api which provides similar functionality.
      * 
      * @return a list of AppdefResourceValue objects
      */
     public static List<AppdefResourceValue> buildAppdefResources(int sessionId, AppdefBoss boss,
-                                            AppdefEntityID[] entities) 
-        throws ObjectNotFoundException, RemoteException,
-               SessionTimeoutException, SessionNotFoundException,
-               PermissionException 
-    {
+                                                                 AppdefEntityID[] entities)
+        throws ObjectNotFoundException, RemoteException, SessionTimeoutException,
+        SessionNotFoundException, PermissionException {
         if (entities == null)
             return new ArrayList();
-        
-        return boss.findByIds(sessionId, entities, PageControl.PAGE_ALL);            
+
+        return boss.findByIds(sessionId, entities, PageControl.PAGE_ALL);
     }
-    
+
     /**
-     * This method sorts list of AppdefResourceValue objects 
+     * This method sorts list of AppdefResourceValue objects
      * 
      * @return a list of AppdefResourceValue objects
      */
-    public static List<AppdefResourceValue> sortAppdefResource(List appdefList, PageControl pc) 
-    {
+    public static List<AppdefResourceValue> sortAppdefResource(List appdefList, PageControl pc) {
         List sortedList = new ArrayList();
-        SortedSet sSet =
-            new TreeSet(new BizappUtils().new AppdefResourceNameComparator(pc));
+        SortedSet sSet = new TreeSet(new BizappUtils().new AppdefResourceNameComparator(pc));
         sSet.addAll(appdefList);
-        CollectionUtils.addAll(sortedList, sSet.iterator());       
-        
+        CollectionUtils.addAll(sortedList, sSet.iterator());
+
         // There are duplicated names, figure out where to insert them
-        for (Iterator it = appdefList.iterator();
-             sortedList.size() != appdefList.size() && it.hasNext(); ) {
+        for (Iterator it = appdefList.iterator(); sortedList.size() != appdefList.size() &&
+                                                  it.hasNext();) {
             AppdefResourceValue res = (AppdefResourceValue) it.next();
-            
+
             for (int i = 0; i < sortedList.size(); i++) {
-                AppdefResourceValue sorted =
-                    (AppdefResourceValue) sortedList.get(i);
+                AppdefResourceValue sorted = (AppdefResourceValue) sortedList.get(i);
                 if (sorted.getEntityId().equals(res.getEntityId()))
                     break;
-                
+
                 // Either it's meant to go in between or the last
-                if (res.getName().toLowerCase().compareTo(
-                    sorted.getName().toLowerCase()) < 0 ||
+                if (res.getName().toLowerCase().compareTo(sorted.getName().toLowerCase()) < 0 ||
                     i == sortedList.size() - 1) {
                     sortedList.add(i, res);
                     break;
                 }
             }
         }
-        
-        return sortedList;    
-            
+
+        return sortedList;
+
     }
 
     /**
@@ -545,16 +512,14 @@ public class BizappUtils {
      * 
      * @param entityIds list of [entityType]:[resourceTypeId] strings
      */
-    public static List<AppdefEntityID> buildAppdefEntityIds(List entityIds)
-    {
+    public static List<AppdefEntityID> buildAppdefEntityIds(List entityIds) {
         List<AppdefEntityID> entities = new ArrayList<AppdefEntityID>();
-        for (Iterator rIterator = entityIds.iterator(); rIterator.hasNext(); ) {
+        for (Iterator rIterator = entityIds.iterator(); rIterator.hasNext();) {
             entities.add(new AppdefEntityID((String) rIterator.next()));
         }
-                    
+
         return entities;
     }
-
 
     /**
      * builds the value objects in the form: [entity type id]:[resource type id]
@@ -563,92 +528,82 @@ public class BizappUtils {
      * @return List
      * @throws InvalidAppdefTypeException
      */
-    public static PageList buildAppdefOptionList(List resourceTypes,
-                                                 boolean useHyphen)
+    public static PageList buildAppdefOptionList(List resourceTypes, boolean useHyphen)
         throws InvalidAppdefTypeException {
         PageList optionList = new PageList();
-        
+
         if (resourceTypes == null)
             return optionList;
-            
+
         Iterator aIterator = resourceTypes.iterator();
-        optionList.setTotalSize(resourceTypes.size() );
-        while (aIterator.hasNext())
-        {
-            AppdefResourceTypeValue sTypeVal = 
-                            (AppdefResourceTypeValue)aIterator.next();
-            
+        optionList.setTotalSize(resourceTypes.size());
+        while (aIterator.hasNext()) {
+            AppdefResourceTypeValue sTypeVal = (AppdefResourceTypeValue) aIterator.next();
+
             HashMap map1 = new HashMap(2);
-            map1.put("value", sTypeVal.getAppdefTypeKey() );
+            map1.put("value", sTypeVal.getAppdefTypeKey());
             if (useHyphen)
                 map1.put("label", "- " + sTypeVal.getName());
             else
                 map1.put("label", sTypeVal.getName());
-                
+
             optionList.add(map1);
         }
-        
+
         return optionList;
     }
-    
 
     /**
      * Return the full name of the subject.
-     *
+     * 
      * @param subject the subject
      */
     public static String makeSubjectFullName(AuthzSubject subject) {
-        return makeSubjectFullName(subject.getFirstName(),
-                                   subject.getLastName());
+        return makeSubjectFullName(subject.getFirstName(), subject.getLastName());
     }
 
     /**
-     * build group types and its corresponding resource string 
-     * respresentations from the ApplicationResources.properties file.
-     *
-     * @return a list 
+     * build group types and its corresponding resource string respresentations
+     * from the ApplicationResources.properties file.
+     * 
+     * @return a list
      */
-    public static List buildGroupTypes(HttpServletRequest request) 
-    {
-        
+    public static List buildGroupTypes(HttpServletRequest request) {
+
         List groupTypes = new ArrayList();
 
         HashMap map2 = new HashMap(2);
-        map2.put("value", 
-        new Integer(Constants.APPDEF_TYPE_GROUP_COMPAT));
-        map2.put("label", RequestUtils.message(request, 
-                                "resource.group.inventory.CompatibleClusterResources"));
+        map2.put("value", new Integer(Constants.APPDEF_TYPE_GROUP_COMPAT));
+        map2.put("label",
+            RequestUtils.message(request, "resource.group.inventory.CompatibleClusterResources"));
         groupTypes.add(map2);
 
         HashMap map1 = new HashMap(2);
-        map1.put("value", 
-                new Integer(Constants.APPDEF_TYPE_GROUP_ADHOC));
-        map1.put("label", RequestUtils.message(request, 
-                                "resource.group.inventory.MixedResources"));
+        map1.put("value", new Integer(Constants.APPDEF_TYPE_GROUP_ADHOC));
+        map1.put("label", RequestUtils.message(request, "resource.group.inventory.MixedResources"));
         groupTypes.add(map1);
 
         return groupTypes;
     }
 
     /**
-     * builds a list of AppdefResourceValue objects from a list
-     * of AppdefEntityID objects stored in the group.
+     * builds a list of AppdefResourceValue objects from a list of
+     * AppdefEntityID objects stored in the group.
      * @param group AppdefGroupValue which contains the list of resources
      * @param pc TODO
      * 
      * @return a list of AppdefResourceValue objects
      */
     public static PageList<AppdefResourceValue> buildGroupResources(AppdefBoss boss, int sessionId,
-                                               AppdefGroupValue group,
-                                               PageControl pc) 
-        throws ObjectNotFoundException, RemoteException,
-               SessionTimeoutException, SessionNotFoundException 
-    {
+                                                                    AppdefGroupValue group,
+                                                                    PageControl pc)
+        throws ObjectNotFoundException, RemoteException, SessionTimeoutException,
+        SessionNotFoundException {
         List grpEntries = group.getAppdefGroupEntries();
-        
+
         AppdefEntityID[] entities = new AppdefEntityID[grpEntries.size()];
         entities = (AppdefEntityID[]) grpEntries.toArray(entities);
-                    
+
         try {
             return boss.findByIds(sessionId, entities, pc);
         } catch (PermissionException e) {
@@ -656,13 +611,11 @@ public class BizappUtils {
         }
     }
 
-
     /**
      * Check in the permissions map to see if the user can administer HQ.
      * @return Whether or not the admin cam is contained in the type map.
      */
-    public static boolean canAdminHQ(Integer sessionId,
-                                     AuthzBoss boss) {
+    public static boolean canAdminHQ(Integer sessionId, AuthzBoss boss) {
         try {
             return boss.hasAdminPermission(sessionId.intValue());
         } catch (Exception e) {
@@ -671,10 +624,9 @@ public class BizappUtils {
     }
 
     /**
-     * Return a <code>List</code> of <code>AuthzSubject</code>
-     * objects from a list that do <strong>not</strong> appear in
-     * a list of matches.
-     *
+     * Return a <code>List</code> of <code>AuthzSubject</code> objects from a
+     * list that do <strong>not</strong> appear in a list of matches.
+     * 
      * @param all the list to operate on
      * @param matches the list to grep out
      */
@@ -704,44 +656,37 @@ public class BizappUtils {
         return objects;
     }
 
-    public static String getBaselineText(String baselineOption,
-                                         Measurement m) {
-        final String minText  = "Min Value";
+    public static String getBaselineText(String baselineOption, Measurement m) {
+        final String minText = "Min Value";
         final String meanText = "Baseline Value";
-        final String maxText  = "Max Value";
+        final String maxText = "Max Value";
 
         if (null != m && null != m.getBaseline()) {
             Baseline b = m.getBaseline();
             if (baselineOption.equals(MeasurementConstants.BASELINE_OPT_MIN)) {
                 if (null != b.getMaxExpectedVal()) {
-                    FormattedNumber min = UnitsConvert.convert(
-                        b.getMinExpectedVal().doubleValue(),
+                    FormattedNumber min = UnitsConvert.convert(b.getMinExpectedVal().doubleValue(),
                         m.getTemplate().getUnits());
                     return min.toString() + " (" + minText + ')';
-                }
-                else
+                } else
                     return minText;
             }
-            
+
             if (baselineOption.equals(MeasurementConstants.BASELINE_OPT_MEAN)) {
                 if (null != b.getMean()) {
-                    FormattedNumber mean =
-                        UnitsConvert.convert(b.getMean().doubleValue(),
-                                             m.getTemplate().getUnits());
+                    FormattedNumber mean = UnitsConvert.convert(b.getMean().doubleValue(), m
+                        .getTemplate().getUnits());
                     return mean.toString() + " (" + meanText + ')';
-                }
-                else
+                } else
                     return meanText;
             }
-            
+
             if (baselineOption.equals(MeasurementConstants.BASELINE_OPT_MAX)) {
                 if (null != b.getMaxExpectedVal()) {
-                    FormattedNumber max = UnitsConvert.convert(
-                        b.getMaxExpectedVal().doubleValue(),
+                    FormattedNumber max = UnitsConvert.convert(b.getMaxExpectedVal().doubleValue(),
                         m.getTemplate().getUnits());
                     return max.toString() + " (" + maxText + ')';
-                }
-                else
+                } else
                     return maxText;
             }
         }
@@ -755,49 +700,13 @@ public class BizappUtils {
             return meanText;
     }
 
-    /**
-     * build a list of UI option using a list of ConfigOptions
-     */
-    public static List buildLoadConfigOptions(ConfigSchema config,
-                                              ConfigResponse oldResponse) {
-        return buildLoadConfigOptions("", config, oldResponse);
-    }
-
-    //XXX tmp hack.  AIPlatformValue does not have a ConfigResponse, if it did,
-    //plugins could set this default themselves.
-    private static String getDefaultConfigValue(ConfigOption option,
-                                                ConfigResponse config) {
-        String value = option.getDefault();
-        String name = option.getName();
-        String type = config.getValue(ProductPlugin.PROP_PLATFORM_TYPE);
-        if (name.equals(SNMPClient.PROP_IP) ||
-            name.equals(HQConstants.PROP_IPADDRESS))
-        {
-            //dont want to override those that default to the loopback
-            //address, such as apache and iplanet servers
-            if (type != null && !PlatformDetector.isSupportedPlatform(type)) {
-                value = config.getValue(ProductPlugin.PROP_PLATFORM_IP);
-            }
-        }
-        if (value == null) {
-            value = option.getDefault();
-        }
-        return value;
-    }
-
-    /**
-     * build a list of UI option using a list of ConfigOptions
-     */
-    public static List<ConfigValues> buildLoadConfigOptions( String prefix,
-                                               ConfigSchema config,
-                                               ConfigResponse oldResponse)
-    {
+    public static List buildLoadConfigOptions(ConfigSchema config, ConfigResponse oldResponse) {
         List options = config.getOptions();
         List uiOptions = new ArrayList();
         int i,nOptions = options.size();
         //XXX set the defaults from the oldResponse and also 
         Set oldKeys = oldResponse.getKeys();
-        if (prefix == null) prefix = "";
+        String prefix = "";
         i=0;
         while (i < nOptions) {
             ConfigOption option = (ConfigOption)options.get(i);
@@ -878,55 +787,143 @@ public class BizappUtils {
         }
         
         return uiOptions;
+
+
+    }
+
+    
+
+    /**
+     * build a list of UI option using a list of ConfigOptions
+     */
+    public static List buildLoadConfigOptions(ConfigType config, ConfigResponse oldResponse) {
+        return buildLoadConfigOptions("", config, oldResponse);
+    }
+
+    private static String getDefaultConfigValue(ConfigOption option, ConfigResponse config) {
+        String value = option.getDefault();
+        String name = option.getName();
+        String type = config.getValue(ProductPlugin.PROP_PLATFORM_TYPE);
+        if (name.equals(SNMPClient.PROP_IP) || name.equals(HQConstants.PROP_IPADDRESS)) {
+            // dont want to override those that default to the loopback
+            // address, such as apache and iplanet servers
+            if (type != null && !PlatformDetector.isSupportedPlatform(type)) {
+                value = config.getValue(ProductPlugin.PROP_PLATFORM_IP);
+            }
+        }
+        if (value == null) {
+            value = option.getDefault();
+        }
+        return value;
+    }
+
+    // XXX tmp hack. AIPlatformValue does not have a ConfigResponse, if it did,
+    // plugins could set this default themselves.
+    private static String getDefaultConfigValue(ConfigOptionType option, ConfigResponse config) {
+        String value = option.getDefaultValue() != null ? option.getDefaultValue().toString()
+                                                       : null;
+        String name = option.getName();
+        String type = config.getValue(ProductPlugin.PROP_PLATFORM_TYPE);
+        if (name.equals(SNMPClient.PROP_IP) || name.equals(HQConstants.PROP_IPADDRESS)) {
+            // dont want to override those that default to the loopback
+            // address, such as apache and iplanet servers
+            if (type != null && !PlatformDetector.isSupportedPlatform(type)) {
+                value = config.getValue(ProductPlugin.PROP_PLATFORM_IP);
+            }
+        }
+        if (value == null) {
+            value = option.getDefaultValue() != null ? option.getDefaultValue().toString() : null;
+        }
+        return value;
+    }
+
+    /**
+     * build a list of UI option using a list of ConfigOptions
+     */
+    public static List<ConfigValues> buildLoadConfigOptions(String prefix, ConfigType config,
+                                                            ConfigResponse oldResponse) {
+        if (config == null) {
+            return new ArrayList<ConfigValues>();
+        }
+        Set<ConfigOptionType> options = config.getConfigOptionTypes();
+        List uiOptions = new ArrayList();
+        int i, nOptions = options.size();
+        // XXX set the defaults from the oldResponse and also
+        Set oldKeys = oldResponse.getKeys();
+        if (prefix == null)
+            prefix = "";
+        i = 0;
+        for (ConfigOptionType option : options) {
+            if (option.isHidden()) {
+                // Skip hidden options
+                i++;
+                continue;
+            }
+            ConfigValues configValue = new ConfigValues();
+            configValue.setOption(prefix + option.getName());
+            configValue.setPrefix(prefix);
+            configValue.setOptional(false);
+            configValue.setValue(oldKeys.contains(option.getName()) ? oldResponse.getValue(option
+                .getName()) : getDefaultConfigValue(option, oldResponse));
+            configValue.setDescription(option.getDescription());
+            configValue.setIsSecret(option.isSecret());
+            // TODO replace pipe with comma on DirArray?
+            // else if(option instanceof DirArrayConfigOption) {
+            // // on upgrades the value may not be set if the config option
+            // // was recently added.
+            // String oldValue = oldResponse.getValue(option.getName());
+            // if (oldValue != null) {
+            // configValue.setValue(StringUtil.
+            // replace(new String(oldValue),
+            // Constants.DIR_PIPE_SYM,
+            // Constants.DIR_COMMA_SYM));
+            // }
+            //
+            // configValue.setDescription(
+            // StringUtil.replace(new String(option.getDescription()),
+            // Constants.DIR_PIPE_SYM, Constants.DIR_COMMA_SYM));
+            // }
+
+            uiOptions.add(configValue);
+
+            i++;
+        }
+
+        return uiOptions;
     }
 
     /**
      * @return the last error stored in the scan state
      */
-    public static StringifiedException findLastError(ScanStateCore scanState)
-    {
+    public static StringifiedException findLastError(ScanStateCore scanState) {
         StringifiedException lastError = scanState.getGlobalException();
         if (lastError != null)
             return lastError;
 
         ScanMethodState[] methodStates = scanState.getScanMethodStates();
-        for (int i = 0; i < methodStates.length; i++)
-        {
+        for (int i = 0; i < methodStates.length; i++) {
             StringifiedException[] exceptions = methodStates[i].getExceptions();
-            if (exceptions != null)
-            {
-                for (int j = 0; j < exceptions.length; j++)
-                {
+            if (exceptions != null) {
+                for (int j = 0; j < exceptions.length; j++) {
                     if (exceptions[j] != null)
-                        lastError = exceptions[j]; 
+                        lastError = exceptions[j];
                 } // for j
             } // if
         } // for i
-        
-        return lastError;    
+
+        return lastError;
     }
     
-    public static ConfigResponse buildSaveConfigOptions(
-            HttpServletRequest request, ConfigResponse oldResponse,
-            ConfigSchema config, ActionErrors errors)
-        throws InvalidOptionException, InvalidOptionValueException,
-               InvalidOptionValsFoundException {
-
-        return buildSaveConfigOptions("", request, oldResponse, config, errors);
-    }
-
-    public static ConfigResponse buildSaveConfigOptions(String prefix,
-            HttpServletRequest request, ConfigResponse oldResponse,
-            ConfigSchema config, ActionErrors errors)
-        throws InvalidOptionException, InvalidOptionValueException,
-               InvalidOptionValsFoundException 
-    {
+    public static ConfigResponse buildSaveConfigOptions(HttpServletRequest request,
+                                                        ConfigResponse oldResponse,
+                                                        ConfigSchema config, ActionErrors errors)
+        throws InvalidOptionException, InvalidOptionValueException, InvalidOptionValsFoundException {
         boolean invalidConfigOptionFound = false;
         Enumeration params = request.getParameterNames();
         List keys = config.getOptions();
         List stringKeys = new ArrayList();
         Hashtable configList = new Hashtable();
-        if (prefix == null) prefix = "";
+        String prefix = "";
         for(Iterator itr = keys.iterator();itr.hasNext();) {
             ConfigOption opt = (ConfigOption) itr.next(); 
             stringKeys.add(opt.getName());
@@ -982,76 +979,146 @@ public class BizappUtils {
         return configResponse;
     }
 
+    public static ConfigResponse buildSaveConfigOptions(HttpServletRequest request,
+                                                        ConfigResponse oldResponse,
+                                                        ConfigType config, ActionErrors errors)
+        throws InvalidOptionException, InvalidOptionValueException, InvalidOptionValsFoundException {
+
+        return buildSaveConfigOptions("", request, oldResponse, config, errors);
+    }
+
+    public static ConfigResponse buildSaveConfigOptions(String prefix, HttpServletRequest request,
+                                                        ConfigResponse oldResponse,
+                                                        ConfigType config, ActionErrors errors)
+        throws InvalidOptionException, InvalidOptionValueException, InvalidOptionValsFoundException {
+        boolean invalidConfigOptionFound = false;
+        Enumeration params = request.getParameterNames();
+        Set<ConfigOptionType> keys = config.getConfigOptionTypes();
+        List stringKeys = new ArrayList();
+        Hashtable<String, ConfigOptionType> configList = new Hashtable<String, ConfigOptionType>();
+        if (prefix == null)
+            prefix = "";
+        for (Iterator<ConfigOptionType> itr = keys.iterator(); itr.hasNext();) {
+            ConfigOptionType opt = itr.next();
+            stringKeys.add(opt.getName());
+            configList.put(opt.getName(), opt);
+        }
+
+        ConfigResponse configResponse;
+        String value = "";
+        String param = "";
+        String shortParam;
+        configResponse = new ConfigResponse();
+        while (params.hasMoreElements()) {
+            param = (String) params.nextElement();
+            if (!param.startsWith(prefix))
+                continue;
+            shortParam = param.substring(prefix.length());
+            if (stringKeys.contains(shortParam)) {
+                value = request.getParameter(param).trim();
+
+                try {
+                    if (!value.equals(oldResponse.getValue(shortParam))) {
+                        ConfigOptionType opt = configList.get(shortParam);
+
+                        // TODO filter for DirArrayConfigOption consumption
+                        // if (opt instanceof DirArrayConfigOption)
+                        // value = StringUtil.replace(new String(value),
+                        // Constants.DIR_COMMA_SYM, Constants.DIR_PIPE_SYM );
+
+                        if (value == null)
+                            value = "";
+                        configResponse.setValue(shortParam, value);
+                    } else {
+                        configResponse.setValue(shortParam, oldResponse.getValue(shortParam));
+                    }
+                } catch (InvalidOptionValueException e) {
+                    // TODO this is never going to happen, we aren't validating
+                    // on ConfigResponse.setValue anymore
+                    if (invalidConfigOptionFound = (errors != null)) {
+                        errors.add(param, new ActionMessage(
+                            "resource.common.inventory.error.InvalidConfigOption", e.getMessage()));
+                    } else
+                        throw e;
+                }
+            }
+        }
+
+        if (invalidConfigOptionFound)
+            throw new InvalidOptionValsFoundException(
+                "an config option value exception has been thrown ", configResponse);
+
+        return configResponse;
+    }
+
     /**
-     * Gut the <code>String[]</code> appdef key values for the passed-in
-     * entity ids.
-     *
+     * Gut the <code>String[]</code> appdef key values for the passed-in entity
+     * ids.
+     * 
      * @param eids the appdef entity ids
      * @return String[] of appdef keys (type:rid)
      */
     public static String[] stringifyEntityIds(AppdefEntityID[] eids) {
         String[] eidStrs = new String[eids.length];
-        for (int i=0; i<eids.length; ++i) {
+        for (int i = 0; i < eids.length; ++i) {
             eidStrs[i] = eids[i].getAppdefKey();
         }
         return eidStrs;
     }
 
     /**
-     * Populate a config response with values.  The config is populated
-     * with values by looking at all the schema keys, and pulling their
-     * corresponding values out of the requestParams.  The oldConfig is
-     * supplied so that we can tell if anything has actually changed.
-     *
+     * Populate a config response with values. The config is populated with
+     * values by looking at all the schema keys, and pulling their corresponding
+     * values out of the requestParams. The oldConfig is supplied so that we can
+     * tell if anything has actually changed.
+     * 
      * @param request The servlet request
-     * @param prefix Only parameters with this prefix will be considered.  The 
-     * prefix will be stripped before inserting it as a key into the config.
+     * @param prefix Only parameters with this prefix will be considered. The
+     *        prefix will be stripped before inserting it as a key into the
+     *        config.
      * @param schema The config schema that will supply the keys we'll look for
-     * in the requestParams
+     *        in the requestParams
      * @param config The ConfigResponse to populate with values
      * @param oldConfig The existing configuration, used for comparison to see
-     * if anything has changed.
+     *        if anything has changed.
      * @return True if there were actually changes to the config, False if there
-     * were not any changes to the config, or null if the schema has no keys, so
-     * the concept of changes might not make sense.
+     *         were not any changes to the config, or null if the schema has no
+     *         keys, so the concept of changes might not make sense.
      */
-    public static Boolean populateConfig (HttpServletRequest request,
-                                          String prefix,
-                                          ConfigSchema schema,
-                                          ConfigResponse config,
-                                          ConfigResponse oldConfig)
-        throws InvalidOptionException, InvalidOptionValueException {
+    public static Boolean populateConfig(HttpServletRequest request, String prefix,
+                                         ConfigType schema, ConfigResponse config,
+                                         ConfigResponse oldConfig) throws InvalidOptionException,
+        InvalidOptionValueException {
 
-        if ( prefix == null ) prefix = "";
+        if (prefix == null)
+            prefix = "";
         Boolean wereChanges = Boolean.FALSE;
-        List keys = schema.getOptions();
+        Set<ConfigOptionType> keys = schema.getConfigOptionTypes();
 
         // If the schema has no keys, then there can be no changes
         int numKeys = keys.size();
-        if (numKeys == 0) return null;
-        
-        ConfigOption opt;
+        if (numKeys == 0)
+            return null;
+
         String optName, value;
         String[] values;
-        for ( int i=0; i<numKeys; i++ ) {
-            opt = (ConfigOption) keys.get(i);
+        for (ConfigOptionType opt : keys) {
             optName = opt.getName();
             values = request.getParameterValues(prefix + optName);
-            if ( values == null  ) {
+            if (values == null) {
                 continue;
             }
-            if ( values.length > 1 ) {
-                value="";
-                for(int regExps=0;regExps<values.length;regExps++) {
+            if (values.length > 1) {
+                value = "";
+                for (int regExps = 0; regExps < values.length; regExps++) {
                     value += values[regExps] + " ";
                 }
             } else {
                 value = values[0];
             }
-            if ( value != null ) {
+            if (value != null) {
                 config.setValue(optName, value);
-                if ( wereChanges == Boolean.FALSE 
-                     && !value.equals(oldConfig.getValue(optName)) ) {
+                if (wereChanges == Boolean.FALSE && !value.equals(oldConfig.getValue(optName))) {
                     wereChanges = Boolean.TRUE;
                 }
             }
@@ -1060,55 +1127,43 @@ public class BizappUtils {
     }
 
     /**
-     * Parse a measurement value and units string.  For example:
-     * "30MB" = 31,457,280.0
-     *
+     * Parse a measurement value and units string. For example: "30MB" =
+     * 31,457,280.0
+     * 
      * @param value The string to parse
      * @param mtv The measurement template being parsed
      * @return the measurement as parsed based on a number and its units
      * @throws ParseException
      */
-    public static double parseMeasurementValue(String value, String unit)
-        throws ParseException
-    {
+    public static double parseMeasurementValue(String value, String unit) throws ParseException {
         int unitType = UnitsConvert.getUnitForUnit(unit);
         int scale = UnitsConvert.getScaleForUnit(unit);
         UnitNumber num = UnitsFormat.parse(value, unitType);
         return num.getScaledValue(scale).doubleValue();
     }
 
-    public static void populateAgentConnections(int sessionId,
-                                               AppdefBoss appdefBoss,
-                                               HttpServletRequest request,
-                                               PlatformForm form,
-                                               String usedIpPort)
-        throws RemoteException,
-               SessionTimeoutException,
-               SessionNotFoundException {
+    public static void populateAgentConnections(int sessionId, AppdefBoss appdefBoss,
+                                                HttpServletRequest request, PlatformForm form,
+                                                String usedIpPort) throws RemoteException,
+        SessionTimeoutException, SessionNotFoundException {
 
         List agents = appdefBoss.findAllAgents(sessionId);
         List uiAgents = new ArrayList();
-        for (Iterator itr = agents.iterator();itr.hasNext();) {
-            Agent agent = (Agent)itr.next();
-            uiAgents.add(new AgentBean(agent.getAddress(), 
-                         agent.getPort()));
+        for (Iterator itr = agents.iterator(); itr.hasNext();) {
+            Agent agent = (Agent) itr.next();
+            uiAgents.add(new AgentBean(agent.getAddress(), agent.getPort()));
 
         }
 
         form.setAgents(uiAgents);
-        request.setAttribute(Constants.AGENTS_COUNT, 
-                             new Integer(uiAgents.size()));
+        request.setAttribute(Constants.AGENTS_COUNT, new Integer(uiAgents.size()));
         request.setAttribute("usedIpPort", usedIpPort);
     }
 
-    public static Agent getAgentConnection(int sessionId,
-                                           AppdefBoss appdefBoss,
-                                           HttpServletRequest request,
-                                           PlatformForm form)
-        throws RemoteException,
-               SessionTimeoutException,
-               SessionNotFoundException,
-               AgentNotFoundException {
+    public static Agent getAgentConnection(int sessionId, AppdefBoss appdefBoss,
+                                           HttpServletRequest request, PlatformForm form)
+        throws RemoteException, SessionTimeoutException, SessionNotFoundException,
+        AgentNotFoundException {
 
         String agentIpPort = form.getAgentIpPort();
 
@@ -1116,26 +1171,22 @@ public class BizappUtils {
             StringTokenizer st = new StringTokenizer(agentIpPort, ":");
             String ip = null;
             int port = -1;
-            while(st.hasMoreTokens()) {
+            while (st.hasMoreTokens()) {
                 ip = st.nextToken();
                 port = Integer.parseInt(st.nextToken());
             }
 
             return appdefBoss.findAgentByIpAndPort(sessionId, ip, port);
-        }
-        else {
+        } else {
             return null;
         }
     }
 
-    public static void startAutoScan(ServletContext ctx,
-                                     int sessionId,
-                                     AppdefEntityID entityId,
+    public static void startAutoScan(ServletContext ctx, int sessionId, AppdefEntityID entityId,
                                      AIBoss aiBoss) {
         try {
-            aiBoss.startScan(sessionId, entityId.getID(),
-                             new ScanConfigurationCore(),
-                             null, null, null);
+            aiBoss.startScan(sessionId, entityId.getID(), new ScanConfigurationCore(), null, null,
+                null);
         } catch (Exception e) {
             log.error("Error starting scan: " + e.getMessage(), e);
         }

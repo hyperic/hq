@@ -32,20 +32,21 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.util.LabelValueBean;
+import org.hyperic.hq.inventory.domain.ConfigOptionType;
+import org.hyperic.hq.inventory.domain.ConfigType;
 import org.hyperic.hq.ui.beans.ConfigValues;
 import org.hyperic.util.HypericEnum;
 import org.hyperic.util.config.BooleanConfigOption;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.StringConfigOption;
-
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.util.LabelValueBean;
 
 /**
  * Utilities class that provides general convenience methods.
@@ -155,7 +156,7 @@ public class ActionUtils {
         return findReturnPath(mapping, params);
     }
 
-    public static List<ConfigValues> getConfigValues(ConfigSchema schema,
+    public static List<ConfigValues> getConfigValues(ConfigType schema,
                                        ConfigResponse config) {
         List<ConfigValues> values = new ArrayList<ConfigValues>();
 
@@ -163,30 +164,16 @@ public class ActionUtils {
             return values;
         }
 
-        List options = schema.getOptions();
-        int size = options.size();
-
-        for (int i=0; i<size; i++) {
-            ConfigOption option = (ConfigOption)options.get(i);
+        Set<ConfigOptionType> options = schema.getConfigOptionTypes();
+       
+        for (ConfigOptionType option: options) {
+            if(option.isHidden()) {
+                continue;
+            }
             String value = config.getValue(option.getName());
-
-            if (option instanceof StringConfigOption) {
-                StringConfigOption strOption =
-                    (StringConfigOption)option;
-                
-                if (strOption.isHidden()) {
-                    continue; //Ignore
-                }
-                if (strOption.isSecret()) {
-                    value = "*******";
-                }
+            if(option.isSecret()) {
+                value = "*******";
             }
-            else if (option instanceof BooleanConfigOption) {
-                if (value == null) {
-                    value = String.valueOf(false);
-                }
-            }
-
             values.add(new ConfigValues(option.getName(), value));
         }
 

@@ -57,6 +57,7 @@ import org.hyperic.hq.inventory.domain.ConfigOptionType;
 import org.hyperic.hq.inventory.domain.ConfigType;
 import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.inventory.domain.PropertyType;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.server.session.MonitorableMeasurementInfo;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
@@ -213,15 +214,14 @@ public class ProductManagerImpl implements ProductManager {
     /**
      */
     @Transactional(readOnly = true)
-    public ConfigSchema getConfigSchema(String type, String name, AppdefEntityValue entityVal,
-                                        ConfigResponse baseResponse) throws PluginException,
-        AppdefEntityNotFoundException, PermissionException {
-
-        PluginManager manager = getPluginManager(type);
-        TypeInfo info = getTypeInfo(entityVal);
-        return manager.getConfigSchema(name, info, baseResponse);
+    public ConfigType getConfigSchema(Integer resourceId, String type) throws NotFoundException {
+        Resource resource = resourceManager.findResourceById(resourceId);
+        if(resource == null) {
+            throw new NotFoundException("Resource with ID: " + resourceId + " was not found");
+        }
+        return resource.getType().getConfigType(type);
     }
-
+    
     private void updatePlugin(PluginDAO plHome, PluginInfo pInfo) {
         Plugin plugin = plHome.findByName(pInfo.name);
         if (plugin == null) {

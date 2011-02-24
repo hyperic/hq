@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -51,7 +50,7 @@ import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.product.PluginNotFoundException;
+import org.hyperic.hq.inventory.domain.ConfigType;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.common.inventory.RemoveResourceGroupsForm;
@@ -60,7 +59,6 @@ import org.hyperic.hq.ui.util.ActionUtils;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.SortAttribute;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -133,8 +131,7 @@ public class ViewServerAction
             ConfigResponse oldResponse = productBoss.getMergedConfigResponse(sessionId, ProductPlugin.TYPE_PRODUCT,
                 entityId, false);
 
-            ConfigSchema config = productBoss.getConfigSchema(sessionId, entityId, ProductPlugin.TYPE_PRODUCT,
-                oldResponse);
+            ConfigType config = productBoss.getConfigSchema(sessionId, entityId.getId(), ProductPlugin.TYPE_PRODUCT);
 
             boolean platformWithAgent = false;
 
@@ -151,14 +148,14 @@ public class ViewServerAction
             request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS, uiProductOptions);
             request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS_COUNT, new Integer(uiProductOptions.size()));
 
-            config = new ConfigSchema();
+            
             oldResponse = new ConfigResponse();
 
             try {
                 oldResponse = productBoss.getMergedConfigResponse(sessionId, ProductPlugin.TYPE_MEASUREMENT, entityId,
                     false);
 
-                config = productBoss.getConfigSchema(sessionId, entityId, ProductPlugin.TYPE_MEASUREMENT, oldResponse);
+                config = productBoss.getConfigSchema(sessionId, entityId.getId(), ProductPlugin.TYPE_MEASUREMENT);
 
                 if (server.getWasAutodiscovered()) {
                     request.setAttribute(Constants.SERVER_BASED_AUTO_INVENTORY, new Integer(0));
@@ -169,28 +166,24 @@ public class ViewServerAction
                 }
             } catch (ConfigFetchException e) {
                 // do nothing
-            } catch (PluginNotFoundException e) {
-                // do nothing
-            }
+            } 
 
             List<ConfigValues> uiMonitorOptions = ActionUtils.getConfigValues(config, oldResponse);
 
             request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS, uiMonitorOptions);
             request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS_COUNT, new Integer(uiMonitorOptions.size()));
 
-            config = new ConfigSchema();
+            
             oldResponse = new ConfigResponse();
 
             try {
                 oldResponse = productBoss.getMergedConfigResponse(sessionId, ProductPlugin.TYPE_CONTROL, entityId,
                     false);
 
-                config = productBoss.getConfigSchema(sessionId, entityId, ProductPlugin.TYPE_CONTROL, oldResponse);
+                config = productBoss.getConfigSchema(sessionId, entityId.getId(), ProductPlugin.TYPE_CONTROL);
             } catch (ConfigFetchException e) {
                 // do nothing
-            } catch (PluginNotFoundException e) {
-                // do nothing
-            }
+            } 
 
             List<ConfigValues> uiControlOptions = ActionUtils.getConfigValues(config, oldResponse);
 

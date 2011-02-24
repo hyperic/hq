@@ -37,15 +37,14 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.bizapp.server.session.ProductBossImpl;
+import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.AttachType;
 import org.hyperic.hq.hqu.server.session.View;
 import org.hyperic.hq.hqu.server.session.ViewResourceCategory;
-import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.inventory.domain.ConfigType;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
 
 /**
@@ -101,31 +100,9 @@ public interface ProductBoss {
      * base entities have not yet been configured, an exception will be thrown
      * indicating which resource must be configured.
      */
-    public ConfigSchema getConfigSchema(int sessionId, AppdefEntityID id, String type, ConfigResponse resp)
-        throws SessionTimeoutException, SessionNotFoundException, PluginException, PermissionException,
-        AppdefEntityNotFoundException;
-
-    public ConfigSchema getConfigSchema(int sessionId, AppdefEntityID id, String type) throws ConfigFetchException,
-        EncodingException, PluginNotFoundException, PluginException, SessionTimeoutException, SessionNotFoundException,
-        PermissionException, AppdefEntityNotFoundException;
-
-    /**
-     * Get a configuration schema.
-     * @param id Entity to be configured
-     * @param type One of ProductPTYPE_*
-     * @param validateFlow If true a ConfigFetchException will be thrown if the
-     *        appropriate base entities are not already configured.
-     */
-    public ProductBossImpl.ConfigSchemaAndBaseResponse getConfigSchemaAndBaseResponse(AuthzSubject subject,
-                                                                                      AppdefEntityID id, String type,
-                                                                                      boolean validateFlow)
-        throws ConfigFetchException, EncodingException, PluginNotFoundException, PluginException, PermissionException,
-        AppdefEntityNotFoundException;
-
-    public ConfigSchema getConfigSchema(AuthzSubject subject, AppdefEntityID id, String type, boolean validateFlow)
-        throws ConfigFetchException, EncodingException, PluginNotFoundException, PluginException, PermissionException,
-        AppdefEntityNotFoundException;
-
+    public ConfigType getConfigSchema(int sessionId, Integer id, String type)
+        throws SessionTimeoutException, SessionNotFoundException, NotFoundException;
+   
     /**
      * Gets the version number
      */
