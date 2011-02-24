@@ -88,10 +88,6 @@ public class Plugin  implements ContainerManagedTimestampTrackable
         super();
     }
     
-    public Plugin(org.hyperic.hq.pdk.domain.Plugin plugin) {
-    	setName(plugin.getName());
-    }
-    
     /**
      * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
      * @return <code>true</code> by default.
