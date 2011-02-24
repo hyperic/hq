@@ -29,7 +29,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.agent.domain.Agent;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.server.session.Server;

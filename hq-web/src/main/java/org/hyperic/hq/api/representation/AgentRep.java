@@ -1,6 +1,6 @@
 package org.hyperic.hq.api.representation;
 
-import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.agent.domain.Agent;
 
 public class AgentRep {
 	private Integer id;

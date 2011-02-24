@@ -39,7 +39,7 @@ import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
-import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.agent.domain.Agent;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;

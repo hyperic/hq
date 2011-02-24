@@ -2,10 +2,10 @@ package org.hyperic.hq.api;
 
 import java.util.List;
 
+import org.hyperic.hq.agent.domain.Agent;
 import org.hyperic.hq.api.representation.AgentRep;
 import org.hyperic.hq.api.representation.ListRep;
 import org.hyperic.hq.api.representation.SuccessResponse;
-import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hyperic.hq.agent.domain.Agent;
 import org.hyperic.hq.api.LinkHelper;
-import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;

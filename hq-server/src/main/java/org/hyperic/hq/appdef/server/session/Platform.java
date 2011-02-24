@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.agent.domain.Agent;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;

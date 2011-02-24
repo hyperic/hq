@@ -26,7 +26,7 @@
 package org.hyperic.hq.appdef.server.session;
 
 import org.hibernate.SessionFactory;
-import org.hyperic.hq.appdef.AgentType;
+import org.hyperic.hq.agent.domain.AgentType;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;

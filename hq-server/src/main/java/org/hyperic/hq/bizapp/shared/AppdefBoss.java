@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.agent.domain.Agent;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.ApplicationType;
 import org.hyperic.hq.appdef.server.session.DownResource;

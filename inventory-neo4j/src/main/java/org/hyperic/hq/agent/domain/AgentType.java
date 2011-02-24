@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.appdef;
+package org.hyperic.hq.agent.domain;
 
 import java.util.Collection;
 

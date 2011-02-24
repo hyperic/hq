@@ -19,7 +19,7 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
-import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.agent.domain.Agent;
 import org.hyperic.hq.inventory.events.CPropChangeEvent;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.inventory.InvalidRelationshipException;

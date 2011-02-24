@@ -43,7 +43,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.type.IntegerType;
 import org.hyperic.hibernate.dialect.HQDialect;
-import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.agent.domain.Agent;
 import org.hyperic.hq.appdef.server.session.AgentDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.dao.HibernateDAO;

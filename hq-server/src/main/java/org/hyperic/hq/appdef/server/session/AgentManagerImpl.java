@@ -49,8 +49,8 @@ import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
 import org.hyperic.hq.agent.commands.AgentUpgrade_result;
-import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.AgentType;
+import org.hyperic.hq.agent.domain.Agent;
+import org.hyperic.hq.agent.domain.AgentType;
 import org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection;
 import org.hyperic.hq.appdef.shared.AgentCreateException;
 import org.hyperic.hq.appdef.shared.AgentManager;
@@ -873,7 +873,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     /**
      * Pings the specified agent.
      * @see org.hyperic.hq.appdef.server.session.AgentManagerImpl#pingAgent(org.hyperic.hq.authz.server.session.AuthzSubject,
-     *      org.hyperic.hq.appdef.Agent)
+     *      org.hyperic.hq.agent.domain.Agent)
      */
     @Transactional(readOnly=true)
     public long pingAgent(AuthzSubject subject, AppdefEntityID id) throws AgentNotFoundException,

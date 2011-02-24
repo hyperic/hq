@@ -31,8 +31,8 @@ import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.AgentType;
+import org.hyperic.hq.agent.domain.Agent;
+import org.hyperic.hq.agent.domain.AgentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.orm.jpa.JpaCallback;

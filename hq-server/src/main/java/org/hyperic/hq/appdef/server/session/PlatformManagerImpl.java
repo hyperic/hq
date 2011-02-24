@@ -46,7 +46,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.NonUniqueObjectException;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.agent.AgentConnectionException;
-import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.agent.domain.Agent;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;

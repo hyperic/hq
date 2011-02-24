@@ -28,7 +28,7 @@ package org.hyperic.hq.measurement.agent.client;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AbstractCommandsClient;
-import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.agent.domain.Agent;
 import org.hyperic.hq.measurement.agent.commands.DeleteProperties_args;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_result;

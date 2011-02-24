@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.hyperic.hq.agent.domain.Agent;
 import org.hyperic.hq.api.form.ListSettings;
 import org.hyperic.hq.api.representation.ListRep;
 import org.hyperic.hq.api.representation.ResourceRep;
 import org.hyperic.hq.api.representation.SuccessResponse;
-import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentDAO;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectDAO;
