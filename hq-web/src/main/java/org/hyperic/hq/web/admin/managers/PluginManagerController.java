@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -18,9 +20,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 
 @Controller
@@ -36,11 +41,24 @@ public class PluginManagerController implements ApplicationContextAware {
 	
 	@RequestMapping(method = RequestMethod.GET)
 	public String index(Model model) {
+		model.addAttribute("pluginSummaries", getPluginSummaries());
+		
+		return "admin/managers/plugin";
+	}
+	
+	@RequestMapping(method = RequestMethod.GET, value="/list", headers="Accept=application/json")
+	public @ResponseBody List<Map<String, Object>> getPluginSummaries() {
 		List<Map<String, Object>> pluginSummaries = new ArrayList<Map<String,Object>>();
 		List<Plugin> plugins = agentManager.getAllPlugins();
+		Comparator<Plugin> sortByPluginName = new Comparator<Plugin>() {
+			public int compare(Plugin o1, Plugin o2) {
+				return o1.getName().compareTo(o2.getName());
+			}
+		};
 		Map<Plugin, Collection<Agent>> pluginAgentMap = agentManager.getOutOfSyncAgentsByPlugin();
 		long agentCount = agentManager.getNumAutoUpdatingAgents();
-		int pluginCount = plugins.size();
+		
+		Collections.sort(plugins, sortByPluginName);
 		
 		for (Plugin plugin : plugins) {
 			Map<String, Object> pluginSummary = new HashMap<String, Object>();
@@ -64,9 +82,7 @@ public class PluginManagerController implements ApplicationContextAware {
 			pluginSummaries.add(pluginSummary);
 		}
 		
-		model.addAttribute("pluginSummaries", pluginSummaries);
-		
-		return "admin/managers/plugin";
+		return pluginSummaries;
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, value="/upload")
@@ -104,7 +120,7 @@ public class PluginManagerController implements ApplicationContextAware {
 		
 		return "admin/managers/plugin/upload/status";
 	}
-
+	
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
 	}

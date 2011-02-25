@@ -9,7 +9,6 @@ body { background: #EFEFEF; }
 	text-align: center;
 	font-weight: bold;
 	font-size: 0.9em;
-	padding-bottom: 5px;
 }
 
 #footer span#processUser {
@@ -19,9 +18,7 @@ body { background: #EFEFEF; }
 #footer .footerWarning {
     background-color: orange;
     font-weight: bold;
-    padding: 5px 0;
     text-align: center;
-    width: 100%;
 }
 
 #footer span a {
@@ -51,9 +48,6 @@ body { background: #EFEFEF; }
 #searchClose {
 	background: url("../../images/close.png") repeat scroll 0 0 transparent;
     cursor: pointer;
-    height: 16px;
-    width: 16px;
-    margin-top: 3px;
 }
 
 #headerSearchResults {
@@ -65,14 +59,10 @@ body { background: #EFEFEF; }
 #headerSearchResults .category {
     background: none repeat scroll 0 0 #92C1FD;
     color: #FFFFFF;
-    margin-bottom: 3px;
-    padding: 2px;
 }
 
 #headerSearchResults ul {
     list-style: none;
-    margin: 0;
-    padding: 4px;
 }
 
 #headerSearchResults li.service {
@@ -81,8 +71,6 @@ body { background: #EFEFEF; }
 
 #headerSearchResults li {
     border: 1px solid #fff;
-    margin: 2px 0;
-    padding: 1px 0 1px 22px;
 }
 
 #headerSearchResults li a {
@@ -142,6 +130,7 @@ input[type="submit"], input[type="button"] {
 	-moz-border-radius: 4px;
 	-webkit-border-radius: 4px;
 	border-radius: 3px;
-	padding: 3px 15px;
+	font-weight: bold;
+	font-size: 0.9em;
 	cursor: pointer;
 }

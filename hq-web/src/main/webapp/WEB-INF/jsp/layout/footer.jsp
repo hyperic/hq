@@ -3,7 +3,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 
-<div>
+<div id="footerContent">
 	<span id="currentTime">
 		<c:set var="tmpTime"><%= java.lang.System.currentTimeMillis() %></c:set>
 		<hq:dateFormatter value="${tmpTime}"/>
@@ -72,13 +72,13 @@
   		
   		var pinFooter = function() {
 	  		var windowCoords = dojo.window.getBox();
+	  		var contentCoords = dojo.position(dojo.byId("content"), true);
   			var footerCoords = dojo.position(dojo.byId("footer"), true);
-  			var combinedHeight = footerCoords.y + footerCoords.h + 5;
-  		
-  			if (windowCoords.h > combinedHeight) {
-  				var diff = windowCoords.h - combinedHeight;
-
-	  			dojo.style("footer", "marginTop", diff + "px");	  			
+  			var combinedContentHeight = contentCoords.y + contentCoords.h;
+  			var diff = windowCoords.h - combinedContentHeight - footerCoords.h;
+  			
+  			if (diff > 0) {
+  				dojo.style("footer", "marginTop", diff + "px");	  			
   			}
   		};
   		
