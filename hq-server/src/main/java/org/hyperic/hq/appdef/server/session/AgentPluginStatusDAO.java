@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.Hibernate;
+import org.hibernate.SQLQuery;
 import org.hibernate.SessionFactory;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.dao.HibernateDAO;
@@ -75,7 +76,7 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
 
     Map<Plugin, Collection<Agent>> getOutOfSyncAgentsByPlugin() {
         final Map<Plugin, Collection<Agent>> rtn = new HashMap<Plugin, Collection<Agent>>();
-        final List<Object[]> list = getOutOfSyncPlugins();
+        final List<Object[]> list = getOutOfSyncPlugins(null);
         for (final Object[] obj : list) {
             final int agentId = (Integer) obj[0];
             final String pluginName = (String) obj[1];
@@ -93,7 +94,7 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
 
     Map<Agent, Collection<Plugin>> getOutOfSyncPluginsByAgent() {
         final Map<Agent, Collection<Plugin>> rtn = new HashMap<Agent, Collection<Plugin>>();
-        final List<Object[]> list = getOutOfSyncPlugins();
+        final List<Object[]> list = getOutOfSyncPlugins(null);
         for (final Object[] obj : list) {
             final int agentId = (Integer) obj[0];
             final String pluginName = (String) obj[1];
@@ -108,28 +109,82 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
         }
         return rtn;
     }
+    
+    List<String> getOutOfSyncPluginNamesByAgentId(int agentId) {
+        final List<Object[]> objs = getOutOfSyncPlugins(agentId);
+        final List<String> rtn = new ArrayList<String>(objs.size());
+        for (final Object[] obj : objs) {
+            final String pluginName = (String) obj[1];
+            rtn.add(pluginName);
+        }
+        return rtn;
+    }
 
+    /**
+     * @param agentId may be null
+     * @return {@link List} of Object[] where
+     * [0] = agentId (Integer) and
+     * [1] = pluginName (String)
+     */
     @SuppressWarnings("unchecked")
-    private List<Object[]> getOutOfSyncPlugins() {
+    private List<Object[]> getOutOfSyncPlugins(Integer agentId) {
+        final String agentSql = agentId == null ? "" : " s.agent_id = :agentId AND ";
         final String sql = new StringBuilder(256)
-            .append("select distinct s.agent_id, s.plugin_name from EAM_AGENT_PLUGIN_STATUS s ")
-            .append("where not exists ( ")
+            .append("select distinct s.agent_id, s.plugin_name ")
+            .append("from EAM_AGENT_PLUGIN_STATUS s ")
+            .append("where ")
+            .append(agentSql)
+            .append("not exists ( ")
             .append("    select 1 ")
             .append("    from EAM_PLUGIN p ")
             .append("    join EAM_AGENT_PLUGIN_STATUS st on p.md5 = st.md5 ")
             .append("    where st.agent_id = s.agent_id and s.md5 = st.md5 ")
             .append(")")
             .toString();
-        return getSession().createSQLQuery(sql)
-                           .addScalar("agent_id", Hibernate.INTEGER)
-                           .addScalar("plugin_name", Hibernate.STRING)
-                           .list();
+        final SQLQuery query = getSession().createSQLQuery(sql);
+        if (agentId != null) {
+            query.setParameter("agentId", agentId);
+        }
+        return query.addScalar("agent_id", Hibernate.INTEGER)
+                    .addScalar("plugin_name", Hibernate.STRING)
+                    .list();
     }
 
-    public long getNumAutoUpdatingAgents() {
+    @SuppressWarnings("unchecked")
+    Collection<Integer> getPluginsNotOnAgent(int agentId) {
+        final String sql = new StringBuilder(128)
+			.append("select p.id ")
+            .append("from EAM_PLUGIN p ")
+			.append("where not exists (")
+			.append("    select 1 from EAM_AGENT_PLUGIN_STATUS ")
+			.append("    where agent_id = :agentId and plugin_name = p.name")
+			.append(")")
+            .toString();
+        return getSession().createSQLQuery(sql)
+                           .addScalar("id", Hibernate.INTEGER)
+                           .setParameter("agentId", agentId)
+                           .list();
+    }
+    
+    long getNumAutoUpdatingAgents() {
         final String hql = "select count(distinct Agent) from AgentPluginStatus";
-        Long i = (Long) getSession().createQuery(hql).uniqueResult();
+        final Long i = (Long) getSession().createQuery(hql).uniqueResult();
         return (i == null) ? 0 : i;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, AgentPluginStatus> getStatusByAgentId(Integer agentId) {
+        final String hql = "from AgentPluginStatus where agent.id = :agentId";
+        final Collection<AgentPluginStatus> list =
+            getSession().createQuery(hql)
+                        .setParameter("agentId", agentId)
+                        .list();
+        final Map<String, AgentPluginStatus> rtn =
+            new HashMap<String, AgentPluginStatus>(list.size());
+        for (final AgentPluginStatus status : list) {
+            rtn.put(status.getPluginName(), status);
+        }
+        return rtn;
     }
 
 }

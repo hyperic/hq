@@ -37,6 +37,8 @@ public class AgentPluginStatus extends PersistedObject {
     private String pluginName;
     private String productName;
     private Agent agent;
+    private String lastSyncStatus;
+    private long lastSyncAttempt;
     
     public AgentPluginStatus() {
     }
@@ -89,6 +91,22 @@ public class AgentPluginStatus extends PersistedObject {
         this.agent = agent;
     }
     
+    public String getLastSyncStatus() {
+        return lastSyncStatus;
+    }
+
+    public void setLastSyncStatus(String lastSyncStatus) {
+        this.lastSyncStatus = lastSyncStatus;
+    }
+
+    public long getLastSyncAttempt() {
+        return lastSyncAttempt;
+    }
+
+    public void setLastSyncAttempt(long lastSyncAttempt) {
+        this.lastSyncAttempt = lastSyncAttempt;
+    }
+
     public int hashCode() {
         return md5.hashCode();
     }
@@ -106,4 +124,5 @@ public class AgentPluginStatus extends PersistedObject {
                pluginName.equals(o.pluginName) &&
                productName.equals(o.productName);
     }
+
 }

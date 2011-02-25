@@ -36,6 +36,7 @@ import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
+import org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum;
 import org.hyperic.hq.appdef.server.session.AgentSortField;
 import org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
@@ -455,5 +456,12 @@ public interface AgentManager {
 
 // XXX javadoc!
     public Map<Plugin, Collection<Agent>> getOutOfSyncAgentsByPlugin();
+
+// XXX javadoc!
+    public Collection<String> getOutOfSyncPluginNamesByAgentId(Integer agentId);
+
+// XXX javadoc!
+    public void updateAgentPluginSyncStatusInNewTran(AgentPluginStatusEnum s, Integer agentId,
+                                                     Collection<Plugin> plugins);
 
 }

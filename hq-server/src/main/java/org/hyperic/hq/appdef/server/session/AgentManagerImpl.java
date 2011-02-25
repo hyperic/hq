@@ -37,6 +37,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
@@ -73,6 +74,7 @@ import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.server.session.PluginDAO;
+import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.zevents.ZeventManager;
@@ -86,6 +88,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.Resource;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.emory.mathcs.backport.java.util.Collections;
@@ -115,6 +118,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     private AgentPluginStatusDAO agentPluginStatusDAO;
     private AgentPluginUpdater agentPluginUpdater;
     private PluginDAO pluginDAO;
+    private ConcurrentStatsCollector concurrentStatsCollector;
 
     @Autowired
     public AgentManagerImpl(AgentTypeDAO agentTypeDao,
@@ -123,7 +127,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                             ServerConfigManager serverConfigManager,
                             AgentCommandsClientFactory agentCommandsClientFactory,
                             AgentPluginStatusDAO agentPluginStatusDAO,
-                            AgentPluginUpdater agentPluginUpdater, PluginDAO pluginDAO) {
+                            AgentPluginUpdater agentPluginUpdater, PluginDAO pluginDAO,
+                            ConcurrentStatsCollector concurrentStatsCollector) {
         this.agentPluginUpdater = agentPluginUpdater;
         this.pluginDAO = pluginDAO;
         this.agentTypeDao = agentTypeDao;
@@ -135,6 +140,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         this.serverConfigManager = serverConfigManager;
         this.agentCommandsClientFactory = agentCommandsClientFactory;
         this.agentPluginStatusDAO = agentPluginStatusDAO;
+        this.concurrentStatsCollector = concurrentStatsCollector;
     }
     
     @PostConstruct
@@ -151,6 +157,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                 return "Plugin Status Updater";
             }
         });
+        concurrentStatsCollector.register(ConcurrentStatsCollector.AGENT_PLUGIN_TRANSFER);
     }
 
     /**
@@ -838,6 +845,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     throws PermissionException, AgentConnectionException, AgentNotFoundException,
            AgentRemoteException, FileNotFoundException, IOException,
            ConfigPropertyException {
+        concurrentStatsCollector.addStat(jarNames.size(),
+            ConcurrentStatsCollector.AGENT_PLUGIN_TRANSFER);
         permissionManager.checkCreatePlatformPermission(subject);
         String[][] files = new String[jarNames.size()][2];
         int[] modes = new int[jarNames.size()];
@@ -848,7 +857,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             File src = new File(
                 applicationContext.getResource("WEB-INF" + HQ_PLUGINS_DIR).getFile(), jarName);
             if (!src.exists()) {
-                throw new FileNotFoundException("Plugin " + jarName + " could not be found");
+                log.warn("Plugin " + jarName + " could not be found");
+                continue;
             }
             files[i][0] = src.getPath();
             if (jarName.indexOf(PLUGINS_EXTENSION) < 0) {
@@ -1108,43 +1118,36 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         throws AgentNotFoundException, AgentConnectionException, AgentRemoteException,
         PermissionException, FileNotFoundException, IOException {
         permissionManager.checkCreatePlatformPermission(subject);
-
         AgentCommandsClient client = agentCommandsClientFactory.getClient(agent);
-
-        FileData[] data = new FileData[files.length];
-        InputStream[] streams = new InputStream[files.length];
-
+        List<FileData> data = new ArrayList<FileData>(files.length);
+        List<InputStream> streams = new ArrayList<InputStream>(files.length);
         try {
             for (int i = 0; i < files.length; i++) {
+                if (files[i][0] == null) {
+                    continue;
+                }
                 File file = new File(files[i][0]);
-
                 FileData fileData = new FileData(files[i][1], file.length(), modes[i]);
-
                 String md5sum = MD5.getDigestString(file);
-
                 fileData.setMD5CheckSum(md5sum);
-
                 FileInputStream is = new FileInputStream(file);
-
-                data[i] = fileData;
-                streams[i] = is;
+                data.add(fileData);
+                streams.add(is);
             }
-
-            return client.agentSendFileData(data, streams);
+            return client.agentSendFileData(
+                data.toArray(new FileData[0]), streams.toArray(new InputStream[0]));
         } finally {
             safeCloseStreams(streams);
         }
     }
 
-    private void safeCloseStreams(InputStream[] streams) {
-        for (int i = 0; i < streams.length; i++) {
-            InputStream is = streams[i];
-
+    private void safeCloseStreams(List<InputStream> streams) {
+        for (InputStream is : streams) {
             if (is != null) {
                 try {
                     is.close();
                 } catch (IOException e) {
-                    // swallow
+                    log.debug(e,e);
                 }
             }
         }
@@ -1173,26 +1176,30 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             @SuppressWarnings("unchecked")
             final Map<String, List<String>> stringLists = arg.getStringLists();
             final List<String> jars = stringLists.get(PluginReport_args.JAR_NAME);
-            final List<String> md5s = stringLists.get(PluginReport_args.MD5);
             final List<String> pluginNames = stringLists.get(PluginReport_args.PLUGIN_NAME);
             final List<String> productNames = stringLists.get(PluginReport_args.PRODUCT_NAME);
+            final List<String> md5s = stringLists.get(PluginReport_args.MD5);
             log.debug(stringVals);
             log.debug(stringLists);
             final Map<Integer, Collection<Plugin>> updateMap = new HashMap<Integer, Collection<Plugin>>();
+            final boolean debug = log.isDebugEnabled();
             for (int i=0; i<md5s.size(); i++) {
                 final String jarName = jars.get(i);
                 final String md5 = md5s.get(i);
                 AgentPluginStatus status;
                 final Plugin currPlugin = pluginDAO.getByJarName(jarName);
-                if (null == (status = statusByJarName.get(jarName))) {
+                if (null == (status = statusByJarName.remove(jarName))) {
                     status = new AgentPluginStatus();
-                    setPluginToUpdate(updateMap, agent.getId(), currPlugin);
-                } else if (currPlugin == null) {
+                }
+                if (currPlugin == null) {
                     // the agent seems to have a plugin that is unknown to the server
                     // remove it!
                     // XXX implement code
                 } else if (!md5.equals(currPlugin.getMD5())) {
                     setPluginToUpdate(updateMap, agent.getId(), currPlugin);
+                    if (debug) log.debug("plugin=" + currPlugin.getName() +
+                                         " fingerprint does not match agentId=" + agent.getId() +
+                                         ", " + md5 + " != " + currPlugin.getMD5());
                 }
                 status.setAgent(agent);
                 status.setJarName(jarName);
@@ -1201,6 +1208,21 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                 status.setProductName(productNames.get(i));
                 status.setLastCheckin(now);
                 agentPluginStatusDAO.saveOrUpdate(status);
+            }
+            // process remaining plugins that the AgentPluginStatus table knows about but
+            // the agent didn't check in
+            for (final String jarName: statusByJarName.keySet()) {
+                final Plugin plugin = pluginDAO.getByJarName(jarName);
+                setPluginToUpdate(updateMap, agent.getId(), plugin);
+            }
+            final Collection<Integer> pluginIds =
+                agentPluginStatusDAO.getPluginsNotOnAgent(agent.getId());
+            for (final Integer pluginId : pluginIds) {
+                final Plugin plugin = pluginDAO.get(pluginId);
+                if (plugin == null) {
+                    continue;
+                }
+                setPluginToUpdate(updateMap, agent.getId(), plugin);
             }
             agentPluginUpdater.queuePluginTransfer(updateMap);
         } catch (AgentNotFoundException e) {
@@ -1259,6 +1281,29 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     @Transactional(readOnly=true)
     public List<Plugin> getAllPlugins() {
         return pluginDAO.findAll();
+    }
+
+// XXX needs javadoc!
+// XXX should probably go into a server-side PluginManager
+    @Transactional(readOnly=true)
+    public Collection<String> getOutOfSyncPluginNamesByAgentId(Integer agentId) {
+        return agentPluginStatusDAO.getOutOfSyncPluginNamesByAgentId(agentId);
+    }
+    
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
+    public void updateAgentPluginSyncStatusInNewTran(AgentPluginStatusEnum s, Integer agentId,
+                                                     Collection<Plugin> plugins) {
+        final Map<String, AgentPluginStatus> statusMap =
+            agentPluginStatusDAO.getStatusByAgentId(agentId);
+        final long now = System.currentTimeMillis();
+        for (final Plugin plugin : plugins) {
+            AgentPluginStatus status = statusMap.get(plugin.getName());
+            if (status == null) {
+                continue;
+            }
+            status.setLastSyncStatus(s.toString());
+            status.setLastSyncAttempt(now);
+        }
     }
 
 }
