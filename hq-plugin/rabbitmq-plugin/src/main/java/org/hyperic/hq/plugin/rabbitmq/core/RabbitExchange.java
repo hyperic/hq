@@ -117,7 +117,7 @@ public class RabbitExchange implements RabbitObject {
     }
 
     public String getServiceName() {
-        return getName() + " @ " + getVhost();
+        return getServiceType() + " " + getName() + " @ " + getVhost();
 
     }
 

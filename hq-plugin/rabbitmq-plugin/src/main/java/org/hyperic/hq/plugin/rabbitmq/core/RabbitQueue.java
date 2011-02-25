@@ -145,7 +145,7 @@ public class RabbitQueue implements RabbitObject {
     }
 
     public String getServiceName() {
-        return getName() + " @ " + getVhost();
+        return getServiceType() + " " + getName() + " @ " + getVhost();
 
     }
 

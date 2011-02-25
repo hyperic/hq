@@ -56,7 +56,7 @@ public class RabbitVirtualHost implements RabbitObject {
     }
 
     public String getServiceName() {
-        return getName();
+        return getServiceType() + " " + getName();
     }
 
     public ConfigResponse ProductConfig() {
