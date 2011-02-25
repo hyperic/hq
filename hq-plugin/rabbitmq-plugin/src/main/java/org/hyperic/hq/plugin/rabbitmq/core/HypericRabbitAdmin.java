@@ -43,8 +43,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
@@ -63,14 +61,14 @@ public class HypericRabbitAdmin {
 
     private static final Log logger = LogFactory.getLog(HypericRabbitAdmin.class);
     private final HttpClient client;
-    private String node;
+    private String nodeName;
     private String addr;
     private String user;
     private String pass;
     private int port;
 
     public HypericRabbitAdmin(Properties props) {
-        this.node = props.getProperty("node");
+        this.nodeName = props.getProperty("node");
         this.port = Integer.parseInt(props.getProperty("port"));
         this.addr = props.getProperty("addr");
         this.user = props.getProperty("user");
@@ -138,15 +136,6 @@ public class HypericRabbitAdmin {
         return get("/api/channels/" + chName, RabbitChannel.class);
     }
 
-    public boolean getStatus() throws PluginException {
-        RabbitNode n = get("/api/nodes/" + node, RabbitNode.class);
-        return (n != null) && n.isRunning();
-    }
-
-    public String getPeerNodeName() {
-        return node;
-    }
-
     public RabbitVirtualHost getVirtualHost(String vhName) throws PluginException {
         try {
             vhName = URLEncoder.encode(vhName, "UTF-8");
@@ -178,6 +167,16 @@ public class HypericRabbitAdmin {
         return get("/api/exchanges/" + vhost + "/" + exch, RabbitExchange.class);
     }
 
+    public RabbitNode getNode(String node) throws PluginException {
+        try {
+            node = URLEncoder.encode(node, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex);
+        }
+
+        return get("/api/nodes/" + node, RabbitNode.class);
+    }
+
     private <T extends Object> T get(String api, Class<T> classOfT) throws PluginException {
         T res = null;
         try {
@@ -199,7 +198,11 @@ public class HypericRabbitAdmin {
 
             res = gson.fromJson(responseBody, classOfT);
             if (logger.isDebugEnabled()) {
-                logger.debug("[" + api + "] -(" + r + ")-> " + res);
+                if (res.getClass().isArray()) {
+                    logger.debug("[" + api + "] -(" + r + ")*> " + Arrays.asList((Object[])res));
+                } else {
+                    logger.debug("[" + api + "] -(" + r + ")-> " + res);
+                }
             }
         } catch (IOException ex) {
             logger.error(ex);

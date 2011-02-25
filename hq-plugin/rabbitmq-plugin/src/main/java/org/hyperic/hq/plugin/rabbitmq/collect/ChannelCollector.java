@@ -25,12 +25,11 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.collect;
 
+import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.*;
-import org.hyperic.util.config.ConfigResponse;
 
-import java.util.List;
 import java.util.Properties;
 import org.hyperic.hq.product.Metric;
 
@@ -49,7 +48,8 @@ public class ChannelCollector extends RabbitMQListCollector {
         try {
             RabbitChannel c = rabbitAdmin.getChannel(chName);
             logger.debug("[collect] RabbitChannel=" + c.getName());
-            setValue("Availability", Metric.AVAIL_UP);
+            setAvailability(c.getIdleSince() == null ? Metric.AVAIL_UP : Metric.AVAIL_PAUSED);
+            setValue("idleTime", c.getIdleSince() == null ? 0 : new Date().getTime() - c.getIdleSince().getTime());
             setValue("consumerCount", c.getConsumerCount());
             setValue("prefetchCount", c.getPrefetchCount());
             setValue("acksUncommitted", c.getAcksUncommitted());

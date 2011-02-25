@@ -25,13 +25,14 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.collect;
 
+import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
-import org.hyperic.util.config.ConfigResponse;
 
 import java.util.Properties;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitQueue;
+import org.hyperic.hq.product.Metric;
 
 /**
  * QueueCollector
@@ -53,7 +54,8 @@ public class QueueCollector extends RabbitMQListCollector {
         try {
             HypericRabbitAdmin admin = new HypericRabbitAdmin(props);
             RabbitQueue q = admin.getVirtualQueue(vhost, queue);
-            setAvailability(true);
+            setAvailability(q.getIdleSince() == null ? Metric.AVAIL_UP : Metric.AVAIL_PAUSED);
+            setValue("idleTime", q.getIdleSince() == null ? 0 : new Date().getTime() - q.getIdleSince().getTime());
             setValue("messages", q.getMessages());
             setValue("consumers", q.getConsumers());
             setValue("messagesReady", q.getMessagesReady());

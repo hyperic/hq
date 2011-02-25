@@ -25,30 +25,25 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
 
+import org.hyperic.hq.plugin.rabbitmq.collect.MetricConstants;
+import org.hyperic.util.config.ConfigResponse;
+
 /**
  * ErlangConnection is a simple POJO reflecting the response <connectioninfoitem>
  * @author Helena Edelson
  */
-public class RabbitConnection implements RabbitObject{
- 
+public class RabbitConnection implements RabbitObject {
+
     private String name;
-   
     private long recvOct;
-
     private long recvCnt;
-
     private long sendOct;
-
     private long sendCnt;
-
     private long sendPend;
-
     private String state; // running
-
     private long channels;
 
     public RabbitConnection() {
-
     }
 
     /**
@@ -166,5 +161,19 @@ public class RabbitConnection implements RabbitObject{
     @Override
     public String toString() {
         return "RabbitConnection{pid=" + name + ", recvOct=" + recvOct + ", recvCnt=" + recvCnt + ", sendOct=" + sendOct + ", sendCnt=" + sendCnt + ", sendPend=" + sendPend + ", state=" + state + ", channels=" + channels + '}';
+    }
+
+    public String getServiceType() {
+        return AMQPTypes.CONNECTION;
+    }
+
+    public String getServiceName() {
+        return getName();
+    }
+
+    public ConfigResponse ProductConfig() {
+        ConfigResponse c = new ConfigResponse();
+        c.setValue(MetricConstants.CONNECTION, getName());
+        return c;
     }
 }

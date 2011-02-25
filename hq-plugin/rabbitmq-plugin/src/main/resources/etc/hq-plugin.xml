@@ -107,6 +107,20 @@
                 <option name="queue" description="queue name"/>
             </config>
 
+
+            <metric name="Availability"
+                    category="AVAILABILITY"
+                    units="percentage"
+                    indicator="true"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="idle Time"
+                    alias="idleTime"
+                    category="UTILIZATION"
+                    units="ms"
+                    indicator="true"
+                    defaultOn="true"
+                    collectionType="static"/>
             <metric name="Messages"
                     alias="messages"
                     category="THROUGHPUT"
@@ -156,12 +170,6 @@
                     indicator="true"
                     defaultOn="true"
                     collectionType="dynamic"/>
-            <metric name="Availability"
-                    category="AVAILABILITY"
-                    units="percentage"
-                    indicator="true"
-                    defaultOn="true"
-                    collectionType="dynamic"/>
             <metric name="Memory"
                     alias="memory"
                     category="UTILIZATION"
@@ -188,6 +196,19 @@
                 <option name="channel" description="channel name"/>
             </config>
 
+            <metric name="Availability"
+                    category="AVAILABILITY"
+                    interval="300000"
+                    units="percentage"
+                    indicator="true"
+                    collectionType="dynamic"/>
+            <metric name="idle Time"
+                    alias="idleTime"
+                    category="UTILIZATION"
+                    units="ms"
+                    indicator="true"
+                    defaultOn="true"
+                    collectionType="static"/>
             <metric name="Consumers"
                     alias="consumerCount"
                     category="UTILIZATION"
@@ -215,12 +236,6 @@
                     units="B"
                     indicator="true"
                     defaultOn="true"
-                    collectionType="dynamic"/>
-            <metric name="Availability"
-                    category="AVAILABILITY"
-                    interval="300000"
-                    units="percentage"
-                    indicator="true"
                     collectionType="dynamic"/>
 
             <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.ChannelCollector"/>

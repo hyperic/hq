@@ -25,11 +25,14 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
 
+import org.hyperic.hq.plugin.rabbitmq.collect.MetricConstants;
+import org.hyperic.util.config.ConfigResponse;
+
 /**
  * RabbitVirtualHost
  * @author Helena Edelson
  */
-public class RabbitVirtualHost implements RabbitObject{
+public class RabbitVirtualHost implements RabbitObject {
 
     private String name;
 
@@ -38,7 +41,7 @@ public class RabbitVirtualHost implements RabbitObject{
 
     @Override
     public String toString() {
-        return super.toString()+"[name="+getName()+"]";
+        return super.toString() + "[name=" + getName() + "]";
     }
 
     /**
@@ -46,5 +49,19 @@ public class RabbitVirtualHost implements RabbitObject{
      */
     public String getName() {
         return name;
+    }
+
+    public String getServiceType() {
+        return AMQPTypes.VIRTUAL_HOST;
+    }
+
+    public String getServiceName() {
+        return getName();
+    }
+
+    public ConfigResponse ProductConfig() {
+        ConfigResponse c = new ConfigResponse();
+        c.setValue(MetricConstants.VHOST, getName());
+        return c;
     }
 }

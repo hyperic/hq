@@ -8,7 +8,7 @@ package org.hyperic.hq.plugin.rabbitmq.core;
  *
  * @author administrator
  */
-class RabbitNode implements RabbitObject {
+public class RabbitNode {
 
     private String name;
     private boolean running;

@@ -4,6 +4,8 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
 
+import org.hyperic.util.config.ConfigResponse;
+
 /**
  *
  * @author administrator
@@ -11,4 +13,10 @@ package org.hyperic.hq.plugin.rabbitmq.core;
 public interface RabbitObject {
 
     public String getName();
+
+    public String getServiceType();
+
+    public String getServiceName();
+
+    public ConfigResponse ProductConfig();
 }

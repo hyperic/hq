@@ -4,6 +4,10 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
 
+import java.util.Date;
+import org.hyperic.hq.plugin.rabbitmq.collect.MetricConstants;
+import org.hyperic.util.config.ConfigResponse;
+
 /**
  *
  * @author administrator
@@ -16,6 +20,8 @@ public class RabbitQueue implements RabbitObject {
     private Integer messagesReady;
     private Integer messagesUnacknowledged;
     private Integer memory;
+    private Date idleSince;
+    private String vhost;
 
     /**
      * @return the name
@@ -101,8 +107,52 @@ public class RabbitQueue implements RabbitObject {
         this.memory = memory;
     }
 
+    /**
+     * @return the idleSince
+     */
+    public Date getIdleSince() {
+        return idleSince;
+    }
+
+    /**
+     * @param idleSince the idleSince to set
+     */
+    public void setIdleSince(Date idleSince) {
+        this.idleSince = idleSince;
+    }
+
+    /**
+     * @return the virtualHost
+     */
+    public String getVhost() {
+        return vhost;
+    }
+
+    /**
+     * @param virtualHost the virtualHost to set
+     */
+    public void setVHost(String vhost) {
+        this.vhost = vhost;
+    }
+
     @Override
     public String toString() {
-        return "RabbitQueue{name=" + getName() + ", messages=" + getMessages() + ", consumers=" + getConsumers() + ", messagesReady=" + getMessagesReady() + ", messagesUnacknowledged=" + getMessagesUnacknowledged() + ", memory=" + getMemory() + '}';
+        return "RabbitQueue{name=" + getName() + ", vhost=" + vhost + ", idleSince=" + idleSince + ", messages=" + getMessages() + ", consumers=" + getConsumers() + ", messagesReady=" + getMessagesReady() + ", messagesUnacknowledged=" + getMessagesUnacknowledged() + ", memory=" + getMemory() + '}';
+    }
+
+    public String getServiceType() {
+        return AMQPTypes.QUEUE;
+    }
+
+    public String getServiceName() {
+        return getName() + " @ " + getVhost();
+
+    }
+
+    public ConfigResponse ProductConfig() {
+        ConfigResponse c = new ConfigResponse();
+        c.setValue(MetricConstants.QUEUE, getName());
+        c.setValue(MetricConstants.VHOST, getVhost());
+        return c;
     }
 }

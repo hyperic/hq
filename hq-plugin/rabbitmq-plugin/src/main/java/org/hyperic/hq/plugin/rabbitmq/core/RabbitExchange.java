@@ -4,6 +4,9 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
 
+import org.hyperic.hq.plugin.rabbitmq.collect.MetricConstants;
+import org.hyperic.util.config.ConfigResponse;
+
 /**
  *
  * @author administrator
@@ -109,4 +112,19 @@ public class RabbitExchange implements RabbitObject {
         return "RabbitExchange{" + "name=" + name + ", vhost=" + vhost + ", type=" + type + ", durable=" + durable + ", autoDelete=" + autoDelete + ", internal=" + internal + '}';
     }
 
+    public String getServiceType() {
+        return AMQPTypes.EXCHANGE;
+    }
+
+    public String getServiceName() {
+        return getName() + " @ " + getVhost();
+
+    }
+
+    public ConfigResponse ProductConfig() {
+        ConfigResponse c = new ConfigResponse();
+        c.setValue(MetricConstants.EXCHANGE, getName());
+        c.setValue(MetricConstants.VHOST, getVhost());
+        return c;
+    }
 }

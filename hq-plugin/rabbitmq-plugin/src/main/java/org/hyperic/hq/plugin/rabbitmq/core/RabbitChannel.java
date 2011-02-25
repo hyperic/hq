@@ -26,12 +26,14 @@
 package org.hyperic.hq.plugin.rabbitmq.core;
 
 import java.util.Date;
+import org.hyperic.hq.plugin.rabbitmq.collect.MetricConstants;
+import org.hyperic.util.config.ConfigResponse;
 
 /**
  * AmqpChannel
  * @author Helena Edelson
  */
-public class RabbitChannel implements RabbitObject{
+public class RabbitChannel implements RabbitObject {
 
     private String name;
     private Date idleSince;
@@ -108,5 +110,17 @@ public class RabbitChannel implements RabbitObject{
         return "RabbitChannel{name=" + name + ", idleSince=" + idleSince + ", number=" + number + ", consumerCount=" + consumerCount + ", messagesUnacknowledged=" + messagesUnacknowledged + ", acksUncommitted=" + acksUncommitted + ", prefetchCount=" + prefetchCount + '}';
     }
 
+    public String getServiceType() {
+        return AMQPTypes.CHANNEL;
+    }
 
+    public String getServiceName() {
+        return getName();
+    }
+
+    public ConfigResponse ProductConfig() {
+        ConfigResponse c = new ConfigResponse();
+        c.setValue(MetricConstants.CHANNEL, getName());
+        return c;
+    }
 }
