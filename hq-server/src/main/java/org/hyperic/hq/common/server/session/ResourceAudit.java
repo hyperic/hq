@@ -24,9 +24,13 @@
  */
 package org.hyperic.hq.common.server.session;
 
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.inventory.domain.Resource;
-
+@Entity
+@DiscriminatorValue("resource")
 public class ResourceAudit
     extends Audit {
     

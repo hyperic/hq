@@ -25,29 +25,85 @@
 
 package org.hyperic.hq.autoinventory;
 
-import org.hyperic.hibernate.PersistedObject;
+import java.io.Serializable;
+
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 
-/**
- * Pojo for hibernate hbm mapping file
- */
-public class AIHistory extends PersistedObject
+@Entity
+@Table(name="EAM_AUTOINV_HISTORY")
+public class AIHistory implements Serializable
 {
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name="VERSION_COL")
+    @Version
+    private Long version;
+    
+    @Column(name="GROUP_ID")
     private Integer groupId;
+    
+    @Column(name="BATCH_ID")
     private Integer batchId;
+    
+    @Column(name="ENTITY_TYPE",nullable=false)
     private Integer entityType;
+    
+    @Column(name="ENTITY_ID",nullable=false)
     private Integer entityId;
+    
+    @Column(name="SUBJECT",nullable=false,length=32)
     private String subject;
+    
+    @Column(name="SCHEDULED",nullable=false)
     private boolean scheduled;
+    
+    @Column(name="DATE_SCHEDULED",nullable=false)
     private long dateScheduled;
+    
+    @Column(name="STARTTIME",nullable=false)
     private long startTime;
+    
+    @Column(name="STATUS",nullable=false,length=64)
     private String status;
+    
+    @Column(name="ENDTIME",nullable=false)
     private long endTime;
+    
+    @Column(name="DURATION",nullable=false)
     private long duration;
+    
+    @Column(name="SCANNAME",length=100)
+    @Index(name="AI_HIST_SCANNAME_IDX")
     private String scanName;
+    
+    @Column(name="SCANDESC",length=200)
     private String scanDesc;
+    
+    @Column(name="DESCRIPTION",length=500)
     private String description;
+    
+    @Column(name="MESSAGE",length=500)
     private String message;
+    
+    @Basic(fetch=FetchType.LAZY)
+    @Lob
+    @Column(name="CONFIG",nullable=false)
     private byte[] config;
 
     /**
@@ -58,7 +114,7 @@ public class AIHistory extends PersistedObject
         super();
     }
 
-    // Property accessors
+
     public Integer getGroupId()
     {
         return this.groupId;
@@ -250,6 +306,43 @@ public class AIHistory extends PersistedObject
     throws AutoinventoryException
     {
         setConfig(core.serialize());
+    }
+    
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof AIHistory)) {
+            return false;
+        }
+        Integer objId = ((AIHistory)obj).getId();
+  
+        return getId() == objId ||
+        (getId() != null && 
+         objId != null && 
+         getId().equals(objId));     
+    }
+
+    public int hashCode() {
+        int result = 17;
+        result = 37*result + (getId() != null ? getId().hashCode() : 0);
+        return result;      
     }
 
 }

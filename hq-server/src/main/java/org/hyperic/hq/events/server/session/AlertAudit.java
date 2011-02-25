@@ -24,12 +24,17 @@
  */
 package org.hyperic.hq.events.server.session;
 
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditImportance;
 import org.hyperic.hq.common.server.session.AuditNature;
 import org.hyperic.hq.common.server.session.AuditPurpose;
 
+@Entity
+@DiscriminatorValue("alert")
 public class AlertAudit
     extends Audit {
 

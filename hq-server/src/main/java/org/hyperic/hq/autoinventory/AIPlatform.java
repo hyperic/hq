@@ -25,41 +25,138 @@
 
 package org.hyperic.hq.autoinventory;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.hyperic.hq.appdef.server.session.AppdefResource;
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
+import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.product.PlatformDetector;
 
-public class AIPlatform extends AppdefResource
+@Entity
+@Table(name="EAM_AIQ_PLATFORM")
+public class AIPlatform implements ContainerManagedTimestampTrackable, Serializable
 {
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name="VERSION_COL")
+    @Version
+    private Long version;
+    
+    @Column(name="NAME",nullable=false,length=255,unique=true)
+    private String name;
+    
+    @Column(name="DESCRIPTION",length=300)
+    private String description;
+    
+    @Column(name="OS",length=80)
     private String platformTypeName;
+    
+    @Column(name="OSVERSION",length=80)
     private String osversion;
+    
+    @Column(name="ARCH",length=80)
     private String arch;
-    private String agentToken;
-    private Integer queueStatus;
-    private long diff;
-    private boolean ignored;
-    private Long lastApproved;
-    private Integer cpuSpeed;
-    private Integer ram;
-    private String gateway;
-    private String dhcpServer;
-    private String dnsServer;
-    private byte[] customProperties;
-    private byte[] productConfig;
-    private byte[] controlConfig;
-    private byte[] measurementConfig;
-    private Collection aiips = new ArrayList();
-    private Collection aiservers =  new ArrayList();
+    
+    @Column(name="FQDN",nullable=false,length=200,unique=true)
     private String fqdn;
+    
+    @Column(name="AGENTTOKEN",nullable=false,length=100)
+    @Index(name="AIQ_PLATFORM_AGENTTOKEN_IDX")
+    private String agentToken;
+    
+    @Column(name="CERTDN",length=200,unique=true)
     private String certdn;
+    
+    @Column(name="QUEUESTATUS")
+    private Integer queueStatus;
+    
+    @Column(name="DIFF")
+    private long diff;
+    
+    @Column(name="IGNORED")
+    private boolean ignored;
+    
+    @Column(name="CTIME")
+    private Long creationTime;
+    
+    @Column(name="MTIME")
+    private Long modifiedTime;
+    
+    @Column(name="LASTAPPROVED")
+    private Long lastApproved;
+    
+    @Column(name="LOCATION",length=100)
+    private String location;
+    
+    @Column(name="CPU_SPEED")
+    private Integer cpuSpeed;
+    
+    @Column(name="CPU_COUNT")
     private Integer cpuCount;
+    
+    @Column(name="RAM")
+    private Integer ram;
+    
+    @Column(name="GATEWAY",length=64)
+    private String gateway;
+    
+    @Column(name="DHCP_SERVER",length=64)
+    private String dhcpServer;
+    
+    @Column(name="DNS_SERVER",length=64)
+    private String dnsServer;
+    
+    @Basic(fetch=FetchType.LAZY)
+    @Lob
+    @Column(name="CUSTOM_PROPERTIES")
+    private byte[] customProperties;
+    
+    @Basic(fetch=FetchType.LAZY)
+    @Lob
+    @Column(name="PRODUCT_CONFIG",length=256)
+    private byte[] productConfig;
+    
+    @Basic(fetch=FetchType.LAZY)
+    @Lob
+    @Column(name="CONTROL_CONFIG",length=256)
+    private byte[] controlConfig;
+    
+    @Basic(fetch=FetchType.LAZY)
+    @Lob
+    @Column(name="MEASUREMENT_CONFIG",length=256)
+    private byte[] measurementConfig;
+    
+    @OneToMany(fetch=FetchType.LAZY,mappedBy="aIPlatform",cascade=CascadeType.ALL)
+    private Collection<AIIp> aiips = new ArrayList<AIIp>();
+    
+    @OneToMany(fetch=FetchType.LAZY,mappedBy="aIPlatform",cascade=CascadeType.ALL,orphanRemoval=true)
+    private Collection<AIServer> aiservers =  new ArrayList<AIServer>();
+ 
+   
+     
 
     public AIPlatform()
     {
@@ -86,6 +183,94 @@ public class AIPlatform extends AppdefResource
         setControlConfig(apv.getControlConfig());
     }
     
+    /**
+     * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
+     * @return <code>true</code> by default.
+     */
+    public boolean allowContainerManagedCreationTime() {
+        return true;
+    }
+    
+    /**
+     * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
+     * @return <code>true</code> by default.
+     */
+    public boolean allowContainerManagedLastModifiedTime() {
+        return true;
+    }
+
+    public long getCreationTime()
+    {
+        return creationTime;
+    }
+
+    public void setCreationTime(Long creationTime)
+    {
+        this.creationTime = creationTime;
+    }
+
+    public long getModifiedTime()
+    {
+        return modifiedTime;
+    }
+
+    public void setModifiedTime(Long modifiedTime)
+    {
+        this.modifiedTime = modifiedTime;
+    }
+    
+    public String getDescription()
+    {
+        return this.description;
+    }
+
+    public void setDescription(String description)
+    {
+        this.description = description;
+    }
+
+   
+
+    public String getLocation()
+    {
+        return this.location;
+    }
+
+    public void setLocation(String location)
+    {
+        this.location = location;
+    }
+
+  
+    public String getName()
+    {
+        return this.name;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+   
+    
+   
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
     public String getFqdn()
     {
         return this.fqdn;
@@ -176,7 +361,7 @@ public class AIPlatform extends AppdefResource
 
     public int getQueueStatus()
     {
-        return queueStatus != null ? queueStatus.intValue() : 0;
+        return queueStatus;
     }
 
     public void setQueueStatus(Integer queueStatus)
@@ -205,7 +390,7 @@ public class AIPlatform extends AppdefResource
 
     public void setDiff(Long diff)
     {
-        this.diff = diff != null ? diff.longValue() : 0L;
+        this.diff = diff;
     }
 
     public boolean isIgnored()
@@ -220,7 +405,7 @@ public class AIPlatform extends AppdefResource
 
     public long getLastApproved()
     {
-        return lastApproved != null ? lastApproved.longValue() : 0L;
+        return lastApproved;
     }
 
     public void setLastApproved(Long lastApproved)
@@ -318,12 +503,12 @@ public class AIPlatform extends AppdefResource
         this.measurementConfig = measurementConfig;
     }
 
-    public Collection getAIIps()
+    public Collection<AIIp> getAIIps()
     {
         return this.aiips;
     }
 
-    public void setAIIps(Collection aiips)
+    public void setAIIps(Collection<AIIp> aiips)
     {
         this.aiips = aiips;
     }
@@ -333,7 +518,7 @@ public class AIPlatform extends AppdefResource
         return this.aiservers;
     }
 
-    public void setAIServers(Collection aiservers)
+    public void setAIServers(Collection<AIServer> aiservers)
     {
         this.aiservers = aiservers;
     }
@@ -376,20 +561,20 @@ public class AIPlatform extends AppdefResource
         aipValue.setDescription(getDescription());
         aipValue.setCpuCount(getCpuCount());
         aipValue.setId(getId());
-        aipValue.setMTime(getMTime());
-        aipValue.setCTime(getCTime());
+        aipValue.setMTime(getModifiedTime());
+        aipValue.setCTime(getCreationTime());
         aipValue.removeAllAIIpValues();
-        Iterator iAIIpValue = getAIIps().iterator();
+        Iterator<AIIp> iAIIpValue = getAIIps().iterator();
         while (iAIIpValue.hasNext()){
             aipValue.addAIIpValue(
-                ((AIIp)iAIIpValue.next()).getAIIpValue() );
+                (iAIIpValue.next()).getAIIpValue() );
         }
         aipValue.cleanAIIpValue();
         aipValue.removeAllAIServerValues();
-        Iterator iAIServerValue = getAIServers().iterator();
+        Iterator<AIServer> iAIServerValue = getAIServers().iterator();
         while (iAIServerValue.hasNext()){
             aipValue.addAIServerValue(
-                ((AIServer)iAIServerValue.next()).getAIServerValue() );
+                (iAIServerValue.next()).getAIServerValue() );
         }
         aipValue.cleanAIServerValue();
         return aipValue;

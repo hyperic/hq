@@ -25,65 +25,118 @@
  */
 package org.hyperic.hq.common;
 
-import org.hyperic.hibernate.PersistedObject;
+import java.io.Serializable;
 
-public class ConfigProperty 
-    extends PersistedObject
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
+
+@Entity
+@Table(name="EAM_CONFIG_PROPS",uniqueConstraints = { @UniqueConstraint(name = "configPropertyId", columnNames = { "PREFIX",
+"PROPKEY" }) })
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+public class ConfigProperty implements Serializable
 {
-    private String  _prefix;
-    private String  _key;
-    private String  _value;
-    private String  _defaultValue;
-    private boolean _readOnly = false;
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name="VERSION_COL")
+    @Version
+    private Long version;
+    
+    @Column(name="PREFIX",length=80)
+    private String  prefix;
+    
+    @Column(name="PROPKEY",length=80)
+    private String  key;
+    
+    @Column(name="PROPVALUE",length=300)
+    private String  value;
+    
+    @Column(name="DEFAULT_PROPVALUE",length=300)
+    private String  defaultValue;
+    
+    @Column(name="FREAD_ONLY")
+    private boolean readOnly = false;
 
     public ConfigProperty() {
     }
+    
+    
+
+    public Integer getId() {
+        return id;
+    }
+
+
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+
+
+    public Long getVersion() {
+        return version;
+    }
+
+
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+
 
     public String getPrefix() {
-        return _prefix;
+        return prefix;
     }
 
     public void setPrefix(String prefix) {
-        _prefix = prefix;
+        this.prefix = prefix;
     }
 
     public String getKey() {
-        return _key;
+        return key;
     }
 
     public void setKey(String propKey) {
-        _key = propKey;
+        key = propKey;
     }
 
     public String getValue() {
-        return _value;
+        return value;
     }
 
     public void setValue(String propValue) {
-        _value = propValue;
+        value = propValue;
     }
 
     public String getDefaultValue() {
-        return _defaultValue;
+        return defaultValue;
     }
 
     public void setDefaultValue(String defaultPropValue) {
-        _defaultValue = defaultPropValue;
+        defaultValue = defaultPropValue;
     }
 
     public boolean isReadOnly() {
-        return _readOnly;
-    }
-
-    /**
-     * @deprecated use isReadOnly()
-     */
-    public boolean getReadOnly() {
-        return isReadOnly();
+        return readOnly;
     }
 
     public void setReadOnly(boolean flag) {
-        _readOnly = flag;
+        readOnly = flag;
     }
 
     public boolean equals(Object obj) {
@@ -92,20 +145,20 @@ public class ConfigProperty
         }
         ConfigProperty o = (ConfigProperty) obj;
         return
-               ((_prefix == o.getPrefix()) ||
-                (_prefix != null && o.getPrefix() != null &&
-                 _prefix.equals(o.getPrefix())))
+               ((prefix == o.getPrefix()) ||
+                (prefix != null && o.getPrefix() != null &&
+                 prefix.equals(o.getPrefix())))
                &&
-               ((_key == o.getKey()) ||
-                (_key != null && o.getKey() != null &&
-                 _key.equals(o.getKey())));
+               ((key == o.getKey()) ||
+                (key != null && o.getKey() != null &&
+                 key.equals(o.getKey())));
     }
 
     public int hashCode() {
         int result = super.hashCode();
 
-        result = 37*result + (_prefix != null ? _prefix.hashCode() : 0);
-        result = 37*result + (_key != null ? _key.hashCode() : 0);
+        result = 37*result + (prefix != null ? prefix.hashCode() : 0);
+        result = 37*result + (key != null ? key.hashCode() : 0);
 
         return result;
     }

@@ -102,8 +102,7 @@ public class EscalationManagerImpl implements EscalationManager {
         Escalation escalation;
 
         if ((escalation = escalationDAO.findByName(name)) != null) {
-            throw new DuplicateObjectException("An escalation with that name " + "already exists",
-                escalation);
+            throw new DuplicateObjectException("An escalation with that name " + "already exists");
         }
     }
 

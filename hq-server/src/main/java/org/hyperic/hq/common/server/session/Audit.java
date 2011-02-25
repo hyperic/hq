@@ -25,32 +25,96 @@
 
 package org.hyperic.hq.common.server.session;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.hyperic.hibernate.PersistedObject;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
+import org.hibernate.annotations.OptimisticLock;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.inventory.domain.Resource;
 
-public abstract class Audit
-    extends PersistedObject
+@Entity
+@Table(name="EAM_AUDIT")
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name="KLAZZ")
+public abstract class Audit implements Serializable
 {
-    private String          _klazz;
-    private long            _startTime;
-    private long            _endTime;
-    private int             _purpose;
-    private int             _importance;
-    private int             _nature;
-    private boolean         _original;
-    private AuthzSubject    _subject;
-    private String          _message;
-    private Resource        _resource;
-    private String          _fieldName;
-    private String          _oldFieldValue;
-    private String          _newFieldValue;
-    private Audit           _parent;
-    private Collection      _children = new ArrayList();
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name="VERSION_COL")
+    @Version
+    private Long version;
+    
+    @Column(name="START_TIME",nullable=false)
+    private long            startTime;
+    
+    @Column(name="END_TIME",nullable=false)
+    private long            endTime;
+    
+    @Column(name="PURPOSE",nullable=false)
+    private int             purpose;
+    
+    @Column(name="IMPORTANCE",nullable=false)
+    private int             importance;
+    
+    @Column(name="NATURE",nullable=false)
+    private int             nature;
+    
+    @Column(name="ORIGINAL",nullable=false)
+    private boolean         original;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="SUBJECT_ID",nullable=false)
+    @Index(name="SUBJECT_ID_IDX")
+    private AuthzSubject    subject;
+    
+    @Column(name="MESSAGE",length=1000,nullable=false)
+    private String          message;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="RESOURCE_ID",nullable=false)
+    @Index(name="RESOURCE_ID_IDX")
+    private Resource        resource;
+    
+    @Column(name="FIELD",length=100)
+    private String          fieldName;
+    
+    @Column(name="OLD_VAL",length=1000)
+    private String          oldFieldValue;
+    
+    @Column(name="NEW_VAL",length=1000)
+    private String          newFieldValue;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="PARENT_ID")
+    @Index(name="PARENT_ID_IDX")
+    private Audit           parent;
+    
+    @OneToMany(mappedBy="parent",fetch=FetchType.LAZY,cascade=CascadeType.ALL,orphanRemoval=true)
+    @OptimisticLock(excluded=true)
+    private Collection<Audit>      children = new ArrayList<Audit>();
     
     protected Audit() {}
     
@@ -58,158 +122,150 @@ public abstract class Audit
                     AuditNature nature, AuditImportance importance, 
                     String message)    
     {
-        _purpose    = purpose.getCode();
-        _importance = importance.getCode();
-        _nature     = nature.getCode();
-        _subject    = subject;
-        _resource   = r;
-        _message    = message;
-        _original   = true;
+        this.purpose    = purpose.getCode();
+        this.importance = importance.getCode();
+        this.nature     = nature.getCode();
+        this.subject    = subject;
+        resource   = r;
+        this.message    = message;
+        original   = true;
     }
-
-    protected String getKlazz() {
-        return _klazz;
-    }
-    
-    protected void setKlazz(String k) {
-        _klazz = k;
-    }
-    
+  
     public long getStartTime() {
-        return _startTime;
+        return startTime;
     }
     
     public void setStartTime(long t) {
-        _startTime = t;
+        startTime = t;
     }
     
     public long getEndTime() {
-        return _endTime;
+        return endTime;
     }
     
     public void setEndTime(long t) {
-        _endTime = t;
+        endTime = t;
     }
     
     public AuditPurpose getPurpose() {
-        return AuditPurpose.findByCode(_purpose);
+        return AuditPurpose.findByCode(purpose);
     }
     
     protected int getPurposeEnum() {
-        return _purpose;
+        return purpose;
     }
     
     protected void setPurposeEnum(int p) {
-        _purpose = p;
+        purpose = p;
     }
     
     public AuditImportance getImportance() {
-        return AuditImportance.findByCode(_importance);
+        return AuditImportance.findByCode(importance);
     }
     
     protected int getNatureEnum() {
-        return _nature;
+        return nature;
     }
     
     protected void setNatureEnum(int e) {
-        _nature = e;
+        nature = e;
     }
     
     public AuditNature getNature() {
-        return AuditNature.findByCode(_nature);
+        return AuditNature.findByCode(nature);
     }
     
     protected void setImportanceEnum(int p) {
-        _importance = p;
+        importance = p;
     }
     
     protected int getImportanceEnum() {
-        return _importance;
+        return importance;
     }
     
     public boolean isOriginal() {
-        return _original;
+        return original;
     }
     
     protected void setOriginal(boolean o) {
-        _original = o;
+        original = o;
     }
 
     public Resource getResource() {
-        return _resource;
+        return resource;
     }
     
     protected void setResource(Resource r) {
-        _resource = r;
+        resource = r;
     }
     
     public String getFieldName() {
-        return _fieldName;
+        return fieldName;
     }
     
     public void setFieldName(String f) {
-        _fieldName = f;
+        fieldName = f;
     }
     
     public String getOldFieldValue() {
-        return _oldFieldValue;
+        return oldFieldValue;
     }
     
     public void setOldFieldValue(String f) {
-        _oldFieldValue = f;
+        oldFieldValue = f;
     }
     
     public String getNewFieldValue() {
-        return _newFieldValue;
+        return newFieldValue;
     }
     
     public void setNewFieldValue(String v) {
-        _newFieldValue = v;
+        newFieldValue = v;
     }
     
     public AuthzSubject getSubject() {
-        return _subject;
+        return subject;
     }
     
     protected void setSubject(AuthzSubject s) {
-        _subject = s;
+        subject = s;
     }
     
     public String getMessage() {
-        return _message;
+        return message;
     }
     
     protected void setMessage(String m) {
-        _message = m;
+        message = m;
     }
     
     public Audit getParent() {
-        return _parent;
+        return parent;
     }
     
     protected void setParent(Audit p) {
-        _parent = p;
+        parent = p;
     }
     
-    protected Collection getChildrenBag() {
-        return _children;
+    protected Collection<Audit> getChildrenBag() {
+        return children;
     }
     
-    protected void setChildrenBag(Collection c) {
-        _children = c;
+    protected void setChildrenBag(Collection<Audit> c) {
+        children = c;
     }
     
     public Collection<Audit> getChildren() {
-        return Collections.unmodifiableCollection(_children);
+        return Collections.unmodifiableCollection(children);
     }
     
     void addChild(Audit a) {
-        _children.add(a);
+        children.add(a);
         a.setParent(this);
     }
     
     void removeChild(Audit a) {
-        _children.remove(a);
+        children.remove(a);
         a.setParent(null);
     }
     
@@ -226,14 +282,17 @@ public abstract class Audit
     }
     
     public String toString() {
-        return "Audit[user=" + _subject.getName() + ",purpose=" + _purpose +
-               ",time=" + _startTime +
-               ",resource=" + (_resource != null ? _resource.getName() : "N/A")+
-               ",msg=" + _message + "]";
+        return "Audit[user=" + subject.getName() + ",purpose=" + purpose +
+               ",time=" + startTime +
+               ",resource=" + (resource != null ? resource.getName() : "N/A")+
+               ",msg=" + message + "]";
     }
     
     public boolean equals(Object obj) {
-        if (!(obj instanceof Audit) || !super.equals(obj)) {
+        if(obj == null) {
+            return false;
+        }
+        if (!(obj.getClass().equals(getClass())) || !super.equals(obj)) {
             return false;
         }
         
@@ -241,8 +300,7 @@ public abstract class Audit
         return o.getImportance().equals(getImportance()) &&
                o.getPurpose().equals(getPurpose()) &&
                o.getMessage().equals(getMessage()) &&
-               o.getStartTime() == getStartTime() &&
-               o.getKlazz().equals(getKlazz());
+               o.getStartTime() == getStartTime();
     }
 
     public int hashCode() {
@@ -252,8 +310,25 @@ public abstract class Audit
         result = 37 * result + getPurpose().hashCode();
         result = 37 * result + getMessage().hashCode();
         result = 37 * result + System.identityHashCode(new Long(getStartTime()));
-        result = 37 * result + getKlazz().hashCode();
 
         return result;
     }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+    
+    
 }

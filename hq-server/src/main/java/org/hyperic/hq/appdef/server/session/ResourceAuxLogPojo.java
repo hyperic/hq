@@ -26,67 +26,119 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.hibernate.PersistedObject;
+import java.io.Serializable;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
 import org.hyperic.hq.appdef.galerts.ResourceAuxLog;
-import org.hyperic.hq.appdef.galerts.ResourceAuxLogProvider;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.events.AlertAuxLogProvider;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 
-public class ResourceAuxLogPojo
-    extends PersistedObject
+@Entity
+@Table(name="EAM_RESOURCE_AUX_LOGS")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+public class ResourceAuxLogPojo implements Serializable
 {
-    private GalertAuxLog  _auxLog;
-    private int           _appdefType;
-    private int           _appdefId;
-    private GalertDef     _def;
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name="VERSION_COL")
+    @Version
+    private Long version;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="AUX_LOG_ID",nullable=false)
+    @Index(name="METRIC_AUX_LOG_ID_IDX")
+    private GalertAuxLog  auxLog;
+    
+    @Column(name="APPDEF_TYPE",nullable=false)
+    private int           appdefType;
+    
+    @Column(name="APPDEF_ID",nullable=false)
+    private int           appdefId;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="DEF_ID",nullable=false)
+    @Index(name="RSRC_AUX_LOG_IDX")
+    private GalertDef     def;
     
     protected ResourceAuxLogPojo() {
     }
 
     ResourceAuxLogPojo(GalertAuxLog log, ResourceAuxLog logInfo, GalertDef def) 
     { 
-        _auxLog     = log;
-        _appdefType = logInfo.getEntity().getType();
-        _appdefId   = logInfo.getEntity().getID();
-        _def        = def;
+        auxLog     = log;
+        appdefType = logInfo.getEntity().getType();
+        appdefId   = logInfo.getEntity().getID();
+        this.def        = def;
     }
    
     public GalertAuxLog getAuxLog() {
-        return _auxLog;
+        return auxLog;
     }
     
     protected void setAuxLog(GalertAuxLog log) {
-        _auxLog = log;
+        auxLog = log;
     }
     
     protected int getAppdefType() {
-        return _appdefType;
+        return appdefType;
     }
     
     protected void setAppdefType(int appdefType) {
-        _appdefType = appdefType;
+        this.appdefType = appdefType;
     }
     
     protected int getAppdefId() {
-        return _appdefId;
+        return appdefId;
     }
     
     protected void setAppdefId(int appdefId) {
-        _appdefId = appdefId;
+        this.appdefId = appdefId;
     }
     
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
     public AppdefEntityID getEntityId() {
         return new AppdefEntityID(getAppdefType(), getAppdefId());
     }
     
     public GalertDef getAlertDef() {
-        return _def;
+        return def;
     }
     
     protected void setAlertDef(GalertDef def) {
-        _def = def;
+        this.def = def;
     }
     
     public int hashCode() {
