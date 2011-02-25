@@ -1272,7 +1272,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
 // XXX needs javadoc!
 // XXX should probably go into a server-side PluginManager
     @Transactional(readOnly=true)
-    public Map<Plugin, Collection<Agent>> getOutOfSyncAgentsByPlugin() {
+    public Map<Plugin, Collection<AgentPluginStatus>> getOutOfSyncAgentsByPlugin() {
         return agentPluginStatusDAO.getOutOfSyncAgentsByPlugin();
     }
     
@@ -1289,7 +1289,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     public Collection<String> getOutOfSyncPluginNamesByAgentId(Integer agentId) {
         return agentPluginStatusDAO.getOutOfSyncPluginNamesByAgentId(agentId);
     }
-    
+
     @Transactional(propagation=Propagation.REQUIRES_NEW)
     public void updateAgentPluginSyncStatusInNewTran(AgentPluginStatusEnum s, Integer agentId,
                                                      Collection<Plugin> plugins) {

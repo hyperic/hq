@@ -74,47 +74,48 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
         return rtn;
     }
 
-    Map<Plugin, Collection<Agent>> getOutOfSyncAgentsByPlugin() {
-        final Map<Plugin, Collection<Agent>> rtn = new HashMap<Plugin, Collection<Agent>>();
-        final List<Object[]> list = getOutOfSyncPlugins(null);
-        for (final Object[] obj : list) {
-            final int agentId = (Integer) obj[0];
-            final String pluginName = (String) obj[1];
-            final Agent agent = agentDAO.get(agentId);
+    Map<Plugin, Collection<AgentPluginStatus>> getOutOfSyncAgentsByPlugin() {
+        final Map<Plugin, Collection<AgentPluginStatus>> rtn =
+            new HashMap<Plugin, Collection<AgentPluginStatus>>();
+        final List<Integer> list = getOutOfSyncPlugins(null);
+        for (final Integer id : list) {
+            final AgentPluginStatus st = get(id);
+            final String pluginName = st.getPluginName();
             final Plugin plugin = pluginDAO.findByName(pluginName);
-            Collection<Agent> tmp;
+            Collection<AgentPluginStatus> tmp;
             if (null == (tmp = rtn.get(plugin))) {
-                tmp = new ArrayList<Agent>();
+                tmp = new ArrayList<AgentPluginStatus>();
                 rtn.put(plugin, tmp);
             }
-            tmp.add(agent);
+            tmp.add(st);
         }
         return rtn;
     }
 
-    Map<Agent, Collection<Plugin>> getOutOfSyncPluginsByAgent() {
-        final Map<Agent, Collection<Plugin>> rtn = new HashMap<Agent, Collection<Plugin>>();
-        final List<Object[]> list = getOutOfSyncPlugins(null);
-        for (final Object[] obj : list) {
-            final int agentId = (Integer) obj[0];
-            final String pluginName = (String) obj[1];
+    Map<Agent, Collection<AgentPluginStatus>> getOutOfSyncPluginsByAgent() {
+        final Map<Agent, Collection<AgentPluginStatus>> rtn =
+            new HashMap<Agent, Collection<AgentPluginStatus>>();
+        final List<Integer> list = getOutOfSyncPlugins(null);
+        for (final Integer id : list) {
+            final AgentPluginStatus st = get(id);
+            final int agentId = st.getAgent().getId();
             final Agent agent = agentDAO.get(agentId);
-            final Plugin plugin = pluginDAO.findByName(pluginName);
-            Collection<Plugin> tmp;
+            Collection<AgentPluginStatus> tmp;
             if (null == (tmp = rtn.get(agent))) {
-                tmp = new ArrayList<Plugin>();
+                tmp = new ArrayList<AgentPluginStatus>();
                 rtn.put(agent, tmp);
             }
-            tmp.add(plugin);
+            tmp.add(st);
         }
         return rtn;
     }
-    
+
     List<String> getOutOfSyncPluginNamesByAgentId(int agentId) {
-        final List<Object[]> objs = getOutOfSyncPlugins(agentId);
-        final List<String> rtn = new ArrayList<String>(objs.size());
-        for (final Object[] obj : objs) {
-            final String pluginName = (String) obj[1];
+        final List<Integer> ids = getOutOfSyncPlugins(agentId);
+        final List<String> rtn = new ArrayList<String>(ids.size());
+        for (final Integer id : ids) {
+            final AgentPluginStatus st = get(id);
+            final String pluginName = st.getPluginName();
             rtn.add(pluginName);
         }
         return rtn;
@@ -122,15 +123,13 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
 
     /**
      * @param agentId may be null
-     * @return {@link List} of Object[] where
-     * [0] = agentId (Integer) and
-     * [1] = pluginName (String)
+     * @return {@link List} of {@link Integer} which represents the AgentPluginStatusId
      */
     @SuppressWarnings("unchecked")
-    private List<Object[]> getOutOfSyncPlugins(Integer agentId) {
+    private List<Integer> getOutOfSyncPlugins(Integer agentId) {
         final String agentSql = agentId == null ? "" : " s.agent_id = :agentId AND ";
         final String sql = new StringBuilder(256)
-            .append("select distinct s.agent_id, s.plugin_name ")
+            .append("select distinct s.id ")
             .append("from EAM_AGENT_PLUGIN_STATUS s ")
             .append("where ")
             .append(agentSql)
