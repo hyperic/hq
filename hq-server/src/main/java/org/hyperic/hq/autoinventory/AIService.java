@@ -56,7 +56,7 @@ public class AIService implements ContainerManagedTimestampTrackable, Serializab
     @Column(name = "ID")
     private Integer id;
 
-    @Column(name="VERSION_COL")
+    @Column(name="VERSION_COL",nullable=false)
     @Version
     private Long version;
     

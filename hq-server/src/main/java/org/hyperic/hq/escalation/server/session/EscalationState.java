@@ -72,8 +72,11 @@ public class EscalationState implements Serializable
     @JoinColumn(name="ESCALATION_ID",nullable=false)
     private Escalation escalation;
     
+    @SuppressWarnings("unused")
     @Column(name="ALERT_TYPE",nullable=false)
-    private EscalationAlertType alertType;
+    private int alertTypeEnum;
+    
+    private transient EscalationAlertType alertType;
     
     @Column(name="ALERT_DEF_ID",nullable=false)
     private int alertDefId;
