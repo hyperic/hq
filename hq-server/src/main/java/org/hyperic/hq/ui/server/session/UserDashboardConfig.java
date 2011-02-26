@@ -41,7 +41,7 @@ public class UserDashboardConfig
     extends DashboardConfig {
     
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="USER_ID")
+    @JoinColumn(name="USER_ID",unique=true)
     private AuthzSubject user;
 
     protected UserDashboardConfig() {

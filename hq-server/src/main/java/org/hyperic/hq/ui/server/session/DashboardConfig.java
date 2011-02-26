@@ -52,7 +52,7 @@ import org.hyperic.util.config.ConfigResponse;
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Table(name="EAM_DASH_CONFIG")
-@DiscriminatorColumn(name="CONFIG_TYPE")
+@DiscriminatorColumn(name="CONFIG_TYPE",length=255)
 public abstract class DashboardConfig implements Serializable
 {
     @Id
@@ -70,7 +70,7 @@ public abstract class DashboardConfig implements Serializable
     @Index(name="DASH_CONFIG_CRISPO_ID_IDX")
     private Crispo config;
     
-    @Column(name="NAME",length=255,nullable=false)
+    @Column(name="name",length=255,nullable=false)
     private String name;
 
     protected DashboardConfig() {

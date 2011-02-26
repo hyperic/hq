@@ -46,6 +46,8 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hyperic.hq.events.AlertAuxLog;
 import org.hyperic.hq.events.AlertAuxLogProvider;
 
@@ -85,6 +87,7 @@ public class GalertAuxLog implements Serializable
     
     @OneToMany(mappedBy="parent",cascade=CascadeType.ALL,orphanRemoval=true)
     @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<GalertAuxLog>   children;
     
     @ManyToOne(fetch=FetchType.LAZY)

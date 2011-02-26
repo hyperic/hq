@@ -29,6 +29,7 @@ import java.util.Calendar;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 /**
@@ -39,6 +40,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "EAM_CALENDAR_WEEK")
+@PrimaryKeyJoinColumn(name="CALENDAR_WEEK_ID", referencedColumnName = "ID")
 public class WeekEntry
     extends CalendarEntry
 {

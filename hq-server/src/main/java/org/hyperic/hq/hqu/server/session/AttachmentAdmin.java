@@ -36,11 +36,9 @@ import javax.persistence.Table;
 public class AttachmentAdmin
     extends Attachment
 { 
-    private transient String   category;
+    @Column(name="CATEGORY",nullable=false,length=255)
+    private String   category;
     
-    @SuppressWarnings("unused")
-    @Column(name="CATEGORY",nullable=false)
-    private int categoryEnum;
     
     protected AttachmentAdmin() {}
     

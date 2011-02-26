@@ -59,7 +59,7 @@ public class Baseline implements Serializable {
     private Long version;
     
     @ManyToOne
-    @JoinColumn(name="MEASUREMENT_ID",unique=true)
+    @JoinColumn(name="MEASUREMENT_ID")
     @Index(name="METRIC_BASELINE_CALCULATED_IDX")
     @Fetch(FetchMode.JOIN)
     private Measurement measurement;

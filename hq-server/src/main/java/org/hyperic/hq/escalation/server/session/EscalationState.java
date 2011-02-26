@@ -47,8 +47,8 @@ import org.hyperic.hq.auth.domain.AuthzSubject;
  * The escalation state ties an escalation chain to an alert definition. 
  */
 @Entity
-@Table(name="EAM_ESCALATION_STATE", uniqueConstraints = { @UniqueConstraint(name = "alert_def_id_key", columnNames = { "ALERT_TYPE",
-"ALERT_DEF_ID" }) })
+@Table(name="EAM_ESCALATION_STATE", uniqueConstraints = { @UniqueConstraint(name = "alert_def_id_key", columnNames = { "ALERT_DEF_ID","ALERT_TYPE"
+ }) })
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class EscalationState implements Serializable
 {
@@ -58,7 +58,7 @@ public class EscalationState implements Serializable
     @Column(name = "ID")
     private Integer id;
 
-    @Column(name="VERSION_COL")
+    @Column(name="VERSION_COL",nullable=false)
     @Version
     private Long version;
     
@@ -89,6 +89,8 @@ public class EscalationState implements Serializable
     @Index(name="ACKNOWLEDGED_BY_IDX")
     private AuthzSubject acknowledgedBy;
     
+    private transient boolean paused;
+    
     protected EscalationState(){
     }
 
@@ -118,6 +120,14 @@ public class EscalationState implements Serializable
 
     public void setVersion(Long version) {
         this.version = version;
+    }
+    
+    public boolean isPaused() {
+        return paused;
+    }
+
+    public void setPaused(boolean paused) {
+        this.paused = paused;
     }
 
     public int getNextAction() {

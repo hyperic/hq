@@ -42,11 +42,9 @@ import org.hyperic.hq.inventory.domain.Resource;
 public class AttachmentResource
     extends Attachment
 { 
-    @SuppressWarnings("unused")
-    @Column(name="CATEGORY",nullable=false)
-    private int categoryEnum;
     
-    private transient String   category;
+    @Column(name="CATEGORY",nullable=false,length=255)
+    private String   category;
     
     @ManyToOne(cascade={CascadeType.MERGE,CascadeType.PERSIST})
     @JoinColumn(name="RESOURCE_ID",nullable=false)

@@ -43,7 +43,7 @@ public class RoleDashboardConfig
     extends DashboardConfig {
     
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="ROLE_ID")
+    @JoinColumn(name="ROLE_ID",unique=true)
     private Role role;
 
     protected RoleDashboardConfig() {

@@ -50,6 +50,8 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.bizapp.shared.action.SyslogActionConfig;
 import org.hyperic.hq.common.SystemException;
@@ -91,7 +93,7 @@ public class Action implements JSON, Serializable {
     
     @Basic(fetch=FetchType.LAZY)
     @Lob
-    @Column(name="CONFIG",nullable=false)
+    @Column(name="CONFIG",columnDefinition="BLOB")
     private byte[] config;
     
     @ManyToOne(fetch=FetchType.LAZY)
@@ -101,9 +103,11 @@ public class Action implements JSON, Serializable {
     
     @OneToMany(mappedBy="action",fetch=FetchType.LAZY,cascade=CascadeType.ALL)
     @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<AlertActionLog> logEntries = new ArrayList<AlertActionLog>();
     
     @OneToMany(mappedBy="parent",fetch=FetchType.LAZY,cascade=CascadeType.ALL)
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<Action> children = new ArrayList<Action>();
     
     @Column(name="DELETED",nullable=false)

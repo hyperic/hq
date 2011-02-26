@@ -49,6 +49,8 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.AlertAuxLog;
@@ -101,11 +103,13 @@ public class GalertLog implements AlertInterface, Serializable
     @OneToMany(mappedBy="galertLog",cascade=CascadeType.ALL,orphanRemoval=true)
     @OrderBy("id")
     @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<GalertActionLog>         actionLog = new ArrayList<GalertActionLog>();
     
     @OneToMany(mappedBy="alert",cascade=CascadeType.ALL,orphanRemoval=true)
     @OrderBy("id")
     @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private List<GalertAuxLog>               auxLogs = new ArrayList<GalertAuxLog>();
     
     @Formula("(select e.id from EAM_ESCALATION_STATE e where e.alert_id = id and e.alert_def_id = def_id and e.alert_type != -559038737)")

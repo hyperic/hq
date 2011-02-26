@@ -73,7 +73,7 @@ public class ControlSchedule implements Serializable
     
     @Basic(fetch=FetchType.LAZY)
     @Lob
-    @Column(name="SCHEDULEVALUEBYTES",nullable=false)
+    @Column(name="SCHEDULEVALUEBYTES",nullable=false,columnDefinition="BLOB")
     private byte[] scheduleValueBytes;
     
     @Column(name="NEXTFIRETIME",nullable=false)

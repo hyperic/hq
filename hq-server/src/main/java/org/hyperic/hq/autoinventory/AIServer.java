@@ -75,27 +75,27 @@ public class AIServer implements ContainerManagedTimestampTrackable, Serializabl
     
     @Basic(fetch=FetchType.LAZY)
     @Lob
-    @Column(name="CUSTOM_PROPERTIES")
+    @Column(name="CUSTOM_PROPERTIES",columnDefinition="BLOB")
     private byte[] customProperties;
     
     @Basic(fetch=FetchType.LAZY)
     @Lob
-    @Column(name="PRODUCT_CONFIG",length=256)
+    @Column(name="PRODUCT_CONFIG",length=256,columnDefinition="BLOB")
     private byte[] productConfig;
     
     @Basic(fetch=FetchType.LAZY)
     @Lob
-    @Column(name="CONTROL_CONFIG",length=256)
+    @Column(name="CONTROL_CONFIG",length=256,columnDefinition="BLOB")
     private byte[] controlConfig;
     
     @Basic(fetch=FetchType.LAZY)
     @Lob
-    @Column(name="RESPONSETIME_CONFIG",length=256)
+    @Column(name="RESPONSETIME_CONFIG",length=256,columnDefinition="BLOB")
     private byte[] responseTimeConfig;
     
     @Basic(fetch=FetchType.LAZY)
     @Lob
-    @Column(name="MEASUREMENT_CONFIG",length=256)
+    @Column(name="MEASUREMENT_CONFIG",length=256,columnDefinition="BLOB")
     private byte[] measurementConfig;
     
     @Column(name="QUEUESTATUS")

@@ -35,13 +35,13 @@ import javax.persistence.Lob;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="QRTZ_CRON_TRIGGERS")
+@Table(name="QRTZ_BLOB_TRIGGERS")
 public class QzBlobTrigger extends QzTrigger
     implements Serializable {
 
     @Basic(fetch=FetchType.LAZY)
     @Lob
-    @Column(name="BLOB_DATA")
+    @Column(name="BLOB_DATA",columnDefinition="BLOB")
     private byte[] blobData;
 
     

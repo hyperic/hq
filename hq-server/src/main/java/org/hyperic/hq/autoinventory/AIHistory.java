@@ -103,7 +103,7 @@ public class AIHistory implements Serializable
     
     @Basic(fetch=FetchType.LAZY)
     @Lob
-    @Column(name="CONFIG",nullable=false)
+    @Column(name="CONFIG",nullable=false,columnDefinition="BLOB")
     private byte[] config;
 
     /**

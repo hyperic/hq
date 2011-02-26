@@ -39,6 +39,8 @@ import javax.persistence.Version;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.OptimisticLock;
@@ -58,7 +60,7 @@ public class AgentType implements ContainerManagedTimestampTrackable {
     @Column(name = "ID")
     private Integer id;
 
-    @Column(name = "VERSION_COL")
+    @Column(name = "VERSION_COL",nullable=false)
     @Version
     private Long version;
 
@@ -67,6 +69,7 @@ public class AgentType implements ContainerManagedTimestampTrackable {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, mappedBy = "agentType")
     @OptimisticLock(excluded = true)
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<Agent> agents;
 
     @Column(name = "CTIME")

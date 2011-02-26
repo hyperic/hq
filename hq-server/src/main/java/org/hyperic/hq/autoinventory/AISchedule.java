@@ -74,7 +74,7 @@ public class AISchedule implements Serializable
     
     @Basic(fetch=FetchType.LAZY)
     @Lob
-    @Column(name="SCHEDULEVALUEBYTES")
+    @Column(name="SCHEDULEVALUEBYTES",columnDefinition="BLOB")
     private byte[] scheduleValueBytes;
     
     @Column(name="NEXTFIRETIME",nullable=false)
@@ -98,7 +98,7 @@ public class AISchedule implements Serializable
     
     @Basic(fetch=FetchType.LAZY)
     @Lob
-    @Column(name="CONFIG")
+    @Column(name="CONFIG",columnDefinition="BLOB")
     private byte[] config;
 
     /**

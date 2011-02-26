@@ -44,6 +44,8 @@ import javax.persistence.Version;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
@@ -131,28 +133,30 @@ public class AIPlatform implements ContainerManagedTimestampTrackable, Serializa
     
     @Basic(fetch=FetchType.LAZY)
     @Lob
-    @Column(name="CUSTOM_PROPERTIES")
+    @Column(name="CUSTOM_PROPERTIES",columnDefinition="BLOB")
     private byte[] customProperties;
     
     @Basic(fetch=FetchType.LAZY)
     @Lob
-    @Column(name="PRODUCT_CONFIG",length=256)
+    @Column(name="PRODUCT_CONFIG",length=256,columnDefinition="BLOB")
     private byte[] productConfig;
     
     @Basic(fetch=FetchType.LAZY)
     @Lob
-    @Column(name="CONTROL_CONFIG",length=256)
+    @Column(name="CONTROL_CONFIG",length=256,columnDefinition="BLOB")
     private byte[] controlConfig;
     
     @Basic(fetch=FetchType.LAZY)
     @Lob
-    @Column(name="MEASUREMENT_CONFIG",length=256)
+    @Column(name="MEASUREMENT_CONFIG",length=256,columnDefinition="BLOB")
     private byte[] measurementConfig;
     
     @OneToMany(fetch=FetchType.LAZY,mappedBy="aIPlatform",cascade=CascadeType.ALL)
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<AIIp> aiips = new ArrayList<AIIp>();
     
     @OneToMany(fetch=FetchType.LAZY,mappedBy="aIPlatform",cascade=CascadeType.ALL,orphanRemoval=true)
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<AIServer> aiservers =  new ArrayList<AIServer>();
  
    
@@ -534,14 +538,14 @@ public class AIPlatform implements ContainerManagedTimestampTrackable, Serializa
     public boolean isPlatformDevice() {
         return !PlatformDetector.isSupportedPlatform(getPlatformTypeName());
     }
-
-    private AIPlatformValue aipValue = new AIPlatformValue();
+    
     /**
      * @deprecated use (this) AIPlatformValue object
      * @return
      */
     public AIPlatformValue getAIPlatformValue()
     {
+        AIPlatformValue aipValue = new AIPlatformValue();
         aipValue.setAgentToken(
             (getAgentToken() == null) ? "" : getAgentToken());
         aipValue.setQueueStatus(getQueueStatus());

@@ -45,6 +45,8 @@ import javax.persistence.Version;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hyperic.hq.calendar.domain.Calendar;
 import org.springframework.data.graph.annotation.NodeEntity;
 
@@ -64,9 +66,9 @@ public class Role  {
     inverseJoinColumns = {@JoinColumn(name="SUBJECT_ID")})
     private Collection<AuthzSubject> subjects;
     
-    @OneToMany(cascade=CascadeType.ALL)
-    @JoinTable(name="EAM_ROLE_CALENDARS",joinColumns = {@JoinColumn(name="ROLE_ID")})
+    @OneToMany(mappedBy="role",cascade=CascadeType.ALL)
     @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<RoleCalendar> calendars;
       
     @Column(name="NAME",length=100,nullable=false,unique=true)
@@ -81,7 +83,7 @@ public class Role  {
     @Column(name = "ID")
     private Integer id;
     
-    @Column(name="VERSION_COL")
+    @Column(name="VERSION_COL",nullable=false)
     @Version
     private Long   version;
 

@@ -36,12 +36,10 @@ import javax.persistence.Table;
 public class AttachmentMasthead
     extends Attachment
 { 
-    private transient String   category;
+    @Column(name="CATEGORY",nullable=false,length=255)
+    private String   category;
     
-    @SuppressWarnings("unused")
-    @Column(name="CATEGORY",nullable=false)
-    private int categoryEnum;
-    
+   
     protected AttachmentMasthead() {}
     
     AttachmentMasthead(View view, ViewMastheadCategory c) {

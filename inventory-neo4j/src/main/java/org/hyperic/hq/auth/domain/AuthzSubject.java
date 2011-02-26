@@ -38,6 +38,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import org.hibernate.annotations.Cache;
@@ -50,7 +51,7 @@ import org.hyperic.hq.config.domain.Crispo;
 import org.springframework.data.graph.annotation.NodeEntity;
 
 @Entity
-@Table(name="EAM_SUBJECT")
+@Table(name="EAM_SUBJECT",uniqueConstraints={@UniqueConstraint(columnNames={"NAME","DSN"})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @NodeEntity(partial=true)
 public class AuthzSubject  {
@@ -108,7 +109,7 @@ public class AuthzSubject  {
     @Column(name = "ID")
     private Integer id;
 
-    @Column(name="VERSION_COL")
+    @Column(name="VERSION_COL",nullable=false)
     @Version
     private Long version;
     

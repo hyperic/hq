@@ -38,6 +38,9 @@ import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 @Entity
 @Table(name="QRTZ_JOB_DETAILS")
 public class QzJobDetail  implements Serializable {
@@ -65,13 +68,15 @@ public class QzJobDetail  implements Serializable {
     
     @Basic(fetch=FetchType.LAZY)
     @Lob
-    @Column(name="JOB_DATA")
+    @Column(name="JOB_DATA",columnDefinition="BLOB")
     private byte[] jobData;
     
     @OneToMany(mappedBy="jobDetails",cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<QzJobListener> jobListeners;
     
     @OneToMany(mappedBy="jobDetail",cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<QzTrigger> triggers;
 
    

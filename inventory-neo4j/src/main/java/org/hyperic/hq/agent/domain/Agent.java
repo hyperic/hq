@@ -59,7 +59,7 @@ public class Agent implements ContainerManagedTimestampTrackable {
     @Column(name = "AGENTTOKEN", length = 100, nullable = false, unique = true)
     private String agentToken;
 
-    @Column(name = "VERSION", length = 20)
+    @Column(name = "VERSION", length = 50)
     private String agentVersion;
 
     @Column(name = "UNIDIRECTIONAL", nullable = false)
@@ -82,7 +82,7 @@ public class Agent implements ContainerManagedTimestampTrackable {
     @Column(name = "MTIME")
     private Long modifiedTime;
 
-    @Column(name = "VERSION_COL")
+    @Column(name = "VERSION_COL",nullable=false)
     @Version
     private Long version;
 

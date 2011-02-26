@@ -42,6 +42,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 @Entity
 @Table(name="QRTZ_TRIGGERS")
 @Inheritance(strategy=InheritanceType.JOINED)
@@ -88,7 +91,7 @@ public class QzTrigger  implements java.io.Serializable {
     
     @Basic(fetch=FetchType.LAZY)
     @Lob
-    @Column(name="JOB_DATA")
+    @Column(name="JOB_DATA",columnDefinition="BLOB")
     private byte[] jobData;
     
     @ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
@@ -97,6 +100,7 @@ public class QzTrigger  implements java.io.Serializable {
     private QzJobDetail jobDetail;
     
     @OneToMany(mappedBy="trigger",cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<QzTriggerListener> triggerListeners;
     
     @Column(name="PRIORITY")

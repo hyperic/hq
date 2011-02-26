@@ -45,6 +45,8 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertConditionValue;
@@ -97,6 +99,7 @@ public class AlertCondition implements Serializable {
     
     @OneToMany(mappedBy="condition",cascade=CascadeType.ALL)
     @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<AlertConditionLog> logEntries;
 
     protected AlertCondition() {

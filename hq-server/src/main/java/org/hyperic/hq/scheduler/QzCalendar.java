@@ -45,7 +45,7 @@ public class QzCalendar  implements Serializable {
     
     @Basic(fetch=FetchType.LAZY)
     @Lob
-    @Column(name="CALENDAR",nullable=false)
+    @Column(name="CALENDAR",nullable=false,columnDefinition="BLOB")
     private byte[] calendar;
 
     public QzCalendar() {

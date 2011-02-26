@@ -47,6 +47,8 @@ import javax.persistence.Version;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.OptimisticLock;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.inventory.domain.Resource;
@@ -54,7 +56,7 @@ import org.hyperic.hq.inventory.domain.Resource;
 @Entity
 @Table(name="EAM_AUDIT")
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name="KLAZZ")
+@DiscriminatorColumn(name="KLAZZ",length=255)
 public abstract class Audit implements Serializable
 {
     @Id
@@ -114,6 +116,7 @@ public abstract class Audit implements Serializable
     
     @OneToMany(mappedBy="parent",fetch=FetchType.LAZY,cascade=CascadeType.ALL,orphanRemoval=true)
     @OptimisticLock(excluded=true)
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<Audit>      children = new ArrayList<Audit>();
     
     protected Audit() {}

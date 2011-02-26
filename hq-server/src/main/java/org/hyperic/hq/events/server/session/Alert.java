@@ -50,6 +50,8 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.OptimisticLock;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.context.Bootstrap;
@@ -90,12 +92,14 @@ public class Alert implements AlertInterface, Serializable
     @OptimisticLock(excluded=true)
     @OrderBy("timeStamp, id")
     @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<AlertActionLog>     actionLog    = new ArrayList<AlertActionLog>();
     
     @OneToMany(mappedBy="alert",fetch=FetchType.LAZY,cascade=CascadeType.ALL)
     @OptimisticLock(excluded=true)
     @OrderBy("id")
     @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<AlertConditionLog>      conditionLog = new ArrayList<AlertConditionLog>();
     
     @Formula("select e.id from EAM_ESCALATION_STATE e where e.alert_id = id and e.alert_type = -559038737")

@@ -54,7 +54,7 @@ public class MonitorableType implements Serializable {
     @Version
     private Long version;
     
-    @Column(name="NAME",nullable=false,unique=true,length=100)
+    @Column(name="NAME",nullable=false,length=100)
     @Index(name="TYPE_NAME_IDX")
     private String name;
     
