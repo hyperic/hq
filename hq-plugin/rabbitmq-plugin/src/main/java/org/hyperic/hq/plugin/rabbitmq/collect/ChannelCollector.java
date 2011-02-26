@@ -44,10 +44,10 @@ public class ChannelCollector extends RabbitMQListCollector {
     public void collect(HypericRabbitAdmin rabbitAdmin) {
         Properties props = getProperties();
         String chName = props.getProperty(MetricConstants.CHANNEL);
+        logger.debug("[collect] RabbitChannel=" + chName);
 
         try {
             RabbitChannel c = rabbitAdmin.getChannel(chName);
-            logger.debug("[collect] RabbitChannel=" + c.getName());
             setAvailability(c.getIdleSince() == null ? Metric.AVAIL_UP : Metric.AVAIL_PAUSED);
             setValue("idleTime", c.getIdleSince() == null ? 0 : new Date().getTime() - c.getIdleSince().getTime());
             setValue("consumerCount", c.getConsumerCount());

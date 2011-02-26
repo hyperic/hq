@@ -14,15 +14,15 @@ import org.hyperic.hq.product.MetricValue;
  */
 public abstract class RabbitMQListCollector extends RabbitMQDefaultCollector {
 
-    @Override
-    public final MetricValue getValue(Metric metric, CollectorResult result) {
-        MetricValue res = result.getMetricValue(metric.getAttributeName());
-        if (metric.getAttributeName().endsWith(Metric.ATTR_AVAIL)) {
-            if (res.getValue() != Metric.AVAIL_UP) {
-                res = new MetricValue(Metric.AVAIL_DOWN, System.currentTimeMillis());
-            }
-            getLog().debug("[getValue] metric=" + metric.getAttributeName() + " res=" + res.getValue());
-        }
-        return res;
-    }
+//    @Override
+//    public final MetricValue getValue(Metric metric, CollectorResult result) {
+//        MetricValue res = result.getMetricValue(metric.getAttributeName());
+//        if (metric.getAttributeName().endsWith(Metric.ATTR_AVAIL)) {
+//            if (res.getValue() != Metric.AVAIL_UP) {
+//                res = new MetricValue(Metric.AVAIL_DOWN, System.currentTimeMillis());
+//            }
+//            getLog().debug("[getValue] metric=" + metric.getAttributeName() + " res=" + res.getValue());
+//        }
+//        return res;
+//    }
 }
