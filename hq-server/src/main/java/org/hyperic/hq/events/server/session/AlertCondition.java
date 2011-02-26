@@ -25,10 +25,26 @@
 
 package org.hyperic.hq.events.server.session;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.hyperic.hibernate.PersistedObject;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertConditionValue;
@@ -38,128 +54,174 @@ import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.shared.ResourceLogEvent;
 import org.hyperic.util.units.FormattedNumber;
 
-public class AlertCondition
-    extends PersistedObject {
-    private int _type;
-    private boolean _required;
-    private int _measurementId;
-    private String _name;
-    private String _comparator;
-    private double _threshold;
-    private String _optionStatus;
-    private RegisteredTrigger _trigger;
-    private Collection _logEntries;
+@Entity
+@Table(name="EAM_ALERT_CONDITION")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+public class AlertCondition implements Serializable {
+    
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
 
-    private AlertConditionValue _value;
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
+    
+    @Column(name="TYPE",nullable=false)
+    private int type;
+    
+    @Column(name="REQUIRED",nullable=false)
+    private boolean required;
+    
+    @Column(name="MEASUREMENT_ID")
+    private int measurementId;
+    
+    @Column(name="NAME",length=100)
+    private String name;
+    
+    @Column(name="COMPARATOR",length=2)
+    private String comparator;
+    
+    @Column(name="THRESHOLD")
+    private double threshold;
+    
+    @Column(name="OPTION_STATUS",length=25)
+    private String optionStatus;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="TRIGGER_ID")
+    @Index(name="ALERT_COND_TRIGGER_ID_IDX")
+    private RegisteredTrigger trigger;
+    
+    @OneToMany(mappedBy="condition",cascade=CascadeType.ALL)
+    @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+    private Collection<AlertConditionLog> logEntries;
 
     protected AlertCondition() {
     }
 
+    @SuppressWarnings("unchecked")
     AlertCondition(AlertConditionValue val, RegisteredTrigger trigger) {
-        _type = val.getType();
-        _required = val.getRequired();
-        _measurementId = val.getMeasurementId();
-        _name = val.getName();
-        _comparator = val.getComparator();
-        _threshold = val.getThreshold();
-        _optionStatus = val.getOption();
-        _trigger = trigger;
-        _logEntries = Collections.EMPTY_LIST;
+        type = val.getType();
+        required = val.getRequired();
+        measurementId = val.getMeasurementId();
+        name = val.getName();
+        comparator = val.getComparator();
+        threshold = val.getThreshold();
+        optionStatus = val.getOption();
+        this.trigger = trigger;
+        logEntries = Collections.EMPTY_LIST;
+    }
+
+    
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 
     public int getType() {
-        return _type;
+        return type;
     }
 
     protected void setType(int type) {
-        _type = type;
+        this.type = type;
     }
 
     public boolean isRequired() {
-        return _required;
+        return required;
     }
 
     protected void setRequired(boolean required) {
-        _required = required;
+        this.required = required;
     }
 
     public int getMeasurementId() {
-        return _measurementId;
+        return measurementId;
     }
 
     protected void setMeasurementId(int measurementId) {
-        _measurementId = measurementId;
+        this.measurementId = measurementId;
     }
 
     public String getName() {
-        return _name;
+        return name;
     }
 
     protected void setName(String name) {
-        _name = name;
+        this.name = name;
     }
 
     public String getComparator() {
-        return _comparator;
+        return comparator;
     }
 
     protected void setComparator(String comparator) {
-        _comparator = comparator;
+        this.comparator = comparator;
     }
 
     public double getThreshold() {
-        return _threshold;
+        return threshold;
     }
 
     protected void setThreshold(double threshold) {
-        _threshold = threshold;
+        this.threshold = threshold;
     }
 
     public String getOptionStatus() {
-        return _optionStatus;
+        return optionStatus;
     }
 
     protected void setOptionStatus(String optionStatus) {
-        _optionStatus = optionStatus;
+        this.optionStatus = optionStatus;
     }
 
     public RegisteredTrigger getTrigger() {
-        return _trigger;
+        return trigger;
     }
 
     protected void setTrigger(RegisteredTrigger trigger) {
-        _trigger = trigger;
+        this.trigger = trigger;
     }
 
-    public Collection getLogEntries() {
-        return Collections.unmodifiableCollection(_logEntries);
+    public Collection<AlertConditionLog> getLogEntries() {
+        return Collections.unmodifiableCollection(logEntries);
     }
 
-    protected Collection getLogEntriesBag() {
-        return _logEntries;
+    protected Collection<AlertConditionLog> getLogEntriesBag() {
+        return logEntries;
     }
 
-    protected void setLogEntriesBag(Collection logEntries) {
-        _logEntries = logEntries;
+    protected void setLogEntriesBag(Collection<AlertConditionLog> logEntries) {
+        this.logEntries = logEntries;
     }
 
     public AlertConditionValue getAlertConditionValue() {
-        if (_value == null) {
-            _value = new AlertConditionValue();
-        }
-
-        _value.setId(getId());
-        _value.setType(getType());
-        _value.setRequired(isRequired());
-        _value.setMeasurementId(getMeasurementId());
-        _value.setName(getName() == null ? "" : getName());
-        _value.setComparator(getComparator() == null ? "" : getComparator());
-        _value.setThreshold(getThreshold());
-        _value.setOption(getOptionStatus() == null ? "" : getOptionStatus());
+        AlertConditionValue value = new AlertConditionValue();
+        value.setId(getId());
+        value.setType(getType());
+        value.setRequired(isRequired());
+        value.setMeasurementId(getMeasurementId());
+        value.setName(getName() == null ? "" : getName());
+        value.setComparator(getComparator() == null ? "" : getComparator());
+        value.setThreshold(getThreshold());
+        value.setOption(getOptionStatus() == null ? "" : getOptionStatus());
         if (getTrigger() != null) {
-            _value.setTriggerId(getTrigger().getId());
+            value.setTriggerId(getTrigger().getId());
         }
-        return _value;
+        return value;
     }
 
     public void setAlertConditionValue(AlertConditionValue val) {
@@ -227,5 +289,26 @@ public class AlertCondition
         }
 
         return text.toString();
+    }
+    
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof AlertCondition)) {
+            return false;
+        }
+        Integer objId = ((AlertCondition)obj).getId();
+  
+        return getId() == objId ||
+        (getId() != null && 
+         objId != null && 
+         getId().equals(objId));     
+    }
+
+    public int hashCode() {
+        int result = 17;
+        result = 37*result + (getId() != null ? getId().hashCode() : 0);
+        return result;      
     }
 }

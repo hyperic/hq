@@ -25,39 +25,88 @@
 
 package org.hyperic.hq.scheduler;
 
-public class QzJobListenerId  implements java.io.Serializable {
+import java.io.Serializable;
 
-    // Fields
-    private String _jobName;
-    private String _jobGroup;
-    private String _jobListener;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
 
-    // Constructors
+@Embeddable
+public class QzJobListenerId  implements Serializable {
+
+    @Column(name="JOB_NAME",nullable=false,length=200)
+    private String jobName;
+    
+    @Column(name="JOB_GROUP",nullable=false,length=200)
+    private String jobGroup;
+    
+    @Column(name="JOB_LISTENER",nullable=false,length=200)
+    private String jobListener;
+
+    
     public QzJobListenerId() {
     }
 
-    // Property accessors
+  
     public String getJobName() {
-        return _jobName;
+        return jobName;
     }
     
     public void setJobName(String jobName) {
-        _jobName = jobName;
+        this.jobName = jobName;
     }
     
     public String getJobGroup() {
-        return _jobGroup;
+        return jobGroup;
     }
     
     public void setJobGroup(String jobGroup) {
-        _jobGroup = jobGroup;
+        this.jobGroup = jobGroup;
     }
 
     public String getJobListener() {
-        return _jobListener;
+        return jobListener;
     }
     
     public void setJobListener(String jobListener) {
-        _jobListener = jobListener;
+        this.jobListener = jobListener;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((jobGroup == null) ? 0 : jobGroup.hashCode());
+        result = prime * result + ((jobListener == null) ? 0 : jobListener.hashCode());
+        result = prime * result + ((jobName == null) ? 0 : jobName.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        QzJobListenerId other = (QzJobListenerId) obj;
+        if (jobGroup == null) {
+            if (other.jobGroup != null)
+                return false;
+        } else if (!jobGroup.equals(other.jobGroup))
+            return false;
+        if (jobListener == null) {
+            if (other.jobListener != null)
+                return false;
+        } else if (!jobListener.equals(other.jobListener))
+            return false;
+        if (jobName == null) {
+            if (other.jobName != null)
+                return false;
+        } else if (!jobName.equals(other.jobName))
+            return false;
+        return true;
+    }
+    
+    
 }

@@ -25,21 +25,60 @@
 
 package org.hyperic.hq.scheduler;
 
-public class QzLock  implements java.io.Serializable {
+import java.io.Serializable;
 
-    // Fields
-    private String _lockName;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
-    // Constructors
+@Entity
+@Table(name="QRTZ_LOCKS")
+public class QzLock  implements Serializable {
+
+    @Id
+    @Column(name="LOCK_NAME",length=40,nullable=false)
+    private String lockName;
+
+    
     public QzLock() {
     }
 
-    // Property accessors
+  
     public String getLockName() {
-        return _lockName;
+        return lockName;
     }
     
     public void setLockName(String lockName) {
-        _lockName = lockName;
+        this.lockName = lockName;
     }
+
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((lockName == null) ? 0 : lockName.hashCode());
+        return result;
+    }
+
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        QzLock other = (QzLock) obj;
+        if (lockName == null) {
+            if (other.lockName != null)
+                return false;
+        } else if (!lockName.equals(other.lockName))
+            return false;
+        return true;
+    }
+    
+    
 }

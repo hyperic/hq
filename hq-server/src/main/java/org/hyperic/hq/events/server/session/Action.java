@@ -25,13 +25,31 @@
 
 package org.hyperic.hq.events.server.session;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hibernate.PersistedObject;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.bizapp.shared.action.SyslogActionConfig;
 import org.hyperic.hq.common.SystemException;
@@ -49,21 +67,47 @@ import org.hyperic.util.json.JSON;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Action
-    extends PersistedObject
-    implements JSON {
-    private static final Log _log = LogFactory.getLog(Action.class);
+@Entity
+@Table(name="EAM_ACTION")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+public class Action implements JSON, Serializable {
+    
+    private transient final Log log = LogFactory.getLog(Action.class);
 
     public static final String JSON_NAME = "action";
+    
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
 
-    private String _className;
-    private byte[] _config;
-    private Action _parent;
-    private Collection _logEntries = new ArrayList();
-    private Collection<Action> _children = new ArrayList<Action>();
-    private boolean _deleted = false;
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
 
-    private ActionValue _valueObj;
+    @Column(name="CLASSNAME",nullable=false,length=200)
+    private String className;
+    
+    @Basic(fetch=FetchType.LAZY)
+    @Lob
+    @Column(name="CONFIG",nullable=false)
+    private byte[] config;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="PARENT_ID")
+    @Index(name="ACTION_CHILD_IDX")
+    private Action parent;
+    
+    @OneToMany(mappedBy="action",fetch=FetchType.LAZY,cascade=CascadeType.ALL)
+    @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+    private Collection<AlertActionLog> logEntries = new ArrayList<AlertActionLog>();
+    
+    @OneToMany(mappedBy="parent",fetch=FetchType.LAZY,cascade=CascadeType.ALL)
+    private Collection<Action> children = new ArrayList<Action>();
+    
+    @Column(name="DELETED",nullable=false)
+    private boolean deleted = false;
 
     static Action newInstance(JSONObject json)
         throws JSONException {
@@ -131,84 +175,101 @@ public class Action
     protected Action() {
     }
 
+    @SuppressWarnings("unchecked")
     Action(String className, byte[] config, Action parent) {
-        _className = className;
-        _config = config;
-        _parent = parent;
-        _logEntries = Collections.EMPTY_LIST;
-        _children = Collections.EMPTY_LIST;
+        this.className = className;
+        this.config = config;
+        this.parent = parent;
+        logEntries = Collections.EMPTY_LIST;
+        children = Collections.EMPTY_LIST;
+    }
+    
+    
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 
     public String getClassName() {
-        return _className;
+        return className;
     }
 
     protected void setClassName(String className) {
-        _className = className;
+        this.className = className;
     }
 
     public byte[] getConfig() {
-        return ArrayUtil.clone(_config);
+        return ArrayUtil.clone(config);
     }
 
     protected void setConfig(byte[] config) {
-        _config = config;
+        this.config = config;
     }
 
     public Action getParent() {
-        return _parent;
+        return parent;
     }
 
     protected void setParent(Action parent) {
-        _parent = parent;
+        this.parent = parent;
     }
 
     public Collection<Action> getChildren() {
-        return Collections.unmodifiableCollection(_children);
+        return Collections.unmodifiableCollection(children);
     }
 
     protected Collection<Action> getChildrenBag() {
-        return _children;
+        return children;
     }
 
     protected void setChildrenBag(Collection<Action> children) {
-        _children = children;
+        this.children = children;
     }
 
-    public Collection getLogEntries() {
-        return Collections.unmodifiableCollection(_logEntries);
+    public Collection<AlertActionLog> getLogEntries() {
+        return Collections.unmodifiableCollection(logEntries);
     }
 
-    protected Collection getLogEntriesBag() {
-        return _logEntries;
+    protected Collection<AlertActionLog> getLogEntriesBag() {
+        return logEntries;
     }
 
-    protected void setLogEntriesBag(Collection logEntries) {
-        _logEntries = logEntries;
+    protected void setLogEntriesBag(Collection<AlertActionLog> logEntries) {
+        this.logEntries = logEntries;
     }
 
     public boolean isDeleted() {
-        return _deleted;
+        return deleted;
     }
 
     protected void setDeleted(boolean deleted) {
-        _deleted = deleted;
+        this.deleted = deleted;
     }
 
     public ActionValue getActionValue() {
-        if (_valueObj == null)
-            _valueObj = new ActionValue();
-
-        _valueObj.setId(getId());
-        _valueObj.setClassname(getClassName());
-        _valueObj.setConfig(getConfig());
+        ActionValue valueObj = new ActionValue();
+        valueObj.setId(getId());
+        valueObj.setClassname(getClassName());
+        valueObj.setConfig(getConfig());
         if (getParent() != null) {
-            _valueObj.setParentId(getParent().getId());
+            valueObj.setParentId(getParent().getId());
         } else {
-            _valueObj.setParentId(null);
+            valueObj.setParentId(null);
         }
 
-        return _valueObj;
+        return valueObj;
     }
 
     public JSONObject toJSON() {
@@ -219,7 +280,7 @@ public class Action
                                               .put("config", conf.toProperties());
             if (getId() != null) {
                 json.put("id", getId());
-                json.put("_version_", get_version_());
+                json.put("_version_", getVersion());
             }
             return json;
         } catch (EncodingException e) {
@@ -238,7 +299,7 @@ public class Action
         String actionClassName = null;
         try {
             actionClassName = getClassName();
-            Class ac = Class.forName(actionClassName);
+            Class<?> ac = Class.forName(actionClassName);
             ActionInterface action = (ActionInterface) ac.newInstance();
 
             action.init(ConfigResponse.decode(action.getConfigSchema(),
@@ -246,7 +307,7 @@ public class Action
 
             return action;
         } catch (Exception e) {
-            _log.error("Error getting initialized action for " + actionClassName);
+            log.error("Error getting initialized action for " + actionClassName);
             throw new SystemException("Unable to get action", e);
         }
     }
@@ -259,8 +320,8 @@ public class Action
         try {
             return getInitializedAction().execute(alert, info);
         } catch (Exception e) {
-            if (_log.isDebugEnabled()) {
-                _log.debug("Unable to execute action", e);
+            if (log.isDebugEnabled()) {
+                log.debug("Unable to execute action", e);
             }
             throw new ActionExecuteException("Unable to execute action: " +
                                              e.getMessage(), e);
@@ -268,6 +329,28 @@ public class Action
     }
 
     public String toString() {
-        return "(id=" + getId() + ", class=" + _className + ")";
+        return "(id=" + getId() + ", class=" + className + ")";
     }
+    
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof Action)) {
+            return false;
+        }
+        Integer objId = ((Action)obj).getId();
+  
+        return getId() == objId ||
+        (getId() != null && 
+         objId != null && 
+         getId().equals(objId));     
+    }
+
+    public int hashCode() {
+        int result = 17;
+        result = 37*result + (getId() != null ? getId().hashCode() : 0);
+        return result;      
+    }
+
 }

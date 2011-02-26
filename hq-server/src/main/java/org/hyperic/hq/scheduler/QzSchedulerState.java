@@ -25,38 +25,81 @@
 
 package org.hyperic.hq.scheduler;
 
-public class QzSchedulerState  implements java.io.Serializable {
+import java.io.Serializable;
 
-    // Fields
-    private String _instanceName;
-    private long _lastCheckinTime;
-    private long _checkinInterval;
-    // Constructors
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name="QRTZ_SCHEDULER_STATE")
+public class QzSchedulerState  implements Serializable {
+
+   @Id
+   @Column(name="INSTANCE_NAME",length=200,nullable=false)
+    private String instanceName;
+   
+   @Column(name="LAST_CHECKIN_TIME",nullable=false)
+    private long lastCheckinTime;
+   
+   @Column(name="CHECKIN_INTERVAL",nullable=false)
+    private long checkinInterval;
+   
     public QzSchedulerState() {
     }
 
-    // Property accessors
+   
     public String getInstanceName() {
-        return _instanceName;
+        return instanceName;
     }
     
     public void setInstanceName(String instanceName) {
-        _instanceName = instanceName;
+        this.instanceName = instanceName;
     }
 
     public long getLastCheckinTime() {
-        return _lastCheckinTime;
+        return lastCheckinTime;
     }
     
     public void setLastCheckinTime(long lastCheckinTime) {
-        _lastCheckinTime = lastCheckinTime;
+        this.lastCheckinTime = lastCheckinTime;
     }
 
     public long getCheckinInterval() {
-        return _checkinInterval;
+        return checkinInterval;
     }
     
     public void setCheckinInterval(long checkinInterval) {
-        _checkinInterval = checkinInterval;
+        this.checkinInterval = checkinInterval;
     }
+
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((instanceName == null) ? 0 : instanceName.hashCode());
+        return result;
+    }
+
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        QzSchedulerState other = (QzSchedulerState) obj;
+        if (instanceName == null) {
+            if (other.instanceName != null)
+                return false;
+        } else if (!instanceName.equals(other.instanceName))
+            return false;
+        return true;
+    }
+    
+    
 }

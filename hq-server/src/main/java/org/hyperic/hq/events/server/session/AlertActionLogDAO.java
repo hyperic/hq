@@ -42,8 +42,8 @@ public class AlertActionLogDAO
         super(AlertActionLog.class, f);
     }
 
-    public void savePersisted(PersistedObject entity) {
-        save((AlertActionLog) entity);
+    public void savePersisted(AlertActionLog entity) {
+        save(entity);
     }
 
     /**

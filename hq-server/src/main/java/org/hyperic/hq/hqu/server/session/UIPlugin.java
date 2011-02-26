@@ -25,56 +25,103 @@
 
 package org.hyperic.hq.hqu.server.session;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.hyperic.hibernate.PersistedObject;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Version;
 
-public class UIPlugin
-    extends PersistedObject 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
+
+@Entity
+@Table(name="EAM_UI_PLUGIN")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+public class UIPlugin implements Serializable
 { 
-    private String     _name;
-    private String     _pluginVersion;
-    private Collection _views = new ArrayList();
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
+    
+    @Column(name="NAME",nullable=false,length=100,unique=true)
+    private String     name;
+    
+    @Column(name="PLUGIN_VERSION",nullable=false,length=30)
+    private String     pluginVersion;
+    
+    @OneToMany(mappedBy="plugin",cascade=CascadeType.ALL,orphanRemoval=true)
+    private Collection<View> views = new ArrayList<View>();
 
     protected UIPlugin() {}
     
     UIPlugin(String name, String pluginVersion) {
-        _name          = name;
-        _pluginVersion = pluginVersion;
+        this.name          = name;
+        this.pluginVersion = pluginVersion;
     }
     
+    
+    
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
     public String getName() {
-        return _name;
+        return name;
     }
     
     protected void setName(String name){
-        _name = name;
+        this.name = name;
     }
     
     public String getPluginVersion() {
-        return _pluginVersion;
+        return pluginVersion;
     }
     
     protected void setPluginVersion(String pluginVer) {
-        _pluginVersion = pluginVer;
+        pluginVersion = pluginVer;
     }
     
-    public Collection getViews() {
-        return Collections.unmodifiableCollection(_views);
+    public Collection<View> getViews() {
+        return Collections.unmodifiableCollection(views);
     }
     
     void addView(View v) {
         getViewsBag().add(v);
     }
     
-    protected Collection getViewsBag() {
-        return _views;
+    protected Collection<View> getViewsBag() {
+        return views;
     }
     
-    protected void setViewsBag(Collection v) {
-        _views = v;
+    protected void setViewsBag(Collection<View> v) {
+        views = v;
     }
     
     public String toString() {

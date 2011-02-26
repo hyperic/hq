@@ -25,19 +25,60 @@
 
 package org.hyperic.hq.galerts.server.session;
 
-import org.hyperic.hibernate.PersistedObject;
+import java.io.Serializable;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.events.server.session.Action;
 
-public class GalertActionLog  
-    extends PersistedObject
+@Entity
+@Table(name="EAM_GALERT_ACTION_LOG")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+public class GalertActionLog implements Serializable
 {
-    private String       _detail;
-    private GalertLog    _galertLog;
-    private Action       _action;
-    private AuthzSubject _subject;
-    private long         _timeStamp;
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+    
+    @Column(name="DETAIL",nullable=false,length=1024)
+    private String       detail;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="GALERT_ID",nullable=false)
+    @Index(name="GALERT_ACTION_LOG_IDX")
+    private GalertLog    galertLog;
+    
+    @SuppressWarnings("unused")
+    @Column(name="ALERT_TYPE",nullable=false)
+    private int alertTypeEnum;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="ACTION_ID")
+    @Index(name="GALERT_ACTION_ID_IDX")
+    private Action       action;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="SUBJECT_ID")
+    @Index(name="GALERT_ACTION_SUBJECT_ID_IDX")
+    private AuthzSubject subject;
+    
+    @Column(name="TIMESTAMP",nullable=false)
+    private long         timeStamp;
     
     protected GalertActionLog() {
     }
@@ -45,43 +86,53 @@ public class GalertActionLog
     GalertActionLog(GalertLog alert, String detail, Action action,
                     AuthzSubject subject) 
     {
-        _detail    = detail;
-        _galertLog = alert;
-        _action    = action;
-        _subject   = subject;
-        _timeStamp = System.currentTimeMillis();
+        this.detail    = detail;
+        galertLog = alert;
+        this.action    = action;
+        this.subject   = subject;
+        timeStamp = System.currentTimeMillis();
     }
     
+    
+    
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     public String getDetail() {
-        return _detail;
+        return detail;
     }
     
     protected void setDetail(String detail) {
-        _detail = detail;
+        this.detail = detail;
     }
     
     public GalertLog getGalertLog() {
-        return _galertLog;
+        return galertLog;
     }
     
     protected void setGalertLog(GalertLog alert) {
-        _galertLog = alert;
+        galertLog = alert;
     }
     
     public Action getAction() {
-        return _action;
+        return action;
     }
     
     protected void setAction(Action action) {
-        _action = action;
+        this.action = action;
     }
     
     public AuthzSubject getSubject() {
-        return _subject;
+        return subject;
     }
     
     protected void setSubject(AuthzSubject subject) {
-        _subject = subject;
+        this.subject = subject;
     }
 
     protected int getAlertTypeEnum() {
@@ -97,10 +148,32 @@ public class GalertActionLog
     }
 
     public long getTimeStamp() {
-        return _timeStamp;
+        return timeStamp;
     }
     
     protected void setTimeStamp(long stamp) {
-        _timeStamp = stamp;
+        timeStamp = stamp;
     }
+    
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof GalertActionLog)) {
+            return false;
+        }
+        Integer objId = ((GalertActionLog)obj).getId();
+  
+        return getId() == objId ||
+        (getId() != null && 
+         objId != null && 
+         getId().equals(objId));     
+    }
+
+    public int hashCode() {
+        int result = 17;
+        result = 37*result + (getId() != null ? getId().hashCode() : 0);
+        return result;      
+    }
+
 }

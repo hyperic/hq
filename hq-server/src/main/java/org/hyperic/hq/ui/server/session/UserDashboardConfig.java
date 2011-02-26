@@ -25,28 +25,39 @@
 
 package org.hyperic.hq.ui.server.session;
 
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.config.domain.Crispo;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 
+@Entity
+@DiscriminatorValue("USER")
 public class UserDashboardConfig
     extends DashboardConfig {
-    private AuthzSubject _user;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="USER_ID")
+    private AuthzSubject user;
 
     protected UserDashboardConfig() {
     }
 
     UserDashboardConfig(AuthzSubject user, String name, Crispo config) {
         super(name, config);
-        _user = user;
+        this.user = user;
     }
 
     public AuthzSubject getUser() {
-        return _user;
+        return user;
     }
     
     protected void setUser(AuthzSubject user) {
-        _user = user;
+        this.user = user;
     }
     
     public boolean isEditable(AuthzSubject by) {
@@ -56,7 +67,7 @@ public class UserDashboardConfig
     public int hashCode() {
         int hash = super.hashCode();
 
-        hash = hash * 37 + _user.hashCode();
+        hash = hash * 37 + user.hashCode();
         return hash;
     }
     
@@ -72,6 +83,6 @@ public class UserDashboardConfig
         if (!super.equals(oe))
             return false;
 
-        return _user.equals(oe.getUser());
+        return user.equals(oe.getUser());
     }
 }

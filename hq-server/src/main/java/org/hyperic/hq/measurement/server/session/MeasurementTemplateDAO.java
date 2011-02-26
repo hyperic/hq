@@ -241,8 +241,8 @@ public class MeasurementTemplateDAO
         final String templatesql = "INSERT INTO EAM_MEASUREMENT_TEMPL "
                                    + "(id, name, alias, units, collection_type, default_on, "
                                    + "default_interval, designate, monitorable_type_id, "
-                                   + "category_id, template, plugin, ctime, mtime) "
-                                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                                   + "category_id, template, plugin, ctime, mtime, version_col) "
+                                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         final List<MonitorableMeasurementInfo> combinedInfos = new ArrayList<MonitorableMeasurementInfo>();
         for(List<MonitorableMeasurementInfo> info : toAdd.values()) {
             combinedInfos.addAll(info);
@@ -286,6 +286,7 @@ public class MeasurementTemplateDAO
                 stmt.setString(12, pluginName);
                 stmt.setLong(13, current);
                 stmt.setLong(14, current);
+                stmt.setLong(15, 0);
             }
 
             public int getBatchSize() {

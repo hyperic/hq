@@ -25,51 +25,64 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-public class MetricProblem implements java.io.Serializable {
+import java.io.Serializable;
 
-    // Fields    
-    private MeasurementDataId _id;
-    private Integer _type;
-    private long _version_;
+import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Version;
 
-    // Constructors
+@Entity
+@Table(name="EAM_METRIC_PROB")
+public class MetricProblem implements Serializable {
+
+    @EmbeddedId 
+    private MeasurementDataId id;
+    
+    @Column(name="TYPE",nullable=false)
+    private Integer type;
+    
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
+
     public MetricProblem() {
     }
 
     public MetricProblem(MeasurementDataId id, Integer type) {
-        _id = id;
-        _type = type;
+        this.id = id;
+        this.type = type;
     }
 
     public MetricProblem(MeasurementDataId id, Integer type,
                          Integer additional) {
-        _id = id;
-        _type = type;
+        this.id = id;
+        this.type = type;
     }
    
-    // Property accessors
     public MeasurementDataId getId() {
-        return _id;
+        return id;
     }
     
     protected void setId(MeasurementDataId id) {
-        _id = id;
+        this.id = id;
     }
 
-    public long get_version_() {
-        return _version_;
+    public long getVersion() {
+        return version;
     }
 
-    protected void set_version_(long newVer) {
-        _version_ = newVer;
+    protected void setVersion(long newVer) {
+        version = newVer;
     }
 
     public Integer getType() {
-        return _type;
+        return type;
     }
     
     protected void setType(Integer type) {
-        _type = type;
+        this.type = type;
     }
 
     public boolean equals(Object other) {

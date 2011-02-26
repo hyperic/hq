@@ -25,28 +25,40 @@
 
 package org.hyperic.hq.hqu.server.session;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Table;
+
+@Entity
+@Table(name="EAM_UI_ATTACH_ADMIN")
+@PrimaryKeyJoinColumn(name="ATTACH_ID", referencedColumnName = "ID")
 public class AttachmentAdmin
     extends Attachment
 { 
-    private String   _category;
+    private transient String   category;
+    
+    @SuppressWarnings("unused")
+    @Column(name="CATEGORY",nullable=false)
+    private int categoryEnum;
     
     protected AttachmentAdmin() {}
     
     AttachmentAdmin(View view, ViewAdminCategory c) {
         super(view);
-        _category = c.getDescription();
+        category = c.getDescription();
     }
     
     protected String getCategoryEnum() {
-        return _category;
+        return category;
     }
     
     protected void setCategoryEnum(String cat) {
-        _category = cat;
+        category = cat;
     }
     
     public ViewAdminCategory getCategory() {
-        return ViewAdminCategory.findByDescription(_category);
+        return ViewAdminCategory.findByDescription(category);
     }
 
     public String toString() {

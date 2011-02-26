@@ -25,28 +25,70 @@
 
 package org.hyperic.hq.galerts.server.session;
 
-import org.hyperic.hibernate.PersistedObject;
+import java.io.Serializable;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.config.domain.Crispo;
 import org.hyperic.util.config.ConfigResponse;
 
-public class ExecutionStrategyTypeInfo 
-    extends PersistedObject
+
+@Entity
+@Table(name="EAM_EXEC_STRATEGY_TYPES")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+public class ExecutionStrategyTypeInfo implements Serializable
 {
-    private Class _typeClass;
+    
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
+    
+    @Column(name="TYPE_CLASS",nullable=false)
+    private Class<?> typeClass;
     
     protected ExecutionStrategyTypeInfo() {}
 
     ExecutionStrategyTypeInfo(ExecutionStrategyType stratType) {
-        _typeClass = stratType.getClass();
+        typeClass = stratType.getClass();
     }
     
-    public Class getTypeClass() {
-        return _typeClass;
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    public Class<?> getTypeClass() {
+        return typeClass;
     }
     
-    protected void setTypeClass(Class typeClass) {
-        _typeClass = typeClass;
+    protected void setTypeClass(Class<?> typeClass) {
+        this.typeClass = typeClass;
     }
     
     ExecutionStrategyInfo createStrategyInfo(GalertDef def, Crispo config,
@@ -57,7 +99,7 @@ public class ExecutionStrategyTypeInfo
     
     public ExecutionStrategyType getType() {
         try {
-            return (ExecutionStrategyType)_typeClass.newInstance();
+            return (ExecutionStrategyType)typeClass.newInstance();
         } catch(Exception e) {
             throw new SystemException(e);
         }
@@ -65,5 +107,26 @@ public class ExecutionStrategyTypeInfo
     
     public ExecutionStrategy getStrategy(ConfigResponse config) {
         return getType().createStrategy(config);
+    }
+    
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof ExecutionStrategyTypeInfo)) {
+            return false;
+        }
+        Integer objId = ((ExecutionStrategyTypeInfo)obj).getId();
+  
+        return getId() == objId ||
+        (getId() != null && 
+         objId != null && 
+         getId().equals(objId));     
+    }
+
+    public int hashCode() {
+        int result = 17;
+        result = 37*result + (getId() != null ? getId().hashCode() : 0);
+        return result;      
     }
 }

@@ -25,35 +25,87 @@
 
 package org.hyperic.hq.events.server.session;
 
-import org.hyperic.hibernate.PersistedObject;
+import java.io.Serializable;
 
-public class AlertDefinitionState extends PersistedObject {
-    private ResourceAlertDefinition _alertDefinition;
-    private long _lastFired;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapsId;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+@Entity
+@Table(name="EAM_ALERT_DEF_STATE")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+public class AlertDefinitionState implements Serializable {
+    
+    @Id
+    private Integer id;
+    
+    @MapsId 
+    @OneToOne
+    @JoinColumn(name = "ALERT_DEFINITION_ID")
+    private ResourceAlertDefinition alertDefinition;
+    
+    @Column(name="LAST_FIRED",nullable=false)
+    private long lastFired;
 
     AlertDefinitionState() {}
     
     AlertDefinitionState(ResourceAlertDefinition def) {
-        _alertDefinition = def;
-        _lastFired = 0;
+        alertDefinition = def;
+        lastFired = 0;
     }
     
+    
+    
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     public ResourceAlertDefinition getAlertDefinition() {
-        return _alertDefinition;
+        return alertDefinition;
     }
     
     void setAlertDefinition(ResourceAlertDefinition def) { 
-        _alertDefinition = def;
+        alertDefinition = def;
     }
     
     public long getLastFired() {
-        return _lastFired;
+        return lastFired;
     }
 
     void setLastFired(long lastFired) {
-        _lastFired = lastFired;
+        this.lastFired = lastFired;
     }
     
-    
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof AlertDefinitionState)) {
+            return false;
+        }
+        Integer objId = ((AlertDefinitionState)obj).getId();
+  
+        return getId() == objId ||
+        (getId() != null && 
+         objId != null && 
+         getId().equals(objId));     
+    }
+
+    public int hashCode() {
+        int result = 17;
+        result = 37*result + (getId() != null ? getId().hashCode() : 0);
+        return result;      
+    }
 
 }

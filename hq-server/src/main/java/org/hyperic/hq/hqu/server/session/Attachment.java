@@ -25,39 +25,94 @@
 
 package org.hyperic.hq.hqu.server.session;
 
-import org.hyperic.hibernate.PersistedObject;
+import java.io.Serializable;
 
-public class Attachment
-    extends PersistedObject 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
+
+@Entity
+@Table(name="EAM_UI_ATTACHMENT")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+@Inheritance(strategy=InheritanceType.JOINED)
+public class Attachment implements Serializable
 { 
-    private View _view;
-    private long         _attachTime;
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
+    
+    @ManyToOne(cascade={CascadeType.MERGE,CascadeType.PERSIST})
+    @JoinColumn(name="VIEW_ID",nullable=false)
+    @Index(name="UI_ATTACHMENT_VIEW_ID_IDX")
+    private View view;
+    
+    @Column(name="ATTACH_TIME",nullable=false)
+    private long         attachTime;
+    
+    
     
     protected Attachment() {}
     
     Attachment(View view) {
-        _view       = view;
-        _attachTime = System.currentTimeMillis();
+        this.view       = view;
+        attachTime = System.currentTimeMillis();
     }
     
+    
+    
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
     public View getView() {
-        return _view;
+        return view;
     }
     
     protected void setView(View view) {
-        _view = view;
+        this.view = view;
     }
     
     public long getAttachTime() {
-        return _attachTime;
+        return attachTime;
     }
     
     protected void setAttachTime(long attachTime) {
-        _attachTime = attachTime;
+        this.attachTime = attachTime;
     }
 
     public String toString() {
-        return _view.getPath() + " [" + _view.getDescription() + "] attached";
+        return view.getPath() + " [" + view.getDescription() + "] attached";
     }
     
     /**

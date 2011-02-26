@@ -27,32 +27,40 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+
+@Embeddable
 public class SrnId implements Serializable {
-    private int _appdefType;
-    private int _instanceId;
+    
+    @Column(name="APPDEF_TYPE",nullable=false)
+    private int appdefType;
+    
+    @Column(name="INSTANCE_ID",nullable=false)
+    private int instanceId;
 
     public SrnId() {
     }
     
     public SrnId(int appdefType, int instanceId) {
-        _appdefType = appdefType;
-        _instanceId = instanceId;
+        this.appdefType = appdefType;
+        this.instanceId = instanceId;
     }
    
     public int getAppdefType() {
-        return _appdefType;
+        return appdefType;
     }
     
     protected void setAppdefType(int appdefType) {
-        _appdefType = appdefType;
+        this.appdefType = appdefType;
     }
 
     public int getInstanceId() {
-        return _instanceId;
+        return instanceId;
     }
     
     protected void setInstanceId(int  instanceId) {
-        _instanceId = instanceId;
+        this.instanceId = instanceId;
     }
 
     public boolean equals(Object other) {

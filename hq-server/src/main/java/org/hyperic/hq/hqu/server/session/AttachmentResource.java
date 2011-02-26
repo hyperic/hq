@@ -25,13 +25,35 @@
 
 package org.hyperic.hq.hqu.server.session;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.Index;
 import org.hyperic.hq.inventory.domain.Resource;
 
+@Entity
+@Table(name="EAM_UI_ATTACH_RSRC")
+@PrimaryKeyJoinColumn(name="ATTACH_ID", referencedColumnName = "ID")
 public class AttachmentResource
     extends Attachment
 { 
-    private String   _category;
-    private Resource _resource;
+    @SuppressWarnings("unused")
+    @Column(name="CATEGORY",nullable=false)
+    private int categoryEnum;
+    
+    private transient String   category;
+    
+    @ManyToOne(cascade={CascadeType.MERGE,CascadeType.PERSIST})
+    @JoinColumn(name="RESOURCE_ID",nullable=false)
+    @Index(name="UI_ATTACHMENT_RES_ID_IDX")
+    private Resource resource;
+    
+    
     
     protected AttachmentResource() {}
     
@@ -39,32 +61,32 @@ public class AttachmentResource
                        Resource r) 
     {
         super(view);
-        _category = cat.getDescription();
-        _resource = r;
+        category = cat.getDescription();
+        resource = r;
     }
     
     protected String getCategoryEnum() {
-        return _category;
+        return category;
     }
     
     protected void setCategoryEnum(String cat) {
-        _category = cat;
+        category = cat;
     }
     
     public ViewResourceCategory getCategory() {
-        return ViewResourceCategory.findByDescription(_category);
+        return ViewResourceCategory.findByDescription(category);
     }
     
     public Resource getResource() {
-        return _resource;
+        return resource;
     }
     
     protected void setResource(Resource r) {
-        _resource = r;
+        resource = r;
     }
     
     public String toString() {
-        return super.toString() + " (to " + _resource.getName() + " under " +
+        return super.toString() + " (to " + resource.getName() + " under " +
             getCategory().getValue() + ")";
     }
 

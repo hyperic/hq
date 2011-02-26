@@ -25,47 +25,57 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-public class MeasurementDataId implements java.io.Serializable {
+import java.io.Serializable;
 
-    // Fields    
-    private Integer _measurementId;
-    private long _timestamp;
-    private Integer _additional;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
 
-    // Constructors
+@Embeddable
+public class MeasurementDataId implements Serializable {
+
+    @Column(name="MEASUREMENT_ID",nullable=false)
+    private Integer measurementId;
+    
+    @Column(name="TIMESTAMP",nullable=false)
+    private long timestamp;
+    
+    @Column(name="ADDITIONAL")
+    private Integer additional;
+   
+    
     public MeasurementDataId() {
     }
 
     public MeasurementDataId(Integer measurementId, long timestamp,
                              Integer additional) {
-        _measurementId = measurementId;
-        _timestamp = timestamp;
-        _additional = additional;
+        this.measurementId = measurementId;
+        this.timestamp = timestamp;
+        this.additional = additional;
     }
-   
-    // Property accessors
+  
     public Integer getMeasurementId() {
-        return _measurementId;
+        return measurementId;
     }
     
     protected void setMeasurementId(Integer measurementId) {
-        _measurementId = measurementId;
+        this.measurementId = measurementId;
     }
     public long getTimestamp() {
-        return _timestamp;
+        return timestamp;
     }
     
     protected void setTimestamp(long timestamp) {
-        _timestamp = timestamp;
+        this.timestamp = timestamp;
     }
-
-
+    
+    
+    
     public Integer getAdditional() {
-        return _additional;
+        return additional;
     }
 
-    protected void setAdditional(Integer additional) {
-        _additional = additional;
+    public void setAdditional(int additional) {
+        this.additional = additional;
     }
 
     public boolean equals(Object other) {

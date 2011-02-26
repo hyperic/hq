@@ -25,13 +25,32 @@
 
 package org.hyperic.hq.events.server.session;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.hyperic.hibernate.PersistedObject;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.Formula;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
+import org.hibernate.annotations.OptimisticLock;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
@@ -40,19 +59,52 @@ import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertValue;
 
-public class Alert
-    extends PersistedObject
-    implements AlertInterface
+@Entity
+@Table(name="EAM_ALERT")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+public class Alert implements AlertInterface, Serializable
 {
-    private boolean         _fixed;
-    private long            _ctime;
-    private ResourceAlertDefinition _alertDefinition;
-    private Collection      _actionLog    = new ArrayList();
-    private Collection      _conditionLog = new ArrayList();
-    private Long            _stateId;
-    private Long            _ackedBy;
-    private AlertValue      _alertVal;
-    private Boolean         _ackable = null;
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
+    
+    @Column(name="FIXED",nullable=false)
+    private boolean         fixed;
+    
+    @Column(name="CTIME",nullable=false)
+    @Index(name="ALERT_TIME_IDX")
+    private long            ctime;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="ALERT_DEFINITION_ID",nullable=false)
+    @Index(name="ALERT_ALERTDEFINITION_IDX")
+    private ResourceAlertDefinition alertDefinition;
+    
+    @OneToMany(mappedBy="alert",fetch=FetchType.LAZY,cascade=CascadeType.ALL)
+    @OptimisticLock(excluded=true)
+    @OrderBy("timeStamp, id")
+    @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+    private Collection<AlertActionLog>     actionLog    = new ArrayList<AlertActionLog>();
+    
+    @OneToMany(mappedBy="alert",fetch=FetchType.LAZY,cascade=CascadeType.ALL)
+    @OptimisticLock(excluded=true)
+    @OrderBy("id")
+    @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+    private Collection<AlertConditionLog>      conditionLog = new ArrayList<AlertConditionLog>();
+    
+    @Formula("select e.id from EAM_ESCALATION_STATE e where e.alert_id = id and e.alert_type = -559038737")
+    private Long            stateId;
+    
+    @Formula("select e.acknowledged_by from EAM_ESCALATION_STATE e where e.alert_id = id and e.alert_type = -559038737")
+    private Long            ackedBy;
+    
+    private transient Boolean  ackable = null;
     
     public Alert() {
     }
@@ -67,13 +119,31 @@ public class Alert
         //TODO
         setAlertDefinition((ResourceAlertDefinition)def);
     }
+    
+    
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
 
     protected AlertActionLog createActionLog(String detail, Action action,
                                              AuthzSubject fixer)
     {
         AlertActionLog res = new AlertActionLog(this, detail, action, fixer);
 
-        _actionLog.add(res);
+        actionLog.add(res);
         return res;
     }
 
@@ -82,7 +152,7 @@ public class Alert
     {
         AlertConditionLog res = new AlertConditionLog(this, value, cond);
 
-        _conditionLog.add(res);
+        conditionLog.add(res);
         return res;
     }
 
@@ -91,19 +161,19 @@ public class Alert
     }
 
     public boolean isFixed() {
-        return _fixed;
+        return fixed;
     }
 
     protected void setFixed(boolean fixed) {
-        _fixed = fixed;
+        this.fixed = fixed;
     }
 
     public long getCtime() {
-        return _ctime;
+        return ctime;
     }
 
     protected void setCtime(long ctime) {
-        _ctime = ctime;
+        this.ctime = ctime;
     }
 
     public long getTimestamp() {
@@ -111,11 +181,11 @@ public class Alert
     }
 
     public AlertDefinition getAlertDefinition() {
-        return _alertDefinition;
+        return alertDefinition;
     }
 
     protected void setAlertDefinition(ResourceAlertDefinition alertDefinition) {
-        _alertDefinition = alertDefinition;
+        this.alertDefinition = alertDefinition;
     }
 
     public AlertDefinitionInterface getAlertDefinitionInterface() {
@@ -123,71 +193,71 @@ public class Alert
     }
 
     public Collection<AlertActionLog> getActionLog() {
-        return Collections.unmodifiableCollection(_actionLog);
+        return Collections.unmodifiableCollection(actionLog);
     }
 
-    protected Collection getActionLogBag() {
-        return _actionLog;
+    protected Collection<AlertActionLog> getActionLogBag() {
+        return actionLog;
     }
 
-    protected void setActionLogBag(Collection actionLog) {
-        _actionLog = actionLog;
+    protected void setActionLogBag(Collection<AlertActionLog> actionLog) {
+        this.actionLog = actionLog;
     }
 
     private void addActionLog(AlertActionLog aal) {
-        _actionLog.add(aal);
+        actionLog.add(aal);
     }
 
     private void removeActionLog(AlertActionLog aal) {
-        _actionLog.remove(aal);
+        actionLog.remove(aal);
     }
 
-    @SuppressWarnings("unchecked")
+   
     public Collection<AlertConditionLog> getConditionLog() {
-        return Collections.unmodifiableCollection(_conditionLog);
+        return Collections.unmodifiableCollection(conditionLog);
     }
 
-    protected Collection getConditionLogBag() {
-        return _conditionLog;
+    protected Collection<AlertConditionLog> getConditionLogBag() {
+        return conditionLog;
     }
 
-    protected void setConditionLogBag(Collection conditionLog) {
-        _conditionLog = conditionLog;
+    protected void setConditionLogBag(Collection<AlertConditionLog> conditionLog) {
+        this.conditionLog = conditionLog;
     }
 
     private void addConditionLog(AlertConditionLog acl) {
-        _conditionLog.add(acl);
+        conditionLog.add(acl);
     }
 
     private void removeConditionLog(AlertConditionLog acl) {
-        _conditionLog.remove(acl);
+        conditionLog.remove(acl);
     }
 
     protected void setAckedBy(Long ackedBy) {
-        _ackedBy = ackedBy;
+        this.ackedBy = ackedBy;
     }
 
     protected Long getAckedBy() {
-        return _ackedBy;
+        return ackedBy;
     }
 
     protected void setStateId(Long stateId) {
-        _stateId = stateId;
+        this.stateId = stateId;
     }
 
     protected Long getStateId() {
-        return _stateId;
+        return stateId;
     }
 
     public boolean isAckable() {
         // Performing the conditional check to maintain existing functionality
-        return (_ackable == null) ? 
+        return (ackable == null) ? 
                (getStateId() != null && getAckedBy() == null) :
-               _ackable.booleanValue();
+               ackable.booleanValue();
     }
 
     public void setAckable(boolean ackable) {
-        this._ackable = new Boolean(ackable);
+        this.ackable = new Boolean(ackable);
     }
     
     /**
@@ -199,46 +269,43 @@ public class Alert
      * that the Alert should be evicted.
      */
     protected void invalidate() {
-        set_version_(new Long(get_version_() + 1));     // Invalidate caches
+        setVersion(new Long(getVersion() + 1));     // Invalidate caches
     }
 
     public AlertValue getAlertValue() {
-        if (_alertVal == null)
-            _alertVal = new AlertValue();
+        AlertValue alertVal = new AlertValue();
 
-        _alertVal.setId(getId());
-        _alertVal.setAlertDefId(getAlertDefinition().getId());
-        _alertVal.setCtime(getCtime());
-        _alertVal.setFixed(isFixed());
+        alertVal.setId(getId());
+        alertVal.setAlertDefId(getAlertDefinition().getId());
+        alertVal.setCtime(getCtime());
+        alertVal.setFixed(isFixed());
 
-        _alertVal.removeAllConditionLogs();
+        alertVal.removeAllConditionLogs();
 
-        for (Iterator i=getConditionLog().iterator(); i.hasNext(); ) {
-            AlertConditionLog l = (AlertConditionLog)i.next();
-
-            _alertVal.addConditionLog(l.getAlertConditionLogValue());
+        for (AlertConditionLog l  :getConditionLog() ) {
+            alertVal.addConditionLog(l.getAlertConditionLogValue());
         }
-        _alertVal.cleanConditionLog();
+        alertVal.cleanConditionLog();
 
-        _alertVal.removeAllActionLogs();
-        _alertVal.removeAllEscalationLogs();
-        for (Iterator i=getActionLog().iterator(); i.hasNext(); ) {
-            AlertActionLog l = (AlertActionLog)i.next();
-            _alertVal.addActionLog(l);
+        alertVal.removeAllActionLogs();
+        alertVal.removeAllEscalationLogs();
+        for (AlertActionLog l : getActionLog() ) {
+            alertVal.addActionLog(l);
 
             // No action or alert definition means escalation log
             if (l.getAction() == null) { //TODO need this? ||
                 //l.getAction().getAlertDefinition() == null) {
                 
-                _alertVal.addEscalationLog(l);
+                alertVal.addEscalationLog(l);
             }
         }
-        _alertVal.cleanActionLog();
-        _alertVal.cleanEscalationLog();
+        alertVal.cleanActionLog();
+        alertVal.cleanEscalationLog();
 
-        return _alertVal;
+        return alertVal;
     }
 
+    @SuppressWarnings("unchecked")
     protected void setAlertValue(AlertValue val) {
         AlertDefinitionDAO aDao = Bootstrap.getBean(AlertDefinitionDAO.class);
         AlertDefinition def = aDao.findResourceAlertDefById(val.getAlertDefId());
@@ -250,26 +317,26 @@ public class Alert
         setAlertDefinition((ResourceAlertDefinition)def);
         setCtime(val.getCtime());
 
-        for (Iterator i=val.getAddedConditionLogs().iterator(); i.hasNext(); ){
-            AlertConditionLogValue lv = (AlertConditionLogValue)i.next();
+        for (Iterator<AlertConditionLogValue> i=val.getAddedConditionLogs().iterator(); i.hasNext(); ){
+            AlertConditionLogValue lv = i.next();
 
             addConditionLog(aclDao.findById(lv.getId()));
         }
 
-        for (Iterator i=val.getRemovedConditionLogs().iterator(); i.hasNext();){
-            AlertConditionLogValue lv = (AlertConditionLogValue)i.next();
+        for (Iterator<AlertConditionLogValue> i=val.getRemovedConditionLogs().iterator(); i.hasNext();){
+            AlertConditionLogValue lv = i.next();
 
             removeConditionLog(aclDao.findById(lv.getId()));
         }
 
-        for (Iterator i=val.getAddedActionLogs().iterator(); i.hasNext(); ) {
-            AlertActionLog lv = (AlertActionLog)i.next();
+        for (Iterator<AlertActionLog> i=val.getAddedActionLogs().iterator(); i.hasNext(); ) {
+            AlertActionLog lv = i.next();
 
             addActionLog(alDao.findById(lv.getId()));
         }
 
-        for (Iterator i=val.getRemovedActionLogs().iterator(); i.hasNext(); ) {
-            AlertActionLog lv = (AlertActionLog)i.next();
+        for (Iterator<AlertActionLog> i=val.getRemovedActionLogs().iterator(); i.hasNext(); ) {
+            AlertActionLog lv = i.next();
 
             removeActionLog(alDao.findById(lv.getId()));
         }
@@ -279,12 +346,33 @@ public class Alert
      * Get a list of the fields which can be used to sort various queries
      * for alerts.
      */
-    public static List getSortFields() {
+    public static List<AlertSortField> getSortFields() {
         return AlertSortField.getAll(AlertSortField.class);
     }
 
     public String toString() {
-        return "(id=" + getId() + ", alertdef=" + _alertDefinition.getId() +
-               ", createdtime=" + _ctime +")";
+        return "(id=" + getId() + ", alertdef=" + alertDefinition.getId() +
+               ", createdtime=" + ctime +")";
+    }
+    
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof Alert)) {
+            return false;
+        }
+        Integer objId = ((Alert)obj).getId();
+  
+        return getId() == objId ||
+        (getId() != null && 
+         objId != null && 
+         getId().equals(objId));     
+    }
+
+    public int hashCode() {
+        int result = 17;
+        result = 37*result + (getId() != null ? getId().hashCode() : 0);
+        return result;      
     }
 }

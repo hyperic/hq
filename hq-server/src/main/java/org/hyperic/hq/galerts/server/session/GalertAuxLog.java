@@ -25,58 +25,122 @@
 
 package org.hyperic.hq.galerts.server.session;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.hyperic.hibernate.PersistedObject;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
 import org.hyperic.hq.events.AlertAuxLog;
 import org.hyperic.hq.events.AlertAuxLogProvider;
 
-public class GalertAuxLog
-    extends PersistedObject 
+@Entity
+@Table(name="EAM_GALERT_AUX_LOGS")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+public class GalertAuxLog implements Serializable
 { 
-    private long         _timestamp;
-    private GalertLog    _alert;
-    private int          _auxType;
-    private String       _description;
-    private GalertAuxLog _parent;
-    private Collection   _children;
-    private GalertDef    _def;
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
+    
+    @Column(name="TIMESTAMP",nullable=false)
+    private long         timestamp;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="GALERT_ID",nullable=false)
+    @Index(name="AUX_LOG_GALERT_ID")
+    private GalertLog    alert;
+    
+    @Column(name="AUXTYPE",nullable=false)
+    private int          auxType;
+    
+    @Column(name="DESCRIPTION",nullable=false)
+    private String       description;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="PARENT")
+    @Index(name="GALERT_AUX_LOGS_PARENT_IDX")
+    private GalertAuxLog parent;
+    
+    @OneToMany(mappedBy="parent",cascade=CascadeType.ALL,orphanRemoval=true)
+    @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+    private Collection<GalertAuxLog>   children;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="DEF_ID",nullable=false)
+    @Index(name="AUX_LOG_DEF_IDX")
+    private GalertDef    def;
     
     protected GalertAuxLog() {}
     
     GalertAuxLog(GalertLog alert, AlertAuxLog log, GalertAuxLog parent) {
-        _timestamp   = log.getTimestamp();
-        _alert       = alert;
+        timestamp   = log.getTimestamp();
+        this.alert       = alert;
         if (log.getProvider() == null)
-            _auxType = 0;
+            auxType = 0;
         else
-            _auxType = log.getProvider().getCode();
-        _description = log.getDescription();
-        _parent      = parent;
-        _children    = new ArrayList();
+            auxType = log.getProvider().getCode();
+        description = log.getDescription();
+        this.parent      = parent;
+        children    = new ArrayList<GalertAuxLog>();
         
-        if (_parent != null) {
-            _parent.getChildrenBag().add(this);
+        if (parent != null) {
+            parent.getChildrenBag().add(this);
         }
-        _def = alert.getAlertDef();
+        def = alert.getAlertDef();
     }
     
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
     public long getTimestamp() {
-        return _timestamp;
+        return timestamp;
     }
     
     protected void setTimestamp(long timestamp) {
-        _timestamp = timestamp;
+        this.timestamp = timestamp;
     }
     
     public GalertLog getAlert() {
-        return _alert;
+        return alert;
     }
     
     protected void setAlert(GalertLog alert) {
-        _alert = alert;
+        this.alert = alert;
     }
     
     public AlertAuxLogProvider getProvider() {
@@ -84,47 +148,47 @@ public class GalertAuxLog
     }
     
     protected int getAuxType() {
-        return _auxType;
+        return auxType;
     }
     
     protected void setAuxType(int auxType) {
-        _auxType = auxType;
+        this.auxType = auxType;
     }
     
     public String getDescription() {
-        return _description;
+        return description;
     }
     
     protected void setDescription(String description) {
-        _description = description;
+        this.description = description;
     }
     
     public GalertAuxLog getParent() {
-        return _parent;
+        return parent;
     }
     
     protected void setParent(GalertAuxLog parent) {
-        _parent = parent;
+        this.parent = parent;
     }
     
-    protected Collection getChildrenBag() {
-        return _children;
+    protected Collection<GalertAuxLog> getChildrenBag() {
+        return children;
     }
     
-    protected void setChildrenBag(Collection c) {
-        _children = c;
+    protected void setChildrenBag(Collection<GalertAuxLog> c) {
+        children = c;
     }
     
-    public Collection getChildren() {
-        return Collections.unmodifiableCollection(_children);
+    public Collection<GalertAuxLog> getChildren() {
+        return Collections.unmodifiableCollection(children);
     }
     
     public GalertDef getAlertDef() {
-        return _def;
+        return def;
     }
     
     protected void setAlertDef(GalertDef def) {
-        _def = def;
+        this.def = def;
     }
     
     public int hashCode() {

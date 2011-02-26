@@ -25,39 +25,88 @@
 
 package org.hyperic.hq.scheduler;
 
-public class QzTriggerListenerId  implements java.io.Serializable {
+import java.io.Serializable;
 
-    // Fields    
-    private String _triggerName;
-    private String _triggerGroup;
-    private String _triggerListener;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
 
-    // Constructors
+@Embeddable
+public class QzTriggerListenerId  implements Serializable {
+
+    @Column(name="TRIGGER_NAME",nullable=false,length=200)  
+    private String triggerName;
+    
+    @Column(name="TRIGGER_GROUP",nullable=false,length=200)  
+    private String triggerGroup;
+    
+    @Column(name="TRIGGER_LISTENER",nullable=false,length=200)  
+    private String triggerListener;
+
+  
     public QzTriggerListenerId() {
     }
 
-    // Property accessors
+    
     public String getTriggerName() {
-        return _triggerName;
+        return triggerName;
     }
     
     public void setTriggerName(String triggerName) {
-        _triggerName = triggerName;
+        this.triggerName = triggerName;
     }
 
     public String getTriggerGroup() {
-        return _triggerGroup;
+        return triggerGroup;
     }
     
     public void setTriggerGroup(String triggerGroup) {
-        _triggerGroup = triggerGroup;
+        this.triggerGroup = triggerGroup;
     }
 
     public String getTriggerListener() {
-        return _triggerListener;
+        return triggerListener;
     }
     
     public void setTriggerListener(String triggerListener) {
-        _triggerListener = triggerListener;
+        this.triggerListener = triggerListener;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((triggerGroup == null) ? 0 : triggerGroup.hashCode());
+        result = prime * result + ((triggerListener == null) ? 0 : triggerListener.hashCode());
+        result = prime * result + ((triggerName == null) ? 0 : triggerName.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        QzTriggerListenerId other = (QzTriggerListenerId) obj;
+        if (triggerGroup == null) {
+            if (other.triggerGroup != null)
+                return false;
+        } else if (!triggerGroup.equals(other.triggerGroup))
+            return false;
+        if (triggerListener == null) {
+            if (other.triggerListener != null)
+                return false;
+        } else if (!triggerListener.equals(other.triggerListener))
+            return false;
+        if (triggerName == null) {
+            if (other.triggerName != null)
+                return false;
+        } else if (!triggerName.equals(other.triggerName))
+            return false;
+        return true;
+    }
+    
+    
 }

@@ -25,21 +25,58 @@
 
 package org.hyperic.hq.scheduler;
 
-public class QzPausedTriggerGrp  implements java.io.Serializable {
+import java.io.Serializable;
 
-    // Fields
-    private String _triggerGroup;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
-    // Constructors
+@Entity
+@Table(name="QRTZ_PAUSED_TRIGGER_GRPS")
+public class QzPausedTriggerGrp  implements Serializable {
+
+    @Id
+    @Column(name="TRIGGER_GROUP",length=200,nullable=false)
+    private String triggerGroup;
+
+    
     public QzPausedTriggerGrp() {
     }
 
-    // Property accessors
+   
     public String getTriggerGroup() {
-        return _triggerGroup;
+        return triggerGroup;
     }
     
     public void setTriggerGroup(String triggerGroup) {
-        _triggerGroup = triggerGroup;
+        triggerGroup = triggerGroup;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((triggerGroup == null) ? 0 : triggerGroup.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        QzPausedTriggerGrp other = (QzPausedTriggerGrp) obj;
+        if (triggerGroup == null) {
+            if (other.triggerGroup != null)
+                return false;
+        } else if (!triggerGroup.equals(other.triggerGroup))
+            return false;
+        return true;
+    }
+    
+    
 }

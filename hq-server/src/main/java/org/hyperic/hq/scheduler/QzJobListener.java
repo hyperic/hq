@@ -25,29 +25,73 @@
 
 package org.hyperic.hq.scheduler;
 
-public class QzJobListener  implements java.io.Serializable {
+import java.io.Serializable;
 
-    // Fields
-    private QzJobListenerId _id;
-    private QzJobDetail _jobDetails;
+import javax.persistence.CascadeType;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+@Entity
+@Table(name="QRTZ_JOB_LISTENERS")
+public class QzJobListener  implements Serializable {
+
+    @EmbeddedId
+    private QzJobListenerId id;
+    
+    @ManyToOne(fetch=FetchType.LAZY,cascade=CascadeType.ALL)
+    @JoinColumns({@JoinColumn(name="JOB_NAME",referencedColumnName="JOB_NAME",insertable=false,updatable=false),
+        @JoinColumn(name="JOB_GROUP",referencedColumnName="JOB_GROUP",insertable=false,updatable=false)})
+    private QzJobDetail jobDetails;
 
     public QzJobListener() {
     }
 
-    // Property accessors
+   
     public QzJobListenerId getId() {
-        return _id;
+        return id;
     }
     
     public void setId(QzJobListenerId id) {
-        _id = id;
+        this.id = id;
     }
 
     public QzJobDetail getJobDetails() {
-        return _jobDetails;
+        return jobDetails;
     }
     
     public void setJobDetails(QzJobDetail jobDetails) {
-        _jobDetails = jobDetails;
+        this.jobDetails = jobDetails;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        QzJobListener other = (QzJobListener) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        return true;
+    }
+    
+    
 }

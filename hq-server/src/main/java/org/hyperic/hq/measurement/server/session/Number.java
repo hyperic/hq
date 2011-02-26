@@ -25,12 +25,22 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-public class Number implements java.io.Serializable {
+import java.io.Serializable;
 
-    // Fields    
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name="EAM_NUMBERS")
+public class Number implements Serializable {
+
+    @Id
+    @Column(name="I")
     private long _I;
 
-    // Constructors
+    
     public Number() {
     }
 
@@ -38,7 +48,7 @@ public class Number implements java.io.Serializable {
         _I = I;
     }
     
-    // Property accessors
+
     public long getI() {
         return _I;
     }

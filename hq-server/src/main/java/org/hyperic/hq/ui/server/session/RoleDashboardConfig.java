@@ -25,33 +25,41 @@
 
 package org.hyperic.hq.ui.server.session;
 
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.auth.domain.Role;
-import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.config.domain.Crispo;
-import org.hyperic.hq.ui.server.session.DashboardConfig;
 
+@Entity
+@DiscriminatorValue("ROLE")
 public class RoleDashboardConfig
     extends DashboardConfig {
-    private Role _role;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="ROLE_ID")
+    private Role role;
 
     protected RoleDashboardConfig() {
     }
 
     RoleDashboardConfig(Role r, String name, Crispo config) {
         super(name, config);
-        _role = r;
+        role = r;
     }
     
     protected void setRole(Role r) {
-        _role = r;
+        role = r;
     }
     
     public Role getRole() {
-        return _role;
+        return role;
     }
     
     public boolean isEditable(AuthzSubject by) {
@@ -70,7 +78,7 @@ public class RoleDashboardConfig
     public int hashCode() {
         int hash = super.hashCode();
 
-        hash = hash * 37 + _role.hashCode();
+        hash = hash * 37 + role.hashCode();
         return hash;
     }
     
@@ -86,6 +94,6 @@ public class RoleDashboardConfig
         if (!super.equals(oe))
             return false;
 
-        return _role.equals(oe.getRole());
+        return role.equals(oe.getRole());
     }
 }

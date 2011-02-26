@@ -25,32 +25,74 @@
 
 package org.hyperic.hq.scheduler;
 
-public class QzCalendar  implements java.io.Serializable {
+import java.io.Serializable;
 
-    // Fields
-    private String _calendarName;
-    private byte[] _calendar;
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.Table;
 
-    // Constructors
+@Entity
+@Table(name="QRTZ_CALENDARS")
+public class QzCalendar  implements Serializable {
+
+    @Id
+    @Column(name="CALENDAR_NAME",length=200,nullable=false)
+    private String calendarName;
+    
+    @Basic(fetch=FetchType.LAZY)
+    @Lob
+    @Column(name="CALENDAR",nullable=false)
+    private byte[] calendar;
+
     public QzCalendar() {
     }
 
-    // Property accessors
     public String getCalendarName() {
-        return _calendarName;
+        return calendarName;
     }
     
     public void setCalendarName(String calendarName) {
-        _calendarName = calendarName;
+        this.calendarName = calendarName;
     }
 
     public byte[] getCalendar() {
-        return _calendar;
+        return calendar;
     }
     
     public void setCalendar(byte[] calendar) {
-        _calendar = calendar;
+        this.calendar = calendar;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((calendarName == null) ? 0 : calendarName.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        QzCalendar other = (QzCalendar) obj;
+        if (calendarName == null) {
+            if (other.calendarName != null)
+                return false;
+        } else if (!calendarName.equals(other.calendarName))
+            return false;
+        return true;
+    }
+    
+    
 }
 
 

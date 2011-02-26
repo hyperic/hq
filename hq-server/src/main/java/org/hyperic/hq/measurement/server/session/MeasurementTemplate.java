@@ -27,31 +27,85 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
-import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.units.FormattedNumber;
 
-public class MeasurementTemplate 
-    extends PersistedObject
-    implements ContainerManagedTimestampTrackable, Serializable 
+@Entity
+@Table(name="EAM_MEASUREMENT_TEMPL")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+public class MeasurementTemplate implements ContainerManagedTimestampTrackable, Serializable 
 {
-    private String  _name;
-    private String  _alias;
-    private String  _units;
-    private int     _collectionType;
-    private boolean _defaultOn = false;
-    private long    _defaultInterval;
-    private boolean _designate = false;
-    private String  _template;
-    private String  _plugin;
-    private long    _ctime;
-    private long    _mtime;
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
 
-    private MonitorableType _monitorableType;
-    private Category        _category;
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
+    
+    @Column(name="NAME",nullable=false,length=100)
+    private String  name;
+    
+    @Column(name="ALIAS",nullable=false,length=100)
+    private String  alias;
+    
+    @Column(name="UNITS",nullable=false,length=50)
+    private String  units;
+    
+    @Column(name="COLLECTION_TYPE",nullable=false)
+    private int     collectionType;
+    
+    @Column(name="DEFAULT_ON",nullable=false)
+    private boolean defaultOn = false;
+    
+    @Column(name="DEFAULT_INTERVAL",nullable=false)
+    private long    defaultInterval=60000l;
+    
+    @Column(name="DESIGNATE",nullable=false)
+    @Index(name="TEMPL_DESIG_IDX")
+    private boolean designate = false;
+    
+    @Column(name="TEMPLATE",nullable=false,length=2048)
+    private String  template;
+    
+    @Column(name="PLUGIN",nullable=false,length=250)
+    private String  plugin;
+    
+    @Column(name="CTIME",nullable=false)
+    private long    creationTime;
+    
+    @Column(name="MTIME",nullable=false)
+    private long    modifiedTime;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="CATEGORY_ID",nullable=false)
+    @Index(name="TEMPL_CATEGORY_IDX")
+    private Category        category;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="MONITORABLE_TYPE_ID",nullable=false)
+    @Index(name="TEMPL_MONITORABLE_TYPE_ID_IDX")
+    private MonitorableType monitorableType;
+   
 
     public MeasurementTemplate() {
     }
@@ -62,17 +116,35 @@ public class MeasurementTemplate
                                String template, MonitorableType type,
                                Category category, String plugin)
     {
-        _name = name;
-        _alias = alias;
-        _units = units;
-        _collectionType = collectionType;
-        _defaultOn = defaultOn;
-        _defaultInterval = defaultInterval;
-        _designate = designate;
-        _template = template;
-        _monitorableType = type;
-        _category = category;
-        _plugin = plugin;
+        this.name = name;
+        this.alias = alias;
+        this.units = units;
+        this.collectionType = collectionType;
+        this.defaultOn = defaultOn;
+        this.defaultInterval = defaultInterval;
+        this.designate = designate;
+        this.template = template;
+        monitorableType = type;
+        this.category = category;
+        this.plugin = plugin;
+    }
+    
+    
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 
     /**
@@ -92,107 +164,107 @@ public class MeasurementTemplate
     }
 
     public String getName() {
-        return _name;
+        return name;
     }
     
     public void setName(String name) {
-        _name = name;
+        this.name = name;
     }
 
     public String getAlias() {
-        return _alias;
+        return alias;
     }
     
     void setAlias(String alias) {
-        _alias = alias;
+        this.alias = alias;
     }
 
     public String getUnits() {
-        return _units;
+        return units;
     }
     
     void setUnits(String units) {
-        _units = units;
+        this.units = units;
     }
 
     public int getCollectionType() {
-        return _collectionType;
+        return collectionType;
     }
 
     void setCollectionType(int collectionType) {
-        _collectionType = collectionType;
+        this.collectionType = collectionType;
     }
 
     public boolean isDefaultOn() {
-        return _defaultOn;
+        return defaultOn;
     }
     
     void setDefaultOn(boolean defaultOn) {
-        _defaultOn = defaultOn;
+        this.defaultOn = defaultOn;
     }
 
     public long getDefaultInterval() {
-        return _defaultInterval;
+        return defaultInterval;
     }
     
     void setDefaultInterval(long defaultInterval) {
-        _defaultInterval = defaultInterval;
+        this.defaultInterval = defaultInterval;
     }
 
     public boolean isDesignate() {
-        return _designate;
+        return designate;
     }
     
     void setDesignate(boolean designate) {
-        _designate = designate;
+        this.designate = designate;
     }
 
     public String getTemplate() {
-        return _template;
+        return template;
     }
     
     void setTemplate(String template) {
-        _template = template;
+        this.template = template;
     }
 
     public String getPlugin() {
-        return _plugin;
+        return plugin;
     }
     
     void setPlugin(String plugin) {
-        _plugin = plugin;
+        this.plugin = plugin;
     }
 
     public long getCtime() {
-        return _ctime;
+        return creationTime;
     }
     
     void setCtime(long ctime) {
-        _ctime = ctime;
+        creationTime = ctime;
     }
 
     public long getMtime() {
-        return _mtime;
+        return modifiedTime;
     }
     
     void setMtime(long mtime) {
-        _mtime = mtime;
+        modifiedTime = mtime;
     }
 
     public MonitorableType getMonitorableType() {
-        return _monitorableType;
+        return monitorableType;
     }
     
     void setMonitorableType(MonitorableType monitorableType) {
-        _monitorableType = monitorableType;
+        this.monitorableType = monitorableType;
     }
 
     public Category getCategory() {
-        return _category;
+        return category;
     }
     
     void setCategory(Category category) {
-        _category = category;
+        this.category = category;
     }
 
     public boolean isAvailability() {
@@ -216,5 +288,26 @@ public class MeasurementTemplate
     public String formatValue(double val) {
         FormattedNumber th = UnitsConvert.convert(val, getUnits());
         return th.toString();
+    }
+    
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof MeasurementTemplate)) {
+            return false;
+        }
+        Integer objId = ((MeasurementTemplate)obj).getId();
+  
+        return getId() == objId ||
+        (getId() != null && 
+         objId != null && 
+         getId().equals(objId));     
+    }
+
+    public int hashCode() {
+        int result = 17;
+        result = 37*result + (getId() != null ? getId().hashCode() : 0);
+        return result;      
     }
 }

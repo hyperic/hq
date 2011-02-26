@@ -25,121 +25,177 @@
 
 package org.hyperic.hq.scheduler;
 
-public class QzFiredTrigger  implements java.io.Serializable {
+import java.io.Serializable;
 
-    // Fields
-    private String _entryId;
-    private String _triggerName;
-    private String _triggerGroup;
-    private String _instanceName;
-    private long _firedTime;
-    private String _state;
-    private boolean _isVolatile;
-    private String _jobName;
-    private String _jobGroup;
-    private boolean _isStateful;
-    private boolean _requestsRecovery;
-    private int     _priority;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
-    // Constructors
+@Entity
+@Table(name="QRTZ_FIRED_TRIGGERS")
+public class QzFiredTrigger  implements Serializable {
+
+    @Id
+    @Column(name="ENTRY_ID",length=95,nullable=false)
+    private String entryId;
+    
+    @Column(name="TRIGGER_NAME",nullable=false,length=200)
+    private String triggerName;
+    
+    @Column(name="TRIGGER_GROUP",nullable=false,length=200)
+    private String triggerGroup;
+    
+    @Column(name="INSTANCE_NAME",nullable=false,length=200)
+    private String instanceName;
+    
+    @Column(name="FIRED_TIME",nullable=false)
+    private long firedTime;
+    
+    @Column(name="STATE",nullable=false,length=16)
+    private String state;
+    
+    @Column(name="IS_VOLATILE",nullable=false)
+    private boolean isVolatile;
+    
+    @Column(name="JOB_NAME",length=200)
+    private String jobName;
+    
+    @Column(name="JOB_GROUP",length=200)
+    private String jobGroup;
+    
+    @Column(name="IS_STATEFUL")
+    private boolean stateful;
+    
+    @Column(name="REQUESTS_RECOVERY")
+    private boolean requestsRecovery;
+    
+    @Column(name="PRIORITY",nullable=false)
+    private int     priority;
+
+  
     public QzFiredTrigger() {
     }
 
-    // Property accessors
     public String getEntryId() {
-        return _entryId;
+        return entryId;
     }
     
     public void setEntryId(String entryId) {
-        _entryId = entryId;
+        this.entryId = entryId;
     }
 
     public String getTriggerName() {
-        return _triggerName;
+        return triggerName;
     }
     
     public void setTriggerName(String triggerName) {
-        _triggerName = triggerName;
+        this.triggerName = triggerName;
     }
 
     public String getTriggerGroup() {
-        return _triggerGroup;
+        return triggerGroup;
     }
     
     public void setTriggerGroup(String triggerGroup) {
-        _triggerGroup = triggerGroup;
+        this.triggerGroup = triggerGroup;
     }
 
     public String getInstanceName() {
-        return _instanceName;
+        return instanceName;
     }
     
     public void setInstanceName(String instanceName) {
-        _instanceName = instanceName;
+        this.instanceName = instanceName;
     }
 
     public long getFiredTime() {
-        return _firedTime;
+        return firedTime;
     }
     
     public void setFiredTime(long firedTime) {
-        _firedTime = firedTime;
+        this.firedTime = firedTime;
     }
 
     public String getState() {
-        return _state;
+        return state;
     }
     
     public void setState(String state) {
-        _state = state;
+        this.state = state;
     }
 
     public boolean isIsVolatile() {
-        return _isVolatile;
+        return isVolatile;
     }
     
     public void setIsVolatile(boolean isVolatile) {
-        _isVolatile = isVolatile;
+        this.isVolatile = isVolatile;
     }
 
     public String getJobName() {
-        return _jobName;
+        return jobName;
     }
     
     public void setJobName(String jobName) {
-        _jobName = jobName;
+        this.jobName = jobName;
     }
 
     public String getJobGroup() {
-        return _jobGroup;
+        return jobGroup;
     }
     
     public void setJobGroup(String jobGroup) {
-        _jobGroup = jobGroup;
+        this.jobGroup = jobGroup;
     }
 
-    public boolean isIsStateful() {
-        return _isStateful;
+    public boolean isStateful() {
+        return stateful;
     }
     
-    public void setIsStateful(boolean isStateful) {
-        _isStateful = isStateful;
+    public void setStateful(boolean stateful) {
+        this.stateful = stateful;
     }
 
     public boolean isRequestsRecovery() {
-        return _requestsRecovery;
+        return requestsRecovery;
     }
     
     public void setRequestsRecovery(boolean requestsRecovery) {
-        _requestsRecovery = requestsRecovery;
+        this.requestsRecovery = requestsRecovery;
     }
 
     public int getPriority() {
-        return _priority;
+        return priority;
     }
 
     public void setPriority(int priority) {
-        _priority = priority;
+        this.priority = priority;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((entryId == null) ? 0 : entryId.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        QzFiredTrigger other = (QzFiredTrigger) obj;
+        if (entryId == null) {
+            if (other.entryId != null)
+                return false;
+        } else if (!entryId.equals(other.entryId))
+            return false;
+        return true;
     }
 
 }

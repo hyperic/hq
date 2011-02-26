@@ -27,60 +27,76 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+@Entity
+@Table(name="EAM_SRN")
 public class ScheduleRevNum implements Serializable {
 
-    private SrnId _id;
-    private long  _version;
-    private int   _srn;
-    private long  _minInterval = 0;
-    private long  _lastReported = 0;
+    @EmbeddedId
+    private SrnId id;
+    
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
+    
+    @Column(name="SRN",nullable=false)
+    private int   srn;
+    
+    
+    private transient long  minInterval = 0;
+    private transient long  lastReported = 0;
     
     public ScheduleRevNum() {
     }
 
     public ScheduleRevNum(SrnId id, int srn) {
-        _id  = id;
-        _srn = srn;
+        this.id  = id;
+        this.srn = srn;
     }
 
     public SrnId getId() {
-        return _id;
+        return id;
     }
     
     protected void setId(SrnId id) {
-        _id = id;
+        this.id = id;
     }
 
-    public long get_version_() {
-        return _version;
+    public long getVersion() {
+        return version;
     }
     
-    protected void set_version_(long version) {
-        _version = version;
+    protected void setVersion(long version) {
+        this.version = version;
     }
 
     public int getSrn() {
-        return _srn;
+        return srn;
     }
     
     protected void setSrn(int srn) {
-        _srn = srn;
+        this.srn = srn;
     }
 
     public long getMinInterval() {
-        return _minInterval;
+        return minInterval;
     }
     
     public void setMinInterval(long minInterval) {
-        _minInterval = minInterval;
+        this.minInterval = minInterval;
     }
 
     public long getLastReported() {
-        return _lastReported;
+        return lastReported;
     }
     
     public void setLastReported(long lastReported) {
-        _lastReported = lastReported;
+        this.lastReported = lastReported;
     }
 
     public boolean equals(Object obj) {
@@ -91,14 +107,14 @@ public class ScheduleRevNum implements Serializable {
             return false;
         }
         ScheduleRevNum o = (ScheduleRevNum)obj;
-        return _id == o.getId() ||
-               (_id != null && o.getId() != null && _id.equals(o.getId()));
+        return id == o.getId() ||
+               (id != null && o.getId() != null && id.equals(o.getId()));
     }
 
     public int hashCode() {
         int result = 17;
 
-        result = 37*result + (_id != null ? _id.hashCode() : 0);
+        result = 37*result + (id != null ? id.hashCode() : 0);
 
         return result;
     }

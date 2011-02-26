@@ -25,91 +25,155 @@
 
 package org.hyperic.hq.hqu.server.session;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.hyperic.hibernate.PersistedObject;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
 import org.hyperic.hq.hqu.ViewDescriptor;
 
-public abstract class View
-    extends PersistedObject 
+@Entity
+@Table(name="EAM_UI_VIEW")
+@Inheritance(strategy=InheritanceType.JOINED)
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+public abstract class View<T extends Attachment> implements Serializable
 { 
-    private UIPlugin   _plugin;
-    private String     _path;
-    private String     _descr;
-    private AttachType _attachType;
-    private Collection _attachments = new ArrayList();
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
+    
+    @ManyToOne(fetch=FetchType.LAZY,cascade={CascadeType.PERSIST,CascadeType.MERGE})
+    @JoinColumn(name="UI_PLUGIN_ID",nullable=false)
+    @Index(name="UI_PLUGIN_ID_IDX")
+    private UIPlugin   plugin;
+    
+    @Column(name="PATH",nullable=false,length=255,unique=true)
+    private String     path;
+    
+    @Column(name="DESCRIPTION",nullable=false,length=255)
+    private String     descr;
+    
+    @SuppressWarnings("unused")
+    @Column(name="ATTACH_TYPE",nullable=false)
+    private int attachTypeEnum;
+    
+    private transient AttachType attachType;
+    
+    @OneToMany(mappedBy="view",fetch=FetchType.LAZY,cascade=CascadeType.ALL,orphanRemoval=true,targetEntity=Attachment.class)
+    private Collection<T> attachments = new ArrayList<T>();
     
     protected View() {}
     
     protected View(UIPlugin plugin, ViewDescriptor view, AttachType attach) {
-        _plugin     = plugin;
-        _path       = view.getPath();
-        _descr      = view.getDescription();
-        _attachType = attach;
+        this.plugin     = plugin;
+        path       = view.getPath();
+        descr      = view.getDescription();
+        attachType = attach;
     }
     
+    
+    
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
     public UIPlugin getPlugin() {
-        return _plugin;
+        return plugin;
     }
     
     protected void setPlugin(UIPlugin plugin) {
-        _plugin = plugin;
+        this.plugin = plugin;
     }
     
     public String getPath() {
-        return _path;
+        return path;
     }
     
     protected void setPath(String path) {
-        _path = path;
+        this.path = path;
     }
 
     public String getDescription() {
-        return _descr;
+        return descr;
     }
     
     protected void setDescription(String descr) {
-        _descr = descr;
+        this.descr = descr;
     }
     
     protected int getAttachTypeEnum() {
-        return _attachType.getCode();
+        return attachType.getCode();
     }
     
     protected void setAttachTypeEnum(int code) {
-        _attachType = AttachType.findByCode(code);
+        attachType = AttachType.findByCode(code);
     }
     
     public AttachType getAttachType() {
-        return _attachType;
+        return attachType;
     }
     
-    void addAttachment(Attachment a) {
+    void addAttachment(T a) {
         getAttachmentsBag().add(a);
     }
     
-    void removeAttachment(Attachment a) {
+    void removeAttachment(T a) {
         getAttachmentsBag().remove(a);
     }
     
-    protected Collection getAttachmentsBag() {
-        return _attachments;
+    protected Collection<T> getAttachmentsBag() {
+        return attachments;
     }
     
-    protected void setAttachmentsBag(Collection a) {
-        _attachments = a;
+    protected void setAttachmentsBag(Collection<T> a) {
+        attachments = a;
     }
     
-    public Collection getAttachments() {
-        return Collections.unmodifiableCollection(_attachments);
+    public Collection<T> getAttachments() {
+        return Collections.unmodifiableCollection(attachments);
     }
     
     public String toString() {
         return getPath() + " [" + getDescription() + "] attachable to [" +
             getAttachType().getDescription() + "]";
     }
+    
     
     public boolean equals(Object obj) {
         if (!(obj instanceof View)) {
