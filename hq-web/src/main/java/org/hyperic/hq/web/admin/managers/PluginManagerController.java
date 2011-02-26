@@ -1,6 +1,5 @@
 package org.hyperic.hq.web.admin.managers;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,9 +10,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hyperic.hq.appdef.Agent;
+import javax.servlet.http.HttpSession;
+
+import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
 import org.hyperic.hq.appdef.shared.AgentManager;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.product.Plugin;
+import org.hyperic.hq.product.shared.ProductManager;
+import org.hyperic.hq.web.BaseController;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -28,13 +37,17 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 @RequestMapping("/admin/managers/plugin")
-public class PluginManagerController implements ApplicationContextAware {
+public class PluginManagerController extends BaseController implements ApplicationContextAware {
 	private ApplicationContext applicationContext;
 	private AgentManager agentManager;
+	private ProductManager productManager;
 	
 	@Autowired
-	public PluginManagerController(AgentManager agentManager) {
+	public PluginManagerController(AppdefBoss appdefBoss, AuthzBoss authzBoss, 
+			AgentManager agentManager, ProductManager productManager) {
+		super(appdefBoss, authzBoss);
 		this.agentManager = agentManager;
+		this.productManager = productManager;
 	}
 	
 	@RequestMapping(method = RequestMethod.GET)
@@ -53,7 +66,7 @@ public class PluginManagerController implements ApplicationContextAware {
 				return o1.getName().compareTo(o2.getName());
 			}
 		};
-		Map<Plugin, Collection<Agent>> pluginAgentMap = agentManager.getOutOfSyncAgentsByPlugin();
+		Map<Plugin, Collection<AgentPluginStatus>> pluginAgentMap = agentManager.getOutOfSyncAgentsByPlugin();
 		long agentCount = agentManager.getNumAutoUpdatingAgents();
 		
 		Collections.sort(plugins, sortByPluginName);
@@ -84,34 +97,35 @@ public class PluginManagerController implements ApplicationContextAware {
 	}
 	
 	@RequestMapping(method = RequestMethod.POST, value="/upload")
-	public String uploadProductPlugin(@RequestParam MultipartFile plugin, Model model) {
+	public String uploadProductPlugin(@RequestParam MultipartFile plugin, HttpSession session, Model model) {
 		boolean success = false;
 		String messageKey = "";
 		String filename = "";
+		AuthzSubject subject;
 		
-		if (!plugin.isEmpty()) {
-			filename = plugin.getOriginalFilename();
+		try {
+			subject = getAuthzSubject(session);
 			
-			try {
-				File pluginDir = applicationContext.getResource("WEB-INF/hq-plugins").getFile();
-					
-				if (pluginDir.exists()) {
-					String pathToUploadPlugin = pluginDir.getAbsolutePath() + File.separator + filename;
-					File pluginFile = new File(pathToUploadPlugin);
-	
-					plugin.transferTo(pluginFile);
-					
-					success = true;
-					messageKey = "admin.managers.plugin.message.success";
-				}
-			} catch(IOException e) {
-				// TODO
-				e.printStackTrace();
-				
+			if (!plugin.isEmpty() && productManager.deployPluginIfValid(subject, plugin.getBytes())) {
+				success = true;
+				messageKey = "admin.managers.plugin.message.success";
+			} else {
 				messageKey = "admin.managers.plugin.message.io.failure";
 			}
+		} catch (SessionNotFoundException e) {
+			e.printStackTrace();
+			messageKey = "admin.managers.plugin.message.io.failure";
+		} catch (SessionTimeoutException e) {
+			e.printStackTrace();
+			messageKey = "admin.managers.plugin.message.io.failure";
+		} catch (PermissionException e) {
+			e.printStackTrace();
+			messageKey = "admin.managers.plugin.message.io.failure";
+		} catch (IOException e) {
+			e.printStackTrace();
+			messageKey = "admin.managers.plugin.message.io.failure";
 		}
-		
+
 		model.addAttribute("success", success);
 		model.addAttribute("messageKey", messageKey);
 		model.addAttribute("filename", filename);
