@@ -13,6 +13,16 @@
 	width: 60%;
 }
 
+#footer .footerWarning {
+    padding: 5px 0;
+    width: 100%;
+}
+
+#footerContent {
+	overflow: hidden;
+	padding: 5px 0;
+}
+
 #header {
 	width: 100%;
     position: relative;
@@ -69,15 +79,33 @@
     position: absolute;
     right: 10px;
     top: 60px;
-	-moz-border-radius-bottomleft: 5px;
-	-moz-border-radius-bottomright: 5px;
-	-moz-box-shadow: 0 3px 3px;
+}
+
+#headerSearchResults .category {
+    margin-bottom: 3px;
+    padding: 2px;
+}
+
+#headerSearchResults ul {
+    margin: 0;
+    padding: 4px;
+}
+
+#headerSearchResults li {
+    margin: 2px 0;
+    padding: 1px 0 1px 22px;
 }
 
 #searchBox { 
 	padding: 0.25em;
 	padding-left: 20px;
 	width: 250px;
+}
+
+#searchClose {
+    height: 16px;
+    width: 16px;
+    margin-top: 3px;
 }
 
 #headerLogo {
@@ -158,4 +186,8 @@
 #loginPanel .msgPanel {
 	margin-bottom: 9px;
 	padding: 5px 2px 5px 28px;
+}
+
+input[type="submit"], input[type="button"] {
+	padding: 3px 15px;
 }
