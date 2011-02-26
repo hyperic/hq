@@ -97,6 +97,10 @@
 		text-align: right;
 	}
 	
+	#validationMessage {
+	    font-weight: bold;
+	}
+	
 	#progressMessage {
 	    font-weight: bold;
 	    margin-right: 1em;
@@ -106,6 +110,7 @@
 	    color: #00bb00;
 	}
 	
+	#validationMessage.error,
 	#progressMessage.error {
 	    color: #bb0000;
 	}
@@ -140,12 +145,15 @@
 	</div>	
 </section>
 <div id="uploadPanel" style="visibility:hidden;">
-	<form id="uploadForm" name="uploadForm" action="<spring:url value="/app/admin/managers/plugin/upload" />" method="POST" enctype="multipart/form-data">
-		<fieldset>
-			<legend><fmt:message key="admin.managers.plugin.upload.dialog.instruction" /></legend>
-			<label for="plugin"><fmt:message key="admin.managers.plugin.upload.dialog.label" /></label><br/>
+	<form id="uploadForm" name="uploadForm" onsubmit="return false;" method="POST" enctype="multipart/form-data">
+		<strong><fmt:message key="admin.managers.plugin.upload.dialog.instruction" /></strong>
+		<p>
+			<span><fmt:message key="admin.managers.plugin.upload.dialog.label" /></span>
+		</p>
+		<p>
 			<input type="file" id="plugin" name="plugin" />
-		</fieldset>
+		</p>
+		<p id="validationMessage" class="error" style="opacity:0;">&nbsp;</p>
 		<div>
 			<input id="uploadButton" type="submit" name="upload" value="<fmt:message key="admin.managers.plugin.button.upload" />" />
 			<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.cancel" /></a>
@@ -249,6 +257,25 @@
 			});
 		});
 		dojo.connect(dojo.byId("uploadForm"), "onsubmit", function(e) {
+			var filePath = dojo.byId("plugin").value;
+			var ext = filePath.substr(filePath.length - 4);
+			
+			if (ext != ".jar" || ext != ".xml") {
+				dojo.byId("validationMessage").innerHTML = "<fmt:message key="admin.managers.plugin.message.invalid.file.extension" />";
+				var anim = [dojo.fadeIn({
+								node: "validationMessage",
+								duration: 500
+							}),
+							dojo.fadeOut({
+								node: "validationMessage",
+								delay: 5000,
+								duration: 500
+							})];
+				dojo.fx.chain(anim).play();
+				
+				return false;
+			}
+			
 			dojo.io.iframe.send({
 				form: "uploadForm",
 				handleAs: "json",
