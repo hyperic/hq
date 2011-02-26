@@ -26,6 +26,9 @@
 
 package org.hyperic.hq.hqu.rendit.helpers
 
+import org.hyperic.hq.appdef.shared.AppdefEntityID
+import org.hyperic.hq.auth.shared.SessionManager
+import org.hyperic.hq.bizapp.shared.MeasurementBoss
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate
 import org.hyperic.hq.measurement.shared.MeasurementManager;
@@ -33,12 +36,14 @@ import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplateSortField
 import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.measurement.MeasurementConstants
 import org.hyperic.hq.measurement.server.session.Measurement
 import org.hyperic.util.pager.PageControl
 
 class MetricHelper extends BaseHelper {
     private tmplMan = Bootstrap.getBean(TemplateManager.class)
     private measMan = Bootstrap.getBean(MeasurementManager.class)
+    private measBoss = Bootstrap.getBean(MeasurementBoss.class)
 
     MetricHelper(AuthzSubject user) {
         super(user)
@@ -112,6 +117,24 @@ class MetricHelper extends BaseHelper {
 
      Measurement findMeasurementById(int id) {
          measMan.getMeasurement(id)
+     }
+     
+     Map getMetricsSummary(List resources, long begin, long end) {
+		def mgr = SessionManager.instance
+		def sessionId = mgr.put(user)
+		def aeids = []
+       
+		resources.each { r ->
+       		aeids << r.entityId
+		}
+       
+		return measBoss.findMetrics(sessionId,
+           aeids as AppdefEntityID[],
+           MeasurementConstants.FILTER_NONE,
+           null,
+           begin,
+           end,
+           false) 
      }
 
     /**
