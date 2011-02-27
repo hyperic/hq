@@ -347,8 +347,8 @@ public class ProductManagerImpl implements ProductManager {
         return true;
     }
 
-    private void updatePlugin(String pluginName) throws VetoException, PluginNotFoundException,
-        NotFoundException {
+    private void updatePlugin(String pluginName)
+    throws VetoException, PluginNotFoundException, NotFoundException {
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
         ProductPluginManager ppm = getProductPluginManager();

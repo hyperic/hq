@@ -1128,7 +1128,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                 }
                 File file = new File(files[i][0]);
                 FileData fileData = new FileData(files[i][1], file.length(), modes[i]);
-                String md5sum = MD5.getDigestString(file);
+                String md5sum = MD5.getMD5Checksum(file);
                 fileData.setMD5CheckSum(md5sum);
                 FileInputStream is = new FileInputStream(file);
                 data.add(fileData);
