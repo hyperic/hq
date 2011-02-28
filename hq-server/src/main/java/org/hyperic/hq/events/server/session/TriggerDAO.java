@@ -41,6 +41,10 @@ public class TriggerDAO
 {
     private final Log log = LogFactory.getLog(TriggerDAO.class);
     
+    protected TriggerDAO() {
+        super();
+    }
+    
     @Autowired
     public TriggerDAO(SessionFactory sessionFactory) {
         super(RegisteredTrigger.class, sessionFactory);

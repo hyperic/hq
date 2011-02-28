@@ -38,7 +38,6 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.server.session.CrispoDAO;
 import org.hyperic.hq.config.domain.Crispo;
 import org.hyperic.hq.inventory.data.ResourceTypeDao;
-import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -48,12 +47,18 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class AuthzSubjectDAO {
+    
+
     private CrispoDAO crispoDao;
     private RoleDAO roleDAO;
     private ResourceTypeDao resourceTypeDao;
     @PersistenceContext
     private EntityManager entityManager;
    
+    protected AuthzSubjectDAO() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
 
     @Autowired
     public AuthzSubjectDAO( CrispoDAO crispoDAO, 

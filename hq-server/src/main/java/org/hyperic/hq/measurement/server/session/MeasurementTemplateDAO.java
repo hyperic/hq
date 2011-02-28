@@ -59,6 +59,10 @@ public class MeasurementTemplateDAO
     private static final int ALIAS_LIMIT = 100;
 
     private JdbcTemplate jdbcTemplate;
+    
+    protected MeasurementTemplateDAO() {
+        super();
+    }
 
     @Autowired
     public MeasurementTemplateDAO(SessionFactory f, CategoryDAO categoryDAO,

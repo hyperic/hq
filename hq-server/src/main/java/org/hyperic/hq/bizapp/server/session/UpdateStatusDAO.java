@@ -36,6 +36,10 @@ import org.springframework.stereotype.Repository;
 public class UpdateStatusDAO
     extends HibernateDAO
 {
+    protected UpdateStatusDAO() {
+        super();
+    }
+    
     @Autowired
     public UpdateStatusDAO(SessionFactory f) {
         super(UpdateStatus.class, f);

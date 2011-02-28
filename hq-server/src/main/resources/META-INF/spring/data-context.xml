@@ -60,10 +60,12 @@
 		<constructor-arg ref="preloadCaches" />
 	</bean>
 	
-	<jpa:repositories base-package="org.hyperic.hq.*.data">
-		<!-- <repository:exclude-filter type="regex" expression=".*DAO"/>  -->
-	</jpa:repositories>
+	<!-- TODO remove below bean definition once all DAO classes deleted -->
+	<bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor">
+		<property name="proxyTargetClass" value="true"/>
+	</bean>
 	
+	<jpa:repositories base-package="org.hyperic.hq.*.data"/>
 
 	<util:list id="preloadCaches">
 		<value>org.hyperic.hq.agent.domain.AgentType</value>

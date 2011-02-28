@@ -56,6 +56,13 @@ public class AlertDefinitionDAO implements AlertDefinitionDAOInterface {
     private ResourceTypeDao resourceTypeDao;
     @PersistenceContext
     private EntityManager entityManager;
+    
+    
+
+
+    protected AlertDefinitionDAO() {
+        super();
+    }
 
 
     @Autowired

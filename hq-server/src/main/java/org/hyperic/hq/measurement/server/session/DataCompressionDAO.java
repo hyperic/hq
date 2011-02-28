@@ -53,11 +53,19 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class DataCompressionDAO {
+   
+
     private JdbcTemplate jdbcTemplate;
     private SessionFactory sessionFactory;
     private final Log log = LogFactory.getLog(DataCompressionDAO.class);
     private static final String MEAS_VIEW = MeasTabManagerUtil.MEAS_VIEW;
     private static final String TAB_DATA = MeasurementConstants.TAB_DATA;
+    
+    protected DataCompressionDAO() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+    
 
     @Autowired
     public DataCompressionDAO(JdbcTemplate jdbcTemplate, SessionFactory sessionFactory) {

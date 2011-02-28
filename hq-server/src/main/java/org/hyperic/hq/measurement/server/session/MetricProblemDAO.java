@@ -42,6 +42,10 @@ import org.springframework.stereotype.Repository;
 public class MetricProblemDAO
     extends HibernateDAO<MetricProblem> {
     private static Log _log = LogFactory.getLog(MetricProblemDAO.class);
+    
+    protected MetricProblemDAO() {
+        super();
+    }
 
     @Autowired
     public MetricProblemDAO(SessionFactory f) {

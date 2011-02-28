@@ -33,6 +33,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class CategoryDAO
     extends HibernateDAO<Category> {
+    
+    
+    protected CategoryDAO() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
     @Autowired
     public CategoryDAO(SessionFactory f) {
         super(Category.class, f);

@@ -35,6 +35,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class CalendarDAO
     extends HibernateDAO<Calendar> {
+    
+    
+    protected CalendarDAO() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
     @Autowired
     public CalendarDAO(SessionFactory f) {
         super(Calendar.class, f);

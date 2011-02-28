@@ -37,6 +37,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class AIIpDAO
     extends HibernateDAO<AIIp> {
+    
+    protected AIIpDAO() {
+        super();
+    }
+    
     @Autowired
     public AIIpDAO(SessionFactory f) {
         super(AIIp.class, f);

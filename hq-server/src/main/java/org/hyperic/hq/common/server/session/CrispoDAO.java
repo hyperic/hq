@@ -33,6 +33,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class CrispoDAO
     extends HibernateDAO<Crispo> {
+    
+    protected CrispoDAO() {
+       super();
+    }
+    
     @Autowired
     public CrispoDAO(SessionFactory f) {
         super(Crispo.class, f);

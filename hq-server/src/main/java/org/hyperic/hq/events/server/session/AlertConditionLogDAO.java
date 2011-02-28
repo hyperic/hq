@@ -32,6 +32,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class AlertConditionLogDAO
     extends HibernateDAO<AlertConditionLog> {
+    
+    protected AlertConditionLogDAO() {
+        super();
+    }
 
     @Autowired
     public AlertConditionLogDAO(SessionFactory f) {

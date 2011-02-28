@@ -48,6 +48,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class AIPlatformDAO
     extends HibernateDAO<AIPlatform> {
+    
+    protected AIPlatformDAO() {
+        super();
+     }
 
     @Autowired
     public AIPlatformDAO(SessionFactory f) {

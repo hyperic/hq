@@ -47,6 +47,10 @@ public class AgentDAO {
     
     private JpaTemplate jpaTemplate;
     
+    protected AgentDAO() {
+        super();
+    }
+    
     @Autowired
     public AgentDAO(JpaTemplate jpaTemplate) {
         this.jpaTemplate = jpaTemplate;

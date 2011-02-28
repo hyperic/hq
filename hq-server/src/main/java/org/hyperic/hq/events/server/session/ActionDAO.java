@@ -40,6 +40,10 @@ import org.springframework.stereotype.Repository;
 public class ActionDAO
     extends HibernateDAO<Action> {
 
+    protected ActionDAO() {
+        super();
+    }
+    
     @Autowired
     public ActionDAO(SessionFactory f) {
         super(Action.class, f);

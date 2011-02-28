@@ -50,6 +50,10 @@ public class RoleDAO {
     @PersistenceContext
     private EntityManager entityManager;
     
+    protected RoleDAO() {
+        super();
+    }
+    
     @Autowired
     public RoleDAO(ResourceTypeDao resourceTypeDao) {
         this.resourceTypeDao = resourceTypeDao;

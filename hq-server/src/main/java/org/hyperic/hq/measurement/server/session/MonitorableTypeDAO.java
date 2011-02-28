@@ -38,6 +38,10 @@ import org.springframework.stereotype.Repository;
 public class MonitorableTypeDAO
     extends HibernateDAO<MonitorableType> {
 
+    protected MonitorableTypeDAO() {
+        super();
+    }
+    
     @Autowired
     public MonitorableTypeDAO(SessionFactory f) {
         super(MonitorableType.class, f);

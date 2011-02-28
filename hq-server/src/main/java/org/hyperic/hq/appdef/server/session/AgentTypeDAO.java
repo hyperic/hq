@@ -34,6 +34,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class AgentTypeDAO
     extends HibernateDAO<AgentType> {
+    
+    protected AgentTypeDAO() {
+        super();
+    }
+    
     @Autowired
     public AgentTypeDAO(SessionFactory f) {
         super(AgentType.class, f);
