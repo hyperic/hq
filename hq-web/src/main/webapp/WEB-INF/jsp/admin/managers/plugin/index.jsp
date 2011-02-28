@@ -260,7 +260,7 @@
 			var filePath = dojo.byId("plugin").value;
 			var ext = filePath.substr(filePath.length - 4);
 			
-			if (ext != ".jar" || ext != ".xml") {
+			if (ext != ".jar" && ext != ".xml") {
 				dojo.byId("validationMessage").innerHTML = "<fmt:message key="admin.managers.plugin.message.invalid.file.extension" />";
 				var anim = [dojo.fadeIn({
 								node: "validationMessage",

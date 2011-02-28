@@ -23,10 +23,7 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.hq.web.BaseController;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,8 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 @RequestMapping("/admin/managers/plugin")
-public class PluginManagerController extends BaseController implements ApplicationContextAware {
-	private ApplicationContext applicationContext;
+public class PluginManagerController extends BaseController {
 	private AgentManager agentManager;
 	private ProductManager productManager;
 	
@@ -66,6 +62,7 @@ public class PluginManagerController extends BaseController implements Applicati
 				return o1.getName().compareTo(o2.getName());
 			}
 		};
+		
 		Map<Plugin, Collection<AgentPluginStatus>> pluginAgentMap = agentManager.getOutOfSyncAgentsByPlugin();
 		long agentCount = agentManager.getNumAutoUpdatingAgents();
 		
@@ -133,7 +130,8 @@ public class PluginManagerController extends BaseController implements Applicati
 		return "admin/managers/plugin/upload/status";
 	}
 	
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		this.applicationContext = applicationContext;
+	@RequestMapping(method = RequestMethod.DELETE, value="/remove")
+	public String removeProductPlugins(@RequestParam Integer[] pluginIds) {
+		return "admin/managers/plugin/upload/status";
 	}
 }
