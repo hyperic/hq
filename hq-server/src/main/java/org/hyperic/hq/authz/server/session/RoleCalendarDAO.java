@@ -33,6 +33,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 @Repository
 public class RoleCalendarDAO extends HibernateDAO {
+    
+    protected RoleCalendarDAO() {
+        super();
+    }
+    
     @Autowired
     public RoleCalendarDAO(SessionFactory f) {
         super(Role.class, f);

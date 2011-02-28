@@ -38,6 +38,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ScheduleRevNumDAO
     extends HibernateDAO<ScheduleRevNum> {
+    
+    protected ScheduleRevNumDAO() {
+        super();
+    }
 
     @Autowired
     public ScheduleRevNumDAO(SessionFactory f) {

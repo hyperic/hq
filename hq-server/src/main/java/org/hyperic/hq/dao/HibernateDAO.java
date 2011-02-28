@@ -54,6 +54,10 @@ public abstract class HibernateDAO<T> {
 
     @Autowired
     protected EntityManagerFactory entityManagerFactory;
+    
+    protected HibernateDAO() {
+        
+    }
 
     protected HibernateDAO(Class<T> persistentClass, SessionFactory f) {
         _persistentClass = persistentClass;

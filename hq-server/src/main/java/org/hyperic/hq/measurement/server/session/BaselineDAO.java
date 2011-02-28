@@ -43,7 +43,14 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class BaselineDAO
     extends HibernateDAO<Baseline> {
+  
+
     private Log _log = LogFactory.getLog(BaselineDAO.class);
+    
+    protected BaselineDAO() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
 
     @Autowired
     public BaselineDAO(SessionFactory f) {

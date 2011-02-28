@@ -34,6 +34,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class GtriggerTypeInfoDAO
     extends HibernateDAO<GtriggerTypeInfo> {
+    
+    protected GtriggerTypeInfoDAO() {
+        super();
+    }
+    
     @Autowired
     GtriggerTypeInfoDAO(SessionFactory f) {
         super(GtriggerTypeInfo.class, f);

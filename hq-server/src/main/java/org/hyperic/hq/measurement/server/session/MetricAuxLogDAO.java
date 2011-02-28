@@ -49,6 +49,10 @@ public class MetricAuxLogDAO
     extends HibernateDAO<MetricAuxLogPojo> {
     private static Log _log = LogFactory.getLog(MetricAuxLogDAO.class);
 
+    protected MetricAuxLogDAO() {
+        super();
+    }
+    
     @Autowired
     public MetricAuxLogDAO(SessionFactory f) {
         super(MetricAuxLogPojo.class, f);

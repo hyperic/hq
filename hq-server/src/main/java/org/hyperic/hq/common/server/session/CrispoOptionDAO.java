@@ -38,6 +38,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class CrispoOptionDAO
     extends HibernateDAO<CrispoOption> {
+    
+    
+
+    protected CrispoOptionDAO() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
 
     @Autowired
     public CrispoOptionDAO(SessionFactory f) {

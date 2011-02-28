@@ -37,6 +37,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class DashboardConfigDAO
     extends HibernateDAO<DashboardConfig> {
+    
+    
+
+    protected DashboardConfigDAO() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
 
     @Autowired
     DashboardConfigDAO(SessionFactory f) {

@@ -36,6 +36,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ResourceAuxLogDAO
     extends HibernateDAO<ResourceAuxLogPojo> {
+    
+    protected ResourceAuxLogDAO() {
+        super();
+    }
+    
     @Autowired
     public ResourceAuxLogDAO(SessionFactory f) {
         super(ResourceAuxLogPojo.class, f);

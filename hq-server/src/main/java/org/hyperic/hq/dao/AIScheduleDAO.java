@@ -40,6 +40,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class AIScheduleDAO
     extends HibernateDAO<AISchedule> {
+    
+    protected AIScheduleDAO() {
+        super();
+    }
+    
     @Autowired
     public AIScheduleDAO(SessionFactory f) {
         super(AISchedule.class, f);

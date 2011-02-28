@@ -37,13 +37,14 @@ import org.hyperic.hq.common.ConfigProperty;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.util.ConfigPropertyException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * This class is an in-memory map of HQ server settings
  */
-@Repository
+@Component
 @Transactional
 public class ServerConfigCacheImpl implements ServerConfigCache {
     

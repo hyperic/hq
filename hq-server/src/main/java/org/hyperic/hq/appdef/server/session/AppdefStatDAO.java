@@ -94,6 +94,10 @@ public class AppdefStatDAO {
     private SessionFactory sessionFactory;
 
     protected final Log log = LogFactory.getLog(AppdefStatDAO.class);
+    
+    protected AppdefStatDAO() {
+        super();
+    }
 
     @Autowired
     public AppdefStatDAO(JdbcTemplate jdbcTemplate, SessionFactory sessionFactory) {

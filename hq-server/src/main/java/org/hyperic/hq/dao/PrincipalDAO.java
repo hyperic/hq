@@ -38,6 +38,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class PrincipalDAO
     extends HibernateDAO<Principal> {
+    
+    protected PrincipalDAO() {
+        super();
+    }
+    
     @Autowired
     public PrincipalDAO(SessionFactory f) {
         super(Principal.class, f);

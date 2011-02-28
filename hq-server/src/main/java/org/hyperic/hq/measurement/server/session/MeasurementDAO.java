@@ -66,6 +66,10 @@ public class MeasurementDAO
     
     @PersistenceContext
     private EntityManager entityManager;
+    
+    protected MeasurementDAO() {
+        super();
+    }
 
     @Autowired
     public MeasurementDAO(SessionFactory f, AgentDAO agentDao, ResourceDao resourceDao) {

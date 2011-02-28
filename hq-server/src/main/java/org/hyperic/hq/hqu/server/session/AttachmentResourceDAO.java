@@ -38,6 +38,11 @@ import org.springframework.stereotype.Repository;
 public class AttachmentResourceDAO
     extends HibernateDAO
 {
+    protected AttachmentResourceDAO() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
     @Autowired
     AttachmentResourceDAO(SessionFactory f) {
         super(AttachmentResource.class, f);

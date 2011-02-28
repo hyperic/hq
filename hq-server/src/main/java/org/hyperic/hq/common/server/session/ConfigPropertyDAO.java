@@ -37,6 +37,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ConfigPropertyDAO
     extends HibernateDAO<ConfigProperty> {
+    
+    
+    protected ConfigPropertyDAO() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
     @Autowired
     public ConfigPropertyDAO(SessionFactory f) {
         super(ConfigProperty.class, f);

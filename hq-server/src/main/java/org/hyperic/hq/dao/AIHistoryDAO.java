@@ -39,6 +39,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class AIHistoryDAO
     extends HibernateDAO<AIHistory> {
+    
+    protected AIHistoryDAO() {
+        super();
+    }
+    
     @Autowired
     public AIHistoryDAO(SessionFactory f) {
         super(AIHistory.class, f);

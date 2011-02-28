@@ -49,6 +49,12 @@ public class ControlHistoryDAO
     
     private JdbcTemplate jdbcTemplate;
     
+    protected ControlHistoryDAO() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+    
+    
     @Autowired
     public ControlHistoryDAO(SessionFactory f, JdbcTemplate jdbcTemplate) {
         super(ControlHistory.class, f);

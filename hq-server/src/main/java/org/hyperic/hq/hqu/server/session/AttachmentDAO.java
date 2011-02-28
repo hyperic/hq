@@ -36,6 +36,12 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class AttachmentDAO
     extends HibernateDAO<Attachment> {
+    
+    
+    protected AttachmentDAO() {
+        super();
+    }
+
     @Autowired
     AttachmentDAO(SessionFactory f) {
         super(Attachment.class, f);

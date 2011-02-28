@@ -48,6 +48,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class GalertLogDAO
     extends HibernateDAO<GalertLog> {
+    
+    protected GalertLogDAO() {
+        super();
+    }
+    
     @Autowired
     GalertLogDAO(SessionFactory f) {
         super(GalertLog.class, f);

@@ -33,6 +33,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class EscalationDAO
     extends HibernateDAO<Escalation> {
+    
+    
+    protected EscalationDAO() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
     @Autowired
     EscalationDAO(SessionFactory f) {
         super(Escalation.class, f);

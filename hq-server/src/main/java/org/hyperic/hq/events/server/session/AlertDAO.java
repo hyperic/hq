@@ -51,6 +51,12 @@ public class AlertDAO
 
     private AlertActionLogDAO alertActionLogDAO;
     private PermissionManager permissionManager;
+    
+    
+
+    protected AlertDAO() {
+        super();
+    }
 
     @Autowired
     public AlertDAO(SessionFactory f, AlertActionLogDAO alertActionLogDAO, PermissionManager permissionManager) {

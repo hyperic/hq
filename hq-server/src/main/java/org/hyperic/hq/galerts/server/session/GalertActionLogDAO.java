@@ -33,6 +33,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class GalertActionLogDAO
     extends HibernateDAO<GalertActionLog> {
+    
+    protected GalertActionLogDAO() {
+        super();
+    }
+    
     @Autowired
     GalertActionLogDAO(SessionFactory f) {
         super(GalertActionLog.class, f);

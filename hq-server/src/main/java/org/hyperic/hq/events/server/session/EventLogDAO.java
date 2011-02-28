@@ -76,6 +76,10 @@ public class EventLogDAO
                              AuthzConstants.serviceOpManageAlerts,
                              AuthzConstants.groupOpManageAlerts
     });
+    
+    protected EventLogDAO() {
+        super();
+    }
 
     @Autowired
     public EventLogDAO(SessionFactory f, PermissionManager permissionManager) {

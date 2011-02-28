@@ -70,6 +70,12 @@ public class AvailabilityDataDAO
                                              + "- greatest(rle.startime,:startime)";
     private static final String TOTAL_UPTIME = "(" + TOTAL_TIME + ") * rle.availVal";
 
+    protected AvailabilityDataDAO() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+    
+    
     @Autowired
     public AvailabilityDataDAO(SessionFactory f) {
         super(AvailabilityDataRLE.class, f);

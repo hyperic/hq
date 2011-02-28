@@ -36,7 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.events.AlertConditionEvaluatorStateRepository;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
 /**
  * Default implementation of{@link AlertConditionEvaluatorRepository} This
@@ -49,7 +49,7 @@ import org.springframework.stereotype.Repository;
  * @author jhickey
  * 
  */
-@Repository
+@Component
 public class AlertConditionEvaluatorRepositoryImpl implements AlertConditionEvaluatorRepository,
     DisposableBean {
     private static final Log log = LogFactory.getLog(AlertConditionEvaluatorRepositoryImpl.class);

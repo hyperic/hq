@@ -42,6 +42,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ControlScheduleDAO
     extends HibernateDAO<ControlSchedule> {
+    
+    
+
+    protected ControlScheduleDAO() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
 
     @Autowired
     public ControlScheduleDAO(SessionFactory f) {

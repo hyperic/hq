@@ -31,14 +31,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.server.session.AlertRegulator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
 /**
  * Repository of in memory triggers for event processing
  * @author jhickey
  * 
  */
-@Repository
+@Component
 public class RegisteredTriggers implements RegisterableTriggerRepository {
 
     public static final Integer KEY_ALL = new Integer(0);

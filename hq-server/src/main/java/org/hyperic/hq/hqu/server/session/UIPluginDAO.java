@@ -34,6 +34,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class UIPluginDAO
     extends HibernateDAO<UIPlugin> {
+    
+    protected UIPluginDAO() {
+        super();
+    }
 
     @Autowired
     UIPluginDAO(SessionFactory f) {

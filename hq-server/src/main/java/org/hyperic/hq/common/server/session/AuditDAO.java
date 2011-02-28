@@ -40,6 +40,12 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class AuditDAO
     extends HibernateDAO<Audit> {
+    
+    protected AuditDAO() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
     @Autowired
     public AuditDAO(SessionFactory f) {
         super(Audit.class, f);

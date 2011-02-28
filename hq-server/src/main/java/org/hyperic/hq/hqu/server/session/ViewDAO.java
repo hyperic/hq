@@ -36,6 +36,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ViewDAO
     extends HibernateDAO<View> {
+    
+    protected ViewDAO() {
+        super();
+    }
+    
     @Autowired
     ViewDAO(SessionFactory f) {
         super(View.class, f);

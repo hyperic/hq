@@ -35,9 +35,9 @@ import net.sf.ehcache.Element;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
-@Repository
+@Component
 public class SRNCache {
 
     // The cache name, must match the definition in ehcache.xml
@@ -46,7 +46,7 @@ public class SRNCache {
     private Cache cache;
 
     private ScheduleRevNumDAO scheduleRevNumDAO;
-
+    
     @Autowired
     public SRNCache(ScheduleRevNumDAO scheduleRevNumDAO) {
         this.scheduleRevNumDAO = scheduleRevNumDAO;

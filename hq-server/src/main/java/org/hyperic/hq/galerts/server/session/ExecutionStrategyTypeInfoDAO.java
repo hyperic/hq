@@ -34,6 +34,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ExecutionStrategyTypeInfoDAO
     extends HibernateDAO<ExecutionStrategyTypeInfo> {
+    
+    protected ExecutionStrategyTypeInfoDAO() {
+        super();
+    }
 
     @Autowired
     public ExecutionStrategyTypeInfoDAO(SessionFactory f) {
