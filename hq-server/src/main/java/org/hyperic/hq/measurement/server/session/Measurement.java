@@ -39,19 +39,22 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.inventory.domain.Resource;
 
 @Entity
-@Table(name = "EAM_MEASUREMENT")
+@Table(name = "EAM_MEASUREMENT",uniqueConstraints={@UniqueConstraint(columnNames={"INSTANCE_ID","TEMPLATE_ID"})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Measurement implements ContainerManagedTimestampTrackable, Serializable {
     
@@ -60,7 +63,7 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
     private int instanceId;
     
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name = "TEMPLATE_ID")
+    @JoinColumn(name = "TEMPLATE_ID",nullable=false)
     @Index(name="MEAS_TEMPLATE_ID")
     private MeasurementTemplate template;
 
@@ -77,13 +80,13 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
     @Column(name = "DSN", nullable = false, length = 2048)
     private String dsn;
 
-    @OneToMany(cascade = CascadeType.ALL,orphanRemoval=true)
-    @JoinColumn(name="MEASUREMENT_ID")
+    @OneToMany(cascade = CascadeType.ALL,orphanRemoval=true,mappedBy="measurement")
     @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<Baseline> baselinesBag;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name="MEASUREMENT_ID")
+    @OneToMany(cascade = CascadeType.ALL,mappedBy="measurement")
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<AvailabilityDataRLE> availabilityData;
 
     @ManyToOne
@@ -97,7 +100,7 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
     @Column(name = "ID")
     private Integer id;
 
-    @Column(name = "VERSION_COL")
+    @Column(name = "VERSION_COL",nullable=false)
     @Version
     private Long version;
 

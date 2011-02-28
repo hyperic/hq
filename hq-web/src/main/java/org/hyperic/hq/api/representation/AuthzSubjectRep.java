@@ -1,6 +1,6 @@
 package org.hyperic.hq.api.representation;
 
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 
 public class AuthzSubjectRep {
 	public AuthzSubjectRep() {}

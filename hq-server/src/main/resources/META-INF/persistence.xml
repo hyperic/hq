@@ -11,29 +11,23 @@
         <class>org.hyperic.hq.inventory.domain.Resource</class>
         <class>org.hyperic.hq.inventory.domain.ResourceGroup</class>
         <class>org.hyperic.hq.inventory.domain.ResourceType</class>
-        <class>org.hyperic.hq.appdef.AgentType</class>
-        <class>org.hyperic.hq.appdef.Agent</class>
-        <class>org.hyperic.hq.authz.server.session.AuthzSubject</class>
-        <class>org.hyperic.hq.authz.server.session.Role</class>
-        <class>org.hyperic.hq.authz.server.session.RoleCalendar</class>
-        <class>org.hyperic.hq.common.server.session.Calendar</class>
-        <class>org.hyperic.hq.common.server.session.CalendarEntry</class>
-        <class>org.hyperic.hq.common.server.session.WeekEntry</class>
-        <class>org.hyperic.hq.common.server.session.Crispo</class>
-        <class>org.hyperic.hq.common.server.session.CrispoOption</class>
-        <class>org.hyperic.hq.product.Plugin</class>
-         <!--  TODO Below are only in JPA project.  Figure out some way to segment persistence contexts 
-         <class>org.hyperic.hq.inventory.domain.ResourceProperty</class>
-         <class>org.hyperic.hq.inventory.domain.ConfigOption</class>
-         <class>org.hyperic.hq.inventory.domain.ResourceRelationship</class>
-         <class>org.hyperic.hq.inventory.domain.ResourceRelationshipProperty</class>
-         <class>org.hyperic.hq.inventory.domain.ResourceTypeRelationship</class>-->
+        <class>org.hyperic.hq.agent.domain.AgentType</class>
+        <class>org.hyperic.hq.agent.domain.Agent</class>
+        <class>org.hyperic.hq.auth.domain.AuthzSubject</class>
+        <class>org.hyperic.hq.auth.domain.Role</class>
+        <class>org.hyperic.hq.auth.domain.RoleCalendar</class>
+        <class>org.hyperic.hq.calendar.domain.Calendar</class>
+        <class>org.hyperic.hq.calendar.domain.CalendarEntry</class>
+        <class>org.hyperic.hq.calendar.domain.WeekEntry</class>
+        <class>org.hyperic.hq.config.domain.Crispo</class>
+        <class>org.hyperic.hq.config.domain.CrispoOption</class>
+        <class>org.hyperic.hq.plugin.domain.Plugin</class>
         <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
         <properties>
-            <property name="hibernate.hbm2ddl.auto" value="create"/>
+        	<property name="hibernate.hbm2ddl.auto" value="create"/>
             <property name="hibernate.ejb.interceptor" value="org.hyperic.hibernate.HypericInterceptor" />
             <property name="hibernate.cache.provider_class" value="net.sf.ehcache.hibernate.SingletonEhCacheProvider" />
-			<property name="hibernate.archive.autodetection" value="class, hbm"/>
+			<property name="hibernate.archive.autodetection" value="class"/>
         </properties>
     </persistence-unit>
 </persistence>

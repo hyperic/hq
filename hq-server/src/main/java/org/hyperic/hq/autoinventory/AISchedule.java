@@ -25,31 +25,80 @@
 
 package org.hyperic.hq.autoinventory;
 
-import org.hyperic.hibernate.PersistedObject;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
 import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
 import org.hyperic.hq.scheduler.ScheduleValue;
 
-import java.io.IOException;
-import java.io.ByteArrayInputStream;
-import java.io.ObjectInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
-
-/**
- * Pojo for hibernate mapping file
- */
-public class AISchedule extends PersistedObject
+@Entity
+@Table(name="EAM_AUTOINV_SCHEDULE")
+public class AISchedule implements Serializable
 {
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
+    
+    @Column(name="ENTITY_TYPE",nullable=false)
+    @Index(name="AI_SCHEDULE_ENTITY_IDX")
     private Integer entityType;
+    
+    @Column(name="ENTITY_ID",nullable=false)
+    @Index(name="AI_SCHEDULE_ENTITY_IDX")
     private Integer entityId;
+    
+    @Column(name="SUBJECT",nullable=false,length=32)
     private String subject;
+    
+    @Basic(fetch=FetchType.LAZY)
+    @Lob
+    @Column(name="SCHEDULEVALUEBYTES",columnDefinition="BLOB")
     private byte[] scheduleValueBytes;
+    
+    @Column(name="NEXTFIRETIME",nullable=false)
+    @Index(name="AI_SCHEDULE_NEXTFIRETIME_IDX")
     private long nextFireTime;
+    
+    @Column(name="TRIGGERNAME",nullable=false,length=128,unique=true)
     private String triggerName;
+    
+    @Column(name="JOBNAME",nullable=false,length=128,unique=true)
     private String jobName;
+    
+    @Column(name="JOB_ORDER_DATA",length=500)
     private String jobOrderData;
+    
+    @Column(name="SCANNAME",length=100,unique=true)
     private String scanName;
+    
+    @Column(name="SCANDESC",length=200)
     private String scanDesc;
+    
+    @Basic(fetch=FetchType.LAZY)
+    @Lob
+    @Column(name="CONFIG",columnDefinition="BLOB")
     private byte[] config;
 
     /**
@@ -59,8 +108,31 @@ public class AISchedule extends PersistedObject
     {
         super();
     }
+    
+   
+    public Integer getId() {
+        return id;
+    }
 
-    // Property accessors
+
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+
+
+    public Long getVersion() {
+        return version;
+    }
+
+
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+
 
     public Integer getEntityType()
     {
@@ -172,15 +244,14 @@ public class AISchedule extends PersistedObject
         this.config = config;
     }
 
-    private AIScheduleValue aIScheduleValue = new AIScheduleValue();
     /**
      * legacy DTO pattern
      * @deprecated use (this) AISchedule object
      * @return
      */
     public AIScheduleValue getAIScheduleValue()
-    {
-        try {
+    {   AIScheduleValue aIScheduleValue = new AIScheduleValue();
+        try {   
             aIScheduleValue.setId(getId());
             aIScheduleValue.setEntityType(getEntityType());
             aIScheduleValue.setEntityId(getEntityId());
@@ -250,5 +321,26 @@ public class AISchedule extends PersistedObject
         os.close();
 
         setScheduleValueBytes(os.toByteArray());
+    }
+    
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof AISchedule)) {
+            return false;
+        }
+        Integer objId = ((AISchedule)obj).getId();
+  
+        return getId() == objId ||
+        (getId() != null && 
+         objId != null && 
+         getId().equals(objId));     
+    }
+
+    public int hashCode() {
+        int result = 17;
+        result = 37*result + (getId() != null ? getId().hashCode() : 0);
+        return result;      
     }
 }

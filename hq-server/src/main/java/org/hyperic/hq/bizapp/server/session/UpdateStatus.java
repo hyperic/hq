@@ -26,53 +26,118 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
-import org.hyperic.hibernate.PersistedObject;
+import java.io.Serializable;
 
-public class UpdateStatus 
-    extends PersistedObject
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
+
+@Entity
+@Table(name="EAM_UPDATE_STATUS")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+public class UpdateStatus implements Serializable
 {
-    private String  _report;
-    private int     _updateModeEnum;
-    private boolean _ignored;
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
+    
+    @Column(name="REPORT",length=4000)
+    private String  report;
+    
+    @Column(name="UPMODE",nullable=false)
+    private int     updateModeEnum;
+    
+    @Column(name="IGNORED",nullable=false)
+    private boolean ignored;
 
     protected UpdateStatus() {
     }
     
     UpdateStatus(String report, UpdateStatusMode mode) {
-        _report         = report;
-        _updateModeEnum = mode.getCode();
-        _ignored        = false;
+        this.report         = report;
+        updateModeEnum = mode.getCode();
+        ignored        = false;
     }
     
     public String getReport() {
-        return _report;
+        return report;
     }
     
     protected void setReport(String report) {
-        _report = report;
+        this.report = report;
     }
     
     protected int getUpdateModeEnum() {
-        return _updateModeEnum;
+        return updateModeEnum;
     }
     
     protected void setUpdateModeEnum(int mode) {
-        _updateModeEnum = mode;
+        updateModeEnum = mode;
     }
     
     public UpdateStatusMode getMode() {
-        return UpdateStatusMode.findByCode(_updateModeEnum);
+        return UpdateStatusMode.findByCode(updateModeEnum);
     }
     
     void setMode(UpdateStatusMode mode) {
-        _updateModeEnum = mode.getCode();
+        updateModeEnum = mode.getCode();
     }
     
     public boolean isIgnored() {
-        return _ignored;
+        return ignored;
     }
     
     protected void setIgnored(boolean ignored) {
-        _ignored = ignored;
+        this.ignored = ignored;
     }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof UpdateStatus)) {
+            return false;
+        }
+        Integer objId = ((UpdateStatus)obj).getId();
+  
+        return getId() == objId ||
+        (getId() != null && 
+         objId != null && 
+         getId().equals(objId));     
+    }
+
+    public int hashCode() {
+        int result = 17;
+        result = 37*result + (getId() != null ? getId().hashCode() : 0);
+        return result;      
+    }
+    
 }

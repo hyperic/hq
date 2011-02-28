@@ -25,40 +25,51 @@
 
 package org.hyperic.hq.scheduler;
 
-public class QzSimpleTrigger extends org.hyperic.hq.scheduler.QzTrigger
-    implements java.io.Serializable {
+import java.io.Serializable;
 
-    // Fields
-    private long _repeatCount;
-    private long _repeatInterval;
-    private long _timesTriggered;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
-    // Constructors
+@Entity
+@Table(name="QRTZ_SIMPLE_TRIGGERS")
+public class QzSimpleTrigger extends QzTrigger
+    implements Serializable {
+
+    @Column(name="REPEAT_COUNT",nullable=false)
+    private long repeatCount;
+    
+    @Column(name="REPEAT_INTERVAL",nullable=false)
+    private long repeatInterval;
+    
+    @Column(name="TIMES_TRIGGERED",nullable=false)
+    private long timesTriggered;
+
+   
     public QzSimpleTrigger() {
     }
 
-    // Property accessors
     public long getRepeatCount() {
-        return _repeatCount;
+        return repeatCount;
     }
     
     public void setRepeatCount(long repeatCount) {
-        _repeatCount = repeatCount;
+        this.repeatCount = repeatCount;
     }
 
     public long getRepeatInterval() {
-        return _repeatInterval;
+        return repeatInterval;
     }
     
     public void setRepeatInterval(long repeatInterval) {
-        _repeatInterval = repeatInterval;
+        this.repeatInterval = repeatInterval;
     }
 
     public long getTimesTriggered() {
-        return _timesTriggered;
+        return timesTriggered;
     }
     
     public void setTimesTriggered(long timesTriggered) {
-        _timesTriggered = timesTriggered;
+        this.timesTriggered = timesTriggered;
     }
 }

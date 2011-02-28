@@ -25,10 +25,40 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import org.hyperic.hibernate.PersistedObject;
+import java.io.Serializable;
 
-public class MonitorableType extends PersistedObject {
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
+
+@Entity
+@Table(name="EAM_MONITORABLE_TYPE")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+public class MonitorableType implements Serializable {
+    
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
+    
+    @Column(name="NAME",nullable=false,length=100)
+    @Index(name="TYPE_NAME_IDX")
     private String name;
+    
+    @Column(name="PLUGIN",nullable=false,length=250)
     private String pluginName;
     
     protected MonitorableType() {
@@ -37,6 +67,24 @@ public class MonitorableType extends PersistedObject {
     public MonitorableType(String name, String pluginName) {
         this.name           = name;
         this.pluginName     = pluginName;
+    }
+    
+    
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 
     public String getName() {
@@ -53,5 +101,26 @@ public class MonitorableType extends PersistedObject {
     
     protected void setPluginName(String pluginName) {
     	this.pluginName = pluginName;
+    }
+    
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof MonitorableType)) {
+            return false;
+        }
+        Integer objId = ((MonitorableType)obj).getId();
+  
+        return getId() == objId ||
+        (getId() != null && 
+         objId != null && 
+         getId().equals(objId));     
+    }
+
+    public int hashCode() {
+        int result = 17;
+        result = 37*result + (getId() != null ? getId().hashCode() : 0);
+        return result;      
     }
 }

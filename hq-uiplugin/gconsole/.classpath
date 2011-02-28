@@ -78,5 +78,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-common"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-pdk"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-core/3.0.5.RELEASE/spring-core-3.0.5.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-core/3.0.5.RELEASE/spring-core-3.0.5.RELEASE-sources.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/inventory-neo4j"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

@@ -31,10 +31,10 @@ import java.util.Map;
 
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
-import org.hyperic.hq.reference.RelationshipTypes;
 
 /** AppdefUtil - utility methods for appdef entities and
 * brethren.

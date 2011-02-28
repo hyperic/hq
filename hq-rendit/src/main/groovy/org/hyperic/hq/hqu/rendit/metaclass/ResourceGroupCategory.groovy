@@ -29,7 +29,7 @@ package org.hyperic.hq.hqu.rendit.metaclass
 import org.hyperic.hq.authz.server.session.ResourceFactory;
 import org.hyperic.hq.authz.server.session.ResourceGroup
 import org.hyperic.hq.authz.server.session.Resource
-import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.auth.domain.AuthzSubject
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.context.Bootstrap;
 import org.springframework.security.provisioning.GroupManager;

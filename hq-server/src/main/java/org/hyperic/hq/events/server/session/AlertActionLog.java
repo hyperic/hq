@@ -25,18 +25,56 @@
 
 package org.hyperic.hq.events.server.session;
 
-import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import java.io.Serializable;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 
-public class AlertActionLog  
-    extends PersistedObject
+@Entity
+@Table(name="EAM_ALERT_ACTION_LOG")
+public class AlertActionLog  implements Serializable
 {
-    private String              _detail;
-    private Alert               _alert;
-    private Action              _action;
-    private AuthzSubject        _subject;
-    private long                _timeStamp;
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name="DETAIL",nullable=false,length=500)
+    private String              detail;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="ALERT_ID")
+    @Index(name="ALERT_ACTION_LOG_IDX")
+    private Alert               alert;
+    
+    @SuppressWarnings("unused")
+    @Column(name="ALERT_TYPE",nullable=false)
+    private int alertTypeEnum;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="ACTION_ID")
+    @Index(name="ALERT_ACTION_ID_IDX")
+    private Action              action;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="SUBJECT_ID")
+    @Index(name="ALERT_ACTION_SUBJ_ID_IDX")
+    private AuthzSubject        subject;
+    
+    @Column(name="TIMESTAMP",nullable=false)
+    private long                timeStamp;
     
     protected AlertActionLog() {
     }
@@ -44,52 +82,62 @@ public class AlertActionLog
     protected AlertActionLog(Alert alert, String detail, Action action,
                              AuthzSubject subject) 
     {
-        _alert     = alert;
-        _action    = action;
-        _subject   = subject;
-        _timeStamp = System.currentTimeMillis();
+        this.alert     = alert;
+        this.action    = action;
+        this.subject   = subject;
+        timeStamp = System.currentTimeMillis();
         setDetail(detail);
     }
     
+    
+    
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     public String getDetail() {
-        return _detail;
+        return detail;
     }
     
     protected void setDetail(String detail) {
         if (detail != null && detail.length() > 500) {
-            _detail = detail.substring(0, 499);
+            this.detail = detail.substring(0, 499);
         }
         else if (detail == null || detail.length() == 0) {
             // detail cannot be null and oracle treats empty strings as null
-            _detail = " ";
+            this.detail = " ";
         }
         else {
-            _detail = detail;
+            this.detail = detail;
         }
     }
     
     protected Alert getAlert() {
-        return _alert;
+        return alert;
     }
     
     protected void setAlert(Alert alert) {
-        _alert = alert;
+        this.alert = alert;
     }
     
     public Action getAction() {
-        return _action;
+        return action;
     }
     
     protected void setAction(Action action) {
-        _action = action;
+        this.action = action;
     }
     
     public AuthzSubject getSubject() {
-        return _subject;
+        return subject;
     }
     
     protected void setSubject(AuthzSubject subject) {
-        _subject = subject;
+        this.subject = subject;
     }
     
     protected int getAlertTypeEnum() {
@@ -105,10 +153,31 @@ public class AlertActionLog
     }
     
     public long getTimeStamp() {
-        return _timeStamp;
+        return timeStamp;
     }
     
     protected void setTimeStamp(long stamp) {
-        _timeStamp = stamp;
+        timeStamp = stamp;
+    }
+    
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof AlertActionLog)) {
+            return false;
+        }
+        Integer objId = ((AlertActionLog)obj).getId();
+  
+        return getId() == objId ||
+        (getId() != null && 
+         objId != null && 
+         getId().equals(objId));     
+    }
+
+    public int hashCode() {
+        int result = 17;
+        result = 37*result + (getId() != null ? getId().hashCode() : 0);
+        return result;      
     }
 }

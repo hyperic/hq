@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.TemplateNotFoundException;

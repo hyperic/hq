@@ -30,7 +30,7 @@ import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventSourceId;
 import org.hyperic.hq.zevents.ZeventPayload;
 import org.hyperic.hq.zevents.ZeventManager;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 
 public class UserLoginZevent extends Zevent {
 

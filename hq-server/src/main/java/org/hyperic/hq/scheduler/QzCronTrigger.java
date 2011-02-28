@@ -25,31 +25,41 @@
 
 package org.hyperic.hq.scheduler;
 
-public class QzCronTrigger extends org.hyperic.hq.scheduler.QzTrigger
-    implements java.io.Serializable {
+import java.io.Serializable;
 
-    // Fields
-    private String _cronExpression;
-    private String _timeZoneId;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
-    // Constructors
+@Entity
+@Table(name="QRTZ_CRON_TRIGGERS")
+public class QzCronTrigger extends QzTrigger
+    implements Serializable {
+
+    @Column(name="CRON_EXPRESSION",nullable=false,length=200)
+    private String cronExpression;
+    
+    @Column(name="TIME_ZONE_ID",length=80)
+    private String timeZoneId;
+
+    
     public QzCronTrigger() {
     }
 
-    // Property accessors
+ 
     public String getCronExpression() {
-        return _cronExpression;
+        return cronExpression;
     }
     
     public void setCronExpression(String cronExpression) {
-        _cronExpression = cronExpression;
+        this.cronExpression = cronExpression;
     }
 
     public String getTimeZoneId() {
-        return _timeZoneId;
+        return timeZoneId;
     }
     
     public void setTimeZoneId(String timeZoneId) {
-        _timeZoneId = timeZoneId;
+        this.timeZoneId = timeZoneId;
     }
 }

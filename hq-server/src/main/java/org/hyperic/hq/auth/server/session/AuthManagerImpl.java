@@ -26,8 +26,8 @@
 package org.hyperic.hq.auth.server.session;
 
 import org.hyperic.hq.auth.Principal;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.auth.shared.AuthManager;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.dao.PrincipalDAO;

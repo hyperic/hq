@@ -1,5 +1,9 @@
 package org.hyperic.hq.appdef.server.session;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Properties;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -17,9 +21,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Integration test of {@link ConfigManagerImpl}

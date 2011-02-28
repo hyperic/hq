@@ -30,32 +30,90 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
-import org.hyperic.hibernate.PersistedObject;
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Lob;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
 import org.hyperic.hq.scheduler.ScheduleValue;
 
-public class ControlSchedule extends PersistedObject
+@Entity
+@Table(name="EAM_CONTROL_SCHEDULE")
+public class ControlSchedule implements Serializable
 {
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
 
-    // Fields
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
 
+    @Column(name="ENTITY_TYPE",nullable=false)
+    @Index(name="CTL_SCHEDULE_ENTITY_IDX")
     private Integer entityType;
+    
+    @Column(name="ENTITY_ID",nullable=false)
+    @Index(name="CTL_SCHEDULE_ENTITY_IDX")
     private Integer entityId;
+    
+    @Column(name="SUBJECT",nullable=false,length=32)
     private String subject;
+    
+    @Basic(fetch=FetchType.LAZY)
+    @Lob
+    @Column(name="SCHEDULEVALUEBYTES",nullable=false,columnDefinition="BLOB")
     private byte[] scheduleValueBytes;
+    
+    @Column(name="NEXTFIRETIME",nullable=false)
+    @Index(name="CTL_SCHEDULE_NEXTFIRETIME_IDX")
     private long nextFireTime;
+    
+    @Column(name="TRIGGERNAME",nullable=false,length=128,unique=true)
     private String triggerName;
+    
+    @Column(name="JOBNAME",nullable=false,length=128,unique=true)
     private String jobName;
+    
+    @Column(name="JOB_ORDER_DATA",length=500)
     private String jobOrderData;
+    
+    @Column(name="ACTION",nullable=false,length=32)
     private String action;
 
-    // Constructors
 
     /**
      * default constructor
      */
     public ControlSchedule()
     {
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 
     // Property accessors
@@ -175,6 +233,12 @@ public class ControlSchedule extends PersistedObject
     public boolean equals(Object obj)
     {
         return (obj instanceof ControlSchedule) && super.equals(obj);
+    }
+    
+    public int hashCode() {
+        int result = 17;
+        result = 37*result + (getId() != null ? getId().hashCode() : 0);
+        return result;      
     }
 
 }

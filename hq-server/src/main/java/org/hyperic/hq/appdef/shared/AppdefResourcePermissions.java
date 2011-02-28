@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.appdef.shared;
 
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 
 /**
  * This object is used to represent a users permissions as they

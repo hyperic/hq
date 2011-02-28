@@ -26,6 +26,8 @@
 
 package org.hyperic.hq.authz.server.session;
 
+import org.hyperic.hq.auth.domain.Role;
+
 /**
  * Indicates that a role has been created
  * @author jhickey

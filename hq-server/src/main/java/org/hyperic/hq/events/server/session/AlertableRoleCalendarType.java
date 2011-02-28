@@ -27,7 +27,7 @@ package org.hyperic.hq.events.server.session;
 
 import java.util.ResourceBundle;
 
-import org.hyperic.hq.authz.server.session.RoleCalendarType;
+import org.hyperic.hq.auth.domain.RoleCalendarType;
 
 public class AlertableRoleCalendarType
     extends RoleCalendarType

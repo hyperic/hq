@@ -27,20 +27,16 @@ package org.hyperic.hq.appdef;
 
 import java.io.Serializable;
 
-import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
-import org.hyperic.hibernate.PersistedObject;
-
 /**
  * This is the base abstract class for all appdef pojos.
  * This is modeled after the AppdefEntityBean
  */
-public abstract class AppdefBean 
-    extends PersistedObject
-    implements ContainerManagedTimestampTrackable, Serializable
+public abstract class AppdefBean implements Serializable
 {
     // XXX -- Can we make these private?  We have accessors.  -- JMT
     protected Long creationTime;
     protected Long modifiedTime;
+    private Integer id;
 
     protected AppdefBean() {
         super();
@@ -52,22 +48,17 @@ public abstract class AppdefBean
         setId(id);
     }
     
-    /**
-     * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
-     * @return <code>true</code> by default.
-     */
-    public boolean allowContainerManagedCreationTime() {
-        return true;
-    }
     
-    /**
-     * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
-     * @return <code>true</code> by default.
-     */
-    public boolean allowContainerManagedLastModifiedTime() {
-        return true;
+    
+    public Integer getId() {
+        return id;
     }
 
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+   
     public long getCreationTime()
     {
         return creationTime != null ? creationTime.longValue() : 0;
@@ -105,27 +96,38 @@ public abstract class AppdefBean
     {
         return modifiedTime;
     }
-   
-    public boolean equals(Object obj)
-    {
-        if (!(obj instanceof AppdefBean) || !super.equals(obj)) {
-            return false;
-        }
-        AppdefBean o = (AppdefBean)obj;
-        return
-            ((creationTime == o.getCTime()) ||
-             (creationTime!=null && o.getCTime()!=null &&
-              creationTime.equals(o.getCTime())));
-    }
 
-    public int hashCode()
-    {
-        int result = super.hashCode();
-
-        result = 37*result +
-                 (creationTime != null ? creationTime.hashCode() : 0);
-
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((creationTime == null) ? 0 : creationTime.hashCode());
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        AppdefBean other = (AppdefBean) obj;
+        if (creationTime == null) {
+            if (other.creationTime != null)
+                return false;
+        } else if (!creationTime.equals(other.creationTime))
+            return false;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        return true;
+    }
+   
+   
 
 }

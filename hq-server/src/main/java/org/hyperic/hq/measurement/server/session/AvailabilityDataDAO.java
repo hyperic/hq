@@ -67,7 +67,7 @@ public class AvailabilityDataDAO
     // may result in Long.MAX_VALUE as the endtime and a startime which is <
     // the user specified value
     private static final String TOTAL_TIME = "least(rle.endtime,:endtime) "
-                                             + "- greatest(rle.availabilityDataId.startime,:startime)";
+                                             + "- greatest(rle.startime,:startime)";
     private static final String TOTAL_UPTIME = "(" + TOTAL_TIME + ") * rle.availVal";
 
     @Autowired
@@ -86,7 +86,7 @@ public class AvailabilityDataDAO
             return rtn;
         }
         String hql = new StringBuilder().append("from AvailabilityDataRLE").append(
-            " WHERE endtime > :endtime").append(" AND availabilityDataId.measurement in (:ids)")
+            " WHERE endtime > :endtime").append(" AND measurement in (:ids)")
             .append(" ORDER BY endtime desc").toString();
         Query query = getSession().createQuery(hql).setLong("endtime", after);
         for (int i = 0; i < mids.size(); i += BATCH_SIZE) {
@@ -108,7 +108,7 @@ public class AvailabilityDataDAO
             return rtn;
         }
         String hql = new StringBuilder().append("from AvailabilityDataRLE").append(
-            " WHERE endtime = :endtime").append(" AND availabilityDataId.measurement in (:ids)")
+            " WHERE endtime = :endtime").append(" AND measurement in (:ids)")
             .toString();
         // need to do this because of hibernate bug
         // http://opensource.atlassian.com/projects/hibernate/browse/HHH-1985
@@ -124,8 +124,8 @@ public class AvailabilityDataDAO
     @SuppressWarnings("unchecked")
     AvailabilityDataRLE findAvail(DataPoint state) {
         String sql = new StringBuilder().append("FROM AvailabilityDataRLE").append(
-            " WHERE availabilityDataId.measurement = :meas").append(
-            " AND availabilityDataId.startime = :startime").toString();
+            " WHERE measurement = :meas").append(
+            " AND startime = :startime").toString();
         List<AvailabilityDataRLE> list = getSession().createQuery(sql).setLong("startime",
             state.getTimestamp()).setInteger("meas", state.getMetricId().intValue()).list();
         if (list.isEmpty()) {
@@ -137,8 +137,8 @@ public class AvailabilityDataDAO
     @SuppressWarnings("unchecked")
     List<AvailabilityDataRLE> findAllAvailsAfter(DataPoint state) {
         String sql = new StringBuilder().append("FROM AvailabilityDataRLE").append(
-            " WHERE availabilityDataId.measurement = :meas").append(
-            " AND availabilityDataId.startime > :startime").append(" ORDER BY startime asc")
+            " WHERE measurement = :meas").append(
+            " AND startime > :startime").append(" ORDER BY startime asc")
             .toString();
         return getSession().createQuery(sql).setLong("startime", state.getTimestamp()).setInteger(
             "meas", state.getMetricId().intValue()).list();
@@ -147,8 +147,8 @@ public class AvailabilityDataDAO
     @SuppressWarnings("unchecked")
     AvailabilityDataRLE findAvailAfter(DataPoint state) {
         String sql = new StringBuilder().append("FROM AvailabilityDataRLE").append(
-            " WHERE availabilityDataId.measurement = :meas").append(
-            " AND availabilityDataId.startime > :startime").append(" ORDER BY startime asc")
+            " WHERE measurement = :meas").append(
+            " AND startime > :startime").append(" ORDER BY startime asc")
             .toString();
         List<AvailabilityDataRLE> list = getSession().createQuery(sql).setLong("startime",
             state.getTimestamp()).setInteger("meas", state.getMetricId().intValue()).setMaxResults(
@@ -167,8 +167,8 @@ public class AvailabilityDataDAO
     @SuppressWarnings("unchecked")
     AvailabilityDataRLE findAvailBefore(DataPoint state) {
         String sql = new StringBuilder().append("FROM AvailabilityDataRLE").append(
-            " WHERE availabilityDataId.measurement = :meas").append(
-            " AND availabilityDataId.startime < :startime").append(" ORDER BY startime desc")
+            " WHERE measurement = :meas").append(
+            " AND startime < :startime").append(" ORDER BY startime desc")
             .toString();
         List<AvailabilityDataRLE> list = getSession().createQuery(sql).setLong("startime",
             state.getTimestamp()).setInteger("meas", state.getMetricId().intValue()).setMaxResults(
@@ -186,13 +186,13 @@ public class AvailabilityDataDAO
     List<AvailabilityDataRLE> getHistoricalAvails(Measurement m, long start, long end,
                                                   boolean descending) {
         String sql = new StringBuilder().append("FROM AvailabilityDataRLE rle ").append(
-            "WHERE rle.availabilityDataId.measurement = :m AND").append(
-            " (rle.availabilityDataId.startime > :startime").append(
+            "WHERE rle.measurement = :m AND").append(
+            " (rle.startime > :startime").append(
             "   OR rle.endtime > :startime)").append(
-            " AND (rle.availabilityDataId.startime < :endtime").append(
+            " AND (rle.startime < :endtime").append(
             "   OR rle.endtime < :endtime)")
-            .append(" ORDER BY rle.availabilityDataId.measurement,").append(
-                " rle.availabilityDataId.startime").append(((descending) ? " DESC" : " ASC"))
+            .append(" ORDER BY rle.measurement,").append(
+                " rle.startime").append(((descending) ? " DESC" : " ASC"))
             .toString();
         return getSession().createQuery(sql).setLong("startime", start).setLong("endtime", end)
             .setParameter("m", m).list();
@@ -207,11 +207,11 @@ public class AvailabilityDataDAO
         final List<AvailabilityDataRLE> rtn = new ArrayList<AvailabilityDataRLE>(mids.length);
         final List<Integer> list = Arrays.asList(mids);
         final String sql = new StringBuilder().append("FROM AvailabilityDataRLE rle").append(
-            " WHERE rle.availabilityDataId.measurement in (:mids)").append(
+            " WHERE rle.measurement in (:mids)").append(
             " AND rle.endtime > :startime").append(
-            " AND rle.availabilityDataId.startime < :endtime").append(
-            " ORDER BY rle.availabilityDataId.measurement,").append(
-            " rle.availabilityDataId.startime").append(((descending) ? " DESC" : " ASC"))
+            " AND rle.startime < :endtime").append(
+            " ORDER BY rle.measurement,").append(
+            " rle.startime").append(((descending) ? " DESC" : " ASC"))
             .toString();
         for (int i=0; i<list.size(); i+=BATCH_SIZE) {
             final int last = Math.min(i+BATCH_SIZE, list.size());
@@ -253,7 +253,7 @@ public class AvailabilityDataDAO
             }
         };
         StringBuilder sql = new StringBuilder().append("FROM AvailabilityDataRLE rle").append(
-            " WHERE rle.availabilityDataId.measurement in (:mids)");
+            " WHERE rle.measurement in (:mids)");
         if (after > 0) {
             sql.append(" AND rle.endtime >= :endtime");
         }
@@ -288,10 +288,10 @@ public class AvailabilityDataDAO
     @SuppressWarnings("unchecked")
     List<AvailabilityDataRLE> getHistoricalAvails(Resource res, long start, long end) {
         String sql = new StringBuilder().append("SELECT rle").append(
-            " FROM AvailabilityDataRLE rle").append(" JOIN rle.availabilityDataId.measurement m")
+            " FROM AvailabilityDataRLE rle").append(" JOIN rle.measurement m")
             .append(" WHERE m.resource = :resource").append(" AND rle.endtime > :startime").append(
-                " AND rle.availabilityDataId.startime < :endtime").append(
-                " ORDER BY rle.availabilityDataId.startime").toString();
+                " AND rle.startime < :endtime").append(
+                " ORDER BY rle.startime").toString();
         return getSession().createQuery(sql).setParameter("resource", res).setLong("startime",
             start).setLong("endtime", end).list();
     }
@@ -312,9 +312,9 @@ public class AvailabilityDataDAO
             " (:endtime - :startime) / m.interval, ").append(" sum(").append(TOTAL_UPTIME).append(
             "), ").append(" sum(").append(TOTAL_TIME).append(") ").append(" FROM Measurement m")
             .append(" JOIN m.availabilityData rle").append(" WHERE m in (:mids)").append(
-                " AND (rle.availabilityDataId.startime > :startime").append(
+                " AND (rle.startime > :startime").append(
                 "   OR rle.endtime > :startime)").append(
-                " AND (rle.availabilityDataId.startime < :endtime").append(
+                " AND (rle.startime < :endtime").append(
                 "   OR rle.endtime < :endtime)")
             // must group by all columns in query for postgres to work
             // there is an open bug on this for hibernate to
@@ -357,9 +357,9 @@ public class AvailabilityDataDAO
             .append(" sum(").append(TOTAL_UPTIME).append("), ").append(" sum(").append(TOTAL_TIME)
             .append(") ").append(" FROM Measurement m").append(" JOIN m.availabilityData rle")
             .append(" WHERE m.template in (:tids)").append(" AND m.instanceId in (:iids)").append(
-                " AND (rle.availabilityDataId.startime > :startime").append(
+                " AND (rle.startime > :startime").append(
                 "   OR rle.endtime > :startime)").append(
-                " AND (rle.availabilityDataId.startime < :endtime").append(
+                " AND (rle.startime < :endtime").append(
                 "   OR rle.endtime < :endtime)").append(" GROUP BY m.template.id, rle.endtime")
             .append(" ORDER BY rle.endtime").toString();
         return getSession().createQuery(sql).setLong("startime", start).setLong("endtime", end)
@@ -379,13 +379,13 @@ public class AvailabilityDataDAO
     @SuppressWarnings("unchecked")
     List<AvailabilityDataRLE> getDownMeasurements(List<Integer> includes) {
         StringBuilder sql = new StringBuilder().append("SELECT rle FROM AvailabilityDataRLE rle")
-            .append(" JOIN rle.availabilityDataId.measurement m").append(" JOIN m.template t")
+            .append(" JOIN rle.measurement m").append(" JOIN m.template t")
             .append(" WHERE rle.endtime = ").append(MAX_TIMESTAMP).append(
                 " AND m.resource is not null ").append(" AND rle.availVal = ").append(AVAIL_DOWN)
             .append(" AND ").append(ALIAS_CLAUSE);
         final boolean hasIncludes = (includes != null && includes.size() > 0) ? true : false;
         if (hasIncludes) {
-            sql.append(" rle.availabilityDataId.measurement in (:mids)");
+            sql.append(" rle.measurement in (:mids)");
         }
         Query query = getSession().createQuery(sql.toString());
         if (!hasIncludes) {

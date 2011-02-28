@@ -4,9 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.hyperic.hq.inventory.dao.ResourceDao;
-import org.hyperic.hq.inventory.dao.ResourceGroupDao;
-import org.hyperic.hq.inventory.dao.ResourceTypeDao;
+import org.hyperic.hq.inventory.data.ResourceDao;
+import org.hyperic.hq.inventory.data.ResourceGroupDao;
+import org.hyperic.hq.inventory.data.ResourceTypeDao;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

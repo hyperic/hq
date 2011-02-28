@@ -24,19 +24,58 @@
  */
 package org.hyperic.hq.events.server.session;
 
-import org.hyperic.hibernate.PersistedObject;
+import java.io.Serializable;
+
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.util.ArrayUtil;
 
-public class RegisteredTrigger 
-    extends PersistedObject
+@Entity
+@Table(name="EAM_REGISTERED_TRIGGER")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+public class RegisteredTrigger implements Serializable
 {
-    private String           _className;
-    private byte[]           _config;
-    private long             _frequency;
-    private ResourceAlertDefinition  _alertDef;
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
     
-    private RegisteredTriggerValue _valueObj;
+    @Column(name="CLASSNAME",nullable=false,length=200)
+    private String           className;
+    
+    @Basic(fetch=FetchType.LAZY)
+    @Lob
+    @Column(name="CONFIG",columnDefinition="BLOB")
+    private byte[]           config;
+    
+    @Column(name="FREQUENCY",nullable=false)
+    private long             frequency;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="ALERT_DEFINITION_ID")
+    @Index(name="ALERT_DEF_TRIGGER_IDX")
+    private ResourceAlertDefinition  alertDef;
+    
     
     protected RegisteredTrigger() { // Needed for Hibernate
     }
@@ -45,6 +84,24 @@ public class RegisteredTrigger
         setRegisteredTriggerValue(val);
     }
     
+    
+    
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
     protected void setRegisteredTriggerValue(RegisteredTriggerValue val) {
         setClassname(val.getClassname());
         setConfig(ArrayUtil.clone(val.getConfig()));
@@ -56,47 +113,68 @@ public class RegisteredTrigger
      * @deprecated
      */
     public RegisteredTriggerValue getRegisteredTriggerValue() {
-        if (_valueObj == null)
-            _valueObj = new RegisteredTriggerValue();
         
-        _valueObj.setId(getId());
-        _valueObj.setClassname(getClassname());
+        RegisteredTriggerValue valueObj = new RegisteredTriggerValue();
+        
+        valueObj.setId(getId());
+        valueObj.setClassname(getClassname());
         // XXX -- Config is mutable here.  The proper thing to do is clone it
-        _valueObj.setConfig(ArrayUtil.clone(getConfig()));
-        _valueObj.setFrequency(getFrequency());
+        valueObj.setConfig(ArrayUtil.clone(getConfig()));
+        valueObj.setFrequency(getFrequency());
 
-        return _valueObj;
+        return valueObj;
     }
     
     public String getClassname() {
-        return _className;
+        return className;
     }
 
     public byte[] getConfig() {
-        return ArrayUtil.clone(_config);
+        return ArrayUtil.clone(config);
     }
 
     public long getFrequency() {
-        return _frequency;
+        return frequency;
     }
 
     protected void setClassname(String className) {
-        _className = className;
+        this.className = className;
     }
 
     protected void setConfig(byte[] config) {
-        _config = config;
+        this.config = config;
     }
 
     public void setFrequency(long frequency) {
-        _frequency = frequency;
+        this.frequency = frequency;
     }
 
     public ResourceAlertDefinition getAlertDefinition() {
-        return _alertDef;
+        return alertDef;
     }
     
     protected void setAlertDefinition(ResourceAlertDefinition def) {
-        _alertDef = def;
+        alertDef = def;
+    }
+    
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof RegisteredTrigger)) {
+            return false;
+        }
+        Integer objId = ((RegisteredTrigger)obj).getId();
+  
+        return getId() == objId ||
+        (getId() != null && 
+         objId != null && 
+         getId().equals(objId));     
+    }
+
+    public int hashCode() {
+        int result = 17;
+        result = 37*result + (getId() != null ? getId().hashCode() : 0);
+        return result;      
     }
 }

@@ -25,34 +25,83 @@
 
 package org.hyperic.hq.events.server.session;
 
-import org.hyperic.hibernate.PersistedObject;
+import java.io.Serializable;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Index;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.util.data.IEventPoint;
 
-public class EventLog extends PersistedObject implements IEventPoint {
-    private String   _detail;
-    private String   _type;
-    private long     _timestamp;
-    private String   _subject;
-    private String   _status;
-    private Resource _resource;
+@Immutable
+@Entity
+@Table(name="EAM_EVENT_LOG")
+public class EventLog implements IEventPoint, Serializable {
+    
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+    
+    @Column(name="DETAIL",nullable=false,length=4000)
+    private String   detail;
+    
+    @Column(name="TYPE",nullable=false,length=100)
+    private String   type;
+    
+    @Column(name="TIMESTAMP",nullable=false)
+    @Index(name="EVENT_LOG_IDX",columnNames={"TIMESTAMP","RESOURCE_ID"})
+    private long     timestamp;
+    
+    @Column(name="SUBJECT",length=100)
+    private String   subject;
+    
+    @Column(name="STATUS",length=100)
+    private String   status;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="RESOURCE_ID",nullable=false)
+    @Index(name="EVENT_LOG_RES_ID_IDX")
+    private Resource resource;
+    
+    @Column(name="INSTANCE_ID")
     private Integer instanceId;
     
     // Not persisted
-    private int     _eventId;
+    private transient int     eventId;
 
     protected EventLog() {
     }
 
     protected EventLog(Resource r, String subject, String type, String detail,
                        long timestamp, String status, Integer instanceId) {
-        _resource = r;
-        _subject = subject;
-        _type = type;
-        _detail = detail;
-        _timestamp = timestamp;
-        _status = status;
+        resource = r;
+        this.subject = subject;
+        this.type = type;
+        this.detail = detail;
+        this.timestamp = timestamp;
+        this.status = status;
         this.instanceId = instanceId;
+    }
+    
+    
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public Integer getInstanceId() {
@@ -64,58 +113,79 @@ public class EventLog extends PersistedObject implements IEventPoint {
     }
 
     public String getDetail() {
-        return _detail;
+        return detail;
     }
     
     protected void setDetail(String detail) {
-        _detail = detail;
+        this.detail = detail;
     }
     
     public String getType() {
-        return _type;
+        return type;
     }
     
     protected void setType(String type) {
-        _type = type;
+        this.type = type;
     }
     
     public long getTimestamp() {
-        return _timestamp;
+        return timestamp;
     }
     
     protected void setTimestamp(long timestamp) {
-        _timestamp = timestamp;
+        this.timestamp = timestamp;
     }
     
     public String getSubject() {
-        return _subject;
+        return subject;
     }
     
     protected void setSubject(String subject) {
-        _subject = subject;
+        this.subject = subject;
     }
 
     public String getStatus() {
-        return _status;
+        return status;
     }
     
     protected void setStatus(String status) {
-        _status = status;
+        this.status = status;
     }
     
     public Resource getResource() {
-        return _resource;
+        return resource;
     }
     
     protected void setResource(Resource r) {
-        _resource = r;
+        resource = r;
     }
 
     public int getEventID() {
-        return _eventId;
+        return eventId;
     }
 
     public void setEventID(int eventId) {
-        _eventId = eventId;
+        this.eventId = eventId;
+    }
+    
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof EventLog)) {
+            return false;
+        }
+        Integer objId = ((EventLog)obj).getId();
+  
+        return getId() == objId ||
+        (getId() != null && 
+         objId != null && 
+         getId().equals(objId));     
+    }
+
+    public int hashCode() {
+        int result = 17;
+        result = 37*result + (getId() != null ? getId().hashCode() : 0);
+        return result;      
     }
 }

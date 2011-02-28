@@ -25,6 +25,9 @@
 
 package org.hyperic.hq.authz.server.session;
 
+import org.hyperic.hq.auth.domain.AuthzSubject;
+import org.hyperic.hq.auth.domain.Role;
+
 // Generated Oct 17, 2006 12:45:08 PM by Hibernate Tools 3.1.0.beta4
 
 

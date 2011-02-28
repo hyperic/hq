@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import org.hyperic.hq.auth.domain.Role;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.grouping.CritterList;
 import org.hyperic.hq.grouping.GroupException;

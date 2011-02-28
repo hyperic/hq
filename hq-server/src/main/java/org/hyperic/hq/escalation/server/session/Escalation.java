@@ -24,13 +24,28 @@
  */
 package org.hyperic.hq.escalation.server.session;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.IndexColumn;
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
-import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.util.json.JSON;
@@ -38,50 +53,84 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Escalation
-    extends PersistedObject
-    implements ContainerManagedTimestampTrackable, JSON
+@Entity
+@Table(name="EAM_ESCALATION")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+public class Escalation implements ContainerManagedTimestampTrackable, JSON, Serializable
 {
     public static final String JSON_NAME = "escalation";
     
-    // Name of the escalation chain
-    private String _name;
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
 
-    // Description of the escalation chain
-    private String _description;
-
-    // Allow the escalation to be paused (up to maxWaitTime milliseconds)
-    private boolean _pauseAllowed;
-
-    // Max amount of time that the escalation can be paused
-    private long _maxPauseTime;
-
-    // If true, notify everyone specified by the chain, else just the previous
-    // notifications.
-    private boolean _notifyAll;
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
     
-    // If true, repeat the escalation chain once it reaches end
-    private boolean _repeat;
+    @Column(name="NAME",nullable=false,length=200,unique=true)
+    private String name;
 
-    private long _ctime;
-    private long _mtime;
-    private List _actions = new ArrayList();
+    @Column(name="DESCRIPTION",length=250)
+    private String description;
+
+    @Column(name="ALLOW_PAUSE",nullable=false)
+    private boolean pauseAllowed;
+
+    @Column(name="MAX_WAIT_TIME",nullable=false)
+    private long maxPauseTime;
+
+    @Column(name="NOTIFY_ALL",nullable=false)
+    private boolean notifyAll;
+    
+    @Column(name="FREPEAT",nullable=false)
+    private boolean repeat;
+
+    @Column(name="CTIME",nullable=false)
+    private long creationTime;
+    
+    @Column(name="MTIME",nullable=false)
+    private long modifiedTime;
+    
+    @ElementCollection(fetch=FetchType.LAZY)
+    @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+    @JoinTable(name="EAM_ESCALATION_ACTION",joinColumns = {@JoinColumn(name="ESCALATION_ID")})
+    @IndexColumn(name="IDX")
+    private List<EscalationAction> actions = new ArrayList<EscalationAction>();
 
     protected Escalation() {}
 
     Escalation(String name, String description, boolean pauseAllowed,
                 long maxPauseTime, boolean notifyAll, boolean repeat)
     {
-        _name         = name;
-        _description  = description;
-        _pauseAllowed = pauseAllowed;
-        _maxPauseTime = maxPauseTime;
-        _notifyAll    = notifyAll;
-        _ctime        = System.currentTimeMillis();
-        _mtime        = _ctime;
-        _repeat       = repeat;
+        this.name         = name;
+        this.description  = description;
+        this.pauseAllowed = pauseAllowed;
+        this.maxPauseTime = maxPauseTime;
+        this.notifyAll    = notifyAll;
+        creationTime        = System.currentTimeMillis();
+        modifiedTime        = creationTime;
+        this.repeat       = repeat;
     }
     
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
     /**
      * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
      * @return <code>true</code> by default.
@@ -99,71 +148,71 @@ public class Escalation
     }
     
     public String getName() {
-        return _name;
+        return name;
     }
 
     protected void setName(String name) {
-        _name = name;
+        this.name = name;
     }
 
     public String getDescription() {
-        return _description;
+        return description;
     }
 
     protected void setDescription(String description) {
-        _description = description;
+        this.description = description;
     }
 
     public boolean isPauseAllowed() {
-        return _pauseAllowed;
+        return pauseAllowed;
     }
 
     protected void setPauseAllowed(boolean allowed) {
-        _pauseAllowed = allowed;
+        pauseAllowed = allowed;
     }
 
     public long getMaxPauseTime() {
-        return _maxPauseTime;
+        return maxPauseTime;
     }
 
     protected void setMaxPauseTime(long pauseTime) {
-        _maxPauseTime = pauseTime;
+        maxPauseTime = pauseTime;
     }
 
     public boolean isNotifyAll() {
-        return _notifyAll;
+        return notifyAll;
     }
 
     protected void setNotifyAll(boolean notifyAll) {
-        _notifyAll = notifyAll;
+        this.notifyAll = notifyAll;
     }
 
     public long getCreationTime() {
-        return _ctime;
+        return creationTime;
     }
 
     protected void setCreationTime(long ctime) {
-        _ctime = ctime;
+        creationTime = ctime;
     }
 
     public long getModifiedTime() {
-        return _mtime;
+        return modifiedTime;
     }
 
     public void setModifiedTime(long mtime) {
-        _mtime = mtime;
+        modifiedTime = mtime;
     }
 
-    public List getActions() {
-        return Collections.unmodifiableList(_actions);
+    public List<EscalationAction> getActions() {
+        return Collections.unmodifiableList(actions);
     }
     
-    protected List getActionsList() {
-        return _actions;
+    protected List<EscalationAction> getActionsList() {
+        return actions;
     }
 
-    protected void setActionsList(List actions) {
-        _actions = actions;
+    protected void setActionsList(List<EscalationAction> actions) {
+        this.actions = actions;
     }
     
     protected EscalationAction addAction(long waitTime, Action a) {
@@ -177,9 +226,9 @@ public class Escalation
      * Find an escalation action based on the ID of its associated action. 
      */
     public EscalationAction getAction(Integer id) {
-        List a = getActions();
+        List<EscalationAction> a = getActions();
         
-        for (Iterator i=a.iterator(); i.hasNext(); ) {
+        for (Iterator<EscalationAction> i=a.iterator(); i.hasNext(); ) {
             EscalationAction ea = (EscalationAction)i.next();
             
             if (ea.getAction().getId().equals(id))
@@ -189,17 +238,17 @@ public class Escalation
     }
 
     public boolean isRepeat() {
-        return _repeat;
+        return repeat;
     }
 
     public void setRepeat(boolean repeat) {
-        _repeat = repeat;
+        this.repeat = repeat;
     }
 
     public JSONObject toJSON() {
         try {
             JSONArray actions = new JSONArray();
-            for (Iterator i = getActions().iterator(); i.hasNext(); ) {
+            for (Iterator<EscalationAction> i = getActions().iterator(); i.hasNext(); ) {
                 EscalationAction action = (EscalationAction)i.next();
 
                 actions.put(action.toJSON());
@@ -219,7 +268,7 @@ public class Escalation
 
             if (getId() != null) {
                 json.put("id", getId());
-                json.put("_version_", get_version_());
+                json.put("_version_", getVersion());
             }
             return json;
         } catch(JSONException e) {
@@ -258,8 +307,8 @@ public class Escalation
     }
 
     public String toString() {
-        return "(id=" + getId() + ", name=" + _name + ", allowPause=" +
-            _pauseAllowed + ", maxPauseTime=" + _maxPauseTime + ", notifyAll=" +
-            _notifyAll + ", created=" + _ctime + ")";
+        return "(id=" + getId() + ", name=" + name + ", allowPause=" +
+            pauseAllowed + ", maxPauseTime=" + maxPauseTime + ", notifyAll=" +
+            notifyAll + ", created=" + creationTime + ")";
     }
 }

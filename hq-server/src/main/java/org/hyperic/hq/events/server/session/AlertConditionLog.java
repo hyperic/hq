@@ -25,19 +25,48 @@
 
 package org.hyperic.hq.events.server.session;
 
-import org.hyperic.hibernate.PersistedObject;
+import java.io.Serializable;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 
-public class AlertConditionLog  
-    extends PersistedObject
+@Entity
+@Table(name="EAM_ALERT_CONDITION_LOG")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+public class AlertConditionLog  implements Serializable
 {
     public static final int MAX_LOG_LENGTH = 250;
     
-    private String         _value;
-    private Alert          _alert;
-    private AlertCondition _condition;
-
-    private AlertConditionLogValue _valueObj;
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+    
+    @Column(name="VALUE",length=250)
+    private String         value;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="ALERT_ID")
+    @Index(name="ALERT_COND_LOG_IDX")
+    private Alert          alert;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="CONDITION_ID")
+    @Index(name="ALERT_CONDITION_ID_IDX")
+    private AlertCondition condition;
     
     protected AlertConditionLog() {
     }
@@ -52,43 +81,73 @@ public class AlertConditionLog
         setAlert(alert);
         setCondition(condition);
     }
+    
+    
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public String getValue() {
-        return _value;
+        return value;
     }
     
     protected void setValue(String value) {
-        _value = value;
+        this.value = value;
     }
 
     protected Alert getAlert() {
-        return _alert;
+        return alert;
     }
     
     protected void setAlert(Alert alert) {
-        _alert = alert;
+        this.alert = alert;
     }
 
     public AlertCondition getCondition() {
-        return _condition;
+        return condition;
     }
     
     protected void setCondition(AlertCondition condition) {
-        _condition = condition;
+        this.condition = condition;
     }
 
     public AlertConditionLogValue getAlertConditionLogValue() {
-        if (_valueObj == null) {
-            _valueObj = new AlertConditionLogValue();
-        }
-
-        _valueObj.setId(getId());
-        _valueObj.setValue(getValue() == null ? "" : getValue());
+       
+        AlertConditionLogValue valueObj = new AlertConditionLogValue();
+        valueObj.setId(getId());
+        valueObj.setValue(getValue() == null ? "" : getValue());
         if (getCondition() != null)
-            _valueObj.setCondition(getCondition().getAlertConditionValue());
+            valueObj.setCondition(getCondition().getAlertConditionValue());
         else
-            _valueObj.setCondition(null);
+            valueObj.setCondition(null);
 
-        return _valueObj;
+        return valueObj;
     }
+    
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof AlertConditionLog)) {
+            return false;
+        }
+        Integer objId = ((AlertConditionLog)obj).getId();
+  
+        return getId() == objId ||
+        (getId() != null && 
+         objId != null && 
+         getId().equals(objId));     
+    }
+
+    public int hashCode() {
+        int result = 17;
+        result = 37*result + (getId() != null ? getId().hashCode() : 0);
+        return result;      
+    }
+
 }

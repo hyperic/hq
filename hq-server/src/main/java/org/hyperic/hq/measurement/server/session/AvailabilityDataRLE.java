@@ -26,16 +26,39 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import org.hyperic.hibernate.PersistedObject;
+import java.io.Serializable;
 
-public class AvailabilityDataRLE
-    extends PersistedObject {
+import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
-    private long _startime;
-    private long _endtime;
-    private double _availVal;
-    private Measurement _measurement;
+import org.hibernate.annotations.Index;
+
+@Entity
+@Table(name="HQ_AVAIL_DATA_RLE")
+public class AvailabilityDataRLE implements Serializable  {
+
+    @Column(name="STARTTIME",nullable=false,insertable=false,updatable=false)
+    private long startime;
+    
+    @Column(name="ENDTIME",nullable=false)
+    @Index(name="AVAIL_RLE_ENDTIME_VAL_IDX")
+    private long endtime=9223372036854775807l;
+    
+    @Column(name="AVAILVAL",nullable=false)
+    @Index(name="AVAIL_RLE_ENDTIME_VAL_IDX")
+    private double availVal;
+    
+    @ManyToOne
+    @JoinColumn(name="MEASUREMENT_ID",nullable=false,insertable=false,updatable=false)
+    private Measurement measurement;
+    
+    @EmbeddedId
     private AvailabilityDataId id;
+    
     private static final long MAX_ENDTIME = Long.MAX_VALUE;
     
     public AvailabilityDataRLE() {
@@ -57,65 +80,67 @@ public class AvailabilityDataRLE
     
     private void init(Measurement meas, long startime, long endtime,
             double availVal) {
-        _measurement = meas;
-        _startime = startime;
-        _endtime = endtime;
-        _availVal = availVal;
+        setAvailabilityDataId(new AvailabilityDataId(startime, meas));
+        this.measurement = meas;
+        this.startime = startime;
+        this.endtime = endtime;
+        this.availVal = availVal;
     }
 
     public Measurement getMeasurement() {
-        return _measurement;
+        return measurement;
     }
 
     public void setMeasurement(Measurement meas) {
-        _measurement = meas;
+        measurement = meas;
     }
     
     protected void setAvailabilityDataId(AvailabilityDataId id) {
-        _startime = id.getStartime();
-        _measurement = id.getMeasurement();
+        this.id = id;
+        startime = id.getStartime();
+        measurement = id.getMeasurement();
     }
 
     public AvailabilityDataId getAvailabilityDataId() {
-        if (id == null) {
-            id = new AvailabilityDataId(_startime, _measurement);
-        }
+        if(this.id==null) {
+            this.id= new AvailabilityDataId(startime, measurement);
+        }   
         return id;
     }
 
     public long getStartime() {
-        return _startime;
+        return startime;
     }
 
     public void setStartime(long startime) {
-        _startime = startime;
+        this.startime = startime;
     }
 
     public long getEndtime() {
-        return _endtime;
+        return endtime;
     }
 
     public void setEndtime(long endtime) {
-        _endtime = endtime;
+        this.endtime = endtime;
     }
 
     public double getAvailVal() {
-        return _availVal;
+        return availVal;
     }
 
     public void setAvailVal(double val) {
-        _availVal = val;
+        availVal = val;
     }
     
     public long getApproxEndtime() {
-        long approxEndtime = _endtime;
+        long approxEndtime = endtime;
         
         if (approxEndtime == MAX_ENDTIME) {        
-            long interval = _measurement.getInterval();
+            long interval = measurement.getInterval();
             // java will round down
-            long multiplier = (System.currentTimeMillis() - _startime) / interval;
+            long multiplier = (System.currentTimeMillis() - startime) / interval;
             
-            approxEndtime = _startime + (multiplier * interval);        
+            approxEndtime = startime + (multiplier * interval);        
         }
         
         return approxEndtime;
@@ -139,10 +164,10 @@ public class AvailabilityDataRLE
 
     public String toString() {
         StringBuilder buf = new StringBuilder();
-        return buf.append(" measurement -> ").append(_measurement.getId())
-               .append(" startime -> ").append(_startime)
-               .append(" endtime -> ").append(_endtime)
+        return buf.append(" measurement -> ").append(measurement.getId())
+               .append(" startime -> ").append(startime)
+               .append(" endtime -> ").append(endtime)
                .append(" approxEndtime -> ").append(getApproxEndtime())
-               .append(" availVal -> ").append(_availVal).toString();
+               .append(" availVal -> ").append(availVal).toString();
     }
 }

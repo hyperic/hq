@@ -25,29 +25,112 @@
 
 package org.hyperic.hq.autoinventory;
 
-import org.hyperic.hq.appdef.server.session.AppdefResource;
+import java.io.Serializable;
+
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
+import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 
-public class AIServer extends AppdefResource
+@Entity
+@Table(name="EAM_AIQ_SERVER",uniqueConstraints = { @UniqueConstraint(name = "AIQ_SERVER_UNIQUE_IDX", columnNames = { "AIQ_PLATFORM_ID",
+"AUTOINVENTORYIDENTIFIER" }) })
+public class AIServer implements ContainerManagedTimestampTrackable, Serializable
 {
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="AIQ_PLATFORM_ID")
     private AIPlatform aIPlatform;
-    private Character active;
+    
+    @Column(name="ACTIVE",length=1)
+    private Character active= 't';
+    
+    @Column(name="SERVERTYPENAME",length=200,nullable=false)
     private String serverTypeName;
+    
+    @Basic(fetch=FetchType.LAZY)
+    @Lob
+    @Column(name="CUSTOM_PROPERTIES",columnDefinition="BLOB")
     private byte[] customProperties;
+    
+    @Basic(fetch=FetchType.LAZY)
+    @Lob
+    @Column(name="PRODUCT_CONFIG",length=256,columnDefinition="BLOB")
     private byte[] productConfig;
+    
+    @Basic(fetch=FetchType.LAZY)
+    @Lob
+    @Column(name="CONTROL_CONFIG",length=256,columnDefinition="BLOB")
     private byte[] controlConfig;
-    private byte[] responseTime_Config;
+    
+    @Basic(fetch=FetchType.LAZY)
+    @Lob
+    @Column(name="RESPONSETIME_CONFIG",length=256,columnDefinition="BLOB")
+    private byte[] responseTimeConfig;
+    
+    @Basic(fetch=FetchType.LAZY)
+    @Lob
+    @Column(name="MEASUREMENT_CONFIG",length=256,columnDefinition="BLOB")
     private byte[] measurementConfig;
+    
+    @Column(name="QUEUESTATUS")
     private Integer queueStatus;
+    
+    @Column(name="DIFF")
     private long diff;
+    
+    @Column(name="IGNORED")
     private boolean ignored;
+    
+    @Column(name="AUTOINVENTORYIDENTIFIER",length=255)
     private String autoinventoryIdentifier;
+    
+    @Column(name="INSTALLPATH",length=255)
     private String installPath;
+    
+    @Column(name="SERVICESAUTOMANAGED")
     private boolean servicesAutomanaged;
+    
+    @Column(name="VIRTUAL")
     private boolean virtual;
+    
+    @Column(name="NAME",length=255,nullable=false)
+    @Index(name="AIQ_SERVER_NAME")
+    private String name;
+    
+    @Column(name="DESCRIPTION",length=300)
+    private String description;
+    
+    @Column(name="CTIME")
+    private Long creationTime;
+    
+    @Column(name="MTIME")
+    private Long modifiedTime;
 
     /**
      * default constructor
@@ -63,6 +146,24 @@ public class AIServer extends AppdefResource
         setAIServerValue(sv);
     }
     
+    
+    
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
     public String getAutoinventoryIdentifier()
     {
         return this.autoinventoryIdentifier;
@@ -169,12 +270,12 @@ public class AIServer extends AppdefResource
 
     public byte[] getResponseTimeConfig()
     {
-        return this.responseTime_Config;
+        return this.responseTimeConfig;
     }
 
     public void setResponseTimeConfig(byte[] responseTime_Config)
     {
-        this.responseTime_Config = responseTime_Config;
+        this.responseTimeConfig = responseTime_Config;
     }
 
     public byte[] getMeasurementConfig()
@@ -244,8 +345,6 @@ public class AIServer extends AppdefResource
     }
 
 
-
-    private AIServerValue aIServerValue = new AIServerValue();
     /**
      * legacy DTO pattern
      * @deprecated use (this) AIServer object instead
@@ -253,6 +352,7 @@ public class AIServer extends AppdefResource
      */
     public AIServerValue getAIServerValue()
     {
+        AIServerValue aIServerValue = new AIServerValue();
         aIServerValue.setQueueStatus(getQueueStatus());
         aIServerValue.setCustomProperties(getCustomProperties());
         aIServerValue.setProductConfig(getProductConfig());
@@ -269,8 +369,8 @@ public class AIServer extends AppdefResource
         aIServerValue.setDescription(getDescription());
         aIServerValue.setServicesAutomanaged(isServicesAutomanaged());
         aIServerValue.setId(getId());
-        aIServerValue.setMTime(getMTime());
-        aIServerValue.setCTime(getCTime());
+        aIServerValue.setMTime(getModifiedTime());
+        aIServerValue.setCTime(getCreationTime());
         aIServerValue.setVirtual(isVirtual());
         return aIServerValue;
     }
@@ -334,6 +434,54 @@ public class AIServer extends AppdefResource
    public AppdefResourceValue getAppdefResourceValue() {
         return null;
     }
+   
+   /**
+    * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
+    * @return <code>true</code> by default.
+    */
+   public boolean allowContainerManagedCreationTime() {
+       return true;
+   }
+   
+   /**
+    * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
+    * @return <code>true</code> by default.
+    */
+   public boolean allowContainerManagedLastModifiedTime() {
+       return true;
+   }
+
+    public String getName() {
+        return name;
+    }
     
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public String getDescription() {
+        return description;
+    }
+    
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    
+    public Long getCreationTime() {
+        return creationTime;
+    }
+    
+    public void setCreationTime(Long creationTime) {
+        this.creationTime = creationTime;
+    }
+    
+    public Long getModifiedTime() {
+        return modifiedTime;
+    }
+    
+    public void setModifiedTime(Long modifiedTime) {
+        this.modifiedTime = modifiedTime;
+    }
+   
 }
 

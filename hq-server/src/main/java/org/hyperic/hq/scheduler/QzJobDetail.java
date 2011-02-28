@@ -25,104 +25,171 @@
 
 package org.hyperic.hq.scheduler;
 
+import java.io.Serializable;
 import java.util.Collection;
 
-public class QzJobDetail  implements java.io.Serializable {
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Lob;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 
-    // Fields    
-    private QzJobDetailId _id;
-    private String _description;
-    private String _jobClassName;
-    private boolean _isDurable;
-    private boolean _isVolatile;
-    private boolean _isStateful;
-    private boolean _requestsRecovery;
-    private byte[] _jobData;
-    private Collection _jobListeners;
-    private Collection _triggers;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
-    // Constructors
+@Entity
+@Table(name="QRTZ_JOB_DETAILS")
+public class QzJobDetail  implements Serializable {
+
+    @EmbeddedId  
+    private QzJobDetailId id;
+    
+    @Column(name="DESCRIPTION",length=250)
+    private String description;
+    
+    @Column(name="JOB_CLASS_NAME",length=250,nullable=false)
+    private String jobClassName;
+    
+    @Column(name="IS_DURABLE",nullable=false)
+    private boolean durable;
+    
+    @Column(name="IS_VOLATILE",nullable=false)
+    private boolean isVolatile;
+    
+    @Column(name="IS_STATEFUL",nullable=false)
+    private boolean stateful;
+    
+    @Column(name="REQUESTS_RECOVERY",nullable=false)
+    private boolean requestsRecovery;
+    
+    @Basic(fetch=FetchType.LAZY)
+    @Lob
+    @Column(name="JOB_DATA",columnDefinition="BLOB")
+    private byte[] jobData;
+    
+    @OneToMany(mappedBy="jobDetails",cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+    @OnDelete(action=OnDeleteAction.CASCADE)
+    private Collection<QzJobListener> jobListeners;
+    
+    @OneToMany(mappedBy="jobDetail",cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+    @OnDelete(action=OnDeleteAction.CASCADE)
+    private Collection<QzTrigger> triggers;
+
+   
     public QzJobDetail() {
     }
 
-    // Property accessors
+ 
     public QzJobDetailId getId() {
-        return _id;
+        return id;
     }
     
     public void setId(QzJobDetailId id) {
-        _id = id;
+        this.id = id;
     }
 
     public String getDescription() {
-        return _description;
+        return description;
     }
     
     public void setDescription(String description) {
-        _description = description;
+        this.description = description;
     }
     public String getJobClassName() {
-        return _jobClassName;
+        return jobClassName;
     }
     
     public void setJobClassName(String jobClassName) {
-        _jobClassName = jobClassName;
+        this.jobClassName = jobClassName;
     }
 
-    public boolean isIsDurable() {
-        return _isDurable;
+    public boolean isDurable() {
+        return durable;
     }
     
-    public void setIsDurable(boolean isDurable) {
-        _isDurable = isDurable;
+    public void setDurable(boolean durable) {
+        this.durable = durable;
     }
 
     public boolean isIsVolatile() {
-        return _isVolatile;
+        return isVolatile;
     }
     
     public void setIsVolatile(boolean isVolatile) {
-        _isVolatile = isVolatile;
+        this.isVolatile = isVolatile;
     }
 
-    public boolean isIsStateful() {
-        return _isStateful;
+    public boolean isStateful() {
+        return stateful;
     }
     
-    public void setIsStateful(boolean isStateful) {
-        _isStateful = isStateful;
+    public void setStateful(boolean stateful) {
+        this.stateful = stateful;
     }
 
     public boolean isRequestsRecovery() {
-        return _requestsRecovery;
+        return requestsRecovery;
     }
     
     public void setRequestsRecovery(boolean requestsRecovery) {
-        _requestsRecovery = requestsRecovery;
+        this.requestsRecovery = requestsRecovery;
     }
 
     public byte[] getJobData() {
-        return _jobData;
+        return jobData;
     }
     
     public void setJobData(byte[] jobData) {
-        _jobData = jobData;
+        this.jobData = jobData;
     }
 
-    public Collection getJobListeners() {
-        return _jobListeners;
+    public Collection<QzJobListener> getJobListeners() {
+        return jobListeners;
     }
     
-    public void setJobListeners(Collection jobListeners) {
-        _jobListeners = jobListeners;
+    public void setJobListeners(Collection<QzJobListener> jobListeners) {
+        this.jobListeners = jobListeners;
     }
 
-    public Collection getTriggers() {
-        return _triggers;
+    public Collection<QzTrigger> getTriggers() {
+        return triggers;
     }
     
-    public void setTriggers(Collection triggers) {
-        _triggers = triggers;
+    public void setTriggers(Collection<QzTrigger> triggers) {
+        this.triggers = triggers;
     }
+
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        return result;
+    }
+
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        QzJobDetail other = (QzJobDetail) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        return true;
+    }
+    
+    
 
 }

@@ -25,86 +25,152 @@
 
 package org.hyperic.hq.galerts.server.session;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.common.server.session.Crispo;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderColumn;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
+import org.hyperic.hq.config.domain.Crispo;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.util.config.ConfigResponse;
 
-public class ExecutionStrategyInfo 
-    extends PersistedObject
+@Entity
+@Table(name="EAM_EXEC_STRATEGIES")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+public class ExecutionStrategyInfo implements Serializable
 { 
-    private GalertDef                 _alertDef;
-    private ExecutionStrategyTypeInfo _type;
-    private Crispo                    _config;
-    private GalertDefPartition        _partition;
-    private List<GtriggerInfo>        _triggers = new ArrayList<GtriggerInfo>();
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="DEF_ID",nullable=false)
+    @Index(name="EXEC_STRATEGIES_DEF_ID_IDX")
+    private GalertDef                 alertDef;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="TYPE_ID",nullable=false)
+    @Index(name="EXEC_STRATEGIES_TYPE_ID_IDX")
+    private ExecutionStrategyTypeInfo type;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="CONFIG_ID",nullable=false)
+    @Index(name="EXEC_STRATEGIES_CONFIG_ID_IDX")
+    private Crispo                    config;
+    
+    @SuppressWarnings("unused")
+    @Column(name="PARTITION",nullable=false)
+    private int partitionEnum;
+    
+    private transient GalertDefPartition        partition;
+    
+    @OneToMany(mappedBy="strategy",cascade=CascadeType.ALL,orphanRemoval=true)
+    @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+    @OrderColumn(name="LIDX",nullable=false)
+    private List<GtriggerInfo>        triggers = new ArrayList<GtriggerInfo>();
     
     protected ExecutionStrategyInfo() {}
 
     ExecutionStrategyInfo(GalertDef alertDef, ExecutionStrategyTypeInfo type, 
                           Crispo config, GalertDefPartition partition) 
     {
-        _alertDef  = alertDef;
-        _type      = type;
-        _config    = config;
-        _partition = partition;
+        this.alertDef  = alertDef;
+        this.type      = type;
+        this.config    = config;
+        this.partition = partition;
     }
     
+    
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
     public GalertDef getAlertDef() {
-        return _alertDef;
+        return alertDef;
     }
     
     protected void setAlertDef(GalertDef def) {
-        _alertDef = def;
+        alertDef = def;
     }
     
     public ExecutionStrategyTypeInfo getType() {
-        return _type;
+        return type;
     }
     
     protected void setType(ExecutionStrategyTypeInfo type) {
-        _type = type;
+        this.type = type;
     }
     
     protected Crispo getConfigCrispo() {
-        return _config;
+        return config;
     }
     
     protected void setConfigCrispo(Crispo config) {
-        _config = config;
+        this.config = config;
     }
     
     public ConfigResponse getConfig() {
-        return _config.toResponse();
+        return config.toResponse();
     }
     
     public ExecutionStrategy getStrategy() {
-        return _type.getStrategy(_config.toResponse());
+        return type.getStrategy(config.toResponse());
     }
 
     public GalertDefPartition getPartition() {
-        return _partition;
+        return partition;
     }
     
     protected int getPartitionEnum() {
-        return _partition.getCode();
+        return partition.getCode();
     }
     
     protected void setPartitionEnum(int partition) {
-        _partition = GalertDefPartition.findByCode(partition);
+        this.partition = GalertDefPartition.findByCode(partition);
     }
     
     
     public List<GtriggerInfo> getTriggers() {
-        return Collections.unmodifiableList(_triggers);
+        return Collections.unmodifiableList(triggers);
     }
     
     protected List<GtriggerInfo> getTriggerList() {
-        return _triggers;
+        return triggers;
     }
     
     GtriggerInfo addTrigger(GtriggerTypeInfo typeInfo, Crispo config, 
@@ -139,7 +205,7 @@ public class ExecutionStrategyInfo
     }
     
     protected void setTriggerList(List<GtriggerInfo> triggers) {
-        _triggers = triggers;
+        this.triggers = triggers;
     }
     
     public int hashCode() {

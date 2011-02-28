@@ -25,81 +25,140 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import org.hyperic.hibernate.PersistedObject;
+import java.io.Serializable;
 
-public class Baseline extends PersistedObject
-    implements java.io.Serializable {
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
+
+@Entity
+@Table(name="EAM_MEASUREMENT_BL")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+public class Baseline implements Serializable {
     
-    // Fields
-    private Measurement _measurement;
-    private long _computeTime;
-    private boolean _userEntered = false;
-    private Double _mean;
-    private Double _minExpectedVal;
-    private Double _maxExpectedVal;
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
 
-    // Constructors
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
+    
+    @ManyToOne
+    @JoinColumn(name="MEASUREMENT_ID")
+    @Index(name="METRIC_BASELINE_CALCULATED_IDX")
+    @Fetch(FetchMode.JOIN)
+    private Measurement measurement;
+    
+    @Column(name="COMPUTE_TIME",nullable=false)
+    @Index(name="METRIC_BASELINE_CALCULATED_IDX")
+    private long computeTime;
+    
+    @Column(name="USER_ENTERED",nullable=false)
+    private boolean userEntered = false;
+    
+    @Column(name="MEAN")
+    private Double mean;
+    
+    @Column(name="MIN_EXPECTED_VAL")
+    private Double minExpectedVal;
+    
+    @Column(name="MAX_EXPECTED_VAL")
+    private Double maxExpectedVal;
+
     public Baseline() {
     }
 
     public Baseline(Measurement measurement, long computeTime,
                     boolean userEntered, Double mean, Double minExpectedVal,
                     Double maxExpectedVal) {
-        _measurement = measurement;
-        _computeTime = computeTime;
-        _userEntered = userEntered;
-        _mean = mean;
-        _minExpectedVal = minExpectedVal;
-        _maxExpectedVal = maxExpectedVal;
+        this.measurement = measurement;
+        this.computeTime = computeTime;
+        this.userEntered = userEntered;
+        this.mean = mean;
+        this.minExpectedVal = minExpectedVal;
+        this.maxExpectedVal = maxExpectedVal;
+    }
+    
+    
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 
     // Property accessors
     public Measurement getMeasurement() {
-        return _measurement;
+        return measurement;
     }
     
     public void setMeasurement(Measurement measurement) {
-        _measurement = measurement;
+        this.measurement = measurement;
     }
 
     public long getComputeTime() {
-        return _computeTime;
+        return computeTime;
     }
     
     public void setComputeTime(long computeTime) {
-        _computeTime = computeTime;
+        this.computeTime = computeTime;
     }
 
     public boolean isUserEntered() {
-        return _userEntered;
+        return userEntered;
     }
     
     public void setUserEntered(boolean userEntered) {
-        _userEntered = userEntered;
+        this.userEntered = userEntered;
     }
 
     public Double getMean() {
-        return _mean;
+        return mean;
     }
     
     protected void setMean(Double mean) {
-        _mean = mean;
+        this.mean = mean;
     }
 
     public Double getMinExpectedVal() {
-        return _minExpectedVal;
+        return minExpectedVal;
     }
     
     protected void setMinExpectedVal(Double minExpectedVal) {
-        _minExpectedVal = minExpectedVal;
+        this.minExpectedVal = minExpectedVal;
     }
 
     public Double getMaxExpectedVal() {
-        return _maxExpectedVal;
+        return maxExpectedVal;
     }
     
     protected void setMaxExpectedVal(Double maxExpectedVal) {
-        _maxExpectedVal = maxExpectedVal;
+        this.maxExpectedVal = maxExpectedVal;
     }
 
     /**
@@ -114,6 +173,28 @@ public class Baseline extends PersistedObject
         setMinExpectedVal(minExpectedValue);
         setMaxExpectedVal(maxExpectedValue);
     }
+    
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof Baseline)) {
+            return false;
+        }
+        Integer objId = ((Baseline)obj).getId();
+  
+        return getId() == objId ||
+        (getId() != null && 
+         objId != null && 
+         getId().equals(objId));     
+    }
+
+    public int hashCode() {
+        int result = 17;
+        result = 37*result + (getId() != null ? getId().hashCode() : 0);
+        return result;      
+    }
+
 }
 
 

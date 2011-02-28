@@ -26,7 +26,7 @@
 package org.hyperic.hq.measurement.shared;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;

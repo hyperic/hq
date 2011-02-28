@@ -28,7 +28,7 @@ package org.hyperic.hq.appdef.shared;
 import java.util.Map;
 
 import org.hyperic.hq.appdef.server.session.AppdefResource;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 
 /**

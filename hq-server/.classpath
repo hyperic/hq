@@ -52,7 +52,6 @@
 	<classpathentry kind="var" path="M2_REPO/org/hibernate/javax/persistence/hibernate-jpa-2.0-api/1.0.0.Final/hibernate-jpa-2.0-api-1.0.0.Final.jar" sourcepath="M2_REPO/org/hibernate/javax/persistence/hibernate-jpa-2.0-api/1.0.0.Final/hibernate-jpa-2.0-api-1.0.0.Final-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/hibernate/hibernate-validator/4.1.0.Final/hibernate-validator-4.1.0.Final.jar" sourcepath="M2_REPO/org/hibernate/hibernate-validator/4.1.0.Final/hibernate-validator-4.1.0.Final-sources.jar"/>
 	<classpathentry kind="src" path="/hq-common"/>
-	<classpathentry kind="src" path="/hq-domain"/>
 	<classpathentry kind="src" path="/hq-lather"/>
 	<classpathentry kind="src" path="/hq-pdk"/>
 	<classpathentry kind="src" path="/hq-util"/>

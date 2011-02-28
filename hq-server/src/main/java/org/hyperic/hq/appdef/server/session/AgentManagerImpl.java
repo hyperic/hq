@@ -49,21 +49,21 @@ import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
 import org.hyperic.hq.agent.commands.AgentUpgrade_result;
-import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.AgentType;
+import org.hyperic.hq.agent.domain.Agent;
+import org.hyperic.hq.agent.domain.AgentType;
 import org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection;
 import org.hyperic.hq.appdef.shared.AgentCreateException;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentUnauthorizedException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
-import org.hyperic.hq.inventory.dao.ResourceDao;
+import org.hyperic.hq.inventory.data.ResourceDao;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
@@ -872,8 +872,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
 
     /**
      * Pings the specified agent.
-     * @see org.hyperic.hq.appdef.server.session.AgentManagerImpl#pingAgent(org.hyperic.hq.authz.server.session.AuthzSubject,
-     *      org.hyperic.hq.appdef.Agent)
+     * @see org.hyperic.hq.appdef.server.session.AgentManagerImpl#pingAgent(org.hyperic.hq.auth.domain.AuthzSubject,
+     *      org.hyperic.hq.agent.domain.Agent)
      */
     @Transactional(readOnly=true)
     public long pingAgent(AuthzSubject subject, AppdefEntityID id) throws AgentNotFoundException,

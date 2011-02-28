@@ -26,6 +26,8 @@
 
 package org.hyperic.hq.authz.server.session;
 
+import org.hyperic.hq.auth.domain.AuthzSubject;
+
 /**
  * Sent before a subject is deleted
  * @author jhickey

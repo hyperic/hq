@@ -28,7 +28,7 @@ package org.hyperic.hq.measurement.shared;
 import java.util.Collection;
 import java.util.List;
 
-import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.agent.domain.Agent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.inventory.domain.Resource;

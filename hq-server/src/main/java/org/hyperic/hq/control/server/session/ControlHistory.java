@@ -25,31 +25,78 @@
  */
 package org.hyperic.hq.control.server.session;
 
-import org.hyperic.hibernate.PersistedObject;
+import java.io.Serializable;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.control.shared.ControlConstants;
 
-public class ControlHistory extends PersistedObject
+@Entity
+@Table(name="EAM_CONTROL_HISTORY")
+public class ControlHistory implements Serializable
 {
-    // Fields
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
 
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
+
+    @Column(name="GROUP_ID")
     private Integer groupId;
+    
+    @Column(name="BATCH_ID")
     private Integer batchId;
+    
+    @Column(name="ENTITY_TYPE",nullable=false)
     private Integer entityType;
+    
+    @Column(name="ENTITY_ID",nullable=false)
     private Integer entityId;
-    private String entityName;
+    
+    private transient String entityName;
+    
+    @Column(name="SUBJECT",nullable=false,length=32)
     private String subject;
+    
+    @Column(name="SCHEDULED",nullable=false)
     private boolean scheduled;
+    
+    @Column(name="DATE_SCHEDULED",nullable=false)
     private long dateScheduled;
+    
+    @Column(name="STARTTIME",nullable=false)
+    @Index(name="CTL_HISTORY_STARTTIME_IDX")
     private long startTime;
+    
+    @Column(name="STATUS",nullable=false,length=64)
     private String status;
+    
+    @Column(name="ENDTIME",nullable=false)
     private long endTime;
+    
+    @Column(name="DESCRIPTION",length=500)
     private String description;
+    
+    @Column(name="MESSAGE",length=500)
     private String message;
+    
+    @Column(name="ACTION",length=32,nullable=false)
     private String action;
+    
+    @Column(name="ARGS",length=500)
     private String args;
-
-    // Constructors
 
     /**
      * default constructor
@@ -57,6 +104,30 @@ public class ControlHistory extends PersistedObject
     public ControlHistory()
     {
     }
+    
+    public Integer getId() {
+        return id;
+    }
+
+
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+
+
+    public Long getVersion() {
+        return version;
+    }
+
+
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+
 
     public Integer getGroupId()
     {
@@ -237,6 +308,12 @@ public class ControlHistory extends PersistedObject
     public boolean equals(Object obj)
     {
         return (obj instanceof ControlHistory) && super.equals(obj);
+    }
+    
+    public int hashCode() {
+        int result = 17;
+        result = 37*result + (getId() != null ? getId().hashCode() : 0);
+        return result;      
     }
 }
 

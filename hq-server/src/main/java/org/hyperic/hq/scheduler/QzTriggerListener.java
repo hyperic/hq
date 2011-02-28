@@ -25,30 +25,71 @@
 
 package org.hyperic.hq.scheduler;
 
+import javax.persistence.CascadeType;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+@Entity
+@Table(name="QRTZ_TRIGGER_LISTENERS")
 public class QzTriggerListener  implements java.io.Serializable {
 
-    // Fields    
-    private QzTriggerListenerId _id;
-    private QzTrigger _trigger;
+    @EmbeddedId
+    private QzTriggerListenerId id;
+    
+    @ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.LAZY)
+    @JoinColumns({@JoinColumn(name="TRIGGER_NAME",referencedColumnName="TRIGGER_NAME",insertable=false,updatable=false),
+       @JoinColumn(name="TRIGGER_GROUP",referencedColumnName="TRIGGER_GROUP",insertable=false,updatable=false)})
+    private QzTrigger trigger;
 
-    // Constructors
+   
     public QzTriggerListener() {
     }
 
-    // Property accessors
     public QzTriggerListenerId getId() {
-        return _id;
+        return id;
     }
     
     public void setId(QzTriggerListenerId id) {
-        _id = id;
+        this.id = id;
     }
 
     public QzTrigger getTrigger() {
-        return _trigger;
+        return trigger;
     }
     
     public void setTrigger(QzTrigger trigger) {
-        _trigger = trigger;
+        this.trigger = trigger;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        QzTriggerListener other = (QzTriggerListener) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        return true;
+    }
+    
+    
 }

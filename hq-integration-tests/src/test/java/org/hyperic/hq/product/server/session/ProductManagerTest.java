@@ -1,9 +1,10 @@
 package org.hyperic.hq.product.server.session;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import org.hyperic.hq.inventory.domain.ConfigOptionType;
 import org.hyperic.hq.inventory.domain.ConfigType;
 import org.hyperic.hq.inventory.domain.PropertyType;

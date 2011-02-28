@@ -25,18 +25,56 @@
 
 package org.hyperic.hq.auth;
 
-import org.hyperic.hibernate.PersistedObject;
+import java.io.Serializable;
 
-/**
- * Pojo for hibernate
- */
-public class Principal extends PersistedObject
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.GenericGenerator;
+
+
+@Entity
+@Table(name="EAM_PRINCIPAL")
+public class Principal implements Serializable
 {
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
+    
+    @Column(name="PRINCIPAL",nullable=false,length=64,unique=true)
     private String principal;
+    
+    @Column(name="PASSWORD",nullable=false,length=64)
     private String password;
 
     public Principal()
     {
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 
     public String getPrincipal()

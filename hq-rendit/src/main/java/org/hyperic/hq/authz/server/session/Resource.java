@@ -3,6 +3,7 @@ package org.hyperic.hq.authz.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 
 

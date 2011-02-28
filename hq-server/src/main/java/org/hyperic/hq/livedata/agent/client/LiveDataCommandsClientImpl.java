@@ -28,7 +28,7 @@ package org.hyperic.hq.livedata.agent.client;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.client.AbstractCommandsClient;
-import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.agent.domain.Agent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.livedata.shared.LiveDataResult;
 import org.hyperic.hq.transport.AgentProxyFactory;

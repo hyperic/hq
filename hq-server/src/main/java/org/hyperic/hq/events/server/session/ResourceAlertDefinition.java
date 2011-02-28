@@ -22,6 +22,8 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
@@ -37,9 +39,9 @@ public class ResourceAlertDefinition extends AlertDefinition {
     @Index(name="ALERT_DEF_RES_ID_IDX")
     private Resource resource;
 
-    @OneToMany(cascade = CascadeType.ALL,orphanRemoval=true)
-    @JoinColumn(name = "ALERT_DEFINITION_ID")
+    @OneToMany(cascade = CascadeType.ALL,orphanRemoval=true,mappedBy="alertDef")
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<RegisteredTrigger> triggersBag = new ArrayList<RegisteredTrigger>();
 
     @OneToMany(cascade = CascadeType.ALL)
@@ -64,7 +66,7 @@ public class ResourceAlertDefinition extends AlertDefinition {
     @Id
     @GenericGenerator(name = "mygen1", strategy = "increment")
     @GeneratedValue(generator = "mygen1")
-    @Column(name = "ID")
+    @Column(name = "ID",nullable=false)
     private Integer id;
 
     @Column(name = "VERSION_COL")

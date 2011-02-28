@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.hyperic.hq.common.shared.CrispoManager;
+import org.hyperic.hq.config.domain.Crispo;
+import org.hyperic.hq.config.domain.CrispoOption;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;

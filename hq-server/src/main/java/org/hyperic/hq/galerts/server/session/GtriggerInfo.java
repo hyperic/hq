@@ -25,69 +25,126 @@
 
 package org.hyperic.hq.galerts.server.session;
 
-import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.common.server.session.Crispo;
+import java.io.Serializable;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
+import org.hyperic.hq.config.domain.Crispo;
 import org.hyperic.hq.galerts.processor.Gtrigger;
 import org.hyperic.util.config.ConfigResponse;
 
-
-public class GtriggerInfo 
-    extends PersistedObject
+@Entity
+@Table(name="EAM_GTRIGGERS")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+public class GtriggerInfo implements Serializable
 {
-    private GtriggerTypeInfo      _typeInfo;
-    private ExecutionStrategyInfo _strategy;
-    private Crispo                _config;
-    private int                   _listIndex;
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="TYPE_ID",nullable=false)
+    @Index(name="GTRIGGERS_TYPE_ID_IDX")
+    private GtriggerTypeInfo      typeInfo;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="STRAT_ID",nullable=false)
+    @Index(name="GTRIGGERS_STRAT_ID_IDX")
+    private ExecutionStrategyInfo strategy;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="CONFIG_ID",nullable=false)
+    @Index(name="GTRIGGERS_CONFIG_ID_IDX")
+    private Crispo                config;
+    
+    @Column(name="LIDX",nullable=false)
+    private int                   listIndex;
     
     protected GtriggerInfo() {}
 
     GtriggerInfo(GtriggerTypeInfo typeInfo, ExecutionStrategyInfo strategy, 
                  Crispo config, int listIndex) 
     {
-        _typeInfo  = typeInfo;
-        _strategy  = strategy;
-        _config    = config;
-        _listIndex = listIndex;
+        this.typeInfo  = typeInfo;
+        this.strategy  = strategy;
+        this.config    = config;
+        this.listIndex = listIndex;
     }
     
+    
+    
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
     protected GtriggerTypeInfo getTypeInfo() {
-        return _typeInfo;
+        return typeInfo;
     }
     
     protected void setTypeInfo(GtriggerTypeInfo typeInfo) {
-        _typeInfo = typeInfo;
+        this.typeInfo = typeInfo;
     }
     
     public Gtrigger getTrigger() {
-        return _typeInfo.getType().createTrigger(getConfig());
+        return typeInfo.getType().createTrigger(getConfig());
     }
     
     protected Crispo getConfigCrispo() {
-        return _config;
+        return config;
     }
     
     protected void setConfigCrispo(Crispo config) {
-        _config = config;
+        this.config = config;
     }
     
     public ConfigResponse getConfig() {
-        return _config.toResponse();
+        return config.toResponse();
     }
     
     public ExecutionStrategyInfo getStrategy() {
-        return _strategy;
+        return strategy;
     }
     
     protected void setStrategy(ExecutionStrategyInfo strategy) {
-        _strategy = strategy;
+        this.strategy = strategy;
     }
     
     protected void setListIndex(int listIndex) {
-        _listIndex = listIndex;
+        this.listIndex = listIndex;
     }
     
     protected int getListIndex() {
-        return _listIndex;
+        return listIndex;
     }
     
     /**
@@ -100,5 +157,26 @@ public class GtriggerInfo
         getStrategy();
         getTypeInfo();
         return this;
+    }
+    
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof GtriggerInfo)) {
+            return false;
+        }
+        Integer objId = ((GtriggerInfo)obj).getId();
+  
+        return getId() == objId ||
+        (getId() != null && 
+         objId != null && 
+         getId().equals(objId));     
+    }
+
+    public int hashCode() {
+        int result = 17;
+        result = 37*result + (getId() != null ? getId().hashCode() : 0);
+        return result;      
     }
 }

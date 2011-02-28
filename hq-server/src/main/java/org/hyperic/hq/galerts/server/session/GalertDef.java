@@ -25,16 +25,32 @@
 
 package org.hyperic.hq.galerts.server.session;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.hyperic.hibernate.PersistedObject;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
-import org.hyperic.hq.common.server.session.Crispo;
+import org.hyperic.hq.config.domain.Crispo;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
@@ -43,36 +59,95 @@ import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 
-public class GalertDef
-    extends PersistedObject
-    implements AlertDefinitionInterface, PerformsEscalations {
-    private String _name;
-    private String _desc;
-    private AlertSeverity _severity;
-    private boolean _enabled;
-    private ResourceGroup _group;
-    private Escalation _escalation;
-    private Set _strategies = new HashSet();
-    private long _ctime;
-    private long _mtime;
-    private boolean _deleted;
-    private Long _lastFired;
+@Entity
+@Table(name="EAM_GALERT_DEFS")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+public class GalertDef implements AlertDefinitionInterface, PerformsEscalations, Serializable {
+    
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
+    
+    @Column(name="NAME",nullable=false)
+    private String name;
+    
+    @Column(name="DESCR")
+    private String desc;
+    
+    @Column(name="SEVERITY",nullable=false)
+    @SuppressWarnings("unused")
+    private int severityEnum;
+    
+    private transient AlertSeverity severity;
+    
+    @Column(name="ENABLED",nullable=false)
+    private boolean enabled;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="GROUP_ID",nullable=false)
+    @Index(name="GALERT_DEFS_GROUP_ID_IDX")
+    private ResourceGroup group;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="ESCALATION_ID")
+    @Index(name="GALERT_DEFS_ESC_ID_IDX")
+    private Escalation escalation;
+    
+    @OneToMany(mappedBy="alertDef",cascade=CascadeType.ALL,orphanRemoval=true)
+    @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+    private Set<ExecutionStrategyInfo> strategies = new HashSet<ExecutionStrategyInfo>();
+    
+    @Column(name="CTIME",nullable=false)
+    private long creationTime;
+    
+    @Column(name="MTIME",nullable=false)
+    private long modifiedTime;
+    
+    @Column(name="DELETED",nullable=false)
+    private boolean deleted;
+    
+    @Column(name="LAST_FIRED")
+    private Long lastFired;
 
     protected GalertDef() {
     }
 
     GalertDef(String name, String desc, AlertSeverity severity, boolean enabled,
               ResourceGroup group) {
-        _name = name;
-        _desc = desc;
-        _severity = severity;
-        _enabled = enabled;
-        _group = group;
-        _escalation = null;
-        _ctime = System.currentTimeMillis();
-        _mtime = _ctime;
-        _deleted = false;
-        _lastFired = null;
+        this.name = name;
+        this.desc = desc;
+        this.severity = severity;
+        this.enabled = enabled;
+        this.group = group;
+        escalation = null;
+        creationTime = System.currentTimeMillis();
+        modifiedTime = creationTime;
+        deleted = false;
+        lastFired = null;
+    }
+    
+    
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 
     ExecutionStrategyInfo addPartition(GalertDefPartition partition,
@@ -90,7 +165,7 @@ public class GalertDef
     }
 
     private ExecutionStrategyInfo findStrategyByPartition(GalertDefPartition p) {
-        for (Iterator i = getStrategies().iterator(); i.hasNext();) {
+        for (Iterator<ExecutionStrategyInfo> i = getStrategies().iterator(); i.hasNext();) {
             ExecutionStrategyInfo strat = (ExecutionStrategyInfo) i.next();
 
             if (strat.getPartition().equals(p))
@@ -100,39 +175,39 @@ public class GalertDef
     }
 
     public String getName() {
-        return _name;
+        return name;
     }
 
     protected void setName(String name) {
-        _name = name;
+        this.name = name;
     }
 
     public String getDescription() {
-        return _desc;
+        return desc;
     }
 
     protected void setDescription(String desc) {
-        _desc = desc;
+        this.desc = desc;
     }
 
     public boolean isEnabled() {
-        return _enabled;
+        return enabled;
     }
 
     protected void setEnabled(boolean enabled) {
-        _enabled = enabled;
+        this.enabled = enabled;
     }
 
     protected int getSeverityEnum() {
-        return _severity.getCode();
+        return severity.getCode();
     }
 
     protected void setSeverityEnum(int code) {
-        _severity = AlertSeverity.findByCode(code);
+        severity = AlertSeverity.findByCode(code);
     }
 
     public AlertSeverity getSeverity() {
-        return _severity;
+        return severity;
     }
 
     void setSeverity(AlertSeverity severity) {
@@ -140,35 +215,35 @@ public class GalertDef
     }
 
     public ResourceGroup getGroup() {
-        return _group;
+        return group;
     }
 
     protected void setGroup(ResourceGroup group) {
-        _group = group;
+        this.group = group;
     }
 
     public Escalation getEscalation() {
-        return _escalation;
+        return escalation;
     }
 
     protected void setEscalation(Escalation escalation) {
-        _escalation = escalation;
+        this.escalation = escalation;
     }
 
-    protected Set getStrategySet() {
-        return _strategies;
+    protected Set<ExecutionStrategyInfo> getStrategySet() {
+        return strategies;
     }
 
-    protected void setStrategySet(Set strategies) {
-        _strategies = strategies;
+    protected void setStrategySet(Set<ExecutionStrategyInfo> strategies) {
+        this.strategies = strategies;
     }
 
     public Set<ExecutionStrategyInfo> getStrategies() {
-        return Collections.unmodifiableSet(_strategies);
+        return Collections.unmodifiableSet(strategies);
     }
 
     public ExecutionStrategyInfo getStrategy(GalertDefPartition partition) {
-        for (Iterator i = getStrategies().iterator(); i.hasNext();) {
+        for (Iterator<ExecutionStrategyInfo> i = getStrategies().iterator(); i.hasNext();) {
             ExecutionStrategyInfo s = (ExecutionStrategyInfo) i.next();
 
             if (s.getPartition().equals(partition))
@@ -198,35 +273,35 @@ public class GalertDef
     }
 
     public long getCtime() {
-        return _ctime;
+        return creationTime;
     }
 
     protected void setCtime(long ctime) {
-        _ctime = ctime;
+        creationTime = ctime;
     }
 
     public long getMtime() {
-        return _mtime;
+        return modifiedTime;
     }
 
     protected void setMtime(long mtime) {
-        _mtime = mtime;
+        modifiedTime = mtime;
     }
 
     protected void setDeleted(boolean deleted) {
-        _deleted = deleted;
+        this.deleted = deleted;
     }
 
     public boolean isDeleted() {
-        return _deleted;
+        return deleted;
     }
 
     protected void setLastFired(Long l) {
-        _lastFired = l;
+        lastFired = l;
     }
 
     public Long getLastFired() {
-        return _lastFired;
+        return lastFired;
     }
 
     public EscalationAlertType getAlertType() {
@@ -248,4 +323,26 @@ public class GalertDef
     public Resource getResource() {
         return getGroup();
     }
+    
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof GalertDef)) {
+            return false;
+        }
+        Integer objId = ((GalertDef)obj).getId();
+  
+        return getId() == objId ||
+        (getId() != null && 
+         objId != null && 
+         getId().equals(objId));     
+    }
+
+    public int hashCode() {
+        int result = 17;
+        result = 37*result + (getId() != null ? getId().hashCode() : 0);
+        return result;      
+    }
+
 }

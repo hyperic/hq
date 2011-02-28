@@ -25,10 +25,17 @@
 
 package org.hyperic.hq.hqu.server.session;
 
+import javax.persistence.Entity;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Table;
+
 import org.hyperic.hq.hqu.ViewDescriptor;
 
+@Entity
+@Table(name="EAM_UI_VIEW_RESOURCE")
+@PrimaryKeyJoinColumn(name="VIEW_ID", referencedColumnName = "ID")
 public class ViewResource
-    extends View
+    extends View<AttachmentResource>
 { 
     protected ViewResource() {}
     

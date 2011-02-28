@@ -25,23 +25,36 @@
 
 package org.hyperic.hq.scheduler;
 
-public class QzBlobTrigger extends org.hyperic.hq.scheduler.QzTrigger
-    implements java.io.Serializable {
+import java.io.Serializable;
 
-    // Fields
-     private byte[] _blobData;
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Lob;
+import javax.persistence.Table;
 
-    // Constructors
+@Entity
+@Table(name="QRTZ_BLOB_TRIGGERS")
+public class QzBlobTrigger extends QzTrigger
+    implements Serializable {
+
+    @Basic(fetch=FetchType.LAZY)
+    @Lob
+    @Column(name="BLOB_DATA",columnDefinition="BLOB")
+    private byte[] blobData;
+
+    
     public QzBlobTrigger() {
     }
 
-    // Property accessors
+   
     public byte[] getBlobData() {
-        return _blobData;
+        return blobData;
     }
     
     public void setBlobData(byte[] blobData) {
-        _blobData = blobData;
+        this.blobData = blobData;
     }
 }
 

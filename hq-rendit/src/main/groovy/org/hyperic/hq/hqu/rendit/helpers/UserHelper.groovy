@@ -33,7 +33,7 @@ import java.util.List
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.auth.shared.AuthManager;
-import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.auth.domain.AuthzSubject
 
 /**
  * The UserHelper can be used to find Users in the HQ system.

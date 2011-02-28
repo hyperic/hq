@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.authz.server.session;
 
+import org.hyperic.hq.auth.domain.Role;
 import org.hyperic.hq.authz.values.OwnedRoleValue;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.pager.PagerProcessor;

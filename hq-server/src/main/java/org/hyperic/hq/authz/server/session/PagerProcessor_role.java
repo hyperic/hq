@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.authz.server.session;
 
-import org.hyperic.hq.authz.server.session.Role;
+import org.hyperic.hq.auth.domain.Role;
 import org.hyperic.util.pager.PagerProcessor;
 
 public class PagerProcessor_role implements PagerProcessor {

@@ -32,7 +32,7 @@ import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplateSortField
 import org.hyperic.hibernate.PageInfo
-import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.auth.domain.AuthzSubject
 import org.hyperic.hq.measurement.server.session.Measurement
 import org.hyperic.util.pager.PageControl
 

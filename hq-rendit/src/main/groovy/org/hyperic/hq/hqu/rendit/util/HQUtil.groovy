@@ -29,7 +29,7 @@ package org.hyperic.hq.hqu.rendit.util
 
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.common.shared.ServerConfigManager;
-import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.auth.domain.AuthzSubject
 import org.hyperic.hq.common.shared.HQConstants
 import org.hyperic.hq.common.server.session.ServerConfigManagerImpl
 import org.hyperic.hq.context.Bootstrap;

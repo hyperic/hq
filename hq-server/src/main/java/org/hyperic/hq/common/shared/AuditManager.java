@@ -28,7 +28,7 @@ package org.hyperic.hq.common.shared;
 import java.util.List;
 
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditImportance;
 import org.hyperic.hq.common.server.session.AuditPurpose;

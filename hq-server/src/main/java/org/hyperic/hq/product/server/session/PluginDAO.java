@@ -32,7 +32,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
-import org.hyperic.hq.product.Plugin;
+import org.hyperic.hq.plugin.domain.Plugin;
 import org.springframework.stereotype.Repository;
 
 

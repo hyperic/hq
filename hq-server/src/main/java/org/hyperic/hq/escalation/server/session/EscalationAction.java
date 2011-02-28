@@ -27,18 +27,34 @@ package org.hyperic.hq.escalation.server.session;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+
+import org.hibernate.annotations.Index;
+import org.hibernate.annotations.Parent;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.util.json.JSON;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+@Embeddable
 public class EscalationAction 
     implements Serializable, JSON
 {
-    private Escalation _parent;
-    private Action      _action;
-    private long        _waitTime;
+    @Parent
+    private Escalation parent;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="ACTION_ID",nullable=false)
+    @Index(name="ESC_ACTION_ID_IDX")
+    private Action      action;
+    
+    @Column(name="WAIT_TIME",nullable=false)
+    private long        waitTime;
 
     protected EscalationAction() {
     }
@@ -46,33 +62,33 @@ public class EscalationAction
     protected EscalationAction(Escalation parent, Action action, 
                                long waitTime) 
     {
-        _parent   = parent;
-        _action   = action;
-        _waitTime = waitTime;
+        this.parent   = parent;
+        this.action   = action;
+        this.waitTime = waitTime;
     }
     
     protected void setParent(Escalation parent) {
-        _parent = parent;
+        this.parent = parent;
     }
 
     public Escalation getParent() {
-        return _parent;
+        return parent;
     }
     
     public Action getAction() {
-        return _action;
+        return action;
     }
 
     protected void setAction(Action action) {
-        _action = action;
+        this.action = action;
     }
 
     public long getWaitTime() {
-        return _waitTime;
+        return waitTime;
     }
 
     protected void setWaitTime(long waitTime) {
-        _waitTime = waitTime;
+        this.waitTime = waitTime;
     }
 
     public JSONObject toJSON() {
@@ -99,17 +115,17 @@ public class EscalationAction
         }
 
         EscalationAction o = (EscalationAction)obj;
-        return _parent.equals(o.getParent()) && 
-               _waitTime == o.getWaitTime() &&
-               _action.equals(o.getAction());
+        return parent.equals(o.getParent()) && 
+               waitTime == o.getWaitTime() &&
+               action.equals(o.getAction());
     }
 
     public int hashCode() {
         int result = 17;
 
-        result = 37*result + _parent.hashCode();
-        result = 37*result + (int)(_waitTime ^ (_waitTime >>> 32));
-        result = 37*result + _action.hashCode();
+        result = 37*result + parent.hashCode();
+        result = 37*result + (int)(waitTime ^ (waitTime >>> 32));
+        result = 37*result + action.hashCode();
 
         return result;
     }

@@ -27,38 +27,49 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+
+@Embeddable
 public class AvailabilityDataId implements Serializable {
     private static final long serialVersionUID = 1L;
-    private long _startime;
-    private Measurement _measurement;
+    
+    @Column(name="STARTTIME",nullable=false)
+    private long startime;
+    
+    @ManyToOne
+    @JoinColumn(name="MEASUREMENT_ID",nullable=false)
+    private Measurement measurement;
     
     public AvailabilityDataId() {
     }
     
     public AvailabilityDataId(long startime, Measurement measurement) {
-        _startime = startime;
-        _measurement = measurement;
+        this.startime = startime;
+        this.measurement = measurement;
     }
 
     public long getStartime() {
-        return _startime;
+        return startime;
     }
 
     public Measurement getMeasurement() {
-        return _measurement;
+        return measurement;
     }
 
     public void setMeasurement(Measurement measurement) {
-        _measurement = measurement;
+        this.measurement = measurement;
     }
 
     public void setStartime(long startime) {
-        _startime = startime;
+        this.startime = startime;
     }
     
     public int hashCode() {
-        return 17 + (37*(new Long(_startime)).hashCode()) +
-            (37*_measurement.getId().hashCode());
+        return 17 + (37*(new Long(startime)).hashCode()) +
+            (37*measurement.getId().hashCode());
     }
     
     public boolean equals(Object rhs) {
@@ -71,15 +82,15 @@ public class AvailabilityDataId implements Serializable {
     }
     
     private boolean equals(AvailabilityDataId rhs) {
-        if (_startime == rhs._startime &&
-                _measurement.getId().equals(rhs._measurement.getId())) {
+        if (startime == rhs.startime &&
+                measurement.getId().equals(rhs.measurement.getId())) {
             return true;
         }
         return false;
     }
     
     public String toString() {
-        return "startime -> " + _startime +
-            ", measId -> " + _measurement.getId();
+        return "startime -> " + startime +
+            ", measId -> " + measurement.getId();
     }
 }

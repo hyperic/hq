@@ -25,43 +25,96 @@
 
 package org.hyperic.hq.ui.server.session;
 
-import org.hyperic.hibernate.PersistedObject;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.common.server.session.Crispo;
+import java.io.Serializable;
+
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Version;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
+import org.hyperic.hq.auth.domain.AuthzSubject;
+import org.hyperic.hq.config.domain.Crispo;
 import org.hyperic.util.config.ConfigResponse;
 
-public abstract class DashboardConfig
-    extends PersistedObject
+@Entity
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+@Table(name="EAM_DASH_CONFIG")
+@DiscriminatorColumn(name="CONFIG_TYPE",length=255)
+public abstract class DashboardConfig implements Serializable
 {
-    private Crispo _config;
-    private String _name;
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+    
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
+    
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="CRISPO_ID",nullable=false)
+    @Index(name="DASH_CONFIG_CRISPO_ID_IDX")
+    private Crispo config;
+    
+    @Column(name="name",length=255,nullable=false)
+    private String name;
 
     protected DashboardConfig() {
     }
     
     protected DashboardConfig(String name, Crispo config) {
-        _name   = name;
-        _config = config;
+        this.name   = name;
+        this.config = config;
     }
     
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
     public ConfigResponse getConfig() {
-        return _config.toResponse();
+        return config.toResponse();
     }
     
     protected Crispo getCrispo() {
-        return _config;
+        return config;
     }
     
     protected void setCrispo(Crispo config) {
-        _config = config;
+        this.config = config;
     }
     
     public String getName() {
-        return _name;
+        return name;
     }
     
     protected void setName(String n) {
-        _name = n;
+        name = n;
     }
     
     public abstract boolean isEditable(AuthzSubject by);

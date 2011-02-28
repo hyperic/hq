@@ -34,7 +34,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
@@ -102,8 +102,7 @@ public class EscalationManagerImpl implements EscalationManager {
         Escalation escalation;
 
         if ((escalation = escalationDAO.findByName(name)) != null) {
-            throw new DuplicateObjectException("An escalation with that name " + "already exists",
-                escalation);
+            throw new DuplicateObjectException("An escalation with that name " + "already exists");
         }
     }
 
