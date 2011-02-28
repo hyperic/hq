@@ -90,7 +90,7 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
     private Collection<AvailabilityDataRLE> availabilityData;
 
     @ManyToOne
-    @JoinColumn(name = "RESOURCE_ID",nullable=false)
+    @JoinColumn(name = "RESOURCE_ID")
     @Index(name="MEAS_RES_IDX")
     private Resource resource;
 

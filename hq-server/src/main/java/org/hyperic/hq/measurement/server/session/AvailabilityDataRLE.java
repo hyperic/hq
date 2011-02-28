@@ -80,7 +80,8 @@ public class AvailabilityDataRLE implements Serializable  {
     
     private void init(Measurement meas, long startime, long endtime,
             double availVal) {
-        measurement = meas;
+        setAvailabilityDataId(new AvailabilityDataId(startime, meas));
+        this.measurement = meas;
         this.startime = startime;
         this.endtime = endtime;
         this.availVal = availVal;
@@ -95,14 +96,15 @@ public class AvailabilityDataRLE implements Serializable  {
     }
     
     protected void setAvailabilityDataId(AvailabilityDataId id) {
+        this.id = id;
         startime = id.getStartime();
         measurement = id.getMeasurement();
     }
 
     public AvailabilityDataId getAvailabilityDataId() {
-        if (id == null) {
-            id = new AvailabilityDataId(startime, measurement);
-        }
+        if(this.id==null) {
+            this.id= new AvailabilityDataId(startime, measurement);
+        }   
         return id;
     }
 
