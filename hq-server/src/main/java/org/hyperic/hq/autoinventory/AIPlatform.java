@@ -133,22 +133,22 @@ public class AIPlatform implements ContainerManagedTimestampTrackable, Serializa
     
     @Basic(fetch=FetchType.LAZY)
     @Lob
-    @Column(name="CUSTOM_PROPERTIES",columnDefinition="BLOB")
+    @Column(name="CUSTOM_PROPERTIES")
     private byte[] customProperties;
     
     @Basic(fetch=FetchType.LAZY)
     @Lob
-    @Column(name="PRODUCT_CONFIG",length=256,columnDefinition="BLOB")
+    @Column(name="PRODUCT_CONFIG",length=256)
     private byte[] productConfig;
     
     @Basic(fetch=FetchType.LAZY)
     @Lob
-    @Column(name="CONTROL_CONFIG",length=256,columnDefinition="BLOB")
+    @Column(name="CONTROL_CONFIG",length=256)
     private byte[] controlConfig;
     
     @Basic(fetch=FetchType.LAZY)
     @Lob
-    @Column(name="MEASUREMENT_CONFIG",length=256,columnDefinition="BLOB")
+    @Column(name="MEASUREMENT_CONFIG",length=256)
     private byte[] measurementConfig;
     
     @OneToMany(fetch=FetchType.LAZY,mappedBy="aIPlatform",cascade=CascadeType.ALL)

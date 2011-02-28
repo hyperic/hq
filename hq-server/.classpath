@@ -138,5 +138,6 @@
 	<classpathentry kind="con" path="org.eclipse.ajdt.core.ASPECTJRT_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-messaging"/>
 	<classpathentry kind="src" path="/hq-diagnostics"/>
+	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-jpa/1.0.0.M1/spring-data-jpa-1.0.0.M1.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

@@ -35,9 +35,9 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
+import org.hyperic.hq.autoinventory.data.AIServerRepository;
 import org.hyperic.hq.dao.AIIpDAO;
 import org.hyperic.hq.dao.AIPlatformDAO;
-import org.hyperic.hq.dao.AIServerDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -51,13 +51,13 @@ public class AIQRV_purge implements AIQResourceVisitor {
     private final Log log = LogFactory.getLog(AIQRV_purge.class);
     private AIPlatformDAO aiPlatformDAO;
     private AIIpDAO aiIpDAO;
-    private AIServerDAO aiServerDAO;
+    private AIServerRepository aiServerRepository;
 
     @Autowired
-    public AIQRV_purge(AIPlatformDAO aiPlatformDAO, AIIpDAO aiIpDAO, AIServerDAO aiServerDAO) {
+    public AIQRV_purge(AIPlatformDAO aiPlatformDAO, AIIpDAO aiIpDAO, AIServerRepository aiServerRepository) {
         this.aiPlatformDAO = aiPlatformDAO;
         this.aiIpDAO = aiIpDAO;
-        this.aiServerDAO = aiServerDAO;
+        this.aiServerRepository = aiServerRepository;
     }
 
     public void visitPlatform(AIPlatform aiplatform, AuthzSubject subject, List createdResources)
@@ -76,6 +76,6 @@ public class AIQRV_purge implements AIQResourceVisitor {
         throws AIQApprovalException, PermissionException {
         log.info("Visiting server: " + aiserver.getId() + " AIID=" +
                  aiserver.getAutoinventoryIdentifier());
-        aiServerDAO.remove(aiserver);
+        aiServerRepository.delete(aiserver);
     }
 }
