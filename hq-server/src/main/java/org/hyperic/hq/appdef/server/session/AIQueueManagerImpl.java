@@ -62,12 +62,12 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
+import org.hyperic.hq.autoinventory.data.AIServerRepository;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.shared.AuditManager;
 import org.hyperic.hq.dao.AIIpDAO;
 import org.hyperic.hq.dao.AIPlatformDAO;
-import org.hyperic.hq.dao.AIServerDAO;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.sigar.NetFlags;
 import org.hyperic.util.pager.PageControl;
@@ -92,7 +92,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
     private final AI2AppdefDiff appdefDiffProcessor = new AI2AppdefDiff();
     private final AIQSynchronizer queueSynchronizer = new AIQSynchronizer();
 
-    private AIServerDAO aIServerDAO;
+    private AIServerRepository aiServerRepository;
     private AIIpDAO aiIpDAO;
     private AIPlatformDAO aiPlatformDAO;
     private ConfigManager configManager;
@@ -108,7 +108,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
     private AgentDAO agentDAO;
 
     @Autowired
-    public AIQueueManagerImpl(AIServerDAO aIServerDAO, AIIpDAO aiIpDAO,
+    public AIQueueManagerImpl(AIServerRepository aiServerRepository, AIIpDAO aiIpDAO,
                               AIPlatformDAO aiPlatformDAO, ConfigManager configManager,
                               PlatformManager platformManager, PermissionManager permissionManager,
                               AuditManager auditManager, AuthzSubjectManager authzSubjectManager,
@@ -116,7 +116,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
                               AgentManager agentManager, AIAuditFactory aiAuditFactory,
                               AIQResourceVisitorFactory aiqResourceVisitorFactory, AgentDAO agentDAO) {
 
-        this.aIServerDAO = aIServerDAO;
+        this.aiServerRepository = aiServerRepository;
         this.aiIpDAO = aiIpDAO;
         this.aiPlatformDAO = aiPlatformDAO;
         this.configManager = configManager;
@@ -356,7 +356,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
      */
     @Transactional(readOnly = true)
     public AIServerValue findAIServerById(AuthzSubject subject, int serverID) {
-        AIServer aiserver = aIServerDAO.get(new Integer(serverID));
+        AIServer aiserver = aiServerRepository.findById(new Integer(serverID));
 
         if (aiserver == null) {
             return null;
@@ -387,7 +387,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
     @Transactional(readOnly = true)
     public AIServerValue findAIServerByName(AuthzSubject subject, String name) {
         // XXX Do authz check
-        AIServer aiserver = aIServerDAO.findByName(name);
+        AIServer aiserver = aiServerRepository.findByName(name);
         if (aiserver == null) {
             return null;
         }
@@ -573,7 +573,8 @@ public class AIQueueManagerImpl implements AIQueueManager {
                               " has a Server with ID=null");
                     continue;
                 }
-                final AIServer aiserver = aIServerDAO.get(id);
+                
+                final AIServer aiserver = aiServerRepository.findById(id);
                 if (aiserver == null) {
                     if (isPurgeAction) {
                         continue;
