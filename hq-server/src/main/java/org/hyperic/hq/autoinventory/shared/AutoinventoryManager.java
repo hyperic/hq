@@ -30,7 +30,6 @@ import java.util.Map;
 
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.agent.domain.Agent;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -155,11 +154,6 @@ public interface AutoinventoryManager {
      * remove AIHistory
      */
     public void removeHistory(AIHistory history);
-
-    /**
-     * update AIHistory
-     */
-    public void updateAIHistory(Integer jobId, long endTime, String status, String message);
 
     /**
      * Get status for an autoinventory scan, given the agentToken

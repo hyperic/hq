@@ -41,12 +41,11 @@ import org.hyperic.hq.autoinventory.AISchedule;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.DuplicateAIScanNameException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
+import org.hyperic.hq.autoinventory.data.AIHistoryRepository;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManager;
 import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.dao.AIHistoryDAO;
 import org.hyperic.hq.dao.AIScheduleDAO;
 import org.hyperic.hq.scheduler.ScheduleParseException;
 import org.hyperic.hq.scheduler.ScheduleParser;
@@ -64,6 +63,8 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleTrigger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -87,15 +88,15 @@ public class AIScheduleManagerImpl
 
     private AIScheduleDAO aiScheduleDao;
     private PlatformManager platformManager;
-    private AIHistoryDAO aiHistoryDao;
+    private AIHistoryRepository aiHistoryRepository;
 
     @Autowired
     public AIScheduleManagerImpl(Scheduler scheduler, DBUtil dbUtil, AIScheduleDAO aiScheduleDao,
-                                 PlatformManager platformManager, AIHistoryDAO aiHistoryDAO) {
+                                 PlatformManager platformManager, AIHistoryRepository aiHistoryRepository) {
         super(scheduler, dbUtil);
         this.aiScheduleDao = aiScheduleDao;
         this.platformManager = platformManager;
-        this.aiHistoryDao = aiHistoryDAO;
+        this.aiHistoryRepository = aiHistoryRepository;
     }
 
     protected String getHistoryPagerClass() {
@@ -309,22 +310,23 @@ public class AIScheduleManagerImpl
 
         Collection<AIHistory> hist;
         int sortAttr = pc.getSortattribute();
+        Direction direction = pc.isAscending()?Direction.ASC:Direction.DESC;
         switch (sortAttr) {
             case SortAttribute.CONTROL_STATUS:
-                hist = aiHistoryDao.findByEntityStatus(id.getType(), id.getID(), pc.isAscending());
+                hist = aiHistoryRepository.findByEntityTypeAndEntityId(id.getType(), id.getID(), new Sort(direction,"status"));
                 break;
             case SortAttribute.CONTROL_STARTED:
-                hist = aiHistoryDao.findByEntityStartTime(id.getType(), id.getID(), pc.isAscending());
+                hist = aiHistoryRepository.findByEntityTypeAndEntityId(id.getType(), id.getID(), new Sort(direction,"startTime"));
                 break;
             case SortAttribute.CONTROL_ELAPSED:
-                hist = aiHistoryDao.findByEntityDuration(id.getType(), id.getID(), pc.isAscending());
+                hist = aiHistoryRepository.findByEntityTypeAndEntityId(id.getType(), id.getID(), new Sort(direction,"duration"));
                 break;
             case SortAttribute.CONTROL_DATESCHEDULED:
-                hist = aiHistoryDao.findByEntityDateScheduled(id.getType(), id.getID(), pc.isAscending());
+                hist = aiHistoryRepository.findByEntityTypeAndEntityId(id.getType(), id.getID(), new Sort(direction,"dateScheduled"));
                 break;
             case SortAttribute.CONTROL_ENTITYNAME:
                 // No need to sort since all will have the same name
-                hist = aiHistoryDao.findByEntity(id.getType(), id.getID());
+                hist = aiHistoryRepository.findByEntityTypeAndEntityId(id.getType(), id.getID());
                 break;
             default:
                 throw new NotFoundException("Unknown sort attribute: " + sortAttr);
