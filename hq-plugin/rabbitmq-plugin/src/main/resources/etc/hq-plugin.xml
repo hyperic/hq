@@ -63,7 +63,7 @@
 
         <plugin type="autoinventory" class="org.hyperic.hq.plugin.rabbitmq.detect.RabbitServerDetector"/>
 
-        <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+        <plugin type="measurement" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitServerMeasurement"/>
 
         <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitServerCollector"/>
 
@@ -71,7 +71,6 @@
 
         <config>
             <option name="node" description="node"/>
-            <option name="process.query" default="State.Name.re=[beam|erl],Args.*.eq=-sname,Args.*.eq=%node%" description="PTQL Query"/>
             <option name="addr" description="" default="localhost"/>
             <option name="port" description="" default="55672"/>
             <option name="user" description="" default="guest"/>
@@ -90,7 +89,51 @@
                 template="rabbitmq:${server-connection}:Availability"
                 indicator="true"/>
 
-        &process-metrics;
+        <metric name="Process Virtual Memory Size"
+                template="rabbitmq-sigar:Type=ProcMem,${server-connection}:Size"
+                units="B"/>
+
+        <metric name="Process Resident Memory Size"
+                template="rabbitmq-sigar:Type=ProcMem,${server-connection}:Resident"
+                indicator="true"
+                units="B"/>
+
+        <metric name="Process Page Faults"
+                template="rabbitmq-sigar:Type=ProcMem,${server-connection}:PageFaults"
+                collectionType="trendsup"/>
+
+        <metric name="Process Cpu System Time"
+                template="rabbitmq-sigar:Type=ProcCpu,${server-connection}:Sys"
+                units="ms"
+                collectionType="trendsup"/>
+
+        <metric name="Process Cpu User Time"
+                template="rabbitmq-sigar:Type=ProcCpu,${server-connection}:User"
+                units="ms"
+                collectionType="trendsup"/>
+
+        <metric name="Process Cpu Total Time"
+                template="rabbitmq-sigar:Type=ProcCpu,${server-connection}:Total"
+                units="ms"
+                collectionType="trendsup"/>
+
+        <metric name="Process Cpu Usage"
+                template="rabbitmq-sigar:Type=ProcCpu,${server-connection}:Percent"
+                indicator="true"
+                units="percentage"/>
+
+        <metric name="Process Start Time"
+                template="rabbitmq-sigar:Type=ProcTime,${server-connection}:StartTime"
+                category="AVAILABILITY"
+                units="epoch-millis"
+                collectionType="static"/>
+
+        <metric name="Process Open File Descriptors"
+                template="rabbitmq-sigar:Type=ProcFd,${server-connection}:Total"/>
+
+        <metric name="Process Threads"
+                template="rabbitmq-sigar:Type=ProcState,${server-connection}:Threads"/>
+
 
         <!-- Next release:
        <plugin type="control" class="org.hyperic.hq.plugin.rabbitmq.manage.RabbitBrokerManagerPlugin"/>
