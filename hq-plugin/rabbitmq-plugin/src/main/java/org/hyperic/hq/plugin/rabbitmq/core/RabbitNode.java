@@ -21,7 +21,7 @@ public class RabbitNode {
     private int memUsed;
     private int memLimit;
     private int procUsed;
-    private int procUotal;
+    private int procTotal;
     private String erlangVersion;
     private int uptime;
     private int runQueue;
@@ -184,15 +184,15 @@ public class RabbitNode {
     /**
      * @return the procUotal
      */
-    public int getProcUotal() {
-        return procUotal;
+    public int getProcTotal() {
+        return procTotal;
     }
 
     /**
-     * @param procUotal the procUotal to set
+     * @param procTotal the procUotal to set
      */
-    public void setProcUotal(int procUotal) {
-        this.procUotal = procUotal;
+    public void setProcRotal(int procTotal) {
+        this.procTotal = procTotal;
     }
 
     /**
@@ -255,7 +255,7 @@ public class RabbitNode {
     public String toString() {
         return "RabbitNode{name=" + name + ", running=" + running + ", type=" + type + ", osPid=" + osPid + ", memEts=" + memEts
                 + ", memBinary=" + memBinary + ", fdUsed=" + fdUsed + ", fdTotal=" + fdTotal + ", memUsed=" + memUsed
-                + ", memLimit=" + memLimit + ", procUsed=" + procUsed + ", procUotal=" + procUotal + ", erlangVersion=" + erlangVersion
+                + ", memLimit=" + memLimit + ", procUsed=" + procUsed + ", procUotal=" + procTotal + ", erlangVersion=" + erlangVersion
                 + ", uptime=" + uptime + ", runQueue=" + runQueue + ", processors=" + processors + '}';
     }
 }

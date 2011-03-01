@@ -90,6 +90,10 @@ public class HypericRabbitAdmin {
         logger.debug("[HypericRabbitAdmin] destroy()");
     }
 
+    public RabbitOverview getOverview() throws PluginException {
+        return get("/api/overview",RabbitOverview.class);
+    }
+
     public List<RabbitVirtualHost> getVirtualHosts() throws PluginException {
         return Arrays.asList(get("/api/vhosts", RabbitVirtualHost[].class));
     }

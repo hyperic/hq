@@ -89,6 +89,45 @@
                 template="rabbitmq:${server-connection}:Availability"
                 indicator="true"/>
 
+        <metric name="Messages"
+                template="rabbitmq:${server-connection}:messages"
+                indicator="true"/>
+
+        <metric name="Messages Ready"
+                template="rabbitmq:${server-connection}:messages_ready"
+                indicator="true"/>
+
+        <metric name="Messages Unacknowledged"
+                template="rabbitmq:${server-connection}:messages_unacknowledged"
+                indicator="true"/>
+
+        <metric name="Messages Publish /s"
+                template="rabbitmq:${server-connection}:publish_details"
+                indicator="true"/>
+
+        <metric name="Messages Deliver /s"
+                template="rabbitmq:${server-connection}:deliver_get_details"
+                indicator="true"/>
+
+        <metric name="Messages Deliver No Ack /s"
+                template="rabbitmq:${server-connection}:deliver_no_ack_details"
+                indicator="true"/>
+
+        <metric name="Memory watermark"
+                template="rabbitmq:${server-connection}:mem_ets"
+                indicator="true"/>
+
+        <metric name="Erlang Processes used"
+                template="rabbitmq:${server-connection}:proc_used"/>
+
+        <metric name="Erlang Processes % used"
+                template="rabbitmq:${server-connection}:proc_used_percentage"
+                indicator="true" units="percentage"/>
+
+        <metric name="Process Open File Descriptors %"
+                template="rabbitmq:${server-connection}:fd_percentage"
+                indicator="true" units="percentage"/>
+
         <metric name="Process Virtual Memory Size"
                 template="rabbitmq-sigar:Type=ProcMem,${server-connection}:Size"
                 units="B"/>

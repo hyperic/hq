@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitNode;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitOverview;
 import org.hyperic.hq.product.PluginException;
 
 /**
@@ -51,7 +52,18 @@ public class RabbitServerCollector extends RabbitMQDefaultCollector {
 
         try {
             RabbitNode n = rabbitAdmin.getNode(node);
+            RabbitOverview o = rabbitAdmin.getOverview();
+
             setAvailability(n.isRunning());
+
+            setValue("mem_ets", n.getMemEts());
+            setValue("proc_used", n.getProcUsed());
+            setValue("proc_used_percentage", (double) n.getProcUsed() / (double) n.getProcTotal());
+            setValue("fd_percentage", (double) n.getFdUsed() / (double) n.getFdTotal());
+            getResult().addValues(o.getQueueTotals());
+            setValue("publish_details", o.getMessageStats().getPublishDetails().get("rate"));
+            setValue("deliver_get_details", o.getMessageStats().getDeliverGetDetails().get("rate"));
+            setValue("deliver_no_ack_details", o.getMessageStats().getDeliverNoAckDetails().get("rate"));
         } catch (PluginException ex) {
             setAvailability(false);
             logger.debug(ex.getMessage(), ex);
