@@ -47,191 +47,126 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.inventory.domain.Resource;
 
 @Entity
-@Table(name="EAM_AIQ_SERVICE")
-public class AIService implements ContainerManagedTimestampTrackable, Serializable
-{
+@Table(name = "EAM_AIQ_SERVICE")
+public class AIService implements ContainerManagedTimestampTrackable, Serializable {
+    @Basic(fetch = FetchType.LAZY)
+    @Lob
+    @Column(name = "CONTROL_CONFIG", length = 256)
+    private byte[] controlConfig;
+
+    @Column(name = "CTIME")
+    private Long creationTime;
+
+    @Basic(fetch = FetchType.LAZY)
+    @Lob
+    @Column(name = "CUSTOM_PROPERTIES")
+    private byte[] customProperties;
+
+    @Column(name = "DESCRIPTION", length = 300)
+    private String description;
+
+    @Column(name = "DIFF")
+    private long diff;
+
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "ID")
     private Integer id;
 
-    @Column(name="VERSION_COL",nullable=false)
+    @Column(name = "IGNORED")
+    private boolean ignored;
+
+    @Basic(fetch = FetchType.LAZY)
+    @Lob
+    @Column(name = "MEASUREMENT_CONFIG", length = 256)
+    private byte[] measurementConfig;
+
+    @Column(name = "MTIME")
+    private Long modifiedTime;
+
+    @Column(name = "NAME", nullable = false, length = 255)
+    @Index(name = "AIQ_SERVICE_NAME_IDX")
+    private String name;
+
+    @Basic(fetch = FetchType.LAZY)
+    @Lob
+    @Column(name = "PRODUCT_CONFIG", length = 256)
+    private byte[] productConfig;
+
+    @Column(name = "QUEUESTATUS")
+    private Integer queueStatus;
+
+    @Basic(fetch = FetchType.LAZY)
+    @Lob
+    @Column(name = "RESPONSETIME_CONFIG", length = 256)
+    private byte[] responseTimeConfig;
+
+    @ManyToOne
+    @JoinColumn(name = "SERVER_ID", nullable = false)
+    @Index(name = "AIQ_SVC_SERVER_ID_IDX")
+    private Resource server;
+
+    @Column(name = "SERVICETYPENAME", nullable = false, length = 200)
+    private String serviceTypeName;
+
+    @Column(name = "VERSION_COL", nullable = false)
     @Version
     private Long version;
-    
-    @Column(name="SERVICETYPENAME",nullable=false,length=200)
-    private String serviceTypeName;
-    
-    @Column(name="QUEUESTATUS")
-    private Integer queueStatus;
-    
-    @Column(name="DIFF")
-    private long diff;
-    
-    @Column(name="IGNORED")
-    private boolean ignored;
-    
-    @Basic(fetch=FetchType.LAZY)
-    @Lob
-    @Column(name="CUSTOM_PROPERTIES",columnDefinition="BLOB")
-    private byte[] customProperties;
-    
-    @Basic(fetch=FetchType.LAZY)
-    @Lob
-    @Column(name="PRODUCT_CONFIG",length=256,columnDefinition="BLOB")
-    private byte[] productConfig;
-    
-    @Basic(fetch=FetchType.LAZY)
-    @Lob
-    @Column(name="CONTROL_CONFIG",length=256,columnDefinition="BLOB")
-    private byte[] controlConfig;
-    
-    @Basic(fetch=FetchType.LAZY)
-    @Lob
-    @Column(name="MEASUREMENT_CONFIG",length=256,columnDefinition="BLOB")
-    private byte[] measurementConfig;
-    
-    @Basic(fetch=FetchType.LAZY)
-    @Lob
-    @Column(name="RESPONSETIME_CONFIG",length=256,columnDefinition="BLOB")
-    private byte[] responseTimeConfig;
-    
-    @ManyToOne
-    @JoinColumn(name="SERVER_ID",nullable=false)
-    @Index(name="AIQ_SVC_SERVER_ID_IDX")
-    private Resource server;
-    
-    @Column(name="NAME",nullable=false,length=255)
-    @Index(name="AIQ_SERVICE_NAME_IDX")
-    private String name;
-    
-    @Column(name="DESCRIPTION",length=300)
-    private String description;
-    
-    @Column(name="CTIME")
-    private Long creationTime;
-    
-    @Column(name="MTIME")
-    private Long modifiedTime;
 
     /**
      * default constructor
      */
-    public AIService()
-    {
+    public AIService() {
         super();
     }
 
-    public AIService(AIServiceValue sv)
-    {
+    public AIService(AIServiceValue sv) {
         super();
         setAIServiceValue(sv);
     }
 
-    public AppdefEntityID getEntityId()
-    {
-        return AppdefEntityID.newServiceID(getId());
+    /**
+     * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
+     * @return <code>true</code> by default.
+     */
+    public boolean allowContainerManagedCreationTime() {
+        return true;
     }
 
-    public String getServiceTypeName()
-    {
-        return this.serviceTypeName;
+    /**
+     * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
+     * @return <code>true</code> by default.
+     */
+    public boolean allowContainerManagedLastModifiedTime() {
+        return true;
     }
 
-    public void setServiceTypeName(String serviceTypeName)
-    {
-        this.serviceTypeName = serviceTypeName;
-    }
-
-    public Integer getQueueStatus()
-    {
-        return this.queueStatus;
-    }
-
-    public void setQueueStatus(Integer queueStatus)
-    {
-        this.queueStatus = queueStatus;
-    }
-
-    public long getDiff()
-    {
-        return this.diff;
-    }
-
-    public void setDiff(long diff)
-    {
-        this.diff = diff;
-    }
-
-    public boolean isIgnored()
-    {
-        return this.ignored;
-    }
-
-    public void setIgnored(boolean ignored)
-    {
-        this.ignored = ignored;
-    }
-
-    public byte[] getCustomProperties()
-    {
-        return this.customProperties;
-    }
-
-    public void setCustomProperties(byte[] customProperties)
-    {
-        this.customProperties = customProperties;
-    }
-
-    public byte[] getProductConfig()
-    {
-        return this.productConfig;
-    }
-
-    public void setProductConfig(byte[] productConfig)
-    {
-        this.productConfig = productConfig;
-    }
-
-    public byte[] getControlConfig()
-    {
-        return this.controlConfig;
-    }
-
-    public void setControlConfig(byte[] controlConfig)
-    {
-        this.controlConfig = controlConfig;
-    }
-
-    public byte[] getMeasurementConfig()
-    {
-        return this.measurementConfig;
-    }
-
-    public void setMeasurementConfig(byte[] measurementConfig)
-    {
-        this.measurementConfig = measurementConfig;
-    }
-
-    public byte[] getResponseTimeConfig()
-    {
-        return this.responseTimeConfig;
-    }
-
-    public void setResponseTimeConfig(byte[] responseTimeConfig)
-    {
-        this.responseTimeConfig = responseTimeConfig;
-    }
-
-    public Resource getServer()
-    {
-        return server;
-    }
-
-    public void setServer(Resource server)
-    {
-        this.server = server;
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        AIService other = (AIService) obj;
+        if (creationTime == null) {
+            if (other.creationTime != null)
+                return false;
+        } else if (!creationTime.equals(other.creationTime))
+            return false;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        if (server == null) {
+            if (other.server != null)
+                return false;
+        } else if (!server.equals(other.server))
+            return false;
+        return true;
     }
 
     /**
@@ -239,11 +174,11 @@ public class AIService implements ContainerManagedTimestampTrackable, Serializab
      * @deprecated use (this) AIService object instead
      * @return
      */
-    public AIServiceValue getAIServiceValue()
-    {   AIServiceValue aIServiceValue = new AIServiceValue();
+    public AIServiceValue getAIServiceValue() {
+        AIServiceValue aIServiceValue = new AIServiceValue();
         aIServiceValue.setServerId(getServerId());
-        aIServiceValue.setServiceTypeName(
-            (getServiceTypeName() == null) ? "" : getServiceTypeName());
+        aIServiceValue.setServiceTypeName((getServiceTypeName() == null) ? ""
+                                                                        : getServiceTypeName());
         aIServiceValue.setCustomProperties(getCustomProperties());
         aIServiceValue.setProductConfig(getProductConfig());
         aIServiceValue.setControlConfig(getControlConfig());
@@ -257,111 +192,162 @@ public class AIService implements ContainerManagedTimestampTrackable, Serializab
         return aIServiceValue;
     }
 
-    public void setAIServiceValue(AIServiceValue valueHolder)
-    {
-        setServiceTypeName( valueHolder.getServiceTypeName() );
-        setCustomProperties( valueHolder.getCustomProperties() );
-        setProductConfig( valueHolder.getProductConfig() );
-        setControlConfig( valueHolder.getControlConfig() );
-        setMeasurementConfig( valueHolder.getMeasurementConfig() );
-        setResponseTimeConfig( valueHolder.getResponseTimeConfig() );
-        setName( valueHolder.getName() );
-        setDescription( valueHolder.getDescription() );
-    }
-
-    public int getServerId()
-    {
-        return
-            getServer() != null && getServer().getId() != null ?
-            getServer().getId().intValue() : 0;
-    }
-
- 
-    public boolean equals(Object obj)
-    {
-        if (!(obj instanceof AIService) || !super.equals(obj)) {
-            return false;
-        }
-        AIService o = (AIService)obj;
-        return
-            ((server == o.getServer()) ||
-             (server!=null && o.getServer()!=null &&
-              server.equals(o.getServer())));
-    }
-
-    public int hashCode()
-    {
-        int result = super.hashCode();
-
-        result = 37*result + (server != null ? server.hashCode() : 0);
-
-        return result;
-    }
-
-   
-    
-    /**
-     * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
-     * @return <code>true</code> by default.
-     */
-    public boolean allowContainerManagedCreationTime() {
-        return true;
-    }
-    
-    /**
-     * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
-     * @return <code>true</code> by default.
-     */
-    public boolean allowContainerManagedLastModifiedTime() {
-        return true;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Long getVersion() {
-        return version;
-    }
-
-    public void setVersion(Long version) {
-        this.version = version;
+    public byte[] getControlConfig() {
+        return this.controlConfig;
     }
 
     public Long getCreationTime() {
         return creationTime;
     }
 
-    public void setCreationTime(Long creationTime) {
-        this.creationTime = creationTime;
+    public byte[] getCustomProperties() {
+        return this.customProperties;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public long getDiff() {
+        return this.diff;
+    }
+
+    public AppdefEntityID getEntityId() {
+        return AppdefEntityID.newServiceID(getId());
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public byte[] getMeasurementConfig() {
+        return this.measurementConfig;
     }
 
     public Long getModifiedTime() {
         return modifiedTime;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public byte[] getProductConfig() {
+        return this.productConfig;
+    }
+
+    public Integer getQueueStatus() {
+        return this.queueStatus;
+    }
+
+    public byte[] getResponseTimeConfig() {
+        return this.responseTimeConfig;
+    }
+
+    public Resource getServer() {
+        return server;
+    }
+
+    public int getServerId() {
+        return getServer() != null && getServer().getId() != null ? getServer().getId().intValue()
+                                                                 : 0;
+    }
+
+    public String getServiceTypeName() {
+        return this.serviceTypeName;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((creationTime == null) ? 0 : creationTime.hashCode());
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        result = prime * result + ((server == null) ? 0 : server.hashCode());
+        return result;
+    }
+
+    public boolean isIgnored() {
+        return this.ignored;
+    }
+
+    public void setAIServiceValue(AIServiceValue valueHolder) {
+        setServiceTypeName(valueHolder.getServiceTypeName());
+        setCustomProperties(valueHolder.getCustomProperties());
+        setProductConfig(valueHolder.getProductConfig());
+        setControlConfig(valueHolder.getControlConfig());
+        setMeasurementConfig(valueHolder.getMeasurementConfig());
+        setResponseTimeConfig(valueHolder.getResponseTimeConfig());
+        setName(valueHolder.getName());
+        setDescription(valueHolder.getDescription());
+    }
+
+    public void setControlConfig(byte[] controlConfig) {
+        this.controlConfig = controlConfig;
+    }
+
+    public void setCreationTime(Long creationTime) {
+        this.creationTime = creationTime;
+    }
+
+    public void setCustomProperties(byte[] customProperties) {
+        this.customProperties = customProperties;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setDiff(long diff) {
+        this.diff = diff;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setIgnored(boolean ignored) {
+        this.ignored = ignored;
+    }
+
+    public void setMeasurementConfig(byte[] measurementConfig) {
+        this.measurementConfig = measurementConfig;
+    }
+
     public void setModifiedTime(Long modifiedTime) {
         this.modifiedTime = modifiedTime;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setProductConfig(byte[] productConfig) {
+        this.productConfig = productConfig;
+    }
+
+    public void setQueueStatus(Integer queueStatus) {
+        this.queueStatus = queueStatus;
+    }
+
+    public void setResponseTimeConfig(byte[] responseTimeConfig) {
+        this.responseTimeConfig = responseTimeConfig;
+    }
+
+    public void setServer(Resource server) {
+        this.server = server;
+    }
+
+    public void setServiceTypeName(String serviceTypeName) {
+        this.serviceTypeName = serviceTypeName;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 
 }
