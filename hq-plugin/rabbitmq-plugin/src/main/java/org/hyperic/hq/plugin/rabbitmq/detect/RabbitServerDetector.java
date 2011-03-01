@@ -175,7 +175,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         }
 
         String node = serviceConfig.getValue(DetectorConstants.SERVER_NAME);
-        boolean noDurable = serviceConfig.getValue(DetectorConstants.NO_DURABLE).equals("true");
+        boolean noDurable = serviceConfig.getValue(DetectorConstants.NO_DURABLE,"false").equals("true");
 
         try {
             HypericRabbitAdmin admin = new HypericRabbitAdmin(serviceConfig);
