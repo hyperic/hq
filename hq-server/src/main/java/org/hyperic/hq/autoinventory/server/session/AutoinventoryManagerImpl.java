@@ -82,13 +82,13 @@ import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.autoinventory.ServerSignature;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClientFactory;
+import org.hyperic.hq.autoinventory.data.AIPlatformRepository;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManager;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.AIHistoryDAO;
-import org.hyperic.hq.dao.AIPlatformDAO;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.product.AutoinventoryPluginManager;
@@ -118,7 +118,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
 
     
     private AIHistoryDAO aiHistoryDao;
-    private AIPlatformDAO aiPlatformDao;
+    private AIPlatformRepository aiPlatformRepository;
 
     private ProductManager productManager;
     private ServerManager serverManager;
@@ -129,14 +129,13 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
     private AIQueueManager aiQueueManager;
     private PermissionManager permissionManager;
     private AICommandsClientFactory aiCommandsClientFactory;
-    private ServiceMerger serviceMerger;
     private RuntimePlatformAndServerMerger runtimePlatformAndServerMerger;
     private PlatformManager platformManager;
     private MeasurementProcessor measurementProcessor;
     private AgentManager agentManager;
 
     @Autowired
-    public AutoinventoryManagerImpl(AIHistoryDAO aiHistoryDao, AIPlatformDAO aiPlatformDao,
+    public AutoinventoryManagerImpl(AIHistoryDAO aiHistoryDao, AIPlatformRepository aiPlatformRepository,
                                     ProductManager productManager, ServerManager serverManager,
                                     AIScheduleManager aiScheduleManager,
                                     ResourceManager resourceManager, ConfigManager configManager,
@@ -144,11 +143,10 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
                                     AIQueueManager aiQueueManager,
                                     PermissionManager permissionManager,
                                     AICommandsClientFactory aiCommandsClientFactory,
-                                    ServiceMerger serviceMerger,
                                     RuntimePlatformAndServerMerger runtimePlatformAndServerMerger, PlatformManager platformManager, 
                                     MeasurementProcessor measurementProcessor, AgentManager agentManager) {
         this.aiHistoryDao = aiHistoryDao;
-        this.aiPlatformDao = aiPlatformDao;
+        this.aiPlatformRepository = aiPlatformRepository;
         this.productManager = productManager;
         this.serverManager = serverManager;
         this.aiScheduleManager = aiScheduleManager;
@@ -158,7 +156,6 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
         this.aiQueueManager = aiQueueManager;
         this.permissionManager = permissionManager;
         this.aiCommandsClientFactory = aiCommandsClientFactory;
-        this.serviceMerger = serviceMerger;
         this.runtimePlatformAndServerMerger = runtimePlatformAndServerMerger;
         this.platformManager = platformManager;
         this.measurementProcessor = measurementProcessor;
@@ -440,7 +437,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
 
         // Is there an already-approved platform with this agent token? If so,
         // re-call using the other startScan method
-        AIPlatform aipLocal = aiPlatformDao.findByAgentToken(agentToken);
+        AIPlatform aipLocal = aiPlatformRepository.findByAgentToken(agentToken);
         if (aipLocal == null) {
             throw new AutoinventoryException("No platform in auto-discovery " +
                                              "queue with agentToken=" + agentToken);
