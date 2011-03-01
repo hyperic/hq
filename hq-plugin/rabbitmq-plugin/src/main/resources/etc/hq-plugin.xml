@@ -75,6 +75,7 @@
             <option name="port" description="" default="55672"/>
             <option name="user" description="" default="guest"/>
             <option name="pass" description="" default="guest"/>
+            <option name="nodurable" description="Discover No Durable Objects" type="boolean" default="false"/>
         </config>
 
         <properties>

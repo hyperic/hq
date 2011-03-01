@@ -33,7 +33,7 @@ import org.hyperic.util.config.ConfigResponse;
  * AmqpChannel
  * @author Helena Edelson
  */
-public class RabbitChannel implements RabbitObject {
+public class RabbitChannel extends RabbitNoDurableObject {
 
     private String name;
     private Date idleSince;

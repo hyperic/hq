@@ -18,5 +18,7 @@ public interface RabbitObject {
 
     public String getServiceName();
 
+    public boolean isDurable();
+
     public ConfigResponse ProductConfig();
 }

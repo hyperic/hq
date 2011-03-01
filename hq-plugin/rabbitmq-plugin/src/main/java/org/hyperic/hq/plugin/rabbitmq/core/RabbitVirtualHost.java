@@ -32,7 +32,7 @@ import org.hyperic.util.config.ConfigResponse;
  * RabbitVirtualHost
  * @author Helena Edelson
  */
-public class RabbitVirtualHost implements RabbitObject {
+public class RabbitVirtualHost extends RabbitNoDurableObject {
 
     private String name;
 

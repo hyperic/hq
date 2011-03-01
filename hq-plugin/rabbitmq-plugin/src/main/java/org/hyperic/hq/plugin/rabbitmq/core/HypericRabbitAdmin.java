@@ -63,14 +63,12 @@ public class HypericRabbitAdmin {
 
     private static final Log logger = LogFactory.getLog(HypericRabbitAdmin.class);
     private final HttpClient client;
-    private String nodeName;
     private String addr;
     private String user;
     private String pass;
     private int port;
 
     public HypericRabbitAdmin(Properties props) {
-        this.nodeName = props.getProperty("node");
         this.port = Integer.parseInt(props.getProperty("port"));
         this.addr = props.getProperty("addr");
         this.user = props.getProperty("user");
@@ -85,8 +83,6 @@ public class HypericRabbitAdmin {
         client.getHttpConnectionManager().getParams().setConnectionTimeout(5000);
         client.getParams().setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY, authPrefs);
         client.getParams().setAuthenticationPreemptive(true);
-
-
     }
 
     public HypericRabbitAdmin(ConfigResponse props) {
@@ -210,7 +206,7 @@ public class HypericRabbitAdmin {
             res = gson.fromJson(responseBody, classOfT);
             if (logger.isDebugEnabled()) {
                 if (res.getClass().isArray()) {
-                    logger.debug("[" + api + "] -(" + r + ")*> " + Arrays.asList((Object[]) res));
+                    logger.debug("[" + api + "] -(" + r + ")*> " + Arrays.asList((Object[])res));
                 } else {
                     logger.debug("[" + api + "] -(" + r + ")-> " + res);
                 }

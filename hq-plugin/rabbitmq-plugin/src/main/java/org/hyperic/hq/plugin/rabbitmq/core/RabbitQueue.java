@@ -22,6 +22,7 @@ public class RabbitQueue implements RabbitObject {
     private Integer memory;
     private Date idleSince;
     private String vhost;
+    private boolean durable;
 
     /**
      * @return the name
@@ -135,9 +136,23 @@ public class RabbitQueue implements RabbitObject {
         this.vhost = vhost;
     }
 
+    /**
+     * @return the durable
+     */
+    public boolean isDurable() {
+        return durable;
+    }
+
+    /**
+     * @param durable the durable to set
+     */
+    public void setDurable(boolean durable) {
+        this.durable = durable;
+    }
+
     @Override
     public String toString() {
-        return "RabbitQueue{name=" + getName() + ", vhost=" + vhost + ", idleSince=" + idleSince + ", messages=" + getMessages() + ", consumers=" + getConsumers() + ", messagesReady=" + getMessagesReady() + ", messagesUnacknowledged=" + getMessagesUnacknowledged() + ", memory=" + getMemory() + '}';
+        return "RabbitQueue{name=" + getName() + ", durable="+durable+", vhost=" + vhost + ", idleSince=" + idleSince + ", messages=" + getMessages() + ", consumers=" + getConsumers() + ", messagesReady=" + getMessagesReady() + ", messagesUnacknowledged=" + getMessagesUnacknowledged() + ", memory=" + getMemory() + '}';
     }
 
     public String getServiceType() {
