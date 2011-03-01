@@ -83,21 +83,7 @@ public class AIHistoryDAO
         return getSession().createQuery(sql).setInteger(0, type).setInteger(1, id).list();
     }
 
-    /**
-     * @deprecated use findByEntityStatus()
-     * @return
-     */
-    public Collection findByEntityStartTimeDesc(int type, int id) {
-        return findByEntityStartTime(type, id, true);
-    }
-
-    /**
-     * @deprecated use findByEntityStatus()
-     * @return
-     */
-    public Collection findByEntityStartTimeAsc(int type, int id) {
-        return findByEntityStartTime(type, id, true);
-    }
+  
 
     public Collection<AIHistory> findByEntityStartTime(int type, int id, boolean asc) {
         String sql = "from AIHistory where entityType=? and entityId=? " + "order by startTime " +
