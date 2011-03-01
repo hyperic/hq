@@ -6,6 +6,7 @@
      <class>org.hyperic.hq.autoinventory.AIServer</class>
      <class>org.hyperic.hq.autoinventory.AIIp</class>
      <class>org.hyperic.hq.autoinventory.AIHistory</class>
+     <class>org.hyperic.hq.autoinventory.AISchedule</class>
      <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
       <properties>
             <property name="hibernate.hbm2ddl.auto" value="update"/>

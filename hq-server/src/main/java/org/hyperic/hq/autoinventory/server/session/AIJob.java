@@ -135,11 +135,6 @@ public abstract class AIJob
             scanDesc, scheduled, startTime, stopTime, scheduleTime, status, errorMessage);
     }
 
-    protected void updateHistory(Integer jobId, long endTime, String status, String message) {
-        AutoinventoryManager alocal = getAutoInventoryManager();
-        alocal.updateAIHistory(jobId, endTime, status, message);
-    }
-
     private AutoinventoryManager aimanager = Bootstrap.getBean(AutoinventoryManager.class);
 
     protected AutoinventoryManager getAutoInventoryManager() {
