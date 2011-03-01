@@ -27,6 +27,7 @@ package org.hyperic.hq.plugin.rabbitmq.detect;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,6 @@ import org.hyperic.hq.agent.AgentCommand;
 import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.agent.server.AgentDaemon;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsUtils;
-import org.hyperic.hq.plugin.rabbitmq.collect.*;
 import org.hyperic.hq.plugin.rabbitmq.core.*;
 import org.hyperic.hq.plugin.rabbitmq.manage.RabbitTransientResourceManager;
 import org.hyperic.hq.plugin.rabbitmq.manage.TransientResourceManager;
@@ -93,47 +93,21 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                             logger.debug(sb.toString());
                         }
 
-//                        List<String> names = new ArrayList();
-//                        HypericRabbitAdmin admin = new HypericRabbitAdmin(server.getProductConfig());
-//                        try {
-////                            names.addAll(formatNames(admin.getChannels(), null));
-////                            names.addAll(formatNames(admin.getConnections(), null));
-//                            List<RabbitVirtualHost> vhs = admin.getVirtualHosts();
-//                            for (RabbitVirtualHost vh : vhs) {
-//                                names.addAll(formatNames(admin.getQueues(vh), vh));
-//                                names.addAll(formatNames(admin.getExchanges(vh), vh));
-//                            }
-//                        } finally {
-//                            admin.destroy();
-//                        }
-//
-//                        Collections.sort(names);
-//                        String node = server.getProductConfig().getValue(DetectorConstants.NODE);
-//                        String new_signature = names.toString();
-//                        String signature = signatures.get(node);
-//                        if (!new_signature.equalsIgnoreCase(signature)) {
-//                            if (signature != null) {
-//                                runAutoDiscovery(server.getProductConfig());
-//                            }
-//                            signatures.put(node, new_signature);
-//                        }
-
+                        String new_signature = generateSignature(server);
+                        String node = server.getProductConfig().getValue(DetectorConstants.NODE);
+                        String signature = signatures.get(node);
+                        if (!new_signature.equalsIgnoreCase(signature)) {
+                            if (signature != null) {
+                                runAutoDiscovery(server.getProductConfig());
+                            }
+                            signatures.put(node, new_signature);
+                        }
                     }
                 }
             }
-
         }
 
         return resources;
-    }
-
-    // XXX:ajustar nombres a los nombre de la version anterior.
-    private static List<String> formatNames(List<RabbitObject> rbs, RabbitObject parent) {
-        List<String> names = new ArrayList();
-        for (RabbitObject rb : rbs) {
-            names.add(rb.getName() + "@" + parent.getName());
-        }
-        return names;
     }
 
     public void runAutoDiscovery(ConfigResponse cf) {
@@ -201,6 +175,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         }
 
         String node = serviceConfig.getValue(DetectorConstants.SERVER_NAME);
+        boolean noDurable = serviceConfig.getValue(DetectorConstants.NO_DURABLE).equals("true");
 
         try {
             HypericRabbitAdmin admin = new HypericRabbitAdmin(serviceConfig);
@@ -213,7 +188,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                     rabbitObjectss.addAll(admin.getExchanges(vhost));
                 }
                 rabbitObjectss.addAll(vhosts);
-                rabbitResources = doCreateServiceResources(rabbitObjectss, node);
+                rabbitResources = doCreateServiceResources(rabbitObjectss, node, noDurable);
             } finally {
                 admin.destroy();
             }
@@ -234,19 +209,21 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @param vHost
      * @return
      */
-    private List<ServiceResource> doCreateServiceResources(List<RabbitObject> rabbitObjects, String node) {
+    private List<ServiceResource> doCreateServiceResources(List<RabbitObject> rabbitObjects, String node, boolean noDurable) {
         List<ServiceResource> serviceResources = null;
 
         if (rabbitObjects != null) {
             serviceResources = new ArrayList<ServiceResource>();
 
             for (RabbitObject obj : rabbitObjects) {
-                ServiceResource service = createServiceResource(obj.getServiceType());
-                service.setName(node + " " + obj.getServiceName());
-                setProductConfig(service, obj.ProductConfig());
-                service.setMeasurementConfig();
-                service.setControlConfig();
-                serviceResources.add(service);
+                if (obj.isDurable() || noDurable) {
+                    ServiceResource service = createServiceResource(obj.getServiceType());
+                    service.setName(node + " " + obj.getServiceName());
+                    setProductConfig(service, obj.ProductConfig());
+                    service.setMeasurementConfig();
+                    service.setControlConfig();
+                    serviceResources.add(service);
+                }
             }
         }
 
@@ -388,15 +365,6 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         return mpath;
     }
 
-    private String getHostFromNode(String nodeName) {
-        if (nodeName != null && nodeName.length() > 0) {
-            Pattern p = Pattern.compile("@([^\\s.]+)");
-            Matcher m = p.matcher(nodeName);
-            return (m.find()) ? m.group(1) : null;
-        }
-        return null;
-    }
-
     /**
      * based on https://github.com/erlang/otp/blob/dev/lib/erl_interface/src/connect/ei_connect.c
      * @param nodePid
@@ -426,5 +394,31 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         }
         logger.debug("[getProcessHome] home=" + home);
         return home;
+    }
+
+    private String generateSignature(ServerResource server) {
+        List<RabbitObject> objs = new ArrayList();
+        HypericRabbitAdmin admin = new HypericRabbitAdmin(server.getProductConfig());
+        try {
+            objs.addAll(admin.getChannels());
+            objs.addAll(admin.getConnections());
+            List<RabbitVirtualHost> vhs = admin.getVirtualHosts();
+            for (RabbitVirtualHost vh : vhs) {
+                objs.addAll(admin.getQueues(vh));
+                objs.addAll(admin.getExchanges(vh));
+            }
+        } catch (PluginException e) {
+            logger.debug(e.getMessage(), e);
+            objs.clear();
+        } finally {
+            admin.destroy();
+        }
+
+        List<String> names = new ArrayList();
+        for (RabbitObject obj : objs) {
+            names.add(obj.getServiceName());
+        }
+        Collections.sort(names);
+        return names.toString();
     }
 }
