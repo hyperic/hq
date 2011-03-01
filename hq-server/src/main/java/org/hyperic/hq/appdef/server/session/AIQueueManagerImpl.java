@@ -34,7 +34,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
@@ -62,12 +61,12 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
+import org.hyperic.hq.autoinventory.data.AIIpRepository;
 import org.hyperic.hq.autoinventory.data.AIPlatformRepository;
 import org.hyperic.hq.autoinventory.data.AIServerRepository;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.shared.AuditManager;
-import org.hyperic.hq.dao.AIIpDAO;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.sigar.NetFlags;
 import org.hyperic.util.pager.PageControl;
@@ -93,7 +92,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
     private final AIQSynchronizer queueSynchronizer = new AIQSynchronizer();
 
     private AIServerRepository aiServerRepository;
-    private AIIpDAO aiIpDAO;
+    private AIIpRepository aiIpRepository;
     private AIPlatformRepository aiPlatformRepository;
     private ConfigManager configManager;
     private PlatformManager platformManager;
@@ -108,7 +107,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
     private AgentDAO agentDAO;
 
     @Autowired
-    public AIQueueManagerImpl(AIServerRepository aiServerRepository, AIIpDAO aiIpDAO,
+    public AIQueueManagerImpl(AIServerRepository aiServerRepository, AIIpRepository aiIpRepository,
                               AIPlatformRepository aiPlatformRepository, ConfigManager configManager,
                               PlatformManager platformManager, PermissionManager permissionManager,
                               AuditManager auditManager, AuthzSubjectManager authzSubjectManager,
@@ -117,7 +116,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
                               AIQResourceVisitorFactory aiqResourceVisitorFactory, AgentDAO agentDAO) {
 
         this.aiServerRepository = aiServerRepository;
-        this.aiIpDAO = aiIpDAO;
+        this.aiIpRepository = aiIpRepository;
         this.aiPlatformRepository = aiPlatformRepository;
         this.configManager = configManager;
         this.platformManager = platformManager;
@@ -407,7 +406,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
      */
     @Transactional(readOnly = true)
     public AIIpValue findAIIpById(AuthzSubject subject, int ipID) {
-        AIIp aiip = aiIpDAO.get(new Integer(ipID));
+        AIIp aiip = aiIpRepository.findById(new Integer(ipID));
         if (aiip == null) {
             return null;
         }
@@ -425,7 +424,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
     @Transactional(readOnly = true)
     public AIIpValue findAIIpByAddress(AuthzSubject subject, String address) {
         // XXX Do authz check
-        List<AIIp> aiips = aiIpDAO.findByAddress(address);
+        List<AIIp> aiips = aiIpRepository.findByAddress(address);
         if (aiips.size() == 0) {
             return null;
         }
@@ -553,13 +552,13 @@ public class AIQueueManagerImpl implements AIQueueManager {
                     continue;
                 }
 
-                final AIIp aiip = aiIpDAO.get(id);
+                final AIIp aiip = aiIpRepository.findById(id);
 
                 if (aiip == null) {
                     if (isPurgeAction)
                         continue;
                     else
-                        throw new ObjectNotFoundException(id, AIIp.class.getName());
+                        throw new SystemException("AIIp with ID: " + id + " not found");
                 }
                 visitor.visitIp(aiip, subject);
                 if (!isPurgeAction) {
@@ -639,7 +638,10 @@ public class AIQueueManagerImpl implements AIQueueManager {
         }
 
         for (Integer id : ipList) {
-            final AIIp aiip = aiIpDAO.get(id);
+            final AIIp aiip = aiIpRepository.findById(id);
+            if(aiip == null) {
+                throw new SystemException("AIIp with ID: " + id + " not found");
+            }
             if (AIQueueConstants.Q_STATUS_REMOVED == aiip.getQueueStatus() &&
                 aiip.getAddress().equals(agent.getAddress())) {
                 return true;
@@ -714,7 +716,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
             String mac = qip.getMacAddress();
 
             if (mac != null && mac.length() > 0 && !mac.equals(NetFlags.NULL_HWADDR)) {
-                List<AIIp> addrs = aiIpDAO.findByMACAddress(qip.getMacAddress());
+                List<AIIp> addrs = aiIpRepository.findByMacAddress(qip.getMacAddress());
                 if (addrs.size() > 0) {
                     AIPlatform aiplatform = ((AIIp) addrs.get(0)).getAIPlatform();
                     return aiplatform;
@@ -734,7 +736,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
                 continue;
             }
 
-            List<AIIp> addrs = aiIpDAO.findByAddress(address);
+            List<AIIp> addrs = aiIpRepository.findByAddress(address);
             if (addrs.size() > 0) {
                 AIPlatform aiplatform = addrs.get(0).getAIPlatform();
                 return aiplatform;
