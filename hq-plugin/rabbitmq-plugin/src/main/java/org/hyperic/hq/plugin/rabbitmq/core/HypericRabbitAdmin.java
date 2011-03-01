@@ -39,12 +39,14 @@ import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthPolicy;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
@@ -78,7 +80,12 @@ public class HypericRabbitAdmin {
         client.getState().setCredentials(
                 new AuthScope(addr, port, "Management: Web UI"),
                 new UsernamePasswordCredentials(user, pass));
+        List authPrefs = new ArrayList(1);
+        authPrefs.add("Management: Web UI");
         client.getHttpConnectionManager().getParams().setConnectionTimeout(5000);
+        client.getParams().setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY, authPrefs);
+        client.getParams().setAuthenticationPreemptive(true);
+
 
     }
 
@@ -91,7 +98,7 @@ public class HypericRabbitAdmin {
     }
 
     public RabbitOverview getOverview() throws PluginException {
-        return get("/api/overview",RabbitOverview.class);
+        return get("/api/overview", RabbitOverview.class);
     }
 
     public List<RabbitVirtualHost> getVirtualHosts() throws PluginException {
@@ -203,7 +210,7 @@ public class HypericRabbitAdmin {
             res = gson.fromJson(responseBody, classOfT);
             if (logger.isDebugEnabled()) {
                 if (res.getClass().isArray()) {
-                    logger.debug("[" + api + "] -(" + r + ")*> " + Arrays.asList((Object[])res));
+                    logger.debug("[" + api + "] -(" + r + ")*> " + Arrays.asList((Object[]) res));
                 } else {
                     logger.debug("[" + api + "] -(" + r + ")-> " + res);
                 }
