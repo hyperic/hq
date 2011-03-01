@@ -1,5 +1,8 @@
 package org.hyperic.hq.autoinventory.data;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,8 +15,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 @DirtiesContext
 @Transactional
@@ -42,7 +43,7 @@ public class AIPlatformRepositoryIntegrationTest {
     }
 
     @Test
-    public void testFindAllNotIgnoredIncludingProcessed() {
+    public void testFindByIgnoredOrderByNameAsc() {
         AIPlatform platform1 = createAIPlatform("Platform1", System.currentTimeMillis() - 5000,
             false, "agentToken1");
         AIPlatform platform2 = createAIPlatform("Platform2", System.currentTimeMillis() + 10000,
@@ -57,24 +58,7 @@ public class AIPlatformRepositoryIntegrationTest {
         expected.add(platform1);
         expected.add(platform2);
 
-        assertEquals(expected, aiPlatformRepository.findAllNotIgnoredIncludingProcessed());
-    }
-
-    @Test
-    public void testFindAllIncludingProcessed() {
-        AIPlatform platform1 = createAIPlatform("Platform1", System.currentTimeMillis() - 5000,
-            false, "agentToken1");
-        AIPlatform platform2 = createAIPlatform("Platform2", System.currentTimeMillis() + 10000,
-            false, "agentToken1");
-        AIPlatform platform3 = createAIPlatform("OtherPlatform",
-            System.currentTimeMillis() - 10000, false, "agentToken1");
-
-        // make sure they are sorted by name
-        List<AIPlatform> expected = new ArrayList<AIPlatform>();
-        expected.add(platform3);
-        expected.add(platform1);
-        expected.add(platform2);
-        assertEquals(expected, aiPlatformRepository.findAllIncludingProcessed());
+        assertEquals(expected, aiPlatformRepository.findByIgnoredOrderByNameAsc(false));
     }
 
     @Test

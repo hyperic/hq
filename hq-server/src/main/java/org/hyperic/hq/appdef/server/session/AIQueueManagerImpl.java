@@ -74,6 +74,7 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -225,13 +226,13 @@ public class AIQueueManagerImpl implements AIQueueManager {
         try {
             if (showIgnored) {
                 if (showAlreadyProcessed) {
-                    queue = aiPlatformRepository.findAllIncludingProcessed();
+                    queue = aiPlatformRepository.findAll(new Sort("name"));
                 } else {
                     queue = aiPlatformRepository.findAll();
                 }
             } else {
                 if (showAlreadyProcessed) {
-                    queue = aiPlatformRepository.findAllNotIgnoredIncludingProcessed();
+                    queue = aiPlatformRepository.findByIgnoredOrderByNameAsc(false);
                 } else {
                     queue = aiPlatformRepository.findAllNotIgnored();
                 }
