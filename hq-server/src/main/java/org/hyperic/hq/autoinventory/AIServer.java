@@ -164,20 +164,38 @@ public class AIServer implements ContainerManagedTimestampTrackable, Serializabl
            return true;
        }
 
-    public boolean equals(Object obj)
-    {
-        if (!(obj instanceof AIServer) || !super.equals(obj)) {
+   
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
             return false;
-        }
-        AIServer o = (AIServer)obj;
-        return
-            ((autoinventoryIdentifier == o.getAutoinventoryIdentifier()) ||
-             (autoinventoryIdentifier!=null && o.getAutoinventoryIdentifier()!=null &&
-              autoinventoryIdentifier.equals(o.getAutoinventoryIdentifier())))
-            &&
-            ((aIPlatform == o.getAIPlatform()) ||
-             (aIPlatform!=null && o.getAIPlatform()!=null &&
-              aIPlatform.equals(o.getAIPlatform())));
+        if (getClass() != obj.getClass())
+            return false;
+        AIServer other = (AIServer) obj;
+        if (aIPlatform == null) {
+            if (other.aIPlatform != null)
+                return false;
+        } else if (!aIPlatform.equals(other.aIPlatform))
+            return false;
+        if (autoinventoryIdentifier == null) {
+            if (other.autoinventoryIdentifier != null)
+                return false;
+        } else if (!autoinventoryIdentifier.equals(other.autoinventoryIdentifier))
+            return false;
+        if (creationTime == null) {
+            if (other.creationTime != null)
+                return false;
+        } else if (!creationTime.equals(other.creationTime))
+            return false;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        return true;
     }
 
     public Character getActive()
@@ -331,16 +349,19 @@ public class AIServer implements ContainerManagedTimestampTrackable, Serializabl
         return version;
     }
 
-    public int hashCode()
-    {
-        int result = super.hashCode();
-
-        result = 37*result +(autoinventoryIdentifier != null ?
-                             autoinventoryIdentifier.hashCode() : 0);
-        result = 37*result + (aIPlatform != null ? aIPlatform.hashCode() : 0);
-
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((aIPlatform == null) ? 0 : aIPlatform.hashCode());
+        result = prime * result +
+                 ((autoinventoryIdentifier == null) ? 0 : autoinventoryIdentifier.hashCode());
+        result = prime * result + ((creationTime == null) ? 0 : creationTime.hashCode());
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
     }
+
+   
 
     public boolean isIgnored()
     {

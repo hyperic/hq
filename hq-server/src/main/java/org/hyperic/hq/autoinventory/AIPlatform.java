@@ -211,21 +211,40 @@ public class AIPlatform implements ContainerManagedTimestampTrackable, Serializa
         return true;
     }
 
-    public boolean equals(Object obj)
-    {
-        return (obj instanceof AIPlatform) && super.equals(obj);
+  
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        AIPlatform other = (AIPlatform) obj;
+        if (creationTime == null) {
+            if (other.creationTime != null)
+                return false;
+        } else if (!creationTime.equals(other.creationTime))
+            return false;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        return true;
     }
 
     public String getAgentToken()
     {
         return this.agentToken;
     }
-
+    
     public Collection<AIIp> getAIIps()
     {
         return this.aiips;
     }
-    
+
     /**
      * @deprecated use (this) AIPlatformValue object
      * @return
@@ -271,12 +290,12 @@ public class AIPlatform implements ContainerManagedTimestampTrackable, Serializa
         return aipValue;
     }
 
+   
+
     public Collection<AIServer> getAIServers()
     {
         return this.aiservers;
     }
-
-   
 
     /**
      * For compatibility
@@ -285,6 +304,7 @@ public class AIPlatform implements ContainerManagedTimestampTrackable, Serializa
         return null;
     }
 
+  
     /**
      * For compatibility
      */
@@ -292,20 +312,19 @@ public class AIPlatform implements ContainerManagedTimestampTrackable, Serializa
         return null;
     }
 
-  
     public String getArch()
     {
         return this.arch;
     }
 
+   
+    
+   
     public String getCertdn()
     {
         return this.certdn;
     }
 
-   
-    
-   
     public byte[] getControlConfig()
     {
         return this.controlConfig;
@@ -424,13 +443,14 @@ public class AIPlatform implements ContainerManagedTimestampTrackable, Serializa
         return version;
     }
 
-    public int hashCode()
-    {
-        int result = super.hashCode();
-
-        result = 37*result + (fqdn != null ? fqdn.hashCode() : 0);
-        result = 37*result + (certdn != null ? certdn.hashCode() : 0);
-
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((certdn == null) ? 0 : certdn.hashCode());
+        result = prime * result + ((creationTime == null) ? 0 : creationTime.hashCode());
+        result = prime * result + ((fqdn == null) ? 0 : fqdn.hashCode());
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
     }
 
