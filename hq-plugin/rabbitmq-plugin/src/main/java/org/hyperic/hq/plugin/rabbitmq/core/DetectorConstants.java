@@ -48,6 +48,8 @@ public class DetectorConstants {
     public static final String SERVER_NAME = "node";
     public static final String SERVER_PATH = "server.path";
     public static final String PLATFORM_TYPE = "platform.type";
+    public static final String ADDR = "addr";
     public static final String PORT = "port";
     public static final String NO_DURABLE = "nodurable";
+    public static final String AUTO_SYNC = "autosycn";
 }

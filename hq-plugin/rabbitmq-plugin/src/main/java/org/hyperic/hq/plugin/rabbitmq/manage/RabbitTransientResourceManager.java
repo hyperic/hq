@@ -33,7 +33,6 @@ import org.hyperic.hq.bizapp.agent.client.HQApiFactory;
 import org.hyperic.hq.hqapi1.HQApi;
 import org.hyperic.hq.hqapi1.types.Resource;
 import org.hyperic.hq.hqapi1.types.ResourceConfig;
-import org.hyperic.hq.hqapi1.types.ResourceProperty;
 import org.hyperic.hq.hqapi1.types.ResourcePrototype;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServiceResource;
@@ -43,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
 
 /**
  * RabbitTransientResourceManager deletes transient RabbitMQ services
@@ -54,42 +54,37 @@ import java.util.Properties;
  */
 public class RabbitTransientResourceManager implements TransientResourceManager {
 
-	private static final Log logger = LogFactory.getLog(RabbitTransientResourceManager.class);
+    private static final Log logger = LogFactory.getLog(RabbitTransientResourceManager.class);
+    private static final String RABBITMQ_TYPE = "RabbitMQ";
+    private HQApiCommandsClient commandsClient;
+    private Properties props;
 
-	private static final String RABBITMQ_TYPE = "RabbitMQ";
+    public RabbitTransientResourceManager(Properties props)
+            throws PluginException {
 
-	private static final String NODE_PATH_PROPERTY = "node.path";
-	private static final String NODE_CONFIG = "node";
+        this.props = props;
+        HQApi api = HQApiFactory.getHQApi(AgentDaemon.getMainInstance(), props);
+        this.commandsClient = new HQApiCommandsClient(api);
+    }
 
-	private HQApiCommandsClient commandsClient;
-	private Properties props;
+    public void syncServices(List<ServiceResource> rabbitResources)
+            throws Exception {
 
-	public RabbitTransientResourceManager(Properties props)
-		throws PluginException {
+        if (rabbitResources == null) {
+            return;
+        }
 
-		this.props = props;
-		HQApi api = HQApiFactory.getHQApi(AgentDaemon.getMainInstance(), props);
-		this.commandsClient = new HQApiCommandsClient(api);
-	}
+        int numResourcesDeleted = 0;
 
-	public void syncServices(List<ServiceResource> rabbitResources)
-		throws Exception {
+        try {
+            Resource rabbitMQ = getRabbitMQServer();
 
-		if (rabbitResources == null) {
-			return;
-		}
-		
-		int numResourcesDeleted = 0;
-		
-		try {
-			Resource rabbitMQ = getRabbitMQServer();
-
-			if (rabbitMQ == null) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Could not find a RabbitMQ server");
-				}
-				return;
-			}
+            if (rabbitMQ == null) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Could not find a RabbitMQ server");
+                }
+                return;
+            }
 
             List<String> resources = new ArrayList();
             for (ServiceResource s : rabbitResources) {
@@ -115,60 +110,50 @@ public class RabbitTransientResourceManager implements TransientResourceManager 
                     numResourcesDeleted++;
                 }
             }
-		} catch (Exception e) {
-			// TODO: log here?
-			throw e;
-		} finally {
-			if (numResourcesDeleted > 0) {
-				logger.info(numResourcesDeleted + " transient RabbitMQ services deleted");
-			}
-		}
-	}
+        } catch (Exception e) {
+            // TODO: log here?
+            throw e;
+        } finally {
+            if (numResourcesDeleted > 0) {
+                logger.info(numResourcesDeleted + " transient RabbitMQ services deleted");
+            }
+        }
+    }
 
-	private Resource getRabbitMQServer() 
-		throws IOException, PluginException {
+    private Resource getRabbitMQServer()
+            throws IOException, PluginException {
 
-		Resource rabbit = null;
-		ResourcePrototype rezProto = commandsClient.getResourcePrototype(RABBITMQ_TYPE);
+        Resource rabbit = null;
+        ResourcePrototype rezProto = commandsClient.getResourcePrototype(RABBITMQ_TYPE);
         List<Resource> resources = commandsClient.getResources(rezProto, true, true);
 
         for (Resource r : resources) {
-			if (isResourcePropertyMatch(r.getResourceProperty(), props)
-					&& isResourceConfigMatch(r.getResourceConfig(), props)) {
-				rabbit = r;
-				break;
-			}
-		}
-
-		return rabbit;
-	}
-
-	private boolean isResourcePropertyMatch(List<ResourceProperty> resourceProps, Properties props) {
-		boolean nodePathMatches = false;
-
-		for (ResourceProperty p : resourceProps) {
-            if (NODE_PATH_PROPERTY.equals(p.getKey())) {
-                nodePathMatches = true;
+            logger.debug(r.getName());
+            if (isResourceConfigMatch(r.getResourceConfig(), props)) {
+                rabbit = r;
                 break;
             }
         }
 
-		return nodePathMatches;
-	}
+        return rabbit;
+    }
 
-	private boolean isResourceConfigMatch(List<ResourceConfig> configs, Properties props) {
-		boolean usernameMatches = false;
-		boolean passwordMatches = false;
+    private boolean isResourceConfigMatch(List<ResourceConfig> configs, Properties props) {
+        boolean portMatches = false;
+        boolean addrMatches = false;
 
-		for (ResourceConfig c : configs) {
-			if (NODE_CONFIG.equals(c.getKey())) {
-				if (c.getValue().equals(props.get(NODE_CONFIG))) {
-					usernameMatches = true;
-				}
-			}
-		}
+        for (ResourceConfig c : configs) {
+            if (DetectorConstants.PORT.equals(c.getKey())) {
+                if (c.getValue().equals(props.get(DetectorConstants.PORT))) {
+                    portMatches = true;
+                }
+            } else if (DetectorConstants.ADDR.equals(c.getKey())) {
+                if (c.getValue().equals(props.get(DetectorConstants.ADDR))) {
+                    addrMatches = true;
+                }
+            }
+        }
 
-		return usernameMatches && passwordMatches;
-	}
-
+        return portMatches && addrMatches;
+    }
 }

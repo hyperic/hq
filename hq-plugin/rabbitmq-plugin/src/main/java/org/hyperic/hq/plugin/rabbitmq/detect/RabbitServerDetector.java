@@ -67,7 +67,6 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      */
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
         logger.debug("[getServerResources] platformConfig=" + platformConfig);
-        //System.setProperty("OtpConnection.trace", "99");
 
         List<ServerResource> resources = new ArrayList<ServerResource>();
         long[] pids = getPids(PTQL_QUERY);
@@ -114,7 +113,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         logger.debug("[runAutoDiscovery] >> start");
         try {
             AgentRemoteValue configARV = AICommandsUtils.createArgForRuntimeDiscoveryConfig(0, 0, "RabbitMQ", null, cf);
-            logger.info("[runAutoDiscovery] configARV=" + configARV);
+            logger.debug("[runAutoDiscovery] configARV=" + configARV);
             AgentCommand ac = new AgentCommand(1, 1, "autoinv:pushRuntimeDiscoveryConfig", configARV);
             AgentDaemon.getMainInstance().getCommandDispatcher().processRequest(ac, null, null);
             logger.debug("[runAutoDiscovery] << OK");
@@ -146,17 +145,19 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
     }
 
     private void syncServices(ConfigResponse serviceConfig, List<ServiceResource> rabbitResources) {
+        boolean autoSync = serviceConfig.getValue(DetectorConstants.AUTO_SYNC, "false").equals("true");
+        logger.debug("[syncServices] autoSync=" + autoSync + " " + rabbitResources.size() + " resources");
+        if (autoSync) {
+            try {
+                Properties props = new Properties();
+                props.putAll(serviceConfig.toProperties());
+                props.putAll(getManager().getProperties());
 
-        try {
-            Properties props = new Properties();
-            props.putAll(serviceConfig.toProperties());
-            props.putAll(getManager().getProperties());
-
-            TransientResourceManager manager = new RabbitTransientResourceManager(props);
-            manager.syncServices(rabbitResources);
-
-        } catch (Throwable e) {
-            logger.info("Could not sync transient services: " + e.getMessage(), e);
+                TransientResourceManager manager = new RabbitTransientResourceManager(props);
+                manager.syncServices(rabbitResources);
+            } catch (Throwable e) {
+                logger.debug("Could not sync transient services: " + e.getMessage(), e);
+            }
         }
     }
 
@@ -175,7 +176,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         }
 
         String node = serviceConfig.getValue(DetectorConstants.SERVER_NAME);
-        boolean noDurable = serviceConfig.getValue(DetectorConstants.NO_DURABLE,"false").equals("true");
+        boolean noDurable = serviceConfig.getValue(DetectorConstants.NO_DURABLE, "false").equals("true");
 
         try {
             HypericRabbitAdmin admin = new HypericRabbitAdmin(serviceConfig);
@@ -254,8 +255,6 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
             }
         }
         conf.setValue(DetectorConstants.SERVER_NAME, nodeName);
-
-        final String home = getProcessHome(nodePid);
 
         logger.debug("ProductConfig[" + conf + "]");
 
@@ -363,37 +362,6 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
             }
         }
         return mpath;
-    }
-
-    /**
-     * based on https://github.com/erlang/otp/blob/dev/lib/erl_interface/src/connect/ei_connect.c
-     * @param nodePid
-     * @return
-     */
-    private String getProcessHome(long nodePid) {
-        Sigar sigar = new Sigar();
-        String home = null;
-        try {
-            if (isWin32()) {
-                String homedrive = sigar.getProcEnv(nodePid, "HOMEDRIVE");
-                String homepath = sigar.getProcEnv(nodePid, "HOMEPATH");
-                if ((homedrive != null) && (homepath != null)) {
-                    home = new File(homedrive, homepath).getAbsolutePath();
-                }
-                if (home == null) {
-                    home = sigar.getProcEnv(nodePid, "windir");
-                    logger.debug("[getProcessHome] home==null -> windir");
-                }
-            } else {
-                home = sigar.getProcEnv(nodePid, "HOME");
-            }
-        } catch (Exception ex) {
-            logger.debug("[getProcessHome] Error gatting process home: " + ex.getMessage());
-            home = System.getProperty("user.home");
-            logger.debug("[getProcessHome] Using user '" + System.getProperty("user.name") + "' home: " + home);
-        }
-        logger.debug("[getProcessHome] home=" + home);
-        return home;
     }
 
     private String generateSignature(ServerResource server) {

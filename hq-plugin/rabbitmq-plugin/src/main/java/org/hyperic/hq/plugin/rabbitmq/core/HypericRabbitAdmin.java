@@ -69,10 +69,10 @@ public class HypericRabbitAdmin {
     private int port;
 
     public HypericRabbitAdmin(Properties props) {
-        this.port = Integer.parseInt(props.getProperty("port"));
-        this.addr = props.getProperty("addr");
-        this.user = props.getProperty("user");
-        this.pass = props.getProperty("pass");
+        this.port = Integer.parseInt(props.getProperty(DetectorConstants.PORT));
+        this.addr = props.getProperty(DetectorConstants.ADDR);
+        this.user = props.getProperty(DetectorConstants.USERNAME);
+        this.pass = props.getProperty(DetectorConstants.PASSWORD);
 
         client = new HttpClient();
         client.getState().setCredentials(

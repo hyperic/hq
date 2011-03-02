@@ -29,7 +29,7 @@
 
 <plugin class="org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin">
 
-    <filter name="server-connection" value="node=%node%,addr=%addr%,port=%port%,user=%user%,pass=%pass%"/>
+    <filter name="server-connection" value="node=%node%,addr=%addr%,port=%port%,username=%username%,password=%password%"/>
 
     <server name="RabbitMQ" description="RabbitMQ">
 
@@ -73,9 +73,10 @@
             <option name="node" description="node"/>
             <option name="addr" description="" default="localhost"/>
             <option name="port" description="" default="55672"/>
-            <option name="user" description="" default="guest"/>
-            <option name="pass" description="" default="guest"/>
+            <option name="username" description="" default="guest"/>
+            <option name="password" description="" default="guest"/>
             <option name="nodurable" description="Discover No Durable Objects" type="boolean" default="false"/>
+            <option name="autosycn" description="Auto-Delete UnAvailable Objects" type="boolean" default="false"/>
         </config>
 
         <properties>
