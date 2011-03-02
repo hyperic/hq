@@ -35,6 +35,7 @@ import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.scheduler.ScheduleValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -55,14 +56,13 @@ public class ControlScheduleDAO
         super(ControlSchedule.class, f);
     }
 
-    ControlSchedule create(AppdefEntityID entityId, String subject, String action,
+    ControlSchedule create(Resource resource, String subject, String action,
                            ScheduleValue schedule, long nextFire, String triggerName,
                            String jobName, String jobOrderData) {
         ControlSchedule s = new ControlSchedule();
 
         try {
-            s.setEntityId(entityId.getId());
-            s.setEntityType(new Integer(entityId.getType()));
+            s.setResource(resource);
             s.setSubject(subject);
             s.setScheduleValue(schedule);
             s.setNextFireTime(nextFire);

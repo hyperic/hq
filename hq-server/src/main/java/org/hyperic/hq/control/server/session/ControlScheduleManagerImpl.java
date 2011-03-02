@@ -39,9 +39,11 @@ import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
@@ -52,6 +54,7 @@ import org.hyperic.hq.control.shared.ScheduledJobNotFoundException;
 import org.hyperic.hq.control.shared.ScheduledJobRemoveException;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.scheduler.ScheduleParseException;
 import org.hyperic.hq.scheduler.ScheduleParser;
@@ -97,16 +100,18 @@ public class ControlScheduleManagerImpl
     private ControlHistoryDAO controlHistoryDAO;
     private ControlScheduleDAO controlScheduleDAO; 
     private PermissionManager permissionManager;
+    private ResourceManager resourceManager;
   
 
     @Autowired
     public ControlScheduleManagerImpl(Scheduler scheduler, DBUtil dbUtil, ControlHistoryDAO controlHistoryDAO,
                                       ControlScheduleDAO controlScheduleDAO, 
-                                      PermissionManager permissionManager) {
+                                      PermissionManager permissionManager, ResourceManager resourceManager) {
         super(scheduler, dbUtil);
         this.controlHistoryDAO = controlHistoryDAO;
         this.controlScheduleDAO = controlScheduleDAO;
         this.permissionManager = permissionManager;
+        this.resourceManager = resourceManager;
     }
 
     protected String getHistoryPagerClass() {
@@ -215,7 +220,7 @@ public class ControlScheduleManagerImpl
             int count = 0;
             for (Iterator<ControlSchedule> i = pending.iterator(); i.hasNext();) {
                 ControlSchedule sLocal = i.next();
-                AppdefEntityID entity = new AppdefEntityID(sLocal.getEntityType().intValue(), sLocal.getEntityId());
+                AppdefEntityID entity = AppdefUtil.newAppdefEntityId(sLocal.getResource());
                 try {
                     checkControlPermission(subject, entity);
                     if (++count > rows)
@@ -607,6 +612,7 @@ public class ControlScheduleManagerImpl
             throw new PluginException(e);
         }
 
+        Resource resource = resourceManager.findResourceById(id.getId());
         // Single scheduled actions do not have cron strings
         if (cronStr == null) {
             SimpleTrigger trigger = new SimpleTrigger(triggerName, GROUP, schedule.getStart());
@@ -615,9 +621,10 @@ public class ControlScheduleManagerImpl
             if (nextFire == null) {
                 throw new SchedulerException();
             }
-
+           
             try {
-                controlScheduleDAO.create(id, subject.getName(), action, schedule, nextFire.getTime(), triggerName,
+               
+                controlScheduleDAO.create(resource, subject.getName(), action, schedule, nextFire.getTime(), triggerName,
                     jobName, null);
             } catch (Exception e) {
                 log.error("Unable to schedule job: " + e.getMessage());
@@ -642,7 +649,7 @@ public class ControlScheduleManagerImpl
                 if (order != null)
                     stringOrder = StringUtil.arrayToString(order);
 
-                controlScheduleDAO.create(id, subject.getName(), action, schedule, nextFire.getTime(), triggerName,
+                controlScheduleDAO.create(resource, subject.getName(), action, schedule, nextFire.getTime(), triggerName,
                     jobName, stringOrder);
             } catch (ParseException e) {
                 log.error("Unable to setup cron trigger: " + e.getMessage());
