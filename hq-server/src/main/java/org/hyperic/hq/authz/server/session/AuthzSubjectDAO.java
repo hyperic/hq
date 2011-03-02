@@ -71,9 +71,8 @@ public class AuthzSubjectDAO {
     public AuthzSubject findById(Serializable id) {
         if (id == null) return null;
         AuthzSubject result = entityManager.find(AuthzSubject.class, id);
-        // TODO workaround to trigger Neo4jNodeBacking's around advice for the getter
         if(result != null) {
-            result.getId();
+            result.attach();
         }    
         return result;
     }
@@ -84,7 +83,7 @@ public class AuthzSubjectDAO {
         AuthzSubject subject = new AuthzSubject(active, dsn, dept, email, html, first, last, name,
             phone, sms, false);
         entityManager.persist(subject);
-
+        subject.attach();
         // XXX create resource for owner
         //TODO need this?
         //ResourceType rt = resourceTypeDao.findByName(AuthzConstants.subjectResourceTypeName);
@@ -110,7 +109,6 @@ public class AuthzSubjectDAO {
         crispoDao.save(c);
 
         subject.setPrefs(c);
-        subject.getId();
         return subject;
     }
 
@@ -120,7 +118,7 @@ public class AuthzSubjectDAO {
         //You also may have been expecting an ObjectNotFoundException.  Now you get back null.
         AuthzSubject result = entityManager.find(AuthzSubject.class, id);
         if(result != null) {
-            result.getId();
+            result.attach();
         }    
         return result;
     }
@@ -146,7 +144,7 @@ public class AuthzSubjectDAO {
         try {
             AuthzSubject subject =  entityManager.createQuery(sql,AuthzSubject.class).setHint("org.hibernate.cacheable", true).
             setHint("org.hibernate.cacheRegion", "AuthzSubject.findByAuth").setParameter("name", name).setParameter("dsn", dsn).getSingleResult();
-            subject.getId();
+            subject.attach();
             return subject;
         }catch(EmptyResultDataAccessException e) {
             //Hibernate UniqueResult would return null if nothing, but throw Exception if more than one.  getSingleResult does not do this
@@ -159,7 +157,7 @@ public class AuthzSubjectDAO {
         try {
             AuthzSubject subject = entityManager.createQuery(sql,AuthzSubject.class).setHint("org.hibernate.cacheable", true).
             setHint("org.hibernate.cacheRegion", "AuthzSubject.findByName").setParameter(1, name).getSingleResult();
-            subject.getId();
+            subject.attach();
             return subject;
         }catch(EmptyResultDataAccessException e) {
             //Hibernate UniqueResult would return null if nothing, but throw Exception if more than one.  getSingleResult does not do this
@@ -260,7 +258,7 @@ public class AuthzSubjectDAO {
                 ") order by s.sortName " + (asc ? "asc" : "desc"),AuthzSubject.class).setParameter(1, roleId.intValue())
             .getResultList();
         for(AuthzSubject subject: subjects) {
-            subject.getId();
+            subject.attach();
         }
         return subjects;
     }
@@ -271,7 +269,7 @@ public class AuthzSubjectDAO {
                 "(select id from r.subjects) and " + "s.system = false order by s.sortName " +
                 (asc ? "asc" : "desc"),AuthzSubject.class).setParameter(1, roleId.intValue()).getResultList();
         for(AuthzSubject subject: subjects) {
-            subject.getId();
+            subject.attach();
         }
         return subjects;
     }

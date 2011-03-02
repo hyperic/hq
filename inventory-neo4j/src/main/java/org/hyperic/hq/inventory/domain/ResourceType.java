@@ -23,7 +23,6 @@ import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.TraversalPosition;
 import org.neo4j.graphdb.Traverser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.annotation.Indexed;
 import org.springframework.data.graph.annotation.GraphProperty;
 import org.springframework.data.graph.annotation.NodeEntity;
@@ -41,7 +40,6 @@ import org.springframework.transaction.annotation.Transactional;
  * 
  */
 @Entity
-@Configurable
 @NodeEntity(partial = true)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class ResourceType {
@@ -114,9 +112,10 @@ public class ResourceType {
      * @param configType The ConfigType to add
      */
     public void addConfigType(ConfigType configType) {
+        //TODO can't do this in a detached env b/c relationship doesn't take unless both items are node-backed
         entityManager.persist(configType);
-        configType.getId();
-        relateTo(configType, DynamicRelationshipType.withName(RelationshipTypes.HAS_CONFIG_TYPE));
+        configType.attach();
+        configTypes.add(configType);
     }
 
     /**
@@ -124,10 +123,10 @@ public class ResourceType {
      * @param operationType The OperationType to add
      */
     public void addOperationType(OperationType operationType) {
+        //TODO can't do this in a detached env b/c relationship doesn't take unless both items are node-backed
         entityManager.persist(operationType);
-        operationType.getId();
-        relateTo(operationType,
-            DynamicRelationshipType.withName(RelationshipTypes.HAS_OPERATION_TYPE));
+        operationType.attach();
+        operationTypes.add(operationType);
     }
 
     /**
@@ -135,10 +134,10 @@ public class ResourceType {
      * @param propertyType The PropertyType to add
      */
     public void addPropertyType(PropertyType propertyType) {
+        //TODO can't do this in a detached env b/c relationship doesn't take unless both items are node-backed
         entityManager.persist(propertyType);
-        propertyType.getId();
-        relateTo(propertyType,
-            DynamicRelationshipType.withName(RelationshipTypes.HAS_PROPERTY_TYPE));
+        propertyType.attach();
+        propertyTypes.add(propertyType);
     }
 
     private Set<ResourceTypeRelationship> convertRelationships(ResourceType entity,

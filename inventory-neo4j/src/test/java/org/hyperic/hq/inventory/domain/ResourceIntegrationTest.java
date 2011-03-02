@@ -294,7 +294,7 @@ public class ResourceIntegrationTest {
         AuthzSubject bob = new AuthzSubject(true, "bob", "dev", "bob@bob.com", true, "Bob",
             "Bobbins", "Bob", "123123123", "123123123", false);
         entityManager.persist(bob);
-        bob.getId();
+        bob.attach();
         traderJoes.setOwner(bob);
         assertTrue(traderJoes.isOwner(bob.getId()));
     }
@@ -445,7 +445,7 @@ public class ResourceIntegrationTest {
         Config measurement = new Config();
         ConfigType measType = new ConfigType("Measurement");
         entityManager.persist(measType);
-        measType.getId();
+        measType.attach();
         measurement.setType(measType);
         traderJoes.addConfig(measurement);
     }
@@ -458,6 +458,11 @@ public class ResourceIntegrationTest {
     @Test
     public void testGetConfigInvalidType() {
         assertNull(traderJoes.getConfig("Measurement"));
+    }
+    
+    @Test(expected=NotUniqueException.class)
+    public void testPersistResourceAlreadyExists() {
+        resourceDao.persist(new Resource("Trader Joes",store));
     }
 
 }

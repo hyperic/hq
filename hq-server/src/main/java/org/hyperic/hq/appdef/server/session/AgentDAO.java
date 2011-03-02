@@ -79,7 +79,7 @@ public class AgentDAO {
                         String authToken, String agentToken, String version) {
         Agent ag = new Agent(type, address, port, unidirectional, authToken, agentToken, version);
         entityManager.persist(ag);
-        ag.getId();
+        ag.attach();
         return ag;
     }
 
@@ -87,7 +87,7 @@ public class AgentDAO {
         //TODO previously ordered by Address, then Port
         List<Agent> agents = entityManager.createQuery("select a from Agent a",Agent.class).getResultList();
         for(Agent agent: agents) {
-            agent.getId();
+            agent.attach();
         }
         return agents;
     }
@@ -97,7 +97,7 @@ public class AgentDAO {
         List<Agent> agents = entityManager.createQuery("SELECT a FROM Agent a WHERE a.address = :address",Agent.class).
             setParameter("address", ip).getResultList();
         for(Agent agent: agents) {
-            agent.getId();
+            agent.attach();
         }
         return agents;
     }
@@ -114,7 +114,7 @@ public class AgentDAO {
         try {
             Agent agent = entityManager.createQuery("SELECT a FROM Agent a WHERE a.address = :address and a.port = :port",Agent.class).
                 setParameter("address", address).setParameter("port", port).getSingleResult();
-            agent.getId();
+            agent.attach();
             return agent;
         }catch(EmptyResultDataAccessException e) {
             //Hibernate UniqueResult would return null if nothing, but throw Exception if more than one.  getSingleResult does not do this
@@ -128,7 +128,7 @@ public class AgentDAO {
                 setHint("org.hibernate.cacheable", true).setHint("org.hibernate.cacheRegion", "Agent.findByAgentToken").
                 setParameter("agentToken", token).
                 getSingleResult();
-            agent.getId();
+            agent.attach();
             return agent;
         }catch(EmptyResultDataAccessException e) {
             //Hibernate UniqueResult would return null if nothing, but throw Exception if more than one.  getSingleResult does not do this
@@ -142,7 +142,7 @@ public class AgentDAO {
         //You also may have been expecting an ObjectNotFoundException.  Now you get back null.
         Agent result = entityManager.find(Agent.class, id);
         if(result != null) {
-            result.getId();
+            result.attach();
         }    
         return result;
     }

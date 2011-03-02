@@ -274,7 +274,7 @@ public class ResourceDaoIntegrationTest {
         AuthzSubject bob = new AuthzSubject(true, "bob", "dev", "bob@bob.com", true, "Bob",
             "Bobbins", "Bob", "123123123", "123123123", false);
         entityManager.persist(bob);
-        bob.getId();
+        bob.attach();
         resource1.setOwner(bob);
         Resource resource2 = new Resource("Another Resource", type);
         resourceDao.persist(resource2);

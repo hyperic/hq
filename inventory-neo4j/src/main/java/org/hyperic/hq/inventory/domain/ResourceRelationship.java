@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.neo4j.graphdb.NotFoundException;
-import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.graph.annotation.EndNode;
 import org.springframework.data.graph.annotation.RelationshipEntity;
 import org.springframework.data.graph.annotation.StartNode;
@@ -16,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author dcrutchfield
  * 
  */
-@Configurable
+
 @RelationshipEntity
 public class ResourceRelationship {
     @StartNode

@@ -1,6 +1,5 @@
 package org.hyperic.hq.inventory.domain;
 
-import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.graph.annotation.EndNode;
 import org.springframework.data.graph.annotation.RelationshipEntity;
 import org.springframework.data.graph.annotation.StartNode;
@@ -11,7 +10,7 @@ import org.springframework.data.graph.annotation.StartNode;
  * @author dcrutchfield
  * 
  */
-@Configurable
+
 @RelationshipEntity
 public class ResourceTypeRelationship {
 

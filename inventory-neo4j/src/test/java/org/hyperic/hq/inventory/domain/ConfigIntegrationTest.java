@@ -33,7 +33,7 @@ public class ConfigIntegrationTest {
         config = new Config();
         ConfigType configType =  new ConfigType("Product");
         entityManager.persist(configType);
-        configType.getId();
+        configType.attach();
         configType.addConfigOptionType(new ConfigOptionType("user", "A user"));
         config.setType(configType);
     }

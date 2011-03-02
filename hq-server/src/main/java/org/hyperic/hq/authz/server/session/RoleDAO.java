@@ -127,7 +127,7 @@ public class RoleDAO {
 //        resourceGroupDAO.addMembers(group, Collections.singleton(myResource));
 //
 //        role.setResourceGroups(groups);
-        role.getId();
+        role.attach();
         return role;
     }
 
@@ -230,7 +230,7 @@ public class RoleDAO {
                 "order by r.sortName " + (asc ? "asc" : "desc"),Role.class).setParameter(1, system).setParameter(
             2, sid.intValue()).getResultList();
         for(Role role: roles) {
-            role.getId();
+            role.attach();
         }
         return roles;
     }
@@ -240,7 +240,7 @@ public class RoleDAO {
             Role role =  entityManager.createQuery(
             "select r from Role r where r.id = ? and ? not in " + "(select id from r.subjects) ",Role.class)
             .setParameter(0, roleId.intValue()).setParameter(1, subjectid.intValue()).getSingleResult();
-            role.getId();
+            role.attach();
             return role;
         }catch(EmptyResultDataAccessException e) {
             //Hibernate UniqueResult would return null if nothing, but throw Exception if more than one.  getSingleResult does not do this
@@ -254,7 +254,7 @@ public class RoleDAO {
                 + "? not in (select id from r.resourceGroups) " + "order by r.sortName ",Role.class)
             .setParameter(0, system).setParameter(1, groupId.intValue()).getResultList();
         for(Role role: roles) {
-            role.getId();
+            role.attach();
         }
         return roles;
     }

@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.hyperic.hq.inventory.NotUniqueException;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.graph.neo4j.finder.FinderFactory;
@@ -32,9 +33,9 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
             .setMaxResults(maxResults)
             .getResultList();
         
-        // TODO workaround to trigger Neo4jNodeBacking's around advice for the getter
+   
         for (ResourceType resourceType : result) {
-            resourceType.getId();
+            resourceType.attach();
         }
         
         return result;
@@ -45,9 +46,9 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
     public List<ResourceType> findAll() {
         List<ResourceType> result =  entityManager.createQuery("select o from ResourceType o",ResourceType.class).getResultList();
         
-        // TODO workaround to trigger Neo4jNodeBacking's around advice for the getter
+        
         for (ResourceType resourceType : result) {
-            resourceType.getId();
+            resourceType.attach();
         }
         
         return result;
@@ -58,10 +59,9 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
         if (id == null) return null;
         
         ResourceType result = entityManager.find(ResourceType.class, id);
-        
-        // TODO workaround to trigger Neo4jNodeBacking's around advice for the getter
+       
         if(result != null) {
-            result.getId();
+            result.attach();
         }
         
         return result;
@@ -74,7 +74,7 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
             .findByPropertyValue(null, "name",name);
 
         if (type != null) {
-            type.getId();
+            type.attach();
         }
 
         return type;
@@ -87,17 +87,19 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
     
     @Transactional
     public ResourceType merge(ResourceType resourceType) {
-        resourceType.getId();
         ResourceType merged = entityManager.merge(resourceType);
         entityManager.flush();
+        merged.attach();
         return merged;
     }
     
     @Transactional
     public void persist(ResourceType resourceType) {
-        //TODO need a way to keep ResourceType unique by name.  Can't do getName() before persist() or we get NPE on flushDirty
+        if(findByName(resourceType.getName()) != null) {
+            throw new NotUniqueException("Resource Type with name " + resourceType.getName() + " already exists");
+        }
         entityManager.persist(resourceType);
-        resourceType.getId();
+        resourceType.attach();
         //flush to get the JSR-303 validation done sooner
         entityManager.flush();
     }  

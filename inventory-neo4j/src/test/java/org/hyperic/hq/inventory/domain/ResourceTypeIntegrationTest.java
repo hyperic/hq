@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hyperic.hq.inventory.NotUniqueException;
 import org.hyperic.hq.inventory.data.ResourceDao;
 import org.hyperic.hq.inventory.data.ResourceTypeDao;
 import org.junit.Before;
@@ -287,6 +288,11 @@ public class ResourceTypeIntegrationTest {
     public void testRemoveRelationshipName() {
         store.removeRelationships(RelationshipTypes.CONTAINS);
         assertTrue(store.getRelationships().isEmpty()); 
+    }
+    
+    @Test(expected=NotUniqueException.class)
+    public void testPersistResourceTypeAlreadyExists() {
+        resourceTypeDao.persist(new ResourceType("Grocery Store"));
     }
 
 }

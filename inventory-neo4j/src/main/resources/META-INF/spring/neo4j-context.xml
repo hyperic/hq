@@ -23,10 +23,6 @@
 		class="org.springframework.data.graph.neo4j.support.SubReferenceNodeTypeStrategy">
 		<constructor-arg index="0" ref="graphDatabaseContext" />
 	</bean>
-	<bean id="indexService" class="org.neo4j.index.lucene.LuceneIndexService"
-		destroy-method="shutdown">
-		<constructor-arg index="0" ref="graphDatabaseService" />
-	</bean>
 	<bean id="graphDatabaseContext" class="org.springframework.data.graph.neo4j.support.GraphDatabaseContext">
 		<property name="graphDatabaseService" ref="graphDatabaseService"/>
 		<property name="relationshipEntityInstantiator">
@@ -34,9 +30,9 @@
 		</property>
 		<property name="graphEntityInstantiator">
 			<bean class="org.springframework.data.graph.neo4j.support.node.PartialNeo4jEntityInstantiator">
-		        <property name="entityInstantiator" >
+		        <constructor-arg >
 		            <bean class="org.springframework.data.graph.neo4j.support.node.Neo4jConstructorGraphEntityInstantiator"/>
-		        </property>
+		        </constructor-arg>
 		    </bean>
 		</property>
 		<property name="conversionService">
