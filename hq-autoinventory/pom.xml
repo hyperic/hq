@@ -29,10 +29,12 @@
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-jpa</artifactId>
-			<exclusion>
-				<groupId>org.springframework.data</groupId>
-				<artifactId>*</artifactId>
-			</exclusion>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.data</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
