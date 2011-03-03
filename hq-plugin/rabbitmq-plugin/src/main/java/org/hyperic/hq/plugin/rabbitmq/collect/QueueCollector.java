@@ -61,6 +61,16 @@ public class QueueCollector extends RabbitMQListCollector {
             setValue("messagesReady", q.getMessagesReady());
             setValue("messagesUnacknowledged", q.getMessagesUnacknowledged());
             setValue("memory", q.getMemory());
+            if (q.getMessageStats().getPublishDetails() != null) {
+                setValue("publish_details", q.getMessageStats().getPublishDetails().get("rate"));
+            }
+            if (q.getMessageStats().getDeliverGetDetails() != null) {
+                setValue("deliver_get_details", q.getMessageStats().getDeliverGetDetails().get("rate"));
+            }
+            if (q.getMessageStats().getDeliverNoAckDetails() != null) {
+                setValue("deliver_no_ack_details", q.getMessageStats().getDeliverNoAckDetails().get("rate"));
+            }
+
         } catch (Exception ex) {
             setAvailability(false);
             logger.debug(ex.getMessage(), ex);

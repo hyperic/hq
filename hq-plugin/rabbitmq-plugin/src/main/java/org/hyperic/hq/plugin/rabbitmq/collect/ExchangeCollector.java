@@ -53,8 +53,15 @@ public class ExchangeCollector extends RabbitMQListCollector {
         }
 
         try {
-            RabbitExchange exchange = rabbitAdmin.getExchange(vhost, exch);
+            RabbitExchange e = rabbitAdmin.getExchange(vhost, exch);
             setAvailability(true);
+            if (e.getMessageStatsIn() != null) {
+                setValue("in_publish_details", e.getMessageStatsIn().getPublishDetails().get("rate"));
+            }
+            if (e.getMessageStatsOut() != null) {
+                setValue("out_publish_details", e.getMessageStatsOut().getPublishDetails().get("rate"));
+            }
+
         } catch (Exception ex) {
             setAvailability(false);
             logger.debug(ex.getMessage(), ex);

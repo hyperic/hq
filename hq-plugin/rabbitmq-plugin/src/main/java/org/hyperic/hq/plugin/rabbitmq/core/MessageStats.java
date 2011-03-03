@@ -64,5 +64,5 @@ public class MessageStats {
     @Override
     public String toString() {
         return "MessageStats{publishDetails=" + publishDetails + ", deliverGetDetails=" + deliverGetDetails + ", deliverNoAckDetails=" + deliverNoAckDetails + '}';
-    }
+}
 }

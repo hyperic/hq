@@ -54,6 +54,17 @@ public class ChannelCollector extends RabbitMQListCollector {
             setValue("prefetchCount", c.getPrefetchCount());
             setValue("acksUncommitted", c.getAcksUncommitted());
             setValue("messagesUnacknowledged", c.getMessagesUnacknowledged());
+            if (c.getMessageStats() != null) {
+                if (c.getMessageStats().getPublishDetails() != null) {
+                    setValue("publish_details", c.getMessageStats().getPublishDetails().get("rate"));
+                }
+                if (c.getMessageStats().getDeliverGetDetails() != null) {
+                    setValue("deliver_get_details", c.getMessageStats().getDeliverGetDetails().get("rate"));
+                }
+                if (c.getMessageStats().getDeliverNoAckDetails() != null) {
+                    setValue("deliver_no_ack_details", c.getMessageStats().getDeliverNoAckDetails().get("rate"));
+                }
+            }
         } catch (Exception ex) {
             setAvailability(false);
             logger.debug(ex.getMessage(), ex);

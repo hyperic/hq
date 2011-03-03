@@ -61,9 +61,15 @@ public class RabbitServerCollector extends RabbitMQDefaultCollector {
             setValue("proc_used_percentage", (double) n.getProcUsed() / (double) n.getProcTotal());
             setValue("fd_percentage", (double) n.getFdUsed() / (double) n.getFdTotal());
             getResult().addValues(o.getQueueTotals());
-            setValue("publish_details", o.getMessageStats().getPublishDetails().get("rate"));
-            setValue("deliver_get_details", o.getMessageStats().getDeliverGetDetails().get("rate"));
-            setValue("deliver_no_ack_details", o.getMessageStats().getDeliverNoAckDetails().get("rate"));
+            if (o.getMessageStats().getPublishDetails() != null) {
+                setValue("publish_details", o.getMessageStats().getPublishDetails().get("rate"));
+            }
+            if (o.getMessageStats().getDeliverGetDetails() != null) {
+                setValue("deliver_get_details", o.getMessageStats().getDeliverGetDetails().get("rate"));
+            }
+            if (o.getMessageStats().getDeliverNoAckDetails() != null) {
+                setValue("deliver_no_ack_details", o.getMessageStats().getDeliverNoAckDetails().get("rate"));
+            }
         } catch (PluginException ex) {
             setAvailability(false);
             logger.debug(ex.getMessage(), ex);

@@ -19,6 +19,8 @@ public class RabbitExchange implements RabbitObject {
     private boolean durable;
     private boolean autoDelete;
     private boolean internal;
+    private MessageStats messageStatsIn;
+    private MessageStats messageStatsOut;
 
     /**
      * @return the name
@@ -107,9 +109,37 @@ public class RabbitExchange implements RabbitObject {
         this.internal = internal;
     }
 
+    /**
+     * @return the messageStatsIn
+     */
+    public MessageStats getMessageStatsIn() {
+        return messageStatsIn;
+    }
+
+    /**
+     * @param messageStatsIn the messageStatsIn to set
+     */
+    public void setMessageStatsIn(MessageStats messageStatsIn) {
+        this.messageStatsIn = messageStatsIn;
+    }
+
+    /**
+     * @return the messageStatsOut
+     */
+    public MessageStats getMessageStatsOut() {
+        return messageStatsOut;
+    }
+
+    /**
+     * @param messageStatsOut the messageStatsOut to set
+     */
+    public void setMessageStatsOut(MessageStats messageStatsOut) {
+        this.messageStatsOut = messageStatsOut;
+    }
+
     @Override
     public String toString() {
-        return "RabbitExchange{" + "name=" + name + ", vhost=" + vhost + ", type=" + type + ", durable=" + durable + ", autoDelete=" + autoDelete + ", internal=" + internal + '}';
+        return "RabbitExchange{" + "name=" + name + ", vhost=" + vhost + ", messageStatsOut=" + messageStatsOut + ", messageStatsIn=" + messageStatsIn + ", type=" + type + ", durable=" + durable + ", autoDelete=" + autoDelete + ", internal=" + internal + '}';
     }
 
     public String getServiceType() {

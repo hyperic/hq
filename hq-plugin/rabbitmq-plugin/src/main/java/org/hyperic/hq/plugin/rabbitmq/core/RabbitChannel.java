@@ -42,6 +42,7 @@ public class RabbitChannel extends RabbitNoDurableObject {
     private long messagesUnacknowledged;
     private long acksUncommitted;
     private long prefetchCount;
+    private MessageStats messageStats;
 
     public String getName() {
         return name;
@@ -105,9 +106,23 @@ public class RabbitChannel extends RabbitNoDurableObject {
         this.idleSince = idleSince;
     }
 
+    /**
+     * @return the messageStats
+     */
+    public MessageStats getMessageStats() {
+        return messageStats;
+    }
+
+    /**
+     * @param messageStats the messageStats to set
+     */
+    public void setMessageStats(MessageStats messageStats) {
+        this.messageStats = messageStats;
+    }
+
     @Override
     public String toString() {
-        return "RabbitChannel{name=" + name + ", idleSince=" + idleSince + ", number=" + number + ", consumerCount=" + consumerCount + ", messagesUnacknowledged=" + messagesUnacknowledged + ", acksUncommitted=" + acksUncommitted + ", prefetchCount=" + prefetchCount + '}';
+        return "RabbitChannel{name=" + name + ", idleSince=" + idleSince + ", messageStats=" + messageStats + ", number=" + number + ", consumerCount=" + consumerCount + ", messagesUnacknowledged=" + messagesUnacknowledged + ", acksUncommitted=" + acksUncommitted + ", prefetchCount=" + prefetchCount + '}';
     }
 
     public String getServiceType() {

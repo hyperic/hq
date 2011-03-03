@@ -42,6 +42,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import org.apache.commons.httpclient.HttpClient;
@@ -201,12 +202,13 @@ public class HypericRabbitAdmin {
             GsonBuilder gsb = new GsonBuilder();
             gsb.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
             gsb.registerTypeAdapter(Date.class, new DateTimeDeserializer());
+            gsb.registerTypeAdapter(MessageStats.class, new MessageStatsDeserializer());
             Gson gson = gsb.create();
 
             res = gson.fromJson(responseBody, classOfT);
             if (logger.isDebugEnabled()) {
                 if (res.getClass().isArray()) {
-                    logger.debug("[" + api + "] -(" + r + ")*> " + Arrays.asList((Object[])res));
+                    logger.debug("[" + api + "] -(" + r + ")*> " + Arrays.asList((Object[]) res));
                 } else {
                     logger.debug("[" + api + "] -(" + r + ")-> " + res);
                 }
@@ -226,6 +228,22 @@ public class HypericRabbitAdmin {
             } catch (ParseException ex) {
                 throw new JsonParseException(ex.getMessage(), ex);
             }
+        }
+    }
+
+    private class MessageStatsDeserializer implements JsonDeserializer<MessageStats> {
+
+        public MessageStats deserialize(JsonElement je, Type Type, JsonDeserializationContext jdc) throws JsonParseException {
+            MessageStats res = null;
+            if (je.isJsonArray()) {
+                res = new MessageStats();
+            } else {
+                GsonBuilder gsb = new GsonBuilder();
+                gsb.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+                Gson gson = gsb.create();
+                res = gson.fromJson(je, Type);
+            }
+            return res;
         }
     }
 }

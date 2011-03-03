@@ -46,6 +46,7 @@ public class ConnectionCollector extends RabbitMQListCollector {
     public void collect(HypericRabbitAdmin rabbitAdmin) {
         Properties props = getProperties();
         String cName = props.getProperty(MetricConstants.CONNECTION);
+        logger.debug("[collect] ConnectionName=" + cName);
 
         try {
             logger.debug("[collect] RabbitConnection=" + cName);
