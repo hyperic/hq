@@ -11,7 +11,6 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.graph.annotation.GraphProperty;
 import org.springframework.data.graph.annotation.NodeEntity;
 import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
@@ -23,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author jhickey
  * 
  */
-@Configurable
+
 @NodeEntity(partial = true)
 @Entity
 public class OperationArgType {

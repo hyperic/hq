@@ -54,6 +54,7 @@ public class PluginDAO {
         p.setPath(path);
         p.setMD5(md5);
         entityManager.persist(p);
+        p.attach();
         return p;
     }
 
@@ -67,7 +68,7 @@ public class PluginDAO {
         {
             final Plugin plugin = (Plugin) resultList.get(0);
             if (plugin != null) {
-                plugin.getId();
+                plugin.attach();
             }
             return plugin;
         } 

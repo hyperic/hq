@@ -123,14 +123,14 @@ public class Resource {
      */
     @Transactional
     public void addConfig(Config config) {
+        //TODO can't do this in a detached env b/c relationship doesn't take unless both items are node-backed
         String cfgType = config.getType().getName();
         if (type.getConfigType(cfgType) == null) {
             throw new IllegalArgumentException("Config " + cfgType +
                                                " is not defined for resource of type " +
                                                type.getName());
         }
-        getUnderlyingState().createRelationshipTo(config.getUnderlyingState(),
-            DynamicRelationshipType.withName(RelationshipTypes.HAS_CONFIG));
+       configs.add(config);
     }
 
     private Set<ResourceRelationship> convertRelationships(Resource entity,
@@ -724,7 +724,7 @@ public class Resource {
         }
         getUnderlyingState().setProperty(key, value);
         if (propertyType.isIndexed()) {
-            graphDatabaseContext.getNodeIndex(null).add(getUnderlyingState(), key, value);
+            graphDatabaseContext.getNodeIndex(GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME).add(getUnderlyingState(), key, value);
         }
         CPropChangeEvent event = new CPropChangeEvent(getId(), key, oldValue, value);
         messagePublisher.publishMessage(MessagePublisher.EVENTS_TOPIC, event);

@@ -13,7 +13,6 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.graph.annotation.GraphProperty;
 import org.springframework.data.graph.annotation.NodeEntity;
 import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
@@ -28,7 +27,6 @@ import org.springframework.validation.Validator;
  * @author dcrutchfield
  * 
  */
-@Configurable
 @NodeEntity(partial = true)
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)

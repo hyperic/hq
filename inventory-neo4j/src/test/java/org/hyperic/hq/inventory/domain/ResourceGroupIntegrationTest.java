@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.hyperic.hq.inventory.NotUniqueException;
 import org.hyperic.hq.inventory.data.ResourceDao;
 import org.hyperic.hq.inventory.data.ResourceGroupDao;
 import org.hyperic.hq.inventory.data.ResourceTypeDao;
@@ -35,10 +36,12 @@ public class ResourceGroupIntegrationTest {
     private ResourceGroup group;
 
     private Resource vm;
+    
+    private ResourceType vApp;
 
     @Before
     public void setUp() {
-        ResourceType vApp = new ResourceType("vApp");
+        vApp = new ResourceType("vApp");
         resourceTypeDao.persist(vApp);
         ResourceType vmType = new ResourceType("VM");
         resourceTypeDao.persist(vmType);
@@ -86,6 +89,11 @@ public class ResourceGroupIntegrationTest {
     @Test
     public void testIsMemberNotMember() {
         assertFalse(group.isMember(vm));
+    }
+    
+    @Test(expected=NotUniqueException.class)
+    public void testPersistAlreadyExists() {
+        resourceGroupDao.persist(new ResourceGroup("Group1",vApp));
     }
 
 }

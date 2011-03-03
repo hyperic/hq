@@ -9,6 +9,7 @@ import javax.persistence.PersistenceContext;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.hyperic.hq.auth.domain.AuthzSubject;
+import org.hyperic.hq.inventory.NotUniqueException;
 import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.paging.PageInfo;
@@ -54,7 +55,7 @@ public class Neo4jResourceDao implements ResourceDao {
             .createQuery("select o from Resource o", Resource.class).setFirstResult(firstResult)
             .setMaxResults(maxResults).getResultList();
         for (Resource resource : result) {
-            resource.getId();
+            resource.attach();
         }
         return result;
     }
@@ -66,7 +67,7 @@ public class Neo4jResourceDao implements ResourceDao {
         List<Resource> result = entityManager.createQuery("select o from Resource o",
             Resource.class).getResultList();
         for (Resource resource : result) {
-            resource.getId();
+            resource.attach();
         }
         return result;
     }
@@ -77,7 +78,7 @@ public class Neo4jResourceDao implements ResourceDao {
             return null;
         Resource result = entityManager.find(Resource.class, id);
         if (result != null) {
-            result.getId();
+            result.attach();
         }
         return result;
     }
@@ -90,7 +91,7 @@ public class Neo4jResourceDao implements ResourceDao {
             queryContext.sort(new Sort(new SortField(pageInfo.getSortAttribute(),
                 getSortFieldType(pageInfo.getSortAttributeType()), pageInfo.isDescending())));
         }
-        IndexHits<Node> indexHits = graphDatabaseContext.getNodeIndex(null).query(propertyName,
+        IndexHits<Node> indexHits = graphDatabaseContext.getNodeIndex(GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME).query(propertyName,
             queryContext);
         if (indexHits == null) {
             return new PageList<Resource>(0);
@@ -120,7 +121,7 @@ public class Neo4jResourceDao implements ResourceDao {
         Resource resource = finderFactory.createNodeEntityFinder(Resource.class)
             .findByPropertyValue(null, "name", name);
         if (resource != null) {
-            resource.getId();
+            resource.attach();
         }
 
         return resource;
@@ -173,7 +174,6 @@ public class Neo4jResourceDao implements ResourceDao {
 
     @Transactional
     public Resource merge(Resource resource) {
-        resource.getId();
         Resource merged = entityManager.merge(resource);
         entityManager.flush();
         return merged;
@@ -181,13 +181,14 @@ public class Neo4jResourceDao implements ResourceDao {
 
     @Transactional
     public void persist(Resource resource) {
-        // TODO need a way to keep Resource unique by name. Can't do getName()
-        // before persist() or we get NPE on flushDirty
+        if(findByName(resource.getName()) != null) {
+            throw new NotUniqueException("Resource with name " + resource.getName() + " already exists");
+        }
         entityManager.persist(resource);
-        resource.getId();
+        resource.attach();
         // Set the type index here b/c Resource needs an ID before we can access
         // the underlying node
-        graphDatabaseContext.getNodeIndex(null).add(resource.getUnderlyingState(), "type",
+        graphDatabaseContext.getNodeIndex(GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME).add(resource.getUnderlyingState(), "type",
             resource.getType().getId());
         //flush to get the JSR-303 validation done sooner
         entityManager.flush();

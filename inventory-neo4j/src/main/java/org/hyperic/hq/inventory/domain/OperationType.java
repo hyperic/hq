@@ -14,9 +14,7 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.graph.annotation.GraphProperty;
 import org.springframework.data.graph.annotation.NodeEntity;
 import org.springframework.data.graph.annotation.RelatedTo;
@@ -31,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author dcrutchfield
  * 
  */
-@Configurable
+
 @NodeEntity(partial = true)
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
@@ -79,11 +77,10 @@ public class OperationType {
      */
     @Transactional
     public void addOperationArgType(OperationArgType argType) {
-        // TODO can't call this method until the OperationType has been
-        // persisted, a little easy for callers to get wrong
+        //TODO can't do this in a detached env b/c relationship doesn't take unless both items are node-backed
         entityManager.persist(argType);
-        argType.getId();
-        relateTo(argType, DynamicRelationshipType.withName(RelationshipTypes.OPERATION_ARG_TYPE));
+        argType.attach();
+        operationArgTypes.add(argType);
     }
 
     /**
@@ -109,7 +106,7 @@ public class OperationType {
     public Set<OperationArgType> getOperationArgTypes() {
         return operationArgTypes;
     }
-
+    
     /**
      * 
      * @return The return value type or null if operation has no return value
@@ -119,7 +116,7 @@ public class OperationType {
     }
 
     /**
-     * Removes the OperationType.  Only supported as part of ResourceType removal
+     * Removes the OperationType. Only supported as part of ResourceType removal
      */
     @Transactional
     public void remove() {
