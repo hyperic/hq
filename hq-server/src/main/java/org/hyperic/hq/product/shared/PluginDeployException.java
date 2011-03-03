@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  *  "derived work".
  *
- *  Copyright (C) [2009-2011], VMware, Inc.
+ *  Copyright (C) [2004-2011], VMware, Inc.
  *  This file is part of HQ.
  *
  *  HQ is free software; you can redistribute it and/or modify
@@ -21,23 +21,10 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  *  USA.
- *
  */
-package org.hyperic.hq.appdef.shared;
 
-import java.util.Collection;
-import java.util.Map;
+package org.hyperic.hq.product.shared;
 
-import org.hyperic.hq.product.Plugin;
-
-public interface AgentPluginUpdater {
-    
-    public void initialize();
-    
-    /**
-     * @param map {@link Map} of {@link Integer} = agentId to {@link Collection} of {@link Plugin}
-     */
-    public void queuePluginTransfer(final Map<Integer, Collection<Plugin>> map,
-                                    final Map<Integer, Collection<String>> removeMap);
+public class PluginDeployException extends Exception {
 
 }

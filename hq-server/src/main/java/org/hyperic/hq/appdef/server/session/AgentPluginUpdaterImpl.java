@@ -64,13 +64,14 @@ public class AgentPluginUpdaterImpl implements AgentPluginUpdater {
 //        Map<Agent, Collection<Plugin>> agents = agentPluginStatusDAO.getOutOfSyncPluginsByAgent();
 //        queuePluginTransfer(agents);
     }
-    
-    public void queuePluginTransfer(final Map<Integer, Collection<Plugin>> map) {
-        if (map == null || map.isEmpty()) {
+
+    public void queuePluginTransfer(final Map<Integer, Collection<Plugin>> updateMap,
+                                    final Map<Integer, Collection<String>> removeMap) {
+        if (updateMap == null || updateMap.isEmpty()) {
             return;
         }
         final AgentManager agentManager = Bootstrap.getBean(AgentManager.class);
-        for (final Entry<Integer, Collection<Plugin>> entry : map.entrySet()) {
+        for (final Entry<Integer, Collection<Plugin>> entry : updateMap.entrySet()) {
             final Integer agentId = entry.getKey();
             final Collection<Plugin> plugins = entry.getValue();
             final Collection<String> pluginNames = new HashSet<String>(plugins.size());
@@ -94,6 +95,10 @@ public class AgentPluginUpdaterImpl implements AgentPluginUpdater {
                         agentManager.transferAgentPlugins(overlord, agentId, pluginNames);
                         agentManager.updateAgentPluginSyncStatusInNewTran(
                             AgentPluginStatusEnum.SYNC_SUCCESS, agentId, plugins);
+                        final Collection<String> pluginJarNames = removeMap.get(agentId);
+                        if (pluginJarNames != null && !pluginJarNames.isEmpty()) {
+                            agentManager.agentRemovePlugins(overlord, agentId, pluginJarNames);
+                        }
 // XXX disabled for now
 //                        agentManager.restartAgent(overlord, agentId);
                     } catch (Exception e) {

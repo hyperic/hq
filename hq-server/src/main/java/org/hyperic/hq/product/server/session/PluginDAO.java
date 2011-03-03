@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  *  "derived work".
  *
- *  Copyright (C) [2004-2010], VMware, Inc.
+ *  Copyright (C) [2004-2011], VMware, Inc.
  *  This file is part of HQ.
  *
  *  HQ is free software; you can redistribute it and/or modify
@@ -34,8 +34,7 @@ import org.springframework.stereotype.Repository;
 
 
 @Repository
-public class PluginDAO
-    extends HibernateDAO<Plugin> {
+public class PluginDAO extends HibernateDAO<Plugin> {
     @Autowired
     public PluginDAO(SessionFactory f) {
         super(Plugin.class, f);

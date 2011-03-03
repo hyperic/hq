@@ -465,4 +465,14 @@ public interface AgentManager {
     public void updateAgentPluginSyncStatusInNewTran(AgentPluginStatusEnum s, Integer agentId,
                                                      Collection<Plugin> plugins);
 
+// XXX may want to change Boolean so that it is a status string "SUCCESS" or an error message
+    /**
+     * Removes plugin jars from the plugin directory on the remote Agent.
+     * @return {@link Map} of {@link String} = pluginJarName to
+     * {@link Boolean} = file delete was successful or failed.
+     */
+    public Map<String, Boolean> agentRemovePlugins(AuthzSubject subject, Integer agentId,
+                                                   Collection<String> pluginJarNames)
+    throws AgentConnectionException, AgentRemoteException;
+
 }

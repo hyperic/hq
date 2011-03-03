@@ -186,4 +186,14 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
         return rtn;
     }
 
+    @SuppressWarnings("unchecked")
+    public Collection<AgentPluginStatus> getErrorPluginStatusByJarName(String jarName) {
+        final String hql =
+            "from AgentPluginStatus where jarName = :jarName and lastSyncStatus = :error";
+        return getSession().createQuery(hql)
+                           .setParameter("jarName", jarName)
+                           .setParameter("error", AgentPluginStatusEnum.SYNC_FAILURE.toString())
+                           .list();
+    }
+
 }
