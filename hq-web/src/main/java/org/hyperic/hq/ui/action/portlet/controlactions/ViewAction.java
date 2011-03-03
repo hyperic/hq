@@ -37,6 +37,7 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
@@ -121,8 +122,7 @@ public class ViewAction
 
                 DashboardControlBean bean = new DashboardControlBean();
                 try {
-                    AppdefEntityID entity = new AppdefEntityID(control.getEntityType().intValue(), control
-                        .getEntityId());
+                    AppdefEntityID entity = AppdefUtil.newAppdefEntityId(control.getResource());
                     bean.setResource(appdefBoss.findById(sessionId, entity));
                     bean.setControl(control);
                     pendingList.add(bean);

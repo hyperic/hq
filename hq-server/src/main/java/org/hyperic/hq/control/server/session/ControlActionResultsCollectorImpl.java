@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.ResourceManager;
@@ -89,8 +90,7 @@ public class ControlActionResultsCollectorImpl implements ControlActionResultsCo
                 String status = history.getStatus();
                 if (status.equals(ControlConstants.STATUS_COMPLETED) ||
                     status.equals(ControlConstants.STATUS_FAILED)) {
-                    return new ControlActionResult(new AppdefEntityID(history.getEntityType()
-                        .intValue(), history.getEntityId()), status, history.getMessage());
+                    return new ControlActionResult(AppdefUtil.newAppdefEntityId(history.getResource()), status, history.getMessage());
                 }
             } catch (ApplicationException e) {
                 // This may happen if we start checking status before tx
@@ -125,8 +125,7 @@ public class ControlActionResultsCollectorImpl implements ControlActionResultsCo
                     if (status.equals(ControlConstants.STATUS_COMPLETED) ||
                         status.equals(ControlConstants.STATUS_FAILED)) {
                         iterator.remove();
-                        results.add(new ControlActionResult(new AppdefEntityID(history
-                            .getEntityType().intValue(), history.getEntityId()), status, history
+                        results.add(new ControlActionResult(AppdefUtil.newAppdefEntityId(history.getResource()), status, history
                             .getMessage()));
                     }
                     if (status.equals(ControlConstants.STATUS_FAILED)) {

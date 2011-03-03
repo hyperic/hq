@@ -166,8 +166,8 @@ public class GroupControlActionExecutorImpl implements GroupControlActionExecuto
                     ControlHistory cv = controlScheduleManager.getJobHistoryValue(groupJobId);
 
                     // Send a control event
-                    ControlEvent event = new ControlEvent(cv.getSubject(),cv.getEntityId(), cv.getAction(), cv.getScheduled()
-                        .booleanValue(), cv.getDateScheduled(), status);
+                    ControlEvent event = new ControlEvent(cv.getSubject(),cv.getResource().getId(), 
+                        cv.getAction(), cv.getScheduled().booleanValue(), cv.getDateScheduled(), status);
                     event.setMessage(errMsg);
 
                     sender.publishMessage(MessagePublisher.EVENTS_TOPIC, event);
