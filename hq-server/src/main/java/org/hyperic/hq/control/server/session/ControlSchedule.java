@@ -117,7 +117,6 @@ public class ControlSchedule implements Serializable {
         return this.action;
     }
 
-   
     public Integer getId() {
         return id;
     }
@@ -170,8 +169,6 @@ public class ControlSchedule implements Serializable {
         result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
     }
-    
-    
 
     public void setAction(String action) {
         this.action = action;

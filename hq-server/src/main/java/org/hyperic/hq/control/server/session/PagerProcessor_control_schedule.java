@@ -30,6 +30,7 @@ import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.control.data.ControlScheduleRepository;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.util.pager.PagerEventHandler;
 import org.hyperic.util.pager.PagerProcessorExt;
@@ -41,7 +42,7 @@ public class PagerProcessor_control_schedule implements PagerProcessorExt {
     protected static Log log =
         LogFactory.getLog( PagerProcessor_control_schedule.class.getName() );
 
-    private ControlScheduleDAO cdao = Bootstrap.getBean(ControlScheduleDAO.class);
+    private ControlScheduleRepository controlScheduleRepository = Bootstrap.getBean(ControlScheduleRepository.class);
 
     public PagerProcessor_control_schedule() {}
 
@@ -60,7 +61,7 @@ public class PagerProcessor_control_schedule implements PagerProcessorExt {
                     if (trigger == null) {
                         // Job no longer exists
                         try {
-                            cdao.remove(s);
+                            controlScheduleRepository.delete(s);
                             return null;
                         } catch (Exception e) {
                         // Ignore Exception
@@ -78,7 +79,7 @@ public class PagerProcessor_control_schedule implements PagerProcessorExt {
                     s.setNextFireTime(nextFire.getTime());
                 } else {
                     // Schedule will not fire again
-                    cdao.remove(s);
+                    controlScheduleRepository.delete(s);
                     return null;
                 }
 

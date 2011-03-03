@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.control.server.session;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Collections;
@@ -45,8 +46,8 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.control.data.ControlScheduleRepository;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlFrequencyValue;
 import org.hyperic.hq.control.shared.ControlScheduleManager;
@@ -74,6 +75,8 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleTrigger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -98,18 +101,18 @@ public class ControlScheduleManagerImpl
     private static final String SCHEDULE_PAGER = PAGER_BASE + "PagerProcessor_control_schedule";
 
     private ControlHistoryDAO controlHistoryDAO;
-    private ControlScheduleDAO controlScheduleDAO; 
+    private ControlScheduleRepository controlScheduleRepository; 
     private PermissionManager permissionManager;
     private ResourceManager resourceManager;
   
 
     @Autowired
     public ControlScheduleManagerImpl(Scheduler scheduler, DBUtil dbUtil, ControlHistoryDAO controlHistoryDAO,
-                                      ControlScheduleDAO controlScheduleDAO, 
+                                      ControlScheduleRepository controlScheduleRepository, 
                                       PermissionManager permissionManager, ResourceManager resourceManager) {
         super(scheduler, dbUtil);
         this.controlHistoryDAO = controlHistoryDAO;
-        this.controlScheduleDAO = controlScheduleDAO;
+        this.controlScheduleRepository = controlScheduleRepository;
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
     }
@@ -214,7 +217,8 @@ public class ControlScheduleManagerImpl
         // this routine ignores sort attribute!
 
         try {
-            Collection<ControlSchedule> pending = controlScheduleDAO.findByFireTime(false);
+            Collection<ControlSchedule> pending = controlScheduleRepository.findAll(new Sort(Direction.DESC,
+                "nextFireTime"));
             // Run through the list only returning entities the user
             // has the ability to see
             int count = 0;
@@ -289,25 +293,25 @@ public class ControlScheduleManagerImpl
         throws ScheduledJobNotFoundException {
 
         Collection<ControlSchedule> schedule;
-        try {
+        // default the sorting to the next fire time
+        pc = PageControl.initDefaults(pc, SortAttribute.CONTROL_NEXTFIRE);
 
-            // default the sorting to the next fire time
-            pc = PageControl.initDefaults(pc, SortAttribute.CONTROL_NEXTFIRE);
-
-            int sortAttr = pc.getSortattribute();
-            switch (sortAttr) {
+        int sortAttr = pc.getSortattribute();
+        Direction direction = pc.isAscending() ? Direction.ASC: Direction.DESC;
+        switch (sortAttr) {
                 case SortAttribute.CONTROL_NEXTFIRE:
-                    schedule = controlScheduleDAO.findByEntityFireTime(id.getType(), id.getID(), pc.isAscending());
+                    schedule = controlScheduleRepository.findByResource(id.getID(), new Sort(direction,"nextFireTime"));
                     break;
 
                 case SortAttribute.CONTROL_ACTION:
-                    schedule = controlScheduleDAO.findByEntityAction(id.getType(), id.getID(), pc.isAscending());
+                    schedule = controlScheduleRepository.findByResource(id.getID(), new Sort(direction,"action"));
                     break;
                 default:
-                    throw new NotFoundException("Unknown sort attribute: " + sortAttr);
-            }
-        } catch (NotFoundException e) {
-            throw new ScheduledJobNotFoundException(e);
+                    throw new ScheduledJobNotFoundException("Unknown sort attribute: " + sortAttr);
+        }
+        
+        if(schedule == null) {
+            throw new ScheduledJobNotFoundException();
         }
 
         // This will remove stale data and update fire times which
@@ -531,8 +535,11 @@ public class ControlScheduleManagerImpl
     public ControlSchedule getControlJob(AuthzSubject subject, Integer id) throws PluginException {
 
         try {
-            return controlScheduleDAO.findById(id);
-
+            ControlSchedule controlSchedule = controlScheduleRepository.findById(id);
+            if(controlSchedule == null) {
+                throw new PluginException("Control Schedule with id: " + id + " not found");
+            }
+            return controlSchedule;
             // TODO: validate the job in the scheduler?
         } catch (Exception e) {
             log.error("Unable to get control job info: " + e.getMessage());
@@ -552,9 +559,13 @@ public class ControlScheduleManagerImpl
 
         for (int i = 0; i < ids.length; i++) {
             try {
-                ControlSchedule cScheduleLocal = controlScheduleDAO.findById(ids[i]);
+                ControlSchedule cScheduleLocal = controlScheduleRepository.findById(ids[i]);
+                if(cScheduleLocal == null) {
+                    throw new PluginException("Unable to remove job.  Control Schedule with id:  " + ids[i] + 
+                        " not found");
+                }
                 scheduler.deleteJob(cScheduleLocal.getJobName(), GROUP);
-                controlScheduleDAO.remove(cScheduleLocal);
+                controlScheduleRepository.delete(cScheduleLocal);
             } catch (Exception e) {
                 log.error("Unable to remove job: " + e.getMessage());
                 throw new PluginException(e);
@@ -571,14 +582,14 @@ public class ControlScheduleManagerImpl
     public void removeScheduledJobs(AuthzSubject subject, AppdefEntityID id) throws ScheduledJobRemoveException {
 
         // Any associated triggers will be automatically removed by Quartz.
-        Collection<ControlSchedule> jobs = controlScheduleDAO.findByEntity(id.getType(), id.getID());
+        Collection<ControlSchedule> jobs = controlScheduleRepository.findByResource(id.getID());
         for (ControlSchedule cSched : jobs) {
             try {
                 scheduler.deleteJob(cSched.getJobName(), GROUP);
             } catch (SchedulerException e) {
                 log.error("Unable to remove job " + cSched.getJobName() + ": " + e.getMessage());
             }
-            controlScheduleDAO.remove(cSched);
+            controlScheduleRepository.delete(cSched);
         }
     }
     
@@ -623,8 +634,7 @@ public class ControlScheduleManagerImpl
             }
            
             try {
-               
-                controlScheduleDAO.create(resource, subject.getName(), action, schedule, nextFire.getTime(), triggerName,
+                create(resource, subject.getName(), action, schedule, nextFire.getTime(), triggerName,
                     jobName, null);
             } catch (Exception e) {
                 log.error("Unable to schedule job: " + e.getMessage());
@@ -649,7 +659,7 @@ public class ControlScheduleManagerImpl
                 if (order != null)
                     stringOrder = StringUtil.arrayToString(order);
 
-                controlScheduleDAO.create(resource, subject.getName(), action, schedule, nextFire.getTime(), triggerName,
+                create(resource, subject.getName(), action, schedule, nextFire.getTime(), triggerName,
                     jobName, stringOrder);
             } catch (ParseException e) {
                 log.error("Unable to setup cron trigger: " + e.getMessage());
@@ -660,6 +670,26 @@ public class ControlScheduleManagerImpl
                 log.error("Unable to schedule job: " + e.getMessage());
                 throw new PluginException(e);
             }
+        }
+    }
+    
+    ControlSchedule create(Resource resource, String subject, String action,
+                                              ScheduleValue schedule, long nextFire, String triggerName,
+                                              String jobName, String jobOrderData) {
+        ControlSchedule s = new ControlSchedule();
+        try {
+            s.setResource(resource);
+            s.setSubject(subject);
+            s.setScheduleValue(schedule);
+            s.setNextFireTime(nextFire);
+            s.setTriggerName(triggerName);
+            s.setJobName(jobName);
+            s.setJobOrderData(jobOrderData);
+            s.setAction(action);
+            controlScheduleRepository.save(s);
+            return s;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

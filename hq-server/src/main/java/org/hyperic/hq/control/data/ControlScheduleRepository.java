@@ -9,6 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ControlScheduleRepository extends JpaRepository<ControlSchedule, Integer> {
 
     List<ControlSchedule> findByResource(int resourceId);
-    
+
     List<ControlSchedule> findByResource(int resourceId, Sort sort);
 }
