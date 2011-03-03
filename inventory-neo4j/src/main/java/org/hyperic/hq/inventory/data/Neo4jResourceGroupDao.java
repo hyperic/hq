@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.hyperic.hq.inventory.NotUniqueException;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.graph.neo4j.finder.FinderFactory;
@@ -36,7 +37,7 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
             .createQuery("select o from ResourceGroup o", ResourceGroup.class)
             .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
         for (ResourceGroup resourceGroup : result) {
-            resourceGroup.getId();
+            resourceGroup.attach();
         }
         return result;
     }
@@ -46,7 +47,7 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
         List<ResourceGroup> result = entityManager.createQuery("select o from ResourceGroup o",
             ResourceGroup.class).getResultList();
         for (ResourceGroup resourceGroup : result) {
-            resourceGroup.getId();
+            resourceGroup.attach();
         }
         return result;
     }
@@ -58,7 +59,7 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
         }
         ResourceGroup result = entityManager.find(ResourceGroup.class, id);
         if (result != null) {
-            result.getId();
+            result.attach();
         }
         return result;
     }
@@ -69,7 +70,7 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
             .findByPropertyValue(null, "name", name);
 
         if (group != null) {
-            group.getId();
+            group.attach();
         }
 
         return group;
@@ -77,23 +78,24 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
 
     @Transactional
     public ResourceGroup merge(ResourceGroup resourceGroup) {
-        resourceGroup.getId();
         ResourceGroup merged = entityManager.merge(resourceGroup);
         entityManager.flush();
+        merged.attach();
         return merged;
     }
 
     @Transactional
     public void persist(ResourceGroup resourceGroup) {
-        // TODO need a way to keep ResourceGroup unique by name. Can't do
-        // getName() before persist() or we get NPE on flushDirty
+        if(findByName(resourceGroup.getName()) != null) {
+            throw new NotUniqueException("Group with name " + resourceGroup.getName() + " already exists");
+        }
         entityManager.persist(resourceGroup);
-        resourceGroup.getId();
-        // Set the type index here b/c ResourceGroup needs an ID before we can
-        // access the underlying node
-        graphDatabaseContext.getNodeIndex(null).add(resourceGroup.getUnderlyingState(), "type",
-            resourceGroup.getType().getId());
         //flush to get the JSR-303 validation done sooner
         entityManager.flush();
+        resourceGroup.attach();
+        // Set the type index here b/c ResourceGroup needs an ID before we can
+        // access the underlying node
+        graphDatabaseContext.getNodeIndex(GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME).add(resourceGroup.getUnderlyingState(), "type",
+            resourceGroup.getType().getId());
     }
 }

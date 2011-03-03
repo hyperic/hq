@@ -8,7 +8,6 @@ import javax.persistence.Transient;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hyperic.hq.auth.domain.Role;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.springframework.data.graph.annotation.GraphProperty;
 import org.springframework.data.graph.annotation.NodeEntity;
 import org.springframework.data.graph.annotation.RelatedTo;
@@ -69,7 +68,7 @@ public class ResourceGroup
      */
     @Transactional
     public void addMember(Resource member) {
-        relateTo(member, DynamicRelationshipType.withName(RelationshipTypes.HAS_MEMBER));
+       members.add(member);
     }
 
     /**
@@ -78,7 +77,7 @@ public class ResourceGroup
      */
     @Transactional
     public void addRole(Role role) {
-        relateTo(role, DynamicRelationshipType.withName(RelationshipTypes.HAS_ROLE));
+       roles.add(role);
     }
 
     /**
@@ -120,7 +119,7 @@ public class ResourceGroup
      */
     @Transactional
     public void removeMember(Resource member) {
-        removeRelationshipTo(member, RelationshipTypes.HAS_MEMBER);
+        members.remove(member);
     }
 
     /**
@@ -129,7 +128,7 @@ public class ResourceGroup
      */
     @Transactional
     public void removeRole(Role role) {
-        removeRelationshipTo(role, RelationshipTypes.HAS_ROLE);
+       roles.remove(role);
     }
 
     /**

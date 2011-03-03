@@ -14,10 +14,8 @@ import javax.persistence.Transient;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.graph.annotation.NodeEntity;
 import org.springframework.data.graph.annotation.RelatedTo;
 import org.springframework.data.graph.core.Direction;
@@ -30,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @author jhickey
  * @author dcrutchfield
  */
-@Configurable
 @NodeEntity(partial = true)
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
@@ -130,13 +127,12 @@ public class Config {
     }
 
     public void setType(ConfigType configType) {
-        //TODO can't set type on constructor b/c failure to flush dirty on persist of Config later. Here is where we persist Config
+        //TODO can't do this in a detached env b/c relationship doesn't take unless both items are node-backed
         if(getUnderlyingState() == null) {
             entityManager.persist(this);
-            getId();
+            attach();
         }
-        relateTo(configType,
-            DynamicRelationshipType.withName(RelationshipTypes.IS_A));
+       this.type = configType;
     }
 
     /**
