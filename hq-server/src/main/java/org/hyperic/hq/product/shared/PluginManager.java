@@ -53,4 +53,6 @@ public interface PluginManager {
 
 // XXX javadoc!
     boolean isPluginDeploymentOff();
+
+    Plugin getPluginById(Integer id);
 }

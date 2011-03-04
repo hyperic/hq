@@ -902,6 +902,20 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
 
+  <!-- Plugin caches -->
+  <cache name="org.hyperic.hq.appdef.server.session.AgentPluginStatus"
+         maxElementsInMemory="10000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.product.Plugin"
+         maxElementsInMemory="100"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+
   <!-- UI Plugin caches -->
   <cache name="org.hyperic.hq.hqu.server.session.Attachment"
          maxElementsInMemory="100"

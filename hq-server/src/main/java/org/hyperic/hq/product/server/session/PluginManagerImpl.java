@@ -99,6 +99,10 @@ public class PluginManagerImpl implements PluginManager {
         final AgentPluginStatusEnum e = AgentPluginStatusEnum.valueOf(lastSyncStatus);
         tmp.put(e, tmp.get(e)+1);
     }
+    
+    public Plugin getPluginById(Integer id) {
+        return pluginDAO.get(id);
+    }
 
     private Map<String, Plugin> getAllPluginsByName() {
         final List<Plugin> plugins = pluginDAO.findAll();
