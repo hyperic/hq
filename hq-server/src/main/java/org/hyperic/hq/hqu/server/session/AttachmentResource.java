@@ -37,75 +37,71 @@ import org.hibernate.annotations.Index;
 import org.hyperic.hq.inventory.domain.Resource;
 
 @Entity
-@Table(name="EAM_UI_ATTACH_RSRC")
-@PrimaryKeyJoinColumn(name="ATTACH_ID", referencedColumnName = "ID")
+@Table(name = "EAM_UI_ATTACH_RSRC")
+@PrimaryKeyJoinColumn(name = "ATTACH_ID", referencedColumnName = "ID")
 public class AttachmentResource
-    extends Attachment
-{ 
-    
-    @Column(name="CATEGORY",nullable=false,length=255)
-    private String   category;
-    
-    @ManyToOne(cascade={CascadeType.MERGE,CascadeType.PERSIST})
-    @JoinColumn(name="RESOURCE_ID",nullable=false)
-    @Index(name="UI_ATTACHMENT_RES_ID_IDX")
+    extends Attachment {
+
+    @Column(name = "CATEGORY", nullable = false, length = 255)
+    private String category;
+
+    @ManyToOne(cascade = { CascadeType.MERGE, CascadeType.PERSIST })
+    @JoinColumn(name = "RESOURCE_ID", nullable = false)
+    @Index(name = "UI_ATTACHMENT_RES_ID_IDX")
     private Resource resource;
-    
-    
-    
-    protected AttachmentResource() {}
-    
-    AttachmentResource(ViewResource view, ViewResourceCategory cat,
-                       Resource r) 
-    {
+
+    protected AttachmentResource() {
+    }
+
+    public AttachmentResource(ViewResource view, ViewResourceCategory cat, Resource r) {
         super(view);
         category = cat.getDescription();
         resource = r;
-    }
-    
-    protected String getCategoryEnum() {
-        return category;
-    }
-    
-    protected void setCategoryEnum(String cat) {
-        category = cat;
-    }
-    
-    public ViewResourceCategory getCategory() {
-        return ViewResourceCategory.findByDescription(category);
-    }
-    
-    public Resource getResource() {
-        return resource;
-    }
-    
-    protected void setResource(Resource r) {
-        resource = r;
-    }
-    
-    public String toString() {
-        return super.toString() + " (to " + resource.getName() + " under " +
-            getCategory().getValue() + ")";
     }
 
     public boolean equals(Object obj) {
         if (!super.equals(obj))
             return false;
-        
+
         if (obj instanceof AttachmentResource == false)
             return false;
-        
-        AttachmentResource o = (AttachmentResource)obj;
-        
+
+        AttachmentResource o = (AttachmentResource) obj;
+
         return o.getResource().equals(getResource()) &&
-            o.getCategoryEnum().equals(getCategoryEnum());
+               o.getCategoryEnum().equals(getCategoryEnum());
+    }
+
+    public ViewResourceCategory getCategory() {
+        return ViewResourceCategory.findByDescription(category);
+    }
+
+    protected String getCategoryEnum() {
+        return category;
+    }
+
+    public Resource getResource() {
+        return resource;
     }
 
     public int hashCode() {
         int result = super.hashCode();
-        
+
         result = 37 * result + getResource().hashCode();
         result = 37 * result + getCategoryEnum().hashCode();
         return result;
+    }
+
+    protected void setCategoryEnum(String cat) {
+        category = cat;
+    }
+
+    protected void setResource(Resource r) {
+        resource = r;
+    }
+
+    public String toString() {
+        return super.toString() + " (to " + resource.getName() + " under " +
+               getCategory().getValue() + ")";
     }
 }

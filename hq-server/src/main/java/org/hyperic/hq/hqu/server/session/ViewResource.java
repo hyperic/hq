@@ -32,14 +32,14 @@ import javax.persistence.Table;
 import org.hyperic.hq.hqu.ViewDescriptor;
 
 @Entity
-@Table(name="EAM_UI_VIEW_RESOURCE")
-@PrimaryKeyJoinColumn(name="VIEW_ID", referencedColumnName = "ID")
+@Table(name = "EAM_UI_VIEW_RESOURCE")
+@PrimaryKeyJoinColumn(name = "VIEW_ID", referencedColumnName = "ID")
 public class ViewResource
-    extends View<AttachmentResource>
-{ 
-    protected ViewResource() {}
-    
-    ViewResource(UIPlugin plugin, ViewDescriptor view) {
+    extends View<AttachmentResource> {
+    protected ViewResource() {
+    }
+
+    public ViewResource(UIPlugin plugin, ViewDescriptor view) {
         super(plugin, view, AttachType.RESOURCE);
     }
 }

@@ -45,97 +45,92 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
 
 @Entity
-@Table(name="EAM_UI_ATTACHMENT")
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-@Inheritance(strategy=InheritanceType.JOINED)
-public class Attachment implements Serializable
-{ 
+@Table(name = "EAM_UI_ATTACHMENT")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@Inheritance(strategy = InheritanceType.JOINED)
+public class Attachment implements Serializable {
+    @Column(name = "ATTACH_TIME", nullable = false)
+    private long attachTime;
+
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "ID")
     private Integer id;
 
-    @Column(name="VERSION_COL",nullable=false)
+    @Column(name = "VERSION_COL", nullable = false)
     @Version
     private Long version;
-    
-    @ManyToOne(cascade={CascadeType.MERGE,CascadeType.PERSIST})
-    @JoinColumn(name="VIEW_ID",nullable=false)
-    @Index(name="UI_ATTACHMENT_VIEW_ID_IDX")
-    private View view;
-    
-    @Column(name="ATTACH_TIME",nullable=false)
-    private long         attachTime;
-    
-    
-    
-    protected Attachment() {}
-    
-    Attachment(View view) {
-        this.view       = view;
-        attachTime = System.currentTimeMillis();
-    }
-    
-    
-    
-    public Integer getId() {
-        return id;
+
+    @ManyToOne(cascade = { CascadeType.MERGE, CascadeType.PERSIST })
+    @JoinColumn(name = "VIEW_ID", nullable = false)
+    @Index(name = "UI_ATTACHMENT_VIEW_ID_IDX")
+    private View<?> view;
+
+    protected Attachment() {
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public Attachment(View<?> view) {
+        this.view = view;
+        attachTime = System.currentTimeMillis();
+    }
+
+    /**
+     * TODO: We probably need to subclass the attachments into their specific
+     * types (such as admin, etc.), via a Hibernate subclass. This way each
+     * object can do a proper .equals()
+     */
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Attachment)) {
+            return false;
+        }
+
+        Attachment o = (Attachment) obj;
+        return o.getView().equals(getView()) && o.getAttachTime() == getAttachTime();
+    }
+
+    public long getAttachTime() {
+        return attachTime;
+    }
+
+    public Integer getId() {
+        return id;
     }
 
     public Long getVersion() {
         return version;
     }
 
-    public void setVersion(Long version) {
-        this.version = version;
-    }
-
     public View getView() {
         return view;
-    }
-    
-    protected void setView(View view) {
-        this.view = view;
-    }
-    
-    public long getAttachTime() {
-        return attachTime;
-    }
-    
-    protected void setAttachTime(long attachTime) {
-        this.attachTime = attachTime;
-    }
-
-    public String toString() {
-        return view.getPath() + " [" + view.getDescription() + "] attached";
-    }
-    
-    /**
-     * TODO:  We probably need to subclass the attachments into their specific
-     *        types (such as admin, etc.), via a Hibernate subclass.  This way
-     *        each object can do a proper .equals()
-     */
-    public boolean equals(Object obj) {
-        if (!(obj instanceof Attachment)) {
-            return false;
-        }
-        
-        Attachment o = (Attachment)obj;
-        return o.getView().equals(getView()) &&
-            o.getAttachTime() == getAttachTime();
     }
 
     public int hashCode() {
         int result = 17;
 
         result = 37 * result + getView().hashCode();
-        result = 37 * result + (int)getAttachTime();
+        result = 37 * result + (int) getAttachTime();
 
         return result;
+    }
+
+    protected void setAttachTime(long attachTime) {
+        this.attachTime = attachTime;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    protected void setView(View<?> view) {
+        this.view = view;
+    }
+
+    public String toString() {
+        return view.getPath() + " [" + view.getDescription() + "] attached";
     }
 }

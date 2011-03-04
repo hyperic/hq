@@ -88,13 +88,6 @@ public interface UIPluginManager {
 	public Collection<UIPlugin> findAll();
 
 	/**
-	 * Find all the views attached via a specific attach type
-	 * 
-	 * @return a collection of {@link AttachType}s
-	 */
-	public Collection<AttachType> findViews(AttachType type);
-
-	/**
 	 * Find all attachments for a specific type
 	 * 
 	 * @return a collection of {@link AttachmentDescriptor}s

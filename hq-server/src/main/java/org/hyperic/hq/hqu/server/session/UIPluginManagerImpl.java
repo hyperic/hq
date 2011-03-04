@@ -36,9 +36,13 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.RenditServer;
 import org.hyperic.hq.hqu.ViewDescriptor;
+import org.hyperic.hq.hqu.data.AttachmentRepository;
+import org.hyperic.hq.hqu.data.AttachmentResourceRepository;
+import org.hyperic.hq.hqu.data.ViewRepository;
 import org.hyperic.hq.hqu.shared.UIPluginManager;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
@@ -52,20 +56,22 @@ public class UIPluginManagerImpl implements UIPluginManager {
     private final static Log log = LogFactory.getLog(UIPluginManagerImpl.class.getName());
 
     private UIPluginDAO uiPluginDAO;
-    private ViewDAO viewDAO;
-    private AttachmentDAO attachmentDAO;
-    private AttachmentResourceDAO attachmentResourceDAO;
+    private ViewRepository viewRepository;
+    private AttachmentRepository attachmentRepository;
+    private AttachmentResourceRepository attachmentResourceRepository;
     private RenditServer renditServer;
     private ResourceManager resourceManager;
     private ResourceGroupManager resourceGroupManager;
 
     @Autowired
-    public UIPluginManagerImpl(AttachmentDAO attachmentDAO, AttachmentResourceDAO attachmentResourceDAO,
-                               ViewDAO viewDAO, UIPluginDAO uiPluginDAO, RenditServer renditServer,
-                               ResourceManager resourceManager, ResourceGroupManager resourceGroupManager) {
-        this.attachmentDAO = attachmentDAO;
-        this.attachmentResourceDAO = attachmentResourceDAO;
-        this.viewDAO = viewDAO;
+    public UIPluginManagerImpl(AttachmentRepository attachmentRepository,
+                               AttachmentResourceRepository attachmentResourceRepository, ViewRepository viewRepository,
+                               UIPluginDAO uiPluginDAO, RenditServer renditServer,
+                               ResourceManager resourceManager,
+                               ResourceGroupManager resourceGroupManager) {
+        this.attachmentRepository = attachmentRepository;
+        this.attachmentResourceRepository = attachmentResourceRepository;
+        this.viewRepository = viewRepository;
         this.uiPluginDAO = uiPluginDAO;
         this.renditServer = renditServer;
         this.resourceManager = resourceManager;
@@ -90,48 +96,56 @@ public class UIPluginManagerImpl implements UIPluginManager {
         return p;
     }
 
-    public View createAdminView(UIPlugin p, ViewDescriptor d) {
-        View res = new ViewAdmin(p, d);
+    public View<AttachmentAdmin> createAdminView(UIPlugin p, ViewDescriptor d) {
+        View<AttachmentAdmin> res = new ViewAdmin(p, d);
 
         p.addView(res);
 
         return res;
     }
 
-    public View createMastheadView(UIPlugin p, ViewDescriptor d) {
-        View res = new ViewMasthead(p, d);
+    public View<AttachmentMasthead> createMastheadView(UIPlugin p, ViewDescriptor d) {
+        View<AttachmentMasthead> res = new ViewMasthead(p, d);
 
         p.addView(res);
 
         return res;
     }
 
-    public View createResourceView(UIPlugin p, ViewDescriptor d) {
-        View res = new ViewResource(p, d);
+    public View<AttachmentResource> createResourceView(UIPlugin p, ViewDescriptor d) {
+        View<AttachmentResource> res = new ViewResource(p, d);
 
         p.addView(res);
 
         return res;
     }
 
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public UIPlugin findPluginByName(String name) {
         return uiPluginDAO.findByName(name);
     }
 
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public UIPlugin findPluginById(Integer id) {
         return uiPluginDAO.findById(id);
     }
 
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public View findViewById(Integer id) {
-        return viewDAO.findById(id);
+        View view = viewRepository.findById(id);
+        if(view == null) {
+            throw new EntityNotFoundException("View with ID: " + id + " was not found");
+        }
+        return view;
     }
 
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Attachment findAttachmentById(Integer id) {
-        return attachmentDAO.findById(id);
+        Attachment attachment = attachmentRepository.findById(id);
+        if (attachment == null) {
+            throw new EntityNotFoundException("Attachment with ID: " + id + " was not found");
+        }
+        return attachment;
     }
 
     /**
@@ -174,8 +188,9 @@ public class UIPluginManagerImpl implements UIPluginManager {
             AttachmentResource a = i.next();
 
             if (a.getCategory().equals(cat) && a.getResource().equals(r)) {
-                throw new IllegalArgumentException("View [" + view + "] is " + "already attached to [" + r + "] in [" +
-                                                   cat + "]");
+                throw new IllegalArgumentException("View [" + view + "] is " +
+                                                   "already attached to [" + r + "] in [" + cat +
+                                                   "]");
             }
         }
 
@@ -196,19 +211,9 @@ public class UIPluginManagerImpl implements UIPluginManager {
     /**
      * Finds all {@link UIPlugin}s
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Collection<UIPlugin> findAll() {
         return uiPluginDAO.findAll();
-    }
-
-    /**
-     * Find all the views attached via a specific attach type
-     * 
-     * @return a collection of {@link AttachType}s
-     */
-    @Transactional(readOnly=true)
-    public Collection<AttachType> findViews(AttachType type) {
-        return viewDAO.findFor(type);
     }
 
     /**
@@ -216,14 +221,14 @@ public class UIPluginManagerImpl implements UIPluginManager {
      * 
      * @return a collection of {@link AttachmentDescriptor}s
      */
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Collection<AttachmentDescriptor> findAttachments(AttachType type, AuthzSubject user) {
         Resource root = resourceManager.findRootResource();
 
-        return convertAttachmentsToDescriptors(attachmentDAO.findFor(type), root, user);
+        return convertAttachmentsToDescriptors(attachmentRepository.findFor(type.getCode()), root, user);
     }
 
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public AttachmentDescriptor findAttachmentDescriptorById(Integer id, AuthzSubject user) {
         Attachment attachment = findAttachmentById(id);
         List<Attachment> attachments = new ArrayList<Attachment>(1);
@@ -231,8 +236,8 @@ public class UIPluginManagerImpl implements UIPluginManager {
         attachments.add(attachment);
 
         Resource root = resourceManager.findRootResource();
-        Collection<AttachmentDescriptor> attachmentDescriptors = convertAttachmentsToDescriptors(attachments, root,
-            user);
+        Collection<AttachmentDescriptor> attachmentDescriptors = convertAttachmentsToDescriptors(
+            attachments, root, user);
 
         if (attachmentDescriptors.isEmpty()) {
             return null;
@@ -246,26 +251,27 @@ public class UIPluginManagerImpl implements UIPluginManager {
      * 
      * @return a collection of {@link AttachmentDescriptor}s
      */
-    @Transactional(readOnly=true)
-    public Collection<AttachmentDescriptor> findAttachments(AppdefEntityID ent, ViewResourceCategory cat,
+    @Transactional(readOnly = true)
+    public Collection<AttachmentDescriptor> findAttachments(AppdefEntityID ent,
+                                                            ViewResourceCategory cat,
                                                             AuthzSubject user) {
         Collection<Attachment> attachments;
 
         if (ent.isGroup()) {
             ResourceGroup group = resourceGroupManager.findResourceGroupById(ent.getId());
 
-            attachments = attachmentResourceDAO.findFor(resourceManager.findRootResource(), cat);
+            attachments = attachmentResourceRepository.findFor(resourceManager.findRootResource(), cat.getDescription());
 
             if (!resourceGroupManager.getGroupConvert(user, group).isMixed()) {
                 // For compatible groups add in attachments specific to that
                 // resource type.
-                Collection<Attachment> compatAttachments = attachmentResourceDAO.findFor(group,
-                    cat);
+                Collection<Attachment> compatAttachments = attachmentResourceRepository
+                    .findFor(group, cat.getDescription());
 
                 attachments.addAll(compatAttachments);
             }
         } else {
-            attachments = attachmentResourceDAO.findFor(resourceManager.findResource(ent), cat);
+            attachments = attachmentResourceRepository.findFor(resourceManager.findResource(ent), cat.getDescription());
         }
 
         Resource viewedResource = resourceManager.findResource(ent);
@@ -274,7 +280,8 @@ public class UIPluginManagerImpl implements UIPluginManager {
     }
 
     private Collection<AttachmentDescriptor> convertAttachmentsToDescriptors(Collection<Attachment> attachments,
-                                                                             Resource viewedRsrc, AuthzSubject user) {
+                                                                             Resource viewedRsrc,
+                                                                             AuthzSubject user) {
         Collection<AttachmentDescriptor> attachmentDescriptors = new ArrayList<AttachmentDescriptor>();
 
         for (Iterator<Attachment> i = attachments.iterator(); i.hasNext();) {
@@ -283,17 +290,19 @@ public class UIPluginManagerImpl implements UIPluginManager {
             AttachmentDescriptor attachmentDescriptor;
 
             try {
-                attachmentDescriptor = (AttachmentDescriptor) renditServer.getAttachmentDescriptor(pluginName,
-                    attachment, viewedRsrc, user);
+                attachmentDescriptor = (AttachmentDescriptor) renditServer.getAttachmentDescriptor(
+                    pluginName, attachment, viewedRsrc, user);
             } catch (Exception e) {
-                log.warn("Not returning attachment for [" + attachment + "], it " + "threw an exception", e);
+                log.warn("Not returning attachment for [" + attachment + "], it " +
+                         "threw an exception", e);
                 continue;
             }
 
             if (attachmentDescriptor != null) {
                 attachmentDescriptors.add(attachmentDescriptor);
             } else {
-                log.debug("Not returning attachment for [" + attachment + "], the " + "plugin says not to render it");
+                log.debug("Not returning attachment for [" + attachment + "], the " +
+                          "plugin says not to render it");
             }
         }
 
