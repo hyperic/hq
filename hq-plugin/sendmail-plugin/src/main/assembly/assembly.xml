@@ -28,7 +28,6 @@
 -->
 
 <assembly>
-	<id>agent</id>
 	<formats>
 		<format>zip</format>
 	</formats>
