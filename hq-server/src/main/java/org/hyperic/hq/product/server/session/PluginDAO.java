@@ -45,6 +45,7 @@ public class PluginDAO extends HibernateDAO<Plugin> {
         p.setName(name);
         p.setPath(path);
         p.setMD5(md5);
+        p.setModifiedTime(System.currentTimeMillis());
         save(p);
         return p;
     }
