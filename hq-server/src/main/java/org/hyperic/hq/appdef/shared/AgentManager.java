@@ -473,6 +473,6 @@ public interface AgentManager {
      */
     public Map<String, Boolean> agentRemovePlugins(AuthzSubject subject, Integer agentId,
                                                    Collection<String> pluginJarNames)
-    throws AgentConnectionException, AgentRemoteException;
+    throws AgentConnectionException, AgentRemoteException, PermissionException;
 
 }

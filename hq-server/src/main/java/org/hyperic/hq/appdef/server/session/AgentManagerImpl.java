@@ -1120,7 +1120,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     @Transactional(readOnly=true)
     public Map<String, Boolean> agentRemovePlugins(AuthzSubject subject, Integer agentId,
                                                    Collection<String> pluginJarNames)
-    throws AgentConnectionException, AgentRemoteException {
+    throws AgentConnectionException, AgentRemoteException, PermissionException {
         if (pluginJarNames == null || pluginJarNames.size() <= 0 || agentId == null ||
                 subject == null) {
             return Collections.emptyMap();
@@ -1156,9 +1156,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     
     private Map<String, Boolean> agentRemoveFiles(AuthzSubject subject, Agent agent,
                                                   Collection<String> filenames)
-    throws AgentConnectionException, AgentRemoteException {
-        // XXX what permission should be used here?
-//        permissionManager.checkCreatePlatformPermission(subject);
+    throws AgentConnectionException, AgentRemoteException, PermissionException {
+        permissionManager.checkIsSuperUser(subject);
         AgentCommandsClient client = agentCommandsClientFactory.getClient(agent);
         return client.agentRemoveFile(filenames);
     }
