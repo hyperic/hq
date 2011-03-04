@@ -64,6 +64,7 @@ import org.hyperic.hq.autoinventory.AIServer;
 import org.hyperic.hq.autoinventory.data.AIIpRepository;
 import org.hyperic.hq.autoinventory.data.AIPlatformRepository;
 import org.hyperic.hq.autoinventory.data.AIServerRepository;
+import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.shared.AuditManager;
@@ -158,7 +159,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
             AIPlatform aiplatformLocal;
             aiplatformLocal = aiPlatformRepository.findById(aiplatform.getId());
             if(aiplatformLocal == null) {
-                throw new SystemException("AIPlatform with ID: " + aiplatform.getId() + " not found");
+                throw new EntityNotFoundException("AIPlatform with ID: " + aiplatform.getId() + " not found");
             }
             removeFromQueue(aiplatformLocal);
             return null;
@@ -505,7 +506,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
                     if (isPurgeAction) {
                         continue;
                     } else {
-                        throw new SystemException("AIPlatform with ID: " + id + " not found");
+                        throw new EntityNotFoundException("AIPlatform with ID: " + id + " not found");
                     }
                 }
 
@@ -641,7 +642,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
         for (Integer id : ipList) {
             final AIIp aiip = aiIpRepository.findById(id);
             if(aiip == null) {
-                throw new SystemException("AIIp with ID: " + id + " not found");
+                throw new EntityNotFoundException("AIIp with ID: " + id + " not found");
             }
             if (AIQueueConstants.Q_STATUS_REMOVED == aiip.getQueueStatus() &&
                 aiip.getAddress().equals(agent.getAddress())) {
@@ -675,7 +676,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
         // XXX Do authz check
         aiplatform = aiPlatformRepository.findById(new Integer(aiPlatformID));
         if(aiplatform == null) {
-            throw new SystemException("AIPlatform with ID: " + aiPlatformID + " not found");
+            throw new EntityNotFoundException("AIPlatform with ID: " + aiPlatformID + " not found");
         }
         return getPlatformByAI(subject, aiplatform).getPlatformValue();
     }

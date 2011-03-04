@@ -47,6 +47,7 @@ import org.hyperic.hq.autoinventory.data.AIScheduleRepository;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManager;
 import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.scheduler.ScheduleParseException;
@@ -321,7 +322,7 @@ public class AIScheduleManagerImpl
     public AISchedule findScheduleByID(AuthzSubject subject, Integer id) {
         AISchedule aiSchedule = aiScheduleRepository.findById(id);
         if(aiSchedule == null) {
-            throw new SystemException("AISchedule with id: " + id + " was not found");
+            throw new EntityNotFoundException("AISchedule with id: " + id + " was not found");
         }
         return aiSchedule;
     }
