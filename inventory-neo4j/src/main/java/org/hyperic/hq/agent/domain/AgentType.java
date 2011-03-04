@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.agent.domain;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 import javax.persistence.CascadeType;
@@ -49,10 +50,18 @@ import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 @Entity
 @Table(name = "EAM_AGENT_TYPE")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class AgentType implements ContainerManagedTimestampTrackable {
+public class AgentType implements ContainerManagedTimestampTrackable, Serializable {
     @SuppressWarnings("unused")
     private static final Integer TYPE_LEGACY_TRANSPORT = new Integer(1);
     private static final Integer TYPE_NEW_TRANSPORT = new Integer(2);
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, mappedBy = "agentType")
+    @OptimisticLock(excluded = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Collection<Agent> agents;
+
+    @Column(name = "CTIME")
+    private Long creationTime;
 
     @Id
     @GenericGenerator(name = "mygen1", strategy = "increment")
@@ -60,33 +69,86 @@ public class AgentType implements ContainerManagedTimestampTrackable {
     @Column(name = "ID")
     private Integer id;
 
-    @Column(name = "VERSION_COL",nullable=false)
-    @Version
-    private Long version;
-
-    @Column(name = "NAME", length = 80)
-    private String name;
-
-    @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, mappedBy = "agentType")
-    @OptimisticLock(excluded = true)
-    @OnDelete(action=OnDeleteAction.CASCADE)
-    private Collection<Agent> agents;
-
-    @Column(name = "CTIME")
-    private Long creationTime;
-
     @Column(name = "MTIME")
     private Long modifiedTime;
 
+    @Column(name = "NAME", length = 80, unique=true)
+    private String name;
+
+    @Column(name = "VERSION_COL", nullable = false)
+    @Version
+    private Long version;
+
     public AgentType() {
+    }
+
+    public boolean allowContainerManagedCreationTime() {
+        return true;
+    }
+
+    public boolean allowContainerManagedLastModifiedTime() {
+        return true;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        AgentType other = (AgentType) obj;
+        if (creationTime == null) {
+            if (other.creationTime != null)
+                return false;
+        } else if (!creationTime.equals(other.creationTime))
+            return false;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        return true;
+    }
+
+    public Collection<Agent> getAgents() {
+        return agents;
+    }
+
+    public Long getCreationTime() {
+        return creationTime;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public Long getModifiedTime() {
+        return modifiedTime;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public Long getVersion() {
+        return version;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((creationTime == null) ? 0 : creationTime.hashCode());
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        return result;
     }
 
     public boolean isNewTransportType() {
@@ -99,68 +161,28 @@ public class AgentType implements ContainerManagedTimestampTrackable {
         return false;
     }
 
-    public Collection<Agent> getAgents() {
-        return agents;
-    }
-
     public void setAgents(Collection<Agent> agents) {
         this.agents = agents;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Long getVersion() {
-        return version;
-    }
-
-    public void setVersion(Long version) {
-        this.version = version;
-    }
-
-    public Long getCreationTime() {
-        return creationTime;
     }
 
     public void setCreationTime(Long creationTime) {
         this.creationTime = creationTime;
     }
 
-    public Long getModifiedTime() {
-        return modifiedTime;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public void setModifiedTime(Long modifiedTime) {
         this.modifiedTime = modifiedTime;
     }
 
-    public boolean allowContainerManagedCreationTime() {
-        return true;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public boolean allowContainerManagedLastModifiedTime() {
-        return true;
+    public void setVersion(Long version) {
+        this.version = version;
     }
 
-    public boolean equals(Object obj) {
-        if (!(obj instanceof AgentType) || !super.equals(obj)) {
-            return false;
-        }
-        AgentType o = (AgentType) obj;
-        return (name == o.getName() || (name != null && o.getName() != null && name.equals(o
-            .getName())));
-    }
-
-    public int hashCode() {
-        int result = super.hashCode();
-
-        result = 37 * result + (name != null ? name.hashCode() : 0);
-
-        return result;
-    }
 }

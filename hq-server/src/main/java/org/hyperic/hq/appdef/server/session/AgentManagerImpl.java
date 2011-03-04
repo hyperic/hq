@@ -40,7 +40,6 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
-import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentUpgradeManager;
@@ -51,6 +50,7 @@ import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
 import org.hyperic.hq.agent.commands.AgentUpgrade_result;
 import org.hyperic.hq.agent.domain.Agent;
 import org.hyperic.hq.agent.domain.AgentType;
+import org.hyperic.hq.agent.mgmt.data.AgentTypeRepository;
 import org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection;
 import org.hyperic.hq.appdef.shared.AgentCreateException;
 import org.hyperic.hq.appdef.shared.AgentManager;
@@ -88,7 +88,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     private static final String PLUGINS_EXTENSION = "-plugin";
 
     private final Log log = LogFactory.getLog(AgentManagerImpl.class.getName());
-    private AgentTypeDAO agentTypeDao;
+    private AgentTypeRepository agentTypeRepository;
     private AgentDAO agentDao;
     private PermissionManager permissionManager;
     private ServerConfigManager serverConfigManager;
@@ -97,13 +97,13 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     private ResourceDao resourceDao;
 
     @Autowired
-    public AgentManagerImpl(AgentTypeDAO agentTypeDao,
+    public AgentManagerImpl(AgentTypeRepository agentTypeRepository,
                             AgentDAO agentDao, 
                             PermissionManager permissionManager, 
                             ServerConfigManager serverConfigManager,
                             AgentCommandsClientFactory agentCommandsClientFactory,
                             ResourceDao resourceDao) {
-        this.agentTypeDao = agentTypeDao;
+        this.agentTypeRepository = agentTypeRepository;
         this.agentDao = agentDao;
         this.permissionManager = permissionManager;
         this.serverConfigManager = serverConfigManager;
@@ -198,7 +198,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     public Agent createNewTransportAgent(String address, Integer port, String authToken,
                                          String agentToken, String version, boolean unidirectional)
         throws AgentCreateException {
-        AgentType type = agentTypeDao.findByName(HQ_AGENT_REMOTING_TYPE);
+        AgentType type = agentTypeRepository.findByName(HQ_AGENT_REMOTING_TYPE);
         if (type == null) {
             throw new SystemException("Unable to find agent type '" + HQ_AGENT_REMOTING_TYPE + "'");
         }
@@ -219,7 +219,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      */
     public Agent createLegacyAgent(String address, Integer port, String authToken,
                                    String agentToken, String version) throws AgentCreateException {
-        AgentType type = agentTypeDao.findByName(CAM_AGENT_TYPE);
+        AgentType type = agentTypeRepository.findByName(CAM_AGENT_TYPE);
         if (type == null) {
             throw new SystemException("Unable to find agent type '" + CAM_AGENT_TYPE + "'");
         }
@@ -243,7 +243,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     public Agent updateNewTransportAgent(String agentToken, String ip, int port, String authToken,
                                          String version, boolean unidirectional)
         throws AgentNotFoundException {
-        AgentType type = agentTypeDao.findByName(HQ_AGENT_REMOTING_TYPE);
+        AgentType type = agentTypeRepository.findByName(HQ_AGENT_REMOTING_TYPE);
 
         if (type == null) {
             throw new SystemException("Unable to find agent type '" + HQ_AGENT_REMOTING_TYPE + "'");
@@ -269,7 +269,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      */
     public Agent updateLegacyAgent(String agentToken, String ip, int port, String authToken,
                                    String version) throws AgentNotFoundException {
-        AgentType type = agentTypeDao.findByName(CAM_AGENT_TYPE);
+        AgentType type = agentTypeRepository.findByName(CAM_AGENT_TYPE);
 
         if (type == null) {
             throw new SystemException("Unable to find agent type '" + CAM_AGENT_TYPE + "'");
@@ -296,7 +296,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     public Agent updateNewTransportAgent(String ip, int port, String authToken, String agentToken,
                                          String version, boolean unidirectional)
         throws AgentNotFoundException {
-        AgentType type = agentTypeDao.findByName(HQ_AGENT_REMOTING_TYPE);
+        AgentType type = agentTypeRepository.findByName(HQ_AGENT_REMOTING_TYPE);
 
         if (type == null) {
             throw new SystemException("Unable to find agent type '" + HQ_AGENT_REMOTING_TYPE + "'");
@@ -320,7 +320,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      */
     public Agent updateLegacyAgent(String ip, int port, String authToken, String agentToken,
                                    String version) throws AgentNotFoundException {
-        AgentType type = agentTypeDao.findByName(CAM_AGENT_TYPE);
+        AgentType type = agentTypeRepository.findByName(CAM_AGENT_TYPE);
 
         if (type == null) {
             throw new SystemException("Unable to find agent type '" + CAM_AGENT_TYPE + "'");
@@ -357,7 +357,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      */
     public Agent updateNewTransportAgent(String agentToken, String ip, int port,
                                          boolean unidirectional) throws AgentNotFoundException {
-        AgentType type = agentTypeDao.findByName(HQ_AGENT_REMOTING_TYPE);
+        AgentType type = agentTypeRepository.findByName(HQ_AGENT_REMOTING_TYPE);
 
         if (type == null) {
             throw new SystemException("Unable to find agent type '" + HQ_AGENT_REMOTING_TYPE + "'");
@@ -384,7 +384,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      */
     public Agent updateLegacyAgent(String agentToken, String ip, int port)
         throws AgentNotFoundException {
-        AgentType type = agentTypeDao.findByName(CAM_AGENT_TYPE);
+        AgentType type = agentTypeRepository.findByName(CAM_AGENT_TYPE);
 
         if (type == null) {
             throw new SystemException("Unable to find agent type '" + CAM_AGENT_TYPE + "'");
