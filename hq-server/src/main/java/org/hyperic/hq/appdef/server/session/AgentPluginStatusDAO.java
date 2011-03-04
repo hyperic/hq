@@ -74,7 +74,7 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
         return rtn;
     }
 
-    Map<Plugin, Collection<AgentPluginStatus>> getOutOfSyncAgentsByPlugin() {
+    public Map<Plugin, Collection<AgentPluginStatus>> getOutOfSyncAgentsByPlugin() {
         final Map<Plugin, Collection<AgentPluginStatus>> rtn =
             new HashMap<Plugin, Collection<AgentPluginStatus>>();
         final List<Integer> list = getOutOfSyncPlugins(null);
@@ -110,7 +110,7 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
         return rtn;
     }
 
-    List<String> getOutOfSyncPluginNamesByAgentId(int agentId) {
+    public List<String> getOutOfSyncPluginNamesByAgentId(int agentId) {
         final List<Integer> ids = getOutOfSyncPlugins(agentId);
         final List<String> rtn = new ArrayList<String>(ids.size());
         for (final Integer id : ids) {

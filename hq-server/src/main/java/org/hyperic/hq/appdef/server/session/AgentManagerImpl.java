@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -90,10 +91,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.Resource;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  */
@@ -1242,7 +1240,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                 final String jarName = jars.get(i);
                 final String md5 = md5s.get(i);
                 AgentPluginStatus status;
-                final Plugin currPlugin = pluginDAO.getByJarName(jarName);
+                final Plugin currPlugin = pluginDAO.getByFilename(jarName);
                 if (null == (status = statusByJarName.remove(jarName))) {
                     status = new AgentPluginStatus();
                 }
@@ -1260,9 +1258,15 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             }
             // process remaining plugins that the AgentPluginStatus table knows about but
             // the agent didn't check in
-            for (final String jarName: statusByJarName.keySet()) {
-                final Plugin plugin = pluginDAO.getByJarName(jarName);
-                setPluginToUpdate(updateMap, agent.getId(), plugin);
+            for (final Entry<String, AgentPluginStatus> entry: statusByJarName.entrySet()) {
+                final String filename = entry.getKey();
+                final AgentPluginStatus status = entry.getValue();
+                final Plugin plugin = pluginDAO.getByFilename(filename);
+                if (plugin == null) {
+                    agentPluginStatusDAO.remove(status);
+                } else {
+                    setPluginToUpdate(updateMap, agent.getId(), plugin);
+                }
             }
             final Collection<Integer> pluginIds =
                 agentPluginStatusDAO.getPluginsNotOnAgent(agent.getId());
@@ -1341,43 +1345,6 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     @Transactional(readOnly=true)
     public long getNumAutoUpdatingAgents() {
         return agentPluginStatusDAO.getNumAutoUpdatingAgents();
-    }
-    
-// XXX needs javadoc!
-// XXX should probably go into a server-side PluginManager
-    @Transactional(readOnly=true)
-    public Map<Plugin, Collection<AgentPluginStatus>> getOutOfSyncAgentsByPlugin() {
-        return agentPluginStatusDAO.getOutOfSyncAgentsByPlugin();
-    }
-    
-// XXX needs javadoc!
-// XXX should probably go into a server-side PluginManager
-    @Transactional(readOnly=true)
-    public List<Plugin> getAllPlugins() {
-        return pluginDAO.findAll();
-    }
-
-// XXX needs javadoc!
-// XXX should probably go into a server-side PluginManager
-    @Transactional(readOnly=true)
-    public Collection<String> getOutOfSyncPluginNamesByAgentId(Integer agentId) {
-        return agentPluginStatusDAO.getOutOfSyncPluginNamesByAgentId(agentId);
-    }
-
-    @Transactional(propagation=Propagation.REQUIRES_NEW)
-    public void updateAgentPluginSyncStatusInNewTran(AgentPluginStatusEnum s, Integer agentId,
-                                                     Collection<Plugin> plugins) {
-        final Map<String, AgentPluginStatus> statusMap =
-            agentPluginStatusDAO.getStatusByAgentId(agentId);
-        final long now = System.currentTimeMillis();
-        for (final Plugin plugin : plugins) {
-            AgentPluginStatus status = statusMap.get(plugin.getName());
-            if (status == null) {
-                continue;
-            }
-            status.setLastSyncStatus(s.toString());
-            status.setLastSyncAttempt(now);
-        }
     }
 
 }

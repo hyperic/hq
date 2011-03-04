@@ -21,6 +21,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.product.Plugin;
+import org.hyperic.hq.product.shared.PluginManager;
 import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.hq.web.BaseController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,13 +38,16 @@ import org.springframework.web.multipart.MultipartFile;
 public class PluginManagerController extends BaseController {
 	private AgentManager agentManager;
 	private ProductManager productManager;
+	private PluginManager pluginManager;
 	
 	@Autowired
 	public PluginManagerController(AppdefBoss appdefBoss, AuthzBoss authzBoss, 
-			AgentManager agentManager, ProductManager productManager) {
+			AgentManager agentManager, ProductManager productManager,
+			PluginManager pluginManager) {
 		super(appdefBoss, authzBoss);
 		this.agentManager = agentManager;
 		this.productManager = productManager;
+		this.pluginManager = pluginManager;
 	}
 	
 	@RequestMapping(method = RequestMethod.GET)
@@ -56,14 +60,14 @@ public class PluginManagerController extends BaseController {
 	@RequestMapping(method = RequestMethod.GET, value="/list", headers="Accept=application/json")
 	public @ResponseBody List<Map<String, Object>> getPluginSummaries() {
 		List<Map<String, Object>> pluginSummaries = new ArrayList<Map<String,Object>>();
-		List<Plugin> plugins = agentManager.getAllPlugins();
+		List<Plugin> plugins = pluginManager.getAllPlugins();
 		Comparator<Plugin> sortByPluginName = new Comparator<Plugin>() {
 			public int compare(Plugin o1, Plugin o2) {
 				return o1.getName().compareTo(o2.getName());
 			}
 		};
 		
-		Map<Plugin, Collection<AgentPluginStatus>> pluginAgentMap = agentManager.getOutOfSyncAgentsByPlugin();
+		Map<Plugin, Collection<AgentPluginStatus>> pluginAgentMap = pluginManager.getOutOfSyncAgentsByPlugin();
 		long agentCount = agentManager.getNumAutoUpdatingAgents();
 		
 		Collections.sort(plugins, sortByPluginName);

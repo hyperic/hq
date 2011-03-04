@@ -60,8 +60,8 @@ public class PluginDAO extends HibernateDAO<Plugin> {
         return (Plugin) getSession().createQuery(hql).setString("md5", md5).uniqueResult();
     }
 
-    public Plugin getByJarName(String jarName) {
-        String hql = "from Plugin where path = :jarName";
-        return (Plugin) getSession().createQuery(hql).setString("jarName", jarName).uniqueResult();
+    public Plugin getByFilename(String filename) {
+        String hql = "from Plugin where path = :filename";
+        return (Plugin) getSession().createQuery(hql).setString("filename", filename).uniqueResult();
     }
 }

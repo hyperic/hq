@@ -41,6 +41,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.product.Plugin;
+import org.hyperic.hq.product.shared.PluginManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,11 +52,14 @@ public class AgentPluginUpdaterImpl implements AgentPluginUpdater {
     
     private AuthzSubject overlord;
     private AgentSynchronizer agentSynchronizer;
+    private PluginManager pluginManager;
     
     @Autowired
     public AgentPluginUpdaterImpl(AuthzSubjectManager authzSubjectManager,
-                                  AgentSynchronizer agentSynchronizer) {
+                                  AgentSynchronizer agentSynchronizer,
+                                  PluginManager pluginManager) {
         this.agentSynchronizer = agentSynchronizer;
+        this.pluginManager = pluginManager;
         this.overlord = authzSubjectManager.getOverlordPojo();
     }
     
@@ -90,10 +94,10 @@ public class AgentPluginUpdaterImpl implements AgentPluginUpdater {
                 }
                 public void execute() {
                     try {
-                        agentManager.updateAgentPluginSyncStatusInNewTran(
+                        pluginManager.updateAgentPluginSyncStatusInNewTran(
                             AgentPluginStatusEnum.SYNC_IN_PROGRESS, agentId, plugins);
                         agentManager.transferAgentPlugins(overlord, agentId, pluginNames);
-                        agentManager.updateAgentPluginSyncStatusInNewTran(
+                        pluginManager.updateAgentPluginSyncStatusInNewTran(
                             AgentPluginStatusEnum.SYNC_SUCCESS, agentId, plugins);
                         final Collection<String> pluginJarNames = removeMap.get(agentId);
                         if (pluginJarNames != null && !pluginJarNames.isEmpty()) {
@@ -102,7 +106,7 @@ public class AgentPluginUpdaterImpl implements AgentPluginUpdater {
 // XXX disabled for now
 //                        agentManager.restartAgent(overlord, agentId);
                     } catch (Exception e) {
-                        agentManager.updateAgentPluginSyncStatusInNewTran(
+                        pluginManager.updateAgentPluginSyncStatusInNewTran(
                             AgentPluginStatusEnum.SYNC_FAILURE, agentId, plugins);
                         throw new SystemException(
                             "error transferring agent plugins to agentId=" + agentId, e);
