@@ -904,7 +904,7 @@
 
   <!-- Plugin caches -->
   <cache name="org.hyperic.hq.appdef.server.session.AgentPluginStatus"
-         maxElementsInMemory="10000"
+         maxElementsInMemory="100000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
