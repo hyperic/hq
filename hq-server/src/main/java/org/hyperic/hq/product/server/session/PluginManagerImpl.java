@@ -39,6 +39,7 @@ import org.hyperic.hq.product.shared.PluginDeployException;
 import org.hyperic.hq.product.shared.PluginManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.emory.mathcs.backport.java.util.Collections;
@@ -57,7 +58,7 @@ public class PluginManagerImpl implements PluginManager {
     }
     
     public Plugin getByJarName(String jarName) {
-        return pluginDAO.getByJarName(jarName);
+        return pluginDAO.getByFilename(jarName);
     }
     
     public void deployPluginIfValid(AuthzSubject subj, Map<String, Collection<byte[]>> jarInfo)
@@ -126,5 +127,33 @@ public class PluginManagerImpl implements PluginManager {
 // XXX need to implement
         return false;
     }
+
+     public Map<Plugin, Collection<AgentPluginStatus>> getOutOfSyncAgentsByPlugin() {
+         return agentPluginStatusDAO.getOutOfSyncAgentsByPlugin();
+     }
+
+     public List<Plugin> getAllPlugins() {
+         return pluginDAO.findAll();
+     }
+
+     public Collection<String> getOutOfSyncPluginNamesByAgentId(Integer agentId) {
+         return agentPluginStatusDAO.getOutOfSyncPluginNamesByAgentId(agentId);
+     }
+     
+     @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly=false)
+     public void updateAgentPluginSyncStatusInNewTran(AgentPluginStatusEnum s, Integer agentId,
+                                                      Collection<Plugin> plugins) {
+         final Map<String, AgentPluginStatus> statusMap =
+             agentPluginStatusDAO.getStatusByAgentId(agentId);
+         final long now = System.currentTimeMillis();
+         for (final Plugin plugin : plugins) {
+             AgentPluginStatus status = statusMap.get(plugin.getName());
+             if (status == null) {
+                 continue;
+             }
+             status.setLastSyncStatus(s.toString());
+             status.setLastSyncAttempt(now);
+         }
+     }
 
 }

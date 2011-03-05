@@ -61,6 +61,10 @@
       <column name="CTIME" not-null="true"/>
     </property>
 
+    <property name="modifiedTime" type="long">
+      <column name="MTIME" not-null="true"/>
+    </property>
+
   </class>
 
 </hibernate-mapping>

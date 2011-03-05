@@ -26,6 +26,7 @@
 package org.hyperic.hq.product.shared;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
@@ -55,4 +56,17 @@ public interface PluginManager {
     boolean isPluginDeploymentOff();
 
     Plugin getPluginById(Integer id);
+
+// XXX javadoc!
+    Map<Plugin, Collection<AgentPluginStatus>> getOutOfSyncAgentsByPlugin();
+
+// XXX javadoc!
+    List<Plugin> getAllPlugins();
+
+// XXX javadoc!
+    Collection<String> getOutOfSyncPluginNamesByAgentId(Integer agentId);
+    
+ // XXX javadoc!
+     void updateAgentPluginSyncStatusInNewTran(AgentPluginStatusEnum s, Integer agentId,
+                                               Collection<Plugin> plugins);
 }

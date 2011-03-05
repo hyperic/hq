@@ -45,6 +45,7 @@ public class PluginDAO extends HibernateDAO<Plugin> {
         p.setName(name);
         p.setPath(path);
         p.setMD5(md5);
+        p.setModifiedTime(System.currentTimeMillis());
         save(p);
         return p;
     }
@@ -60,8 +61,8 @@ public class PluginDAO extends HibernateDAO<Plugin> {
         return (Plugin) getSession().createQuery(hql).setString("md5", md5).uniqueResult();
     }
 
-    public Plugin getByJarName(String jarName) {
-        String hql = "from Plugin where path = :jarName";
-        return (Plugin) getSession().createQuery(hql).setString("jarName", jarName).uniqueResult();
+    public Plugin getByFilename(String filename) {
+        String hql = "from Plugin where path = :filename";
+        return (Plugin) getSession().createQuery(hql).setString("filename", filename).uniqueResult();
     }
 }

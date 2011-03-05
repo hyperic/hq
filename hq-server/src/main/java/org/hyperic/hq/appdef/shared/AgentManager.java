@@ -452,19 +452,6 @@ public interface AgentManager {
 // XXX javadoc!
     public long getNumAutoUpdatingAgents();
     
-// XXX javadoc!
-    public List<Plugin> getAllPlugins();
-
-// XXX javadoc!
-    public Map<Plugin, Collection<AgentPluginStatus>> getOutOfSyncAgentsByPlugin();
-
-// XXX javadoc!
-    public Collection<String> getOutOfSyncPluginNamesByAgentId(Integer agentId);
-
-// XXX javadoc!
-    public void updateAgentPluginSyncStatusInNewTran(AgentPluginStatusEnum s, Integer agentId,
-                                                     Collection<Plugin> plugins);
-
 // XXX may want to change Boolean so that it is a status string "SUCCESS" or an error message
     /**
      * Removes plugin jars from the plugin directory on the remote Agent.
