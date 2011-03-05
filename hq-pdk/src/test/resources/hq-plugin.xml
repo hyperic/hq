@@ -58,7 +58,7 @@
   USA.
  -->
 
-<plugin package="org.hyperic.hq.plugin.activemq" name="activemq">
+<plugin package="org.hyperic.hq.plugin.activemq" name="activemq" version="1.0">
 
   <classpath>
     <include name="pdk/lib/mx4j"/>

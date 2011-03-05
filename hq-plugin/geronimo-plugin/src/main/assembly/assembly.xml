@@ -36,7 +36,7 @@
 
 	<fileSets>
 		<fileSet>
-			<directory>src/main/resources</directory>
+			<directory>target/classes</directory>
 			<outputDirectory>/</outputDirectory>
 			<fileMode>0644</fileMode>
 			<directoryMode>0755</directoryMode>
