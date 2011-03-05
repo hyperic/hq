@@ -64,11 +64,11 @@
 		<td class="BlockLabel"></td>
 		<td class="BlockContent"><html:link page="/admin/config/Config.do?mode=escalate"><fmt:message key="admin.home.EscalationSchemes"/></html:link> <span class="italicInfo"><fmt:message key="inform.config.admin.EscalationScheme"/></span></td>
 	</tr>
+<c:if test="${useroperations['administerCAM']}">
     <tr>
 		<td class="BlockLabel"></td>
 		<td class="BlockContent"><a href="<spring:url value="/app/admin/managers/plugin" />"><fmt:message key="admin.managers.plugin.title"/></a> <span class="italicInfo"><fmt:message key="admin.managers.plugin.description"/></span></td>
 	</tr>
+</c:if>
 </table>
 <!--  /  -->
-
-

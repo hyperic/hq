@@ -217,7 +217,7 @@ var menuLayers = {
     this.clearTimer();
     if (this.activeMenuID && $) 
     {
-      this.timer = setTimeout("$('"+menuLayers.activeMenuID+"').style.visibility = 'hidden';if(dojo11.isIE == 6){dojo11.query('select').forEach(function(sel) { sel.style.display = '';});}", 200);
+      this.timer = setTimeout("$('"+menuLayers.activeMenuID+"').style.visibility = 'hidden';", 200);
     }
   },
   
@@ -236,7 +236,7 @@ var menuLayers = {
           viewport.height + viewport.scrollY - mnu.offsetHeight;
     else y = y + this.offY;
 
-    this.timer = setTimeout("$('" + menuLayers.activeMenuID + "').style.visibility = 'visible';if(dojo11.isIE == 6){dojo11.query('select').forEach(function(sel) { sel.style.display = 'none';});}", 200);
+    this.timer = setTimeout("$('" + menuLayers.activeMenuID + "').style.visibility = 'visible';", 200);
     mnu.style.left = x + "px"; mnu.style.top = y + "px";
   },
   

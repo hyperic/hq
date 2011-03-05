@@ -76,17 +76,17 @@
 </div>
 
 <script type="text/javascript">
-  dojo11.require("dijit.Dialog");
+  dojo.require("dijit.Dialog");
 
   var aboutDia = null;
-  dojo11.addOnLoad(function(){
-  	aboutDia = new dijit11.Dialog({
+  dojo.ready(function(){
+  	aboutDia = new dijit.Dialog({
                 id: 'about_popup',
                 refocus: true,
                 autofocus: false,
                 opacity: 0,
                 title: "<fmt:message key="about.Title" />"
-            }, dojo11.byId('about'));
+            }, dojo.byId('about'));
   });
 
   setFoot();

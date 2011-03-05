@@ -37,11 +37,11 @@
         if (opt == "<fmt:message key="header.Acknowledge"/>") {
         	var postData = { update: true};
             var updateUrl = 'Dashboard.do?';
-            dojo11.xhrPost({
+            dojo.xhrPost({
          	 	url: updateUrl,
          	 	content: postData,
          	 	load: function(data) {
-         	 	dojo11.style("updateLink", "display", "none");
+         	 	dojo.style("updateLink", "display", "none");
          	 	updateDialog.hide();
         		}
        		});
@@ -50,15 +50,14 @@
     }
     var resourceURL = '<html:rewrite action="/Resource" />';
 	var userURL = '<html:rewrite action="/admin/user/UserAdmin" />';
-    var searchWidget = new hyperic.widget.search(dojo11, {search:'/app/search'}, 3, {keyCode: 83, ctrl: true});
-    dojo.require("dojo.lfx.html");
-    dojo.event.connect(window, "onload",function(){ 
-        activateHeaderTab(dojo11);
+    var searchWidget = new hyperic.widget.search(dojo, {search:'/app/search'}, 3, {keyCode: 83, ctrl: true});
+    dojo.ready(function(){ 
+        activateHeaderTab(dojo);
         searchWidget.create();
         //Connect the events for the box, cancel and search buttons
-        dojo11.connect(searchWidget.searchBox, "onkeypress", searchWidget, "search");
+        dojo.connect(searchWidget.searchBox, "onkeypress", searchWidget, "search");
          // What should the hot-keys do?
-        dojo11.subscribe('enter', searchWidget, "search");
+        dojo.subscribe('enter', searchWidget, "search");
     });
     
     <!--
@@ -140,19 +139,19 @@
         </div>
     </div>
     <script type="text/javascript">
-	    dojo11.addOnLoad(function() {
+	    dojo.ready(function() {
 	    	var menu = dojo.byId("navTabContainer");
 	    	
-	    	dojo11.query(".tab", menu).onmouseenter(function(e) {
-	    		dojo11.addClass(e.currentTarget, "over");
+	    	dojo.query(".tab", menu).onmouseenter(function(e) {
+	    		dojo.addClass(e.currentTarget, "over");
 	    	}).onmouseleave(function(e) {
-	    		dojo11.removeClass(e.currentTarget, "over")
+	    		dojo.removeClass(e.currentTarget, "over")
 	    	});
 	    	
-	    	dojo11.query("li", menu).onmouseover(function(e) {
-	    		dojo11.addClass(e.currentTarget, "over");
+	    	dojo.query("li", menu).onmouseover(function(e) {
+	    		dojo.addClass(e.currentTarget, "over");
 	    	}).onmouseout(function(e) {
-	    		dojo11.removeClass(e.currentTarget, "over")
+	    		dojo.removeClass(e.currentTarget, "over")
 	    	});
 	    });
     </script>
@@ -179,18 +178,18 @@
  	 	</form>
  	</div>
 	<script type="text/javascript">
- 	 	dojo11.require("dijit.Dialog");
+ 	 	dojo.require("dijit.Dialog");
  	 		
  	 	var updateDialog = null;
  	 		
- 	 	dojo11.addOnLoad(function(){
- 	 	updateDialog = new dijit11.Dialog({
+ 	 	dojo.ready(function(){
+ 	 	updateDialog = new dijit.Dialog({
  	 	 	id: 'update_popup',
  	 		refocus: true,
  	 		autofocus: false,
  	 		opacity: 0,
  	 		title: "<fmt:message key="header.dialog.title.update" />"
- 			}, dojo11.byId('update'));
+ 			}, dojo.byId('update'));
  	 	});
  	</script>
  	<a id="updateLink" href="javascript:updateDialog.show()">

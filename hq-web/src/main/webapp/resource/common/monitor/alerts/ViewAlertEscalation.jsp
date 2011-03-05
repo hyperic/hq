@@ -80,7 +80,7 @@
 	    		<td width="80%" class="BlockContent">
 			 		<c:if test="${escalation.pauseAllowed}">
 				  		<div id="AlertEscalationOption" syle="text-align:left;">
-				     		<input type="checkbox" name="pause" value="true" checked="checked" onclick="dojo11.byId('pauseTimeSel').disabled = !this.checked;" />&nbsp;<fmt:message key="alert.escalation.pause"/>
+				     		<input type="checkbox" name="pause" value="true" checked="checked" onclick="dojo.byId('pauseTimeSel').disabled = !this.checked;" />&nbsp;<fmt:message key="alert.escalation.pause"/>
 				  		</div>	  
 			  		</c:if>&nbsp;
 	          		<div style="text-align:left;">
@@ -104,7 +104,7 @@
     		}
   		}
 
-  		var escalationSpan = dojo11.byId("AlertEscalationOption");
+  		var escalationSpan = dojo.byId("AlertEscalationOption");
 
   	  	if (escalationSpan != null) {
 	  		escalationSpan.appendChild(hyperic.form.createEscalationPauseOptions({id: "pauseTimeSel", name: "pauseTime"}, <c:out value="${escalation.maxPauseTime}"/>));

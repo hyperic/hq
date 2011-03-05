@@ -370,13 +370,10 @@ table border on left side - do not remove */
 
 .downTableContainer {
     border: 1px solid rgb(96, 165, 234);
-    overflow-x: hidden;
-    overflow-y: auto;
     float: right;
     display: inline;
     width: 75%;
     background-color:#FFF;
-    height: 442px
 }
 
 .leftbxht {

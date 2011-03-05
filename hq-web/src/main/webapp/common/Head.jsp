@@ -35,17 +35,9 @@
 <link rel="stylesheet" href="<html:rewrite page="/css/HQ_40.css"/>" type="text/css"/>
 
 <script type="text/javascript">
-djConfig = { isDebug: false, locale: 'en-us' }
-</script>
-<script type="text/javascript" src="<html:rewrite page='/js/dojo/0.4.4/dojo.js'/>"></script> 
-<script type="text/javascript">
+var djConfig = {};
 djConfig.parseOnLoad = true;
 djConfig.baseUrl = '/static/js/dojo/1.5/dojo/';
-djConfig.scopeMap = [
-        ["dojo", "dojo11"],
-        ["dijit", "dijit11"],
-        ["dojox", "dojox11"]
-    ];
 </script>
 
 <!--[if IE]>
@@ -69,9 +61,7 @@ djConfig.modulePaths = {
 <script src="<html:rewrite page='/static/js/dojo/1.5/dojo/dojo.js'/>" type="text/javascript"></script>
 <script type="text/javascript">
     var imagePath = "<html:rewrite page="/images/"/>";
-    dojo11.require('dojo.date');
-    dojo.require('dojo.event.*');
-	dojo.require('dojo.widget.*');
+    dojo.require('dojo.date');
 </script>
 <script src="<html:rewrite page='/js/prototype.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/popup.js'/>" type="text/javascript"></script>
