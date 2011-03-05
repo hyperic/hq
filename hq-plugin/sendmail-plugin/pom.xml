@@ -16,7 +16,6 @@
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-pdk</artifactId>
 			<version>${project.version}</version>
-			<scope>provided</scope>
 		</dependency>
 		<!-- During a clover build, we end up using an instrumented hq-pdk jar.  
 		Since we are skipping instrumentation, we end up with a ClassNotFoundException for clover on exec-->
