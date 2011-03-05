@@ -11503,6 +11503,10 @@ has already been defined.
     <schema-alterColumn table="EAM_AGENT" column="version"
 	       	            precision="50" columnType="VARCHAR2" /> 	
  </schemaSpec>
+ <schemaSpec version="3.200.1">
+	<schema-alterColumn table="EAM_ALERT_CONDITION" column="OPTION_STATUS"
+		                precision="150" columnType="VARCHAR2" />
+ </schemaSpec>
 </dbupgrade>
 </target>
 </project>
