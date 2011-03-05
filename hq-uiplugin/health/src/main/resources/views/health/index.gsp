@@ -205,7 +205,7 @@ getSystemStats();
 </div>
 
 <div id="fullBody" style="clear:both">
-  <% dojoTabContainer(id:'bodyTabContainer', style:'width: 100%; height:500px;') { %>
+  <% dojoTabContainer(id:'bodyTabContainer', style:'width: 100%; height:525px;') { %>
     <% dojoTabPane(id:'diagTab', label:l.diagnostics) { %>
       <div style="padding: 6px;">${l.diagWatchNotice}</div>
       <div id="diagSelectControls">
@@ -326,7 +326,7 @@ function selectQuery(q) {
     
   	dojo.xhrPost({
     	url: '<%= urlFor(action:"runQuery") %>',
-    	handleAs: "text/json-comment-filtered",
+    	handleAs: "json-comment-filtered",
     	content: {
     		query: q
         },
