@@ -1,63 +1,56 @@
-<%= dojoInclude(["dojo.event.*",
-                 "dojo.collections.Store",
-                 "dojo.widget.ContentPane",
-                 "dojo.widget.TabContainer",
-                 "dojo.widget.FilteringTable"]) %>
 <%= hquStylesheets() %>
-
 <script type="text/javascript">
 document.navTabCat = "Admin";
 function getSystemStats() {
-  dojo.io.bind({
+  dojo.xhrPost({
     url: '<%= urlFor(action:"getSystemStats") %>',
-    method: "post",
-    mimetype: "text/json-comment-filtered",
-    load: function(type, data, evt) {
-      dojo.byId('userCPU').innerHTML = data.sysUserCpu;
-      dojo.byId('userCPUBar').style.width = data.sysUserCpu;
-      dojo.byId('sysCPU').innerHTML  = data.sysSysCpu;
-      dojo.byId('sysCPUBar').style.width = data.sysSysCpu;
-      dojo.byId('niceCPU').innerHTML = data.sysNiceCpu;
-      dojo.byId('idleCPU').innerHTML = data.sysIdleCpu;
-      dojo.byId('waitCPU').innerHTML = data.sysWaitCpu;
+    handleAs: "json-comment-filtered",
+    load: function(response, args) {
+      dojo.byId('userCPU').innerHTML = response.sysUserCpu;
+      dojo.byId('userCPUBar').style.width = response.sysUserCpu;
+      dojo.byId('sysCPU').innerHTML  = response.sysSysCpu;
+      dojo.byId('sysCPUBar').style.width = response.sysSysCpu;
+      dojo.byId('niceCPU').innerHTML = response.sysNiceCpu;
+      dojo.byId('idleCPU').innerHTML = response.sysIdleCpu;
+      dojo.byId('waitCPU').innerHTML = response.sysWaitCpu;
 
-      dojo.byId('loadAvg1').innerHTML  = data.loadAvg1;
-      dojo.byId('loadAvg5').innerHTML  = data.loadAvg5;
-      dojo.byId('loadAvg15').innerHTML = data.loadAvg15;
+      dojo.byId('loadAvg1').innerHTML  = response.loadAvg1;
+      dojo.byId('loadAvg5').innerHTML  = response.loadAvg5;
+      dojo.byId('loadAvg15').innerHTML = response.loadAvg15;
 
-      dojo.byId('totalMem').innerHTML = data.totalMem;
-      dojo.byId('usedMem').innerHTML  = data.usedMem;
-      dojo.byId('usedMemBar').style.width = data.percMem;
-      dojo.byId('freeMem').innerHTML  = data.freeMem;
+      dojo.byId('totalMem').innerHTML = response.totalMem;
+      dojo.byId('usedMem').innerHTML  = response.usedMem;
+      dojo.byId('usedMemBar').style.width = response.percMem;
+      dojo.byId('freeMem').innerHTML  = response.freeMem;
 
-      dojo.byId('totalSwap').innerHTML = data.totalSwap;
-      dojo.byId('usedSwap').innerHTML  = data.usedSwap;
-      dojo.byId('usedSwapBar').style.width = data.percSwap;
-      dojo.byId('freeSwap').innerHTML  = data.freeSwap;
+      dojo.byId('totalSwap').innerHTML = response.totalSwap;
+      dojo.byId('usedSwap').innerHTML  = response.usedSwap;
+      dojo.byId('usedSwapBar').style.width = response.percSwap;
+      dojo.byId('freeSwap').innerHTML  = response.freeSwap;
       
-      dojo.byId('pid').innerHTML         = data.pid;
-      dojo.byId('procStartTime').innerHTML = data.procStartTime;
-      dojo.byId('procOpenFds').innerHTML = data.procOpenFds;
+      dojo.byId('pid').innerHTML         = response.pid;
+      dojo.byId('procStartTime').innerHTML = response.procStartTime;
+      dojo.byId('procOpenFds').innerHTML = response.procOpenFds;
       
-      dojo.byId('procMemSize').innerHTML  = data.procMemSize;
-      dojo.byId('procMemRes').innerHTML   = data.procMemRes;
-      dojo.byId('procMemShare').innerHTML = data.procMemShare;
+      dojo.byId('procMemSize').innerHTML  = response.procMemSize;
+      dojo.byId('procMemRes').innerHTML   = response.procMemRes;
+      dojo.byId('procMemShare').innerHTML = response.procMemShare;
 
-      dojo.byId('procCpu').innerHTML = data.procCpu;
-      dojo.byId('procCpuBar').style.width = data.procCpu;
+      dojo.byId('procCpu').innerHTML = response.procCpu;
+      dojo.byId('procCpuBar').style.width = response.procCpu;
       
-      dojo.byId('sysPercCpu').innerHTML = data.sysPercCpu;
-      dojo.byId('sysPercCpuBar').style.width = data.sysPercCpu;
-      dojo.byId('percMem').innerHTML    = data.percMem;
-      dojo.byId('percMemBar').style.width = data.percMem;
-      dojo.byId('percSwap').innerHTML   = data.percSwap;
-      dojo.byId('percSwapBar').style.width = data.percSwap;
+      dojo.byId('sysPercCpu').innerHTML = response.sysPercCpu;
+      dojo.byId('sysPercCpuBar').style.width = response.sysPercCpu;
+      dojo.byId('percMem').innerHTML    = response.percMem;
+      dojo.byId('percMemBar').style.width = response.percMem;
+      dojo.byId('percSwap').innerHTML   = response.percSwap;
+      dojo.byId('percSwapBar').style.width = response.percSwap;
       
       
-      dojo.byId('jvmTotalMem').innerHTML  = data.jvmTotalMem
-      dojo.byId('jvmFreeMem').innerHTML   = data.jvmFreeMem
-      dojo.byId('jvmMaxMem').innerHTML    = data.jvmMaxMem
-      dojo.byId('jvmPercMem').innerHTML   = data.jvmPercMem
+      dojo.byId('jvmTotalMem').innerHTML  = response.jvmTotalMem
+      dojo.byId('jvmFreeMem').innerHTML   = response.jvmFreeMem
+      dojo.byId('jvmMaxMem').innerHTML    = response.jvmMaxMem
+      dojo.byId('jvmPercMem').innerHTML   = response.jvmPercMem
     }
   });
   setTimeout("getSystemStats()", 3000);
@@ -212,7 +205,7 @@ getSystemStats();
 </div>
 
 <div id="fullBody" style="clear:both">
-  <% dojoTabContainer(id:'bodyTabContainer', style:'width: 100%; height:500px;') { %>
+  <% dojoTabContainer(id:'bodyTabContainer', style:'width: 100%; height:525px;') { %>
     <% dojoTabPane(id:'diagTab', label:l.diagnostics) { %>
       <div style="padding: 6px;">${l.diagWatchNotice}</div>
       <div id="diagSelectControls">
@@ -296,19 +289,21 @@ getSystemStats();
 
 <script type="text/javascript">
 function selectDiag(d) {
-  if (d == 'none') {
-    dojo.byId('diagData').innerHTML = '';
-    return;
-  }
+  	if (d == 'none') {
+    	dojo.byId('diagData').innerHTML = '';
+    	return;
+  	}
     
-  dojo.io.bind({
-    url: '<%= urlFor(action:"getDiag") %>' + '?diag=' + d,
-    method: "post",
-    mimetype: "text/json-comment-filtered",
-    load: function(type, data, evt) {
-      dojo.byId('diagData').innerHTML = data.diagData;
-    }
-  });
+  	dojo.xhrPost({
+    	url: '<%= urlFor(action:"getDiag") %>',
+    	handleAs: "json-comment-filtered",
+    	content: {
+    		diag: d
+        },
+    	load: function(response, args) {
+      		dojo.byId('diagData').innerHTML = response.diagData;
+    	}
+  	});
 }
 
 function loadDiag() {
@@ -324,19 +319,21 @@ function refreshDiag() {
 refreshDiag();
 
 function selectQuery(q) {
-  if (q == 'none') {
-    dojo.byId('queryData').innerHTML = '';
-    return;
-  }
+  	if (q == 'none') {
+    	dojo.byId('queryData').innerHTML = '';
+	    return;
+  	}
     
-  dojo.io.bind({
-    url: '<%= urlFor(action:"runQuery") %>' + '?query=' + q,
-    method: "post",
-    mimetype: "text/json-comment-filtered",
-    load: function(type, data, evt) {
-      dojo.byId('queryData').innerHTML = data.queryData;
-    }
-  });
+  	dojo.xhrPost({
+    	url: '<%= urlFor(action:"runQuery") %>',
+    	handleAs: "json-comment-filtered",
+    	content: {
+    		query: q
+        },
+    	load: function(response, args) {
+      		dojo.byId('queryData').innerHTML = response.queryData;
+    	}
+  	});
 }
 
 function queryAction() {
@@ -345,19 +342,21 @@ function queryAction() {
 }
 
 function executeQuery(q) {
-  if (q == 'none') {
-    dojo.byId('queryData').innerHTML = '';
-    return;
-  }
+  	if (q == 'none') {
+    	dojo.byId('queryData').innerHTML = '';
+    	return;
+  	}
     
-  dojo.io.bind({
-    url: '<%= urlFor(action:"executeQuery") %>' + '?query=' + q,
-    method: "post",
-    mimetype: "text/json-comment-filtered",
-    load: function(type, data, evt) {
-      dojo.byId('queryData').innerHTML = data.queryData;
-    }
-  });
+  	dojo.xhrPost({
+    	url: '<%= urlFor(action:"executeQuery") %>',
+    	handleAs: "json-comment-filtered",
+    	content: {
+    		query: q
+        },
+    	load: function(response, args) {
+      		dojo.byId('queryData').innerHTML = response.queryData;
+    	}
+  	});
 }
 
 function loadQuery() {

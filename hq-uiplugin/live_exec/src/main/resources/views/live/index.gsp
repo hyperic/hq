@@ -73,38 +73,40 @@ function processResult(result) {
 }
 
 function runCommand() {
-  var cmdSelect = dojo.byId('commandSelect');
-  if (cmdSelect.selectedIndex == 0)
-    return;
+  	var cmdSelect = dojo.byId('commandSelect');
+
+    if (cmdSelect.selectedIndex == 0) return;
     
-  var cmd = cmdSelect.options[cmdSelect.selectedIndex].value;
-  var url = '<%= urlFor(action:'invoke') %>' + 
+  	var cmd = cmdSelect.options[cmdSelect.selectedIndex].value;
+  	var url = '<%= urlFor(action:'invoke') %>' + 
             '?cmd=' + cmd + 
             '&eid=<%= eid %>';
-  var fmtSelect = dojo.byId('fmt_' + cmd);
-  if (fmtSelect.selectedIndex != -1) {
-    var fmt = fmtSelect.options[fmtSelect.selectedIndex].value;
-    url = url + '&formatter=' + fmt;
-  } 
+  	var fmtSelect = dojo.byId('fmt_' + cmd);
 
-  if (++ajaxCount > 0) {
-    dojo.byId("spinner").style.visibility = 'visible';  
-  }
+    if (fmtSelect.selectedIndex != -1) {
+    	var fmt = fmtSelect.options[fmtSelect.selectedIndex].value;
+
+        url = url + '&formatter=' + fmt;
+  	} 
+
+  	if (++ajaxCount > 0) {
+    	dojo.byId("spinner").style.visibility = 'visible';  
+  	}
     
-  dojo.io.bind({
-    url: url,
-    method: "get",
-    mimetype: "text/json-comment-filtered",
-    load: function(type, data, evt) {
-      if (--ajaxCount == 0) {
-        dojo.byId("spinner").style.visibility = 'hidden';  
-      }
-      processResult(data);
-    },
-    error: function(err, msg) {
-      //alert('There has been an error:  ' + err);
-    }
-  });
+	dojo.xhrGet({
+    	url: url,
+    	handleAs: "json-comment-filtered",
+    	load: function(response, args) {
+      		if (--ajaxCount == 0) {
+        		dojo.byId("spinner").style.visibility = 'hidden';  
+      		}
+
+            processResult(response);
+    	},
+    	error: function(response, args) {
+      		//alert('There has been an error:  ' + err);
+    	}
+  	});
 }
 
 function handleError(er) {
@@ -146,7 +148,7 @@ function updateLegend(select){
     legendDiv.innerHTML = legends[select.options[select.selectedIndex].value];
 }
 
-dojo.addOnLoad(function(){
+dojo.ready(function(){
     updateLegend(dojo.byId("commandSelect"));
 });
 

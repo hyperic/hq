@@ -710,7 +710,7 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             loadData();
         }
 
-        dojo11.addOnLoad(
+        dojo.ready(
             function() {
                 document.status = hyperic.widget.StatusElement('ct', 'nt', 'status', 'update', refInt);
                 loadData();
@@ -726,7 +726,7 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
         function loadData() {
             //Show the status update message
             document.status.startUpdate();
-            dojo11.xhrGet( {
+            dojo.xhrGet( {
                 // url : '/cloud1.js?' + new Date().getTime(), //prevent caching
                 url : '/hqu/saasCenter/Saascenter/summaryData.hqu?time=' + t + '&range=' + dataRange + '?' + t,
                 handleAs : 'json',

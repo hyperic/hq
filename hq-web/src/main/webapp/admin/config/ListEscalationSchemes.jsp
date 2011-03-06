@@ -40,7 +40,7 @@
         }
 
     function hideCreateButton() {
-        dojo11.byId('createButton').style.display = "none";
+        dojo.byId('createButton').style.display = "none";
     }
 </script>
 <table width="100%" cellpadding="0" cellspacing="10">
@@ -81,7 +81,7 @@ function showEscRows(originalRequest) {
 
   var schemes = escJson.escalations;
 
-  var escalations = dojo11.byId('escalations');
+  var escalations = dojo.byId('escalations');
   if (escalations.childNodes.length > 0) {
     while(escalations.lastChild) {
       escalations.removeChild(escalations.lastChild);
@@ -129,7 +129,7 @@ function showEscRows(originalRequest) {
     td3.setAttribute('align', 'right');
 
     if (schemes.length > 1) {
-      td3.innerHTML = '<a href="<html:rewrite action="/admin/config/RemoveEscalation"/>' + '?esc=' + schemes[i].id + '">' + dojo11.byId('deleteBtn').innerHTML + '</a>';
+      td3.innerHTML = '<a href="<html:rewrite action="/admin/config/RemoveEscalation"/>' + '?esc=' + schemes[i].id + '">' + dojo.byId('deleteBtn').innerHTML + '</a>';
     } else {
         td3.innerHTML="&nbsp;";
     }
@@ -153,7 +153,7 @@ function showEscRows(originalRequest) {
     document.EscalationSchemeForm.mode.value = 'escalate';
   }
 
-  dojo11.addOnLoad(initEscalationSchemes);
+  dojo.ready(initEscalationSchemes);
 
   var reloadScheme = true;
 </script>

@@ -58,7 +58,7 @@
              		onloads[i]();
 	        };
 	        
-	        dojo11.addOnLoad(function() {
+	        dojo.ready(function() {
             	initOnloads();
             });
 	    </script>

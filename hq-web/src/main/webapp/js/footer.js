@@ -33,12 +33,12 @@ function setFoot() {
   };
   
   winH = WindowSize.height;
-  conH = dojo11.coords("header", false).h + dojo11.coords("migContainer", false).h;
+  conH = dojo.position("header").h + dojo.position("migContainer").h;
   
   var myHeight = winH - conH - footerH + browserH;
   
   if (myHeight > 60) {
-  	var footerContent = dojo11.byId("footerContent");
+  	var footerContent = dojo.byId("footerContent");
   	
   	footerContent.style.marginTop = myHeight + "px";
   }

@@ -46,7 +46,7 @@
 	autoLogout = false;
 	
 	function removePortlet(name, label) {
-	    dojo11.xhrPost({
+	    dojo.xhrPost({
 	        url: '/app/dashboard/<c:out value="${selectedDashboardId}" />/portlets/' + name,
 	        content: {
 				_method: "DELETE"
@@ -295,7 +295,7 @@
 			               			containment: ["<c:out value="narrowList_${narrow}"/>"],
 			               			handle: 'widgetHandle',
 			               			onUpdate: function() {
-			                    		dojo11.xhrPost({
+			                    		dojo.xhrPost({
 			                        		url: "<html:rewrite page="/dashboard/ReorderPortlets.do"/>?"+Sortable.serialize('<c:out value="narrowList_${narrow}"/>'),
 			                        		load: function(){ }
 			                    		});

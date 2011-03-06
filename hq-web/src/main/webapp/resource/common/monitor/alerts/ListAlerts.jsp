@@ -289,13 +289,12 @@
 	<tiles:insert definition=".portlet.error"/>
 
 	<script type="text/javascript">
-		dojo11.require("dijit.dijit");
-		dojo11.require("dijit.Dialog");
-  		dojo11.require("dijit.ProgressBar");
+		dojo.require("dijit.Dialog");
+  		dojo.require("dijit.ProgressBar");
           	
 		var MyAlertCenter = null;
 
-		dojo11.addOnLoad(function(){
+		dojo.ready(function(){
 			MyAlertCenter = new hyperic.alert_center("Alerts");          		
 		});
 	</script>

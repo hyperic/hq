@@ -30,7 +30,11 @@ import org.apache.commons.lang.StringEscapeUtils
 
 class HtmlUtil {
     static String hquStylesheets() {
-        '<link rel="stylesheet" href="/hqu/public/hqu.css" type="text/css">'
+		"""
+		<link rel="stylesheet" href="/static/js/dojo/1.5/dojox/grid/resources/Grid.css">                 
+		<link rel="stylesheet" href="/static/js/dojo/1.5/dojox/grid/resources/tundraGrid.css">                 
+		<link rel="stylesheet" href="/hqu/public/hqu.css">
+		"""
     }
     
     static String escapeHtml(o) {
@@ -177,11 +181,10 @@ class HtmlUtil {
         res << """
             <script type="text/javascript">
               function ${funcid}() {
-                  dojo.io.bind({
+                  dojo.xhrPost({
                       url: '${useUrlFor(p)}',
-                      method: "post",
-                      mimetype: "text/json-comment-filtered",
-                      load: function(type, data, evt) {
+                      handleAs: "json-comment-filtered",
+                      load: function(response, args) {
                           ${afterAction};
                       }
                    });
