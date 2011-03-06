@@ -78,19 +78,19 @@ class DojoUtil {
             var plugin={};plugin.accordion={};plugin.ajax={};
             var updateKWArgs = {};
             
-            plugin.ajax.getData = function(type, data, evt) {
+            plugin.ajax.getData = function(response, args) {
                 var unique = null;
-                if (data) {
-                    if (data.length == 0) {
+                if (response) {
+                    if (response.length == 0) {
                         document.getElementById('resourceTree').innerHTML = '';
                         dojo.publish("XHRComplete", [ "NO_DATA_RETURNED" ]);
                     }else{
                         dojo.publish("XHRComplete", [ "DATA_RETURNED" ]);
                         var domTree = document.getElementById('resourceTree');
                         var tree = "";
-                        for (var x = 0; x < data.length; x++) {
-                            var parent = data[x]['parent'];
-                            var children = data[x]['children'];
+                        for (var x = 0; x < response.length; x++) {
+                            var parent = response[x]['parent'];
+                            var children = response[x]['children'];
                             var innerChildren = "";
                             var markExpanded = false;
                             for (var i = 0; i < children.length; i++) {
@@ -110,14 +110,14 @@ class DojoUtil {
                                     innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count']);
                                 }
                             }
-                            if (selectedItem && typeof(selectedItem) == "string" && data[x]['id'] == selectedItem) {
+                            if (selectedItem && typeof(selectedItem) == "string" && response[x]['id'] == selectedItem) {
                                  unique = dijit.getUniqueId("unique");
-                                 tree +=  plugin.accordion.createParent(data[x]['parent'], data[x]['id'], data[x]['count'], innerChildren, markExpanded, unique);
-                            } else if (selectedItem && typeof(selectedItem) == "object" && data[x]['id'] == selectedItem.getAttribute('nodeid')) {
+                                 tree +=  plugin.accordion.createParent(response[x]['parent'], response[x]['id'], response[x]['count'], innerChildren, markExpanded, unique);
+                            } else if (selectedItem && typeof(selectedItem) == "object" && response[x]['id'] == selectedItem.getAttribute('nodeid')) {
                                  unique = dijit.getUniqueId("unique");
-                                 tree +=  plugin.accordion.createParent(data[x]['parent'], data[x]['id'], data[x]['count'], innerChildren, markExpanded, unique);
+                                 tree +=  plugin.accordion.createParent(response[x]['parent'], response[x]['id'], response[x]['count'], innerChildren, markExpanded, unique);
                             } else {
-                                 tree +=  plugin.accordion.createParent(data[x]['parent'], data[x]['id'], data[x]['count'], innerChildren, markExpanded);
+                                 tree +=  plugin.accordion.createParent(response[x]['parent'], response[x]['id'], response[x]['count'], innerChildren, markExpanded);
                             }
                             
                         }
