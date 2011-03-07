@@ -42,6 +42,7 @@ import org.hyperic.hq.hqu.RenditServer;
 import org.hyperic.hq.hqu.ViewDescriptor;
 import org.hyperic.hq.hqu.data.AttachmentRepository;
 import org.hyperic.hq.hqu.data.AttachmentResourceRepository;
+import org.hyperic.hq.hqu.data.UIPluginRepository;
 import org.hyperic.hq.hqu.data.ViewRepository;
 import org.hyperic.hq.hqu.shared.UIPluginManager;
 import org.hyperic.hq.inventory.domain.Resource;
@@ -55,7 +56,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UIPluginManagerImpl implements UIPluginManager {
     private final static Log log = LogFactory.getLog(UIPluginManagerImpl.class.getName());
 
-    private UIPluginDAO uiPluginDAO;
+    private UIPluginRepository uiPluginRepository;
     private ViewRepository viewRepository;
     private AttachmentRepository attachmentRepository;
     private AttachmentResourceRepository attachmentResourceRepository;
@@ -66,20 +67,21 @@ public class UIPluginManagerImpl implements UIPluginManager {
     @Autowired
     public UIPluginManagerImpl(AttachmentRepository attachmentRepository,
                                AttachmentResourceRepository attachmentResourceRepository, ViewRepository viewRepository,
-                               UIPluginDAO uiPluginDAO, RenditServer renditServer,
+                               UIPluginRepository uiPluginRepository, RenditServer renditServer,
                                ResourceManager resourceManager,
                                ResourceGroupManager resourceGroupManager) {
         this.attachmentRepository = attachmentRepository;
         this.attachmentResourceRepository = attachmentResourceRepository;
         this.viewRepository = viewRepository;
-        this.uiPluginDAO = uiPluginDAO;
+        this.uiPluginRepository = uiPluginRepository;
         this.renditServer = renditServer;
         this.resourceManager = resourceManager;
         this.resourceGroupManager = resourceGroupManager;
     }
 
     public UIPlugin createPlugin(String name, String ver) {
-        return uiPluginDAO.create(name, ver);
+        UIPlugin uiPlugin = new UIPlugin(name,ver);
+        return uiPluginRepository.save(uiPlugin);
     }
 
     public UIPlugin createOrUpdate(String name, String version) {
@@ -87,7 +89,8 @@ public class UIPluginManagerImpl implements UIPluginManager {
 
         if (p == null) {
             log.info("Creating plugin [" + name + "]");
-            p = uiPluginDAO.create(name, version);
+            UIPlugin uiPlugin = new UIPlugin(name,version);
+            p = uiPluginRepository.save(uiPlugin);
         } else {
             log.info("Updating plugin [" + name + "]");
             updatePlugin(p, version);
@@ -122,13 +125,10 @@ public class UIPluginManagerImpl implements UIPluginManager {
 
     @Transactional(readOnly = true)
     public UIPlugin findPluginByName(String name) {
-        return uiPluginDAO.findByName(name);
+        return uiPluginRepository.findByName(name);
     }
 
-    @Transactional(readOnly = true)
-    public UIPlugin findPluginById(Integer id) {
-        return uiPluginDAO.findById(id);
-    }
+    
 
     @Transactional(readOnly = true)
     public View findViewById(Integer id) {
@@ -154,7 +154,7 @@ public class UIPluginManagerImpl implements UIPluginManager {
     public void deletePlugin(UIPlugin p) {
         log.info("Deleting plugin " + p);
 
-        uiPluginDAO.remove(p);
+        uiPluginRepository.delete(p);
     }
 
     public void detach(Attachment a) {
@@ -213,7 +213,7 @@ public class UIPluginManagerImpl implements UIPluginManager {
      */
     @Transactional(readOnly = true)
     public Collection<UIPlugin> findAll() {
-        return uiPluginDAO.findAll();
+        return uiPluginRepository.findAll();
     }
 
     /**

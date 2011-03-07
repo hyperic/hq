@@ -60,8 +60,6 @@ public interface UIPluginManager {
 
 	public UIPlugin findPluginByName(String name);
 
-	public UIPlugin findPluginById(Integer id);
-
 	public View findViewById(Integer id);
 
 	public Attachment findAttachmentById(Integer id);
