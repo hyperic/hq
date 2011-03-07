@@ -3,6 +3,12 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	
+	 <parent>
+        <groupId>org.hyperic.hq</groupId>
+        <artifactId>hq-parent</artifactId>
+       <version>4.6.0.BUILD-SNAPSHOT</version>
+    </parent>
+
 	<groupId>org.hyperic.hq.plugin</groupId>
 	<artifactId>modules</artifactId>
 	<packaging>pom</packaging>
