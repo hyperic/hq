@@ -137,10 +137,8 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         List<ServiceResource> rabbitResources = createRabbitResources(config);
         if (rabbitResources != null && rabbitResources.size() > 0) {
             serviceResources.addAll(rabbitResources);
+            syncServices(config, rabbitResources);
         }
-
-        syncServices(config, rabbitResources);
-
         return serviceResources;
     }
 
