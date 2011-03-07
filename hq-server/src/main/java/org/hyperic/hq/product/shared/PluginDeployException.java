@@ -25,6 +25,15 @@
 
 package org.hyperic.hq.product.shared;
 
+@SuppressWarnings("serial")
 public class PluginDeployException extends Exception {
+
+    public PluginDeployException(String msg, Exception e) {
+        super(msg, e);
+    }
+
+    public PluginDeployException(String msg) {
+        super(msg);
+    }
 
 }
