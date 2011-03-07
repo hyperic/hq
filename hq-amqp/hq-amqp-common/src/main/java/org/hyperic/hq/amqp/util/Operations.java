@@ -31,5 +31,20 @@ package org.hyperic.hq.amqp.util;
 public class Operations {
 
     public static final String PING = "ping";
-    
+
+    public static final String START = "start";
+
+    public static final String RESTART = "restart";
+
+    public static final String DIE = "die";
+
+    public static final String UPGRADE = "upgrade";
+
+    public static final String GET_AGENT_BUNDLE = "getCurrentAgentBundle";
+
+    public static final String SEND_FILE = "agentSendFileData";
+
+    public static final String REMOVE_FILE = "agentRemoveFile";
+
+ 
 }
