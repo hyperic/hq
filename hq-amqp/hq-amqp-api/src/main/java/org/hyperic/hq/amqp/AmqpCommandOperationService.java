@@ -33,6 +33,7 @@ import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.amqp.util.Operations;
 
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Map;
 
 
@@ -64,13 +65,13 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
      * @param legacyClient
      */
     public AmqpCommandOperationService(AgentCommandsClient legacyClient) {
-        this(new AgentAmqpOperationService(), legacyClient, false); 
+        this(new AgentAmqpOperationService(), legacyClient, false);
     }
 
     /**
      * Temporary: for the legacy Server constructor
-     * @param operationService pre-configured operation service 
-     * @param legacyClient the legacy client implementation
+     * @param operationService    pre-configured operation service
+     * @param legacyClient        the legacy client implementation
      * @param agentUnidirectional currently just used for the server ping operation
      */
     public AmqpCommandOperationService(OperationService operationService, AgentCommandsClient legacyClient, boolean agentUnidirectional) {
@@ -78,11 +79,11 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         this.unidirectional = agentUnidirectional;
         this.legacyClient = legacyClient;
     }
-    
+
     /**
      * The first to be overridden.
      * Do we really need to return a duration during the transition?
-     * @return duration 
+     * @return duration
      * @see org.hyperic.hq.agent.client.AgentCommandsClient#ping()
      */
     public long ping() {
@@ -90,10 +91,17 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         if (unidirectional) return 0;
 
         long sendTime = System.currentTimeMillis();
-        operationService.send(Operations.PING);
-        long duration = System.currentTimeMillis() - sendTime;
+        long duration = 0;
 
-        logger.info("***********.ping() duration=" + duration);
+        try {
+
+            operationService.send(Operations.PING);
+            
+            duration = System.currentTimeMillis() - sendTime;
+            logger.info("***********.ping() duration=" + duration);
+        } catch (Exception e) {
+             handleException(e, Operations.PING);
+        }
         return duration;
     }
 
@@ -102,7 +110,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         try {
             legacyClient.restart();
         } catch (Exception e) {
-            logger.error(e);
+            handleException(e, Operations.RESTART);
         }
     }
 
@@ -111,7 +119,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
             legacyClient.die();
             stop();
         } catch (Exception e) {
-            logger.error(e);
+            handleException(e, Operations.DIE);
         }
     }
 
@@ -119,7 +127,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         try {
             return legacyClient.getCurrentAgentBundle();
         } catch (Exception e) {
-            logger.error(e);
+            handleException(e, Operations.GET_AGENT_BUNDLE);
             return null;
         }
     }
@@ -128,7 +136,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         try {
             return legacyClient.upgrade(tarFile, destination);
         } catch (Exception e) {
-            logger.error(e);
+            handleException(e, Operations.UPGRADE);
             return null;
         }
     }
@@ -137,9 +145,28 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         try {
             return legacyClient.agentSendFileData(destFiles, streams);
         } catch (Exception e) {
-            logger.error(e);
+            handleException(e, Operations.SEND_FILE);
             return null;
         }
+    }
+
+    public Map<String, Boolean> agentRemoveFile(Collection<String> files) {
+        try {
+            return legacyClient.agentRemoveFile(files);
+        } catch (Exception e) {
+            handleException(e, Operations.REMOVE_FILE);
+            return null;
+        }
+    }
+
+    /**
+     * Temporary strategy until legacy remoting etc is replaced and
+     * until an API exception handling strategy is created.
+     * Currently, AgentRemoteException or AgentConnectionException can
+     * be thrown from legacy implementations.
+     */
+    private void handleException(Throwable t, String operation) {
+        logger.error(t.getClass().getSimpleName() + " thrown while executing " + operation, t); 
     }
 
     /**
