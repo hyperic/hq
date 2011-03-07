@@ -25,6 +25,16 @@
 
 package org.hyperic.hq.agent.client;
 
+import org.hyperic.hq.agent.AgentConnectionException;
+import org.hyperic.hq.agent.AgentRemoteException;
+import org.hyperic.hq.agent.FileData;
+import org.hyperic.hq.agent.FileDataResult;
+import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.transport.AgentProxyFactory;
+import org.hyperic.hq.transport.AgentProxyFactoryImpl;
+import org.hyperic.hq.transport.util.InputStreamServiceImpl;
+import org.hyperic.hq.transport.util.RemoteInputStream;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -32,26 +42,21 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hyperic.hq.agent.AgentConnectionException;
-import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.agent.FileData;
-import org.hyperic.hq.agent.FileDataResult;
-import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.transport.AgentProxyFactory;
-import org.hyperic.hq.transport.util.InputStreamServiceImpl;
-import org.hyperic.hq.transport.util.RemoteInputStream;
-
 /**
  * The Agent Commands client that uses the new transport.
  */
 public class AgentCommandsClientImpl 
     extends AbstractCommandsClient implements AgentCommandsClient {
-    
+
     private final boolean _agentRegistrationClient;
+
+    public AgentCommandsClientImpl(Agent agent) {
+        this(agent, new AgentProxyFactoryImpl());
+    }
 
     public AgentCommandsClientImpl(Agent agent, AgentProxyFactory factory) {
         super(agent, factory);
-        _agentRegistrationClient = false;
+        this._agentRegistrationClient = false;
     }
     
     /**
@@ -59,25 +64,12 @@ public class AgentCommandsClientImpl
      * the agent doesn't yet know its agent token and the Agent pojo has not 
      * yet been persisted on the server.
      */
-    public AgentCommandsClientImpl(AgentProxyFactory factory, 
-                                   String agentAddress, 
-                                   int agentPort, 
-                                   boolean unidirectional) {
-        super(createAgent(agentAddress, agentPort, unidirectional), factory);
+    public AgentCommandsClientImpl(AgentProxyFactory factory,  String agentAddress, int agentPort, boolean unidirectional) {
+        super(Agent.create(agentAddress, agentPort, unidirectional,null,false), factory);
         
-        _agentRegistrationClient = true;
+        this._agentRegistrationClient = true;
     }
-    
-    private static Agent createAgent(String agentAddress, 
-                                     int agentPort, 
-                                     boolean unidirectional) {
-        Agent agent = new Agent();
-        agent.setAddress(agentAddress);
-        agent.setPort(agentPort);
-        agent.setUnidirectional(unidirectional);
-        return agent;
-    }
-    
+     
     /**
      * @see org.hyperic.hq.agent.client.AgentCommandsClient#agentSendFileData(org.hyperic.hq.agent.FileData[], java.io.InputStream[])
      */
