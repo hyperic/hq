@@ -15,6 +15,11 @@
 	<name>Hyperic HQ Agent - Core</name>
 
 	<dependencies>
+        <dependency>
+            <groupId>org.hyperic.hq.amqp</groupId>
+            <artifactId>hq-amqp-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-lather</artifactId>
