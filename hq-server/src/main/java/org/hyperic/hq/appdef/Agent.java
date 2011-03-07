@@ -25,12 +25,10 @@
 
 package org.hyperic.hq.appdef;
 
+import org.hyperic.hq.appdef.server.session.Platform;
+
 import java.util.ArrayList;
 import java.util.Collection;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.server.session.Platform;
 
 public class Agent extends AppdefBean {
     private String _address;
@@ -41,6 +39,7 @@ public class Agent extends AppdefBean {
     private boolean _unidirectional;
     private AgentType _agentType;
     private Collection _platforms;
+    private boolean isNewTransportAgent;
 
     public Agent() {
     }
@@ -58,7 +57,21 @@ public class Agent extends AppdefBean {
         _version    = version;
         _platforms  = new ArrayList();
     }
-    
+
+    public static Agent create(String address, int port, boolean unidirectional, String authToken, boolean isNewTransportAgent) {
+        Agent agent = new Agent(null, address, port, unidirectional, authToken, null, null);
+        agent.setIsNewTransportAgent(isNewTransportAgent);
+        return agent;
+    }
+
+    public void setIsNewTransportAgent(boolean isNewTransportAgent) {
+        this.isNewTransportAgent = isNewTransportAgent;
+    }
+
+    public boolean getIsNewTransportAgent() {
+        return isNewTransportAgent;
+    }
+
     public String getAddress() {
         return _address;
     }
