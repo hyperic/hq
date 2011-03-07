@@ -25,7 +25,7 @@
   USA.
  -->
 
-<plugin name="weblogic" class="WeblogicProductPlugin">
+<plugin name="weblogic" class="WeblogicProductPlugin" version="@project.version@">
 
   <classpath>
     <!-- look for service pack jar as weblogic does in their scripts. -->

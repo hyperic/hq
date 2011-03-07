@@ -66,7 +66,6 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-resources-plugin</artifactId>
-				<version>2.4.3</version>
 				<executions>
 					<execution>
 						<id>copy-resources</id>
@@ -75,10 +74,13 @@
 							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${basedir}/target/classes/hqu</outputDirectory>
+							<delimiters>
+  									<delimiter>@</delimiter>
+							</delimiters>
+							<outputDirectory>${basedir}/target/classes</outputDirectory>
 							<resources>
 								<resource>
-									<directory>src/main/groovy/</directory>
+									<directory>src/main/resources/</directory>
 									<filtering>true</filtering>
 								</resource>
 							</resources>
@@ -125,6 +127,7 @@
 				<groupId>org.codehaus.groovy.maven</groupId>
 				<artifactId>gmaven-plugin</artifactId>
 			</plugin>
+			
 			<plugin>
 				<groupId>com.atlassian.maven.plugins</groupId>
 				<artifactId>maven-clover2-plugin</artifactId>

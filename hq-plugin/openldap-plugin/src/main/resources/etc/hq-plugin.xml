@@ -34,7 +34,7 @@
 
 
 
-<plugin package="org.hyperic.hq.plugin.openldap">
+<plugin package="org.hyperic.hq.plugin.openldap" version="@project.version@">
 
   <property name="template-config"
     value="ldapDriver=%ldapDriver%,ldapHostURL=%ldapHostURL%,ldapAuthType=%ldapAuthType%,ldapTreePathToDN=%ldapTreePathToDN%,ldapPasswd=%ldapPasswd%"/>

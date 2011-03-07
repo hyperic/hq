@@ -3,7 +3,7 @@
 <!DOCTYPE plugin [
   <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
 ]>
-<plugin>
+<plugin version="@project.version@">
     <classpath>
         <include name="pdk/lib/mx4j" />
     </classpath>

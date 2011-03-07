@@ -25,7 +25,7 @@
   USA.
  -->
 
-<plugin class="org.hyperic.hq.plugin.hqagent.AgentProductPlugin">
+<plugin class="org.hyperic.hq.plugin.hqagent.AgentProductPlugin" version="@project.version@">
   <metrics name="HQ Agent">
     <metric name="Availability"
             alias="Availability"

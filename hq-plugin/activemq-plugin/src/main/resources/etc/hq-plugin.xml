@@ -35,7 +35,7 @@
 
 
 
-<plugin package="org.hyperic.hq.plugin.activemq" name="activemq">
+<plugin package="org.hyperic.hq.plugin.activemq" name="activemq" version="@project.version@">
 
   <classpath>
     <include name="pdk/lib/mx4j"/>

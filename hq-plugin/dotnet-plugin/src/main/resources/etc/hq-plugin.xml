@@ -24,7 +24,7 @@
   USA.
  -->
 
-<plugin package="org.hyperic.hq.plugin.dotnet">
+<plugin package="org.hyperic.hq.plugin.dotnet" version="@project.version@">
   <filter name="data.domain"
           value=".NET CLR Data"/>
 

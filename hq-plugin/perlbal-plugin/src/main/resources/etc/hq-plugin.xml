@@ -23,7 +23,7 @@
   USA.
  -->
 
-<plugin>
+<plugin version="@project.version@">
 
   <!-- extends NetServicesCollector -->
   <classpath>

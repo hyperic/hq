@@ -25,7 +25,7 @@
   USA.
  -->
 
-<plugin name="iis">
+<plugin name="iis" version="@project.version@">
   <!-- Properties used for looking up metrics through the PDH -->
   <filter name="domain"
           value="\Web Service(${iishost})\" />
