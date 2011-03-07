@@ -12,3 +12,5 @@ ExecutionStrategyStates.dat
 logs
 nbactions.xml
 
+.idea/
+intellij/
