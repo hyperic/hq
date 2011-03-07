@@ -9,27 +9,32 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Prototype only.
+ * Simple config for prototype.
  * @author Helena Edelson
  */
 @Configuration
 /* @ImportResource("classpath:META-INF/spring/rabbit.xml") */
-public class CommonAmqpConfiguration implements CommonConfiguration { 
+public class CommonAmqpConfiguration implements CommonConfiguration {
     /* 
     @Value("${exchanges.agent.server}") private String agentToServerExchangeName;
     @Value("${exchanges.direct}") private String directExchangeName;
     @Value("${exchanges.fanout}") private String fanoutExchangeName;
     @Value("${exchanges.topic}") private String topicExchangeName;
     */
+
+    protected final String agentToServerQueueName = "queues.agentToServer";
+    protected final String serverToAgentQueueName = "queues.serverToAgent";
+
+    protected final String agentToServerDirectExchangeName = "exchanges.direct.agentToServer";
+    protected final String serverToAgentDirectExchangeName = "exchanges.direct.serverToAgent";
+
+    protected final String fanoutExchangeName = "exchanges.fanout";
     
-    private final String agentToServerExchangeName = "agentServerExchange";
-    private final String directExchangeName = "direct";
-    private final String fanoutExchangeName = "fanout";
-    private final String topicExchangeName = "topic";
+    protected final String agentSubscriptionName = "exchanges.topic.agentToServer";
 
     @Bean
     public ConnectionFactory rabbitConnectionFactory() {
-        return new SingleConnectionFactory(); 
+        return new SingleConnectionFactory();
     }
 
     @Bean
@@ -38,29 +43,28 @@ public class CommonAmqpConfiguration implements CommonConfiguration {
     }
 
     @Bean
-    public RabbitAdmin amqpAdmin() { 
+    public RabbitAdmin amqpAdmin() {
         return new RabbitAdmin(rabbitConnectionFactory());
     }
 
-    @Bean
-    public Queue serverToAgentQueue() {
-        Queue queue = new Queue("serverToAgentQueue");
-        amqpAdmin().declareQueue(queue);
-        return queue;
-    }
-
-    @Bean
-    public Queue agentToServerQueue() {
-        Queue queue = new Queue("agentServerQueue");
-        amqpAdmin().declareQueue(queue);
-        return queue;
-    }
+    /**
+     * Agent sends to agentToServerExchange to route to the Server.
+     */
     @Bean
     public DirectExchange agentToServerExchange() {
-        DirectExchange e = new DirectExchange(agentToServerExchangeName, true, false);
-        amqpAdmin().declareExchange(e); 
-        amqpAdmin().declareBinding(BindingBuilder.from(agentToServerQueue()).to(e).with(agentToServerQueue().getName()));
+        DirectExchange e = new DirectExchange(agentToServerDirectExchangeName, true, false);
+        amqpAdmin().declareExchange(e);
         return e;
+    }
+ 
+    /**
+     * Agent consumes from the server
+     */
+    @Bean
+    public Queue serverToAgentQueue() {
+        Queue queue = new Queue(serverToAgentQueueName);
+        amqpAdmin().declareQueue(queue);
+        return queue;
     }
 
     /* Specific Queues/Exchanges - these and their creation/binding
@@ -70,22 +74,17 @@ public class CommonAmqpConfiguration implements CommonConfiguration {
     public Queue directQueue() {
         return amqpAdmin().declareQueue();
     }
-    @Bean
-    public DirectExchange directExchange() {
-        DirectExchange e = new DirectExchange(directExchangeName, true, false);
-        amqpAdmin().declareExchange(e);
-        return e;
-    }
+
 
     @Bean
     public Queue fanoutQueue() {
         return amqpAdmin().declareQueue();
     }
+
     @Bean
     public Queue topicQueue() {
         return amqpAdmin().declareQueue();
     }
-
 
 
     @Bean
@@ -97,7 +96,7 @@ public class CommonAmqpConfiguration implements CommonConfiguration {
 
     @Bean
     public TopicExchange topicExchange() {
-        TopicExchange e = new TopicExchange(topicExchangeName, true, false);
+        TopicExchange e = new TopicExchange(agentSubscriptionName, true, false);
         amqpAdmin().declareExchange(e);
         return e;
     }

@@ -14,12 +14,22 @@ public class AmqpOperationService implements OperationService {
 
     protected Logger logger = Logger.getLogger(this.getClass());
 
-    /** Injection of template with pre-configured exchange and routing key */
+    protected final String agentToServerExchangeName = "agentServerExchange";
+
+    protected final String agentToServerRoutingKey = "agentServerQueue";
+
+    protected final String serverToAgentQueueName = "serverToAgentQueue";
+
+    /**
+     * Injection of template with pre-configured exchange and routing key
+     */
     private RabbitTemplate rabbitTemplate;
 
-    /** Temporary, for the agent prototype */
+    /**
+     * Temporary, for the agent prototype
+     */
     public AmqpOperationService() {
-        this(new RabbitTemplate(new SingleConnectionFactory()));
+        this.rabbitTemplate = new RabbitTemplate(new SingleConnectionFactory());
     }
 
     @Autowired
@@ -29,9 +39,9 @@ public class AmqpOperationService implements OperationService {
 
     /**
      * TODO desc.
-     * @param operationName The name of the operation that should be performed
-     * @param nodeId The id of the node this operation should be performed on
-     * @param context The context for the operation being performed
+     * @param operationName           The name of the operation that should be performed
+     * @param nodeId                  The id of the node this operation should be performed on
+     * @param context                 The context for the operation being performed
      * @param operationStatusCallback A callback for notification of selected events in the lifecycle of the operation
      * @param <T>
      * @throws RuntimeException
@@ -51,18 +61,8 @@ public class AmqpOperationService implements OperationService {
     /**
      * Sends a message with configurable routing.
      */
-    public void send(String exchange, String routingKey, String message) { 
+    public void send(String exchange, String routingKey, String message) {
         rabbitTemplate.convertAndSend(exchange, routingKey, message);
         logger.info("Sent message: " + message);
-    }
-
-    /**
-     * Ignored call on the server.
-     */
-    public void stop() {
-    }
-
-    public RabbitTemplate getRabbitTemplate() {
-        return rabbitTemplate;
-    }
+    } 
 }

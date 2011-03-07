@@ -27,8 +27,4 @@ public interface OperationService {
      */
     void send(String exchange, String routingKey, String message);
 
-    /**
-     * Temporary to deal with no Spring on Agent.
-     */
-    void stop();
 }

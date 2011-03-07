@@ -25,29 +25,9 @@
 
 package org.hyperic.hq.bizapp.agent.client;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.InterruptedIOException;
-import java.io.PrintStream;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.URL;
-import java.net.UnknownHostException;
-import java.util.Properties;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.PropertyConfigurator;
-import org.apache.log4j.RollingFileAppender;
+import org.apache.log4j.*;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentConfigException;
 import org.hyperic.hq.agent.AgentConnectionException;
@@ -56,26 +36,22 @@ import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.LegacyAgentCommandsClientImpl;
 import org.hyperic.hq.agent.server.AgentDaemon;
 import org.hyperic.hq.agent.server.LoggingOutputStream;
+import org.hyperic.hq.amqp.AmqpCommandOperationService;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.agent.commands.CreateToken_args;
 import org.hyperic.hq.bizapp.agent.commands.CreateToken_result;
-import org.hyperic.hq.bizapp.client.AgentCallbackClient;
-import org.hyperic.hq.bizapp.client.AgentCallbackClientException;
-import org.hyperic.hq.bizapp.client.BizappCallbackClient;
-import org.hyperic.hq.bizapp.client.RegisterAgentResult;
-import org.hyperic.hq.bizapp.client.StaticProviderFetcher;
+import org.hyperic.hq.bizapp.client.*;
 import org.hyperic.hq.common.shared.ProductProperties;
-import org.hyperic.sigar.FileInfo;
-import org.hyperic.sigar.FileWatcher;
-import org.hyperic.sigar.FileWatcherThread;
-import org.hyperic.sigar.Sigar;
-import org.hyperic.sigar.SigarException;
+import org.hyperic.sigar.*;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.security.SecurityUtil;
 import org.tanukisoftware.wrapper.WrapperManager;
-
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
+
+import java.io.*;
+import java.net.*;
+import java.util.Properties;
 
 
 /**
@@ -132,13 +108,14 @@ public class AgentClient {
     private boolean             redirectedOutputs = false;
 
     private AgentClient(AgentConfig config, SecureAgentConnection conn){
-        this.agtCommands = new LegacyAgentCommandsClientImpl(conn);
+        this.agtCommands = new AmqpCommandOperationService(new LegacyAgentCommandsClientImpl(conn));
+        //this.agtCommands = new LegacyAgentCommandsClientImpl(conn);
         this.camCommands = new CommandsClient(conn);
         this.config      = config;
         this.log         = LogFactory.getLog(AgentClient.class);
         this.nuking      = false;
     }
-
+    
     private long cmdPing(int numAttempts)
         throws AgentConnectionException, AgentRemoteException
     {
@@ -147,6 +124,8 @@ public class AgentClient {
         lastExc = new AgentConnectionException("Failed to connect to agent");
         while(numAttempts-- != 0){
             try {
+                log.info(".cmdPing("+numAttempts+") returns "+this.agtCommands+".ping()***********");
+
                 return this.agtCommands.ping();
             } catch(AgentConnectionException exc){
                 // Loop around to the next attempt

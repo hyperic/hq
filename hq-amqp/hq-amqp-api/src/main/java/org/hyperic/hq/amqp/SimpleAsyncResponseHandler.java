@@ -8,12 +8,12 @@ import org.apache.log4j.Logger;
  */
 public class SimpleAsyncResponseHandler implements AsyncQueueConsumer {
 
-    protected Logger logger = Logger.getLogger(this.getClass());
+    protected final Logger logger = Logger.getLogger(this.getClass());
 
     protected OperationService operationService;
 
     public SimpleAsyncResponseHandler() {
-       this.operationService = new AgentAmqpOperationService();
+       //this.operationService = new AgentAmqpOperationService();
     }
     
     public SimpleAsyncResponseHandler(OperationService operationService) {
@@ -24,7 +24,7 @@ public class SimpleAsyncResponseHandler implements AsyncQueueConsumer {
             String status = this + " received [" + message + "]";
             logger.info("********"+status);
 
-            operationService.send(status);
+            //operationService.send(status);
     }
 
     public void handleMessage(byte[] message) {

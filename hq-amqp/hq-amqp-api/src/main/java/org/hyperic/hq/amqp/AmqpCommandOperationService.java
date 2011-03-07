@@ -89,7 +89,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
     public long ping() {
         /* The unidirectional client does not work yet: agent unaware of its token. */
         if (unidirectional) return 0;
-
+        logger.info("***********.ping()");
         long sendTime = System.currentTimeMillis();
         long duration = 0;
 
@@ -98,7 +98,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
             operationService.send(Operations.PING);
             
             duration = System.currentTimeMillis() - sendTime;
-            logger.info("***********.ping() duration=" + duration);
+            logger.info("***********ping() executed, returning duration=" + duration);
         } catch (Exception e) {
              handleException(e, Operations.PING);
         }
@@ -116,8 +116,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
 
     public void die() {
         try {
-            legacyClient.die();
-            stop();
+            legacyClient.die(); 
         } catch (Exception e) {
             handleException(e, Operations.DIE);
         }
@@ -167,16 +166,6 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
      */
     private void handleException(Throwable t, String operation) {
         logger.error(t.getClass().getSimpleName() + " thrown while executing " + operation, t); 
-    }
-
-    /**
-     * Temporary for the non-spring Agent - which
-     * will be resolved this sprint.
-     */
-    private void stop() {
-        if (this.operationService instanceof AgentAmqpOperationService) {
-            operationService.stop();
-        }
     }
 
 }

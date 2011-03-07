@@ -25,29 +25,16 @@
 
 package org.hyperic.hq.agent.client;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.*;
+import org.hyperic.hq.agent.commands.*;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.hyperic.hq.agent.AgentCommandsAPI;
-import org.hyperic.hq.agent.AgentConnectionException;
-import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.agent.AgentRemoteValue;
-import org.hyperic.hq.agent.AgentStreamPair;
-import org.hyperic.hq.agent.FileData;
-import org.hyperic.hq.agent.FileDataResult;
-import org.hyperic.hq.agent.commands.AgentBundle_args;
-import org.hyperic.hq.agent.commands.AgentBundle_result;
-import org.hyperic.hq.agent.commands.AgentDie_args;
-import org.hyperic.hq.agent.commands.AgentPing_args;
-import org.hyperic.hq.agent.commands.AgentReceiveFileData_args;
-import org.hyperic.hq.agent.commands.AgentRemoveFileData_args;
-import org.hyperic.hq.agent.commands.AgentRestart_args;
-import org.hyperic.hq.agent.commands.AgentUpgrade_args;
-import org.hyperic.hq.agent.commands.AgentUpgrade_result;
-import org.hyperic.hq.agent.commands.FileRemoval_result;
 
 /**
  * The set of commands a client can call to a remote agent.  This object
@@ -56,6 +43,9 @@ import org.hyperic.hq.agent.commands.FileRemoval_result;
  */
 
 public class LegacyAgentCommandsClientImpl implements AgentCommandsClient {
+
+    private static final Log logger = LogFactory.getLog(LegacyAgentCommandsClientImpl.class);
+
     private AgentConnection  agentConn;   
     private AgentCommandsAPI verAPI;
 
@@ -79,9 +69,9 @@ public class LegacyAgentCommandsClientImpl implements AgentCommandsClient {
         long sendTime = System.currentTimeMillis();
         this.agentConn.sendCommand(AgentCommandsAPI.command_ping,
                                    this.verAPI.getVersion(), args, false);
-        long recvTime = System.currentTimeMillis();
-
-        return recvTime - sendTime;
+        long duration = System.currentTimeMillis() - sendTime;
+        logger.info(".ping()********* returning " + duration);
+        return duration;
     }
 
     /**

@@ -63,7 +63,7 @@ public class ServerConfiguration extends CommonAmqpConfiguration {
 
     @Bean
     public Binding direct() {
-        Binding direct = BindingBuilder.from(directQueue()).to(directExchange()).with(directQueue().getName());
+        Binding direct = BindingBuilder.from(directQueue()).to(serverToAgentDirectExchange()).with(directQueue().getName());
         amqpAdmin().declareBinding(direct);
         return direct;
     }

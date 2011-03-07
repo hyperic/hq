@@ -106,7 +106,7 @@ public class AgentConfig extends CommonAmqpConfiguration {
     }
 
     @Bean
-    public DirectExchange directExchange() {
+    public DirectExchange serverToAgentDirectExchange() {
         DirectExchange e = new DirectExchange("rockets.exchanges.direct", true, false);
         amqpAdmin().declareExchange(e);
         amqpAdmin().declareBinding(BindingBuilder.from(directQueue()).to(e).with(directQueue().getName()));
@@ -116,7 +116,7 @@ public class AgentConfig extends CommonAmqpConfiguration {
     @Bean
     public AmqpTemplate directTemplate() {
         RabbitTemplate template = new RabbitTemplate(rabbitConnectionFactory());
-        template.setExchange(directExchange().getName());
+        template.setExchange(serverToAgentDirectExchange().getName());
         template.setRoutingKey(directQueue().getName());
         return template;
     }
