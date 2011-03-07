@@ -25,28 +25,9 @@
 
 package org.hyperic.hq.agent.server;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.AgentConfig;
-import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.agent.AgentUpgradeManager;
-import org.hyperic.hq.agent.FileData;
-import org.hyperic.hq.agent.FileDataResult;
+import org.hyperic.hq.agent.*;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.commands.AgentReceiveFileData_args;
 import org.hyperic.hq.agent.commands.AgentUpgrade_result;
@@ -60,6 +41,11 @@ import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.file.FileWriter;
 import org.hyperic.util.math.MathUtil;
 import org.tanukisoftware.wrapper.WrapperManager;
+
+import java.io.*;
+import java.net.MalformedURLException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * The Agent Commands service.
@@ -289,6 +275,7 @@ public class AgentCommandsService implements AgentCommandsClient {
      * @see org.hyperic.hq.agent.client.AgentCommandsClient#ping()
      */
     public long ping() throws AgentRemoteException {
+        _log.info(".ping()****************return 0");
         return 0;
     }
 
