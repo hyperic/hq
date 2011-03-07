@@ -812,6 +812,7 @@
 			<modules>
 					<module>hq-util</module>
 					<module>hq-common</module>
+					<module>hq-lather</module>
 					<module>hq-pdk</module>
 					<module>hq-diagnostics</module>
 					<module>hq-messaging</module>
