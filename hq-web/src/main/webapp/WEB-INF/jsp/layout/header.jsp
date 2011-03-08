@@ -139,40 +139,41 @@
     </div>
     <script src="<spring:url value="/js/lib/lib.js" />" type="text/javascript"></script>
     <script>
-    	dojo.require("dijit.Dialog");
+	    hqDojo.require("dijit.dijit");
+    	hqDojo.require("dijit.Dialog");
    	 	
     	var resourceURL = '<html:rewrite action="/Resource" />';
 		var userURL = '<html:rewrite action="/admin/user/UserAdmin" />';
-    	var searchWidget = new hyperic.widget.search(dojo, { search: '<spring:url value="/app/search" />' }, 3, { keyCode: 83, ctrl: true });
+    	var searchWidget = new hyperic.widget.search(hqDojo, { search: '<spring:url value="/app/search" />' }, 3, { keyCode: 83, ctrl: true });
     	var refreshCount = 0;
     	var refreshAlerts = function() {
-      		dojo.xhrGet({
+      		hqDojo.xhrGet({
 	    	  	url: "<html:rewrite page="/common/RecentAlerts.jsp"/>",
 	    	  	load: function(response, args) {
-	    	        dojo.style("headerAlerts", {
+	    	        hqDojo.style("headerAlerts", {
 	    	        	"display": "",
 	    	        	"top": 0,
 	    	        	"left": "310px",
 	    	        	"paddingLeft": "72px"
 	    	        });
-	    	        dojo.byId("recentAlerts").innerHTML = response;
+	    	        hqDojo.byId("recentAlerts").innerHTML = response;
 	    	  	} 
 	      	});
 	    };
    	 	
-	    dojo.ready(function() { 
+	    hqDojo.ready(function() { 
 	    	refreshAlerts();
-        	activateHeaderTab(dojo);
+        	activateHeaderTab(hqDojo);
         	searchWidget.create();
         
-        	dojo.subscribe("refreshAlerts", function(data) {
+        	hqDojo.subscribe("refreshAlerts", function(data) {
         		refreshCount++;
         		refreshAlerts();
         	});
         	
         	setInterval(function() {
         		if (refreshCount < 30 || window.autoLogout === undefined) {
-    	            dojo.publish("refreshAlerts");
+    	            hqDojo.publish("refreshAlerts");
     	        } else {
     	        	top.location.href = "<spring:url value="/j_spring_security_logout" />";
     	        }
@@ -181,51 +182,51 @@
         	}, 60*1000);
         	
         	//Connect the events for the box, cancel and search buttons
-        	dojo.connect(searchWidget.searchBox, "onkeypress", searchWidget, "search");
+        	hqDojo.connect(searchWidget.searchBox, "onkeypress", searchWidget, "search");
         	
         	// What should the hot-keys do?
-        	dojo.subscribe('enter', searchWidget, "search");
+        	hqDojo.subscribe('enter', searchWidget, "search");
         	
         	// Render Search Tooltip
-        	dojo.byId('headerSearch').title = "<fmt:message key="header.searchTip.mac" />";
+        	hqDojo.byId('headerSearch').title = "<fmt:message key="header.searchTip.mac" />";
         	
-        	dojo.query(".tab", dojo.byId("headerTabs")).onmouseenter(function(e) {
-        		dojo.addClass(e.currentTarget, "hover");
+        	hqDojo.query(".tab", hqDojo.byId("headerTabs")).onmouseenter(function(e) {
+        		hqDojo.addClass(e.currentTarget, "hover");
         	}).onmouseleave(function(e) {
-        		dojo.removeClass(e.currentTarget, "hover");
+        		hqDojo.removeClass(e.currentTarget, "hover");
         	});
-        	dojo.query(".subMenu", dojo.byId("headerTabs")).onmouseenter(function(e) {
-        		dojo.addClass(e.currentTarget, "hover");
+        	hqDojo.query(".subMenu", hqDojo.byId("headerTabs")).onmouseenter(function(e) {
+        		hqDojo.addClass(e.currentTarget, "hover");
         	}).onmouseleave(function(e) {
-        		dojo.removeClass(e.currentTarget, "hover");
+        		hqDojo.removeClass(e.currentTarget, "hover");
         	});
-    		if (dojo.byId("updateLink")) {
-    			new dijit.Dialog({
+    		if (hqDojo.byId("updateLink")) {
+    			new hqDijit.Dialog({
         	 	 		id: 'update_popup',
         	 			refocus: true,
         	 			autofocus: false,
         	 			opacity: 0,
         	 			title: "<fmt:message key="header.dialog.title.update" />"
         			}, 
-        			dojo.byId('update')
+        			hqDojo.byId('update')
         		);
         	 	
-    			dojo.connect(dojo.byId("updateAcknowledgementButton"), "onclick", function(e) {
+    			hqDojo.connect(hqDojo.byId("updateAcknowledgementButton"), "onclick", function(e) {
         			if (this.value == "<fmt:message key="header.Acknowledge"/>") {
-            	        dojo.xhrPost({
+            	        hqDojo.xhrPost({
                 	 	 	url: "<html:rewrite action="/Dashboard" />",
                  		 	content: { 
                  		 		update: true 
                  		 	},
                  	 		load: function(data) {
-                 	 			dojo.style("updateLink", "display", "none");
-                 	 			dijit.byId("update_popup").hide();
+                 	 			hqDojo.style("updateLink", "display", "none");
+                 	 			hqDijit.byId("update_popup").hide();
                 			}
                			});
                 	}
         		});
-        		dojo.connect(dojo.byId("updateLink"), "onclick", function(e) {
-        			 dijit.byId("update_popup").show();
+        		hqDojo.connect(hqDojo.byId("updateLink"), "onclick", function(e) {
+        			 hqDijit.byId("update_popup").show();
         		});
     		}
     	});

@@ -56,33 +56,34 @@
 </div>
 <script src="<spring:url value="/js/footer.js" />" type="text/javascript"></script>
 <script type="text/javascript">
-  	dojo.require("dijit.Dialog");
+	hqDojo.require("dijit.dijit");
+  	hqDojo.require("dijit.Dialog");
 
-  	dojo.ready(function(){
-  		var aboutDialog = new dijit.Dialog({
+  	hqDojo.ready(function(){
+  		var aboutDialog = new hqDijit.Dialog({
         	id: 'about_popup',
             refocus: true,
             autofocus: false,
             title: "<fmt:message key="about.Title" />"
         }, "aboutDialogContent");
   		
-  		dojo.connect(dojo.byId("aboutLink"), "onclick", function(e) {
-  			dijit.byId("about_popup").show();
+  		hqDojo.connect(hqDojo.byId("aboutLink"), "onclick", function(e) {
+  			hqDijit.byId("about_popup").show();
   		});
   		
   		var pinFooter = function() {
-	  		var windowCoords = dojo.window.getBox();
-	  		var contentCoords = dojo.position(dojo.byId("content"), true);
-  			var footerCoords = dojo.position(dojo.byId("footer"), true);
+	  		var windowCoords = hqDojo.window.getBox();
+	  		var contentCoords = hqDojo.position(hqDojo.byId("content"), true);
+  			var footerCoords = hqDojo.position(hqDojo.byId("footer"), true);
   			var combinedContentHeight = contentCoords.y + contentCoords.h;
   			var diff = windowCoords.h - combinedContentHeight - footerCoords.h;
   			
   			if (diff > 0) {
-  				dojo.style("footer", "marginTop", diff + "px");	  			
+  				hqDojo.style("footer", "marginTop", diff + "px");	  			
   			}
   		};
   		
-  		dojo.connect(window, "onresize", pinFooter);
+  		hqDojo.connect(window, "onresize", pinFooter);
   		
   		pinFooter();
   	});

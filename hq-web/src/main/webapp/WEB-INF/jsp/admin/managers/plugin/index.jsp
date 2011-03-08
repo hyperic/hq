@@ -168,46 +168,47 @@
 	</div>
 </div>
 <script>
-	dojo.require("dojo.fx");
-	dojo.require("dojo.io.iframe");
-	dojo.require("dijit.Dialog");
+	hqDojo.require("dojo.fx");
+	hqDojo.require("dojo.io.iframe");
+	hqDojo.require("dijit.dijit");
+	hqDojo.require("dijit.Dialog");
 	
-	dojo.ready(function() {
-		var uploadDialog = new dijit.Dialog({
+	hqDojo.ready(function() {
+		var uploadDialog = new hqDijit.Dialog({
 			id: "uploadPanelDialog",
 			title: "<fmt:message key="admin.managers.plugin.upload.dialog.title" />"
 		});
 		
-		var removeDialog = new dijit.Dialog({
+		var removeDialog = new hqDijit.Dialog({
 			id: "removePanelDialog",
 			title: "<fmt:message key="admin.managers.plugin.remove.dialog.title" />"
 		});
 		
-		var uploadPanel = dojo.byId("uploadPanel");
-		var confirmationPanel = dojo.byId("confirmationPanel");
+		var uploadPanel = hqDojo.byId("uploadPanel");
+		var confirmationPanel = hqDojo.byId("confirmationPanel");
 		
-		dojo.style(uploadDialog.closeButtonNode, "visibility", "hidden");
-		dojo.style(removeDialog.closeButtonNode, "visibility", "hidden");
+		hqDojo.style(uploadDialog.closeButtonNode, "visibility", "hidden");
+		hqDojo.style(removeDialog.closeButtonNode, "visibility", "hidden");
 		uploadDialog.setContent(uploadPanel);
 		removeDialog.setContent(confirmationPanel);
-		dojo.style(uploadPanel, "visibility", "visible");
-		dojo.style(confirmationPanel, "visibility", "visible");
-		dojo.connect(dojo.byId("showUploadFormButton"), "onclick", function(e) {
-			dojo.byId("plugin").value = "";
-			dijit.byId("uploadPanelDialog").show();
+		hqDojo.style(uploadPanel, "visibility", "visible");
+		hqDojo.style(confirmationPanel, "visibility", "visible");
+		hqDojo.connect(hqDojo.byId("showUploadFormButton"), "onclick", function(e) {
+			hqDojo.byId("plugin").value = "";
+			hqDijit.byId("uploadPanelDialog").show();
 		});
-		dojo.connect(dojo.byId("showRemoveConfirmationButton"), "onclick", function(e) {
-			dojo.byId("plugin").value = "";
-			dijit.byId("removePanelDialog").show();
+		hqDojo.connect(hqDojo.byId("showRemoveConfirmationButton"), "onclick", function(e) {
+			hqDojo.byId("plugin").value = "";
+			hqDijit.byId("removePanelDialog").show();
 		});
-		dojo.query("#uploadPanelDialog .cancelLink").onclick(function(e) {
-			dijit.byId("uploadPanelDialog").hide();
+		hqDojo.query("#uploadPanelDialog .cancelLink").onclick(function(e) {
+			hqDijit.byId("uploadPanelDialog").hide();
 		});
-		dojo.query("#removePanelDialog .cancelLink").onclick(function(e) {
-			dijit.byId("removePanelDialog").hide();
+		hqDojo.query("#removePanelDialog .cancelLink").onclick(function(e) {
+			hqDijit.byId("removePanelDialog").hide();
 		});
-		dojo.subscribe("refreshDataGrid", function() {
-			dojo.xhrGet({
+		hqDojo.subscribe("refreshDataGrid", function() {
+			hqDojo.xhrGet({
 				url: "<spring:url value="/app/admin/managers/plugin/list" />",
 				handleAs: "json",
 				headers: { 
@@ -215,35 +216,35 @@
                 	"Accept": "application/json"
                 },
                 load: function(response, args) {
-                	dojo.empty("pluginList");
+                	hqDojo.empty("pluginList");
                 	
                 	var index = 0;
                 	
-                	dojo.forEach(response, function(summary) {
-                		var li = dojo.create("li", {
+                	hqDojo.forEach(response, function(summary) {
+                		var li = hqDojo.create("li", {
                 			"class": "gridrow clear" + ((index % 2 == 0) ? " even" : "")
                 		}, "pluginList");
-                		var span = dojo.create("span", {
+                		var span = hqDojo.create("span", {
                 			"class": "first column span-1"
                 		}, li);
-                		var input = dojo.create("input", {
+                		var input = hqDojo.create("input", {
                 			"type": "checkbox",
                 			"value": summary.id,
                 			"class": "checkbox"
                 		}, span);
-                		span = dojo.create("span", {
+                		span = hqDojo.create("span", {
                 			"class": "column span-5",
                 			"innerHTML": summary.name
                 		}, li);
-                		span = dojo.create("span", {
+                		span = hqDojo.create("span", {
                 			"class": "column span-6",
                 			"innerHTML": summary.jarName
                 		}, li);
-                		span = dojo.create("span", {
+                		span = hqDojo.create("span", {
                 			"class": "column span-5",
                 			"innerHTML": summary.initialDeployDate
                 		}, li);
-                		span = dojo.create("span", {
+                		span = hqDojo.create("span", {
                 			"class": "last column span-5",
                 			"innerHTML": summary.status
                 		}, li);
@@ -256,27 +257,27 @@
                 }
 			});
 		});
-		dojo.connect(dojo.byId("uploadForm"), "onsubmit", function(e) {
-			var filePath = dojo.byId("plugin").value;
+		hqDojo.connect(hqDojo.byId("uploadForm"), "onsubmit", function(e) {
+			var filePath = hqDojo.byId("plugin").value;
 			var ext = filePath.substr(filePath.length - 4);
 			
 			if (ext != ".jar" && ext != ".xml") {
-				dojo.byId("validationMessage").innerHTML = "<fmt:message key="admin.managers.plugin.message.invalid.file.extension" />";
-				var anim = [dojo.fadeIn({
+				hqDojo.byId("validationMessage").innerHTML = "<fmt:message key="admin.managers.plugin.message.invalid.file.extension" />";
+				var anim = [hqDojo.fadeIn({
 								node: "validationMessage",
 								duration: 500
 							}),
-							dojo.fadeOut({
+							hqDojo.fadeOut({
 								node: "validationMessage",
 								delay: 5000,
 								duration: 500
 							})];
-				dojo.fx.chain(anim).play();
+				hqDojo.fx.chain(anim).play();
 				
 				return false;
 			}
 			
-			dojo.io.iframe.send({
+			hqDojo.io.iframe.send({
 				form: "uploadForm",
 				handleAs: "json",
 				url: "<spring:url value="/app/admin/managers/plugin/upload" />",
@@ -284,49 +285,49 @@
 					var diplayCount = 5000;
 					
 					if (response.success) {
-						dojo.attr("progressMessage", "class", "information");
-						dojo.publish("refreshDataGrid");
+						hqDojo.attr("progressMessage", "class", "information");
+						hqDojo.publish("refreshDataGrid");
 					} else {
-						dojo.attr("progressMessage", "class", "error");
+						hqDojo.attr("progressMessage", "class", "error");
 						diplayCount = 10000;
 					}
 					
-					dojo.byId("progressMessage").innerHTML = response.message;
-					var anim = [dojo.fadeIn({
+					hqDojo.byId("progressMessage").innerHTML = response.message;
+					var anim = [hqDojo.fadeIn({
 									node: "progressMessage",
 									duration: 500
 								}),
-								dojo.fadeOut({
+								hqDojo.fadeOut({
 									node: "progressMessage",
 									delay: diplayCount,
 									duration: 500
 								})];
-					dojo.fx.chain(anim).play();						
+					hqDojo.fx.chain(anim).play();						
 				},
 				error: function(response, args) {
-					dojo.attr("progressMessage", "class", "error");
-					dojo.byId("progressMessage").innerHTML = response.message;
-					var anim = [dojo.fadeIn({
+					hqDojo.attr("progressMessage", "class", "error");
+					hqDojo.byId("progressMessage").innerHTML = response.message;
+					var anim = [hqDojo.fadeIn({
 									node: "progressMessage",
 									duration: 500
 								}),
-								dojo.fadeOut({
+								hqDojo.fadeOut({
 									node: "progressMessage",
 									delay: 10000,
 									duration: 500
 								})];
-					dojo.fx.chain(anim).play();						
+					hqDojo.fx.chain(anim).play();						
 				}
 			});
 			
-			dijit.byId("uploadPanelDialog").hide();
+			hqDijit.byId("uploadPanelDialog").hide();
 			
 			return false;
 		});
-		dojo.connect(dojo.byId("removeButton"), "onclick", function(e) {
+		hqDojo.connect(hqDojo.byId("removeButton"), "onclick", function(e) {
 			alert("trigger removal server side");
-			dojo.publish("refreshDataGrid");
-			dijit.byId("removePanelDialog").hide();
+			hqDojo.publish("refreshDataGrid");
+			hqDijit.byId("removePanelDialog").hide();
 		});
 	});
 </script>

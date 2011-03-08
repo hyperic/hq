@@ -181,7 +181,7 @@ class HtmlUtil {
         res << """
             <script type="text/javascript">
               function ${funcid}() {
-                  dojo.xhrPost({
+                  hqDojo.xhrPost({
                       url: '${useUrlFor(p)}',
                       handleAs: "json-comment-filtered",
                       load: function(response, args) {
