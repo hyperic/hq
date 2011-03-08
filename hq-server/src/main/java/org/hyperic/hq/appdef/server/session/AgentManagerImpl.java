@@ -1114,7 +1114,16 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         return agentSendFileData(subject, agent, files, modes);
     }
     
-    @SuppressWarnings("unchecked")
+    @Transactional(readOnly=true)
+    public void removePluginInBackground(AuthzSubject subj, Collection<Agent> agents,
+                                         Collection<String> pluginFileNames)
+    throws PermissionException {
+        permissionManager.checkIsSuperUser(subj);
+        for (final Agent agent : agents) {
+            agentPluginUpdater.queuePluginRemoval(agent.getId(), pluginFileNames);
+        }
+    }
+    
     @Transactional(readOnly=true)
     public Map<String, Boolean> agentRemovePlugins(AuthzSubject subject, Integer agentId,
                                                    Collection<String> pluginJarNames)

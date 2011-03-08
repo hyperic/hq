@@ -50,11 +50,15 @@ import java.util.jar.Manifest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatusDAO;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum;
+import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.shared.PluginDeployException;
 import org.hyperic.hq.product.shared.PluginManager;
@@ -77,6 +81,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     
     private PluginDAO pluginDAO;
     private AgentPluginStatusDAO agentPluginStatusDAO;
+
     private static final String TMP_DIR = System.getProperty("java.io.tmpdir");
 
     private ApplicationContext ctx;
@@ -89,6 +94,21 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     
     public Plugin getByJarName(String jarName) {
         return pluginDAO.getByFilename(jarName);
+    }
+    
+    @Transactional(readOnly=false)
+    public void removePlugins(AuthzSubject subj, Collection<String> pluginFileNames)
+    throws PermissionException {
+        final Collection<Agent> agents = agentPluginStatusDAO.getAutoUpdatingAgents();
+        final AgentManager agentManager = Bootstrap.getBean(AgentManager.class);
+        final File pluginDir = getPluginDir();
+        for (final String filename : pluginFileNames) {
+            final File plugin = new File(pluginDir.getAbsolutePath() + "/" + filename);
+            if (!plugin.delete()) {
+                log.warn("Could not remove plugin " + filename);
+            }
+        }
+        agentManager.removePluginInBackground(subj, agents, pluginFileNames);
     }
     
     // XXX currently if one plugin validation fails all will fail.  Probably want to deploy the
@@ -140,20 +160,24 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
             close(writer);
         }
     }
-
-    private void deployPlugins(Collection<File> files) {
+    
+// XXX probably want to get this from the ProductPluginDeployer
+    private File getPluginDir() {
         try {
-// XXX probably want to get this directly from ProductPluginDeployer
-File pluginDir = ctx.getResource("WEB-INF/hq-plugins").getFile();
-            if (!pluginDir.exists()) {
-                throw new SystemException(pluginDir.getAbsolutePath() + " does not exist");
-            }
-            for (final File file : files) {
-                final File dest = new File(pluginDir.getAbsolutePath() + "/" + file.getName());
-                file.renameTo(dest);
-            }
+            return ctx.getResource("WEB-INF/hq-plugins").getFile();
         } catch (IOException e) {
             throw new SystemException(e);
+        }
+    }
+
+    private void deployPlugins(Collection<File> files) {
+        File pluginDir = getPluginDir();
+        if (!pluginDir.exists()) {
+            throw new SystemException(pluginDir.getAbsolutePath() + " does not exist");
+        }
+        for (final File file : files) {
+            final File dest = new File(pluginDir.getAbsolutePath() + "/" + file.getName());
+            file.renameTo(dest);
         }
     }
 

@@ -26,18 +26,22 @@
 package org.hyperic.hq.appdef.server.session;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.annotation.PostConstruct;
 
+import org.hyperic.hq.agent.AgentConnectionException;
+import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.server.session.AgentDataTransferJob;
 import org.hyperic.hq.agent.server.session.AgentSynchronizer;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentPluginUpdater;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.product.Plugin;
@@ -99,9 +103,9 @@ public class AgentPluginUpdaterImpl implements AgentPluginUpdater {
                         agentManager.transferAgentPlugins(overlord, agentId, pluginNames);
                         pluginManager.updateAgentPluginSyncStatusInNewTran(
                             AgentPluginStatusEnum.SYNC_SUCCESS, agentId, plugins);
-                        final Collection<String> pluginJarNames = removeMap.get(agentId);
-                        if (pluginJarNames != null && !pluginJarNames.isEmpty()) {
-                            agentManager.agentRemovePlugins(overlord, agentId, pluginJarNames);
+                        final Collection<String> pluginFileNames = removeMap.get(agentId);
+                        if (pluginFileNames != null && !pluginFileNames.isEmpty()) {
+                            agentManager.agentRemovePlugins(overlord, agentId, pluginFileNames);
                         }
 // XXX disabled for now
 //                        agentManager.restartAgent(overlord, agentId);
@@ -115,6 +119,32 @@ public class AgentPluginUpdaterImpl implements AgentPluginUpdater {
             };
             agentSynchronizer.addAgentJob(job);
         }
+    }
+
+    public void queuePluginRemoval(final Integer agentId, final Collection<String> pluginFileNames) {
+        if (agentId == null || pluginFileNames == null || pluginFileNames.isEmpty()) {
+            return;
+        }
+        final AgentDataTransferJob job = new AgentDataTransferJob() {
+            public String getJobDescription() {
+                return "Agent Plugin Remove";
+            }
+            public int getAgentId() {
+                return agentId;
+            }
+            public void execute() {
+                final AgentManager agentManager = Bootstrap.getBean(AgentManager.class);
+                try {
+                    agentManager.agentRemovePlugins(overlord, agentId, pluginFileNames);
+// XXX disabled for now
+//                    agentManager.restartAgent(overlord, agentId);
+                } catch (Exception e) {
+                    throw new SystemException("error removing pluginFiles=" + pluginFileNames +
+                                              " from agentId=" + agentId, e);
+                }
+            }
+        };
+        agentSynchronizer.addAgentJob(job);
     }
 
 }
