@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -44,6 +43,7 @@ import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
+import org.hyperic.hq.measurement.data.MonitorableTypeRepository;
 import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.product.MeasurementInfo;
@@ -64,7 +64,7 @@ public class TemplateManagerImpl implements TemplateManager {
    
     private MeasurementDAO measurementDAO;
     private MeasurementTemplateDAO measurementTemplateDAO;
-    private MonitorableTypeDAO monitorableTypeDAO;
+    private MonitorableTypeRepository monitorableTypeRepository;
     private ScheduleRevNumDAO scheduleRevNumDAO;
     private SRNManager srnManager;
     private SRNCache srnCache;
@@ -72,12 +72,12 @@ public class TemplateManagerImpl implements TemplateManager {
     @Autowired
     public TemplateManagerImpl(MeasurementDAO measurementDAO,
                                MeasurementTemplateDAO measurementTemplateDAO,
-                               MonitorableTypeDAO monitorableTypeDAO,
+                               MonitorableTypeRepository monitorableTypeRepository,
                                ScheduleRevNumDAO scheduleRevNumDAO, SRNManager srnManager,
                                SRNCache srnCache) {
         this.measurementDAO = measurementDAO;
         this.measurementTemplateDAO = measurementTemplateDAO;
-        this.monitorableTypeDAO = monitorableTypeDAO;
+        this.monitorableTypeRepository = monitorableTypeRepository;
         this.scheduleRevNumDAO = scheduleRevNumDAO;
         this.srnManager = srnManager;
         this.srnCache = srnCache;
@@ -405,17 +405,24 @@ public class TemplateManagerImpl implements TemplateManager {
 
     @Transactional
     public MonitorableType createMonitorableType(String pluginName, TypeInfo info) {
-        return monitorableTypeDAO.create(info.getName(), pluginName);
+        MonitorableType type =  new MonitorableType(info.getName(),pluginName);
+        return monitorableTypeRepository.save(type);
     }
 
     @Transactional
     public MonitorableType createMonitorableType(String pluginName, ResourceType resourceType) {
-        return monitorableTypeDAO.create(resourceType.getName(), pluginName);
+        MonitorableType type =  new MonitorableType(resourceType.getName(),pluginName);
+        return monitorableTypeRepository.save(type);
     }
     
     @Transactional(readOnly = true)
     public Map<String, MonitorableType> getMonitorableTypesByName(String pluginName) {
-        return monitorableTypeDAO.findByPluginName(pluginName);
+        Map<String,MonitorableType> namesToTypes = new HashMap<String,MonitorableType>();
+        List<MonitorableType> types = monitorableTypeRepository.findByPluginName(pluginName);
+        for(MonitorableType type: types) {
+            namesToTypes.put(type.getName(), type);
+        }
+        return namesToTypes;
     }
 
     /**
