@@ -102,7 +102,7 @@
 				</div>
 				<script src="/js/addtodashboard.js"></script>
 				<script type="text/javascript">
-				    dojo.ready(function() {
+				    hqDojo.ready(function() {
 					    var config = {
 					    	title : "<fmt:message key='resource.common.quickFavorites.addToMultipleDashboards' />",
 					    	dialogId : "AddToFavorites_Dialog",

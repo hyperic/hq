@@ -44,10 +44,10 @@ import org.apache.commons.lang.StringEscapeUtils
 <script type="text/javascript">
     function getEventLogsUrlMap(id) {
         var res = {};
-        var statusSelect = dojo.byId('statusSelect');
-        var typeSelect   = dojo.byId('typeSelect');
-        var timeSelect   = dojo.byId('timeSelect');
-        var groupSelect  = dojo.byId('groupSelect');
+        var statusSelect = hqDojo.byId('statusSelect');
+        var typeSelect   = hqDojo.byId('typeSelect');
+        var timeSelect   = hqDojo.byId('timeSelect');
+        var groupSelect  = hqDojo.byId('groupSelect');
         res['minStatus'] = statusSelect.options[statusSelect.selectedIndex].value;
         res['type']      = typeSelect.options[typeSelect.selectedIndex].value;
         res['timeRange'] = timeSelect.options[timeSelect.selectedIndex].value;
@@ -60,12 +60,12 @@ import org.apache.commons.lang.StringEscapeUtils
         return res;
     }
     function selectAll(box){
-        var box = dojo.byId(box);
+        var box = hqDojo.byId(box);
         for(var i = 0; i < box.length; i++)
             box.options[i].selected = true;
     }
     function deselectAll(box){
-        var box = dojo.byId(box);
+        var box = hqDojo.byId(box);
         for(var i = 0; i < box.length; i++)
             box.options[i].selected = '';
     }

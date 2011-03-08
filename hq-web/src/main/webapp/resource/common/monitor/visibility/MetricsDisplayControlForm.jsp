@@ -196,19 +196,19 @@
 <script type="text/javascript">
 	var advancedDialog = null;
 	
-	dojo.ready(function(){
-		advancedDialog = new dijit.Dialog({
+	hqDojo.ready(function(){
+		advancedDialog = new hqDijit.Dialog({
 	            id: 'advancedDisplay',
 	            refocus: true,
 	            autofocus: false,
 	            opacity: 0,
 	            title: "<fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn" />"
-	    }, dojo.byId('advancedDisplay'));
+	    }, hqDojo.byId('advancedDisplay'));
 		
 		var showHolder = advancedDialog.show;
 		var hideHolder = advancedDialog.hide;
 		var toggleControl = function (id, enabled) {
-			var obj = dojo.byId(id);
+			var obj = hqDojo.byId(id);
 			
 			if (obj) {
 				obj.disabled = !enabled;
@@ -233,6 +233,6 @@
 			hideHolder.call(this);
 		}
 		
-	    dojo.place(dojo.byId('advancedDisplay'), dojo.byId('advancedContainer'), "last");
+	    hqDojo.place(hqDojo.byId('advancedDisplay'), hqDojo.byId('advancedContainer'), "last");
 	});
 </script>

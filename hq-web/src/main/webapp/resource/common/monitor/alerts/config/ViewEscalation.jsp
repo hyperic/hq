@@ -56,12 +56,12 @@ function showViewEscResponse() {
     var id = tmp.escalation.id;
     var maxPauseTime = formatWaitTime(null, tmp.escalation.maxWaitTime, '<fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/>',  '<fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>');
 
-    dojo.byId('viewEscalation').style.display = "";
+    hqDojo.byId('viewEscalation').style.display = "";
     if (document.EscalationSchemeForm != null) {
       document.EscalationSchemeForm.escId.value = id;
     }
   
-    var escViewUL = dojo.byId('viewEscalationUL');
+    var escViewUL = hqDojo.byId('viewEscalationUL');
 
     if (actions.length > 0) {
       for (var i=escViewUL.childNodes.length; i > 0; i--) {
@@ -118,8 +118,8 @@ function showViewEscResponse() {
   
       viewLi.setAttribute((document.all ? 'className' : 'class'), "BlockContent");
       viewLi.setAttribute('id','row_'+ liID);
-      dojo.byId('row_'+ liID).style.margin = "0px";
-      dojo.byId('row_'+ liID).style.padding = "0px";
+      hqDojo.byId('row_'+ liID).style.margin = "0px";
+      hqDojo.byId('row_'+ liID).style.padding = "0px";
        
       viewLi.appendChild(escTable);
       escTable.setAttribute((document.all ? 'className' : 'class'), "escTbl");
@@ -269,28 +269,28 @@ function showViewEscResponse() {
 
       if (allowPause) {
           if (tmp.escalation.maxWaitTime == <%= Long.MAX_VALUE %>) {
-              dojo.byId('acknowledged').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationAllow.pause.indefinitely" />';
+              hqDojo.byId('acknowledged').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationAllow.pause.indefinitely" />';
           } else {
-              dojo.byId('acknowledged').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationAllow.pause" /> ' + maxPauseTime;
+              hqDojo.byId('acknowledged').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationAllow.pause" /> ' + maxPauseTime;
           }
       }
       else {
-        dojo.byId('acknowledged').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationAllow.continue" />';
+        hqDojo.byId('acknowledged').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationAllow.continue" />';
       }
 
       if (notifyAll) {
-        dojo.byId('changed').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationNotify.all" />';
+        hqDojo.byId('changed').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationNotify.all" />';
       }
       else {
-        dojo.byId('changed').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationNotify.previous" />';
+        hqDojo.byId('changed').innerHTML = '<fmt:message key="resource.common.monitor.visibility.config.EscalationNotify.previous" />';
       }
    }    
 
 </c:when>
 <c:when test="${not empty primaryAlert}">
 	function disableEscForRecoveryAlert() {
-		dojo.byId('escIdSel').options[0].text = "<fmt:message key="alert.config.error.escalation.alert.recovery" />";
-		dojo.byId('escIdSel').disabled = true;
+		hqDojo.byId('escIdSel').options[0].text = "<fmt:message key="alert.config.error.escalation.alert.recovery" />";
+		hqDojo.byId('escIdSel').disabled = true;
 	}
 
 	onloads.push(disableEscForRecoveryAlert);
@@ -314,12 +314,12 @@ function showViewEscResponse() {
     	function initEsc () {
 	        // Set up the escalation dropdown
 	        var escJson = eval( '( { "escalations":<c:out value="${escalations}" escapeXml="false" /> })' );
-	        var escalationSel = dojo.byId('escIdSel');
+	        var escalationSel = hqDojo.byId('escIdSel');
 	        var schemes = escJson.escalations;
 	
 	        if (schemes.length == 0) {
 		        escalationSel.style.display = "none";
-	            dojo.byId('noescalations').style.display = "";;
+	            hqDojo.byId('noescalations').style.display = "";;
 	        }
 
 	    	for (var i = 0; i < schemes.length; i++) {
@@ -341,7 +341,7 @@ function showViewEscResponse() {
    		onloads.push( initEsc );
 
     	function hideExample() {
-            dojo.byId('example').style.display= 'none';
+            hqDojo.byId('example').style.display= 'none';
     	}
    	</c:if>
 

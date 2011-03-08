@@ -42,7 +42,7 @@ djConfig.baseUrl = '/static/js/dojo/1.5/dojo/';
 <script src="<html:rewrite page='/static/js/dojo/1.5/dojo/dojo.js'/>" type="text/javascript"></script>
 <script type="text/javascript">
     var imagePath = "<html:rewrite page="/images/"/>";
-    dojo.require('dojo.date');
+    hqDojo.require('dojo.date');
 </script>
 <script src="<html:rewrite page='/js/prototype.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/popup.js'/>" type="text/javascript"></script>
@@ -66,8 +66,8 @@ var onloads = [];
 
 	function refreshPortlets() {
 	
-	    var problemPortlet = dojo.byId('problemResourcesTable');
-	    var favoritePortlet = dojo.byId('favoriteTable');
+	    var problemPortlet = hqDojo.byId('problemResourcesTable');
+	    var favoritePortlet = hqDojo.byId('favoriteTable');
 	
 	    var nodes = document.getElementsByTagName('table');
 	    var getRecentForm = document.getElementsByTagName('form')
@@ -118,7 +118,7 @@ var onloads = [];
 	
 	onloads.push(refreshPortlets);
 
-	dojo.ready(function() {
+	hqDojo.ready(function() {
 		initOnloads();
 	});
 </script>

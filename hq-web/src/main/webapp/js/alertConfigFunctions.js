@@ -24,7 +24,7 @@
 /*-- START alertConfigFunctions.js --*/
 
 function resetNote(){
-    dojo.byId('baselineNotCalcMsg').style.display='none';
+    hqDojo.byId('baselineNotCalcMsg').style.display='none';
 }
 function toggleNoBaselineMessage(obj){
 	// baselines with values are in the format: 100.0% (Baseline Value)
@@ -32,10 +32,10 @@ function toggleNoBaselineMessage(obj){
 	if(obj.selectedIndex > 0
 			&& obj[obj.selectedIndex].text.indexOf('(') == -1
 			&& obj[obj.selectedIndex].text.indexOf(')') == -1){
-	   dojo.byId('baselineNotCalcMsg').style.display='inline';
+	   hqDojo.byId('baselineNotCalcMsg').style.display='inline';
 	}
 	else{
-	   dojo.byId('baselineNotCalcMsg').style.display='none';
+	   hqDojo.byId('baselineNotCalcMsg').style.display='none';
 	}
 }
 function selectMetric(selName, hidName) {
