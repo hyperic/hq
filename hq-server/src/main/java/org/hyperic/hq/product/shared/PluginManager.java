@@ -32,6 +32,7 @@ import java.util.Map;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.product.Plugin;
 
 public interface PluginManager {
@@ -73,4 +74,8 @@ public interface PluginManager {
  // XXX javadoc!
      void updateAgentPluginSyncStatusInNewTran(AgentPluginStatusEnum s, Integer agentId,
                                                Collection<Plugin> plugins);
+
+ // XXX javadoc!
+    void removePlugins(AuthzSubject subj, Collection<String> pluginFilenames)
+    throws PermissionException;
 }

@@ -166,7 +166,7 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
     }
     
     long getNumAutoUpdatingAgents() {
-        final String hql = "select count(distinct Agent) from AgentPluginStatus";
+        final String hql = "select count(distinct agent) from AgentPluginStatus";
         final Long i = (Long) getSession().createQuery(hql).uniqueResult();
         return (i == null) ? 0 : i;
     }
@@ -194,6 +194,12 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
                            .setParameter("jarName", jarName)
                            .setParameter("error", AgentPluginStatusEnum.SYNC_FAILURE.toString())
                            .list();
+    }
+
+    @SuppressWarnings("unchecked")
+    public Collection<Agent> getAutoUpdatingAgents() {
+        final String hql = "select distinct agent from AgentPluginStatus";
+        return getSession().createQuery(hql).list();
     }
 
 }

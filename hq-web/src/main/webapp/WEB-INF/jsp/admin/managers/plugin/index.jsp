@@ -2,6 +2,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 
 <style>
 	#pluginManagerPanel {
@@ -114,30 +115,68 @@
 	#progressMessage.error {
 	    color: #bb0000;
 	}
+	
+
+	
 </style>
 <section id="pluginManagerPanel" class="container top">
 	<h1><fmt:message key="admin.managers.plugin.title" /></h1>
 	<p><fmt:message key="admin.managers.plugin.instructions" /></p>
 	<div class="gridheader clear">
 		<span class="first column span-1">&nbsp;</span>
-		<span class="column span-5"><fmt:message key="admin.managers.plugin.column.header.product.plugin" /></span>
-		<span class="column span-6"><fmt:message key="admin.managers.plugin.column.header.jar.name" /></span>
-		<span class="column span-5"><fmt:message key="admin.managers.plugin.column.header.initial.deploy.date" /></span>
-		<span class="last column span-5"><fmt:message key="admin.managers.plugin.column.header.status" /></span>
+		<span class="column span-3"><fmt:message key="admin.managers.plugin.column.header.product.plugin" /></span>
+		<span class="column span-3"><fmt:message key="admin.managers.plugin.column.header.version" /></span>
+		<span class="column span-4"><fmt:message key="admin.managers.plugin.column.header.jar.name" /></span>
+		<span class="column span-4"><fmt:message key="admin.managers.plugin.column.header.initial.deploy.date" /></span>
+		<span class="column span-4"><fmt:message key="admin.managers.plugin.column.header.last.sync.date" /></span>
+		<span class="last column span-3"><fmt:message key="admin.managers.plugin.column.header.status" /></span>
 	</div>
+	
+	<form:form id="deleteForm" name="deleteForm" onsubmit="return false;" method="delete">
 	<ul id="pluginList">
 		<c:forEach var="pluginSummary" items="${pluginSummaries}" varStatus="index">
 			<li class="gridrow clear<c:if test="${index.count % 2 == 0}"> even</c:if>">
 				<span class="first column span-1">
-                    <input type="checkbox" value="${pluginSummary.id}" class="checkbox" />&nbsp; 
+                    <input type="checkbox" name="deleteId" value="${pluginSummary.id}" class="checkbox" />&nbsp; 
 				</span>
-				<span class="column span-5">${pluginSummary.name}&nbsp;</span>
-				<span class="column span-6">${pluginSummary.jarName}&nbsp;</span>
-				<span class="column span-5">${pluginSummary.initialDeployDate}&nbsp;</span>
-				<span class="last column span-5">${pluginSummary.status}&nbsp;</span>
+				<span class="column span-3">${pluginSummary.name}&nbsp;</span>
+				<span class="column span-3">${pluginSummary.version}&nbsp;</span>
+				<span class="column span-4">${pluginSummary.jarName}&nbsp;</span>
+				<span class="column span-4">${pluginSummary.initialDeployDate}&nbsp;</span>
+				<span class="column span-4">${pluginSummary.updatedDate}&nbsp;</span>		
+				<span class="last column span-3" >
+				    <c:if test="${!pluginSummary.inProgress}">
+				    	<c:if test="${pluginSummary.successAgentCount==pluginSummary.allAgentCount}">
+				    		<img src="/images/icon_available_green.gif"/>
+				    	</c:if>
+				    	<c:if test="${pluginSummary.successAgentCount<pluginSummary.allAgentCount}">
+				    		<img src="/images/icon_available_yellow.gif"/>
+				    	</c:if>
+				    </c:if>
+				    <c:if test="${pluginSummary.inProgress}">
+				        <img src="/images/arrow_refresh.png"/>
+				   	</c:if>				    
+				  		${pluginSummary.successAgentCount} / ${pluginSummary.allAgentCount}
+				   	<c:if test="${pluginSummary.errorAgentCount>0}">
+				   		<span id="errorAgent_${index.count}">
+				       		&nbsp;<img src="/images/icon_available_red.gif"/>
+				    		${pluginSummary.errorAgentCount} 
+				    		<c:if test="${pluginSummary.errorAgentCount==1}">
+				    			<fmt:message key="admin.managers.plugin.column.status.error"/>
+				    		</c:if>
+				    		<c:if test="${pluginSummary.errorAgentCount>1}">
+				    			<fmt:message key="admin.managers.plugin.column.status.errors"/>
+				    		</c:if>				    		
+				    	</span>
+					</c:if>
+				</span>
 			</li>
 		</c:forEach>
 	</ul>
+	</form:form>
+
+	
+	
 	<div class="actionbar">
 		<span id="progressMessage"></span>
 		<input id="showUploadFormButton" type="button" value="<fmt:message key="admin.managers.plugin.button.add.plugin" />" />
@@ -167,10 +206,40 @@
 		<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.cancel" /></a>
 	</div>
 </div>
-<script>
+<script djConfig="parseOnLoad: true">
 	dojo.require("dojo.fx");
 	dojo.require("dojo.io.iframe");
 	dojo.require("dijit.Dialog");
+	dojo.require("dijit.TooltipDialog");
+	
+	
+	
+	dojo.addOnLoad(function(){
+		<c:forEach var="pluginSummary" items="${pluginSummaries}" varStatus="index">
+			<c:if test="${pluginSummary.errorAgentCount>0}">
+				var content_${index.count}="";
+				<c:forEach var="agent" items="${pluginSummary.errorAgents}">
+					content_${index.count}+='${agent.agentName}: sync failed at ${agent.syncDate}  <br/>';
+				</c:forEach>
+				
+				var dialog_${index.count} = new dijit.TooltipDialog({
+					content:content_${index.count}
+				});
+				
+				dojo.connect(dojo.byId("errorAgent_${index.count}"),"onmouseenter", function(e){
+					dijit.popup.open({
+						popup:dialog_<c:out value="${index.count}"/>, around:dojo.byId("errorAgent_${index.count}")
+					});
+				});
+				dojo.connect(dojo.byId("errorAgent_${index.count}"),"onmouseleave", function(e){
+					dijit.popup.close(dialog_${index.count});
+				});						
+				
+			</c:if>
+		</c:forEach>
+		
+	});
+
 	
 	dojo.ready(function() {
 		var uploadDialog = new dijit.Dialog({
@@ -229,25 +298,70 @@
                 		var input = dojo.create("input", {
                 			"type": "checkbox",
                 			"value": summary.id,
-                			"class": "checkbox"
+                			"class": "checkbox",
+                			"name":"deleteId"
                 		}, span);
                 		span = dojo.create("span", {
-                			"class": "column span-5",
+                			"class": "column span-3",
                 			"innerHTML": summary.name
                 		}, li);
                 		span = dojo.create("span", {
-                			"class": "column span-6",
+                			"class": "column span-2",
+                			"innerHTML": summary.version
+                		}, li);
+                		span = dojo.create("span", {
+                			"class": "column span-4",
                 			"innerHTML": summary.jarName
                 		}, li);
                 		span = dojo.create("span", {
-                			"class": "column span-5",
+                			"class": "column span-4",
                 			"innerHTML": summary.initialDeployDate
                 		}, li);
                 		span = dojo.create("span", {
-                			"class": "last column span-5",
-                			"innerHTML": summary.status
+                			"class": "column span-4",
+                			"innerHTML": summary.updatedDate
                 		}, li);
-
+                		var statusSpan = dojo.create("span", {
+                			"class": "last column span-4",
+                		}, li);
+                		
+                		if(summary.inProgress){
+               				dojo.create("img",{
+               					"src": "/images/arrow_refresh.png",
+	               				},statusSpan);
+                		}else{
+                   			if(summary.successAgentCount<summary.allAgentCount){
+                				dojo.create("img",{
+                					"src": "/images/icon_available_yellow.gif",
+                				},statusSpan);
+                			}else{     			
+                				dojo.create("img",{
+                					"src": "/images/icon_available_green.gif",
+                					},statusSpan);   
+                				}
+                		}
+                		
+                		statusSpan.innerHTML+="&nbsp;"+summary.successAgentCount +"&nbsp;/&nbsp;"+ summary.allAgentCount+"&nbsp;&nbsp;";
+                		
+                		if(summary.errorAgentCount>0){
+                			var errorAgentSpan = dojo.create("span",{
+                				"id":"errorAgent_"+summary.id
+                			},statusSpan);
+                		
+                			dojo.create("img",{
+                				"src": "/images/icon_available_red.gif",
+                			},errorAgentSpan);
+                			
+                			errorAgentSpan.innerHTML+="</img>&nbsp;"+ summary.errorAgentCount;
+                			if(summary.errorAgentCount==1){
+                				errorAgentSpan.innerHTML+="&nbsp;<fmt:message key='admin.managers.plugin.column.status.error'/>";
+                			}else{
+	                			errorAgentSpan.innerHTML+="&nbsp;<fmt:message key='admin.managers.plugin.column.status.errors'/>";
+                			}
+                			
+                		};
+                		
+                		
                 		index++;
                 	});
                 },
@@ -256,6 +370,7 @@
                 }
 			});
 		});
+		
 		dojo.connect(dojo.byId("uploadForm"), "onsubmit", function(e) {
 			var filePath = dojo.byId("plugin").value;
 			var ext = filePath.substr(filePath.length - 4);
@@ -324,9 +439,18 @@
 			return false;
 		});
 		dojo.connect(dojo.byId("removeButton"), "onclick", function(e) {
-			alert("trigger removal server side");
+			var xhrArgs={
+				form: dojo.byId("deleteForm"),
+				url: "<spring:url value="/app/admin/managers/plugin/delete" />",
+				
+			}
+			dojo.xhrPost(xhrArgs);
 			dojo.publish("refreshDataGrid");
 			dijit.byId("removePanelDialog").hide();
+			
+			
 		});
 	});
+	
+
 </script>

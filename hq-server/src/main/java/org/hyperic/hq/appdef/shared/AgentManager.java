@@ -462,4 +462,9 @@ public interface AgentManager {
                                                    Collection<String> pluginJarNames)
     throws AgentConnectionException, AgentRemoteException, PermissionException;
 
+// XXX javadoc!
+    public void removePluginInBackground(AuthzSubject subj, Collection<Agent> agents,
+                                         Collection<String> pluginFileNames)
+    throws PermissionException;
+
 }
