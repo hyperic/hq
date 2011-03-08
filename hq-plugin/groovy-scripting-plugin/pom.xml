@@ -117,11 +117,21 @@
 							</delimiters>
 							<outputDirectory>${basedir}/target/classes</outputDirectory>
 							<resources>
-								<resource>
-									<directory>src/main/resources/</directory>
-									<filtering>true</filtering>
-								</resource>
-							</resources>
+      								<resource>
+        								<directory>src/main/resources</directory>
+        								<filtering>true</filtering>
+        								<includes>
+          									<include>**/*.xml</include>
+        								</includes>
+      								</resource>
+      								<resource>
+        								<directory>src/main/resources</directory>
+        								<filtering>false</filtering>
+        								<excludes>
+          									<exclude>**/*.xml</exclude>
+        								</excludes>
+      								</resource>
+    						</resources>
 						</configuration>
 					</execution>
 				</executions>
