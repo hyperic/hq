@@ -218,7 +218,8 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
                 if (obj.isDurable() || noDurable) {
                     ServiceResource service = createServiceResource(obj.getServiceType());
                     service.setName(node + " " + obj.getServiceName());
-                    setProductConfig(service, obj.ProductConfig());
+                    setProductConfig(service, obj.getProductConfig());
+                    service.setCustomProperties(obj.getCustomProperties());
                     service.setMeasurementConfig();
                     service.setControlConfig();
                     serviceResources.add(service);

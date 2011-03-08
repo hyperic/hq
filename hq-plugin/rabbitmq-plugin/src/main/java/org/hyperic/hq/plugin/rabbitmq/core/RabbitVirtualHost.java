@@ -59,9 +59,14 @@ public class RabbitVirtualHost implements RabbitObject {
         return getServiceType() + " " + getName();
     }
 
-    public ConfigResponse ProductConfig() {
+    public ConfigResponse getProductConfig() {
         ConfigResponse c = new ConfigResponse();
         c.setValue(MetricConstants.VHOST, getName());
+        return c;
+    }
+
+    public ConfigResponse getCustomProperties() {
+        ConfigResponse c = new ConfigResponse();
         return c;
     }
 

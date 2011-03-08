@@ -80,11 +80,6 @@
         </config>
 
         <properties>
-            <property description="Node Name" name="node.name"/>
-            <property description="Node Path" name="node.path"/>
-            <property description="Node PID" name="node.pid"/>
-            <property description="Rabbit -boot" name="rabbit.boot"/>
-            <property description="erlang.process" name="erlang.process"/>
         </properties>
 
         <metric name="Availability"
@@ -303,8 +298,6 @@
             <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
             <plugin type="autoinventory"/>
             <properties>
-                <property description="Name" name="name"/>
-                <property description="Process ID" name="pid"/>
                 <property description="Durable" name="durable"/>
             </properties>
         </service>
@@ -388,10 +381,8 @@
             <plugin type="autoinventory"/>
 
             <properties>
-                <property description="Process ID" name="pid"/>
-                <property description="Connection" name="connection"/>
-                <property description="Number" name="number"/>
                 <property description="User" name="user"/>
+                <property description="Confirm" name="confirm"/>
                 <property description="Transactional" name="transactional"/>
             </properties>
         </service>
@@ -457,13 +448,11 @@
             <plugin type="autoinventory"/>
 
             <properties>
-                <property description="PID" name="pid"/>
-                <property description="Self Node" name="selfNode"/>
-                <property description="Peer Node" name="peerNode"/>
-                <property description="Frame Max" name="frameMax"/>
-                <property description="State" name="state"/>
-                <property description="VHost" name="vHost"/>
-                <property description="Username" name="username"/>
+                <property description="Authentication" name="authMechanism"/>
+                <property description="Protocol" name="protocol"/>
+                <property description="User" name="user"/>
+                <property description="Timeout" name="timeout"/>
+                <property description="SSL" name="ssl"/>
             </properties>
         </service>
 
@@ -501,7 +490,7 @@
 
             <properties>
                 <property description="Durable" name="durable"/>
-                <property description="Exchange Type" name="exchangeType"/>
+                <property description="Exchange Type" name="type"/>
                 <property description="Auto-delete" name="autoDelete"/>
             </properties>
         </service>

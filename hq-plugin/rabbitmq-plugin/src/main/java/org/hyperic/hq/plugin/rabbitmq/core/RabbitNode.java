@@ -4,6 +4,9 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  *
  * @author administrator
@@ -26,6 +29,8 @@ public class RabbitNode {
     private int uptime;
     private int runQueue;
     private int processors;
+    private String statisticsLevel;
+    private List<Map<String, String>> applications;
 
     /**
      * @return the name
@@ -251,11 +256,41 @@ public class RabbitNode {
         this.processors = processors;
     }
 
+    /**
+     * @return the statisticsLevel
+     */
+    public String getStatisticsLevel() {
+        return statisticsLevel;
+    }
+
+    /**
+     * @param statisticsLevel the statisticsLevel to set
+     */
+    public void setStatisticsLevel(String statisticsLevel) {
+        this.statisticsLevel = statisticsLevel;
+    }
+
+    /**
+     * @return the applications
+     */
+    public List<Map<String, String>> getApplications() {
+        return applications;
+    }
+
+    /**
+     * @param aplications the applications to set
+     */
+    public void setApplications(List<Map<String, String>> aplications) {
+        this.applications = aplications;
+    }
+
     @Override
     public String toString() {
-        return "RabbitNode{name=" + name + ", running=" + running + ", type=" + type + ", osPid=" + osPid + ", memEts=" + memEts
+        return "RabbitNode{name=" + name + ", running=" + running + ", type=" + type + ", applications=" + applications
+                + ", statisticsLevel=" + statisticsLevel + ", osPid=" + osPid + ", memEts=" + memEts
                 + ", memBinary=" + memBinary + ", fdUsed=" + fdUsed + ", fdTotal=" + fdTotal + ", memUsed=" + memUsed
-                + ", memLimit=" + memLimit + ", procUsed=" + procUsed + ", procUotal=" + procTotal + ", erlangVersion=" + erlangVersion
-                + ", uptime=" + uptime + ", runQueue=" + runQueue + ", processors=" + processors + '}';
+                + ", memLimit=" + memLimit + ", procUsed=" + procUsed + ", procUotal=" + procTotal
+                + ", erlangVersion=" + erlangVersion + ", uptime=" + uptime + ", runQueue=" + runQueue
+                + ", processors=" + processors + '}';
     }
 }

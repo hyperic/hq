@@ -151,10 +151,18 @@ public class RabbitExchange implements RabbitObject {
 
     }
 
-    public ConfigResponse ProductConfig() {
+    public ConfigResponse getProductConfig() {
         ConfigResponse c = new ConfigResponse();
         c.setValue(MetricConstants.EXCHANGE, getName());
         c.setValue(MetricConstants.VHOST, getVhost());
+        return c;
+    }
+
+    public ConfigResponse getCustomProperties() {
+        ConfigResponse c = new ConfigResponse();
+        c.setValue("durable", isDurable());
+        c.setValue("type", getType());
+        c.setValue("autoDelete", isAutoDelete());
         return c;
     }
 }

@@ -164,10 +164,16 @@ public class RabbitQueue extends RabbitDefaultStatsObject implements RabbitObjec
 
     }
 
-    public ConfigResponse ProductConfig() {
+    public ConfigResponse getProductConfig() {
         ConfigResponse c = new ConfigResponse();
         c.setValue(MetricConstants.QUEUE, getName());
         c.setValue(MetricConstants.VHOST, getVhost());
+        return c;
+    }
+
+    public ConfigResponse getCustomProperties() {
+        ConfigResponse c = new ConfigResponse();
+        c.setValue("durable", isDurable());
         return c;
     }
 }

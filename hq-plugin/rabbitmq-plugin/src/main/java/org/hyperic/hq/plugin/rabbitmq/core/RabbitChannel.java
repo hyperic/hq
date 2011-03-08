@@ -42,6 +42,9 @@ public class RabbitChannel extends RabbitDefaultStatsObject implements RabbitObj
     private long messagesUnacknowledged;
     private long acksUncommitted;
     private long prefetchCount;
+    private boolean transactional;
+    private boolean confirm;
+    private String user;
 
     public String getName() {
         return name;
@@ -105,9 +108,51 @@ public class RabbitChannel extends RabbitDefaultStatsObject implements RabbitObj
         this.idleSince = idleSince;
     }
 
+    /**
+     * @return the transactional
+     */
+    public boolean isTransactional() {
+        return transactional;
+    }
+
+    /**
+     * @param transactional the transactional to set
+     */
+    public void setTransactional(boolean transactional) {
+        this.transactional = transactional;
+    }
+
+    /**
+     * @return the confirm
+     */
+    public boolean isConfirm() {
+        return confirm;
+    }
+
+    /**
+     * @param confirm the confirm to set
+     */
+    public void setConfirm(boolean confirm) {
+        this.confirm = confirm;
+    }
+
+    /**
+     * @return the user
+     */
+    public String getUser() {
+        return user;
+    }
+
+    /**
+     * @param user the user to set
+     */
+    public void setUser(String user) {
+        this.user = user;
+    }
+
     @Override
     public String toString() {
-        return "RabbitChannel{name=" + name + ", idleSince=" + idleSince + ", messageStats=" + getMessageStats() + ", number=" + number + ", consumerCount=" + consumerCount + ", messagesUnacknowledged=" + messagesUnacknowledged + ", acksUncommitted=" + acksUncommitted + ", prefetchCount=" + prefetchCount + '}';
+        return "RabbitChannel{name=" + name + ", idleSince=" + idleSince + ", number=" + number + ", consumerCount=" + consumerCount + ", messagesUnacknowledged=" + messagesUnacknowledged + ", acksUncommitted=" + acksUncommitted + ", prefetchCount=" + prefetchCount + ", transactional=" + transactional + ", confirm=" + confirm + ", user=" + user + '}';
     }
 
     public String getServiceType() {
@@ -118,13 +163,22 @@ public class RabbitChannel extends RabbitDefaultStatsObject implements RabbitObj
         return getServiceType() + " " + getName();
     }
 
-    public ConfigResponse ProductConfig() {
+    public ConfigResponse getProductConfig() {
         ConfigResponse c = new ConfigResponse();
         c.setValue(MetricConstants.CHANNEL, getName());
         return c;
     }
 
+    public ConfigResponse getCustomProperties() {
+        ConfigResponse c = new ConfigResponse();
+        c.setValue("transactional", isTransactional());
+        c.setValue("confirm", isConfirm());
+        c.setValue("user", getUser());
+        return c;
+    }
+
     public boolean isDurable() {
         return false;
+
     }
 }

@@ -42,6 +42,11 @@ public class RabbitConnection implements RabbitObject {
     private long sendPend;
     private String state; // running
     private long channels;
+    private String authMechanism;
+    private String protocol;
+    private String user;
+    private int timeout;
+    private boolean ssl;
 
     public RabbitConnection() {
     }
@@ -158,9 +163,79 @@ public class RabbitConnection implements RabbitObject {
         this.channels = channels;
     }
 
+    /**
+     * @return the authMechanism
+     */
+    public String getAuthMechanism() {
+        return authMechanism;
+    }
+
+    /**
+     * @param authMechanism the authMechanism to set
+     */
+    public void setAuthMechanism(String authMechanism) {
+        this.authMechanism = authMechanism;
+    }
+
+    /**
+     * @return the protocol
+     */
+    public String getProtocol() {
+        return protocol;
+    }
+
+    /**
+     * @param protocol the protocol to set
+     */
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
+
+    /**
+     * @return the user
+     */
+    public String getUser() {
+        return user;
+    }
+
+    /**
+     * @param user the user to set
+     */
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    /**
+     * @return the timeout
+     */
+    public int getTimeout() {
+        return timeout;
+    }
+
+    /**
+     * @param timeout the timeout to set
+     */
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
+    }
+
+    /**
+     * @return the ssl
+     */
+    public boolean isSsl() {
+        return ssl;
+    }
+
+    /**
+     * @param ssl the ssl to set
+     */
+    public void setSsl(boolean ssl) {
+        this.ssl = ssl;
+    }
+
     @Override
     public String toString() {
-        return "RabbitConnection{pid=" + name + ", recvOct=" + recvOct + ", recvCnt=" + recvCnt + ", sendOct=" + sendOct + ", sendCnt=" + sendCnt + ", sendPend=" + sendPend + ", state=" + state + ", channels=" + channels + '}';
+        return "RabbitConnection{name=" + name + ", recvOct=" + recvOct + " ,recvCnt=" + recvCnt + " ,sendOct=" + sendOct + " ,sendCnt=" + sendCnt + ", sendPend=" + sendPend + ", state=" + state + ", channels=" + channels + ", authMechanism=" + authMechanism + ", protocol=" + protocol + ", user=" + user + ", timeout=" + timeout + ", ssl=" + ssl + '}';
     }
 
     public String getServiceType() {
@@ -171,9 +246,19 @@ public class RabbitConnection implements RabbitObject {
         return getServiceType() + " " + getName();
     }
 
-    public ConfigResponse ProductConfig() {
+    public ConfigResponse getProductConfig() {
         ConfigResponse c = new ConfigResponse();
         c.setValue(MetricConstants.CONNECTION, getName());
+        return c;
+    }
+
+    public ConfigResponse getCustomProperties() {
+        ConfigResponse c = new ConfigResponse();
+        c.setValue("authMechanism", getAuthMechanism());
+        c.setValue("protocol", getProtocol());
+        c.setValue("user", getUser());
+        c.setValue("timeout", getTimeout());
+        c.setValue("ssl", isSsl());
         return c;
     }
 

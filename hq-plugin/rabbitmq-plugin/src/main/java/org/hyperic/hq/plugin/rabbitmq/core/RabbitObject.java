@@ -20,5 +20,7 @@ public interface RabbitObject {
 
     public boolean isDurable();
 
-    public ConfigResponse ProductConfig();
+    public ConfigResponse getProductConfig();
+
+    public ConfigResponse getCustomProperties();
 }
