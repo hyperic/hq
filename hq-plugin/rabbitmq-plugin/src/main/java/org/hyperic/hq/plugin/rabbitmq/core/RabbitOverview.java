@@ -10,7 +10,7 @@ import java.util.Map;
  *
  * @author administrator
  */
-public class RabbitOverview {
+public class RabbitOverview implements RabbitStatsObject{
 
     private Map<String, Integer> queueTotals;
     private MessageStats messageStats;

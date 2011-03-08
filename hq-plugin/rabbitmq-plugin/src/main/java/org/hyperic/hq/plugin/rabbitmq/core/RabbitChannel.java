@@ -33,7 +33,7 @@ import org.hyperic.util.config.ConfigResponse;
  * AmqpChannel
  * @author Helena Edelson
  */
-public class RabbitChannel extends RabbitNoDurableObject {
+public class RabbitChannel extends RabbitDefaultStatsObject implements RabbitObject {
 
     private String name;
     private Date idleSince;
@@ -42,7 +42,6 @@ public class RabbitChannel extends RabbitNoDurableObject {
     private long messagesUnacknowledged;
     private long acksUncommitted;
     private long prefetchCount;
-    private MessageStats messageStats;
 
     public String getName() {
         return name;
@@ -106,23 +105,9 @@ public class RabbitChannel extends RabbitNoDurableObject {
         this.idleSince = idleSince;
     }
 
-    /**
-     * @return the messageStats
-     */
-    public MessageStats getMessageStats() {
-        return messageStats;
-    }
-
-    /**
-     * @param messageStats the messageStats to set
-     */
-    public void setMessageStats(MessageStats messageStats) {
-        this.messageStats = messageStats;
-    }
-
     @Override
     public String toString() {
-        return "RabbitChannel{name=" + name + ", idleSince=" + idleSince + ", messageStats=" + messageStats + ", number=" + number + ", consumerCount=" + consumerCount + ", messagesUnacknowledged=" + messagesUnacknowledged + ", acksUncommitted=" + acksUncommitted + ", prefetchCount=" + prefetchCount + '}';
+        return "RabbitChannel{name=" + name + ", idleSince=" + idleSince + ", messageStats=" + getMessageStats() + ", number=" + number + ", consumerCount=" + consumerCount + ", messagesUnacknowledged=" + messagesUnacknowledged + ", acksUncommitted=" + acksUncommitted + ", prefetchCount=" + prefetchCount + '}';
     }
 
     public String getServiceType() {
@@ -137,5 +122,9 @@ public class RabbitChannel extends RabbitNoDurableObject {
         ConfigResponse c = new ConfigResponse();
         c.setValue(MetricConstants.CHANNEL, getName());
         return c;
+    }
+
+    public boolean isDurable() {
+        return false;
     }
 }

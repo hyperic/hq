@@ -39,7 +39,7 @@ import org.hyperic.util.config.ConfigResponse;
  * ConnectionCollector
  * @author Helena Edelson
  */
-public class ConnectionCollector extends RabbitMQListCollector {
+public class ConnectionCollector extends RabbitMQDefaultCollector {
 
     private static final Log logger = LogFactory.getLog(ConnectionCollector.class);
 

@@ -32,7 +32,7 @@ import org.hyperic.util.config.ConfigResponse;
  * RabbitVirtualHost
  * @author Helena Edelson
  */
-public class RabbitVirtualHost extends RabbitNoDurableObject {
+public class RabbitVirtualHost implements RabbitObject {
 
     private String name;
 
@@ -63,5 +63,9 @@ public class RabbitVirtualHost extends RabbitNoDurableObject {
         ConfigResponse c = new ConfigResponse();
         c.setValue(MetricConstants.VHOST, getName());
         return c;
+    }
+
+    public boolean isDurable() {
+        return true;
     }
 }

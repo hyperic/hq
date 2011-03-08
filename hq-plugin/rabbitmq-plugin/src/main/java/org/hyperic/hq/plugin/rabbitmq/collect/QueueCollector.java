@@ -32,17 +32,18 @@ import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
 
 import java.util.Properties;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitQueue;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitStatsObject;
 import org.hyperic.hq.product.Metric;
 
 /**
  * QueueCollector
  * @author Helena Edelson
  */
-public class QueueCollector extends RabbitMQListCollector {
+public class QueueCollector extends RabbitStatsCollector {
 
     private static final Log logger = LogFactory.getLog(QueueCollector.class);
 
-    public void collect(HypericRabbitAdmin rabbitAdmin) {
+    public RabbitStatsObject collectStats(HypericRabbitAdmin rabbitAdmin) {
         Properties props = getProperties();
         String vhost = (String) props.get(MetricConstants.VHOST);
         String queue = (String) props.get(MetricConstants.QUEUE);
@@ -50,6 +51,8 @@ public class QueueCollector extends RabbitMQListCollector {
             String node = (String) props.get(MetricConstants.NODE);
             logger.debug("[collect] queue='" + queue + "' vhost='" + vhost + "' node='" + node + "'");
         }
+
+        RabbitStatsObject res = null;
 
         try {
             HypericRabbitAdmin admin = new HypericRabbitAdmin(props);
@@ -61,20 +64,12 @@ public class QueueCollector extends RabbitMQListCollector {
             setValue("messagesReady", q.getMessagesReady());
             setValue("messagesUnacknowledged", q.getMessagesUnacknowledged());
             setValue("memory", q.getMemory());
-            if (q.getMessageStats().getPublishDetails() != null) {
-                setValue("publish_details", q.getMessageStats().getPublishDetails().get("rate"));
-            }
-            if (q.getMessageStats().getDeliverGetDetails() != null) {
-                setValue("deliver_get_details", q.getMessageStats().getDeliverGetDetails().get("rate"));
-            }
-            if (q.getMessageStats().getDeliverNoAckDetails() != null) {
-                setValue("deliver_no_ack_details", q.getMessageStats().getDeliverNoAckDetails().get("rate"));
-            }
-
+            res = q;
         } catch (Exception ex) {
             setAvailability(false);
             logger.debug(ex.getMessage(), ex);
         }
+        return res;
     }
 
     @Override

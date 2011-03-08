@@ -37,15 +37,15 @@ import org.hyperic.hq.product.Metric;
  * ChannelCollector
  * @author Helena Edelson
  */
-public class ChannelCollector extends RabbitMQListCollector {
+public class ChannelCollector extends RabbitStatsCollector {
 
     private static final Log logger = LogFactory.getLog(ChannelCollector.class);
 
-    public void collect(HypericRabbitAdmin rabbitAdmin) {
+    public RabbitStatsObject collectStats(HypericRabbitAdmin rabbitAdmin) {
         Properties props = getProperties();
         String chName = props.getProperty(MetricConstants.CHANNEL);
         logger.debug("[collect] RabbitChannel=" + chName);
-
+        RabbitStatsObject res = null;
         try {
             RabbitChannel c = rabbitAdmin.getChannel(chName);
             setAvailability(c.getIdleSince() == null ? Metric.AVAIL_UP : Metric.AVAIL_PAUSED);
@@ -54,22 +54,12 @@ public class ChannelCollector extends RabbitMQListCollector {
             setValue("prefetchCount", c.getPrefetchCount());
             setValue("acksUncommitted", c.getAcksUncommitted());
             setValue("messagesUnacknowledged", c.getMessagesUnacknowledged());
-            if (c.getMessageStats() != null) {
-                if (c.getMessageStats().getPublishDetails() != null) {
-                    setValue("publish_details", c.getMessageStats().getPublishDetails().get("rate"));
-                }
-                if (c.getMessageStats().getDeliverGetDetails() != null) {
-                    setValue("deliver_get_details", c.getMessageStats().getDeliverGetDetails().get("rate"));
-                }
-                if (c.getMessageStats().getDeliverNoAckDetails() != null) {
-                    setValue("deliver_no_ack_details", c.getMessageStats().getDeliverNoAckDetails().get("rate"));
-                }
-            }
+            res = c;
         } catch (Exception ex) {
             setAvailability(false);
             logger.debug(ex.getMessage(), ex);
         }
-
+        return res;
     }
 
     @Override

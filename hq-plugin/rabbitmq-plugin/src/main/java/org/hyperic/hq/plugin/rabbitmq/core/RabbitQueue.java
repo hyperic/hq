@@ -12,7 +12,7 @@ import org.hyperic.util.config.ConfigResponse;
  *
  * @author administrator
  */
-public class RabbitQueue implements RabbitObject {
+public class RabbitQueue extends RabbitDefaultStatsObject implements RabbitObject {
 
     private String name;
     private Integer messages;
@@ -23,7 +23,6 @@ public class RabbitQueue implements RabbitObject {
     private Date idleSince;
     private String vhost;
     private boolean durable;
-    private MessageStats messageStats;
 
     /**
      * @return the name
@@ -151,23 +150,9 @@ public class RabbitQueue implements RabbitObject {
         this.durable = durable;
     }
 
-    /**
-     * @return the messageStats
-     */
-    public MessageStats getMessageStats() {
-        return messageStats;
-    }
-
-    /**
-     * @param messageStats the messageStats to set
-     */
-    public void setMessageStats(MessageStats messageStats) {
-        this.messageStats = messageStats;
-    }
-
     @Override
     public String toString() {
-        return "RabbitQueue{name=" + getName() + ", durable=" + durable + ", messageStats=" + messageStats + ", vhost=" + vhost + ", idleSince=" + idleSince + ", messages=" + getMessages() + ", consumers=" + getConsumers() + ", messagesReady=" + getMessagesReady() + ", messagesUnacknowledged=" + getMessagesUnacknowledged() + ", memory=" + getMemory() + '}';
+        return "RabbitQueue{name=" + getName() + ", durable=" + durable + ", messageStats=" + getMessageStats() + ", vhost=" + vhost + ", idleSince=" + idleSince + ", messages=" + getMessages() + ", consumers=" + getConsumers() + ", messagesReady=" + getMessagesReady() + ", messagesUnacknowledged=" + getMessagesUnacknowledged() + ", memory=" + getMemory() + '}';
     }
 
     public String getServiceType() {

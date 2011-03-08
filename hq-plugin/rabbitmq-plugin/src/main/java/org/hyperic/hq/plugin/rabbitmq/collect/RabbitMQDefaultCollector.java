@@ -45,6 +45,7 @@ public abstract class RabbitMQDefaultCollector extends Collector {
         }
     }
 
+
     public abstract void collect(HypericRabbitAdmin admin);
 
     public abstract Log getLog();

@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitNode;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitOverview;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitStatsObject;
 import org.hyperic.hq.product.PluginException;
 
 /**
@@ -38,17 +39,18 @@ import org.hyperic.hq.product.PluginException;
  * @author Helena Edelson
  * @author German Laullon
  */
-public class RabbitServerCollector extends RabbitMQDefaultCollector {
+public class RabbitServerCollector extends RabbitStatsCollector {
 
     private static final Log logger = LogFactory.getLog(RabbitServerCollector.class);
 
-    @Override
-    public void collect(HypericRabbitAdmin rabbitAdmin) {
+    public RabbitStatsObject collectStats(HypericRabbitAdmin rabbitAdmin) {
         Properties props = getProperties();
         String node = (String) props.get(MetricConstants.NODE);
         if (logger.isDebugEnabled()) {
             logger.debug("[collect] node=" + node);
         }
+
+        RabbitStatsObject res = null;
 
         try {
             RabbitNode n = rabbitAdmin.getNode(node);
@@ -61,19 +63,13 @@ public class RabbitServerCollector extends RabbitMQDefaultCollector {
             setValue("proc_used_percentage", (double) n.getProcUsed() / (double) n.getProcTotal());
             setValue("fd_percentage", (double) n.getFdUsed() / (double) n.getFdTotal());
             getResult().addValues(o.getQueueTotals());
-            if (o.getMessageStats().getPublishDetails() != null) {
-                setValue("publish_details", o.getMessageStats().getPublishDetails().get("rate"));
-            }
-            if (o.getMessageStats().getDeliverGetDetails() != null) {
-                setValue("deliver_get_details", o.getMessageStats().getDeliverGetDetails().get("rate"));
-            }
-            if (o.getMessageStats().getDeliverNoAckDetails() != null) {
-                setValue("deliver_no_ack_details", o.getMessageStats().getDeliverNoAckDetails().get("rate"));
-            }
+            res = o;
+
         } catch (PluginException ex) {
             setAvailability(false);
             logger.debug(ex.getMessage(), ex);
         }
+        return res;
     }
 
     @Override

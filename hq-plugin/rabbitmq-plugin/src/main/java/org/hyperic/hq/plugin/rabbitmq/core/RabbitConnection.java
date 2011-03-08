@@ -32,7 +32,7 @@ import org.hyperic.util.config.ConfigResponse;
  * ErlangConnection is a simple POJO reflecting the response <connectioninfoitem>
  * @author Helena Edelson
  */
-public class RabbitConnection extends RabbitNoDurableObject {
+public class RabbitConnection implements RabbitObject {
 
     private String name;
     private long recvOct;
@@ -175,5 +175,9 @@ public class RabbitConnection extends RabbitNoDurableObject {
         ConfigResponse c = new ConfigResponse();
         c.setValue(MetricConstants.CONNECTION, getName());
         return c;
+    }
+
+    public boolean isDurable() {
+        return false;
     }
 }

@@ -36,7 +36,7 @@ import org.hyperic.hq.plugin.rabbitmq.core.RabbitExchange;
  * ExchangeCollector
  * @author Helena Edelson
  */
-public class ExchangeCollector extends RabbitMQListCollector {
+public class ExchangeCollector extends RabbitMQDefaultCollector {
 
     private static final Log logger = LogFactory.getLog(ExchangeCollector.class);
 
