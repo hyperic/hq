@@ -59,19 +59,18 @@ public class VirtualHostCollector extends RabbitMQDefaultCollector {
             setAvailability(true);
         } catch (PluginException ex) {
             setAvailability(false);
-            logger.debug(ex.getMessage(),ex);
+            logger.debug(ex.getMessage(), ex);
         }
 
-//        RabbitVirtualHost virtualHost = new RabbitVirtualHost(vhost, rabbitAdmin);
-//
-//        if (virtualHost != null) {
-//            setAvailability(virtualHost.isAvailable());
-//            setValue("queueCount", virtualHost.getQueueCount());
-//            setValue("exchangeCount", virtualHost.getExchangeCount());
-//            setValue("connectionCount", virtualHost.getConnectionCount());
-//            setValue("channelCount", virtualHost.getChannelCount());
-//            setValue("consumerCount", virtualHost.getConsumerCount());
-//        }
+        try {
+            RabbitVirtualHost virtualHost = rabbitAdmin.getVirtualHost(vhost);
+            setAvailability(true);
+            setValue("queueCount", rabbitAdmin.getQueues(virtualHost).size());
+            setValue("exchangeCount", rabbitAdmin.getQueues(virtualHost).size());
+        } catch (Exception ex) {
+            setAvailability(false);
+            logger.debug(ex.getMessage(), ex);
+        }
     }
 
     @Override

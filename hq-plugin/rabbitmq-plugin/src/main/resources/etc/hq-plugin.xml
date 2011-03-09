@@ -183,6 +183,19 @@
         <metric name="Process Threads"
                 template="rabbitmq-sigar:Type=ProcState,${server-connection}:Threads"/>
 
+        <metric name="Channels"
+                    template="rabbitmq:${server-connection}:channelCount"
+                    category="UTILIZATION"
+                    units="none"
+                    indicator="true"
+                    collectionType="dynamic"/>
+        <metric name="Connections"
+                    template="rabbitmq:${server-connection}:connectionCount"
+                    category="UTILIZATION"
+                    units="none"
+                    indicator="true"
+                    collectionType="dynamic"/>
+
 
         <!-- Next release:
        <plugin type="control" class="org.hyperic.hq.plugin.rabbitmq.manage.RabbitBrokerManagerPlugin"/>
@@ -523,25 +536,6 @@
                     units="none"
                     indicator="true"
                     collectionType="dynamic"/>
-            <metric name="Consumers"
-                    alias="consumerCount"
-                    category="UTILIZATION"
-                    units="none"
-                    indicator="true"
-                    collectionType="dynamic"/>
-            <metric name="Channels"
-                    alias="channelCount"
-                    category="UTILIZATION"
-                    units="none"
-                    indicator="true"
-                    collectionType="dynamic"/>
-            <metric name="Connections"
-                    alias="connectionCount"
-                    category="UTILIZATION"
-                    units="none"
-                    indicator="true"
-                    collectionType="dynamic"/>
-
 
             <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.VirtualHostCollector"/>
             <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>

@@ -62,6 +62,8 @@ public class RabbitServerCollector extends RabbitStatsCollector {
             setValue("proc_used", n.getProcUsed());
             setValue("proc_used_percentage", (double) n.getProcUsed() / (double) n.getProcTotal());
             setValue("fd_percentage", (double) n.getFdUsed() / (double) n.getFdTotal());
+            setValue("connectionCount", rabbitAdmin.getConnections().size());
+            setValue("channelCount", rabbitAdmin.getChannels().size());
             getResult().addValues(o.getQueueTotals());
             res = o;
 
