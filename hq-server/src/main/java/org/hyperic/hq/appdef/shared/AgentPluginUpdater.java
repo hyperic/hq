@@ -35,9 +35,12 @@ public interface AgentPluginUpdater {
     public void initialize();
     
     /**
-     * @param map {@link Map} of {@link Integer} = agentId to {@link Collection} of {@link Plugin}
+     * @param updateMap {@link Map} of {@link Integer} = agentId to {@link Collection}
+     *  of {@link Plugin}
+     * @param removeMap {@link Map} of {@link Integer} = agentId to {@link Collection}
+     *  of {@link String} = plugin filename or {@link Plugin}.getPath()
      */
-    public void queuePluginTransfer(final Map<Integer, Collection<Plugin>> map,
+    public void queuePluginTransfer(final Map<Integer, Collection<Plugin>> updateMap,
                                     final Map<Integer, Collection<String>> removeMap);
 
     /**

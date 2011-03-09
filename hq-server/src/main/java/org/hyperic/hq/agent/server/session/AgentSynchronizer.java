@@ -144,7 +144,7 @@ public class AgentSynchronizer implements DiagnosticObject {
                 // allow the other thread some time to get its job done
                 return false;
             }
-            if (debug) log.debug("scheduling agent data transfer agentId=" + agentId +
+            if (debug) log.debug("executing agent data transfer agentId=" + agentId +
                                  " jobdesc=" + job.getJobDescription());
             job.execute();
             setDiags(job);

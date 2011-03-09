@@ -144,8 +144,7 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
         if (agentId != null) {
             query.setParameter("agentId", agentId);
         }
-        return query.addScalar("agent_id", Hibernate.INTEGER)
-                    .addScalar("plugin_name", Hibernate.STRING)
+        return query.addScalar("id", Hibernate.INTEGER)
                     .list();
     }
 

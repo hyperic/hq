@@ -25,38 +25,46 @@
  */
 package org.hyperic.hq.appdef.server.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.annotation.PostConstruct;
 
-import org.hyperic.hq.agent.AgentConnectionException;
-import org.hyperic.hq.agent.AgentRemoteException;
+import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.agent.server.session.AgentDataTransferJob;
 import org.hyperic.hq.agent.server.session.AgentSynchronizer;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentPluginUpdater;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
-import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.shared.PluginManager;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service("agentPluginUpdater")
 @Transactional
-public class AgentPluginUpdaterImpl implements AgentPluginUpdater {
+public class AgentPluginUpdaterImpl
+implements AgentPluginUpdater, ApplicationListener<ContextRefreshedEvent>, ApplicationContextAware {
     
     private AuthzSubject overlord;
     private AgentSynchronizer agentSynchronizer;
     private PluginManager pluginManager;
+    private ApplicationContext ctx;
     
     @Autowired
     public AgentPluginUpdaterImpl(AuthzSubjectManager authzSubjectManager,
@@ -100,20 +108,35 @@ public class AgentPluginUpdaterImpl implements AgentPluginUpdater {
                     try {
                         pluginManager.updateAgentPluginSyncStatusInNewTran(
                             AgentPluginStatusEnum.SYNC_IN_PROGRESS, agentId, plugins);
-                        agentManager.transferAgentPlugins(overlord, agentId, pluginNames);
+                        final FileDataResult[] transferResult =
+                            agentManager.transferAgentPlugins(overlord, agentId, pluginNames);
                         pluginManager.updateAgentPluginSyncStatusInNewTran(
                             AgentPluginStatusEnum.SYNC_SUCCESS, agentId, plugins);
                         final Collection<String> pluginFileNames = removeMap.get(agentId);
                         if (pluginFileNames != null && !pluginFileNames.isEmpty()) {
                             agentManager.agentRemovePlugins(overlord, agentId, pluginFileNames);
                         }
-// XXX disabled for now
-//                        agentManager.restartAgent(overlord, agentId);
+                        restartAgentIfFilesUpdated(transferResult, pluginFileNames, agentManager);
                     } catch (Exception e) {
                         pluginManager.updateAgentPluginSyncStatusInNewTran(
                             AgentPluginStatusEnum.SYNC_FAILURE, agentId, plugins);
                         throw new SystemException(
                             "error transferring agent plugins to agentId=" + agentId, e);
+                    }
+                }
+                private void restartAgentIfFilesUpdated(FileDataResult[] transferResult,
+                                                        Collection<String> pluginFileNames,
+                                                        AgentManager agentManager) {
+                    if (pluginFileNames != null && !pluginFileNames.isEmpty()) {
+// XXX disabled for now
+//                        agentManager.restartAgent(overlord, agentId);
+                    } else {
+                        for (final FileDataResult res : transferResult) {
+                            if (res.getSendBytes() > 0) {
+// XXX disabled for now
+//                                agentManager.restartAgent(overlord, agentId);
+                            }
+                        }
                     }
                 }
             };
@@ -135,9 +158,15 @@ public class AgentPluginUpdaterImpl implements AgentPluginUpdater {
             public void execute() {
                 final AgentManager agentManager = Bootstrap.getBean(AgentManager.class);
                 try {
-                    agentManager.agentRemovePlugins(overlord, agentId, pluginFileNames);
+                    final Map<String, Boolean> result =
+                        agentManager.agentRemovePlugins(overlord, agentId, pluginFileNames);
+                    // only reboot the agent if we actually removed a plugin
+                    for (Boolean res : result.values()) {
+                        if (res.booleanValue()) {
 // XXX disabled for now
-//                    agentManager.restartAgent(overlord, agentId);
+//                            agentManager.restartAgent(overlord, agentId);
+                        }
+                    }
                 } catch (Exception e) {
                     throw new SystemException("error removing pluginFiles=" + pluginFileNames +
                                               " from agentId=" + agentId, e);
@@ -145,6 +174,24 @@ public class AgentPluginUpdaterImpl implements AgentPluginUpdater {
             }
         };
         agentSynchronizer.addAgentJob(job);
+    }
+
+    public void setApplicationContext(ApplicationContext ctx) throws BeansException {
+        this.ctx = ctx;
+    }
+
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext() != this.ctx) {
+            return;
+        }
+        // don't want the main thread to hang the startup so put it in a new thread
+        Thread thread = new Thread() {
+            public void run() {
+                final AgentManager agentManager = Bootstrap.getBean(AgentManager.class);
+                agentManager.syncAllAgentPlugins();
+            }
+        };
+        thread.start();
     }
 
 }
