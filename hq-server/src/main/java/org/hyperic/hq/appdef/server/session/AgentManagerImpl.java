@@ -151,6 +151,9 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         ZeventManager.getInstance().addBufferedListener(PluginStatusZevent.class,
             new ZeventListener<PluginStatusZevent>() {
             public void processEvents(List<PluginStatusZevent> events) {
+                if (agentPluginUpdater.isDisabled()) {
+                    return;
+                }
                 AgentManager am = applicationContext.getBean(AgentManager.class);
                 for (final PluginStatusZevent zevent : events) {
                     am.updateAgentPluginStatus(zevent.getPluginReport());
@@ -742,9 +745,9 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * @throws InterruptedException if enqueuing the Zevent is interrupted.
      */
     public void transferAgentBundleAsync(AuthzSubject subject, AppdefEntityID aid,
-                                         String bundleFileName) throws PermissionException,
-        AgentNotFoundException, FileNotFoundException, ConfigPropertyException,
-        InterruptedException {
+                                         String bundleFileName)
+    throws PermissionException, AgentNotFoundException, FileNotFoundException,
+           ConfigPropertyException, InterruptedException {
 
         // check permissions
         permissionManager.checkCreatePlatformPermission(subject);
@@ -792,8 +795,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      *         retrieved.
      */
     public void transferAgentBundle(AuthzSubject subject, AppdefEntityID aid, String bundleFileName)
-        throws PermissionException, AgentNotFoundException, AgentConnectionException,
-        AgentRemoteException, FileNotFoundException, IOException, ConfigPropertyException {
+    throws PermissionException, AgentNotFoundException, AgentConnectionException,
+           AgentRemoteException, FileNotFoundException, IOException, ConfigPropertyException {
 
         log.info("Transferring agent bundle  " + bundleFileName + " to agent " + aid.getID());
 
@@ -907,7 +910,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      */
     public void transferAgentPluginAsync(AuthzSubject subject, AppdefEntityID aid, String plugin)
         throws PermissionException, FileNotFoundException, AgentNotFoundException,
-        InterruptedException {
+               InterruptedException {
 
         // check permissions
         permissionManager.checkCreatePlatformPermission(subject);
@@ -1241,11 +1244,11 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             if (agent == null) {
                 return;
             }
-            final Map<String, AgentPluginStatus> statusByJarName =
+            final Map<String, AgentPluginStatus> statusByFileName =
                 agentPluginStatusDAO.getPluginStatusByAgent(agent);
             @SuppressWarnings("unchecked")
             final Map<String, List<String>> stringLists = arg.getStringLists();
-            final List<String> jars = stringLists.get(PluginReport_args.JAR_NAME);
+            final List<String> files = stringLists.get(PluginReport_args.JAR_NAME);
             final List<String> pluginNames = stringLists.get(PluginReport_args.PLUGIN_NAME);
             final List<String> productNames = stringLists.get(PluginReport_args.PRODUCT_NAME);
             final List<String> md5s = stringLists.get(PluginReport_args.MD5);
@@ -1257,28 +1260,28 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             final Map<Integer, Collection<String>> removeMap =
                 new HashMap<Integer, Collection<String>>();
             for (int i=0; i<md5s.size(); i++) {
-                final String jarName = jars.get(i);
+                final String filename = files.get(i);
                 final String md5 = md5s.get(i);
                 AgentPluginStatus status;
-                final Plugin currPlugin = pluginDAO.getByFilename(jarName);
-                if (null == (status = statusByJarName.remove(jarName))) {
+                final Plugin currPlugin = pluginDAO.getByFilename(filename);
+                if (null == (status = statusByFileName.remove(filename))) {
                     status = new AgentPluginStatus();
                 }
                 if (currPlugin == null) {
                     // the agent has a plugin that is unknown to the server, remove it!
-                    setJarNameToRemove(removeMap, agent.getId(), jarName);
+                    setJarNameToRemove(removeMap, agent.getId(), filename);
                 } else if (!md5.equals(currPlugin.getMD5())) {
                     setPluginToUpdate(updateMap, agent.getId(), currPlugin);
                     if (debug) log.debug("plugin=" + currPlugin.getName() +
                                          " md5 does not match agentId=" + agent.getId() +
                                          ", " + md5 + " != " + currPlugin.getMD5());
                 }
-                updateStatus(status, agent, jarName, md5, pluginNames.get(i),
+                updateStatus(status, agent, filename, md5, pluginNames.get(i),
                              productNames.get(i), now);
             }
             // process remaining plugins that the AgentPluginStatus table knows about but
             // the agent didn't check in
-            for (final Entry<String, AgentPluginStatus> entry: statusByJarName.entrySet()) {
+            for (final Entry<String, AgentPluginStatus> entry: statusByFileName.entrySet()) {
                 final String filename = entry.getKey();
                 final AgentPluginStatus status = entry.getValue();
                 final Plugin plugin = pluginDAO.getByFilename(filename);
@@ -1340,8 +1343,6 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         plugins.add(plugin);
     }
 
-
-
     private class PluginStatusZevent extends Zevent {
         private PluginStatusZevent(PluginReport_args arg) {
             super(new ZeventSourceId() {}, new PluginReportPayload(arg));
@@ -1361,16 +1362,13 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         }
     }
     
-// XXX needs javadoc!
-// is this needed anymore?
-    @Transactional(readOnly=true)
-    public long getNumAutoUpdatingAgents() {
-        return agentPluginStatusDAO.getNumAutoUpdatingAgents();
-    }
-    
     @Transactional(readOnly=true)
     public void syncAllAgentPlugins() {
         final boolean debug = log.isDebugEnabled();
+        if (agentPluginUpdater.isDisabled()) {
+            if (debug) log.debug("Plugin update mechanism is disabled, will not sync all agent plugins");
+            return;
+        }
         if (debug) log.debug("running syncAllAgentPlugins");
         final Map<Agent, Collection<AgentPluginStatus>> map = 
             agentPluginStatusDAO.getOutOfSyncPluginsByAgent();

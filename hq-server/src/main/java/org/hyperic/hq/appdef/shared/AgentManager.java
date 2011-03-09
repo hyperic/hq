@@ -454,9 +454,6 @@ public interface AgentManager {
     throws PermissionException, AgentConnectionException, AgentNotFoundException,
            AgentRemoteException, FileNotFoundException, IOException, ConfigPropertyException;
     
-// XXX javadoc!
-    public long getNumAutoUpdatingAgents();
-    
 // XXX may want to change Boolean so that it is a status string "SUCCESS" or an error message
     /**
      * Removes plugin jars from the plugin directory on the remote Agent.
