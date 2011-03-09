@@ -48,74 +48,70 @@ import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.units.FormattedNumber;
 
 @Entity
-@Table(name="EAM_MEASUREMENT_TEMPL")
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-public class MeasurementTemplate implements ContainerManagedTimestampTrackable, Serializable 
-{
+@Table(name = "EAM_MEASUREMENT_TEMPL")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public class MeasurementTemplate implements ContainerManagedTimestampTrackable, Serializable {
+    @Column(name = "ALIAS", nullable = false, length = 100)
+    private String alias;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CATEGORY_ID", nullable = false)
+    @Index(name = "TEMPL_CATEGORY_IDX")
+    private Category category;
+
+    @Column(name = "COLLECTION_TYPE", nullable = false)
+    private int collectionType;
+
+    @Column(name = "CTIME", nullable = false)
+    private long creationTime;
+
+    @Column(name = "DEFAULT_INTERVAL", nullable = false)
+    private long defaultInterval = 60000l;
+
+    @Column(name = "DEFAULT_ON", nullable = false)
+    private boolean defaultOn = false;
+
+    @Column(name = "DESIGNATE", nullable = false)
+    @Index(name = "TEMPL_DESIG_IDX")
+    private boolean designate = false;
+
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "ID")
     private Integer id;
 
-    @Column(name="VERSION_COL",nullable=false)
+    @Column(name = "MTIME", nullable = false)
+    private long modifiedTime;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MONITORABLE_TYPE_ID", nullable = false)
+    @Index(name = "TEMPL_MONITORABLE_TYPE_ID_IDX")
+    private MonitorableType monitorableType;
+
+    @Column(name = "NAME", nullable = false, length = 100)
+    private String name;
+
+    @Column(name = "PLUGIN", nullable = false, length = 250)
+    private String plugin;
+
+    @Column(name = "TEMPLATE", nullable = false, length = 2048)
+    private String template;
+
+    @Column(name = "UNITS", nullable = false, length = 50)
+    private String units;
+
+    @Column(name = "VERSION_COL", nullable = false)
     @Version
     private Long version;
-    
-    @Column(name="NAME",nullable=false,length=100)
-    private String  name;
-    
-    @Column(name="ALIAS",nullable=false,length=100)
-    private String  alias;
-    
-    @Column(name="UNITS",nullable=false,length=50)
-    private String  units;
-    
-    @Column(name="COLLECTION_TYPE",nullable=false)
-    private int     collectionType;
-    
-    @Column(name="DEFAULT_ON",nullable=false)
-    private boolean defaultOn = false;
-    
-    @Column(name="DEFAULT_INTERVAL",nullable=false)
-    private long    defaultInterval=60000l;
-    
-    @Column(name="DESIGNATE",nullable=false)
-    @Index(name="TEMPL_DESIG_IDX")
-    private boolean designate = false;
-    
-    @Column(name="TEMPLATE",nullable=false,length=2048)
-    private String  template;
-    
-    @Column(name="PLUGIN",nullable=false,length=250)
-    private String  plugin;
-    
-    @Column(name="CTIME",nullable=false)
-    private long    creationTime;
-    
-    @Column(name="MTIME",nullable=false)
-    private long    modifiedTime;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="CATEGORY_ID",nullable=false)
-    @Index(name="TEMPL_CATEGORY_IDX")
-    private Category        category;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="MONITORABLE_TYPE_ID",nullable=false)
-    @Index(name="TEMPL_MONITORABLE_TYPE_ID_IDX")
-    private MonitorableType monitorableType;
-   
 
     public MeasurementTemplate() {
     }
 
-    public MeasurementTemplate(String name, String alias, String units,
-                               int collectionType, boolean defaultOn,
-                               long defaultInterval, boolean designate,
-                               String template, MonitorableType type,
-                               Category category, String plugin)
-    {
+    public MeasurementTemplate(String name, String alias, String units, int collectionType,
+                               boolean defaultOn, long defaultInterval, boolean designate,
+                               String template, MonitorableType type, Category category,
+                               String plugin) {
         this.name = name;
         this.alias = alias;
         this.units = units;
@@ -128,24 +124,6 @@ public class MeasurementTemplate implements ContainerManagedTimestampTrackable, 
         this.category = category;
         this.plugin = plugin;
     }
-    
-    
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Long getVersion() {
-        return version;
-    }
-
-    public void setVersion(Long version) {
-        this.version = version;
-    }
 
     /**
      * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
@@ -154,7 +132,7 @@ public class MeasurementTemplate implements ContainerManagedTimestampTrackable, 
     public boolean allowContainerManagedCreationTime() {
         return true;
     }
-    
+
     /**
      * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
      * @return <code>true</code> by default.
@@ -163,123 +141,16 @@ public class MeasurementTemplate implements ContainerManagedTimestampTrackable, 
         return true;
     }
 
-    public String getName() {
-        return name;
-    }
-    
-    public void setName(String name) {
-        this.name = name;
-    }
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof MeasurementTemplate)) {
+            return false;
+        }
+        Integer objId = ((MeasurementTemplate) obj).getId();
 
-    public String getAlias() {
-        return alias;
-    }
-    
-    void setAlias(String alias) {
-        this.alias = alias;
-    }
-
-    public String getUnits() {
-        return units;
-    }
-    
-    void setUnits(String units) {
-        this.units = units;
-    }
-
-    public int getCollectionType() {
-        return collectionType;
-    }
-
-    void setCollectionType(int collectionType) {
-        this.collectionType = collectionType;
-    }
-
-    public boolean isDefaultOn() {
-        return defaultOn;
-    }
-    
-    void setDefaultOn(boolean defaultOn) {
-        this.defaultOn = defaultOn;
-    }
-
-    public long getDefaultInterval() {
-        return defaultInterval;
-    }
-    
-    void setDefaultInterval(long defaultInterval) {
-        this.defaultInterval = defaultInterval;
-    }
-
-    public boolean isDesignate() {
-        return designate;
-    }
-    
-    void setDesignate(boolean designate) {
-        this.designate = designate;
-    }
-
-    public String getTemplate() {
-        return template;
-    }
-    
-    void setTemplate(String template) {
-        this.template = template;
-    }
-
-    public String getPlugin() {
-        return plugin;
-    }
-    
-    void setPlugin(String plugin) {
-        this.plugin = plugin;
-    }
-
-    public long getCtime() {
-        return creationTime;
-    }
-    
-    void setCtime(long ctime) {
-        creationTime = ctime;
-    }
-
-    public long getMtime() {
-        return modifiedTime;
-    }
-    
-    void setMtime(long mtime) {
-        modifiedTime = mtime;
-    }
-
-    public MonitorableType getMonitorableType() {
-        return monitorableType;
-    }
-    
-    void setMonitorableType(MonitorableType monitorableType) {
-        this.monitorableType = monitorableType;
-    }
-
-    public Category getCategory() {
-        return category;
-    }
-    
-    void setCategory(Category category) {
-        this.category = category;
-    }
-
-    public boolean isAvailability() {
-        return getAlias().toUpperCase().
-            equals(MeasurementConstants.CAT_AVAILABILITY);
-    }
-
-    /**
-     * Format a metric value, based on the units specified by this template
-     */
-    public String formatValue(MetricValue val) {
-        if (val == null)
-            return "";
-        
-        return formatValue(val.getValue());
+        return getId() == objId || (getId() != null && objId != null && getId().equals(objId));
     }
 
     /**
@@ -289,25 +160,144 @@ public class MeasurementTemplate implements ContainerManagedTimestampTrackable, 
         FormattedNumber th = UnitsConvert.convert(val, getUnits());
         return th.toString();
     }
-    
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || !(obj instanceof MeasurementTemplate)) {
-            return false;
-        }
-        Integer objId = ((MeasurementTemplate)obj).getId();
-  
-        return getId() == objId ||
-        (getId() != null && 
-         objId != null && 
-         getId().equals(objId));     
+
+    /**
+     * Format a metric value, based on the units specified by this template
+     */
+    public String formatValue(MetricValue val) {
+        if (val == null)
+            return "";
+
+        return formatValue(val.getValue());
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public int getCollectionType() {
+        return collectionType;
+    }
+
+    public long getCtime() {
+        return creationTime;
+    }
+
+    public long getDefaultInterval() {
+        return defaultInterval;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public MonitorableType getMonitorableType() {
+        return monitorableType;
+    }
+
+    public long getMtime() {
+        return modifiedTime;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getPlugin() {
+        return plugin;
+    }
+
+    public String getTemplate() {
+        return template;
+    }
+
+    public String getUnits() {
+        return units;
+    }
+
+    public Long getVersion() {
+        return version;
     }
 
     public int hashCode() {
         int result = 17;
-        result = 37*result + (getId() != null ? getId().hashCode() : 0);
-        return result;      
+        result = 37 * result + (getId() != null ? getId().hashCode() : 0);
+        return result;
+    }
+
+    public boolean isAvailability() {
+        return getAlias().toUpperCase().equals(MeasurementConstants.CAT_AVAILABILITY);
+    }
+
+    public boolean isDefaultOn() {
+        return defaultOn;
+    }
+
+    public boolean isDesignate() {
+        return designate;
+    }
+
+    void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    void setCategory(Category category) {
+        this.category = category;
+    }
+
+    void setCollectionType(int collectionType) {
+        this.collectionType = collectionType;
+    }
+
+    void setCtime(long ctime) {
+        creationTime = ctime;
+    }
+
+    void setDefaultInterval(long defaultInterval) {
+        this.defaultInterval = defaultInterval;
+    }
+
+    void setDefaultOn(boolean defaultOn) {
+        this.defaultOn = defaultOn;
+    }
+
+    void setDesignate(boolean designate) {
+        this.designate = designate;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    void setMonitorableType(MonitorableType monitorableType) {
+        this.monitorableType = monitorableType;
+    }
+
+    void setMtime(long mtime) {
+        modifiedTime = mtime;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    void setPlugin(String plugin) {
+        this.plugin = plugin;
+    }
+
+    void setTemplate(String template) {
+        this.template = template;
+    }
+
+    void setUnits(String units) {
+        this.units = units;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }
