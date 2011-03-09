@@ -22,7 +22,7 @@ var lastSelected = undefined;
 <% } %>
 
 function showResult(eid) {
-  dojo.byId("results_msgLive").innerHTML = "Results of " + liveResults.command +
+  hqDojo.byId("results_msgLive").innerHTML = "Results of " + liveResults.command +
                                        " for " + resInfo[eid].name;
   var results = liveResults.results;
   for (var i=0; i<results.length; i++) {
@@ -30,21 +30,21 @@ function showResult(eid) {
     if (r.rid == eid) {
       if (r.result) {
       hideErrorPanel();
-      dojo.byId('result').innerHTML = r.result;
+      hqDojo.byId('result').innerHTML = r.result;
       } else {
       handleError(r.error);
-      //dojo.byId('result').innerHTML = r.error;
+      //hqDojo.byId('result').innerHTML = r.error;
       }
       break;
     }
   }
   <% if (isGroup) { %>
     if (lastSelected) {
-      dojo.byId('mem_' + lastSelected).style.color = 'black';
-      dojo.byId('mem_' + lastSelected).style.fontWeight = 'normal';
+      hqDojo.byId('mem_' + lastSelected).style.color = 'black';
+      hqDojo.byId('mem_' + lastSelected).style.fontWeight = 'normal';
     }
-    dojo.byId('mem_' + eid).style.color = '#60A5EA';
-    dojo.byId('mem_' + eid).style.fontWeight = 'bold';
+    hqDojo.byId('mem_' + eid).style.color = '#60A5EA';
+    hqDojo.byId('mem_' + eid).style.fontWeight = 'bold';
     lastSelected = eid;
   <% } %>
 }
@@ -54,16 +54,16 @@ function processResult(result) {
   <% if (!isGroup) { %>
     showResult('${eid}');
   <% } else { %>
-    dojo.byId("groupMembers").className = 'hasData';
+    hqDojo.byId("groupMembers").className = 'hasData';
   
     var res = result.results;
     for (var i=0; i<res.length; i++) {
       var r = res[i];
       
       if (r.result) {
-        dojo.byId('clicker_' + r.rid).className = 'goodResults';
+        hqDojo.byId('clicker_' + r.rid).className = 'goodResults';
       } else {
-        dojo.byId('clicker_' + r.rid).className = 'errorResults';
+        hqDojo.byId('clicker_' + r.rid).className = 'errorResults';
       }
       if (lastSelected) {
         showResult(lastSelected);
@@ -73,7 +73,7 @@ function processResult(result) {
 }
 
 function runCommand() {
-  	var cmdSelect = dojo.byId('commandSelect');
+  	var cmdSelect = hqDojo.byId('commandSelect');
 
     if (cmdSelect.selectedIndex == 0) return;
     
@@ -81,7 +81,7 @@ function runCommand() {
   	var url = '<%= urlFor(action:'invoke') %>' + 
             '?cmd=' + cmd + 
             '&eid=<%= eid %>';
-  	var fmtSelect = dojo.byId('fmt_' + cmd);
+  	var fmtSelect = hqDojo.byId('fmt_' + cmd);
 
     if (fmtSelect.selectedIndex != -1) {
     	var fmt = fmtSelect.options[fmtSelect.selectedIndex].value;
@@ -90,15 +90,15 @@ function runCommand() {
   	} 
 
   	if (++ajaxCount > 0) {
-    	dojo.byId("spinner").style.visibility = 'visible';  
+    	hqDojo.byId("spinner").style.visibility = 'visible';  
   	}
     
-	dojo.xhrGet({
+	hqDojo.xhrGet({
     	url: url,
     	handleAs: "json-comment-filtered",
     	load: function(response, args) {
       		if (--ajaxCount == 0) {
-        		dojo.byId("spinner").style.visibility = 'hidden';  
+        		hqDojo.byId("spinner").style.visibility = 'hidden';  
       		}
 
             processResult(response);
@@ -110,22 +110,22 @@ function runCommand() {
 }
 
 function handleError(er) {
-    var msgPanelObj = dojo.byId("messagePanel");
+    var msgPanelObj = hqDojo.byId("messagePanel");
     if(msgPanelObj.style.display != "block") {
         msgPanelObj.style.display = "block";
     }
 
     if (er.search(/Unknown command/) < 0)
-        dojo.byId("messagePanelMessage").innerHTML = er;
+        hqDojo.byId("messagePanelMessage").innerHTML = er;
     else
-        dojo.byId("messagePanelMessage").innerHTML = "${l.agentUnknownCommand}";
+        hqDojo.byId("messagePanelMessage").innerHTML = "${l.agentUnknownCommand}";
 }
 
 function hideErrorPanel() {
-      var msgPanelObj = dojo.byId("messagePanel");
+      var msgPanelObj = hqDojo.byId("messagePanel");
             if(msgPanelObj.style.display = "block") {
             msgPanelObj.style.display = "none";
-            dojo.byId("messagePanelMessage").innerHTML = '';
+            hqDojo.byId("messagePanelMessage").innerHTML = '';
             }
 }
 
@@ -140,7 +140,7 @@ legends['who'] = '${l.who}';
 
 
 function updateLegend(select){
-    var legendDiv = dojo.byId("legend");
+    var legendDiv = hqDojo.byId("legend");
     if(select.selectedIndex <= 0){
         legendDiv.innerHTML = "";
         return;
@@ -148,8 +148,8 @@ function updateLegend(select){
     legendDiv.innerHTML = legends[select.options[select.selectedIndex].value];
 }
 
-dojo.ready(function(){
-    updateLegend(dojo.byId("commandSelect"));
+hqDojo.ready(function(){
+    updateLegend(hqDojo.byId("commandSelect"));
 });
 
 

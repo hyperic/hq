@@ -1,18 +1,18 @@
 <script type="text/javascript">
 document.navTabCat = "Admin";
 function sendCode() {
-  	dojo.byId('timeStatus').innerHTML = '... executing';
-   	dojo.xhrPost({
+  	hqDojo.byId('timeStatus').innerHTML = '... executing';
+   	hqDojo.xhrPost({
     	url: '<%= urlFor(action:"execute") %>',
     	handleAs: "json-comment-filtered",
     	content: {
-        	code:   dojo.byId("code").value,
- 	       debug:  dojo.byId("hiberDebug").checked
+        	code:   hqDojo.byId("code").value,
+ 	       debug:  hqDojo.byId("hiberDebug").checked
     	},
     	load: function(response, args) {
-     		dojo.byId('result').innerHTML = response.result;
-		    dojo.byId('hiberStats').innerHTML = response.hiberStats;
-      		dojo.byId('timeStatus').innerHTML = response.timeStatus;
+     		hqDojo.byId('result').innerHTML = response.result;
+		    hqDojo.byId('hiberStats').innerHTML = response.hiberStats;
+      		hqDojo.byId('timeStatus').innerHTML = response.timeStatus;
     	},
     	error: function(response, args) {
       		alert('error! ' + response);
@@ -21,14 +21,14 @@ function sendCode() {
 }
 
 function chooseTemplate(t) {
-  	dojo.xhrGet({
+  	hqDojo.xhrGet({
     	url: '<%= urlFor(action:"getTemplate") %>',
 	    handleAs: "json-comment-filtered",
     	content: {
         	template: t
         },
     	load: function(response, args) {
-      		dojo.byId('code').value = response.result;
+      		hqDojo.byId('code').value = response.result;
     	},
     	error: function(response, args) {
       		alert('error! ' + response);

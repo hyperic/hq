@@ -33,12 +33,12 @@ function setFoot() {
   };
   
   winH = WindowSize.height;
-  conH = dojo.position("header").h + dojo.position("migContainer").h;
+  conH = hqDojo.position("header").h + hqDojo.position("migContainer").h;
   
   var myHeight = winH - conH - footerH + browserH;
   
   if (myHeight > 60) {
-  	var footerContent = dojo.byId("footerContent");
+  	var footerContent = hqDojo.byId("footerContent");
   	
   	footerContent.style.marginTop = myHeight + "px";
   }

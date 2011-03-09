@@ -48,20 +48,20 @@
 </script>
 
 <script>
-	dojo.ready(function() {
+	hqDojo.ready(function() {
 		<c:if test="${empty cancelOnly}">
-			dojo.connect(dojo.byId("okButton"), "onclick", function() {
+			hqDojo.connect(hqDojo.byId("okButton"), "onclick", function() {
 				hyperic.form.mockLinkSubmit("ok.x", "1", "formButtonHiddenSubmitArea");
 			});
 			
 			<c:if test="${empty noReset}">
-				dojo.connect(dojo.byId("resetButton"), "onclick", function() {
+				hqDojo.connect(hqDojo.byId("resetButton"), "onclick", function() {
 					hyperic.form.mockLinkSubmit("reset.x", "1", "formButtonHiddenSubmitArea");
 				});
 			</c:if>
 		</c:if>
 		<c:if test="${empty noCancel}">
-			dojo.connect(dojo.byId("cancelButton"), "onclick", function() {
+			hqDojo.connect(hqDojo.byId("cancelButton"), "onclick", function() {
 				hyperic.form.mockLinkSubmit("cancel.x", "1", "formButtonHiddenSubmitArea");
 			});
 		</c:if>

@@ -2,55 +2,55 @@
 <script type="text/javascript">
 document.navTabCat = "Admin";
 function getSystemStats() {
-  dojo.xhrPost({
+  hqDojo.xhrPost({
     url: '<%= urlFor(action:"getSystemStats") %>',
     handleAs: "json-comment-filtered",
     load: function(response, args) {
-      dojo.byId('userCPU').innerHTML = response.sysUserCpu;
-      dojo.byId('userCPUBar').style.width = response.sysUserCpu;
-      dojo.byId('sysCPU').innerHTML  = response.sysSysCpu;
-      dojo.byId('sysCPUBar').style.width = response.sysSysCpu;
-      dojo.byId('niceCPU').innerHTML = response.sysNiceCpu;
-      dojo.byId('idleCPU').innerHTML = response.sysIdleCpu;
-      dojo.byId('waitCPU').innerHTML = response.sysWaitCpu;
+      hqDojo.byId('userCPU').innerHTML = response.sysUserCpu;
+      hqDojo.byId('userCPUBar').style.width = response.sysUserCpu;
+      hqDojo.byId('sysCPU').innerHTML  = response.sysSysCpu;
+      hqDojo.byId('sysCPUBar').style.width = response.sysSysCpu;
+      hqDojo.byId('niceCPU').innerHTML = response.sysNiceCpu;
+      hqDojo.byId('idleCPU').innerHTML = response.sysIdleCpu;
+      hqDojo.byId('waitCPU').innerHTML = response.sysWaitCpu;
 
-      dojo.byId('loadAvg1').innerHTML  = response.loadAvg1;
-      dojo.byId('loadAvg5').innerHTML  = response.loadAvg5;
-      dojo.byId('loadAvg15').innerHTML = response.loadAvg15;
+      hqDojo.byId('loadAvg1').innerHTML  = response.loadAvg1;
+      hqDojo.byId('loadAvg5').innerHTML  = response.loadAvg5;
+      hqDojo.byId('loadAvg15').innerHTML = response.loadAvg15;
 
-      dojo.byId('totalMem').innerHTML = response.totalMem;
-      dojo.byId('usedMem').innerHTML  = response.usedMem;
-      dojo.byId('usedMemBar').style.width = response.percMem;
-      dojo.byId('freeMem').innerHTML  = response.freeMem;
+      hqDojo.byId('totalMem').innerHTML = response.totalMem;
+      hqDojo.byId('usedMem').innerHTML  = response.usedMem;
+      hqDojo.byId('usedMemBar').style.width = response.percMem;
+      hqDojo.byId('freeMem').innerHTML  = response.freeMem;
 
-      dojo.byId('totalSwap').innerHTML = response.totalSwap;
-      dojo.byId('usedSwap').innerHTML  = response.usedSwap;
-      dojo.byId('usedSwapBar').style.width = response.percSwap;
-      dojo.byId('freeSwap').innerHTML  = response.freeSwap;
+      hqDojo.byId('totalSwap').innerHTML = response.totalSwap;
+      hqDojo.byId('usedSwap').innerHTML  = response.usedSwap;
+      hqDojo.byId('usedSwapBar').style.width = response.percSwap;
+      hqDojo.byId('freeSwap').innerHTML  = response.freeSwap;
       
-      dojo.byId('pid').innerHTML         = response.pid;
-      dojo.byId('procStartTime').innerHTML = response.procStartTime;
-      dojo.byId('procOpenFds').innerHTML = response.procOpenFds;
+      hqDojo.byId('pid').innerHTML         = response.pid;
+      hqDojo.byId('procStartTime').innerHTML = response.procStartTime;
+      hqDojo.byId('procOpenFds').innerHTML = response.procOpenFds;
       
-      dojo.byId('procMemSize').innerHTML  = response.procMemSize;
-      dojo.byId('procMemRes').innerHTML   = response.procMemRes;
-      dojo.byId('procMemShare').innerHTML = response.procMemShare;
+      hqDojo.byId('procMemSize').innerHTML  = response.procMemSize;
+      hqDojo.byId('procMemRes').innerHTML   = response.procMemRes;
+      hqDojo.byId('procMemShare').innerHTML = response.procMemShare;
 
-      dojo.byId('procCpu').innerHTML = response.procCpu;
-      dojo.byId('procCpuBar').style.width = response.procCpu;
+      hqDojo.byId('procCpu').innerHTML = response.procCpu;
+      hqDojo.byId('procCpuBar').style.width = response.procCpu;
       
-      dojo.byId('sysPercCpu').innerHTML = response.sysPercCpu;
-      dojo.byId('sysPercCpuBar').style.width = response.sysPercCpu;
-      dojo.byId('percMem').innerHTML    = response.percMem;
-      dojo.byId('percMemBar').style.width = response.percMem;
-      dojo.byId('percSwap').innerHTML   = response.percSwap;
-      dojo.byId('percSwapBar').style.width = response.percSwap;
+      hqDojo.byId('sysPercCpu').innerHTML = response.sysPercCpu;
+      hqDojo.byId('sysPercCpuBar').style.width = response.sysPercCpu;
+      hqDojo.byId('percMem').innerHTML    = response.percMem;
+      hqDojo.byId('percMemBar').style.width = response.percMem;
+      hqDojo.byId('percSwap').innerHTML   = response.percSwap;
+      hqDojo.byId('percSwapBar').style.width = response.percSwap;
       
       
-      dojo.byId('jvmTotalMem').innerHTML  = response.jvmTotalMem
-      dojo.byId('jvmFreeMem').innerHTML   = response.jvmFreeMem
-      dojo.byId('jvmMaxMem').innerHTML    = response.jvmMaxMem
-      dojo.byId('jvmPercMem').innerHTML   = response.jvmPercMem
+      hqDojo.byId('jvmTotalMem').innerHTML  = response.jvmTotalMem
+      hqDojo.byId('jvmFreeMem').innerHTML   = response.jvmFreeMem
+      hqDojo.byId('jvmMaxMem').innerHTML    = response.jvmMaxMem
+      hqDojo.byId('jvmPercMem').innerHTML   = response.jvmPercMem
     }
   });
   setTimeout("getSystemStats()", 3000);
@@ -290,18 +290,18 @@ getSystemStats();
 <script type="text/javascript">
 function selectDiag(d) {
   	if (d == 'none') {
-    	dojo.byId('diagData').innerHTML = '';
+    	hqDojo.byId('diagData').innerHTML = '';
     	return;
   	}
     
-  	dojo.xhrPost({
+  	hqDojo.xhrPost({
     	url: '<%= urlFor(action:"getDiag") %>',
     	handleAs: "json-comment-filtered",
     	content: {
     		diag: d
         },
     	load: function(response, args) {
-      		dojo.byId('diagData').innerHTML = response.diagData;
+      		hqDojo.byId('diagData').innerHTML = response.diagData;
     	}
   	});
 }
@@ -320,18 +320,18 @@ refreshDiag();
 
 function selectQuery(q) {
   	if (q == 'none') {
-    	dojo.byId('queryData').innerHTML = '';
+    	hqDojo.byId('queryData').innerHTML = '';
 	    return;
   	}
     
-  	dojo.xhrPost({
+  	hqDojo.xhrPost({
     	url: '<%= urlFor(action:"runQuery") %>',
     	handleAs: "json-comment-filtered",
     	content: {
     		query: q
         },
     	load: function(response, args) {
-      		dojo.byId('queryData').innerHTML = response.queryData;
+      		hqDojo.byId('queryData').innerHTML = response.queryData;
     	}
   	});
 }
@@ -343,18 +343,18 @@ function queryAction() {
 
 function executeQuery(q) {
   	if (q == 'none') {
-    	dojo.byId('queryData').innerHTML = '';
+    	hqDojo.byId('queryData').innerHTML = '';
     	return;
   	}
     
-  	dojo.xhrPost({
+  	hqDojo.xhrPost({
     	url: '<%= urlFor(action:"executeQuery") %>',
     	handleAs: "json-comment-filtered",
     	content: {
     		query: q
         },
     	load: function(response, args) {
-      		dojo.byId('queryData').innerHTML = response.queryData;
+      		hqDojo.byId('queryData').innerHTML = response.queryData;
     	}
   	});
 }

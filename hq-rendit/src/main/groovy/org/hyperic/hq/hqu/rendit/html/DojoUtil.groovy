@@ -83,9 +83,9 @@ class DojoUtil {
                 if (response) {
                     if (response.length == 0) {
                         document.getElementById('resourceTree').innerHTML = '';
-                        dojo.publish("XHRComplete", [ "NO_DATA_RETURNED" ]);
+                        hqDojo.publish("XHRComplete", [ "NO_DATA_RETURNED" ]);
                     }else{
-                        dojo.publish("XHRComplete", [ "DATA_RETURNED" ]);
+                        hqDojo.publish("XHRComplete", [ "DATA_RETURNED" ]);
                         var domTree = document.getElementById('resourceTree');
                         var tree = "";
                         for (var x = 0; x < response.length; x++) {
@@ -96,11 +96,11 @@ class DojoUtil {
                             for (var i = 0; i < children.length; i++) {
                                 if(selectedItem){
                                     if(typeof(selectedItem) == 'string' && selectedItem == children[i]['id']){
-                                        unique = dijit.getUniqueId("unique");
+                                        unique = hqDijit.getUniqueId("unique");
                                         innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count'], unique);
                                         markExpanded = true;
                                     }else if(typeof(selectedItem) == 'object' && selectedItem.getAttribute('nodeid') == children[i]['id']){
-                                        unique = dijit.getUniqueId("unique");
+                                        unique = hqDijit.getUniqueId("unique");
                                         innerChildren += plugin.accordion.createChild(children[i]['name'], children[i]['id'], children[i]['count'], unique);
                                         markExpanded = true;
                                     } else {
@@ -111,10 +111,10 @@ class DojoUtil {
                                 }
                             }
                             if (selectedItem && typeof(selectedItem) == "string" && response[x]['id'] == selectedItem) {
-                                 unique = dijit.getUniqueId("unique");
+                                 unique = hqDijit.getUniqueId("unique");
                                  tree +=  plugin.accordion.createParent(response[x]['parent'], response[x]['id'], response[x]['count'], innerChildren, markExpanded, unique);
                             } else if (selectedItem && typeof(selectedItem) == "object" && response[x]['id'] == selectedItem.getAttribute('nodeid')) {
-                                 unique = dijit.getUniqueId("unique");
+                                 unique = hqDijit.getUniqueId("unique");
                                  tree +=  plugin.accordion.createParent(response[x]['parent'], response[x]['id'], response[x]['count'], innerChildren, markExpanded, unique);
                             } else {
                                  tree +=  plugin.accordion.createParent(response[x]['parent'], response[x]['id'], response[x]['count'], innerChildren, markExpanded);
@@ -123,12 +123,12 @@ class DojoUtil {
                         }
                         domTree.innerHTML = tree;
                         if(unique) {
-                            plugin.accordion.setSelected(dojo.byId(unique));
+                            plugin.accordion.setSelected(hqDojo.byId(unique));
                         }
                     }
                 }
                 if(unique != null)
-                    selectedItem = dojo.byId(unique);
+                    selectedItem = hqDojo.byId(unique);
             }
         
             plugin.accordion.createParent = function(name, id, count, innerChildren, markExpanded, unique) {
@@ -174,7 +174,7 @@ class DojoUtil {
         
             plugin.ajax.bind = function (url){
                plugin.ajax.bindMixin.url = url;
-               dojo.xhrGet(plugin.ajax.bindMixin);
+               hqDojo.xhrGet(plugin.ajax.bindMixin);
             }
             
     
@@ -189,7 +189,7 @@ class DojoUtil {
             plugin.accordion.swapVis = function(elem) {
                 plugin.accordion.disableSelection(elem);
                 var sib = elem.parentNode.nextSibling;
-                if (dojo.style(sib, 'display') == 'none') {
+                if (hqDojo.style(sib, 'display') == 'none') {
                     sib.style.display = 'block';
                     elem.className="collapse";
                 } else {
@@ -207,7 +207,7 @@ class DojoUtil {
                     selectedItem.style.background = '';
                 }
                 selectedItem = elem;
-                dojo.cookie('selecteditemid', elem.getAttribute('nodeid'));
+                hqDojo.cookie('selecteditemid', elem.getAttribute('nodeid'));
                 plugin.accordion.setSelected(selectedItem);
                 plugin.accordion.itemClicked(elem);
                 plugin.accordion.update({typeId: elem.getAttribute('nodeid')});
@@ -251,20 +251,20 @@ class DojoUtil {
                 }
             }
             
-            dojo.require("dojo.cookie");
-            dojo.ready(function(){
+            hqDojo.require("dojo.cookie");
+            hqDojo.ready(function(){
                 //Register update callback
                  ${params.filterTargetId}_addUrlXtraCallback(plugin.accordion.updateCallback);
                 
-                if(dojo.cookie("selecteditemid")) {
-                    selectedItem = dojo.cookie("selecteditemid")
+                if(hqDojo.cookie("selecteditemid")) {
+                    selectedItem = hqDojo.cookie("selecteditemid")
                     updateKWArgs.typeId = selectedItem;
                 }
-                if(dojo.cookie("filtercount")) {
-                    currentCountFilter = dojo.byId(dojo.cookie("filtercount"));
+                if(hqDojo.cookie("filtercount")) {
+                    currentCountFilter = hqDojo.byId(hqDojo.cookie("filtercount"));
                     updateKWArgs.numRows = currentCountFilter.id;
                 } else {
-                    currentCountFilter = dojo.byId("50");
+                    currentCountFilter = hqDojo.byId("50");
                     updateKWArgs.numRows = 50;
                 }
                 updateFilterCount(currentCountFilter.id, currentCountFilter);
@@ -358,8 +358,8 @@ class DojoUtil {
         
         def res = new StringBuffer(""" 
         <script type="text/javascript">
-        dojo.require("dojox.grid.DataGrid");
-        dojo.require("dojo.data.ItemFileReadStore");
+        hqDojo.require("dojox.grid.DataGrid");
+        hqDojo.require("dojo.data.ItemFileReadStore");
         
         var ${sortFieldVar};
 		var ${urlXtraVar} = [];
@@ -372,7 +372,7 @@ class DojoUtil {
         var ${refreshTimeoutVar};
 		var ${tableVar};
 		
-        dojo.ready(function() {
+        hqDojo.ready(function() {
         	var ${tableVar}_layout = [""")
 		
             for (c in params.schema.columns) {
@@ -407,12 +407,12 @@ class DojoUtil {
             
             ${tableVar}_layout.pop();
             
-            ${tableVar} = new dojox.grid.DataGrid({
+            ${tableVar} = new hqDojox.grid.DataGrid({
             	structure: ${tableVar}_layout,
             	autoHeight: 20,
             	escapeHTMLInData: false,
             	selectionMode: "none"
-            }, dojo.byId("${id}"));
+            }, hqDojo.byId("${id}"));
            	
             ${tableVar}.startup();
             
@@ -460,11 +460,11 @@ class DojoUtil {
         }
 
         function ${id}_show() {
-            dojo.style("${id}_tableWrapper", 'display', 'block');
+            hqDojo.style("${id}_tableWrapper", 'display', 'block');
         }
 
         function ${id}_hide() {
-            dojo.style("${id}_tableWrapper", 'display', 'none');
+            hqDojo.style("${id}_tableWrapper", 'display', 'none');
         }
 
         function ${id}_clear() {
@@ -473,16 +473,16 @@ class DojoUtil {
 
         function ${id}_refreshTable(kwArgs) {
             // Don't refresh data for this table if it's hidden.
-            var tableWrapper = dojo.byId("${id}_tableWrapper");
-            if (dojo.style(tableWrapper, 'display') == 'none') {
+            var tableWrapper = hqDojo.byId("${id}_tableWrapper");
+            if (hqDojo.style(tableWrapper, 'display') == 'none') {
                 return;
             }
             var queryStr = ${idVar}_makeQueryStr(kwArgs);
             ${ajaxCountVar}++;
             if (${ajaxCountVar} > 0) {
-                dojo.style("${idVar}_loadMsg", 'visibility', 'visible');
+                hqDojo.style("${idVar}_loadMsg", 'visibility', 'visible');
             }
-            dojo.xhrGet({
+            hqDojo.xhrGet({
                 url: '${params.url}' + queryStr,
                 handleAs: "json-comment-filtered",
                 load: function(response, args) {
@@ -490,10 +490,10 @@ class DojoUtil {
                     ${sortFieldVar} = response.sortField;
                     ${sortOrderVar} = response.sortOrder;
                     var sortColIdx = 0;
-                    var thead = dojo.query("thead", dojo.byId("${id}"))[0];
-                    var ths = dojo.query('th', thead);
+                    var thead = hqDojo.query("thead", hqDojo.byId("${id}"))[0];
+                    var ths = hqDojo.query('th', thead);
                     for (j = 0; j < ths.length; j++) {
-                        if (dojo.attr(ths[j], 'field') == ${sortFieldVar}) {
+                        if (hqDojo.attr(ths[j], 'field') == ${sortFieldVar}) {
                             sortColIdx = j;
                             break;
                         }
@@ -502,7 +502,7 @@ class DojoUtil {
 					response.items = response.data;
 					response.identifier = "id";
 					
-					var dataStore = new dojo.data.ItemFileReadStore({
+					var dataStore = new hqDojo.data.ItemFileReadStore({
 						clearOnClose: true,
 						data: response 
 					});
@@ -522,12 +522,12 @@ class DojoUtil {
                     }
 
                     if (${ajaxCountVar} == 0) {
-                        dojo.style("${idVar}_loadMsg", "visibility", 'hidden');
+                        hqDojo.style("${idVar}_loadMsg", "visibility", 'hidden');
                     }
                     if (response.data == '') {
-                        dojo.publish("XHRComplete", [ "NO_DATA_RETURNED" ]);                        
+                        hqDojo.publish("XHRComplete", [ "NO_DATA_RETURNED" ]);                        
                     } else {
-                        dojo.publish("XHRComplete", [ "DATA_RETURNED" ]);
+                        hqDojo.publish("XHRComplete", [ "DATA_RETURNED" ]);
                     }
                 }
             });
@@ -545,7 +545,7 @@ class DojoUtil {
                         if (id == vals) {
                             var rowTDs = trs[b].getElementsByTagName('td');
                             for (k = 0; k < rowTDs.length; k++) {
-                            	dojo.attr(rowTDs[k], "class", styleClassVal);
+                            	hqDojo.attr(rowTDs[k], "class", styleClassVal);
                             }
                         }
                     }
@@ -555,20 +555,20 @@ class DojoUtil {
          
         function ${idVar}_setupPager() {
             var leftClazz = "noprevious";
-            var pageNumDisplay = dojo.byId("${idVar}_pageNumbers");
+            var pageNumDisplay = hqDojo.byId("${idVar}_pageNumbers");
             pageNumDisplay.innerHTML = "${BUNDLE['dojoutil.PageNum']} " + 
                                        (${pageNumVar} + 1); 
 
             if (${pageNumVar} != 0) {
                 leftClazz = 'previousLeft';
             }
-            dojo.attr("${idVar}_pageLeft", "class", leftClazz);
+            hqDojo.attr("${idVar}_pageLeft", "class", leftClazz);
 
             var rightClazz = "nonext";
             if (${lastPageVar} == false) {
                 rightClazz = "nextRight";
             }
-            dojo.attr("${idVar}_pageRight", "class", rightClazz);
+            hqDojo.attr("${idVar}_pageRight", "class", rightClazz);
         }
 
         function ${idVar}_nextPage() {
@@ -749,7 +749,7 @@ class DojoUtil {
         
         def output = b.PAGE.getOutput()
         output.write("<div id='${idVar}' style='display:none'>\n")
-        output.write("  <div id='${cntVar}' dojoType='dijit.layout.ContentPane' title='${params.label}'>\n")
+        output.write("  <div id='${cntVar}' hqDojoType='dijit.layout.ContentPane' title='${params.label}'>\n")
         yield()
         output.write('  </div>\n')
         output.write('</div>\n')
@@ -776,21 +776,22 @@ class DojoUtil {
     static dojoTabContainer(Binding b, Map params, Closure yield) {
         def idVar  = "_hqu_TabContainer_${params.id}"
         def output = b.PAGE.getOutput()
-        output.write('<div dojoType="dijit.layout.TabContainer" ' +
+        output.write('<div hqDojoType="dijit.layout.TabContainer" ' +
                      HtmlUtil.htmlOptions(params) + '>\n')
         yield()
         output.write('</div>\n')
         output.write('<script type="text/javascript">\n')
-		output.write('dojo.require("dijit.layout.TabContainer");\n')
-		output.write('dojo.require("dijit.layout.ContentPane");\n')
+		output.write('hqDojo.require("dijit.dijit");\n')
+		output.write('hqDojo.require("dijit.layout.TabContainer");\n')
+		output.write('hqDojo.require("dijit.layout.ContentPane");\n')
 		
         if (b.PAGE[PANE_VAR] != null) {
             output.write("  ${idVar}_start = function() {\n")
             for (p in b.PAGE[PANE_VAR]) {
-                output.write("  dojo.style('${p}', 'display', '');\n");
+                output.write("  hqDojo.style('${p}', 'display', '');\n");
             }
             output.write("  };\n")
-            output.write("  dojo.ready(${idVar}_start);\n")
+            output.write("  hqDojo.ready(${idVar}_start);\n")
         }
         
         output.write('</script>\n')

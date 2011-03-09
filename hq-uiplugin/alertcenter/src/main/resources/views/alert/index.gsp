@@ -52,7 +52,7 @@ function setSelectedOption() {
   <% } %>
 }
 
-dojo.ready( function(){
+hqDojo.ready( function(){
     setSelectedOption();
 });
 </script>
@@ -166,15 +166,16 @@ dojo.ready( function(){
       		</div>
       		<div id="HQAlertCenterDialog" style="display:none;"></div>
       		<script type="text/javascript">
-	          	dojo.require("dijit.Dialog");
-	          	dojo.require("dijit.ProgressBar");
+				hqDojo.require("dijit.dijit");
+	          	hqDojo.require("dijit.Dialog");
+	          	hqDojo.require("dijit.ProgressBar");
 	          	
 	          	var MyAlertCenter = null;
-	          	dojo.ready(function(){
+	          	hqDojo.ready(function(){
 	          		MyAlertCenter = new hyperic.alert_center("Alert Center");
 	          		
-	          		dojo.connect("Alerts_refreshTable", function() { MyAlertCenter.resetAlertTable(dojo.byId('Alerts_FixForm')); });
-	          		dojo.connect("GroupAlerts_refreshTable", function() { MyAlertCenter.resetAlertTable(dojo.byId('GroupAlerts_FixForm')); });         		
+	          		hqDojo.connect("Alerts_refreshTable", function() { MyAlertCenter.resetAlertTable(hqDojo.byId('Alerts_FixForm')); });
+	          		hqDojo.connect("GroupAlerts_refreshTable", function() { MyAlertCenter.resetAlertTable(hqDojo.byId('GroupAlerts_FixForm')); });         		
 	          	});
       		</script>      
     	</div>
@@ -244,15 +245,15 @@ dojo.ready( function(){
 <script type="text/javascript">
     function getAlertsUrlMap(id) {
         var res = {};
-        var sevSelect  = dojo.byId('alertSevSelect');
-        var timeSelect = dojo.byId('alertTimeSelect');
-        var groupSelect = dojo.byId('alertGroupSelect');
+        var sevSelect  = hqDojo.byId('alertSevSelect');
+        var timeSelect = hqDojo.byId('alertTimeSelect');
+        var groupSelect = hqDojo.byId('alertGroupSelect');
         res['minPriority'] = sevSelect.options[sevSelect.selectedIndex].value;
         res['alertTime']   = timeSelect.options[timeSelect.selectedIndex].value;
         res['group']   = groupSelect.options[groupSelect.selectedIndex].value;
 
-        var escOnly    = dojo.byId('escOnly');
-        var notFixed   = dojo.byId('notFixed');
+        var escOnly    = hqDojo.byId('escOnly');
+        var notFixed   = hqDojo.byId('notFixed');
         if (escOnly.checked) {
           res['show'] = escOnly.value;
         }
@@ -269,9 +270,9 @@ dojo.ready( function(){
     function getDefsUrlMap(id) {
         var res = {};
         <% if (isEE) { %>
-          res['excludeTypes']   = dojo.byId('excludeTypeBased').checked;
+          res['excludeTypes']   = hqDojo.byId('excludeTypeBased').checked;
         <% } %>
-        res['onlyShowDisabled'] = dojo.byId('onlyShowDisabled').checked;        
+        res['onlyShowDisabled'] = hqDojo.byId('onlyShowDisabled').checked;        
         return res;
     }
     

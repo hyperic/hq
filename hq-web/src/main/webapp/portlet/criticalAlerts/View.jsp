@@ -54,16 +54,17 @@ function _hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_autoRefresh
 	requestRecentAlerts<c:out value="${portlet.token}"/>();
 }
 
-dojo.require("dijit.Dialog");
-dojo.require("dijit.ProgressBar");
+hqDojo.require("dijit.dijit");
+hqDojo.require("dijit.Dialog");
+hqDojo.require("dijit.ProgressBar");
 
 var MyAlertCenter = null;
-dojo.ready(function(){
+hqDojo.ready(function(){
 	if (MyAlertCenter == null) {
 		MyAlertCenter = new hyperic.alert_center("<fmt:message key="dash.home.CriticalAlerts"/>");
 	}
 
-	dojo.connect("requestRecentAlerts<c:out value="${portlet.token}"/>", function() { MyAlertCenter.resetAlertTable(dojo.byId('<c:out value="${widgetInstanceName}${portlet.token}"/>_FixForm')); });
+	hqDojo.connect("requestRecentAlerts<c:out value="${portlet.token}"/>", function() { MyAlertCenter.resetAlertTable(hqDojo.byId('<c:out value="${widgetInstanceName}${portlet.token}"/>_FixForm')); });
 
 	_hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_autoRefresh();
 });
@@ -146,7 +147,7 @@ dojo.ready(function(){
       </tfoot>
   </table>
   <script type="text/javascript">
-  	if (dojo.byId("HQAlertCenterDialog") == null) {
+  	if (hqDojo.byId("HQAlertCenterDialog") == null) {
   		document.write('<div id="HQAlertCenterDialog" style="display:none;"></div>');
   	}
   </script>

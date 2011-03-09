@@ -58,7 +58,7 @@
              		onloads[i]();
 	        };
 	        
-	        dojo.ready(function() {
+	        hqDojo.ready(function() {
             	initOnloads();
             });
 	    </script>

@@ -76,18 +76,19 @@
 </div>
 
 <script type="text/javascript">
-  dojo.require("dijit.Dialog");
+	hqDojo.require("dijit.dijit");
+  	hqDojo.require("dijit.Dialog");
 
-  var aboutDia = null;
-  dojo.ready(function(){
-  	aboutDia = new dijit.Dialog({
+  	var aboutDia = null;
+  	hqDojo.ready(function(){
+  		aboutDia = new hqDijit.Dialog({
                 id: 'about_popup',
                 refocus: true,
                 autofocus: false,
                 opacity: 0,
                 title: "<fmt:message key="about.Title" />"
-            }, dojo.byId('about'));
-  });
+            }, hqDojo.byId('about'));
+  	});
 
-  setFoot();
+  	setFoot();
 </script>

@@ -80,13 +80,13 @@
 	    		<td width="80%" class="BlockContent">
 			 		<c:if test="${escalation.pauseAllowed}">
 				  		<div id="AlertEscalationOption" syle="text-align:left;">
-				     		<input type="checkbox" name="pause" value="true" checked="checked" onclick="dojo.byId('pauseTimeSel').disabled = !this.checked;" />&nbsp;<fmt:message key="alert.escalation.pause"/>
+				     		<input type="checkbox" name="pause" value="true" checked="checked" onclick="hqDojo.byId('pauseTimeSel').disabled = !this.checked;" />&nbsp;<fmt:message key="alert.escalation.pause"/>
 				  		</div>	  
 			  		</c:if>&nbsp;
 	          		<div style="text-align:left;">
 				  		<tiles:insert page="/common/components/ActionButton.jsp">
 	  			     		<tiles:put name="labelKey" value="resource.common.alert.action.acknowledge.label"/>
-	                 		<tiles:put name="buttonClick">dojo.byId('mode').setAttribute('value', '<fmt:message key="resource.common.alert.action.acknowledge.label"/>'); document.forms[0].submit();</tiles:put>
+	                 		<tiles:put name="buttonClick">hqDojo.byId('mode').setAttribute('value', '<fmt:message key="resource.common.alert.action.acknowledge.label"/>'); document.forms[0].submit();</tiles:put>
 	              		</tiles:insert>
 	          		</div>
 	    		</td>
@@ -104,7 +104,7 @@
     		}
   		}
 
-  		var escalationSpan = dojo.byId("AlertEscalationOption");
+  		var escalationSpan = hqDojo.byId("AlertEscalationOption");
 
   	  	if (escalationSpan != null) {
 	  		escalationSpan.appendChild(hyperic.form.createEscalationPauseOptions({id: "pauseTimeSel", name: "pauseTime"}, <c:out value="${escalation.maxPauseTime}"/>));

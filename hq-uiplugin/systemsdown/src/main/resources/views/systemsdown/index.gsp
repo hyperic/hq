@@ -16,7 +16,7 @@
             currentCountFilter.style.fontWeight = 'bold';
         }else
             return;
-        dojo.cookie('filtercount', obj.id);
+        hqDojo.cookie('filtercount', obj.id);
         currentCountFilter = obj;
         currentCountFilter.style.color = '#000000';
         currentCountFilter.style.cursor = 'default';
@@ -26,11 +26,11 @@
     
     plugin.MessagePanel = function(){
         this.toggleVisibility = function(reason){
-            var msgPanelObj = dojo.byId("messagePanel");
+            var msgPanelObj = hqDojo.byId("messagePanel");
             if(reason == "NO_DATA_RETURNED"){
                 if(msgPanelObj.style.display != "block"){
                     msgPanelObj.style.display = "block";
-                    dojo.byId("messagePanelMessage").innerHTML = this.getLocalizedMessageForReason(reason);
+                    hqDojo.byId("messagePanelMessage").innerHTML = this.getLocalizedMessageForReason(reason);
                 }
             }else
                 msgPanelObj.style.display = "none";
@@ -39,7 +39,7 @@
         this.getLocalizedMessageForReason = function(reason){
             return "${l.noDataAvailable}";
         };
-        dojo.subscribe("XHRComplete", this, "toggleVisibility");
+        hqDojo.subscribe("XHRComplete", this, "toggleVisibility");
     }
     
     new plugin.MessagePanel();
