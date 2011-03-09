@@ -64,7 +64,7 @@ public class ProblemMetricManagerImpl implements ProblemMetricManager {
 
     
     public ProblemResourceInfo[] getProblemResourcesByTypeAndInstances(
-        int appdefType, int[] instanceIds, long begin, long end, PageControl pc) {
+        int appdefType, Integer[] instanceIds, long begin, long end, PageControl pc) {
         return new ProblemResourceInfo[0];
     }
 
