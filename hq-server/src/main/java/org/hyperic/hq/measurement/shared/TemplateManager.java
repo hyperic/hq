@@ -64,17 +64,6 @@ public interface TemplateManager {
         throws TemplateNotFoundException;
 
     /**
-     * Get all the templates. Must be superuser to execute.
-     * @param pInfo must contain a sort field of type
-     *        {@link MeasurementTemplateSortField}
-     * @param defaultOn If non-null, return templates with defaultOn ==
-     *        defaultOn
-     * @return a list of {@link MeasurementTemplate}s
-     */
-    public List<MeasurementTemplate> findTemplates(AuthzSubject user, PageInfo pInfo,
-                                                   Boolean defaultOn) throws PermissionException;
-
-    /**
      * Get all templates for a given MonitorableType
      * @param pInfo must contain a sort field of type
      *        {@link MeasurementTemplateSortField}
@@ -82,9 +71,7 @@ public interface TemplateManager {
      *        defaultOn
      * @return a list of {@link MeasurementTemplate}s
      */
-    public List<MeasurementTemplate> findTemplatesByMonitorableType(AuthzSubject user,
-                                                                    PageInfo pInfo, String type,
-                                                                    Boolean defaultOn)
+    public List<MeasurementTemplate> findTemplatesByMonitorableType(AuthzSubject user,String type)
         throws PermissionException;
 
     /**

@@ -35,7 +35,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.hyperic.hibernate.PageInfo;
+import javax.persistence.EntityNotFoundException;
+
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -43,6 +44,8 @@ import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
+import org.hyperic.hq.measurement.data.CategoryRepository;
+import org.hyperic.hq.measurement.data.MeasurementTemplateRepository;
 import org.hyperic.hq.measurement.data.MonitorableTypeRepository;
 import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
@@ -63,24 +66,26 @@ import org.springframework.transaction.annotation.Transactional;
 public class TemplateManagerImpl implements TemplateManager {
    
     private MeasurementDAO measurementDAO;
-    private MeasurementTemplateDAO measurementTemplateDAO;
+    private MeasurementTemplateRepository measurementTemplateRepository;
     private MonitorableTypeRepository monitorableTypeRepository;
     private ScheduleRevNumDAO scheduleRevNumDAO;
     private SRNManager srnManager;
     private SRNCache srnCache;
+    private CategoryRepository categoryRepository;
 
     @Autowired
     public TemplateManagerImpl(MeasurementDAO measurementDAO,
-                               MeasurementTemplateDAO measurementTemplateDAO,
+                               MeasurementTemplateRepository measurementTemplateRepository,
                                MonitorableTypeRepository monitorableTypeRepository,
                                ScheduleRevNumDAO scheduleRevNumDAO, SRNManager srnManager,
-                               SRNCache srnCache) {
+                               SRNCache srnCache, CategoryRepository categoryRepository) {
         this.measurementDAO = measurementDAO;
-        this.measurementTemplateDAO = measurementTemplateDAO;
+        this.measurementTemplateRepository = measurementTemplateRepository;
         this.monitorableTypeRepository = monitorableTypeRepository;
         this.scheduleRevNumDAO = scheduleRevNumDAO;
         this.srnManager = srnManager;
         this.srnCache = srnCache;
+        this.categoryRepository = categoryRepository;
     }
 
     /**
@@ -88,7 +93,7 @@ public class TemplateManagerImpl implements TemplateManager {
      */
     @Transactional(readOnly = true)
     public MeasurementTemplate getTemplate(Integer id) {
-        return measurementTemplateDAO.get(id);
+        return measurementTemplateRepository.findById(id);
     }
 
     /**
@@ -96,8 +101,7 @@ public class TemplateManagerImpl implements TemplateManager {
      */
     @Transactional(readOnly = true)
     public List<MeasurementTemplate> getTemplates(List<Integer> ids) {
-        Integer[] mtids = ids.toArray(new Integer[ids.size()]);
-        return measurementTemplateDAO.findTemplates(mtids);
+        return measurementTemplateRepository.findByIds(ids);
     }
 
     /**
@@ -109,7 +113,7 @@ public class TemplateManagerImpl implements TemplateManager {
     @Transactional(readOnly = true)
     public List<MeasurementTemplate> getTemplates(Integer[] ids, PageControl pc)
         throws TemplateNotFoundException {
-        List<MeasurementTemplate> mts = measurementTemplateDAO.findTemplates(ids);
+        List<MeasurementTemplate> mts = measurementTemplateRepository.findByIds(Arrays.asList(ids));
 
         if (ids.length != mts.size()) {
             throw new TemplateNotFoundException("Could not look up " +
@@ -123,22 +127,7 @@ public class TemplateManagerImpl implements TemplateManager {
         return mts;
     }
 
-    /**
-     * Get all the templates. Must be superuser to execute.
-     * 
-     * @param pInfo must contain a sort field of type
-     *        {@link MeasurementTemplateSortField}
-     * @param defaultOn If non-null, return templates with defaultOn ==
-     *        defaultOn
-     * 
-     * @return a list of {@link MeasurementTemplate}s
-     */
-    @Transactional(readOnly = true)
-    public List<MeasurementTemplate> findTemplates(AuthzSubject user, PageInfo pInfo,
-                                                   Boolean defaultOn) throws PermissionException {
-        assertSuperUser(user);
-        return measurementTemplateDAO.findAllTemplates(pInfo, defaultOn);
-    }
+    
 
     /**
      * Get all templates for a given MonitorableType
@@ -151,12 +140,10 @@ public class TemplateManagerImpl implements TemplateManager {
      * @return a list of {@link MeasurementTemplate}s
      */
     @Transactional(readOnly = true)
-    public List<MeasurementTemplate> findTemplatesByMonitorableType(AuthzSubject user,
-                                                                    PageInfo pInfo, String type,
-                                                                    Boolean defaultOn)
+    public List<MeasurementTemplate> findTemplatesByMonitorableType(AuthzSubject user,String type)
         throws PermissionException {
         assertSuperUser(user);
-        return measurementTemplateDAO.findTemplatesByMonitorableType(pInfo, type, defaultOn);
+        return measurementTemplateRepository.findByMonitorableTypeOrderByName(type);
     }
 
     private void assertSuperUser(AuthzSubject s) throws PermissionException {
@@ -177,9 +164,9 @@ public class TemplateManagerImpl implements TemplateManager {
                                                    PageControl pc) {
         List<MeasurementTemplate> templates;
         if (cat == null) {
-            templates = measurementTemplateDAO.findTemplatesByMonitorableType(type);
+            templates = measurementTemplateRepository.findByMonitorableTypeOrderByName(type);
         } else {
-            templates = measurementTemplateDAO.findTemplatesByMonitorableTypeAndCategory(type, cat);
+            templates = measurementTemplateRepository.findByMonitorableTypeAndCategoryOrderByName(type, cat);
         }
 
         if (templates == null) {
@@ -215,7 +202,6 @@ public class TemplateManagerImpl implements TemplateManager {
      */
     @Transactional(readOnly = true)
     public List<MeasurementTemplate> findTemplates(String type, long filters, String keyword) {
-        MeasurementTemplateDAO dao = measurementTemplateDAO;
         List<MeasurementTemplate> mts;
 
         if ((filters & MeasurementConstants.FILTER_AVAIL) == 0 ||
@@ -226,23 +212,23 @@ public class TemplateManagerImpl implements TemplateManager {
 
             // Go through each filter
             if ((filters & MeasurementConstants.FILTER_AVAIL) > 0) {
-                mts.addAll(dao.findTemplatesByMonitorableTypeAndCategory(type,
+                mts.addAll(measurementTemplateRepository.findByMonitorableTypeAndCategoryOrderByName(type,
                     MeasurementConstants.CAT_AVAILABILITY));
             }
             if ((filters & MeasurementConstants.FILTER_UTIL) > 0) {
-                mts.addAll(dao.findTemplatesByMonitorableTypeAndCategory(type,
+                mts.addAll(measurementTemplateRepository.findByMonitorableTypeAndCategoryOrderByName(type,
                     MeasurementConstants.CAT_UTILIZATION));
             }
             if ((filters & MeasurementConstants.FILTER_THRU) > 0) {
-                mts.addAll(dao.findTemplatesByMonitorableTypeAndCategory(type,
+                mts.addAll(measurementTemplateRepository.findByMonitorableTypeAndCategoryOrderByName(type,
                     MeasurementConstants.CAT_THROUGHPUT));
             }
             if ((filters & MeasurementConstants.FILTER_PERF) > 0) {
-                mts.addAll(dao.findTemplatesByMonitorableTypeAndCategory(type,
+                mts.addAll(measurementTemplateRepository.findByMonitorableTypeAndCategoryOrderByName(type,
                     MeasurementConstants.CAT_PERFORMANCE));
             }
         } else {
-            mts = dao.findTemplatesByMonitorableType(type);
+            mts = measurementTemplateRepository.findByMonitorableTypeOrderByName(type);
         }
 
         if (mts == null) {
@@ -295,7 +281,7 @@ public class TemplateManagerImpl implements TemplateManager {
      */
     @Transactional(readOnly = true)
     public Integer[] findTemplateIds(String type) {
-        List<MeasurementTemplate> mts = measurementTemplateDAO.findTemplatesByMonitorableType(type);
+        List<MeasurementTemplate> mts = measurementTemplateRepository.findByMonitorableTypeOrderByName(type);
 
         if (mts == null) {
             return new Integer[0];
@@ -321,7 +307,10 @@ public class TemplateManagerImpl implements TemplateManager {
                                               long interval) {
         HashSet<AppdefEntityID> toReschedule = new HashSet<AppdefEntityID>();
         for (int i = 0; i < templIds.length; i++) {
-            MeasurementTemplate template = measurementTemplateDAO.findById(templIds[i]);
+            MeasurementTemplate template = measurementTemplateRepository.findById(templIds[i]);
+            if(template == null) {
+                throw new EntityNotFoundException("MeasurementTemplate with id: " + templIds[i] + " not found");
+            }
 
             if (interval != template.getDefaultInterval()) {
                 template.setDefaultInterval(interval);
@@ -366,8 +355,10 @@ public class TemplateManagerImpl implements TemplateManager {
 
         Map<AppdefEntityID, Long> aeids = new HashMap<AppdefEntityID, Long>();
         for (Integer templateId : templIds) {
-            MeasurementTemplate template = measurementTemplateDAO.findById(templateId);
-
+            MeasurementTemplate template = measurementTemplateRepository.findById(templateId);
+            if(template == null) {
+                throw new EntityNotFoundException("MeasurementTemplate with id: " + templateId + " not found");
+            }
             template.setDefaultOn(on);
 
             List<Measurement> metrics = measurementDAO.findByTemplate(templateId);
@@ -441,8 +432,8 @@ public class TemplateManagerImpl implements TemplateManager {
             tmap.put(tmpls[i].getAlias(), tmpls[i]);
         }
 
-        Collection<MeasurementTemplate> mts = measurementTemplateDAO
-            .findRawByMonitorableType(monitorableType);
+        Collection<MeasurementTemplate> mts = measurementTemplateRepository
+            .findByMonitorableType(monitorableType);
 
         for (MeasurementTemplate mt : mts) {
             // See if this is in the list
@@ -450,12 +441,47 @@ public class TemplateManagerImpl implements TemplateManager {
 
             if (info == null) {
                 measurementDAO.remove(mt);
-                measurementTemplateDAO.remove(mt);
+                measurementTemplateRepository.delete(mt);
             } else {
-                measurementTemplateDAO.update(mt, pluginName, info);
+                update(mt, pluginName, info);
             }
         }
         return tmap;
+    }
+    
+    private void update(MeasurementTemplate mt, String pluginName, MeasurementInfo info) {
+        // Load category
+        Category cat;
+        if (info.getCategory() != null) {
+            if (!mt.getCategory().getName().equals(info.getCategory())) {
+
+                cat = categoryRepository.findByName(info.getCategory());
+                if (cat == null) {
+                    cat = new Category(info.getCategory());
+                    categoryRepository.save(cat);
+                }
+            } else {
+                cat = mt.getCategory();
+            }
+        } else {
+            throw new IllegalArgumentException("Category is null");
+        }
+
+        // Update the MeasurementTemplate
+        mt.setTemplate(info.getTemplate());
+        mt.setCollectionType(info.getCollectionType());
+        mt.setPlugin(pluginName);
+        mt.setCategory(cat);
+
+        // Don't reset indicator, defaultOn or interval if it's been
+        // changed
+        if (mt.getMtime() == mt.getCtime()) {
+            mt.setDesignate(info.isIndicator());
+            mt.setDefaultOn(info.isDefaultOn());
+            mt.setDefaultInterval(info.getInterval());
+        }
+
+        measurementTemplateRepository.save(mt);
     }
     
     /**
@@ -464,7 +490,7 @@ public class TemplateManagerImpl implements TemplateManager {
      * This does a batch style insert
      */
     public void createTemplates(String pluginName,Map<MonitorableType,List<MonitorableMeasurementInfo>> toAdd) {
-        measurementTemplateDAO.createTemplates(pluginName, toAdd);
+        measurementTemplateRepository.createTemplates(pluginName, toAdd);
     }
 
     /** 
@@ -480,8 +506,8 @@ public class TemplateManagerImpl implements TemplateManager {
      * Set the measurement templates to be "designated" for a monitorable type.
      */
     public void setDesignatedTemplates(String mType, Integer[] desigIds) {
-        List<MeasurementTemplate> derivedTemplates = measurementTemplateDAO
-            .findDerivedByMonitorableType(mType);
+        List<MeasurementTemplate> derivedTemplates = measurementTemplateRepository
+            .findByMonitorableTypeOrderByName(mType);
 
         HashSet<Integer> designates = new HashSet<Integer>();
         designates.addAll(Arrays.asList(desigIds));

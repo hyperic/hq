@@ -125,11 +125,7 @@ public class AlertDefinitionXmlParser {
 
     private List getTemplates(AuthzSubject subject, Resource resource) {
         try {
-            return templateManager.findTemplatesByMonitorableType(subject,
-                                                                  PageInfo.getAll(MeasurementTemplateSortField.TEMPLATE_NAME,
-                                                                                  true),
-                                                                  resource.getName(),
-                                                                  null);
+            return templateManager.findTemplatesByMonitorableType(subject, resource.getName());
         } catch (PermissionException e) {
             throw new AlertDefinitionXmlParserException("Error obtaining measurement templates.  Cause: " +
                                                         e.getMessage());

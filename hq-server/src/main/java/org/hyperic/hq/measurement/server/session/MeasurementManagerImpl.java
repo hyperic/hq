@@ -69,6 +69,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.inventory.domain.Resource;
@@ -79,6 +80,7 @@ import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.agent.client.AgentMonitor;
+import org.hyperic.hq.measurement.data.MeasurementTemplateRepository;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
@@ -120,7 +122,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     private ConfigManager configManager;
     private MetricDataCache metricDataCache;
     private MeasurementDAO measurementDAO;
-    private MeasurementTemplateDAO measurementTemplateDAO;
+    private MeasurementTemplateRepository measurementTemplateRepository;
     private AgentManager agentManager;
     private AgentMonitor agentMonitor;
     private ApplicationManager applicationManager;
@@ -133,7 +135,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                                   AuthzSubjectManager authzSubjectManager,
                                   ConfigManager configManager, MetricDataCache metricDataCache,
                                   MeasurementDAO measurementDAO,
-                                  MeasurementTemplateDAO measurementTemplateDAO,
+                                  MeasurementTemplateRepository measurementTemplateRepository,
                                   AgentManager agentManager, AgentMonitor agentMonitor, 
                                   ApplicationManager applicationManager) {
         this.resourceManager = resourceManager;
@@ -143,7 +145,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         this.configManager = configManager;
         this.metricDataCache = metricDataCache;
         this.measurementDAO = measurementDAO;
-        this.measurementTemplateDAO = measurementTemplateDAO;
+        this.measurementTemplateRepository = measurementTemplateRepository;
         this.agentManager = agentManager;
         this.agentMonitor = agentMonitor;
         this.applicationManager = applicationManager;
@@ -163,11 +165,6 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     private MeasurementPluginManager getMeasurementPluginManager() throws Exception {
         return (MeasurementPluginManager) Bootstrap.getBean(ProductManager.class).getPluginManager(
             ProductPlugin.TYPE_MEASUREMENT);
-    }
-
-    // TODO resolve circular dependency
-    private AgentScheduleSynchronizer getAgentScheduleSynchronizer() {
-        return Bootstrap.getBean(AgentScheduleSynchronizer.class);
     }
 
     /**
@@ -254,7 +251,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 "The templates and intervals lists must be the same size");
         }
 
-        MeasurementTemplateDAO tDao = measurementTemplateDAO;
+      
         MeasurementDAO dao = measurementDAO;
         List<Measurement> metrics = dao.findByTemplatesForInstance(templates, resource);
 
@@ -266,7 +263,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         ArrayList<Measurement> dmList = new ArrayList<Measurement>();
         for (int i = 0; i < templates.length; i++) {
-            MeasurementTemplate t = tDao.get(templates[i]);
+            MeasurementTemplate t = measurementTemplateRepository.findById(templates[i]);
             if (t == null) {
                 continue;
             }
@@ -318,7 +315,10 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         throws PermissionException, MeasurementCreateException, TemplateNotFoundException {
         long[] intervals = new long[templates.length];
         for (int i = 0; i < templates.length; i++) {
-            MeasurementTemplate tmpl = measurementTemplateDAO.findById(templates[i]);
+            MeasurementTemplate tmpl = measurementTemplateRepository.findById(templates[i]);
+            if(tmpl == null) {
+                throw new EntityNotFoundException("MeasurementTemplate with ID " + templates[i] + " not found");
+            }
             intervals[i] = tmpl.getDefaultInterval();
         }
 
@@ -351,8 +351,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         List<Measurement> dms = findMeasurements(subject, id, null, PageControl.PAGE_ALL);
 
         // Find the templates
-        Collection<MeasurementTemplate> mts = measurementTemplateDAO
-            .findTemplatesByMonitorableType(mtype);
+        Collection<MeasurementTemplate> mts = measurementTemplateRepository
+            .findByMonitorableTypeOrderByName(mtype);
 
         if (mts.size() == 0 || (dms.size() != 0 && dms.size() == mts.size())) {
             return dms;
@@ -1368,7 +1368,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                     ProductPlugin.TYPE_MEASUREMENT, id, true);
                 if (getEnabledMetricsCount(subject, id) == 0) {
                     if (debug) log.debug("Enabling default metrics for [" + id + "]");
-                    List metrics = enableDefaultMetrics(subject, id, c, true);
+                    List<Measurement> metrics = enableDefaultMetrics(subject, id, c, true);
                     if (!metrics.isEmpty()) {
                         eids.add(id);
                     }
@@ -1401,7 +1401,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     private String[] getTemplatesToCheck(AuthzSubject s, AppdefEntityID id)
         throws AppdefEntityNotFoundException, PermissionException {
         String mType = (new AppdefEntityValue(id, s)).getMonitorableType();
-        List<MeasurementTemplate> templates = measurementTemplateDAO.findDefaultsByMonitorableType(
+        List<MeasurementTemplate> templates = measurementTemplateRepository.findByMonitorableTypeDefaultOn(
             mType);
         List<String> dsnList = new ArrayList<String>(SAMPLE_SIZE);
         int idx = 0;
