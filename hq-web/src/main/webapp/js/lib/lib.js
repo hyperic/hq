@@ -511,28 +511,13 @@ function init_reporting(){
 hyperic.hq = {};
 hyperic.hq.reporting = {};
 hyperic.hq.dom = {};
-
-hyperic.hq.dom.datePickerProps = {
-    displayWeeks : "6",
-    inputWidth : "15em",
-    formatLength : "full",
-    templateString : '<div class="fieldRow" dojoAttachPoint="fieldRowContainerNode">\n\t<label for="${this.widgetId}">\n\t\t<span class="fieldLabel ${this.fieldRequiredClass}"><img src="/images/icon_required.gif" height="9" width="9" border="0"><span dojoAttachPoint="fieldLabel">${this.label}</span></span>\n\t</label>\n\t\t<div class="fieldValue" dojoAttachPoint="fieldWrapper">\n\t\t<span style=\"white-space:nowrap\"><input type=\"hidden\" name=\"\" value=\"\" dojoAttachPoint=\"valueNode\" /><input name=\"\" type=\"text\" value=\"\" style=\"vertical-align:middle;\" dojoAttachPoint=\"inputNode\" dojoAttachEvent=\"onclick:onIconClick\" readonly=\"readonly\" autocomplete=\"off\" /> <img src=\"${this.iconURL}\" alt=\"${this.iconAlt}\" dojoAttachEvent=\"onclick:onIconClick\" dojoAttachPoint=\"buttonNode\" style=\"vertical-align:middle; cursor:pointer; cursor:hand\" /></span>\n<div dojoattachpoint="validationMessage" class="errorMsg"></div></div>\n</div>',
-    value : new Date(),
-    StartDate : new Date(1-1-2000)
-};
     
 hyperic.hq.dom.validationTextboxProps = {
     id : "ValidationWidget1",
-    type : 'text',
     required : true,
-    missingClass : "",
     size : 23,
     maxlength : 60,
-    missingMessage : "",
-    requiredMessage : "this value is required",
-    listenOnKeyPress : false,
-    templateString : '<div class="fieldRow" dojoAttachPoint="fieldRowContainerNode">\n\t<label for="${this.widgetId}">\n\t\t<span class="fieldLabel ${this.fieldRequiredClass}"><img src="/images/icon_required.gif" height="9" width="9" border="0"><span dojoAttachPoint="fieldLabel">${this.label}</span></span>\n\t</label>\n\t\t<div class="fieldValue" dojoAttachPoint="fieldWrapper">\n\t\t<span style="float:${this.htmlfloat};">\n\t\t<input dojoAttachPoint="textbox" type="${this.type}" dojoAttachEvent="onblur;onfocus;onkeyup" id="${this.widgetId}" name="${this.name}" size="${this.size}" maxlength="${this.maxlength}" class="${this.className}" style="">\n\t\t\t<div dojoAttachPoint="invalidSpan" class="${this.invalidClass}">&nbsp;-&nbsp;${this.messages.invalidMessage}</div>\n\t\t<div dojoAttachPoint="missingSpan" class="${this.missingClass}">&nbsp;-&nbsp;${this.messages.missingMessage}</div>\n\t\t<div dojoAttachPoint="rangeSpan" class="${this.rangeClass}">&nbsp;-&nbsp;${this.messages.rangeMessage}</div>\n\t\t</span>\n</div>\n</div>',
-    templateCssString : ".dojoValidateEmpty{}\n.dojoValidateValid{}\n.dojoValidateInvalid{}\n.dojoValidateRange{}\n"
+    templateString : '<div class="fieldRow" dojoAttachPoint="fieldRowContainerNode">\n\t<label for="${this.widgetId}">\n\t\t<span class="fieldLabel ${this.fieldRequiredClass}"><img src="/images/icon_required.gif" height="9" width="9" border="0"><span dojoAttachPoint="fieldLabel">${this.label}</span></span>\n\t</label>\n\t\t<div class="fieldValue" dojoAttachPoint="fieldWrapper">\n\t\t<span style="float:${this.htmlfloat};">\n\t\t<input dojoAttachPoint="textbox" type="${this.type}" dojoAttachEvent="onblur;onfocus;onkeyup" id="${this.widgetId}" name="${this.name}" size="${this.size}" maxlength="${this.maxlength}" class="${this.className}" style="">\n\t\t\t<div dojoAttachPoint="invalidSpan" class="${this.invalidClass}">&nbsp;-&nbsp;${this.messages.invalidMessage}</div>\n\t\t<div dojoAttachPoint="missingSpan" class="${this.missingClass}">&nbsp;-&nbsp;${this.messages.missingMessage}</div>\n\t\t<div dojoAttachPoint="rangeSpan" class="${this.rangeClass}">&nbsp;-&nbsp;${this.messages.rangeMessage}</div>\n\t\t</span>\n</div>\n</div>'
 };
 
 hyperic.hq.dom.selectboxProps = {
@@ -548,58 +533,121 @@ hyperic.hq.dom.selectboxProps = {
 hqDojo.require("dijit.dijit");
 hqDojo.require("dijit.form.DateTextBox");
 hyperic.hq.dom.createDatePicker = function(datePickerName){
-    hyperic.hq.dom.datePickerProps.label = datePickerName;
-    hyperic.hq.dom.datePickerProps.name = datePickerName;
-    hyperic.hq.dom.id = datePickerName;
-    var parentNode =  document.createElement('div');
-    parentNode.id = hqDijit.getUniqueId("unique");
-    hqDojo.byId("reportOptions").appendChild(parentNode); 
-    var calendarWidget = new hqDijit.form.DateTextBox(hyperic.hq.dom.datePickerProps, parentNode);
-    calendarWidget.inputNode.id = calendarWidget.widgetId;
-    hyperic.hq.reporting.manager.currentReportOptions.push(calendarWidget);
+	var section = hqDojo.create("div", {
+			"style": "padding: 5px;"
+	}, "reportOptions");
+	
+	var label = hqDojo.create("label", {
+		"for": datePickerName,
+		"class": "fieldLabel required"	
+	}, section);
+	
+	var img = hqDojo.create("img", {
+		"src": "/images/icon_required.gif",
+		"height": 9,
+		"width": 9,
+		"border": 0
+	}, label);
+	
+	var span = hqDojo.create("span", {}, label);
+	
+	span.innerHTML = datePickerName;
+
+	var div = hqDojo.create("div", {}, section);
+	var datePicker = new hqDijit.form.DateTextBox({
+		"name": datePickerName,
+		"value": new Date()
+	}, div);
+	
+    hyperic.hq.reporting.manager.currentReportOptions.push(datePicker);
 };
 
 hqDojo.require("dijit.form.ValidationTextBox");
 hyperic.hq.dom.createTextBox = function(textboxName){
-    hyperic.hq.dom.validationTextboxProps.label = textboxName;
-    hyperic.hq.dom.validationTextboxProps.name = textboxName;
-    var parentNode =  document.createElement('div');
-    parentNode.id = hqDijit.getUniqueId("unique");
-    hqDojo.byId("reportOptions").appendChild(parentNode); 
-    var validationWidget = new hqDijit.form.ValidationTextBox(hyperic.hq.dom.validationTextboxProps, parentNode);
-    hyperic.hq.reporting.manager.currentReportOptions.push(validationWidget);
-    return validationWidget;
+	var section = hqDojo.create("div", {
+		"style": "padding: 5px;"
+	}, "reportOptions");
+
+	var label = hqDojo.create("label", {
+		"for": textboxName,
+		"class": "fieldLabel required"	
+	}, section);
+	
+	var img = hqDojo.create("img", {
+		"src": "/images/icon_required.gif",
+		"height": 9,
+		"width": 9,
+		"border": 0
+	}, label);
+	
+	var span = hqDojo.create("span", {}, label);
+
+	span.innerHTML = textboxName;
+	
+	var div = hqDojo.create("div", {}, section);
+	var textbox = new hqDijit.form.ValidationTextBox({
+		"name": textboxName,
+		"required": true,
+	    "size": 23,
+	    "maxlength": 60
+	}, div);
+	
+	hyperic.hq.reporting.manager.currentReportOptions.push(textbox);
+    
+	return textbox;
 };
 
-hqDojo.require("dijit.form.ComboBox");
+hqDojo.require("dijit.form.FilteringSelect");
+hqDojo.require("dojo.data.ItemFileReadStore");
 hyperic.hq.dom.createSelectBox = function(selectboxName, optionsArray){
-    this.option = function(name, value){
-        return "<option value='" + value + '">' + name + "</option>";
-    };
-    var select = document.createElement('select');
-    select.id = "temp";
-    var option = document.createElement('option'); 
-    option.value = "-1";
-    option.innerHTML = "All Resources";
-    select.appendChild(option);
-    for(var i =0; i < optionsArray.length; i++){
-        option = document.createElement('option');
-        option.value = optionsArray[i].id;
-        option.innerHTML = optionsArray[i].name;
-        select.appendChild(option);
-    }
-    hqDojo.byId("reportOptions").appendChild(select);
-    hyperic.hq.dom.selectboxProps.label = selectboxName;
-    var selectWidget = new hqDijit.form.ComboBox(hyperic.hq.dom.selectboxProps, select);
-    selectWidget.textInputNode.id = selectWidget.widgetId;
-    selectWidget.dataProvider.searchLimit = optionsArray.length + 1;
-    selectWidget.domNode = selectWidget.textInputNode;
-    hyperic.hq.reporting.manager.currentReportOptions.push(selectWidget);
+	var section = hqDojo.create("div", {
+		"style": "padding: 5px;"
+	}, "reportOptions");
+
+	var label = hqDojo.create("label", {
+		"for": selectboxName,
+		"class": "fieldLabel required"	
+	}, section);
+	
+	var img = hqDojo.create("img", {
+		"src": "/images/icon_required.gif",
+		"height": 9,
+		"width": 9,
+		"border": 0
+	}, label);
+	
+	var span = hqDojo.create("span", {}, label);
+
+	span.innerHTML = selectboxName;
+
+	optionsArray.unshift({
+		id: "-1", 
+		name: "All Resources"
+	});
+	
+	var dataStore = new hqDojo.data.ItemFileReadStore({
+		data: {
+			identifier: "id",
+			label: "name",
+			items: optionsArray
+		}
+	});
+	
+	var div = hqDojo.create("div", {}, section);
+	
+	var comboBox = new hqDijit.form.FilteringSelect({
+		"name": selectboxName,
+		"store": dataStore,
+		"value": -1,
+        "searchAttr": "name"
+    }, div);
+	
+	hyperic.hq.reporting.manager.currentReportOptions.push(comboBox);
 };
 
 hyperic.hq.reporting.manager = { 
     currentReportOptions : [], 
-    preSubmit : function(){
+    preSubmit : function() {
         var submit = this.validateReportOptions();
         if(submit){
             this.serializeReportOptions();
@@ -614,70 +662,46 @@ hyperic.hq.reporting.manager = {
         }
     },
     serializeReportOptions : function(){
-        var obj = "{";
-        for(var i = 0; i < this.currentReportOptions.length; i++){
-            if(this.currentReportOptions[i].getDate){
-                obj += '"' + this.currentReportOptions[i].name + '":"' +  this.currentReportOptions[i].getDate().getTime() +'",'; 
-            }else if(this.currentReportOptions[i].getState){
-                var value = this.currentReportOptions[i].comboBoxSelectionValue.value;
-                
-                obj += '"' + this.currentReportOptions[i].label + '":"' + value +'",';
-            }else if(this.currentReportOptions[i].textbox){
-                obj += '"' + this.currentReportOptions[i].name + '":"' +  this.currentReportOptions[i].getValue() +'",';
-            }
+        var obj = [];
+        var temp = "";
+        
+        for(var i = 0; i < this.currentReportOptions.length; i++) {
+        	temp += '"' + this.currentReportOptions[i].name + '":"';
+        	
+        	if (this.currentReportOptions[i].getValue().getTime) {
+	        	temp += this.currentReportOptions[i].getValue().getTime();
+	        } else {
+	        	temp += this.currentReportOptions[i].getValue();
+	        }
+	        
+	        temp += '"';
+	        
+            obj.push(temp);
+            
+            temp = "";
         }
-        obj += "}";
-        hqDojo.byId("jsonData").value = obj;
+        
+        hqDojo.byId("jsonData").value = "{" + obj.join(",") + "}";
     },
     validateReportOptions : function(){
         var submit = true;
         var dates ={};
-        for(var i =0; i < this.currentReportOptions.length; i++){
-            if(this.currentReportOptions[i].getDate){
-                if(this.currentReportOptions[i].label == "Start Date" ||
-                    this.currentReportOptions[i].label == "StartDate"){ 
-                    dates.StartDate = this.currentReportOptions[i].getDate();
-                    dates.StartDateNode = this.currentReportOptions[i];
-                }else{
-                    dates.EndDate = this.currentReportOptions[i].getDate();
-                    dates.EndDateNode = this.currentReportOptions[i];
-                }
-                if(this.currentReportOptions[i].inputNode.value === ''){
-                    this.currentReportOptions[i].fieldWrapper.className += ' error';
-                    this.currentReportOptions[i].validationMessage.innerHTML = "&nbsp;-&nbsp;this field is required ";
-                    submit = false && submit;
-                }else{
-                    this.currentReportOptions[i].fieldWrapper.className = 'fieldValue';
-                    this.currentReportOptions[i].validationMessage.innerHTML = "";
-                    submit = true && submit;                        
-                }
-            }else if(this.currentReportOptions[i].getState){
-                if(this.currentReportOptions[i].getValue() === '' && !this.currentReportOptions[i]._isValidOption()){
-                    this.currentReportOptions[i].fieldWrapper.className += ' error';
-                    this.currentReportOptions[i].validationMessage.innerHTML = "&nbsp;-&nbsp;this field is required ";
-                    submit = false && submit;  
-                }else{
-                    this.currentReportOptions[i].fieldWrapper.className = 'fieldValue';
-                    this.currentReportOptions[i].validationMessage.innerHTML = "";
-                    submit = true && submit;
-                }
-            }else if(this.currentReportOptions[i].getValue && !this.currentReportOptions[i].getState){
-                if(this.currentReportOptions[i].textbox.value === ''){
-                    this.currentReportOptions[i].fieldWrapper.className += ' error';
-                    this.currentReportOptions[i].validationMessage.innerHTML = "&nbsp;-&nbsp;this field is required ";
-                    submit = false && submit;                       
-                }else{
-                    this.currentReportOptions[i].fieldWrapper.className = 'fieldValue';
-                    this.currentReportOptions[i].validationMessage.innerHTML = "";
-                    submit = true && submit;                        
-                }
-            }
+        
+        for (var i =0; i < this.currentReportOptions.length; i++) {
+            if (this.currentReportOptions[i].getValue === '') {
+            	submit = false && submit;
+            	break;
+            } else if (this.currentReportOptions[i].name == "StartDate") { 
+                dates.StartDate = this.currentReportOptions[i].getValue();
+                dates.StartDateNode = this.currentReportOptions[i];
+            } else if (this.currentReportOptions[i].name == "EndDate") {
+                dates.EndDate = this.currentReportOptions[i].getValue();
+                dates.EndDateNode = this.currentReportOptions[i];
+            } 
         }
         if(dates.EndDate && dates.StartDate){
             if(dates.StartDate > dates.EndDate){
-                    dates.EndDateNode.fieldWrapper.className += ' error';
-                    dates.EndDateNode.validationMessage.innerHTML = '&nbsp;-&nbsp;The "End" date must be earlier than the "Start" date.';
-                    submit = false && submit;
+                submit = false && submit;
             }
         }
         return submit;
@@ -685,7 +709,7 @@ hyperic.hq.reporting.manager = {
 };
 
 function resetReportOptions(){
-    hqDojo.byId("reportOptions").innerHTML = "";
+    hqDojo.empty("reportOptions");
     hyperic.hq.reporting.manager.currentReportOptions = [];
     //TODO iterate through and call destroy
 }
@@ -708,32 +732,30 @@ function selectedChanged(selectNode){
 function getReportOptions(reportName){
 	hqDojo.xhrGet({
 		url: "/reporting/ReportCenter.do?reportName=" + reportName,
-		handleAs: "text",
+		handleAs: "json",
 		load: function(response, args) {
 	        if(response) createInputFieldsFromJSON(response); 
 	    } 
 	});
 }
 
-function createInputFieldsFromJSON(jsonArray){
+function createInputFieldsFromJSON(descriptor){
     resetReportOptions();
-    var descriptor = hqDojo.fromJson(jsonArray);
-    //for(var key in descriptor){
-    var i = 0;
-    while(i < descriptor.length){
-        // var type = descriptor[key].type;
+    
+    for (var i = 0; i < descriptor.length; i++) {
         var type = descriptor[i].descriptor.type;
-        if(type !== undefined){
+        
+        if (type !== undefined) {
             var o = descriptor[i].descriptor;
-            if(type.indexOf("String") != -1){
+        
+            if (type.indexOf("String") != -1) {
                 hyperic.hq.dom.createTextBox(o.name);
-            }else if(type.indexOf("Date") != -1){
+            } else if (type.indexOf("Date") != -1) {
                 hyperic.hq.dom.createDatePicker(o.name);
-            }else if(type.indexOf("Group") != -1){
+            } else if (type.indexOf("Group") != -1) {
                 hyperic.hq.dom.createSelectBox(o.name, o.options);
             }
         } 
-        i++; 
     }
 }
 
