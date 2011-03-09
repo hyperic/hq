@@ -66,6 +66,7 @@
 		<property name="locations">
 			<list>
 				<value>classpath:/hq-server.conf</value>
+				<value>classpath:/spring-jdbc.properties</value>
 			</list>
 		</property>
 	</bean>
