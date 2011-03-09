@@ -115,6 +115,10 @@
 	#progressMessage.error {
 	    color: #bb0000;
 	}
+	
+	#showRemoveConfirmationButton{
+		float:left;
+	}
 </style>
 <section id="pluginManagerPanel" class="container top">
 	<h1><fmt:message key="admin.managers.plugin.title" /></h1>
@@ -142,6 +146,7 @@
 				<span class="column span-4">${pluginSummary.initialDeployDate}&nbsp;</span>
 				<span class="column span-4">${pluginSummary.updatedDate}&nbsp;</span>		
 				<span class="last column span-3" >
+					&nbsp;${pluginSummary.successAgentCount}&nbsp;/&nbsp;${pluginSummary.allAgentCount}
 				    <c:if test="${!pluginSummary.inProgress}">
 				    	<c:if test="${pluginSummary.successAgentCount==pluginSummary.allAgentCount}">
 				    		<img src="/images/icon_available_green.gif"/>
@@ -153,17 +158,10 @@
 				    <c:if test="${pluginSummary.inProgress}">
 				        <img src="/images/arrow_refresh.png"/>
 				   	</c:if>				    
-				  		${pluginSummary.successAgentCount} / ${pluginSummary.allAgentCount}
+				    &nbsp;&nbsp;
 				   	<c:if test="${pluginSummary.errorAgentCount>0}">
 				   		<span id="errorAgent_${index.count}">
-				       		&nbsp;<img src="/images/icon_available_red.gif"/>
-				    		${pluginSummary.errorAgentCount} 
-				    		<c:if test="${pluginSummary.errorAgentCount==1}">
-				    			<fmt:message key="admin.managers.plugin.column.status.error"/>
-				    		</c:if>
-				    		<c:if test="${pluginSummary.errorAgentCount>1}">
-				    			<fmt:message key="admin.managers.plugin.column.status.errors"/>
-				    		</c:if>				    		
+				   			${pluginSummary.errorAgentCount}&nbsp;<img src="/images/icon_available_red.gif"/>
 				    	</span>
 					</c:if>
 				</span>
@@ -172,9 +170,9 @@
 	</ul>
 	</form:form>
 	<div class="actionbar">
+		<input id="showRemoveConfirmationButton" type="button" value="<fmt:message key="admin.managers.plugin.button.remove.plugin" />" />
 		<span id="progressMessage"></span>
 		<input id="showUploadFormButton" type="button" value="<fmt:message key="admin.managers.plugin.button.add.plugin" />" />
-		<input id="showRemoveConfirmationButton" type="button" value="<fmt:message key="admin.managers.plugin.button.remove.plugin" />" />
 	</div>	
 </section>
 <div id="uploadPanel" style="visibility:hidden;">
@@ -214,11 +212,11 @@
 					content_${index.count}+='${agent.agentName}: sync failed at ${agent.syncDate}  <br/>';
 				</c:forEach>
 				
-				var dialog_${index.count} = new dijit.TooltipDialog({
+				var dialog_${index.count} = new hqDijit.TooltipDialog({
 					content:content_${index.count}
 				});
 				
-				hqDojo.connect(dojo.byId("errorAgent_${index.count}"),"onmouseenter", function(e){
+				hqDojo.connect(hqDojo.byId("errorAgent_${index.count}"),"onmouseenter", function(e){
 					hqDijit.popup.open({
 						popup: dialog_<c:out value="${index.count}"/>, 
                         around: hqDojo.byId("errorAgent_${index.count}")
@@ -278,7 +276,7 @@
                 	
                 	hqDojo.forEach(response, function(summary) {
                 		var li = hqDojo.create("li", {
-                			"class": "gridrow clear" + ((index % 2 == 0) ? " even" : "")
+                			"class": "gridrow clear" + (((index+1) % 2 == 0) ? " even" : "")
                 		}, "pluginList");
                 		var span = hqDojo.create("span", {
                 			"class": "first column span-1"
@@ -290,11 +288,11 @@
                 			"name":"deleteId"
                 		}, span);
                 		span = hqDojo.create("span", {
-                			"class": "column span-5",
+                			"class": "column span-3",
                 			"innerHTML": summary.name
                 		}, li);
                 		span = hqDojo.create("span", {
-                			"class": "column span-2",
+                			"class": "column span-3",
                 			"innerHTML": summary.version
                 		}, li);
                 		span = hqDojo.create("span", {
@@ -302,16 +300,17 @@
                 			"innerHTML": summary.jarName
                 		}, li);
                 		span = hqDojo.create("span", {
-                			"class": "column span-5",
+                			"class": "column span-4",
                 			"innerHTML": summary.initialDeployDate
                 		}, li);
                 		span = hqDojo.create("span", {
-                			"class": "last column span-5",
-                			"innerHTML": summary.status
+                			"class": "column span-4",
+                			"innerHTML": summary.updatedDate
                 		}, li);
 
                 		var statusSpan = hqDojo.create("span", {
-                			"class": "last column span-4",
+                			"class": "last column span-3",
+                			"innerHTML": "&nbsp;"+summary.successAgentCount +"&nbsp;/&nbsp;"+ summary.allAgentCount+"&nbsp;"
                 		}, li);
                 		
                 		if (summary.inProgress) {
@@ -329,24 +328,17 @@
                 				}, statusSpan);   
                 			}
                 		}
-                		
-                		statusSpan.innerHTML+="&nbsp;"+summary.successAgentCount +"&nbsp;/&nbsp;"+ summary.allAgentCount+"&nbsp;&nbsp;";
+                		statusSpan.innerHTML+="&nbsp;&nbsp;";
                 		
                 		if (summary.errorAgentCount > 0) {
                 			var errorAgentSpan = hqDojo.create("span",{
-                				"id":"errorAgent_"+summary.id
+                				"id":"errorAgent_"+(index+1)
                 			}, statusSpan);
+                			errorAgentSpan.innerHTML+= "&nbsp;&nbsp;"+summary.errorAgentCount+"&nbsp;";
                 			hqDojo.create("img",{
                 				"src": "/images/icon_available_red.gif",
                 			}, errorAgentSpan);
-                			
-                			errorAgentSpan.innerHTML+="</img>&nbsp;"+ summary.errorAgentCount;
-
-                			if (summary.errorAgentCount == 1) {
-                				errorAgentSpan.innerHTML+="&nbsp;<fmt:message key='admin.managers.plugin.column.status.error'/>";
-                			} else {
-	                			errorAgentSpan.innerHTML+="&nbsp;<fmt:message key='admin.managers.plugin.column.status.errors'/>";
-                			}
+                			errorAgentSpan.innerHTML+="</img>&nbsp;";
                 		};
                 		
                 		index++;
