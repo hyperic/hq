@@ -57,9 +57,13 @@ public class ExchangeCollector extends RabbitMQDefaultCollector {
             setAvailability(true);
             if (e.getMessageStatsIn() != null) {
                 setValue("in_publish_details", e.getMessageStatsIn().getPublishDetails().get("rate"));
+            } else {
+                setValue("in_publish_details", 0);
             }
             if (e.getMessageStatsOut() != null) {
                 setValue("out_publish_details", e.getMessageStatsOut().getPublishDetails().get("rate"));
+            } else {
+                setValue("out_publish_details", 0);
             }
 
         } catch (Exception ex) {
