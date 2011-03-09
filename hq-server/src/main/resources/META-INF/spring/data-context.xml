@@ -65,7 +65,7 @@
 		<property name="proxyTargetClass" value="true"/>
 	</bean>
 	
-	<jpa:repositories base-package="org.hyperic.hq.*.data"/>
+	<jpa:repositories base-package="org.hyperic.hq.**.data"/>
 
 	<util:list id="preloadCaches">
 		<value>org.hyperic.hq.agent.domain.AgentType</value>

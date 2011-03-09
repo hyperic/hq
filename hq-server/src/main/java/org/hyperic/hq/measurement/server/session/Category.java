@@ -40,24 +40,23 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Immutable;
 
 @Entity
-@Table(name="EAM_MEASUREMENT_CAT")
-@Cache(usage=CacheConcurrencyStrategy.READ_ONLY)
-@Immutable
+@Table(name = "EAM_MEASUREMENT_CAT")
+@Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
+@Immutable                                                                                 
 public class Category implements Serializable {
 
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "ID")
     private Integer id;
 
-    @Column(name="VERSION_COL",nullable=false)
+    @Column(name = "NAME", nullable = false, length = 100, unique = true)
+    private String name;
+
+    @Column(name = "VERSION_COL", nullable = false)
     @Version
     private Long version;
-    
-    @Column(name="NAME",nullable=false,length=100,unique=true)
-     private String name;
-
 
     public Category() {
     }
@@ -65,32 +64,7 @@ public class Category implements Serializable {
     public Category(String name) {
         this.name = name;
     }
-   
-    
-    public Integer getId() {
-        return id;
-    }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Long getVersion() {
-        return version;
-    }
-
-    public void setVersion(Long version) {
-        this.version = version;
-    }
-
-    public String getName() {
-        return name;
-    }
-    
-    protected void setName(String name) {
-        this.name = name;
-    }
-    
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
@@ -98,17 +72,38 @@ public class Category implements Serializable {
         if (obj == null || !(obj instanceof Category)) {
             return false;
         }
-        Integer objId = ((Category)obj).getId();
-  
-        return getId() == objId ||
-        (getId() != null && 
-         objId != null && 
-         getId().equals(objId));     
+        Integer objId = ((Category) obj).getId();
+
+        return getId() == objId || (getId() != null && objId != null && getId().equals(objId));
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Long getVersion() {
+        return version;
     }
 
     public int hashCode() {
         int result = 17;
-        result = 37*result + (getId() != null ? getId().hashCode() : 0);
-        return result;      
+        result = 37 * result + (getId() != null ? getId().hashCode() : 0);
+        return result;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    protected void setName(String name) {
+        this.name = name;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }

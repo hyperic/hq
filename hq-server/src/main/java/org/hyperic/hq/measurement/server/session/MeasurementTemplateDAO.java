@@ -42,6 +42,7 @@ import org.hibernate.id.IdentifierGenerator;
 import org.hibernate.impl.SessionImpl;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.measurement.data.CategoryRepository;
 import org.hyperic.hq.product.MeasurementInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -52,7 +53,7 @@ import org.springframework.stereotype.Repository;
 public class MeasurementTemplateDAO
     extends HibernateDAO<MeasurementTemplate> {
 
-    private CategoryDAO catDAO;
+    private CategoryRepository categoryRepository;
 
     private final Log log = LogFactory.getLog(MeasurementTemplateDAO.class);
 
@@ -65,10 +66,10 @@ public class MeasurementTemplateDAO
     }
 
     @Autowired
-    public MeasurementTemplateDAO(SessionFactory f, CategoryDAO categoryDAO,
+    public MeasurementTemplateDAO(SessionFactory f, CategoryRepository categoryRepository,
                                   JdbcTemplate jdbcTemplate) {
         super(MeasurementTemplate.class, f);
-        this.catDAO = categoryDAO;
+        this.categoryRepository = categoryRepository;
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -88,9 +89,10 @@ public class MeasurementTemplateDAO
         if (info.getCategory() != null) {
             if (!mt.getCategory().getName().equals(info.getCategory())) {
 
-                cat = catDAO.findByName(info.getCategory());
+                cat = categoryRepository.findByName(info.getCategory());
                 if (cat == null) {
-                    cat = catDAO.create(info.getCategory());
+                    cat = new Category(info.getCategory());
+                    categoryRepository.save(cat);
                 }
             } else {
                 cat = mt.getCategory();
@@ -260,9 +262,10 @@ public class MeasurementTemplateDAO
                 MeasurementInfo info = combinedInfos.get(i).getMeasurementInfo();
                 Category cat = (Category) cats.get(info.getCategory());
                 if (cat == null) {
-                    cat = catDAO.findByName(info.getCategory());
+                    cat = categoryRepository.findByName(info.getCategory());
                     if (cat == null) {
-                        cat = catDAO.create(info.getCategory());
+                        cat = new Category(info.getCategory());
+                        categoryRepository.save(cat);
                     }
                     cats.put(info.getCategory(), cat);
                 }
