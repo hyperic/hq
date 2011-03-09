@@ -44,48 +44,47 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
 
 @Entity
-@Table(name="EAM_MEASUREMENT_BL")
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+@Table(name = "EAM_MEASUREMENT_BL")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Baseline implements Serializable {
-    
+
+    @Column(name = "COMPUTE_TIME", nullable = false)
+    @Index(name = "METRIC_BASELINE_CALCULATED_IDX")
+    private long computeTime;
+
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "ID")
     private Integer id;
 
-    @Column(name="VERSION_COL",nullable=false)
-    @Version
-    private Long version;
-    
+    @Column(name = "MAX_EXPECTED_VAL")
+    private Double maxExpectedVal;
+
+    @Column(name = "MEAN")
+    private Double mean;
+
     @ManyToOne
-    @JoinColumn(name="MEASUREMENT_ID")
-    @Index(name="METRIC_BASELINE_CALCULATED_IDX")
+    @JoinColumn(name = "MEASUREMENT_ID")
+    @Index(name = "METRIC_BASELINE_CALCULATED_IDX")
     @Fetch(FetchMode.JOIN)
     private Measurement measurement;
-    
-    @Column(name="COMPUTE_TIME",nullable=false)
-    @Index(name="METRIC_BASELINE_CALCULATED_IDX")
-    private long computeTime;
-    
-    @Column(name="USER_ENTERED",nullable=false)
-    private boolean userEntered = false;
-    
-    @Column(name="MEAN")
-    private Double mean;
-    
-    @Column(name="MIN_EXPECTED_VAL")
+
+    @Column(name = "MIN_EXPECTED_VAL")
     private Double minExpectedVal;
-    
-    @Column(name="MAX_EXPECTED_VAL")
-    private Double maxExpectedVal;
+
+    @Column(name = "USER_ENTERED", nullable = false)
+    private boolean userEntered = false;
+
+    @Column(name = "VERSION_COL", nullable = false)
+    @Version
+    private Long version;
 
     public Baseline() {
     }
 
-    public Baseline(Measurement measurement, long computeTime,
-                    boolean userEntered, Double mean, Double minExpectedVal,
-                    Double maxExpectedVal) {
+    public Baseline(Measurement measurement, long computeTime, boolean userEntered, Double mean,
+                    Double minExpectedVal, Double maxExpectedVal) {
         this.measurement = measurement;
         this.computeTime = computeTime;
         this.userEntered = userEntered;
@@ -93,87 +92,7 @@ public class Baseline implements Serializable {
         this.minExpectedVal = minExpectedVal;
         this.maxExpectedVal = maxExpectedVal;
     }
-    
-    
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Long getVersion() {
-        return version;
-    }
-
-    public void setVersion(Long version) {
-        this.version = version;
-    }
-
-    // Property accessors
-    public Measurement getMeasurement() {
-        return measurement;
-    }
-    
-    public void setMeasurement(Measurement measurement) {
-        this.measurement = measurement;
-    }
-
-    public long getComputeTime() {
-        return computeTime;
-    }
-    
-    public void setComputeTime(long computeTime) {
-        this.computeTime = computeTime;
-    }
-
-    public boolean isUserEntered() {
-        return userEntered;
-    }
-    
-    public void setUserEntered(boolean userEntered) {
-        this.userEntered = userEntered;
-    }
-
-    public Double getMean() {
-        return mean;
-    }
-    
-    protected void setMean(Double mean) {
-        this.mean = mean;
-    }
-
-    public Double getMinExpectedVal() {
-        return minExpectedVal;
-    }
-    
-    protected void setMinExpectedVal(Double minExpectedVal) {
-        this.minExpectedVal = minExpectedVal;
-    }
-
-    public Double getMaxExpectedVal() {
-        return maxExpectedVal;
-    }
-    
-    protected void setMaxExpectedVal(Double maxExpectedVal) {
-        this.maxExpectedVal = maxExpectedVal;
-    }
-
-    /**
-     * Update a Baseline
-     */
-    public void update(long computeTime, boolean userEntered,
-                       Double mean, Double minExpectedValue,
-                       Double maxExpectedValue) {
-        setComputeTime(computeTime);
-        setUserEntered(userEntered);
-        setMean(mean);
-        setMinExpectedVal(minExpectedValue);
-        setMaxExpectedVal(maxExpectedValue);
-    }
-    
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
@@ -181,20 +100,92 @@ public class Baseline implements Serializable {
         if (obj == null || !(obj instanceof Baseline)) {
             return false;
         }
-        Integer objId = ((Baseline)obj).getId();
-  
-        return getId() == objId ||
-        (getId() != null && 
-         objId != null && 
-         getId().equals(objId));     
+        Integer objId = ((Baseline) obj).getId();
+
+        return getId() == objId || (getId() != null && objId != null && getId().equals(objId));
+    }
+
+    public long getComputeTime() {
+        return computeTime;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public Double getMaxExpectedVal() {
+        return maxExpectedVal;
+    }
+
+    public Double getMean() {
+        return mean;
+    }
+
+    // Property accessors
+    public Measurement getMeasurement() {
+        return measurement;
+    }
+
+    public Double getMinExpectedVal() {
+        return minExpectedVal;
+    }
+
+    public Long getVersion() {
+        return version;
     }
 
     public int hashCode() {
         int result = 17;
-        result = 37*result + (getId() != null ? getId().hashCode() : 0);
-        return result;      
+        result = 37 * result + (getId() != null ? getId().hashCode() : 0);
+        return result;
+    }
+
+    public boolean isUserEntered() {
+        return userEntered;
+    }
+
+    public void setComputeTime(long computeTime) {
+        this.computeTime = computeTime;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    protected void setMaxExpectedVal(Double maxExpectedVal) {
+        this.maxExpectedVal = maxExpectedVal;
+    }
+
+    protected void setMean(Double mean) {
+        this.mean = mean;
+    }
+
+    public void setMeasurement(Measurement measurement) {
+        this.measurement = measurement;
+    }
+
+    protected void setMinExpectedVal(Double minExpectedVal) {
+        this.minExpectedVal = minExpectedVal;
+    }
+
+    public void setUserEntered(boolean userEntered) {
+        this.userEntered = userEntered;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    /**
+     * Update a Baseline
+     */
+    public void update(long computeTime, boolean userEntered, Double mean, Double minExpectedValue,
+                       Double maxExpectedValue) {
+        setComputeTime(computeTime);
+        setUserEntered(userEntered);
+        setMean(mean);
+        setMinExpectedVal(minExpectedValue);
+        setMaxExpectedVal(maxExpectedValue);
     }
 
 }
-
-
