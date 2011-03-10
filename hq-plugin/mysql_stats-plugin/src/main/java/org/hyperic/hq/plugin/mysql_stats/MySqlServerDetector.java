@@ -73,6 +73,7 @@ public class MySqlServerDetector
                                 VERSION_4_1_x = "4.1.x",
                                 VERSION_5_0_x = "5.0.x",
                                 VERSION_5_1_x = "5.1.x",
+                                VERSION_5_5_x = "5.5.x",
                                 TABLE_SERVICE = "Table",
                                 SLAVE_STATUS  = "Slave Status",
                                 SHOW_SLAVE_STATUS  = "Show Slave Status";
@@ -80,7 +81,8 @@ public class MySqlServerDetector
         REGEX_VER_4_0 = Pattern.compile("Ver 4.0.[0-9]+"),
         REGEX_VER_4_1 = Pattern.compile("Ver 4.1.[0-9]+"),
         REGEX_VER_5_0 = Pattern.compile("Ver 5.0.[0-9]+"),
-        REGEX_VER_5_1 = Pattern.compile("Ver 5.1.[0-9]+");
+        REGEX_VER_5_1 = Pattern.compile("Ver 5.1.[0-9]+"),
+        REGEX_VER_5_5 = Pattern.compile("Ver 5.5.[0-9]+");
 
     public List getServerResources(ConfigResponse platformConfig)
         throws PluginException
@@ -305,7 +307,7 @@ public class MySqlServerDetector
         String version = getVersion(path, "--version");
         
         if (version == null) {
-            _log.debug("Version returned null, looking for version in --version output. Trying --help");
+        	_log.debug("Version returned null, looking for version in --version output. Trying --help");
             version = getVersion(path, "--help");
         }
         
@@ -355,7 +357,7 @@ public class MySqlServerDetector
             }
             String out = output.toString();
             if (_log.isDebugEnabled()) {
-                _log.debug("Version detected from output of " + executable + " " + arg +":\n" + out);
+            	_log.debug("Version detected from output of " + executable + " " + arg +":\n" + out);
             }
             if (REGEX_VER_4_0.matcher(out).find()) {
                 return VERSION_4_0_x;
@@ -365,6 +367,8 @@ public class MySqlServerDetector
                 return VERSION_5_0_x;
             } else if (REGEX_VER_5_1.matcher(out).find()) {
                 return VERSION_5_1_x;
+            } else if (REGEX_VER_5_5.matcher(out).find()) {
+                return VERSION_5_5_x;
             }
         } catch (Exception e) {
             _log.warn("Could not get the version of mysql: " + e.getMessage(), e);

@@ -11,7 +11,7 @@
 	<properties>
 		<activemq.version>5.3.0</activemq.version>
 		<ajp.version>1.3</ajp.version>
-		<aspectj.version>1.6.5</aspectj.version>
+		<aspectj.version>1.6.8</aspectj.version>
 		<ant.version>1.7.1</ant.version>
 		<ant-contrib.version>1.0b2</ant-contrib.version>
 		<apache-taglibs.version>1.1.2</apache-taglibs.version>
@@ -59,11 +59,13 @@
 		<roo.version>1.0.2.RELEASE</roo.version>
 		<servlet-api.version>2.4</servlet-api.version>
 		<sigar.version>1.6.4</sigar.version>
+        <slf4j.version>1.6.1</slf4j.version>
 		<snmp.version>1.11</snmp.version>
 		<spring-framework.version>3.0.5.RELEASE</spring-framework.version>
 		<spring-security.version>3.0.5.RELEASE</spring-security.version>
 		<struts.version>1.3.10</struts.version>
-		<tapestry.version>4.1.5</tapestry.version>
+		<surefire.version>2.6</surefire.version>
+        <tiles2.version>2.2.2</tiles2.version>
 		<tomcat-jdbc.version>1.0.8.5</tomcat-jdbc.version>
 		<tomcat-juli.version>6.0.20</tomcat-juli.version>
 		<urlrewrite.version>3.1.0</urlrewrite.version>
@@ -160,6 +162,17 @@
 				<artifactId>geronimo-j2ee-management_1.0_spec</artifactId>
 				<version>${j2ee-management.version}</version>
 			</dependency>
+            <dependency>
+  				<groupId>org.apache.tiles</groupId>
+	  			<artifactId>tiles-jsp</artifactId>
+  				<version>${tiles2.version}</version>
+  				<exclusions>
+  					<exclusion>
+  						<artifactId>commons-logging-api</artifactId>
+  						<groupId>commons-logging</groupId>
+	  				</exclusion>
+  				</exclusions>
+  			</dependency>
 			<dependency>
 				<groupId>org.apache.velocity</groupId>
 				<artifactId>velocity</artifactId>
@@ -203,6 +216,21 @@
 				<artifactId>hibernate-tools</artifactId>
 				<version>${hibernate-tools.version}</version>
 			</dependency>
+            <dependency>
+            	<groupId>org.slf4j</groupId>
+            	<artifactId>slf4j-api</artifactId>
+            	<version>${slf4j.version}</version>
+        	</dependency>
+        	<dependency>
+            	<groupId>org.slf4j</groupId>
+            	<artifactId>jcl-over-slf4j</artifactId>
+            	<version>${slf4j.version}</version>
+        	</dependency>
+        	<dependency>
+            	<groupId>org.slf4j</groupId>
+            	<artifactId>slf4j-log4j12</artifactId>
+            	<version>${slf4j.version}</version>
+        	</dependency>
 			<dependency>
 				<groupId>org.hyperic.db2monitor</groupId>
 				<artifactId>db2monitor</artifactId>
@@ -619,6 +647,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
+					<version>${surefire.version}</version>
 					<configuration>
 						<argLine>-Xmx512m -XX:MaxPermSize=192m -XX:-UseGCOverheadLimit</argLine>
 						<enableAssertions>false</enableAssertions>

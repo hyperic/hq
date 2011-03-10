@@ -2,9 +2,7 @@ package com.vmware.springsource.hyperic.plugin.gemfire;
 
 import com.vmware.springsource.hyperic.plugin.gemfire.collectors.MemberCollector;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import javax.management.MBeanServerConnection;
@@ -57,11 +55,9 @@ public class GemFireLiveData extends LiveDataPlugin {
         return id;
     }
 
-    private static final Map<String,String> namesCache=new Hashtable();
+    private static final Map<String,String> namesCache=new HashMap<String, String>();
     private static String[][] getMembers(MBeanServerConnection mServer) throws Exception {
-        Object[] args = new Object[0];
-        String[] def = new String[0];
-        List<String> members = Arrays.asList((String[]) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMembers", args, def));
+        List<String> members=GemFireUtils.getMembers(mServer);
         List<String[]> names=new ArrayList();
         for(String member :members){
             String name=namesCache.get(member);
@@ -75,19 +71,26 @@ public class GemFireLiveData extends LiveDataPlugin {
         }
 
         //cleanig olds names.
-        for(String member: namesCache.keySet()){
-            if(!members.contains(member)){
+        List <String> idsToRemove = new ArrayList<String>();
+        for (String member : namesCache.keySet()) {
+            if (!members.contains(member)) {
+                idsToRemove.add(member);
+            }
+        }
+        if (idsToRemove.size() > 0) {
+            log.debug("[getMembers] namesCache.size="+namesCache.size());
+            log.debug("[getMembers] idsToRemove.size="+idsToRemove.size());
+            for (String member : idsToRemove) {
                 namesCache.remove(member);
             }
+            log.debug("[getMembers] namesCache.size="+namesCache.size());
         }
 
         return names.toArray(new String[0][0]);
     }
 
     private static Map getDetails(MBeanServerConnection mServer) throws Exception {
-        Object[] args = new Object[0];
-        String[] def = new String[0];
-        String[] members = (String[]) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMembers", args, def);
+        List<String> members=GemFireUtils.getMembers(mServer);
         Map data = new HashMap();
         for (String member : members) {
             data.put(member, getMemberDetails(mServer, member));

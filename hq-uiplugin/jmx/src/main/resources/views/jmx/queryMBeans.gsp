@@ -3,68 +3,72 @@
 <script type="text/javascript">
 
 function invoke(id, name, op) {
-    var params = "?op=" + op + "&name=" + name + "&id=" + id
+    var params = {
+    	  "op": op,
+    	  "name": name,
+    	  "id": id
+    };
     var argsid = name + "." + op + ".args"
     var rsltid = name + ".invokeResult"
-    var args = dojo.byId(argsid)
+    var args = hqDojo.byId(argsid)
     if (args) {
-        params += "&args=" + args.value
+        params["args"] = args.value;
     }
-    dojo.io.bind({
-      url:  '/<%= urlFor(action:"invoke") %>' + params,
-      method: "post",
-      mimetype:  "text/json-comment-filtered",
-      load:  function(type, data, evt) {
-        dojo.byId(rsltid).innerHTML = data.html;
-      },
+    hqDojo.xhrPost({
+      	url:  '/<%= urlFor(action:"invoke") %>',
+      	handleAs: "json-comment-filtered",
+      	content: params,
+      	load:  function(response, args) {
+        	hqDojo.byId(rsltid).innerHTML = response.html;
+      	},
     });
-  }
+}
 
 function updateFilters(id) {
 <%  for (filter in filters) { %>
     if ("${filter.'@id'}" == id) {
-      dojo.byId('pattern').value = "${filter.objectName.text()}"
-      dojo.byId('attributeFilter').value = "${filter.attributeRegex.text()}"
-      dojo.byId('operationFilter').value = "${filter.operationRegex.text()}"
+      hqDojo.byId('pattern').value = "${filter.objectName.text()}"
+      hqDojo.byId('attributeFilter').value = "${filter.attributeRegex.text()}"
+      hqDojo.byId('operationFilter').value = "${filter.operationRegex.text()}"
     }
 <% } %>
 }
 
-dojo.addOnLoad(function(){
-<% if (message) { %>
-    dojo.byId('queryResult').innerHTML = "${message}";
-<% } else { %>
-    dojo.byId('queryResult').innerHTML = '';
-<% } %>
-setRefreshInterval(${refreshInterval});
+hqDojo.ready(function(){
+	<% if (message) { %>
+    	hqDojo.byId('queryResult').innerHTML = "${message}";
+	<% } else { %>
+    	hqDojo.byId('queryResult').innerHTML = '';
+	<% } %>
+	setRefreshInterval(${refreshInterval});
 });
 
 function refreshAttributeData() {
-    if (dojo.byId('mbeans').childNodes.length > 1) {
-         dojo.byId('queryResult').innerHTML = '... updating';
-         dojo.io.bind({
-          url: '<%= urlFor(action:"listMBeans") %>',
-          method: "get",
-          mimetype: "text/json-comment-filtered",
-          content: {
-              eid: "${eid}",
-              pattern: dojo.byId("pattern").value,
-              attributeFilter: dojo.byId("attributeFilter").value,
-              operationFilter: dojo.byId("operationFilter").value,
-              presetFilter: dojo.byId("presetFilter").value
-          },
-          load: function(type, data, evt) {
-                dojo.byId('queryResult').innerHTML =  "${message}";
-                var res = data.results;
+    if (hqDojo.byId('mbeans').childNodes.length > 1) {
+		hqDojo.byId('queryResult').innerHTML = '... updating';
+        hqDojo.xhrGet({
+        	url: '<%= urlFor(action:"listMBeans") %>',
+          	handleAs: "json-comment-filtered",
+          	content: {
+              	eid: "${eid}",
+              	pattern: hqDojo.byId("pattern").value,
+              	attributeFilter: hqDojo.byId("attributeFilter").value,
+              	operationFilter: hqDojo.byId("operationFilter").value,
+              	presetFilter: hqDojo.byId("presetFilter").value
+          	},
+          	load: function(response, args) {
+                hqDojo.byId('queryResult').innerHTML =  "${message}";
+                var res = response.results;
                 for (var i=0; i < res.length; i++) {
-                  var r = res[i];
-                  if (r.value) {
-                    dojo.byId(r.id).innerHTML = r.value;
-                  }
+                  	var r = res[i];
+
+                    if (r.value) {
+                    	hqDojo.byId(r.id).innerHTML = r.value;
+                  	}
                 }
             }
         });
-      }
+	}
 }
 
 var refreshIntervalId = 0;

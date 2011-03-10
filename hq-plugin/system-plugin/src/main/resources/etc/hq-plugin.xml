@@ -26,7 +26,7 @@
 
 
 -->
-<plugin name="system" class="SystemPlugin"> 
+<plugin name="system" class="SystemPlugin" version="@project.version@"> 
 
   <filter name="unix.config_files"
           value="/etc/hosts"/>
@@ -1021,6 +1021,14 @@
 
     <metric name="Threads"
             template="sigar:Type=ProcState,Arg=%process.query%:Threads"/>
+
+    <metric name="Child Processes"
+            alias="ChildProcesses"
+            template="sigar.ext:Type=ChildProcesses,Arg=%process.query%:ChildProcesses"
+            category="UTILIZATION"
+            units="none"
+            collectionType="dynamic"/>
+
   </metrics>
 
   <metrics name="MultiProcess">

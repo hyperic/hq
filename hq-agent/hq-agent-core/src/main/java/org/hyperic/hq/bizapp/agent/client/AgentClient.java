@@ -153,7 +153,9 @@ public class AgentClient {
                 lastExc = exc;
             }
             try {
-                Thread.sleep(1000);
+                if (numAttempts > 0) {
+                    Thread.sleep(1000);
+                }
             } catch(InterruptedException exc){
                 throw new AgentConnectionException("Connection interrupted");
             }

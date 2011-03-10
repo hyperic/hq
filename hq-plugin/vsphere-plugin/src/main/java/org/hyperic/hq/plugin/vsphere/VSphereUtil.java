@@ -1,15 +1,15 @@
 /*
- * NOTE: This copyright does *not* cover user programs that use HQ
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2010], VMWare, Inc.
- * This file is part of HQ.
+ * Copyright (C) [2004-2011], VMware, Inc.
+ * This file is part of Hyperic.
  * 
- * HQ is free software; you can redistribute it and/or modify
+ * Hyperic is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
  * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -29,18 +29,22 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.timer.StopWatch;
 
 import com.vmware.vim25.HostHardwareSummary;
 import com.vmware.vim25.HostListSummary;
+import com.vmware.vim25.ManagedObjectNotFound;
 import com.vmware.vim25.VirtualMachineConfigInfo;
 import com.vmware.vim25.mo.HostSystem;
 import com.vmware.vim25.mo.InventoryNavigator;
@@ -132,6 +136,48 @@ public class VSphereUtil extends ServiceInstance {
     }
 
     /**
+     * Find a managed entity by UUID from the live vCenter inventory.
+     * This should only be used when a real-time inventory check is required.
+     * Otherwise, use findByUuidFromCache() since it is more efficient.
+     */
+    Map<String, ManagedEntity> findByUuidFromInventory(String type, Set<String> uuids)
+    	throws PluginException {
+
+        if (uuids == null || uuids.isEmpty()) {
+        	return Collections.EMPTY_MAP;
+        }
+        
+        StopWatch watch = new StopWatch();
+        Map<String, ManagedEntity> inventory = new HashMap<String, ManagedEntity>(uuids.size());
+    	
+    	try {
+            ManagedEntity[] entities = find(type);
+    		for (int i=0; entities!=null && i<entities.length; i++) {
+                ManagedEntity entity = entities[i];
+                String entUuid = getUuid(entity);
+                if (entUuid == null) {
+                    continue;
+                }
+                if (uuids.contains(entUuid)) {
+                    inventory.put(entUuid, entity);
+                    if (inventory.size() == uuids.size()) {
+                    	break;
+                    }
+                }
+    		}
+    	} catch (Exception ex) {
+    		throw new PluginException(type + "/" + uuids + ": " + ex, ex);
+    	} finally {
+            if (_log.isDebugEnabled()) {
+                _log.debug("findByUuidFromInventory: type=" + type + ", uuids=" + uuids 
+                			+ ", managedEntities=" + inventory + ", time=" + watch);
+            }
+    	}
+    	
+    	return inventory;
+    }
+    
+    /**
      * Find a managed entity by UUID.  This method caches the entired vm inventory every 5 minutes.
      * If a uuid is not found in the inventory during the cached period an Exception is thrown.
      * @throws {@link PluginException} general case exception is thrown while grabbing all the
@@ -145,6 +191,8 @@ public class VSphereUtil extends ServiceInstance {
         if (cached != null) {
             return cached.get(uuid);
         }
+        
+        StopWatch watch = new StopWatch();
         ManagedEntity obj = null;
         Exception ex = null;
         cached = new HashMap<String, ManagedEntity>();
@@ -152,9 +200,6 @@ public class VSphereUtil extends ServiceInstance {
             ManagedEntity[] entities = find(type);
             for (int i=0; entities!=null && i<entities.length; i++) {
                 ManagedEntity entity = entities[i];
-                if (entity == null) {
-                    continue;
-                }
                 String entUuid = getUuid(entity);
                 if (entUuid == null) {
                     continue;
@@ -168,7 +213,9 @@ public class VSphereUtil extends ServiceInstance {
             ex = e;
         } finally {
             if (_log.isDebugEnabled()) {
-                _log.debug("findByUuid: type=" + type + ", uuid=" + uuid + ", managedEntity=" + obj);
+                _log.debug("findByUuid: type=" + type + ", uuid=" + uuid 
+                				+ ", managedEntity=" + obj + ", cacheSize=" + cached.size()
+                				+ ", time=" + watch);
             }
         }
         // does not matter if obj is null, want to cache that as well
@@ -222,7 +269,7 @@ public class VSphereUtil extends ServiceInstance {
             throw new PluginException(type + ": " + e, e);
         }
         if (rtn == null) {
-            throw new PluginException("name=" + name + ",type=" + type + ": not found");
+            throw new ManagedEntityNotFoundException("name=" + name + ",type=" + type + ": not found");
         }
         return rtn;
     }
@@ -235,7 +282,7 @@ public class VSphereUtil extends ServiceInstance {
             throw new PluginException(type + ": " + e, e);
         }
         if (obj == null) {
-            throw new PluginException(type + ": not found");
+            throw new ManagedEntityNotFoundException(type + ": not found");
         }
         return obj;
     }
@@ -245,25 +292,45 @@ public class VSphereUtil extends ServiceInstance {
     }
     
     static String getUuid(ManagedEntity entity) {
-        String uuid = null;
-        if (entity instanceof HostSystem) {
-            HostSystem host = (HostSystem) entity;
-            HostListSummary summary = host.getSummary();
-            if (summary == null) {
-                return null;
-            }
-            HostHardwareSummary hardware = summary.getHardware();
-            if (hardware == null) {
-                return null;
-            }
-            uuid = hardware.getUuid();
-        } else if (entity instanceof VirtualMachine) {
-            VirtualMachine vm = (VirtualMachine) entity;
-            VirtualMachineConfigInfo config = vm.getConfig();
-            if (config == null) {
-                return null;
-            }
-            uuid = config.getUuid();
+    	if (entity == null) {
+    		return null;
+    	}
+    	
+    	String uuid = null;
+        
+        try {
+        	if (entity instanceof HostSystem) {
+        		HostSystem host = (HostSystem) entity;
+        		HostListSummary summary = host.getSummary();
+        		if (summary == null) {
+        			return null;
+        		}
+        		HostHardwareSummary hardware = summary.getHardware();
+        		if (hardware == null) {
+        			return null;
+        		}
+        		uuid = hardware.getUuid();
+        	} else if (entity instanceof VirtualMachine) {
+        		VirtualMachine vm = (VirtualMachine) entity;
+        		VirtualMachineConfigInfo config = vm.getConfig();
+        		if (config == null) {
+        			return null;
+        		}
+        		uuid = config.getUuid();
+        	}
+        } catch (Exception e) {
+        	Throwable causeBy = e.getCause();
+        	if (e instanceof ManagedObjectNotFound
+        			|| causeBy instanceof ManagedObjectNotFound) {
+        		if (_log.isDebugEnabled()) {
+        			_log.debug("getUuid: ManagedEntity[name=" + entity.getName() 
+        						+ "] not found.");       		
+        		}
+        	} else {
+        		_log.info("Could not get UUID for ManagedEntity[name="
+        					+ entity.getName() + "]: " + e.getMessage(), e);
+        	}
+        	return null;
         }
         return uuid;
     }

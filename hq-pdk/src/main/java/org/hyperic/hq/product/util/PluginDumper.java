@@ -514,15 +514,15 @@ public class PluginDumper {
     private void loadPlugins() {
 
         int nplugins =
-            ppm.registerPlugins(this.config.pluginDir);
+            ppm.registerPlugins(this.config.pluginDir).size();
 
         String dir = this.config.props.getProperty("plugin.dir");
         if (dir == null) {
-            nplugins += ppm.registerCustomPlugins(".");
+            nplugins += ppm.registerCustomPlugins(".").size();
         }
         else {
             //override ../hq-plugins useful for dev
-            nplugins += ppm.registerPlugins(dir);
+            nplugins += ppm.registerPlugins(dir).size();
         }
         
         if (nplugins == 0) {

@@ -27,7 +27,7 @@ package org.hyperic.hq.agent.client;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,11 +43,11 @@ import org.hyperic.hq.agent.commands.AgentBundle_result;
 import org.hyperic.hq.agent.commands.AgentDie_args;
 import org.hyperic.hq.agent.commands.AgentPing_args;
 import org.hyperic.hq.agent.commands.AgentReceiveFileData_args;
+import org.hyperic.hq.agent.commands.AgentRemoveFileData_args;
 import org.hyperic.hq.agent.commands.AgentRestart_args;
-import org.hyperic.hq.agent.commands.AgentRestart_result;
 import org.hyperic.hq.agent.commands.AgentUpgrade_args;
 import org.hyperic.hq.agent.commands.AgentUpgrade_result;
-import org.hyperic.util.math.MathUtil;
+import org.hyperic.hq.agent.commands.FileRemoval_result;
 
 /**
  * The set of commands a client can call to a remote agent.  This object
@@ -73,13 +73,12 @@ public class LegacyAgentCommandsClientImpl implements AgentCommandsClient {
      * @see org.hyperic.hq.agent.client.AgentCommandsClient#ping()
      */
     public long ping()
-        throws AgentRemoteException, AgentConnectionException 
-    {
+    throws AgentRemoteException, AgentConnectionException {
         AgentPing_args args = new AgentPing_args();
 
         long sendTime = System.currentTimeMillis();
         this.agentConn.sendCommand(AgentCommandsAPI.command_ping,
-                                   this.verAPI.getVersion(), args);
+                                   this.verAPI.getVersion(), args, false);
         long recvTime = System.currentTimeMillis();
 
         return recvTime - sendTime;
@@ -188,6 +187,14 @@ public class LegacyAgentCommandsClientImpl implements AgentCommandsClient {
                                        args);
         
         return new AgentBundle_result(cmdRes).getCurrentAgentBundle();
+    }
+
+    public Map<String, Boolean> agentRemoveFile(Collection<String> files)
+    throws AgentRemoteException, AgentConnectionException {
+        AgentRemoveFileData_args args = new AgentRemoveFileData_args(files);
+        AgentRemoteValue res = 
+            agentConn.sendCommand(AgentCommandsAPI.command_remove_file, verAPI.getVersion(), args);
+        return new FileRemoval_result(res).getResult();
     }    
 
 }

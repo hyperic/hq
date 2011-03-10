@@ -30,7 +30,7 @@
 <script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/footer.js"/>" type="text/javascript"></script>
 
-<table id="footerContent" width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top:60px;">
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
 	<tr>
 		<td class="FooterBold" nowrap="nowrap" style="padding-left: 30px;" width="20%"><tiles:insert definition=".footer.current.time" /></td>
 		<td class="FooterRegular" nowrap="nowrap" align="center" width="60%">
@@ -76,18 +76,19 @@
 </div>
 
 <script type="text/javascript">
-  dojo11.require("dijit.Dialog");
+	hqDojo.require("dijit.dijit");
+  	hqDojo.require("dijit.Dialog");
 
-  var aboutDia = null;
-  dojo11.addOnLoad(function(){
-  	aboutDia = new dijit11.Dialog({
+  	var aboutDia = null;
+  	hqDojo.ready(function(){
+  		aboutDia = new hqDijit.Dialog({
                 id: 'about_popup',
                 refocus: true,
                 autofocus: false,
                 opacity: 0,
                 title: "<fmt:message key="about.Title" />"
-            }, dojo11.byId('about'));
-  });
+            }, hqDojo.byId('about'));
+  	});
 
-  setFoot();
+  	setFoot();
 </script>

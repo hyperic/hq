@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC
+	"-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN"
+	"http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
+
+<tiles-definitions>
+	<definition name="login" extends="primaryLayout">
+		<put-attribute name="title" value="login.title" />
+		<put-attribute name="content" value="/WEB-INF/jsp/login.jsp" />
+	</definition>	
+</tiles-definitions>

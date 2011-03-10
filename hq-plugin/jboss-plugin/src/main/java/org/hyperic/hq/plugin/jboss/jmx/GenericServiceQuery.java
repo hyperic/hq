@@ -52,6 +52,7 @@ class GenericServiceQuery extends ServiceQuery {
         return getProperty("MBEAN_CLASS");
     }
 
+    @Override
     public ServiceQuery cloneInstance() {
         GenericServiceQuery query =
                 (GenericServiceQuery) super.cloneInstance();
@@ -106,8 +107,8 @@ class GenericServiceQuery extends ServiceQuery {
             throw new IllegalArgumentException(msg);
         }
 
-        Map props = oName.getKeyPropertyList();
-        for (Iterator it = props.entrySet().iterator(); it.hasNext();) {
+        Map _props = oName.getKeyPropertyList();
+        for (Iterator it = _props.entrySet().iterator(); it.hasNext();) {
             Map.Entry entry = (Map.Entry) it.next();
             String key = (String) entry.getKey();
             String val = (String) entry.getValue();
@@ -158,6 +159,7 @@ class GenericServiceQuery extends ServiceQuery {
     //jboss.ejb:service=EJB,jndiName=*
     //can't use QueryExp either because that is applied to attributes
     //of the MBean, not the attributes of the ObjectName itself
+    @Override
     public boolean apply(ObjectName name) {
         Map _props = name.getKeyPropertyList();
         if (this.props.size() != _props.size()) {
@@ -191,6 +193,7 @@ class GenericServiceQuery extends ServiceQuery {
         return "name";
     }
 
+    @Override
     public Properties getResourceConfig() {
         ObjectName name = getObjectName();
         Properties config = new Properties();
@@ -208,13 +211,14 @@ class GenericServiceQuery extends ServiceQuery {
         return config;
     }
 
+    @Override
     public String getName() {
         ObjectName oName = getObjectName();
         if (oName == null) {
             return null; //XXX happens duing cloneInstance()
         }
 
-        StringBuffer name = new StringBuffer();
+        StringBuilder name = new StringBuilder();
 
         for (Iterator it = this.names.iterator(); it.hasNext();) {
             String n = oName.getKeyProperty((String) it.next());
@@ -229,6 +233,7 @@ class GenericServiceQuery extends ServiceQuery {
         return name.toString();
     }
 
+    @Override
     public boolean hasControl() {
         //XXX this functionality should be elsewhere
         ProductPluginManager ppm =

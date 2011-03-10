@@ -444,18 +444,12 @@ public class ApplicationManagerImpl implements ApplicationManager,
      * @return list of ApplicationPKs for which the subject has
      *         AuthzConstants.applicationOpViewApplication
      */
-    protected List<Integer> getViewableApplications(AuthzSubject whoami)
-        throws PermissionException, NotFoundException {
-
-        Operation op = getOperationByName(resourceManager
-            .findResourceTypeByName(AuthzConstants.applicationResType),
+    protected Collection<Integer> getViewableApplications(AuthzSubject whoami)
+    throws PermissionException, NotFoundException {
+        Operation op = getOperationByName(
+            resourceManager.findResourceTypeByName(AuthzConstants.applicationResType),
             AuthzConstants.appOpViewApplication);
-        List<Integer> idList = permissionManager.findOperationScopeBySubject(whoami, op.getId());
-        List<Integer> keyList = new ArrayList<Integer>(idList.size());
-        for (int i = 0; i < idList.size(); i++) {
-            keyList.add(idList.get(i));
-        }
-        return keyList;
+        return permissionManager.findOperationScopeBySubject(whoami, op.getId());
     }
     
     /**

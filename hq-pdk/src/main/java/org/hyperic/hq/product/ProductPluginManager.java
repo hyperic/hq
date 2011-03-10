@@ -33,7 +33,9 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.JarURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -52,6 +54,9 @@ import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.util.PluginLoader;
 import org.hyperic.util.PluginLoaderException;
 import org.hyperic.util.StringUtil;
+import org.hyperic.util.security.MD5;
+
+import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * This class is a manager for ProductPlugin implementations and is also a
@@ -407,6 +412,21 @@ public class ProductPluginManager
         }
     }
 
+    public Map<String, String> getPluginVersions(String pluginDir) {
+        Map<String, String> rtn = new HashMap<String, String>();
+        for (int i = 0; i < PLUGIN_SUPPORT_DIRS.length; i++) {
+            File dir = new File(pluginDir, PLUGIN_SUPPORT_DIRS[i]);
+            if (!dir.exists()) {
+                continue;
+            }
+            File[] pluginFiles = listPlugins(dir);
+            for (final File file : pluginFiles) {
+                rtn.put(file.toString(), MD5.getMD5Checksum(file));
+            }
+        }
+        return rtn;
+    }
+
     public void shutdown() throws PluginException {
 
         this.managers.remove(getName()); // skip this
@@ -658,7 +678,7 @@ public class ProductPluginManager
      * @param jarName The name of the jar file on disk.
      * @see #registerPluginJar(String jarName,ClassLoader resourceLoader)
      */
-    public String registerPluginJar(String jarName) throws PluginException, PluginExistsException {
+    public PluginInfo registerPluginJar(String jarName) throws PluginException, PluginExistsException {
         return registerPluginJar(jarName, null);
     }
 
@@ -685,7 +705,7 @@ public class ProductPluginManager
         }
     }
 
-    public int registerCustomPlugins(String startDir) {
+    public Collection<PluginInfo> registerCustomPlugins(String startDir) {
         // check startDir and higher for hq-plugins
         File dir = new File(startDir).getAbsoluteFile();
         
@@ -698,7 +718,7 @@ public class ProductPluginManager
             
             dir = dir.getParentFile();
         }
-        return 0;
+        return Collections.emptyList();
     }
 
     private File[] listPlugins(File dir) {
@@ -722,9 +742,9 @@ public class ProductPluginManager
         }
     }
 
-    public int registerPlugins(String path) {
+    public Collection<PluginInfo> registerPlugins(String path) {
 
-        int nplugins = 0;
+        Collection<PluginInfo> rtn = new ArrayList<PluginInfo>();
         List<String> dirs = StringUtil.explode(path, File.pathSeparator);
 
         for (int i = 0; i < dirs.size(); i++) {
@@ -749,8 +769,9 @@ public class ProductPluginManager
                 log.info("Loading plugin: " + name);
                 
                 try {
-                    if (registerPluginJar(plugins[j].getAbsolutePath()) != null) {
-                    	nplugins++;
+                    PluginInfo info = null;
+                    if ((info = registerPluginJar(plugins[j].getAbsolutePath())) != null) {
+                    	rtn.add(info);
                     }
                 } catch (UnsupportedClassVersionError e) {
                     log.info("Cannot load " + name + ": " + unsupportedClassVersionMessage(e.getMessage()));
@@ -763,7 +784,7 @@ public class ProductPluginManager
             }
         }
 
-        return nplugins;
+        return rtn;
     }
 
     private void addClassPath(PluginLoader loader, String path) throws PluginException {
@@ -830,7 +851,7 @@ public class ProductPluginManager
      *         ProductPlugin.getName.
      * @see org.hyperic.hq.product.ProductPlugin
      */
-    public String registerPluginJar(String jarName, ClassLoader resourceLoader) throws PluginException,
+    public PluginInfo registerPluginJar(String jarName, ClassLoader resourceLoader) throws PluginException,
         PluginExistsException {
 
         ProductPlugin plugin = null;
@@ -953,7 +974,7 @@ public class ProductPluginManager
                 return null;
             }
             addPluginTypes(types, plugin);
-            return pluginName;
+            return info;
         } catch (PluginException e) {
             throw e;
         } catch (Exception e) {

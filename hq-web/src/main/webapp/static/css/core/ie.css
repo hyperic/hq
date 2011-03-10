@@ -1,0 +1,14 @@
+#headerAlerts {
+	position:absolute;
+	top: 0;
+	left: 310px;
+}
+
+#headerTabs ul li.tab a {
+	padding: 7px 8px 4px 0;
+    zoom: 1;
+}
+
+#headerTabs ul.root li {
+	padding: 0 5px;
+}

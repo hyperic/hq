@@ -34,7 +34,7 @@
 
 
 
-<plugin package="org.hyperic.hq.plugin.oracle">
+<plugin package="org.hyperic.hq.plugin.oracle" version="@project.version@">
 
   <!-- extracted to: pdk/work/scripts/oracle/hq-tns-ping -->
   <script name="hq-tns-ping">

@@ -1,12 +1,12 @@
 package com.vmware.springsource.hyperic.plugin.gemfire.detectors;
 
+import com.vmware.springsource.hyperic.plugin.gemfire.GemFireUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.management.MBeanServerConnection;
-import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.PluginException;
@@ -26,17 +26,10 @@ public abstract class MemberDetector extends ServerDetector implements AutoServe
         Map<String, String> names = new HashMap();
         try {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(pc.toProperties());
-            log.debug("mServer=" + mServer);
-
-            Object[] args = {};
-            String[] def = {};
-            ObjectName statsMBean = new ObjectName("GemFire:type=MemberInfoWithStatsMBean");
-            String[] members = (String[]) mServer.invoke(statsMBean, "getMembers", args, def);
+            List<String> members=GemFireUtils.getMembers(mServer);
             log.debug("[getServerResources] members=" + Arrays.asList(members));
-            for (String menber : members) {
-                Object[] args2 = {menber};
-                String[] def2 = {String.class.getName()};
-                Map<String, Object> memberDetails = (Map) mServer.invoke(statsMBean, "getMemberDetails", args2, def2);
+            for (String memberID : members) {
+                Map memberDetails = GemFireUtils.getMemberDetails(memberID, mServer);
                 if (log.isDebugEnabled()) {
                     log.debug("[getServerResources] memberDetails=" + memberDetails);
                 }
@@ -44,7 +37,7 @@ public abstract class MemberDetector extends ServerDetector implements AutoServe
                 if (isValidMember(memberDetails)) {
                     String name = (String) memberDetails.get("gemfire.member.name.string");
                     if (names.get(name) != null) {
-                        log.error("There is 2 of more '" + getTypeInfo().getName() + "' with the same name '" + name + "'");
+                        log.error("[getServerResources] There is 2 of more '" + getTypeInfo().getName() + "' with the same name '" + name + "'");
                     }
                     names.put(name, name);
 
@@ -52,7 +45,7 @@ public abstract class MemberDetector extends ServerDetector implements AutoServe
                     server.setName(getTypeInfo().getName() + " " + name);
                     server.setIdentifier("GFDS server.name " + name);
                     ConfigResponse c = new ConfigResponse();
-                    c.setValue("memberID", menber);
+                    c.setValue("member.name", name);
                     setMeasurementConfig(server, c);
                     setProductConfig(server, new ConfigResponse());
                     setCustomProperties(server, getAtributtes(memberDetails));
@@ -72,14 +65,8 @@ public abstract class MemberDetector extends ServerDetector implements AutoServe
         List services = new ArrayList();
         try {
             MBeanServerConnection mServer = MxUtil.getMBeanServer(config.toProperties());
-            log.debug("mServer=" + mServer);
-
-            String memberId = config.getValue("memberID");
-            Object[] args2 = {memberId};
-            String[] def2 = {String.class.getName()};
-            ObjectName statsMBean = new ObjectName("GemFire:type=MemberInfoWithStatsMBean");
-
-            Map<String, Object> memberDetails = (Map) mServer.invoke(statsMBean, "getMemberDetails", args2, def2);
+            String memberID = GemFireUtils.memberNameToMemberID(config.getValue("member.name"), mServer);
+            Map memberDetails = GemFireUtils.getMemberDetails(memberID, mServer);
             Map<String, Map> regions = (Map) memberDetails.get("gemfire.member.regions.map");
 
             if (regions != null) {
@@ -113,7 +100,6 @@ public abstract class MemberDetector extends ServerDetector implements AutoServe
                     service.setName(memberDetails.get("gemfire.member.name.string") + " Gateway " + id);
 
                     ConfigResponse c = new ConfigResponse();
-                    c.setValue("memberID", memberId);
                     c.setValue("gatewayID", id);
                     log.debug("[discoverServices] gateway -> c=" + c);
 

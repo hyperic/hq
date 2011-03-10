@@ -29,7 +29,7 @@
 
 
 
-<plugin name="spring">
+<plugin name="spring" version="@project.version@">
 	<classpath>
 		<include name="pdk/lib/mx4j" />
 	</classpath>

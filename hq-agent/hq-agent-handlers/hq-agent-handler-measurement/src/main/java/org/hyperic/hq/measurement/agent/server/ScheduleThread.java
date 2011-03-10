@@ -223,6 +223,15 @@ public class ScheduleThread
                             log.error("Metric '" + mt +
                                        "' took too long to run (" + mt.getExecutionDuration() +
                                        "ms), cancelled (result=" + res + ")");
+
+                            // If the metric is Availability, send a down data point in
+                            // case the metric cancellation fails.
+                            ParsedTemplate pt = getParsedTemplate(mt.meas);
+                            if (pt.metric.isAvail()) {
+                                MetricValue data = new MetricValue(MeasurementConstants.AVAIL_DOWN);
+                                sender.processData(mt.meas.getDsnID(), data,
+                                                   mt.meas.getDerivedID());
+                            }
                             // Task will be removed on next iteration
                         }
                     }

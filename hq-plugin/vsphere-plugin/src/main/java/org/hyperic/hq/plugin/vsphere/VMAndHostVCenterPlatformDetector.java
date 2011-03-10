@@ -62,6 +62,7 @@ import org.hyperic.hq.hqapi1.types.StatusResponse;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.timer.StopWatch;
 
 import com.vmware.vim25.AboutInfo;
 import com.vmware.vim25.GuestInfo;
@@ -434,11 +435,14 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
     public void discoverPlatforms(Properties props, HQApi hqApi, VSphereUtil vim)
         throws IOException, PluginException {
         
+        StopWatch watch = new StopWatch();
+        final boolean debug = log.isDebugEnabled();
+
         String vCenterUrl = VSphereUtil.getURL(props);
         Resource vCenter = getVCenterServer(vCenterUrl,hqApi);
         
         if (vCenter == null) {
-            if (log.isDebugEnabled()) {
+            if (debug) {
                 log.debug("Skip discovering hosts and VMs. "
                             + "No VMware vCenter server found with url=" 
                             + vCenterUrl);
@@ -447,8 +451,13 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
         }
         
    
+        	if (debug) watch.markTimeBegin("getAgent");
             Agent agent = getAgent(hqApi, props);
+            if (debug) watch.markTimeEnd("getAgent");
+            
+            if (debug) watch.markTimeBegin("discoverHosts");
             List<Resource> hosts = discoverHosts(agent,hqApi, vim, props);
+            if (debug) watch.markTimeEnd("discoverHosts");
           
             List<Resource> vms = new ArrayList<Resource>();
             Map<String, List<Resource>> vcHostVms = new HashMap<String, List<Resource>>();
@@ -470,17 +479,32 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
             }
             else {
                 ResourceApi api = hqApi.getResourceApi();
-
                 StatusResponse response;
+
+                if (debug) watch.markTimeBegin("syncVms");
                 response = api.syncResources(vms);
+                if (debug) watch.markTimeEnd("syncVms");
                 assertSuccess(response, "sync " + vms.size() + " VMs", false);
+
+                if (debug) watch.markTimeBegin("syncHosts");
                 response = api.syncResources(hosts);
+                if (debug) watch.markTimeEnd("syncHosts");
                 assertSuccess(response, "sync " + hosts.size() + " Hosts", false);
                 
               	Map<String, Resource> existingHosts = new HashMap<String, Resource>();
                 Map<String, List<Resource>> existingHostVms = new HashMap<String, List<Resource>>();
+                
+                if (debug) watch.markTimeBegin("syncResourceEdges");
                 syncResourceEdges(existingHosts,existingHostVms, props,hqApi);
+                if (debug) watch.markTimeEnd("syncResourceEdges");
+                
+                if (debug) watch.markTimeBegin("removePlatformsFromInventory");
                 removePlatformsFromInventory(vcHostVms, existingHosts, existingHostVms,vim,hqApi);
+                if (debug) watch.markTimeEnd("removePlatformsFromInventory");
+            }
+            
+            if (debug) {
+            	log.debug("discoverPlatforms: time=" + watch);
             }
         
     }
@@ -597,6 +621,9 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
     private void removePlatformsFromInventory(Map<String, List<Resource>> vcHosts, 
                                     Map<String, Resource> existingHosts, Map<String, List<Resource>> existingHostVms, VSphereUtil vim, HQApi hqApi)  throws IOException, PluginException {
         //
+    	List<Resource> hostsToRemove = new ArrayList<Resource>();
+    	List<Resource> vmsToRemove = new ArrayList<Resource>();
+    	
         for (String hostName : existingHostVms.keySet()) {
             List<Resource> hqVms = existingHostVms.get(hostName);
             List<Resource> vcVms = vcHosts.get(hostName);
@@ -605,7 +632,7 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
                 // not one of the hosts in vCenter
                 Resource r = existingHosts.get(hostName);
                 if (r != null) {
-                    removeHost(r,vim,hqApi);
+                	hostsToRemove.add(r);
                 }
             } else {
                 // vm names may be the same, so use fqdn (uuid) to
@@ -623,11 +650,15 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
                     String fqdn = getFqdn(r);
                     if (fqdn != null && !vcVmFqdns.contains(fqdn)) {
                         // Not one of the powered-on VMs from vCenter
-                        removeVM(r,vim,hqApi);
+                    	vmsToRemove.add(r);
                     }
                 }
             }
         }
+        
+        // Remove resources in batch
+        removeResources(VSphereUtil.HOST_SYSTEM, hostsToRemove, vim, hqApi);
+        removeResources(VSphereUtil.VM, vmsToRemove, vim, hqApi);
     }
 
     private boolean isVCenterManagedEntity(String vCenterUrl, Resource r) {
@@ -709,45 +740,44 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
         return name + " {" + uuid + "}";
     }
     
-    private void removeHost(Resource r, VSphereUtil vim, HQApi hqApi)
+    private void removeResources(String entityType, List<Resource> resources, VSphereUtil vim, HQApi hqApi)
         throws IOException, PluginException {
         
+    	if (resources == null || resources.isEmpty()) {
+    		return;
+    	}
+    	
+    	Map<String, Resource> toDelete = new HashMap<String, Resource>(resources.size());
+    	
         try {
+        	for (Resource r : resources) {
+        		toDelete.put(getFqdn(r), r);
+        	}
+        	
             // verify to see if it exists in vCenter
-            vim.findByUuid(VSphereUtil.HOST_SYSTEM, getFqdn(r));
+        	Map<String, ManagedEntity> inventory = vim.findByUuidFromInventory(entityType, toDelete.keySet());
             
-            if (log.isDebugEnabled()) {
-                log.debug(HOST_TYPE + "[id=" + r.getId()
-                			  + ", name=" + r.getName() 
-                              + "] exists in vCenter. Not removing from HQ.");
-            }
-        } catch (ManagedEntityNotFoundException me) {
-            removeResource(r, hqApi);
+        	// remove resources from queue that still exists in vCenter
+        	if (toDelete.keySet().removeAll(inventory.keySet())) {
+                if (log.isDebugEnabled()) {
+                    for (Map.Entry<String, ManagedEntity> entry : inventory.entrySet()) {
+                        String uuid = entry.getKey();
+                        ManagedEntity entity = entry.getValue();
+                        log.debug(entityType + "[UUID=" + uuid
+                  			  		+ ", name=" + entity.getName() 
+                  			  		+ "] exists in vCenter. Not removing from HQ.");
+                    }
+                }
+        	}
+        	
+        	// remove remaining resources
+        	for (Map.Entry<String, Resource> entry : toDelete.entrySet()) {
+        		removeResource(entry.getValue(), hqApi);
+        	}
+        	
         } catch (Throwable t) {
-        	log.warn("Error removing " + HOST_TYPE 
-        				+ "[id=" + r.getId()
-        				+ ", name=" + r.getName() + "] from HQ", t);
-        }
-    }
-
-    private void removeVM(Resource r, VSphereUtil vim, HQApi hqApi)
-        throws IOException, PluginException {
-    
-        try {
-            // verify to see if it exists in vCenter
-            vim.findByUuid(VSphereUtil.VM, getFqdn(r));
-            
-            if (log.isDebugEnabled()) {
-                log.debug(VM_TYPE + "[id=" + r.getId()
-                			  + ", name=" + r.getName() 
-                              + "] exists in vCenter. Not removing from HQ.");
-            }
-        } catch (ManagedEntityNotFoundException me) {
-            removeResource(r, hqApi);
-        } catch (Throwable t) {
-        	log.warn("Error removing " + VM_TYPE 
-        				+ "[id=" + r.getId()
-        				+ ", name=" + r.getName() + "] from HQ", t);
+        	log.warn("Error removing " + resources.size() + " " + entityType 
+        				+ " [" + toDelete + "] from HQ", t);
         }
     }
     
@@ -755,7 +785,8 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
         throws IOException, PluginException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Managed entity (" + r.getName() + ") no longer exists in vCenter. "
+            log.debug("Resource [id=" + r.getId() 
+            			 + ", name=" + r.getName() + "] no longer exists in vCenter. "
                          + " Removing from HQ inventory.");
         }
         
@@ -768,10 +799,6 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
         }
 
         ResourceApi rApi = hqApi.getResourceApi();
-
-        // TODO: As a final step, need to check resource availability
-        // (must be DOWN) before deleting.
-        
         StatusResponse deleteResponse = rApi.deleteResource(r.getId());
         assertSuccess(deleteResponse, "Delete resource id=" + r.getId(), false);
     }

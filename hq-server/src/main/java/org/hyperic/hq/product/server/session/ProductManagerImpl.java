@@ -47,6 +47,7 @@ import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
@@ -228,6 +229,7 @@ public class ProductManagerImpl implements ProductManager {
         if (plugin == null) {
             plHome.create(pInfo.name, pInfo.jar, pInfo.md5);
         } else {
+            plugin.setModifiedTime(System.currentTimeMillis());
             plugin.setPath(pInfo.jar);
             plugin.setMD5(pInfo.md5);
         }
@@ -259,20 +261,17 @@ public class ProductManagerImpl implements ProductManager {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void deploymentNotify(String pluginName) throws PluginNotFoundException, VetoException,
-        NotFoundException {
+    public void deploymentNotify(String pluginName)
+    throws PluginNotFoundException, VetoException, NotFoundException {
         ProductPlugin pplugin = (ProductPlugin) getProductPluginManager().getPlugin(pluginName);
-        PluginValue pluginVal;
-        PluginInfo pInfo;
         boolean created = false;
         long start = System.currentTimeMillis();
-
-        pInfo = getProductPluginManager().getPluginInfo(pluginName);
+        PluginInfo pInfo = getProductPluginManager().getPluginInfo(pluginName);
         Plugin plugin = pluginDao.findByName(pluginName);
-        pluginVal = plugin != null ? plugin.getPluginValue() : null;
+        PluginValue pluginVal = plugin != null ? plugin.getPluginValue() : null;
 
         if (pluginVal != null && pInfo.name.equals(pluginVal.getName()) &&
-            pInfo.md5.equals(pluginVal.getMD5())) {
+                pInfo.md5.equals(pluginVal.getMD5())) {
             log.info(pluginName + " plugin up to date");
             if (forceUpdate(pluginName)) {
                 log.info(pluginName + " configured to force update");
@@ -337,9 +336,17 @@ public class ProductManagerImpl implements ProductManager {
             log.error("Error updating service types.  Cause: " + e.getMessage());
         }
     }
+    
+    public boolean deployPluginIfValid(AuthzSubject subj, byte[] pluginJar) {
+        // XXX need to implement this
+        if (pluginJar == null) {
+            return false;
+        }
+        return true;
+    }
 
-    private void updatePlugin(String pluginName) throws VetoException, PluginNotFoundException,
-        NotFoundException {
+    private void updatePlugin(String pluginName)
+    throws VetoException, PluginNotFoundException, NotFoundException {
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
         ProductPluginManager ppm = getProductPluginManager();
@@ -349,19 +356,18 @@ public class ProductManagerImpl implements ProductManager {
 
         TypeInfo[] entities = pplugin.getTypes();
 
-        if (debug)
-            watch.markTimeBegin("updateAppdefEntities");
+        if (debug) watch.markTimeBegin("updateAppdefEntities");
         updateAppdefEntities(pluginName, entities);
-        if (debug)
-            watch.markTimeEnd("updateAppdefEntities");
+        if (debug) watch.markTimeEnd("updateAppdefEntities");
 
         // Get the measurement templates
         // Keep a list of templates to add
-       Map<MonitorableType,List<MonitorableMeasurementInfo>> toAdd = new HashMap<MonitorableType,List<MonitorableMeasurementInfo>>();
+        Map<MonitorableType,List<MonitorableMeasurementInfo>> toAdd =
+            new HashMap<MonitorableType,List<MonitorableMeasurementInfo>>();
 
-        Map<String, MonitorableType> types = new HashMap<String,MonitorableType>(templateManager.getMonitorableTypesByName(pluginName));
-        if (debug)
-            watch.markTimeBegin("loop0");
+        Map<String, MonitorableType> types =
+            new HashMap<String,MonitorableType>(templateManager.getMonitorableTypesByName(pluginName));
+        if (debug) watch.markTimeBegin("loop0");
         for (TypeInfo info : Arrays.asList(entities)) {
             MeasurementInfo[] measurements;
             try {
@@ -396,27 +402,21 @@ public class ProductManagerImpl implements ProductManager {
                 toAdd.put(monitorableType,infos);
             }
         }
-        if (debug)
-            watch.markTimeEnd("loop0");
+        if (debug) watch.markTimeEnd("loop0");
         pluginDao.getSession().flush();
 
         // For performance reasons, we add all the new measurements at once.
-        if (debug)
-            watch.markTimeBegin("createTemplates");
+        if (debug) watch.markTimeBegin("createTemplates");
         templateManager.createTemplates(pluginName, toAdd);
-        if (debug)
-            watch.markTimeEnd("createTemplates");
+        if (debug) watch.markTimeEnd("createTemplates");
 
         // Add any custom properties.
-        if (debug)
-            watch.markTimeBegin("findResourceType");
-        Map<String, AppdefResourceType> rTypes = cPropManager.findResourceType(Arrays
-            .asList(entities));
-        if (debug)
-            watch.markTimeEnd("findResourceType");
+        if (debug) watch.markTimeBegin("findResourceType");
+        Map<String, AppdefResourceType> rTypes =
+            cPropManager.findResourceType(Arrays.asList(entities));
+        if (debug) watch.markTimeEnd("findResourceType");
 
-        if (debug)
-            watch.markTimeBegin("loop");
+        if (debug) watch.markTimeBegin("loop");
         for (int i = 0; i < entities.length; i++) {
             TypeInfo info = entities[i];
             ConfigSchema schema = pplugin.getCustomPropertiesSchema(info);
@@ -433,14 +433,12 @@ public class ProductManagerImpl implements ProductManager {
                 }
             }
         }
-        if (debug)
-            watch.markTimeEnd("loop");
+        if (debug) watch.markTimeEnd("loop");
 
         createAlertDefinitions(pInfo);
         pluginDeployed(pInfo);
         updatePlugin(pluginDao, pInfo);
-        if (debug)
-            log.debug(watch);
+        if (debug) log.debug(watch);
     }
 
     private void createAlertDefinitions(final PluginInfo pInfo) throws VetoException {

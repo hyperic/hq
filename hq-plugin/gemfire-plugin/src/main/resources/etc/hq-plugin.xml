@@ -3,7 +3,7 @@
 <!DOCTYPE plugin [
   <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
 ]>
-<plugin>
+<plugin version="@project.version@">
     <classpath>
         <include name="pdk/lib/mx4j" />
     </classpath>
@@ -67,7 +67,7 @@
             <plugin type="collector" class="com.vmware.springsource.hyperic.plugin.gemfire.collectors.MemberCollector" />
             <plugin type="livedata" class="com.vmware.springsource.hyperic.plugin.gemfire.GemFireLiveData" />
             <config type="measurement">
-                <option name="memberID" description="Cache Server Id"/>
+                <option name="member.name" description="Cache Server Name"/>
             </config>
             <properties>
                 <property name="id" description="ID"/>
@@ -75,7 +75,7 @@
                 <property name="host" description="Peer Host"/>
                 <property name="port" description="Peer Port"/>
             </properties>
-            <filter name="template" value="collector:${JXMCFG},memberID=%memberID%:${alias}"/>
+            <filter name="template" value="collector:${JXMCFG},member.name=%member.name%:${alias}"/>
             <metrics>
                 <metric name="Availability"  indicator="true" />
                 <metric name="Used Heap" alias="used_memory" indicator="true" units="percentage"/>
@@ -102,7 +102,7 @@
                     <property description="Interest Policy" name="interestpolicy"/>
                     <property description="Disk Attributes" name="diskattrs"/>
                 </properties>
-                <filter name="template" value="GemFire:${JXMCFG},memberID=%memberID%:%regionID%.${alias}"/>
+                <filter name="template" value="GemFire:${JXMCFG},member.name=%member.name%:%regionID%.${alias}"/>
                 <metrics>
                     <metric name="Availability"  indicator="true" />
                     <metric name="Entry Count" alias="entry_count" indicator="true" />
@@ -120,7 +120,7 @@
                 <config type="measurement">
                     <option name="gatewayID" description="Gateway Id"/>
                 </config>
-                <filter name="template" value="GemFire:${JXMCFG},memberID=%memberID%,gatewayID=%gatewayID%:${alias}"/>
+                <filter name="template" value="GemFire:${JXMCFG},member.name=%member.name%,gatewayID=%gatewayID%:${alias}"/>
                 <metrics>
                     <metric name="Availability"  indicator="true" />
                     <metric name="Queue size" alias="queuesize" indicator="true" />

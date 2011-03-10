@@ -25,7 +25,7 @@
   USA.
  -->
 
-<plugin package="org.hyperic.hq.plugin.postfix">
+<plugin package="org.hyperic.hq.plugin.postfix" version="@project.version@">
   <filter name="domain" value="postfix"/>
 
   <!-- Process metrics -->

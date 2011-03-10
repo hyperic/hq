@@ -57,7 +57,7 @@
   USA.
  -->
 
-<plugin package="org.hyperic.hq.plugin.jetty">
+<plugin package="org.hyperic.hq.plugin.jetty" version="@project.version@">
 
   <classpath>
     <include name="pdk/lib/mx4j"/>

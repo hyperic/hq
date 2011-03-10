@@ -53,8 +53,6 @@ public class RabbitVirtualHost {
 
     private boolean isAvailable;
 
-    private String users;
-
     public RabbitVirtualHost(String vHostName, HypericRabbitAdmin rabbitAdmin) {
         this.name = vHostName;
         this.node = rabbitAdmin.getPeerNodeName();
@@ -63,7 +61,6 @@ public class RabbitVirtualHost {
         setAvailable(rabbitAdmin.virtualHostAvailable(name, node));
         setQueueCount(rabbitAdmin.getQueues(name));
         setExchangeCount(rabbitAdmin.getExchanges(name));
-        setUsers(rabbitAdmin.listUsers());
     }
 
 
@@ -73,7 +70,7 @@ public class RabbitVirtualHost {
                 .append(" connectionCount=").append(connectionCount).append(" channelCount=").append(channelCount)
                 .append(" consumerCount=").append(consumerCount).append(" queueCount=").append(queueCount)
                 .append(" exchangeCount=").append(exchangeCount).append(" isAvailable=").append(isAvailable)
-                .append(" users=").append(users).append("]").toString();
+                .append("]").toString();
     }
 
     public long getQueueCount() {
@@ -139,15 +136,4 @@ public class RabbitVirtualHost {
     public long getConsumerCount() {
         return consumerCount;
     }
-
-    private void setUsers(List<String> users) {
-        if (users != null) {
-            this.users = StringUtils.collectionToCommaDelimitedString(users);
-        }
-    }
-
-    public String getUsers() {
-        return users;
-    }
-
 }

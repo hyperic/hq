@@ -33,7 +33,7 @@
 <!ENTITY multi-process-metrics SYSTEM "/pdk/plugins/multi-process-metrics.xml">
  ]>
 
-<plugin package="org.hyperic.hq.plugin.zimbra">
+<plugin package="org.hyperic.hq.plugin.zimbra" version="@project.version@">
     
     <server name="Zimbra"
      version="4.5.x">

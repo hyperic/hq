@@ -76,17 +76,17 @@
 </div>
 
 <script type="text/javascript">
-    dojo11.require("dijit.dijit");
-    dojo11.require("dijit.Dialog");
+	hqDojo.require("dijit.dijit");
+    hqDojo.require("dijit.Dialog");
 
     var MyGroupManager = null;
-    dojo11.addOnLoad(function(){
+    hqDojo.ready(function(){
     	MyGroupManager = new hyperic.group_manager({
 			url: "/app/resource/"
     	});
     });
 
-    var AddToGroupMenuLink = dojo11.byId("AddToGroupMenuLink");
+    var AddToGroupMenuLink = hqDojo.byId("AddToGroupMenuLink");
     if (AddToGroupMenuLink) {
     	AddToGroupMenuLink.onclick = function() { 
         	MyGroupManager.processAction(document.AddToExistingGroupForm); 

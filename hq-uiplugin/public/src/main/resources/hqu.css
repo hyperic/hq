@@ -370,13 +370,10 @@ table border on left side - do not remove */
 
 .downTableContainer {
     border: 1px solid rgb(96, 165, 234);
-    overflow-x: hidden;
-    overflow-y: auto;
     float: right;
     display: inline;
     width: 75%;
     background-color:#FFF;
-    height: 442px
 }
 
 .leftbxht {
@@ -821,61 +818,6 @@ table border on left side - do not remove */
 
 #bodyTabContainer .dojoTabPane {
     overflow: auto;
-}
-
-/* HQ Health */
-
-#cacheTable, #agentTable {
-    font-family: Lucida Grande, Verdana;
-    font-size: 11px;
-    width: 100%;
-    border: 1px solid #ccc;
-    border-collapse: collapse;
-    /* IE issue loosing
-
-table border on left side - do not remove */
-    *margin-left: 1px;
-    cursor: default;
-}
-
-#cacheTable th, #agentTable th {
-    font-weight: bold;
-    padding: 3px;
-    padding-left: 5px;
-    border-right: 1px solid #7bafff;
-    border-top: 1px solid #7bafff;
-}
-
-#cacheTable td, #agentTable td {
-    padding: 3px;
-    font-weight: normal;
-    padding-left: 5px;
-}
-
-#cacheTable th {
-    background-image: url( "images/ft-head.gif" );
-    background-repeat: no-repeat;
-    background-position: top right;
-}
-
-#cacheTable td.selectedUp, #cacheTable th.selectedUp {
-    background-image: url( "images/ft-headup.gif" );
-}
-
-#cacheTable td.selectedDown, #cacheTable th.selectedDown {
-    background-image: url( "images/ft-headdown.gif" );
-}
-
-#cacheTable td {
-    border-bottom: 1px solid #ddd;
-}
-
-#cacheTable tr.alt td {
-    background: #eef4fc;
-}
-
-#cacheTable tr.selected td {
-    
 }
 
 #alertsCont table tbody tr:hover td {

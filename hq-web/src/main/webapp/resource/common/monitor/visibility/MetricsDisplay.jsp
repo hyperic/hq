@@ -119,7 +119,7 @@ sometimes we don't want any left side buttons or checkboxes at all
         <script type="text/javascript">
         <!--
           var metricsUpdater;
-          dojo11.addOnLoad( function() {
+          hqDojo.ready( function() {
             var ctype = null;
             <c:if test="${not empty childResourceType}">
               ctype = '<c:out value="${ctype}"/>';

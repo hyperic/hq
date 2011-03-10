@@ -21,8 +21,6 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 // USA.
 
-/*-- START footer.js --*/
-
 var conH;
 var winH;
 var footerH = 28;
@@ -35,37 +33,13 @@ function setFoot() {
   };
   
   winH = WindowSize.height;
-  conH = dojo11.coords("header", false).h + dojo11.coords("migContainer", false).h;
+  conH = hqDojo.position("header").h + hqDojo.position("migContainer").h;
   
   var myHeight = winH - conH - footerH + browserH;
   
   if (myHeight > 60) {
-  	var footerContent = dojo11.byId("footerContent");
+  	var footerContent = hqDojo.byId("footerContent");
   	
   	footerContent.style.marginTop = myHeight + "px";
   }
 }
-
-var aboutShown = false;
-
-function about() {
-  Dialog.info($('about').innerHTML,
-              {windowParameters: {className:'dialog', width:305, height:200,
-               resize:false, draggable:false}});
-  aboutShown = true;
-}
-
-function closeAbout(e) {
-  if (typeof(window['diagShown']) != 'undefined') {
-      bodyClicked(e);
-  }
-
-  if (aboutShown) {
-    Dialog.closeInfo();
-    aboutShown = false;
-  }
-}
-
-document.body.onclick = closeAbout;
-
-/*-- END footer.js --*/

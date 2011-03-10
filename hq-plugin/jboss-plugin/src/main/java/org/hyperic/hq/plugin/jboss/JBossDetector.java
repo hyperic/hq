@@ -25,15 +25,12 @@
 package org.hyperic.hq.plugin.jboss;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -42,13 +39,10 @@ import java.util.StringTokenizer;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.management.MBeanServerConnection;
 
 import javax.management.ObjectName;
 import javax.naming.Context;
-
-import org.jboss.jmx.adaptor.rmi.RMIAdaptor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -344,7 +338,7 @@ public class JBossDetector
     static String getRunningInstallPath(GenericPlugin plugin) {
         List servers = getServerProcessList(plugin);
 
-        if (servers.size() == 0) {
+        if (servers.isEmpty()) {
             return null;
         }
 
@@ -353,20 +347,21 @@ public class JBossDetector
         return instance.getHomePath();
     }
     
+    @Override
 	public Set discoverServiceTypes(ConfigResponse serverConfig) throws PluginException {
 		Set serviceTypes = new HashSet();
 	         
-		RMIAdaptor mServer;
+		MBeanServerConnection mServer;
 	
 	 	try {
-	 		mServer = JBossUtil.getMBeanServer(serverConfig.toProperties());
+	 		mServer = JBossUtil.getMBeanServerConnection(serverConfig.toProperties());
 	 	} catch (Exception e) {
 	 		throw new PluginException(e.getMessage(), e);
 	 	}
 	
 	    try {
 			final Set objectNames = mServer.queryNames(new ObjectName(org.hyperic.hq.product.jmx.MBeanUtil.DYNAMIC_SERVICE_DOMAIN + ":*"), null);
-			//TODO have to instantiate here due to classloading issues with MBeanServerConnection in 1.4 agent.  Can make an instance variable when agent can be 1.5 compliant.
+			//TODO have to instantiate here due to classloading issues with MBeanServerConnectionConnection in 1.4 agent.  Can make an instance variable when agent can be 1.5 compliant.
 			ServiceTypeFactory serviceTypeFactory = new ServiceTypeFactory();
 			serviceTypes = serviceTypeFactory.create(getProductPlugin(), (ServerTypeInfo)getTypeInfo(), mServer, objectNames);
 		} catch (Exception e) {
@@ -404,20 +399,21 @@ public class JBossDetector
                 notes.put(EMBEDDED_TOMCAT, tomcats);
             }
 
-            Map config = new HashMap();
-            config.put(JBossProductPlugin.PROP_INSTALLPATH, dir.getPath());
+            Map _config = new HashMap();
+            _config.put(JBossProductPlugin.PROP_INSTALLPATH, dir.getPath());
             if (port != null) {
-                config.put("port", port);
+                _config.put("port", port);
             }
             if (address != null) {
-                config.put("address", address);
+                _config.put("address", address);
             }
-            tomcats.add(config);
+            tomcats.add(_config);
 
-            getLog().debug("Found embedded tomcat: " + config);
+            getLog().debug("Found embedded tomcat: " + _config);
         }
     }
 
+    @Override
     public List getServerResources(ConfigResponse platformConfig)
             throws PluginException {
 
@@ -509,7 +505,7 @@ public class JBossDetector
         getLog().debug("discovered JBoss server [" + serverName + "] in " +
                 configDir);
 
-        ConfigResponse config = new ConfigResponse();
+        ConfigResponse _config = new ConfigResponse();
         ConfigResponse controlConfig = new ConfigResponse();
         ConfigResponse metricConfig = new ConfigResponse();
 
@@ -520,7 +516,7 @@ public class JBossDetector
         String jnpUrl = "jnp://" + address + ":" + cfg.getJnpPort();
         getLog().debug("JNP url=" + jnpUrl);
 
-        config.setValue(Context.PROVIDER_URL, jnpUrl);
+        _config.setValue(Context.PROVIDER_URL, jnpUrl);
 
         //for use w/ -jar hq-pdk.jar or agent.properties
         Properties props = getManager().getProperties();
@@ -533,7 +529,7 @@ public class JBossDetector
             String value =
                     props.getProperty(credProps[i]);
             if (value != null) {
-                config.setValue(credProps[i], value);
+                _config.setValue(credProps[i], value);
             }
         }
 
@@ -566,7 +562,7 @@ public class JBossDetector
                     Context.PROVIDER_URL
                 });
 
-        server.setProductConfig(config);
+        server.setProductConfig(_config);
         server.setMeasurementConfig(metricConfig);
         server.setControlConfig(controlConfig);
 
@@ -602,6 +598,7 @@ public class JBossDetector
         return servers;
     }
 
+    @Override
     public List getServerResources(ConfigResponse platformConfig, String path)
             throws PluginException {
 
@@ -609,6 +606,7 @@ public class JBossDetector
         return getServerList(getParentDir(path, 2));
     }
 
+    @Override
     protected List discoverServices(ConfigResponse serverConfig)
             throws PluginException {
 
@@ -623,10 +621,10 @@ public class JBossDetector
             throws PluginException {
 
         String url = serverConfig.getValue(Context.PROVIDER_URL);
-        RMIAdaptor mServer;
+        MBeanServerConnection mServer;
 
         try {
-            mServer = JBossUtil.getMBeanServer(serverConfig.toProperties());
+            mServer = JBossUtil.getMBeanServerConnection(serverConfig.toProperties());
         } catch (Exception e) {
             throw new PluginException(e.getMessage(), e);
         }
@@ -660,7 +658,7 @@ public class JBossDetector
             service.setName(query.getQualifiedName());
             service.setType(query.getResourceType());
 
-            ConfigResponse config =
+            ConfigResponse _config =
                     new ConfigResponse(query.getResourceConfig());
 
             if (query.hasControl()) {
@@ -669,11 +667,11 @@ public class JBossDetector
                 service.setControlConfig(controlConfig);
             }
 
-            service.setProductConfig(config);
+            service.setProductConfig(_config);
             service.setMeasurementConfig();
 
-            config = new ConfigResponse(query.getCustomProperties());
-            service.setCustomProperties(config);
+            _config = new ConfigResponse(query.getCustomProperties());
+            service.setCustomProperties(_config);
 
             services.add(service);
         }

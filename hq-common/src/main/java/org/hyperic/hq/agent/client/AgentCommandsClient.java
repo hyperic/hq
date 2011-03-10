@@ -26,6 +26,7 @@
 package org.hyperic.hq.agent.client;
 
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Map;
 
 import org.hyperic.hq.agent.AgentConnectionException;
@@ -101,8 +102,10 @@ public interface AgentCommandsClient {
      * Send file data to a remote agent
      * @param destFiles  Info about the file data to send
      */
-    FileDataResult[] agentSendFileData(FileData[] destFiles, 
-                                       InputStream[] streams) 
-        throws AgentRemoteException, AgentConnectionException;
+    FileDataResult[] agentSendFileData(FileData[] destFiles, InputStream[] streams) 
+    throws AgentRemoteException, AgentConnectionException;
+    
+    Map<String, Boolean> agentRemoveFile(Collection<String> files)
+    throws AgentRemoteException, AgentConnectionException;
 
 }

@@ -32,7 +32,7 @@
   <!ENTITY multi-process-metrics SYSTEM "/pdk/plugins/multi-process-metrics.xml">
 ]>
 
-<plugin>
+<plugin version="@project.version@">
   <!-- extracted to: pdk/work/scripts/sendmail/hq-sendmail-stat -->
   <script name="hq-sendmail-stat">
   <![CDATA[

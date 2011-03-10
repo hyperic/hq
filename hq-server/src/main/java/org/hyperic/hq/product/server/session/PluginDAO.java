@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  *  "derived work".
  *
- *  Copyright (C) [2004-2010], VMware, Inc.
+ *  Copyright (C) [2004-2011], VMware, Inc.
  *  This file is part of HQ.
  *
  *  HQ is free software; you can redistribute it and/or modify
@@ -34,8 +34,7 @@ import org.springframework.stereotype.Repository;
 
 
 @Repository
-public class PluginDAO
-    extends HibernateDAO<Plugin> {
+public class PluginDAO extends HibernateDAO<Plugin> {
     @Autowired
     public PluginDAO(SessionFactory f) {
         super(Plugin.class, f);
@@ -46,6 +45,7 @@ public class PluginDAO
         p.setName(name);
         p.setPath(path);
         p.setMD5(md5);
+        p.setModifiedTime(System.currentTimeMillis());
         save(p);
         return p;
     }
@@ -53,5 +53,16 @@ public class PluginDAO
     public Plugin findByName(String name) {
         String sql = "from Plugin where name=?";
         return (Plugin) getSession().createQuery(sql).setString(0, name).uniqueResult();
+    }
+
+    // XXX do i need this?
+    public Plugin getByMd5(String md5) {
+        String hql = "from Plugin where MD5 = :md5";
+        return (Plugin) getSession().createQuery(hql).setString("md5", md5).uniqueResult();
+    }
+
+    public Plugin getByFilename(String filename) {
+        String hql = "from Plugin where path = :filename";
+        return (Plugin) getSession().createQuery(hql).setString("filename", filename).uniqueResult();
     }
 }

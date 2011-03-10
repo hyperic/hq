@@ -28,7 +28,6 @@ package org.hyperic.hq.product;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
-import java.util.List;
 
 import org.hyperic.util.security.MD5;
 
@@ -46,16 +45,6 @@ public class PluginInfo implements java.io.Serializable {
     public String product;
     public int deploymentOrder = 0;
     public transient ClassLoader resourceLoader = null;
-
-    private static final byte[] PLATFORMS;
-
-    static {
-        String platforms = "";
-        for (int i=0; i<PlatformDetector.PLATFORM_NAMES.length; i++) {
-            platforms += PlatformDetector.PLATFORM_NAMES[i];
-        }
-        PLATFORMS = platforms.getBytes();
-    }
 
     //for use by MeasurementPluginManager (proxies)
     PluginInfo(String name) {
@@ -88,31 +77,8 @@ public class PluginInfo implements java.io.Serializable {
         this.deploymentOrder = info.deploymentOrder;
     }
 
-    private String getMD5(ProductPlugin plugin, String jar)
-        throws IOException {
-
-        MD5 md5;
-
-        if (jar.endsWith(".jar")) {
-            md5 = MD5.getJarDigest(jar);
-            //if PlatformBasics.PLATFORM_NAMES changes
-            //we want the plugins to re-deploy
-            md5.getMessageDigest().update(PLATFORMS);
-        }
-        else {
-            md5 = new MD5();
-            md5.add(new File(jar));
-        }
-
-        //add any external entities to the MD5 such that
-        //changes to externals causes this plugin to redeploy
-        List includes = plugin.data.getIncludes();
-        for (int i=0; i<includes.size(); i++) {
-            File file = new File((String)includes.get(i));
-            md5.add(file);
-        }
-
-        return md5.getDigestString();
+    private String getMD5(ProductPlugin plugin, String jar) throws IOException {
+        return MD5.getMD5Checksum(new File(jar));
     }
 
     //true if plugins are from the same jar

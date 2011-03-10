@@ -23,7 +23,7 @@
   USA.
  -->
 
-<plugin name="memcached">
+<plugin name="memcached" version="@project.version@">
 
   <!-- extends NetServicesCollector -->
   <classpath>

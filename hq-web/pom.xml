@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
 	<modelVersion>4.0.0</modelVersion>
-
 	<parent>
 		<groupId>org.hyperic.hq</groupId>
 		<artifactId>hq-parent</artifactId>
@@ -94,7 +92,6 @@
 		<dependency>
 	  		<groupId>org.springframework.security</groupId>
 	  		<artifactId>spring-security-taglibs</artifactId>
-	  		<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>taglibs</groupId>
@@ -123,6 +120,14 @@
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-mapper-asl</artifactId>
+		</dependency>
+		<dependency>
+  			<groupId>org.apache.tiles</groupId>
+  			<artifactId>tiles-jsp</artifactId>
+  		</dependency>
+		<dependency>
+  			<groupId>org.slf4j</groupId>
+  			<artifactId>slf4j-log4j12</artifactId>
 		</dependency>
 		
 		<!--  UI Plugins -->
@@ -316,7 +321,6 @@
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>geronimo-plugin</artifactId>
 			<version>${project.version}</version>
-			<classifier>agent</classifier>
 			<scope>provided</scope>
 		    <type>zip</type>
 		</dependency>
@@ -324,7 +328,6 @@
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>glassfish-plugin</artifactId>
 			<version>${project.version}</version>
-			<classifier>agent</classifier>
 			<scope>provided</scope>
 		    <type>zip</type>
 		</dependency>
@@ -332,7 +335,6 @@
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>groovy-scripting-plugin</artifactId>
 			<version>${project.version}</version>
-			<classifier>agent</classifier>
 			<scope>provided</scope>
 		    <type>zip</type>
 		</dependency>
@@ -340,7 +342,6 @@
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>hibernate-plugin</artifactId>
 			<version>${project.version}</version>
-			<classifier>agent</classifier>
 			<scope>provided</scope>
 		    <type>zip</type>
 		</dependency>
@@ -348,7 +349,6 @@
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>hq-internal-plugin</artifactId>
 			<version>${project.version}</version>
-			<classifier>agent</classifier>
 			<scope>provided</scope>
 		    <type>zip</type>
 		</dependency>
@@ -386,7 +386,6 @@
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>jetty-plugin</artifactId>
 			<version>${project.version}</version>
-			<classifier>agent</classifier>
 			<scope>provided</scope>
 		    <type>zip</type>
 		</dependency>
@@ -394,7 +393,6 @@
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>jmx-plugin</artifactId>
 			<version>${project.version}</version>
-			<classifier>agent</classifier>
 			<scope>provided</scope>
 		    <type>zip</type>
 		</dependency>
@@ -402,7 +400,6 @@
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>jvm-plugin</artifactId>
 			<version>${project.version}</version>
-			<classifier>agent</classifier>
 			<scope>provided</scope>
 		    <type>zip</type>
 		</dependency>
@@ -506,7 +503,6 @@
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>process-plugin</artifactId>
 			<version>${project.version}</version>
-			<classifier>agent</classifier>
 			<scope>provided</scope>
 		    <type>zip</type>
 		</dependency>
@@ -520,7 +516,6 @@
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>resin-plugin</artifactId>
 			<version>${project.version}</version>
-			<classifier>agent</classifier>
 			<scope>provided</scope>
 		    <type>zip</type>
 		</dependency>
@@ -534,7 +529,6 @@
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>sendmail-plugin</artifactId>
 			<version>${project.version}</version>
-			<classifier>agent</classifier>
 			<scope>provided</scope>
 		    <type>zip</type>
 		</dependency>
@@ -713,11 +707,6 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>tomcat-maven-plugin</artifactId>
-				<configuration>
-					<warFile>${project.build.directory}/ROOT.war</warFile>
-					<server>local-tomcat</server>
-					<path>/</path>
-				</configuration>
 			</plugin>
 				<plugin>
 					<groupId>com.atlassian.maven.plugins</groupId>
@@ -793,7 +782,17 @@
 							<dependency>
 								<groupId>org.slf4j</groupId>
 								<artifactId>slf4j-log4j12</artifactId>
-								<version>1.5.8</version>
+								<version>1.6.1</version>
+							</dependency>
+							<dependency>
+								<groupId>org.slf4j</groupId>
+								<artifactId>slf4j-api</artifactId>
+								<version>1.6.1</version>
+							</dependency>
+							<dependency>
+								<groupId>org.slf4j</groupId>
+								<artifactId>jcl-over-slf4j</artifactId>
+								<version>1.6.1</version>
 							</dependency>
     					</dependencies>
 					</plugin>

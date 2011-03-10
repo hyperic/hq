@@ -47,10 +47,10 @@ public class JBossMBeanDumper extends MBeanDumper {
         };
     }
 
-    protected MBeanServerConnection getMBeanServer(Properties config)
+    protected MBeanServerConnection getMBeanServerConnection(Properties config)
         throws Exception {
 
-        return (MBeanServerConnection)JBossUtil.getMBeanServer(_config);
+        return (MBeanServerConnection)JBossUtil.getMBeanServerConnection(_config);
     }
 
     //java -jar pdk/lib/hq-pdk.jar jboss JBossMBeanDumper

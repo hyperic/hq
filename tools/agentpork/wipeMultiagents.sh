@@ -1,4 +1,3 @@
-rm -rf runtimeGroups/*
-cd ./agent_builds/mbeanserver
-./stopAll.sh
+./stopMultiagent.sh 
+rm -rf runtimeGroups 
  

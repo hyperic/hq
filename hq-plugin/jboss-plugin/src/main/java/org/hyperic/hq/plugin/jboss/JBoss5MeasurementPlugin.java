@@ -34,7 +34,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricNotFoundException;
-import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
@@ -45,6 +44,7 @@ import org.hyperic.util.config.ConfigResponse;
  */
 public class JBoss5MeasurementPlugin extends JBossMeasurementPlugin {
 
+    @Override
     public MetricValue getValue(Metric metric) throws PluginException, MetricNotFoundException, PluginException {
 
         if (getLog().isDebugEnabled()) {
@@ -102,6 +102,7 @@ public class JBoss5MeasurementPlugin extends JBossMeasurementPlugin {
         return res;
     }
 
+    @Override
     public String translate(String template, ConfigResponse config) {
         return super.translate(translateMetic(template, config), config);
 

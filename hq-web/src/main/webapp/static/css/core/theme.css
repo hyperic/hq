@@ -1,0 +1,136 @@
+body { background: #EFEFEF; }
+
+#header { 
+	background: #000 url('../../images/header_background.jpg') repeat-x scroll;
+    border-bottom: 3px solid #2D6EBE;
+}
+
+#footer span {
+	text-align: center;
+	font-weight: bold;
+	font-size: 0.9em;
+}
+
+#footer span#processUser {
+	text-align: left;
+}
+
+#footer .footerWarning {
+    background-color: orange;
+    font-weight: bold;
+    text-align: center;
+}
+
+#footer span a {
+	text-decoration: none;
+	cursor: pointer;
+}
+
+#headerLogo {
+	cursor: pointer;	
+}
+
+#headerLinks { color: #FFF; }
+#headerLinks ul li a { 
+	text-decoration: none;
+	color: #88C7FC; 
+}
+
+#searchBox {
+	background: url("../../images/search.png") no-repeat 3px center #fff;
+	color: #444;
+}
+
+#searchBox .searchActive {
+	background: url("../../images/ajax-loading.gif") no-repeat 3px center #fff;
+}
+
+#searchClose {
+	background: url("../../images/close.png") repeat scroll 0 0 transparent;
+    cursor: pointer;
+}
+
+#headerSearchResults {
+   	background-color: #fff;
+    border: 1px solid #3179D4;
+    border-top: 0;
+}
+
+#headerSearchResults .category {
+    background: none repeat scroll 0 0 #92C1FD;
+    color: #FFFFFF;
+}
+
+#headerSearchResults ul {
+    list-style: none;
+}
+
+#headerSearchResults li.service {
+    background: url("../../images/service.png") no-repeat scroll 0 50% transparent;
+}
+
+#headerSearchResults li {
+    border: 1px solid #fff;
+}
+
+#headerSearchResults li a {
+	color: #88C7FC;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+#loginPanel {
+    border: 3px solid #B0F6FF;
+    background: #fff;
+    -moz-box-shadow: 0 3px 3px #999;
+	-webkit-box-shadow: 0 3px 3px #999;
+	-moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+}
+
+#loginPanel .fieldsetTitle {
+	font-size: 1.25em;
+	font-weight: bold;
+}
+
+#loginPanel .fieldsetNote {
+	border-bottom: 1px dotted gray;
+}
+
+#loginPanel form fieldset {
+	border: 0;
+}
+
+#loginPanel .fieldRow label {
+	font-weight: bold;
+}
+
+#loginPanel .guestUser {
+	color: #45A8DF;
+}
+
+#loginPanel .fieldRow.active input {
+	background-color: #D9E4F1;
+}
+
+#loginPanel .msgError {
+	background: url('../../images/exclamation.png') no-repeat scroll 6px 40% transparent;
+	border: 1px solid red;
+	color: red;
+}
+
+.dijitDialogUnderlay {
+    background-color: #000000;
+}
+
+input[type="submit"], input[type="button"] {
+	color: #fff;
+	border: 1px solid #84B96D;
+	background: #2DBF3D url('../../images/button-green-background.jpg') repeat-x bottom;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 3px;
+	font-weight: bold;
+	font-size: 0.9em;
+	cursor: pointer;
+}

@@ -30,6 +30,9 @@
 <hibernate-mapping package="org.hyperic.hq.product">
 
   <class name="Plugin" table="EAM_PLUGIN">
+
+    <cache usage="read-write"/>
+
     <id name="id" type="integer">
       <meta attribute="scope-set"><![CDATA[private]]></meta>
       <column name="ID" not-null="true"/>
@@ -56,6 +59,10 @@
 
     <property name="creationTime" type="long">
       <column name="CTIME" not-null="true"/>
+    </property>
+
+    <property name="modifiedTime" type="long">
+      <column name="MTIME" not-null="true"/>
     </property>
 
   </class>

@@ -102,7 +102,7 @@ class ResourceHelper extends BaseHelper {
         // Initialize all used arguments to null
         ['count', 'platform', 'server', 'service',
                 'byPrototype', 'prototype', 'withPaging',
-                'byFqdn',].each {args.get(it, null)}
+                'byFqdn', 'byPlugin',].each {args.get(it, null)}
         args.get('user', user)         // Use default user  
         args.get('operation', 'view')  // Default permission required
         
@@ -138,6 +138,10 @@ class ResourceHelper extends BaseHelper {
         
         if (args.byFqdn) {
             return findByFqdn(args.byFqdn)
+        }
+        
+        if (args.byPlugin) {
+        	return findByPlugin(args.byPlugin)
         }
         
         def plat
@@ -201,7 +205,11 @@ class ResourceHelper extends BaseHelper {
             return null
         }
     }
-    
+
+    private List findByPlugin(pluginName) {
+        rman.findResourcesByPlugin(pluginName)
+    }
+        
     private Resource findPrototype(Map args) {
         rman.findResourcePrototypeByName(args.prototype)
     }

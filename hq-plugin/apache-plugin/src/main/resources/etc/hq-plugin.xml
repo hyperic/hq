@@ -23,7 +23,7 @@
   USA.
  -->
 
-<plugin name="apache">
+<plugin name="apache" version="@project.version@">
 
   <!-- ApacheStatusCollector extends HTTPCollector -->
   <classpath>

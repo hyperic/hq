@@ -25,7 +25,7 @@
   USA.
  -->
 
-<plugin name="resin">
+<plugin name="resin" version="@project.version@">
     <classpath>
         <include name="pdk/lib/mx4j"/>
     </classpath>

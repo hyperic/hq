@@ -43,6 +43,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.hqu.RenditServer;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginInfo;
@@ -86,10 +87,14 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
     private List<File> pluginDirs = new ArrayList<File>(2);
     private File hquDir;
 
+    private AgentManager agentManager;
+
     @Autowired
-    public ProductPluginDeployer(RenditServer renditServer, ProductManager productManager) {
+    public ProductPluginDeployer(RenditServer renditServer, ProductManager productManager,
+                                 AgentManager agentManager) {
         this.renditServer = renditServer;
         this.productManager = productManager;
+        this.agentManager = agentManager;
     }
 
     private void initializePlugins(File pluginDir) {
@@ -230,7 +235,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
             return null;
         }
         try {
-            String plugin = productPluginManager.registerPluginJar(pluginJar, null);
+            String plugin = productPluginManager.registerPluginJar(pluginJar, null).name;
             return plugin;
         } catch (Exception e) {
             log.error("Unable to deploy plugin '" + pluginJar + "'", e);
@@ -349,6 +354,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
             log.info("Deploying plugin: " + pluginName);
             deployPlugin(pluginName);
         }
+        agentManager.syncAllAgentPlugins();
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -361,13 +367,13 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
              File pluginDir = applicationContext.getResource("WEB-INF/" + PLUGIN_DIR).getFile();
              pluginDirs.add(pluginDir);
         } catch (IOException e) {
-            log.info("Plugins directory not found");
+            log.error("Plugins directory not found", e);
         }
         //Add custom hq-plugins dir at same level as server home
         File workingDirParent = new File(System.getProperty("user.dir")).getParentFile();
         if( workingDirParent != null && new File(workingDirParent,"hq-plugins").exists()) {
-                File customPluginDir = new File(workingDirParent,"hq-plugins");
-                pluginDirs.add(customPluginDir);
+            File customPluginDir = new File(workingDirParent,"hq-plugins");
+            pluginDirs.add(customPluginDir);
          }  
     }
 

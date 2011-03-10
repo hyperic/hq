@@ -1,24 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.hyperic.hq.plugin</groupId>
-		<artifactId>hq-plugin-parent</artifactId>
-		<version>4.6.0.BUILD-SNAPSHOT</version>
-	</parent>
-
+	<groupId>org.hyperic.hq.plugin</groupId>
 	<artifactId>hibernate-plugin</artifactId>
 	<packaging>pom</packaging>
 	<name>Hyperic HQ Plugin - Hibernate Plugin</name>
+	<version>4.6.0.BUILD-SNAPSHOT</version>
 
 	<build>
 		<plugins>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>package</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<tarLongFileMode>gnu</tarLongFileMode>
+					<descriptors>
+						<descriptor>src/main/assembly/assembly.xml</descriptor>
+					</descriptors>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.atlassian.maven.plugins</groupId>
+				<artifactId>maven-clover2-plugin</artifactId>
+				<version>2.6.3</version>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
+
+	<distributionManagement>
+		<repository>
+			<id>hyperic-milestone</id>
+			<name>Hyperic Milestone Repository</name>
+			<url>s3://maven.hyperic.org/milestone</url>
+		</repository>
+		<snapshotRepository>
+			<id>hyperic-snapshot</id>
+			<name>Hyperic Snapshot Repository</name>
+			<url>s3://maven.hyperic.org/snapshot</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+	<scm>
+		<developerConnection>scm:git:git://git.springsource.org/hq/hq.git</developerConnection>
+		<url>https://fisheye.springsource.org/browse/hq</url>
+	</scm>
 
 </project>

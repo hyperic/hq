@@ -30,6 +30,7 @@ import java.util.Set;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
@@ -61,5 +62,8 @@ public interface ProductManager {
 
     public void updateDynamicServiceTypePlugin(String pluginName, Set<ServiceType> serviceTypes)
         throws PluginNotFoundException, VetoException, NotFoundException;
+
+// XXX needs javadoc!
+    public boolean deployPluginIfValid(AuthzSubject subj, byte[] pluginJar);
 
 }

@@ -1,15 +1,15 @@
 /*
- * NOTE: This copyright does *not* cover user programs that use HQ
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2007], Hyperic, Inc.
- * This file is part of HQ.
+ * Copyright (C) [2004-2011], VMware, Inc.
+ * This file is part of Hyperic.
  *
- * HQ is free software; you can redistribute it and/or modify
+ * Hyperic is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
  * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -144,7 +144,7 @@ public class AlertDAO
        
 
         String sql = PermissionManagerFactory.getInstance().getAlertsHQL(inEsc, notFixed, groupId,
-            alertDefId, false) +
+            null, alertDefId, false) +
                      " order by " +
                      sort.getSortString("a", "d", "r") +
                      (pageInfo.isAscending() ? "" : " DESC");
@@ -170,11 +170,11 @@ public class AlertDAO
 
     Number countByCreateTimeAndPriority(Integer subj, long begin, long end, int priority,
                                          boolean inEsc, boolean notFixed, Integer groupId,
-                                         Integer alertDefId) {
+                                         Integer resourceId, Integer alertDefId) {
       
         String sql = PermissionManagerFactory.getInstance().getAlertsHQL(inEsc, notFixed, groupId,
-            alertDefId, true);
-
+            resourceId, alertDefId, true);
+        
         Query q = getSession().createQuery(sql).setLong("begin", begin).setLong("end", end).setInteger(
             "priority", priority);
 

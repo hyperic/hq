@@ -25,7 +25,7 @@
   USA.
  -->
 
-<plugin name="websphere" class="WebsphereProductPlugin">
+<plugin name="websphere" class="WebsphereProductPlugin" version="@project.version@">
     <filter name="domain"
           value="%server.node%/%server.name%"/>
     <filter name="auth"

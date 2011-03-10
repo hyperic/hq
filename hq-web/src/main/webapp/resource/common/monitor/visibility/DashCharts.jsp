@@ -39,8 +39,30 @@
 <META Http-Equiv="Expires" Content="0">
 
 <link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
-
-<script src="<html:rewrite page='/js/dojo/1.1.2/dojo/dojo.js'/>" type="text/javascript"></script>
+<script type="text/javascript">
+	var djConfig = {};
+	djConfig.parseOnLoad = true;
+	djConfig.baseUrl = '/static/js/dojo/1.5/dojo/';
+	djConfig.scopeMap = [ [ "dojo", "hqDojo" ], [ "dijit", "hqDijit" ], [ "dojox", "hqDojox" ] ];
+</script>
+<!--[if IE]>
+<script type="text/javascript">
+	// since dojo has trouble when it comes to using relative urls + ssl, we
+	// use this workaorund to provide absolute urls.
+	function qualifyURL(url) {
+		var a = document.createElement('img');
+	    a.src = url;
+	    return a.src;
+	}
+			
+	djConfig.modulePaths = {
+	    "dojo": qualifyURL("/static/js/dojo/1.5/dojo"),
+	    "dijit":  qualifyURL("/static/js/dojo/1.5/dijit"),
+	    "dojox":  qualifyURL("/static/js/dojo/1.5/dojox")
+  	};
+</script>
+<![endif]-->
+<script src="<html:rewrite page='/static/js/dojo/1.5/dojo/dojo.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/prototype.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>

@@ -1,37 +1,37 @@
 <script type="text/javascript">
 document.navTabCat = "Admin";
 function sendCode() {
-  dojo.byId('timeStatus').innerHTML = '... executing';
-   dojo.io.bind({
-    url: '<%= urlFor(action:"execute") %>',
-    method: "post",
-    mimetype: "text/json-comment-filtered",
-    content: {
-        code:   dojo.byId("code").value,
-    },
-    load: function(type, data, evt) {
-      dojo.byId('result').innerHTML = data.result;
-      dojo.byId('timeStatus').innerHTML = data.timeStatus;
-    },
-    error: function(type, data, evt) {
-      alert('error! ' + data);
-    }
-  });
+  	hqDojo.byId('timeStatus').innerHTML = '... executing';
+	hqDojo.xhrPost({
+    	url: '<%= urlFor(action:"execute") %>',
+    	handleAs: "json-comment-filtered",
+    	content: {
+        	code:   hqDojo.byId("code").value,
+    	},
+    	load: function(response, args) {
+      		hqDojo.byId('result').innerHTML = response.result;
+      		hqDojo.byId('timeStatus').innerHTML = response.timeStatus;
+    	},
+    	error: function(response, args) {
+      		alert('error! ' + response);
+    	}
+  	});
 }
 
 function chooseTemplate(t) {
-  dojo.io.bind({
-    url: '<%= urlFor(action:"getTemplate") %>',
-    method: "get",
-    mimetype: "text/json-comment-filtered",
-    content: {template: t},
-    load: function(type, data, evt) {
-      dojo.byId('code').value = data.result;
-    },
-    error: function(type, data, evt) {
-      alert('error! ' + data);
-    }
-  });
+  	hqDojo.xhrGet({
+    	url: '<%= urlFor(action:"getTemplate") %>',
+    	handleAs: "json-comment-filtered",
+    	content: {
+        	template: t
+        },
+    	load: function(response, args) {
+      		hqDojo.byId('code').value = response.result;
+    	},
+    	error: function(response, args) {
+      		alert('error! ' + response);
+    	}
+  	});
 }
 
 </script>

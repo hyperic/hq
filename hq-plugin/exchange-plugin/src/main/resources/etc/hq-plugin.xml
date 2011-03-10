@@ -24,7 +24,7 @@
   USA.
  -->
 
-<plugin name="exchange">
+<plugin name="exchange" version="@project.version@">
 
   <filter name="store" value="win32:Object=MSExchangeIS"/>
   <filter name="mta" value="win32:Object=MSExchangeMTA"/>
