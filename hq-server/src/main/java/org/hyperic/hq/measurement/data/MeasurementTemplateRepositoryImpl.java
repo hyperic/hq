@@ -26,7 +26,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.transaction.annotation.Transactional;
 
-public class MeasurementTemplateRepositoryImpl implements MeasurementTemplateCustom {
+public class MeasurementTemplateRepositoryImpl implements MeasurementTemplateRepositoryCustom {
 
     private JdbcTemplate jdbcTemplate;
 

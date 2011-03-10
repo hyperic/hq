@@ -7,7 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ControlHistoryRepository extends JpaRepository<ControlHistory, Integer>,
-    ControlHistoryCustom {
+    ControlHistoryRepositoryCustom {
 
     List<ControlHistory> findByGroupIdAndBatchId(int groupId, int batchId, Sort sort);
 

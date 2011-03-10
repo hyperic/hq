@@ -5,9 +5,11 @@ import java.util.Map;
 
 import org.hyperic.hq.measurement.server.session.MonitorableMeasurementInfo;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface MeasurementTemplateCustom {
+public interface MeasurementTemplateRepositoryCustom {
     
+    @Transactional
     void createTemplates(final String pluginName,
                          final Map<MonitorableType, List<MonitorableMeasurementInfo>> toAdd);
 }
