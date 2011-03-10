@@ -1,3 +1,4 @@
+<%= hquStylesheets() %>
 <script type="text/javascript">
 function selectAlertType(t) {
   if (t == "1") {
