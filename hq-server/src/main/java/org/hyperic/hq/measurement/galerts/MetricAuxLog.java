@@ -26,6 +26,7 @@
 
 package org.hyperic.hq.measurement.galerts;
 
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.events.AlertAuxLogProvider;
 import org.hyperic.hq.events.SimpleAlertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
@@ -59,7 +60,7 @@ public class MetricAuxLog
     public String getURL() {
         return "/resource/common/monitor/Visibility.do?m=" +
                _measurement.getTemplate().getId() +
-               "&eid=" + _measurement.getEntityId().toString() +
+               "&eid=" + AppdefUtil.newAppdefEntityId(_measurement.getResource()).toString() +
                "&mode=chartSingleMetricSingleResource";
     }
 

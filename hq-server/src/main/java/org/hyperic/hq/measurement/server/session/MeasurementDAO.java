@@ -78,10 +78,7 @@ public class MeasurementDAO
         this.resourceDao = resourceDao;
     }
 
-    public void removeBaseline(Measurement m) {
-        m.setBaseline(null);
-    }
-
+   
     /**
      * Used primarily for preloaded 2nd level cache measurement objects
      * retrieves List<Object[]> 
@@ -112,11 +109,10 @@ public class MeasurementDAO
     }
 
     Measurement create(Resource resource, MeasurementTemplate mt, String dsn, long interval) {
-        Measurement m = new Measurement(resource.getId(), mt, interval);
+        Measurement m = new Measurement(resource, mt, interval);
         m.setEnabled(interval != 0);
         m.setDsn(dsn);
         entityManager.persist(m);
-        m.setResource(resource);
         return m;
     }
     

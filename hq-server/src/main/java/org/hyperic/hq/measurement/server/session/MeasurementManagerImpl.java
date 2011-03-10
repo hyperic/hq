@@ -432,7 +432,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         if (mids.size() > 0) {
             applicationContext.publishEvent(new MetricsDeleteRequestedEvent(mids));
-            dao.deleteByIds(mids);
+            deleteByIds(mids);
         }
 
         if (log.isDebugEnabled()) {
@@ -440,19 +440,20 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         }
         return mids.size();
     }
-
-    /**
-     * Look up a Measurement for a Resource and Measurement alias
-     * @return a The Measurement for the Resource of the given alias.
-     */
-    @Transactional(readOnly = true)
-    public Measurement getMeasurement(AuthzSubject s, Resource r, String alias)
-        throws MeasurementNotFoundException {
-        Measurement m = measurementDAO.findByAliasAndID(alias, r);
-        if (m == null) {
-            throw new MeasurementNotFoundException(alias + " for " + r.getName() + " not found");
+    
+    private int deleteByIds(List<Integer> ids) {
+        int count = 0;
+        // need to remove one at a time to avoid EhCache clearing the
+        // measurement cache which would lead to thrashing
+        for (Integer id : ids) {
+            Measurement meas = measurementDAO.findById(id);
+            if (meas == null) {
+                continue;
+            }
+            count++;
+            measurementDAO.remove(meas);
         }
-        return m;
+        return count;
     }
 
     /**
@@ -1084,29 +1085,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         ZeventManager.getInstance().enqueueEventAfterCommit(event);
     }
 
-    /**
-     * Enable the default on metrics for a given resource, enqueue for
-     * scheduling after commit
-     */
-    public void enableDefaultMeasurements(AuthzSubject subj, Resource r) throws PermissionException {
-        AppdefEntityID appId = AppdefUtil.newAppdefEntityId(r);
-        permissionManager.checkModifyPermission(subj.getId(), appId);
-        boolean sendToAgent = false;
-
-        List<Measurement> metrics = measurementDAO.findDefaultsByResource(r);
-        for (Measurement dm : metrics) {
-            if (!dm.isEnabled()) {
-                dm.setEnabled(true);
-                sendToAgent = true;
-            }
-        }
-        if (sendToAgent) {
-            List<AppdefEntityID> eids = Collections.singletonList(appId);
-            AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
-            ZeventManager.getInstance().enqueueEventAfterCommit(event);
-        }
-    }
-
+   
     /**
      * @throws PermissionException
      */

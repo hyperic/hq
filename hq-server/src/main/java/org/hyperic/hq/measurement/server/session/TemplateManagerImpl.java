@@ -38,6 +38,7 @@ import java.util.Map;
 import javax.persistence.EntityNotFoundException;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -374,8 +375,8 @@ public class TemplateManagerImpl implements TemplateManager {
                     dm.setInterval(template.getDefaultInterval());
                 }
 
-                final AppdefEntityID aeid = new AppdefEntityID(dm.getAppdefType(), dm
-                    .getInstanceId());
+                final AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(dm
+                    .getResource());
 
                 Long min = new Long(dm.getInterval());
                 if (aeids.containsKey(aeid)) {

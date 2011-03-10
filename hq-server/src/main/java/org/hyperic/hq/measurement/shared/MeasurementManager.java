@@ -103,13 +103,6 @@ public interface MeasurementManager {
     public int removeOrphanedMeasurements();
 
     /**
-     * Look up a Measurement for a Resource and Measurement alias
-     * @return a The Measurement for the Resource of the given alias.
-     */
-    public Measurement getMeasurement(AuthzSubject s, Resource r, String alias)
-        throws MeasurementNotFoundException;
-
-    /**
      * Get a Measurement by Id.
      */
     public Measurement getMeasurement(Integer mid);
@@ -280,12 +273,6 @@ public interface MeasurementManager {
      */
     public void enableMeasurement(AuthzSubject subject, Integer mId, long interval)
         throws PermissionException;
-
-    /**
-     * Enable the default on metrics for a given resource, enqueue for
-     * scheduling after commit
-     */
-    public void enableDefaultMeasurements(AuthzSubject subj, Resource r) throws PermissionException;
 
     public void updateMeasurementInterval(AuthzSubject subject, Integer mId, long interval)
         throws PermissionException;

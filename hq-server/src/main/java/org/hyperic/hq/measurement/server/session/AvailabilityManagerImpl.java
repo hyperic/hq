@@ -716,7 +716,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             long timestamp = rle.getStartime();
             Integer mid = meas.getId();
             MetricValue val = new MetricValue(AVAIL_DOWN, timestamp);
-            rtn.add(new DownMetricValue(meas.getEntityId(), mid, val));
+            rtn.add(new DownMetricValue(AppdefUtil.newAppdefEntityId(meas.getResource()), mid, val));
         }
         return rtn;
     }
