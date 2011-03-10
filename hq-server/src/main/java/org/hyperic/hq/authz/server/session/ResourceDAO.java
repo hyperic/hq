@@ -202,6 +202,18 @@ public class ResourceDAO
             .list();
     }
 
+    public List<Resource> findChildren(AuthzSubject subject, Resource r) {
+        final String[] VIEW_APPDEFS = new String[] { AuthzConstants.platformOpViewPlatform,
+                                                    AuthzConstants.serverOpViewServer,
+                                                    AuthzConstants.serviceOpViewService, };
+
+        EdgePermCheck wherePermCheck = permissionManager.makePermCheckHql("rez", false);
+        String hql = "select rez from Resource rez " + wherePermCheck;
+
+        Query q = createQuery(hql);
+        return wherePermCheck.addQueryParameters(q, subject, r, 1, Arrays.asList(VIEW_APPDEFS)).list();
+    }
+
     @SuppressWarnings("unchecked")
     public Collection<Resource> findByOwner(AuthzSubject owner) {
         String sql = "from Resource where owner.id = ?";
