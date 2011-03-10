@@ -675,6 +675,15 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     }
 
     /**
+     * Find all the resources which are direct descendants of the given resource.
+     * In resource edge terminology, distance = 1.
+     */
+    @Transactional(readOnly = true)
+    public List<Resource> findChildren(AuthzSubject subject, Resource res) {
+        return resourceDAO.findChildren(subject, res);
+    }
+
+    /**
      * Find all the resources of an authz resource type
      * 
      * @param resourceType 301 for platforms, etc.

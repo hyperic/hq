@@ -198,6 +198,12 @@ public interface ResourceManager {
     public List<Resource> findResourcesByParent(AuthzSubject subject, Resource res);
 
     /**
+     * Find all the resources which are direct descendants of the given resource.
+     * In resource edge terminology, distance = 1.
+     */
+    public List<Resource> findChildren(AuthzSubject subject, Resource res);
+
+    /**
      * Find all the resources of an authz resource type
      * @param resourceType 301 for platforms, etc.
      * @param pInfo A pager, using a sort field of {@link ResourceSortField}
