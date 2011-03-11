@@ -48,26 +48,25 @@ public class AmqpServerIntegrationTests extends BaseInfrastructureTest {
     @Autowired
     protected AgentCommandsClientFactory agentCommandsClientFactory;
 
-    //@Autowired protected AmqpOperationService operationService;
-
-    @Autowired protected RabbitTemplate rabbitTemplate;
+    @Autowired
+    protected RabbitTemplate serverRabbitTemplate;
 
     protected Agent agent;
 
     @Before
     public void prepare() {
-        this.agent = Agent.create("localhost", 7080, false, "", false);  
+        this.agent = Agent.create("localhost", 7080, false, "", false);
         assertNotNull("'agentCommandsClientFactory' must not be null", agentCommandsClientFactory);
-        assertNotNull("'rabbitTemplate' must not be null", rabbitTemplate);
+        assertNotNull("'rabbitTemplate' must not be null", serverRabbitTemplate);
     }
 
     @Test
-    public void ping() throws AgentConnectionException, AgentRemoteException, InterruptedException {
+    public void ping() throws InterruptedException, AgentConnectionException, AgentRemoteException {
         AgentCommandsClient client = agentCommandsClientFactory.getClient(agent);
-        assertNotNull(client);  
+        assertNotNull(client);
         assertTrue(client instanceof AmqpCommandOperationService);
         long response = client.ping();
-        assertTrue(response > 0); 
+        assertTrue(response > 0);
         Thread.sleep(20000);
-    }
+    } 
 }
