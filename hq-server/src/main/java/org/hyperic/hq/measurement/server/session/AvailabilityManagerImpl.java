@@ -62,6 +62,7 @@ import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TimingVoodoo;
+import org.hyperic.hq.measurement.data.MeasurementRepository;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
@@ -118,7 +119,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
 
     private AvailabilityDataDAO availabilityDataDAO;
 
-    private MeasurementDAO measurementDAO;
+    private MeasurementRepository measurementRepository;
     private MessagePublisher messagePublisher;
     private RegisteredTriggers registeredTriggers;
     private AvailabilityCache availabilityCache;
@@ -127,14 +128,14 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     
     @Autowired
     public AvailabilityManagerImpl(ResourceManager resourceManager, ResourceGroupManager groupManager, MessagePublisher messenger,
-                                   AvailabilityDataDAO availabilityDataDAO, MeasurementDAO measurementDAO,
+                                   AvailabilityDataDAO availabilityDataDAO, MeasurementRepository measurementRepository,
                                    MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers, AvailabilityCache availabilityCache,
                                    ConcurrentStatsCollector concurrentStatsCollector,PlatformManager platformManager) {
         this.resourceManager = resourceManager;
         this.groupManager = groupManager;
         this.messenger = messenger;
         this.availabilityDataDAO = availabilityDataDAO;
-        this.measurementDAO = measurementDAO;
+        this.measurementRepository = measurementRepository;
         this.messagePublisher = messagePublisher;
         this.registeredTriggers = registeredTriggers;
         this.availabilityCache = availabilityCache;
@@ -160,16 +161,20 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      */
     @Transactional(readOnly = true)
     public Measurement getAvailMeasurement(Resource resource) {
-        return measurementDAO.findAvailMeasurement(resource);
+        return measurementRepository.findAvailabilityMeasurementByResource(resource);
     }
 
     /**
      * 
      */
+    @SuppressWarnings("unchecked")
     @Transactional(readOnly = true)
     public List<Measurement> getPlatformResources() {
         Set<Integer> platformIds = platformManager.getAllPlatformIds();
-        return measurementDAO.findAvailMeasurementsByInstances(platformIds.toArray(new Integer[platformIds.size()]));
+        if(platformIds.isEmpty()) {
+            return Collections.EMPTY_LIST;
+        }
+        return measurementRepository.findAvailabilityMeasurementsByResources(new ArrayList<Integer>(platformIds));
     }
 
     /**
@@ -179,7 +184,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      */
     @Transactional(readOnly = true)
     public long getDowntime(Resource resource, long begin, long end) throws MeasurementNotFoundException {
-        Measurement meas = measurementDAO.findAvailMeasurement(resource);
+        Measurement meas = measurementRepository.findAvailabilityMeasurementByResource(resource);
         if (meas == null) {
             throw new MeasurementNotFoundException("Availability measurement " + "not found for resource " +
                                                    resource.getId());
@@ -205,16 +210,6 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     }
 
     /**
-     * @return List of all measurement ids for availability, ordered
-     * 
-     * 
-     */
-    @Transactional(readOnly = true)
-    public List<Integer> getAllAvailIds() {
-        return measurementDAO.findAllAvailIds();
-    }
-
-    /**
      * 
      */
     @Transactional(readOnly = true)
@@ -235,45 +230,21 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      */
     @Transactional(readOnly = true)
     public Map<Integer, List<Measurement>> getAvailMeasurementChildren(List<Integer> resourceIds) {
-        return measurementDAO.findRelatedAvailMeasurements(resourceIds);
-    }
-
-    /**
-     * 
-     */
-    @Transactional(readOnly = true)
-    public List<Measurement> getAvailMeasurementParent(Resource resource, String resourceRelationType) {
-        final List<Integer> sList = Collections.singletonList(resource.getId());
-        List<Measurement> rtn = getAvailMeasurementParent(sList, resourceRelationType).get(resource.getId());
-        if (rtn == null) {
-            rtn = new ArrayList<Measurement>(0);
+        if (resourceIds.isEmpty()) {
+            return new HashMap<Integer,List<Measurement>>(0);
         }
-        return rtn;
-    }
-
-    /**
-     * 
-     */
-    @Transactional(readOnly = true)
-    public Map<Integer, List<Measurement>> getAvailMeasurementParent(List<Integer> resourceIds,
-                                                                     String resourceRelationType) {
-        final List<Object[]> objects = measurementDAO.findParentAvailMeasurements(resourceIds, resourceRelationType);
-        return convertAvailMeasurementListToMap(objects);
-    }
-
-    private Map<Integer, List<Measurement>> convertAvailMeasurementListToMap(List<Object[]> objects) {
-        final Map<Integer, List<Measurement>> rtn = new HashMap<Integer, List<Measurement>>(objects.size());
-        for (Object[] o : objects) {
-            final Integer rId = (Integer) o[0];
-            final Measurement m = (Measurement) o[1];
-            List<Measurement> tmp;
-            if (null == (tmp = rtn.get(rId))) {
-                tmp = new ArrayList<Measurement>();
-                rtn.put(rId, tmp);
-            }
-            tmp.add(m);
+        //TODO this query used to batch by children IDs of all resources, but can't do that now since
+        //resource hierarchy info is not in relational DB. If this becomes a perf issue, investigate other ways to optimize
+        Map<Integer,List<Integer>> childrenIds = new HashMap<Integer,List<Integer>>();
+        for(Integer resourceId : resourceIds) {
+            List<Integer> sortedChildrenIds = new ArrayList<Integer>();
+            sortedChildrenIds.addAll(resourceManager.findResourceById(resourceId).getChildrenIds(true));
+            Collections.sort(sortedChildrenIds);
+            childrenIds.put(resourceId, sortedChildrenIds);
         }
-        return rtn;
+        return null;
+        //TODO
+        //return measurementDAO.findRelatedAvailMeasurements(childrenIds);
     }
 
     /**

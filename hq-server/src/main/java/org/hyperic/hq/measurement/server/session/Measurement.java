@@ -224,7 +224,7 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
         this.mtime = mtime;
     }
 
-    void setResource(Resource resource) {
+    public void setResource(Resource resource) {
         this.resource = resource;
     }
 

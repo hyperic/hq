@@ -34,12 +34,12 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.EntityNotFoundException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Hibernate;
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.ApplicationEvent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
@@ -60,10 +60,10 @@ import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.TimingVoodoo;
+import org.hyperic.hq.measurement.data.MeasurementRepository;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEventSource;
 import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.server.session.MeasurementDAO;
 import org.hyperic.hq.messaging.MessagePublisher;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.pager.PageControl;
@@ -98,7 +98,7 @@ public class AlertManagerImpl implements AlertManager,
 
     private AlertConditionDAO alertConditionDAO;
 
-    private MeasurementDAO measurementDAO;
+    private MeasurementRepository measurementRepository;
 
     private ResourceManager resourceManager;
 
@@ -117,7 +117,7 @@ public class AlertManagerImpl implements AlertManager,
     public AlertManagerImpl(AlertPermissionManager alertPermissionManager,
                             AlertDefinitionDAO alertDefDao, AlertActionLogDAO alertActionLogDAO,
                             AlertDAO alertDAO, AlertConditionDAO alertConditionDAO,
-                            MeasurementDAO measurementDAO, ResourceManager resourceManager,
+                            MeasurementRepository measurementRepository, ResourceManager resourceManager,
                             AlertDefinitionManager alertDefinitionManager,
                             AuthzSubjectManager authzSubjectManager,
                             EscalationManager escalationManager, MessagePublisher messagePublisher,
@@ -127,7 +127,7 @@ public class AlertManagerImpl implements AlertManager,
         this.alertActionLogDAO = alertActionLogDAO;
         this.alertDAO = alertDAO;
         this.alertConditionDAO = alertConditionDAO;
-        this.measurementDAO = measurementDAO;
+        this.measurementRepository = measurementRepository;
         this.resourceManager = resourceManager;
         this.alertDefinitionManager = alertDefinitionManager;
         this.authzSubjectManager = authzSubjectManager;
@@ -700,7 +700,11 @@ public class AlertManagerImpl implements AlertManager,
             switch (cond.getType()) {
                 case EventConstants.TYPE_THRESHOLD:
                 case EventConstants.TYPE_BASELINE:
-                    dm = measurementDAO.findById(new Integer(cond.getMeasurementId()));
+                    dm = measurementRepository.findById(new Integer(cond.getMeasurementId()));
+                    if(dm == null) {
+                        throw new EntityNotFoundException("Measurement with ID: " + cond.getMeasurementId() + 
+                            " not found");
+                    }
                     text.append(cond.describe(dm));
 
                     // Value is already formatted by HHQ-2573

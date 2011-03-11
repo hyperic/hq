@@ -42,10 +42,12 @@ import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.data.CategoryRepository;
+import org.hyperic.hq.measurement.data.MeasurementRepository;
 import org.hyperic.hq.measurement.data.MeasurementTemplateRepository;
 import org.hyperic.hq.measurement.data.MonitorableTypeRepository;
 import org.hyperic.hq.measurement.shared.SRNManager;
@@ -66,7 +68,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class TemplateManagerImpl implements TemplateManager {
    
-    private MeasurementDAO measurementDAO;
+    private MeasurementRepository measurementRepository;
     private MeasurementTemplateRepository measurementTemplateRepository;
     private MonitorableTypeRepository monitorableTypeRepository;
     private ScheduleRevNumDAO scheduleRevNumDAO;
@@ -75,12 +77,12 @@ public class TemplateManagerImpl implements TemplateManager {
     private CategoryRepository categoryRepository;
 
     @Autowired
-    public TemplateManagerImpl(MeasurementDAO measurementDAO,
+    public TemplateManagerImpl(MeasurementRepository measurementRepository,
                                MeasurementTemplateRepository measurementTemplateRepository,
                                MonitorableTypeRepository monitorableTypeRepository,
                                ScheduleRevNumDAO scheduleRevNumDAO, SRNManager srnManager,
                                SRNCache srnCache, CategoryRepository categoryRepository) {
-        this.measurementDAO = measurementDAO;
+        this.measurementRepository = measurementRepository;
         this.measurementTemplateRepository = measurementTemplateRepository;
         this.monitorableTypeRepository = monitorableTypeRepository;
         this.scheduleRevNumDAO = scheduleRevNumDAO;
@@ -320,15 +322,17 @@ public class TemplateManagerImpl implements TemplateManager {
             if (!template.isDefaultOn()) {
                 template.setDefaultOn(interval != 0);
             }
-            final List<Measurement> measurements = measurementDAO.findByTemplate(template.getId());
+            final List<Measurement> measurements = measurementRepository.findByTemplate(template.getId());
             for (Measurement m : measurements) {
                 m.setEnabled(template.isDefaultOn());
                 m.setInterval(template.getDefaultInterval());
             }
 
-            List<AppdefEntityID> appdefEntityIds = measurementDAO
-                .findAppdefEntityIdsByTemplate(template.getId());
-
+            List<Resource> resources = measurementRepository.findMeasurementResourcesByTemplate(template.getId());
+            List<AppdefEntityID> appdefEntityIds = new ArrayList<AppdefEntityID>();
+            for(Resource resource: resources) {
+                appdefEntityIds.add(AppdefUtil.newAppdefEntityId(resource));
+            }
             toReschedule.addAll(appdefEntityIds);
         }
 
@@ -362,7 +366,7 @@ public class TemplateManagerImpl implements TemplateManager {
             }
             template.setDefaultOn(on);
 
-            List<Measurement> metrics = measurementDAO.findByTemplate(templateId);
+            List<Measurement> metrics = measurementRepository.findByTemplate(templateId);
             for (Measurement dm : metrics) {
                 if (dm.isEnabled() == on) {
                     continue;
@@ -439,9 +443,12 @@ public class TemplateManagerImpl implements TemplateManager {
         for (MeasurementTemplate mt : mts) {
             // See if this is in the list
             MeasurementInfo info = tmap.remove(mt.getAlias());
-
+           
             if (info == null) {
-                measurementDAO.remove(mt);
+                List<Measurement> measurements = measurementRepository.findByTemplate(mt.getId());
+                for(Measurement measurement: measurements) {
+                    measurementRepository.delete(measurement);
+                }
                 measurementTemplateRepository.delete(mt);
             } else {
                 update(mt, pluginName, info);

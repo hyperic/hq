@@ -52,16 +52,9 @@ public interface AvailabilityManager {
 
     public long getDowntime(Resource resource, long begin, long end) throws MeasurementNotFoundException;
 
-    public List<Integer> getAllAvailIds();
-
     public List<Measurement> getAvailMeasurementChildren(Resource resource);
 
     public Map<Integer, List<Measurement>> getAvailMeasurementChildren(List<Integer> resourceIds);
-
-    public List<Measurement> getAvailMeasurementParent(Resource resource, String resourceRelationType);
-
-    public Map<Integer, List<Measurement>> getAvailMeasurementParent(List<Integer> resourceIds,
-                                                                     String resourceRelationType);
 
     /**
      * Get Availability measurements (disabled) in scheduled downtime. 

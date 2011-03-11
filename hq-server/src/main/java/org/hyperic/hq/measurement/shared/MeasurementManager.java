@@ -30,10 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hyperic.hq.agent.domain.Agent;
-import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
-import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
@@ -304,28 +301,12 @@ public interface MeasurementManager {
                                               MaintenanceEvent event,
                                               Collection<Resource> resources);
 
-    public void syncPluginMetrics(String plugin);
-
     /**
      * Gets a summary of the metrics which are scheduled for collection, across
      * all resource types and metrics.
      * @return a list of {@link CollectionSummary} beans
      */
     public List<CollectionSummary> findMetricCountSummaries();
-
-    /**
-     * Find a list of tuples (of size 4) consisting of the {@link Agent} the
-     * {@link Platform} it manages the {@link Server} representing the Agent the
-     * {@link Measurement} that contains the Server Offset value
-     */
-    public List<Object[]> findAgentOffsetTuples();
-
-    /**
-     * Get the # of metrics that each agent is collecting.
-     * @return a map of {@link Agent} onto Longs indicating how many metrics
-     *         that agent is collecting.
-     */
-    public Map<Agent, Long> findNumMetricsPerAgent();
 
     /**
      * Handle events from the {@link MeasurementEnabler}. This method is
@@ -354,13 +335,6 @@ public interface MeasurementManager {
     void scheduleSynchronous(List<AppdefEntityID> aeids);
 
     void unschedule(List<AppdefEntityID> aeids) throws MeasurementUnscheduleException;
-    
-    /**
-     * Get the maximum collection interval for a scheduled metric within a
-     * compatible group of resources.
-     * @return The maximum collection time in milliseconds.
-     */
-    long getMaxCollectionInterval(ResourceGroup g, Integer templateId);
 
     /**
      * Return a List of Measurements that are collecting for the given template

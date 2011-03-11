@@ -1,5 +1,6 @@
 package org.hyperic.hq.inventory.domain;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Entity;
@@ -68,6 +69,9 @@ public class ResourceGroup
      */
     @Transactional
     public void addMember(Resource member) {
+       if(this.members == null) {
+           this.members = new HashSet<Resource>();
+       }
        members.add(member);
     }
 
