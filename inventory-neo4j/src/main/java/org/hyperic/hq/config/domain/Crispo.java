@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.config.domain;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -52,69 +53,57 @@ import org.hyperic.util.config.ConfigResponse;
  * mechanism for {@link ConfigResponse} objects.
  */
 @Entity
-@Table(name="EAM_CRISPO")
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-public class Crispo {
-    
+@Table(name = "EAM_CRISPO")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public class Crispo implements Serializable {
+
+    public static Crispo create(ConfigResponse cfg) {
+        Crispo res = new Crispo();
+
+        for (String key : cfg.getKeys()) {
+            String val = cfg.getValue(key);
+
+            if (val == null || val.length() == 0)
+                continue;
+
+            res.addOption(key, cfg.getValue(key));
+        }
+        return res;
+    }
+
+    public static Crispo create(Map<String, String> keyVals) {
+        Crispo res = new Crispo();
+
+        for (Map.Entry<String, String> ent : keyVals.entrySet()) {
+            String val = ent.getValue();
+
+            if (val == null || val.length() == 0)
+                continue;
+
+            res.addOption(ent.getKey(), val);
+        }
+        return res;
+    }
+
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "ID")
     private Integer id;
-    
-    @Column(name="VERSION_COL",nullable=false)
-    @Version
-    private Long    version;
-    
-    @OneToMany(cascade=CascadeType.ALL,mappedBy="crispo")
-    @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "crispo")
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     private Collection<CrispoOption> opts = new HashSet<CrispoOption>();
+
+    @Column(name = "VERSION_COL", nullable = false)
+    @Version
+    private Long version;
 
     public Crispo() {
     }
 
-    
-    public Integer getId() {
-        return id;
-    }
-
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-
-    public Long getVersion() {
-        return version;
-    }
-
-
-    public void setVersion(Long version) {
-        this.version = version;
-    }
-
-
-    /**
-     * Return a collection of {@link CrispoOption}s
-     */
-    public Collection<CrispoOption> getOptions() {
-        return Collections.unmodifiableCollection(opts);
-    }
-
-    public Collection<CrispoOption> getOptsSet() {
-        return opts;
-    }
-
-    protected void setOptsSet(Collection<CrispoOption> opts) {
-        this.opts = opts;
-    }
-
     void addOption(String key, String val) {
         getOptsSet().add(new CrispoOption(this, key, val));
-    }
-
-    public int hashCode() {
-        return getId() == null ? 0 : getId().intValue();
     }
 
     public boolean equals(Object obj) {
@@ -131,9 +120,44 @@ public class Crispo {
         return getId().equals(o.getId());
     }
 
+    public Integer getId() {
+        return id;
+    }
+
     /**
-     * Create a new {@link ConfigResponse} based on the key/values stored
-     * within this object.
+     * Return a collection of {@link CrispoOption}s
+     */
+    public Collection<CrispoOption> getOptions() {
+        return Collections.unmodifiableCollection(opts);
+    }
+
+    public Collection<CrispoOption> getOptsSet() {
+        return opts;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public int hashCode() {
+        return getId() == null ? 0 : getId().intValue();
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    protected void setOptsSet(Collection<CrispoOption> opts) {
+        this.opts = opts;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    /**
+     * Create a new {@link ConfigResponse} based on the key/values stored within
+     * this object.
      */
     public ConfigResponse toResponse() {
         ConfigResponse res = new ConfigResponse();
@@ -170,39 +194,10 @@ public class Crispo {
         for (Iterator<CrispoOption> i = opts.iterator(); i.hasNext();) {
             CrispoOption opt = (CrispoOption) i.next();
 
-            if (cfg.getValue(opt.getKey()) == null ||
-                opt.getValue() == null ||
+            if (cfg.getValue(opt.getKey()) == null || opt.getValue() == null ||
                 opt.getValue().length() == 0) {
                 i.remove();
             }
         }
-    }
-
-    public static Crispo create(Map<String, String> keyVals) {
-        Crispo res = new Crispo();
-
-        for (Map.Entry<String, String> ent : keyVals.entrySet()) {
-            String val = ent.getValue();
-
-            if (val == null || val.length() == 0)
-                continue;
-
-            res.addOption(ent.getKey(), val);
-        }
-        return res;
-    }
-
-    public static Crispo create(ConfigResponse cfg) {
-        Crispo res = new Crispo();
-
-        for (String key : cfg.getKeys()) {
-            String val = cfg.getValue(key);
-
-            if (val == null || val.length() == 0)
-                continue;
-
-            res.addOption(key, cfg.getValue(key));
-        }
-        return res;
     }
 }

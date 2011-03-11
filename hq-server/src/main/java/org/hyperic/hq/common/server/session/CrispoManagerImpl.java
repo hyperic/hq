@@ -30,9 +30,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.hyperic.hq.common.shared.CrispoManager;
+import org.hyperic.hq.config.data.CrispoRepository;
 import org.hyperic.hq.config.domain.Crispo;
 import org.hyperic.hq.config.domain.CrispoOption;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,12 +47,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class CrispoManagerImpl implements CrispoManager {
-    private CrispoDAO crispoDao;
+    private CrispoRepository crispoRepository;
     private CrispoOptionDAO crispoOptionDao;
 
     @Autowired
-    public CrispoManagerImpl(CrispoDAO crispoDao, CrispoOptionDAO crispoOptionDao) {
-        this.crispoDao = crispoDao;
+    public CrispoManagerImpl(CrispoRepository crispoRepository, CrispoOptionDAO crispoOptionDao) {
+        this.crispoRepository = crispoRepository;
         this.crispoOptionDao = crispoOptionDao;
     }
 
@@ -63,7 +63,7 @@ public class CrispoManagerImpl implements CrispoManager {
     public Crispo createCrispo(Map<String, String> keyVals) {
         Crispo c = Crispo.create(keyVals);
 
-        crispoDao.save(c);
+        crispoRepository.save(c);
         return c;
     }
 
@@ -72,21 +72,21 @@ public class CrispoManagerImpl implements CrispoManager {
      */
     @Transactional(readOnly=true)
     public Collection<Crispo> findAll() {
-        return crispoDao.findAll();
+        return crispoRepository.findAll();
     }
 
     /**
      */
     @Transactional(readOnly=true)
     public Crispo findById(Integer id) {
-        return crispoDao.findById(id);
+        return crispoRepository.findById(id);
     }
 
     /**
      * Delete a {@link Crispo} and all the options contained within.
      */
     public void deleteCrispo(Crispo c) {
-        crispoDao.remove(c);
+        crispoRepository.delete(c);
     }
 
     /**
@@ -95,7 +95,7 @@ public class CrispoManagerImpl implements CrispoManager {
      */
     public Crispo create(ConfigResponse cfg) {
         Crispo res = Crispo.create(cfg);
-        crispoDao.save(res);
+        crispoRepository.save(res);
         return res;
     }
 
@@ -105,7 +105,7 @@ public class CrispoManagerImpl implements CrispoManager {
      */
     public void update(Crispo c, ConfigResponse cfg) {
         c.updateWith(cfg);
-        crispoDao.save(c);
+        crispoRepository.save(c);
     }
 
     /**
