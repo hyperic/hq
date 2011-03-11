@@ -27,19 +27,13 @@ var footerH = 28;
 var browserH = 88;
 
 function setFoot() {
-  var WindowSize = {
-    width: window.innerWidth || (window.document.documentElement.clientWidth || window.document.body.clientWidth),
-    height: window.innerHeight || (window.document.documentElement.clientHeight || window.document.body.clientHeight)
-  };
-  
-  winH = WindowSize.height;
-  conH = hqDojo.position("header").h + hqDojo.position("migContainer").h;
-  
-  var myHeight = winH - conH - footerH + browserH;
-  
-  if (myHeight > 60) {
-  	var footerContent = hqDojo.byId("footerContent");
-  	
-  	footerContent.style.marginTop = myHeight + "px";
-  }
+	var windowCoords = hqDojo.window.getBox();
+	var contentCoords = hqDojo.position(hqDojo.byId("migContainer"), true);
+  	var footerCoords = hqDojo.position(hqDojo.byId("footerContent"), true);
+  	var combinedContentHeight = (contentCoords.y + contentCoords.h) - footerCoords.h;
+  	var diff = windowCoords.h - combinedContentHeight + 2;
+
+  	if (diff > 0) {
+  		hqDojo.style("footerContent", "marginTop", diff + "px");	  			
+  	}
 }
