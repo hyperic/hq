@@ -21,8 +21,8 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.hyperic.hq.amqp </groupId>
-            <artifactId>hq-amqp-agent</artifactId>
+            <groupId>org.hyperic.hq.amqp</groupId>
+            <artifactId>hq-amqp-common</artifactId>
             <version>${project.version}</version>
         </dependency>
 		<dependency>

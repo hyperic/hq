@@ -60,11 +60,6 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.erlang.otp</groupId>
-            <artifactId>jinterface</artifactId>
-            <version>${otp.version}</version>
-        </dependency>
         <!-- Spring AMQP dependencies -->
         <dependency>
             <groupId>org.springframework.amqp</groupId>
@@ -74,11 +69,6 @@
         <dependency>
             <groupId>org.springframework.amqp</groupId>
             <artifactId>spring-rabbit</artifactId>
-            <version>${spring.amqp.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.amqp</groupId>
-            <artifactId>spring-erlang</artifactId>
             <version>${spring.amqp.version}</version>
         </dependency>
         <!-- Spring Framework -->
@@ -94,15 +84,6 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
         </dependency> 
-        <!-- JSON -->
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-core-asl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-        </dependency>
         <!-- Hyperic -->
         <dependency>
             <groupId>org.hyperic.hq</groupId>
@@ -125,6 +106,17 @@
                 <groupId>com.atlassian.maven.plugins</groupId>
                 <artifactId>maven-clover2-plugin</artifactId>
             </plugin>
+            <plugin>
+				<artifactId>maven-source-plugin</artifactId>
+			</plugin>
+            <plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptors>
+						<descriptor>src/main/assembly/agent.xml</descriptor>
+					</descriptors>
+				</configuration>
+			</plugin>
         </plugins>
         <resources>
             <resource>

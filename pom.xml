@@ -748,6 +748,17 @@
             </modules>
         </profile>
         <profile>
+            <id>agent</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>hq-amqp</module>
+                <module>hq-agent</module>
+                <module>dist</module>
+            </modules>
+        </profile>
+        <profile>
             <id>no-dist</id>
             <modules>
                 <module>hq-util</module>

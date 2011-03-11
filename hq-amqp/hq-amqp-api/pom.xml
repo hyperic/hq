@@ -91,7 +91,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
-        </dependency> 
+        </dependency>
     </dependencies>
 
     <build>
@@ -108,6 +108,17 @@
                 <groupId>com.atlassian.maven.plugins</groupId>
                 <artifactId>maven-clover2-plugin</artifactId>
             </plugin>
+            <plugin>
+				<artifactId>maven-source-plugin</artifactId>
+			</plugin>
+            <plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptors>
+						<descriptor>src/main/assembly/agent.xml</descriptor>
+					</descriptors>
+				</configuration>
+			</plugin>
         </plugins>
     </build>
 </project>

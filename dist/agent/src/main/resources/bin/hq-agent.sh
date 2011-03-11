@@ -178,6 +178,18 @@ fi
 
 CLIENT_CLASSPATH="${AGENT_LIB}/hq-agent-core-${project.version}.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/hq-lather-${project.version}.jar"
+
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/hq-amqp-api-${project.version}.jar"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/hq-amqp-common-${project.version}.jar"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/amqp-client-2.3.1.jar"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/commons-io-1.3.2.jar"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/spring-amqp-1.0.0.M2.jar"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/spring-rabbit-1.0.0.M2.jar"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/spring-beans-3.0.5.RELEASE.jar"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/spring-content-3.0.5.RELEASE.jar"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/spring-core-3.0.5.RELEASE.jar"
+
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/hq-common-${project.version}.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/hq-util-${project.version}.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/hq-pdk-${project.version}.jar"
@@ -187,7 +199,7 @@ CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/log4j-1.2.14.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/sigar-${sigar.version}.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/commons-httpclient-3.1.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/commons-codec-1.2.jar"
-CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/hq-lather-${project.version}.jar"
+
 
 CLIENT_CLASS=org.hyperic.hq.bizapp.agent.client.AgentClient
 
