@@ -40,85 +40,37 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 
 @Entity
-@Table(name="EAM_UPDATE_STATUS")
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-public class UpdateStatus implements Serializable
-{
+@Table(name = "EAM_UPDATE_STATUS")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public class UpdateStatus implements Serializable {
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "ID")
     private Integer id;
 
-    @Column(name="VERSION_COL",nullable=false)
+    @Column(name = "IGNORED", nullable = false)
+    private boolean ignored;
+
+    @Column(name = "REPORT", length = 4000)
+    private String report;
+
+    @Column(name = "UPMODE", nullable = false)
+    private int updateModeEnum;
+
+    @Column(name = "VERSION_COL", nullable = false)
     @Version
     private Long version;
-    
-    @Column(name="REPORT",length=4000)
-    private String  report;
-    
-    @Column(name="UPMODE",nullable=false)
-    private int     updateModeEnum;
-    
-    @Column(name="IGNORED",nullable=false)
-    private boolean ignored;
 
     protected UpdateStatus() {
     }
-    
+
     UpdateStatus(String report, UpdateStatusMode mode) {
-        this.report         = report;
-        updateModeEnum = mode.getCode();
-        ignored        = false;
-    }
-    
-    public String getReport() {
-        return report;
-    }
-    
-    protected void setReport(String report) {
         this.report = report;
-    }
-    
-    protected int getUpdateModeEnum() {
-        return updateModeEnum;
-    }
-    
-    protected void setUpdateModeEnum(int mode) {
-        updateModeEnum = mode;
-    }
-    
-    public UpdateStatusMode getMode() {
-        return UpdateStatusMode.findByCode(updateModeEnum);
-    }
-    
-    void setMode(UpdateStatusMode mode) {
         updateModeEnum = mode.getCode();
-    }
-    
-    public boolean isIgnored() {
-        return ignored;
-    }
-    
-    protected void setIgnored(boolean ignored) {
-        this.ignored = ignored;
+        ignored = false;
     }
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Long getVersion() {
-        return version;
-    }
-
-    public void setVersion(Long version) {
-        this.version = version;
-    }
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
@@ -126,18 +78,63 @@ public class UpdateStatus implements Serializable
         if (obj == null || !(obj instanceof UpdateStatus)) {
             return false;
         }
-        Integer objId = ((UpdateStatus)obj).getId();
-  
-        return getId() == objId ||
-        (getId() != null && 
-         objId != null && 
-         getId().equals(objId));     
+        Integer objId = ((UpdateStatus) obj).getId();
+
+        return getId() == objId || (getId() != null && objId != null && getId().equals(objId));
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public UpdateStatusMode getMode() {
+        return UpdateStatusMode.findByCode(updateModeEnum);
+    }
+
+    public String getReport() {
+        return report;
+    }
+
+    protected int getUpdateModeEnum() {
+        return updateModeEnum;
+    }
+
+    public Long getVersion() {
+        return version;
     }
 
     public int hashCode() {
         int result = 17;
-        result = 37*result + (getId() != null ? getId().hashCode() : 0);
-        return result;      
+        result = 37 * result + (getId() != null ? getId().hashCode() : 0);
+        return result;
     }
-    
+
+    public boolean isIgnored() {
+        return ignored;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    protected void setIgnored(boolean ignored) {
+        this.ignored = ignored;
+    }
+
+    void setMode(UpdateStatusMode mode) {
+        updateModeEnum = mode.getCode();
+    }
+
+    protected void setReport(String report) {
+        this.report = report;
+    }
+
+    protected void setUpdateModeEnum(int mode) {
+        updateModeEnum = mode;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
 }

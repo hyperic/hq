@@ -53,6 +53,7 @@ import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
 import org.hyperic.hq.hqu.shared.UIPluginManager;
+import org.hyperic.hq.update.data.UpdateStatusRepository;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -71,7 +72,7 @@ public class UpdateBossImpl implements UpdateBoss {
     private ServerManager serverManager;
     private ServiceManager serviceManager;
     private UIPluginManager uiPluginManager;
-    private UpdateStatusDAO updateDAO;
+    private UpdateStatusRepository updateStatusRepository;
     private ServerConfigAuditFactory serverConfigAuditFactory;
     private String updateNotifyUrl;
     private static final int HTTP_TIMEOUT_MILLIS = 30000;
@@ -80,7 +81,7 @@ public class UpdateBossImpl implements UpdateBoss {
 
     @Autowired
     public UpdateBossImpl(
-                          UpdateStatusDAO updateDAO,
+                          UpdateStatusRepository updateStatusRepository,
                           ServerConfigManager serverConfigManager,
                           PlatformManager platformManager,
                           ServerManager serverManager,
@@ -89,7 +90,7 @@ public class UpdateBossImpl implements UpdateBoss {
                           ServerConfigAuditFactory serverConfigAuditFactory,
                           DataSource dataSource,
                           @Value("#{tweakProperties['hq.updateNotify.url'] }") String updateNotifyUrl) {
-        this.updateDAO = updateDAO;
+        this.updateStatusRepository = updateStatusRepository;
         this.serverConfigManager = serverConfigManager;
         this.platformManager = platformManager;
         this.serverManager = serverManager;
@@ -306,11 +307,13 @@ public class UpdateBossImpl implements UpdateBoss {
     }
 
     private UpdateStatus getOrCreateStatus() {
-        UpdateStatus res = updateDAO.get();
-
-        if (res == null) {
+        List<UpdateStatus> statuses = updateStatusRepository.findAll();
+        UpdateStatus res;
+        if (statuses.isEmpty()) {
             res = new UpdateStatus("", UpdateStatusMode.MAJOR);
-            updateDAO.save(res);
+            updateStatusRepository.save(res);
+        } else {
+            res = statuses.iterator().next();
         }
         return res;
     }
