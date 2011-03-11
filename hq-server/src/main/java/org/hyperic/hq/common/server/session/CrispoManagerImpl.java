@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hyperic.hq.common.shared.CrispoManager;
+import org.hyperic.hq.config.data.CrispoOptionRepository;
 import org.hyperic.hq.config.data.CrispoRepository;
 import org.hyperic.hq.config.domain.Crispo;
 import org.hyperic.hq.config.domain.CrispoOption;
@@ -48,12 +49,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class CrispoManagerImpl implements CrispoManager {
     private CrispoRepository crispoRepository;
-    private CrispoOptionDAO crispoOptionDao;
+    private CrispoOptionRepository crispoOptionRepository;
 
     @Autowired
-    public CrispoManagerImpl(CrispoRepository crispoRepository, CrispoOptionDAO crispoOptionDao) {
+    public CrispoManagerImpl(CrispoRepository crispoRepository, CrispoOptionRepository crispoOptionRepository) {
         this.crispoRepository = crispoRepository;
-        this.crispoOptionDao = crispoOptionDao;
+        this.crispoOptionRepository = crispoOptionRepository;
     }
 
     /**
@@ -117,7 +118,7 @@ public class CrispoManagerImpl implements CrispoManager {
      */
     @Transactional(readOnly=true)
     public List<CrispoOption> findOptionByKey(String key) {
-        return crispoOptionDao.findOptionsByKey(key);
+        return crispoOptionRepository.findByKeyLike('%' + key + '%');
     }
 
     /**
@@ -129,7 +130,7 @@ public class CrispoManagerImpl implements CrispoManager {
      */
     @Transactional(readOnly=true)
     public List<CrispoOption> findOptionByValue(String val) {
-        return crispoOptionDao.findOptionsByValue(val);
+        return crispoOptionRepository.findByValue(val);
     }
 
     /**
@@ -140,12 +141,12 @@ public class CrispoManagerImpl implements CrispoManager {
      */
     public void updateOption(CrispoOption o, String val) {
         if (val == null || val.matches("^\\s*$")) {
-            crispoOptionDao.remove(o);
+            crispoOptionRepository.delete(o);
             Collection<CrispoOption> opts = o.getCrispo().getOptsSet();
             opts.remove(o);
         } else {
             o.setValue(val);
-            crispoOptionDao.save(o);
+            crispoOptionRepository.save(o);
         }
     }
 }
