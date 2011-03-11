@@ -31,6 +31,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.agent.server.session.AgentDataTransferJob;
 import org.hyperic.hq.agent.server.session.AgentSynchronizer;
@@ -56,6 +58,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AgentPluginUpdaterImpl
 implements AgentPluginUpdater, ApplicationListener<ContextRefreshedEvent>, ApplicationContextAware {
     
+    private static final Log log = LogFactory.getLog(AgentPluginUpdaterImpl.class);
     private AuthzSubject overlord;
     private AgentSynchronizer agentSynchronizer;
     private PluginManager pluginManager;
@@ -63,14 +66,17 @@ implements AgentPluginUpdater, ApplicationListener<ContextRefreshedEvent>, Appli
     // used AtomicBoolean so that a groovy script may disable the mechanism live, no restarts
     private final AtomicBoolean isDisabled =
         new AtomicBoolean(new Boolean(System.getProperty("hq.saps.disable", "false")));
+    private AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
     
     @Autowired
     public AgentPluginUpdaterImpl(AuthzSubjectManager authzSubjectManager,
                                   AgentSynchronizer agentSynchronizer,
-                                  PluginManager pluginManager) {
+                                  PluginManager pluginManager,
+                                  AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle) {
         this.agentSynchronizer = agentSynchronizer;
         this.pluginManager = pluginManager;
         this.overlord = authzSubjectManager.getOverlordPojo();
+        this.agentPluginSyncRestartThrottle = agentPluginSyncRestartThrottle;
     }
 
     public void queuePluginTransfer(final Map<Integer, Collection<Plugin>> updateMap,
@@ -121,7 +127,8 @@ implements AgentPluginUpdater, ApplicationListener<ContextRefreshedEvent>, Appli
                         agentManager.transferAgentPlugins(overlord, agentId, pluginNames);
                     pluginManager.updateAgentPluginSyncStatusInNewTran(
                         AgentPluginStatusEnum.SYNC_SUCCESS, agentId, plugins);
-                    final Collection<String> pluginFileNames = removeMap.get(agentId);
+                    final Collection<String> pluginFileNames =
+                        (removeMap == null) ? null : removeMap.get(agentId);
                     if (pluginFileNames != null && !pluginFileNames.isEmpty()) {
                         agentManager.agentRemovePlugins(overlord, agentId, pluginFileNames);
                     }
@@ -137,13 +144,11 @@ implements AgentPluginUpdater, ApplicationListener<ContextRefreshedEvent>, Appli
                                                     Collection<String> pluginFileNames,
                                                     AgentManager agentManager) {
                 if (pluginFileNames != null && !pluginFileNames.isEmpty()) {
-// XXX disabled for now
-//                    agentManager.restartAgent(overlord, agentId);
+                    agentPluginSyncRestartThrottle.restartAgent(agentId);
                 } else {
                     for (final FileDataResult res : transferResult) {
                         if (res.getSendBytes() > 0) {
-// XXX disabled for now
-//                            agentManager.restartAgent(overlord, agentId);
+                            agentPluginSyncRestartThrottle.restartAgent(agentId);
                         }
                     }
                 }
@@ -165,13 +170,13 @@ implements AgentPluginUpdater, ApplicationListener<ContextRefreshedEvent>, Appli
             public void execute() {
                 final AgentManager agentManager = Bootstrap.getBean(AgentManager.class);
                 try {
+                    pluginManager.removeAgentPluginStatuses(agentId, pluginFileNames);
                     final Map<String, Boolean> result =
                         agentManager.agentRemovePlugins(overlord, agentId, pluginFileNames);
                     // only reboot the agent if we actually removed a plugin
                     for (Boolean res : result.values()) {
                         if (res.booleanValue()) {
-// XXX disabled for now
-//                            agentManager.restartAgent(overlord, agentId);
+                            agentPluginSyncRestartThrottle.restartAgent(agentId);
                         }
                     }
                 } catch (Exception e) {
@@ -192,10 +197,16 @@ implements AgentPluginUpdater, ApplicationListener<ContextRefreshedEvent>, Appli
             return;
         }
         // don't want the main thread to hang the startup so put it in a new thread
-        Thread thread = new Thread() {
+        Thread thread = new Thread("AgentPluginStartupSync") {
             public void run() {
-                final AgentManager agentManager = Bootstrap.getBean(AgentManager.class);
-                agentManager.syncAllAgentPlugins();
+                try {
+                    log.info("starting agent plugin sync");
+                    final AgentManager agentManager = Bootstrap.getBean(AgentManager.class);
+	                agentManager.syncAllAgentPlugins();
+                    log.info("agent plugin sync complete");
+                } catch (Throwable t) {
+                    log.error("error running plugin sync to agents",t);
+                }
             }
         };
         thread.start();
