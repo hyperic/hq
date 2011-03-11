@@ -3,6 +3,7 @@ package org.hyperic.hq.measurement.data;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertArrayEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -743,6 +744,52 @@ public class MeasurementRepositoryIntegrationTest {
         assertEquals(expected,
             measurementRepository.findRelatedAvailabilityMeasurements(parentToChildIds));
         verifyQueryCaching("Measurement.findRelatedAvailMeasurements");
+    }
+
+    @Test
+    public void testGetMinIntervals() {
+        Category category2 = new Category("Performance");
+        entityManager.persist(category2);
+        MeasurementTemplate template2 = new MeasurementTemplate("Queue Rate", "queueSize",
+            "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true,
+            "service:queueSize", type, category2, "tomcat");
+        entityManager.persist(template2);
+        Resource resource2 = new Resource();
+        resource2.setName("Resource2");
+        entityManager.persist(resource2);
+        Measurement measurement = new Measurement(resource, template, 10);
+        measurement.setDsn("queueSize");
+        measurementRepository.save(measurement);
+        Measurement measurement2 = new Measurement(resource2, template, 20);
+        measurement2.setDsn("queueErrors");
+        measurementRepository.save(measurement2);
+        Measurement measurement3 = new Measurement(resource2, template2, 30);
+        measurement3.setDsn("throughput");
+        measurementRepository.save(measurement3);
+        List<Object[]> actual = measurementRepository.getMinIntervals();
+        assertEquals(2, actual.size());
+        assertArrayEquals(new Object[] { resource.getId(), 10l }, actual.get(0));
+        assertArrayEquals(new Object[] { resource2.getId(), 20l }, actual.get(1));
+    }
+
+    @Test
+    public void testGetMinInterval() {
+        Category category2 = new Category("Performance");
+        entityManager.persist(category2);
+        MeasurementTemplate template2 = new MeasurementTemplate("Queue Rate", "queueSize",
+            "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true,
+            "service:queueSize", type, category2, "tomcat");
+        entityManager.persist(template2);
+        Resource resource2 = new Resource();
+        resource2.setName("Resource2");
+        entityManager.persist(resource2);
+        Measurement measurement2 = new Measurement(resource2, template, 20);
+        measurement2.setDsn("queueErrors");
+        measurementRepository.save(measurement2);
+        Measurement measurement3 = new Measurement(resource2, template2, 30);
+        measurement3.setDsn("throughput");
+        measurementRepository.save(measurement3);
+        assertEquals(Long.valueOf(20), measurementRepository.getMinInterval(resource2.getId()));
     }
 
     private void verifyQueryCaching(String cacheName) {

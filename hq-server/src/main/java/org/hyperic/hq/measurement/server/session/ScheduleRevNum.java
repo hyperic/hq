@@ -34,69 +34,29 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 @Entity
-@Table(name="EAM_SRN")
+@Table(name = "EAM_SRN")
 public class ScheduleRevNum implements Serializable {
 
     @EmbeddedId
     private SrnId id;
+
+    private transient long lastReported = 0;
+
+    private transient long minInterval = 0;
+
+    @Column(name = "SRN", nullable = false)
+    private int srn;
     
-    @Column(name="VERSION_COL",nullable=false)
+    @Column(name = "VERSION_COL", nullable = false)
     @Version
     private Long version;
-    
-    @Column(name="SRN",nullable=false)
-    private int   srn;
-    
-    
-    private transient long  minInterval = 0;
-    private transient long  lastReported = 0;
-    
+
     public ScheduleRevNum() {
     }
 
     public ScheduleRevNum(SrnId id, int srn) {
-        this.id  = id;
-        this.srn = srn;
-    }
-
-    public SrnId getId() {
-        return id;
-    }
-    
-    protected void setId(SrnId id) {
         this.id = id;
-    }
-
-    public long getVersion() {
-        return version;
-    }
-    
-    protected void setVersion(long version) {
-        this.version = version;
-    }
-
-    public int getSrn() {
-        return srn;
-    }
-    
-    protected void setSrn(int srn) {
         this.srn = srn;
-    }
-
-    public long getMinInterval() {
-        return minInterval;
-    }
-    
-    public void setMinInterval(long minInterval) {
-        this.minInterval = minInterval;
-    }
-
-    public long getLastReported() {
-        return lastReported;
-    }
-    
-    public void setLastReported(long lastReported) {
-        this.lastReported = lastReported;
     }
 
     public boolean equals(Object obj) {
@@ -106,16 +66,55 @@ public class ScheduleRevNum implements Serializable {
         if (obj == null || !(obj instanceof ScheduleRevNum)) {
             return false;
         }
-        ScheduleRevNum o = (ScheduleRevNum)obj;
-        return id == o.getId() ||
-               (id != null && o.getId() != null && id.equals(o.getId()));
+        ScheduleRevNum o = (ScheduleRevNum) obj;
+        return id == o.getId() || (id != null && o.getId() != null && id.equals(o.getId()));
+    }
+
+    public SrnId getId() {
+        return id;
+    }
+
+    public long getLastReported() {
+        return lastReported;
+    }
+
+    public long getMinInterval() {
+        return minInterval;
+    }
+
+    public int getSrn() {
+        return srn;
+    }
+
+    public long getVersion() {
+        return version;
     }
 
     public int hashCode() {
         int result = 17;
 
-        result = 37*result + (id != null ? id.hashCode() : 0);
+        result = 37 * result + (id != null ? id.hashCode() : 0);
 
         return result;
+    }
+
+    protected void setId(SrnId id) {
+        this.id = id;
+    }
+
+    public void setLastReported(long lastReported) {
+        this.lastReported = lastReported;
+    }
+
+    public void setMinInterval(long minInterval) {
+        this.minInterval = minInterval;
+    }
+
+    protected void setSrn(int srn) {
+        this.srn = srn;
+    }
+
+    protected void setVersion(long version) {
+        this.version = version;
     }
 }

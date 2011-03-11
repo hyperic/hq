@@ -32,57 +32,45 @@ import javax.persistence.Embeddable;
 
 @Embeddable
 public class SrnId implements Serializable {
-    
-    @Column(name="APPDEF_TYPE",nullable=false)
-    private int appdefType;
-    
-    @Column(name="INSTANCE_ID",nullable=false)
+
+    @Column(name = "INSTANCE_ID", nullable = false)
     private int instanceId;
 
     public SrnId() {
     }
-    
-    public SrnId(int appdefType, int instanceId) {
-        this.appdefType = appdefType;
+
+    public SrnId(int instanceId) {
         this.instanceId = instanceId;
     }
-   
-    public int getAppdefType() {
-        return appdefType;
-    }
-    
-    protected void setAppdefType(int appdefType) {
-        this.appdefType = appdefType;
+
+    public boolean equals(Object other) {
+        if (this == other)
+            return true;
+        if (other == null)
+            return false;
+        if (!(other instanceof SrnId))
+            return false;
+        SrnId castOther = (SrnId) other;
+
+        return (getInstanceId() == castOther.getInstanceId());
     }
 
     public int getInstanceId() {
         return instanceId;
     }
-    
-    protected void setInstanceId(int  instanceId) {
-        this.instanceId = instanceId;
-    }
 
-    public boolean equals(Object other) {
-        if (this == other) return true;
-        if (other == null) return false;
-        if (!(other instanceof SrnId)) return false;
-        SrnId castOther = (SrnId)other;
-
-        return (getAppdefType() == castOther.getAppdefType()) &&
-            (getInstanceId() == castOther.getInstanceId());
-    }
-
-    public int hashCode()
-    {
+    public int hashCode() {
         int result = 17;
 
-        result = 37 * result + getAppdefType();
         result = 37 * result + getInstanceId();
         return result;
     }
-    
+
+    protected void setInstanceId(int instanceId) {
+        this.instanceId = instanceId;
+    }
+
     public String toString() {
-        return getAppdefType() + ":" + getInstanceId();
+        return Integer.toString(getInstanceId());
     }
 }

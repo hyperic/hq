@@ -50,6 +50,7 @@ import org.hyperic.hq.measurement.data.CategoryRepository;
 import org.hyperic.hq.measurement.data.MeasurementRepository;
 import org.hyperic.hq.measurement.data.MeasurementTemplateRepository;
 import org.hyperic.hq.measurement.data.MonitorableTypeRepository;
+import org.hyperic.hq.measurement.data.ScheduleRevNumRepository;
 import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.product.MeasurementInfo;
@@ -71,7 +72,7 @@ public class TemplateManagerImpl implements TemplateManager {
     private MeasurementRepository measurementRepository;
     private MeasurementTemplateRepository measurementTemplateRepository;
     private MonitorableTypeRepository monitorableTypeRepository;
-    private ScheduleRevNumDAO scheduleRevNumDAO;
+    private ScheduleRevNumRepository scheduleRevNumRepository;
     private SRNManager srnManager;
     private SRNCache srnCache;
     private CategoryRepository categoryRepository;
@@ -80,12 +81,12 @@ public class TemplateManagerImpl implements TemplateManager {
     public TemplateManagerImpl(MeasurementRepository measurementRepository,
                                MeasurementTemplateRepository measurementTemplateRepository,
                                MonitorableTypeRepository monitorableTypeRepository,
-                               ScheduleRevNumDAO scheduleRevNumDAO, SRNManager srnManager,
+                               ScheduleRevNumRepository scheduleRevNumRepository, SRNManager srnManager,
                                SRNCache srnCache, CategoryRepository categoryRepository) {
         this.measurementRepository = measurementRepository;
         this.measurementTemplateRepository = measurementTemplateRepository;
         this.monitorableTypeRepository = monitorableTypeRepository;
-        this.scheduleRevNumDAO = scheduleRevNumDAO;
+        this.scheduleRevNumRepository = scheduleRevNumRepository;
         this.srnManager = srnManager;
         this.srnCache = srnCache;
         this.categoryRepository = categoryRepository;
@@ -342,12 +343,12 @@ public class TemplateManagerImpl implements TemplateManager {
             if (srn != null) {
                 srnManager.incrementSrn(id, Math.min(interval, srn.getMinInterval()));
                 if (++count % 100 == 0) {
-                    scheduleRevNumDAO.flushSession();
+                    scheduleRevNumRepository.flush();
                 }
             }
         }
 
-        scheduleRevNumDAO.flushSession();
+        scheduleRevNumRepository.flush();
     }
 
     /**

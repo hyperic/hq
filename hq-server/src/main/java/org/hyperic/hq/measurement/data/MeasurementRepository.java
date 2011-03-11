@@ -101,4 +101,24 @@ public interface MeasurementRepository extends JpaRepository<Measurement, Intege
     @Query("select distinct m.resource from Measurement m where m.template.id = :templateId")
     List<Resource> findMeasurementResourcesByTemplate(@Param("templateId") Integer templateId);
 
+    /**
+     * @param id The resource to look up.
+     * @return The minimum collection interval for the given resource
+     */
+    @Transactional(readOnly = true)
+    @Query("select min(m.interval) " + "from Measurement m " + "where m.enabled = true and "
+           + "m.resource.id = :resource " + "group by resource.id")
+    Long getMinInterval(@Param("resource") Integer resourceId);
+
+    /**
+     * Get the minimum collection intervals for all entities with metrics
+     * enabled.
+     * @return A Collection of Object arrays with 2 entries, the Resource ID and
+     *         the Long collection interval.
+     */
+    @Transactional(readOnly = true)
+    @Query("select m.resource.id, min(m.interval) " + "from Measurement m "
+           + "where m.enabled = true group by m.resource.id")
+    List<Object[]> getMinIntervals();
+
 }
