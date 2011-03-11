@@ -28,8 +28,6 @@ package org.hyperic.hq.measurement.action;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.ActionExecuteException;
@@ -41,7 +39,9 @@ import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertCondition;
 import org.hyperic.hq.events.server.session.AlertConditionLog;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.server.session.MetricProblemDAO;
+import org.hyperic.hq.measurement.data.MetricProblemRepository;
+import org.hyperic.hq.measurement.server.session.MeasurementDataId;
+import org.hyperic.hq.measurement.server.session.MetricProblem;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.InvalidOptionException;
@@ -51,8 +51,8 @@ import org.hyperic.util.config.InvalidOptionValueException;
  * Log the fact that an alert was generated due to some measurement
  */
 public class MetricAlertAction implements ActionInterface {
-    private final Log log = LogFactory.getLog(MetricAlertAction.class);
-    private MetricProblemDAO metricProblemDAO = Bootstrap.getBean(MetricProblemDAO.class);
+  
+    private MetricProblemRepository metricProblemRepository = Bootstrap.getBean(MetricProblemRepository.class);
 
     public String execute(AlertInterface aIface, ActionExecutionInfo info)
         throws ActionExecuteException
@@ -75,10 +75,14 @@ public class MetricAlertAction implements ActionInterface {
                     continue;
 
                 track.add(mid);
-                metricProblemDAO.create(mid, alert.getCtime(),
-                           MeasurementConstants.PROBLEM_TYPE_ALERT,
-                           alert.getId());
+                MeasurementDataId id = new MeasurementDataId(mid, alert.getCtime(), alert.getId());
 
+                MetricProblem p = new MetricProblem();
+                p.setId(id);
+                p.setType(MeasurementConstants.PROBLEM_TYPE_ALERT);
+
+                metricProblemRepository.save(p);
+               
                 // Append to action log
                 actLog.append("MeasurementAlert added for mid: ")
                       .append(cond.getMeasurementId())

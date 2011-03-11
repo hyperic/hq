@@ -33,78 +33,73 @@ import javax.persistence.Embeddable;
 @Embeddable
 public class MeasurementDataId implements Serializable {
 
-    @Column(name="MEASUREMENT_ID",nullable=false)
-    private Integer measurementId;
-    
-    @Column(name="TIMESTAMP",nullable=false)
-    private long timestamp;
-    
-    @Column(name="ADDITIONAL")
+    @Column(name = "ADDITIONAL")
     private Integer additional;
-   
-    
+
+    @Column(name = "MEASUREMENT_ID", nullable = false)
+    private Integer measurementId;
+
+    @Column(name = "TIMESTAMP", nullable = false)
+    private long timestamp;
+
     public MeasurementDataId() {
     }
 
-    public MeasurementDataId(Integer measurementId, long timestamp,
-                             Integer additional) {
+    public MeasurementDataId(Integer measurementId, long timestamp, Integer additional) {
         this.measurementId = measurementId;
         this.timestamp = timestamp;
         this.additional = additional;
     }
-  
+
+    public boolean equals(Object other) {
+        if ((this == other))
+            return true;
+        if ((other == null))
+            return false;
+        if (!(other instanceof MeasurementDataId))
+            return false;
+        MeasurementDataId castOther = (MeasurementDataId) other;
+
+        return ((getMeasurementId() == castOther.getMeasurementId()) || (getMeasurementId() != null &&
+                                                                         castOther
+                                                                             .getMeasurementId() != null && getMeasurementId()
+            .equals(castOther.getMeasurementId()))) &&
+               (getTimestamp() == castOther.getTimestamp()) &&
+               ((getAdditional() == castOther.getAdditional()) || (getAdditional() != null &&
+                                                                   castOther.getAdditional() != null && getAdditional()
+                   .equals(castOther.getAdditional())));
+    }
+
+    public Integer getAdditional() {
+        return additional;
+    }
+
     public Integer getMeasurementId() {
         return measurementId;
     }
-    
-    protected void setMeasurementId(Integer measurementId) {
-        this.measurementId = measurementId;
-    }
+
     public long getTimestamp() {
         return timestamp;
     }
-    
-    protected void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
-    
-    
-    
-    public Integer getAdditional() {
-        return additional;
+
+    public int hashCode() {
+        int result = 17;
+
+        result = 37 * result + (getMeasurementId() == null ? 0 : getMeasurementId().hashCode());
+        result = 37 * result + (int) getTimestamp();
+        result = 37 * result + (getAdditional() == null ? 0 : getAdditional().hashCode());
+        return result;
     }
 
     public void setAdditional(int additional) {
         this.additional = additional;
     }
 
-    public boolean equals(Object other) {
-        if ((this == other)) return true;
-        if ((other == null)) return false;
-        if (!(other instanceof MeasurementDataId)) return false;
-        MeasurementDataId castOther = (MeasurementDataId) other; 
-        
-        return ((getMeasurementId() == castOther.getMeasurementId()) || 
-                (getMeasurementId() != null &&
-                 castOther.getMeasurementId() != null &&
-                 getMeasurementId().equals(castOther.getMeasurementId()))) &&
-            (getTimestamp() == castOther.getTimestamp()) &&
-            ((getAdditional() == castOther.getAdditional()) || 
-                (getAdditional() != null &&
-                 castOther.getAdditional() != null &&
-                 getAdditional().equals(castOther.getAdditional())));
+    protected void setMeasurementId(Integer measurementId) {
+        this.measurementId = measurementId;
     }
-   
-    public int hashCode() {
-        int result = 17;
-        
-        result = 37 * result + 
-            (getMeasurementId() == null ? 0 : getMeasurementId().hashCode() );
-        result = 37 * result + (int)getTimestamp();
-        result = 37 * result +
-            (getAdditional() == null ? 0 : getAdditional().hashCode() );
-        return result;
-    }   
+
+    protected void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
 }
-
-

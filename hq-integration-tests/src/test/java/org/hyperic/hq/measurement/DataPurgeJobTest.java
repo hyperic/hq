@@ -27,7 +27,9 @@ package org.hyperic.hq.measurement;
 
 import static org.junit.Assert.assertEquals;
 
-import org.hyperic.hq.measurement.server.session.MetricProblemDAO;
+import org.hyperic.hq.measurement.data.MetricProblemRepository;
+import org.hyperic.hq.measurement.server.session.MeasurementDataId;
+import org.hyperic.hq.measurement.server.session.MetricProblem;
 import org.hyperic.hq.measurement.shared.MeasRangeObj;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Test;
@@ -52,7 +54,7 @@ public class DataPurgeJobTest
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    private MetricProblemDAO metricProblemDAO;
+    private MetricProblemRepository metricProblemRepository;
 
     /**
      * Sanity test that no exceptions are thrown on truncating measurement data
@@ -111,14 +113,21 @@ public class DataPurgeJobTest
     @Test
     public void testPurgeMetricProblems() {
         long timestamp = System.currentTimeMillis();
-        metricProblemDAO.create(12345, timestamp, MeasurementConstants.PROBLEM_TYPE_ALERT, 5678);
+        MeasurementDataId id = new MeasurementDataId(12345, timestamp, 5678);
+        MetricProblem p = new MetricProblem();
+        p.setId(id);
+        p.setType(MeasurementConstants.PROBLEM_TYPE_ALERT);
+        metricProblemRepository.save(p);
         flushSession();
-        metricProblemDAO.create(12345, timestamp + 2001, MeasurementConstants.PROBLEM_TYPE_ALERT,
-            5678);
+        MeasurementDataId id2 = new MeasurementDataId(12345, timestamp + 2001, 5678);
+        MetricProblem p2 = new MetricProblem();
+        p2.setId(id2);
+        p2.setType(MeasurementConstants.PROBLEM_TYPE_ALERT);
+        metricProblemRepository.save(p2);
         flushSession();
         dataPurgeJob.purgeMetricProblems(timestamp + 100l);
         clearSession();
-        assertEquals(1, metricProblemDAO.findAll().size());
+        assertEquals(1, metricProblemRepository.findAll().size());
     }
 
     @Test
