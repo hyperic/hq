@@ -27,6 +27,8 @@ package org.hyperic.hq.amqp.admin.erlang;
 
 import com.ericsson.otp.erlang.*;
 import org.hyperic.hq.amqp.admin.ConversionException;
+import org.hyperic.hq.amqp.admin.erlang.ControlAction;
+import org.hyperic.hq.amqp.admin.erlang.ErlangConverter;
 
 import java.util.ArrayList;
 

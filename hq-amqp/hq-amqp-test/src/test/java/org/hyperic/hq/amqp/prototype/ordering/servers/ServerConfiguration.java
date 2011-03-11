@@ -25,45 +25,54 @@
 
 package org.hyperic.hq.amqp.prototype.ordering.servers;
 
-import org.hyperic.hq.amqp.configuration.CommonAmqpConfiguration;
+import org.hyperic.hq.amqp.SimpleServerResponseHandler;
+import org.hyperic.hq.amqp.admin.RabbitAdminTemplate;
+import org.hyperic.hq.amqp.prototype.TestConfiguration;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportResource;
 
 /**
  * @author Helena Edelson
  */
 @Configuration
-@ImportResource("classpath:META-INF/spring/simple-rabbit.xml")
-public class ServerConfiguration extends CommonAmqpConfiguration {
+public class ServerConfiguration extends TestConfiguration {
 
-    @Value("${messages.to.send}") private String messagesToSend;
+    private int messagesToSend = 5000;
 
     @Bean
-    public Server server() throws InterruptedException {
-        RabbitTemplate template = new RabbitTemplate(rabbitConnectionFactory());
-        //template.setMessageConverter(new JsonMessageConverter());
-        return new Server(messagesToSend, template, serverListener());
+    public Server server() {  
+        return new Server(messagesToSend, serverRabbitTemplate(), agentListener());
     }
 
     @Bean
-    public SimpleMessageListenerContainer serverListener() throws InterruptedException {
-        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
-        container.setConnectionFactory(rabbitConnectionFactory());
-        container.setMessageListener(new MessageListenerAdapter(new ServerMessageHandler()));
-        container.setQueues(agentToServerQueue()); 
+    public RabbitAdminTemplate adminTemplate() {
+        return new RabbitAdminTemplate();
+    }
+
+    @Bean
+    public RabbitTemplate serverRabbitTemplate() {
+        RabbitTemplate template = new RabbitTemplate(connectionFactory());
+        template.setExchange(agentExchangeName);
+        template.setRoutingKey(agentQueueName);
+        return template;
+    }
+
+    @Bean
+    public SimpleMessageListenerContainer agentListener() {
+        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(connectionFactory());
+        container.setMessageListener(new MessageListenerAdapter(new SimpleServerResponseHandler()));
+        container.setQueues(agentQueue());
         return container;
-    } 
+    }
 
     @Bean
     public Binding direct() {
-        Binding direct = BindingBuilder.from(directQueue()).to(serverToAgentDirectExchange()).with(directQueue().getName());
+        Binding direct = BindingBuilder.from(directQueue()).to(agentExchange()).with(directQueue().getName());
         amqpAdmin().declareBinding(direct);
         return direct;
     }

@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,13 +14,7 @@ import org.springframework.stereotype.Component;
 public class AmqpOperationService implements OperationService {
 
     protected Logger logger = Logger.getLogger(this.getClass());
-
-    protected final String agentToServerExchangeName = "agentServerExchange";
-
-    protected final String agentToServerRoutingKey = "agentServerQueue";
-
-    protected final String serverToAgentQueueName = "serverToAgentQueue";
-
+ 
     /**
      * Injection of template with pre-configured exchange and routing key
      */
@@ -31,9 +26,9 @@ public class AmqpOperationService implements OperationService {
     public AmqpOperationService() {
         this.rabbitTemplate = new RabbitTemplate(new SingleConnectionFactory());
     }
-
-    @Autowired
-    public AmqpOperationService(RabbitTemplate rabbitTemplate) {
+ 
+    @Autowired 
+    public AmqpOperationService(@Qualifier("serverRabbitTemplate") RabbitTemplate rabbitTemplate) {
         this.rabbitTemplate = rabbitTemplate;
     }
 

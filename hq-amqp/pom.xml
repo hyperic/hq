@@ -41,8 +41,7 @@
     <modules>
         <module>hq-amqp-common</module>
         <module>hq-amqp-api</module>
-        <module>hq-amqp-server</module>
-        <module>hq-amqp-agent</module>
+        <module>hq-amqp-admin</module> 
         <module>hq-amqp-installer</module>
         <module>hq-amqp-test</module>
     </modules>
@@ -69,16 +68,6 @@
             </plugin>
         </plugins>
     </build>
-
-    <repositories>
-        <repository>
-            <id>spring-maven-snapshot</id>
-            <name>Spring Maven Snapshot Repository</name>
-            <url>http://maven.springframework.org/snapshot</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
+ 
 
 </project>

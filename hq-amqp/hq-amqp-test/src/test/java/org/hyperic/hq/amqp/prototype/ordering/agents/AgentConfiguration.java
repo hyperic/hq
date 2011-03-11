@@ -25,11 +25,10 @@
 
 package org.hyperic.hq.amqp.prototype.ordering.agents;
 
-import org.hyperic.hq.amqp.configuration.CommonAmqpConfiguration;
+import org.hyperic.hq.amqp.prototype.TestConfiguration;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
-import org.springframework.amqp.support.converter.JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -37,40 +36,44 @@ import org.springframework.context.annotation.Configuration;
  * @author Helena Edelson
  */
 @Configuration
-public abstract class CommonAgentConfiguration extends CommonAmqpConfiguration {
-    
-   @Bean
-    public RabbitTemplate agentTemplate() {
-        RabbitTemplate template = new RabbitTemplate(rabbitConnectionFactory());
-        template.setMessageConverter(new JsonMessageConverter());
-        template.setExchange(agentToServerExchange().getName());
-        template.setRoutingKey(agentToServerQueue().getName());
+public class AgentConfiguration extends TestConfiguration {
+
+    @Bean
+    public RabbitTemplate agentRabbitTemplate() {
+        RabbitTemplate template = new RabbitTemplate(connectionFactory());
+        template.setExchange(serverDirectExchangeName);
+        template.setRoutingKey(agentQueueName);
         return template;
     }
 
     @Bean
-    public SimpleMessageListenerContainer directListener() throws InterruptedException {
-        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
-        container.setConnectionFactory(rabbitConnectionFactory());
-        container.setMessageListener(new MessageListenerAdapter(new Agent(agentTemplate())));
-        container.setQueues(directQueue()); 
+    public SimpleMessageListenerContainer serverListener() {
+        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(connectionFactory());
+        container.setMessageListener(new MessageListenerAdapter(new Agent(agentRabbitTemplate())));
+        container.setQueues(agentQueue());
         return container;
     }
 
     @Bean
-    public SimpleMessageListenerContainer fanoutListener() throws Exception {
-        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
-        container.setConnectionFactory(rabbitConnectionFactory());
-        container.setMessageListener(new MessageListenerAdapter(new Agent(agentTemplate())));
+    public SimpleMessageListenerContainer directListener() {
+        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(connectionFactory());
+        container.setMessageListener(new MessageListenerAdapter(new Agent(agentRabbitTemplate())));
+        container.setQueues(directQueue());
+        return container;
+    }
+
+    @Bean
+    public SimpleMessageListenerContainer fanoutListener() {
+        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(connectionFactory());
+        container.setMessageListener(new MessageListenerAdapter(new Agent(agentRabbitTemplate())));
         container.setQueues(fanoutQueue());
         return container;
     }
 
     @Bean
-    public SimpleMessageListenerContainer topicListener() throws Exception {
-        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
-        container.setConnectionFactory(rabbitConnectionFactory());
-        container.setMessageListener(new MessageListenerAdapter(new Agent(agentTemplate())));
+    public SimpleMessageListenerContainer topicListener() {
+        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(connectionFactory());  
+        container.setMessageListener(new MessageListenerAdapter(new Agent(agentRabbitTemplate())));
         container.setQueues(topicQueue());
         return container;
     }

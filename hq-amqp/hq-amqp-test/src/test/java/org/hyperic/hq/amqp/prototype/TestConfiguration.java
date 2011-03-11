@@ -1,4 +1,4 @@
-package org.hyperic.hq.amqp.configuration;
+package org.hyperic.hq.amqp.prototype;
 
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -8,11 +8,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Simple config for prototype.
  * @author Helena Edelson
  */
 @Configuration
-public class CommonAmqpConfiguration {
+public class TestConfiguration {
 
     /** to consume from the agent */
     protected final String agentQueueName = "queues.agentToServer";
@@ -26,17 +25,17 @@ public class CommonAmqpConfiguration {
     /** to send to an agent */
     protected final String agentExchangeName = "exchanges.direct.serverToAgent";
 
-    protected final String fanoutExchangeName = "exchanges.fanout";    
+    protected final String fanoutExchangeName = "exchanges.fanout";
     protected final String agentSubscriptionName = "exchanges.topic.agentToServer";
 
     @Bean
-    public ConnectionFactory rabbitConnectionFactory() {
+    public ConnectionFactory connectionFactory() {
         return new SingleConnectionFactory();
     }
 
     @Bean
     public RabbitAdmin amqpAdmin() {
-        return new RabbitAdmin(rabbitConnectionFactory());
+        return new RabbitAdmin(connectionFactory());
     }
 
     /**
@@ -48,12 +47,12 @@ public class CommonAmqpConfiguration {
         amqpAdmin().declareExchange(e);
         return e;
     }
- 
+
     /**
      * To consume from the server
      */
     @Bean
-    public Queue serverQueue() { 
+    public Queue serverQueue() {
         return amqpAdmin().declareQueue();
     }
 
@@ -77,6 +76,10 @@ public class CommonAmqpConfiguration {
         return queue;
     }
 
+
+
+
+
     /* Specific Queues/Exchanges - these and their creation/binding
        will be pulled out of Spring and done dynamically. */
 
@@ -95,7 +98,8 @@ public class CommonAmqpConfiguration {
     public Queue topicQueue() {
         return amqpAdmin().declareQueue();
     }
- 
+
+
     @Bean
     public FanoutExchange fanoutExchange() {
         FanoutExchange e = new FanoutExchange(fanoutExchangeName, true, false);

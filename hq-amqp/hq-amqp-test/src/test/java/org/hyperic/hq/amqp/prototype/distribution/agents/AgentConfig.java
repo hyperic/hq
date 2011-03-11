@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.amqp.prototype.distribution.agents;
 
-import org.hyperic.hq.amqp.configuration.CommonAmqpConfiguration;
+import org.hyperic.hq.amqp.prototype.TestConfiguration;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
@@ -37,7 +37,7 @@ import org.springframework.context.annotation.Configuration;
  * @author Helena Edelson
  */
 @Configuration
-public class AgentConfig extends CommonAmqpConfiguration {
+public class AgentConfig extends TestConfiguration {
  
     @Bean
     public Queue topicQueue() {
@@ -54,7 +54,7 @@ public class AgentConfig extends CommonAmqpConfiguration {
 
     @Bean
     public AmqpTemplate topicTemplate() {
-        RabbitTemplate template = new RabbitTemplate(rabbitConnectionFactory());
+        RabbitTemplate template = new RabbitTemplate(connectionFactory());
         template.setExchange(topicExchange().getName());
         template.setRoutingKey(topicQueue().getName());
         return template;
@@ -63,7 +63,7 @@ public class AgentConfig extends CommonAmqpConfiguration {
     @Bean
     public SimpleMessageListenerContainer topicListener() {
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
-        container.setConnectionFactory(rabbitConnectionFactory());
+        container.setConnectionFactory(connectionFactory());
         container.setMessageListener(new MessageListenerAdapter(new Agent(topicTemplate())));
         //container.setConcurrentConsumers(this.concurrentConsumers);
         container.setQueues(topicQueue());
@@ -85,7 +85,7 @@ public class AgentConfig extends CommonAmqpConfiguration {
 
     @Bean
     public AmqpTemplate fanoutTemplate() {
-        RabbitTemplate template = new RabbitTemplate(rabbitConnectionFactory());
+        RabbitTemplate template = new RabbitTemplate(connectionFactory());
         template.setExchange(fanoutExchange().getName());
         return template;
     }
@@ -93,7 +93,7 @@ public class AgentConfig extends CommonAmqpConfiguration {
     @Bean
     public SimpleMessageListenerContainer fanoutListener() {
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
-        container.setConnectionFactory(rabbitConnectionFactory());
+        container.setConnectionFactory(connectionFactory());
         container.setMessageListener(new MessageListenerAdapter(new Agent(fanoutTemplate())));
         //container.setConcurrentConsumers(this.concurrentConsumers);
         container.setQueues(fanoutQueue());
@@ -115,7 +115,7 @@ public class AgentConfig extends CommonAmqpConfiguration {
 
     @Bean
     public AmqpTemplate directTemplate() {
-        RabbitTemplate template = new RabbitTemplate(rabbitConnectionFactory());
+        RabbitTemplate template = new RabbitTemplate(connectionFactory());
         template.setExchange(serverToAgentDirectExchange().getName());
         template.setRoutingKey(directQueue().getName());
         return template;
@@ -124,7 +124,7 @@ public class AgentConfig extends CommonAmqpConfiguration {
     @Bean
     public SimpleMessageListenerContainer directListener() {
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
-        container.setConnectionFactory(rabbitConnectionFactory());
+        container.setConnectionFactory(connectionFactory());
         container.setMessageListener(new MessageListenerAdapter(new Agent(directTemplate())));
         //container.setConcurrentConsumers(this.concurrentConsumers);
         container.setQueues(directQueue());

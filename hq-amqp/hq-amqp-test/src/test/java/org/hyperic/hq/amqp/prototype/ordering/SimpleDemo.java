@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.amqp.prototype.ordering;
 
-import org.hyperic.hq.amqp.prototype.ordering.agents.CommonAgentConfiguration;
+import org.hyperic.hq.amqp.prototype.ordering.agents.AgentConfiguration;
 import org.hyperic.hq.amqp.prototype.ordering.servers.ServerConfiguration;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.AbstractApplicationContext;
@@ -37,7 +37,7 @@ public class SimpleDemo {
  
     public static void main(String[] args) {
         AbstractApplicationContext ac = new AnnotationConfigApplicationContext(
-                CommonAgentConfiguration.class, ServerConfiguration.class
+                AgentConfiguration.class, ServerConfiguration.class
         );
 
         try {

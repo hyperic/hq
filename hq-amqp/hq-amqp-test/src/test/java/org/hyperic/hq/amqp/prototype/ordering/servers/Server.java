@@ -53,8 +53,8 @@ public class Server {
 
     private static int sent = 0;
 
-    public Server(String messagesToSend, RabbitTemplate template, AbstractMessageListenerContainer serverListener) {
-        this.messagesToSend = Integer.parseInt(messagesToSend);
+    public Server(int messagesToSend, RabbitTemplate template, AbstractMessageListenerContainer serverListener) {
+        this.messagesToSend = messagesToSend;
         this.template = template;
         this.serverListener = serverListener;
     }

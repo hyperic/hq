@@ -39,13 +39,40 @@
 
 
     <properties>
+        <maven.test.failure.ignore>true</maven.test.failure.ignore>
         <spring.amqp.version>1.0.0.M2</spring.amqp.version>
         <rabbitmq.version>2.3.1</rabbitmq.version>
         <otp.version>1.5.3</otp.version>
-        <spring.framework.version>3.1.0.BUILD-20110225135352</spring.framework.version>
+        <spring.framework.version>3.1.0.BUILD-20110310181504</spring.framework.version>
     </properties>
-
+    <profiles>
+        <profile>
+            <id>strict</id>
+            <properties>
+                <!-- temporary for rabbit server dependency where no server is present -->
+                <maven.test.failure.ignore>${maven.test.failure.ignore}</maven.test.failure.ignore>
+            </properties>
+        </profile>
+    </profiles>
     <dependencies>
+        <!-- HQ -->
+        <dependency>
+            <groupId>org.hyperic.hq</groupId>
+            <artifactId>hq-server</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hyperic.hq</groupId>
+            <artifactId>hq-server</artifactId>
+            <version>${project.version}</version>
+            <classifier>tests</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.hyperic.hq.agent</groupId>
+            <artifactId>hq-agent-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- HQ AMQP -->
         <dependency>
             <groupId>org.hyperic.hq.amqp</groupId>
             <artifactId>hq-amqp-common</artifactId>
@@ -53,20 +80,15 @@
         </dependency>
         <dependency>
             <groupId>org.hyperic.hq.amqp</groupId>
-            <artifactId>hq-amqp-server</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hyperic.hq.amqp</groupId>
-            <artifactId>hq-amqp-agent</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hyperic.hq.amqp</groupId>
             <artifactId>hq-amqp-api</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!-- Rabbit dependencies -->
+        <dependency>
+            <groupId>org.hyperic.hq.amqp</groupId>
+            <artifactId>hq-amqp-admin</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- Rabbit -->
         <dependency>
             <groupId>com.rabbitmq</groupId>
             <artifactId>amqp-client</artifactId>
@@ -124,6 +146,17 @@
             <artifactId>org.springframework.core</artifactId>
             <version>${spring.framework.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>org.springframework.oxm</artifactId>
+            <version>${spring.framework.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>org.springframework.test</artifactId>
+            <version>${spring.framework.version}</version>
+            <scope>provided</scope>
+        </dependency>
         <!-- JSON -->
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
@@ -133,38 +166,34 @@
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-mapper-asl</artifactId>
         </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>org.springframework.test</artifactId>
-            <version>${spring.framework.version}</version>
-            <scope>test</scope>
-        </dependency>
+
         <!--<dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>${mockito.version}</version>
-            <scope>test</scope>
-        </dependency>
-         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
+           <groupId>org.mockito</groupId>
+           <artifactId>mockito-all</artifactId>
+           <version>${mockito.version}</version>
+           <scope>test</scope>
+       </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>log4j-over-slf4j</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-        </dependency> -->
+           <groupId>org.slf4j</groupId>
+           <artifactId>slf4j-api</artifactId>
+       </dependency>
+       <dependency>
+           <groupId>org.slf4j</groupId>
+           <artifactId>jcl-over-slf4j</artifactId>
+       </dependency>
+       <dependency>
+           <groupId>org.slf4j</groupId>
+           <artifactId>log4j-over-slf4j</artifactId>
+       </dependency>
+       <dependency>
+           <groupId>org.slf4j</groupId>
+           <artifactId>slf4j-simple</artifactId>
+       </dependency> -->
     </dependencies>
 
     <build>

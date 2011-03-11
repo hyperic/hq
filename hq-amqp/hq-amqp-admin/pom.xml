@@ -33,9 +33,9 @@
         <version>4.6.0.BUILD-SNAPSHOT</version>
     </parent>
 
-    <artifactId>hq-amqp-server</artifactId>
+    <artifactId>hq-amqp-admin</artifactId>
     <packaging>jar</packaging>
-    <name>Hyperic AMQP Server Implementation</name>
+    <name>Hyperic AMQP Admin Implementation</name>
 
     <properties>
         <spring.amqp.version>1.0.0.M2</spring.amqp.version>
@@ -43,16 +43,15 @@
         <otp.version>1.5.3</otp.version> 
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.hyperic.hq</groupId>
-            <artifactId>hq-server</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
+    <dependencies> 
         <dependency>
             <groupId>org.hyperic.hq.amqp</groupId>
             <artifactId>hq-amqp-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hyperic.hq.amqp</groupId>
+            <artifactId>hq-amqp-common</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -60,9 +59,15 @@
             <artifactId>jinterface</artifactId>
             <version>${otp.version}</version>
         </dependency>
+        <!-- Spring AMQP dependencies -->
         <dependency>
             <groupId>org.springframework.amqp</groupId>
             <artifactId>spring-amqp</artifactId>
+            <version>${spring.amqp.version}</version>
+        </dependency> 
+        <dependency>
+            <groupId>org.springframework.amqp</groupId>
+            <artifactId>spring-rabbit</artifactId>
             <version>${spring.amqp.version}</version>
         </dependency>
         <dependency>
@@ -70,10 +75,18 @@
             <artifactId>spring-erlang</artifactId>
             <version>${spring.amqp.version}</version>
         </dependency>
+        <!-- Spring Framework -->
         <dependency>
-            <groupId>org.springframework.amqp</groupId>
-            <artifactId>spring-rabbit</artifactId>
-            <version>${spring.amqp.version}</version>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency> 
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
         </dependency>
         <!--<dependency>
 			<groupId>org.springframework</groupId>
