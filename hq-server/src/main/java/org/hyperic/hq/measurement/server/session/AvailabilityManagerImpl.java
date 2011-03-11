@@ -242,9 +242,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             Collections.sort(sortedChildrenIds);
             childrenIds.put(resourceId, sortedChildrenIds);
         }
-        return null;
-        //TODO
-        //return measurementDAO.findRelatedAvailMeasurements(childrenIds);
+        return measurementRepository.findRelatedAvailabilityMeasurements(childrenIds);
     }
 
     /**
