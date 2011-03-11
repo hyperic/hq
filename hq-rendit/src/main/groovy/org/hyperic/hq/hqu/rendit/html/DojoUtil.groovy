@@ -262,10 +262,10 @@ class DojoUtil {
                 }
                 if(hqDojo.cookie("filtercount")) {
                     currentCountFilter = hqDojo.byId(hqDojo.cookie("filtercount"));
-                    updateKWArgs.numRows = currentCountFilter.id;
+                    updateKWArgs.pageSize = currentCountFilter.id;
                 } else {
                     currentCountFilter = hqDojo.byId("50");
-                    updateKWArgs.numRows = 50;
+                    updateKWArgs.pageSize = 50;
                 }
                 updateFilterCount(currentCountFilter.id, currentCountFilter);
                 plugin.ajax.bind("${params.updateURL}");
@@ -290,6 +290,7 @@ class DojoUtil {
      *   titleHtml*:  Additional HTML to place in the header of the table
      *   hidden*: Set to true if this table should start hidden
      *   numRows:  Number of rows to display
+     *   pageSize: Number of items to retrieve per page
      *   refresh*:  If specified, the table will refresh at the passed # of
      *              seconds.
      *   pageControls*:  If specified, provides a boolean value indicating
@@ -356,6 +357,8 @@ class DojoUtil {
             pageControlStyle = 'display:block'
         }
         
+		def pageSizeValue = new Integer(params.get("pageSize", params.get("numRows", "20")))
+		
         def res = new StringBuffer(""" 
         <script type="text/javascript">
         hqDojo.require("dojox.grid.DataGrid");
@@ -366,7 +369,7 @@ class DojoUtil {
         var	${postRefreshVar} = [];
         var	${ajaxCountVar} = 0;
         var	${lastPageVar} = false;
-        var	${pageSizeVar} = ${params.numRows};
+        var	${pageSizeVar} = ${pageSizeValue};
         var	${pageNumVar}  = 0; 
 		var ${sortOrderVar}; 
         var ${refreshTimeoutVar};
@@ -409,7 +412,7 @@ class DojoUtil {
             
             ${tableVar} = new hqDojox.grid.DataGrid({
             	structure: ${tableVar}_layout,
-            	autoHeight: ${params.get('numRows', 20)},
+            	autoHeight: ${params.get('numRows', true)},
             	escapeHTMLInData: false,
             	selectionMode: "none"
             }, hqDojo.byId("${id}"));
@@ -433,8 +436,8 @@ class DojoUtil {
 
         function ${idVar}_makeQueryStr(kwArgs) {
             var res = '?pageNum=' + ${pageNumVar};
-            if (kwArgs && kwArgs.numRows)
-                res += '&pageSize='+ kwArgs.numRows;
+            if (kwArgs && kwArgs.pageSize)
+                res += '&pageSize='+ kwArgs.pageSize;
             else
                 res += '&pageSize=' + ${pageSizeVar};
             if(kwArgs && kwArgs.typeId)
@@ -672,8 +675,8 @@ class DojoUtil {
         }
 
         def pageNum  = new Integer(params.getOne("pageNum", "0"))
-        def pageSize = new Integer(params.getOne("pageSize", "20"))
-
+        def pageSize = new Integer(params.getOne("pageSize", params.getOne("numRows", "20")))
+		
         /* To determine if we are at the last page, we modify the pageSize
            when we query to get 1 additional row.  If that row exists, we know
            we aren't on the last page */
@@ -790,8 +793,8 @@ class DojoUtil {
             for (p in b.PAGE[PANE_VAR]) {
                 output.write("  hqDojo.style('${p}', 'display', '');\n");
             }
-			output.write("     hqDijit.byId('${params.id}').resize();")
-            output.write("  };\n")
+			output.write("     hqDijit.byId('${params.id}').resize();\n")
+			output.write("  };\n")
             output.write("  hqDojo.ready(${idVar}_start);\n")
         }
         

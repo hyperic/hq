@@ -44,6 +44,9 @@
     
     new plugin.MessagePanel();
     
+    hqDojo.subscribe("XHRComplete", function() {
+    	setFoot();
+    });    
 </script>
 <div class="messagePanel messageInfo" style="display:none;" id="messagePanel"><div class="infoIcon"></div><span id="messagePanelMessage"></span></div>
 <div class="downContainer" style="clear:both;">
@@ -72,7 +75,7 @@
 
         <%= dojoTable(id:'SystemsDown', title:l.SystemsDownTitle,
             refresh:60, pageControls:false, url:urlFor(action:'data'),
-            schema:systemsDownSchema, numRows:50, headerHTML: headerHTML)
+            schema:systemsDownSchema, numRows:25, pageSize:50, headerHTML: headerHTML)
         %>
         </div>
     </div>
