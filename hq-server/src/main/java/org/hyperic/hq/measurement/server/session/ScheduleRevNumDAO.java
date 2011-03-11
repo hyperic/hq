@@ -73,7 +73,7 @@ public class ScheduleRevNumDAO
         String sql = "select m.resource, min(m.interval) "
                      + "from Measurement m "
                      + "where m.enabled = true "
-                     + "group by m.instanceId";
+                     + "group by m.resource.id";
         return getSession().createQuery(sql).list();
     }
 
