@@ -28,6 +28,7 @@ package org.hyperic.hq.measurement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,9 +68,9 @@ import org.springframework.stereotype.Component;
 public class MetricsNotComingInDiagnostic implements DiagnosticObject {
 
     private final Log log = LogFactory.getLog(MetricsNotComingInDiagnostic.class);
-    private long started = now();
-    // 60 minutes
-    private static final long THRESHOLD = 1000 * 60 * 60;
+    private long last = now();
+    // 12 hours
+    private static final long THRESHOLD = 1000 * 60 * 60 * 12;
     private DiagnosticsLogger diagnosticsLogger;
     private AuthzSubjectManager authzSubjectManager;
     private AvailabilityManager availabilityManager;
@@ -117,16 +118,16 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
     }
     
     public void reset() {
-        this.started = now();
+        this.last = now();
     }
     
     private String getReport(final boolean isVerbose) {
         if (!HAUtil.isMasterNode()) {
             return "Server must be the primary node in the HA configuration before this report is valid.";
         }
-        if ((now() - THRESHOLD) < started) {
-            return "Server must be up for " + THRESHOLD / 1000 / 60 +
-                   " minutes before this report is valid";
+        if ((now() - last) < THRESHOLD) {
+            return "MetricsNotComingInDiagnostic is only run every " + THRESHOLD / 1000 / 60 / 60 +
+                   " hours, next run at " + new Date(last + THRESHOLD);
         }
         final StringBuilder rtn = new StringBuilder();
         try {
@@ -141,6 +142,8 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
             });
         } catch (Exception e) {
             log.error(e, e);
+        } finally {
+        	reset();
         }
         return rtn.toString();
     }

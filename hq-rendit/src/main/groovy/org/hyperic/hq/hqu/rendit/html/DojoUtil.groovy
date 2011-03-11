@@ -409,14 +409,14 @@ class DojoUtil {
             
             ${tableVar} = new hqDojox.grid.DataGrid({
             	structure: ${tableVar}_layout,
-            	autoHeight: 20,
+            	autoHeight: ${params.get('numRows', 20)},
             	escapeHTMLInData: false,
             	selectionMode: "none"
             }, hqDojo.byId("${id}"));
-           	
-            ${tableVar}.startup();
+			
+			${id}_refreshTable();           	
             
-            ${id}_refreshTable();
+            ${tableVar}.startup();
         });    
 
         // Allows the caller to specify a callback which will return 
@@ -790,6 +790,7 @@ class DojoUtil {
             for (p in b.PAGE[PANE_VAR]) {
                 output.write("  hqDojo.style('${p}', 'display', '');\n");
             }
+			output.write("     hqDijit.byId('${params.id}').resize();")
             output.write("  };\n")
             output.write("  hqDojo.ready(${idVar}_start);\n")
         }

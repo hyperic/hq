@@ -36,16 +36,13 @@ import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
-import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
-import org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum;
-import org.hyperic.hq.appdef.server.session.AgentSortField;
 import org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection;
+import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
+import org.hyperic.hq.appdef.server.session.AgentSortField;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.lather.PluginReport_args;
-import org.hyperic.hq.product.Plugin;
 import org.hyperic.util.ConfigPropertyException;
 
 /**
@@ -454,9 +451,6 @@ public interface AgentManager {
     throws PermissionException, AgentConnectionException, AgentNotFoundException,
            AgentRemoteException, FileNotFoundException, IOException, ConfigPropertyException;
     
-// XXX javadoc!
-    public long getNumAutoUpdatingAgents();
-    
 // XXX may want to change Boolean so that it is a status string "SUCCESS" or an error message
     /**
      * Removes plugin jars from the plugin directory on the remote Agent.
@@ -468,11 +462,12 @@ public interface AgentManager {
     throws AgentConnectionException, AgentRemoteException, PermissionException;
 
 // XXX javadoc!
-    public void removePluginInBackground(AuthzSubject subj, Collection<Agent> agents,
-                                         Collection<String> pluginFileNames)
-    throws PermissionException;
+    public void syncAllAgentPlugins();
 
 // XXX javadoc!
-    public void syncAllAgentPlugins();
+    public void syncPluginToAgents(String pluginName);
+
+// XXX javadoc!
+    public void syncPluginToAgentsAfterCommit(String pluginFileName);
 
 }

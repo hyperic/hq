@@ -995,6 +995,17 @@ ExtendedStatus On
   </server>
 
   <server name="Apache-ERS"
+          version="4.x"
+          include="2.4">
+
+    <property name="VERSION_FILE"
+              value="ers-server.pl"/>
+    <scan>
+      <include name="/**/${VERSION_FILE}"/>
+    </scan>
+  </server>
+
+  <server name="Apache-ERS"
           version="3.x"
           include="2.4">
 

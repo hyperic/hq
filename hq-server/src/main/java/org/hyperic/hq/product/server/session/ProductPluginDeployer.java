@@ -337,6 +337,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
     private void undeployPlugin(File pluginFile) throws Exception {
         log.info("Undeploying plugin: " + pluginFile);
         productPluginManager.removePluginJar(pluginFile.toString());
+        agentManager.syncPluginToAgentsAfterCommit(pluginFile.getName());
     }
 
     private String loadPlugin(File pluginFile, boolean initializing) throws Exception {
@@ -354,7 +355,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
             log.info("Deploying plugin: " + pluginName);
             deployPlugin(pluginName);
         }
-        agentManager.syncAllAgentPlugins();
+        agentManager.syncPluginToAgentsAfterCommit(pluginFile.getName());
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -392,8 +393,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
                     loadAndDeployPlugin(fileEvent.getFileDetails().getFile());
                 }
             } catch (Exception e) {
-                log.error("Error responding to plugin file event " + fileEvent + ".  Cause: " +
-                          e.getMessage());
+                log.error("Error responding to plugin file event " + fileEvent + ".  Cause: " + e, e);
             }
         }
     }

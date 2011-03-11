@@ -55,8 +55,10 @@ import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatusDAO;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum;
 import org.hyperic.hq.appdef.shared.AgentManager;
+import org.hyperic.hq.appdef.shared.AgentPluginUpdater;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.product.Plugin;
@@ -86,10 +88,14 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
 
     private ApplicationContext ctx;
 
+    private PermissionManager permissionManager;
+
     @Autowired
-    public PluginManagerImpl(PluginDAO pluginDAO, AgentPluginStatusDAO agentPluginStatusDAO) {
+    public PluginManagerImpl(PluginDAO pluginDAO, AgentPluginStatusDAO agentPluginStatusDAO,
+                             PermissionManager permissionManager) {
         this.pluginDAO = pluginDAO;
         this.agentPluginStatusDAO = agentPluginStatusDAO;
+        this.permissionManager = permissionManager;
     }
     
     public Plugin getByJarName(String jarName) {
@@ -99,8 +105,8 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     @Transactional(readOnly=false)
     public void removePlugins(AuthzSubject subj, Collection<String> pluginFileNames)
     throws PermissionException {
+        permissionManager.checkIsSuperUser(subj);
         final Collection<Agent> agents = agentPluginStatusDAO.getAutoUpdatingAgents();
-        final AgentManager agentManager = Bootstrap.getBean(AgentManager.class);
         final File pluginDir = getPluginDir();
         for (final String filename : pluginFileNames) {
             final File plugin = new File(pluginDir.getAbsolutePath() + "/" + filename);
@@ -108,7 +114,10 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
                 log.warn("Could not remove plugin " + filename);
             }
         }
-        agentManager.removePluginInBackground(subj, agents, pluginFileNames);
+        final AgentPluginUpdater agentPluginUpdater = Bootstrap.getBean(AgentPluginUpdater.class);
+        for (final Agent agent : agents) {
+            agentPluginUpdater.queuePluginRemoval(agent.getId(), pluginFileNames);
+        }
     }
     
     // XXX currently if one plugin validation fails all will fail.  Probably want to deploy the
@@ -368,6 +377,11 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         } catch (IOException e) {
             log.debug(e,e);
         }
+    }
+
+    @Transactional(readOnly=false)
+    public void removeAgentPluginStatuses(Integer agentId, Collection<String> pluginFileNames) {
+        agentPluginStatusDAO.removeAgentPluginStatuses(agentId, pluginFileNames);
     }
 
 }

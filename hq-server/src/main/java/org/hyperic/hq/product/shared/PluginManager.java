@@ -78,4 +78,7 @@ public interface PluginManager {
  // XXX javadoc!
     void removePlugins(AuthzSubject subj, Collection<String> pluginFilenames)
     throws PermissionException;
+
+ // XXX javadoc!
+    void removeAgentPluginStatuses(Integer agentId, Collection<String> pluginFileNames);
 }
