@@ -36,85 +36,89 @@ import javax.persistence.Version;
 
 import org.hibernate.annotations.GenericGenerator;
 
-
 @Entity
-@Table(name="EAM_PRINCIPAL")
-public class Principal implements Serializable
-{
+@Table(name = "EAM_PRINCIPAL")
+public class Principal implements Serializable {
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "ID")
     private Integer id;
 
-    @Column(name="VERSION_COL",nullable=false)
-    @Version
-    private Long version;
-    
-    @Column(name="PRINCIPAL",nullable=false,length=64,unique=true)
-    private String principal;
-    
-    @Column(name="PASSWORD",nullable=false,length=64)
+    @Column(name = "PASSWORD", nullable = false, length = 64)
     private String password;
 
-    public Principal()
-    {
+    @Column(name = "PRINCIPAL", nullable = false, length = 64, unique = true)
+    private String principal;
+
+    @Column(name = "VERSION_COL", nullable = false)
+    @Version
+    private Long version;
+
+    public Principal() {
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Principal other = (Principal) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        if (principal == null) {
+            if (other.principal != null)
+                return false;
+        } else if (!principal.equals(other.principal))
+            return false;
+        return true;
     }
 
     public Integer getId() {
         return id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public String getPassword() {
+        return password;
+    }
+
+    public String getPrincipal() {
+        return principal;
     }
 
     public Long getVersion() {
         return version;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        result = prime * result + ((principal == null) ? 0 : principal.hashCode());
+        return result;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setPrincipal(String principal) {
+        this.principal = principal;
+    }
+
     public void setVersion(Long version) {
         this.version = version;
     }
 
-    public String getPrincipal()
-    {
-        return principal;
-    }
-
-    public void setPrincipal(String principal)
-    {
-        this.principal = principal;
-    }
-
-    public String getPassword()
-    {
-        return password;
-    }
-
-    public void setPassword(String password)
-    {
-        this.password = password;
-    }
-
-    public boolean equals(Object obj)
-    {
-        if (!(obj instanceof Principal) || !super.equals(obj)) {
-            return false;
-        }
-        Principal o = (Principal)obj;
-        return
-            ((principal==o.getPrincipal()) ||
-             (principal!=null && o.getPrincipal()!=null &&
-              principal.equals(o.getPrincipal())));
-    }
-
-    public int hashCode()
-    {
-        int result = super.hashCode();
-
-        result = 37*result +(principal != null ? principal.hashCode() : 0);
-
-        return result;
-    }
 }

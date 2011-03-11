@@ -33,11 +33,11 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.auth.Principal;
+import org.hyperic.hq.auth.data.PrincipalRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.dao.PrincipalDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -59,15 +59,15 @@ import org.springframework.stereotype.Component;
 public class JdbcHQAuthenticationProvider implements HQAuthenticationProvider {
 
     private final Log log = LogFactory.getLog(JdbcHQAuthenticationProvider.class.getName());
-    private PrincipalDAO principalDao;
+    private PrincipalRepository principalRepository;
     private AuthzSubjectManager authzSubjectManager;
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public JdbcHQAuthenticationProvider(PrincipalDAO principalDao,
+    public JdbcHQAuthenticationProvider(PrincipalRepository principalRepository,
                                         AuthzSubjectManager authzSubjectManager,
                                         PasswordEncoder passwordEncoder) {
-        this.principalDao = principalDao;
+        this.principalRepository = principalRepository;
         this.authzSubjectManager = authzSubjectManager;
         this.passwordEncoder = passwordEncoder;
     }
@@ -78,7 +78,7 @@ public class JdbcHQAuthenticationProvider implements HQAuthenticationProvider {
             // TODO We shouldn't have to make two calls here...
             AuthzSubject subject = authzSubjectManager.findSubjectByAuth(username,
                 HQConstants.ApplicationName);
-            Principal principal = principalDao.findByUsername(username);
+            Principal principal = principalRepository.findByPrincipal(username);
 
             if (password == null || principal == null) {
                 if (debug) {
