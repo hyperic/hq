@@ -62,6 +62,7 @@ import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TimingVoodoo;
+import org.hyperic.hq.measurement.data.AvailabilityDataRepository;
 import org.hyperic.hq.measurement.data.MeasurementRepository;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
@@ -117,7 +118,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
 
     private MessagePublisher messenger;
 
-    private AvailabilityDataDAO availabilityDataDAO;
+    private AvailabilityDataRepository availabilityDataRepository;
 
     private MeasurementRepository measurementRepository;
     private MessagePublisher messagePublisher;
@@ -128,13 +129,13 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     
     @Autowired
     public AvailabilityManagerImpl(ResourceManager resourceManager, ResourceGroupManager groupManager, MessagePublisher messenger,
-                                   AvailabilityDataDAO availabilityDataDAO, MeasurementRepository measurementRepository,
+                                   AvailabilityDataRepository availabilityDataRepository, MeasurementRepository measurementRepository,
                                    MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers, AvailabilityCache availabilityCache,
                                    ConcurrentStatsCollector concurrentStatsCollector,PlatformManager platformManager) {
         this.resourceManager = resourceManager;
         this.groupManager = groupManager;
         this.messenger = messenger;
-        this.availabilityDataDAO = availabilityDataDAO;
+        this.availabilityDataRepository = availabilityDataRepository;
         this.measurementRepository = measurementRepository;
         this.messagePublisher = messagePublisher;
         this.registeredTriggers = registeredTriggers;
@@ -189,7 +190,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             throw new MeasurementNotFoundException("Availability measurement " + "not found for resource " +
                                                    resource.getId());
         }
-        List<AvailabilityDataRLE> availInfo = availabilityDataDAO.getHistoricalAvails(meas, begin, end, false);
+        List<AvailabilityDataRLE> availInfo = availabilityDataRepository.getHistoricalAvails(meas, begin, end, false);
         long rtn = 0l;
         for (AvailabilityDataRLE avail : availInfo) {
             if (avail.getAvailVal() != AVAIL_DOWN) {
@@ -300,7 +301,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     @Transactional(readOnly = true)
     public PageList<HighLowMetricValue> getHistoricalAvailData(Measurement m, long begin, long end, PageControl pc,
                                                                boolean prependUnknowns) {
-        List<AvailabilityDataRLE> availInfo = availabilityDataDAO.getHistoricalAvails(m, begin, end, pc.isDescending());
+        List<AvailabilityDataRLE> availInfo = availabilityDataRepository.getHistoricalAvails(m, begin, end, pc.isDescending());
         return getPageList(availInfo, begin, end, m.getInterval(), prependUnknowns);
     }
 
@@ -325,7 +326,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         if (mids.length == 0) {
             return new PageList<HighLowMetricValue>();
         }
-        List<AvailabilityDataRLE> availInfo = availabilityDataDAO.getHistoricalAvails(mids, begin, end, pc
+        List<AvailabilityDataRLE> availInfo = availabilityDataRepository.getHistoricalAvails(Arrays.asList(mids), begin, end, pc
             .isDescending());
         return getPageList(availInfo, begin, end, interval, prependUnknowns);
     }
@@ -337,7 +338,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      */
     @Transactional(readOnly = true)
     public List<AvailabilityDataRLE> getHistoricalAvailData(Resource res, long begin, long end) {
-        return availabilityDataDAO.getHistoricalAvails(res, begin, end);
+        return availabilityDataRepository.getHistoricalAvails(res, begin, end);
     }
 
     private Collection<HighLowMetricValue> getDefaultHistoricalAvail(long timestamp) {
@@ -470,7 +471,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      */
     @Transactional(readOnly = true)
     public Map<Integer, double[]> getAggregateData(Integer[] mids, long begin, long end) {
-        List<Object[]> avails = availabilityDataDAO.findAggregateAvailability(mids, begin, end);
+        List<Object[]> avails = availabilityDataRepository.findAggregateAvailability(Arrays.asList(mids), begin, end);
         return getAggData(avails, false);
     }
 
@@ -482,7 +483,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      */
     @Transactional(readOnly = true)
     public Map<Integer, double[]> getAggregateDataByTemplate(Integer[] mids, long begin, long end) {
-        List<Object[]> avails = availabilityDataDAO.findAggregateAvailability(mids, begin, end);
+        List<Object[]> avails = availabilityDataRepository.findAggregateAvailability(Arrays.asList(mids), begin, end);
         return getAggData(avails, true);
     }
 
@@ -636,7 +637,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         // Don't modify callers array
         final List<Integer> midList = Collections.unmodifiableList(Arrays.asList(mids));
         final Map<Integer, MetricValue> rtn = new HashMap<Integer, MetricValue>(midList.size());
-        final List<AvailabilityDataRLE> list = availabilityDataDAO.findLastAvail(midList);
+        final List<AvailabilityDataRLE> list = availabilityDataRepository.findLastByMeasurements(midList);
         for (AvailabilityDataRLE avail : list) {
             final Integer mid = avail.getMeasurement().getId();
             final AvailabilityMetricValue mVal = new AvailabilityMetricValue(avail.getAvailVal(), avail.getStartime(),
@@ -667,7 +668,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         } else {
             rtn = new ArrayList<DownMetricValue>();
         }
-        List<AvailabilityDataRLE> unavails = availabilityDataDAO.getDownMeasurements(includes);
+        List<AvailabilityDataRLE> unavails = availabilityDataRepository.getDownMeasurements(includes);
         for (AvailabilityDataRLE rle : unavails) {
             Measurement meas = rle.getMeasurement();
             long timestamp = rle.getStartime();
@@ -758,11 +759,11 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             AvailabilityDataRLE rle = (AvailabilityDataRLE) entry.getValue();
             // if we call remove() on an object which is already in the session
             // hibernate will throw NonUniqueObjectExceptions
-            AvailabilityDataRLE tmp = availabilityDataDAO.get(rle.getAvailabilityDataId());
+            AvailabilityDataRLE tmp = availabilityDataRepository.findById(rle.getAvailabilityDataId());
             if (tmp != null) {
-                availabilityDataDAO.remove(tmp);
+                availabilityDataRepository.delete(tmp);
             } else {
-                availabilityDataDAO.remove(rle);
+                availabilityDataRepository.delete(rle);
             }
         }
         if (debug) {
@@ -774,7 +775,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         // flush() in order to ensure that these old objects are not in the
         // session when the equivalent create() on the same ID is run,
         // thus avoiding NonUniqueObjectExceptions
-        availabilityDataDAO.getSession().flush();
+        availabilityDataRepository.flush();
         if (debug) {
             watch.markTimeEnd("flush");
             watch.markTimeBegin("create");
@@ -785,7 +786,9 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             AvailabilityDataId id = new AvailabilityDataId();
             id.setMeasurement(rle.getMeasurement());
             id.setStartime(rle.getStartime());
-            availabilityDataDAO.create(rle.getMeasurement(), rle.getStartime(), rle.getEndtime(), rle.getAvailVal());
+            AvailabilityDataRLE availData = new AvailabilityDataRLE(rle.getMeasurement(), rle.getStartime(), 
+                rle.getEndtime(), rle.getAvailVal());
+            availabilityDataRepository.save(availData);
         }
         if (debug) {
             watch.markTimeEnd("create");
@@ -828,8 +831,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                 currAvails = Collections.EMPTY_MAP;
     
             }
-            Integer[] mIds = (Integer[]) mids.toArray(new Integer[0]);
-            currAvails = availabilityDataDAO.getHistoricalAvailMap(mIds, now - MAX_DATA_BACKLOG_TIME, false);
+            currAvails = availabilityDataRepository.getHistoricalAvailMap(new ArrayList<Integer>(mids), now - MAX_DATA_BACKLOG_TIME, false);
             return currAvails;
         } finally {
             if (_log.isDebugEnabled()) {

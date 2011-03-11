@@ -2,8 +2,10 @@ package org.hyperic.hq.measurement.data;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
@@ -82,7 +84,45 @@ public class AvailabilityDataRepositoryIntegrationTest {
         expected.add(avail3);
         assertEquals(
             expected,
-            new HashSet<AvailabilityDataRLE>(availabilityDataRepository.findByMeasurements(Arrays
-                .asList(new Integer[] { measurement.getId(), measurement2.getId() }))));
+            new HashSet<AvailabilityDataRLE>(availabilityDataRepository
+                .findLastByMeasurements(Arrays.asList(new Integer[] { measurement.getId(),
+                                                                     measurement2.getId() }))));
+    }
+
+    @Test
+    public void testGetHistoricalAvailsByMeasurement() {
+        long starttime = System.currentTimeMillis();
+        AvailabilityDataRLE avail1 = new AvailabilityDataRLE(measurement, starttime + 1000,
+            starttime + 5000, 1.0);
+        availabilityDataRepository.save(avail1);
+        AvailabilityDataRLE avail2 = new AvailabilityDataRLE(measurement, starttime,
+            starttime + 7000, 1.0);
+        availabilityDataRepository.save(avail2);
+        AvailabilityDataRLE avail3 = new AvailabilityDataRLE(measurement, starttime,
+            starttime + 3000, 1.0);
+        availabilityDataRepository.save(avail3);
+        List<AvailabilityDataRLE> expected = new ArrayList<AvailabilityDataRLE>();
+        expected.add(avail1);
+        assertEquals(expected, availabilityDataRepository.getHistoricalAvails(measurement,
+            starttime + 4000, starttime + 8000, true));
+    }
+
+    @Test
+    public void testGetHistoricalAvailsByResource() {
+        long starttime = System.currentTimeMillis();
+        AvailabilityDataRLE avail1 = new AvailabilityDataRLE(measurement, starttime + 1000,
+            starttime + 5000, 1.0);
+        availabilityDataRepository.save(avail1);
+        AvailabilityDataRLE avail2 = new AvailabilityDataRLE(measurement, starttime,
+            starttime + 10000, 1.0);
+        availabilityDataRepository.save(avail2);
+        AvailabilityDataRLE avail3 = new AvailabilityDataRLE(measurement2, starttime,
+            starttime + 3000, 1.0);
+        availabilityDataRepository.save(avail3);
+        List<AvailabilityDataRLE> expected = new ArrayList<AvailabilityDataRLE>();
+        expected.add(avail2);
+        expected.add(avail1);
+        assertEquals(expected, availabilityDataRepository.getHistoricalAvails(
+            measurement.getResource(), starttime + 4000, starttime + 8000));
     }
 }
