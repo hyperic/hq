@@ -7,7 +7,7 @@
      <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
       <properties>
             <property name="hibernate.hbm2ddl.auto" value="update"/>
-            <property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect"/>
+            <property name="hibernate.dialect" value="org.hyperic.hq.test.HSQLDialect"/>
             <property name="hibernate.cache.provider_class" value="net.sf.ehcache.hibernate.SingletonEhCacheProvider" />
         </properties>
   	</persistence-unit>
