@@ -486,18 +486,6 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         return getAggData(avails, true);
     }
 
-    /**
-     * @return {@link Map} of {@link MeasurementTemplate.getId} to {@link
-     *         double[]}. Array is comprised of 5 elements: [IND_MIN] [IND_AVG]
-     *         [IND_MAX] [IND_CFG_COUNT] [IND_LAST_TIME]
-     * 
-     */
-    @Transactional(readOnly = true)
-    public Map<Integer, double[]> getAggregateData(Integer[] tids, Integer[] iids, long begin, long end) {
-        List<Object[]> avails = availabilityDataDAO.findAggregateAvailability(tids, iids, begin, end);
-        return getAggData(avails, true);
-    }
-
     private Map<Integer, double[]> getAggData(List<Object[]> avails, boolean useTidKey) {
         Map<Integer, double[]> rtn = new HashMap<Integer, double[]>();
         if (avails.size() == 0) {

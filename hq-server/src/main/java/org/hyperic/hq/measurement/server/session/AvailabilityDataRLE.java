@@ -38,116 +38,42 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Index;
 
 @Entity
-@Table(name="HQ_AVAIL_DATA_RLE")
-public class AvailabilityDataRLE implements Serializable  {
+@Table(name = "HQ_AVAIL_DATA_RLE")
+public class AvailabilityDataRLE implements Serializable {
 
-    @Column(name="STARTTIME",nullable=false,insertable=false,updatable=false)
-    private long startime;
-    
-    @Column(name="ENDTIME",nullable=false)
-    @Index(name="AVAIL_RLE_ENDTIME_VAL_IDX")
-    private long endtime=9223372036854775807l;
-    
-    @Column(name="AVAILVAL",nullable=false)
-    @Index(name="AVAIL_RLE_ENDTIME_VAL_IDX")
-    private double availVal;
-    
-    @ManyToOne
-    @JoinColumn(name="MEASUREMENT_ID",nullable=false,insertable=false,updatable=false)
-    private Measurement measurement;
-    
-    @EmbeddedId
-    private AvailabilityDataId id;
-    
     private static final long MAX_ENDTIME = Long.MAX_VALUE;
-    
-    public AvailabilityDataRLE() {
-    }
 
-    public AvailabilityDataRLE(Measurement meas, long startime,
-                               long endtime, double availType) {
-        init(meas, startime, endtime, availType);
-    }
-
-    public AvailabilityDataRLE(Measurement meas, long startime,
-                               double availType) {
-        init(meas, startime, MAX_ENDTIME, availType);
-    }
-    
     public static long getLastTimestamp() {
         return MAX_ENDTIME;
     }
-    
-    private void init(Measurement meas, long startime, long endtime,
-            double availVal) {
-        setAvailabilityDataId(new AvailabilityDataId(startime, meas));
-        this.measurement = meas;
-        this.startime = startime;
-        this.endtime = endtime;
-        this.availVal = availVal;
+
+    @Column(name = "AVAILVAL", nullable = false)
+    @Index(name = "AVAIL_RLE_ENDTIME_VAL_IDX")
+    private double availVal;
+
+    @Column(name = "ENDTIME", nullable = false)
+    @Index(name = "AVAIL_RLE_ENDTIME_VAL_IDX")
+    private long endtime = 9223372036854775807l;
+
+    @EmbeddedId
+    private AvailabilityDataId id;
+
+    @ManyToOne
+    @JoinColumn(name = "MEASUREMENT_ID", nullable = false, insertable = false, updatable = false)
+    private Measurement measurement;
+
+    @Column(name = "STARTTIME", nullable = false, insertable = false, updatable = false)
+    private long startime;
+
+    public AvailabilityDataRLE() {
     }
 
-    public Measurement getMeasurement() {
-        return measurement;
+    public AvailabilityDataRLE(Measurement meas, long startime, double availType) {
+        init(meas, startime, MAX_ENDTIME, availType);
     }
 
-    public void setMeasurement(Measurement meas) {
-        measurement = meas;
-    }
-    
-    protected void setAvailabilityDataId(AvailabilityDataId id) {
-        this.id = id;
-        startime = id.getStartime();
-        measurement = id.getMeasurement();
-    }
-
-    public AvailabilityDataId getAvailabilityDataId() {
-        if(this.id==null) {
-            this.id= new AvailabilityDataId(startime, measurement);
-        }   
-        return id;
-    }
-
-    public long getStartime() {
-        return startime;
-    }
-
-    public void setStartime(long startime) {
-        this.startime = startime;
-    }
-
-    public long getEndtime() {
-        return endtime;
-    }
-
-    public void setEndtime(long endtime) {
-        this.endtime = endtime;
-    }
-
-    public double getAvailVal() {
-        return availVal;
-    }
-
-    public void setAvailVal(double val) {
-        availVal = val;
-    }
-    
-    public long getApproxEndtime() {
-        long approxEndtime = endtime;
-        
-        if (approxEndtime == MAX_ENDTIME) {        
-            long interval = measurement.getInterval();
-            // java will round down
-            long multiplier = (System.currentTimeMillis() - startime) / interval;
-            
-            approxEndtime = startime + (multiplier * interval);        
-        }
-        
-        return approxEndtime;
-    }
-    
-    public int hashCode() {
-        return getAvailabilityDataId().hashCode();
+    public AvailabilityDataRLE(Measurement meas, long startime, long endtime, double availType) {
+        init(meas, startime, endtime, availType);
     }
 
     public boolean equals(Object rhs) {
@@ -157,17 +83,86 @@ public class AvailabilityDataRLE implements Serializable  {
         if (!(rhs instanceof AvailabilityDataRLE)) {
             return false;
         }
-        AvailabilityDataRLE rle = (AvailabilityDataRLE)rhs;
+        AvailabilityDataRLE rle = (AvailabilityDataRLE) rhs;
         AvailabilityDataId id = rle.getAvailabilityDataId();
         return getAvailabilityDataId().equals(id);
     }
 
+    public long getApproxEndtime() {
+        long approxEndtime = endtime;
+
+        if (approxEndtime == MAX_ENDTIME) {
+            long interval = measurement.getInterval();
+            // java will round down
+            long multiplier = (System.currentTimeMillis() - startime) / interval;
+
+            approxEndtime = startime + (multiplier * interval);
+        }
+
+        return approxEndtime;
+    }
+
+    public AvailabilityDataId getAvailabilityDataId() {
+        if (this.id == null) {
+            this.id = new AvailabilityDataId(startime, measurement);
+        }
+        return id;
+    }
+
+    public double getAvailVal() {
+        return availVal;
+    }
+
+    public long getEndtime() {
+        return endtime;
+    }
+
+    public Measurement getMeasurement() {
+        return measurement;
+    }
+
+    public long getStartime() {
+        return startime;
+    }
+
+    public int hashCode() {
+        return getAvailabilityDataId().hashCode();
+    }
+
+    private void init(Measurement meas, long startime, long endtime, double availVal) {
+        setAvailabilityDataId(new AvailabilityDataId(startime, meas));
+        this.measurement = meas;
+        this.startime = startime;
+        this.endtime = endtime;
+        this.availVal = availVal;
+    }
+
+    protected void setAvailabilityDataId(AvailabilityDataId id) {
+        this.id = id;
+        startime = id.getStartime();
+        measurement = id.getMeasurement();
+    }
+
+    public void setAvailVal(double val) {
+        availVal = val;
+    }
+
+    public void setEndtime(long endtime) {
+        this.endtime = endtime;
+    }
+
+    public void setMeasurement(Measurement meas) {
+        measurement = meas;
+    }
+
+    public void setStartime(long startime) {
+        this.startime = startime;
+    }
+
     public String toString() {
         StringBuilder buf = new StringBuilder();
-        return buf.append(" measurement -> ").append(measurement.getId())
-               .append(" startime -> ").append(startime)
-               .append(" endtime -> ").append(endtime)
-               .append(" approxEndtime -> ").append(getApproxEndtime())
-               .append(" availVal -> ").append(availVal).toString();
+        return buf.append(" measurement -> ").append(measurement.getId()).append(" startime -> ")
+            .append(startime).append(" endtime -> ").append(endtime).append(" approxEndtime -> ")
+            .append(getApproxEndtime()).append(" availVal -> ").append(availVal).toString();
     }
 }
