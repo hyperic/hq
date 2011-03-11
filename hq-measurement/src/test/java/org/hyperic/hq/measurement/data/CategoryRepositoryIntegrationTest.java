@@ -1,5 +1,7 @@
 package org.hyperic.hq.measurement.data;
 
+import net.sf.ehcache.CacheManager;
+
 import org.hyperic.hq.measurement.server.session.Category;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,6 +29,7 @@ public class CategoryRepositoryIntegrationTest {
         Category category2 = new Category("Performance");
         categoryRepository.save(category2);
         assertEquals(category2, categoryRepository.findByName("Performance"));
+        assertEquals(1, CacheManager.getInstance().getCache("Category.findByName").getSize());
     }
 
     @Test

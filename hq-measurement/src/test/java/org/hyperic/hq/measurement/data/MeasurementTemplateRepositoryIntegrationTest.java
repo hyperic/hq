@@ -11,6 +11,8 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import net.sf.ehcache.CacheManager;
+
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.Category;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
@@ -64,6 +66,7 @@ public class MeasurementTemplateRepositoryIntegrationTest {
         expected.add(mt1);
         assertEquals(expected,
             measurementTemplateRepository.findByIds(Arrays.asList(new Integer[] { mt1.getId() })));
+        assertEquals(1, CacheManager.getInstance().getCache("MeasurementTemplate.findTemplates").getSize());
     }
 
     @Test
@@ -76,7 +79,6 @@ public class MeasurementTemplateRepositoryIntegrationTest {
             "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true,
             "service:queueFailures", type, category, "tomcat");
         measurementTemplateRepository.save(mt2);
-        // PageRequest pageRequest = new PageRequest(1, 1, new Sort("name"));
         List<MeasurementTemplate> expected = new ArrayList<MeasurementTemplate>();
         expected.add(mt2);
         expected.add(mt1);
