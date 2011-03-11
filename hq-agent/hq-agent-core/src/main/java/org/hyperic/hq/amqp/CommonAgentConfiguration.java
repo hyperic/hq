@@ -1,31 +1,31 @@
 package org.hyperic.hq.amqp;
-
+ 
 import org.hyperic.hq.amqp.configuration.CommonAmqpConfiguration;
-import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * @author Helena Edelson
  */
-//@Configuration
+@Configuration
 public class CommonAgentConfiguration extends CommonAmqpConfiguration {
 
     @Bean
-    public AmqpTemplate rabbitTemplate() {
+    public RabbitTemplate agentRabbitTemplate() {
         RabbitTemplate template = new RabbitTemplate(rabbitConnectionFactory());
-        template.setExchange(agentToServerDirectExchangeName);
-        template.setRoutingKey(serverToAgentQueueName);
+        template.setExchange(serverDirectExchangeName);
+        template.setRoutingKey(agentQueueName);
         return template;
     }
 
-      @Bean
-    public SimpleMessageListenerContainer agentListener() throws InterruptedException {
+    @Bean
+    public SimpleMessageListenerContainer serverListener() {
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(rabbitConnectionFactory()); 
         container.setMessageListener(new MessageListenerAdapter(new SimpleAsyncResponseHandler()));
-        container.setQueues(serverToAgentQueue());
+        container.setQueues(agentQueue());
         return container;
     }
 

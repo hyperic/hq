@@ -25,10 +25,8 @@
 
 package org.hyperic.hq.amqp;
 
+import org.hyperic.hq.amqp.admin.RabbitAdminTemplate;
 import org.hyperic.hq.amqp.configuration.CommonAmqpConfiguration;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
@@ -42,46 +40,24 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class CommonServerConfiguration extends CommonAmqpConfiguration {
 
-    
-    /**
-     * Server listens on agentToServerQueue.
-     * @return
-     */
     @Bean
-    public Queue fromAgentQueue() {
-        Queue queue = new Queue(agentToServerQueueName);
-        amqpAdmin().declareQueue(queue);
-        amqpAdmin().declareBinding(BindingBuilder.from(queue).to(agentToServerExchange()).with(agentToServerQueueName));
-        return queue;
-    }
- 
-    /**
-     * Server sends to the Agent
-     * @return
-     */
-    @Bean
-    public DirectExchange serverToAgentDirectExchange() {
-        DirectExchange e = new DirectExchange(serverToAgentDirectExchangeName, true, false);
-        amqpAdmin().declareExchange(e);
-        amqpAdmin().declareBinding(BindingBuilder.from(serverToAgentQueue()).to(e).with(serverToAgentQueueName));
-        return e;
+    public RabbitAdminTemplate adminTemplate() {
+        return new RabbitAdminTemplate();
     }
 
-
     @Bean
-    public RabbitTemplate rabbitTemplate() {
+    public RabbitTemplate serverRabbitTemplate() {
         RabbitTemplate template = new RabbitTemplate(rabbitConnectionFactory());
-        template.setExchange(serverToAgentDirectExchangeName);
-        template.setRoutingKey(serverToAgentQueueName);
+        template.setExchange(agentExchangeName);
+        template.setRoutingKey(agentQueueName);
         return template;
     }
 
     @Bean
-    public SimpleMessageListenerContainer serverListener() {
+    public SimpleMessageListenerContainer agentListener() {
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(rabbitConnectionFactory());
         container.setMessageListener(new MessageListenerAdapter(new SimpleServerResponseHandler()));
-        container.setQueues(fromAgentQueue());
+        container.setQueues(agentQueue());
         return container;
     }
-
 }
