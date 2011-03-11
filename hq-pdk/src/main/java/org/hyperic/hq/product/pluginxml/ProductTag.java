@@ -40,7 +40,7 @@ class ProductTag
     static final String ATTR_PACKAGE = "package";
     
     private static final String[] OPTIONAL_ATTRS = {
-        ATTR_CLASS, ATTR_PACKAGE, ATTR_NAME
+        ATTR_CLASS, ATTR_PACKAGE, ATTR_NAME, ATTR_VERSION 
     };
     
     private ProductTag() {}

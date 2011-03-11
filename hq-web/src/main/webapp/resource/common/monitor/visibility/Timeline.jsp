@@ -109,7 +109,7 @@
           </td>
           <td valign="top" style="text-align: right; border-bottom: solid; border-width: 1px; border-color: #000000;">
             <html:img page="/images/dash-icon_delete.gif"
-                      onclick="new Effect.Fade(dojo.byId('eventDetailTable'))"/>
+                      onclick="new Effect.Fade(hqDojo.byId('eventDetailTable'))"/>
           </td>
         </tr>
         <tr>

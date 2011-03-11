@@ -46,6 +46,7 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
+import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
@@ -736,7 +737,7 @@ public abstract class PermissionManager {
                                            String opListManageAlertsParam); 
 
     public abstract String getAlertsHQL(boolean inEscalation, boolean notFixed, Integer groupId,
-                                        Integer alertDefId, boolean count);
+                                        Integer resourceId, Integer alertDefId, boolean count);
 
     public abstract String getAlertDefsHQL();
 
@@ -826,5 +827,18 @@ public abstract class PermissionManager {
      * Return the HierarchicalAlertingManager implementation
      */
     public abstract HierarchicalAlertingManager getHierarchicalAlertingManager();
+
+    public void checkIsSuperUser(AuthzSubject subject) throws PermissionException {
+        if (subject.getId().equals(AuthzConstants.overlordId)) {
+            return;
+        }
+        final Collection<Role> roles = subject.getRoles();
+        for (final Role role : roles) {
+            if (role.getId().equals(AuthzConstants.rootRoleId)) {
+                return;
+            }
+        }
+        throw new PermissionException(subject.getName() + " does not have super user priviledge");
+    }
 
 }

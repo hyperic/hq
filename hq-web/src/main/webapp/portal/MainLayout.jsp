@@ -58,7 +58,7 @@
              		onloads[i]();
 	        };
 	        
-	        dojo11.addOnLoad(function() {
+	        hqDojo.ready(function() {
             	initOnloads();
             });
 	    </script>
@@ -68,8 +68,9 @@
 
 		<div id="migContainer">
 			<tiles:insert attribute='body' /> 
-			<img src="/images/spacer.gif" width="1" height="60" alt="" border="0" class="footerSpacer" style="clear: both;" id="footerSpacer" />
-			<tiles:insert attribute="footer" />
+			<div id="footerContent" style="margin-top:60px;">
+				<tiles:insert attribute="footer" />
+			</div>
 		</div>
 	</body>
 </html>

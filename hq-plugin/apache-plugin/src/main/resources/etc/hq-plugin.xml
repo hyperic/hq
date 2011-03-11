@@ -23,7 +23,7 @@
   USA.
  -->
 
-<plugin name="apache">
+<plugin name="apache" version="@project.version@">
 
   <!-- ApacheStatusCollector extends HTTPCollector -->
   <classpath>
@@ -989,6 +989,17 @@ ExtendedStatus On
     <property name="VERSION_FILE"
               value="tools/lib/covalent.ico"/>
 
+    <scan>
+      <include name="/**/${VERSION_FILE}"/>
+    </scan>
+  </server>
+
+  <server name="Apache-ERS"
+          version="4.x"
+          include="2.4">
+
+    <property name="VERSION_FILE"
+              value="ers-server.pl"/>
     <scan>
       <include name="/**/${VERSION_FILE}"/>
     </scan>

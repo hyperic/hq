@@ -43,6 +43,16 @@
     <context:annotation-config />
 	<mvc:annotation-driven/>
 	<mvc:resources mapping="/static/**" location="/, /static/" cache-period="31556926"/>
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/admin/managers/plugin"/>
+	        <bean class="org.hyperic.hq.web.MastheadInterceptor" />
+		</mvc:interceptor>
+		<mvc:interceptor>
+			<mvc:mapping path="/admin/managers/plugin"/>
+	        <bean class="org.hyperic.hq.web.admin.managers.AdminFeatureInterceptor" />
+		</mvc:interceptor>
+	</mvc:interceptors>
 	
 	<!-- Commons Multipart Resolver w/ progress reporting capabilities -->
 	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">

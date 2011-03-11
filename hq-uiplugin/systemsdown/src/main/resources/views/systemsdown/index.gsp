@@ -1,7 +1,6 @@
 <script type="text/javascript">
     document.navTabCat = "Resource";
     
-    getDojo();
     <%= ajaxAccordionFilter( refresh:60, updateURL:urlFor(action:'summary')+"?q=all", id:"SystemsDownFilter", filterTargetId:"SystemsDown") %>
     plugin.accordion.update = function(kwArgs) {
         if(kwArgs.numRows)
@@ -17,7 +16,7 @@
             currentCountFilter.style.fontWeight = 'bold';
         }else
             return;
-        dojo.io.cookie.setCookie('filtercount', obj.id);
+        hqDojo.cookie('filtercount', obj.id);
         currentCountFilter = obj;
         currentCountFilter.style.color = '#000000';
         currentCountFilter.style.cursor = 'default';
@@ -27,11 +26,11 @@
     
     plugin.MessagePanel = function(){
         this.toggleVisibility = function(reason){
-            var msgPanelObj = dojo.byId("messagePanel");
+            var msgPanelObj = hqDojo.byId("messagePanel");
             if(reason == "NO_DATA_RETURNED"){
                 if(msgPanelObj.style.display != "block"){
                     msgPanelObj.style.display = "block";
-                    dojo.byId("messagePanelMessage").innerHTML = this.getLocalizedMessageForReason(reason);
+                    hqDojo.byId("messagePanelMessage").innerHTML = this.getLocalizedMessageForReason(reason);
                 }
             }else
                 msgPanelObj.style.display = "none";
@@ -39,12 +38,15 @@
         };
         this.getLocalizedMessageForReason = function(reason){
             return "${l.noDataAvailable}";
-        }
-        dojo.event.topic.subscribe("XHRComplete", this, "toggleVisibility");
+        };
+        hqDojo.subscribe("XHRComplete", this, "toggleVisibility");
     }
     
     new plugin.MessagePanel();
     
+    hqDojo.subscribe("XHRComplete", function() {
+    	setFoot();
+    });    
 </script>
 <div class="messagePanel messageInfo" style="display:none;" id="messagePanel"><div class="infoIcon"></div><span id="messagePanelMessage"></span></div>
 <div class="downContainer" style="clear:both;">
@@ -73,7 +75,7 @@
 
         <%= dojoTable(id:'SystemsDown', title:l.SystemsDownTitle,
             refresh:60, pageControls:false, url:urlFor(action:'data'),
-            schema:systemsDownSchema, numRows:50, headerHTML: headerHTML)
+            schema:systemsDownSchema, numRows:25, pageSize:50, headerHTML: headerHTML)
         %>
         </div>
     </div>

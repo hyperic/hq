@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2009], Hyperic, Inc.
+ * Copyright (C) [2004-2011], VMWare, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -27,26 +27,23 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.server.session.AgentDataTransferJob;
+import org.hyperic.hq.agent.server.session.AgentSynchronizer;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hibernate.SessionManager;
 import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
@@ -58,8 +55,6 @@ import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-
 
 /**
  * This class is used to schedule and unschedule metrics for a given entity. The
@@ -80,35 +75,24 @@ public class AgentScheduleSynchronizer {
     private final Map<Integer, Collection<AppdefEntityID>> unscheduleAeids =
         new HashMap<Integer, Collection<AppdefEntityID>>();
     
-    private final Set<Integer> activeAgents = Collections.synchronizedSet(new HashSet<Integer>());
-    
     private ConcurrentStatsCollector concurrentStatsCollector;
     private MeasurementProcessor measurementProcessor;
+    private AgentSynchronizer agentSynchronizer;
     
-    private static final int NUM_WORKERS = 4;
-
     @Autowired
-    public AgentScheduleSynchronizer(ZeventEnqueuer zEventManager, AgentManager agentManager, MeasurementProcessor measurementProcessor, ConcurrentStatsCollector concurrentStatsCollector) {
+    public AgentScheduleSynchronizer(ZeventEnqueuer zEventManager, AgentManager agentManager,
+                                     MeasurementProcessor measurementProcessor,
+                                     AgentSynchronizer agentSynchronizer,
+                                     ConcurrentStatsCollector concurrentStatsCollector) {
         this.zEventManager = zEventManager;
         this.agentManager = agentManager;
         this.measurementProcessor = measurementProcessor;
         this.concurrentStatsCollector = concurrentStatsCollector;
+        this.agentSynchronizer = agentSynchronizer;
     }
 
     @PostConstruct
     void initialize() {
-        ScheduledThreadPoolExecutor executor =
-            new ScheduledThreadPoolExecutor(NUM_WORKERS, new ThreadFactory() {
-            private AtomicLong i = new AtomicLong(0);
-            public Thread newThread(Runnable r) {
-                return new Thread(r, "AgentScheduler" + i.getAndIncrement());
-            }
-        });
-        for (int i=0; i<NUM_WORKERS; i++) {
-            SchedulerThread worker = new SchedulerThread("AgentScheduler" + i);
-            executor.scheduleWithFixedDelay(worker, i+1, NUM_WORKERS, TimeUnit.SECONDS);
-        }
-
         ZeventListener<Zevent> l = getScheduleListener();
         zEventManager.addBufferedListener(AgentScheduleSyncZevent.class, l);
         zEventManager.addBufferedListener(AgentUnscheduleZevent.class, l);
@@ -117,74 +101,6 @@ public class AgentScheduleSynchronizer {
         zEventManager.addBufferedListener(AgentUnscheduleNonEntityZevent.class, l2);
         concurrentStatsCollector.register(ConcurrentStatsCollector.SCHEDULE_QUEUE_SIZE);
         concurrentStatsCollector.register(ConcurrentStatsCollector.UNSCHEDULE_QUEUE_SIZE);
-    }
-
-    private ZeventListener<Zevent> getScheduleListener() {
-        return new ZeventListener<Zevent>() {
-            public void processEvents(List<Zevent> events) {
-                final List<AppdefEntityID> toSchedule = new ArrayList<AppdefEntityID>(events.size());
-                final Map<String, Collection<AppdefEntityID>> unscheduleMap =
-                    new HashMap<String, Collection<AppdefEntityID>>(events.size());
-                final boolean debug = log.isDebugEnabled();
-                for (final Zevent z : events) {
-                    if (z instanceof AgentScheduleSyncZevent) {
-                        AgentScheduleSyncZevent event = (AgentScheduleSyncZevent) z;
-                        toSchedule.addAll(event.getEntityIds());
-                        if (debug) log.debug("Schduling eids=[" + event.getEntityIds() + "]");
-                    } else if (z instanceof AgentUnscheduleZevent) {
-                        AgentUnscheduleZevent event = (AgentUnscheduleZevent) z;
-                        String token = event.getAgentToken();
-                        if (token == null) {
-                            continue;
-                        }
-                        Collection<AppdefEntityID> tmp;
-                        if (null == (tmp = unscheduleMap.get(token))) {
-                            tmp = new HashSet<AppdefEntityID>();
-                            unscheduleMap.put(token, tmp);
-                        }
-                        tmp.addAll(event.getEntityIds());
-                        if (debug) log.debug("Unschduling eids=[" + event.getEntityIds() + "]");
-                    }
-                }
-                final Map<Integer, Collection<AppdefEntityID>> agentAppdefIds =
-                    agentManager.getAgentMap(toSchedule);
-                synchronized (scheduleAeids) {
-                    for (Map.Entry<Integer, Collection<AppdefEntityID>> entry : agentAppdefIds.entrySet()) {
-                        final Integer agentId = entry.getKey();
-                        final Collection<AppdefEntityID> eids = entry.getValue();
-                        Collection<AppdefEntityID> tmp;
-                        if (null == (tmp = scheduleAeids.get(agentId))) {
-                            tmp = new HashSet<AppdefEntityID>(eids.size());
-                            scheduleAeids.put(agentId, tmp);
-                        }
-                        tmp.addAll(eids);
-                    }
-                }
-                synchronized (unscheduleAeids) {
-                    for (Map.Entry<String, Collection<AppdefEntityID>> entry : unscheduleMap.entrySet()) {
-                        final String token = entry.getKey();
-                        final Collection<AppdefEntityID> eids = entry.getValue();
-                        Integer agentId;
-                        try {
-                            agentId = agentManager.getAgent(token).getId();
-                        } catch (AgentNotFoundException e) {
-                            log.warn("Could not get agentToken=" + token +
-                                     " from db to unschedule: " + e);
-                            continue;
-                        }
-                        Collection<AppdefEntityID> tmp;
-                        if (null == (tmp = unscheduleAeids.get(agentId))) {
-                            tmp = new HashSet<AppdefEntityID>(eids.size());
-                            unscheduleAeids.put(agentId, tmp);
-                        }
-                        tmp.addAll(eids);
-                    }
-                }
-            }
-            public String toString() {
-                return "AgentScheduleSyncListener";
-            }
-        };
     }
 
     private ZeventListener<AgentUnscheduleNonEntityZevent> getUnscheduleUnEntityZeventListener() {
@@ -229,82 +145,122 @@ public class AgentScheduleSynchronizer {
         };
     }
 
-    private class SchedulerThread implements Runnable {
-        private final String _name;
-
-        private SchedulerThread(String name) {
-            _name = name;
-        }
-
-        public String toString() {
-            return _name;
-        }
-
-        public synchronized void run() {
-            try {
-                boolean hasMoreToSchedule = true;
-                boolean hasMoreToUnschedule = true;
+    private ZeventListener<Zevent> getScheduleListener() {
+        return new ZeventListener<Zevent>() {
+            public void processEvents(List<Zevent> events) {
+                final List<AppdefEntityID> toSchedule = new ArrayList<AppdefEntityID>(events.size());
+                final Map<String, Collection<AppdefEntityID>> unscheduleMap =
+                    new HashMap<String, Collection<AppdefEntityID>>(events.size());
+                final boolean debug = log.isDebugEnabled();
+                for (final Zevent z : events) {
+                    if (z instanceof AgentScheduleSyncZevent) {
+                        AgentScheduleSyncZevent event = (AgentScheduleSyncZevent) z;
+                        toSchedule.addAll(event.getEntityIds());
+                        if (debug) log.debug("Schduling eids=[" + event.getEntityIds() + "]");
+                    } else if (z instanceof AgentUnscheduleZevent) {
+                        AgentUnscheduleZevent event = (AgentUnscheduleZevent) z;
+                        String token = event.getAgentToken();
+                        if (token == null) {
+                            continue;
+                        }
+                        Collection<AppdefEntityID> tmp;
+                        if (null == (tmp = unscheduleMap.get(token))) {
+                            tmp = new HashSet<AppdefEntityID>();
+                            unscheduleMap.put(token, tmp);
+                        }
+                        tmp.addAll(event.getEntityIds());
+                        if (debug) log.debug("Unschduling eids=[" + event.getEntityIds() + "]");
+                    }
+                }
+                final Map<Integer, Collection<AppdefEntityID>> agentAppdefIds =
+                    agentManager.getAgentMap(toSchedule);
                 synchronized (scheduleAeids) {
-                	concurrentStatsCollector.addStat(
-                	    scheduleAeids.size(), ConcurrentStatsCollector.SCHEDULE_QUEUE_SIZE);
+                    for (final Map.Entry<Integer, Collection<AppdefEntityID>> entry : agentAppdefIds.entrySet()) {
+                        final Integer agentId = entry.getKey();
+                        final Collection<AppdefEntityID> eids = entry.getValue();
+                        Collection<AppdefEntityID> tmp;
+                        if (null == (tmp = scheduleAeids.get(agentId))) {
+                            tmp = new HashSet<AppdefEntityID>(eids.size());
+                            scheduleAeids.put(agentId, tmp);
+                        }
+                        tmp.addAll(eids);
+                        addScheduleJob(true, agentId);
+                    }
                 }
                 synchronized (unscheduleAeids) {
-                	concurrentStatsCollector.addStat(
-                	    unscheduleAeids.size(), ConcurrentStatsCollector.UNSCHEDULE_QUEUE_SIZE);
-                }
-                while (hasMoreToSchedule || hasMoreToUnschedule) {
-                    hasMoreToUnschedule = syncMetrics(unscheduleAeids, false);
-                    hasMoreToSchedule = syncMetrics(scheduleAeids, true);
-                }
-            } catch (Throwable t) {
-                log.error(t, t);
-            }
-        }
-
-        private boolean syncMetrics(Map<Integer,Collection<AppdefEntityID>> scheduleAeids, final boolean schedule)
-        throws Exception {
-            Integer agentId = null;
-            Collection<AppdefEntityID> aeids = null;
-            final boolean debug = log.isDebugEnabled();
-            try {
-                synchronized (scheduleAeids) {
-                    if (scheduleAeids.isEmpty()) {
-                        return false;
-                    }
-                    for (Map.Entry<Integer, Collection<AppdefEntityID>> entry : scheduleAeids.entrySet()) {
-                        agentId = entry.getKey();
-                        aeids =  entry.getValue();
-                        boolean added = activeAgents.add(agentId);
-                        if (added) {
-                            if (debug)
-                                log.debug("scheduling agentId=" + agentId);
-                            scheduleAeids.remove(agentId);
-                            break;
-                        } else {
-                            agentId = null;
-                            aeids = null;
+                    for (Map.Entry<String, Collection<AppdefEntityID>> entry : unscheduleMap.entrySet()) {
+                        final String token = entry.getKey();
+                        final Collection<AppdefEntityID> eids = entry.getValue();
+                        Integer agentId;
+                        try {
+                            agentId = agentManager.getAgent(token).getId();
+                        } catch (AgentNotFoundException e) {
+                            log.warn("Could not get agentToken=" + token +
+                                     " from db to unschedule: " + e);
+                            continue;
                         }
+                        Collection<AppdefEntityID> tmp;
+                        if (null == (tmp = unscheduleAeids.get(agentId))) {
+                            tmp = new HashSet<AppdefEntityID>(eids.size());
+                            unscheduleAeids.put(agentId, tmp);
+                        }
+                        tmp.addAll(eids);
+                        addScheduleJob(false, agentId);
                     }
                 }
-                if (aeids == null || agentId == null || aeids.isEmpty()) {
-                    return false;
-                }
-                runSchedule(schedule, agentId, aeids);
-                return true;
-            } finally {
-                if (agentId != null) {
-                    if (debug)
-                        log.debug("agentId=" + agentId + " is finished scheduling");
-                    activeAgents.remove(agentId);
+            }
+            public String toString() {
+                return "AgentScheduleSyncListener";
+            }
+        };
+    }
+
+    private void addScheduleJob(final boolean schedule, final Integer agentId) {
+        if (agentId == null) {
+            return;
+        }
+        final AgentDataTransferJob job = new AgentDataTransferJob() {
+            public String getJobDescription() {
+                if (schedule) {
+                    return "Agent Schedule Job";
+                } else {
+                    return "Agent UnSchedule Job";
                 }
             }
+            public int getAgentId() {
+                return agentId;
+            }
+            public void execute() {
+                Collection<AppdefEntityID> aeids = null;
+                final Map<Integer, Collection<AppdefEntityID>> aeidMap =
+                    (schedule) ? scheduleAeids : unscheduleAeids;
+                synchronized (aeidMap) {
+                    aeids = aeidMap.remove(agentId);
+                }
+                if (aeids != null && !aeids.isEmpty()) {
+                    runSchedule(schedule, agentId, aeids);
+                }
+            }
+        };
+        if (schedule) {
+            concurrentStatsCollector.addStat(
+                scheduleAeids.size(), ConcurrentStatsCollector.SCHEDULE_QUEUE_SIZE);
+        } else {
+            concurrentStatsCollector.addStat(
+                unscheduleAeids.size(), ConcurrentStatsCollector.UNSCHEDULE_QUEUE_SIZE);
         }
+        agentSynchronizer.addAgentJob(job);
+    }
 
-        private void runSchedule(final boolean schedule, final Integer agentId,
-                                 final Collection<AppdefEntityID> aeids) throws Exception {
+    private void runSchedule(final boolean schedule, final Integer agentId,
+                             final Collection<AppdefEntityID> aeids) {
+        try {
             SessionManager.runInSession(new SessionRunner() {
                 public void run() throws Exception {
-                    final Agent agent = agentManager.findAgent(agentId);
+                    final Agent agent = agentManager.getAgent(agentId);
+                    if (agent == null) {
+                        return;
+                    }
                     if (schedule) {
                         if (log.isDebugEnabled()) {
                             log.debug("scheduling " + aeids.size() + " resources to agentid=" +
@@ -319,11 +275,16 @@ public class AgentScheduleSynchronizer {
                         measurementProcessor.unschedule(agent.getAgentToken(), aeids);
                     }
                 }
-
                 public String getName() {
-                    return _name;
+                    if (schedule) {
+                        return "Schedule";
+                    } else {
+                        return "Unschedule";
+                    }
                 }
             });
+        } catch (Exception e) {
+            throw new SystemException(e);
         }
     }
 

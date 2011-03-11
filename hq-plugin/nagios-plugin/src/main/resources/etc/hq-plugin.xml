@@ -27,7 +27,7 @@
 
 -->
 
-<plugin name="nagios">
+<plugin name="nagios" version="@project.version@">
   <filter name="dev-url"
           value="http://nagiosplug.sourceforge.net/developer-guidelines.html"/>
 

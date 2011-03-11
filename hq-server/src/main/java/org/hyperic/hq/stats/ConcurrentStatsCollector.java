@@ -104,7 +104,13 @@ public final class ConcurrentStatsCollector {
     						   JDBC_HQ_DS_MAX_ACTIVE = "JDBC_HQ_DS_MAX_ACTIVE", 
     						   JDBC_HQ_DS_IN_USE = "JDBC_HQ_DS_IN_USE",
                                AVAIL_BACKFILLER_TIME = "AVAIL_BACKFILLER_TIME",
-                               AVAIL_BACKFILLER_NUMPLATFORMS = "AVAIL_BACKFILLER_NUMPLATFORMS";
+                               AGENT_PLUGIN_TRANSFER = "AGENT_PLUGIN_TRANSFER",
+                               AGENT_SYNC_JOB_QUEUE_ADDS = "AGENT_SYNC_JOB_QUEUE_ADDS",
+                               AVAIL_BACKFILLER_NUMPLATFORMS = "AVAIL_BACKFILLER_NUMPLATFORMS",
+                               AGENT_PLUGIN_SYNC_PENDING_RESTARTS = "AGENT_PLUGIN_SYNC_PENDING_RESTARTS",
+                               AGENT_PLUGIN_SYNC_RESTARTS = "AGENT_PLUGIN_SYNC_RESTARTS";
+
+
 
     @Autowired
     public ConcurrentStatsCollector(MBeanServer mBeanServer) {

@@ -41,24 +41,22 @@
 	</form>
 </div>
 <script>
-	dojo.require("dijit.Dialog");
-	
-	dojo.ready(function() {
-		var username = dojo.byId("usernameInput");
-		var password = dojo.byId("passwordInput");
+	hqDojo.ready(function() {
+		var username = hqDojo.byId("usernameInput");
+		var password = hqDojo.byId("passwordInput");
 
-		dojo.connect(username, "onfocus", function(e) { dojo.addClass(e.target.parentNode, "active"); });
-		dojo.connect(username, "onblur", function(e) { dojo.removeClass(e.target.parentNode, "active"); });
+		hqDojo.connect(username, "onfocus", function(e) { hqDojo.addClass(e.target.parentNode, "active"); });
+		hqDojo.connect(username, "onblur", function(e) { hqDojo.removeClass(e.target.parentNode, "active"); });
 
-		dojo.connect(password, "onfocus", function(e) { dojo.addClass(e.target.parentNode, "active"); });
-		dojo.connect(password, "onblur", function(e) { dojo.removeClass(e.target.parentNode, "active"); });
+		hqDojo.connect(password, "onfocus", function(e) { hqDojo.addClass(e.target.parentNode, "active"); });
+		hqDojo.connect(password, "onblur", function(e) { hqDojo.removeClass(e.target.parentNode, "active"); });
 
 		username.focus();
 
 		<c:if test="${guestEnabled}">
-			dojo.connect(dojo.byId("guestLoginLink"), "onclick", function() {
-				var username = dojo.byId("usernameInput");
-				var password = dojo.byId("passwordInput");
+			hqDojo.connect(hqDojo.byId("guestLoginLink"), "onclick", function() {
+				var username = hqDojo.byId("usernameInput");
+				var password = hqDojo.byId("passwordInput");
 
 				username.value = "${guestUsername}";
 				document.forms["loginForm"]["submit"].click();
@@ -66,11 +64,5 @@
 				password.disabled = true;
 			});
 		</c:if>
-
-		var dialog = new dijit.Dialog("loginPanel");
-		
-		dojo.style(dialog.closeButtonNode, "visibility", "hidden");
-		dialog.setContent(dojo.byId("loginPanel"));
-		dialog.show();
 	});
 </script>

@@ -421,12 +421,7 @@ public class ProductPluginManager
             }
             File[] pluginFiles = listPlugins(dir);
             for (final File file : pluginFiles) {
-                try {
-// XXX need to update this to the plugin name
-                    rtn.put(file.toString(), MD5.getDigestString(file));
-                } catch (IOException e) {
-                    log.debug(e,e);
-                }
+                rtn.put(file.toString(), MD5.getMD5Checksum(file));
             }
         }
         return rtn;

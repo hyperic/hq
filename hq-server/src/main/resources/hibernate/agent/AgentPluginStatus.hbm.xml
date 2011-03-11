@@ -67,6 +67,14 @@
       <column name="LAST_CHECKIN" not-null="true"/>
     </property>
 
+    <property name="lastSyncStatus" type="string">
+      <column name="LAST_SYNC_STATUS" not-null="false" length="64"/>
+    </property>
+
+    <property name="lastSyncAttempt" type="long">
+      <column name="LAST_SYNC_ATTEMPT" not-null="false"/>
+    </property>
+
   </class>
 
 </hibernate-mapping>

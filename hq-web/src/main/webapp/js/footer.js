@@ -21,51 +21,19 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 // USA.
 
-/*-- START footer.js --*/
-
 var conH;
 var winH;
 var footerH = 28;
 var browserH = 88;
 
 function setFoot() {
-  var WindowSize = {
-    width: window.innerWidth || (window.document.documentElement.clientWidth || window.document.body.clientWidth),
-    height: window.innerHeight || (window.document.documentElement.clientHeight || window.document.body.clientHeight)
-  };
-  
-  winH = WindowSize.height;
-  conH = dojo11.coords("header", false).h + dojo11.coords("migContainer", false).h;
-  
-  var myHeight = winH - conH - footerH + browserH;
-  
-  if (myHeight > 60) {
-  	var footerContent = dojo11.byId("footerContent");
-  	
-  	footerContent.style.marginTop = myHeight + "px";
-  }
+	var windowCoords = hqDojo.window.getBox();
+	var contentCoords = hqDojo.position(hqDojo.byId("migContainer"), true);
+  	var footerCoords = hqDojo.position(hqDojo.byId("footerContent"), true);
+  	var combinedContentHeight = (contentCoords.y + contentCoords.h) - footerCoords.h;
+  	var diff = windowCoords.h - combinedContentHeight + 2;
+
+  	if (diff > 0) {
+  		hqDojo.style("footerContent", "marginTop", diff + "px");	  			
+  	}
 }
-
-var aboutShown = false;
-
-function about() {
-  Dialog.info($('about').innerHTML,
-              {windowParameters: {className:'dialog', width:305, height:200,
-               resize:false, draggable:false}});
-  aboutShown = true;
-}
-
-function closeAbout(e) {
-  if (typeof(window['diagShown']) != 'undefined') {
-      bodyClicked(e);
-  }
-
-  if (aboutShown) {
-    Dialog.closeInfo();
-    aboutShown = false;
-  }
-}
-
-document.body.onclick = closeAbout;
-
-/*-- END footer.js --*/

@@ -171,8 +171,8 @@
 			<div id="metricsDiv" class="scrollable"><script
 				type="text/javascript">
       function setMetricsHeight() {
-        var metricsDiv = dojo.byId('metricsDiv');
-        var bottom = overlay.findPosY(dojo.byId('timetop'));
+        var metricsDiv = hqDojo.byId('metricsDiv');
+        var bottom = overlay.findPosY(hqDojo.byId('timetop'));
         var top = overlay.findPosY(metricsDiv);
 
         metricsDiv.style.height = (bottom - top) + 'px';

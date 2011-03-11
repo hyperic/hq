@@ -26,6 +26,10 @@
 
 package org.hyperic.hq.hqu.rendit.metaclass
 
+import org.hyperic.hq.auth.shared.SessionManager
+import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.bizapp.shared.MeasurementBoss
+import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary
 import org.hyperic.hq.product.MetricValue
 import org.hyperic.hq.measurement.UnitsConvert
 import org.hyperic.hq.measurement.shared.MeasurementManager;
@@ -37,12 +41,12 @@ import org.hyperic.util.pager.PageControl
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate
 import org.hyperic.util.units.UnitNumber
 import org.hyperic.util.units.UnitsFormat
-import org.hyperic.hq.authz.server.session.AuthzSubject
 
 class MetricCategory {
     private static dataMan = Bootstrap.getBean(DataManager.class)
     private static tmplMan = Bootstrap.getBean(TemplateManager.class)
     private static measMan = Bootstrap.getBean(MeasurementManager.class)
+    private static measBoss = Bootstrap.getBean(MeasurementBoss.class)
 
     static String urlFor(Measurement d, Map context) {
         def template = d.template
@@ -131,6 +135,13 @@ class MetricCategory {
         boolean prependAvailUnknowns = false;
         dataMan.getHistoricalData(m, start, end, new PageControl(),
                                   prependAvailUnknowns)
+    }
+    
+    static MetricDisplaySummary getSummary(Measurement m, AuthzSubject user, long start, long end) {
+       def mgr = SessionManager.instance
+       def sessionId = mgr.put(user)
+
+    	measBoss.findMetric(sessionId, [m.resource.entityId], m.template.id, start, end)
     }
     
     /**

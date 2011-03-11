@@ -34,15 +34,15 @@ import java.util.Map;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
+import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection;
 import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
 import org.hyperic.hq.appdef.server.session.AgentSortField;
-import org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.lather.PluginReport_args;
-import org.hyperic.hq.product.Plugin;
 import org.hyperic.util.ConfigPropertyException;
 
 /**
@@ -323,6 +323,7 @@ public interface AgentManager {
      * @param subject The subject issuing the request.
      * @param aid The agent id.
      * @param plugin The plugin name.
+     * @return {@link FileDataResult} if sizes are 0 then file was not transferred
      * @throws PermissionException if the subject does not have proper
      *         permissions to issue an agent plugin transfer.
      * @throws FileNotFoundException if the plugin is not found on the HQ
@@ -335,9 +336,9 @@ public interface AgentManager {
      * @throws AgentNotFoundException if no agent exists with the given agent
      *         id.
      */
-    public void transferAgentPlugin(AuthzSubject subject, AppdefEntityID aid, String plugin)
+    public FileDataResult transferAgentPlugin(AuthzSubject subject, AppdefEntityID aid, String plugin)
         throws PermissionException, AgentConnectionException, AgentNotFoundException, AgentRemoteException,
-        FileNotFoundException, IOException, ConfigPropertyException;
+               FileNotFoundException, IOException, ConfigPropertyException;
 
     /**
      * Transfer an agent plugin residing on the HQ server to an agent. The
@@ -443,17 +444,33 @@ public interface AgentManager {
     public void updateAgentPluginStatusInBackground(PluginReport_args arg);
 
 // XXX javadoc!
-    public void transferAgentPlugins(AuthzSubject subj, Integer agentId, Collection<String> jarNames)
+    /**
+     * @return {@link FileDataResult}[] if sizes are 0 then file was not transferred
+     */
+    public FileDataResult[] transferAgentPlugins(AuthzSubject subj, Integer agentId, Collection<String> jarNames)
     throws PermissionException, AgentConnectionException, AgentNotFoundException,
            AgentRemoteException, FileNotFoundException, IOException, ConfigPropertyException;
     
-// XXX javadoc!
-    public long getNumAutoUpdatingAgents();
-    
-// XXX javadoc!
-    public List<Plugin> getAllPlugins();
+// XXX may want to change Boolean so that it is a status string "SUCCESS" or an error message
+    /**
+     * Removes plugin jars from the plugin directory on the remote Agent.
+     * @return {@link Map} of {@link String} = pluginJarName to
+     * {@link Boolean} = file delete was successful or failed.
+     */
+    public Map<String, Boolean> agentRemovePlugins(AuthzSubject subject, Integer agentId,
+                                                   Collection<String> pluginJarNames)
+    throws AgentConnectionException, AgentRemoteException, PermissionException;
 
 // XXX javadoc!
-    public Map<Plugin, Collection<Agent>> getOutOfSyncAgentsByPlugin();
+    public void syncAllAgentPlugins();
+
+// XXX javadoc!
+    public void syncPluginToAgents(String pluginName);
+
+// XXX javadoc!
+    public void syncPluginToAgentsAfterCommit(String pluginFileName);
+
+// XXX javadoc!
+    public void removePluginFromAgentsInBackground(String pluginFileName);
 
 }

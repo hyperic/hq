@@ -39,18 +39,14 @@ public final class AgentCommandsAPI extends AgentAPIInfo {
 
     private static final String commandPrefix = "agent:";
     public static final int DEFAULT_PORT = 2144;
-    public static final String command_ping = 
-        commandPrefix + "ping";
     public static final String command_getCurrentAgentBundle =
         commandPrefix + "getCurrentAgentBundle";
-    public static final String command_upgrade = 
-        commandPrefix + "upgrade";   
-    public static final String command_restart = 
-        commandPrefix + "restart";   
-    public static final String command_die = 
-        commandPrefix + "die";
-    public static final String command_receive_file =
-        commandPrefix + "receive_file";
+    public static final String command_ping         = commandPrefix + "ping";
+    public static final String command_upgrade      = commandPrefix + "upgrade";   
+    public static final String command_restart      = commandPrefix + "restart";   
+    public static final String command_die          = commandPrefix + "die";
+    public static final String command_remove_file  = commandPrefix + "remove_file";
+    public static final String command_receive_file = commandPrefix + "receive_file";
     
     public static final String[] commandSet = {
         AgentCommandsAPI.command_ping,
@@ -58,7 +54,8 @@ public final class AgentCommandsAPI extends AgentAPIInfo {
         AgentCommandsAPI.command_upgrade,
         AgentCommandsAPI.command_restart,
         AgentCommandsAPI.command_die,
-        AgentCommandsAPI.command_receive_file
+        AgentCommandsAPI.command_receive_file,
+        AgentCommandsAPI.command_remove_file
     };
 
     public AgentCommandsAPI(){
