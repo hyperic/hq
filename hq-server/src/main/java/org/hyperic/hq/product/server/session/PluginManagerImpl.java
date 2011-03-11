@@ -37,12 +37,15 @@ import java.io.Writer;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
@@ -50,10 +53,12 @@ import java.util.jar.Manifest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.server.session.AgentSynchronizer;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatusDAO;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum;
+import org.hyperic.hq.appdef.server.session.AgentPluginSyncRestartThrottle;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentPluginUpdater;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -89,13 +94,19 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     private ApplicationContext ctx;
 
     private PermissionManager permissionManager;
+    private AgentSynchronizer agentSynchronizer;
+    private AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
 
     @Autowired
     public PluginManagerImpl(PluginDAO pluginDAO, AgentPluginStatusDAO agentPluginStatusDAO,
-                             PermissionManager permissionManager) {
+                             PermissionManager permissionManager,
+                             AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle,
+                             AgentSynchronizer agentSynchronizer) {
         this.pluginDAO = pluginDAO;
         this.agentPluginStatusDAO = agentPluginStatusDAO;
         this.permissionManager = permissionManager;
+        this.agentPluginSyncRestartThrottle = agentPluginSyncRestartThrottle;
+        this.agentSynchronizer = agentSynchronizer;
     }
     
     public Plugin getByJarName(String jarName) {
@@ -118,6 +129,19 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         for (final Agent agent : agents) {
             agentPluginUpdater.queuePluginRemoval(agent.getId(), pluginFileNames);
         }
+    }
+    
+    public Set<Integer> getAgentIdsInQueue() {
+        final Set<Integer> rtn = new HashSet<Integer>();
+        rtn.addAll(agentSynchronizer.getJobListByDescription(
+            Arrays.asList(new String[]{AgentPluginUpdater.AGENT_PLUGIN_REMOVE,
+                                       AgentPluginUpdater.AGENT_PLUGIN_TRANSFER})));
+        rtn.addAll(agentPluginSyncRestartThrottle.getQueuedAgentIds());
+        return rtn;
+    }
+    
+    public Map<Integer, Long> getAgentIdsInRestartState() {
+        return agentPluginSyncRestartThrottle.getAgentIdsInRestartState();
     }
     
     // XXX currently if one plugin validation fails all will fail.  Probably want to deploy the

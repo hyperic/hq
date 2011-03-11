@@ -28,6 +28,7 @@ package org.hyperic.hq.product.shared;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum;
@@ -81,4 +82,10 @@ public interface PluginManager {
 
  // XXX javadoc!
     void removeAgentPluginStatuses(Integer agentId, Collection<String> pluginFileNames);
+
+ // XXX javadoc!
+    Set<Integer> getAgentIdsInQueue();
+
+ // XXX javadoc!
+    Map<Integer, Long> getAgentIdsInRestartState();
 }

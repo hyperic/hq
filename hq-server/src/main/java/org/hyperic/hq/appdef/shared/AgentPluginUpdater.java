@@ -32,6 +32,9 @@ import org.hyperic.hq.product.Plugin;
 
 public interface AgentPluginUpdater {
     
+    public static final String AGENT_PLUGIN_TRANSFER = "Agent Plugin Transfer";
+    public static final String AGENT_PLUGIN_REMOVE = "Agent Plugin Remove";
+    
     /**
      * @param updateMap {@link Map} of {@link Integer} = agentId to {@link Collection}
      *  of {@link Plugin}

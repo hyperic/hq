@@ -25,10 +25,13 @@
 
 package org.hyperic.hq.agent.server.session;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -67,6 +70,21 @@ public class AgentSynchronizer implements DiagnosticObject {
                              DiagnosticsLogger diagnosticsLogger) {
         this.concurrentStatsCollector = concurrentStatsCollector;
         diagnosticsLogger.addDiagnosticObject(this);
+    }
+    
+    public Set<Integer> getJobListByDescription(Collection<String> descriptions) {
+        List<AgentDataTransferJob> jobs;
+        final Set<String> descs = new HashSet<String>(descriptions);
+        synchronized (agentJobs) {
+            jobs = new ArrayList<AgentDataTransferJob>(agentJobs);
+        }
+        final Set<Integer> rtn = new HashSet<Integer>();
+        for (final AgentDataTransferJob job : jobs) {
+            if (descs.contains(job.getJobDescription())) {
+                rtn.add(job.getAgentId());
+            }
+        }
+        return rtn;
     }
     
     @PostConstruct

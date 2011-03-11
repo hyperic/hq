@@ -26,9 +26,11 @@
 package org.hyperic.hq.appdef.server.session;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -77,6 +79,18 @@ public class AgentPluginSyncRestartThrottle {
     public void initialize() {
         concurrentStatsCollector.register(ConcurrentStatsCollector.AGENT_PLUGIN_SYNC_RESTARTS);
         concurrentStatsCollector.register(ConcurrentStatsCollector.AGENT_PLUGIN_SYNC_PENDING_RESTARTS);
+    }
+    
+    public Set<Integer> getQueuedAgentIds() {
+        synchronized (LOCK) {
+            return new HashSet<Integer>(pendingRestarts);
+        }
+    }
+    
+    public Map<Integer, Long> getAgentIdsInRestartState() {
+        synchronized (LOCK) {
+            return new HashMap<Integer, Long>(agentRestartTimstampMap);
+        }
     }
     
     private Thread startExecutorThread() {

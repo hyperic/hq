@@ -114,7 +114,7 @@ implements AgentPluginUpdater, ApplicationListener<ContextRefreshedEvent>, Appli
                                                   final AgentManager agentManager) {
         return new AgentDataTransferJob() {
             public String getJobDescription() {
-                return "Agent Plugin Transfer";
+                return AGENT_PLUGIN_TRANSFER;
             }
             public int getAgentId() {
                 return agentId;
@@ -162,7 +162,7 @@ implements AgentPluginUpdater, ApplicationListener<ContextRefreshedEvent>, Appli
         }
         final AgentDataTransferJob job = new AgentDataTransferJob() {
             public String getJobDescription() {
-                return "Agent Plugin Remove";
+                return AGENT_PLUGIN_REMOVE;
             }
             public int getAgentId() {
                 return agentId;
