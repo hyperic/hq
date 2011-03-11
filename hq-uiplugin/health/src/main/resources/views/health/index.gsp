@@ -262,7 +262,7 @@
 	</div>
 </div>
 <div id="fullBody" style="clear:both">
-  	<% dojoTabContainer(id:'bodyTabContainer', style:'width: 100%; height:525px;') { %>
+  	<% dojoTabContainer(id:'bodyTabContainer', style:'width: 100%; height:450px;') { %>
     	<% dojoTabPane(id:'diagTab', label:l.diagnostics) { %>
       		<div style="padding: 6px;">${l.diagWatchNotice}</div>
       		<div id="diagSelectControls">
@@ -282,7 +282,7 @@
     	<% dojoTabPane(id:'cacheTab', label:l.cache) { %>
       		<%= dojoTable(id:'cacheTable', title:l.cache,
                     refresh:60, url:urlFor(action:'cacheData'),
-                    schema:cacheSchema, numRows:50, pageControls:false) %>
+                    schema:cacheSchema, numRows:17, pageSize:500, pageControls:false) %>
     	<% } %>
     	<% dojoTabPane(id:'loadTab', label:l.load) { %>
       		<div style="padding: 6px;">
@@ -329,7 +329,7 @@
     	<% dojoTabPane(id:'agentTab', label:l.agents) { %>
       		<%= dojoTable(id:'agentTable', title:l.agents,
                    refresh:600, url:urlFor(action:'agentData'),
-                   schema:agentSchema, numRows:15) %>
+                   schema:agentSchema, numRows:17) %>
     	<% } %>
   	<% } %>
 </div>
@@ -420,4 +420,8 @@
 	}
 
 	refreshQuery();
+    
+    hqDojo.subscribe("XHRComplete", function() {
+    	setFoot();
+    });
 </script>

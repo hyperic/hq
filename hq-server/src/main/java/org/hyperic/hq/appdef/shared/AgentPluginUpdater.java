@@ -42,7 +42,8 @@ public interface AgentPluginUpdater {
                                     final Map<Integer, Collection<String>> removeMap);
 
     /**
-     * queues a plugin for removal from the the specified agent
+     * queues a plugin for removal from the the specified agent and removes the associated
+     * {@link AgentPluginStatus} object
      */
     public void queuePluginRemoval(Integer agentId, Collection<String> pluginFileNames);
 

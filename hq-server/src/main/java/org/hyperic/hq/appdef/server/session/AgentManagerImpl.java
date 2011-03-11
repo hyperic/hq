@@ -1358,7 +1358,6 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         ZeventManager.getInstance().enqueueEventAfterCommit(new PluginDeployedZevent(pluginFileName));
     }
 
-    @Transactional(readOnly=true)
     public void syncPluginToAgents(String filename) {
         final Plugin plugin = pluginDAO.getByFilename(filename);
         if (plugin == null) {
@@ -1379,6 +1378,17 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             }
         }
         agentPluginUpdater.queuePluginTransfer(toSync, null);
+    }
+
+    @Transactional(readOnly=true)
+    public void removePluginFromAgentsInBackground(String pluginFileName) {
+        final Collection<Agent> agents = agentPluginStatusDAO.getAutoUpdatingAgents();
+        for (final Agent agent : agents) {
+            if (agent == null) {
+                continue;
+            }
+            agentPluginUpdater.queuePluginRemoval(agent.getId(), Collections.singletonList(pluginFileName));
+        }
     }
     
     @Transactional(readOnly=true)

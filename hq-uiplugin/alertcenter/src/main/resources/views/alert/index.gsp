@@ -285,4 +285,8 @@ hqDojo.ready( function(){
       TypeDefs_addUrlXtraCallback(getDefsUrlMap);
       GalertDefs_addUrlXtraCallback(getDefsUrlMap);
     <% } %>
+    
+    hqDojo.subscribe("XHRComplete", function() {
+    	setFoot();
+    });
 </script>
