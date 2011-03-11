@@ -35,10 +35,10 @@ import net.sf.ehcache.Element;
 
 import org.hyperic.hq.common.ConfigProperty;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.config.data.ConfigPropertyRepository;
 import org.hyperic.util.ConfigPropertyException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -50,14 +50,14 @@ public class ServerConfigCacheImpl implements ServerConfigCache {
     
     private final Cache _cache;
     private final Object _cacheLock = new Object();
-    private ConfigPropertyDAO configPropertyDAO;
+    private ConfigPropertyRepository configPropertyRepository;
     
     public static final String CACHENAME = "ServerConfigCache";
    
     @Autowired
-    public ServerConfigCacheImpl(ConfigPropertyDAO configPropertyDAO) {
+    public ServerConfigCacheImpl(ConfigPropertyRepository configPropertyRepository) {
         _cache = CacheManager.getInstance().getCache(CACHENAME);
-        this.configPropertyDAO = configPropertyDAO;
+        this.configPropertyRepository = configPropertyRepository;
     }
 
     @Transactional(readOnly=true)
@@ -166,9 +166,9 @@ public class ServerConfigCacheImpl implements ServerConfigCache {
     @Transactional(readOnly=true)
     public Collection<ConfigProperty> getProps(String prefix) {
         if (prefix == null) {
-            return configPropertyDAO.findAll();
+            return configPropertyRepository.findAllAndCache();
         } else {
-            return configPropertyDAO.findByPrefix(prefix);
+            return configPropertyRepository.findByPrefix(prefix);
         }
     }
 

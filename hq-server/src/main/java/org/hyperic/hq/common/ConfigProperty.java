@@ -40,103 +40,36 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 
 @Entity
-@Table(name="EAM_CONFIG_PROPS",uniqueConstraints = { @UniqueConstraint(name = "configPropertyId", columnNames = { "PREFIX",
-"PROPKEY" }) })
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-public class ConfigProperty implements Serializable
-{
+@Table(name = "EAM_CONFIG_PROPS", uniqueConstraints = { @UniqueConstraint(name = "configPropertyId", columnNames = { "PREFIX",
+                                                                                                                    "PROPKEY" }) })
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public class ConfigProperty implements Serializable {
+    @Column(name = "DEFAULT_PROPVALUE", length = 300)
+    private String defaultValue;
+
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "ID")
     private Integer id;
 
-    @Column(name="VERSION_COL",nullable=false)
-    @Version
-    private Long version;
-    
-    @Column(name="PREFIX",length=80)
-    private String  prefix;
-    
-    @Column(name="PROPKEY",length=80)
-    private String  key;
-    
-    @Column(name="PROPVALUE",length=300)
-    private String  value;
-    
-    @Column(name="DEFAULT_PROPVALUE",length=300)
-    private String  defaultValue;
-    
-    @Column(name="FREAD_ONLY")
+    @Column(name = "PROPKEY", length = 80)
+    private String key;
+
+    @Column(name = "PREFIX", length = 80)
+    private String prefix;
+
+    @Column(name = "FREAD_ONLY")
     private boolean readOnly = false;
 
+    @Column(name = "PROPVALUE", length = 300)
+    private String value;
+
+    @Column(name = "VERSION_COL", nullable = false)
+    @Version
+    private Long version;
+
     public ConfigProperty() {
-    }
-    
-    
-
-    public Integer getId() {
-        return id;
-    }
-
-
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-
-
-    public Long getVersion() {
-        return version;
-    }
-
-
-
-    public void setVersion(Long version) {
-        this.version = version;
-    }
-
-
-
-    public String getPrefix() {
-        return prefix;
-    }
-
-    public void setPrefix(String prefix) {
-        this.prefix = prefix;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String propKey) {
-        key = propKey;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String propValue) {
-        value = propValue;
-    }
-
-    public String getDefaultValue() {
-        return defaultValue;
-    }
-
-    public void setDefaultValue(String defaultPropValue) {
-        defaultValue = defaultPropValue;
-    }
-
-    public boolean isReadOnly() {
-        return readOnly;
-    }
-
-    public void setReadOnly(boolean flag) {
-        readOnly = flag;
     }
 
     public boolean equals(Object obj) {
@@ -144,22 +77,73 @@ public class ConfigProperty implements Serializable
             return false;
         }
         ConfigProperty o = (ConfigProperty) obj;
-        return
-               ((prefix == o.getPrefix()) ||
-                (prefix != null && o.getPrefix() != null &&
-                 prefix.equals(o.getPrefix())))
-               &&
-               ((key == o.getKey()) ||
-                (key != null && o.getKey() != null &&
-                 key.equals(o.getKey())));
+        return ((prefix == o.getPrefix()) || (prefix != null && o.getPrefix() != null && prefix
+            .equals(o.getPrefix()))) &&
+               ((key == o.getKey()) || (key != null && o.getKey() != null && key.equals(o.getKey())));
+    }
+
+    public String getDefaultValue() {
+        return defaultValue;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public Long getVersion() {
+        return version;
     }
 
     public int hashCode() {
         int result = super.hashCode();
 
-        result = 37*result + (prefix != null ? prefix.hashCode() : 0);
-        result = 37*result + (key != null ? key.hashCode() : 0);
+        result = 37 * result + (prefix != null ? prefix.hashCode() : 0);
+        result = 37 * result + (key != null ? key.hashCode() : 0);
 
         return result;
+    }
+
+    public boolean isReadOnly() {
+        return readOnly;
+    }
+
+    public void setDefaultValue(String defaultPropValue) {
+        defaultValue = defaultPropValue;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setKey(String propKey) {
+        key = propKey;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
+    }
+
+    public void setReadOnly(boolean flag) {
+        readOnly = flag;
+    }
+
+    public void setValue(String propValue) {
+        value = propValue;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }
