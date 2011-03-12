@@ -164,6 +164,7 @@ public class AgentSynchronizer implements DiagnosticObject {
             }
             if (debug) log.debug("executing agent data transfer agentId=" + agentId +
                                  " jobdesc=" + job.getJobDescription());
+// XXX NEED TO HANDLE SCENARIO WHERE THIS HANGS!!
             job.execute();
             setDiags(job);
             synchronized (agentJobs) {

@@ -59,7 +59,6 @@ import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatusDAO;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum;
 import org.hyperic.hq.appdef.server.session.AgentPluginSyncRestartThrottle;
-import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentPluginUpdater;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;

@@ -89,6 +89,10 @@ implements AgentPluginUpdater, ApplicationListener<ContextRefreshedEvent>, Appli
             final Integer agentId = entry.getKey();
             final Collection<Plugin> plugins = entry.getValue();
             final Collection<String> pluginNames = getPluginFileNames(plugins);
+            // SYNC_SUCCESS is set on the status when in AgentPluginSyncRestartThrottle,
+            // after the agent restarts
+            pluginManager.updateAgentPluginSyncStatusInNewTran(
+                AgentPluginStatusEnum.SYNC_IN_PROGRESS, agentId, plugins);
 // XXX create a spring managed prototype instead of an anon class
             final AgentDataTransferJob job =
                 getPluginSyncJob(agentId, plugins, pluginNames, removeMap, agentManager);
@@ -121,8 +125,6 @@ implements AgentPluginUpdater, ApplicationListener<ContextRefreshedEvent>, Appli
             }
             public void execute() {
                 try {
-                    pluginManager.updateAgentPluginSyncStatusInNewTran(
-                        AgentPluginStatusEnum.SYNC_IN_PROGRESS, agentId, plugins);
                     final FileDataResult[] transferResult =
                         agentManager.transferAgentPlugins(overlord, agentId, pluginNames);
                     pluginManager.updateAgentPluginSyncStatusInNewTran(
@@ -197,7 +199,7 @@ implements AgentPluginUpdater, ApplicationListener<ContextRefreshedEvent>, Appli
             return;
         }
         // don't want the main thread to hang the startup so put it in a new thread
-        Thread thread = new Thread("AgentPluginStartupSync") {
+        final Thread thread = new Thread("AgentPluginStartupSync") {
             public void run() {
                 try {
                     log.info("starting agent plugin sync");
