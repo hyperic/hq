@@ -372,4 +372,44 @@ public class AlertDAO
         if (def.getLastFired() < alert.getCtime())
             def.setLastFired(alert.getCtime());
     }
+    
+    public long getOldestUnfixedAlertTime() {
+        Object o = getSession()
+            .createQuery("select min(ctime) from Alert where fixed = '0'")
+            .uniqueResult();
+        if (o == null) {
+            return 0;
+        }
+        return ((Long)o).longValue();
+    }
+    
+    /**
+    -     * @return {@link Map} of {@link Integer} = AlertDefitionId to
+    -     *  {@link Map} of <br>
+    -     *   key {@link AlertInfo} <br>
+    -     *   value {@link Integer} AlertId
+    -     */
+    @SuppressWarnings("unchecked")
+    public final Map<Integer,Map<AlertInfo,Integer>> getUnfixedAlertInfoAfter(long ctime) {
+        final String hql = new StringBuilder(128)
+            .append("SELECT alertDefinition.id, id, ctime ")
+            .append("FROM Alert WHERE ctime >= :ctime and fixed = '0' ")
+            .append("ORDER BY ctime")
+            .toString();
+        final List<Object[]> list = getSession()
+            .createQuery(hql)
+            .setLong("ctime", ctime)
+            .list();
+        final Map<Integer,Map<AlertInfo,Integer>> alerts = new HashMap<Integer,Map<AlertInfo,Integer>>(list.size());
+        for (Object[] obj : list) {
+            Map<AlertInfo,Integer> tmp = alerts.get(obj[0]);
+            if (tmp == null) {
+                tmp = new HashMap<AlertInfo,Integer>();
+                alerts.put((Integer)obj[0], tmp);
+            }
+            final AlertInfo ai = new AlertInfo((Integer)obj[0], (Long)obj[2]);
+            tmp.put(ai, (Integer)obj[1]);
+        }
+        return alerts;
+    }
 }

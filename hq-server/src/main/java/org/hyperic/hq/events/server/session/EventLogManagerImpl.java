@@ -27,27 +27,23 @@ package org.hyperic.hq.events.server.session;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.event.data.EventLogRepository;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.AlertFiredEvent;
-import org.hyperic.hq.events.EventLogStatus;
 import org.hyperic.hq.events.ResourceEventInterface;
-import org.hyperic.hq.events.server.session.EventLogDAO.ResourceEventLog;
 import org.hyperic.hq.events.shared.EventLogManager;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
-import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.TrackEvent;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,14 +67,18 @@ public class EventLogManagerImpl implements EventLogManager {
     
     private final Log traceLog = LogFactory.getLog(EventLogManagerImpl.class.getName() + "Trace");
 
-    private EventLogDAO eventLogDAO;
+    private EventLogRepository eventLogDAO;
 
     private ResourceManager resourceManager;
+    
+    private AlertDAO alertDAO;
 
     @Autowired
-    public EventLogManagerImpl(EventLogDAO eventLogDAO, ResourceManager resourceManager) {
+    public EventLogManagerImpl(EventLogRepository eventLogDAO, ResourceManager resourceManager,
+                               AlertDAO alertDAO) {
         this.eventLogDAO = eventLogDAO;
         this.resourceManager = resourceManager;
+        this.alertDAO = alertDAO;
     }
 
     /**
@@ -117,7 +117,7 @@ public class EventLogManagerImpl implements EventLogManager {
 
         EventLog e = new EventLog(r, subject, event.getClass().getName(), detail, event.getTimestamp(), status, event.getInstanceId());
         if (save) {
-            return eventLogDAO.create(e);
+            return eventLogDAO.save(e);
         } else {
             return e;
         }
@@ -134,26 +134,6 @@ public class EventLogManagerImpl implements EventLogManager {
         eventLogDAO.insertLogs(eventLogs);
     }
     
-    /**
-     * Finds a unique log entry with the specified event type, instance ID, and timestamp.  Returns null if no such entry found.  
-     * If multiple entries are found, returns first one found.
-     * 
-     */
-    @Transactional(readOnly=true)
-    public EventLog findLog(String typeClass, int instanceId, long timestamp) {
-        return eventLogDAO.findLog(typeClass, instanceId, timestamp);
-    }
-
-    /**
-     * Find the last event logs of all the resources of a given prototype. (i.e.
-     * 'Linux' or 'FileServer File')
-     * 
-     * 
-     */
-    @Transactional(readOnly=true)
-    public List<EventLog> findLastLogs(Resource proto) {
-        return eventLogDAO.findLastByType(proto);
-    }
     
     /**
      * Find the last unfixed AlertFiredEvents for each alert definition in the list
@@ -167,7 +147,36 @@ public class EventLogManagerImpl implements EventLogManager {
         final boolean debug = log.isDebugEnabled();
         StopWatch watch = new StopWatch();
         if (debug) watch.markTimeBegin("findUnfixedAlertFiredEventLogs");
-        Map<Integer,AlertFiredEvent> alertFiredMap = eventLogDAO.findUnfixedAlertFiredEventLogs();
+        final Map<Integer,AlertFiredEvent> alertFiredMap = new HashMap<Integer,AlertFiredEvent>();
+        final long ctime = alertDAO.getOldestUnfixedAlertTime();
+        if (ctime == 0) {
+            return new HashMap<Integer,AlertFiredEvent>(0,1);
+        }
+        final Map<Integer,Map<AlertInfo,Integer>> alerts = alertDAO.getUnfixedAlertInfoAfter(ctime);
+        List<EventLog> list = eventLogDAO.findByTimestampGreaterThanOrEqualToAndType(ctime, AlertFiredEvent.class.getName());
+        for (EventLog log  : list ) {
+                if (log == null || log.getInstanceId() == null) {
+                    continue;
+                }
+                final Map<AlertInfo,Integer> objs = alerts.get(log.getInstanceId());
+                if (objs == null) {
+                    continue;
+                }
+                final Integer alertDefId = log.getInstanceId();
+                final long timestamp     = log.getTimestamp();
+                final Integer alertId =
+                    objs.get(new AlertInfo(alertDefId, timestamp));
+                if (alertId == null) {
+                    continue;
+                }
+                if (log.getResource().isInAsyncDeleteState()) {
+                    continue;
+                }
+                AlertFiredEvent alertFired = 
+                    createAlertFiredEvent(alertDefId, alertId, log);
+                alertFiredMap.put(alertDefId, alertFired);
+            }
+ 
         if (debug) {
             watch.markTimeEnd("findUnfixedAlertFiredEventLogs");
             if (traceLog.isDebugEnabled()) {
@@ -186,26 +195,12 @@ public class EventLogManagerImpl implements EventLogManager {
         }
         return alertFiredMap;
     }
-
-    /**
-     * Get a list of {@link ResourceEventLog}s in a given interval, with the
-     * maximum specified status.
-     * 
-     * If specified, typeClass dictates the full classname of the rows to check
-     * (i.e. org.hyperic.hq.....ResourceLogEvent)
-     * 
-     * If specified, inGroups must be a collection of {@link ResourceGroup}s
-     * which the resulting logs will be associated with.
-     * 
-     * 
-     */
-    @Transactional(readOnly=true)
-    public List<ResourceEventLog> findLogs(AuthzSubject subject, long begin, long end, PageInfo pInfo,
-                                           EventLogStatus maxStatus, String typeClass,
-                                           Collection<ResourceGroup> inGroups) {
-        return eventLogDAO.findLogs(subject, begin, end, pInfo, maxStatus, typeClass, inGroups);
+    
+    private final AlertFiredEvent createAlertFiredEvent(Integer alertDefId,Integer alertId,EventLog eventLog) {
+        return new AlertFiredEvent(alertId, alertDefId, eventLog.getResource().getId(), eventLog.getSubject(),
+            eventLog.getTimestamp(), eventLog.getDetail());
     }
-
+    
     /**
      * Get a list of log records based on resource, event type and time range.
      * All resources which are descendents of the passed resource will also have
@@ -222,17 +217,21 @@ public class EventLogManagerImpl implements EventLogManager {
             return new ArrayList<EventLog>(0);
         }
 
-        Collection<String> eTypes;
-
-        if (eventTypes == null) {
-            eTypes = Collections.EMPTY_LIST;
-        } else {
-            eTypes = Arrays.asList(eventTypes);
-        }
         if (r instanceof ResourceGroup) {
-            return eventLogDAO.findByGroup(r, begin, end, eTypes);
+            if(eventTypes == null) {
+                return eventLogDAO.findByTimestampBetweenAndResourcesOrderByTimestamp(begin,end,
+                    ((ResourceGroup)r).getMembers());
+            }else {
+                return eventLogDAO.findByTimestampBetweenAndResourcesAndEventTypesOrderByTimestamp(begin,end,
+                    ((ResourceGroup)r).getMembers(), Arrays.asList(eventTypes));
+            }
         } else {
-            return eventLogDAO.findByEntity(user, r, begin, end, eTypes);
+            if(eventTypes == null) {
+                return eventLogDAO.findByTimestampBetweenAndResourceOrderByTimestampAsc(begin, end, r);
+            }else {
+                return eventLogDAO.findByTimestampBetweenAndResourceAndEventTypesOrderByTimestamp(begin, end, r, 
+                    Arrays.asList(eventTypes));
+            }
         }
     }
 
@@ -246,7 +245,7 @@ public class EventLogManagerImpl implements EventLogManager {
     @Transactional(readOnly=true)
     public List<EventLog> findLogs(AppdefEntityID ent, AuthzSubject user, String status, long begin, long end) {
         Resource r = resourceManager.findResource(ent);
-        return eventLogDAO.findByEntityAndStatus(r, user, begin, end, status);
+        return eventLogDAO.findByTimestampBetweenAndStatusAndResourceOrderByTimestampAsc(begin, end, status, r);
     }
 
     /**
@@ -257,7 +256,7 @@ public class EventLogManagerImpl implements EventLogManager {
      */
     @Transactional(readOnly=true)
     public int getTotalNumberLogs() {
-        return eventLogDAO.getTotalNumberLogs();
+        return eventLogDAO.count().intValue();
     }
 
     /**
@@ -280,15 +279,15 @@ public class EventLogManagerImpl implements EventLogManager {
     public boolean[] logsExistPerInterval(AppdefEntityID entityId, AuthzSubject subject, long begin, long end,
                                           int intervals) {
         Resource r = resourceManager.findResource(entityId);
-        return eventLogDAO.logsExistPerInterval(r, subject, begin, end, intervals);
+        return eventLogDAO.logsExistPerInterval(r, begin, end, intervals);
     }
 
     /**
      * Delete event logs for the given resource TODO: Authz check.
      * 
      */
-    public int deleteLogs(Resource r) {
-        return eventLogDAO.deleteLogs(r);
+    public void deleteLogs(Resource r) {
+        eventLogDAO.deleteByResource(r);
     }
 
     /**
@@ -329,10 +328,6 @@ public class EventLogManagerImpl implements EventLogManager {
             return 0;
         }
 
-        // Now that we have valid from/to values, figure out what the
-        // interval is (don't loop more than 60 times)
-        long interval = Math.max(MeasurementConstants.DAY, (to - from) / 60);
-
-        return eventLogDAO.deleteLogs(from, to, interval);
+        return eventLogDAO.deleteLogsInTimeRange(from, to);
     }
 }

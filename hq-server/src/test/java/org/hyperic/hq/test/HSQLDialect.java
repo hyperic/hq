@@ -27,7 +27,6 @@ public class HSQLDialect
     }
 
     public boolean useEamNumbers() {
-        // TODO Auto-generated method stub
         return false;
     }
 
@@ -56,8 +55,7 @@ public class HSQLDialect
     }
 
     public String getLimitString(int num) {
-        // TODO Auto-generated method stub
-        return null;
+        return "LIMIT "+num;
     }
 
     public boolean viewExists(Statement stmt, String viewName) throws SQLException {

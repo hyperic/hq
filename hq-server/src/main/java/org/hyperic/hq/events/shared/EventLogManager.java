@@ -37,7 +37,7 @@ import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.EventLogStatus;
 import org.hyperic.hq.events.server.session.EventLog;
-import org.hyperic.hq.events.server.session.EventLogDAO.ResourceEventLog;
+import org.hyperic.hq.events.server.session.ResourceEventLog;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 
@@ -63,19 +63,6 @@ public interface EventLogManager {
     public void insertEventLogs(org.hyperic.hq.events.server.session.EventLog[] eventLogs);
     
     /**
-     * Finds a unique log entry with the specified event type, instance ID, and timestamp.  Returns null if no such entry found.  
-     * If multiple entries are found, returns first one found.
-     * 
-     */
-    public EventLog findLog(String typeClass, int instanceId, long timestamp);
-
-    /**
-     * Find the last event logs of all the resources of a given prototype. (i.e.
-     * 'Linux' or 'FileServer File')
-     */
-    public List<EventLog> findLastLogs(Resource proto);
-    
-    /**
      * Find the last unfixed AlertFiredEvents for each alert definition in the list
      * 
      * 
@@ -83,17 +70,6 @@ public interface EventLogManager {
      * 
      */
     public Map<Integer,AlertFiredEvent> findLastUnfixedAlertFiredEvents();
-
-    /**
-     * Get a list of {@link ResourceEventLog}s in a given interval, with the
-     * maximum specified status. If specified, typeClass dictates the full
-     * classname of the rows to check (i.e. org.hyperic.hq.....ResourceLogEvent)
-     * If specified, inGroups must be a collection of {@link ResourceGroup}s
-     * which the resulting logs will be associated with.
-     */
-    public List<ResourceEventLog> findLogs(AuthzSubject subject, long begin, long end, PageInfo pInfo,
-                                           EventLogStatus maxStatus, String typeClass,
-                                           Collection<ResourceGroup> inGroups);
 
     /**
      * Get a list of log records based on resource, event type and time range.
@@ -134,7 +110,7 @@ public interface EventLogManager {
     /**
      * Delete event logs for the given resource TODO: Authz check.
      */
-    public int deleteLogs(Resource r);
+    public void deleteLogs(Resource r);
 
     /**
      * Purge old event logs.
