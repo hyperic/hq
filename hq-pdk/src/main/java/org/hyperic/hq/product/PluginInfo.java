@@ -42,13 +42,15 @@ public class PluginInfo implements java.io.Serializable {
     public String jar;
     public String md5;
     public String name;
+    public String version;
     public String product;
     public int deploymentOrder = 0;
     public transient ClassLoader resourceLoader = null;
 
     //for use by MeasurementPluginManager (proxies)
-    PluginInfo(String name) {
+    PluginInfo(String name, String version) {
         this.name = name;
+        this.version = version;
         this.product = name;
         this.jar  = "";
         this.md5  = "";
@@ -59,6 +61,7 @@ public class PluginInfo implements java.io.Serializable {
             File jarFile = new File(jar);
             this.deploymentOrder = plugin.getDeploymentOrder();
             this.name  = plugin.getName();
+            this.version = plugin.getPluginVersion();
             this.product = plugin.getName();
             this.md5   = getMD5(plugin, jar);
             this.jar   = jarFile.getName();
@@ -70,6 +73,7 @@ public class PluginInfo implements java.io.Serializable {
     public PluginInfo(String name, PluginInfo info) {
         this.product = info.name;
         this.name  = name;
+        this.version = info.version;
         this.md5   = info.md5;
         this.jar   = info.jar;
         this.mtime = info.mtime;

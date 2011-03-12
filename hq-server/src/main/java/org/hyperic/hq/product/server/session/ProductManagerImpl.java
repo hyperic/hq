@@ -227,11 +227,12 @@ public class ProductManagerImpl implements ProductManager {
     private void updatePlugin(PluginDAO plHome, PluginInfo pInfo) {
         Plugin plugin = plHome.findByName(pInfo.name);
         if (plugin == null) {
-            plHome.create(pInfo.name, pInfo.jar, pInfo.md5);
+            plHome.create(pInfo.name, pInfo.version, pInfo.jar, pInfo.md5);
         } else {
             plugin.setModifiedTime(System.currentTimeMillis());
             plugin.setPath(pInfo.jar);
             plugin.setMD5(pInfo.md5);
+            plugin.setVersion(pInfo.version);
         }
     }
 

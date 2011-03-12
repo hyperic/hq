@@ -40,9 +40,10 @@ public class PluginDAO extends HibernateDAO<Plugin> {
         super(Plugin.class, f);
     }
 
-    public Plugin create(String name, String path, String md5) {
+    public Plugin create(String name, String version, String path, String md5) {
         Plugin p = new Plugin();
         p.setName(name);
+        p.setVersion(version);
         p.setPath(path);
         p.setMD5(md5);
         p.setModifiedTime(System.currentTimeMillis());

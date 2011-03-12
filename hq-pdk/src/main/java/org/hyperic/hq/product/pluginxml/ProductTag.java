@@ -89,12 +89,19 @@ class ProductTag
     public void endAttributes() throws XmlAttrException {
         String name = getAttribute(ATTR_NAME);
         String packageName = getAttribute(ATTR_PACKAGE);
-
+        String version = getAttribute(ATTR_VERSION);
+        
         if (name != null) {
             this.data.name = name;
         }
         else {
             name = this.data.name;
+        }
+        
+        if (version != null) {
+        	this.data.setVersion(version);
+        } else {
+        	version = this.data.getVersion();
         }
 
         if ((packageName == null) &&

@@ -941,7 +941,10 @@ public class ProductPluginManager
             if (plugin.getName() == null) {
                 plugin.setName(pluginName);
             }
-
+            if (plugin.getPluginVersion() == null) {
+            	plugin.setPluginVersion(data.getVersion());
+            }
+            
             if (this.client && (implName != null)) {
                 // already added the classpath, but the impl may override/adjust
                 String[] pluginClasspath = plugin.getClassPath(this);

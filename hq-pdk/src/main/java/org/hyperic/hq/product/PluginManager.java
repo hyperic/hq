@@ -427,6 +427,7 @@ public abstract class PluginManager {
 
         plugin.data = pluginType.data;
         plugin.setName(name);
+        plugin.setPluginVersion(pluginType.getPluginVersion());
         plugin.setTypeInfo(pluginType.getTypeInfo());
 
         registerPlugin(plugin, config);
