@@ -24,16 +24,24 @@
 var conH;
 var winH;
 var footerH = 28;
-var browserH = 88;
+var browserH = 28;
 
 function setFoot() {
-	var windowCoords = hqDojo.window.getBox();
-	var contentCoords = hqDojo.position(hqDojo.byId("migContainer"), true);
-  	var footerCoords = hqDojo.position(hqDojo.byId("footerContent"), true);
-  	var combinedContentHeight = (contentCoords.y + contentCoords.h) - footerCoords.h;
-  	var diff = windowCoords.h - combinedContentHeight + 2;
+	var footerContent = hqDojo.byId("footerContent");
 
-  	if (diff > 0) {
-  		hqDojo.style("footerContent", "marginTop", diff + "px");	  			
-  	}
+	footerContent.style.marginTop = "0px";
+
+	var WindowSize = {
+		width: window.innerWidth || (window.document.documentElement.clientWidth || window.document.body.clientWidth),
+		height: window.innerHeight || (window.document.documentElement.clientHeight || window.document.body.clientHeight)
+	};
+	
+	winH = WindowSize.height;
+	conH = hqDojo.position("header").h + hqDojo.position("migContainer").h;
+	
+	var myHeight = winH - conH - footerH + browserH;
+	
+	if (myHeight > 0) {
+		footerContent.style.marginTop = myHeight + "px";
+	}
 }

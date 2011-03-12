@@ -68,7 +68,7 @@
 
 		<div id="migContainer">
 			<tiles:insert attribute='body' /> 
-			<div id="footerContent" style="margin-top:60px;">
+			<div id="footerContent" style="margin-top:0px;">
 				<tiles:insert attribute="footer" />
 			</div>
 		</div>
