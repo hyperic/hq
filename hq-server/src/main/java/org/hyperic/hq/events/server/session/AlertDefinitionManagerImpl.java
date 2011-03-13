@@ -37,6 +37,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.ApplicationEvent;
+import org.hyperic.hq.alert.data.AlertConditionRepository;
 import org.hyperic.hq.alert.data.ResourceAlertDefinitionRepository;
 import org.hyperic.hq.alert.data.ResourceTypeAlertDefinitionRepository;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
@@ -117,7 +118,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
 
     private ActionDAO actionDao;
 
-    private AlertConditionDAO alertConditionDAO;
+    private AlertConditionRepository alertConditionRepository;
     
     private AlertDAO alertDAO;
     
@@ -137,7 +138,8 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
 
     @Autowired
     public AlertDefinitionManagerImpl(AlertPermissionManager alertPermissionManager, ResourceAlertDefinitionRepository resAlertDefRepository,
-                                      ResourceTypeAlertDefinitionRepository resTypeAlertDefRepository, ActionDAO actionDao, AlertConditionDAO alertConditionDAO, 
+                                      ResourceTypeAlertDefinitionRepository resTypeAlertDefRepository, ActionDAO actionDao, 
+                                      AlertConditionRepository alertConditionRepository, 
                                       MeasurementManager measurementManager, RegisteredTriggerManager registeredTriggerManager,
                                       ResourceManager resourceManager, EscalationManager escalationManager,
                                       AlertAuditFactory alertAuditFactory, AlertDAO alertDAO,
@@ -147,7 +149,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
         this.resAlertDefRepository = resAlertDefRepository;
         this.resTypeAlertDefRepository = resTypeAlertDefRepository;
         this.actionDao = actionDao;
-        this.alertConditionDAO = alertConditionDAO;
+        this.alertConditionRepository = alertConditionRepository;
         this.measurementManager = measurementManager;
         this.registeredTriggerManager = registeredTriggerManager;
         this.resourceManager = resourceManager;
@@ -405,7 +407,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
                 setEnableAlertDefAction(a, cond.getMeasurementId());
             }
 
-            alertConditionDAO.save(cond);
+            alertConditionRepository.save(cond);
         }
 
         // Create actions
@@ -686,11 +688,21 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
         }
 
         for (AlertConditionValue cVal : val.getAddedConditions()) {
-            def.addCondition(alertConditionDAO.findById(cVal.getId()));
+            AlertCondition cond = alertConditionRepository.findById(cVal.getId());
+            if(cond == null) {
+                throw new EntityNotFoundException("Alert Condition with ID: " + cVal.getId() + 
+                    " was not found");
+            }
+            def.addCondition(cond);
         }
 
         for (AlertConditionValue cVal : val.getRemovedConditions()) {
-            def.removeCondition(alertConditionDAO.findById(cVal.getId()));
+            AlertCondition cond = alertConditionRepository.findById(cVal.getId());
+            if(cond == null) {
+                throw new EntityNotFoundException("Alert Condition with ID: " + cVal.getId() + 
+                    " was not found");
+            }
+            def.removeCondition(cond);
         }
 
         for (ActionValue aVal : val.getAddedActions()) {

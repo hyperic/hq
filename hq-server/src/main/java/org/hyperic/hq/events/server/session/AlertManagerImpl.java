@@ -40,6 +40,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Hibernate;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.alert.data.AlertConditionRepository;
 import org.hyperic.hq.alert.data.ResourceAlertDefinitionRepository;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -97,7 +98,7 @@ public class AlertManagerImpl implements AlertManager,
 
     private AlertDAO alertDAO;
 
-    private AlertConditionDAO alertConditionDAO;
+    private AlertConditionRepository alertConditionRepository;
 
     private MeasurementRepository measurementRepository;
 
@@ -117,7 +118,7 @@ public class AlertManagerImpl implements AlertManager,
     @Autowired
     public AlertManagerImpl(AlertPermissionManager alertPermissionManager,
                             ResourceAlertDefinitionRepository resAlertDefRepository, AlertActionLogDAO alertActionLogDAO,
-                            AlertDAO alertDAO, AlertConditionDAO alertConditionDAO,
+                            AlertDAO alertDAO, AlertConditionRepository alertConditionRepository,
                             MeasurementRepository measurementRepository, ResourceManager resourceManager,
                             AlertDefinitionManager alertDefinitionManager,
                             AuthzSubjectManager authzSubjectManager,
@@ -127,7 +128,7 @@ public class AlertManagerImpl implements AlertManager,
         this.resAlertDefRepository = resAlertDefRepository;
         this.alertActionLogDAO = alertActionLogDAO;
         this.alertDAO = alertDAO;
-        this.alertConditionDAO = alertConditionDAO;
+        this.alertConditionRepository = alertConditionRepository;
         this.measurementRepository = measurementRepository;
         this.resourceManager = resourceManager;
         this.alertDefinitionManager = alertDefinitionManager;
@@ -202,9 +203,12 @@ public class AlertManagerImpl implements AlertManager,
     }
 
     public void addConditionLogs(Alert alert, AlertConditionLogValue[] logs) {
-        AlertConditionDAO dao = alertConditionDAO;
         for (int i = 0; i < logs.length; i++) {
-            AlertCondition cond = dao.findById(logs[i].getCondition().getId());
+            AlertCondition cond = alertConditionRepository.findById(logs[i].getCondition().getId());
+            if(cond == null) {
+                throw new EntityNotFoundException("Alert Condition with ID: " +logs[i].getCondition().getId() + 
+                    " was not found");
+            }
             alert.createConditionLog(logs[i].getValue(), cond);
         }
     }
