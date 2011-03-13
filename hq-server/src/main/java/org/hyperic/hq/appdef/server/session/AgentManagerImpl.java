@@ -874,6 +874,9 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     throws PermissionException, AgentConnectionException, AgentNotFoundException,
            AgentRemoteException, FileNotFoundException, IOException,
            ConfigPropertyException {
+        if (filenames == null || filenames.isEmpty()) {
+            return new FileDataResult[0];
+        }
         final List<FileDataResult> rtn = new ArrayList<FileDataResult>();
         concurrentStatsCollector.addStat(filenames.size(),
             ConcurrentStatsCollector.AGENT_PLUGIN_TRANSFER);
@@ -1152,7 +1155,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     public Map<String, Boolean> agentRemovePlugins(AuthzSubject subject, Integer agentId,
                                                    Collection<String> pluginJarNames)
     throws AgentConnectionException, AgentRemoteException, PermissionException {
-        if (pluginJarNames == null || pluginJarNames.size() <= 0 || agentId == null ||
+        if (pluginJarNames == null || pluginJarNames.isEmpty() || agentId == null ||
                 subject == null) {
             return Collections.emptyMap();
         }
@@ -1426,40 +1429,53 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             return;
         }
         if (debug) log.debug("running syncAllAgentPlugins");
-        final Map<Agent, Collection<AgentPluginStatus>> map = 
-            agentPluginStatusDAO.getOutOfSyncPluginsByAgent();
-        map.putAll(agentPluginStatusDAO.getPluginsToRemoveFromAgents());
-        final Map<Integer, Collection<Plugin>> updateMap = new HashMap<Integer, Collection<Plugin>>(map.size());
-        final Map<Integer, Collection<String>> removeMap = new HashMap<Integer, Collection<String>>(map.size());
-        final PluginManager pluginManager = Bootstrap.getBean(PluginManager.class);
-        final Map<String, Plugin> pluginsByName = getPluginsByName(pluginManager);
-        for (final Entry<Agent, Collection<AgentPluginStatus>> entry : map.entrySet()) {
-            final Agent agent = entry.getKey();
-            final Collection<AgentPluginStatus> list = entry.getValue();
-            final Collection<Plugin> plugins = new HashSet<Plugin>(list.size());
-            // use this Map to determine which plugins aren't on the agent that should be
-            final Map<String, Plugin> missingPlugins = new HashMap<String, Plugin>(pluginsByName);
-            for (final AgentPluginStatus s : list) {
-                missingPlugins.remove(s.getPluginName());
-                Plugin tmp;
-                if (null != (tmp = pluginsByName.get(s.getPluginName()))) {
-                    // plugin exists in EAM_PLUGIN table, check if md5s match
-                    if (!tmp.getMD5().equals(s.getMD5())) {
-                        plugins.add(tmp);
-                    }
-                } else {
-                    // plugin doesn't exist on HQ Server, remove it from agent!
-                    addToRemoveMap(removeMap, agent, s.getJarName());
-                }
-            }
-            plugins.addAll(missingPlugins.values());
-            updateMap.put(agent.getId(), plugins);
-        }
+        final Map<Integer, Collection<String>> removeMap = getRemoveMap();
+        final Map<Integer, Collection<Plugin>> updateMap = getUpdateMap(removeMap);
         if (debug) {
             log.debug("syncAllAgentPlugins queueing " + updateMap.size() + " update(s), " +
                       " and " + removeMap.size() + " remove(s)");
         }
         agentPluginUpdater.queuePluginTransfer(updateMap, removeMap);
+    }
+
+    private Map<Integer, Collection<Plugin>> getUpdateMap(Map<Integer, Collection<String>> removeMap) {
+        final Map<Agent, Collection<AgentPluginStatus>> updates = 
+            agentPluginStatusDAO.getOutOfSyncPluginsByAgent();
+        final int size = updates.size();
+        final Map<Integer, Collection<Plugin>> rtn = new HashMap<Integer, Collection<Plugin>>(size);
+        final Map<String, Plugin> pluginsByName = getPluginsByName();
+        for (final Entry<Agent, Collection<AgentPluginStatus>> entry : updates.entrySet()) {
+            final Agent agent = entry.getKey();
+            final Collection<AgentPluginStatus> list = entry.getValue();
+            final Collection<Plugin> plugins = new HashSet<Plugin>(list.size());
+            for (AgentPluginStatus s : list) {
+                final Plugin plugin = pluginsByName.get(s.getPluginName());
+                if (plugin == null) {
+                    addToRemoveMap(removeMap, agent, s.getJarName());
+                    continue;
+                }
+                if (!plugin.getMD5().equals(s.getMD5())) {
+                    plugins.add(plugin);
+                }
+            }
+            rtn.put(agent.getId(), plugins);
+        }
+        return rtn;
+    }
+
+    private Map<Integer, Collection<String>> getRemoveMap() {
+        final Map<Agent, Collection<AgentPluginStatus>> removes =
+            agentPluginStatusDAO.getPluginsToRemoveFromAgents();
+        final int size = removes.size();
+        final Map<Integer, Collection<String>> rtn = new HashMap<Integer, Collection<String>>(size);
+        for (final Entry<Agent, Collection<AgentPluginStatus>> entry : removes.entrySet()) {
+            final Agent agent = entry.getKey();
+            Collection<AgentPluginStatus> list = entry.getValue();
+            for (AgentPluginStatus s : list) {
+                addToRemoveMap(rtn, agent, s.getJarName());
+            }
+        }
+        return rtn;
     }
 
     private void addToRemoveMap(Map<Integer, Collection<String>> removeMap, Agent agent,
@@ -1479,7 +1495,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         c.add(filename);
     }
 
-    private Map<String, Plugin> getPluginsByName(PluginManager pluginManager) {
+    private Map<String, Plugin> getPluginsByName() {
+        final PluginManager pluginManager = Bootstrap.getBean(PluginManager.class);
         final Map<String, Plugin> rtn = new HashMap<String, Plugin>();
         final List<Plugin> plugins = pluginManager.getAllPlugins();
         for (final Plugin p : plugins) {

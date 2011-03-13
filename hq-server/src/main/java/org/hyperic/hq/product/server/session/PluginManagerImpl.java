@@ -352,6 +352,9 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
      @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly=false)
      public void updateAgentPluginSyncStatusInNewTran(AgentPluginStatusEnum s, Integer agentId,
                                                       Collection<Plugin> plugins) {
+         if (plugins == null || plugins.isEmpty()) {
+             return;
+         }
          final Map<String, AgentPluginStatus> statusMap =
              agentPluginStatusDAO.getStatusByAgentId(agentId);
          final long now = System.currentTimeMillis();
