@@ -40,6 +40,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Hibernate;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.alert.data.AlertActionLogRepository;
 import org.hyperic.hq.alert.data.AlertConditionRepository;
 import org.hyperic.hq.alert.data.ResourceAlertDefinitionRepository;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -94,7 +95,7 @@ public class AlertManagerImpl implements AlertManager,
 
     private ResourceAlertDefinitionRepository resAlertDefRepository;
 
-    private AlertActionLogDAO alertActionLogDAO;
+    private AlertActionLogRepository alertActionLogRepository;
 
     private AlertDAO alertDAO;
 
@@ -117,7 +118,8 @@ public class AlertManagerImpl implements AlertManager,
     
     @Autowired
     public AlertManagerImpl(AlertPermissionManager alertPermissionManager,
-                            ResourceAlertDefinitionRepository resAlertDefRepository, AlertActionLogDAO alertActionLogDAO,
+                            ResourceAlertDefinitionRepository resAlertDefRepository, 
+                            AlertActionLogRepository alertActionLogRepository,
                             AlertDAO alertDAO, AlertConditionRepository alertConditionRepository,
                             MeasurementRepository measurementRepository, ResourceManager resourceManager,
                             AlertDefinitionManager alertDefinitionManager,
@@ -126,7 +128,7 @@ public class AlertManagerImpl implements AlertManager,
                             AlertRegulator alertRegulator, ConcurrentStatsCollector concurrentStatsCollector) {
         this.alertPermissionManager = alertPermissionManager;
         this.resAlertDefRepository = resAlertDefRepository;
-        this.alertActionLogDAO = alertActionLogDAO;
+        this.alertActionLogRepository = alertActionLogRepository;
         this.alertDAO = alertDAO;
         this.alertConditionRepository = alertConditionRepository;
         this.measurementRepository = measurementRepository;
@@ -753,7 +755,7 @@ public class AlertManagerImpl implements AlertManager,
      * 
      */
     public void handleSubjectRemoval(AuthzSubject subject) {
-        alertActionLogDAO.handleSubjectRemoval(subject);
+        alertActionLogRepository.removeSubject(subject);
     }
 
 }

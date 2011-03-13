@@ -35,6 +35,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.alert.data.AlertActionLogRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.EdgePermCheck;
@@ -49,7 +50,7 @@ import org.springframework.stereotype.Repository;
 public class AlertDAO
     extends HibernateDAO<Alert> {
 
-    private AlertActionLogDAO alertActionLogDAO;
+    private AlertActionLogRepository alertActionLogRepository;
     private PermissionManager permissionManager;
     
     
@@ -59,9 +60,10 @@ public class AlertDAO
     }
 
     @Autowired
-    public AlertDAO(SessionFactory f, AlertActionLogDAO alertActionLogDAO, PermissionManager permissionManager) {
+    public AlertDAO(SessionFactory f, AlertActionLogRepository alertActionLogRepository, 
+                    PermissionManager permissionManager) {
         super(Alert.class, f);
-        this.alertActionLogDAO = alertActionLogDAO;
+        this.alertActionLogRepository = alertActionLogRepository;
         this.permissionManager = permissionManager;
     }
 
@@ -108,7 +110,7 @@ public class AlertDAO
             if (list.size() == 0) {
                 break;
             }
-            alertActionLogDAO.deleteAlertActions(list);
+            alertActionLogRepository.deleteAlertActions(list);
             for (Alert alert : list) {
                 count++;
                 remove(alert);

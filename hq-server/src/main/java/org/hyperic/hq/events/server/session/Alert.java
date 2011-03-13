@@ -53,6 +53,7 @@ import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.OptimisticLock;
+import org.hyperic.hq.alert.data.AlertActionLogRepository;
 import org.hyperic.hq.alert.data.AlertConditionLogRepository;
 import org.hyperic.hq.alert.data.ResourceAlertDefinitionRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
@@ -320,7 +321,7 @@ public class Alert implements AlertInterface, Serializable
             throw new EntityNotFoundException("Resource Alert Definition with ID: " + 
                 val.getAlertDefId() + " was not found");
         }
-        AlertActionLogDAO alDao = Bootstrap.getBean(AlertActionLogDAO.class);
+        AlertActionLogRepository alDao = Bootstrap.getBean(AlertActionLogRepository.class);
         AlertConditionLogRepository aclDao = Bootstrap.getBean(AlertConditionLogRepository.class);
 
         setFixed(false);
@@ -350,14 +351,20 @@ public class Alert implements AlertInterface, Serializable
 
         for (Iterator<AlertActionLog> i=val.getAddedActionLogs().iterator(); i.hasNext(); ) {
             AlertActionLog lv = i.next();
-
-            addActionLog(alDao.findById(lv.getId()));
+            AlertActionLog existing = alDao.findById(lv.getId());
+            if(existing == null) {
+                throw new EntityNotFoundException("AlertActionLog with ID: " + lv.getId() + " was not found");
+            }
+            addActionLog(existing);
         }
 
         for (Iterator<AlertActionLog> i=val.getRemovedActionLogs().iterator(); i.hasNext(); ) {
             AlertActionLog lv = i.next();
-
-            removeActionLog(alDao.findById(lv.getId()));
+            AlertActionLog existing = alDao.findById(lv.getId());
+            if(existing == null) {
+                throw new EntityNotFoundException("AlertActionLog with ID: " + lv.getId() + " was not found");
+            }
+            removeActionLog(existing);
         }
     }
 
