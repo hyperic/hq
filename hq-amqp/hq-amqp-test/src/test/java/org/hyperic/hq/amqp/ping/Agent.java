@@ -9,8 +9,6 @@ import java.io.IOException;
  */
 public class Agent extends AbstractAmqpComponent implements Ping {
 
-    private boolean completed;
-
     public Agent() throws IOException {
         super();
     }
@@ -19,23 +17,20 @@ public class Agent extends AbstractAmqpComponent implements Ping {
     public long ping(int attempts) throws IOException, InterruptedException {
         Thread.sleep(100L);
         long startTime = System.currentTimeMillis();
-        channel.basicPublish(serverExchange, routingKey, null, "agent:ping".getBytes());
-        System.out.println("agent sent ping to server");
-
+        channel.basicPublish(serverExchange, routingKey, null, "agent:ping-request".getBytes());
+        
         QueueingConsumer agentConsumer = new QueueingConsumer(channel);
         channel.basicConsume(agentQueue, true, agentConsumer);
-        /* needs to block until receives response */
-        while (!completed) {
+
+        while (true) {
             QueueingConsumer.Delivery delivery = agentConsumer.nextDelivery();
             String message = new String(delivery.getBody());
             long duration = System.currentTimeMillis() - startTime;
             System.out.println("agent received=" + message);
-            if (message.length() > 0 && message.contains("server:ping")) { 
-                completed = true;
+            if (message.length() > 0 && message.contains("agent:ping-response")) {
                 shutdown();
                 return duration;
             }
         }
-        return 0;
     }
 }

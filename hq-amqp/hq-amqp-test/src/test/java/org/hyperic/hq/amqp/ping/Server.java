@@ -9,8 +9,6 @@ import java.io.IOException;
  */
 public class Server extends AbstractAmqpComponent implements Ping {
 
-    private boolean completed;
-    
     public Server() throws IOException {
         super();
     }
@@ -19,33 +17,20 @@ public class Server extends AbstractAmqpComponent implements Ping {
         QueueingConsumer serverConsumer = new QueueingConsumer(channel);
         channel.basicConsume(serverQueue, true, serverConsumer);
 
-        while (!completed) {
+        while (true) {
             QueueingConsumer.Delivery delivery = serverConsumer.nextDelivery();
             String message = new String(delivery.getBody());
-            System.out.println("server received=" + message);
-            if (message.length() > 0 && message.contains("agent:ping")) {
-                channel.basicPublish(agentExchange, routingKey, null, "server:ping".getBytes());
+            if (message.length() > 0 && message.contains("agent:ping-request")) {
+                channel.basicPublish(agentExchange, routingKey, null, "agent:ping-response".getBytes());
+                System.out.println("server received=" + message);
                 shutdown();
-                completed = true;
+                break;
             }
         }
     }
     
     @Override
     public long ping(int attempts) throws IOException, InterruptedException {
-        /*QueueingConsumer serverConsumer = new QueueingConsumer(channel);
-        channel.basicConsume(serverQueue, true, serverConsumer);
-
-        while (!completed) {
-            QueueingConsumer.Delivery delivery = serverConsumer.nextDelivery();
-            String message = new String(delivery.getBody());
-            System.out.println("server received message=" + message);
-            if (message.length() > 0 && message.contains("agent:ping")) {
-                channel.basicPublish(agentExchange, routingKey, null, "server:ping".getBytes());
-                completed = true;
-                return 0;
-            }
-        }*/
         return 0;
     }
 }

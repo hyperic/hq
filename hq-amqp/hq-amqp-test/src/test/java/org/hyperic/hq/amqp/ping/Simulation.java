@@ -15,7 +15,7 @@ public class Simulation {
                 try {
                     new Server().listen();
                 } catch (Exception e) {
-                    System.out.println(e);
+                    System.out.println(e.getMessage());
                 }
             }
         });
@@ -28,7 +28,7 @@ public class Simulation {
                     long duration = agent.ping(5);
                     System.out.println("duration="+duration);
                 } catch (Exception e) {
-                    System.out.println(e);
+                    System.out.println(e.getMessage());
                 }
             }
         });
