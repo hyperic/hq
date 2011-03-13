@@ -80,7 +80,6 @@ implements AgentPluginUpdater, ApplicationListener<ContextRefreshedEvent>, Appli
         this.agentPluginSyncRestartThrottle = agentPluginSyncRestartThrottle;
     }
 
-    @SuppressWarnings("unchecked")
     public void queuePluginTransfer(Map<Integer, Collection<Plugin>> updateMap,
                                     Map<Integer, Collection<String>> removeMap) {
         if (isDisabled()) {
@@ -110,7 +109,6 @@ implements AgentPluginUpdater, ApplicationListener<ContextRefreshedEvent>, Appli
         }
     }
 
-    @SuppressWarnings("unchecked")
     private Collection<String> getPluginFileNames(Collection<Plugin> plugins) {
         if (plugins == null) {
             return Collections.emptyList();
