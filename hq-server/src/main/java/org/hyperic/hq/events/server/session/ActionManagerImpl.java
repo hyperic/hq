@@ -29,7 +29,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.alert.data.ActionRepository;
+import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.events.ActionConfigInterface;
 import org.hyperic.hq.events.shared.ActionManager;
 import org.hyperic.hq.events.shared.ActionValue;
@@ -49,12 +50,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class ActionManagerImpl implements ActionManager {
-    private ActionDAO actionDAO;
+    private ActionRepository actionRepository;
     private AlertDAO alertDAO;
 
     @Autowired
-    public ActionManagerImpl(ActionDAO actionDAO, AlertDAO alertDAO) {
-        this.actionDAO = actionDAO;
+    public ActionManagerImpl(ActionRepository actionRepository, AlertDAO alertDAO) {
+        this.actionRepository = actionRepository;
         this.alertDAO = alertDAO;
     }
 
@@ -66,7 +67,7 @@ public class ActionManagerImpl implements ActionManager {
     @Transactional(readOnly=true)
     public List<ActionValue> getActionsForAlert(int alertId) {
         Alert alert = alertDAO.findById(new Integer(alertId));
-        Collection<Action> actions = actionDAO.findByAlert(alert);
+        Collection<Action> actions = actionRepository.findByAlert(alert);
 
         return actionsToActionValues(actions);
     }
@@ -97,12 +98,15 @@ public class ActionManagerImpl implements ActionManager {
      */
     public Action updateAction(ActionValue val) {
         // First update the primary action
-        Action action = actionDAO.findById(val.getId());
-
+        Action action = actionRepository.findById(val.getId());
+        if(action == null) {
+            throw new EntityNotFoundException("Action with ID: " + 
+                val.getId() + " not found");
+        }
         // Delete it if no configuration or logs
         if (val.getConfig() == null) {
             if (action.getLogEntriesBag().size() == 0) {
-                actionDAO.removeAction(action);
+                actionRepository.delete(action);
             } else { // Disassociate from everything
                  //TODO still necessary?
 //                if (action.getAlertDefinition() != null) {
@@ -170,7 +174,7 @@ public class ActionManagerImpl implements ActionManager {
         throws JSONException {
         Action action = Action.newInstance(json);
 
-        actionDAO.save(action);
+        actionRepository.save(action);
         return action;
     }
 
@@ -181,7 +185,7 @@ public class ActionManagerImpl implements ActionManager {
     public Action createAction(ActionConfigInterface cfg) {
         Action action = Action.createAction(cfg);
 
-        actionDAO.save(action);
+        actionRepository.save(action);
         return action;
     }
 
@@ -197,7 +201,12 @@ public class ActionManagerImpl implements ActionManager {
         if (parent == null) {
             action.setParent(null);
         } else {
-            action.setParent(actionDAO.findById(parent));
+            Action parentAction = actionRepository.findById(parent);
+            if(parentAction == null) {
+                throw new EntityNotFoundException("Action with ID: " + 
+                    parent + " not found");
+            }
+            action.setParent(parentAction);
         }
     }
 

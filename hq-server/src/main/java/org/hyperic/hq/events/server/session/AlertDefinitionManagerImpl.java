@@ -37,6 +37,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.ApplicationEvent;
+import org.hyperic.hq.alert.data.ActionRepository;
 import org.hyperic.hq.alert.data.AlertConditionRepository;
 import org.hyperic.hq.alert.data.ResourceAlertDefinitionRepository;
 import org.hyperic.hq.alert.data.ResourceTypeAlertDefinitionRepository;
@@ -116,7 +117,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
     
     private ResourceTypeAlertDefinitionRepository resTypeAlertDefRepository;
 
-    private ActionDAO actionDao;
+    private ActionRepository actionRepository;
 
     private AlertConditionRepository alertConditionRepository;
     
@@ -138,7 +139,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
 
     @Autowired
     public AlertDefinitionManagerImpl(AlertPermissionManager alertPermissionManager, ResourceAlertDefinitionRepository resAlertDefRepository,
-                                      ResourceTypeAlertDefinitionRepository resTypeAlertDefRepository, ActionDAO actionDao, 
+                                      ResourceTypeAlertDefinitionRepository resTypeAlertDefRepository, ActionRepository actionRepository, 
                                       AlertConditionRepository alertConditionRepository, 
                                       MeasurementManager measurementManager, RegisteredTriggerManager registeredTriggerManager,
                                       ResourceManager resourceManager, EscalationManager escalationManager,
@@ -148,7 +149,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
         this.alertPermissionManager = alertPermissionManager;
         this.resAlertDefRepository = resAlertDefRepository;
         this.resTypeAlertDefRepository = resTypeAlertDefRepository;
-        this.actionDao = actionDao;
+        this.actionRepository = actionRepository;
         this.alertConditionRepository = alertConditionRepository;
         this.measurementManager = measurementManager;
         this.registeredTriggerManager = registeredTriggerManager;
@@ -228,7 +229,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
         if(debug) watch.markTimeBegin("deleteTriggers");
 
         if(debug) watch.markTimeBegin("markActionsDeleted");
-        actionDao.deleteAlertDefinition(alertdef);
+        actionRepository.deleteByAlertDefinition(alertdef);
         if(debug) watch.markTimeBegin("markActionsDeleted");
 
         if(debug) watch.markTimeBegin("mark deleted");
@@ -416,11 +417,16 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
         for (ActionValue action : actions) {
             Action parent = null;
 
-            if (action.getParentId() != null)
-                parent = actionDao.findById(action.getParentId());
+            if (action.getParentId() != null) {
+                parent = actionRepository.findById(action.getParentId());
+                if(parent == null) {
+                    throw new EntityNotFoundException("Action with ID: " + 
+                        action.getParentId() + " was not found");
+                }
+            }
 
             Action act = res.createAction(action.getClassname(), action.getConfig(), parent);
-            actionDao.save(act);
+            actionRepository.save(act);
         }
 
         // Set triggers
@@ -626,10 +632,15 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
             for (ActionValue action : actions) {
                 Action parent = null;
 
-                if (action.getParentId() != null)
-                    parent = actionDao.findById(action.getParentId());
+                if (action.getParentId() != null) {
+                    parent = actionRepository.findById(action.getParentId());
+                    if(parent == null) {
+                        throw new EntityNotFoundException("Action with ID: " + 
+                            action.getParentId() + " was not found");
+                    }
+                }
 
-                actionDao.save(aldef.createAction(action.getClassname(), action.getConfig(), parent));
+                actionRepository.save(aldef.createAction(action.getClassname(), action.getConfig(), parent));
             }
         }
 
@@ -706,11 +717,21 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
         }
 
         for (ActionValue aVal : val.getAddedActions()) {
-            def.addAction(actionDao.findById(aVal.getId()));
+            Action action = actionRepository.findById(aVal.getId());
+            if(action == null) {
+                throw new EntityNotFoundException("Action with ID: " + 
+                    aVal.getId() + " was not found");
+            }
+            def.addAction(action);
         }
 
         for (ActionValue aVal : val.getRemovedActions()) {
-            def.removeAction(actionDao.findById(aVal.getId()));
+            Action action = actionRepository.findById(aVal.getId());
+            if(action == null) {
+                throw new EntityNotFoundException("Action with ID: " + 
+                    aVal.getId() + " was not found");
+            }
+            def.removeAction(action);
         }
     }
     
@@ -1167,7 +1188,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
     
                 // Remove the actions
                 if (debug) watch.markTimeBegin("removeActions");
-                actionDao.removeActions(alertdef);
+                actionRepository.deleteByAlertDefinition(alertdef);
                 if(debug) watch.markTimeEnd("removeActions");
     
                 if(debug) watch.markTimeBegin("remove from parent");

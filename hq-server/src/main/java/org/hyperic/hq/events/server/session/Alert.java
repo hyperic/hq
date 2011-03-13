@@ -191,7 +191,7 @@ public class Alert implements AlertInterface, Serializable
         return alertDefinition;
     }
 
-    protected void setAlertDefinition(ResourceAlertDefinition alertDefinition) {
+    public void setAlertDefinition(ResourceAlertDefinition alertDefinition) {
         this.alertDefinition = alertDefinition;
     }
 

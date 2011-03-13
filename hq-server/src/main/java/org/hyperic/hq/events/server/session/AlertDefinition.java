@@ -38,6 +38,7 @@ import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertValue;
 
+
 @MappedSuperclass
 abstract public class AlertDefinition implements AlertDefinitionInterface, PerformsEscalations,
     ContainerManagedTimestampTrackable, Serializable {
@@ -93,7 +94,7 @@ abstract public class AlertDefinition implements AlertDefinitionInterface, Perfo
     public AlertDefinition() {
     }
 
-    void addAction(Action a) {
+    public void addAction(Action a) {
         getActionsBag().add(a);
     }
 
