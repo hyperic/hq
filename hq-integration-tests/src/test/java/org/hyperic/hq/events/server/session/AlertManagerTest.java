@@ -496,9 +496,9 @@ public class AlertManagerTest
         alertManager.createAlert(this.testServiceAlertDef, ctime);
         int[] alertCounts = { 1, 2, 1 };
         assertArrayEquals("Incorrect Alerts count", alertCounts, alertManager
-            .getAlertCount(new AppdefEntityID[] { this.testPlatformAlertDef.getAppdefEntityId(),
-                                                 this.testServerAlertDef.getAppdefEntityId(),
-                                                 this.testServiceAlertDef.getAppdefEntityId() }));
+            .getAlertCount(new AppdefEntityID[] { this.testPlatform.getEntityId(),
+                                                 this.testServer.getEntityId(),
+                                                 this.testService.getEntityId() }));
     }
 
     @SuppressWarnings("unchecked")
@@ -506,7 +506,7 @@ public class AlertManagerTest
     public void testFireAlert() {
         testPlatformAlertDef.setEnabled(true);
         AlertFiredEvent event = new AlertFiredEvent(123, testPlatformAlertDef.getId(),
-            testPlatformAlertDef.getAppdefEntityId().getId(), "Platform Down", System.currentTimeMillis(),
+            testPlatform.getEntityId().getId(), "Platform Down", System.currentTimeMillis(),
             "Firing Alert-123");
         TriggerFiredEvent triggerFired = new TriggerFiredEvent(15, event);
         AlertConditionsSatisfiedZEvent alertZEvent = new AlertConditionsSatisfiedZEvent(
@@ -545,8 +545,8 @@ public class AlertManagerTest
         actualAlerts.add(0, alert1);
         actualAlerts.add(1, alert2);
         actualAlerts.add(2, alert3);
-        PageList<Alert> alerts = alertManager.findAlerts(overlord, testPlatformAlertDef
-            .getAppdefEntityId(), time3 - 60000l, time1 + 2 * 6000l, new PageControl());
+        PageList<Alert> alerts = alertManager.findAlerts(overlord, testPlatform
+            .getEntityId(), time3 - 60000l, time1 + 2 * 6000l, new PageControl());
         assertEquals("PageList is incorrect", actualAlerts, alerts);
     }
 
@@ -644,9 +644,9 @@ public class AlertManagerTest
         alertManager.createAlert(this.testServerAlertDef, time5);
         alertManager.createAlert(this.testServiceAlertDef, time6);
         List<AppdefEntityID> all = new ArrayList<AppdefEntityID>();
-        all.add(this.testPlatformAlertDef.getAppdefEntityId());
-        all.add(this.testServerAlertDef.getAppdefEntityId());
-        all.add(this.testServiceAlertDef.getAppdefEntityId());
+        all.add(this.testPlatform.getEntityId());
+        all.add(this.testServer.getEntityId());
+        all.add(this.testService.getEntityId());
         // Verify Only 3 *recent* alerts are retrieved; Set count to 3
         List<Alert> alerts = alertManager.findAlerts(overlord, 3, 1, 10 * 60000l,
             time1 + 2 * 60000l, all);
@@ -655,7 +655,7 @@ public class AlertManagerTest
         List<Alert> alerts1 = alertManager.findAlerts(overlord, 10, 1, 10 * 60000l,
             time1 + 2 * 60000l, all);
         assertEquals("All alerts aren't fetched", 6, alerts1.size());
-        all.remove(this.testPlatformAlertDef.getAppdefEntityId());
+        all.remove(this.testPlatform.getEntityId());
         List<Alert> alerts2 = alertManager.findAlerts(overlord, 10, 1, 10 * 60000l,
             time1 + 2 * 60000l, all);
         assertEquals("Alerts aren't fetched correctly", 4, alerts2.size());
@@ -667,9 +667,9 @@ public class AlertManagerTest
         long time1 = System.currentTimeMillis();
         testPlatformAlertDef.setEnabled(true);
         List<AppdefEntityID> platformAppDef = new ArrayList<AppdefEntityID>();
-        platformAppDef.add(this.testPlatformAlertDef.getAppdefEntityId());
+        platformAppDef.add(this.testPlatform.getEntityId());
         AlertFiredEvent event = new AlertFiredEvent(123, testPlatformAlertDef.getId(),
-            testPlatformAlertDef.getAppdefEntityId().getId(), "Platform Down", time1, "Firing Alert-123");
+            testPlatform.getEntityId().getId(), "Platform Down", time1, "Firing Alert-123");
         TriggerFiredEvent triggerFired = new TriggerFiredEvent(15, event);
         AlertConditionsSatisfiedZEvent alertZEvent = new AlertConditionsSatisfiedZEvent(
             testPlatformAlertDef.getId(), new TriggerFiredEvent[] { triggerFired });

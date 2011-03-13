@@ -65,7 +65,7 @@ public class RegisteredTrigger implements Serializable
     
     @Basic(fetch=FetchType.LAZY)
     @Lob
-    @Column(name="CONFIG",columnDefinition="BLOB")
+    @Column(name="CONFIG")
     private byte[]           config;
     
     @Column(name="FREQUENCY",nullable=false)

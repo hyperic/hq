@@ -53,7 +53,9 @@ import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.OptimisticLock;
+import org.hyperic.hq.alert.data.ResourceAlertDefinitionRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
+import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.AlertDefinitionInterface;
@@ -311,8 +313,12 @@ public class Alert implements AlertInterface, Serializable
 
     @SuppressWarnings("unchecked")
     protected void setAlertValue(AlertValue val) {
-        AlertDefinitionDAO aDao = Bootstrap.getBean(AlertDefinitionDAO.class);
-        AlertDefinition def = aDao.findResourceAlertDefById(val.getAlertDefId());
+        ResourceAlertDefinitionRepository aDao = Bootstrap.getBean(ResourceAlertDefinitionRepository.class);
+        ResourceAlertDefinition def = aDao.findById(val.getAlertDefId());
+        if(def == null) {
+            throw new EntityNotFoundException("Resource Alert Definition with ID: " + 
+                val.getAlertDefId() + " was not found");
+        }
         AlertActionLogDAO alDao = Bootstrap.getBean(AlertActionLogDAO.class);
         AlertConditionLogDAO aclDao = Bootstrap.getBean(AlertConditionLogDAO.class);
 

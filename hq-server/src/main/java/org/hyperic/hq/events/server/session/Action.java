@@ -93,7 +93,7 @@ public class Action implements JSON, Serializable {
     
     @Basic(fetch=FetchType.LAZY)
     @Lob
-    @Column(name="CONFIG",columnDefinition="BLOB")
+    @Column(name="CONFIG")
     private byte[] config;
     
     @ManyToOne(fetch=FetchType.LAZY)

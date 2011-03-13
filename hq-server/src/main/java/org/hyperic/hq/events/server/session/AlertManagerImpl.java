@@ -40,6 +40,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Hibernate;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.alert.data.ResourceAlertDefinitionRepository;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
@@ -90,7 +91,7 @@ public class AlertManagerImpl implements AlertManager,
 
     private Pager pojoPager;
 
-    private AlertDefinitionDAO alertDefDao;
+    private ResourceAlertDefinitionRepository resAlertDefRepository;
 
     private AlertActionLogDAO alertActionLogDAO;
 
@@ -115,7 +116,7 @@ public class AlertManagerImpl implements AlertManager,
     
     @Autowired
     public AlertManagerImpl(AlertPermissionManager alertPermissionManager,
-                            AlertDefinitionDAO alertDefDao, AlertActionLogDAO alertActionLogDAO,
+                            ResourceAlertDefinitionRepository resAlertDefRepository, AlertActionLogDAO alertActionLogDAO,
                             AlertDAO alertDAO, AlertConditionDAO alertConditionDAO,
                             MeasurementRepository measurementRepository, ResourceManager resourceManager,
                             AlertDefinitionManager alertDefinitionManager,
@@ -123,7 +124,7 @@ public class AlertManagerImpl implements AlertManager,
                             EscalationManager escalationManager, MessagePublisher messagePublisher,
                             AlertRegulator alertRegulator, ConcurrentStatsCollector concurrentStatsCollector) {
         this.alertPermissionManager = alertPermissionManager;
-        this.alertDefDao = alertDefDao;
+        this.resAlertDefRepository = resAlertDefRepository;
         this.alertActionLogDAO = alertActionLogDAO;
         this.alertDAO = alertDAO;
         this.alertConditionDAO = alertConditionDAO;
@@ -265,7 +266,10 @@ public class AlertManagerImpl implements AlertManager,
     @Transactional(readOnly = true)
     public Alert findLastUnfixedByDefinition(AuthzSubject subj, Integer id) {
         try {
-            AlertDefinition def = alertDefDao.findById(id);
+            AlertDefinition def = resAlertDefRepository.findById(id);
+            if(def == null) {
+                return null;
+            }
             return alertDAO.findLastByDefinition(def, false);
         } catch (Exception e) {
             return null;
@@ -349,7 +353,10 @@ public class AlertManagerImpl implements AlertManager,
     @Transactional(readOnly = true)
     public Alert findLastByDefinition(Integer id) {
         try {
-            AlertDefinition def = alertDefDao.findById(id);
+            AlertDefinition def = resAlertDefRepository.findById(id);
+            if(def == null) {
+                return null;
+            }
             return alertDAO.findLastByDefinition(def);
         } catch (Exception e) {
             return null;
@@ -532,7 +539,7 @@ public class AlertManagerImpl implements AlertManager,
                     // Filter by appdef entity
                     //TODO resources of type
                     if(alertdef instanceof ResourceAlertDefinition) {
-                        AppdefEntityID aeid = ((ResourceAlertDefinition)alertdef).getAppdefEntityId();
+                        AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(((ResourceAlertDefinition)alertdef).getResource());
                         if (!inclSet.contains(aeid)) {
                             continue;
                         }

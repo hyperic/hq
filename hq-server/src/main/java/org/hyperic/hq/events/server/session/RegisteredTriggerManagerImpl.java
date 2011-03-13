@@ -32,9 +32,11 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.alert.data.ResourceAlertDefinitionRepository;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.bizapp.server.trigger.conditional.ConditionalTriggerInterface;
+import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.InvalidTriggerDataException;
@@ -82,7 +84,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
 
     private AlertConditionEvaluatorRepository alertConditionEvaluatorRepository;
 
-    private AlertDefinitionDAOInterface alertDefinitionDAO;
+    private ResourceAlertDefinitionRepository resAlertDefRepository;
     
     private AlertDAO alertDAO;
     
@@ -94,13 +96,13 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
     public RegisteredTriggerManagerImpl(AlertConditionEvaluatorFactory alertConditionEvaluatorFactory,
                                         TriggerDAOInterface triggerDAO, ZeventEnqueuer zeventEnqueuer,
                                         AlertConditionEvaluatorRepository alertConditionEvaluatorRepository,
-                                        AlertDefinitionDAOInterface alertDefinitionDAO, RegisterableTriggerRepository registerableTriggerRepository, 
+                                        ResourceAlertDefinitionRepository resAlertDefRepository, RegisterableTriggerRepository registerableTriggerRepository, 
                                         AlertDAO alertDAO, EventLogManager eventLogManager, DBUtil dbUtil) {
         this.alertConditionEvaluatorFactory = alertConditionEvaluatorFactory;
         this.triggerDAO = triggerDAO;
         this.zeventEnqueuer = zeventEnqueuer;
         this.alertConditionEvaluatorRepository = alertConditionEvaluatorRepository;
-        this.alertDefinitionDAO = alertDefinitionDAO;
+        this.resAlertDefRepository = resAlertDefRepository;
         this.registeredTriggerRepository = registerableTriggerRepository;
         this.alertDAO = alertDAO;
         this.eventLogManager = eventLogManager;
@@ -247,7 +249,11 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
            
             
             try {
-                AlertDefinition def = alertDefinitionDAO.findById(alertDefId);
+                AlertDefinition def = resAlertDefRepository.findById(alertDefId);
+                if(def == null) {
+                    throw new EntityNotFoundException("Alert definition with ID: " + 
+                        alertDefId + " was not found");
+                }
                 Alert alert = alertDAO.findLastByDefinition(def, false);
                 if (alert != null) {
                     AlertDefinition ad = alert.getAlertDefinition();
@@ -811,7 +817,11 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
      * 
      */
     public void deleteTriggers(Integer adId) {
-        AlertDefinition def = alertDefinitionDAO.findById(adId);        
+        AlertDefinition def = resAlertDefRepository.findById(adId);  
+        if(def == null) {
+            throw new EntityNotFoundException("Alert definition with ID: " + 
+                adId + " was not found");
+        }
         deleteTriggers(def);
     }
 

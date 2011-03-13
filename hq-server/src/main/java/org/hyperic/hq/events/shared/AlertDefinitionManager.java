@@ -164,26 +164,8 @@ public interface AlertDefinitionManager {
      */
     public AlertDefinition getByIdNoCheck(Integer id);
 
-    /**
-     * Check if an alert definition is a resource type alert
-     * @param id The alert def
-     * @return <code>true</code> if the alert definition is a resource type
-     *         alert
-     * 
-     */
-    public boolean isResourceTypeAlertDefinition(Integer id);
-
+    
     public ResourceTypeAlertDefinition findResourceTypeAlertDefinitionById(Integer id);
-
-    /**
-     * Get an alert definition's name
-     */
-    public String getNameById(Integer id);
-
-    /**
-     * Get an alert definition's conditions
-     */
-    public AlertConditionValue[] getConditionsById(Integer id);
 
     /**
      * Get list of alert conditions for a resource or resource type
