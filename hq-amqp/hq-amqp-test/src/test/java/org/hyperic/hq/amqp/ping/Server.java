@@ -15,18 +15,17 @@ public class Server extends AbstractAmqpComponent implements Ping {
         super();
     }
 
-    public void listen() throws IOException, InterruptedException {
-        System.out.println("Server is running");
-        
+    public void listen() throws IOException, InterruptedException { 
         QueueingConsumer serverConsumer = new QueueingConsumer(channel);
         channel.basicConsume(serverQueue, true, serverConsumer);
 
         while (!completed) {
             QueueingConsumer.Delivery delivery = serverConsumer.nextDelivery();
             String message = new String(delivery.getBody());
-            System.out.println("server received message=" + message);
+            System.out.println("server received=" + message);
             if (message.length() > 0 && message.contains("agent:ping")) {
                 channel.basicPublish(agentExchange, routingKey, null, "server:ping".getBytes());
+                shutdown();
                 completed = true;
             }
         }

@@ -13,8 +13,7 @@ public class Simulation {
             @Override
             public void run() {
                 try {
-                    Server server = new Server();
-                    server.listen();
+                    new Server().listen();
                 } catch (Exception e) {
                     System.out.println(e);
                 }
@@ -35,7 +34,7 @@ public class Simulation {
         });
         agent.start();
         server.start();
- 
-        Thread.sleep(5000);
+        Thread.sleep(1000);
+        System.exit(0);
     }
 }
