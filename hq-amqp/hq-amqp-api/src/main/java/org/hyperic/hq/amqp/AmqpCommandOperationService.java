@@ -48,7 +48,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
 
     protected final Log logger = LogFactory.getLog(this.getClass());
 
-    private boolean unidirectional;
+    protected boolean unidirectional;
 
     /**
      * temporary: the legacy client impl
@@ -95,12 +95,13 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
 
         try {
 
+            logger.info("Sending " + Operations.PING);
             operationService.send(Operations.PING);
-            
             duration = System.currentTimeMillis() - sendTime;
             logger.info("***********ping() executed, returning duration=" + duration);
+
         } catch (Exception e) {
-             handleException(e, Operations.PING);
+            handleException(e, Operations.PING);
         }
         return duration;
     }
@@ -116,7 +117,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
 
     public void die() {
         try {
-            legacyClient.die(); 
+            legacyClient.die();
         } catch (Exception e) {
             handleException(e, Operations.DIE);
         }
@@ -164,8 +165,15 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
      * Currently, AgentRemoteException or AgentConnectionException can
      * be thrown from legacy implementations.
      */
-    private void handleException(Throwable t, String operation) {
-        logger.error(t.getClass().getSimpleName() + " thrown while executing " + operation, t); 
+    protected void handleException(Throwable t, String operation) {
+        logger.error(t.getClass().getSimpleName() + " thrown while executing " + operation, t);
     }
 
+    public void setUnidirectional(boolean unidirectional) {
+        this.unidirectional = unidirectional;
+    }
+
+    public void setLegacyClient(AgentCommandsClient legacyClient) {
+        this.legacyClient = legacyClient;
+    }
 }

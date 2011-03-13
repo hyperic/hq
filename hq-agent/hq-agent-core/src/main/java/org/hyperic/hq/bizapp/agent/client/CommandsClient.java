@@ -25,22 +25,20 @@
 
 package org.hyperic.hq.bizapp.agent.client;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.agent.client.AgentConnection;
 import org.hyperic.hq.bizapp.agent.CommandsAPIInfo;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
-import org.hyperic.hq.bizapp.agent.commands.CreateToken_args;
-import org.hyperic.hq.bizapp.agent.commands.CreateToken_result;
-import org.hyperic.hq.bizapp.agent.commands.GetServer_args;
-import org.hyperic.hq.bizapp.agent.commands.GetServer_result;
-import org.hyperic.hq.bizapp.agent.commands.SetServer_args;
-import org.hyperic.hq.bizapp.agent.commands.SetServer_result;
+import org.hyperic.hq.bizapp.agent.commands.*;
 
 public class CommandsClient {
     private AgentConnection agentConn;
     private CommandsAPIInfo  verAPI;
+    private Log logger = LogFactory.getLog(AgentClient.class);
 
     public CommandsClient(AgentConnection agentConn){
         this.agentConn = agentConn;
@@ -53,8 +51,8 @@ public class CommandsClient {
     {
         AgentRemoteValue rval;
 
-        rval = this.agentConn.sendCommand(this.verAPI.command_createToken,
-                                          this.verAPI.getVersion(), args);
+        rval = this.agentConn.sendCommand(this.verAPI.command_createToken, this.verAPI.getVersion(), args);
+        logger.info("**********Created agent token="+rval);
         return new CreateToken_result(rval);
     }        
 

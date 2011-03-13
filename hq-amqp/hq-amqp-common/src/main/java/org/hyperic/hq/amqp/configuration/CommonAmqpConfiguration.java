@@ -15,19 +15,19 @@ import org.springframework.context.annotation.Configuration;
 public class CommonAmqpConfiguration {
 
     /** to consume from the agent */
-    protected final String agentQueueName = "queues.agentToServer";
+    protected final String agentQueueName = "queues.agent";
 
     /** to consume from the server */
-    protected final String serverQueueName = "queues.serverToAgent";
+    protected final String serverQueueName = "queues.server";
 
     /** to send to a server */
-    protected final String serverDirectExchangeName = "exchanges.direct.agentToServer";
+    protected final String serverDirectExchangeName = "exchanges.direct.server";
 
     /** to send to an agent */
-    protected final String agentExchangeName = "exchanges.direct.serverToAgent";
+    protected final String agentExchangeName = "exchanges.direct.agent";
 
     protected final String fanoutExchangeName = "exchanges.fanout";    
-    protected final String agentSubscriptionName = "exchanges.topic.agentToServer";
+    protected final String agentSubscriptionName = "exchanges.topic.agent";
 
     @Bean
     public ConnectionFactory rabbitConnectionFactory() {
@@ -46,22 +46,31 @@ public class CommonAmqpConfiguration {
     public DirectExchange serverExchange() {
         DirectExchange e = new DirectExchange(serverDirectExchangeName, true, false);
         amqpAdmin().declareExchange(e);
+        amqpAdmin().declareBinding(BindingBuilder.from(serverQueue()).to(e).with(serverQueue().getName()));
         return e;
     }
- 
+
+    @Bean
+    public Queue anonymousQueue() { 
+        return amqpAdmin().declareQueue();
+    }
+
     /**
      * To consume from the server
      */
     @Bean
     public Queue serverQueue() { 
-        return amqpAdmin().declareQueue();
+        Queue queue = new Queue(serverQueueName);
+        amqpAdmin().declareQueue(queue);
+        return queue;
     }
 
     @Bean
     public DirectExchange agentExchange() {
         DirectExchange e = new DirectExchange(agentExchangeName, true, false);
         amqpAdmin().declareExchange(e);
-        amqpAdmin().declareBinding(BindingBuilder.from(agentQueue()).to(e).with(agentQueueName));
+        amqpAdmin().declareBinding(BindingBuilder.from(agentQueue()).to(e).with(agentQueue().getName()));
+        //amqpAdmin().declareBinding(BindingBuilder.from(agentQueue()).to(serverExchange()).with(agentQueue().getName()));
         return e;
     }
 
@@ -73,7 +82,6 @@ public class CommonAmqpConfiguration {
     public Queue agentQueue() {
         Queue queue = new Queue(agentQueueName);
         amqpAdmin().declareQueue(queue);
-        amqpAdmin().declareBinding(BindingBuilder.from(queue).to(serverExchange()).with(serverQueueName));
         return queue;
     }
 

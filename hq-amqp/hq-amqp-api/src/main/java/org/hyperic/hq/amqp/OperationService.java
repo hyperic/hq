@@ -27,4 +27,13 @@ public interface OperationService {
      */
     void send(String exchange, String routingKey, String message);
 
+    /**
+     * For initial synchronous pings between agent and server.
+     * @param exchange
+     * @param routingKey
+     * @param message
+     * @return
+     */
+    Object sendAndReceive(String exchange, String routingKey, String message);
+
 }

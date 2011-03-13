@@ -25,49 +25,26 @@
 
 package org.hyperic.hq.agent.server;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Vector;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.hyperic.hq.agent.AgentAssertionException;
-import org.hyperic.hq.agent.AgentConfig;
-import org.hyperic.hq.agent.AgentConfigException;
-import org.hyperic.hq.agent.AgentMonitorValue;
-import org.hyperic.hq.agent.AgentStartupCallback;
-import org.hyperic.hq.agent.AgentUpgradeManager;
+import org.hyperic.hq.agent.*;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorInterface;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
-import org.hyperic.hq.bizapp.client.AgentCallbackClient;
-import org.hyperic.hq.bizapp.client.AgentCallbackClientException;
 import org.hyperic.hq.bizapp.client.PlugininventoryCallbackClient;
 import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
-import org.hyperic.hq.product.GenericPlugin;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.PluginInfo;
-import org.hyperic.hq.product.PluginManager;
-import org.hyperic.hq.product.ProductPluginManager;
+import org.hyperic.hq.product.*;
 import org.hyperic.util.PluginLoader;
 import org.hyperic.util.security.SecurityUtil;
 import org.tanukisoftware.wrapper.WrapperManager;
+
+import java.io.*;
+import java.lang.reflect.Constructor;
+import java.util.*;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
 /**
  * The main daemon which processes requests from clients.  The Agent has
@@ -680,6 +657,7 @@ public class AgentDaemon
     public void setConnectionListener(AgentConnectionListener newListener)
         throws AgentRunningException
     {
+        logger.info("**********Set connection listener to "+newListener);
         this.listener.setConnectionListener(newListener);
     }
 

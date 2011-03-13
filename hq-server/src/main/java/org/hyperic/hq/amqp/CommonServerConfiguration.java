@@ -41,22 +41,32 @@ import org.springframework.context.annotation.Configuration;
 public class CommonServerConfiguration extends CommonAmqpConfiguration {
 
     @Bean
-    public RabbitAdminTemplate adminTemplate() {
-        return new RabbitAdminTemplate();
-    }
-
-    @Bean
     public RabbitTemplate serverRabbitTemplate() {
         RabbitTemplate template = new RabbitTemplate(rabbitConnectionFactory());
         template.setExchange(agentExchangeName);
         template.setRoutingKey(agentQueueName);
         return template;
     }
+    
+    @Bean
+    public OperationService operationService() {
+        return new AmqpOperationService(serverRabbitTemplate());
+    }
+
+    @Bean
+    public RabbitAdminTemplate adminTemplate() {
+        return new RabbitAdminTemplate();
+    }
+
+    @Bean
+    public AmqpAgentCommandHandler amqpAgentCommandHandler() {
+        return new AmqpAgentCommandHandler(operationService());
+    }
 
     @Bean
     public SimpleMessageListenerContainer agentListener() {
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(rabbitConnectionFactory());
-        container.setMessageListener(new MessageListenerAdapter(new SimpleServerResponseHandler()));
+        container.setMessageListener(new MessageListenerAdapter(amqpAgentCommandHandler()));
         container.setQueues(agentQueue());
         return container;
     }

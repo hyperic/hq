@@ -21,7 +21,7 @@ public class SimpleAsyncResponseHandler implements AsyncQueueConsumer {
     }
 
     public void handleMessage(String message) {
-            String status = this + " received [" + message + "]";
+            String status = "Received [" + message + "]";
             logger.info("********"+status);
 
             //operationService.send(status);

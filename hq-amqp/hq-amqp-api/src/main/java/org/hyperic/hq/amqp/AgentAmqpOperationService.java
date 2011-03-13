@@ -9,9 +9,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * @author Helena Edelson
  */
 public class AgentAmqpOperationService extends AmqpOperationService implements OperationService {
+
     /** Temporary, for the agent prototype */
-    protected final String serverQueueName = "queues.serverToAgent";
-    protected final String serverDirectExchangeName = "exchanges.direct.agentToServer";
+    protected final String serverQueueName = "queues.server";
+    protected final String serverDirectExchangeName = "exchanges.direct.server";
+
 
     /** Temporary, for the agent prototype */
     public AgentAmqpOperationService() {
@@ -31,4 +33,7 @@ public class AgentAmqpOperationService extends AmqpOperationService implements O
         super.send(exchangeName, routingKey, message);
     }
 
+    public Object sendAndReceive(String message) {
+        return super.sendAndReceive(serverDirectExchangeName, serverQueueName, message);
+    }
 }

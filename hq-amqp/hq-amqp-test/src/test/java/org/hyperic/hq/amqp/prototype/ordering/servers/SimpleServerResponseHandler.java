@@ -23,8 +23,9 @@
  * USA.
  */
 
-package org.hyperic.hq.amqp;
+package org.hyperic.hq.amqp.prototype.ordering.servers;
 
+import org.hyperic.hq.amqp.SimpleAsyncResponseHandler;
 import org.hyperic.hq.amqp.util.Operations;
 
 /**

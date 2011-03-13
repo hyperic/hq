@@ -32,8 +32,8 @@ public class AmqpAgentServerIntegrationTests extends BaseInfrastructureTest {
     protected RabbitTemplate serverRabbitTemplate;
 
     @Autowired
-    RabbitAdminTemplate adminTemplate;
-
+    protected RabbitAdminTemplate adminTemplate;
+ 
     protected AbstractApplicationContext agentContext;
 
     protected AbstractApplicationContext serverContext;
@@ -52,16 +52,39 @@ public class AmqpAgentServerIntegrationTests extends BaseInfrastructureTest {
     }
 
     /**
-     * TODO right now just verifying by the log 
+     * TODO right now just verifying by the log
      * @throws AgentConnectionException
      * @throws AgentRemoteException
      */
     @Test
-    public void AgentToServerPing() throws AgentConnectionException, AgentRemoteException {
-        AgentCommandsClient client = new AmqpCommandOperationService(new LegacyAgentCommandsClientImpl(
+    public void agentToServerRequestPing() throws AgentConnectionException, AgentRemoteException {
+        AgentCommandsClient client = new AgentAmqpCommandOperationService(new LegacyAgentCommandsClientImpl(
                 new SecureAgentConnection(agent.getAddress(), agent.getPort(), agent.getAuthToken())));
 
-        client.ping(); 
+        client.ping();
+    }
+
+    /**
+     * async ping ..TODO sync ping
+     * async won't work in the current legacy code until I have time to
+     * change it.
+     * @throws AgentConnectionException
+     * @throws AgentRemoteException
+     * @throws InterruptedException
+     */
+    @Test
+    public void agentToServerPing() throws AgentConnectionException, AgentRemoteException, InterruptedException {
+        /*AgentPreSpringAmqpConfigurer config = new AgentPreSpringAmqpConfigurer();
+        config.start();
+        config.stop();*/
+
+        /* created by AgentClient */
+        AgentCommandsClient agentClient = new AgentAmqpCommandOperationService(new LegacyAgentCommandsClientImpl(
+                new SecureAgentConnection(agent.getAddress(), agent.getPort(), agent.getAuthToken())));
+
+        agentClient.ping();
+        Thread.sleep(20000);
+
     }
  
     @Test

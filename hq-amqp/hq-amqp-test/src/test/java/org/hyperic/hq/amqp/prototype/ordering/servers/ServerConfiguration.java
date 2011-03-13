@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.amqp.prototype.ordering.servers;
 
-import org.hyperic.hq.amqp.SimpleServerResponseHandler;
 import org.hyperic.hq.amqp.admin.RabbitAdminTemplate;
 import org.hyperic.hq.amqp.prototype.TestConfiguration;
 import org.springframework.amqp.core.Binding;

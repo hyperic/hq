@@ -74,8 +74,9 @@ public class AgentCommandsServer
     {
         if(cmd.equals(AgentCommandsAPI.command_ping)){
             new AgentPing_args(args);  // Just parse the args
-            log.info("dispatchCommand("+cmd+")***********"+agentCommandsService+".ping()");            
+            log.info("dispatchCommand("+cmd+")***********"+agentCommandsService+".ping()");
             agentCommandsService.ping();
+            log.info("*************successfully returned from agentCommandsService.ping() and returning AgentPing_result");
             return new AgentPing_result();
         } else if(cmd.equals(AgentCommandsAPI.command_restart)){
             new AgentRestart_args(args);  // Just parse the args

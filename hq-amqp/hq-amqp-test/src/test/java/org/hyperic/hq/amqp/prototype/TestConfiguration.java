@@ -14,19 +14,19 @@ import org.springframework.context.annotation.Configuration;
 public class TestConfiguration {
 
     /** to consume from the agent */
-    protected final String agentQueueName = "queues.agentToServer";
+    protected final String agentQueueName = "queues.agent";
 
     /** to consume from the server */
-    protected final String serverQueueName = "queues.serverToAgent";
+    protected final String serverQueueName = "queues.server";
 
     /** to send to a server */
-    protected final String serverDirectExchangeName = "exchanges.direct.agentToServer";
+    protected final String serverDirectExchangeName = "exchanges.direct.server";
 
     /** to send to an agent */
-    protected final String agentExchangeName = "exchanges.direct.serverToAgent";
+    protected final String agentExchangeName = "exchanges.direct.agent";
 
     protected final String fanoutExchangeName = "exchanges.fanout";
-    protected final String agentSubscriptionName = "exchanges.topic.agentToServer";
+    protected final String agentSubscriptionName = "exchanges.topic.agent";
 
     @Bean
     public ConnectionFactory connectionFactory() {

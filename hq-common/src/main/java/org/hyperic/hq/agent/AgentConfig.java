@@ -25,6 +25,9 @@
 
 package org.hyperic.hq.agent;
 
+import org.hyperic.util.PropertyUtil;
+import org.hyperic.util.file.FileUtil;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -33,9 +36,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-
-import org.hyperic.util.PropertyUtil;
-import org.hyperic.util.file.FileUtil;
 
 /**
  * The configuration object for the AgentDaemon.  This class performs
@@ -181,6 +181,12 @@ public class AgentConfig {
         this.proxyIp = AgentConfig.DEFAULT_PROXY_HOST;
         this.proxyPort = AgentConfig.DEFAULT_PROXY_PORT;
         this.notifyUpPort = AgentConfig.DEFAULT_NOTIFY_UP_PORT;
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder("agent listening on=").append(getListenIp()).append(":").append(getListenPort())
+                .append(" tokenFile=").append(getTokenFile()).toString();
     }
 
     /**

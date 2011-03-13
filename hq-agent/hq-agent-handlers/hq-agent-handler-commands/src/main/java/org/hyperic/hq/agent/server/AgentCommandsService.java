@@ -275,7 +275,7 @@ public class AgentCommandsService implements AgentCommandsClient {
      * @see org.hyperic.hq.agent.client.AgentCommandsClient#ping()
      */
     public long ping() throws AgentRemoteException {
-        _log.info(".ping()****************return 0");
+        _log.info(".ping()****************return 0, no remote calls made.");
         return 0;
     }
 

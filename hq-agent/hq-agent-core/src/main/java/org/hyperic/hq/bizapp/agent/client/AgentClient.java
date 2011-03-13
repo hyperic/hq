@@ -36,7 +36,8 @@ import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.LegacyAgentCommandsClientImpl;
 import org.hyperic.hq.agent.server.AgentDaemon;
 import org.hyperic.hq.agent.server.LoggingOutputStream;
-import org.hyperic.hq.amqp.AmqpCommandOperationService;
+import org.hyperic.hq.amqp.AgentAmqpCommandOperationService;
+import org.hyperic.hq.amqp.AgentPreSpringAmqpConfigurer;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.agent.commands.CreateToken_args;
 import org.hyperic.hq.bizapp.agent.commands.CreateToken_result;
@@ -99,6 +100,7 @@ public class AgentClient {
 
     private static final String JAAS_CONFIG = "jaas.config";
 
+    private AgentPreSpringAmqpConfigurer preSpringAmqpAgentConfigurer;
     private AgentCommandsClient agtCommands; 
     private CommandsClient   camCommands; 
     private AgentConfig   config;
@@ -108,7 +110,9 @@ public class AgentClient {
     private boolean             redirectedOutputs = false;
 
     private AgentClient(AgentConfig config, SecureAgentConnection conn){
-        this.agtCommands = new AmqpCommandOperationService(new LegacyAgentCommandsClientImpl(conn));
+        this.agtCommands = new AgentAmqpCommandOperationService(new LegacyAgentCommandsClientImpl(conn));
+        this.preSpringAmqpAgentConfigurer = new AgentPreSpringAmqpConfigurer();
+
         //this.agtCommands = new LegacyAgentCommandsClientImpl(conn);
         this.camCommands = new CommandsClient(conn);
         this.config      = config;
@@ -116,21 +120,23 @@ public class AgentClient {
         this.nuking      = false;
     }
     
-    private long cmdPing(int numAttempts)
-        throws AgentConnectionException, AgentRemoteException
-    {
+    private long cmdPing(int numAttempts)  throws AgentConnectionException, AgentRemoteException {
+        log.info("*********cmdPing("+numAttempts+")");
+        log.info("AgentConfig="+config);
         AgentConnectionException lastExc;
 
         lastExc = new AgentConnectionException("Failed to connect to agent");
         while(numAttempts-- != 0){
             try {
-                log.info(".cmdPing("+numAttempts+") returns "+this.agtCommands+".ping()***********");
-
-                return this.agtCommands.ping();
+                log.info("*********executing this.agtCommands.ping()");
+                long duration = this.agtCommands.ping();
+                log.info("*********this.agtCommands.ping() returned " + duration);
+                return duration;
             } catch(AgentConnectionException exc){
                 // Loop around to the next attempt
                 lastExc = exc;
             }
+
             try {
                 if (numAttempts > 0) {
                     Thread.sleep(1000);
@@ -207,6 +213,7 @@ public class AgentClient {
     {
         try {
             this.agtCommands.die();
+            this.preSpringAmqpAgentConfigurer.stop();
         } catch(AgentConnectionException exc){
             return; // If we can't connect then we know the agent is dead
         } catch(AgentRemoteException exc){
@@ -517,6 +524,7 @@ public class AgentClient {
         throws AgentConnectionException, AgentRemoteException, IOException,
                AutoQuestionException
     {
+        log.info(".cmdSetup()**********");
         BizappCallbackClient bizapp;
         InetAddress localHost;
         CreateToken_result tokenRes;
@@ -786,7 +794,7 @@ public class AgentClient {
         }
         tokenRes = this.camCommands.createToken(new CreateToken_args());
         
-        SYSTEM_OUT.println("- Received temporary auth token from agent");
+        SYSTEM_OUT.println("************* Received temporary auth token from agent");
 
         // Ask server to verify agent
         SYSTEM_OUT.println("- Registering agent with " + PRODUCT);
@@ -800,6 +808,7 @@ public class AgentClient {
                                           getCpuCount(), isNewTransportAgent, 
                                           unidirectional);
             response = result.response;
+
             if(!response.startsWith("token:")){
                 SYSTEM_ERR.println("- Unable to register agent: " + response);
                 return;
@@ -808,6 +817,7 @@ public class AgentClient {
             // Else the bizapp responds with the token that the agent needs
             // to use to contact it
             agentToken = response.substring("token:".length());
+            log.info("******************registered a new agent with token="+agentToken);
         } catch(Exception exc){
             exc.printStackTrace(SYSTEM_ERR);
             SYSTEM_ERR.println("- Error registering agent: "+exc.getMessage());
@@ -859,7 +869,7 @@ public class AgentClient {
                                     unidirectionalPortString);
             }
         }
-
+        log.info(".cmdSetup() complete**********");
         redirectOutputs(bootP); //win32
     }
     
@@ -919,6 +929,7 @@ public class AgentClient {
         }
                 
         try {
+            log.info("*************Calling ping()");
             this.agtCommands.ping();
         } catch(Exception exc){
             throw new AgentInvokeException("Unable to ping agent: " +
@@ -992,6 +1003,7 @@ public class AgentClient {
     private int cmdStart(boolean force) 
         throws AgentInvokeException
     {
+        this.preSpringAmqpAgentConfigurer.start();
         ServerSocket startupSock;
         ProviderInfo providerInfo;
         Properties bootProps;
@@ -1035,6 +1047,7 @@ public class AgentClient {
         /* Now comes the painful task of figuring out if the agent
            started correctly. */
         SYSTEM_OUT.println("- Verifying if agent is running...");
+        log.info("*************Calling verifyAgentRunning()");
         this.verifyAgentRunning(startupSock);
         SYSTEM_OUT.println("- Agent is running");            
 
@@ -1271,7 +1284,7 @@ public class AgentClient {
                 }
                 SYSTEM_OUT.println("Stopping agent ... ");
                 try {
-                    client.cmdDie(nWait);
+                    client.cmdDie(nWait); 
                     SYSTEM_OUT.println("Success -- agent is stopped!");
                 } catch(Exception exc){
                     SYSTEM_OUT.println("Failed to stop agent: " +

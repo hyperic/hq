@@ -30,6 +30,10 @@ package org.hyperic.hq.amqp.util;
  */
 public class Operations {
 
+    public static final String AGENT_PING_REQUEST = "agent:ping";
+
+    public static final String AGENT_PING_RESPONSE = "server:ping";
+
     public static final String PING = "ping";
 
     public static final String START = "start";

@@ -25,7 +25,7 @@ public class CommonAgentConfiguration extends CommonAmqpConfiguration {
     public SimpleMessageListenerContainer serverListener() {
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(rabbitConnectionFactory()); 
         container.setMessageListener(new MessageListenerAdapter(new SimpleAsyncResponseHandler()));
-        container.setQueues(agentQueue());
+        container.setQueues(serverQueue());
         return container;
     }
 
