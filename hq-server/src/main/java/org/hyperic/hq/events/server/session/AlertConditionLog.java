@@ -43,81 +43,60 @@ import org.hibernate.annotations.Index;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 
 @Entity
-@Table(name="EAM_ALERT_CONDITION_LOG")
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-public class AlertConditionLog  implements Serializable
-{
+@Table(name = "EAM_ALERT_CONDITION_LOG")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public class AlertConditionLog implements Serializable {
     public static final int MAX_LOG_LENGTH = 250;
-    
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ALERT_ID")
+    @Index(name = "ALERT_COND_LOG_IDX")
+    private Alert alert;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CONDITION_ID")
+    @Index(name = "ALERT_CONDITION_ID_IDX")
+    private AlertCondition condition;
+
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "ID")
     private Integer id;
-    
-    @Column(name="VALUE",length=250)
-    private String         value;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="ALERT_ID")
-    @Index(name="ALERT_COND_LOG_IDX")
-    private Alert          alert;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="CONDITION_ID")
-    @Index(name="ALERT_CONDITION_ID_IDX")
-    private AlertCondition condition;
-    
+
+    @Column(name = "VALUE", length = 250)
+    private String value;
+
     protected AlertConditionLog() {
     }
 
-    protected AlertConditionLog(Alert alert, String value, 
-                                AlertCondition condition)
-    {
+    protected AlertConditionLog(Alert alert, String value, AlertCondition condition) {
         if (value != null && value.length() >= MAX_LOG_LENGTH)
             value = value.substring(0, MAX_LOG_LENGTH);
-        
+
         setValue(value);
         setAlert(alert);
         setCondition(condition);
     }
-    
-    
 
-    public Integer getId() {
-        return id;
-    }
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof AlertConditionLog)) {
+            return false;
+        }
+        Integer objId = ((AlertConditionLog) obj).getId();
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getValue() {
-        return value;
-    }
-    
-    protected void setValue(String value) {
-        this.value = value;
+        return getId() == objId || (getId() != null && objId != null && getId().equals(objId));
     }
 
     protected Alert getAlert() {
         return alert;
     }
-    
-    protected void setAlert(Alert alert) {
-        this.alert = alert;
-    }
-
-    public AlertCondition getCondition() {
-        return condition;
-    }
-    
-    protected void setCondition(AlertCondition condition) {
-        this.condition = condition;
-    }
 
     public AlertConditionLogValue getAlertConditionLogValue() {
-       
+
         AlertConditionLogValue valueObj = new AlertConditionLogValue();
         valueObj.setId(getId());
         valueObj.setValue(getValue() == null ? "" : getValue());
@@ -128,26 +107,39 @@ public class AlertConditionLog  implements Serializable
 
         return valueObj;
     }
-    
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || !(obj instanceof AlertConditionLog)) {
-            return false;
-        }
-        Integer objId = ((AlertConditionLog)obj).getId();
-  
-        return getId() == objId ||
-        (getId() != null && 
-         objId != null && 
-         getId().equals(objId));     
+
+    public AlertCondition getCondition() {
+        return condition;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public String getValue() {
+        return value;
     }
 
     public int hashCode() {
         int result = 17;
-        result = 37*result + (getId() != null ? getId().hashCode() : 0);
-        return result;      
+        result = 37 * result + (getId() != null ? getId().hashCode() : 0);
+        return result;
+    }
+
+    protected void setAlert(Alert alert) {
+        this.alert = alert;
+    }
+
+    protected void setCondition(AlertCondition condition) {
+        this.condition = condition;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    protected void setValue(String value) {
+        this.value = value;
     }
 
 }

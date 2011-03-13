@@ -53,6 +53,7 @@ import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.OptimisticLock;
+import org.hyperic.hq.alert.data.AlertConditionLogRepository;
 import org.hyperic.hq.alert.data.ResourceAlertDefinitionRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.common.EntityNotFoundException;
@@ -320,7 +321,7 @@ public class Alert implements AlertInterface, Serializable
                 val.getAlertDefId() + " was not found");
         }
         AlertActionLogDAO alDao = Bootstrap.getBean(AlertActionLogDAO.class);
-        AlertConditionLogDAO aclDao = Bootstrap.getBean(AlertConditionLogDAO.class);
+        AlertConditionLogRepository aclDao = Bootstrap.getBean(AlertConditionLogRepository.class);
 
         setFixed(false);
         //TODO
@@ -329,14 +330,22 @@ public class Alert implements AlertInterface, Serializable
 
         for (Iterator<AlertConditionLogValue> i=val.getAddedConditionLogs().iterator(); i.hasNext(); ){
             AlertConditionLogValue lv = i.next();
-
-            addConditionLog(aclDao.findById(lv.getId()));
+            AlertConditionLog log = aclDao.findById(lv.getId());
+            if(log == null) {
+                throw new EntityNotFoundException("Alert Condition Log with ID: " + lv.getId() + 
+                    " was not found");
+            }
+            addConditionLog(log);
         }
 
         for (Iterator<AlertConditionLogValue> i=val.getRemovedConditionLogs().iterator(); i.hasNext();){
             AlertConditionLogValue lv = i.next();
-
-            removeConditionLog(aclDao.findById(lv.getId()));
+            AlertConditionLog log = aclDao.findById(lv.getId());
+            if(log == null) {
+                throw new EntityNotFoundException("Alert Condition Log with ID: " + lv.getId() + 
+                    " was not found");
+            }
+            removeConditionLog(log);
         }
 
         for (Iterator<AlertActionLog> i=val.getAddedActionLogs().iterator(); i.hasNext(); ) {
