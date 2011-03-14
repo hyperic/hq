@@ -42,7 +42,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import org.apache.commons.httpclient.HttpClient;
@@ -60,7 +59,7 @@ import org.hyperic.util.config.ConfigResponse;
  * HypericRabbitAdmin
  * @author Helena Edelson
  */
-public class HypericRabbitAdmin {
+public final class HypericRabbitAdmin {
 
     private static final Log logger = LogFactory.getLog(HypericRabbitAdmin.class);
     private final HttpClient client;
@@ -69,7 +68,7 @@ public class HypericRabbitAdmin {
     private String pass;
     private int port;
 
-    public HypericRabbitAdmin(Properties props) {
+    public HypericRabbitAdmin(Properties props) throws PluginException {
         this.port = Integer.parseInt(props.getProperty(DetectorConstants.PORT));
         this.addr = props.getProperty(DetectorConstants.ADDR);
         this.user = props.getProperty(DetectorConstants.USERNAME);
@@ -84,14 +83,13 @@ public class HypericRabbitAdmin {
         client.getHttpConnectionManager().getParams().setConnectionTimeout(5000);
         client.getParams().setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY, authPrefs);
         client.getParams().setAuthenticationPreemptive(true);
+
+        RabbitOverview overview = getOverview();
+        if(overview==null) throw new PluginException("Connection to '"+addr+":"+port+"' fails");
     }
 
-    public HypericRabbitAdmin(ConfigResponse props) {
+    public HypericRabbitAdmin(ConfigResponse props) throws PluginException {
         this(props.toProperties());
-    }
-
-    public void destroy() {
-        logger.debug("[HypericRabbitAdmin] destroy()");
     }
 
     public RabbitOverview getOverview() throws PluginException {
@@ -214,7 +212,8 @@ public class HypericRabbitAdmin {
                 }
             }
         } catch (IOException ex) {
-            logger.error(ex);
+            logger.debug(ex.getMessage(),ex);
+            throw new PluginException(ex.getMessage(),ex);
         }
         return res;
     }

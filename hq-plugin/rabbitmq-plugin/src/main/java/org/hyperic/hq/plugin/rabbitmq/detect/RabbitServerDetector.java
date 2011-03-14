@@ -45,7 +45,6 @@ import org.hyperic.hq.plugin.rabbitmq.core.*;
 import org.hyperic.hq.plugin.rabbitmq.manage.RabbitTransientResourceManager;
 import org.hyperic.hq.plugin.rabbitmq.manage.TransientResourceManager;
 import org.hyperic.hq.product.*;
-import org.hyperic.sigar.Sigar;
 import org.hyperic.util.config.ConfigResponse;
 
 /**
@@ -178,19 +177,15 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
 
         try {
             HypericRabbitAdmin admin = new HypericRabbitAdmin(serviceConfig);
-            try {
-                rabbitObjectss.addAll(admin.getConnections());
-                rabbitObjectss.addAll(admin.getChannels());
-                List<RabbitVirtualHost> vhosts = admin.getVirtualHosts();
-                for (RabbitVirtualHost vhost : vhosts) {
-                    rabbitObjectss.addAll(admin.getQueues(vhost));
-                    rabbitObjectss.addAll(admin.getExchanges(vhost));
-                }
-                rabbitObjectss.addAll(vhosts);
-                rabbitResources = doCreateServiceResources(rabbitObjectss, node, noDurable);
-            } finally {
-                admin.destroy();
+            rabbitObjectss.addAll(admin.getConnections());
+            rabbitObjectss.addAll(admin.getChannels());
+            List<RabbitVirtualHost> vhosts = admin.getVirtualHosts();
+            for (RabbitVirtualHost vhost : vhosts) {
+                rabbitObjectss.addAll(admin.getQueues(vhost));
+                rabbitObjectss.addAll(admin.getExchanges(vhost));
             }
+            rabbitObjectss.addAll(vhosts);
+            rabbitResources = doCreateServiceResources(rabbitObjectss, node, noDurable);
         } catch (RuntimeException ex) {
             logger.debug(ex, ex);
         } catch (PluginException ex) {
@@ -300,31 +295,6 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
     }
 
     /**
-     * Create ConfigResponse for custom node properties to display.
-     * @param nodeName
-     * @param nodePath
-     * @param nodePid
-     * @param nodeArgs
-     * @return
-     */
-//    private ConfigResponse createCustomConfig(String nodeName, String nodePath, long nodePid, String[] nodeArgs) {
-//        ConfigResponse custom = new ConfigResponse();
-//        custom.setValue(DetectorConstants.NODE_NAME, nodeName);
-//        custom.setValue(DetectorConstants.NODE_PATH, nodePath);
-//        custom.setValue(DetectorConstants.NODE_PID, nodePid);
-//
-//        for (int n = 0; n < nodeArgs.length; n++) {
-//            if (nodeArgs[n].contains("beam")) {
-//                custom.setValue(DetectorConstants.ERLANG_PROCESS, nodeArgs[n]);
-//            }
-//            if (nodeArgs[n].contains("boot")) {
-//                custom.setValue(DetectorConstants.RABBIT_BOOT, nodeArgs[n + 1]);
-//            }
-//        }
-//
-//        return custom;
-//    }
-    /**
      * Create the server name
      * @param args
      * @return rabbit@host
@@ -365,8 +335,8 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
 
     private String generateSignature(ServerResource server) {
         List<RabbitObject> objs = new ArrayList();
-        HypericRabbitAdmin admin = new HypericRabbitAdmin(server.getProductConfig());
         try {
+            HypericRabbitAdmin admin = new HypericRabbitAdmin(server.getProductConfig());
             objs.addAll(admin.getChannels());
             objs.addAll(admin.getConnections());
             List<RabbitVirtualHost> vhs = admin.getVirtualHosts();
@@ -377,8 +347,6 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         } catch (PluginException e) {
             logger.debug(e.getMessage(), e);
             objs.clear();
-        } finally {
-            admin.destroy();
         }
 
         List<String> names = new ArrayList();
