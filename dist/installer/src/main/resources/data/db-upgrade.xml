@@ -11505,7 +11505,7 @@ has already been defined.
  </schemaSpec>
 	
  <schemaSpec version="3.201">
-    <schema-alterColumn table="EAM_PLUGIN" column="version"
+    <schema-addColumn table="EAM_PLUGIN" column="version"
 	       	            precision="100" columnType="VARCHAR2" />
  </schemaSpec>
 </dbupgrade>
