@@ -1,7 +1,8 @@
-package org.hyperic.hq.auth.domain;
+package org.hyperic.hq.auth.data;
 
 import java.util.List;
 
+import org.hyperic.hq.auth.domain.Role;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 

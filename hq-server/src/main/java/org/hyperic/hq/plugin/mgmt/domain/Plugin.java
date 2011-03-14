@@ -87,6 +87,12 @@ public class Plugin implements ContainerManagedTimestampTrackable, Serializable 
     public Plugin() {
         super();
     }
+    
+    public Plugin(String name, String path, String md5) {
+        this.name =  name;
+        this.path = path;
+        this.md5 = md5;
+    }
 
     public void addResourceType(ResourceType resourceType) {
         resourceTypes.add(resourceType);

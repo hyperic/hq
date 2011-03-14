@@ -84,7 +84,7 @@ public class ApplicationManagerTest
 
         // Update, add a service
         ServiceType serviceType2 = createServiceType("WebAppService", holder.serverType);
-        Service service2 = createService(holder.server.getId(), serviceType2, "Service2", "desc",
+        Service service2 = createService(holder.server.getId(), serviceType2, "AnotherService2", "desc",
             "location");
         ApplicationValue appVal = managerApplication.getApplicationValue();
         AppService appService = new AppService();

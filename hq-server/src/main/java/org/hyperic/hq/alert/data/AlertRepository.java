@@ -22,7 +22,7 @@ public interface AlertRepository extends JpaRepository<Alert, Integer>, AlertRep
     int getAlertCountByResource(@Param("res") Resource resource);
 
     @Transactional(readOnly = true)
-    @Query("select min(ctime) from Alert where fixed = false")
+    @Query("select min(a.ctime) from Alert a where a.fixed = false")
     long getOldestUnfixedAlertTime();
 
 }

@@ -11,6 +11,6 @@ public interface PluginRepository extends JpaRepository<Plugin, Integer> {
     Plugin findByName(String name);
     
     @Transactional(readOnly=true)
-    @Query("select p from Plugin p where :resType in (p.resourceTypes)")
+    @Query("select p from Plugin p join p.resourceTypes r where r=:resType")
     Plugin findByResourceType(@Param("resType") ResourceType resourceType);
 }

@@ -68,15 +68,15 @@
 	<jpa:repositories base-package="org.hyperic.hq.**.data"/>
 
 	<util:list id="preloadCaches">
-		<value>org.hyperic.hq.agent.domain.AgentType</value>
-		<value>org.hyperic.hq.agent.domain.Agent</value>
+		<value>org.hyperic.hq.agent.mgmt.domain.AgentType</value>
+		<value>org.hyperic.hq.agent.mgmt.domain.Agent</value>
 		<value>org.hyperic.hq.measurement.server.session.Category</value>
 		<value>org.hyperic.hq.measurement.server.session.MonitorableType</value>
 		<value>org.hyperic.hq.inventory.domain.Resource</value>
 		<value>org.hyperic.hq.inventory.domain.ResourceType</value>
 		<value>org.hyperic.hq.inventory.domain.ResourceGroup</value>
 		<value>org.hyperic.hq.inventory.domain.Config</value>
-		<value>org.hyperic.hq.plugin.domain.Plugin</value>
+		<value>org.hyperic.hq.plugin.mgmt.domain.Plugin</value>
 		<value>org.hyperic.hq.inventory.domain.OperationType</value>
 		<value>org.hyperic.hq.inventory.domain.PropertyType</value>
 		<value>org.hyperic.hq.inventory.domain.ConfigType</value>

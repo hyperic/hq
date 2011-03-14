@@ -25,7 +25,7 @@ public interface AuthzSubjectRepository extends JpaRepository<AuthzSubject, Inte
     AuthzSubject findByNameAndDsn(@Param("name") String name, @Param("dsn") String dsn);
 
     @Transactional(readOnly = true)
-    @Query("select s from AuthzSubject s where :resource in (s.ownedResources)")
+    @Query("select s from AuthzSubject s join s.ownedResources r where r=:resource")
     AuthzSubject findOwner(@Param("resource") Resource resource);
 
 }

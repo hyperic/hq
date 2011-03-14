@@ -226,10 +226,7 @@ public class ProductManagerImpl implements ProductManager {
     private void updatePlugin(PluginInfo pInfo) {
         Plugin plugin = pluginRepository.findByName(pInfo.name);
         if (plugin == null) {
-            plugin = new Plugin();
-            plugin.setName(pInfo.name);
-            plugin.setPath(pInfo.jar);
-            plugin.setMD5( pInfo.md5);
+            plugin = new Plugin(pInfo.name,pInfo.jar,pInfo.md5);
         } else {
             plugin.setPath(pInfo.jar);
             plugin.setMD5(pInfo.md5);
