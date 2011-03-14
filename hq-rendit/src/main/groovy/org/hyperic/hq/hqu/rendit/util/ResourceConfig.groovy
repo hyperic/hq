@@ -26,7 +26,7 @@
 
 package org.hyperic.hq.hqu.rendit.util
 
-import org.hyperic.hq.agent.domain.Agent
+import org.hyperic.hq.agent.mgmt.domain.Agent;
 
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;

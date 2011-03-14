@@ -56,7 +56,7 @@ public class AlertDefinitionState implements Serializable {
 
     AlertDefinitionState() {}
     
-    AlertDefinitionState(ResourceAlertDefinition def) {
+    public AlertDefinitionState(ResourceAlertDefinition def) {
         alertDefinition = def;
         lastFired = 0;
     }

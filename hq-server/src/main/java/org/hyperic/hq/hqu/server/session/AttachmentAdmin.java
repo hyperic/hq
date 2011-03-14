@@ -31,54 +31,54 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="EAM_UI_ATTACH_ADMIN")
-@PrimaryKeyJoinColumn(name="ATTACH_ID", referencedColumnName = "ID")
+@Table(name = "EAM_UI_ATTACH_ADMIN")
+@PrimaryKeyJoinColumn(name = "ATTACH_ID", referencedColumnName = "ID")
 public class AttachmentAdmin
-    extends Attachment
-{ 
-    @Column(name="CATEGORY",nullable=false,length=255)
-    private String   category;
+    extends Attachment {
     
-    
-    protected AttachmentAdmin() {}
-    
-    AttachmentAdmin(View view, ViewAdminCategory c) {
-        super(view);
-        category = c.getDescription();
-    }
-    
-    protected String getCategoryEnum() {
-        return category;
-    }
-    
-    protected void setCategoryEnum(String cat) {
-        category = cat;
-    }
-    
-    public ViewAdminCategory getCategory() {
-        return ViewAdminCategory.findByDescription(category);
+    @Column(name = "CATEGORY", nullable = false, length = 255)
+    private String category;
+
+    protected AttachmentAdmin() {
     }
 
-    public String toString() {
-        return super.toString() + " (under " + getCategory().getValue() + ")"; 
+    public AttachmentAdmin(View<AttachmentAdmin> view, ViewAdminCategory c) {
+        super(view);
+        category = c.getDescription();
     }
 
     public boolean equals(Object obj) {
         if (!super.equals(obj))
             return false;
-        
+
         if (obj instanceof AttachmentAdmin == false)
             return false;
-        
-        AttachmentAdmin o = (AttachmentAdmin)obj;
-        
-        return o.getCategoryEnum().equals(getCategoryEnum()); 
+
+        AttachmentAdmin o = (AttachmentAdmin) obj;
+
+        return o.getCategoryEnum().equals(getCategoryEnum());
+    }
+
+    public ViewAdminCategory getCategory() {
+        return ViewAdminCategory.findByDescription(category);
+    }
+
+    protected String getCategoryEnum() {
+        return category;
     }
 
     public int hashCode() {
         int result = super.hashCode();
-        
+
         result = 37 * result + getCategoryEnum().hashCode();
         return result;
+    }
+
+    protected void setCategoryEnum(String cat) {
+        category = cat;
+    }
+
+    public String toString() {
+        return super.toString() + " (under " + getCategory().getValue() + ")";
     }
 }

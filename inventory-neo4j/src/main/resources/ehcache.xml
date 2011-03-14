@@ -214,13 +214,13 @@
          memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Agent Caches -->
-  <cache name="org.hyperic.hq.agent.domain.Agent"
+  <cache name="org.hyperic.hq.agent.mgmt.domain.Agent"
          maxElementsInMemory="5000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  <cache name="org.hyperic.hq.agent.domain.AgentType"
+  <cache name="org.hyperic.hq.agent.mgmt.domain.AgentType"
          maxElementsInMemory="2"
          eternal="true"
          timeToIdleSeconds="0"
@@ -605,19 +605,19 @@
          memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Calendar caches -->
-  <cache name="org.hyperic.hq.calendar.domain.CalendarEntry"
+  <cache name="org.hyperic.hq.auth.domain.CalendarEntry"
          maxElementsInMemory="200"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  <cache name="org.hyperic.hq.calendar.domain.Calendar"
+  <cache name="org.hyperic.hq.auth.domain.Calendar"
          maxElementsInMemory="20"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  <cache name="org.hyperic.hq.calendar.domain.Calendar.entries"
+  <cache name="org.hyperic.hq.auth.domain.Calendar.entries"
          maxElementsInMemory="20"
          eternal="true"
          timeToIdleSeconds="0"
@@ -655,7 +655,7 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  	<cache name="org.hyperic.hq.plugin.domain.Plugin" maxElementsInMemory="200" eternal="true" timeToIdleSeconds="0"
+  	<cache name="org.hyperic.hq.plugin.mgmt.domain.Plugin" maxElementsInMemory="200" eternal="true" timeToIdleSeconds="0"
 		timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
 		
 	<cache name="org.hyperic.hq.inventory.domain.ResourceGroup"

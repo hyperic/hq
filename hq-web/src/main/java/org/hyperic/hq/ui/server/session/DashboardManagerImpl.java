@@ -45,7 +45,6 @@ import org.hyperic.hq.authz.server.session.RoleCreatedEvent;
 import org.hyperic.hq.authz.server.session.RoleDeleteRequestedEvent;
 import org.hyperic.hq.authz.server.session.RoleRemoveFromSubjectRequestedEvent;
 import org.hyperic.hq.authz.server.session.SubjectDeleteRequestedEvent;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -54,6 +53,8 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.shared.CrispoManager;
 import org.hyperic.hq.config.domain.Crispo;
 import org.hyperic.hq.config.domain.CrispoOption;
+import org.hyperic.hq.dashboard.data.RoleDashboardConfigRepository;
+import org.hyperic.hq.dashboard.data.UserDashboardConfigRepository;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Dashboard;
 import org.hyperic.hq.ui.WebUser;
@@ -75,15 +76,19 @@ public class DashboardManagerImpl implements DashboardManager, ApplicationListen
 
     protected SessionManager sessionManager = SessionManager.getInstance();
 
-    private DashboardConfigDAO dashDao;
+    private UserDashboardConfigRepository userDashboardConfigRepository;
+    private RoleDashboardConfigRepository roleDashboardConfigRepository;
     private CrispoManager crispoManager;
     private AuthzSubjectManager authzSubjectManager;
    
 
     @Autowired
-    public DashboardManagerImpl(DashboardConfigDAO dashDao, CrispoManager crispoManager,
+    public DashboardManagerImpl(UserDashboardConfigRepository userDashboardConfigRepository, 
+                                RoleDashboardConfigRepository roleDashboardConfigRepository,
+                                CrispoManager crispoManager,
                                 AuthzSubjectManager authzSubjectManager) {
-        this.dashDao = dashDao;
+        this.userDashboardConfigRepository = userDashboardConfigRepository;
+        this.roleDashboardConfigRepository = roleDashboardConfigRepository;
         this.crispoManager = crispoManager;
         this.authzSubjectManager = authzSubjectManager;
     }
@@ -98,19 +103,18 @@ public class DashboardManagerImpl implements DashboardManager, ApplicationListen
             throw new PermissionException("You are unauthorized to see this " + "dashboard");
         }
 
-        return dashDao.findDashboard(user);
+        return userDashboardConfigRepository.findByUser(user);
     }
 
     /**
      */
     @Transactional(readOnly = true)
     public RoleDashboardConfig getRoleDashboard(AuthzSubject me, Role r) throws PermissionException {
-        PermissionManager permMan = PermissionManagerFactory.getInstance();
-
         //TODO perm check
+        //PermissionManager permMan = PermissionManagerFactory.getInstance();
         //permMan.check(me.getId(), r.getResource().getType(), r.getId(), AuthzConstants.roleOpModifyRole);
 
-        return dashDao.findDashboard(r);
+        return roleDashboardConfigRepository.findByRole(r);
     }
 
     private ConfigResponse getDefaultConfig() {
@@ -129,21 +133,20 @@ public class DashboardManagerImpl implements DashboardManager, ApplicationListen
 
         Crispo cfg = crispoManager.create(getDefaultConfig());
         UserDashboardConfig dash = new UserDashboardConfig(user, name, cfg);
-        dashDao.save(dash);
+        userDashboardConfigRepository.save(dash);
         return dash;
     }
 
     /**
      */
     public RoleDashboardConfig createRoleDashboard(AuthzSubject me, Role r, String name) throws PermissionException {
-        PermissionManager permMan = PermissionManagerFactory.getInstance();
-
         //TODO perm check
+        //PermissionManager permMan = PermissionManagerFactory.getInstance();
         //permMan.check(me.getId(), r.getResource().getType(), r.getId(), AuthzConstants.roleOpModifyRole);
 
         Crispo cfg = crispoManager.create(getDefaultConfig());
         RoleDashboardConfig dash = new RoleDashboardConfig(r, name, cfg);
-        dashDao.save(dash);
+        roleDashboardConfigRepository.save(dash);
         return dash;
     }
 
@@ -188,7 +191,7 @@ public class DashboardManagerImpl implements DashboardManager, ApplicationListen
 
         PermissionManager permMan = PermissionManagerFactory.getInstance();
         if (permMan.hasGuestRole() && permMan.hasAdminPermission(me.getId())) {
-            res.addAll(dashDao.findAllRoleDashboards());
+            res.addAll(roleDashboardConfigRepository.findAllOrderByName());
             res.add(getUserDashboard(me, me));
             return res;
         }
@@ -198,7 +201,7 @@ public class DashboardManagerImpl implements DashboardManager, ApplicationListen
             res.add(cfg);
 
         if (permMan.hasGuestRole())
-            res.addAll(dashDao.findRolesFor(me));
+            res.addAll(roleDashboardConfigRepository.findByUser(me));
 
         return res;
     }
@@ -253,7 +256,7 @@ public class DashboardManagerImpl implements DashboardManager, ApplicationListen
     
     public void onApplicationEvent(AuthzApplicationEvent event) {
         if(event instanceof SubjectDeleteRequestedEvent) {
-            dashDao.handleSubjectRemoval(((SubjectDeleteRequestedEvent)event).getSubject());
+            userDashboardConfigRepository.deleteByUser(((SubjectDeleteRequestedEvent)event).getSubject());
         }else if(event instanceof RoleDeleteRequestedEvent) {
             roleRemoved(((RoleDeleteRequestedEvent)event).getRole());
         }else if(event instanceof RoleCreatedEvent) {
@@ -264,7 +267,7 @@ public class DashboardManagerImpl implements DashboardManager, ApplicationListen
     }
 
     private void roleRemoved(Role role) {
-        RoleDashboardConfig cfg = dashDao.findDashboard(role);
+        RoleDashboardConfig cfg = roleDashboardConfigRepository.findByRole(role);
         if (cfg == null) {
             return;
         }
@@ -274,17 +277,17 @@ public class DashboardManagerImpl implements DashboardManager, ApplicationListen
                 crispoManager.updateOption(opt, null);
             }
         }
-        dashDao.handleRoleRemoval(role);
+        roleDashboardConfigRepository.deleteByRole(role);
     }
     
     private void roleCreated(Role role) {
         Crispo cfg = crispoManager.create(getDefaultConfig());
         RoleDashboardConfig dash = new RoleDashboardConfig(role, role.getName() + " Role Dashboard", cfg);
-        dashDao.save(dash);
+        roleDashboardConfigRepository.save(dash);
     }
     
     private void roleRemovedFromSubject(Role r, AuthzSubject from) {
-        RoleDashboardConfig cfg = dashDao.findDashboard(r);
+        RoleDashboardConfig cfg = roleDashboardConfigRepository.findByRole(r);
         Crispo c = from.getPrefs();
         if (c != null) {
             for (CrispoOption opt : c.getOptions()) {

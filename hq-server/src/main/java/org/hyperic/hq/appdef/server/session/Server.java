@@ -122,9 +122,6 @@ public class Server
         return AppdefEntityID.newServerID(getId());
     }
     
-    private String getOwner() {
-        return getResource() != null && getResource().getOwner() != null ? getResource().getOwner().getName() : "";
-    }
     
     public ServerValue getServerValue() {
         ServerValue serverValue = new ServerValue();
@@ -133,7 +130,7 @@ public class Server
         serverValue.setWasAutodiscovered(isWasAutodiscovered());
         serverValue.setAutodiscoveryZombie(isAutodiscoveryZombie());
         serverValue.setModifiedBy(getModifiedBy());
-        serverValue.setOwner(getOwner());
+        serverValue.setOwner(getOwnerName());
         serverValue.setLocation(getLocation());
         serverValue.setName(getName());
         serverValue.setAutoinventoryIdentifier(getAutoinventoryIdentifier());

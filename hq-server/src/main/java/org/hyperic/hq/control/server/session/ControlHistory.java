@@ -31,216 +31,133 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.control.shared.ControlConstants;
+import org.hyperic.hq.inventory.domain.Resource;
 
 @Entity
-@Table(name="EAM_CONTROL_HISTORY")
-public class ControlHistory implements Serializable
-{
+@Table(name = "EAM_CONTROL_HISTORY")
+public class ControlHistory implements Serializable {
+    @Column(name = "ACTION", length = 32, nullable = false)
+    private String action;
+
+    @Column(name = "ARGS", length = 500)
+    private String args;
+
+    @Column(name = "BATCH_ID")
+    private Integer batchId;
+
+    @Column(name = "DATE_SCHEDULED", nullable = false)
+    private long dateScheduled;
+
+    @Column(name = "DESCRIPTION", length = 500)
+    private String description;
+
+    @Column(name = "ENDTIME", nullable = false)
+    private long endTime;
+
+    @Column(name = "GROUP_ID")
+    private Integer groupId;
+
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "ID")
     private Integer id;
 
-    @Column(name="VERSION_COL",nullable=false)
+    @Column(name = "MESSAGE", length = 500)
+    private String message;
+
+    @ManyToOne
+    @JoinColumn(name = "RESOURCE_ID", nullable = false)
+    private Resource resource;
+
+    @Column(name = "SCHEDULED", nullable = false)
+    private boolean scheduled;
+
+    @Column(name = "STARTTIME", nullable = false)
+    @Index(name = "CTL_HISTORY_STARTTIME_IDX")
+    private long startTime;
+
+    @Column(name = "STATUS", nullable = false, length = 64)
+    private String status;
+
+    @Column(name = "SUBJECT", nullable = false, length = 32)
+    private String subject;
+
+    @Column(name = "VERSION_COL", nullable = false)
     @Version
     private Long version;
-
-    @Column(name="GROUP_ID")
-    private Integer groupId;
-    
-    @Column(name="BATCH_ID")
-    private Integer batchId;
-    
-    @Column(name="ENTITY_TYPE",nullable=false)
-    private Integer entityType;
-    
-    @Column(name="ENTITY_ID",nullable=false)
-    private Integer entityId;
-    
-    private transient String entityName;
-    
-    @Column(name="SUBJECT",nullable=false,length=32)
-    private String subject;
-    
-    @Column(name="SCHEDULED",nullable=false)
-    private boolean scheduled;
-    
-    @Column(name="DATE_SCHEDULED",nullable=false)
-    private long dateScheduled;
-    
-    @Column(name="STARTTIME",nullable=false)
-    @Index(name="CTL_HISTORY_STARTTIME_IDX")
-    private long startTime;
-    
-    @Column(name="STATUS",nullable=false,length=64)
-    private String status;
-    
-    @Column(name="ENDTIME",nullable=false)
-    private long endTime;
-    
-    @Column(name="DESCRIPTION",length=500)
-    private String description;
-    
-    @Column(name="MESSAGE",length=500)
-    private String message;
-    
-    @Column(name="ACTION",length=32,nullable=false)
-    private String action;
-    
-    @Column(name="ARGS",length=500)
-    private String args;
 
     /**
      * default constructor
      */
-    public ControlHistory()
-    {
-    }
-    
-    public Integer getId() {
-        return id;
+    public ControlHistory() {
     }
 
-
-
-    public void setId(Integer id) {
-        this.id = id;
+    public ControlHistory(Resource resource, Integer groupId, Integer batchId, String subject,
+                          String action, String args, Boolean scheduled, long startTime,
+                          long endTime, long dateScheduled, String status, String description,
+                          String message) {
+        setGroupId(groupId);
+        setBatchId(batchId);
+        setResource(resource);
+        setSubject(subject);
+        setScheduled(scheduled);
+        setStartTime(startTime);
+        setEndTime(endTime);
+        setDateScheduled(dateScheduled);
+        setStatus(status);
+        setDescription(description);
+        setAction(action);
+        setArgs(args);
+        setMessage(message);
     }
 
-
-
-    public Long getVersion() {
-        return version;
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ControlHistory other = (ControlHistory) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        return true;
     }
 
-
-
-    public void setVersion(Long version) {
-        this.version = version;
+    public String getAction() {
+        return this.action;
     }
 
-
-
-    public Integer getGroupId()
-    {
-        return this.groupId;
+    public String getArgs() {
+        return this.args;
     }
 
-    protected void setGroupId(Integer groupId)
-    {
-        this.groupId = groupId;
-    }
-
-    public Integer getBatchId()
-    {
+    public Integer getBatchId() {
         return this.batchId;
     }
 
-    protected void setBatchId(Integer batchId)
-    {
-        this.batchId = batchId;
-    }
-
-    public Integer getEntityType()
-    {
-        return this.entityType;
-    }
-
-    protected void setEntityType(Integer entityType)
-    {
-        this.entityType = entityType;
-    }
-
-    public Integer getEntityId()
-    {
-        return this.entityId;
-    }
-
-    protected void setEntityId(Integer entityId)
-    {
-        this.entityId = entityId;
-    }
-
-    public String getSubject()
-    {
-        return this.subject;
-    }
-
-    protected void setSubject(String subject)
-    {
-        this.subject = subject;
-    }
-
-    public boolean isScheduled()
-    {
-        return this.scheduled;
-    }
-
-    protected void setScheduled(boolean scheduled)
-    {
-        this.scheduled = scheduled;
-    }
-
-    public Boolean getScheduled()
-    {
-        return new Boolean(isScheduled());
-    }
-
-    protected void setScheduled(Boolean scheduled)
-    {
-        setScheduled(scheduled.booleanValue());
-    }
-
-    public long getDateScheduled()
-    {
+    public long getDateScheduled() {
         return this.dateScheduled;
     }
 
-    protected void setDateScheduled(long dateScheduled)
-    {
-        this.dateScheduled = dateScheduled;
+    public String getDescription() {
+        return this.description;
     }
 
-    public long getStartTime()
-    {
-        return this.startTime;
-    }
-
-    protected void setStartTime(long startTime)
-    {
-        this.startTime = startTime;
-    }
-
-    public String getStatus()
-    {
-        return this.status;
-    }
-
-    protected void setStatus(String status)
-    {
-        this.status = status;
-    }
-
-    public long getEndTime()
-    {
-        return this.endTime;
-    }
-
-    protected void setEndTime(long endTime)
-    {
-        this.endTime = endTime;
-    }
-
-    public long getDuration()
-    {
+    public long getDuration() {
         if (getStatus().equals(ControlConstants.STATUS_INPROGRESS)) {
             return System.currentTimeMillis() - getStartTime();
         } else {
@@ -248,73 +165,120 @@ public class ControlHistory implements Serializable
         }
     }
 
-    public String getDescription()
-    {
-        return this.description;
+    public long getEndTime() {
+        return this.endTime;
     }
 
-    protected void setDescription(String description)
-    {
-        this.description = description;
+    public Integer getGroupId() {
+        return this.groupId;
     }
 
-    public String getMessage()
-    {
+    public Integer getId() {
+        return id;
+    }
+
+    public String getMessage() {
         return this.message;
     }
 
-    protected void setMessage(String message)
-    {
-        this.message = message;
+    public Resource getResource() {
+        return resource;
     }
 
-    public String getAction()
-    {
-        return this.action;
+    public Boolean getScheduled() {
+        return new Boolean(isScheduled());
     }
 
-    protected void setAction(String action)
-    {
+    public long getStartTime() {
+        return this.startTime;
+    }
+
+    public String getStatus() {
+        return this.status;
+    }
+
+    public String getSubject() {
+        return this.subject;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        return result;
+    }
+
+    public boolean isScheduled() {
+        return this.scheduled;
+    }
+
+    protected void setAction(String action) {
         this.action = action;
     }
 
-    public String getArgs()
-    {
-        return this.args;
-    }
-
-    protected void setArgs(String args)
-    {
+    protected void setArgs(String args) {
         this.args = args;
     }
 
-    private String getEntityIdString()
-    {
-        AppdefEntityID id = new AppdefEntityID(getEntityType().intValue(),
-                                               getEntityId());
-        return id.getAppdefKey();
+    protected void setBatchId(Integer batchId) {
+        this.batchId = batchId;
     }
 
-    public String getEntityName() {
-        if (entityName == null)
-            return getEntityIdString();
-        return entityName;
+    protected void setDateScheduled(long dateScheduled) {
+        this.dateScheduled = dateScheduled;
     }
 
-    public void setEntityName(String entityName) {
-        this.entityName = entityName;
+    protected void setDescription(String description) {
+        this.description = description;
     }
 
-    public boolean equals(Object obj)
-    {
-        return (obj instanceof ControlHistory) && super.equals(obj);
+    protected void setEndTime(long endTime) {
+        this.endTime = endTime;
     }
-    
-    public int hashCode() {
-        int result = 17;
-        result = 37*result + (getId() != null ? getId().hashCode() : 0);
-        return result;      
+
+    protected void setGroupId(Integer groupId) {
+        this.groupId = groupId;
     }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    protected void setMessage(String message) {
+        this.message = message;
+    }
+
+    public void setResource(Resource resource) {
+        this.resource = resource;
+    }
+
+    protected void setScheduled(boolean scheduled) {
+        this.scheduled = scheduled;
+    }
+
+    protected void setScheduled(Boolean scheduled) {
+        setScheduled(scheduled.booleanValue());
+    }
+
+    protected void setStartTime(long startTime) {
+        this.startTime = startTime;
+    }
+
+    protected void setStatus(String status) {
+        this.status = status;
+    }
+
+    protected void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
 }
-
-

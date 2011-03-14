@@ -26,11 +26,11 @@
 package org.hyperic.hq.auth.server.session;
 
 import org.hyperic.hq.auth.Principal;
+import org.hyperic.hq.auth.data.PrincipalRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.auth.shared.AuthManager;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.dao.PrincipalDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -46,16 +46,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(noRollbackFor=AuthenticationException.class)
 public class AuthManagerImpl implements AuthManager {
 
-    private PrincipalDAO principalDao;
+    private PrincipalRepository principalRepository;
     private PasswordEncoder passwordEncoder;
     private AuthenticationManager authenticationManager;
     private AuthzSubjectManager authzSubjectManager;
 
     @Autowired
-    public AuthManagerImpl(PrincipalDAO principalDao, AuthzSubjectManager authzSubjectManager,
+    public AuthManagerImpl(PrincipalRepository principalRepository, AuthzSubjectManager authzSubjectManager,
                            PasswordEncoder passwordEncoder,
                            AuthenticationManager authenticationManager) {
-        this.principalDao = principalDao;
+        this.principalRepository = principalRepository;
         this.authzSubjectManager = authzSubjectManager;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
@@ -78,7 +78,10 @@ public class AuthManagerImpl implements AuthManager {
     public void addUser(AuthzSubject subject, String username, String password) {
         // All passwords are stored encrypted
         String passwordHash = passwordEncoder.encodePassword(password, null);
-        principalDao.create(username, passwordHash);
+        Principal principal = new Principal();
+        principal.setPrincipal(username);
+        principal.setPassword(passwordHash);
+        principalRepository.save(principal);
     }
 
     /**
@@ -96,7 +99,7 @@ public class AuthManagerImpl implements AuthManager {
             // peeps with modifyUsers can modify other
             authzSubjectManager.checkModifyUsers(subject);
         }
-        Principal local = principalDao.findByUsername(username);
+        Principal local = principalRepository.findByPrincipal(username);
         String hash = passwordEncoder.encodePassword(password, null);
         local.setPassword(hash);
     }
@@ -116,11 +119,15 @@ public class AuthManagerImpl implements AuthManager {
             // peeps with modifyUsers can modify other
             authzSubjectManager.checkModifyUsers(subject);
         }
-        Principal local = principalDao.findByUsername(username);
+        Principal local = principalRepository.findByPrincipal(username);
         if (local != null) {
             local.setPassword(hash);
+            principalRepository.save(local);
         } else {
-            principalDao.create(username, hash);
+            Principal principal = new Principal();
+            principal.setPrincipal(username);
+            principal.setPassword(hash);
+            principalRepository.save(principal);
         }
     }
 
@@ -131,12 +138,12 @@ public class AuthManagerImpl implements AuthManager {
      * @param username The user to delete XXX: Shouldn't this check permissions?
      */
     public void deleteUser(AuthzSubject subject, String username) {
-        Principal local = principalDao.findByUsername(username);
+        Principal local = principalRepository.findByPrincipal(username);
 
         // Principal does not exist for users authenticated by other JAAS
         // providers
         if (local != null) {
-            principalDao.remove(local);
+            principalRepository.delete(local);
         }
     }
 
@@ -148,7 +155,7 @@ public class AuthManagerImpl implements AuthManager {
      */
     @Transactional(readOnly = true)
     public boolean isUser(AuthzSubject subject, String username) {
-        return principalDao.findByUsername(username) != null;
+        return principalRepository.findByPrincipal(username) != null;
     }
 
     /**
@@ -158,6 +165,6 @@ public class AuthManagerImpl implements AuthManager {
      */
     @Transactional(readOnly = true)
     public Principal getPrincipal(AuthzSubject subject) {
-        return principalDao.findByUsername(subject.getName());
+        return principalRepository.findByPrincipal(subject.getName());
     }
 }

@@ -105,5 +105,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/inventory-neo4j"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-neo4j/1.0.0.M3-Chrysalis/spring-data-neo4j-1.0.0.M3-Chrysalis.jar" sourcepath="M2_REPO/org/springframework/data/spring-data-neo4j/1.0.0.BUILD-SNAPSHOT/spring-data-neo4j-1.0.0.BUILD-SNAPSHOT-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-messaging"/>
+	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-jpa/1.0.0.M1/spring-data-jpa-1.0.0.M1.jar" sourcepath="M2_REPO/org/springframework/data/spring-data-jpa/1.0.0.M1/spring-data-jpa-1.0.0.M1-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-commons-core/1.0.0.M3-Chrysalis/spring-data-commons-core-1.0.0.M3-Chrysalis.jar" sourcepath="/BAR/src/main/java"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

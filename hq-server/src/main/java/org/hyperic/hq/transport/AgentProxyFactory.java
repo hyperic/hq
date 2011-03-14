@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.transport;
 
-import org.hyperic.hq.agent.domain.Agent;
+import org.hyperic.hq.agent.mgmt.domain.Agent;
 
 /**
  * The interface for classes that create proxies to agent services.

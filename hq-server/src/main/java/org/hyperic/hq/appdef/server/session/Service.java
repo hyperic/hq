@@ -93,7 +93,7 @@ public class Service
         _serviceValue.setServiceRt(isServiceRt());
         _serviceValue.setEndUserRt(isEndUserRt());
         _serviceValue.setModifiedBy(getModifiedBy());
-        _serviceValue.setOwner(getOwner());
+        _serviceValue.setOwner(getOwnerName());
         _serviceValue.setLocation(getLocation());
         _serviceValue.setName(getName());
         _serviceValue.setDescription(getDescription());
@@ -110,11 +110,6 @@ public class Service
         } else
             _serviceValue.setServiceType(null);
         return _serviceValue;
-    }
-
-    private String getOwner() {
-        return getResource() != null && getResource().getOwner() != null ? getResource().getOwner()
-            .getName() : "";
     }
 
     /**

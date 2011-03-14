@@ -28,7 +28,7 @@ package org.hyperic.hq.control.agent.client;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AbstractCommandsClient;
-import org.hyperic.hq.agent.domain.Agent;
+import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.transport.AgentProxyFactory;
 import org.hyperic.util.config.ConfigResponse;
 

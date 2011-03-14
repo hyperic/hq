@@ -33,46 +33,42 @@ import javax.persistence.ManyToOne;
 
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.auth.domain.Role;
-import org.hyperic.hq.authz.shared.PermissionManager;
-import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.config.domain.Crispo;
 
 @Entity
 @DiscriminatorValue("ROLE")
 public class RoleDashboardConfig
     extends DashboardConfig {
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="ROLE_ID",unique=true)
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ROLE_ID", unique = true)
     private Role role;
 
     protected RoleDashboardConfig() {
     }
 
-    RoleDashboardConfig(Role r, String name, Crispo config) {
+    public RoleDashboardConfig(Role r, String name, Crispo config) {
         super(name, config);
         role = r;
     }
-    
-    protected void setRole(Role r) {
-        role = r;
+
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+
+        if (o == null || o instanceof RoleDashboardConfig == false)
+            return false;
+
+        RoleDashboardConfig oe = (RoleDashboardConfig) o;
+
+        if (!super.equals(oe))
+            return false;
+
+        return role.equals(oe.getRole());
     }
-    
+
     public Role getRole() {
         return role;
-    }
-    
-    public boolean isEditable(AuthzSubject by) {
-        PermissionManager pMan = PermissionManagerFactory.getInstance();
-        
-       // try {
-            //TODO perm check
-//            pMan.check(by.getId(), _role.getResource().getType(), 
-//                       _role.getId(), AuthzConstants.roleOpModifyRole);
-            return true;
-       // } catch (PermissionException e) {
-        //    return false;
-        //}
     }
 
     public int hashCode() {
@@ -81,19 +77,21 @@ public class RoleDashboardConfig
         hash = hash * 37 + role.hashCode();
         return hash;
     }
-    
-    public boolean equals(Object o) {
-        if (o == this)
-            return true;
-        
-        if (o == null || o instanceof RoleDashboardConfig == false)
-            return false;
-        
-        RoleDashboardConfig oe = (RoleDashboardConfig)o;
 
-        if (!super.equals(oe))
-            return false;
+    public boolean isEditable(AuthzSubject by) {
+        //PermissionManager pMan = PermissionManagerFactory.getInstance();
 
-        return role.equals(oe.getRole());
+        // try {
+        // TODO perm check
+        // pMan.check(by.getId(), _role.getResource().getType(),
+        // _role.getId(), AuthzConstants.roleOpModifyRole);
+        return true;
+        // } catch (PermissionException e) {
+        // return false;
+        // }
+    }
+
+    protected void setRole(Role r) {
+        role = r;
     }
 }

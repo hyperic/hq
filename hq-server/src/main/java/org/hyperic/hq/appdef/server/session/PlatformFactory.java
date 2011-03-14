@@ -2,10 +2,14 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.Set;
 
+import org.hyperic.hq.agent.mgmt.data.AgentRepository;
 import org.hyperic.hq.appdef.Ip;
+import org.hyperic.hq.auth.data.AuthzSubjectRepository;
 import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
+import org.hyperic.hq.plugin.mgmt.data.PluginRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -28,10 +32,19 @@ public class PlatformFactory {
     static final String CERT_DN = "certDN";
 
     static final String FQDN = "FQDN";
+    
+    @Autowired
+    private PluginRepository pluginRepository;
+    
+    @Autowired
+    private AuthzSubjectRepository authzSubjectRepository;
+    
+    @Autowired
+    private AgentRepository agentRepository;
 
     public Platform createPlatform(Resource resource) {
         Platform platform = new Platform();
-        platform.setAgent(resource.getAgent());
+        platform.setAgent(agentRepository.findManagingAgent(resource));
         platform.setCertdn((String) resource.getProperty(CERT_DN));
         platform.setCommentText((String) resource.getProperty(COMMENT_TEXT));
         platform.setCpuCount((Integer) resource.getProperty(CPU_COUNT));
@@ -46,6 +59,7 @@ public class PlatformFactory {
         platform.setResource(resource);
         platform.setPlatformType(createPlatformType(resource.getType()));
         platform.setSortName((String) resource.getProperty(AppdefResource.SORT_NAME));
+        platform.setOwnerName(authzSubjectRepository.findOwner(resource).getName());
         Set<Resource> ips = resource.getResourcesFrom(RelationshipTypes.IP);
         for (Resource ip : ips) {
             platform.addIp(createIp(ip));
@@ -61,7 +75,7 @@ public class PlatformFactory {
         // platformType.setModifiedTime(modifiedTime)
         platformType.setId(resourceType.getId());
         platformType.setName(resourceType.getName());
-        platformType.setPlugin(resourceType.getPlugin().getName());
+        platformType.setPlugin(pluginRepository.findByResourceType(resourceType).getName());
         // TODO for types, we just fake out sort name for now. Can't do
         // setProperty on ResourceType
         platformType.setSortName(resourceType.getName().toUpperCase());

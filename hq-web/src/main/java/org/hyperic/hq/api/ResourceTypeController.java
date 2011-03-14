@@ -17,8 +17,7 @@ import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.inventory.domain.ResourceTypeRelationship;
-import org.hyperic.hq.plugin.domain.Plugin;
-import org.hyperic.hq.product.server.session.PluginDAO;
+import org.hyperic.hq.plugin.mgmt.domain.Plugin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -33,12 +32,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @RequestMapping("/api/resource-types")
 public class ResourceTypeController extends BaseController {
 	private ResourceTypeDao resourceTypeDao;
-	private PluginDAO pluginDao;
+	
 	
 	@Autowired
-	public ResourceTypeController(ResourceTypeDao resourceTypeDao, PluginDAO pluginDao) {
+	public ResourceTypeController(ResourceTypeDao resourceTypeDao) {
 		this.resourceTypeDao = resourceTypeDao;
-		this.pluginDao = pluginDao;
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/root")
@@ -196,10 +194,6 @@ public class ResourceTypeController extends BaseController {
 		}
 		
 		type.setDescription(form.getDescription());
-		
-		Plugin plugin = pluginDao.findByName(form.getPluginName());
-		
-		type.setPlugin(plugin);
 		
 		if (form.getOperationTypes() != null) {
 			

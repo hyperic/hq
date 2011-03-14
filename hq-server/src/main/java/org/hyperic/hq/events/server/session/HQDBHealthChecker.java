@@ -43,7 +43,7 @@ import javax.mail.internet.InternetAddress;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.dialect.Dialect;
-import org.hyperic.hibernate.dialect.HQDialectUtil;
+import org.hyperic.hibernate.DialectAccessor;
 import org.hyperic.hq.application.Scheduler;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.bizapp.server.action.email.EmailRecipient;
@@ -69,12 +69,15 @@ public class HQDBHealthChecker {
     private DBUtil dbUtil;
     private EmailManager emailManager;
     private Scheduler scheduler;
+    private DialectAccessor dialectAccessor;
 
     @Autowired
-    public HQDBHealthChecker(DBUtil dbUtil, EmailManager emailManager, Scheduler scheduler) {
+    public HQDBHealthChecker(DBUtil dbUtil, EmailManager emailManager, Scheduler scheduler, 
+                             DialectAccessor dialectAccessor) {
         this.dbUtil = dbUtil;
         this.emailManager = emailManager;
         this.scheduler = scheduler;
+        this.dialectAccessor = dialectAccessor;
     }
 
     @PostConstruct
@@ -187,7 +190,7 @@ public class HQDBHealthChecker {
         private long pingDatabase(Connection conn, Statement stmt, ResultSet rs)
             throws SQLException {
 
-            Dialect dialect = HQDialectUtil.getDialect(conn);
+            Dialect dialect = dialectAccessor.getDialect();
             rs = stmt.executeQuery(dialect.getCurrentTimestampSelectString());
 
             if (rs.next()) {

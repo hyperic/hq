@@ -32,14 +32,14 @@ import javax.persistence.Table;
 import org.hyperic.hq.hqu.ViewDescriptor;
 
 @Entity
-@Table(name="EAM_UI_VIEW_ADMIN")
-@PrimaryKeyJoinColumn(name="VIEW_ID", referencedColumnName = "ID")
+@Table(name = "EAM_UI_VIEW_ADMIN")
+@PrimaryKeyJoinColumn(name = "VIEW_ID", referencedColumnName = "ID")
 public class ViewAdmin
-    extends View<AttachmentAdmin>
-{ 
-    protected ViewAdmin() {}
-    
-    ViewAdmin(UIPlugin plugin, ViewDescriptor view) {
+    extends View<AttachmentAdmin> {
+    protected ViewAdmin() {
+    }
+
+    public ViewAdmin(UIPlugin plugin, ViewDescriptor view) {
         super(plugin, view, AttachType.ADMIN);
     }
 }

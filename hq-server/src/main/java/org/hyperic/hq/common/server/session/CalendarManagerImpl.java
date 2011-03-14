@@ -27,9 +27,12 @@ package org.hyperic.hq.common.server.session;
 
 import java.util.Collection;
 
-import org.hyperic.hq.calendar.domain.Calendar;
-import org.hyperic.hq.calendar.domain.CalendarEntry;
-import org.hyperic.hq.calendar.domain.WeekEntry;
+import org.hyperic.hq.auth.data.CalendarEntryRepository;
+import org.hyperic.hq.auth.data.CalendarRepository;
+import org.hyperic.hq.auth.domain.Calendar;
+import org.hyperic.hq.auth.domain.CalendarEntry;
+import org.hyperic.hq.auth.domain.WeekEntry;
+import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.common.shared.CalendarManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,12 +41,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class CalendarManagerImpl implements CalendarManager {
-	private CalendarDAO calendarDAO;
-	private CalendarEntryDAO calendarEntryDAO;
+	private CalendarRepository calendarDAO;
+	private CalendarEntryRepository calendarEntryDAO;
 
 	@Autowired
-	public CalendarManagerImpl(CalendarDAO calendarDAO,
-			CalendarEntryDAO calendarEntryDAO) {
+	public CalendarManagerImpl(CalendarRepository calendarDAO,
+			CalendarEntryRepository calendarEntryDAO) {
 		this.calendarDAO = calendarDAO;
 		this.calendarEntryDAO = calendarEntryDAO;
 	}
@@ -77,7 +80,7 @@ public class CalendarManagerImpl implements CalendarManager {
 	 * 
 	 */
 	public void remove(Calendar c) {
-		calendarDAO.remove(c);
+		calendarDAO.delete(c);
 	}
 
 	/**
@@ -116,7 +119,9 @@ public class CalendarManagerImpl implements CalendarManager {
 	 * 
 	 */
 	public void removeEntries(Calendar c) {
-		calendarDAO.removeEntries(c);
+	    for(CalendarEntry entry: c.getEntries()) {
+	        calendarEntryDAO.delete(entry);
+	    }
 	}
 
 	/**
@@ -124,7 +129,12 @@ public class CalendarManagerImpl implements CalendarManager {
 	 */
     @Transactional(readOnly=true)
 	public Calendar findCalendarById(int id) {
-		return calendarDAO.findById(new Integer(id));
+		Calendar calendar = calendarDAO.findById(new Integer(id));
+		if(calendar == null) {
+		    throw new EntityNotFoundException("Calendar with id: " + id + 
+		        " was not found");
+		}
+		return calendar;
 	}
 
     /**

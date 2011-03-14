@@ -1,5 +1,6 @@
 package org.hyperic.hq.inventory.domain;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Entity;
@@ -7,7 +8,6 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hyperic.hq.auth.domain.Role;
 import org.springframework.data.graph.annotation.GraphProperty;
 import org.springframework.data.graph.annotation.NodeEntity;
 import org.springframework.data.graph.annotation.RelatedTo;
@@ -35,10 +35,6 @@ public class ResourceGroup
     @Transient
     private boolean privateGroup;
 
-    @RelatedTo(type = RelationshipTypes.HAS_ROLE, direction = Direction.OUTGOING, elementClass = Role.class)
-    @Transient
-    private Set<Role> roles;
-    
     public ResourceGroup() {
     }
 
@@ -68,16 +64,10 @@ public class ResourceGroup
      */
     @Transactional
     public void addMember(Resource member) {
-       members.add(member);
-    }
-
-    /**
-     * 
-     * @param role Add a role to the Group TODO keep this for authorization?
-     */
-    @Transactional
-    public void addRole(Role role) {
-       roles.add(role);
+        if (this.members == null) {
+            this.members = new HashSet<Resource>();
+        }
+        members.add(member);
     }
 
     /**
@@ -86,14 +76,6 @@ public class ResourceGroup
      */
     public Set<Resource> getMembers() {
         return members;
-    }
-
-    /**
-     * 
-     * @return The roles associated with this Group
-     */
-    public Set<Role> getRoles() {
-        return roles;
     }
 
     /**
@@ -120,15 +102,6 @@ public class ResourceGroup
     @Transactional
     public void removeMember(Resource member) {
         members.remove(member);
-    }
-
-    /**
-     * 
-     * @param role Remove a role
-     */
-    @Transactional
-    public void removeRole(Role role) {
-       roles.remove(role);
     }
 
     /**

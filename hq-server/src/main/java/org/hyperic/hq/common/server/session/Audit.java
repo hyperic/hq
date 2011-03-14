@@ -54,224 +54,137 @@ import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.inventory.domain.Resource;
 
 @Entity
-@Table(name="EAM_AUDIT")
-@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name="KLAZZ",length=255)
-public abstract class Audit implements Serializable
-{
+@Table(name = "EAM_AUDIT")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "KLAZZ", length = 255)
+public abstract class Audit implements Serializable {
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OptimisticLock(excluded = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Collection<Audit> children = new ArrayList<Audit>();
+
+    @Column(name = "END_TIME", nullable = false)
+    private long endTime;
+
+    @Column(name = "FIELD", length = 100)
+    private String fieldName;
+
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "ID")
     private Integer id;
 
-    @Column(name="VERSION_COL",nullable=false)
+    @Column(name = "IMPORTANCE", nullable = false)
+    private int importance;
+
+    @Column(name = "MESSAGE", length = 1000, nullable = false)
+    private String message;
+
+    @Column(name = "NATURE", nullable = false)
+    private int nature;
+
+    @Column(name = "NEW_VAL", length = 1000)
+    private String newFieldValue;
+
+    @Column(name = "OLD_VAL", length = 1000)
+    private String oldFieldValue;
+
+    @Column(name = "ORIGINAL", nullable = false)
+    private boolean original;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PARENT_ID")
+    @Index(name = "PARENT_ID_IDX")
+    private Audit parent;
+
+    @Column(name = "PURPOSE", nullable = false)
+    private int purpose;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "RESOURCE_ID", nullable = false)
+    @Index(name = "RESOURCE_ID_IDX")
+    private Resource resource;
+
+    @Column(name = "START_TIME", nullable = false)
+    private long startTime;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "SUBJECT_ID", nullable = false)
+    @Index(name = "SUBJECT_ID_IDX")
+    private AuthzSubject subject;
+
+    @Column(name = "VERSION_COL", nullable = false)
     @Version
     private Long version;
-    
-    @Column(name="START_TIME",nullable=false)
-    private long            startTime;
-    
-    @Column(name="END_TIME",nullable=false)
-    private long            endTime;
-    
-    @Column(name="PURPOSE",nullable=false)
-    private int             purpose;
-    
-    @Column(name="IMPORTANCE",nullable=false)
-    private int             importance;
-    
-    @Column(name="NATURE",nullable=false)
-    private int             nature;
-    
-    @Column(name="ORIGINAL",nullable=false)
-    private boolean         original;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="SUBJECT_ID",nullable=false)
-    @Index(name="SUBJECT_ID_IDX")
-    private AuthzSubject    subject;
-    
-    @Column(name="MESSAGE",length=1000,nullable=false)
-    private String          message;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="RESOURCE_ID",nullable=false)
-    @Index(name="RESOURCE_ID_IDX")
-    private Resource        resource;
-    
-    @Column(name="FIELD",length=100)
-    private String          fieldName;
-    
-    @Column(name="OLD_VAL",length=1000)
-    private String          oldFieldValue;
-    
-    @Column(name="NEW_VAL",length=1000)
-    private String          newFieldValue;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="PARENT_ID")
-    @Index(name="PARENT_ID_IDX")
-    private Audit           parent;
-    
-    @OneToMany(mappedBy="parent",fetch=FetchType.LAZY,cascade=CascadeType.ALL,orphanRemoval=true)
-    @OptimisticLock(excluded=true)
-    @OnDelete(action=OnDeleteAction.CASCADE)
-    private Collection<Audit>      children = new ArrayList<Audit>();
-    
-    protected Audit() {}
-    
-    protected Audit(AuthzSubject subject, Resource r, AuditPurpose purpose,
-                    AuditNature nature, AuditImportance importance, 
-                    String message)    
-    {
-        this.purpose    = purpose.getCode();
-        this.importance = importance.getCode();
-        this.nature     = nature.getCode();
-        this.subject    = subject;
-        resource   = r;
-        this.message    = message;
-        original   = true;
-    }
-  
-    public long getStartTime() {
-        return startTime;
-    }
-    
-    public void setStartTime(long t) {
-        startTime = t;
-    }
-    
-    public long getEndTime() {
-        return endTime;
-    }
-    
-    public void setEndTime(long t) {
-        endTime = t;
-    }
-    
-    public AuditPurpose getPurpose() {
-        return AuditPurpose.findByCode(purpose);
-    }
-    
-    protected int getPurposeEnum() {
-        return purpose;
-    }
-    
-    protected void setPurposeEnum(int p) {
-        purpose = p;
-    }
-    
-    public AuditImportance getImportance() {
-        return AuditImportance.findByCode(importance);
-    }
-    
-    protected int getNatureEnum() {
-        return nature;
-    }
-    
-    protected void setNatureEnum(int e) {
-        nature = e;
-    }
-    
-    public AuditNature getNature() {
-        return AuditNature.findByCode(nature);
-    }
-    
-    protected void setImportanceEnum(int p) {
-        importance = p;
-    }
-    
-    protected int getImportanceEnum() {
-        return importance;
-    }
-    
-    public boolean isOriginal() {
-        return original;
-    }
-    
-    protected void setOriginal(boolean o) {
-        original = o;
+
+    protected Audit() {
     }
 
-    public Resource getResource() {
-        return resource;
-    }
-    
-    protected void setResource(Resource r) {
+    protected Audit(AuthzSubject subject, Resource r, AuditPurpose purpose, AuditNature nature,
+                    AuditImportance importance, String message) {
+        this.purpose = purpose.getCode();
+        this.importance = importance.getCode();
+        this.nature = nature.getCode();
+        this.subject = subject;
         resource = r;
+        this.message = message;
+        original = true;
     }
-    
-    public String getFieldName() {
-        return fieldName;
-    }
-    
-    public void setFieldName(String f) {
-        fieldName = f;
-    }
-    
-    public String getOldFieldValue() {
-        return oldFieldValue;
-    }
-    
-    public void setOldFieldValue(String f) {
-        oldFieldValue = f;
-    }
-    
-    public String getNewFieldValue() {
-        return newFieldValue;
-    }
-    
-    public void setNewFieldValue(String v) {
-        newFieldValue = v;
-    }
-    
-    public AuthzSubject getSubject() {
-        return subject;
-    }
-    
-    protected void setSubject(AuthzSubject s) {
-        subject = s;
-    }
-    
-    public String getMessage() {
-        return message;
-    }
-    
-    protected void setMessage(String m) {
-        message = m;
-    }
-    
-    public Audit getParent() {
-        return parent;
-    }
-    
-    protected void setParent(Audit p) {
-        parent = p;
-    }
-    
-    protected Collection<Audit> getChildrenBag() {
-        return children;
-    }
-    
-    protected void setChildrenBag(Collection<Audit> c) {
-        children = c;
-    }
-    
-    public Collection<Audit> getChildren() {
-        return Collections.unmodifiableCollection(children);
-    }
-    
+
     void addChild(Audit a) {
         children.add(a);
         a.setParent(this);
     }
-    
-    void removeChild(Audit a) {
-        children.remove(a);
-        a.setParent(null);
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Audit other = (Audit) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        if (importance != other.importance)
+            return false;
+        if (message == null) {
+            if (other.message != null)
+                return false;
+        } else if (!message.equals(other.message))
+            return false;
+        if (purpose != other.purpose)
+            return false;
+        if (startTime != other.startTime)
+            return false;
+        return true;
     }
-    
+
+    protected String formatHtmlMessage() {
+        return getMessage();
+    }
+
+    public Collection<Audit> getChildren() {
+        return Collections.unmodifiableCollection(children);
+    }
+
+    protected Collection<Audit> getChildrenBag() {
+        return children;
+    }
+
+    public long getEndTime() {
+        return endTime;
+    }
+
+    public String getFieldName() {
+        return fieldName;
+    }
+
     public String getHtmlMessage() {
         if (!isOriginal()) {
             return getMessage();
@@ -279,59 +192,156 @@ public abstract class Audit implements Serializable
             return formatHtmlMessage();
         }
     }
-    
-    protected String formatHtmlMessage() {
-        return getMessage();
-    }
-    
-    public String toString() {
-        return "Audit[user=" + subject.getName() + ",purpose=" + purpose +
-               ",time=" + startTime +
-               ",resource=" + (resource != null ? resource.getName() : "N/A")+
-               ",msg=" + message + "]";
-    }
-    
-    public boolean equals(Object obj) {
-        if(obj == null) {
-            return false;
-        }
-        if (!(obj.getClass().equals(getClass())) || !super.equals(obj)) {
-            return false;
-        }
-        
-        Audit o = (Audit)obj;
-        return o.getImportance().equals(getImportance()) &&
-               o.getPurpose().equals(getPurpose()) &&
-               o.getMessage().equals(getMessage()) &&
-               o.getStartTime() == getStartTime();
-    }
-
-    public int hashCode() {
-        int result = super.hashCode();
-
-        result = 37 * result + getImportance().hashCode();
-        result = 37 * result + getPurpose().hashCode();
-        result = 37 * result + getMessage().hashCode();
-        result = 37 * result + System.identityHashCode(new Long(getStartTime()));
-
-        return result;
-    }
 
     public Integer getId() {
         return id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public AuditImportance getImportance() {
+        return AuditImportance.findByCode(importance);
+    }
+
+    protected int getImportanceEnum() {
+        return importance;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public AuditNature getNature() {
+        return AuditNature.findByCode(nature);
+    }
+
+    protected int getNatureEnum() {
+        return nature;
+    }
+
+    public String getNewFieldValue() {
+        return newFieldValue;
+    }
+
+    public String getOldFieldValue() {
+        return oldFieldValue;
+    }
+
+    public Audit getParent() {
+        return parent;
+    }
+
+    public AuditPurpose getPurpose() {
+        return AuditPurpose.findByCode(purpose);
+    }
+
+    protected int getPurposeEnum() {
+        return purpose;
+    }
+
+    public Resource getResource() {
+        return resource;
+    }
+
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public AuthzSubject getSubject() {
+        return subject;
     }
 
     public Long getVersion() {
         return version;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        result = prime * result + importance;
+        result = prime * result + ((message == null) ? 0 : message.hashCode());
+        result = prime * result + purpose;
+        result = prime * result + (int) (startTime ^ (startTime >>> 32));
+        return result;
+    }
+
+    public boolean isOriginal() {
+        return original;
+    }
+
+    void removeChild(Audit a) {
+        children.remove(a);
+        a.setParent(null);
+    }
+
+    protected void setChildrenBag(Collection<Audit> c) {
+        children = c;
+    }
+
+    public void setEndTime(long t) {
+        endTime = t;
+    }
+
+    public void setFieldName(String f) {
+        fieldName = f;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    protected void setImportanceEnum(int p) {
+        importance = p;
+    }
+
+    protected void setMessage(String m) {
+        message = m;
+    }
+
+    protected void setNatureEnum(int e) {
+        nature = e;
+    }
+
+    public void setNewFieldValue(String v) {
+        newFieldValue = v;
+    }
+
+    public void setOldFieldValue(String f) {
+        oldFieldValue = f;
+    }
+
+    protected void setOriginal(boolean o) {
+        original = o;
+    }
+
+    protected void setParent(Audit p) {
+        parent = p;
+    }
+
+    protected void setPurposeEnum(int p) {
+        purpose = p;
+    }
+
+    protected void setResource(Resource r) {
+        resource = r;
+    }
+
+    public void setStartTime(long t) {
+        startTime = t;
+    }
+
+    protected void setSubject(AuthzSubject s) {
+        subject = s;
+    }
+
     public void setVersion(Long version) {
         this.version = version;
     }
-    
-    
+
+    public String toString() {
+        return "Audit[user=" + subject.getName() + ",purpose=" + purpose + ",time=" + startTime +
+               ",resource=" + (resource != null ? resource.getName() : "N/A") + ",msg=" + message +
+               "]";
+    }
+
 }

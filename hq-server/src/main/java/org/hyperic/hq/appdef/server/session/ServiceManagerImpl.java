@@ -41,6 +41,7 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hq.agent.mgmt.data.AgentRepository;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
@@ -66,9 +67,8 @@ import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
-import org.hyperic.hq.paging.PageInfo;
+import org.hyperic.hq.plugin.mgmt.data.PluginRepository;
 import org.hyperic.hq.product.ServiceTypeInfo;
-import org.hyperic.hq.product.server.session.PluginDAO;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -76,6 +76,9 @@ import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -94,29 +97,31 @@ public class ServiceManagerImpl implements ServiceManager {
     private PermissionManager permissionManager;
     private ResourceManager resourceManager;
     private AuthzSubjectManager authzSubjectManager;
-    private PluginDAO pluginDAO;
+    private PluginRepository pluginRepository;
     private ServiceFactory serviceFactory;
     private ResourceGroupManager resourceGroupManager;
     private ZeventEnqueuer zeventEnqueuer;
     private ResourceDao resourceDao;
     private ResourceTypeDao resourceTypeDao;
+    private AgentRepository agentRepository;
 
     @Autowired
     public ServiceManagerImpl(PermissionManager permissionManager,
                               ResourceManager resourceManager,
-                              AuthzSubjectManager authzSubjectManager, PluginDAO pluginDAO,
+                              AuthzSubjectManager authzSubjectManager, PluginRepository pluginRepository,
                               ServiceFactory serviceFactory,
                               ResourceGroupManager resourceGroupManager, ZeventEnqueuer zeventEnqueuer,
-                              ResourceDao resourceDao, ResourceTypeDao resourceTypeDao) {
+                              ResourceDao resourceDao, ResourceTypeDao resourceTypeDao, AgentRepository agentRepository) {
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
         this.authzSubjectManager = authzSubjectManager;
-        this.pluginDAO = pluginDAO;
+        this.pluginRepository = pluginRepository;
         this.serviceFactory = serviceFactory;
         this.resourceGroupManager = resourceGroupManager;
         this.zeventEnqueuer = zeventEnqueuer;
         this.resourceDao = resourceDao;
         this.resourceTypeDao = resourceTypeDao;
+        this.agentRepository = agentRepository;
     }
     
     private Resource create(AuthzSubject subject,ResourceType type, Resource parent, String name, String desc,
@@ -138,8 +143,8 @@ public class ServiceManagerImpl implements ServiceManager {
         s.setProperty(ServiceFactory.MODIFIED_TIME,System.currentTimeMillis());
         s.setProperty(AppdefResource.SORT_NAME, name.toUpperCase());
         s.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVICE);
-        s.setOwner(subject);
-        s.setAgent(parent.getAgent());
+        subject.addOwnedResource(s);
+        agentRepository.findManagingAgent(parent).addManagedResource(s);
         parent.relateTo(s, RelationshipTypes.SERVICE);
         parent.relateTo(s, RelationshipTypes.CONTAINS);
         return s;
@@ -304,7 +309,8 @@ public class ServiceManagerImpl implements ServiceManager {
     
     @Transactional(readOnly=true)
     public PageList<Resource> getAllServiceResources(AuthzSubject subject, PageControl pc) {
-        PageInfo pageInfo = new PageInfo(pc.getPagenum(),pc.getPagesize(),pc.getSortorder(),"name",String.class);
+        PageRequest pageInfo = new PageRequest(pc.getPagenum(),pc.getPagesize(),
+            new Sort(pc.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
         return resourceDao.findByIndexedProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVICE,pageInfo);
     }
     
@@ -828,7 +834,7 @@ public class ServiceManagerImpl implements ServiceManager {
             Collection<ResourceType> serviceTypes = getAllServiceResourceTypes();
             Set<ResourceType> curServices = new HashSet<ResourceType>();
             for(ResourceType curResourceType: serviceTypes) {
-                if(curResourceType.getPlugin().getName().equals(plugin)) {
+                if(pluginRepository.findByResourceType(curResourceType).getName().equals(plugin)) {
                     curServices.add(curResourceType);
                 }
             }
@@ -940,7 +946,7 @@ public class ServiceManagerImpl implements ServiceManager {
     private ResourceType createServiceType(ServiceTypeInfo sinfo, String plugin) throws NotFoundException {
         ResourceType serviceType = new ResourceType(sinfo.getName());
         resourceTypeDao.persist(serviceType);
-        serviceType.setPlugin(pluginDAO.findByName(plugin));
+        pluginRepository.findByName(plugin).addResourceType(serviceType);
         serviceType.setDescription(sinfo.getDescription());
         serviceType.addPropertyType(createServicePropertyType(ServiceFactory.AUTO_INVENTORY_IDENTIFIER,String.class));
         serviceType.addPropertyType(createServicePropertyType(ServiceFactory.CREATION_TIME,Long.class));

@@ -26,7 +26,6 @@
 package org.hyperic.hq.events.shared;
 
 import java.util.List;
-import java.util.Map;
 
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -36,7 +35,6 @@ import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -87,29 +85,10 @@ public interface AlertManager {
     public Alert findLastUnfixedByDefinition(AuthzSubject subj, Integer id);
     
     /**
-     * Find all last unfixed alerts
-     *
-     * 
-     */
-    public Map<Integer,Alert> findAllLastUnfixed();
-    
-    /**
-     * Find the last alerts for the given resource
-     *
-     * 
-     */
-    public Map<Integer,Alert> findLastByResource(AuthzSubject subj, 
-                                  Resource r,
-                                  boolean includeDescendants,
-                                  boolean fixed);
-
-    /**
      * Find the last alert by definition ID
      * @throws PermissionException
      */
     public Alert findLastFixedByDefinition(AlertDefinition def);
-    
-    Alert findLastByDefinition(Integer id);
 
     /**
      * Get the # of alerts within HQ inventory

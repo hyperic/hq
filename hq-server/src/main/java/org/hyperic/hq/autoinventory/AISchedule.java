@@ -51,38 +51,24 @@ import org.hyperic.hq.scheduler.ScheduleValue;
 @Table(name="EAM_AUTOINV_SCHEDULE")
 public class AISchedule implements Serializable
 {
-    @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
-    @Column(name = "ID")
-    private Integer id;
+    @Basic(fetch=FetchType.LAZY)
+    @Lob
+    @Column(name="CONFIG")
+    private byte[] config;
 
-    @Column(name="VERSION_COL",nullable=false)
-    @Version
-    private Long version;
+    @Column(name="ENTITY_ID",nullable=false)
+    @Index(name="AI_SCHEDULE_ENTITY_IDX")
+    private Integer entityId;
     
     @Column(name="ENTITY_TYPE",nullable=false)
     @Index(name="AI_SCHEDULE_ENTITY_IDX")
     private Integer entityType;
     
-    @Column(name="ENTITY_ID",nullable=false)
-    @Index(name="AI_SCHEDULE_ENTITY_IDX")
-    private Integer entityId;
-    
-    @Column(name="SUBJECT",nullable=false,length=32)
-    private String subject;
-    
-    @Basic(fetch=FetchType.LAZY)
-    @Lob
-    @Column(name="SCHEDULEVALUEBYTES",columnDefinition="BLOB")
-    private byte[] scheduleValueBytes;
-    
-    @Column(name="NEXTFIRETIME",nullable=false)
-    @Index(name="AI_SCHEDULE_NEXTFIRETIME_IDX")
-    private long nextFireTime;
-    
-    @Column(name="TRIGGERNAME",nullable=false,length=128,unique=true)
-    private String triggerName;
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
     
     @Column(name="JOBNAME",nullable=false,length=128,unique=true)
     private String jobName;
@@ -90,16 +76,30 @@ public class AISchedule implements Serializable
     @Column(name="JOB_ORDER_DATA",length=500)
     private String jobOrderData;
     
-    @Column(name="SCANNAME",length=100,unique=true)
-    private String scanName;
+    @Column(name="NEXTFIRETIME",nullable=false)
+    @Index(name="AI_SCHEDULE_NEXTFIRETIME_IDX")
+    private long nextFireTime;
     
     @Column(name="SCANDESC",length=200)
     private String scanDesc;
     
+    @Column(name="SCANNAME",length=100,unique=true)
+    private String scanName;
+    
     @Basic(fetch=FetchType.LAZY)
     @Lob
-    @Column(name="CONFIG",columnDefinition="BLOB")
-    private byte[] config;
+    @Column(name="SCHEDULEVALUEBYTES")
+    private byte[] scheduleValueBytes;
+    
+    @Column(name="SUBJECT",nullable=false,length=32)
+    private String subject;
+    
+    @Column(name="TRIGGERNAME",nullable=false,length=128,unique=true)
+    private String triggerName;
+    
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
 
     /**
      * default constructor
@@ -110,139 +110,22 @@ public class AISchedule implements Serializable
     }
     
    
-    public Integer getId() {
-        return id;
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof AISchedule)) {
+            return false;
+        }
+        Integer objId = ((AISchedule)obj).getId();
+  
+        return getId() == objId ||
+        (getId() != null && 
+         objId != null && 
+         getId().equals(objId));     
     }
 
 
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-
-
-    public Long getVersion() {
-        return version;
-    }
-
-
-
-    public void setVersion(Long version) {
-        this.version = version;
-    }
-
-
-
-    public Integer getEntityType()
-    {
-        return this.entityType;
-    }
-
-    public void setEntityType(Integer entityType)
-    {
-        this.entityType = entityType;
-    }
-
-    public Integer getEntityId()
-    {
-        return this.entityId;
-    }
-
-    public void setEntityId(Integer entityId)
-    {
-        this.entityId = entityId;
-    }
-
-    public String getSubject()
-    {
-        return this.subject;
-    }
-
-    public void setSubject(String subject)
-    {
-        this.subject = subject;
-    }
-
-    public byte[] getScheduleValueBytes()
-    {
-        return this.scheduleValueBytes;
-    }
-
-    public void setScheduleValueBytes(byte[] scheduleValueBytes)
-    {
-        this.scheduleValueBytes = scheduleValueBytes;
-    }
-
-    public long getNextFireTime()
-    {
-        return this.nextFireTime;
-    }
-
-    public void setNextFireTime(long nextFireTime)
-    {
-        this.nextFireTime = nextFireTime;
-    }
-
-    public String getTriggerName()
-    {
-        return this.triggerName;
-    }
-
-    public void setTriggerName(String triggerName)
-    {
-        this.triggerName = triggerName;
-    }
-
-    public String getJobName()
-    {
-        return this.jobName;
-    }
-
-    public void setJobName(String jobName)
-    {
-        this.jobName = jobName;
-    }
-
-    public String getJobOrderData()
-    {
-        return this.jobOrderData;
-    }
-
-    public void setJobOrderData(String jobOrderData)
-    {
-        this.jobOrderData = jobOrderData;
-    }
-
-    public String getScanName()
-    {
-        return this.scanName;
-    }
-
-    public void setScanName(String scanName)
-    {
-        this.scanName = scanName;
-    }
-
-    public String getScanDesc()
-    {
-        return this.scanDesc;
-    }
-
-    public void setScanDesc(String scanDesc)
-    {
-        this.scanDesc = scanDesc;
-    }
-
-    public byte[] getConfig()
-    {
-        return this.config;
-    }
-
-    public void setConfig(byte[] config)
-    {
-        this.config = config;
-    }
 
     /**
      * legacy DTO pattern
@@ -280,6 +163,93 @@ public class AISchedule implements Serializable
         return aIScheduleValue;
     }
 
+
+
+    public byte[] getConfig()
+    {
+        return this.config;
+    }
+
+
+
+    public Integer getEntityId()
+    {
+        return this.entityId;
+    }
+
+
+
+    public Integer getEntityType()
+    {
+        return this.entityType;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public String getJobName()
+    {
+        return this.jobName;
+    }
+
+    public String getJobOrderData()
+    {
+        return this.jobOrderData;
+    }
+
+    public long getNextFireTime()
+    {
+        return this.nextFireTime;
+    }
+
+    public String getScanDesc()
+    {
+        return this.scanDesc;
+    }
+
+    public String getScanName()
+    {
+        return this.scanName;
+    }
+
+    public ScheduleValue getScheduleValue()
+    throws IOException, ClassNotFoundException
+    {
+        ByteArrayInputStream is =
+            new ByteArrayInputStream(getScheduleValueBytes());
+        ObjectInputStream o = new ObjectInputStream(is);
+
+        ScheduleValue schedule = (ScheduleValue)o.readObject();
+
+        return schedule;
+    }
+
+    public byte[] getScheduleValueBytes()
+    {
+        return this.scheduleValueBytes;
+    }
+
+    public String getSubject()
+    {
+        return this.subject;
+    }
+
+    public String getTriggerName()
+    {
+        return this.triggerName;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public int hashCode() {
+        int result = 17;
+        result = 37*result + (getId() != null ? getId().hashCode() : 0);
+        return result;      
+    }
+
     public void setAIScheduleValue(AIScheduleValue valueHolder)
     {
         try {
@@ -300,16 +270,48 @@ public class AISchedule implements Serializable
         }
     }
 
-    public ScheduleValue getScheduleValue()
-    throws IOException, ClassNotFoundException
+    public void setConfig(byte[] config)
     {
-        ByteArrayInputStream is =
-            new ByteArrayInputStream(getScheduleValueBytes());
-        ObjectInputStream o = new ObjectInputStream(is);
+        this.config = config;
+    }
 
-        ScheduleValue schedule = (ScheduleValue)o.readObject();
+    public void setEntityId(Integer entityId)
+    {
+        this.entityId = entityId;
+    }
 
-        return schedule;
+    public void setEntityType(Integer entityType)
+    {
+        this.entityType = entityType;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setJobName(String jobName)
+    {
+        this.jobName = jobName;
+    }
+
+    public void setJobOrderData(String jobOrderData)
+    {
+        this.jobOrderData = jobOrderData;
+    }
+
+    public void setNextFireTime(long nextFireTime)
+    {
+        this.nextFireTime = nextFireTime;
+    }
+
+    public void setScanDesc(String scanDesc)
+    {
+        this.scanDesc = scanDesc;
+    }
+
+    public void setScanName(String scanName)
+    {
+        this.scanName = scanName;
     }
 
     public void setScheduleValue(ScheduleValue schedule) throws IOException
@@ -322,25 +324,22 @@ public class AISchedule implements Serializable
 
         setScheduleValueBytes(os.toByteArray());
     }
-    
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || !(obj instanceof AISchedule)) {
-            return false;
-        }
-        Integer objId = ((AISchedule)obj).getId();
-  
-        return getId() == objId ||
-        (getId() != null && 
-         objId != null && 
-         getId().equals(objId));     
+
+    public void setScheduleValueBytes(byte[] scheduleValueBytes)
+    {
+        this.scheduleValueBytes = scheduleValueBytes;
     }
 
-    public int hashCode() {
-        int result = 17;
-        result = 37*result + (getId() != null ? getId().hashCode() : 0);
-        return result;      
+    public void setSubject(String subject)
+    {
+        this.subject = subject;
+    }
+    
+    public void setTriggerName(String triggerName) {
+        this.triggerName = triggerName;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }

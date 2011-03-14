@@ -39,29 +39,36 @@ import org.hyperic.hq.ui.server.session.DashboardConfig;
 @DiscriminatorValue("USER")
 public class UserDashboardConfig
     extends DashboardConfig {
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="USER_ID",unique=true)
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "USER_ID", unique = true)
     private AuthzSubject user;
 
     protected UserDashboardConfig() {
     }
 
-    UserDashboardConfig(AuthzSubject user, String name, Crispo config) {
+    public UserDashboardConfig(AuthzSubject user, String name, Crispo config) {
         super(name, config);
         this.user = user;
     }
 
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+
+        if (o == null || o instanceof UserDashboardConfig == false)
+            return false;
+
+        UserDashboardConfig oe = (UserDashboardConfig) o;
+
+        if (!super.equals(oe))
+            return false;
+
+        return user.equals(oe.getUser());
+    }
+
     public AuthzSubject getUser() {
         return user;
-    }
-    
-    protected void setUser(AuthzSubject user) {
-        this.user = user;
-    }
-    
-    public boolean isEditable(AuthzSubject by) {
-        return getUser().equals(by);
     }
 
     public int hashCode() {
@@ -70,19 +77,12 @@ public class UserDashboardConfig
         hash = hash * 37 + user.hashCode();
         return hash;
     }
-    
-    public boolean equals(Object o) {
-        if (o == this)
-            return true;
-        
-        if (o == null || o instanceof UserDashboardConfig == false)
-            return false;
-        
-        UserDashboardConfig oe = (UserDashboardConfig)o;
 
-        if (!super.equals(oe))
-            return false;
+    public boolean isEditable(AuthzSubject by) {
+        return getUser().equals(by);
+    }
 
-        return user.equals(oe.getUser());
+    protected void setUser(AuthzSubject user) {
+        this.user = user;
     }
 }

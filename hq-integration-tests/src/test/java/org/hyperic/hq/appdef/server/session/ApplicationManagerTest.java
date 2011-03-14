@@ -38,7 +38,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.hyperic.hq.agent.domain.Agent;
+import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
@@ -84,7 +84,7 @@ public class ApplicationManagerTest
 
         // Update, add a service
         ServiceType serviceType2 = createServiceType("WebAppService", holder.serverType);
-        Service service2 = createService(holder.server.getId(), serviceType2, "Service2", "desc",
+        Service service2 = createService(holder.server.getId(), serviceType2, "AnotherService2", "desc",
             "location");
         ApplicationValue appVal = managerApplication.getApplicationValue();
         AppService appService = new AppService();

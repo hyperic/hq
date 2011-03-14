@@ -34,16 +34,16 @@ import javax.persistence.Table;
 import javax.persistence.Version;
 
 @Entity
-@Table(name="EAM_METRIC_PROB")
+@Table(name = "EAM_METRIC_PROB")
 public class MetricProblem implements Serializable {
 
-    @EmbeddedId 
+    @EmbeddedId
     private MeasurementDataId id;
-    
-    @Column(name="TYPE",nullable=false)
+
+    @Column(name = "TYPE", nullable = false)
     private Integer type;
-    
-    @Column(name="VERSION_COL",nullable=false)
+
+    @Column(name = "VERSION_COL", nullable = false)
     @Version
     private Long version;
 
@@ -55,51 +55,52 @@ public class MetricProblem implements Serializable {
         this.type = type;
     }
 
-    public MetricProblem(MeasurementDataId id, Integer type,
-                         Integer additional) {
+    public MetricProblem(MeasurementDataId id, Integer type, Integer additional) {
         this.id = id;
         this.type = type;
     }
-   
+
+    public boolean equals(Object other) {
+        if ((this == other))
+            return true;
+        if ((other == null))
+            return false;
+        if (!(other instanceof MetricProblem))
+            return false;
+        MetricProblem castOther = (MetricProblem) other;
+
+        return ((getId() == castOther.getId()) || (getId() != null && castOther.getId() != null && getId()
+            .equals(castOther.getId())));
+    }
+
     public MeasurementDataId getId() {
         return id;
     }
-    
-    protected void setId(MeasurementDataId id) {
-        this.id = id;
+
+    public Integer getType() {
+        return type;
     }
 
     public long getVersion() {
         return version;
     }
 
-    protected void setVersion(long newVer) {
-        version = newVer;
+    public int hashCode() {
+        int result = 17;
+
+        result = 37 * result + (getId() == null ? 0 : getId().hashCode());
+        return result;
     }
 
-    public Integer getType() {
-        return type;
+    public void setId(MeasurementDataId id) {
+        this.id = id;
     }
-    
-    protected void setType(Integer type) {
+
+    public void setType(Integer type) {
         this.type = type;
     }
 
-    public boolean equals(Object other) {
-        if ((this == other)) return true;
-        if ((other == null)) return false;
-        if (!(other instanceof MetricProblem)) return false;
-        MetricProblem castOther = (MetricProblem) other; 
-        
-        return ((getId() == castOther.getId()) || 
-                (getId() != null && castOther.getId() != null &&
-                 getId().equals(castOther.getId())));
+    protected void setVersion(long newVer) {
+        version = newVer;
     }
-   
-    public int hashCode() {
-        int result = 17;
-        
-        result = 37 * result + (getId() == null ? 0 : getId().hashCode());
-        return result;
-    }   
 }

@@ -65,7 +65,8 @@ import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.pdk.domain.MetricInfo;
 import org.hyperic.hq.pdk.domain.PluginDefinition;
 import org.hyperic.hq.pdk.domain.PluginDefinition.Triple;
-import org.hyperic.hq.plugin.domain.Plugin;
+import org.hyperic.hq.plugin.mgmt.data.PluginRepository;
+import org.hyperic.hq.plugin.mgmt.domain.Plugin;
 import org.hyperic.hq.product.FlexibleProductPlugin;
 import org.hyperic.hq.product.MeasurementInfo;
 import org.hyperic.hq.product.PlatformTypeInfo;
@@ -101,7 +102,7 @@ public class ProductManagerImpl implements ProductManager {
     private PluginUpdater pluginUpdater = new PluginUpdater();
     private static final String ALERT_DEFINITIONS_XML_FILE = "etc/alert-definitions.xml";
     private AlertDefinitionManager alertDefinitionManager;
-    private PluginDAO pluginDao;
+    private PluginRepository pluginRepository;
     private PlatformManager platformManager;
     private ServerManager serverManager;
     private ServiceManager serviceManager;
@@ -111,14 +112,14 @@ public class ProductManagerImpl implements ProductManager {
     private ResourceTypeDao resourceTypeDao;
 	
     @Autowired
-    public ProductManagerImpl(PluginDAO pluginDao, AlertDefinitionManager alertDefinitionManager,
+    public ProductManagerImpl(PluginRepository pluginRepository, AlertDefinitionManager alertDefinitionManager,
                               TemplateManager templateManager,
                               AuditManager auditManager, ServerManager serverManager,
                               ServiceManager serviceManager, PlatformManager platformManager,
                               AlertDefinitionXmlParser alertDefinitionXmlParser,
                               PluginAuditFactory pluginAuditFactory,
                               ResourceManager resourceManager, ResourceTypeDao resourceTypeDao) {        
-        this.pluginDao = pluginDao;
+        this.pluginRepository = pluginRepository;
         this.alertDefinitionManager = alertDefinitionManager;
         this.templateManager = templateManager;
         this.auditManager = auditManager;
@@ -222,14 +223,15 @@ public class ProductManagerImpl implements ProductManager {
         return resource.getType().getConfigType(type);
     }
     
-    private void updatePlugin(PluginDAO plHome, PluginInfo pInfo) {
-        Plugin plugin = plHome.findByName(pInfo.name);
+    private void updatePlugin(PluginInfo pInfo) {
+        Plugin plugin = pluginRepository.findByName(pInfo.name);
         if (plugin == null) {
-            plHome.create(pInfo.name, pInfo.jar, pInfo.md5);
+            plugin = new Plugin(pInfo.name,pInfo.jar,pInfo.md5);
         } else {
             plugin.setPath(pInfo.jar);
             plugin.setMD5(pInfo.md5);
         }
+        pluginRepository.save(plugin);
     }
 
     // e.g. in ~/.hq/plugin.properties
@@ -268,7 +270,7 @@ public class ProductManagerImpl implements ProductManager {
         long start = System.currentTimeMillis();
 
         pInfo = getProductPluginManager().getPluginInfo(pluginName);
-        Plugin plugin = pluginDao.findByName(pluginName);
+        Plugin plugin = pluginRepository.findByName(pluginName);
        
 
         if (plugin != null && pInfo.name.equals(plugin.getName()) &&
@@ -291,7 +293,7 @@ public class ProductManagerImpl implements ProductManager {
         if (entities == null) {
         	log.info(pluginName + " does not define any resource types");
         	
-        	updatePlugin(pluginDao, pInfo);
+        	updatePlugin(pInfo);
 
         	if (created) {
                 pluginAuditFactory.deployAudit(pluginName, start, System.currentTimeMillis());
@@ -343,11 +345,11 @@ public class ProductManagerImpl implements ProductManager {
     		ResourceType entity = resourceTypeDao.findByName(resourceType.getName());
     		
     		if (entity == null) {
-    			Plugin plugin = pluginDao.findByName(resourceType.getPluginName());
+    			Plugin plugin = pluginRepository.findByName(resourceType.getPluginName());
     			
     			entity = new ResourceType(resourceType.getName(),resourceType.getDescription());
     			resourceTypeDao.persist(entity);
-    			entity.setPlugin(plugin);
+    			plugin.addResourceType(entity);
     			for (org.hyperic.hq.pdk.domain.OperationType ot : resourceType.getOperationTypes()) {
     	            OperationType opType = new OperationType(ot.getName());
     	            entity.addOperationType(opType);
@@ -405,7 +407,7 @@ public class ProductManagerImpl implements ProductManager {
         ProductPlugin pplugin = (ProductPlugin) ppm.getPlugin(pluginName);
         PluginInfo pInfo = getProductPluginManager().getPluginInfo(pluginName);
         
-        updatePlugin(pluginDao, pInfo);
+        updatePlugin(pInfo);
 
         // Get the measurement templates
         // Keep a list of templates to add
@@ -509,7 +511,7 @@ public class ProductManagerImpl implements ProductManager {
         	}
         }
 	    
-        pluginDao.getEntityManager().flush();
+        pluginRepository.flush();
 
 	    // For performance reasons, we add all the new measurements at once.
 	    if (debug) watch.markTimeBegin("createTemplates");

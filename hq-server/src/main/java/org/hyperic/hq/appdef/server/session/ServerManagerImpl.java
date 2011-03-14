@@ -41,6 +41,7 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hq.agent.mgmt.data.AgentRepository;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -73,15 +74,17 @@ import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
-import org.hyperic.hq.paging.PageInfo;
+import org.hyperic.hq.plugin.mgmt.data.PluginRepository;
 import org.hyperic.hq.product.ServerTypeInfo;
-import org.hyperic.hq.product.server.session.PluginDAO;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.ArrayUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -97,8 +100,8 @@ public class ServerManagerImpl implements ServerManager {
     private static final String VALUE_PROCESSOR = "org.hyperic.hq.appdef.server.session.PagerProcessor_server";
     private Pager valuePager;
     private Pager defaultPager;
-    private PluginDAO pluginDAO;
-
+    private PluginRepository pluginRepository;
+    private AgentRepository agentRepository;
     private PermissionManager permissionManager;
     private ResourceManager resourceManager;
     private AuditManager auditManager;
@@ -117,9 +120,9 @@ public class ServerManagerImpl implements ServerManager {
                               AuditManager auditManager,
                              AuthzSubjectManager authzSubjectManager, ResourceGroupManager resourceGroupManager,
                              ZeventEnqueuer zeventManager, ResourceAuditFactory resourceAuditFactory,
-                             PluginDAO pluginDAO, ServerFactory serverFactory,
+                             PluginRepository pluginRepository, ServerFactory serverFactory,
                              ServiceManager serviceManager, ServiceFactory serviceFactory, ResourceDao resourceDao,
-                             ResourceTypeDao resourceTypeDao) {
+                             ResourceTypeDao resourceTypeDao, AgentRepository agentRepository) {
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
         this.auditManager = auditManager;
@@ -127,12 +130,13 @@ public class ServerManagerImpl implements ServerManager {
         this.resourceGroupManager = resourceGroupManager;
         this.zeventManager = zeventManager;
         this.resourceAuditFactory = resourceAuditFactory;
-        this.pluginDAO = pluginDAO;
+        this.pluginRepository = pluginRepository;
         this.serverFactory = serverFactory;
         this.serviceManager = serviceManager;
         this.serviceFactory = serviceFactory;
         this.resourceDao =resourceDao;
         this.resourceTypeDao = resourceTypeDao;
+        this.agentRepository = agentRepository;
     }
     
     private Server toServer(Resource resource) {
@@ -246,9 +250,8 @@ public class ServerManagerImpl implements ServerManager {
         s.setProperty(ServerFactory.CREATION_TIME, System.currentTimeMillis());
         s.setProperty(ServerFactory.MODIFIED_TIME,System.currentTimeMillis());
         s.setProperty(AppdefResource.SORT_NAME, sv.getName().toUpperCase());
-        
-        s.setOwner(owner);
-        s.setAgent(p.getAgent());
+        owner.addOwnedResource(s);
+        agentRepository.findManagingAgent(p).addManagedResource(s);
         return s;
    }
     
@@ -394,7 +397,8 @@ public class ServerManagerImpl implements ServerManager {
     
     @Transactional(readOnly=true)
     public PageList<Resource> getAllServerResources(AuthzSubject subject, PageControl pc) {
-        PageInfo pageInfo = new PageInfo(pc.getPagenum(),pc.getPagesize(),pc.getSortorder(),"name",String.class);
+        PageRequest pageInfo = new PageRequest(pc.getPagenum(),pc.getPagesize(),
+            new Sort(pc.getSortorder() == PageControl.SORT_ASC? Direction.ASC : Direction.DESC,"name"));
         return resourceDao.findByIndexedProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVER,pageInfo);
     }
     
@@ -982,7 +986,7 @@ public class ServerManagerImpl implements ServerManager {
         Collection<ResourceType> serverTypes = getAllServerResourceTypes();
         Set<ResourceType> curServers = new HashSet<ResourceType>();
         for(ResourceType curResourceType: serverTypes) {
-            if(curResourceType.getPlugin().getName().equals(plugin)) {
+            if(pluginRepository.findByResourceType(curResourceType).getName().equals(plugin)) {
                 curServers.add(curResourceType);
             }
         }
@@ -1066,7 +1070,7 @@ public class ServerManagerImpl implements ServerManager {
     private ResourceType createServerResourceType(ServerTypeInfo sinfo, String plugin)  {
         ResourceType stype = new ResourceType(sinfo.getName());
         resourceTypeDao.persist(stype);
-        stype.setPlugin(pluginDAO.findByName(plugin));
+        pluginRepository.findByName(plugin).addResourceType(stype);
         stype.setDescription(sinfo.getDescription());
        
         stype.addPropertyType(createServerPropertyType(ServerFactory.WAS_AUTODISCOVERED,Boolean.class));

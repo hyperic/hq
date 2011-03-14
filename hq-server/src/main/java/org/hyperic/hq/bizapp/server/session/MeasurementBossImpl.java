@@ -1359,7 +1359,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         List<Measurement> mms = measurementManager.findMeasurements(subject, tid, aeids);
         for (Measurement mm : mms) {
 
-            Integer instanceId = mm.getInstanceId();
+            Integer instanceId = mm.getResource().getId();
             AppdefResourceValue resource = (AppdefResourceValue) resourceMap.get(instanceId
                 .intValue());
 

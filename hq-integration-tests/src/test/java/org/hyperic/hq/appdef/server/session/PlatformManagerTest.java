@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.hibernate.NonUniqueObjectException;
-import org.hyperic.hq.agent.domain.Agent;
+import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;

@@ -39,7 +39,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.agent.domain.Agent;
+import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
@@ -82,13 +82,13 @@ import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.autoinventory.ServerSignature;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClientFactory;
+import org.hyperic.hq.autoinventory.data.AIHistoryRepository;
+import org.hyperic.hq.autoinventory.data.AIPlatformRepository;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManager;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.dao.AIHistoryDAO;
-import org.hyperic.hq.dao.AIPlatformDAO;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.product.AutoinventoryPluginManager;
@@ -116,9 +116,8 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
     private AutoinventoryPluginManager aiPluginManager;
     private AIScheduleManager aiScheduleManager;
 
-    
-    private AIHistoryDAO aiHistoryDao;
-    private AIPlatformDAO aiPlatformDao;
+    private AIHistoryRepository aiHistoryRepository;
+    private AIPlatformRepository aiPlatformRepository;
 
     private ProductManager productManager;
     private ServerManager serverManager;
@@ -129,14 +128,14 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
     private AIQueueManager aiQueueManager;
     private PermissionManager permissionManager;
     private AICommandsClientFactory aiCommandsClientFactory;
-    private ServiceMerger serviceMerger;
     private RuntimePlatformAndServerMerger runtimePlatformAndServerMerger;
     private PlatformManager platformManager;
     private MeasurementProcessor measurementProcessor;
     private AgentManager agentManager;
 
     @Autowired
-    public AutoinventoryManagerImpl(AIHistoryDAO aiHistoryDao, AIPlatformDAO aiPlatformDao,
+    public AutoinventoryManagerImpl(AIHistoryRepository aiHistoryRepository,
+                                    AIPlatformRepository aiPlatformRepository,
                                     ProductManager productManager, ServerManager serverManager,
                                     AIScheduleManager aiScheduleManager,
                                     ResourceManager resourceManager, ConfigManager configManager,
@@ -144,11 +143,12 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
                                     AIQueueManager aiQueueManager,
                                     PermissionManager permissionManager,
                                     AICommandsClientFactory aiCommandsClientFactory,
-                                    ServiceMerger serviceMerger,
-                                    RuntimePlatformAndServerMerger runtimePlatformAndServerMerger, PlatformManager platformManager, 
-                                    MeasurementProcessor measurementProcessor, AgentManager agentManager) {
-        this.aiHistoryDao = aiHistoryDao;
-        this.aiPlatformDao = aiPlatformDao;
+                                    RuntimePlatformAndServerMerger runtimePlatformAndServerMerger,
+                                    PlatformManager platformManager,
+                                    MeasurementProcessor measurementProcessor,
+                                    AgentManager agentManager) {
+        this.aiHistoryRepository = aiHistoryRepository;
+        this.aiPlatformRepository = aiPlatformRepository;
         this.productManager = productManager;
         this.serverManager = serverManager;
         this.aiScheduleManager = aiScheduleManager;
@@ -158,7 +158,6 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
         this.aiQueueManager = aiQueueManager;
         this.permissionManager = permissionManager;
         this.aiCommandsClientFactory = aiCommandsClientFactory;
-        this.serviceMerger = serviceMerger;
         this.runtimePlatformAndServerMerger = runtimePlatformAndServerMerger;
         this.platformManager = platformManager;
         this.measurementProcessor = measurementProcessor;
@@ -440,7 +439,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
 
         // Is there an already-approved platform with this agent token? If so,
         // re-call using the other startScan method
-        AIPlatform aipLocal = aiPlatformDao.findByAgentToken(agentToken);
+        AIPlatform aipLocal = aiPlatformRepository.findByAgentToken(agentToken);
         if (aipLocal == null) {
             throw new AutoinventoryException("No platform in auto-discovery " +
                                              "queue with agentToken=" + agentToken);
@@ -527,9 +526,38 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
                                      long startTime, long stopTime, long scheduleTime,
                                      String status, String errorMessage)
         throws AutoinventoryException {
-        return aiHistoryDao.create(id, groupId, batchId, subjectName, config, scanName, scanDesc,
+        return create(id, groupId, batchId, subjectName, config, scanName, scanDesc,
             scheduled, startTime, stopTime, scheduleTime, status, null /* description */,
             errorMessage);
+    }
+
+    private AIHistory create(AppdefEntityID entityId, Integer groupId, Integer batchId, String subject,
+                     ScanConfigurationCore config, String scanName, String scanDesc,
+                     Boolean scheduled, long startTime, long endTime, long dateScheduled,
+                     String status, String description, String message)
+        throws AutoinventoryException {
+        AIHistory h = new AIHistory();
+
+        h.setGroupId(groupId);
+        h.setBatchId(batchId);
+        h.setEntityId(entityId.getId());
+        h.setEntityType(new Integer(entityId.getType()));
+        h.setSubject(subject);
+        h.setScheduled(scheduled);
+        h.setStartTime(startTime);
+        h.setEndTime(endTime);
+        h.setDateScheduled(dateScheduled);
+        h.setDuration(endTime - startTime);
+        h.setStatus(status);
+        h.setDescription(description);
+        if (message != null) {
+            h.setMessage(message);
+        }
+        h.setConfigObj(config);
+        h.setScanName(scanName);
+        h.setScanDesc(scanDesc);
+        aiHistoryRepository.save(h);
+        return h;
     }
 
     /**
@@ -537,20 +565,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
      */
     @Transactional
     public void removeHistory(AIHistory history) {
-        aiHistoryDao.remove(history);
-    }
-
-    /**
-     * update AIHistory
-     */
-    @Transactional
-    public void updateAIHistory(Integer jobId, long endTime, String status, String message) {
-        AIHistory local = aiHistoryDao.findById(jobId);
-
-        local.setEndTime(endTime);
-        local.setDuration(endTime - local.getStartTime());
-        local.setStatus(status);
-        local.setMessage(message);
+        aiHistoryRepository.delete(history);
     }
 
     /**
@@ -645,18 +660,17 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
         if (debug) {
             log.debug("AImgr.reportAIData: state.getPlatform()=" + aiPlatform);
         }
-        
+
         addAIServersToAIPlatform(stateCore, state, aiPlatform);
-        
-        aiPlatform = aiQueueManager.queue(subject, aiPlatform,
-            stateCore.getAreServersIncluded(),
+
+        aiPlatform = aiQueueManager.queue(subject, aiPlatform, stateCore.getAreServersIncluded(),
             false, true);
         approvePlatformDevice(subject, aiPlatform);
         checkAgentAssignment(subject, agentToken, aiPlatform);
     }
-       
-    private void addAIServersToAIPlatform(ScanStateCore stateCore, ScanState state,AIPlatformValue aiPlatform)
-        throws AutoinventoryException {
+
+    private void addAIServersToAIPlatform(ScanStateCore stateCore, ScanState state,
+                                          AIPlatformValue aiPlatform) throws AutoinventoryException {
 
         if (stateCore.getAreServersIncluded()) {
             // TODO: G
@@ -665,12 +679,14 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
             for (AIServerValue aiServer : serverSet) {
                 // Ensure the server reported has a valid appdef type
                 try {
-                    ServerType serverType = serverManager.findServerTypeByName(aiServer.getServerTypeName());
-                    if(serverType.isVirtual()) {
+                    ServerType serverType = serverManager.findServerTypeByName(aiServer
+                        .getServerTypeName());
+                    if (serverType.isVirtual()) {
                         aiServer.setVirtual(true);
                     }
                 } catch (NotFoundException e) {
-                    log.error("Ignoring non-existent server type: " + aiServer.getServerTypeName(),e);
+                    log.error("Ignoring non-existent server type: " + aiServer.getServerTypeName(),
+                        e);
                     continue;
                 }
 
@@ -679,23 +695,24 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
         }
 
     }
+
     private void approvePlatformDevice(AuthzSubject subject, AIPlatformValue aiPlatform) {
         if (aiPlatform.isPlatformDevice()) {
             log.info("Auto-approving inventory for " + aiPlatform.getFqdn());
-            
+
             List<Integer> ips = buildAIResourceIds(aiPlatform.getAIIpValues());
             List<Integer> servers = buildAIResourceIds(aiPlatform.getAIServerValues());
             List<Integer> platforms = Collections.singletonList(aiPlatform.getId());
 
             try {
-                aiQueueManager.processQueue(subject, platforms, servers,
-                    ips, AIQueueConstants.Q_DECISION_APPROVE);
+                aiQueueManager.processQueue(subject, platforms, servers, ips,
+                    AIQueueConstants.Q_DECISION_APPROVE);
             } catch (Exception e) {
                 throw new SystemException(e);
             }
         }
     }
-    
+
     private void checkAgentAssignment(AuthzSubject subj, String agentToken,
                                       AIPlatformValue aiPlatform) {
         try {
@@ -706,24 +723,22 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
                     Agent newAgent = agentManager.getAgent(agentToken);
                     String fqdn = platform.getFqdn();
                     Integer pid = platform.getId();
-                    log.info("reassigning platform agent (fqdn=" + fqdn +
-                              ",id=" + pid + ") from=" + agent +
-                              " to=" + newAgent);
+                    log.info("reassigning platform agent (fqdn=" + fqdn + ",id=" + pid + ") from=" +
+                             agent + " to=" + newAgent);
                     platform.setAgent(newAgent);
-                   
+
                     measurementProcessor.scheduleHierarchyAfterCommit(platform.getResource());
                 }
             }
         } catch (PermissionException e) {
             // using admin, this should not happen
-            log.error(e,e);
+            log.error(e, e);
         } catch (AgentNotFoundException e) {
             // this is a problem since the agent should already exist in our
             // inventory before it gets here.
-            log.error(e,e);
+            log.error(e, e);
         }
     }
-
 
     /**
      * Called by agents to report resources detected at runtime via
@@ -757,8 +772,6 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
         ApplicationException {
         runtimePlatformAndServerMerger.schedulePlatformAndServerMerges(agentToken, crrr);
     }
-
-   
 
     /**
      * Handle ResourceZEvents for enabling runtime autodiscovery.

@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.agent.client;
 
-import org.hyperic.hq.agent.domain.Agent;
+import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
 import org.hyperic.hq.transport.AgentProxyFactory;
 import org.springframework.beans.factory.annotation.Autowired;

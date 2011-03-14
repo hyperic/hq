@@ -34,6 +34,7 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.measurement.data.ScheduleRevNumRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -45,11 +46,11 @@ public class SRNCache {
 
     private Cache cache;
 
-    private ScheduleRevNumDAO scheduleRevNumDAO;
+    private ScheduleRevNumRepository scheduleRevNumRepository;
     
     @Autowired
-    public SRNCache(ScheduleRevNumDAO scheduleRevNumDAO) {
-        this.scheduleRevNumDAO = scheduleRevNumDAO;
+    public SRNCache(ScheduleRevNumRepository scheduleRevNumRepository) {
+        this.scheduleRevNumRepository = scheduleRevNumRepository;
 
     }
 
@@ -73,7 +74,7 @@ public class SRNCache {
     }
 
     public ScheduleRevNum get(AppdefEntityID aid) {
-        SrnId id = new SrnId(aid.getType(), aid.getID());
+        SrnId id = new SrnId(aid.getID());
         return get(id);
     }
 
@@ -88,7 +89,7 @@ public class SRNCache {
             return (ScheduleRevNum) el.getObjectValue();
         }
 
-        ScheduleRevNum srn = scheduleRevNumDAO.get(id);
+        ScheduleRevNum srn = scheduleRevNumRepository.findById(id);
         if (srn != null) {
             this.put(srn);
         }

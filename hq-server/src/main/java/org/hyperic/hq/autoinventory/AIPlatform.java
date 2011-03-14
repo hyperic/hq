@@ -57,100 +57,10 @@ import org.hyperic.hq.product.PlatformDetector;
 @Table(name="EAM_AIQ_PLATFORM")
 public class AIPlatform implements ContainerManagedTimestampTrackable, Serializable
 {
-    @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
-    @Column(name = "ID")
-    private Integer id;
-
-    @Column(name="VERSION_COL",nullable=false)
-    @Version
-    private Long version;
-    
-    @Column(name="NAME",nullable=false,length=255,unique=true)
-    private String name;
-    
-    @Column(name="DESCRIPTION",length=300)
-    private String description;
-    
-    @Column(name="OS",length=80)
-    private String platformTypeName;
-    
-    @Column(name="OSVERSION",length=80)
-    private String osversion;
-    
-    @Column(name="ARCH",length=80)
-    private String arch;
-    
-    @Column(name="FQDN",nullable=false,length=200,unique=true)
-    private String fqdn;
-    
     @Column(name="AGENTTOKEN",nullable=false,length=100)
     @Index(name="AIQ_PLATFORM_AGENTTOKEN_IDX")
     private String agentToken;
-    
-    @Column(name="CERTDN",length=200,unique=true)
-    private String certdn;
-    
-    @Column(name="QUEUESTATUS")
-    private Integer queueStatus;
-    
-    @Column(name="DIFF")
-    private long diff;
-    
-    @Column(name="IGNORED")
-    private boolean ignored;
-    
-    @Column(name="CTIME")
-    private Long creationTime;
-    
-    @Column(name="MTIME")
-    private Long modifiedTime;
-    
-    @Column(name="LASTAPPROVED")
-    private Long lastApproved;
-    
-    @Column(name="LOCATION",length=100)
-    private String location;
-    
-    @Column(name="CPU_SPEED")
-    private Integer cpuSpeed;
-    
-    @Column(name="CPU_COUNT")
-    private Integer cpuCount;
-    
-    @Column(name="RAM")
-    private Integer ram;
-    
-    @Column(name="GATEWAY",length=64)
-    private String gateway;
-    
-    @Column(name="DHCP_SERVER",length=64)
-    private String dhcpServer;
-    
-    @Column(name="DNS_SERVER",length=64)
-    private String dnsServer;
-    
-    @Basic(fetch=FetchType.LAZY)
-    @Lob
-    @Column(name="CUSTOM_PROPERTIES")
-    private byte[] customProperties;
-    
-    @Basic(fetch=FetchType.LAZY)
-    @Lob
-    @Column(name="PRODUCT_CONFIG",length=256)
-    private byte[] productConfig;
-    
-    @Basic(fetch=FetchType.LAZY)
-    @Lob
-    @Column(name="CONTROL_CONFIG",length=256)
-    private byte[] controlConfig;
-    
-    @Basic(fetch=FetchType.LAZY)
-    @Lob
-    @Column(name="MEASUREMENT_CONFIG",length=256)
-    private byte[] measurementConfig;
-    
+
     @OneToMany(fetch=FetchType.LAZY,mappedBy="aIPlatform",cascade=CascadeType.ALL)
     @OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<AIIp> aiips = new ArrayList<AIIp>();
@@ -158,6 +68,96 @@ public class AIPlatform implements ContainerManagedTimestampTrackable, Serializa
     @OneToMany(fetch=FetchType.LAZY,mappedBy="aIPlatform",cascade=CascadeType.ALL,orphanRemoval=true)
     @OnDelete(action=OnDeleteAction.CASCADE)
     private Collection<AIServer> aiservers =  new ArrayList<AIServer>();
+    
+    @Column(name="ARCH",length=80)
+    private String arch;
+    
+    @Column(name="CERTDN",length=200,unique=true)
+    private String certdn;
+    
+    @Basic(fetch=FetchType.LAZY)
+    @Lob
+    @Column(name="CONTROL_CONFIG",length=256)
+    private byte[] controlConfig;
+    
+    @Column(name="CPU_COUNT")
+    private Integer cpuCount;
+    
+    @Column(name="CPU_SPEED")
+    private Integer cpuSpeed;
+    
+    @Column(name="CTIME")
+    private Long creationTime;
+    
+    @Basic(fetch=FetchType.LAZY)
+    @Lob
+    @Column(name="CUSTOM_PROPERTIES")
+    private byte[] customProperties;
+    
+    @Column(name="DESCRIPTION",length=300)
+    private String description;
+    
+    @Column(name="DHCP_SERVER",length=64)
+    private String dhcpServer;
+    
+    @Column(name="DIFF")
+    private long diff;
+    
+    @Column(name="DNS_SERVER",length=64)
+    private String dnsServer;
+    
+    @Column(name="FQDN",nullable=false,length=200,unique=true)
+    private String fqdn;
+    
+    @Column(name="GATEWAY",length=64)
+    private String gateway;
+    
+    @Id
+    @GenericGenerator(name = "mygen1", strategy = "increment")  
+    @GeneratedValue(generator = "mygen1")  
+    @Column(name = "ID")
+    private Integer id;
+    
+    @Column(name="IGNORED")
+    private boolean ignored;
+    
+    @Column(name="LASTAPPROVED")
+    private Long lastApproved;
+    
+    @Column(name="LOCATION",length=100)
+    private String location;
+    
+    @Basic(fetch=FetchType.LAZY)
+    @Lob
+    @Column(name="MEASUREMENT_CONFIG",length=256)
+    private byte[] measurementConfig;
+    
+    @Column(name="MTIME")
+    private Long modifiedTime;
+    
+    @Column(name="NAME",nullable=false,length=255,unique=true)
+    private String name;
+    
+    @Column(name="OSVERSION",length=80)
+    private String osversion;
+    
+    @Column(name="OS",length=80)
+    private String platformTypeName;
+    
+    @Basic(fetch=FetchType.LAZY)
+    @Lob
+    @Column(name="PRODUCT_CONFIG",length=256)
+    private byte[] productConfig;
+    
+    @Column(name="QUEUESTATUS")
+    private Integer queueStatus;
+    
+    @Column(name="RAM")
+    private Integer ram;
+    
+    @Column(name="VERSION_COL",nullable=false)
+    @Version
+    private Long version;
  
    
      
@@ -187,6 +187,14 @@ public class AIPlatform implements ContainerManagedTimestampTrackable, Serializa
         setControlConfig(apv.getControlConfig());
     }
     
+    public void addAIServer(AIServer server)
+    {
+        if (server != null) {
+            aiservers.add(server);
+            server.setAIPlatform(this);
+        }
+    }
+    
     /**
      * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
      * @return <code>true</code> by default.
@@ -194,7 +202,7 @@ public class AIPlatform implements ContainerManagedTimestampTrackable, Serializa
     public boolean allowContainerManagedCreationTime() {
         return true;
     }
-    
+
     /**
      * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
      * @return <code>true</code> by default.
@@ -203,342 +211,40 @@ public class AIPlatform implements ContainerManagedTimestampTrackable, Serializa
         return true;
     }
 
-    public long getCreationTime()
-    {
-        return creationTime;
-    }
-
-    public void setCreationTime(Long creationTime)
-    {
-        this.creationTime = creationTime;
-    }
-
-    public long getModifiedTime()
-    {
-        return modifiedTime;
-    }
-
-    public void setModifiedTime(Long modifiedTime)
-    {
-        this.modifiedTime = modifiedTime;
-    }
-    
-    public String getDescription()
-    {
-        return this.description;
-    }
-
-    public void setDescription(String description)
-    {
-        this.description = description;
-    }
-
-   
-
-    public String getLocation()
-    {
-        return this.location;
-    }
-
-    public void setLocation(String location)
-    {
-        this.location = location;
-    }
-
   
-    public String getName()
-    {
-        return this.name;
-    }
 
-    public void setName(String name)
-    {
-        this.name = name;
-    }
-
-   
-    
-   
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Long getVersion() {
-        return version;
-    }
-
-    public void setVersion(Long version) {
-        this.version = version;
-    }
-
-    public String getFqdn()
-    {
-        return this.fqdn;
-    }
-
-    public void setFqdn(String fqDN)
-    {
-        this.fqdn = fqDN;
-        if (getName() == null) {
-            setName(fqDN);
-        }
-    }
-
-    public AppdefEntityID getEntityId()
-    {
-        return AppdefEntityID.newPlatformID(getId());
-    }
-
-    public String getCertdn()
-    {
-        return this.certdn;
-    }
-
-    public void setCertdn(String certDN)
-    {
-        this.certdn = certDN;
-    }
-
-    public Integer getCpuCount()
-    {
-        return this.cpuCount;
-    }
-
-    public void setCpuCount(Integer cpuCount)
-    {
-        this.cpuCount = cpuCount;
-    }
-
-    public int hashCode()
-    {
-        int result = super.hashCode();
-
-        result = 37*result + (fqdn != null ? fqdn.hashCode() : 0);
-        result = 37*result + (certdn != null ? certdn.hashCode() : 0);
-
-        return result;
-    }
-
-    public String getPlatformTypeName()
-    {
-        return this.platformTypeName;
-    }
-
-    public void setPlatformTypeName(String platformTypeName)
-    {
-        this.platformTypeName = platformTypeName;
-    }
-
-    public String getOsversion()
-    {
-        return this.osversion;
-    }
-
-    public void setOsversion(String osversion)
-    {
-        this.osversion = osversion;
-    }
-
-    public String getArch()
-    {
-        return this.arch;
-    }
-
-    public void setArch(String arch)
-    {
-        this.arch = arch;
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        AIPlatform other = (AIPlatform) obj;
+        if (creationTime == null) {
+            if (other.creationTime != null)
+                return false;
+        } else if (!creationTime.equals(other.creationTime))
+            return false;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        return true;
     }
 
     public String getAgentToken()
     {
         return this.agentToken;
     }
-
-    public void setAgentToken(String agentToken)
-    {
-        this.agentToken = agentToken;
-    }
-
-    public int getQueueStatus()
-    {
-        return queueStatus;
-    }
-
-    public void setQueueStatus(Integer queueStatus)
-    {
-        this.queueStatus = queueStatus;
-    }
-
-    /**
-     * @depreated use setQueueStatus(Integer)
-     * @param queueStatus
-     */
-    public void setQueueStatus(int queueStatus)
-    {
-        setQueueStatus(new Integer(queueStatus));
-    }
-
-    public long getDiff()
-    {
-        return this.diff;
-    }
-
-    public void setDiff(long diff)
-    {
-        this.diff = diff;
-    }
-
-    public void setDiff(Long diff)
-    {
-        this.diff = diff;
-    }
-
-    public boolean isIgnored()
-    {
-        return this.ignored;
-    }
-
-    public void setIgnored(boolean ignored)
-    {
-        this.ignored = ignored;
-    }
-
-    public long getLastApproved()
-    {
-        return lastApproved;
-    }
-
-    public void setLastApproved(Long lastApproved)
-    {
-        this.lastApproved = lastApproved;
-    }
-
-    public Integer getCpuSpeed()
-    {
-        return this.cpuSpeed;
-    }
-
-    public void setCpuSpeed(Integer cpuSpeed)
-    {
-        this.cpuSpeed = cpuSpeed;
-    }
-
-    public Integer getRam()
-    {
-        return this.ram;
-    }
-
-    public void setRam(Integer ram)
-    {
-        this.ram = ram;
-    }
-
-    public String getGateway()
-    {
-        return this.gateway;
-    }
-
-    public void setGateway(String gateway)
-    {
-        this.gateway = gateway;
-    }
-
-    public String getDhcpServer()
-    {
-        return this.dhcpServer;
-    }
-
-    public void setDhcpServer(String dhcpServer)
-    {
-        this.dhcpServer = dhcpServer;
-    }
-
-    public String getDnsServer()
-    {
-        return this.dnsServer;
-    }
-
-    public void setDnsServer(String dnsServer)
-    {
-        this.dnsServer = dnsServer;
-    }
-
-    public byte[] getCustomProperties()
-    {
-        return this.customProperties;
-    }
-
-    public void setCustomProperties(byte[] customProperties)
-    {
-        this.customProperties = customProperties;
-    }
-
-    public byte[] getProductConfig()
-    {
-        return this.productConfig;
-    }
-
-    public void setProductConfig(byte[] productConfig)
-    {
-        this.productConfig = productConfig;
-    }
-
-    public byte[] getControlConfig()
-    {
-        return this.controlConfig;
-    }
-
-    public void setControlConfig(byte[] controlConfig)
-    {
-        this.controlConfig = controlConfig;
-    }
-
-    public byte[] getMeasurementConfig()
-    {
-        return this.measurementConfig;
-    }
-
-    public void setMeasurementConfig(byte[] measurementConfig)
-    {
-        this.measurementConfig = measurementConfig;
-    }
-
+    
     public Collection<AIIp> getAIIps()
     {
         return this.aiips;
     }
 
-    public void setAIIps(Collection<AIIp> aiips)
-    {
-        this.aiips = aiips;
-    }
-
-    public Collection<AIServer> getAIServers()
-    {
-        return this.aiservers;
-    }
-
-    public void setAIServers(Collection<AIServer> aiservers)
-    {
-        this.aiservers = aiservers;
-    }
-
-    public void addAIServer(AIServer server)
-    {
-        if (server != null) {
-            aiservers.add(server);
-            server.setAIPlatform(this);
-        }
-    }
-
-    public boolean isPlatformDevice() {
-        return !PlatformDetector.isSupportedPlatform(getPlatformTypeName());
-    }
-    
     /**
      * @deprecated use (this) AIPlatformValue object
      * @return
@@ -584,9 +290,11 @@ public class AIPlatform implements ContainerManagedTimestampTrackable, Serializa
         return aipValue;
     }
 
-    public boolean equals(Object obj)
+   
+
+    public Collection<AIServer> getAIServers()
     {
-        return (obj instanceof AIPlatform) && super.equals(obj);
+        return this.aiservers;
     }
 
     /**
@@ -596,11 +304,323 @@ public class AIPlatform implements ContainerManagedTimestampTrackable, Serializa
         return null;
     }
 
+  
     /**
      * For compatibility
      */
    public AppdefResourceValue getAppdefResourceValue() {
         return null;
+    }
+
+    public String getArch()
+    {
+        return this.arch;
+    }
+
+   
+    
+   
+    public String getCertdn()
+    {
+        return this.certdn;
+    }
+
+    public byte[] getControlConfig()
+    {
+        return this.controlConfig;
+    }
+
+    public Integer getCpuCount()
+    {
+        return this.cpuCount;
+    }
+
+    public Integer getCpuSpeed()
+    {
+        return this.cpuSpeed;
+    }
+
+    public long getCreationTime()
+    {
+        return creationTime;
+    }
+
+    public byte[] getCustomProperties()
+    {
+        return this.customProperties;
+    }
+
+    public String getDescription()
+    {
+        return this.description;
+    }
+
+    public String getDhcpServer()
+    {
+        return this.dhcpServer;
+    }
+
+    public long getDiff()
+    {
+        return this.diff;
+    }
+
+    public String getDnsServer()
+    {
+        return this.dnsServer;
+    }
+
+    public AppdefEntityID getEntityId()
+    {
+        return AppdefEntityID.newPlatformID(getId());
+    }
+
+    public String getFqdn()
+    {
+        return this.fqdn;
+    }
+
+    public String getGateway()
+    {
+        return this.gateway;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public long getLastApproved()
+    {
+        return lastApproved;
+    }
+
+    public String getLocation()
+    {
+        return this.location;
+    }
+
+    public byte[] getMeasurementConfig()
+    {
+        return this.measurementConfig;
+    }
+
+    public long getModifiedTime()
+    {
+        return modifiedTime;
+    }
+
+    public String getName()
+    {
+        return this.name;
+    }
+
+    public String getOsversion()
+    {
+        return this.osversion;
+    }
+
+    public String getPlatformTypeName()
+    {
+        return this.platformTypeName;
+    }
+
+    public byte[] getProductConfig()
+    {
+        return this.productConfig;
+    }
+
+    public int getQueueStatus()
+    {
+        return queueStatus;
+    }
+
+    public Integer getRam()
+    {
+        return this.ram;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((certdn == null) ? 0 : certdn.hashCode());
+        result = prime * result + ((creationTime == null) ? 0 : creationTime.hashCode());
+        result = prime * result + ((fqdn == null) ? 0 : fqdn.hashCode());
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        return result;
+    }
+
+    public boolean isIgnored()
+    {
+        return this.ignored;
+    }
+
+    public boolean isPlatformDevice() {
+        return !PlatformDetector.isSupportedPlatform(getPlatformTypeName());
+    }
+
+    public void setAgentToken(String agentToken)
+    {
+        this.agentToken = agentToken;
+    }
+
+    public void setAIIps(Collection<AIIp> aiips)
+    {
+        this.aiips = aiips;
+    }
+
+    public void setAIServers(Collection<AIServer> aiservers)
+    {
+        this.aiservers = aiservers;
+    }
+
+    public void setArch(String arch)
+    {
+        this.arch = arch;
+    }
+
+    public void setCertdn(String certDN)
+    {
+        this.certdn = certDN;
+    }
+
+    public void setControlConfig(byte[] controlConfig)
+    {
+        this.controlConfig = controlConfig;
+    }
+
+    public void setCpuCount(Integer cpuCount)
+    {
+        this.cpuCount = cpuCount;
+    }
+
+    public void setCpuSpeed(Integer cpuSpeed)
+    {
+        this.cpuSpeed = cpuSpeed;
+    }
+
+    public void setCreationTime(Long creationTime)
+    {
+        this.creationTime = creationTime;
+    }
+
+    public void setCustomProperties(byte[] customProperties)
+    {
+        this.customProperties = customProperties;
+    }
+
+    public void setDescription(String description)
+    {
+        this.description = description;
+    }
+
+    public void setDhcpServer(String dhcpServer)
+    {
+        this.dhcpServer = dhcpServer;
+    }
+
+    public void setDiff(long diff)
+    {
+        this.diff = diff;
+    }
+
+    public void setDiff(Long diff)
+    {
+        this.diff = diff;
+    }
+
+    public void setDnsServer(String dnsServer)
+    {
+        this.dnsServer = dnsServer;
+    }
+
+    public void setFqdn(String fqDN)
+    {
+        this.fqdn = fqDN;
+        if (getName() == null) {
+            setName(fqDN);
+        }
+    }
+
+    public void setGateway(String gateway)
+    {
+        this.gateway = gateway;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setIgnored(boolean ignored)
+    {
+        this.ignored = ignored;
+    }
+
+    public void setLastApproved(Long lastApproved)
+    {
+        this.lastApproved = lastApproved;
+    }
+
+    public void setLocation(String location)
+    {
+        this.location = location;
+    }
+
+    public void setMeasurementConfig(byte[] measurementConfig)
+    {
+        this.measurementConfig = measurementConfig;
+    }
+
+    public void setModifiedTime(Long modifiedTime)
+    {
+        this.modifiedTime = modifiedTime;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    public void setOsversion(String osversion)
+    {
+        this.osversion = osversion;
+    }
+
+    public void setPlatformTypeName(String platformTypeName)
+    {
+        this.platformTypeName = platformTypeName;
+    }
+
+    public void setProductConfig(byte[] productConfig)
+    {
+        this.productConfig = productConfig;
+    }
+    
+    /**
+     * @depreated use setQueueStatus(Integer)
+     * @param queueStatus
+     */
+    public void setQueueStatus(int queueStatus)
+    {
+        setQueueStatus(new Integer(queueStatus));
+    }
+
+    public void setQueueStatus(Integer queueStatus)
+    {
+        this.queueStatus = queueStatus;
+    }
+
+    public void setRam(Integer ram)
+    {
+        this.ram = ram;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 
 }

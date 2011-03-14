@@ -60,8 +60,6 @@ public interface UIPluginManager {
 
 	public UIPlugin findPluginByName(String name);
 
-	public UIPlugin findPluginById(Integer id);
-
 	public View findViewById(Integer id);
 
 	public Attachment findAttachmentById(Integer id);
@@ -86,13 +84,6 @@ public interface UIPluginManager {
 	 * Finds all {@link UIPlugin}s
 	 */
 	public Collection<UIPlugin> findAll();
-
-	/**
-	 * Find all the views attached via a specific attach type
-	 * 
-	 * @return a collection of {@link AttachType}s
-	 */
-	public Collection<AttachType> findViews(AttachType type);
 
 	/**
 	 * Find all attachments for a specific type

@@ -29,7 +29,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.alert.data.ActionRepository;
+import org.hyperic.hq.alert.data.AlertRepository;
+import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.events.ActionConfigInterface;
 import org.hyperic.hq.events.shared.ActionManager;
 import org.hyperic.hq.events.shared.ActionValue;
@@ -49,13 +51,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class ActionManagerImpl implements ActionManager {
-    private ActionDAO actionDAO;
-    private AlertDAO alertDAO;
+    private ActionRepository actionRepository;
+    private AlertRepository alertRepository;
 
     @Autowired
-    public ActionManagerImpl(ActionDAO actionDAO, AlertDAO alertDAO) {
-        this.actionDAO = actionDAO;
-        this.alertDAO = alertDAO;
+    public ActionManagerImpl(ActionRepository actionRepository, AlertRepository alertRepository) {
+        this.actionRepository = actionRepository;
+        this.alertRepository = alertRepository;
     }
 
     /**
@@ -65,8 +67,12 @@ public class ActionManagerImpl implements ActionManager {
      */
     @Transactional(readOnly=true)
     public List<ActionValue> getActionsForAlert(int alertId) {
-        Alert alert = alertDAO.findById(new Integer(alertId));
-        Collection<Action> actions = actionDAO.findByAlert(alert);
+        Alert alert = alertRepository.findById(new Integer(alertId));
+        if(alert == null) {
+            throw new EntityNotFoundException("Alert with ID: " + 
+                alertId + " was not found");
+        }
+        Collection<Action> actions = actionRepository.findByAlert(alert);
 
         return actionsToActionValues(actions);
     }
@@ -97,12 +103,15 @@ public class ActionManagerImpl implements ActionManager {
      */
     public Action updateAction(ActionValue val) {
         // First update the primary action
-        Action action = actionDAO.findById(val.getId());
-
+        Action action = actionRepository.findById(val.getId());
+        if(action == null) {
+            throw new EntityNotFoundException("Action with ID: " + 
+                val.getId() + " not found");
+        }
         // Delete it if no configuration or logs
         if (val.getConfig() == null) {
             if (action.getLogEntriesBag().size() == 0) {
-                actionDAO.removeAction(action);
+                actionRepository.delete(action);
             } else { // Disassociate from everything
                  //TODO still necessary?
 //                if (action.getAlertDefinition() != null) {
@@ -124,12 +133,13 @@ public class ActionManagerImpl implements ActionManager {
         action.setClassName(val.getClassname());
         action.setConfig(val.getConfig());
         setParentAction(action, val.getParentId());
-        long mtime = System.currentTimeMillis();
+        
 
         // HQ 942: We have seen orphaned actions on upgrade from
         // 3.0.5 to 3.1.1 where the action has no associated alert def.
         // Prevent the NPE.
         //TODO?
+        //long mtime = System.currentTimeMillis();
 //        if (action.getAlertDefinition() != null) {
 //            action.getAlertDefinition().setMtime(mtime);
 //        }
@@ -170,7 +180,7 @@ public class ActionManagerImpl implements ActionManager {
         throws JSONException {
         Action action = Action.newInstance(json);
 
-        actionDAO.save(action);
+        actionRepository.save(action);
         return action;
     }
 
@@ -181,7 +191,7 @@ public class ActionManagerImpl implements ActionManager {
     public Action createAction(ActionConfigInterface cfg) {
         Action action = Action.createAction(cfg);
 
-        actionDAO.save(action);
+        actionRepository.save(action);
         return action;
     }
 
@@ -197,7 +207,12 @@ public class ActionManagerImpl implements ActionManager {
         if (parent == null) {
             action.setParent(null);
         } else {
-            action.setParent(actionDAO.findById(parent));
+            Action parentAction = actionRepository.findById(parent);
+            if(parentAction == null) {
+                throw new EntityNotFoundException("Action with ID: " + 
+                    parent + " not found");
+            }
+            action.setParent(parentAction);
         }
     }
 

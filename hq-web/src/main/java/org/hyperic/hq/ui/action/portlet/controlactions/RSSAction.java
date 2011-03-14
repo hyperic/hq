@@ -38,6 +38,7 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.util.MessageResources;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.control.server.session.ControlHistory;
@@ -110,7 +111,7 @@ public class RSSAction
             int i = 0;
             for (Iterator<ControlHistory> it = list.iterator(); it.hasNext(); i++) {
                 ControlHistory hist = it.next();
-                AppdefEntityID aeid = new AppdefEntityID(hist.getEntityType().intValue(), hist.getEntityId());
+                AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(hist.getResource());
 
                 String link = feed.getBaseUrl() + "/ResourceControlHistory.do?eid=" + aeid.getAppdefKey();
 
@@ -126,7 +127,7 @@ public class RSSAction
                 StringBuffer desc = new StringBuffer(fmtd.toString());
                 desc.append(" ").append(res.getMessage("common.label.Dash")).append(" ").append(hist.getAction());
 
-                feed.addItem(hist.getEntityName(), link, desc.toString(), current);
+                feed.addItem(hist.getResource().getName(), link, desc.toString(), current);
             }
         }
         request.setAttribute("rssFeed", feed);

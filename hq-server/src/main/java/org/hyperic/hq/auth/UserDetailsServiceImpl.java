@@ -29,13 +29,13 @@ package org.hyperic.hq.auth;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hyperic.hq.auth.data.PrincipalRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.dao.PrincipalDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.PermissionDeniedDataAccessException;
@@ -48,18 +48,18 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    private PrincipalDAO principalDao;
+    private PrincipalRepository principalRepository;
 
     private AuthzSubjectManager authzSubjectManager;
 
     @Autowired
-    public UserDetailsServiceImpl(PrincipalDAO principalDao, AuthzSubjectManager authzSubjectManager) {
-        this.principalDao = principalDao;
+    public UserDetailsServiceImpl(PrincipalRepository principalRepository, AuthzSubjectManager authzSubjectManager) {
+        this.principalRepository = principalRepository;
         this.authzSubjectManager = authzSubjectManager;
     }
 
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException, DataAccessException {
-        Principal principal = principalDao.findByUsername(username);
+        Principal principal = principalRepository.findByPrincipal(username);
         if (principal == null) {
             throw new UsernameNotFoundException("Username " + username + " not found");
         }

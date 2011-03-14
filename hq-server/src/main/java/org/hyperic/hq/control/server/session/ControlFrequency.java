@@ -26,18 +26,17 @@
 
 package org.hyperic.hq.control.server.session;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 /**
  * DTO to hold the frequency of invocations of a specific control action
  * @author jhickey
- *
+ * 
  */
 public class ControlFrequency {
-    private AppdefEntityID id;
+    private int id;
     private String action;
     private long count;
 
-    public ControlFrequency(AppdefEntityID id, String action, long count) {
+    public ControlFrequency(int id, String action, long count) {
         this.id = id;
         this.action = action;
         this.count = count;
@@ -47,7 +46,7 @@ public class ControlFrequency {
      * 
      * @return The entity against which the control action was executed
      */
-    public AppdefEntityID getId() {
+    public int getId() {
         return id;
     }
 
@@ -65,6 +64,37 @@ public class ControlFrequency {
      */
     public long getCount() {
         return count;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((action == null) ? 0 : action.hashCode());
+        result = prime * result + (int) (count ^ (count >>> 32));
+        result = prime * result + id;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ControlFrequency other = (ControlFrequency) obj;
+        if (action == null) {
+            if (other.action != null)
+                return false;
+        } else if (!action.equals(other.action))
+            return false;
+        if (count != other.count)
+            return false;
+        if (id != other.id)
+            return false;
+        return true;
     }
 
 }

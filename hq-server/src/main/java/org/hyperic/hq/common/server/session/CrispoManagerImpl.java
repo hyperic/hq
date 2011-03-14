@@ -30,9 +30,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.hyperic.hq.common.shared.CrispoManager;
+import org.hyperic.hq.config.data.CrispoOptionRepository;
+import org.hyperic.hq.config.data.CrispoRepository;
 import org.hyperic.hq.config.domain.Crispo;
 import org.hyperic.hq.config.domain.CrispoOption;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,13 +48,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class CrispoManagerImpl implements CrispoManager {
-    private CrispoDAO crispoDao;
-    private CrispoOptionDAO crispoOptionDao;
+    private CrispoRepository crispoRepository;
+    private CrispoOptionRepository crispoOptionRepository;
 
     @Autowired
-    public CrispoManagerImpl(CrispoDAO crispoDao, CrispoOptionDAO crispoOptionDao) {
-        this.crispoDao = crispoDao;
-        this.crispoOptionDao = crispoOptionDao;
+    public CrispoManagerImpl(CrispoRepository crispoRepository, CrispoOptionRepository crispoOptionRepository) {
+        this.crispoRepository = crispoRepository;
+        this.crispoOptionRepository = crispoOptionRepository;
     }
 
     /**
@@ -63,7 +64,7 @@ public class CrispoManagerImpl implements CrispoManager {
     public Crispo createCrispo(Map<String, String> keyVals) {
         Crispo c = Crispo.create(keyVals);
 
-        crispoDao.save(c);
+        crispoRepository.save(c);
         return c;
     }
 
@@ -72,21 +73,21 @@ public class CrispoManagerImpl implements CrispoManager {
      */
     @Transactional(readOnly=true)
     public Collection<Crispo> findAll() {
-        return crispoDao.findAll();
+        return crispoRepository.findAll();
     }
 
     /**
      */
     @Transactional(readOnly=true)
     public Crispo findById(Integer id) {
-        return crispoDao.findById(id);
+        return crispoRepository.findById(id);
     }
 
     /**
      * Delete a {@link Crispo} and all the options contained within.
      */
     public void deleteCrispo(Crispo c) {
-        crispoDao.remove(c);
+        crispoRepository.delete(c);
     }
 
     /**
@@ -95,7 +96,7 @@ public class CrispoManagerImpl implements CrispoManager {
      */
     public Crispo create(ConfigResponse cfg) {
         Crispo res = Crispo.create(cfg);
-        crispoDao.save(res);
+        crispoRepository.save(res);
         return res;
     }
 
@@ -105,7 +106,7 @@ public class CrispoManagerImpl implements CrispoManager {
      */
     public void update(Crispo c, ConfigResponse cfg) {
         c.updateWith(cfg);
-        crispoDao.save(c);
+        crispoRepository.save(c);
     }
 
     /**
@@ -117,7 +118,7 @@ public class CrispoManagerImpl implements CrispoManager {
      */
     @Transactional(readOnly=true)
     public List<CrispoOption> findOptionByKey(String key) {
-        return crispoOptionDao.findOptionsByKey(key);
+        return crispoOptionRepository.findByKeyLike('%' + key + '%');
     }
 
     /**
@@ -129,7 +130,7 @@ public class CrispoManagerImpl implements CrispoManager {
      */
     @Transactional(readOnly=true)
     public List<CrispoOption> findOptionByValue(String val) {
-        return crispoOptionDao.findOptionsByValue(val);
+        return crispoOptionRepository.findByValue(val);
     }
 
     /**
@@ -140,12 +141,12 @@ public class CrispoManagerImpl implements CrispoManager {
      */
     public void updateOption(CrispoOption o, String val) {
         if (val == null || val.matches("^\\s*$")) {
-            crispoOptionDao.remove(o);
+            crispoOptionRepository.delete(o);
             Collection<CrispoOption> opts = o.getCrispo().getOptsSet();
             opts.remove(o);
         } else {
             o.setValue(val);
-            crispoOptionDao.save(o);
+            crispoOptionRepository.save(o);
         }
     }
 }

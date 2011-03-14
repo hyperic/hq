@@ -45,13 +45,13 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.alert.data.AlertRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.events.ActionExecutionInfo;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.server.session.Action;
-import org.hyperic.hq.events.server.session.AlertDAO;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
 import org.hyperic.hq.galerts.server.session.GalertLogDAO;
@@ -100,18 +100,18 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 	private final ThreadPoolExecutor _executor;
 	private final EscalationStateDAO escalationStateDao;
 	private AuthzSubjectManager authzSubjectManager;
-	private AlertDAO alertDAO;
+	private AlertRepository alertRepository;
 	private final Log log = LogFactory.getLog(EscalationRuntime.class);
 	private GalertLogDAO galertLogDAO;
 	private ConcurrentStatsCollector concurrentStatsCollector;
 	
 	@Autowired
 	public EscalationRuntimeImpl(EscalationStateDAO escalationStateDao,
-			AuthzSubjectManager authzSubjectManager, AlertDAO alertDAO,
+			AuthzSubjectManager authzSubjectManager, AlertRepository alertRepository,
 			GalertLogDAO galertLogDAO, ConcurrentStatsCollector concurrentStatsCollector) {
 		this.escalationStateDao = escalationStateDao;
 		this.authzSubjectManager = authzSubjectManager;
-		this.alertDAO = alertDAO;
+		this.alertRepository = alertRepository;
 		this.galertLogDAO = galertLogDAO;
 		this.concurrentStatsCollector = concurrentStatsCollector;
 		// Want threads to never die (XXX, scottmf, keeping current
@@ -467,7 +467,7 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 		if (alertType instanceof GalertEscalationAlertType) {
 			alert = galertLogDAO.get(new Integer(s.getAlertId()));
 		} else if (alertType instanceof ClassicEscalationAlertType) {
-			alert = alertDAO.get(new Integer(s.getAlertId()));
+			alert = alertRepository.findById(new Integer(s.getAlertId()));
 		}
 		if (alert == null) {
 			if (debug)

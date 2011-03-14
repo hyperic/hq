@@ -34,12 +34,12 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
-import org.hyperic.hq.agent.domain.Agent;
+import org.hyperic.hq.agent.mgmt.data.AgentRepository;
+import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
@@ -62,12 +62,13 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
+import org.hyperic.hq.autoinventory.data.AIIpRepository;
+import org.hyperic.hq.autoinventory.data.AIPlatformRepository;
 import org.hyperic.hq.autoinventory.data.AIServerRepository;
+import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.shared.AuditManager;
-import org.hyperic.hq.dao.AIIpDAO;
-import org.hyperic.hq.dao.AIPlatformDAO;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.sigar.NetFlags;
 import org.hyperic.util.pager.PageControl;
@@ -75,6 +76,7 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -93,8 +95,8 @@ public class AIQueueManagerImpl implements AIQueueManager {
     private final AIQSynchronizer queueSynchronizer = new AIQSynchronizer();
 
     private AIServerRepository aiServerRepository;
-    private AIIpDAO aiIpDAO;
-    private AIPlatformDAO aiPlatformDAO;
+    private AIIpRepository aiIpRepository;
+    private AIPlatformRepository aiPlatformRepository;
     private ConfigManager configManager;
     private PlatformManager platformManager;
     private PermissionManager permissionManager;
@@ -105,20 +107,20 @@ public class AIQueueManagerImpl implements AIQueueManager {
     private AIAuditFactory aiAuditFactory;
     private AIQResourceVisitorFactory aiqResourceVisitorFactory;
     protected final Log log = LogFactory.getLog(AIQueueManagerImpl.class.getName());
-    private AgentDAO agentDAO;
+    private AgentRepository agentDAO;
 
     @Autowired
-    public AIQueueManagerImpl(AIServerRepository aiServerRepository, AIIpDAO aiIpDAO,
-                              AIPlatformDAO aiPlatformDAO, ConfigManager configManager,
+    public AIQueueManagerImpl(AIServerRepository aiServerRepository, AIIpRepository aiIpRepository,
+                              AIPlatformRepository aiPlatformRepository, ConfigManager configManager,
                               PlatformManager platformManager, PermissionManager permissionManager,
                               AuditManager auditManager, AuthzSubjectManager authzSubjectManager,
                               AgentCommandsClientFactory agentCommandsClientFactory,
                               AgentManager agentManager, AIAuditFactory aiAuditFactory,
-                              AIQResourceVisitorFactory aiqResourceVisitorFactory, AgentDAO agentDAO) {
+                              AIQResourceVisitorFactory aiqResourceVisitorFactory, AgentRepository agentDAO) {
 
         this.aiServerRepository = aiServerRepository;
-        this.aiIpDAO = aiIpDAO;
-        this.aiPlatformDAO = aiPlatformDAO;
+        this.aiIpRepository = aiIpRepository;
+        this.aiPlatformRepository = aiPlatformRepository;
         this.configManager = configManager;
         this.platformManager = platformManager;
         this.permissionManager = permissionManager;
@@ -156,13 +158,16 @@ public class AIQueueManagerImpl implements AIQueueManager {
         if (revisedAIplatform == null) {
             // log.info("AIQmgr.queue (post appdef-diff): aiplatform=NULL");
             AIPlatform aiplatformLocal;
-            aiplatformLocal = aiPlatformDAO.get(aiplatform.getId());
+            aiplatformLocal = aiPlatformRepository.findById(aiplatform.getId());
+            if(aiplatformLocal == null) {
+                throw new EntityNotFoundException("AIPlatform with ID: " + aiplatform.getId() + " not found");
+            }
             removeFromQueue(aiplatformLocal);
             return null;
         }
 
         // Synchronize current AI data into existing queue.
-        revisedAIplatform = queueSynchronizer.sync(subject, this, aiPlatformDAO, revisedAIplatform,
+        revisedAIplatform = queueSynchronizer.sync(subject, this, aiPlatformRepository, revisedAIplatform,
             updateServers, isApproval, isReport);
 
         if (revisedAIplatform == null) {
@@ -223,15 +228,15 @@ public class AIQueueManagerImpl implements AIQueueManager {
         try {
             if (showIgnored) {
                 if (showAlreadyProcessed) {
-                    queue = aiPlatformDAO.findAllIncludingProcessed();
+                    queue = aiPlatformRepository.findAll(new Sort("name"));
                 } else {
-                    queue = aiPlatformDAO.findAll();
+                    queue = aiPlatformRepository.findAll();
                 }
             } else {
                 if (showAlreadyProcessed) {
-                    queue = aiPlatformDAO.findAllNotIgnoredIncludingProcessed();
+                    queue = aiPlatformRepository.findByIgnoredOrderByNameAsc(false);
                 } else {
-                    queue = aiPlatformDAO.findAllNotIgnored();
+                    queue = aiPlatformRepository.findAllNotIgnored();
                 }
             }
 
@@ -320,7 +325,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
     @Transactional
     public AIPlatformValue findAIPlatformById(AuthzSubject subject, int aiplatformID) {
 
-        AIPlatform aiplatform = aiPlatformDAO.get(new Integer(aiplatformID));
+        AIPlatform aiplatform = aiPlatformRepository.findById(new Integer(aiplatformID));
 
         if (aiplatform == null) {
             return null;
@@ -341,7 +346,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
     @Transactional
     public AIPlatformValue findAIPlatformByFqdn(AuthzSubject subject, String fqdn) {
         // XXX Do authz check
-        AIPlatform aiPlatform = aiPlatformDAO.findByFQDN(fqdn);
+        AIPlatform aiPlatform = aiPlatformRepository.findByFqdn(fqdn);
         AIPlatformValue aiplatformValue = syncQueue(aiPlatform, false);
         return aiplatformValue;
     }
@@ -373,7 +378,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
         if (aiPlat == null) {
             return;
         }
-        aiPlatformDAO.remove(aiPlat);
+        aiPlatformRepository.delete(aiPlat);
     }
 
     /**
@@ -404,7 +409,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
      */
     @Transactional(readOnly = true)
     public AIIpValue findAIIpById(AuthzSubject subject, int ipID) {
-        AIIp aiip = aiIpDAO.get(new Integer(ipID));
+        AIIp aiip = aiIpRepository.findById(new Integer(ipID));
         if (aiip == null) {
             return null;
         }
@@ -422,7 +427,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
     @Transactional(readOnly = true)
     public AIIpValue findAIIpByAddress(AuthzSubject subject, String address) {
         // XXX Do authz check
-        List<AIIp> aiips = aiIpDAO.findByAddress(address);
+        List<AIIp> aiips = aiIpRepository.findByAddress(address);
         if (aiips.size() == 0) {
             return null;
         }
@@ -496,13 +501,13 @@ public class AIQueueManagerImpl implements AIQueueManager {
                     continue;
                 }
 
-                aiplatform = aiPlatformDAO.get(id);
+                aiplatform = aiPlatformRepository.findById(id);
 
                 if (aiplatform == null) {
                     if (isPurgeAction) {
                         continue;
                     } else {
-                        throw new ObjectNotFoundException(id, AIPlatform.class.getName());
+                        throw new EntityNotFoundException("AIPlatform with ID: " + id + " not found");
                     }
                 }
 
@@ -550,13 +555,13 @@ public class AIQueueManagerImpl implements AIQueueManager {
                     continue;
                 }
 
-                final AIIp aiip = aiIpDAO.get(id);
+                final AIIp aiip = aiIpRepository.findById(id);
 
                 if (aiip == null) {
                     if (isPurgeAction)
                         continue;
                     else
-                        throw new ObjectNotFoundException(id, AIIp.class.getName());
+                        throw new SystemException("AIIp with ID: " + id + " not found");
                 }
                 visitor.visitIp(aiip, subject);
                 if (!isPurgeAction) {
@@ -579,7 +584,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
                     if (isPurgeAction) {
                         continue;
                     } else {
-                        throw new ObjectNotFoundException(id, AIServer.class.getName());
+                        throw new SystemException("AIServer with ID: " + id + " not found");
                     }
                 }
 
@@ -602,7 +607,10 @@ public class AIQueueManagerImpl implements AIQueueManager {
 
             for (Integer id : aiplatformsToResync.keySet()) {
 
-                aiplatform = aiPlatformDAO.get(id);
+                aiplatform = aiPlatformRepository.findById(id);
+                if(aiplatform == null) {
+                    throw new SystemException("AIPlatform with ID: " + id + " not found");
+                }
                 syncQueue(aiplatform, isApproveAction);
             }
 
@@ -633,7 +641,10 @@ public class AIQueueManagerImpl implements AIQueueManager {
         }
 
         for (Integer id : ipList) {
-            final AIIp aiip = aiIpDAO.get(id);
+            final AIIp aiip = aiIpRepository.findById(id);
+            if(aiip == null) {
+                throw new EntityNotFoundException("AIIp with ID: " + id + " not found");
+            }
             if (AIQueueConstants.Q_STATUS_REMOVED == aiip.getQueueStatus() &&
                 aiip.getAddress().equals(agent.getAddress())) {
                 return true;
@@ -651,7 +662,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
     public void removeFromQueue(AIPlatform aiplatform) {
         // Remove the platform, this should recursively remove all queued
         // servers and IPs
-        aiPlatformDAO.remove(aiplatform);
+        aiPlatformRepository.delete(aiplatform);
     }
 
     /**
@@ -664,7 +675,10 @@ public class AIQueueManagerImpl implements AIQueueManager {
         AIPlatform aiplatform;
 
         // XXX Do authz check
-        aiplatform = aiPlatformDAO.get(new Integer(aiPlatformID));
+        aiplatform = aiPlatformRepository.findById(new Integer(aiPlatformID));
+        if(aiplatform == null) {
+            throw new EntityNotFoundException("AIPlatform with ID: " + aiPlatformID + " not found");
+        }
         return getPlatformByAI(subject, aiplatform).getPlatformValue();
     }
 
@@ -705,7 +719,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
             String mac = qip.getMacAddress();
 
             if (mac != null && mac.length() > 0 && !mac.equals(NetFlags.NULL_HWADDR)) {
-                List<AIIp> addrs = aiIpDAO.findByMACAddress(qip.getMacAddress());
+                List<AIIp> addrs = aiIpRepository.findByMacAddress(qip.getMacAddress());
                 if (addrs.size() > 0) {
                     AIPlatform aiplatform = ((AIIp) addrs.get(0)).getAIPlatform();
                     return aiplatform;
@@ -725,7 +739,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
                 continue;
             }
 
-            List<AIIp> addrs = aiIpDAO.findByAddress(address);
+            List<AIIp> addrs = aiIpRepository.findByAddress(address);
             if (addrs.size() > 0) {
                 AIPlatform aiplatform = addrs.get(0).getAIPlatform();
                 return aiplatform;

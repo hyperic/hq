@@ -79,7 +79,7 @@ public class AlertActionLog  implements Serializable
     protected AlertActionLog() {
     }
    
-    protected AlertActionLog(Alert alert, String detail, Action action,
+    public AlertActionLog(Alert alert, String detail, Action action,
                              AuthzSubject subject) 
     {
         this.alert     = alert;

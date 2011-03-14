@@ -26,15 +26,14 @@
 package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
-import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.autoinventory.AIPlatform;
+import org.hyperic.hq.autoinventory.data.AIPlatformRepository;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.dao.AIPlatformDAO;
 import org.hyperic.util.pager.PagerEventHandler;
 import org.hyperic.util.pager.PagerProcessorExt;
 
 public class PagerProcessor_aiplatform implements PagerProcessorExt {
-    private AIPlatformDAO aPlatformDAO = Bootstrap.getBean(AIPlatformDAO.class);
+    private AIPlatformRepository aPlatformRepository = Bootstrap.getBean(AIPlatformRepository.class);
 
     public PagerProcessor_aiplatform () {}
 
@@ -60,7 +59,7 @@ public class PagerProcessor_aiplatform implements PagerProcessorExt {
             // around and hide the backend implementation of DAOs from the
             // front end.  Unfortunately it won't be in 3.x, definitely 4.0
             AIPlatform updated = AIQSynchronizer.getAIQPlatform(
-                aPlatformDAO, value);
+                aPlatformRepository, value);
             //TODO why did we never have to do a null check before?
             if(updated == null) {
                 return null;

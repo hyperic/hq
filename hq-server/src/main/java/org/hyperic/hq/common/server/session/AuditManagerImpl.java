@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.common.server.session;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -36,7 +37,6 @@ import org.hyperic.hq.authz.server.session.ResourceDeleteRequestedEvent;
 import org.hyperic.hq.authz.server.session.SubjectDeleteRequestedEvent;
 import org.hyperic.hq.common.shared.AuditManager;
 import org.hyperic.hq.inventory.domain.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,11 +50,11 @@ public class AuditManagerImpl implements AuditManager, ApplicationListener<Appli
     private final Log log = LogFactory.getLog(AuditManagerImpl.class);
     private static final ThreadLocal<Audit> CONTAINERS = new ThreadLocal<Audit>();
 
-    private AuditDAO auditDao;
+    //private AuditDAO auditDao;
 
-    @Autowired
-    public AuditManagerImpl(AuditDAO auditDao) {
-        this.auditDao = auditDao;
+    
+    public AuditManagerImpl() {
+        //this.auditDao = auditDao;
     }
 
     /**
@@ -110,7 +110,8 @@ public class AuditManagerImpl implements AuditManager, ApplicationListener<Appli
         for (Audit child : a.getChildren()) {
             deleteRecursively(child);
         }
-        auditDao.remove(a);
+        //TODO
+        //auditDao.remove(a);
     }
 
     /**
@@ -230,15 +231,19 @@ public class AuditManagerImpl implements AuditManager, ApplicationListener<Appli
     public List<Audit> find(AuthzSubject me, PageInfo pInfo, long startTime, long endTime,
                             AuditImportance minImportance, AuditPurpose purpose,
                             AuthzSubject target, String klazz) {
-        return auditDao.find(pInfo, me, startTime, endTime, minImportance, purpose, target, klazz);
+        //TODO
+        //return auditDao.find(pInfo, me, startTime, endTime, minImportance, purpose, target, klazz);
+        return new ArrayList<Audit>();
     }
 
     private void handleResourceDelete(Resource r) {
-        auditDao.handleResourceDelete(r);
+        //TODO
+        //auditDao.handleResourceDelete(r);
     }
 
     private void handleSubjectDelete(AuthzSubject s) {
-        auditDao.handleSubjectDelete(s);
+        //TODO
+        //auditDao.handleSubjectDelete(s);
     }
     
 

@@ -32,14 +32,14 @@ import javax.persistence.Table;
 import org.hyperic.hq.hqu.ViewDescriptor;
 
 @Entity
-@Table(name="EAM_UI_VIEW_MASTHEAD")
-@PrimaryKeyJoinColumn(name="VIEW_ID", referencedColumnName = "ID")
+@Table(name = "EAM_UI_VIEW_MASTHEAD")
+@PrimaryKeyJoinColumn(name = "VIEW_ID", referencedColumnName = "ID")
 public class ViewMasthead
-    extends View<AttachmentMasthead>
-{ 
-    protected ViewMasthead() {}
-    
-    ViewMasthead(UIPlugin plugin, ViewDescriptor view) {
+    extends View<AttachmentMasthead> {
+    protected ViewMasthead() {
+    }
+
+    public ViewMasthead(UIPlugin plugin, ViewDescriptor view) {
         super(plugin, view, AttachType.MASTHEAD);
     }
 }

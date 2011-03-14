@@ -21,6 +21,12 @@ public class Application
     private String opsContact;
 
     private String businessContact;
+    
+    private String ownerName;
+    
+    public Application() {
+        super();
+    }
 
     public Collection<AppService> getAppServices() {
         return appServices;
@@ -72,13 +78,13 @@ public class Application
     public void setBusinessContact(String businessContact) {
         this.businessContact = businessContact;
     }
-
+    
     public ApplicationValue getApplicationValue() {
         ApplicationValue applicationValue = new ApplicationValue();
         applicationValue.setName(getName());
         applicationValue.setSortName(getSortName());
         applicationValue.setModifiedBy(getModifiedBy());
-        applicationValue.setOwner(getResource().getOwner().getName());
+        applicationValue.setOwner(ownerName);
         applicationValue.setLocation(getLocation());
         applicationValue.setEngContact(getEngContact());
         applicationValue.setOpsContact(getOpsContact());

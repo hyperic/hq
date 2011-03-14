@@ -30,6 +30,7 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.springframework.stereotype.Repository;
 
@@ -84,7 +85,7 @@ public class AvailabilityDownAlertDefinitionCache  {
          synchronized (_cacheLock) {
              if (isOkToRemove(def)) {
                  //TODO change above method sig
-                 remove(((ResourceAlertDefinition)def).getAppdefEntityId());
+                 remove(AppdefUtil.newAppdefEntityId(((ResourceAlertDefinition)def).getResource()));
              }
 
              //TODO was this for groups?

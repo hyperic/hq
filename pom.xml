@@ -387,6 +387,11 @@
 				<version>${spring-data-jpa.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.springframework.data</groupId>
+				<artifactId>spring-data-commons-core</artifactId>
+				<version>${spring-datastore-graph.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>oro</groupId>
 				<artifactId>oro</artifactId>
 				<version>${oro.version}</version>
@@ -812,6 +817,7 @@
 			<modules>
 					<module>hq-util</module>
 					<module>hq-common</module>
+					<module>hq-lather</module>
 					<module>hq-pdk</module>
 					<module>hq-diagnostics</module>
 					<module>hq-messaging</module>

@@ -35,28 +35,48 @@ import javax.persistence.ManyToOne;
 @Embeddable
 public class AvailabilityDataId implements Serializable {
     private static final long serialVersionUID = 1L;
-    
-    @Column(name="STARTTIME",nullable=false)
-    private long startime;
-    
+
     @ManyToOne
-    @JoinColumn(name="MEASUREMENT_ID",nullable=false)
+    @JoinColumn(name = "MEASUREMENT_ID", nullable = false)
     private Measurement measurement;
-    
+
+    @Column(name = "STARTTIME", nullable = false)
+    private long startime;
+
     public AvailabilityDataId() {
     }
-    
+
     public AvailabilityDataId(long startime, Measurement measurement) {
         this.startime = startime;
         this.measurement = measurement;
+    }
+
+    private boolean equals(AvailabilityDataId rhs) {
+        if (startime == rhs.startime && measurement.getId().equals(rhs.measurement.getId())) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean equals(Object rhs) {
+        if (this == rhs) {
+            return true;
+        } else if (rhs instanceof AvailabilityDataId) {
+            return equals((AvailabilityDataId) rhs);
+        }
+        return false;
+    }
+
+    public Measurement getMeasurement() {
+        return measurement;
     }
 
     public long getStartime() {
         return startime;
     }
 
-    public Measurement getMeasurement() {
-        return measurement;
+    public int hashCode() {
+        return 17 + (37 * (new Long(startime)).hashCode()) + (37 * measurement.getId().hashCode());
     }
 
     public void setMeasurement(Measurement measurement) {
@@ -66,31 +86,8 @@ public class AvailabilityDataId implements Serializable {
     public void setStartime(long startime) {
         this.startime = startime;
     }
-    
-    public int hashCode() {
-        return 17 + (37*(new Long(startime)).hashCode()) +
-            (37*measurement.getId().hashCode());
-    }
-    
-    public boolean equals(Object rhs) {
-        if (this == rhs) {
-            return true;
-        } else if (rhs instanceof AvailabilityDataId) {
-            return equals((AvailabilityDataId)rhs);
-        }
-        return false;
-    }
-    
-    private boolean equals(AvailabilityDataId rhs) {
-        if (startime == rhs.startime &&
-                measurement.getId().equals(rhs.measurement.getId())) {
-            return true;
-        }
-        return false;
-    }
-    
+
     public String toString() {
-        return "startime -> " + startime +
-            ", measId -> " + measurement.getId();
+        return "startime -> " + startime + ", measId -> " + measurement.getId();
     }
 }

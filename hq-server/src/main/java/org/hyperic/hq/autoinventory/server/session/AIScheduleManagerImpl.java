@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.autoinventory.server.session;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
@@ -41,13 +42,14 @@ import org.hyperic.hq.autoinventory.AISchedule;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.DuplicateAIScanNameException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
+import org.hyperic.hq.autoinventory.data.AIHistoryRepository;
+import org.hyperic.hq.autoinventory.data.AIScheduleRepository;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManager;
 import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
+import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.dao.AIHistoryDAO;
-import org.hyperic.hq.dao.AIScheduleDAO;
 import org.hyperic.hq.scheduler.ScheduleParseException;
 import org.hyperic.hq.scheduler.ScheduleParser;
 import org.hyperic.hq.scheduler.ScheduleValue;
@@ -64,6 +66,8 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleTrigger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -85,17 +89,17 @@ public class AIScheduleManagerImpl
     private static final String HISTORY_PAGER = PAGER_BASE + "PagerProcessor_ai_history";
     private static final String SCHEDULE_PAGER = PAGER_BASE + "PagerProcessor_ai_schedule";
 
-    private AIScheduleDAO aiScheduleDao;
+    private AIScheduleRepository aiScheduleRepository;
     private PlatformManager platformManager;
-    private AIHistoryDAO aiHistoryDao;
+    private AIHistoryRepository aiHistoryRepository;
 
     @Autowired
-    public AIScheduleManagerImpl(Scheduler scheduler, DBUtil dbUtil, AIScheduleDAO aiScheduleDao,
-                                 PlatformManager platformManager, AIHistoryDAO aiHistoryDAO) {
+    public AIScheduleManagerImpl(Scheduler scheduler, DBUtil dbUtil, AIScheduleRepository aiScheduleRepository,
+                                 PlatformManager platformManager, AIHistoryRepository aiHistoryRepository) {
         super(scheduler, dbUtil);
-        this.aiScheduleDao = aiScheduleDao;
+        this.aiScheduleRepository = aiScheduleRepository;
         this.platformManager = platformManager;
-        this.aiHistoryDao = aiHistoryDAO;
+        this.aiHistoryRepository = aiHistoryRepository;
     }
 
     protected String getHistoryPagerClass() {
@@ -210,8 +214,8 @@ public class AIScheduleManagerImpl
                 }
                 scheduler.scheduleJob(jobDetail, trigger);
 
-                checkUniqueName(aiScheduleDao, scanName);
-                AISchedule aiLoc = aiScheduleDao.create(id, subject.getName(), scanName, scanDesc, schedule, nextFire
+                checkUniqueName(scanName);
+                AISchedule aiLoc = create(id, subject.getName(), scanName, scanDesc, schedule, nextFire
                     .getTime(), triggerName, jobName);
                 aiLoc.setConfig(scanConfig.serialize());
             } catch (DuplicateAIScanNameException e) {
@@ -234,8 +238,8 @@ public class AIScheduleManagerImpl
                 }
                 scheduler.scheduleJob(jobDetail, trigger);
 
-                checkUniqueName(aiScheduleDao, scanName);
-                AISchedule aiLoc = aiScheduleDao.create(id, subject.getName(), scanName, scanDesc, schedule, nextFire
+                checkUniqueName( scanName);
+                AISchedule aiLoc = create(id, subject.getName(), scanName, scanDesc, schedule, nextFire
                     .getTime(), triggerName, jobName);
                 aiLoc.setConfig(scanConfig.serialize());
             } catch (DuplicateAIScanNameException e) {
@@ -249,6 +253,30 @@ public class AIScheduleManagerImpl
                 log.error("Unable to schedule job: " + e.getMessage());
                 throw new AutoinventoryException(e);
             }
+        }
+    }
+    
+    private AISchedule create(AppdefEntityID entityId, String subject, String scanName,
+                             String scanDesc, ScheduleValue schedule, long nextFire,
+                             String triggerName, String jobName) throws ApplicationException
+
+    {
+        try {
+            AISchedule s = new AISchedule();
+            s.setEntityId(entityId.getId());
+            s.setEntityType(new Integer(entityId.getType()));
+            s.setSubject(subject);
+            s.setScheduleValue(schedule);
+            s.setNextFireTime(nextFire);
+            s.setTriggerName(triggerName);
+            s.setJobName(jobName);
+            s.setJobOrderData(null);
+            s.setScanName(scanName);
+            s.setScanDesc(scanDesc);
+            aiScheduleRepository.save(s);
+            return s;
+        } catch (IOException e) {
+            throw new ApplicationException(e.getMessage());
         }
     }
 
@@ -265,12 +293,13 @@ public class AIScheduleManagerImpl
 
         Collection<AISchedule> schedule;
         int sortAttr = pc.getSortattribute();
+        Direction direction = pc.isAscending()?Direction.ASC:Direction.DESC;
         switch (sortAttr) {
             case SortAttribute.RESOURCE_NAME:
-                schedule = aiScheduleDao.findByEntityScanName(id.getType(), id.getID(), pc.isAscending());
+                schedule = aiScheduleRepository.findByEntityTypeAndEntityId(id.getType(), id.getID(), new Sort(direction, "scanName"));
                 break;
             case SortAttribute.CONTROL_NEXTFIRE:
-                schedule = aiScheduleDao.findByEntityFireTime(id.getType(), id.getID(), pc.isAscending());
+                schedule = aiScheduleRepository.findByEntityTypeAndEntityId(id.getType(), id.getID(),new Sort(direction,"fireTime"));
                 break;
 
             default:
@@ -291,8 +320,11 @@ public class AIScheduleManagerImpl
      */
     @Transactional(readOnly=true)
     public AISchedule findScheduleByID(AuthzSubject subject, Integer id) {
-
-        return aiScheduleDao.findById(id);
+        AISchedule aiSchedule = aiScheduleRepository.findById(id);
+        if(aiSchedule == null) {
+            throw new EntityNotFoundException("AISchedule with id: " + id + " was not found");
+        }
+        return aiSchedule;
     }
 
     /**
@@ -309,22 +341,23 @@ public class AIScheduleManagerImpl
 
         Collection<AIHistory> hist;
         int sortAttr = pc.getSortattribute();
+        Direction direction = pc.isAscending()?Direction.ASC:Direction.DESC;
         switch (sortAttr) {
             case SortAttribute.CONTROL_STATUS:
-                hist = aiHistoryDao.findByEntityStatus(id.getType(), id.getID(), pc.isAscending());
+                hist = aiHistoryRepository.findByEntityTypeAndEntityId(id.getType(), id.getID(), new Sort(direction,"status"));
                 break;
             case SortAttribute.CONTROL_STARTED:
-                hist = aiHistoryDao.findByEntityStartTime(id.getType(), id.getID(), pc.isAscending());
+                hist = aiHistoryRepository.findByEntityTypeAndEntityId(id.getType(), id.getID(), new Sort(direction,"startTime"));
                 break;
             case SortAttribute.CONTROL_ELAPSED:
-                hist = aiHistoryDao.findByEntityDuration(id.getType(), id.getID(), pc.isAscending());
+                hist = aiHistoryRepository.findByEntityTypeAndEntityId(id.getType(), id.getID(), new Sort(direction,"duration"));
                 break;
             case SortAttribute.CONTROL_DATESCHEDULED:
-                hist = aiHistoryDao.findByEntityDateScheduled(id.getType(), id.getID(), pc.isAscending());
+                hist = aiHistoryRepository.findByEntityTypeAndEntityId(id.getType(), id.getID(), new Sort(direction,"dateScheduled"));
                 break;
             case SortAttribute.CONTROL_ENTITYNAME:
                 // No need to sort since all will have the same name
-                hist = aiHistoryDao.findByEntity(id.getType(), id.getID());
+                hist = aiHistoryRepository.findByEntityTypeAndEntityId(id.getType(), id.getID());
                 break;
             default:
                 throw new NotFoundException("Unknown sort attribute: " + sortAttr);
@@ -344,20 +377,22 @@ public class AIScheduleManagerImpl
     public void deleteAIJob(AuthzSubject subject, Integer ids[]) throws AutoinventoryException {
         for (int i = 0; i < ids.length; i++) {
             try {
-                AISchedule aiScheduleLocal = aiScheduleDao.findById(ids[i]);
+                AISchedule aiScheduleLocal = aiScheduleRepository.findById(ids[i]);
+                if(aiScheduleLocal == null) {
+                    throw new AutoinventoryException("Unable to remove job.  Job with id: " + ids[i] + " not found"); 
+                }
                 scheduler.deleteJob(aiScheduleLocal.getJobName(), GROUP);
-                aiScheduleDao.remove(aiScheduleLocal);
+                aiScheduleRepository.delete(aiScheduleLocal);
             } catch (Exception e) {
                 throw new AutoinventoryException("Unable to remove job: " + e.getMessage());
             }
         }
     }
 
-    @Transactional(readOnly=true)
-    public void checkUniqueName(AIScheduleDAO aiScheduleLocalHome, String scanName) throws DuplicateAIScanNameException {
-
+  
+    private void checkUniqueName(String scanName) throws DuplicateAIScanNameException {
         // Ensure that the name is not a duplicate.
-        AISchedule aisl = aiScheduleLocalHome.findByScanName(scanName);
+        AISchedule aisl = aiScheduleRepository.findByScanName(scanName);
         if (aisl != null) {
             throw new DuplicateAIScanNameException(scanName);
         }

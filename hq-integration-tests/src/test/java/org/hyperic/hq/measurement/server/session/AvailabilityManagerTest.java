@@ -43,6 +43,7 @@ import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
+import org.hyperic.hq.measurement.data.AvailabilityDataRepository;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
@@ -71,8 +72,7 @@ public class AvailabilityManagerTest extends BaseInfrastructureTest {
     private AvailabilityManager aMan;
     @Autowired
     private MeasurementManager mMan;
-    @Autowired
-    private AvailabilityDataDAO dao;
+   
     @Autowired
     private AvailabilityCheckService availabilityCheckService;
     
@@ -80,7 +80,7 @@ public class AvailabilityManagerTest extends BaseInfrastructureTest {
     private AvailabilityCache availabilityCache;
     
     @Autowired
-    private AvailabilityDataDAO availabilityDataDao;
+    private AvailabilityDataRepository availabilityDataDao;
     
     @Autowired
     private TemplateManager templateManager;
@@ -113,9 +113,10 @@ public class AvailabilityManagerTest extends BaseInfrastructureTest {
 
     @Test
     public void testFindLastAvail() {
-        availabilityDataDao.create(platformAvail, 1234289880000l, 9223372036854775807l,1.0d);
+        AvailabilityDataRLE data =  new AvailabilityDataRLE(platformAvail, 1234289880000l, 9223372036854775807l,1.0d);
+        availabilityDataDao.save(data);
         flushSession();
-        List<AvailabilityDataRLE> rle = dao.findLastAvail(Collections.singletonList(platformMeasurementId));
+        List<AvailabilityDataRLE> rle = availabilityDataDao.findLastByMeasurements(Collections.singletonList(platformMeasurementId));
         Assert.assertTrue("rle value is incorrect",
             rle.get(0).getAvailVal() == MeasurementConstants.AVAIL_UP);
     }
@@ -137,7 +138,8 @@ public class AvailabilityManagerTest extends BaseInfrastructureTest {
      */
     @Test
     public void testInsertIntoMiddle() throws Exception {
-        availabilityDataDao.create(platformAvail, 1234289880000l, 9223372036854775807l,1.0d);
+        AvailabilityDataRLE data = new AvailabilityDataRLE(platformAvail, 1234289880000l, 9223372036854775807l,1.0d);
+        availabilityDataDao.save(data);
         flushSession();
         int INCRTIME = 240000;
         long baseTime = TimingVoodoo.roundDownTime(now(), 60000);
@@ -157,7 +159,8 @@ public class AvailabilityManagerTest extends BaseInfrastructureTest {
 
     @Test
     public void testOverlap() throws Exception {
-        availabilityDataDao.create(platformAvail, 1234289880000l, 9223372036854775807l,1.0d);
+        AvailabilityDataRLE data =  new AvailabilityDataRLE(platformAvail, 1234289880000l, 9223372036854775807l,1.0d);
+        availabilityDataDao.save(data);
         flushSession();
         List<DataPoint> list = new ArrayList<DataPoint>();
         long now = now();
@@ -206,8 +209,8 @@ public class AvailabilityManagerTest extends BaseInfrastructureTest {
 
     private void backfill(long baseTime) {
         availabilityCheckService.backfill(baseTime);
-        dao.getSession().flush();
-        dao.getSession().clear();
+        flushSession();
+        clearSession();
     }
 
     private void testCatchup(Integer measId) throws Exception {
@@ -474,8 +477,8 @@ public class AvailabilityManagerTest extends BaseInfrastructureTest {
 
     private boolean isAvailDataRLEValid(List<Integer> mids, DataPoint lastPt) {
         boolean descending = false;
-        Map<Integer, TreeSet<AvailabilityDataRLE>> avails = dao.getHistoricalAvailMap(
-            (Integer[]) mids.toArray(new Integer[0]), 0, descending);
+        Map<Integer, TreeSet<AvailabilityDataRLE>> avails = availabilityDataDao.getHistoricalAvailMap(
+             mids, 0, descending);
         for (Map.Entry<Integer, TreeSet<AvailabilityDataRLE>> entry : avails.entrySet()) {
             Integer mId = (Integer) entry.getKey();
             Collection<AvailabilityDataRLE> rleList = entry.getValue();
@@ -526,8 +529,8 @@ public class AvailabilityManagerTest extends BaseInfrastructureTest {
         list.clear();
         list.addAll(vals);
         aMan.addData(list);
-        dao.getSession().flush();
-        dao.getSession().clear();
+        flushSession();
+        clearSession();
     }
 
     private DataPoint addData(Integer measId, MetricValue mVal) {
@@ -536,8 +539,8 @@ public class AvailabilityManagerTest extends BaseInfrastructureTest {
         DataPoint pt = new DataPoint(measId, mVal);
         list.add(pt);
         aMan.addData(list);
-        dao.getSession().flush();
-        dao.getSession().clear();
+        flushSession();
+        clearSession();
         return pt;
     }
 

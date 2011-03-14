@@ -51,6 +51,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hibernate.DialectAccessor;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.common.ProductProperties;
 import org.hyperic.hq.common.SystemException;
@@ -60,6 +61,7 @@ import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.MeasurementDataSourceException;
+import org.hyperic.hq.measurement.data.MeasurementRepository;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.DataManager;
@@ -107,7 +109,6 @@ public class DataManagerImpl implements DataManager {
     private static final String TAB_DATA_1H = MeasurementConstants.TAB_DATA_1H;
     private static final String TAB_DATA_6H = MeasurementConstants.TAB_DATA_6H;
     private static final String TAB_DATA_1D = MeasurementConstants.TAB_DATA_1D;
-    private static final String TAB_MEAS = MeasurementConstants.TAB_MEAS;
     private static final String DATA_MANAGER_INSERT_TIME = ConcurrentStatsCollector.DATA_MANAGER_INSERT_TIME;
 
     // Error strings
@@ -136,8 +137,7 @@ public class DataManagerImpl implements DataManager {
     private long purgeRaw, purge1h, purge6h;
 
     private static final long HOURS_PER_MEAS_TAB = MeasTabManagerUtil.NUMBER_OF_TABLES_PER_DAY;
-
-    private MeasurementDAO measurementDAO;
+    
     private MeasurementManager measurementManager;
     private ServerConfigManager serverConfigManager;
     private AvailabilityManager availabilityManager;
@@ -146,18 +146,18 @@ public class DataManagerImpl implements DataManager {
     private MessagePublisher messagePublisher;
     private RegisteredTriggers registeredTriggers;
     private ConcurrentStatsCollector concurrentStatsCollector;
+    private DialectAccessor dialectAccessor;
     private int transactionTimeout=900;
     
     @Autowired
-    public DataManagerImpl(DBUtil dbUtil, MeasurementDAO measurementDAO,
+    public DataManagerImpl(DBUtil dbUtil,
                            MeasurementManager measurementManager,
                            ServerConfigManager serverConfigManager,
                            AvailabilityManager availabilityManager,
                            MetricDataCache metricDataCache, ZeventEnqueuer zeventManager,
                            MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers,
-                           ConcurrentStatsCollector concurrentStatsCollector) {
+                           ConcurrentStatsCollector concurrentStatsCollector, DialectAccessor dialectAccessor) {
         this.dbUtil = dbUtil;
-        this.measurementDAO = measurementDAO;
         this.measurementManager = measurementManager;
         this.serverConfigManager = serverConfigManager;
         this.availabilityManager = availabilityManager;
@@ -166,6 +166,7 @@ public class DataManagerImpl implements DataManager {
         this.messagePublisher = messagePublisher;
         this.registeredTriggers = registeredTriggers;
         this.concurrentStatsCollector = concurrentStatsCollector;
+        this.dialectAccessor = dialectAccessor;
     }
 
     @PostConstruct
@@ -209,18 +210,6 @@ public class DataManagerImpl implements DataManager {
         return new HighLowMetricValue(value, timestamp);
     }
 
-    // Returns the next index to be used
-    private int setStatementArguments(PreparedStatement stmt, int start, Integer[] ids)
-        throws SQLException {
-        // Set ID's
-        int i = start;
-        for (int ind = 0; ind < ids.length; ind++) {
-            stmt.setInt(i++, ids[ind].intValue());
-        }
-
-        return i;
-    }
-
     private void checkTimeArguments(long begin, long end, long interval)
         throws IllegalArgumentException {
 
@@ -249,7 +238,7 @@ public class DataManagerImpl implements DataManager {
 
         log.debug("Attempting to insert data in a single transaction.");
 
-        HQDialect dialect = measurementDAO.getHQDialect();
+        HQDialect dialect = dialectAccessor.getHQDialect();
         boolean succeeded = false;
         final boolean debug = log.isDebugEnabled();
 
@@ -668,7 +657,7 @@ public class DataManagerImpl implements DataManager {
         PreparedStatement stmt = null;
         final List<DataPoint> left = new ArrayList<DataPoint>();
         final Map<String, List<DataPoint>> buckets = MeasRangeObj.getInstance().bucketData(data);
-        final HQDialect dialect = measurementDAO.getHQDialect();
+        final HQDialect dialect = dialectAccessor.getHQDialect();
         final boolean supportsDupInsStmt = dialect.supportsDuplicateInsertStmt();
         final boolean supportsPLSQL = dialect.supportsPLSQL();
         final StringBuilder buf = new StringBuilder();
@@ -888,7 +877,7 @@ public class DataManagerImpl implements DataManager {
 
         if (usesMetricUnion(begin, end, useAggressiveRollup)) {
             return MeasurementUnionStatementBuilder.getUnionStatement(begin, end, measIds,
-                measurementDAO.getHQDialect());
+                dialectAccessor.getHQDialect());
         } else if (now - this.purge1h < begin) {
             return TAB_DATA_1H;
         } else if (now - this.purge6h < begin) {
@@ -954,7 +943,7 @@ public class DataManagerImpl implements DataManager {
         ResultSet rs = null;
         // The table to query from
         final String table = getDataTable(begin, end, m.getId().intValue());
-        final HQDialect dialect = measurementDAO.getHQDialect();
+        final HQDialect dialect = dialectAccessor.getHQDialect();
         try {
             conn = dbUtil.getConnection();
             stmt = conn.createStatement();
@@ -1253,7 +1242,7 @@ public class DataManagerImpl implements DataManager {
         final Integer[] avIds = (Integer[]) availIds.toArray(new Integer[0]);
         final PageList<HighLowMetricValue> rtn =
             availabilityManager.getHistoricalAvailData(avIds, begin, end, interval, pc, true);
-        final HQDialect dialect = measurementDAO.getHQDialect();
+        final HQDialect dialect = dialectAccessor.getHQDialect();
         final int points = (int) ((begin-end)/interval);
         final int maxExprs = (dialect.getMaxExpressions() == -1) ?
             Integer.MAX_VALUE : dialect.getMaxExpressions();
@@ -1347,7 +1336,7 @@ public class DataManagerImpl implements DataManager {
             log.debug("gathering data from begin=" + TimeUtil.toString(begin) + 
                       ", end=" + TimeUtil.toString(end));
         }
-        final HQDialect dialect = measurementDAO.getHQDialect();
+        final HQDialect dialect = dialectAccessor.getHQDialect();
         // XXX I don't like adding the sql hint, when we start testing against mysql 5.5 we should
         //     re-evaluate if this is necessary
         // 1) we shouldn't have to tell the db to explicitly use the Primary key for these
@@ -1622,7 +1611,7 @@ public class DataManagerImpl implements DataManager {
             conn = dbUtil.getConnection();
 
             final String metricUnion = MeasurementUnionStatementBuilder.getUnionStatement(8 * HOUR,
-                m.getId().intValue(), measurementDAO.getHQDialect());
+                m.getId().intValue(), dialectAccessor.getHQDialect());
             StringBuilder sqlBuf = new StringBuilder().append("SELECT timestamp, value FROM ")
                 .append(metricUnion).append(", (SELECT MAX(timestamp) AS maxt").append(" FROM ")
                 .append(metricUnion).append(") mt ").append("WHERE measurement_id = ").append(
@@ -1801,13 +1790,13 @@ public class DataManagerImpl implements DataManager {
                                                                                        System
                                                                                            .currentTimeMillis(),
                                                                                        measIds,
-                                                                                       measurementDAO
+                                                                                       dialectAccessor
                                                                                            .getHQDialect())
                                                                                : MeasurementUnionStatementBuilder
                                                                                    .getUnionStatement(
                                                                                        getPurgeRaw(),
                                                                                        measIds,
-                                                                                       measurementDAO
+                                                                                       dialectAccessor
                                                                                            .getHQDialect());
 
         StringBuilder sqlBuf = new StringBuilder(
@@ -1896,127 +1885,6 @@ public class DataManagerImpl implements DataManager {
             throw new MeasurementDataSourceException("Can't get baseline data for: " + id, e);
         } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, rs);
-        }
-    }
-
-    /**
-     * Fetch a map of aggregate data values keyed by metrics given a start and
-     * stop time range
-     * 
-     * @param tids The template id's of the Measurement
-     * @param iids The instance id's of the Measurement
-     * @param begin The start of the time range
-     * @param end The end of the time range
-     * @param useAggressiveRollup uses a measurement rollup table to fetch the
-     *        data if the time range spans more than one data table's max
-     *        timerange
-     * @return the Map of data points
-     * 
-     */
-    @Transactional(readOnly = true)
-    public Map<Integer, double[]> getAggregateDataByMetric(Integer[] tids, Integer[] iids,
-                                                           long begin, long end,
-                                                           boolean useAggressiveRollup) {
-        checkTimeArguments(begin, end);
-        Map<Integer, double[]> rtn = getAggDataByMetric(tids, iids, begin, end, useAggressiveRollup);
-        Collection<Measurement> metrics = measurementDAO.findAvailMeasurements(tids, iids);
-        if (metrics.size() > 0) {
-            Integer[] mids = new Integer[metrics.size()];
-            Iterator<Measurement> it = metrics.iterator();
-            for (int i = 0; i < mids.length; i++) {
-                Measurement m = it.next();
-                mids[i] = m.getId();
-            }
-            rtn.putAll(availabilityManager.getAggregateData(mids, begin, end));
-        }
-        return rtn;
-    }
-
-    private Map<Integer, double[]> getAggDataByMetric(Integer[] tids, Integer[] iids, long begin,
-                                                      long end, boolean useAggressiveRollup) {
-        // Check the begin and end times
-        this.checkTimeArguments(begin, end);
-        begin = TimingVoodoo.roundDownTime(begin, MINUTE);
-        end = TimingVoodoo.roundDownTime(end, MINUTE);
-
-        // Result set
-        HashMap<Integer, double[]> resMap = new HashMap<Integer, double[]>();
-
-        if (tids.length == 0 || iids.length == 0)
-            return resMap;
-
-        // Get the data points and add to the ArrayList
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        StopWatch timer = new StopWatch();
-
-        StringBuffer iconj = new StringBuffer(DBUtil
-            .composeConjunctions("instance_id", iids.length));
-
-        DBUtil.replacePlaceHolders(iconj, iids);
-        StringBuilder tconj = new StringBuilder(DBUtil.composeConjunctions("template_id",
-            tids.length));
-
-        try {
-            conn = dbUtil.getConnection();
-            // The table to query from
-            List<Integer> measids = MeasTabManagerUtil.getMeasIds(conn, tids, iids);
-            String table = getDataTable(begin, end, (Integer[]) measids.toArray(new Integer[0]),
-                useAggressiveRollup);
-            // Use the already calculated min, max and average on
-            // compressed tables.
-            String minMax;
-            if (usesMetricUnion(begin, end, useAggressiveRollup)) {
-                minMax = " MIN(value), AVG(value), MAX(value) ";
-            } else {
-                minMax = " MIN(minvalue), AVG(value), MAX(maxvalue) ";
-            }
-            final String aggregateSQL = "SELECT id, " +
-                                        minMax +
-                                        " FROM " +
-                                        table +
-                                        "," +
-                                        TAB_MEAS +
-                                        " WHERE timestamp BETWEEN ? AND ? AND measurement_id = id " +
-                                        " AND " + iconj + " AND " + tconj + " GROUP BY id";
-            if (log.isTraceEnabled()) {
-                log.trace("getAggregateDataByMetric(): " + aggregateSQL);
-            }
-            stmt = conn.prepareStatement(aggregateSQL);
-            int i = 1;
-            stmt.setLong(i++, begin);
-            stmt.setLong(i++, end);
-
-            i = this.setStatementArguments(stmt, i, tids);
-
-            try {
-                rs = stmt.executeQuery();
-
-                while (rs.next()) {
-                    double[] data = new double[IND_MAX + 1];
-
-                    Integer mid = new Integer(rs.getInt(1));
-                    data[IND_MIN] = rs.getDouble(2);
-                    data[IND_AVG] = rs.getDouble(3);
-                    data[IND_MAX] = rs.getDouble(4);
-
-                    // Put it into the result map
-                    resMap.put(mid, data);
-                }
-            } finally {
-                DBUtil.closeResultSet(LOG_CTX, rs);
-            }
-            if (log.isTraceEnabled()) {
-                log.trace("getAggregateDataByMetric(): Statement query elapsed " + "time: " +
-                          timer.getElapsed());
-            }
-            return resMap;
-        } catch (SQLException e) {
-            log.debug("getAggregateDataByMetric()", e);
-            throw new SystemException(e);
-        } finally {
-            DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, null);
         }
     }
 

@@ -27,7 +27,7 @@
 package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.hq.ApplicationEvent;
-import org.hyperic.hq.agent.domain.Agent;
+import org.hyperic.hq.agent.mgmt.domain.Agent;
 
 /**
  * Indicates that an agent has been created

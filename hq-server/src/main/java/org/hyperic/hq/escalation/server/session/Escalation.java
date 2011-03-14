@@ -102,7 +102,7 @@ public class Escalation implements ContainerManagedTimestampTrackable, JSON, Ser
 
     protected Escalation() {}
 
-    Escalation(String name, String description, boolean pauseAllowed,
+    public Escalation(String name, String description, boolean pauseAllowed,
                 long maxPauseTime, boolean notifyAll, boolean repeat)
     {
         this.name         = name;
@@ -289,21 +289,35 @@ public class Escalation implements ContainerManagedTimestampTrackable, JSON, Ser
         return new JSONObject().put(e.getJsonName(), e.toJSON());
     }
     
-    public boolean equals(Object obj) {
-        if (!(obj instanceof Escalation) || !super.equals(obj)) {
-            return false;
-        }
-
-        Escalation o = (Escalation)obj;
-        return getName().equals(o.getName());
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        return result;
     }
 
-    public int hashCode() {
-        int result = super.hashCode();
-
-        result = 37 * result + getName().hashCode();
-
-        return result;
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Escalation other = (Escalation) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        return true;
     }
 
     public String toString() {

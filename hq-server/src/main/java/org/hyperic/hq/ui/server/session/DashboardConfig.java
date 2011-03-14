@@ -49,76 +49,75 @@ import org.hyperic.hq.config.domain.Crispo;
 import org.hyperic.util.config.ConfigResponse;
 
 @Entity
-@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-@Table(name="EAM_DASH_CONFIG")
-@DiscriminatorColumn(name="CONFIG_TYPE",length=255)
-public abstract class DashboardConfig implements Serializable
-{
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@Table(name = "EAM_DASH_CONFIG")
+@DiscriminatorColumn(name = "CONFIG_TYPE", length = 255)
+public abstract class DashboardConfig implements Serializable {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CRISPO_ID", nullable = false)
+    @Index(name = "DASH_CONFIG_CRISPO_ID_IDX")
+    private Crispo config;
+
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "ID")
     private Integer id;
-    
-    @Column(name="VERSION_COL",nullable=false)
+
+    @Column(name = "name", length = 255, nullable = false)
+    private String name;
+
+    @Column(name = "VERSION_COL", nullable = false)
     @Version
     private Long version;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="CRISPO_ID",nullable=false)
-    @Index(name="DASH_CONFIG_CRISPO_ID_IDX")
-    private Crispo config;
-    
-    @Column(name="name",length=255,nullable=false)
-    private String name;
 
     protected DashboardConfig() {
     }
-    
+
     protected DashboardConfig(String name, Crispo config) {
-        this.name   = name;
+        this.name = name;
         this.config = config;
     }
-    
+
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+
+        if (o == null || o instanceof DashboardConfig == false)
+            return false;
+
+        DashboardConfig oe = (DashboardConfig) o;
+
+        if (!getName().equals(oe.getName()))
+            return false;
+
+        if (getCrispo().getId() != oe.getCrispo().getId())
+            return false;
+
+        return true;
+    }
+
+    public ConfigResponse getConfig() {
+        return config.toResponse();
+    }
+
+    protected Crispo getCrispo() {
+        return config;
+    }
+
     public Integer getId() {
         return id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public String getName() {
+        return name;
     }
 
     public Long getVersion() {
         return version;
     }
 
-    public void setVersion(Long version) {
-        this.version = version;
-    }
-
-    public ConfigResponse getConfig() {
-        return config.toResponse();
-    }
-    
-    protected Crispo getCrispo() {
-        return config;
-    }
-    
-    protected void setCrispo(Crispo config) {
-        this.config = config;
-    }
-    
-    public String getName() {
-        return name;
-    }
-    
-    protected void setName(String n) {
-        name = n;
-    }
-    
-    public abstract boolean isEditable(AuthzSubject by);
-    
     public int hashCode() {
         int hash = 17;
 
@@ -126,22 +125,22 @@ public abstract class DashboardConfig implements Serializable
         hash = hash * 37 + (getCrispo() != null ? getCrispo().hashCode() : 0);
         return hash;
     }
-    
-    public boolean equals(Object o) {
-        if (o == this)
-            return true;
-        
-        if (o == null || o instanceof DashboardConfig == false)
-            return false;
-        
-        DashboardConfig oe = (DashboardConfig)o;
 
-        if (!getName().equals(oe.getName()))
-            return false;
-        
-        if (getCrispo().getId() != oe.getCrispo().getId())
-            return false;
+    public abstract boolean isEditable(AuthzSubject by);
 
-        return true;
+    protected void setCrispo(Crispo config) {
+        this.config = config;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    protected void setName(String n) {
+        name = n;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }

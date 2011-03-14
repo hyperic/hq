@@ -49,50 +49,29 @@ import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.inventory.domain.Resource;
 
 @Entity
-@Table(name = "EAM_MEASUREMENT",uniqueConstraints={@UniqueConstraint(columnNames={"INSTANCE_ID","TEMPLATE_ID"})})
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+@Table(name = "EAM_MEASUREMENT", uniqueConstraints = { @UniqueConstraint(columnNames = { "RESOURCE_ID",
+                                                                                        "TEMPLATE_ID" }) })
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class Measurement implements ContainerManagedTimestampTrackable, Serializable {
-    
-    //TODO don't really need instanceId anymore b/c we have Resource
-    @Column(name = "INSTANCE_ID", nullable = false)
-    private int instanceId;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name = "TEMPLATE_ID",nullable=false)
-    @Index(name="MEAS_TEMPLATE_ID")
-    private MeasurementTemplate template;
 
-    @Column(name = "MTIME", nullable = false)
-    private long mtime;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "measurement")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Collection<AvailabilityDataRLE> availabilityData;
 
-    @Column(name = "ENABLED", nullable = false)
-    @Index(name="MEAS_ENABLED_IDX")
-    private boolean enabled=true;
-
-    @Column(name = "COLL_INTERVAL", nullable = false)
-    private long interval;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "measurement")
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Collection<Baseline> baselinesBag;
 
     @Column(name = "DSN", nullable = false, length = 2048)
     private String dsn;
 
-    @OneToMany(cascade = CascadeType.ALL,orphanRemoval=true,mappedBy="measurement")
-    @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-    @OnDelete(action=OnDeleteAction.CASCADE)
-    private Collection<Baseline> baselinesBag;
-
-    @OneToMany(cascade = CascadeType.ALL,mappedBy="measurement")
-    @OnDelete(action=OnDeleteAction.CASCADE)
-    private Collection<AvailabilityDataRLE> availabilityData;
-
-    @ManyToOne
-    @JoinColumn(name = "RESOURCE_ID")
-    @Index(name="MEAS_RES_IDX")
-    private Resource resource;
+    @Column(name = "ENABLED", nullable = false)
+    @Index(name = "MEAS_ENABLED_IDX")
+    private boolean enabled = true;
 
     @Id
     @GenericGenerator(name = "mygen1", strategy = "increment")
@@ -100,127 +79,66 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
     @Column(name = "ID")
     private Integer id;
 
-    @Column(name = "VERSION_COL",nullable=false)
+    @Column(name = "COLL_INTERVAL", nullable = false)
+    private long interval;
+
+    @Column(name = "MTIME", nullable = false)
+    private long mtime;
+
+    @ManyToOne
+    @JoinColumn(name = "RESOURCE_ID")
+    @Index(name = "MEAS_RES_IDX")
+    private Resource resource;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "TEMPLATE_ID", nullable = false)
+    @Index(name = "MEAS_TEMPLATE_ID")
+    private MeasurementTemplate template;
+
+    @Column(name = "VERSION_COL", nullable = false)
     @Version
     private Long version;
 
     public Measurement() {
     }
 
-    public Measurement(Integer instanceId, MeasurementTemplate template) {
-        this.instanceId = instanceId;
+    public Measurement(Resource resource, MeasurementTemplate template) {
+        this.resource = resource;
         this.template = template;
     }
 
-    public Measurement(Integer instanceId, MeasurementTemplate template, long interval) {
-        this(instanceId, template);
+    public Measurement(Resource resource, MeasurementTemplate template, long interval) {
+        this(resource, template);
         this.interval = interval;
     }
 
-    /**
-     * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
-     * @return <code>false</code> by default.
-     */
     public boolean allowContainerManagedCreationTime() {
         return false;
     }
 
-    /**
-     * @see org.hyperic.hibernate.ContainerManagedTimestampTrackable#allowContainerManagedLastModifiedTime()
-     * @return <code>true</code> by default.
-     */
     public boolean allowContainerManagedLastModifiedTime() {
         return true;
     }
 
-    public Integer getInstanceId() {
-        return instanceId;
-    }
-
-    public MeasurementTemplate getTemplate() {
-        return template;
-    }
-
-    protected void setTemplate(MeasurementTemplate template) {
-        this.template = template;
-    }
-
-    public long getMtime() {
-        return mtime;
-    }
-
-    protected void setMtime(long mtime) {
-        this.mtime = mtime;
-    }
-
-    public Resource getResource() {
-        return resource;
-    }
-
-    void setResource(Resource resource) {
-        this.resource = resource;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public long getInterval() {
-        return interval;
-    }
-
-    protected void setInterval(long interval) {
-        this.interval = interval;
-    }
-
-    public String getDsn() {
-        return dsn;
-    }
-
-    protected void setDsn(String dsn) {
-        this.dsn = dsn;
-    }
-
-    //TODO remove the Appdef Entity stuff from domain obj
-    public AppdefEntityID getEntityId() {
-        return AppdefUtil.newAppdefEntityId(resource);
-    }
-
-    public int getAppdefType() {
-        return AppdefUtil.newAppdefEntityId(resource).getType();
-    }
-
-    protected void setBaselinesBag(Collection<Baseline> baselines) {
-        this.baselinesBag = baselines;
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Measurement other = (Measurement) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        return true;
     }
 
     protected Collection<AvailabilityDataRLE> getAvailabilityData() {
         return availabilityData;
-    }
-
-    protected void setAvailabilityData(Collection<AvailabilityDataRLE> availabilityData) {
-        this.availabilityData = availabilityData;
-    }
-
-    protected Collection<Baseline> getBaselinesBag() {
-        return baselinesBag;
-    }
-
-    public Collection<Baseline> getBaselines() {
-        return Collections.unmodifiableCollection(baselinesBag);
-    }
-
-    public void setBaseline(Baseline b) {
-        final Collection<Baseline> baselines = getBaselinesBag();
-        if (!baselines.isEmpty())
-            baselines.clear();
-
-        if (b != null)
-            baselines.add(b);
     }
 
     public Baseline getBaseline() {
@@ -230,27 +148,96 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
             return (Baseline) getBaselinesBag().iterator().next();
     }
 
+    public Collection<Baseline> getBaselines() {
+        return Collections.unmodifiableCollection(baselinesBag);
+    }
+
+    protected Collection<Baseline> getBaselinesBag() {
+        return baselinesBag;
+    }
+
+    public String getDsn() {
+        return dsn;
+    }
+
     public Integer getId() {
         return id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public long getInterval() {
+        return interval;
+    }
+
+    public long getMtime() {
+        return mtime;
+    }
+
+    public Resource getResource() {
+        return resource;
+    }
+
+    public MeasurementTemplate getTemplate() {
+        return template;
     }
 
     public Long getVersion() {
         return version;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        return result;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    protected void setAvailabilityData(Collection<AvailabilityDataRLE> availabilityData) {
+        this.availabilityData = availabilityData;
+    }
+
+    protected void setBaselinesBag(Collection<Baseline> baselines) {
+        this.baselinesBag = baselines;
+    }
+
+    public void setDsn(String dsn) {
+        this.dsn = dsn;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    protected void setInterval(long interval) {
+        this.interval = interval;
+    }
+
+    protected void setMtime(long mtime) {
+        this.mtime = mtime;
+    }
+
+    public void setResource(Resource resource) {
+        this.resource = resource;
+    }
+
+    protected void setTemplate(MeasurementTemplate template) {
+        this.template = template;
+    }
+
     public void setVersion(Long version) {
         this.version = version;
-    }
-    
-    public void setInstanceId(int instanceId) {
-        this.instanceId = instanceId;
     }
 
     public String toString() {
         return getId().toString();
     }
+
 }

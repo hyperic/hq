@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.data.CategoryRepository;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.product.MeasurementInfo;
 import org.hyperic.hq.product.ServerTypeInfo;
@@ -56,7 +57,7 @@ public class TemplateManagerTest
     private TemplateManager templateManager;
 
     @Autowired
-    private CategoryDAO categoryDAO;
+    private CategoryRepository categoryRepository;
 
     @Test
     public void testCreateTemplates() {
@@ -104,12 +105,12 @@ public class TemplateManagerTest
 
         MeasurementTemplate expQueueSize = new MeasurementTemplate("Queue Size", "queueSize",
             "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true,
-            "service:queueSize", monitorableType, categoryDAO
+            "service:queueSize", monitorableType, categoryRepository
                 .findByName(MeasurementConstants.CAT_UTILIZATION), "tomcat");
 
         MeasurementTemplate expRT = new MeasurementTemplate("Response Time", "responseTime", "ms",
             MeasurementConstants.COLL_TYPE_DYNAMIC, true, 6789, true, "service:responseTime",
-            monitorableType, categoryDAO.findByName(MeasurementConstants.CAT_PERFORMANCE), "tomcat");
+            monitorableType, categoryRepository.findByName(MeasurementConstants.CAT_PERFORMANCE), "tomcat");
 
         Integer[] templateIds = templateManager.findTemplateIds(monitorableType.getName());
         MeasurementTemplate template = templateManager.getTemplate(templateIds[0]);

@@ -8,8 +8,9 @@ import org.hyperic.hq.api.form.ResourceGroupForm;
 import org.hyperic.hq.api.representation.ListRep;
 import org.hyperic.hq.api.representation.ResourceGroupRep;
 import org.hyperic.hq.api.representation.SuccessResponse;
+import org.hyperic.hq.auth.data.AuthzSubjectRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectDAO;
+import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.inventory.data.ResourceDao;
 import org.hyperic.hq.inventory.data.ResourceGroupDao;
 import org.hyperic.hq.inventory.data.ResourceTypeDao;
@@ -33,10 +34,11 @@ public class ResourceGroupController extends BaseController {
 	private ResourceDao resourceDao;
 	private ResourceGroupDao resourceGroupDao;
 	private ResourceTypeDao resourceTypeDao;
-	private AuthzSubjectDAO authzSubjectDao;
+	private AuthzSubjectRepository authzSubjectDao;
 		
 	@Autowired
-	public ResourceGroupController(ResourceDao resourceDao, ResourceGroupDao resourceGroupDao, ResourceTypeDao resourceTypeDao, AuthzSubjectDAO authzSubjectDao) {
+	public ResourceGroupController(ResourceDao resourceDao, ResourceGroupDao resourceGroupDao, 
+	                               ResourceTypeDao resourceTypeDao, AuthzSubjectRepository authzSubjectDao) {
 		this.resourceDao = resourceDao;
 		this.resourceGroupDao = resourceGroupDao;
 		this.resourceTypeDao = resourceTypeDao;
@@ -124,8 +126,10 @@ public class ResourceGroupController extends BaseController {
 		
 		// TODO Owner and modifiedby can be set based on the authenticated user, for hardcoding to HQAdmin...
 		AuthzSubject subject = authzSubjectDao.findById(1);
-		
-		group.setOwner(subject);
+		if(subject == null) {
+            throw new EntityNotFoundException("Subject with ID: 1 was not found");
+        }
+		subject.addOwnedResource(group);
 		group.setModifiedBy(subject.getName());
 
 		return group;

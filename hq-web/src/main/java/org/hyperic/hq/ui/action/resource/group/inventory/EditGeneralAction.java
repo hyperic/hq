@@ -39,7 +39,7 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
-import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.auth.data.AuthzSubjectRepository;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
@@ -58,11 +58,13 @@ public class EditGeneralAction
 
     private final Log log = LogFactory.getLog(EditGeneralAction.class.getName());
     private AppdefBoss appdefBoss;
+    private AuthzSubjectRepository authzSubjectRepository;
 
     @Autowired
-    public EditGeneralAction(AppdefBoss appdefBoss) {
+    public EditGeneralAction(AppdefBoss appdefBoss, AuthzSubjectRepository authzSubjectRepository) {
         super();
         this.appdefBoss = appdefBoss;
+        this.authzSubjectRepository = authzSubjectRepository;
     }
 
     /**
@@ -112,7 +114,7 @@ public class EditGeneralAction
 
             if (isPrivate) {
                 // Make sure the username appears in the name
-                final String owner = group.getOwner().getName();
+                final String owner = authzSubjectRepository.findOwner(group).getName();
                 if (rForm.getName().indexOf(owner) < 0) {
                     final String privateName = RequestUtils.message(request, "resource.group.name.private",
                         new Object[] { owner });

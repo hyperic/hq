@@ -41,7 +41,7 @@ import org.hyperic.hq.authz.server.session.ResourceGroup
 import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
 import org.hyperic.hq.authz.server.session.ResourceTypeFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupCreateInfo
-import org.hyperic.hq.agent.domain.Agent
+import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.appdef.shared.ServerManager;

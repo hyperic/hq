@@ -48,6 +48,7 @@ import org.hyperic.hq.common.ConfigProperty;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
+import org.hyperic.hq.config.data.ConfigPropertyRepository;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.util.ConfigPropertyException;
@@ -93,18 +94,18 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
 
     public static final String LOG_CTX = "org.hyperic.hq.common.server.session.ServerConfigManagerImpl";
     protected final Log log = LogFactory.getLog(LOG_CTX);
-    private ConfigPropertyDAO configPropertyDAO;
+    private ConfigPropertyRepository configPropertyRepository;
     private ServerConfigAuditFactory serverConfigAuditFactory;
     private ServerConfigCache serverConfigCache;
 
     @Autowired
     public ServerConfigManagerImpl(DBUtil dbUtil, AuthzSubjectManager authzSubjectManager,
-                                   ConfigPropertyDAO configPropertyDAO,
+                                   ConfigPropertyRepository configPropertyRepository,
                                    ServerConfigAuditFactory serverConfigAuditFactory,
                                    ServerConfigCache serverConfigCache) {
         this.dbUtil = dbUtil;
         this.authzSubjectManager = authzSubjectManager;
-        this.configPropertyDAO = configPropertyDAO;
+        this.configPropertyRepository = configPropertyRepository;
         this.serverConfigAuditFactory = serverConfigAuditFactory;
         this.serverConfigCache = serverConfigCache;
     }
@@ -227,7 +228,7 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
                 String propValue = (String) newProps.get(key);
                 // delete null values from prefixed properties
                 if (prefix != null && (propValue == null || propValue.equals("NULL"))) {
-                    configPropertyDAO.remove(configProp);
+                    configPropertyRepository.delete(configProp);
                     serverConfigCache.remove(key);
                 } else {
                     // non-prefixed properties never get deleted.
@@ -248,7 +249,12 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
                 String key = (String) propsToAdd.nextElement();
                 String propValue = tempProps.getProperty(key);
                 // create the new property
-                configPropertyDAO.create(prefix, key, propValue, propValue);
+                ConfigProperty prop = new ConfigProperty();
+                prop.setPrefix(prefix);
+                prop.setKey(key);
+                prop.setValue(propValue);
+                prop.setDefaultValue(propValue);
+                configPropertyRepository.save(prop);
                 serverConfigCache.put(key, propValue);
             }
         }
@@ -448,7 +454,7 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
     @Transactional(readOnly = true)
     public Collection<ConfigProperty> getConfigProperties() {
 
-        return configPropertyDAO.findAll();
+        return configPropertyRepository.findAllAndCache();
     }
 
     /**

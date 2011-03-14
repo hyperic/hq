@@ -44,47 +44,47 @@ import org.hyperic.util.data.IEventPoint;
 
 @Immutable
 @Entity
-@Table(name="EAM_EVENT_LOG")
+@Table(name = "EAM_EVENT_LOG")
 public class EventLog implements IEventPoint, Serializable {
-    
+
+    @Column(name = "DETAIL", nullable = false, length = 4000)
+    private String detail;
+
+    // Not persisted
+    private transient int eventId;
+
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "ID")
     private Integer id;
-    
-    @Column(name="DETAIL",nullable=false,length=4000)
-    private String   detail;
-    
-    @Column(name="TYPE",nullable=false,length=100)
-    private String   type;
-    
-    @Column(name="TIMESTAMP",nullable=false)
-    @Index(name="EVENT_LOG_IDX",columnNames={"TIMESTAMP","RESOURCE_ID"})
-    private long     timestamp;
-    
-    @Column(name="SUBJECT",length=100)
-    private String   subject;
-    
-    @Column(name="STATUS",length=100)
-    private String   status;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="RESOURCE_ID",nullable=false)
-    @Index(name="EVENT_LOG_RES_ID_IDX")
-    private Resource resource;
-    
-    @Column(name="INSTANCE_ID")
+
+    @Column(name = "INSTANCE_ID")
     private Integer instanceId;
-    
-    // Not persisted
-    private transient int     eventId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "RESOURCE_ID", nullable = false)
+    @Index(name = "EVENT_LOG_RES_ID_IDX")
+    private Resource resource;
+
+    @Column(name = "STATUS", length = 100)
+    private String status;
+
+    @Column(name = "SUBJECT", length = 100)
+    private String subject;
+
+    @Column(name = "TIMESTAMP", nullable = false)
+    @Index(name = "EVENT_LOG_IDX", columnNames = { "TIMESTAMP", "RESOURCE_ID" })
+    private long timestamp;
+
+    @Column(name = "TYPE", nullable = false, length = 100)
+    private String type;
 
     protected EventLog() {
     }
 
-    protected EventLog(Resource r, String subject, String type, String detail,
-                       long timestamp, String status, Integer instanceId) {
+    public EventLog(Resource r, String subject, String type, String detail, long timestamp,
+                       String status, Integer instanceId) {
         resource = r;
         this.subject = subject;
         this.type = type;
@@ -93,81 +93,7 @@ public class EventLog implements IEventPoint, Serializable {
         this.status = status;
         this.instanceId = instanceId;
     }
-    
-    
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Integer getInstanceId() {
-        return instanceId;
-    }
-
-    public void setInstanceId(Integer instanceId) {
-        this.instanceId = instanceId;
-    }
-
-    public String getDetail() {
-        return detail;
-    }
-    
-    protected void setDetail(String detail) {
-        this.detail = detail;
-    }
-    
-    public String getType() {
-        return type;
-    }
-    
-    protected void setType(String type) {
-        this.type = type;
-    }
-    
-    public long getTimestamp() {
-        return timestamp;
-    }
-    
-    protected void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
-    
-    public String getSubject() {
-        return subject;
-    }
-    
-    protected void setSubject(String subject) {
-        this.subject = subject;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-    
-    protected void setStatus(String status) {
-        this.status = status;
-    }
-    
-    public Resource getResource() {
-        return resource;
-    }
-    
-    protected void setResource(Resource r) {
-        resource = r;
-    }
-
-    public int getEventID() {
-        return eventId;
-    }
-
-    public void setEventID(int eventId) {
-        this.eventId = eventId;
-    }
-    
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
@@ -175,17 +101,86 @@ public class EventLog implements IEventPoint, Serializable {
         if (obj == null || !(obj instanceof EventLog)) {
             return false;
         }
-        Integer objId = ((EventLog)obj).getId();
-  
-        return getId() == objId ||
-        (getId() != null && 
-         objId != null && 
-         getId().equals(objId));     
+        Integer objId = ((EventLog) obj).getId();
+
+        return getId() == objId || (getId() != null && objId != null && getId().equals(objId));
+    }
+
+    public String getDetail() {
+        return detail;
+    }
+
+    public int getEventID() {
+        return eventId;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public Integer getInstanceId() {
+        return instanceId;
+    }
+
+    public Resource getResource() {
+        return resource;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public String getType() {
+        return type;
     }
 
     public int hashCode() {
         int result = 17;
-        result = 37*result + (getId() != null ? getId().hashCode() : 0);
-        return result;      
+        result = 37 * result + (getId() != null ? getId().hashCode() : 0);
+        return result;
+    }
+
+    protected void setDetail(String detail) {
+        this.detail = detail;
+    }
+
+    public void setEventID(int eventId) {
+        this.eventId = eventId;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setInstanceId(Integer instanceId) {
+        this.instanceId = instanceId;
+    }
+
+    protected void setResource(Resource r) {
+        resource = r;
+    }
+
+    protected void setStatus(String status) {
+        this.status = status;
+    }
+
+    protected void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    protected void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    protected void setType(String type) {
+        this.type = type;
     }
 }

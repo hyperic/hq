@@ -10,10 +10,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
-import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.inventory.data.ResourceDao;
@@ -21,12 +17,14 @@ import org.hyperic.hq.inventory.data.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
-import org.hyperic.hq.paging.PageInfo;
 import org.hyperic.util.pager.PageList;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -51,9 +49,6 @@ public class ResourceDaoIntegrationTest {
 
     private static final String SKU1 = "1234";
 
-    @PersistenceContext
-    private EntityManager entityManager;
-
     @Before
     public void initializeTestData() throws ApplicationException, NotFoundException {
         type = new ResourceType("TestType");
@@ -73,7 +68,7 @@ public class ResourceDaoIntegrationTest {
         resource2.setProperty(SKU, SKU1);
         Resource resource3 = new Resource("Not a service", type);
         resourceDao.persist(resource3);
-        PageInfo pageInfo = new PageInfo(0, 15, PageInfo.SORT_ASC, "name", String.class);
+        PageRequest pageInfo = new PageRequest(0, 15, new Sort("name"));
         PageList<Resource> actual = resourceDao.findByIndexedProperty(SKU, SKU1, pageInfo);
         List<Resource> expected = Arrays.asList(new Resource[] { resource2, resource1 });
         assertEquals(expected, actual);
@@ -89,7 +84,7 @@ public class ResourceDaoIntegrationTest {
         resource2.setProperty(SKU, SKU1);
         Resource resource3 = new Resource("Not a service", type);
         resourceDao.persist(resource3);
-        PageInfo pageInfo = new PageInfo(0, 15, PageInfo.SORT_DESC, "name", String.class);
+        PageRequest pageInfo = new PageRequest(0, 15, new Sort(Direction.DESC, "name"));
         PageList<Resource> actual = resourceDao.findByIndexedProperty(SKU, SKU1, pageInfo);
         List<Resource> expected = Arrays.asList(new Resource[] { resource1, resource2 });
         assertEquals(expected, actual);
@@ -106,7 +101,7 @@ public class ResourceDaoIntegrationTest {
         Resource resource3 = new Resource("Ummm", type);
         resourceDao.persist(resource3);
         resource3.setProperty(SKU, SKU1);
-        PageInfo pageInfo = new PageInfo(0, 2, PageInfo.SORT_ASC, "name", String.class);
+        PageRequest pageInfo = new PageRequest(0, 2, new Sort("name"));
         PageList<Resource> actual = resourceDao.findByIndexedProperty(SKU, SKU1, pageInfo);
         List<Resource> expected = Arrays.asList(new Resource[] { resource2, resource1 });
         assertEquals(expected, actual);
@@ -130,7 +125,7 @@ public class ResourceDaoIntegrationTest {
                 expected.add(resource);
             }
         }
-        PageInfo pageInfo = new PageInfo(1, 5, PageInfo.SORT_ASC, "name", String.class);
+        PageRequest pageInfo = new PageRequest(1, 5, new Sort("name"));
         PageList<Resource> actual = resourceDao.findByIndexedProperty(SKU, SKU1, pageInfo);
         assertEquals(expected, actual);
         assertEquals(11, actual.getTotalSize());
@@ -138,7 +133,7 @@ public class ResourceDaoIntegrationTest {
 
     @Test
     public void testFindByIndexedPropertyInvalidPropertyName() {
-        PageInfo pageInfo = new PageInfo(1, 5, PageInfo.SORT_ASC, "name", String.class);
+        PageRequest pageInfo = new PageRequest(1, 5, new Sort("name"));
         PageList<Resource> actual = resourceDao.findByIndexedProperty("foo", "bar", pageInfo);
         assertTrue(actual.isEmpty());
         assertEquals(0, actual.getTotalSize());
@@ -157,7 +152,7 @@ public class ResourceDaoIntegrationTest {
             resourceDao.persist(resource);
             resource.setProperty(SKU, SKU1);
         }
-        PageInfo pageInfo = new PageInfo(2, 5);
+        PageRequest pageInfo = new PageRequest(2, 5);
         PageList<Resource> actual = resourceDao.findByIndexedProperty(SKU, SKU1, pageInfo);
         assertEquals(1, actual.size());
         assertEquals(11, actual.getTotalSize());
@@ -165,8 +160,8 @@ public class ResourceDaoIntegrationTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testFindByIndexedPropertyInvalidSortType() {
-        PageInfo pageInfo = new PageInfo(2, 5, PageInfo.SORT_ASC, "name", String[].class);
-        resourceDao.findByIndexedProperty(SKU, SKU1, pageInfo);
+        PageRequest pageInfo = new PageRequest(2, 5, new Sort("name"));
+        resourceDao.findByIndexedProperty(SKU, new String[] {SKU1}, pageInfo);
     }
 
     @Test
@@ -265,23 +260,6 @@ public class ResourceDaoIntegrationTest {
         Resource resource3 = new Resource("Not a service", type);
         resourceDao.persist(resource3);
         assertEquals(new Long(3), resourceDao.count());
-    }
-
-    @Test
-    public void testFindByOwner() {
-        Resource resource1 = new Resource("Some Resource", type);
-        resourceDao.persist(resource1);
-        AuthzSubject bob = new AuthzSubject(true, "bob", "dev", "bob@bob.com", true, "Bob",
-            "Bobbins", "Bob", "123123123", "123123123", false);
-        entityManager.persist(bob);
-        bob.attach();
-        resource1.setOwner(bob);
-        Resource resource2 = new Resource("Another Resource", type);
-        resourceDao.persist(resource2);
-        resource2.setProperty(SKU, SKU1);
-        Resource resource3 = new Resource("Not a service", type);
-        resourceDao.persist(resource3);
-        assertEquals(1, resourceDao.findByOwner(bob).size());
     }
 
     @Test

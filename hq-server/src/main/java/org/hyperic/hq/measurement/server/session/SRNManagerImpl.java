@@ -34,14 +34,16 @@ import javax.persistence.EntityNotFoundException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
+import org.hyperic.hq.measurement.data.MeasurementRepository;
+import org.hyperic.hq.measurement.data.ScheduleRevNumRepository;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.SRNManager;
@@ -62,16 +64,21 @@ public class SRNManagerImpl implements SRNManager {
 
     private AuthzSubjectManager authzSubjectManager;
     private MeasurementManager measurementManager;
-    private ScheduleRevNumDAO scheduleRevNumDAO;
+    private ScheduleRevNumRepository scheduleRevNumRepository;
     private SRNCache srnCache;
+    private ResourceManager resourceManager;
+    private MeasurementRepository measurementRepository;
 
     @Autowired
     public SRNManagerImpl(AuthzSubjectManager authzSubjectManager, MeasurementManager measurementManager,
-                          ScheduleRevNumDAO scheduleRevNumDAO, SRNCache srnCache) {
+                          ScheduleRevNumRepository scheduleRevNumRepository, SRNCache srnCache, ResourceManager resourceManager, 
+                          MeasurementRepository measurementRepository) {
         this.authzSubjectManager = authzSubjectManager;
         this.measurementManager = measurementManager;
-        this.scheduleRevNumDAO = scheduleRevNumDAO;
+        this.scheduleRevNumRepository = scheduleRevNumRepository;
         this.srnCache = srnCache;
+        this.resourceManager = resourceManager;
+        this.measurementRepository = measurementRepository;
     }
 
     /**
@@ -85,7 +92,7 @@ public class SRNManagerImpl implements SRNManager {
             }
 
             log.info("Initializing SRN Cache.");
-            Collection<ScheduleRevNum> srns = scheduleRevNumDAO.findAll();
+            Collection<ScheduleRevNum> srns = scheduleRevNumRepository.findAll();
             log.info("Loaded " + srns.size() + " SRN entries.");
             for (ScheduleRevNum srn : srns) {
                 srnCache.put(srn);
@@ -93,16 +100,17 @@ public class SRNManagerImpl implements SRNManager {
 
             log.info("Fetching minimum metric collection intervals.");
 
-            Collection<Object[]> entities = scheduleRevNumDAO.getMinIntervals();
+            Collection<Object[]> entities = measurementRepository.getMinIntervals();
             log.info("Fetched " + entities.size() + " intervals.");
             final boolean debug = log.isDebugEnabled();
             for (Object[] ent : entities) {
-                AppdefEntityID entityId = AppdefUtil.newAppdefEntityId((Resource)ent[0]);
-                SrnId id = new SrnId(entityId.getType(),entityId.getID());
+                Resource resource = resourceManager.findResourceById((Integer)ent[0]);
+                AppdefEntityID entityId = AppdefUtil.newAppdefEntityId(resource);
+                SrnId id = new SrnId(entityId.getID());
                 ScheduleRevNum srn = srnCache.get(id);
                 if (srn == null) {
                     // Create the SRN if it does not exist.
-                    srn = scheduleRevNumDAO.create(entityId.getType(),entityId.getID());
+                    srn = create(entityId.getID());
                     srnCache.put(srn);
                 }
                 if (debug) {
@@ -132,9 +140,12 @@ public class SRNManagerImpl implements SRNManager {
      */
     @Transactional(noRollbackFor=EntityNotFoundException.class)
     public void removeSrn(AppdefEntityID aid) {
-        SrnId id = new SrnId(aid.getType(), aid.getID());
+        SrnId id = new SrnId(aid.getID());
         if (srnCache.remove(id)) {
-            scheduleRevNumDAO.remove(id);
+            ScheduleRevNum srn = scheduleRevNumRepository.findById(id);
+            if(srn != null) {
+                scheduleRevNumRepository.delete(srn);
+            }
         }
     }
 
@@ -146,8 +157,8 @@ public class SRNManagerImpl implements SRNManager {
      * @return The ScheduleRevNum for the given entity id
      */
     public int incrementSrn(AppdefEntityID aid, long newMin) {        
-        SrnId id = new SrnId(aid.getType(), aid.getID());
-        ScheduleRevNum srn = scheduleRevNumDAO.get(id);
+        SrnId id = new SrnId(aid.getID());
+        ScheduleRevNum srn = scheduleRevNumRepository.findById(id);
         final boolean debug = log.isDebugEnabled();
 
         // Create the SRN if it does not already exist.
@@ -156,7 +167,7 @@ public class SRNManagerImpl implements SRNManager {
             if (debug) {
                 log.debug("Creating SRN for appdef id=" + aid.getID());
             }
-            srn = scheduleRevNumDAO.create(aid.getType(), aid.getID());
+            srn = create(aid.getID());
             srnCache.put(srn);
             return srn.getSrn();
         }
@@ -173,7 +184,7 @@ public class SRNManagerImpl implements SRNManager {
                 srn.setMinInterval(newMin);
             } else {
                 // Set to default
-                Long defaultMin = scheduleRevNumDAO.getMinInterval(aid, true);
+                Long defaultMin = measurementRepository.getMinInterval(aid.getId());
                 // If this call to incrementSrn is due to the last metric
                 // for a resource being unscheduled it's possible for
                 // getMinInterval to return null if the session was flushed
@@ -185,6 +196,12 @@ public class SRNManagerImpl implements SRNManager {
             srnCache.put(srn);
         }
         return srn.getSrn();
+    }
+    
+    private ScheduleRevNum create(int resourceId) {
+        SrnId srnId = new SrnId(resourceId);
+        ScheduleRevNum srn = new ScheduleRevNum(srnId, 1);
+        return scheduleRevNumRepository.save(srn);
     }
 
     /**
@@ -257,7 +274,8 @@ public class SRNManagerImpl implements SRNManager {
         ArrayList<AppdefEntityID> toReschedule = new ArrayList<AppdefEntityID>(srns.size());
 
         for (ScheduleRevNum srn : srns) {
-            AppdefEntityID eid = new AppdefEntityID(srn.getId().getAppdefType(), srn.getId().getInstanceId());
+            Resource resource = resourceManager.findResourceById(srn.getId().getInstanceId());
+            AppdefEntityID eid = AppdefUtil.newAppdefEntityId(resource);
             // TODO: Generic disagree with comments
             toReschedule.add(eid);
         }
@@ -285,13 +303,13 @@ public class SRNManagerImpl implements SRNManager {
             long maxInterval = intervals * srn.getMinInterval();
             long curInterval = current - srn.getLastReported();
             if (debug) {
-                log.debug("Checking " + id.getAppdefType() + ":" + id.getInstanceId() + ", last heard from " +
+                log.debug("Checking " + ":" + id.getInstanceId() + ", last heard from " +
                           curInterval + "ms ago (max=" + maxInterval + ")");
             }
 
             if (curInterval > maxInterval) {
                 if (debug) {
-                    log.debug("Reschedule " + id.getAppdefType() + ":" + id.getInstanceId());
+                    log.debug("Reschedule " + id.getInstanceId());
                 }
                 toReschedule.add(srn);
             }
@@ -307,11 +325,11 @@ public class SRNManagerImpl implements SRNManager {
      * @return The new ScheduleRevNum object.
      */
     public ScheduleRevNum refreshSRN(AppdefEntityID eid) {
-        ScheduleRevNum srn = scheduleRevNumDAO.create(eid.getType(), eid.getID());
+        ScheduleRevNum srn = create( eid.getID());
 
         srnCache.put(srn);
 
-        Long min = scheduleRevNumDAO.getMinInterval(eid);
+        Long min = measurementRepository.getMinInterval(eid.getId());
         srn.setMinInterval(min.longValue());
 
         srnCache.put(srn);

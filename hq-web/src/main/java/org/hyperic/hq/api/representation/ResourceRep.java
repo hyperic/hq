@@ -18,8 +18,6 @@ public class ResourceRep implements SimpleRepresentation, LinkedRepresentation {
 	private String modifiedBy;
 	private Map<String, Object> properties;
 	private Map<String, Object> configs;
-	private AuthzSubjectRep owner;
-	private AgentRep agent;
 	private SimpleRep type;
 	private Map<String, String> links = new HashMap<String, String>();
 	
@@ -41,13 +39,7 @@ public class ResourceRep implements SimpleRepresentation, LinkedRepresentation {
 		links.put(RELATIONSHIPS_LABEL, LinkHelper.getCollectionUri(RESOURCES_LABEL, id, RELATIONSHIPS_LABEL));
 		
 		// Wrap connected domain objects and linkage if applicable...
-		if (resource.getAgent() != null) {
-			agent = new AgentRep(resource.getAgent());
-		}
 		
-		if (resource.getOwner() != null) {
-			owner = new AuthzSubjectRep(resource.getOwner());
-		}
 		
 		if (resource.getType() != null) {
 			type = new SimpleRep(new ResourceTypeRep(resource.getType()));
@@ -108,22 +100,6 @@ public class ResourceRep implements SimpleRepresentation, LinkedRepresentation {
 
 	public void setProperties(Map<String, Object> properties) {
 		this.properties = properties;
-	}
-
-	public AuthzSubjectRep getOwner() {
-		return owner;
-	}
-
-	public void setOwner(AuthzSubjectRep owner) {
-		this.owner = owner;
-	}
-
-	public AgentRep getAgent() {
-		return agent;
-	}
-
-	public void setAgent(AgentRep agent) {
-		this.agent = agent;
 	}
 
 	public SimpleRep getType() {

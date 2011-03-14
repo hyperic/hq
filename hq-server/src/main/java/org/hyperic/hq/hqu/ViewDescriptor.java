@@ -27,25 +27,25 @@ package org.hyperic.hq.hqu;
 import org.hyperic.hq.hqu.server.session.AttachType;
 
 public class ViewDescriptor {
-    private String       _path;
-    private String       _description;
-    private AttachType   _attachType;
+    private String       path;
+    private String       description;
+    private AttachType   attachType;
     
-    ViewDescriptor(String path, String description, AttachType type) {
-        _path        = path;
-        _description = description;
-        _attachType  = type;
+    public ViewDescriptor(String path, String description, AttachType type) {
+        this.path        = path;
+        this.description = description;
+        this.attachType  = type;
     }
     
     public String getPath() {
-        return _path;
+        return path;
     }
     
     public String getDescription() {
-        return _description;
+        return description;
     }
     
     public AttachType getAttachType() {
-        return _attachType;
+        return attachType;
     }
 }

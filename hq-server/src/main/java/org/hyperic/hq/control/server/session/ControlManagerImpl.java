@@ -64,6 +64,7 @@ import org.hyperic.hq.control.ControlEvent;
 import org.hyperic.hq.control.GroupControlActionResult;
 import org.hyperic.hq.control.agent.client.ControlCommandsClient;
 import org.hyperic.hq.control.agent.client.ControlCommandsClientFactory;
+import org.hyperic.hq.control.data.ControlHistoryRepository;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlManager;
 import org.hyperic.hq.control.shared.ControlScheduleManager;
@@ -100,7 +101,7 @@ public class ControlManagerImpl implements ControlManager {
 
     private ProductManager productManager;
     private ControlScheduleManager controlScheduleManager;
-    private ControlHistoryDAO controlHistoryDao;
+    private ControlHistoryRepository controlHistoryRepository;
     
 
     private ConfigManager configManager;
@@ -121,7 +122,7 @@ public class ControlManagerImpl implements ControlManager {
 
     @Autowired
     public ControlManagerImpl(ProductManager productManager, ControlScheduleManager controlScheduleManager,
-                              ControlHistoryDAO controlHistoryDao, 
+                              ControlHistoryRepository controlHistoryRepository, 
                               ConfigManager configManager, PlatformManager platformManager,
                               AuthzSubjectManager authzSubjectManager, PermissionManager permissionManager,
                               MessagePublisher messagePublisher,
@@ -133,7 +134,7 @@ public class ControlManagerImpl implements ControlManager {
                               ResourceManager resourceManager) {
         this.productManager = productManager;
         this.controlScheduleManager = controlScheduleManager;
-        this.controlHistoryDao = controlHistoryDao;
+        this.controlHistoryRepository = controlHistoryRepository;
         this.configManager = configManager;
         this.platformManager = platformManager;
         this.authzSubjectManager = authzSubjectManager;
@@ -509,7 +510,7 @@ public class ControlManagerImpl implements ControlManager {
         }
 
         Integer pk = new Integer(id);
-        ControlHistory cLocal = controlHistoryDao.get(pk);
+        ControlHistory cLocal = controlHistoryRepository.findById(pk);
         if (cLocal == null) {
             // We know the ID, this should not happen
             throw new SystemException(
@@ -528,7 +529,7 @@ public class ControlManagerImpl implements ControlManager {
 
         // Send a control event
         ControlEvent event = new ControlEvent(cLocal.getSubject(),  cLocal
-            .getEntityId(), cLocal.getAction(), cLocal.getScheduled().booleanValue(), cLocal.getDateScheduled(), status);
+            .getResource().getId(), cLocal.getAction(), cLocal.getScheduled().booleanValue(), cLocal.getDateScheduled(), status);
         event.setMessage(msg);
         messagePublisher.publishMessage(MessagePublisher.EVENTS_TOPIC, event);
     }
