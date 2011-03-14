@@ -48,9 +48,8 @@ public class AgentCommandsServer
     private AgentCommandsAPI verAPI;
     private Log              log;
     private AgentDaemon      agent;
-    //private AgentCommandsService agentCommandsService;
-    private AgentHandlerAmqpOperationCommandsService agentCommandsService;
-    
+    private AgentCommandsService agentCommandsService;
+
     public AgentCommandsServer(){
         this.verAPI = new AgentCommandsAPI();
         this.log    = LogFactory.getLog(this.getClass());
@@ -124,8 +123,7 @@ public class AgentCommandsServer
         try {
             agentTransportLifecycle = agent.getAgentTransportLifecycle();
 
-            agentCommandsService = new AgentHandlerAmqpOperationCommandsService(agent);
-            //agentCommandsService = new AgentCommandsService(agent);
+            agentCommandsService = new AgentCommandsService(agent);
         } catch (Exception e) {
             throw new AgentStartException("Unable to get agent transport lifecycle: "+
                                             e.getMessage());

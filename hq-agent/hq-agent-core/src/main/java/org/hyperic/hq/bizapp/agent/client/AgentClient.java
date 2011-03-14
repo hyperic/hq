@@ -36,8 +36,7 @@ import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.LegacyAgentCommandsClientImpl;
 import org.hyperic.hq.agent.server.AgentDaemon;
 import org.hyperic.hq.agent.server.LoggingOutputStream;
-import org.hyperic.hq.amqp.AgentAmqpCommandOperationService;
-import org.hyperic.hq.amqp.AgentPreSpringAmqpConfigurer;
+import org.hyperic.hq.amqp.AmqpCommandOperationService;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.agent.commands.CreateToken_args;
 import org.hyperic.hq.bizapp.agent.commands.CreateToken_result;
@@ -100,7 +99,6 @@ public class AgentClient {
 
     private static final String JAAS_CONFIG = "jaas.config";
 
-    private AgentPreSpringAmqpConfigurer preSpringAmqpAgentConfigurer;
     private AgentCommandsClient agtCommands; 
     private CommandsClient   camCommands; 
     private AgentConfig   config;
@@ -109,10 +107,8 @@ public class AgentClient {
     private boolean             nuking;
     private boolean             redirectedOutputs = false;
 
-    private AgentClient(AgentConfig config, SecureAgentConnection conn){
-        this.agtCommands = new AgentAmqpCommandOperationService(new LegacyAgentCommandsClientImpl(conn));
-        this.preSpringAmqpAgentConfigurer = new AgentPreSpringAmqpConfigurer();
-
+    public AgentClient(AgentConfig config, SecureAgentConnection conn){
+        this.agtCommands = new AmqpCommandOperationService(new LegacyAgentCommandsClientImpl(conn)); 
         //this.agtCommands = new LegacyAgentCommandsClientImpl(conn);
         this.camCommands = new CommandsClient(conn);
         this.config      = config;
@@ -120,17 +116,17 @@ public class AgentClient {
         this.nuking      = false;
     }
     
-    private long cmdPing(int numAttempts)  throws AgentConnectionException, AgentRemoteException {
-        log.info("*********cmdPing("+numAttempts+")");
+    public long cmdPing(int numAttempts)  throws AgentConnectionException, AgentRemoteException {
+        log.info("*********cmdPing()");
         log.info("AgentConfig="+config);
         AgentConnectionException lastExc;
 
         lastExc = new AgentConnectionException("Failed to connect to agent");
         while(numAttempts-- != 0){
             try {
-                log.info("*********executing this.agtCommands.ping()");
+                log.info("***executing this.agtCommands.ping()");
                 long duration = this.agtCommands.ping();
-                log.info("*********this.agtCommands.ping() returned " + duration);
+                log.info("***this.agtCommands.ping() returned " + duration);
                 return duration;
             } catch(AgentConnectionException exc){
                 // Loop around to the next attempt
@@ -213,7 +209,6 @@ public class AgentClient {
     {
         try {
             this.agtCommands.die();
-            this.preSpringAmqpAgentConfigurer.stop();
         } catch(AgentConnectionException exc){
             return; // If we can't connect then we know the agent is dead
         } catch(AgentRemoteException exc){
@@ -1003,7 +998,6 @@ public class AgentClient {
     private int cmdStart(boolean force) 
         throws AgentInvokeException
     {
-        this.preSpringAmqpAgentConfigurer.start();
         ServerSocket startupSock;
         ProviderInfo providerInfo;
         Properties bootProps;
@@ -1104,7 +1098,7 @@ public class AgentClient {
             return 1;
         }
     }
-
+ 
     /**
      * Initialize the AgentClient
      *
@@ -1113,7 +1107,7 @@ public class AgentClient {
      *
      * @return An initialized AgentClient
      */
-    private static AgentClient initializeAgent(boolean generateToken){
+    public static AgentClient initializeAgent(boolean generateToken){
         SecureAgentConnection conn;
         AgentConfig cfg;
         String connIp, listenIp, authToken;

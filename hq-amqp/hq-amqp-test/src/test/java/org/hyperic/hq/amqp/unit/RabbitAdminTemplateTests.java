@@ -25,19 +25,21 @@
 
 package org.hyperic.hq.amqp.unit;
 
-import org.hyperic.hq.amqp.admin.erlang.Node;
 import org.hyperic.hq.amqp.admin.RabbitAdminTemplate;
 import org.hyperic.hq.amqp.admin.erlang.BrokerStatus;
-
-import static org.junit.Assert.*;
-
+import org.hyperic.hq.amqp.admin.erlang.Node;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.List;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 /**
  * @author Helena Edelson
  */
+@Ignore
 public class RabbitAdminTemplateTests {
 
     private RabbitAdminTemplate adminTemplate = new RabbitAdminTemplate();

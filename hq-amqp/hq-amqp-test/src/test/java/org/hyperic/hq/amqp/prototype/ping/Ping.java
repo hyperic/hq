@@ -1,4 +1,4 @@
-package org.hyperic.hq.amqp.ping;
+package org.hyperic.hq.amqp.prototype.ping;
 
 import java.io.IOException;
 

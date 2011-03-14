@@ -1,4 +1,4 @@
-package org.hyperic.hq.amqp.ping;
+package org.hyperic.hq.amqp.prototype.ping;
 
 import com.rabbitmq.client.QueueingConsumer;
 
@@ -13,12 +13,11 @@ public class Server extends AbstractAmqpComponent implements Ping {
         super();
     }
 
-    public void listen() throws IOException, InterruptedException { 
-        QueueingConsumer serverConsumer = new QueueingConsumer(channel);
-        channel.basicConsume(serverQueue, true, serverConsumer);
+    public void listen() throws IOException, InterruptedException {
+        channel.basicConsume(serverQueue, true, queueingConsumer);
 
         while (true) {
-            QueueingConsumer.Delivery delivery = serverConsumer.nextDelivery();
+            QueueingConsumer.Delivery delivery = queueingConsumer.nextDelivery();
             String message = new String(delivery.getBody());
             if (message.length() > 0 && message.contains("agent:ping-request")) {
                 channel.basicPublish(agentExchange, routingKey, null, "agent:ping-response".getBytes());

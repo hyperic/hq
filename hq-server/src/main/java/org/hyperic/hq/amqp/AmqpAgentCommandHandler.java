@@ -31,15 +31,14 @@ public class AmqpAgentCommandHandler implements AsyncQueueConsumer {
         handleMessage(new String(message));
     }
 
-    /**
-     * TODO: if (unidirectional) return 0;
-     */
     private void handleAgentPing(String message) {
-        logger.info("***********server received message=" + message);
+        System.out.println("server received=" + message);
+        logger.info("***server received=" + message);
         try {
 
             operationService.send(Operations.AGENT_PING_RESPONSE);
-            logger.info("***********server sent response back=" + Operations.AGENT_PING_RESPONSE);
+            System.out.println("server sent=" + Operations.AGENT_PING_RESPONSE);
+            logger.info("***server sent=" + Operations.AGENT_PING_RESPONSE);
 
         } catch (Exception e) {
             handleException(e, Operations.AGENT_PING_RESPONSE);

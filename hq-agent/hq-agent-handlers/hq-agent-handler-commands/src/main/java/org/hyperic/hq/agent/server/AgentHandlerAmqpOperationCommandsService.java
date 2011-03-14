@@ -4,7 +4,6 @@ import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.commands.AgentReceiveFileData_args;
 import org.hyperic.hq.amqp.AmqpCommandOperationService;
-import org.springframework.util.Assert;
 
 import java.io.InputStream;
 
@@ -35,7 +34,7 @@ public class AgentHandlerAmqpOperationCommandsService extends AmqpCommandOperati
      * @throws AgentRemoteException
      */
     void agentSendFileData(AgentReceiveFileData_args data, InputStream stream) throws AgentRemoteException {
-        Assert.isInstanceOf(AgentCommandsService.class, legacyClient);
+        //Assert.isInstanceOf(AgentCommandsService.class, legacyClient);
         ((AgentCommandsService)legacyClient).agentSendFileData(data, stream);
     }
 

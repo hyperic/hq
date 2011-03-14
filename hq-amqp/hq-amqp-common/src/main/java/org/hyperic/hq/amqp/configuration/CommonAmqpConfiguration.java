@@ -12,22 +12,13 @@ import org.springframework.context.annotation.Configuration;
  * @author Helena Edelson
  */
 @Configuration
-public class CommonAmqpConfiguration {
+public class CommonAmqpConfiguration { 
 
-    /** to consume from the agent */
-    protected final String agentQueueName = "queues.agent";
+    protected final String routingKey = "ping";
 
-    /** to consume from the server */
-    protected final String serverQueueName = "queues.server";
+    protected final String agentExchange = "agent";
 
-    /** to send to a server */
-    protected final String serverDirectExchangeName = "exchanges.direct.server";
-
-    /** to send to an agent */
-    protected final String agentExchangeName = "exchanges.direct.agent";
-
-    protected final String fanoutExchangeName = "exchanges.fanout";    
-    protected final String agentSubscriptionName = "exchanges.topic.agent";
+    protected final String serverExchange = "server";
 
     @Bean
     public ConnectionFactory rabbitConnectionFactory() {
@@ -44,49 +35,31 @@ public class CommonAmqpConfiguration {
      */
     @Bean
     public DirectExchange serverExchange() {
-        DirectExchange e = new DirectExchange(serverDirectExchangeName, true, false);
+        DirectExchange e = new DirectExchange(serverExchange);
         amqpAdmin().declareExchange(e);
-        amqpAdmin().declareBinding(BindingBuilder.from(serverQueue()).to(e).with(serverQueue().getName()));
+        amqpAdmin().declareBinding(BindingBuilder.from(serverQueue()).to(e).with(routingKey));
         return e;
     }
 
     @Bean
-    public Queue anonymousQueue() { 
-        return amqpAdmin().declareQueue();
-    }
-
-    /**
-     * To consume from the server
-     */
-    @Bean
     public Queue serverQueue() { 
-        Queue queue = new Queue(serverQueueName);
-        amqpAdmin().declareQueue(queue);
-        return queue;
+        return amqpAdmin().declareQueue();
     }
 
     @Bean
     public DirectExchange agentExchange() {
-        DirectExchange e = new DirectExchange(agentExchangeName, true, false);
+        DirectExchange e = new DirectExchange(agentExchange);
         amqpAdmin().declareExchange(e);
-        amqpAdmin().declareBinding(BindingBuilder.from(agentQueue()).to(e).with(agentQueue().getName()));
-        //amqpAdmin().declareBinding(BindingBuilder.from(agentQueue()).to(serverExchange()).with(agentQueue().getName()));
+        amqpAdmin().declareBinding(BindingBuilder.from(agentQueue()).to(e).with(routingKey));
         return e;
     }
 
-    /**
-     * Server listens on this Queue
-     * @return
-     */
     @Bean
     public Queue agentQueue() {
-        Queue queue = new Queue(agentQueueName);
-        amqpAdmin().declareQueue(queue);
-        return queue;
+        return amqpAdmin().declareQueue();
     }
 
-    /* Specific Queues/Exchanges - these and their creation/binding
-       will be pulled out of Spring and done dynamically. */
+    /* temporary, for tests */
 
     @Bean
     public Queue directQueue() {
@@ -106,15 +79,16 @@ public class CommonAmqpConfiguration {
  
     @Bean
     public FanoutExchange fanoutExchange() {
-        FanoutExchange e = new FanoutExchange(fanoutExchangeName, true, false);
+        FanoutExchange e = new FanoutExchange("fanout", true, false);
         amqpAdmin().declareExchange(e);
         return e;
     }
 
     @Bean
     public TopicExchange topicExchange() {
-        TopicExchange e = new TopicExchange(agentSubscriptionName, true, false);
+        TopicExchange e = new TopicExchange("topic", true, false);
         amqpAdmin().declareExchange(e);
         return e;
     }
+ 
 }

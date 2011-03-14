@@ -1,6 +1,7 @@
-package org.hyperic.hq.amqp.ping;
+package org.hyperic.hq.amqp.prototype.ping;
 
 import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.QueueingConsumer;
 import org.hyperic.hq.amqp.core.SingleConnectionFactory;
 
 import java.io.IOException;
@@ -11,6 +12,8 @@ import java.io.IOException;
 public class AbstractAmqpComponent {
 
     protected Channel channel;
+
+    protected QueueingConsumer queueingConsumer;
 
     protected final String exchangeType = "direct";
 
@@ -27,6 +30,8 @@ public class AbstractAmqpComponent {
     public AbstractAmqpComponent() throws IOException {
         this.channel = new SingleConnectionFactory().newConnection().createChannel();
         System.out.println(channel);
+
+        this.queueingConsumer = new QueueingConsumer(channel);
 
         channel.exchangeDeclare(agentExchange, exchangeType, false);
         this.agentQueue = channel.queueDeclare().getQueue();

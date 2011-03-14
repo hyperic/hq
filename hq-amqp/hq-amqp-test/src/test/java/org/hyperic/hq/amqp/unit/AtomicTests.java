@@ -7,6 +7,7 @@ import com.rabbitmq.client.QueueingConsumer;
 import org.hyperic.hq.amqp.core.SingleConnectionFactory;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -16,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Helena Edelson
  */
+@Ignore
 public class AtomicTests {
 
     private Channel channel;

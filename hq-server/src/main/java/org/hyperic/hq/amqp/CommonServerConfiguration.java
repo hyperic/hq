@@ -43,8 +43,8 @@ public class CommonServerConfiguration extends CommonAmqpConfiguration {
     @Bean
     public RabbitTemplate serverRabbitTemplate() {
         RabbitTemplate template = new RabbitTemplate(rabbitConnectionFactory());
-        template.setExchange(agentExchangeName);
-        template.setRoutingKey(agentQueueName);
+        template.setExchange(agentExchange);
+        template.setRoutingKey(routingKey);
         return template;
     }
     
@@ -64,10 +64,10 @@ public class CommonServerConfiguration extends CommonAmqpConfiguration {
     }
 
     @Bean
-    public SimpleMessageListenerContainer agentListener() {
+    public SimpleMessageListenerContainer pingListener() {
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer(rabbitConnectionFactory());
         container.setMessageListener(new MessageListenerAdapter(amqpAgentCommandHandler()));
-        container.setQueues(agentQueue());
+        container.setQueues(serverQueue());
         return container;
     }
 }

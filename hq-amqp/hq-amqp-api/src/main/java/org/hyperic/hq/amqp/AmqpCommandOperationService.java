@@ -48,6 +48,8 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
 
     protected final Log logger = LogFactory.getLog(this.getClass());
 
+    protected SimplePingTemplate template;
+
     protected boolean unidirectional;
 
     /**
@@ -78,6 +80,11 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         this.operationService = operationService;
         this.unidirectional = agentUnidirectional;
         this.legacyClient = legacyClient;
+        this.template = new SimplePingTemplate();
+    }
+
+    public SimplePingTemplate getTemplate() {
+        return template;
     }
 
     /**
@@ -86,24 +93,18 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
      * @return duration
      * @see org.hyperic.hq.agent.client.AgentCommandsClient#ping()
      */
-    public long ping() {
-        /* The unidirectional client does not work yet: agent unaware of its token. */
+    public long ping() { 
+        logger.info("***.ping()");
         if (unidirectional) return 0;
-        logger.info("***********.ping()");
-        long sendTime = System.currentTimeMillis();
-        long duration = 0;
 
         try {
-
-            logger.info("Sending " + Operations.PING);
-            operationService.send(Operations.PING);
-            duration = System.currentTimeMillis() - sendTime;
-            logger.info("***********ping() executed, returning duration=" + duration);
-
-        } catch (Exception e) {
-            handleException(e, Operations.PING);
+            template.agentPing();
+            //return (legacyClient instanceof LegacyAgentCommandsClientImpl) ? template.agentPing() : template.ping();
         }
-        return duration;
+        catch (Exception e) {
+            handleException(e, Operations.PING);
+        } 
+        return 0;
     }
 
 
@@ -169,11 +170,22 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         logger.error(t.getClass().getSimpleName() + " thrown while executing " + operation, t);
     }
 
-    public void setUnidirectional(boolean unidirectional) {
-        this.unidirectional = unidirectional;
-    }
 
-    public void setLegacyClient(AgentCommandsClient legacyClient) {
-        this.legacyClient = legacyClient;
-    }
+
+    /* if (unidirectional) return 0;
+        logger.info("***********.ping()");
+        long sendTime = System.currentTimeMillis();
+        long duration = 0;
+
+        try {
+
+            logger.info("Sending " + Operations.PING);
+            operationService.send(Operations.PING);
+            duration = System.currentTimeMillis() - sendTime;
+            logger.info("***********ping() executed, returning duration=" + duration);
+
+        } catch (Exception e) {
+            handleException(e, Operations.PING);
+        }
+        return duration;*/
 }

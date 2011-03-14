@@ -33,6 +33,7 @@ import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Helena Edelson
  */
+@Ignore
 public class AmqpServerIntegrationTests extends BaseInfrastructureTest {
 
     @Autowired
