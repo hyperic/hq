@@ -4,12 +4,12 @@ public class AlertInfo {
     private final Integer _alertDefId;
     private final Long _ctime;
 
-    AlertInfo(Integer alertDefId, Long ctime) {
+    public AlertInfo(Integer alertDefId, Long ctime) {
         _alertDefId = alertDefId;
         _ctime = ctime;
     }
 
-    AlertInfo(Integer alertDefId, long ctime) {
+    public AlertInfo(Integer alertDefId, long ctime) {
         _alertDefId = alertDefId;
         _ctime = new Long(ctime);
     }

@@ -33,6 +33,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.alert.data.AlertRepository;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
@@ -71,14 +72,14 @@ public class EventLogManagerImpl implements EventLogManager {
 
     private ResourceManager resourceManager;
     
-    private AlertDAO alertDAO;
+    private AlertRepository alertRepository;
 
     @Autowired
     public EventLogManagerImpl(EventLogRepository eventLogDAO, ResourceManager resourceManager,
-                               AlertDAO alertDAO) {
+                               AlertRepository alertRepository) {
         this.eventLogDAO = eventLogDAO;
         this.resourceManager = resourceManager;
-        this.alertDAO = alertDAO;
+        this.alertRepository = alertRepository;
     }
 
     /**
@@ -148,11 +149,11 @@ public class EventLogManagerImpl implements EventLogManager {
         StopWatch watch = new StopWatch();
         if (debug) watch.markTimeBegin("findUnfixedAlertFiredEventLogs");
         final Map<Integer,AlertFiredEvent> alertFiredMap = new HashMap<Integer,AlertFiredEvent>();
-        final long ctime = alertDAO.getOldestUnfixedAlertTime();
+        final long ctime = alertRepository.getOldestUnfixedAlertTime();
         if (ctime == 0) {
             return new HashMap<Integer,AlertFiredEvent>(0,1);
         }
-        final Map<Integer,Map<AlertInfo,Integer>> alerts = alertDAO.getUnfixedAlertInfoAfter(ctime);
+        final Map<Integer,Map<AlertInfo,Integer>> alerts = alertRepository.getUnfixedAlertInfoAfter(ctime);
         List<EventLog> list = eventLogDAO.findByTimestampGreaterThanOrEqualToAndType(ctime, AlertFiredEvent.class.getName());
         for (EventLog log  : list ) {
                 if (log == null || log.getInstanceId() == null) {

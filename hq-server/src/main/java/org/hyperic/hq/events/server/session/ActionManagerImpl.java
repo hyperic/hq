@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.hyperic.hq.alert.data.ActionRepository;
+import org.hyperic.hq.alert.data.AlertRepository;
 import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.events.ActionConfigInterface;
 import org.hyperic.hq.events.shared.ActionManager;
@@ -51,12 +52,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ActionManagerImpl implements ActionManager {
     private ActionRepository actionRepository;
-    private AlertDAO alertDAO;
+    private AlertRepository alertRepository;
 
     @Autowired
-    public ActionManagerImpl(ActionRepository actionRepository, AlertDAO alertDAO) {
+    public ActionManagerImpl(ActionRepository actionRepository, AlertRepository alertRepository) {
         this.actionRepository = actionRepository;
-        this.alertDAO = alertDAO;
+        this.alertRepository = alertRepository;
     }
 
     /**
@@ -66,7 +67,11 @@ public class ActionManagerImpl implements ActionManager {
      */
     @Transactional(readOnly=true)
     public List<ActionValue> getActionsForAlert(int alertId) {
-        Alert alert = alertDAO.findById(new Integer(alertId));
+        Alert alert = alertRepository.findById(new Integer(alertId));
+        if(alert == null) {
+            throw new EntityNotFoundException("Alert with ID: " + 
+                alertId + " was not found");
+        }
         Collection<Action> actions = actionRepository.findByAlert(alert);
 
         return actionsToActionValues(actions);
@@ -128,12 +133,13 @@ public class ActionManagerImpl implements ActionManager {
         action.setClassName(val.getClassname());
         action.setConfig(val.getConfig());
         setParentAction(action, val.getParentId());
-        long mtime = System.currentTimeMillis();
+        
 
         // HQ 942: We have seen orphaned actions on upgrade from
         // 3.0.5 to 3.1.1 where the action has no associated alert def.
         // Prevent the NPE.
         //TODO?
+        //long mtime = System.currentTimeMillis();
 //        if (action.getAlertDefinition() != null) {
 //            action.getAlertDefinition().setMtime(mtime);
 //        }

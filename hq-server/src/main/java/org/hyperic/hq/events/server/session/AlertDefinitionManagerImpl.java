@@ -121,8 +121,6 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
 
     private AlertConditionRepository alertConditionRepository;
     
-    private AlertDAO alertDAO;
-    
     private MeasurementManager measurementManager;
 
     private RegisteredTriggerManager registeredTriggerManager;
@@ -143,7 +141,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
                                       AlertConditionRepository alertConditionRepository, 
                                       MeasurementManager measurementManager, RegisteredTriggerManager registeredTriggerManager,
                                       ResourceManager resourceManager, EscalationManager escalationManager,
-                                      AlertAuditFactory alertAuditFactory, AlertDAO alertDAO,
+                                      AlertAuditFactory alertAuditFactory,
                                       AuthzSubjectManager authzSubjectManager,
                                       AvailabilityDownAlertDefinitionCache availabilityDownAlertDefinitionCache) {
         this.alertPermissionManager = alertPermissionManager;
@@ -157,7 +155,6 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
         this.escalationManager = escalationManager;
         this.authzSubjectManager = authzSubjectManager;
         this.alertAuditFactory = alertAuditFactory;
-        this.alertDAO = alertDAO;
         this.availabilityDownAlertDefinitionCache = availabilityDownAlertDefinitionCache;
     }
 
@@ -1174,7 +1171,8 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
                 alertDefs.add(alertdef);
             }
             if (debug) watch.markTimeBegin("deleteByAlertDefinition");
-            alertDAO.deleteByAlertDefinitions(alertDefs);
+            //TODO IMPL?
+            //alertDAO.deleteByAlertDefinitions(alertDefs);
             if(debug) watch.markTimeEnd("deleteByAlertDefinition");
             
             if (debug) watch.markTimeBegin("loop");
