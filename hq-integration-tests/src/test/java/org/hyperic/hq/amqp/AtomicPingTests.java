@@ -9,20 +9,19 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.bizapp.agent.client.AgentClient;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
 import org.hyperic.hq.test.BaseInfrastructureTest;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.io.File;
 
 import static org.junit.Assert.assertTrue;
 
 /**
  * @author Helena Edelson
  */
-//@Ignore
+@Ignore
 public class AtomicPingTests extends BaseInfrastructureTest {
 
-    private final String AGENT_HOME = "/Users/hedelson/tools/hyperic/hq/agent-4.6.0.BUILD-SNAPSHOT";
+    private final String agent_home = "/path/to/agent/home";
 
     @Autowired
     protected AgentCommandsClientFactory factory;
@@ -36,9 +35,9 @@ public class AtomicPingTests extends BaseInfrastructureTest {
      */
     @Test
     public void agentPing() throws AgentConnectionException, AgentRemoteException, InterruptedException {
-        System.setProperty("agent.install.home", AGENT_HOME);
-        System.setProperty("agent.bundle.home", AGENT_HOME + File.separator + "bin");
-
+        System.setProperty("agent.install.home", agent_home);
+        System.setProperty("agent.bundle.home", agent_home + "/bin");
+      
         new Thread(new Runnable() {
             public void run() {
                 try {

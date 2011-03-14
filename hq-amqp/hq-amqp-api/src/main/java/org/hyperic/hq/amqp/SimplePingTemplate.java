@@ -55,7 +55,7 @@ public class SimplePingTemplate {
 
             long startTime = System.currentTimeMillis();
             channel.basicPublish(serverExchange, routingKey, null, Operations.AGENT_PING_REQUEST.getBytes());
-
+            System.out.println("agent sent=" + Operations.AGENT_PING_REQUEST);
             QueueingConsumer agentConsumer = new QueueingConsumer(channel);
             channel.basicConsume(agentQueue, true, agentConsumer);
 
@@ -63,7 +63,7 @@ public class SimplePingTemplate {
                 QueueingConsumer.Delivery delivery = agentConsumer.nextDelivery();
                 String message = new String(delivery.getBody());
                 long duration = System.currentTimeMillis() - startTime;
-                System.out.println("***agent received=" + message);
+                System.out.println("agent received=" + message);
                 logger.info("***agent received=" + message);
                 if (message.length() > 0 && message.contains(Operations.AGENT_PING_RESPONSE)) {
                     return duration;
