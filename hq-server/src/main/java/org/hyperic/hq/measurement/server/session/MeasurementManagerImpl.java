@@ -39,7 +39,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
-import org.hyperic.hq.agent.domain.Agent;
+import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.Application;
@@ -1116,7 +1116,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         removeMeasurementsFromCache(mids);
         enqueueZeventsForMeasScheduleCollectionDisabled(mids);
         ZeventManager.getInstance().enqueueEventAfterCommit(new AgentUnscheduleZevent(Collections.singletonList(aeid), 
-            res.getAgent().getAgentToken()));
+            agentManager.getAgent(res).getAgentToken()));
     }
 
     /**

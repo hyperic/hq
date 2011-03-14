@@ -35,6 +35,7 @@ public abstract class AppdefResource extends AppdefNamedBean
 {
     public static final String SORT_NAME = "SortName";
     private Resource _resource;
+    private String ownerName;
     
     /**
      * default constructor
@@ -51,6 +52,15 @@ public abstract class AppdefResource extends AppdefNamedBean
     protected void setResource(Resource resource) {
         _resource = resource;
     }
+    
+    public String getOwnerName() {
+        return ownerName;
+    }
+
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
+    }
+    
     /**
      * legacy entity bean code
      * @param obj

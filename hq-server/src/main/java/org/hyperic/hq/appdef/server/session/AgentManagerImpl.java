@@ -48,9 +48,10 @@ import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
 import org.hyperic.hq.agent.commands.AgentUpgrade_result;
-import org.hyperic.hq.agent.domain.Agent;
-import org.hyperic.hq.agent.domain.AgentType;
+import org.hyperic.hq.agent.mgmt.data.AgentRepository;
 import org.hyperic.hq.agent.mgmt.data.AgentTypeRepository;
+import org.hyperic.hq.agent.mgmt.domain.Agent;
+import org.hyperic.hq.agent.mgmt.domain.AgentType;
 import org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection;
 import org.hyperic.hq.appdef.shared.AgentCreateException;
 import org.hyperic.hq.appdef.shared.AgentManager;
@@ -60,10 +61,12 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.inventory.data.ResourceDao;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
@@ -72,7 +75,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.core.io.Resource;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -89,7 +91,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
 
     private final Log log = LogFactory.getLog(AgentManagerImpl.class.getName());
     private AgentTypeRepository agentTypeRepository;
-    private AgentDAO agentDao;
+    private AgentRepository agentDao;
     private PermissionManager permissionManager;
     private ServerConfigManager serverConfigManager;
     private AgentCommandsClientFactory agentCommandsClientFactory;
@@ -98,7 +100,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
 
     @Autowired
     public AgentManagerImpl(AgentTypeRepository agentTypeRepository,
-                            AgentDAO agentDao, 
+                            AgentRepository agentDao, 
                             PermissionManager permissionManager, 
                             ServerConfigManager serverConfigManager,
                             AgentCommandsClientFactory agentCommandsClientFactory,
@@ -115,7 +117,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * Grab an agent object by ip:port
      */
     private Agent getAgentInternal(String ip, int port) throws AgentNotFoundException {
-        Agent agent = agentDao.findByIpAndPort(ip, port);
+        Agent agent = agentDao.findByAddressAndPort(ip, port);
         if (agent == null) {
             throw new AgentNotFoundException("Agent at " + ip + ":" + port + " not found");
         }
@@ -138,7 +140,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     /**
      */
     public void removeAgent(Agent agent) {
-        agentDao.remove(agent);
+        agentDao.delete(agent);
     }
 
     /**
@@ -154,7 +156,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      */
     @Transactional(readOnly = true)
     public int getAgentCount() {
-        return agentDao.size();
+        return agentDao.count().intValue();
     }
 
     /**
@@ -202,8 +204,9 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         if (type == null) {
             throw new SystemException("Unable to find agent type '" + HQ_AGENT_REMOTING_TYPE + "'");
         }
-        Agent agent = agentDao.create(type, address, port, unidirectional, authToken, agentToken,
+        Agent agent = new Agent(type, address, port, unidirectional, authToken, agentToken,
             version);
+        agentDao.save(agent);
         logAgentWarning(address, port.intValue(), unidirectional);
         try {
             applicationContext.publishEvent(new AgentCreatedEvent(agent));
@@ -223,7 +226,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         if (type == null) {
             throw new SystemException("Unable to find agent type '" + CAM_AGENT_TYPE + "'");
         }
-        Agent agent = agentDao.create(type, address, port, false, authToken, agentToken, version);
+        Agent agent = new Agent(type, address, port, false, authToken, agentToken, version);
+        agentDao.save(agent);
         logAgentWarning(address, port.intValue(), false);
         try {
             applicationContext.publishEvent(new AgentCreatedEvent(agent));
@@ -341,7 +345,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      */
     @Transactional(readOnly = true)
     public List<Agent> findAgentsByIP(String ip) {
-        return agentDao.findByIP(ip);
+        return agentDao.findByAddress(ip);
     }
 
     /**
@@ -468,7 +472,11 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      */
     @Transactional(readOnly = true)
     public Agent findAgent(Integer id) {
-        return agentDao.findById(id);
+        Agent agent = agentDao.findById(id);
+        if(agent == null) {
+            throw new EntityNotFoundException("Agent with ID: " + id + " was not found");
+        }
+        return agent;
     }
 
     /**
@@ -476,7 +484,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      */
     @Transactional(readOnly = true)
     public Agent getAgent(Integer id) {
-        return agentDao.get(id);
+        return agentDao.findById(id);
     }
 
     /**
@@ -485,11 +493,16 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      */
     @Transactional(readOnly = true)
     public Agent getAgent(AppdefEntityID aID) throws AgentNotFoundException {
-        try {
-            return resourceDao.findById(aID.getId()).getAgent();
-        } catch (ObjectNotFoundException exc) {
-            throw new AgentNotFoundException("No agent found for " + aID);
-        }
+       Agent agent = getAgent(resourceDao.findById(aID.getId()));
+       if(agent == null) {
+           throw new AgentNotFoundException("No agent found for Resource: " +  aID);
+       }
+       return agent;
+    }
+    
+    @Transactional(readOnly = true)
+    public Agent getAgent(Resource resource)  {
+        return agentDao.findManagingAgent(resource);
     }
 
     /**
@@ -780,7 +793,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
 
         // perform some basic error checking before enqueueing.
 
-        Resource pluginFile = applicationContext.getResource("WEB-INF" + HQ_PLUGINS_DIR + "/" +
+        org.springframework.core.io.Resource pluginFile = applicationContext.getResource("WEB-INF" + HQ_PLUGINS_DIR + "/" +
                                                              plugin);
         if (!pluginFile.exists()) {
             throw new FileNotFoundException("Plugin " + plugin + " could not be found");
@@ -873,7 +886,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     /**
      * Pings the specified agent.
      * @see org.hyperic.hq.appdef.server.session.AgentManagerImpl#pingAgent(org.hyperic.hq.auth.domain.AuthzSubject,
-     *      org.hyperic.hq.agent.domain.Agent)
+     *      org.hyperic.hq.agent.mgmt.domain.Agent)
      */
     @Transactional(readOnly=true)
     public long pingAgent(AuthzSubject subject, AppdefEntityID id) throws AgentNotFoundException,
@@ -920,7 +933,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      * Simply logs if the new agent may conflict with an existing agent
      */
     private void logAgentWarning(String ip, int port, boolean unidirectional) {
-        Collection<Agent> agents = agentDao.findByIP(ip);
+        Collection<Agent> agents = agentDao.findByAddress(ip);
         if (agents.size() == 0) {
             return;
         }

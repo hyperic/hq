@@ -38,7 +38,8 @@ import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
-import org.hyperic.hq.agent.domain.Agent;
+import org.hyperic.hq.agent.mgmt.data.AgentRepository;
+import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
@@ -106,7 +107,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
     private AIAuditFactory aiAuditFactory;
     private AIQResourceVisitorFactory aiqResourceVisitorFactory;
     protected final Log log = LogFactory.getLog(AIQueueManagerImpl.class.getName());
-    private AgentDAO agentDAO;
+    private AgentRepository agentDAO;
 
     @Autowired
     public AIQueueManagerImpl(AIServerRepository aiServerRepository, AIIpRepository aiIpRepository,
@@ -115,7 +116,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
                               AuditManager auditManager, AuthzSubjectManager authzSubjectManager,
                               AgentCommandsClientFactory agentCommandsClientFactory,
                               AgentManager agentManager, AIAuditFactory aiAuditFactory,
-                              AIQResourceVisitorFactory aiqResourceVisitorFactory, AgentDAO agentDAO) {
+                              AIQResourceVisitorFactory aiqResourceVisitorFactory, AgentRepository agentDAO) {
 
         this.aiServerRepository = aiServerRepository;
         this.aiIpRepository = aiIpRepository;

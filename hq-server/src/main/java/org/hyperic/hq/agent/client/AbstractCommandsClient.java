@@ -33,7 +33,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.agent.domain.Agent;
+import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.transport.AgentProxyFactory;
 import org.hyperic.hq.transport.util.TimeoutException;
 import org.hyperic.hq.transport.util.TransportUtils;

@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.calendar.domain;
+package org.hyperic.hq.auth.domain;
 
 import java.util.Calendar;
 
@@ -57,7 +57,7 @@ public class WeekEntry
     
     protected WeekEntry() {}
 
-    WeekEntry(org.hyperic.hq.calendar.domain.Calendar c, int weekDay, 
+    WeekEntry(org.hyperic.hq.auth.domain.Calendar c, int weekDay, 
               int startTime, int endTime) 
     {
         super(c);

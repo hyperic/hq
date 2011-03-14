@@ -1,11 +1,8 @@
 package org.hyperic.hq.inventory.data;
 
-import java.util.List;
-
-import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.hq.paging.PageInfo;
 import org.hyperic.util.pager.PageList;
+import org.springframework.data.domain.Pageable;
 
 /**
  * 
@@ -25,14 +22,7 @@ public interface ResourceDao extends GenericDao<Resource> {
      * @return A paged list of Resource search results
      */
     PageList<Resource> findByIndexedProperty(String propertyName, Object propertyValue,
-                                             PageInfo pageInfo);
-
-    /**
-     * 
-     * @param owner The user who owns the Resource
-     * @return Resources owned by the specified user
-     */
-    List<Resource> findByOwner(AuthzSubject owner);
+                                             Pageable pageInfo);
 
     /**
      * 

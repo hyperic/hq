@@ -32,6 +32,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.auth.data.AuthzSubjectRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.auth.server.session.UserAuditFactory;
 import org.hyperic.hq.auth.shared.SubjectNotFoundException;
@@ -40,6 +41,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.shared.CrispoManager;
 import org.hyperic.hq.config.domain.Crispo;
@@ -67,14 +69,14 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
 
     private static final String SUBJECT_PAGER = PagerProcessor_subject.class.getName();
     private Pager subjectPager;
-    private AuthzSubjectDAO authzSubjectDAO;
+    private AuthzSubjectRepository authzSubjectDAO;
     private CrispoManager crispoManager;
     private PermissionManager permissionManager;
     private UserAuditFactory userAuditFactory;
     private ApplicationContext applicationContext;
 
     @Autowired
-    public AuthzSubjectManagerImpl(AuthzSubjectDAO authzSubjectDAO,
+    public AuthzSubjectManagerImpl(AuthzSubjectRepository authzSubjectDAO,
                                    CrispoManager crispoManager,
                                    PermissionManager permissionManager,
                                    UserAuditFactory userAuditFactory) {
@@ -102,7 +104,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
     @Transactional(readOnly = true)
     public AuthzSubject findSubjectByAuth(String name, String authDsn)
         throws SubjectNotFoundException {
-        AuthzSubject subject = authzSubjectDAO.findByAuth(name, authDsn);
+        AuthzSubject subject = authzSubjectDAO.findByNameAndDsn(name, authDsn);
         if (subject == null) {
             throw new SubjectNotFoundException("Can't find subject: name=" + name + ",authDsn=" +
                                                authDsn);
@@ -129,10 +131,12 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
         if (existing != null) {
             throw new ApplicationException("A system user already exists with " + name);
         }
-
-        AuthzSubject subjectPojo = authzSubjectDAO.create(whoami, name, active, dsn, dept, email,
-            first, last, phone, sms, html);
-
+        
+        Crispo c = crispoManager.create(new ConfigResponse());
+        AuthzSubject subjectPojo = new AuthzSubject(active, dsn, dept, email, html, first, last, name, phone, sms, false);
+        subjectPojo.setPrefs(c);
+        subjectPojo = authzSubjectDAO.save(subjectPojo);
+       
         userAuditFactory.createAudit(whoami, subjectPojo);
         return subjectPojo;
     }
@@ -242,6 +246,10 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
         }
 
         AuthzSubject toDelete = authzSubjectDAO.findById(subject);
+        if(toDelete == null) {
+            throw new EntityNotFoundException("AuthzSubject with ID: " + 
+                subject + " was not found");
+        }
 
         // XXX Should we do anything special for the "suicide" case?
         // Perhaps a _log message?
@@ -252,12 +260,12 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
 //                AuthzConstants.rootResourceId, AuthzConstants.perm_removeSubject);
 //        }
 
-        // Reassign all resources to the root user before deleting
-        authzSubjectDAO.reassignResources(subject.intValue(), AuthzConstants.rootSubjectId.intValue());
+        // TODO Reassign all resources to the root user before deleting
+        //authzSubjectDAO.reassignResources(subject.intValue(), AuthzConstants.rootSubjectId.intValue());
 
         applicationContext.publishEvent(new SubjectDeleteRequestedEvent(toDelete));
-     
-        authzSubjectDAO.remove(toDelete);
+     crispoManager.deleteCrispo(toDelete.getPrefs());
+        authzSubjectDAO.delete(toDelete);
     }
 
     /**
@@ -265,7 +273,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
      */
     @Transactional(readOnly = true)
     public AuthzSubject findByAuth(String name, String authDsn) {
-        return authzSubjectDAO.findByAuth(name, authDsn);
+        return authzSubjectDAO.findByNameAndDsn(name, authDsn);
     }
 
     /**
@@ -284,7 +292,12 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
 
     @Transactional(readOnly = true)
     public AuthzSubject findSubjectById(Integer id) {
-        return authzSubjectDAO.findById(id);
+        AuthzSubject subj = authzSubjectDAO.findById(id);
+        if(subj == null) {
+            throw new EntityNotFoundException("AuthzSubject with ID: " + 
+                id + " was not found");
+        }
+        return subj;
     }
     
     @Transactional(readOnly = true)
@@ -297,7 +310,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
      */
     @Transactional(readOnly = true)
     public AuthzSubject getSubjectById(Integer id) {
-        return authzSubjectDAO.get(id);
+        return authzSubjectDAO.findById(id);
     }
 
     /** 
@@ -322,7 +335,9 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
      */
     @Transactional(readOnly = true)
     public PageList<AuthzSubject> findMatchingName(String name, PageControl pc) {
-        return authzSubjectDAO.findMatchingName(name, pc);
+        return new PageList<AuthzSubject>();
+        //TODO Impl
+        //return authzSubjectDAO.findMatchingName(name, pc);
     }
 
     /**
@@ -340,7 +355,11 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
         // if a user does not have permission to view subjects,
         // all they can see is their own entry.
         AuthzSubject who = authzSubjectDAO.findById(whoami.getId());
-        Collection<AuthzSubject> subjects;
+        if(who == null) {
+            throw new EntityNotFoundException("AuthzSubject with ID: " + 
+                whoami.getId() + " was not found");
+        }
+        Collection<AuthzSubject> subjects = new ArrayList<AuthzSubject>();
         //try {
             //TODO perm check
             //permissionManager.check(whoami.getId(), ResourceType.findTypeResourceType(),
@@ -361,33 +380,33 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
 //            return plist;
 //        }
 
-        switch (pc.getSortattribute()) {
-            case SortAttribute.SUBJECT_NAME:
-                if (who.isRoot())
-                    subjects = authzSubjectDAO.findAllRoot_orderName(excludes, pc.isAscending());
-                else
-                    subjects = authzSubjectDAO.findAll_orderName(excludes, pc.isAscending());
-                break;
-
-            case SortAttribute.FIRST_NAME:
-                if (who.isRoot())
-                    subjects = authzSubjectDAO.findAllRoot_orderFirstName(excludes, pc
-                        .isAscending());
-                else
-                    subjects = authzSubjectDAO.findAll_orderFirstName(excludes, pc.isAscending());
-                break;
-
-            case SortAttribute.LAST_NAME:
-                if (who.isRoot())
-                    subjects = authzSubjectDAO
-                        .findAllRoot_orderLastName(excludes, pc.isAscending());
-                else
-                    subjects = authzSubjectDAO.findAll_orderLastName(excludes, pc.isAscending());
-                break;
-
-            default:
-                throw new NotFoundException("Unrecognized sort attribute: " + pc.getSortattribute());
-        }
+//        switch (pc.getSortattribute()) {
+//            case SortAttribute.SUBJECT_NAME:
+//                if (who.isRoot())
+//                    subjects = authzSubjectDAO.findAllRoot_orderName(excludes, pc.isAscending());
+//                else
+//                    subjects = authzSubjectDAO.findAll_orderName(excludes, pc.isAscending());
+//                break;
+//
+//            case SortAttribute.FIRST_NAME:
+//                if (who.isRoot())
+//                    subjects = authzSubjectDAO.findAllRoot_orderFirstName(excludes, pc
+//                        .isAscending());
+//                else
+//                    subjects = authzSubjectDAO.findAll_orderFirstName(excludes, pc.isAscending());
+//                break;
+//
+//            case SortAttribute.LAST_NAME:
+//                if (who.isRoot())
+//                    subjects = authzSubjectDAO
+//                        .findAllRoot_orderLastName(excludes, pc.isAscending());
+//                else
+//                    subjects = authzSubjectDAO.findAll_orderLastName(excludes, pc.isAscending());
+//                break;
+//
+//            default:
+//                throw new NotFoundException("Unrecognized sort attribute: " + pc.getSortattribute());
+//        }
 
         return subjectPager.seek(subjects, pc.getPagenum(), pc.getPagesize());
     }
@@ -411,9 +430,9 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
             return new PageList<AuthzSubject>();
         }
 
-        // find the requested subjects
-        PageList<AuthzSubject> subjects = authzSubjectDAO.findById_orderName(ids, pc);
-
+        // TODO find the requested subjects
+        //PageList<AuthzSubject> subjects = authzSubjectDAO.findById_orderName(ids, pc);
+        PageList<AuthzSubject> subjects = new PageList<AuthzSubject>();
         // check permission unless the list includes only the id of
         // the subject being requested. This is ugly mostly because
         // we're using a list api to possibly look up a single Item
@@ -438,6 +457,10 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
     @Transactional(readOnly = true)
     public String getEmailById(Integer id) {
         AuthzSubject subject = authzSubjectDAO.findById(id);
+        if(subject == null) {
+            throw new EntityNotFoundException("AuthzSubject with ID: " + 
+                id + " was not found");
+        }
         return subject.getEmailAddress();
     }
 
@@ -468,6 +491,10 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
         }
 
         AuthzSubject targ = authzSubjectDAO.findById(subjId);
+        if(targ == null) {
+            throw new EntityNotFoundException("AuthzSubject with ID: " + 
+                subjId + " was not found");
+        }
         Crispo c = targ.getPrefs();
         if (c == null)
             return new ConfigResponse();
@@ -489,7 +516,10 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
         }
 
         AuthzSubject targ = authzSubjectDAO.findById(subjId);
-
+        if(targ == null) {
+            throw new EntityNotFoundException("AuthzSubject with ID: " + 
+                subjId + " was not found");
+        }
         if (targ.getPrefs() != null)
             crispoManager.update(targ.getPrefs(), prefs);
         else {
@@ -513,6 +543,10 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
     @Transactional(readOnly = true)
     public AuthzSubject getOverlordPojo() {
         AuthzSubject overlord = authzSubjectDAO.findById(AuthzConstants.overlordId);
+        if(overlord == null) {
+            throw new EntityNotFoundException("AuthzSubject with ID: " + 
+                AuthzConstants.overlordId + " was not found");
+        }
         //initialize name to pass Subject b/w method during non-tx testing
         overlord.getName();
         return overlord;

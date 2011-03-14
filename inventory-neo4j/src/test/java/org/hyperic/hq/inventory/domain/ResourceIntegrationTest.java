@@ -13,7 +13,6 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.inventory.InvalidRelationshipException;
@@ -290,31 +289,6 @@ public class ResourceIntegrationTest {
     }
 
     @Test
-    public void testIsOwner() {
-        AuthzSubject bob = new AuthzSubject(true, "bob", "dev", "bob@bob.com", true, "Bob",
-            "Bobbins", "Bob", "123123123", "123123123", false);
-        entityManager.persist(bob);
-        bob.attach();
-        traderJoes.setOwner(bob);
-        assertTrue(traderJoes.isOwner(bob.getId()));
-    }
-
-    @Test
-    public void testIsOwnerNoOwner() {
-        assertFalse(traderJoes.isOwner(7899));
-    }
-
-    @Test
-    public void testIsOwnerNotOwner() {
-        AuthzSubject bob = new AuthzSubject(true, "bob", "dev", "bob@bob.com", true, "Bob",
-            "Bobbins", "Bob", "123123123", "123123123", false);
-        entityManager.persist(bob);
-        bob.getId();
-        traderJoes.setOwner(bob);
-        assertFalse(traderJoes.isOwner(967));
-    }
-
-    @Test
     public void testIsRelatedToIncoming() {
         assertFalse(produce.isRelatedTo(traderJoes, RelationshipTypes.CONTAINS));
     }
@@ -459,10 +433,10 @@ public class ResourceIntegrationTest {
     public void testGetConfigInvalidType() {
         assertNull(traderJoes.getConfig("Measurement"));
     }
-    
-    @Test(expected=NotUniqueException.class)
+
+    @Test(expected = NotUniqueException.class)
     public void testPersistResourceAlreadyExists() {
-        resourceDao.persist(new Resource("Trader Joes",store));
+        resourceDao.persist(new Resource("Trader Joes", store));
     }
 
 }

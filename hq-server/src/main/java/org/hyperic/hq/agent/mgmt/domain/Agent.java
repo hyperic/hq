@@ -23,14 +23,21 @@
  * USA.
  */
 
-package org.hyperic.hq.agent.domain;
+package org.hyperic.hq.agent.mgmt.domain;
+
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
@@ -39,31 +46,32 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
-import org.springframework.data.graph.annotation.NodeEntity;
+import org.hyperic.hq.inventory.domain.Resource;
 
 @Entity
 @Table(name = "EAM_AGENT")
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-@NodeEntity(partial = true)
-public class Agent implements ContainerManagedTimestampTrackable {
+public class Agent implements ContainerManagedTimestampTrackable, Serializable {
 
     @Column(name = "ADDRESS", length = 255, nullable = false)
     private String address;
 
-    @Column(name = "PORT", nullable = false)
-    private Integer port;
-
-    @Column(name = "AUTHTOKEN", length = 100, nullable = false)
-    private String authToken;
-
     @Column(name = "AGENTTOKEN", length = 100, nullable = false, unique = true)
     private String agentToken;
+
+    @ManyToOne
+    @JoinColumn(name = "AGENT_TYPE_ID")
+    @Index(name = "AGENT_TYPE_ID_IDX")
+    private AgentType agentType;
 
     @Column(name = "VERSION", length = 50)
     private String agentVersion;
 
-    @Column(name = "UNIDIRECTIONAL", nullable = false)
-    private boolean unidirectional;
+    @Column(name = "AUTHTOKEN", length = 100, nullable = false)
+    private String authToken;
+
+    @Column(name = "CTIME")
+    private Long creationTime;
 
     @Id
     @GenericGenerator(name = "mygen1", strategy = "increment")
@@ -71,18 +79,20 @@ public class Agent implements ContainerManagedTimestampTrackable {
     @Column(name = "ID")
     private Integer id;
 
-    @ManyToOne
-    @JoinColumn(name = "AGENT_TYPE_ID")
-    @Index(name = "AGENT_TYPE_ID_IDX")
-    private AgentType agentType;
-
-    @Column(name = "CTIME")
-    private Long creationTime;
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "MANAGED_RESOURCES", joinColumns = { @JoinColumn(name = "AGENT_ID") }, inverseJoinColumns = { @JoinColumn(name = "RESOURCE_ID") })
+    private Set<Resource> managedResources = new HashSet<Resource>();
 
     @Column(name = "MTIME")
     private Long modifiedTime;
 
-    @Column(name = "VERSION_COL",nullable=false)
+    @Column(name = "PORT", nullable = false)
+    private Integer port;
+
+    @Column(name = "UNIDIRECTIONAL", nullable = false)
+    private boolean unidirectional;
+
+    @Column(name = "VERSION_COL", nullable = false)
     @Version
     private Long version;
 
@@ -100,60 +110,95 @@ public class Agent implements ContainerManagedTimestampTrackable {
         this.agentVersion = version;
     }
 
-    public Integer getId() {
-        return id;
+    public void addManagedResource(Resource resource) {
+        managedResources.add(resource);
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public boolean allowContainerManagedCreationTime() {
+        return true;
+    }
+
+    public boolean allowContainerManagedLastModifiedTime() {
+        return true;
+    }
+
+    public String connectionString() {
+        return getAddress() + ":" + getPort();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Agent other = (Agent) obj;
+        if (creationTime == null) {
+            if (other.creationTime != null)
+                return false;
+        } else if (!creationTime.equals(other.creationTime))
+            return false;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        return true;
     }
 
     public String getAddress() {
         return address;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public Integer getPort() {
-        return port;
-    }
-
-    public void setPort(Integer port) {
-        this.port = port;
-    }
-
-    public String getAuthToken() {
-        return authToken;
-    }
-
-    public void setAuthToken(String authToken) {
-        this.authToken = authToken;
-    }
-
     public String getAgentToken() {
         return agentToken;
     }
 
-    public void setAgentToken(String agentToken) {
-        this.agentToken = agentToken;
+    public AgentType getAgentType() {
+        return agentType;
     }
 
     public String getAgentVersion() {
         return agentVersion;
     }
 
-    public void setAgentVersion(String version) {
-        this.agentVersion = version;
+    public String getAuthToken() {
+        return authToken;
     }
 
-    public boolean isUnidirectional() {
-        return unidirectional;
+    public long getCreationTime() {
+        return creationTime != null ? creationTime.longValue() : 0;
     }
 
-    public void setUnidirectional(boolean unidirectional) {
-        this.unidirectional = unidirectional;
+    public Integer getId() {
+        return id;
+    }
+
+    public Set<Resource> getManagedResources() {
+        return managedResources;
+    }
+
+    public long getModifiedTime() {
+        return modifiedTime != null ? modifiedTime.longValue() : 0;
+    }
+
+    public Integer getPort() {
+        return port;
+    }
+
+    public long getVersion() {
+        return version != null ? version.longValue() : 0;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((creationTime == null) ? 0 : creationTime.hashCode());
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        return result;
     }
 
     public boolean isNewTransportAgent() {
@@ -166,36 +211,52 @@ public class Agent implements ContainerManagedTimestampTrackable {
         return false;
     }
 
-    public AgentType getAgentType() {
-        return agentType;
+    public boolean isUnidirectional() {
+        return unidirectional;
+    }
+
+    public void removeManagedResource(Resource resource) {
+        managedResources.remove(resource);
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public void setAgentToken(String agentToken) {
+        this.agentToken = agentToken;
     }
 
     public void setAgentType(AgentType agentType) {
         this.agentType = agentType;
     }
 
-    public String connectionString() {
-        return getAddress() + ":" + getPort();
+    public void setAgentVersion(String version) {
+        this.agentVersion = version;
     }
 
-    public long getCreationTime() {
-        return creationTime != null ? creationTime.longValue() : 0;
+    public void setAuthToken(String authToken) {
+        this.authToken = authToken;
     }
 
     public void setCreationTime(Long creationTime) {
         this.creationTime = creationTime;
     }
 
-    public long getModifiedTime() {
-        return modifiedTime != null ? modifiedTime.longValue() : 0;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public void setModifiedTime(Long modifiedTime) {
         this.modifiedTime = modifiedTime;
     }
 
-    public long getVersion() {
-        return version != null ? version.longValue() : 0;
+    public void setPort(Integer port) {
+        this.port = port;
+    }
+
+    public void setUnidirectional(boolean unidirectional) {
+        this.unidirectional = unidirectional;
     }
 
     protected void setVersion(Long newVer) {
@@ -208,14 +269,6 @@ public class Agent implements ContainerManagedTimestampTrackable {
         str.append("address=").append(getAddress()).append(" ").append("port=").append(getPort())
             .append(" ").append("authToken=").append(getAuthToken()).append(" ");
         return (str.toString());
-    }
-
-    public boolean allowContainerManagedCreationTime() {
-        return true;
-    }
-
-    public boolean allowContainerManagedLastModifiedTime() {
-        return true;
     }
 
 }

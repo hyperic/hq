@@ -17,7 +17,6 @@ public class ResourceTypeRep implements SimpleRepresentation, LinkedRepresentati
 	private Integer id;
 	private String name;
 	private String description;
-	private String pluginName;
 	private List<OperationTypeRep> operationTypes;
 	private List<PropertyTypeRep> propertyTypes;
 	private Map<String, String> links = new HashMap<String, String>();
@@ -33,9 +32,7 @@ public class ResourceTypeRep implements SimpleRepresentation, LinkedRepresentati
 		name = type.getName();
 		description = type.getDescription();
 		
-		if (type.getPlugin() != null) {
-			pluginName = type.getPlugin().getName();
-		}
+		
 		
 		if (type.getOperationTypes() != null) {
 			operationTypes = new ArrayList<OperationTypeRep>();
@@ -87,14 +84,7 @@ public class ResourceTypeRep implements SimpleRepresentation, LinkedRepresentati
 		this.description = description;
 	}
 
-	public String getPluginName() {
-		return pluginName;
-	}
-
-	public void setPluginName(String pluginName) {
-		this.pluginName = pluginName;
-	}
-
+	
 	public List<OperationTypeRep> getOperationTypes() {
 		return operationTypes;
 	}

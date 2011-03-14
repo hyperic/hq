@@ -40,7 +40,7 @@ import javax.persistence.EntityManagerFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
-import org.hyperic.hq.agent.domain.Agent;
+import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.appdef.server.session.AIAuditFactory;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
@@ -64,6 +64,7 @@ import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceTypeFactory;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
+import org.hyperic.hq.auth.data.AuthzSubjectRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -113,6 +114,8 @@ public class RuntimeReportProcessor {
     private MeasurementProcessor measurementProcessor;
     
     private ZeventEnqueuer zEventManager;
+    
+    private AuthzSubjectRepository authzSubjectRepository;
 
     private AuthzSubject _overlord;
     private List<ServiceMergeInfo> _serviceMerges = new ArrayList<ServiceMergeInfo>();
@@ -128,7 +131,7 @@ public class RuntimeReportProcessor {
                                   AgentManager agentManager,
                                   ServiceTypeFactory serviceTypeFactory, AIAuditFactory aiAuditFactory, AuditManager auditManager,
                                   ResourceManager resourceManager, MeasurementProcessor measurementProcessor, ZeventEnqueuer zEventManager,
-                                  EntityManagerFactory entityManagerFactory) {
+                                  EntityManagerFactory entityManagerFactory, AuthzSubjectRepository authzSubjectRepository) {
         aiManager = aiMgr;
         platformManager = platformMgr;
         serverManager = serverMgr;
@@ -143,6 +146,7 @@ public class RuntimeReportProcessor {
         this.measurementProcessor = measurementProcessor;
         this.zEventManager = zEventManager;
         this.entityManagerFactory=entityManagerFactory;
+        this.authzSubjectRepository = authzSubjectRepository;
     }
 
     public void processRuntimeReport(AuthzSubject subject, String agentToken, CompositeRuntimeResourceReport crrr)
@@ -488,7 +492,7 @@ public class RuntimeReportProcessor {
                 serverTypePK = foundAppdefServer.getServerType().getId();
 
                 // The server will be owned by whomever owns the platform
-                AuthzSubject serverOwner = platform.getResource().getOwner();
+                AuthzSubject serverOwner = authzSubjectRepository.findByName(platform.getOwnerName());
                 Integer platformPK = platform.getId();
                 server = serverManager.createServer(serverOwner, platformPK, serverTypePK, foundAppdefServer);
 

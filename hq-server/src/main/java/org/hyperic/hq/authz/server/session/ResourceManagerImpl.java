@@ -37,6 +37,7 @@ import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
+import org.hyperic.hq.auth.data.AuthzSubjectRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -50,7 +51,6 @@ import org.hyperic.hq.inventory.data.ResourceDao;
 import org.hyperic.hq.inventory.data.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
-import org.hyperic.hq.paging.PageInfo;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -60,6 +60,9 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,7 +83,6 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     private Pager resourceTypePager = null;
    
     private AuthzSubjectManager authzSubjectManager;
-    private AuthzSubjectDAO authzSubjectDAO;
     private ZeventEnqueuer zeventManager;
    
     private PermissionManager permissionManager;
@@ -91,12 +93,11 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
 
     @Autowired
     public ResourceManagerImpl(AuthzSubjectManager authzSubjectManager,
-                               AuthzSubjectDAO authzSubjectDAO,
+                               
                                ZeventEnqueuer zeventManager, PermissionManager permissionManager,
                                ResourceAuditFactory resourceAuditFactory, ResourceDao resourceDao,
                                ResourceTypeDao resourceTypeDao) {
         this.authzSubjectManager = authzSubjectManager;
-        this.authzSubjectDAO = authzSubjectDAO;
         this.zeventManager = zeventManager;
         this.permissionManager = permissionManager;
         resourceTypePager = Pager.getDefaultPager();
@@ -169,8 +170,9 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     public void setResourceOwner(AuthzSubject whoami, Resource resource, AuthzSubject newOwner)
         throws PermissionException {
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        if (pm.hasAdminPermission(whoami.getId()) || resource.isOwner(whoami.getId())) {
-            resource.setOwner(newOwner);
+        if (pm.hasAdminPermission(whoami.getId()) || whoami.getOwnedResources().contains(resource)) {
+            newOwner.addOwnedResource(resource);
+            whoami.removeOwnedResource(resource);
             resource.setModifiedBy(whoami.getName());
             resourceDao.merge(resource);
         } else {
@@ -271,7 +273,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      */
     @Transactional(readOnly = true)
     public Collection<Resource> findResourceByOwner(AuthzSubject owner) {
-        return resourceDao.findByOwner(owner);
+        return owner.getOwnedResources();
     }
 
     @Transactional(readOnly = true)
@@ -345,7 +347,8 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     }
     
     public PageList<Resource> getResourcesOfType(ResourceType resourceType, PageControl pc) {
-        PageInfo pageInfo = new PageInfo(pc.getPagenum(),pc.getPagesize(),pc.getSortorder(),"name",String.class);
+        PageRequest pageInfo = new PageRequest(pc.getPagenum(),pc.getPagesize(),
+            new Sort(pc.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
         return resourceDao.findByIndexedProperty("type", resourceType.getId(),pageInfo);
     }
 

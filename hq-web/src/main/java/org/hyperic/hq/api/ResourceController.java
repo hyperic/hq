@@ -4,14 +4,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.hyperic.hq.agent.domain.Agent;
 import org.hyperic.hq.api.form.ListSettings;
 import org.hyperic.hq.api.representation.ListRep;
 import org.hyperic.hq.api.representation.ResourceRep;
 import org.hyperic.hq.api.representation.SuccessResponse;
-import org.hyperic.hq.appdef.server.session.AgentDAO;
+import org.hyperic.hq.auth.data.AuthzSubjectRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectDAO;
+import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.inventory.data.ResourceDao;
 import org.hyperic.hq.inventory.data.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.Resource;
@@ -31,14 +30,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class ResourceController extends BaseController {
 	private ResourceDao resourceDao;
 	private ResourceTypeDao resourceTypeDao;
-	private AgentDAO agentDao;
-	private AuthzSubjectDAO authzSubjectDao;
+	private AuthzSubjectRepository authzSubjectDao;
 	
 	@Autowired
-	public ResourceController(ResourceDao resourceDao, ResourceTypeDao resourceTypeDao, AgentDAO agentDao, AuthzSubjectDAO authzSubjectDao) {
+	public ResourceController(ResourceDao resourceDao, ResourceTypeDao resourceTypeDao, AuthzSubjectRepository authzSubjectDao) {
 		this.resourceDao = resourceDao;
 		this.resourceTypeDao = resourceTypeDao;
-		this.agentDao = agentDao;
 		this.authzSubjectDao = authzSubjectDao;
 	}
 	
@@ -117,17 +114,18 @@ public class ResourceController extends BaseController {
 			resource = resourceDao.findById(form.getId());
 		}
 	
-		Agent agent = agentDao.findById(form.getAgent().getId());
 		
-		resource.setAgent(agent);
 		resource.setName(form.getName());
 		resource.setDescription(form.getDescription());
 		resource.setLocation(form.getLocation());
 		
 		// TODO Owner and modifiedby can be set based on the authenticated user, for hardcoding to HQAdmin...
 		AuthzSubject subject = authzSubjectDao.findById(1);
+		if(subject == null) {
+		    throw new EntityNotFoundException("Subject with ID: 1 was not found");
+		}
 		
-		resource.setOwner(subject);
+		subject.addOwnedResource(resource);
 		resource.setModifiedBy(subject.getName());
 
 		return resource;

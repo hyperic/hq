@@ -2,7 +2,7 @@ package org.hyperic.hq.appdef.server.session;
 
 import static org.junit.Assert.assertEquals;
 
-import org.hyperic.hq.agent.domain.Agent;
+import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueManager;

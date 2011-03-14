@@ -15,7 +15,6 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
-import org.hyperic.hq.plugin.domain.Plugin;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.ReturnableEvaluator;
@@ -74,10 +73,6 @@ public class ResourceType {
     @Transient
     private Set<OperationType> operationTypes;
 
-    @Transient
-    @RelatedTo(type = RelationshipTypes.DEFINED_BY, direction = Direction.OUTGOING, elementClass = Plugin.class)
-    private Plugin plugin;
-
     @RelatedTo(type = RelationshipTypes.HAS_PROPERTY_TYPE, direction = Direction.OUTGOING, elementClass = PropertyType.class)
     @Transient
     private Set<PropertyType> propertyTypes;
@@ -112,7 +107,8 @@ public class ResourceType {
      * @param configType The ConfigType to add
      */
     public void addConfigType(ConfigType configType) {
-        //TODO can't do this in a detached env b/c relationship doesn't take unless both items are node-backed
+        // TODO can't do this in a detached env b/c relationship doesn't take
+        // unless both items are node-backed
         entityManager.persist(configType);
         configType.attach();
         configTypes.add(configType);
@@ -123,7 +119,8 @@ public class ResourceType {
      * @param operationType The OperationType to add
      */
     public void addOperationType(OperationType operationType) {
-        //TODO can't do this in a detached env b/c relationship doesn't take unless both items are node-backed
+        // TODO can't do this in a detached env b/c relationship doesn't take
+        // unless both items are node-backed
         entityManager.persist(operationType);
         operationType.attach();
         operationTypes.add(operationType);
@@ -134,7 +131,8 @@ public class ResourceType {
      * @param propertyType The PropertyType to add
      */
     public void addPropertyType(PropertyType propertyType) {
-        //TODO can't do this in a detached env b/c relationship doesn't take unless both items are node-backed
+        // TODO can't do this in a detached env b/c relationship doesn't take
+        // unless both items are node-backed
         entityManager.persist(propertyType);
         propertyType.attach();
         propertyTypes.add(propertyType);
@@ -204,7 +202,7 @@ public class ResourceType {
     public String getName() {
         return name;
     }
-    
+
     /**
      * 
      * @param name The name of the OperationType
@@ -225,14 +223,6 @@ public class ResourceType {
      */
     public Set<OperationType> getOperationTypes() {
         return operationTypes;
-    }
-
-    /**
-     * 
-     * @return The Plugin that defined this ResourceType
-     */
-    public Plugin getPlugin() {
-        return plugin;
     }
 
     /**
@@ -510,14 +500,6 @@ public class ResourceType {
      */
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    /**
-     * 
-     * @param plugin The plugin that defines this ResourceType
-     */
-    public void setPlugin(Plugin plugin) {
-        this.plugin = plugin;
     }
 
     public String toString() {

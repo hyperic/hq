@@ -8,22 +8,15 @@ import javax.persistence.PersistenceContext;
 
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
-import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.inventory.NotUniqueException;
-import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.hq.paging.PageInfo;
 import org.hyperic.util.pager.PageList;
-import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.ReturnableEvaluator;
-import org.neo4j.graphdb.StopEvaluator;
-import org.neo4j.graphdb.TraversalPosition;
-import org.neo4j.graphdb.Traverser;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.index.impl.lucene.QueryContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.graph.core.Direction;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.graph.neo4j.finder.FinderFactory;
 import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
 import org.springframework.stereotype.Repository;
@@ -85,22 +78,24 @@ public class Neo4jResourceDao implements ResourceDao {
 
     @Transactional(readOnly = true)
     public PageList<Resource> findByIndexedProperty(String propertyName, Object propertyValue,
-                                                    PageInfo pageInfo) {
+                                                    Pageable pageInfo) {
         QueryContext queryContext = new QueryContext(propertyValue);
-        if (pageInfo.getSortAttribute() != null) {
-            queryContext.sort(new Sort(new SortField(pageInfo.getSortAttribute(),
-                getSortFieldType(pageInfo.getSortAttributeType()), pageInfo.isDescending())));
+        if (pageInfo.getSort() != null) {
+            Order order = pageInfo.getSort().iterator().next();
+            queryContext.sort(new Sort(new SortField(order.getProperty(),
+                getSortFieldType(propertyValue.getClass()), order.getDirection().equals(
+                    org.springframework.data.domain.Sort.Direction.DESC))));
         }
-        IndexHits<Node> indexHits = graphDatabaseContext.getNodeIndex(GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME).query(propertyName,
-            queryContext);
+        IndexHits<Node> indexHits = graphDatabaseContext.getNodeIndex(
+            GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME).query(propertyName, queryContext);
         if (indexHits == null) {
             return new PageList<Resource>(0);
         }
 
         List<Resource> resources = new ArrayList<Resource>(pageInfo.getPageSize());
         int currentPosition = 0;
-        int startIndex = pageInfo.getPageEntityIndex();
-        int endIndex = pageInfo.getPageEntityIndex() + pageInfo.getPageSize() - 1;
+        int startIndex = pageInfo.getOffset();
+        int endIndex = pageInfo.getOffset() + pageInfo.getPageSize() - 1;
         for (Node node : indexHits) {
             if (currentPosition > endIndex) {
                 break;
@@ -125,24 +120,6 @@ public class Neo4jResourceDao implements ResourceDao {
         }
 
         return resource;
-    }
-
-    @Transactional(readOnly = true)
-    public List<Resource> findByOwner(AuthzSubject owner) {
-        // TODO should this be ordered?
-        List<Resource> resources = new ArrayList<Resource>();
-        Traverser relationTraverser = owner.getUnderlyingState().traverse(
-            Traverser.Order.BREADTH_FIRST, new StopEvaluator() {
-                public boolean isStopNode(TraversalPosition currentPos) {
-                    return currentPos.depth() >= 1;
-                }
-            }, ReturnableEvaluator.ALL_BUT_START_NODE,
-            DynamicRelationshipType.withName(RelationshipTypes.OWNS),
-            Direction.OUTGOING.toNeo4jDir());
-        for (Node related : relationTraverser) {
-            resources.add(graphDatabaseContext.createEntityFromState(related, Resource.class));
-        }
-        return resources;
     }
 
     @Transactional(readOnly = true)
@@ -181,16 +158,17 @@ public class Neo4jResourceDao implements ResourceDao {
 
     @Transactional
     public void persist(Resource resource) {
-        if(findByName(resource.getName()) != null) {
-            throw new NotUniqueException("Resource with name " + resource.getName() + " already exists");
+        if (findByName(resource.getName()) != null) {
+            throw new NotUniqueException("Resource with name " + resource.getName() +
+                                         " already exists");
         }
         entityManager.persist(resource);
         resource.attach();
         // Set the type index here b/c Resource needs an ID before we can access
         // the underlying node
-        graphDatabaseContext.getNodeIndex(GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME).add(resource.getUnderlyingState(), "type",
-            resource.getType().getId());
-        //flush to get the JSR-303 validation done sooner
+        graphDatabaseContext.getNodeIndex(GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME).add(
+            resource.getUnderlyingState(), "type", resource.getType().getId());
+        // flush to get the JSR-303 validation done sooner
         entityManager.flush();
     }
 }

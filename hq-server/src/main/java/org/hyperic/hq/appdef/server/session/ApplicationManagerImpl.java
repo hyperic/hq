@@ -55,6 +55,7 @@ import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
+import org.hyperic.hq.auth.data.AuthzSubjectRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -74,13 +75,15 @@ import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
-import org.hyperic.hq.paging.PageInfo;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -102,6 +105,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
     private ResourceGroupManager resourceGroupManager;
     
     private ResourceGroupDao resourceGroupDao;
+    
+    private AuthzSubjectRepository authzSubjectRepository;
 
     private PermissionManager permissionManager;
 
@@ -147,7 +152,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
                                   PermissionManager permissionManager,
                                   ZeventEnqueuer zeventManager,
                                   ResourceGroupManager resourceGroupManager, ServiceFactory serviceFactory,
-                                  ResourceGroupDao resourceGroupDao, ResourceDao resourceDao,ResourceTypeDao resourceTypeDao) {
+                                  ResourceGroupDao resourceGroupDao, ResourceDao resourceDao,
+                                  ResourceTypeDao resourceTypeDao, AuthzSubjectRepository authzSubjectRepository) {
         this.resourceManager = resourceManager;
         this.permissionManager = permissionManager;
         this.zeventManager = zeventManager;
@@ -156,6 +162,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         this.resourceGroupDao = resourceGroupDao;
         this.resourceDao = resourceDao;
         this.resourceTypeDao = resourceTypeDao;
+        this.authzSubjectRepository= authzSubjectRepository;
     }
 
     /**
@@ -245,6 +252,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         application.setBusinessContact((String)resourceGroup.getProperty(BUSINESS_CONTACT));
         application.setEngContact((String)resourceGroup.getProperty(ENG_CONTACT));
         application.setOpsContact((String)resourceGroup.getProperty(OPS_CONTACT));
+        application.setOwnerName(authzSubjectRepository.findOwner(resourceGroup).getName());
         //TODO get rid of ApplicationType.  For now just hard-coding them all to Generic type
         application.setApplicationType(APPLICATION_TYPES.get(0));
         for(Resource member: resourceGroup.getMembers()) {
@@ -256,7 +264,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     private ResourceGroup create(AuthzSubject owner, ApplicationValue appV) {
         ResourceGroup app =  new ResourceGroup(appV.getName(),resourceManager.findResourceTypeByName(AppdefEntityConstants.APPDEF_NAME_APPLICATION));
         resourceGroupDao.persist(app);
-        app.setOwner(owner);
+        owner.addOwnedResource(app);
         updateApplication(app, appV);
         return app;
     }
@@ -872,7 +880,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
     
     public PageList<Resource> getAllApplicationResources(AuthzSubject subject, PageControl pc) {
         int appGroupTypeId = resourceManager.findResourceTypeByName(AppdefEntityConstants.APPDEF_NAME_APPLICATION).getId();
-        PageInfo pageInfo = new PageInfo(pc.getPagenum(),pc.getPagesize(),pc.getSortorder(),"name",String.class);
+        PageRequest pageInfo = new PageRequest(pc.getPagenum(),pc.getPagesize(),
+            new Sort(pc.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
         return resourceDao.findByIndexedProperty("type", appGroupTypeId,pageInfo);
     }
 

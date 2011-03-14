@@ -41,7 +41,7 @@ import org.hibernate.Query;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.auth.domain.Role;
-import org.hyperic.hq.authz.server.session.RoleDAO;
+import org.hyperic.hq.auth.domain.RoleRepository;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
@@ -53,7 +53,6 @@ import org.hyperic.hq.inventory.data.ResourceGroupDao;
 import org.hyperic.hq.inventory.data.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
@@ -185,8 +184,8 @@ public class PermissionManagerImpl
         return (Resource[]) resLocArr.toArray(new Resource[resLocArr.size()]);
     }
 
-    protected RoleDAO getRoleDAO() {
-        return Bootstrap.getBean(RoleDAO.class);
+    protected RoleRepository getRoleDAO() {
+        return Bootstrap.getBean(RoleRepository.class);
     }
 
    
@@ -201,7 +200,7 @@ public class PermissionManagerImpl
             return ret;
         }
 
-        RoleDAO roleDao = null;
+        RoleRepository roleDao = null;
        
         for (int i = 0; i < vals.length; i++) {
             if (vals[i] instanceof OperationType) {

@@ -31,16 +31,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.agent.domain.Agent;
-import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
-import org.hyperic.hq.appdef.server.session.AgentSortField;
+import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection;
-import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
+import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.util.ConfigPropertyException;
 
 /**
@@ -192,6 +190,8 @@ public interface AgentManager {
      * @return An agent which is set to manage the specified ID
      */
     public Agent getAgent(AppdefEntityID aID) throws AgentNotFoundException;
+    
+    Agent getAgent(Resource resource);
 
     /**
      * Return the bundle that is currently running on a give agent. The returned

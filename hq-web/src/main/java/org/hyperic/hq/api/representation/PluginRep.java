@@ -1,6 +1,6 @@
 package org.hyperic.hq.api.representation;
 
-import org.hyperic.hq.plugin.domain.Plugin;
+import org.hyperic.hq.plugin.mgmt.domain.Plugin;
 
 public class PluginRep {
 	public PluginRep() {}

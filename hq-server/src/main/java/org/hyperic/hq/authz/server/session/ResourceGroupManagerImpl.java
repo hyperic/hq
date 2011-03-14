@@ -50,6 +50,7 @@ import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.GroupTypeValue;
+import org.hyperic.hq.auth.data.AuthzSubjectRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.auth.domain.Role;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -73,7 +74,6 @@ import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
-import org.hyperic.hq.paging.PageInfo;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -83,6 +83,9 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -103,7 +106,8 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
 
     private final String BUNDLE = "org.hyperic.hq.authz.Resources";
    
-    private AuthzSubjectManager authzSubjectManager;
+   
+    private AuthzSubjectRepository authzSubjectRepository;
     private EventLogManager eventLogManager;
     private final Log log = LogFactory.getLog(ResourceGroupManagerImpl.class);
     private ApplicationContext applicationContext;
@@ -113,10 +117,10 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     private Pager defaultPager;
 
     @Autowired
-    public ResourceGroupManagerImpl(AuthzSubjectManager authzSubjectManager,
+    public ResourceGroupManagerImpl(AuthzSubjectRepository authzSubjectRepository,
                                     EventLogManager eventLogManager, ResourceGroupDao resourceGroupDao,
                                     ResourceDao resourceDao, ResourceTypeDao resourceTypeDao) {
-        this.authzSubjectManager = authzSubjectManager;
+        this.authzSubjectRepository = authzSubjectRepository;
         this.eventLogManager = eventLogManager;
         this.resourceGroupDao = resourceGroupDao;
         this.resourceDao = resourceDao;
@@ -180,10 +184,11 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         for(Resource resource : resources) {
             res.addMember(resource);
         }
-        for(Role role: roles) {
-            res.addRole(role);
-        }
-        res.setOwner(whoami);
+        //TODO IMPL add Role
+        //for(Role role: roles) {
+          //  res.addRole(role);
+        //}
+        whoami.addOwnedResource(res);
         if(cInfo.getGroupTypeId() == AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS || 
             cInfo.getGroupTypeId() == AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC) {
             res.setProperty(MIXED,false);
@@ -465,7 +470,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         //retVal.setMTime(new Long(g.getMtime()));
         //retVal.setCTime(new Long(g.getCtime()));
         retVal.setModifiedBy(g.getModifiedBy());
-        retVal.setOwner(g.getOwner().getName());
+        retVal.setOwner(authzSubjectRepository.findOwner(g).getName());
 
         // Add the group members
         for (Resource r : members) {
@@ -651,7 +656,11 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     public void changeGroupOwner(AuthzSubject subject, ResourceGroup group, AuthzSubject newOwner)
         throws PermissionException {
         //TODO this used to call ResourceManager. Perm check?
-        group.setOwner(newOwner);
+        AuthzSubject oldOwner = authzSubjectRepository.findOwner(group);
+        if(oldOwner != null) {
+            oldOwner.removeOwnedResource(group);
+        }
+        newOwner.addOwnedResource(group);
         group.setModifiedBy(newOwner.getName());
     }
         
@@ -671,17 +680,20 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     }
     
     public PageList<Resource> getCompatibleGroups(PageControl pageControl) {
-        PageInfo pageInfo = new PageInfo(pageControl.getPagenum(),pageControl.getPagesize(),pageControl.getSortorder(),"name",String.class);
+        PageRequest pageInfo = new PageRequest(pageControl.getPagenum(),pageControl.getPagesize(),
+            new Sort(pageControl.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
         return resourceDao.findByIndexedProperty(MIXED, false,pageInfo);
     }
 
     public PageList<Resource> getMixedGroups(PageControl pageControl) {
-        PageInfo pageInfo = new PageInfo(pageControl.getPagenum(),pageControl.getPagesize(),pageControl.getSortorder(),"name",String.class);
+        PageRequest pageInfo = new PageRequest(pageControl.getPagenum(),pageControl.getPagesize(),
+            new Sort(pageControl.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
         return resourceDao.findByIndexedProperty(MIXED, true,pageInfo);
     }
     
     public PageList<Resource> getCompatibleGroupsContainingType(int resourceTypeId, PageControl pageControl) {
-        PageInfo pageInfo = new PageInfo(pageControl.getPagenum(),pageControl.getPagesize(),pageControl.getSortorder(),"name",String.class);
+        PageRequest pageInfo = new PageRequest(pageControl.getPagenum(),pageControl.getPagesize(),
+            new Sort(pageControl.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
         return resourceDao.findByIndexedProperty(GROUP_ENT_RES_TYPE, resourceTypeId,pageInfo);
     }
 

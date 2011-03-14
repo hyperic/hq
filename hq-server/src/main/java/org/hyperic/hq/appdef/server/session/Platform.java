@@ -3,9 +3,8 @@ package org.hyperic.hq.appdef.server.session;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 
-import org.hyperic.hq.agent.domain.Agent;
+import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
@@ -114,7 +113,7 @@ public class Platform
          platformValue.setSortName(getSortName());
          platformValue.setCommentText(getCommentText());
          platformValue.setModifiedBy(getModifiedBy());
-         platformValue.setOwner(getOwner());
+         platformValue.setOwner(getOwnerName());
          platformValue.setCertdn(getCertdn());
          platformValue.setFqdn(getFqdn());
          platformValue.setName(getName());
@@ -143,11 +142,6 @@ public class Platform
          else
              platformValue.setAgent(null);
         return platformValue;
-    }
-    
-    private String getOwner() {
-        return getResource() != null && getResource().getOwner() != null ?
-                                                                          getResource().getOwner().getName() : "";
     }
     
     /**

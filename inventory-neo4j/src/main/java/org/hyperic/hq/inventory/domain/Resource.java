@@ -19,11 +19,9 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
-import org.hyperic.hq.agent.domain.Agent;
-import org.hyperic.hq.inventory.events.CPropChangeEvent;
-import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.inventory.InvalidRelationshipException;
 import org.hyperic.hq.inventory.NotUniqueException;
+import org.hyperic.hq.inventory.events.CPropChangeEvent;
 import org.hyperic.hq.messaging.MessagePublisher;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
@@ -57,10 +55,6 @@ public class Resource {
     @RelatedTo(type = RelationshipTypes.HAS_CONFIG, direction = Direction.OUTGOING, elementClass = Config.class)
     @Transient
     private Set<Config> configs;
-
-    @Transient
-    @RelatedTo(type = RelationshipTypes.MANAGED_BY, direction = Direction.OUTGOING, elementClass = Agent.class)
-    private Agent agent;
 
     @GraphProperty
     @Transient
@@ -96,10 +90,6 @@ public class Resource {
     private String name;
 
     @Transient
-    @RelatedTo(type = RelationshipTypes.OWNS, direction = Direction.INCOMING, elementClass = AuthzSubject.class)
-    private AuthzSubject owner;
-
-    @Transient
     @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.OUTGOING, elementClass = ResourceType.class)
     private ResourceType type;
 
@@ -123,14 +113,15 @@ public class Resource {
      */
     @Transactional
     public void addConfig(Config config) {
-        //TODO can't do this in a detached env b/c relationship doesn't take unless both items are node-backed
+        // TODO can't do this in a detached env b/c relationship doesn't take
+        // unless both items are node-backed
         String cfgType = config.getType().getName();
         if (type.getConfigType(cfgType) == null) {
             throw new IllegalArgumentException("Config " + cfgType +
                                                " is not defined for resource of type " +
                                                type.getName());
         }
-       configs.add(config);
+        configs.add(config);
     }
 
     private Set<ResourceRelationship> convertRelationships(Resource entity,
@@ -150,14 +141,6 @@ public class Resource {
             }
         }
         return relations;
-    }
-
-    /**
-     * 
-     * @return The agent managing this resource
-     */
-    public Agent getAgent() {
-        return agent;
     }
 
     /**
@@ -231,7 +214,7 @@ public class Resource {
         }
         return null;
     }
-    
+
     public Set<Config> getConfigs() {
         return this.configs;
     }
@@ -274,14 +257,6 @@ public class Resource {
      */
     public String getName() {
         return name;
-    }
-
-    /**
-     * 
-     * @return The owner of this Resource
-     */
-    public AuthzSubject getOwner() {
-        return owner;
     }
 
     /**
@@ -503,19 +478,6 @@ public class Resource {
 
     /**
      * 
-     * @param subjectId The ID of a user
-     * @return true if the specified user is the owner of this Resource
-     */
-    public boolean isOwner(Integer subjectId) {
-        // TODO some overlord checking
-        if (this.owner == null) {
-            return false;
-        }
-        return owner.getId().equals(subjectId);
-    }
-
-    /**
-     * 
      * @param resource The resource to test relation to
      * @param relationName The name of the relationship
      * @return true if this resource is directly related to the supplied
@@ -636,14 +598,6 @@ public class Resource {
 
     /**
      * 
-     * @param agent The agent that manages this Resource
-     */
-    public void setAgent(Agent agent) {
-        this.agent = agent;
-    }
-
-    /**
-     * 
      * @param description The Resource description
      */
     public void setDescription(String description) {
@@ -684,14 +638,6 @@ public class Resource {
 
     /**
      * 
-     * @param owner The resource owner
-     */
-    public void setOwner(AuthzSubject owner) {
-        this.owner = owner;
-    }
-
-    /**
-     * 
      * @param key The property name
      * @param value The property value
      * @return The previous property value
@@ -724,7 +670,8 @@ public class Resource {
         }
         getUnderlyingState().setProperty(key, value);
         if (propertyType.isIndexed()) {
-            graphDatabaseContext.getNodeIndex(GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME).add(getUnderlyingState(), key, value);
+            graphDatabaseContext.getNodeIndex(GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME).add(
+                getUnderlyingState(), key, value);
         }
         CPropChangeEvent event = new CPropChangeEvent(getId(), key, oldValue, value);
         messagePublisher.publishMessage(MessagePublisher.EVENTS_TOPIC, event);

@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hyperic.hq.agent.domain.Agent;
+import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.api.LinkHelper;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
@@ -22,20 +22,6 @@ public class ListRep<T> implements LinkedRepresentation {
 	public ListRep(List<T> list, Map<String, String> links) {
 		this.list = list;
 		this.links = links;
-	}
-	
-	public static ListRep<AgentRep> createListRepFromAgents(Collection<Agent> entities) {
-		Assert.notNull(entities, "Entities argument can't be null");
-		List<AgentRep> list = new ArrayList<AgentRep>();
-		Map<String, String> links = new HashMap<String, String>();
-		
-		for (Agent agent : entities) {
-			list.add(new AgentRep(agent));
-		}
-		
-		links.put(AGENTS_LABEL, LinkHelper.getDomainUri(AGENTS_LABEL));
-
-		return new ListRep<AgentRep>(list, links);
 	}
 	
 	public static ListRep<SimpleRep> createListRepFromResources(Collection<Resource> entities) {

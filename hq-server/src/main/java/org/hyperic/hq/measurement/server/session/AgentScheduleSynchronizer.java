@@ -42,7 +42,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.domain.Agent;
+import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -82,6 +82,7 @@ public class AgentScheduleSynchronizer {
     private MeasurementProcessor measurementProcessor;
 
     private static final int NUM_WORKERS = 4;
+  
 
     @Autowired
     public AgentScheduleSynchronizer(ZeventEnqueuer zEventManager, AgentManager agentManager,
@@ -148,12 +149,13 @@ public class AgentScheduleSynchronizer {
                         // processing this
                         if (resource != null) {
                             Collection<AppdefEntityID> tmp;
-                            final int agentId = resource.getAgent().getId();
-                            if (null == (tmp = scheduleAeids.get(agentId))) {
-                                tmp = new HashSet<AppdefEntityID>();
-                                scheduleAeids.put(agentId, tmp);
-                            }
-                            tmp.add(id);
+                            int agentId = agentManager.getAgent(resource).getId();
+                             if (null == (tmp = scheduleAeids.get(agentId))) {
+                                    tmp = new HashSet<AppdefEntityID>();
+                                    scheduleAeids.put(agentId, tmp);
+                             }
+                             tmp.add(id);
+                           
                         }
                     }
                 }

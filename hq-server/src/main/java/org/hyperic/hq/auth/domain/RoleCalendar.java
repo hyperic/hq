@@ -39,7 +39,6 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
-import org.hyperic.hq.calendar.domain.Calendar;
 
 @Entity
 @Table(name = "EAM_ROLE_CALENDAR", uniqueConstraints = { @UniqueConstraint(name = "role_cal_uniq", columnNames = { "ROLE_ID","CALENDAR_ID",
