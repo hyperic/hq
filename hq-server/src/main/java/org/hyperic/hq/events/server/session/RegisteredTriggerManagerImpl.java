@@ -32,6 +32,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.alert.data.RegisteredTriggerRepository;
 import org.hyperic.hq.alert.data.ResourceAlertDefinitionRepository;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.auth.domain.AuthzSubject;
@@ -78,7 +79,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
 
     private RegisterableTriggerRepository registeredTriggerRepository;
 
-    private TriggerDAOInterface triggerDAO;
+    private RegisteredTriggerRepository triggerRepository;
 
     private ZeventEnqueuer zeventEnqueuer;
 
@@ -94,12 +95,12 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
 
     @Autowired
     public RegisteredTriggerManagerImpl(AlertConditionEvaluatorFactory alertConditionEvaluatorFactory,
-                                        TriggerDAOInterface triggerDAO, ZeventEnqueuer zeventEnqueuer,
+                                        RegisteredTriggerRepository triggerRepository, ZeventEnqueuer zeventEnqueuer,
                                         AlertConditionEvaluatorRepository alertConditionEvaluatorRepository,
                                         ResourceAlertDefinitionRepository resAlertDefRepository, RegisterableTriggerRepository registerableTriggerRepository, 
                                         AlertDAO alertDAO, EventLogManager eventLogManager, DBUtil dbUtil) {
         this.alertConditionEvaluatorFactory = alertConditionEvaluatorFactory;
-        this.triggerDAO = triggerDAO;
+        this.triggerRepository = triggerRepository;
         this.zeventEnqueuer = zeventEnqueuer;
         this.alertConditionEvaluatorRepository = alertConditionEvaluatorRepository;
         this.resAlertDefRepository = resAlertDefRepository;
@@ -197,7 +198,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
         
         try {
             watch.markTimeBegin("findAllEnabledTriggers");
-            Collection<RegisteredTrigger> registeredTriggers = triggerDAO.findAllEnabledTriggers();
+            Collection<RegisteredTrigger> registeredTriggers = triggerRepository.findAllEnabledTriggers();
             watch.markTimeEnd("findAllEnabledTriggers");
         
             log.info("Found " + registeredTriggers.size() + " enabled triggers");
@@ -578,7 +579,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
     }
 
     Map<Integer,List<Integer>> getTriggerIdsByAlertDefIds(List<Integer> alertDefIds) {
-        return triggerDAO
+        return triggerRepository
                     .findTriggerIdsByAlertDefinitionIds(alertDefIds);
     }
     /**
@@ -591,7 +592,12 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
      */
     @Transactional(readOnly=true)
     public RegisteredTrigger findById(Integer id) {
-        return triggerDAO.findById(id);
+        RegisteredTrigger trigger = triggerRepository.findById(id);
+        if(trigger == null) {
+            throw new EntityNotFoundException("Registered Trigger with ID: " + 
+                id + " was not found");
+        }
+        return trigger;
     }
 
     void unregisterTriggers(Integer alertDefinitionId, Collection<RegisteredTrigger> triggers) {
@@ -620,7 +626,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
      * @return The registered trigger objects.
      */
     private Collection<RegisteredTrigger> getAllTriggersByAlertDefId(Integer id) {
-        return triggerDAO.findByAlertDefinitionId(id);
+        return triggerRepository.findByAlertDefinition(id);
     }
 
     /**
@@ -635,7 +641,10 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
         // registering the trigger with the dispatcher, and updateTrigger()
         // is updating it with the dispatcher. Seems like this should all
         // be done here in the manager
-        return triggerDAO.create(val); // DAO method will set ID on val obj
+        RegisteredTrigger trigger = new RegisteredTrigger(val);
+        trigger = triggerRepository.save(trigger);
+        val.setId(trigger.getId());
+        return trigger;
     }
 
     /**

@@ -98,7 +98,7 @@ abstract public class AlertDefinition implements AlertDefinitionInterface, Perfo
         getActionsBag().add(a);
     }
 
-    void addCondition(AlertCondition c) {
+    public void addCondition(AlertCondition c) {
         getConditionsBag().add(c);
     }
 

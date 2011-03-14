@@ -46,85 +46,64 @@ import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.util.ArrayUtil;
 
 @Entity
-@Table(name="EAM_REGISTERED_TRIGGER")
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-public class RegisteredTrigger implements Serializable
-{
+@Table(name = "EAM_REGISTERED_TRIGGER")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public class RegisteredTrigger implements Serializable {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ALERT_DEFINITION_ID")
+    @Index(name = "ALERT_DEF_TRIGGER_IDX")
+    private ResourceAlertDefinition alertDefinition;
+
+    @Column(name = "CLASSNAME", nullable = false, length = 200)
+    private String className;
+
+    @Basic(fetch = FetchType.LAZY)
+    @Lob
+    @Column(name = "CONFIG")
+    private byte[] config;
+
+    @Column(name = "FREQUENCY", nullable = false)
+    private long frequency;
+
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "ID")
     private Integer id;
 
-    @Column(name="VERSION_COL",nullable=false)
+    @Column(name = "VERSION_COL", nullable = false)
     @Version
     private Long version;
-    
-    @Column(name="CLASSNAME",nullable=false,length=200)
-    private String           className;
-    
-    @Basic(fetch=FetchType.LAZY)
-    @Lob
-    @Column(name="CONFIG")
-    private byte[]           config;
-    
-    @Column(name="FREQUENCY",nullable=false)
-    private long             frequency;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="ALERT_DEFINITION_ID")
-    @Index(name="ALERT_DEF_TRIGGER_IDX")
-    private ResourceAlertDefinition  alertDef;
-    
-    
+
     protected RegisteredTrigger() { // Needed for Hibernate
     }
-    
+
     public RegisteredTrigger(RegisteredTriggerValue val) {
         setRegisteredTriggerValue(val);
     }
-    
-    
-    
-    public Integer getId() {
-        return id;
+
+    public RegisteredTrigger(String className, byte[] config, long frequency) {
+        this.className = className;
+        this.config = config;
+        this.frequency = frequency;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof RegisteredTrigger)) {
+            return false;
+        }
+        Integer objId = ((RegisteredTrigger) obj).getId();
+
+        return getId() == objId || (getId() != null && objId != null && getId().equals(objId));
     }
 
-    public Long getVersion() {
-        return version;
+    public ResourceAlertDefinition getAlertDefinition() {
+        return alertDefinition;
     }
 
-    public void setVersion(Long version) {
-        this.version = version;
-    }
-
-    protected void setRegisteredTriggerValue(RegisteredTriggerValue val) {
-        setClassname(val.getClassname());
-        setConfig(ArrayUtil.clone(val.getConfig()));
-        setFrequency(val.getFrequency());
-    }
-    
-    /** Get the old style value object
-     * @return RegisteredTriggerValue object
-     * @deprecated
-     */
-    public RegisteredTriggerValue getRegisteredTriggerValue() {
-        
-        RegisteredTriggerValue valueObj = new RegisteredTriggerValue();
-        
-        valueObj.setId(getId());
-        valueObj.setClassname(getClassname());
-        // XXX -- Config is mutable here.  The proper thing to do is clone it
-        valueObj.setConfig(ArrayUtil.clone(getConfig()));
-        valueObj.setFrequency(getFrequency());
-
-        return valueObj;
-    }
-    
     public String getClassname() {
         return className;
     }
@@ -135,6 +114,42 @@ public class RegisteredTrigger implements Serializable
 
     public long getFrequency() {
         return frequency;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    /**
+     * Get the old style value object
+     * @return RegisteredTriggerValue object
+     * @deprecated
+     */
+    public RegisteredTriggerValue getRegisteredTriggerValue() {
+
+        RegisteredTriggerValue valueObj = new RegisteredTriggerValue();
+
+        valueObj.setId(getId());
+        valueObj.setClassname(getClassname());
+        // XXX -- Config is mutable here. The proper thing to do is clone it
+        valueObj.setConfig(ArrayUtil.clone(getConfig()));
+        valueObj.setFrequency(getFrequency());
+
+        return valueObj;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public int hashCode() {
+        int result = 17;
+        result = 37 * result + (getId() != null ? getId().hashCode() : 0);
+        return result;
+    }
+
+    public void setAlertDefinition(ResourceAlertDefinition def) {
+        alertDefinition = def;
     }
 
     protected void setClassname(String className) {
@@ -149,32 +164,17 @@ public class RegisteredTrigger implements Serializable
         this.frequency = frequency;
     }
 
-    public ResourceAlertDefinition getAlertDefinition() {
-        return alertDef;
-    }
-    
-    protected void setAlertDefinition(ResourceAlertDefinition def) {
-        alertDef = def;
-    }
-    
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || !(obj instanceof RegisteredTrigger)) {
-            return false;
-        }
-        Integer objId = ((RegisteredTrigger)obj).getId();
-  
-        return getId() == objId ||
-        (getId() != null && 
-         objId != null && 
-         getId().equals(objId));     
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    public int hashCode() {
-        int result = 17;
-        result = 37*result + (getId() != null ? getId().hashCode() : 0);
-        return result;      
+    protected void setRegisteredTriggerValue(RegisteredTriggerValue val) {
+        setClassname(val.getClassname());
+        setConfig(ArrayUtil.clone(val.getConfig()));
+        setFrequency(val.getFrequency());
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }

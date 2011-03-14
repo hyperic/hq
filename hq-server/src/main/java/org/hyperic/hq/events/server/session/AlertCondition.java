@@ -47,6 +47,8 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hyperic.hq.alert.data.RegisteredTriggerRepository;
+import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertConditionValue;
@@ -102,7 +104,7 @@ public class AlertCondition implements Serializable {
     @Version
     private Long version;
 
-    protected AlertCondition() {
+    public AlertCondition() {
     }
 
     @SuppressWarnings("unchecked")
@@ -256,7 +258,7 @@ public class AlertCondition implements Serializable {
     }
 
     public void setAlertConditionValue(AlertConditionValue val) {
-        TriggerDAO tDAO = Bootstrap.getBean(TriggerDAO.class);
+        RegisteredTriggerRepository tDAO = Bootstrap.getBean(RegisteredTriggerRepository.class);
 
         setType(val.getType());
         setRequired(val.getRequired());
@@ -265,7 +267,12 @@ public class AlertCondition implements Serializable {
         setComparator(val.getComparator());
         setThreshold(val.getThreshold());
         setOptionStatus(val.getOption());
-        setTrigger(tDAO.findById(val.getTriggerId()));
+        RegisteredTrigger trigger = tDAO.findById(val.getTriggerId());
+        if(trigger == null) {
+            throw new EntityNotFoundException("Registered Trigger with ID: " + 
+                val.getTriggerId() + " was not found");
+        }
+        setTrigger(trigger);
     }
 
     protected void setComparator(String comparator) {
@@ -300,7 +307,7 @@ public class AlertCondition implements Serializable {
         this.threshold = threshold;
     }
 
-    protected void setTrigger(RegisteredTrigger trigger) {
+    public void setTrigger(RegisteredTrigger trigger) {
         this.trigger = trigger;
     }
 

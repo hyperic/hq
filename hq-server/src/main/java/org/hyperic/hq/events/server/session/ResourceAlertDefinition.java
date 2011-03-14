@@ -64,7 +64,7 @@ public class ResourceAlertDefinition
     @ManyToOne
     private ResourceTypeAlertDefinition resourceTypeAlertDefinition;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "alertDef")
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "alertDefinition")
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Collection<RegisteredTrigger> triggersBag = new ArrayList<RegisteredTrigger>();
@@ -126,7 +126,7 @@ public class ResourceAlertDefinition
         return value;
     }
 
-    Collection<AlertCondition> getConditionsBag() {
+    public Collection<AlertCondition> getConditionsBag() {
         return conditionsBag;
     }
 
@@ -177,7 +177,7 @@ public class ResourceAlertDefinition
         actionsBag = actions;
     }
 
-    void setAlertDefinitionState(AlertDefinitionState state) {
+    public void setAlertDefinitionState(AlertDefinitionState state) {
         this.alertDefinitionState = state;
     }
 
