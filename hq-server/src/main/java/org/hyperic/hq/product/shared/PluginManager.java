@@ -44,7 +44,7 @@ public interface PluginManager {
      * Deploys the specified plugin to the hq-plugins dir.  Checks if the jar file is corrupt
      * and if the hq-plugin.xml is well-formed.  If these checks fail a {@link PluginDeployException}
      * will be thrown.
-     * @param jarInfo {@link Map} of {@link String} = filename to {@link Collection} of bytes
+     * @param pluginInfo {@link Map} of {@link String} = filename to {@link Collection} of bytes
      * that represent the file contents
      * @throws {@link PluginDeployException} if the plugin file is corrupt and/or the hq-plugin.xml
      * is not well-formed.
