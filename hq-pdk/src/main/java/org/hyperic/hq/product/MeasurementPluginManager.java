@@ -55,7 +55,7 @@ public class MeasurementPluginManager extends PluginManager implements Measureme
     private void registerProxy(String name, GenericPlugin plugin)
         throws PluginException {
         registerPlugin(name, plugin);
-        setPluginInfo(name, new PluginInfo(name));
+        setPluginInfo(name, new PluginInfo(name, plugin.getPluginVersion()));
     }
     
     public void init(PluginManager parent) throws PluginException {

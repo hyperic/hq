@@ -23,7 +23,7 @@
   USA.
  -->
 
-<plugin name="db2" class="DB2ProductPlugin">
+<plugin name="db2" class="DB2ProductPlugin" version="@project.version@">
   <!-- appended to each template by MeasurementInfoXML -->
   <property name="template-config" 
             value="nodename=%nodename%,user=%user%,password=%password%"/>

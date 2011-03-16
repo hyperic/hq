@@ -109,7 +109,7 @@ function bodyClicked(e) {
     hide($('recent'));
   }
 }
-dojo.event.connect(dojo.body(), "onclick", window, bodyClicked);
+hqDojo.connect(hqDojo.body(), "onclick", window, bodyClicked);
 //document.body.onclick = bodyClicked;
 
 /*-- END diagram.js --*/

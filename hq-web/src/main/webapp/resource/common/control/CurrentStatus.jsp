@@ -90,7 +90,7 @@
         updateUrl += '&bid=<c:out value="${requestScope.bid}"/>';
       </c:if>
 
-      dojo11.xhrGet( {
+      hqDojo.xhrGet( {
           url: updateUrl,
           handleAs: 'json',
           load: function(status){
@@ -102,11 +102,11 @@
               window.location.reload()
             }
             else {
-              dojo11.byId('ctrlAction').innerHTML = status.ctrlAction;
-              dojo11.byId('ctrlDesc').innerHTML = status.ctrlDesc;
-              dojo11.byId('ctrlStart').innerHTML = new Date(status.ctrlStart).formatDate("MM/dd/yyyy hh:mm:ss t");
-              dojo11.byId('ctrlSched').innerHTML = new Date(status.ctrlSched).formatDate("MM/dd/yyyy hh:mm:ss t");
-              dojo11.byId('ctrlDuration').innerHTML = Math.round(status.ctrlDuration/10)/100 + 's';
+              hqDojo.byId('ctrlAction').innerHTML = status.ctrlAction;
+              hqDojo.byId('ctrlDesc').innerHTML = status.ctrlDesc;
+              hqDojo.byId('ctrlStart').innerHTML = new Date(status.ctrlStart).formatDate("MM/dd/yyyy hh:mm:ss t");
+              hqDojo.byId('ctrlSched').innerHTML = new Date(status.ctrlSched).formatDate("MM/dd/yyyy hh:mm:ss t");
+              hqDojo.byId('ctrlDuration').innerHTML = Math.round(status.ctrlDuration/10)/100 + 's';
             }
           },
           error: function(data){
@@ -117,7 +117,7 @@
       });
     };
 
-    dojo11.addOnLoad( function() {
+    hqDojo.ready( function() {
         hyperic.updateControlStatus();
     });
   -->

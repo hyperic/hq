@@ -367,7 +367,6 @@ class AlertController
     }
 
     def AlertController() {
-        setTemplate('standard')
     }
     
     def index(params) {

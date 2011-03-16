@@ -25,7 +25,7 @@
   USA.
  -->
 
-<plugin name="jmx" package="org.hyperic.hq.product.jmx">
+<plugin name="jmx" package="org.hyperic.hq.product.jmx" version="@project.version@">
 
   <classpath>
     <include name="pdk/lib/mx4j"/>

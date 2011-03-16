@@ -90,15 +90,15 @@
 <script type="text/javascript">
 	var advancedDialog = null;
 	
-	dojo11.addOnLoad(function(){
-		advancedDialog = new dijit11.Dialog({
+	hqDojo.ready(function(){
+		advancedDialog = new hqDijit.Dialog({
                 id: 'advancedDisplay',
                 refocus: true,
                 autofocus: false,
                 opacity: 0,
                 title: "<fmt:message key="resource.common.monitor.visibility.metricsToolbar.EditRangeBtn" />"
-        }, dojo11.byId('advancedDisplay'));
+        }, hqDojo.byId('advancedDisplay'));
         
-        dojo11.place(dojo11.byId('advancedDisplay'), dojo11.byId('advancedContainer'), "last");
+        hqDojo.place(hqDojo.byId('advancedDisplay'), hqDojo.byId('advancedContainer'), "last");
   	});
 </script>

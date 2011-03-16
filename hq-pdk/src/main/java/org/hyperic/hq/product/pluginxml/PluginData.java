@@ -80,6 +80,7 @@ public class PluginData {
     private Map pluginImpls = new HashMap();
 
     String name = null;
+    String version = null;
     String file = null;
     ClassLoader loader;
     Map fileScanIncludes = new HashMap();
@@ -105,7 +106,15 @@ public class PluginData {
         this.name = name;
     }
 
-    public String getPluginName() {
+    public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
+	}
+
+	public String getPluginName() {
         if (this.name != null) {
             return this.name;
         }

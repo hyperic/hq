@@ -24,7 +24,7 @@
   USA.
  -->
 
-<plugin class="org.hyperic.hq.plugin.groovy.GroovyLanguagePlugin">
+<plugin class="org.hyperic.hq.plugin.groovy.GroovyLanguagePlugin" version="@project.version@">
 
   <classpath>
     <include name="pdk/plugins/scripting/groovy-all-*.jar"/>

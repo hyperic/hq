@@ -25,7 +25,30 @@
 		<link rel="stylesheet" type="text/css" href="<spring:url value="/static/css/core/theme.css" />">
 		<link rel="stylesheet" type="text/css" href="<spring:url value="/static/css/xstyle/overrides.css" />">
 		<!--[if lt IE 8]><link rel="stylesheet" href="<spring:url value="/static/css/core/ie.css" />"><![endif]-->
-		<script src="<spring:url value="/static/js/dojo/1.5/dojo/dojo.js" />" type="text/javascript"></script>
+		<script type="text/javascript">
+			var djConfig = {};
+			djConfig.parseOnLoad = true;
+			djConfig.baseUrl = '/static/js/dojo/1.5/dojo/';
+			djConfig.scopeMap = [ [ "dojo", "hqDojo" ], [ "dijit", "hqDijit" ], [ "dojox", "hqDojox" ] ];
+		</script>
+		<!--[if IE]>
+		<script type="text/javascript">
+			// since dojo has trouble when it comes to using relative urls + ssl, we
+			// use this workaorund to provide absolute urls.
+			function qualifyURL(url) {
+				var a = document.createElement('img');
+			    a.src = url;
+			    return a.src;
+			}
+			
+			djConfig.modulePaths = {
+			    "dojo": qualifyURL("/static/js/dojo/1.5/dojo"),
+			    "dijit":  qualifyURL("/static/js/dojo/1.5/dijit"),
+			    "dojox":  qualifyURL("/static/js/dojo/1.5/dojox")
+		  	};
+		</script>
+		<![endif]-->
+		<script src="<spring:url value="/static/js/dojo/1.5/dojo/dojo.js" />" type="text/javascript" djConfig="parseOnLoad: true"></script>
 		<script src="<spring:url value="/static/js/html5.js" />" type="text/javascript"></script>
 	</head>
 	<body class="tundra">

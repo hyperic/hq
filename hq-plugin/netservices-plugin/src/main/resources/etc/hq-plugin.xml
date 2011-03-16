@@ -25,7 +25,7 @@
   USA.
  -->
 
-<plugin name="netservices">
+<plugin name="netservices" version="@project.version@">
 
   <config name="sockaddr" type="global">
     <option name="hostname"

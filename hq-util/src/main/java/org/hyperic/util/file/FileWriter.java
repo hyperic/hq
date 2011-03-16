@@ -159,7 +159,7 @@ public class FileWriter
         }
         
         if (this.expectedMD5Sum != null) {
-            String actualMD5Sum = MD5.getDigestString(getDestFile());
+            String actualMD5Sum = MD5.getMD5Checksum(getDestFile());
             
             log.debug("Verifying MD5 check sum for file "+getDestFile()+
                       "; expected="+this.expectedMD5Sum+", actual="+actualMD5Sum);

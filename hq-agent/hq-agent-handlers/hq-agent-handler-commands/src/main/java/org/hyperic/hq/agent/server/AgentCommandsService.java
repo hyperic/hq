@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -507,6 +508,29 @@ public class AgentCommandsService implements AgentCommandsClient {
                     "Invalid file format for the agent bundle tar file (.zip, .tar.gz or .tgz expected)");
         }
         return fileName.substring(0, index);
+    }
+
+    public Map<String, Boolean> agentRemoveFile(Collection<String> files) {
+        final Map<String, Boolean> rtn = new HashMap<String, Boolean>();
+        for (final String filename : files) {
+            if (filename == null) {
+                continue;
+            }
+            try {
+                final File file = new File(resolveAgentBundleHomePath(filename));
+                if (!file.exists() || !file.isFile()) {
+                    rtn.put(filename, false);
+                    continue;
+                }
+                file.delete();
+                rtn.put(filename, true);
+            } catch (Exception e) {
+                _log.warn("could not remove file " + filename + ": " + e);
+                _log.debug(e,e);
+                rtn.put(filename, false);
+            }
+        }
+        return rtn;
     }
 
 }

@@ -58,7 +58,7 @@
   USA.
  -->
 
-<plugin package="org.hyperic.hq.plugin.glassfish">
+<plugin package="org.hyperic.hq.plugin.glassfish" version="@project.version@">
 
   <classpath>
     <include name="pdk/lib/mx4j"/>

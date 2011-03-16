@@ -57,7 +57,7 @@
   USA.
  -->
 
-<plugin name="jboss" class="JBossProductPlugin">
+<plugin name="jboss" class="JBossProductPlugin" version="@project.version@">
 
     <classpath>
         <include name="client/jnp-client.jar"/>

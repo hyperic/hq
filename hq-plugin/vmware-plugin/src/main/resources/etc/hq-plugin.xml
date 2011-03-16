@@ -24,7 +24,7 @@
   USA.
  -->
 
-<plugin name="vmware" class="VMwareProductPlugin">
+<plugin name="vmware" class="VMwareProductPlugin" version="@project.version@">
 
   <config name="authd">
     <option name="authd.client.port"

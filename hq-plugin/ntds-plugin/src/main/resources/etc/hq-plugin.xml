@@ -24,7 +24,7 @@
   USA.
  -->
 
-<plugin name="ntds">
+<plugin name="ntds" version="@project.version@">
 
   <filter name="ntds" value="NTDS:Platform=Win32"/>
 

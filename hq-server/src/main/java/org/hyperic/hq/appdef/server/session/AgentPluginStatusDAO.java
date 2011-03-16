@@ -27,6 +27,7 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,7 @@ import java.util.Map;
 import org.hibernate.Hibernate;
 import org.hibernate.SQLQuery;
 import org.hibernate.SessionFactory;
+import org.hibernate.type.IntegerType;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.product.Plugin;
@@ -74,7 +76,7 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
         return rtn;
     }
 
-    Map<Plugin, Collection<AgentPluginStatus>> getOutOfSyncAgentsByPlugin() {
+    public Map<Plugin, Collection<AgentPluginStatus>> getOutOfSyncAgentsByPlugin() {
         final Map<Plugin, Collection<AgentPluginStatus>> rtn =
             new HashMap<Plugin, Collection<AgentPluginStatus>>();
         final List<Integer> list = getOutOfSyncPlugins(null);
@@ -110,7 +112,7 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
         return rtn;
     }
 
-    List<String> getOutOfSyncPluginNamesByAgentId(int agentId) {
+    public List<String> getOutOfSyncPluginNamesByAgentId(int agentId) {
         final List<Integer> ids = getOutOfSyncPlugins(agentId);
         final List<String> rtn = new ArrayList<String>(ids.size());
         for (final Integer id : ids) {
@@ -144,8 +146,7 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
         if (agentId != null) {
             query.setParameter("agentId", agentId);
         }
-        return query.addScalar("agent_id", Hibernate.INTEGER)
-                    .addScalar("plugin_name", Hibernate.STRING)
+        return query.addScalar("id", Hibernate.INTEGER)
                     .list();
     }
 
@@ -164,12 +165,6 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
                            .setParameter("agentId", agentId)
                            .list();
     }
-    
-    long getNumAutoUpdatingAgents() {
-        final String hql = "select count(distinct Agent) from AgentPluginStatus";
-        final Long i = (Long) getSession().createQuery(hql).uniqueResult();
-        return (i == null) ? 0 : i;
-    }
 
     @SuppressWarnings("unchecked")
     public Map<String, AgentPluginStatus> getStatusByAgentId(Integer agentId) {
@@ -182,6 +177,92 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
             new HashMap<String, AgentPluginStatus>(list.size());
         for (final AgentPluginStatus status : list) {
             rtn.put(status.getPluginName(), status);
+        }
+        return rtn;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Collection<AgentPluginStatus> getErrorPluginStatusByJarName(String jarName) {
+        final String hql =
+            "from AgentPluginStatus where jarName = :jarName and lastSyncStatus = :error";
+        return getSession().createQuery(hql)
+                           .setParameter("jarName", jarName)
+                           .setParameter("error", AgentPluginStatusEnum.SYNC_FAILURE.toString())
+                           .list();
+    }
+
+    @SuppressWarnings("unchecked")
+    public Collection<Agent> getAutoUpdatingAgents() {
+        final String hql = "select distinct agent from AgentPluginStatus";
+        return getSession().createQuery(hql).list();
+    }
+
+    public void removeAgentPluginStatuses(Integer agentId, Collection<String> pluginFileNames) {
+        final String hql =
+            "select id from AgentPluginStatus where agent.id = :agentId and jarName in (:filenames)";
+        @SuppressWarnings("unchecked")
+        final List<Integer> list =
+            getSession().createQuery(hql)
+                        .setParameter("agentId", agentId, new IntegerType())
+                        .setParameterList("filenames", pluginFileNames)
+                        .list();
+        for (final Integer sapsId : list) {
+            AgentPluginStatus status = get(sapsId);
+            if (status == null) {
+                continue;
+            }
+            remove(status);
+        }
+    }
+
+    public Map<Agent, Collection<AgentPluginStatus>> getPluginsToRemoveFromAgents() {
+        final String hql = new StringBuilder(64)
+            .append("select s.id FROM EAM_AGENT_PLUGIN_STATUS s ")
+            .append("where not exists (select 1 from EAM_PLUGIN p where p.name = s.plugin_name)")
+            .toString();
+        @SuppressWarnings("unchecked")
+        final List<Integer> list =
+            getSession().createSQLQuery(hql)
+                        .addScalar("id", Hibernate.INTEGER)
+                        .list();
+        if (list.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        final Map<Agent, Collection<AgentPluginStatus>> rtn =
+            new HashMap<Agent, Collection<AgentPluginStatus>>(list.size());
+        for (final Integer sapsId : list) {
+            final AgentPluginStatus status = get(sapsId);
+            if (status == null) {
+                continue;
+            }
+            final Agent agent = status.getAgent();
+            if (agent == null) {
+                continue;
+            }
+            Collection<AgentPluginStatus> tmp = rtn.get(agent);
+            if (tmp == null) {
+                tmp = new ArrayList<AgentPluginStatus>();
+                rtn.put(agent, tmp);
+            }
+            tmp.add(status);
+        }
+        return rtn;
+    }
+
+    public Map<Agent, AgentPluginStatus> getPluginStatus(String pluginName) {
+        final String hql = "select id from AgentPluginStatus where pluginName = :name";
+        final List<Integer> list = getSession().createQuery(hql).setParameter("name", pluginName).list();
+        final Map<Agent, AgentPluginStatus> rtn = new HashMap<Agent, AgentPluginStatus>(list.size());
+        for (final Integer sapsId : list) {
+            final AgentPluginStatus status = get(sapsId);
+            if (status == null) {
+                continue;
+            }
+            final Agent agent = status.getAgent();
+            if (agent == null) {
+                continue;
+            }
+            rtn.put(agent, status);
         }
         return rtn;
     }
