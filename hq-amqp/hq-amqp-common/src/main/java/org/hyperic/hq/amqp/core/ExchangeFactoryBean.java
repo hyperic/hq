@@ -36,7 +36,7 @@ import java.io.IOException;
  */
 public class ExchangeFactoryBean implements FactoryBean<String> {
 
-    private static final String TYPE = "direct";
+    private static final String TYPE = "topic";
 
     private static final boolean DURABLE = true;
 
