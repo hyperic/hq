@@ -98,8 +98,6 @@ public interface GalertManager {
 
     public Collection<ExecutionStrategyTypeInfo> findAllStrategyTypes();
 
-    public ExecutionStrategyTypeInfo findStrategyType(Integer id);
-
     public ExecutionStrategyTypeInfo findStrategyType(ExecutionStrategyType t);
 
     public GalertDef findById(Integer id);

@@ -57,6 +57,8 @@ import org.hyperic.hq.events.AlertAuxLogProvider;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.server.session.Action;
+import org.hyperic.hq.galert.data.ExecutionStrategyInfoRepository;
+import org.hyperic.hq.galert.data.ExecutionStrategyTypeInfoRepository;
 import org.hyperic.hq.galerts.processor.GalertProcessor;
 import org.hyperic.hq.galerts.processor.Gtrigger;
 import org.hyperic.hq.galerts.shared.GalertManager;
@@ -80,7 +82,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class GalertManagerImpl implements GalertManager, ApplicationListener<ApplicationEvent> {
     private final Log _log = LogFactory.getLog(GalertManagerImpl.class);
 
-    private ExecutionStrategyTypeInfoDAO _stratTypeDAO;
+    private ExecutionStrategyTypeInfoRepository executionStrategyTypeInfoRepository;
     private GalertDefDAO _defDAO;
     private GalertAuxLogDAO _auxLogDAO;
     private GalertLogDAO _logDAO;
@@ -89,14 +91,16 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
     private EscalationManager escalationManager;
     private GalertProcessor galertProcessor;
     private ResourceGroupManager resourceGroupManager;
+    private ExecutionStrategyInfoRepository executionStrategyInfoRepository;
 
     @Autowired
-    public GalertManagerImpl(ExecutionStrategyTypeInfoDAO stratTypeDAO, GalertDefDAO defDAO,
+    public GalertManagerImpl(ExecutionStrategyTypeInfoRepository executionStrategyTypeInfoRepository, GalertDefDAO defDAO,
                              GalertAuxLogDAO auxLogDAO, GalertLogDAO logDAO,
                              GalertActionLogDAO actionLogDAO, CrispoManager crispoManager,
                              EscalationManager escalationManager,
-                             ResourceGroupManager resourceGroupManager, GalertProcessor gAlertProcessor) {
-        _stratTypeDAO = stratTypeDAO;
+                             ResourceGroupManager resourceGroupManager, GalertProcessor gAlertProcessor,
+                             ExecutionStrategyInfoRepository executionStrategyInfoRepository) {
+        this.executionStrategyTypeInfoRepository = executionStrategyTypeInfoRepository;
         _defDAO = defDAO;
         _auxLogDAO = auxLogDAO;
         _logDAO = logDAO;
@@ -105,6 +109,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         this.escalationManager = escalationManager;
         this.resourceGroupManager = resourceGroupManager;
         this.galertProcessor = gAlertProcessor;
+        this.executionStrategyInfoRepository = executionStrategyInfoRepository;
     }
 
     /**
@@ -218,15 +223,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      */
     @Transactional(readOnly = true)
     public Collection<ExecutionStrategyTypeInfo> findAllStrategyTypes() {
-        return _stratTypeDAO.findAll();
-    }
-
-    /**
-     * 
-     */
-    @Transactional(readOnly = true)
-    public ExecutionStrategyTypeInfo findStrategyType(Integer id) {
-        return _stratTypeDAO.findById(id);
+        return executionStrategyTypeInfoRepository.findAll();
     }
 
     /**
@@ -234,7 +231,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      */
     @Transactional(readOnly = true)
     public ExecutionStrategyTypeInfo findStrategyType(ExecutionStrategyType t) {
-        return _stratTypeDAO.find(t);
+        return executionStrategyTypeInfoRepository.findByType(t.getClass());
     }
 
     /**
@@ -534,7 +531,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      * 
      */
     public ExecutionStrategyTypeInfo registerExecutionStrategy(ExecutionStrategyType stratType) {
-        ExecutionStrategyTypeInfo info = _stratTypeDAO.find(stratType);
+        ExecutionStrategyTypeInfo info = executionStrategyTypeInfoRepository.findByType(stratType.getClass());
 
         if (info != null) {
             _log.warn("Execution strategy type [" + stratType.getClass().getName() +
@@ -543,7 +540,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         }
 
         info = new ExecutionStrategyTypeInfo(stratType);
-        _stratTypeDAO.save(info);
+        executionStrategyTypeInfoRepository.save(info);
         return info;
     }
 
@@ -553,7 +550,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      * 
      */
     public void unregisterExecutionStrategy(ExecutionStrategyType sType) {
-        ExecutionStrategyTypeInfo info = _stratTypeDAO.find(sType);
+        ExecutionStrategyTypeInfo info = executionStrategyTypeInfoRepository.findByType(sType.getClass());
 
         if (info == null) {
             _log.warn("Execution strategy [" + sType.getClass().getName() +
@@ -567,7 +564,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
                                                "] alert defs are using it");
         }
 
-        _stratTypeDAO.remove(info);
+        executionStrategyTypeInfoRepository.delete(info);
     }
 
     /**
@@ -622,7 +619,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         Crispo stratCrispo = crispoManager.create(stratConfig);
         ExecutionStrategyInfo res = def.addPartition(partition, stratType, stratCrispo);
 
-        _stratTypeDAO.save(res);
+        executionStrategyInfoRepository.save(res);
         galertProcessor.loadReloadOrUnload(def);
         return res;
     }

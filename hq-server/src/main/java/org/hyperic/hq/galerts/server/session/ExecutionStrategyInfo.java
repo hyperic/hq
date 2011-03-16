@@ -52,162 +52,139 @@ import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.util.config.ConfigResponse;
 
 @Entity
-@Table(name="EAM_EXEC_STRATEGIES")
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-public class ExecutionStrategyInfo implements Serializable
-{ 
+@Table(name = "EAM_EXEC_STRATEGIES")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public class ExecutionStrategyInfo implements Serializable {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "DEF_ID", nullable = false)
+    @Index(name = "EXEC_STRATEGIES_DEF_ID_IDX")
+    private GalertDef alertDef;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CONFIG_ID", nullable = false)
+    @Index(name = "EXEC_STRATEGIES_CONFIG_ID_IDX")
+    private Crispo config;
+
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "ID")
     private Integer id;
 
-    @Column(name="VERSION_COL",nullable=false)
+    private transient GalertDefPartition partition;
+
+    @SuppressWarnings("unused")
+    @Column(name = "PARTITION", nullable = false)
+    private int partitionEnum;
+
+    @OneToMany(mappedBy = "strategy", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @OrderColumn(name = "LIDX", nullable = false)
+    private List<GtriggerInfo> triggers = new ArrayList<GtriggerInfo>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "TYPE_ID", nullable = false)
+    @Index(name = "EXEC_STRATEGIES_TYPE_ID_IDX")
+    private ExecutionStrategyTypeInfo type;
+
+    @Column(name = "VERSION_COL", nullable = false)
     @Version
     private Long version;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="DEF_ID",nullable=false)
-    @Index(name="EXEC_STRATEGIES_DEF_ID_IDX")
-    private GalertDef                 alertDef;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="TYPE_ID",nullable=false)
-    @Index(name="EXEC_STRATEGIES_TYPE_ID_IDX")
-    private ExecutionStrategyTypeInfo type;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="CONFIG_ID",nullable=false)
-    @Index(name="EXEC_STRATEGIES_CONFIG_ID_IDX")
-    private Crispo                    config;
-    
-    @SuppressWarnings("unused")
-    @Column(name="PARTITION",nullable=false)
-    private int partitionEnum;
-    
-    private transient GalertDefPartition        partition;
-    
-    @OneToMany(mappedBy="strategy",cascade=CascadeType.ALL,orphanRemoval=true)
-    @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-    @OrderColumn(name="LIDX",nullable=false)
-    private List<GtriggerInfo>        triggers = new ArrayList<GtriggerInfo>();
-    
-    protected ExecutionStrategyInfo() {}
 
-    ExecutionStrategyInfo(GalertDef alertDef, ExecutionStrategyTypeInfo type, 
-                          Crispo config, GalertDefPartition partition) 
-    {
-        this.alertDef  = alertDef;
-        this.type      = type;
-        this.config    = config;
+    protected ExecutionStrategyInfo() {
+    }
+
+    ExecutionStrategyInfo(GalertDef alertDef, ExecutionStrategyTypeInfo type, Crispo config,
+                          GalertDefPartition partition) {
+        this.alertDef = alertDef;
+        this.type = type;
+        this.config = config;
         this.partition = partition;
     }
-    
-    
+
+    GtriggerInfo addTrigger(GtriggerTypeInfo typeInfo, Crispo config, ResourceGroup group,
+                            GalertDefPartition style) {
+        GtriggerInfo trigger = new GtriggerInfo(typeInfo, this, config, getTriggerList().size());
+
+        // Ensure that the trigger can process the config. If it can't then
+        // it'll probably throw an exception
+        // TODO: Would be good to actually validate against the schema
+        GtriggerType type = typeInfo.getType();
+
+        if (!type.validForGroup(group)) {
+            throw new IllegalArgumentException("Trigger [" + type.getClass().getName() +
+                                               "] cannot work with this " + "group [" + group + "]");
+        }
+
+        ConfigResponse configResponse = config.toResponse();
+
+        type.createTrigger(configResponse);
+
+        getTriggerList().add(trigger);
+        return trigger;
+    }
+
+    void clearTriggers() {
+        getTriggerList().clear();
+    }
+
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+
+        if (o == null || o instanceof ExecutionStrategyInfo == false)
+            return false;
+
+        ExecutionStrategyInfo oe = (ExecutionStrategyInfo) o;
+
+        return oe.getAlertDef().equals(getAlertDef()) && oe.getType().equals(getType()) &&
+               oe.getPartition().equals(getPartition());
+    }
+
+    public GalertDef getAlertDef() {
+        return alertDef;
+    }
+
+    public ConfigResponse getConfig() {
+        return config.toResponse();
+    }
+
+    protected Crispo getConfigCrispo() {
+        return config;
+    }
+
     public Integer getId() {
         return id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public GalertDefPartition getPartition() {
+        return partition;
+    }
+
+    protected int getPartitionEnum() {
+        return partition.getCode();
+    }
+
+    public ExecutionStrategy getStrategy() {
+        return type.getStrategy(config.toResponse());
+    }
+
+    protected List<GtriggerInfo> getTriggerList() {
+        return triggers;
+    }
+
+    public List<GtriggerInfo> getTriggers() {
+        return Collections.unmodifiableList(triggers);
+    }
+
+    public ExecutionStrategyTypeInfo getType() {
+        return type;
     }
 
     public Long getVersion() {
         return version;
     }
 
-    public void setVersion(Long version) {
-        this.version = version;
-    }
-
-    public GalertDef getAlertDef() {
-        return alertDef;
-    }
-    
-    protected void setAlertDef(GalertDef def) {
-        alertDef = def;
-    }
-    
-    public ExecutionStrategyTypeInfo getType() {
-        return type;
-    }
-    
-    protected void setType(ExecutionStrategyTypeInfo type) {
-        this.type = type;
-    }
-    
-    protected Crispo getConfigCrispo() {
-        return config;
-    }
-    
-    protected void setConfigCrispo(Crispo config) {
-        this.config = config;
-    }
-    
-    public ConfigResponse getConfig() {
-        return config.toResponse();
-    }
-    
-    public ExecutionStrategy getStrategy() {
-        return type.getStrategy(config.toResponse());
-    }
-
-    public GalertDefPartition getPartition() {
-        return partition;
-    }
-    
-    protected int getPartitionEnum() {
-        return partition.getCode();
-    }
-    
-    protected void setPartitionEnum(int partition) {
-        this.partition = GalertDefPartition.findByCode(partition);
-    }
-    
-    
-    public List<GtriggerInfo> getTriggers() {
-        return Collections.unmodifiableList(triggers);
-    }
-    
-    protected List<GtriggerInfo> getTriggerList() {
-        return triggers;
-    }
-    
-    GtriggerInfo addTrigger(GtriggerTypeInfo typeInfo, Crispo config, 
-                            ResourceGroup group, GalertDefPartition style) 
-    {
-        GtriggerInfo trigger = new GtriggerInfo(typeInfo, this, config,
-                                                getTriggerList().size());
-
-        
-        // Ensure that the trigger can process the config.  If it can't then
-        // it'll probably throw an exception
-        // TODO:  Would be good to actually validate against the schema
-        GtriggerType type = typeInfo.getType();
-
-        if (!type.validForGroup(group)) {
-            throw new IllegalArgumentException("Trigger [" + 
-                                               type.getClass().getName() + 
-                                               "] cannot work with this " + 
-                                               "group [" + group + "]");
-        }
-        
-        ConfigResponse configResponse = config.toResponse();
-        
-        type.createTrigger(configResponse);
-        
-        getTriggerList().add(trigger);
-        return trigger;
-    }
-    
-    void clearTriggers() {
-        getTriggerList().clear();
-    }
-    
-    protected void setTriggerList(List<GtriggerInfo> triggers) {
-        this.triggers = triggers;
-    }
-    
     public int hashCode() {
         int hash = 1;
 
@@ -216,18 +193,32 @@ public class ExecutionStrategyInfo implements Serializable
         hash = hash * 31 + getPartition().hashCode();
         return hash;
     }
-    
-    public boolean equals(Object o) {
-        if (o == this)
-            return true;
-        
-        if (o == null || o instanceof ExecutionStrategyInfo == false)
-            return false;
-        
-        ExecutionStrategyInfo oe = (ExecutionStrategyInfo)o;
-        
-        return oe.getAlertDef().equals(getAlertDef()) &&
-            oe.getType().equals(getType()) &&
-            oe.getPartition().equals(getPartition());
+
+    protected void setAlertDef(GalertDef def) {
+        alertDef = def;
+    }
+
+    protected void setConfigCrispo(Crispo config) {
+        this.config = config;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    protected void setPartitionEnum(int partition) {
+        this.partition = GalertDefPartition.findByCode(partition);
+    }
+
+    protected void setTriggerList(List<GtriggerInfo> triggers) {
+        this.triggers = triggers;
+    }
+
+    protected void setType(ExecutionStrategyTypeInfo type) {
+        this.type = type;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }
