@@ -40,6 +40,7 @@ public class Plugin extends PersistedObject implements ContainerManagedTimestamp
     private String md5;
     private long creationTime;
     private long modifiedTime;
+    private boolean disabled;
 
     // Constructors
     /**
@@ -170,6 +171,14 @@ public class Plugin extends PersistedObject implements ContainerManagedTimestamp
         setPath( valueHolder.getPath() );
         setMD5( valueHolder.getMD5() );
         setCtime( valueHolder.getCtime() );
+    }
+
+    public boolean isDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
     }
 
     public boolean equals(Object obj)
