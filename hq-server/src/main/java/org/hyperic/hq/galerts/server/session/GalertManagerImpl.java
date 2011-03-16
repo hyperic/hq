@@ -40,6 +40,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.ApplicationEvent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.server.session.GroupDeleteRequestedEvent;
 import org.hyperic.hq.authz.server.session.GroupMembersChangedEvent;
@@ -464,7 +465,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
             }
 
             // Filter by appdef entity
-            AppdefEntityID aeid = def.getAppdefID();
+            AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(def.getResource());
             if (includes != null && !includes.contains(aeid))
                 continue;
 
