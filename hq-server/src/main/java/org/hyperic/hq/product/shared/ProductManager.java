@@ -63,7 +63,4 @@ public interface ProductManager {
     public void updateDynamicServiceTypePlugin(String pluginName, Set<ServiceType> serviceTypes)
         throws PluginNotFoundException, VetoException, NotFoundException;
 
-// XXX needs javadoc!
-    public boolean deployPluginIfValid(AuthzSubject subj, byte[] pluginJar);
-
 }
