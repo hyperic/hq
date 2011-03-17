@@ -191,6 +191,11 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
                            .list();
     }
 
+    Long getNumAutoUpdatingAgents() {
+        final String hql = "select count(distinct agent) from AgentPluginStatus";
+        return (Long) getSession().createQuery(hql).uniqueResult();
+    }
+
     @SuppressWarnings("unchecked")
     public Collection<Agent> getAutoUpdatingAgents() {
         final String hql = "select distinct agent from AgentPluginStatus";

@@ -1449,6 +1449,11 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     }
     
     @Transactional(readOnly=true)
+    public long getNumAutoUpdatingAgents() {
+        return agentPluginStatusDAO.getNumAutoUpdatingAgents();
+    }
+
+    @Transactional(readOnly=true)
     public void syncAllAgentPlugins() {
         final boolean debug = log.isDebugEnabled();
         if (agentPluginUpdater.isDisabled()) {

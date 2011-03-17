@@ -481,4 +481,7 @@ public interface AgentManager {
 // XXX javadoc!
     public void removePluginFromAgentsInBackground(String pluginFileName);
 
+// XXX javadoc!
+    public long getNumAutoUpdatingAgents();
+
 }
