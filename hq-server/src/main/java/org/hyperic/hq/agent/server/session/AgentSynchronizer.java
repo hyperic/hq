@@ -216,7 +216,7 @@ public class AgentSynchronizer implements DiagnosticObject {
             final AgentManager agentManager = Bootstrap.getBean(AgentManager.class);
             agentManager.pingAgent(overlord, job.getAgentId());
         } catch (Exception e) {
-            log.warn("Could not ping agent in order to run job " + job + ": " + e);
+            log.warn("Could not ping agent in order to run job " + getJobInfo(job) + ": " + e);
             log.debug(e,e);
             return false;
         }
