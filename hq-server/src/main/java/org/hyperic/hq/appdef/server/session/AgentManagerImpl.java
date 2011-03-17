@@ -94,6 +94,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.Resource;
+import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -160,7 +161,25 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                 }
                 AgentManager am = applicationContext.getBean(AgentManager.class);
                 for (final PluginStatusZevent zevent : events) {
-                    am.updateAgentPluginStatus(zevent.getPluginReport());
+                    Exception ex = null;
+                    int tries = 0;
+                    while (tries++ < 3) {
+                        try {
+                            am.updateAgentPluginStatus(zevent.getPluginReport());
+                            ex = null;
+                            break;
+                        } catch (HibernateOptimisticLockingFailureException e) {
+                            ex = e;
+                            if (tries < 3) {
+                                log.warn("retrying updateAgentPluginStatus, tries=" + tries +
+                                         " error: " + e);
+                            }
+                            log.debug(e, e);
+                        }
+                    }
+                    if (ex != null) {
+                        log.error(ex,ex);
+                    }
                 }
             }
             public String toString() {
