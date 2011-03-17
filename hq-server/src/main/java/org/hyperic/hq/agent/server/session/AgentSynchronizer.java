@@ -191,19 +191,12 @@ public class AgentSynchronizer implements DiagnosticObject {
     }
 
     private void executeJob(final AgentDataTransferJob job) throws InterruptedException {
-        try {
-            // XXX need to set this in the constructor
-            final AgentManager agentManager = Bootstrap.getBean(AgentManager.class);
-            agentManager.pingAgent(overlord, job.getAgentId());
-        } catch (Exception e) {
-            log.warn("Could not ping agent in order to run job " + job + ": " + e);
-            log.debug(e,e);
-            return;
-        }
         final String name = Thread.currentThread().getName() + "-" + executorNum.getAndIncrement();
         final Thread thread = new Thread(name) {
             public void run() {
-                job.execute();
+                if (agentIsAlive(job)) {
+                    job.execute();
+                }
             }
         };
         thread.start();
@@ -217,6 +210,19 @@ public class AgentSynchronizer implements DiagnosticObject {
         }
     }
     
+    private boolean agentIsAlive(AgentDataTransferJob job) {
+        try {
+            // XXX need to set this in the constructor
+            final AgentManager agentManager = Bootstrap.getBean(AgentManager.class);
+            agentManager.pingAgent(overlord, job.getAgentId());
+        } catch (Exception e) {
+            log.warn("Could not ping agent in order to run job " + job + ": " + e);
+            log.debug(e,e);
+            return false;
+        }
+        return true;
+    }
+
     private String getJobInfo(AgentDataTransferJob job) {
         final String desc = job.getJobDescription();
         return new StringBuilder(desc.length() + 32)
