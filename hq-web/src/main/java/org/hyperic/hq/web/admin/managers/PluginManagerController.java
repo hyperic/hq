@@ -234,8 +234,7 @@ public class PluginManagerController extends BaseController implements Applicati
             e.printStackTrace();
             messageKey = "admin.managers.plugin.message.io.failure";
         }
-        
-/* XXX scottmf, annie needs to fix up the deployPluginIfValid call      
+         
         try {
             subject = getAuthzSubject(session);
             
@@ -259,7 +258,6 @@ public class PluginManagerController extends BaseController implements Applicati
             log.error(e,e);
             messageKey = "admin.managers.plugin.message.io.failure";
         }
-*/
 
         model.addAttribute("success", success);
         model.addAttribute("messageKey", messageKey);
