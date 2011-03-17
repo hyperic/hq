@@ -3,18 +3,13 @@ package org.hyperic.hq.web.admin.managers;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum;
@@ -38,12 +33,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -65,7 +58,6 @@ public class PluginManagerController extends BaseController implements Applicati
             ProductManager productManager, PluginManager pluginManager,
             AgentManager agentManager) {
         super(appdefBoss, authzBoss);
-        this.productManager = productManager;
         this.pluginManager = pluginManager;
         this.agentManager = agentManager;
     }
@@ -74,8 +66,8 @@ public class PluginManagerController extends BaseController implements Applicati
     public String index(Model model) {
         model.addAttribute("pluginSummaries", getPluginSummaries());
         model.addAttribute("allAgentCount",agentManager.getAgentCount());
-        model.addAttribute("mechanismOn", pluginManager.isPluginDeploymentOff());
-        if (pluginManager.isPluginDeploymentOff()){
+        model.addAttribute("mechanismOn", !pluginManager.isPluginDeploymentOff());
+        if (!pluginManager.isPluginDeploymentOff()){
             model.addAttribute("instruction", "admin.managers.plugin.instructions");
         }else{
             model.addAttribute("instruction", "admin.managers.plugin.mechanism.off");
@@ -133,9 +125,7 @@ public class PluginManagerController extends BaseController implements Applicati
             pluginSummary.put("inProgress",isInProgress);
             pluginSummary.put("updatedDate", formatter.format(plugin.getModifiedTime()));
             pluginSummary.put("version", plugin.getVersion());   
-            
-            //TODO add disabled
-            pluginSummary.put("disabled", false);
+            pluginSummary.put("disabled", plugin.isDisabled());
             
             //errorAgents
             List<Map<String,Object>> errorAgents = new ArrayList<Map<String,Object>>();
@@ -151,7 +141,6 @@ public class PluginManagerController extends BaseController implements Applicati
             
             pluginSummaries.add(pluginSummary);
         }
-
         return pluginSummaries;
     }
     
@@ -167,8 +156,6 @@ public class PluginManagerController extends BaseController implements Applicati
      * @return the address of Agent
      */
     private String getAgentName(Agent agent){
-        //Our intent is to return the FQDN of the platform the agent is running on. 
-        // However, we haven't figure out a good way to distinguish "fake" platform now.
         Collection <Platform> platforms = agent.getPlatforms();
         for (Platform platform: platforms){
             if(PlatformDetector.isSupportedPlatform(platform.getPlatformType().getName())){
@@ -195,17 +182,13 @@ public class PluginManagerController extends BaseController implements Applicati
             return "success";
 
         } catch (SessionNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error(e,e);
         } catch (SessionTimeoutException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error(e,e);
         } catch (PermissionException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error(e,e);
         }
         
-
         return "error";
     }
        
