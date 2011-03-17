@@ -329,7 +329,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         if (plugin == null) {
             return Collections.emptyList();
         }
-        return agentPluginStatusDAO.getErrorPluginStatusByJarName(plugin.getPath());
+        return agentPluginStatusDAO.getErrorPluginStatusByFileName(plugin.getPath());
     }
     
     public boolean isPluginDeploymentOff() {
