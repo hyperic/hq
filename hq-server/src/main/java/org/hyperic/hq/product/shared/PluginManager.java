@@ -88,4 +88,10 @@ public interface PluginManager {
 
  // XXX javadoc!
     Map<Integer, Long> getAgentIdsInRestartState();
+
+ // XXX javadoc!
+    Map<String, Integer> getAllPluginIdsByName();
+
+ // XXX javadoc!
+    void markDisabled(Collection<Integer> pluginIds);
 }

@@ -313,6 +313,26 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     public Plugin getPluginById(Integer id) {
         return pluginDAO.get(id);
     }
+    
+    @Transactional(readOnly=false)
+    public void markDisabled(Collection<Integer> pluginIds) {
+        for (final Integer pluginId : pluginIds) {
+            final Plugin plugin = pluginDAO.get(pluginId);
+            if (plugin == null) {
+                continue;
+            }
+            plugin.setDisabled(true);
+        }
+    }
+
+    public Map<String, Integer> getAllPluginIdsByName() {
+        final List<Plugin> plugins = pluginDAO.findAll();
+        final Map<String, Integer> rtn = new HashMap<String, Integer>(plugins.size());
+        for (final Plugin plugin : plugins) {
+            rtn.put(plugin.getName(), plugin.getId());
+        }
+        return rtn;
+    }
 
     private Map<String, Plugin> getAllPluginsByName() {
         final List<Plugin> plugins = pluginDAO.findAll();
