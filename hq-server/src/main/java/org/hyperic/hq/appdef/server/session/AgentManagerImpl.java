@@ -1050,6 +1050,14 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         return pingAgent(subject, a);
     }
 
+    @Transactional(readOnly=true)
+    public long pingAgent(AuthzSubject subject, Integer agentId)
+    throws AgentNotFoundException, PermissionException, AgentConnectionException, IOException,
+           ConfigPropertyException, AgentRemoteException {
+        final Agent agent = agentDao.get(agentId);
+        return pingAgent(subject, agent);
+    }
+
     /**
      * Pings the specified agent.
      * 
