@@ -36,6 +36,7 @@ import org.hibernate.Hibernate;
 import org.hibernate.SQLQuery;
 import org.hibernate.SessionFactory;
 import org.hibernate.type.IntegerType;
+import org.hibernate.type.StringType;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.product.Plugin;
@@ -182,12 +183,17 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
     }
 
     @SuppressWarnings("unchecked")
-    public Collection<AgentPluginStatus> getErrorPluginStatusByFileName(String fileName) {
+    public Collection<AgentPluginStatus> getPluginStatusByFileName(String fileName,
+                                                      Collection<AgentPluginStatusEnum> statuses) {
         final String hql =
-            "from AgentPluginStatus where fileName = :fileName and lastSyncStatus = :error";
+            "from AgentPluginStatus where fileName = :fileName and lastSyncStatus in (:statuses)";
+        Collection<String> vals = new ArrayList<String>(statuses.size());
+        for (final AgentPluginStatusEnum s : statuses) {
+            vals.add(s.toString());
+        }
         return getSession().createQuery(hql)
                            .setParameter("fileName", fileName)
-                           .setParameter("error", AgentPluginStatusEnum.SYNC_FAILURE.toString())
+                           .setParameterList("statuses", vals, new StringType())
                            .list();
     }
 

@@ -139,7 +139,8 @@ public class PluginManagerController extends BaseController implements Applicati
             
             //errorAgents
             List<Map<String,Object>> errorAgents = new ArrayList<Map<String,Object>>();
-            Collection<AgentPluginStatus> errorAgentStatusList = pluginManager.getErrorStatusesByPluginId(pluginId);
+            Collection<AgentPluginStatus> errorAgentStatusList =
+                pluginManager.getStatusesByPluginId(pluginId, AgentPluginStatusEnum.SYNC_FAILURE);
             
             for(AgentPluginStatus errorAgentStatus: errorAgentStatusList){
                 Map<String,Object> errorAgent = new HashMap<String,Object>();

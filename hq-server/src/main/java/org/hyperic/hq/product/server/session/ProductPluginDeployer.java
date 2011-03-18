@@ -346,6 +346,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
     private void undeployPlugin(File pluginFile) throws Exception {
         log.info("Undeploying plugin: " + pluginFile);
         productPluginManager.removePluginJar(pluginFile.toString());
+        pluginManager.markDisabled(pluginFile.getName());
         agentManager.removePluginFromAgentsInBackground(pluginFile.getName());
     }
 
