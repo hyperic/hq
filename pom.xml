@@ -730,6 +730,7 @@
 			<modules>
 					<module>hq-util</module>
 					<module>hq-common</module>
+					<module>hq-lather</module>
 					<module>hq-pdk</module>
 					<module>hq-server</module>
 					<module>hq-rendit</module>
