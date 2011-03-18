@@ -27,6 +27,7 @@ package org.hyperic.hq.amqp.core;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
+import org.hyperic.hq.amqp.util.MessageConstants;
 
 import java.io.IOException;
 
@@ -40,7 +41,7 @@ public class DeclarativeBindingDelegate implements BindingDelegate {
     public DeclarativeBindingDelegate(ConnectionFactory connectionFactory) {
         this.template = new ChannelTemplate(connectionFactory);
     }
-
+ 
     /**
      * Declares an exchange and an anonymous queue, then binds them together:
      * <ul><li>A durable, non-autodelete exchange of a given type</li>
@@ -48,11 +49,11 @@ public class DeclarativeBindingDelegate implements BindingDelegate {
      * Returns the queue name generated.
      * @param exchangeName
      * @param routingKey
-     * @param exchangeType
+     * @param exchangeType can be null, which will create a TopicExchange
      * @throws ChannelException
      */
     public String bindExchangeToAnonymousQueue(final String exchangeName, final String routingKey, final String exchangeType) throws ChannelException {
-        return declareAndBind(exchangeName, routingKey, exchangeType, null);
+        return declareAndBind(exchangeName, routingKey, exchangeType != null ? exchangeType : MessageConstants.DEFAULT_EXCHANGE_TYPE, null);
     }
 
      /**
@@ -80,7 +81,7 @@ public class DeclarativeBindingDelegate implements BindingDelegate {
      */
     private String declareAndBind(final String exchangeName, final String routingKey, final String exchangeType, final String queueName) throws ChannelException {
         return this.template.execute(new ChannelCallback<String>() {
-            //@Override
+
             public String doInChannel(Channel channel) throws ChannelException {
                 String name = queueName;
                 try { 

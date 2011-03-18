@@ -13,7 +13,7 @@ public class Simulation {
             @Override
             public void run() {
                 try {
-                    new Server().listen();
+                    new Server().receiveAndReply(); 
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }

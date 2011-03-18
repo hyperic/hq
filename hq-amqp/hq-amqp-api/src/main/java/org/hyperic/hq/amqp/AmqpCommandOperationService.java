@@ -32,6 +32,7 @@ import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.amqp.util.Operations;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Map;
@@ -61,7 +62,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
      * The implementation for Server, Agent, and AgentHandler
      */
     protected AgentCommandsClient legacyClient;
-
+     
     /**
      * temporary: for the legacy Agent constructor
      * @param legacyClient
@@ -105,6 +106,10 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
             handleException(e, Operations.PING);
         } 
         return 0;
+    }
+
+    public void timedPing(int append) throws IOException, InterruptedException {
+        template.timedPing(append);
     }
 
 

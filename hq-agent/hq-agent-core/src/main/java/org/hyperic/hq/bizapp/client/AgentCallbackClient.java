@@ -25,10 +25,6 @@
 
 package org.hyperic.hq.bizapp.client;
 
-import java.io.IOException;
-import java.net.ConnectException;
-import java.util.HashSet;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
@@ -37,6 +33,10 @@ import org.hyperic.hq.bizapp.shared.lather.SecureAgentLatherValue;
 import org.hyperic.lather.LatherRemoteException;
 import org.hyperic.lather.LatherValue;
 import org.hyperic.lather.client.LatherHTTPClient;
+
+import java.io.IOException;
+import java.net.ConnectException;
+import java.util.HashSet;
 
 /**
  * Central place for communication back to the server. 

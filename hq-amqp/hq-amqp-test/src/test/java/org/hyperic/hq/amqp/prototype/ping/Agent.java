@@ -17,6 +17,8 @@ public class Agent extends AbstractAmqpComponent implements Ping {
     public long ping(int attempts) throws IOException, InterruptedException {
         Thread.sleep(100L);
         long startTime = System.currentTimeMillis();
+        /*AMQP.BasicProperties props = new AMQP.BasicProperties();
+        props.setReplyTo();*/
         channel.basicPublish(serverExchange, routingKey, null, "agent:ping-request".getBytes());
 
         channel.basicConsume(agentQueue, true, queueingConsumer);

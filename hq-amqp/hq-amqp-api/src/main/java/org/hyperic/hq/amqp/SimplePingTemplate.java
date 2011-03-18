@@ -31,13 +31,14 @@ public class SimplePingTemplate {
 
     protected String agentQueue;
 
+    protected QueueingConsumer queueingConsumer;
+
     private final Object monitor = new Object();
 
     public SimplePingTemplate() {
         try {
-            this.channel = new SingleConnectionFactory().newConnection().createChannel();
-            System.out.println(channel);
- 
+            this.channel = new SingleConnectionFactory().newConnection().createChannel(); 
+
             channel.exchangeDeclare(agentExchange, exchangeType, false);
             this.agentQueue = channel.queueDeclare().getQueue();
             channel.queueBind(agentQueue, agentExchange, routingKey);
@@ -45,30 +46,37 @@ public class SimplePingTemplate {
             channel.exchangeDeclare(serverExchange, exchangeType, false);
             this.serverQueue = channel.queueDeclare().getQueue();
             channel.queueBind(serverQueue, serverExchange, routingKey);
+
+            this.queueingConsumer = new QueueingConsumer(channel);
         } catch (IOException e) {
             logger.info(e);
         }
     }
 
     public long agentPing() throws IOException, InterruptedException {
-        synchronized (monitor) {
+        // synchronized (monitor) {
+        channel.basicPublish(serverExchange, routingKey, null, Operations.AGENT_PING_REQUEST.getBytes());
+        logger.info("***agent sent=" + Operations.AGENT_PING_REQUEST);
+        QueueingConsumer agentConsumer = new QueueingConsumer(channel);
+        channel.basicConsume(agentQueue, true, agentConsumer);
 
-            long startTime = System.currentTimeMillis();
-            channel.basicPublish(serverExchange, routingKey, null, Operations.AGENT_PING_REQUEST.getBytes());
-            System.out.println("agent sent=" + Operations.AGENT_PING_REQUEST);
-            QueueingConsumer agentConsumer = new QueueingConsumer(channel);
-            channel.basicConsume(agentQueue, true, agentConsumer);
+        while (true) {
+            QueueingConsumer.Delivery delivery = agentConsumer.nextDelivery();
+            String message = new String(delivery.getBody());
+            logger.info("***agent received=" + message);
+            return (message.length() > 0 && message.contains(Operations.AGENT_PING_RESPONSE)) ? 1 : 0;
+        } //}
+    }
 
-            while (true) {
-                QueueingConsumer.Delivery delivery = agentConsumer.nextDelivery();
-                String message = new String(delivery.getBody());
-                long duration = System.currentTimeMillis() - startTime;
-                System.out.println("agent received=" + message);
-                logger.info("***agent received=" + message);
-                if (message.length() > 0 && message.contains(Operations.AGENT_PING_RESPONSE)) {
-                    return duration;
-                }
-            }
+    public void timedPing(int append) throws IOException, InterruptedException {
+        String send = Operations.AGENT_PING_REQUEST+append;
+        channel.basicPublish(serverExchange, routingKey, null, send.getBytes());
+        channel.basicConsume(agentQueue, true, queueingConsumer);
+        while (true) {
+            QueueingConsumer.Delivery delivery = queueingConsumer.nextDelivery();
+            String message = new String(delivery.getBody());
+            if (message.startsWith(Operations.AGENT_PING_RESPONSE))
+                break;
         }
     }
 
@@ -91,8 +99,8 @@ public class SimplePingTemplate {
             }
         }
     }
- 
+
     public void shutdown() throws IOException {
-        this.channel.close();
+        this.channel.close(); 
     }
 }

@@ -28,29 +28,40 @@ import static org.junit.Assert.assertTrue;
 public class AmqpAgentServerIntegrationTests extends BaseInfrastructureTest {
 
     @Autowired
-    protected AgentCommandsClientFactory agentCommandsClientFactory;
+    private AgentCommandsClientFactory agentCommandsClientFactory;
 
     @Autowired
-    protected RabbitTemplate serverRabbitTemplate;
+    private RabbitTemplate serverRabbitTemplate;
 
     @Autowired
-    protected RabbitAdminTemplate adminTemplate;
+    private RabbitAdminTemplate adminTemplate;
 
-    protected AbstractApplicationContext agentContext;
+    private AbstractApplicationContext agentContext;
 
-    protected AbstractApplicationContext serverContext;
+    private AbstractApplicationContext serverContext;
 
-    protected Agent agent; 
+    private Agent agent;
+
+    private final String host = "localhost";
+
+    private final int port = 7080;
 
     @Before
     public void prepare() {
-        this.agent = Agent.create("localhost", 7080, false, "", false);
+        this.agent = Agent.create(host, port, false, "", false);
         this.agentContext = new AnnotationConfigApplicationContext(CommonAgentConfiguration.class);
         this.serverContext = new AnnotationConfigApplicationContext(CommonServerConfiguration.class);
 
         assertNotNull("'agentCommandsClientFactory' must not be null", agentCommandsClientFactory);
         assertNotNull("'rabbitTemplate' must not be null", serverRabbitTemplate);
         assertNotNull("'adminTemplate' must not be null", adminTemplate);
+    }
+
+    @After
+    public void shutdown() throws InterruptedException {
+        Thread.sleep(20000);
+        agentContext.close();
+        serverContext.close();
     }
 
     /**
@@ -65,28 +76,12 @@ public class AmqpAgentServerIntegrationTests extends BaseInfrastructureTest {
 
         client.ping();
     }
- 
+
     @Test
     public void serverToAgentPing() throws AgentConnectionException, AgentRemoteException {
         AgentCommandsClient client = agentCommandsClientFactory.getClient(agent);
         assertNotNull(client);
         assertTrue(client instanceof AmqpCommandOperationService);
-        long response = client.ping();
-        assertTrue(response > 0);
-    }
-
-    @After
-    public void shutdown() {
-        try {
-            Thread.sleep(20000);
-        } catch (InterruptedException e) {
-            logger.error(e);
-        }
-        agentContext.close();
-        serverContext.close();
-    }
-
-            /*AgentPreSpringAmqpConfigurer config = new AgentPreSpringAmqpConfigurer();
-        config.start();
-        config.stop();*/
+        assertTrue(client.ping() > 0);
+    } 
 }

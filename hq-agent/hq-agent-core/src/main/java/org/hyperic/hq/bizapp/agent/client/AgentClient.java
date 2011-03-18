@@ -394,7 +394,7 @@ public class AgentClient {
     /**
      * Test the connection information.
      */
-    private BizappCallbackClient getConnection(String provider,
+    private BizappCallbackClient         getConnection(String provider,
                                                boolean secure)
         throws AutoQuestionException, AgentCallbackClientException
     {
@@ -408,6 +408,8 @@ public class AgentClient {
 
             try {
                 bizapp = this.testProvider(provider);
+                log.info("*********testing connectivity to the unidirectional and lather servlet container: unidirectionalProvider=" +
+                                 bizapp);
                 SYSTEM_OUT.println("Success");
                 return bizapp;
             } catch (AgentCallbackClientException exc) {
@@ -573,7 +575,7 @@ public class AgentClient {
             host = this.askQuestion("What is the " + PRODUCT +
                                     " server IP address",
                                     null, QPROP_IPADDR);
-                        
+            System.out.println("host="+host);            
             secure = askYesNoQuestion("Should Agent communications " +
                                       "to " + PRODUCT + " always " +
                                       "be secure", 
@@ -634,8 +636,11 @@ public class AgentClient {
                         AgentCallbackClient.getDefaultProviderURL(host,
                                                         unidirectionalPort,
                                                         true);
+                    log.info("*********testing connectivity to the unidirectional and lather servlet container: unidirectionalProvider=" +
+                                 unidirectionalProvider);
                     try {
                         getConnection(unidirectionalProvider, true);
+
                     } catch (AgentCallbackClientException e) {
                         continue;
                     }
@@ -653,8 +658,10 @@ public class AgentClient {
                                      " password", null, true,
                                      QPROP_PWORD);
             try {
-                if(bizapp.userIsValid(user, pword))
+                if(bizapp.userIsValid(user, pword)) {
+                    log.info("*********testing whether use is valid=" + true);
                     break;
+                }
             } catch(AgentCallbackClientException exc){
                 SYSTEM_ERR.println("Error validating user: " + 
                                    exc.getMessage());
@@ -1107,7 +1114,7 @@ public class AgentClient {
      *
      * @return An initialized AgentClient
      */
-    public static AgentClient initializeAgent(boolean generateToken){
+    private static AgentClient initializeAgent(boolean generateToken){
         SecureAgentConnection conn;
         AgentConfig cfg;
         String connIp, listenIp, authToken;
@@ -1358,5 +1365,9 @@ public class AgentClient {
      */
     private static String normalizeClassPath(String s) {
         return StringUtil.replace(s, ":", File.pathSeparator);
+    }
+
+    public AgentConfig getAgentConfig() {
+        return config;
     }
 }

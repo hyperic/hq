@@ -22,7 +22,7 @@ public class AmqpAgentCommandHandler implements AsyncQueueConsumer {
      * @param message the message converted from byte[]
      */
     public void handleMessage(String message) {
-        if (message.equalsIgnoreCase(Operations.AGENT_PING_REQUEST)) {
+        if (message.startsWith(Operations.AGENT_PING_REQUEST)) {
             handleAgentPing(message);
         }
     }
@@ -31,14 +31,12 @@ public class AmqpAgentCommandHandler implements AsyncQueueConsumer {
         handleMessage(new String(message));
     }
 
-    private void handleAgentPing(String message) {
-        System.out.println("server received=" + message);
-        logger.info("***server received=" + message);
+    private void handleAgentPing(String message) {  
+        //logger.info("***server received=" + message);
         try {
-
-            operationService.send(Operations.AGENT_PING_RESPONSE);
-            System.out.println("server sent=" + Operations.AGENT_PING_RESPONSE);
-            logger.info("***server sent=" + Operations.AGENT_PING_RESPONSE);
+            String resp = Operations.AGENT_PING_RESPONSE + (message.substring(message.length()-1));
+            //logger.info("***server sending=" + Operations.AGENT_PING_RESPONSE);
+            operationService.send(resp);
 
         } catch (Exception e) {
             handleException(e, Operations.AGENT_PING_RESPONSE);

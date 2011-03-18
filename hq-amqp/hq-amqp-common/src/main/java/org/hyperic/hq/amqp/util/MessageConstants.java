@@ -26,7 +26,6 @@
 package org.hyperic.hq.amqp.util;
 
 import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.MessageProperties;
 
 import java.nio.charset.Charset;
 
@@ -44,12 +43,11 @@ public final class MessageConstants {
      * Default RabbitMQ port
      */
     public static final int DEFAULT_PORT = AMQP.PROTOCOL.PORT;
-     
-    /**
-     * Message exchange
-     */
-    public static final String EXCHANGE_NAME = "hyperic.resources";
 
+    /**
+     * Default exchange type
+     */
+    public static final String DEFAULT_EXCHANGE_TYPE = "topic";
     /**
      * The encoding of the message
      */
