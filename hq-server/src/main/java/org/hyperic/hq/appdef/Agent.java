@@ -28,8 +28,7 @@ package org.hyperic.hq.appdef;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
 import org.hyperic.hq.appdef.server.session.Platform;
 
 public class Agent extends AppdefBean {
@@ -41,6 +40,7 @@ public class Agent extends AppdefBean {
     private boolean _unidirectional;
     private AgentType _agentType;
     private Collection _platforms;
+    private Collection _pluginStatuses;
 
     public Agent() {
     }
@@ -127,6 +127,14 @@ public class Agent extends AppdefBean {
 
     public void setAgentType(AgentType agentType) {
         _agentType = agentType;
+    }
+    
+    public void setPluginStatuses(Collection<AgentPluginStatus> pluginStatuses) {
+        _pluginStatuses = pluginStatuses;
+    }
+    
+    public Collection<AgentPluginStatus> getPluginStatuses() {
+        return _pluginStatuses;
     }
 
     public Collection<Platform> getPlatforms() {

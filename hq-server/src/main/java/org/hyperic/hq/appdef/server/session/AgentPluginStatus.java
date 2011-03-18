@@ -33,7 +33,7 @@ public class AgentPluginStatus extends PersistedObject {
 
     private long lastCheckin;
     private String md5;
-    private String jarName;
+    private String fileName;
     private String pluginName;
     private String productName;
     private Agent agent;
@@ -59,12 +59,12 @@ public class AgentPluginStatus extends PersistedObject {
         this.md5 = md5;
     }
 
-    public String getJarName() {
-        return jarName;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setJarName(String jarName) {
-        this.jarName = jarName;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public String getPluginName() {
@@ -120,7 +120,7 @@ public class AgentPluginStatus extends PersistedObject {
         }
         AgentPluginStatus o = (AgentPluginStatus) rhs;
         return md5.equals(o.md5) &&
-               jarName.equals(o.jarName) &&
+               fileName.equals(o.fileName) &&
                pluginName.equals(o.pluginName) &&
                productName.equals(o.productName);
     }

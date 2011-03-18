@@ -28,6 +28,7 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.Plugin;
+import org.hyperic.hq.product.shared.PluginDeployException;
 import org.hyperic.hq.product.shared.PluginManager;
 import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.hq.web.BaseController;
@@ -44,10 +45,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 @Controller
 @RequestMapping("/admin/managers/plugin")
 public class PluginManagerController extends BaseController implements ApplicationContextAware {
+    private static final Log log = LogFactory.getLog(PluginManagerController.class);
     private ApplicationContext applicationContext;
     private ProductManager productManager;
     private PluginManager pluginManager;
@@ -69,7 +73,13 @@ public class PluginManagerController extends BaseController implements Applicati
     @RequestMapping(method = RequestMethod.GET)
     public String index(Model model) {
         model.addAttribute("pluginSummaries", getPluginSummaries());
-        
+        model.addAttribute("allAgentCount",agentManager.getAgentCount());
+        model.addAttribute("mechanismOn", pluginManager.isPluginDeploymentOff());
+        if (pluginManager.isPluginDeploymentOff()){
+            model.addAttribute("instruction", "admin.managers.plugin.instructions");
+        }else{
+            model.addAttribute("instruction", "admin.managers.plugin.mechanism.off");
+        }
         return "admin/managers/plugin";
     }
     
@@ -145,10 +155,10 @@ public class PluginManagerController extends BaseController implements Applicati
         return pluginSummaries;
     }
     
-    @RequestMapping(method = RequestMethod.GET, value="/agentInfo", headers="Accept=application/json")
+    @RequestMapping(method = RequestMethod.GET, value="/info", headers="Accept=application/json")
     public @ResponseBody Map<String, Object> getAgentInfo() {
         Map<String, Object> info = new HashMap<String,Object>();
-        info.put("allAgentCount", 250); //TODO
+        info.put("allAgentCount", agentManager.getAgentCount());
         return info;
     }
     
@@ -200,32 +210,52 @@ public class PluginManagerController extends BaseController implements Applicati
     }
        
     @RequestMapping(method = RequestMethod.POST, value="/upload")
-    public String uploadProductPlugin(@RequestParam MultipartFile plugin, HttpSession session, Model model) {
+    public String uploadProductPlugin(@RequestParam MultipartFile[] plugins, HttpSession session, Model model) {
         boolean success = false;
         String messageKey = "";
-        String filename = "";
+        List<String> filename = new ArrayList<String>() ;
         AuthzSubject subject;
-        
+        Map<String, byte[]> pluginInfo = new HashMap<String, byte[]>();
+
+        try{
+            for (int i= 0 ; i<plugins.length;i++){
+                MultipartFile plugin = plugins[i];
+                String name = "";
+                name = plugin.getName();
+                if ("application/java-archive".equals(plugin.getContentType().toString())){
+                    name+=".jar";
+                }else if ("text/xml".equals(plugin.getContentType().toString())){
+                    name+=".xml";
+                }
+                filename.add(name);
+                pluginInfo.put(name, plugin.getBytes());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            messageKey = "admin.managers.plugin.message.io.failure";
+        }
+         
         try {
             subject = getAuthzSubject(session);
             
-            if (!plugin.isEmpty() && productManager.deployPluginIfValid(subject, plugin.getBytes())) {
+            if (plugins.length>0) {
+                pluginManager.deployPluginIfValid(subject, pluginInfo);
                 success = true;
                 messageKey = "admin.managers.plugin.message.success";
             } else {
                 messageKey = "admin.managers.plugin.message.io.failure";
             }
         } catch (SessionNotFoundException e) {
-            e.printStackTrace();
+            log.error(e,e);
             messageKey = "admin.managers.plugin.message.io.failure";
         } catch (SessionTimeoutException e) {
-            e.printStackTrace();
+            log.error(e,e);
             messageKey = "admin.managers.plugin.message.io.failure";
         } catch (PermissionException e) {
-            e.printStackTrace();
+            log.error(e,e);
             messageKey = "admin.managers.plugin.message.io.failure";
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (PluginDeployException e){
+            log.error(e,e);
             messageKey = "admin.managers.plugin.message.io.failure";
         }
 
@@ -235,6 +265,8 @@ public class PluginManagerController extends BaseController implements Applicati
         
         return "admin/managers/plugin/upload/status";
     }
+    
+    
     
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;

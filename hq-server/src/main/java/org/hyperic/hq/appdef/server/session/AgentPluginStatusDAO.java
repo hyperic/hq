@@ -71,7 +71,7 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
                         .list();
         final Map<String, AgentPluginStatus> rtn = new HashMap<String, AgentPluginStatus>(list.size());
         for (final AgentPluginStatus status : list) {
-            rtn.put(status.getJarName(), status);
+            rtn.put(status.getFileName(), status);
         }
         return rtn;
     }
@@ -182,13 +182,18 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
     }
 
     @SuppressWarnings("unchecked")
-    public Collection<AgentPluginStatus> getErrorPluginStatusByJarName(String jarName) {
+    public Collection<AgentPluginStatus> getErrorPluginStatusByFileName(String fileName) {
         final String hql =
-            "from AgentPluginStatus where jarName = :jarName and lastSyncStatus = :error";
+            "from AgentPluginStatus where fileName = :fileName and lastSyncStatus = :error";
         return getSession().createQuery(hql)
-                           .setParameter("jarName", jarName)
+                           .setParameter("fileName", fileName)
                            .setParameter("error", AgentPluginStatusEnum.SYNC_FAILURE.toString())
                            .list();
+    }
+
+    Long getNumAutoUpdatingAgents() {
+        final String hql = "select count(distinct agent) from AgentPluginStatus";
+        return (Long) getSession().createQuery(hql).uniqueResult();
     }
 
     @SuppressWarnings("unchecked")
@@ -199,7 +204,7 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
 
     public void removeAgentPluginStatuses(Integer agentId, Collection<String> pluginFileNames) {
         final String hql =
-            "select id from AgentPluginStatus where agent.id = :agentId and jarName in (:filenames)";
+            "select id from AgentPluginStatus where agent.id = :agentId and fileName in (:filenames)";
         @SuppressWarnings("unchecked")
         final List<Integer> list =
             getSession().createQuery(hql)
