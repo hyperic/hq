@@ -170,7 +170,7 @@ public class PluginManagerController extends BaseController implements Applicati
         }
         
         Collection<AgentPluginStatus> inProgressAgentStatusList = 
-            pluginManager.getStatusesByPluginId(pluginId, AgentPluginStatusEnum.SYNC_FAILURE);
+            pluginManager.getStatusesByPluginId(pluginId, AgentPluginStatusEnum.SYNC_IN_PROGRESS);
         for(AgentPluginStatus inProgressAgentStatus: inProgressAgentStatusList){
             Map<String,Object> inProgressAgent = new HashMap<String,Object>();
             inProgressAgent.put("agentName", getAgentName(inProgressAgentStatus.getAgent())); 
@@ -179,6 +179,7 @@ public class PluginManagerController extends BaseController implements Applicati
             resultAgents.add(inProgressAgent);
         }       
     
+        
         return resultAgents;
     }
     
