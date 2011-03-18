@@ -121,7 +121,7 @@
 	#uploadPanel {
 		width: 400px;
 	}
-	
+
 	#removeErrorPanel, #confirmationPanel {
 		width: 400px;
 	}
@@ -165,12 +165,13 @@
 	#pluginList .disabled{
 		color:red;
 	}
-	.errorAgentSpan{
+	.agentStatusSpan{
 		color: #0066CC;
 		font-weight: bold;
+		height:50px;
 	}
-	.errorAgentSpan:focus,
-	.errorAgentSpan:hover{
+	.agentStatusSpan:focus,
+	.agentStatusSpan:hover{
 		color: #0066FF;
 	}
 	.errorAgentTip{
@@ -197,6 +198,39 @@
 		float:right;
 		visibility:hidden;
 	}
+	#showStatusPanelDialog{
+		width: 405px;
+		height: 400px;
+	}
+	
+	#statusButtonBar {
+		text-align: right;
+		vertical-align:bottom;
+	}
+	#agentList{
+		height: 290px;
+		overflow: auto;
+		margin: 10px;
+		padding: 0px 30px;
+		width:320px;
+	}
+	
+	.errorAgent{
+		list-style-image: url("/images/icon_available_red.gif");
+	}
+	.inProgressAgent{
+		list-style-image: url("/images/arrow_refresh.png");
+	}
+	#searchText{
+		background: url("/images/4.0/icons/search.png") no-repeat scroll 3px center #FFFFFF;
+		color: #444444;
+		padding: 0.25em 0.25em 0.25em 20px;
+		width:250px;
+	}
+	input[type="text"]{
+		margin:0.5em 0;
+	}
+	
 </style>
 <section id="pluginManagerPanel" class="container top">
 	<h1><fmt:message key="admin.managers.plugin.title" /></h1>
@@ -237,18 +271,20 @@
 				<span class="column span-4">${pluginSummary.updatedDate}&nbsp;</span>		
 				<span class="last column span-3" >
 					<c:if test="${pluginSummary.allAgentCount>0}">
-						<c:if test="${pluginSummary.inProgressAgentCount>0}">
-					        ${pluginSummary.inProgressAgentCount}&nbsp;<img src="/images/arrow_refresh.png"/>&nbsp;&nbsp;
-					   	</c:if>	
 					    <c:if test="${pluginSummary.successAgentCount>0}">
 					    	${pluginSummary.successAgentCount}&nbsp;<img src="/images/icon_available_green.gif"/>&nbsp;&nbsp;
 					    </c:if>
-				    </c:if>
-				    
-				   	<c:if test="${pluginSummary.errorAgentCount>0}">
-				   		<span id="errorAgent_${index.count}" class="errorAgentSpan">
-				   			${pluginSummary.errorAgentCount}&nbsp;<img src="/images/icon_available_red.gif"/>
-				    	</span>
+					    
+					    <c:if test="${pluginSummary.inProgressAgentCount>0 ||pluginSummary.errorAgentCount>0 }">
+					    	<span id="agentStatus_${pluginSummary.id}" class="agentStatusSpan">				    	
+							<c:if test="${pluginSummary.inProgressAgentCount>0}">
+						        ${pluginSummary.inProgressAgentCount}&nbsp;<img id="progressIcon_${pluginSummary.id}" src="/images/arrow_refresh.png"/>&nbsp;&nbsp;
+						   	</c:if>	
+						   	<c:if test="${pluginSummary.errorAgentCount>0}">	   		
+					   			${pluginSummary.errorAgentCount}&nbsp;<img id="errorIcon_${pluginSummary.id}" src="/images/icon_available_red.gif"/>
+							</c:if>
+							</span>
+						</c:if>
 					</c:if>
 				</span>
 			</li>
@@ -298,9 +334,18 @@
 		<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.cancel" /></a>
 	</div>
 </div>
-
-
 </c:if>
+
+<div id="showStatusPanel" style="visibility:hidden;">
+	<input type="text" id="searchText"/>
+	<img id="loadingIcon" src="/static/images/ajax-loader.gif" />
+	<ul id="agentList"></ul>
+	
+	<div id="statusButtonBar">
+		<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.close" /></a>
+	</div>
+	<ul id="unfilteredList" style="visibility:hidden;"></ul>
+</div>
 
 <script  djConfig="parseOnLoad: true">
 	hqDojo.require("dojo.fx");
@@ -311,6 +356,7 @@
 	hqDojo.require("dijit.Tooltip");
 	hqDojo.require("dojox.form.FileUploader");
 	hqDojo.require("dijit.ProgressBar");
+	hqDojo.require("dojo.behavior");
 	
 	function refreshPage(){
 			var infoXhrArgs={
@@ -329,12 +375,113 @@
 	}
 	
 	hqDojo.ready(function() {
+
 		refreshPage();
+		function seeStatusDetail(pluginId){
+			hqDijit.byId("showStatusPanelDialog").show();
+			var agentListUl = hqDojo.byId("agentList");
+			var unfilteredUl= hqDojo.byId("unfilteredList");
+			var xhrArgs = {
+					url: "/app/admin/managers/plugin/status/"+pluginId,
+					load: function(response) {
+						hqDojo.style(hqDojo.byId("loadingIcon"),"visibility","hidden");
+						hqDojo.forEach(response, function(agentStatus) {
+							var statusLi = hqDojo.create("li",{
+								"innerHTML":agentStatus.agentName
+							});
+							statusLi.innerHTML+=" <fmt:message key="admin.managers.Plugin.tip.status.sync.date" /> "+agentStatus.syncDate;
+							if(response.status=="error"){
+								hqDojo.addClass(statusLi,"errorAgent");
+							}else{
+								hqDojo.addClass(statusLi,"inProgressAgent");
+							};
+							agentListUl.appendChild(statusLi);
+							unfilteredLi = hqDojo.clone(statusLi);
+							unfilteredUl.appendChild(unfilteredLi);
+						});
+					},
+					handleAs: "json",
+					headers: { 
+	 	               	"Content-Type": "application/json",
+    	            	"Accept": "application/json"
+        	        }
+				
+			};
+			hqDojo.xhrGet(xhrArgs);			
+		}
+		function buildAgentStatusList(response){
+		var agentListUl = hqDojo.byId("agentList");
+			hqDojo.forEach(response, function(agentStatus) {
+							var statusLi = hqDojo.create("li",{
+								"innerHTML":agentStatus.agentName
+							},agentListUl);
+							
+							statusLi.innerHTML+="&nbsp;<fmt:message key="admin.managers.Plugin.tip.status.sync.date" />&nbsp;"+agentStatus.syncDate;
+							if(response.status=="error"){
+								hqDojo.addClass(statusLi,"errorAgent");
+							}else{
+								hqDojo.addClass(statusLi,"inProgressAgent");
+							};
+						});
+		}
+		hqDojo.behavior.add({
+			".agentStatusSpan":{
+				onclick: function(evt){
+					var anchor = evt.target.id.indexOf("_");
+					var pluginId = evt.target.id.substr(anchor+1,evt.target.id.length);
+					seeStatusDetail(pluginId);
+				},
+				found: function(node){hqDojo.style(node,"cursor","pointer");}
+			}
+		});
+		hqDojo.behavior.apply();
+		
+		var showStatusDialog = new hqDijit.Dialog({
+			id: "showStatusPanelDialog",
+			title: "<fmt:message key="admin.managers.Plugin.tip.status.title" />"
+		});
+		
+		var showStatusPanel = hqDojo.byId("showStatusPanel");
+		hqDojo.style(showStatusDialog.closeButtonNode,"visibility", "hidden" );
+		showStatusDialog.setContent(showStatusPanel);
+		hqDojo.style(showStatusPanel, "visibility", "visible");
+			
+		hqDojo.query("#showStatusPanelDialog .cancelLink").onclick(function(e) {
+			hqDijit.byId("showStatusPanelDialog").hide();
+			hqDojo.empty("unfilteredList");
+			hqDojo.empty("agentList");
+		});
+		
+		hqDojo.connect(hqDojo.byId("searchText"),"onkeyup",function(e){
+			// filter here
+			var statusList = hqDojo.clone(hqDojo.query("#unfilteredList li"));
+			var inputText = hqDojo.byId("searchText").value;
+			
+			var result = hqDojo.filter(statusList,
+				function(agent){
+					return agent.innerHTML.toLowerCase().indexOf(inputText) !=-1;
+				}
+			);
+			
+			hqDojo.empty("agentList");
+			//buildAgentStatusList(result);
+			
+			hqDojo.forEach(result, function(node) {
+				var agentListUl = hqDojo.byId("agentList");
+				agentListUl.appendChild(node);
+			});			
+			
+			
+		});
 		
 		new hqDijit.Tooltip({
 			connectId:["agentInfo"],
 			label: "<fmt:message key='admin.managers.Plugin.information.agent.count.tip' />"
 		});
+		
+					
+
+			
 		
 		if(${!mechanismOn}){
 			hqDojo.attr("deleteForm","class","mechanismOff");
@@ -427,7 +574,8 @@
 				id: "removeErrorPanelDialog",
 				title: "<fmt:message key="admin.managers.Plugin.remove.error.dialog.title" />"
 			});
-		
+
+			
 			var uploadPanel = hqDojo.byId("uploadPanel");
 			var confirmationPanel = hqDojo.byId("confirmationPanel");
 			var removeErrorPanel = hqDojo.byId("removeErrorPanel");
@@ -458,6 +606,7 @@
 			hqDojo.query("#uploadPanelDialog .cancelLink").onclick(function(e) {
 				hqDijit.byId("uploadPanelDialog").hide();
 			});
+
 			hqDojo.query("#removePanelDialog .cancelLink").onclick(function(e) {
 				hqDijit.byId("removePanelDialog").hide();
 			});
@@ -468,7 +617,7 @@
 			hqDojo.connect(hqDojo.byId("removeButton"), "onclick", function(e) {
 				var xhrArgs = {
 					form: hqDojo.byId("deleteForm"),
-					url: "/app/admin/managers/plugin/delete",
+					url: "<spring:url value='/app/admin/managers/plugin/delete' />",
 					load: function(response) {
 						if (response=="success") {
 							hqDojo.publish("refreshDataGrid");
@@ -532,11 +681,11 @@
                 load: function(response, args) {
                 	hqDojo.empty("pluginList");
                 	
-                	var index = 0;
+                	var index = 1;
                 	
                 	hqDojo.forEach(response, function(summary) {
                 		var li = hqDojo.create("li", {
-                			"class": "gridrow clear" + (((index+1) % 2 == 0) ? " even" : "")
+                			"class": "gridrow clear" + (((index) % 2 == 0) ? " even" : "")
                 		}, "pluginList");
                 		var span = hqDojo.create("span", {
                 			"class": "first column span-1"
@@ -581,13 +730,6 @@
                 		}, li);
                 		
                 		if (summary.allAgentCount>0){      
-	                		if (summary.inProgressAgentCount>0) {
-	                		    statusSpan.innerHTML+=summary.inProgressAgentCount+"&nbsp;";
-    	           				hqDojo.create("img",{
-        	       					"src": "/images/arrow_refresh.png",
-	        	       			}, statusSpan);
-	        	       			statusSpan.innerHTML+="&nbsp;&nbsp;&nbsp;";
-                			}	
                 			if(summary.successAgentCount>0){
                 				statusSpan.innerHTML+=summary.successAgentCount+"&nbsp;";
    	            				hqDojo.create("img",{
@@ -595,28 +737,35 @@
            	    				}, statusSpan); 
            	    				statusSpan.innerHTML+="&nbsp;&nbsp;&nbsp;";
                 			}
-                			
+                			if (summary.inProgressAgentCount>0 || summary.errorAgentCount > 0){
+                				var errorAgentSpan = hqDojo.create("span",{
+        	        				"id":"errorAgent_"+summary.id,
+            	    				"class":"agentStatusSpan"
+                					}, statusSpan);
+	                		if (summary.inProgressAgentCount>0) {
+	                		    errorAgentSpan.innerHTML+=summary.inProgressAgentCount+"&nbsp;";
+    	           				hqDojo.create("img",{
+        	       					"src": "/images/arrow_refresh.png",
+        	       					"id":"progressIcon_"+summary.id,
+	        	       			}, errorAgentSpan);
+	        	       			errorAgentSpan.innerHTML+="&nbsp;&nbsp;&nbsp;";
+                			}			
 	                		if (summary.errorAgentCount > 0) {
-    	            			var errorAgentSpan = hqDojo.create("span",{
-        	        				"id":"errorAgent_${index+1}",
-            	    				"class":"errorAgentSpan"
-                				}, statusSpan);
                 				errorAgentSpan.innerHTML+= summary.errorAgentCount+"&nbsp;";
                 				hqDojo.create("img",{
                 					"src": "/images/icon_available_red.gif",
+                					"id":"errorIcon_"+summary.id,
                 				}, errorAgentSpan);
                 				errorAgentSpan.innerHTML+="</img>";
-                				
-                				hqDojo.connect(hqDojo.byId("errorAgent_${index+1}"),"onmouseenter", function(e){
-									hqDijit.popup.open({
-										popup: dialog_${index+1}, 
-                       		 			around: hqDojo.byId("errorAgent_${index+1}")
-									});
-								});
+                			}
+                			
                 			}
                 		}
                 		index++;
                 	});
+
+		hqDojo.behavior.apply();
+		
                 
                 },
                 error: function(response, args) {
