@@ -44,6 +44,7 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.RoleManager;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
@@ -73,8 +74,8 @@ public class UISessionInitializationStrategy extends BaseSessionInitializationSt
     		                               AuthzSubjectManager authzSubjectManager,
     		                               DashboardManager dashboardManager,
     		                               UserAuditFactory userAuditFactory,
-    		                               SessionManager sessionManager) {
-    	super(authBoss, authzBoss, authzSubjectManager, userAuditFactory, sessionManager);
+    		                               SessionManager sessionManager, RoleManager roleManager) {
+    	super(authBoss, authzBoss, authzSubjectManager, userAuditFactory, sessionManager, roleManager);
     	
     	this.authzBoss = authzBoss;
     	this.dashboardManager = dashboardManager;

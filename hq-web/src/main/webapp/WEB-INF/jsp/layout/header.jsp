@@ -10,7 +10,7 @@
 	</a>
 </div>
 <div id="headerLinks">
-	<sec:authorize access="hasRole('ROLE_USER')">
+	<sec:authorize access="hasRole('ROLE_HQ_USER')">
  		<c:if test="${not empty HQUpdateReport}">
  	 		<div id="update" class="dialog" style="display: none;">
  	 			<c:out value="${HQUpdateReport}" escapeXml="false"/>
@@ -27,7 +27,7 @@
 		</c:if>	
 	</sec:authorize>
 	<ul>
-		<sec:authorize access="hasRole('ROLE_USER')">
+		<sec:authorize access="hasRole('ROLE_HQ_USER')">
 			<li>
 				<span><fmt:message key="header.Welcome"/></span>
 				<a href="<html:rewrite action="/admin/user/UserAdmin" />?mode=view&u=${sessionScope.webUser.id}">
@@ -52,7 +52,7 @@
 		</li>
 	</ul>
 </div>
-<sec:authorize access="hasRole('ROLE_USER')">
+<sec:authorize access="hasRole('ROLE_HQ_USER')">
 	<div id="loading" class="ajaxLoading" style="">
        	<img src="<spring:url value="/static/images/ajax-loader.gif" />" border="0" width="16" height="16" />
     </div>

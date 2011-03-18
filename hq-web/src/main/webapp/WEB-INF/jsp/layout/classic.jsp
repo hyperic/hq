@@ -58,7 +58,7 @@
    		<div id="content">
 			<tiles:insertAttribute name="content" />
 		</div>
-		<sec:authorize access="hasRole('ROLE_USER')">
+		<sec:authorize access="hasRole('ROLE_HQ_USER')">
 			<div id="footer">
 				<tiles:insertAttribute name="footer" />
 			</div>

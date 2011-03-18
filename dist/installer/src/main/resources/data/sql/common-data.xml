@@ -194,6 +194,21 @@
         <data ID="65" PROPKEY="HQ_ALERT_THRESHOLD_EMAILS" DEFAULT_PROPVALUE="" PROPVALUE="" FREAD_ONLY="FALSE"/>
         <!-- Hierarchical Alerting Properties -->
         <data ID="66" PROPKEY="HQ_HIERARCHICAL_ALERTING_ENABLED" DEFAULT_PROPVALUE="true" PROPVALUE="true" FREAD_ONLY="FALSE"/>
+        
+        <!--  LDAP Group Settings -->
+        <data ID="67" PROPKEY="LDAP_GROUP_SEARCH_BASE"
+              PROPVALUE="@@@LDAPGROUPSEARCHBASE@@@" DEFAULT_PROPVALUE=""
+              FREAD_ONLY="FALSE"/>
+        <data ID="68" PROPKEY="LDAP_GROUP_SEARCH_FILTER"
+              PROPVALUE="@@@LDAPGROUPSEARCHFILTER@@@" DEFAULT_PROPVALUE="(member={0})"
+              FREAD_ONLY="FALSE"/>
+        <data ID="69" PROPKEY="LDAP_GROUP_SEARCH_ROLE_ATTRIBUTE"
+              PROPVALUE="@@@LDAPGROUPSEARCHROLEATTRIBUTE@@@" DEFAULT_PROPVALUE="cn"
+              FREAD_ONLY="FALSE"/>
+         <data ID="70" PROPKEY="LDAP_GROUP_SEARCH_SUBTREE"
+              PROPVALUE="@@@LDAPGROUPSEARCHSUBTREE@@@" DEFAULT_PROPVALUE="false"
+              FREAD_ONLY="FALSE"/>
+              
        
     </table>
 
