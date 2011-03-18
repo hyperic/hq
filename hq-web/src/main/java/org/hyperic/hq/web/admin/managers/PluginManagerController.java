@@ -157,18 +157,29 @@ public class PluginManagerController extends BaseController implements Applicati
 
     @RequestMapping(method = RequestMethod.GET, value="/status/{pluginId}", headers="Accept=application/json")
     public @ResponseBody List<Map<String, Object>> getAgentStatus(@PathVariable int pluginId) {
-        Collection<AgentPluginStatus> errorAgentStatusList = pluginManager.getErrorStatusesByPluginId(pluginId);
+        Collection<AgentPluginStatus> errorAgentStatusList = 
+            pluginManager.getStatusesByPluginId(pluginId, AgentPluginStatusEnum.SYNC_FAILURE);
 
-        List<Map<String,Object>> errorAgents = new ArrayList<Map<String,Object>>();
-        
+        List<Map<String,Object>> resultAgents = new ArrayList<Map<String,Object>>();
         for(AgentPluginStatus errorAgentStatus: errorAgentStatusList){
             Map<String,Object> errorAgent = new HashMap<String,Object>();
             errorAgent.put("agentName", getAgentName(errorAgentStatus.getAgent())); 
             errorAgent.put("syncDate", formatter.format(errorAgentStatus.getLastSyncAttempt()));
-            errorAgents.add(errorAgent);
+            errorAgent.put("status", "error");
+            resultAgents.add(errorAgent);
         }
-
-        return errorAgents;
+        
+        Collection<AgentPluginStatus> inProgressAgentStatusList = 
+            pluginManager.getStatusesByPluginId(pluginId, AgentPluginStatusEnum.SYNC_FAILURE);
+        for(AgentPluginStatus inProgressAgentStatus: inProgressAgentStatusList){
+            Map<String,Object> inProgressAgent = new HashMap<String,Object>();
+            inProgressAgent.put("agentName", getAgentName(inProgressAgentStatus.getAgent())); 
+            inProgressAgent.put("syncDate", formatter.format(inProgressAgentStatus.getLastSyncAttempt()));
+            inProgressAgent.put("status", "inProgress");
+            resultAgents.add(inProgressAgent);
+        }       
+    
+        return resultAgents;
     }
     
     
