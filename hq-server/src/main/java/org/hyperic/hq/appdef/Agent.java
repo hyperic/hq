@@ -25,12 +25,11 @@
 
 package org.hyperic.hq.appdef;
 
+import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
 import org.hyperic.hq.appdef.server.session.Platform;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
-import org.hyperic.hq.appdef.server.session.Platform;
 
 public class Agent extends AppdefBean {
     private String _address;
