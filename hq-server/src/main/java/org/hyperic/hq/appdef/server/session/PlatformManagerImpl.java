@@ -194,17 +194,6 @@ public class PlatformManagerImpl implements PlatformManager {
         return Bootstrap.getBean(AIQueueManager.class);
     }
 
-    // TODO remove after HE-54 allows injection
-    private PlatformCounter getCounter() {
-        PlatformCounter counter = (PlatformCounter) ProductProperties
-            .getPropertyInstance("hyperic.hq.platform.counter");
-
-        if (counter == null) {
-            counter = new DefaultPlatformCounter();
-        }
-        return counter;
-    }
-
     /**
      * Find a PlatformType by id
      * 
@@ -511,7 +500,6 @@ public class PlatformManagerImpl implements PlatformManager {
             }
 
             trimStrings(pValue);
-            getCounter().addCPUs(pValue.getCpuCount().intValue());
             validateNewPlatform(pValue);
             PlatformType pType = findPlatformType(platformTypeId);
 
@@ -536,8 +524,7 @@ public class PlatformManagerImpl implements PlatformManager {
             platformDAO.getSession().flush();
 
             // Send resource create event
-            ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, platform
-                .getEntityId());
+            PlatformCreatedZEvent zevent = new PlatformCreatedZEvent(subject, platform.getEntityId(), platform.getIps());
             zeventManager.enqueueEventAfterCommit(zevent);
 
             return platform;
@@ -560,8 +547,6 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     public Platform createPlatform(AuthzSubject subject, AIPlatformValue aipValue)
         throws ApplicationException {
-        getCounter().addCPUs(aipValue.getCpuCount().intValue());
-
         PlatformType platType = platformTypeDAO.findByName(aipValue.getPlatformTypeName());
 
         if (platType == null) {
@@ -592,7 +577,7 @@ public class PlatformManagerImpl implements PlatformManager {
         }
 
         // Send resource create event
-        ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, platform.getEntityId());
+        PlatformCreatedZEvent zevent = new PlatformCreatedZEvent(subject, platform.getEntityId(), platform.getIps());
         zeventManager.enqueueEventAfterCommit(zevent);
 
         return platform;
@@ -1574,12 +1559,6 @@ public class PlatformManagerImpl implements PlatformManager {
             log.debug("No changes found between value object and entity");
             return plat;
         } else {
-            int newCount = existing.getCpuCount().intValue();
-            int prevCpuCount = plat.getCpuCount().intValue();
-            if (newCount > prevCpuCount) {
-                getCounter().addCPUs(newCount - prevCpuCount);
-            }
-
             if (!(existing.getName().equals(plat.getName()))) {
                 if (platformDAO.findByName(existing.getName()) != null)
                     // duplicate found, throw a duplicate object exception
@@ -1618,8 +1597,22 @@ public class PlatformManagerImpl implements PlatformManager {
                 } else if (!plat.getAgent().equals(existing.getAgent())) {
                     // Need to enqueue the ResourceUpdatedZevent if the
                     // agent changed to get the metrics scheduled
-                    List<ResourceUpdatedZevent> events = new ArrayList<ResourceUpdatedZevent>();
-                    events.add(new ResourceUpdatedZevent(subject, plat.getEntityId()));
+                	List<ResourceUpdatedZevent> events = new ArrayList<ResourceUpdatedZevent>();
+                    
+                    // ... a little through hoop jumping for new licensing scheme...
+                	Collection<Ip> updatedIps = new ArrayList<Ip>();
+
+                    for (IpValue ipValue : existing.getAddedIpValues()) {
+                    	updatedIps.add(new Ip(ipValue.getAddress(), ipValue.getNetmask(), ipValue.getMACAddress()));
+                    }
+
+                    for (IpValue ipValue : existing.getUpdatedIpValues()) {
+                    	updatedIps.add(new Ip(ipValue.getAddress(), ipValue.getNetmask(), ipValue.getMACAddress()));
+                    }
+                    
+                    events.add(new PlatformUpdatedZEvent(subject, plat.getEntityId(), plat.getIps(), updatedIps));
+                    // ...done jumping...
+                    
                     for (Server svr : plat.getServers()) {
 
                         events.add(new ResourceUpdatedZevent(subject, svr.getEntityId()));
@@ -1806,11 +1799,6 @@ public class PlatformManagerImpl implements PlatformManager {
         if (platform == null) {
             throw new PlatformNotFoundException("Platform not found with either FQDN: " + fqdn +
                                                 " nor CertDN: " + certdn);
-        }
-        int prevCpuCount = platform.getCpuCount().intValue();
-        Integer count = aiplatform.getCpuCount();
-        if ((count != null) && (count.intValue() > prevCpuCount)) {
-            getCounter().addCPUs(aiplatform.getCpuCount().intValue() - prevCpuCount);
         }
 
         // Get the FQDN before we update
