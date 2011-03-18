@@ -11508,6 +11508,17 @@ has already been defined.
     <schema-addColumn table="EAM_PLUGIN" column="version"
 	       	            precision="100" columnType="VARCHAR2" />
  </schemaSpec>
+	
+ <schemaSpec version="3.202">
+    <schema-insert table="EAM_CONFIG_PROPS"
+	                   insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES ('67', 'LDAP_GROUP_SEARCH_BASE', '', '')"/>
+	<schema-insert table="EAM_CONFIG_PROPS"
+	                   insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES ('68', 'LDAP_GROUP_SEARCH_FILTER', '', '(member={0})')"/>
+	<schema-insert table="EAM_CONFIG_PROPS"
+	                   insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES ('69', 'LDAP_GROUP_SEARCH_ROLE_ATTRIBUTE', '', 'cn')"/>
+	<schema-insert table="EAM_CONFIG_PROPS"
+	                   insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES ('70', 'LDAP_GROUP_SEARCH_SUBTREE', '', 'false')"/>
+ </schemaSpec>
 </dbupgrade>
 </target>
 </project>
