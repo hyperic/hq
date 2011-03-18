@@ -128,19 +128,6 @@ public class PluginManagerController extends BaseController implements Applicati
             pluginSummary.put("version", plugin.getVersion());   
             pluginSummary.put("disabled", plugin.isDisabled());
             
-            //errorAgents
-            List<Map<String,Object>> errorAgents = new ArrayList<Map<String,Object>>();
-            Collection<AgentPluginStatus> errorAgentStatusList =
-                pluginManager.getStatusesByPluginId(pluginId, AgentPluginStatusEnum.SYNC_FAILURE);
-            
-            for(AgentPluginStatus errorAgentStatus: errorAgentStatusList){
-                Map<String,Object> errorAgent = new HashMap<String,Object>();
-                errorAgent.put("agentName", getAgentName(errorAgentStatus.getAgent())); 
-                errorAgent.put("syncDate", formatter.format(errorAgentStatus.getLastSyncAttempt()));
-                errorAgents.add(errorAgent);
-            }
-            pluginSummary.put("errorAgents", errorAgents);
-            
             pluginSummaries.add(pluginSummary);
         }
 
