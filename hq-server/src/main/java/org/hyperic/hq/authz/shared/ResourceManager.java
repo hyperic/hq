@@ -148,12 +148,10 @@ public interface ResourceManager {
      * @return AppdefEntityID[] - an array of the resources (including children)
      *         deleted
      */
-    public AppdefEntityID[] removeResourcePerms(AuthzSubject subj, Resource r,
+    public AppdefEntityID[] removeResourceAndRelatedResources(AuthzSubject subj, Resource r,
                                                 boolean nullResourceType,
                                                 boolean removeAllVirtual) throws VetoException,
         PermissionException;
-
-    public void _removeResource(AuthzSubject subj, Resource r, boolean nullResourceType);
 
     public void removeResource(AuthzSubject subject, Resource r) throws VetoException;
 
