@@ -33,6 +33,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -50,7 +51,7 @@ public class PluginManagerController extends BaseController implements Applicati
     private PluginManager pluginManager;
     private AgentManager agentManager;
     private AuthzBoss authzBoss;
-    
+    SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy hh:mm aa zzz");
 
     
     @Autowired
@@ -65,7 +66,7 @@ public class PluginManagerController extends BaseController implements Applicati
     @RequestMapping(method = RequestMethod.GET)
     public String index(Model model) {
         model.addAttribute("pluginSummaries", getPluginSummaries());
-        model.addAttribute("allAgentCount",agentManager.getAgentCount());
+        model.addAttribute("allAgentCount",agentManager.getNumAutoUpdatingAgents());
         model.addAttribute("mechanismOn", !pluginManager.isPluginDeploymentOff());
         if (!pluginManager.isPluginDeploymentOff()){
             model.addAttribute("instruction", "admin.managers.plugin.instructions");
@@ -79,7 +80,7 @@ public class PluginManagerController extends BaseController implements Applicati
     public @ResponseBody List<Map<String, Object>> getPluginSummaries() {
         List<Map<String, Object>> pluginSummaries = new ArrayList<Map<String,Object>>();
         List<Plugin> plugins =  pluginManager.getAllPlugins();
-        SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy hh:mm aa zzz");
+        
         
         Comparator<Plugin> sortByPluginName = new Comparator<Plugin>() {
             public int compare(Plugin o1, Plugin o2) {
@@ -141,15 +142,34 @@ public class PluginManagerController extends BaseController implements Applicati
             
             pluginSummaries.add(pluginSummary);
         }
+
+
         return pluginSummaries;
     }
     
     @RequestMapping(method = RequestMethod.GET, value="/info", headers="Accept=application/json")
     public @ResponseBody Map<String, Object> getAgentInfo() {
         Map<String, Object> info = new HashMap<String,Object>();
-        info.put("allAgentCount", agentManager.getAgentCount());
+        info.put("allAgentCount", agentManager.getNumAutoUpdatingAgents());
         return info;
     }
+
+    @RequestMapping(method = RequestMethod.GET, value="/status/{pluginId}", headers="Accept=application/json")
+    public @ResponseBody List<Map<String, Object>> getAgentStatus(@PathVariable int pluginId) {
+        Collection<AgentPluginStatus> errorAgentStatusList = pluginManager.getErrorStatusesByPluginId(pluginId);
+
+        List<Map<String,Object>> errorAgents = new ArrayList<Map<String,Object>>();
+        
+        for(AgentPluginStatus errorAgentStatus: errorAgentStatusList){
+            Map<String,Object> errorAgent = new HashMap<String,Object>();
+            errorAgent.put("agentName", getAgentName(errorAgentStatus.getAgent())); 
+            errorAgent.put("syncDate", formatter.format(errorAgentStatus.getLastSyncAttempt()));
+            errorAgents.add(errorAgent);
+        }
+
+        return errorAgents;
+    }
+    
     
     /**
      * @param agent

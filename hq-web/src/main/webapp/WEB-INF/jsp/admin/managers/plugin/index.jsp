@@ -122,7 +122,7 @@
 		width: 400px;
 	}
 	
-	#removeErrorPanel {
+	#removeErrorPanel, #confirmationPanel {
 		width: 400px;
 	}
 	#removeErrorPanel div{
@@ -155,12 +155,15 @@
 	}
 	
 	#validationMessage.error,
-	#progressMessage.error {
+	#progressMessage.error{
 	    color: #bb0000;
 	}
 	
 	#showRemoveConfirmationButton{
 		float:left;
+	}
+	#pluginList .disabled{
+		color:red;
 	}
 	.errorAgentSpan{
 		color: #0066CC;
@@ -214,15 +217,20 @@
 	</div>
 	
 	<form:form id="deleteForm" name="deleteForm" onsubmit="return false;" method="delete">
+	
 	<ul id="pluginList">
 		<c:forEach var="pluginSummary" items="${pluginSummaries}" varStatus="index">
 			<li class="gridrow clear<c:if test="${index.count % 2 == 0}"> even</c:if>">
 				<span class="first column span-1">
-					<c:if test="${mechasimOn}">
+					<c:if test="${mechanismOn}">
                     	<input type="checkbox" name="deleteId" value="${pluginSummary.id}" class="checkbox" />&nbsp; 
 					</c:if>
 				</span>
-				<span class="column span-3">${pluginSummary.name}&nbsp;</span>
+				<span class="column span-3">${pluginSummary.name}&nbsp;
+					<c:if test="${disabled}">
+						<span class="disabled"><fmt:message key="admin.managers.Plugin.column.plugin.disabled"/></span>
+					</c:if>
+				</span>
 				<span class="column span-3">${pluginSummary.version}&nbsp;</span>
 				<span class="column span-4">${pluginSummary.jarName}&nbsp;</span>
 				<span class="column span-4">${pluginSummary.initialDeployDate}&nbsp;</span>
@@ -255,7 +263,9 @@
 			<input id="showUploadFormButton" type="button" value="<fmt:message key="admin.managers.plugin.button.add.plugin" />" />
 		</div>	
 	</c:if>
+	<span> <fmt:message key="admin.managers.Plugin.column.plugin.disabled.tip" /></span>
 </section>
+
 
 <c:if test="${mechanismOn}" >
 <div id="uploadPanel" style="visibility:hidden;">
@@ -289,6 +299,7 @@
 	</div>
 </div>
 
+
 </c:if>
 
 <script  djConfig="parseOnLoad: true">
@@ -320,65 +331,11 @@
 	hqDojo.ready(function() {
 		refreshPage();
 		
-
-		
 		new hqDijit.Tooltip({
 			connectId:["agentInfo"],
 			label: "<fmt:message key='admin.managers.Plugin.information.agent.count.tip' />"
 		});
 		
-		
-
-	
-		<c:forEach var="pluginSummary" items="${pluginSummaries}" varStatus="index">
-			if(${pluginSummary.errorAgentCount>0}){
-				var errorAgentTip_${index.count} = hqDojo.create("div",{
-					"class":"errorAgentTip"
-				});
-				
-				var errorAgentTipTitleSpan_${index.count} = hqDojo.create("p",{
-					"class":"errorAgentTitle",
-					"innerHTML":"<fmt:message key='admin.managers.Plugin.tip.status.title' /> ${pluginSummary.name}"
-				},errorAgentTip_${index.count});
-				
-				hqDojo.create("input",{
-					"type":"button",
-					"id": "closeErrorAgentTipButton_${index.count}",
-					"class":"closeButton",
-					"value":"x"},
-					errorAgentTipTitleSpan_${index.count}
-				);
-				
-				<c:if test="${pluginSummary.inProgressAgentCount>0}">
-					var errorUl=hqDojo.create("ul",{
-						"class":"inProgressAgentList"
-						},errorAgentTip_${index.count});
-				</c:if>
-				<c:if test="${pluginSummary.errorAgentCount>0}">
-					var errorUl=hqDojo.create("ul",{
-						"class":"errorAgentList"
-						},errorAgentTip_${index.count});
-					<c:forEach var="agent" items="${pluginSummary.errorAgents}">
-						li = hqDojo.create("li",{
-							"innerHTML":"${agent.agentName} <fmt:message key='admin.managers.Plugin.tip.status.sync.fail'/> ${agent.syncDate}"
-						},errorUl);
-					</c:forEach>
-				</c:if>
-				
-				var dialog_${index.count} = new hqDijit.TooltipDialog();
-				dialog_${index.count}.setContent(errorAgentTip_${index.count});
-				
-				hqDojo.connect(hqDojo.byId("errorAgent_${index.count}"),"onmouseenter", function(e){
-					hqDijit.popup.open({
-						popup: dialog_<c:out value="${index.count}"/>, 
-                        around: hqDojo.byId("errorAgent_${index.count}")
-					});
-				});
-				hqDojo.connect(hqDojo.byId("closeErrorAgentTipButton_${index.count}"),"onclick", function(e){
-					hqDijit.popup.close(dialog_${index.count});
-				});				
-			}
-		</c:forEach>
 		if(${!mechanismOn}){
 			hqDojo.attr("deleteForm","class","mechanismOff");
 		}
@@ -592,10 +549,16 @@
                 				"name":"deleteId"
                 			}, span);
                 		}
-                		span = hqDojo.create("span", {
+                		spanName = hqDojo.create("span", {
                 			"class": "column span-3",
                 			"innerHTML": summary.name
                 		}, li);
+                		if(summary.disabled){
+                			span = hqDojo.create("span",{
+                				"class":"disabled",
+                				"innerHTML":"&nbsp;<fmt:message key='admin.managers.Plugin.column.plugin.disabled'/>"
+                			},spanName);
+                		}
                 		span = hqDojo.create("span", {
                 			"class": "column span-3",
                 			"innerHTML": summary.version
@@ -632,9 +595,10 @@
            	    				}, statusSpan); 
            	    				statusSpan.innerHTML+="&nbsp;&nbsp;&nbsp;";
                 			}
+                			
 	                		if (summary.errorAgentCount > 0) {
     	            			var errorAgentSpan = hqDojo.create("span",{
-        	        				"id":"errorAgent_"+(index+1),
+        	        				"id":"errorAgent_${index+1}",
             	    				"class":"errorAgentSpan"
                 				}, statusSpan);
                 				errorAgentSpan.innerHTML+= summary.errorAgentCount+"&nbsp;";
