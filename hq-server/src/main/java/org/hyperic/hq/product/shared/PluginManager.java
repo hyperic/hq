@@ -56,7 +56,8 @@ public interface PluginManager {
     Map<Integer, Map<AgentPluginStatusEnum, Integer>> getPluginRollupStatus();
 
 // XXX javadoc!
-    Collection<AgentPluginStatus> getErrorStatusesByPluginId(int pluginId);
+    Collection<AgentPluginStatus> getStatusesByPluginId(int pluginId,
+                                                        AgentPluginStatusEnum ... statuses);
 
 // XXX javadoc!
     boolean isPluginDeploymentOff();
@@ -94,4 +95,7 @@ public interface PluginManager {
 
  // XXX javadoc!
     void markDisabled(Collection<Integer> pluginIds);
+
+ // XXX javadoc!
+    void markDisabled(String pluginFileName);
 }

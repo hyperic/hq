@@ -39,6 +39,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -77,8 +78,6 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 @Service
 @Transactional(readOnly=true)
@@ -344,12 +343,15 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     }
 
     @SuppressWarnings("unchecked")
-    public Collection<AgentPluginStatus> getErrorStatusesByPluginId(int pluginId) {
+    public Collection<AgentPluginStatus> getStatusesByPluginId(int pluginId, AgentPluginStatusEnum ... keys) {
+        if (keys.length == 0) {
+            return Collections.emptyList();
+        }
         final Plugin plugin = pluginDAO.get(pluginId);
         if (plugin == null) {
             return Collections.emptyList();
         }
-        return agentPluginStatusDAO.getErrorPluginStatusByFileName(plugin.getPath());
+        return agentPluginStatusDAO.getPluginStatusByFileName(plugin.getPath(), Arrays.asList(keys));
     }
     
     public boolean isPluginDeploymentOff() {
@@ -428,6 +430,15 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     @Transactional(readOnly=false)
     public void removeAgentPluginStatuses(Integer agentId, Collection<String> pluginFileNames) {
         agentPluginStatusDAO.removeAgentPluginStatuses(agentId, pluginFileNames);
+    }
+
+    @Transactional(readOnly=false)
+    public void markDisabled(String pluginFileName) {
+        final Plugin plugin = pluginDAO.getByFilename(pluginFileName);
+        if (plugin == null) {
+            return;
+        }
+        plugin.setDisabled(true);
     }
 
 }
