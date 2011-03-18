@@ -48,6 +48,10 @@
 			<mvc:mapping path="/admin/managers/plugin"/>
 	        <bean class="org.hyperic.hq.web.MastheadInterceptor" />
 		</mvc:interceptor>
+		<mvc:interceptor>
+			<mvc:mapping path="/admin/managers/plugin"/>
+	        <bean class="org.hyperic.hq.web.admin.managers.AdminFeatureInterceptor" />
+		</mvc:interceptor>
 	</mvc:interceptors>
 	
 	<!-- Commons Multipart Resolver w/ progress reporting capabilities -->

@@ -24,7 +24,7 @@
   USA.
  -->
 
-<plugin package="org.hyperic.hq.plugin.geronimo" name="geronimo">
+<plugin package="org.hyperic.hq.plugin.geronimo" name="geronimo" version="@project.version@">
 
   <classpath>
     <include name="pdk/lib/mx4j"/>

@@ -1,6 +1,5 @@
 <script type="text/javascript">
     document.navTabCat = "Resource";
-    getDojo();
 </script>
 <div class="nagContainer">
     <div class="nagTableContainer" id="nagCont">

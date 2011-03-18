@@ -173,9 +173,9 @@
 		</property>
 		<property name="securityMetadataSource">
 			<sec:filter-security-metadata-source>
-				<sec:intercept-url pattern="/hqu/hqapi*/**" access="ROLE_USER" /> 
-		    	<sec:intercept-url pattern="/app/login" access="ROLE_ANONYMOUS,ROLE_USER" />
-		    	<sec:intercept-url pattern="/**" access="ROLE_USER" />
+				<sec:intercept-url pattern="/hqu/hqapi*/**" access="ROLE_HQ_USER" /> 
+		    	<sec:intercept-url pattern="/app/login" access="ROLE_ANONYMOUS,ROLE_HQ_USER" />
+		    	<sec:intercept-url pattern="/**" access="ROLE_HQ_USER" />
 			</sec:filter-security-metadata-source>
 		</property>
 	</bean>

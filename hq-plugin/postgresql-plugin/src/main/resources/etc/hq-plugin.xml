@@ -25,7 +25,7 @@
   USA.
  -->
 
-<plugin package="org.hyperic.hq.plugin.postgresql">
+<plugin package="org.hyperic.hq.plugin.postgresql" version="@project.version@">
   <classpath>
     <include name="pdk/lib/jdbc/postgresql-7.4.3.jar"/>
   </classpath>

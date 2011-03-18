@@ -29,6 +29,8 @@ import org.hyperic.hq.appdef.server.session.Platform;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
+import org.hyperic.hq.appdef.server.session.Platform;
 
 public class Agent extends AppdefBean {
     private String _address;
@@ -40,6 +42,7 @@ public class Agent extends AppdefBean {
     private AgentType _agentType;
     private Collection _platforms;
     private boolean isNewTransportAgent;
+    private Collection _pluginStatuses;
 
     public Agent() {
     }
@@ -140,6 +143,14 @@ public class Agent extends AppdefBean {
 
     public void setAgentType(AgentType agentType) {
         _agentType = agentType;
+    }
+    
+    public void setPluginStatuses(Collection<AgentPluginStatus> pluginStatuses) {
+        _pluginStatuses = pluginStatuses;
+    }
+    
+    public Collection<AgentPluginStatus> getPluginStatuses() {
+        return _pluginStatuses;
     }
 
     public Collection<Platform> getPlatforms() {

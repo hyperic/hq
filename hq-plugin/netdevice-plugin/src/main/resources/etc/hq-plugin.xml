@@ -59,7 +59,7 @@
  -->
 
 <plugin name="netdevice"
-        class="org.hyperic.hq.plugin.netdevice.NetworkDeviceProductPlugin">
+        class="org.hyperic.hq.plugin.netdevice.NetworkDeviceProductPlugin" version="@project.version@">
 
   <!-- column sums from IfTableCollector -->
   <filter name="iftotal.template"

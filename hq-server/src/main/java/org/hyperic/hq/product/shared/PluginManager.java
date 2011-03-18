@@ -26,11 +26,14 @@
 package org.hyperic.hq.product.shared;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.product.Plugin;
 
 public interface PluginManager {
@@ -38,11 +41,15 @@ public interface PluginManager {
     Plugin getByJarName(String jarName);
 
     /**
-     * @param jarInfo {@link Map} of {@link String} = filename to {@link Collection} of bytes
+     * Deploys the specified plugin to the hq-plugins dir.  Checks if the jar file is corrupt
+     * and if the hq-plugin.xml is well-formed.  If these checks fail a {@link PluginDeployException}
+     * will be thrown.
+     * @param pluginInfo {@link Map} of {@link String} = filename to {@link Collection} of bytes
      * that represent the file contents
-     * @throws {@link PluginDeployException}
+     * @throws {@link PluginDeployException} if the plugin file is corrupt and/or the hq-plugin.xml
+     * is not well-formed.
      */
-    void deployPluginIfValid(AuthzSubject subj, Map<String, Collection<byte[]>> jarInfo)
+    void deployPluginIfValid(AuthzSubject subj, Map<String, byte[]> pluginInfo)
     throws PluginDeployException;
 
 // XXX javadoc!
@@ -55,4 +62,36 @@ public interface PluginManager {
     boolean isPluginDeploymentOff();
 
     Plugin getPluginById(Integer id);
+
+// XXX javadoc!
+    Map<Plugin, Collection<AgentPluginStatus>> getOutOfSyncAgentsByPlugin();
+
+// XXX javadoc!
+    List<Plugin> getAllPlugins();
+
+// XXX javadoc!
+    Collection<String> getOutOfSyncPluginNamesByAgentId(Integer agentId);
+    
+ // XXX javadoc!
+     void updateAgentPluginSyncStatusInNewTran(AgentPluginStatusEnum s, Integer agentId,
+                                               Collection<Plugin> plugins);
+
+ // XXX javadoc!
+    void removePlugins(AuthzSubject subj, Collection<String> pluginFilenames)
+    throws PermissionException;
+
+ // XXX javadoc!
+    void removeAgentPluginStatuses(Integer agentId, Collection<String> pluginFileNames);
+
+ // XXX javadoc!
+    Set<Integer> getAgentIdsInQueue();
+
+ // XXX javadoc!
+    Map<Integer, Long> getAgentIdsInRestartState();
+
+ // XXX javadoc!
+    Map<String, Integer> getAllPluginIdsByName();
+
+ // XXX javadoc!
+    void markDisabled(Collection<Integer> pluginIds);
 }

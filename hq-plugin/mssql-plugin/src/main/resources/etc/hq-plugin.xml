@@ -24,7 +24,7 @@
   USA.
  -->
 
-<plugin name="mssql">
+<plugin name="mssql" version="@project.version@">
   <!-- appended to each template by the hq-plugin.xml parser -->
     <property name="template-config"
             value="service_name=%service_name%"/>

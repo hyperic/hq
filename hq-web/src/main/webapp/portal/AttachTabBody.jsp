@@ -41,7 +41,7 @@
 </c:choose>
 
 <script type="text/javascript">
-dojo.addOnLoad(function(){
-    dojo.byId("SubTabTarget").innerHTML = dojo.byId("SubTabSource").innerHTML;
+hqDojo.ready(function(){
+    hqDojo.byId("SubTabTarget").innerHTML = hqDojo.byId("SubTabSource").innerHTML;
 });
 </script>

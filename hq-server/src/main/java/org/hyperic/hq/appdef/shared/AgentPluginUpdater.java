@@ -32,12 +32,32 @@ import org.hyperic.hq.product.Plugin;
 
 public interface AgentPluginUpdater {
     
-    public void initialize();
+    public static final String AGENT_PLUGIN_TRANSFER = "Agent Plugin Transfer";
+    public static final String AGENT_PLUGIN_REMOVE = "Agent Plugin Remove";
     
     /**
-     * @param map {@link Map} of {@link Integer} = agentId to {@link Collection} of {@link Plugin}
+     * @param updateMap {@link Map} of {@link Integer} = agentId to {@link Collection}
+     *  of {@link Plugin}
+     * @param removeMap {@link Map} of {@link Integer} = agentId to {@link Collection}
+     *  of {@link String} = plugin filename or {@link Plugin}.getPath()
      */
-    public void queuePluginTransfer(final Map<Integer, Collection<Plugin>> map,
+    public void queuePluginTransfer(final Map<Integer, Collection<Plugin>> updateMap,
                                     final Map<Integer, Collection<String>> removeMap);
+
+    /**
+     * queues a plugin for removal from the the specified agent and removes the associated
+     * {@link AgentPluginStatus} object
+     */
+    public void queuePluginRemoval(Integer agentId, Collection<String> pluginFileNames);
+
+    /**
+     * returns true is the Agent Plugin Sync Mechanism is disabled
+     */
+    public boolean isDisabled();
+
+    /**
+     * disable the Agent Plugin Sync Mechanism
+     */
+    public void setDisabled(boolean disabled);
 
 }

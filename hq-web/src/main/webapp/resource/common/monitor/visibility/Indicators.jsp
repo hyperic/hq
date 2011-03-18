@@ -65,20 +65,20 @@
 	    var form = document.IndicatorViewsForm;
 
 	    if (option.value == 'go') {
-	        dojo.byId('viewname').style.display = "";
+	        hqDojo.byId('viewname').style.display = "";
 	        form.view.value = option.text;
 	        form.submit();
 	    } else if (option.value == 'delete') {
 	        form.view.value = "";
 	        form.submit();
 	    } else if (option.value == 'create') {
-	        dojo.byId('viewname').style.display = "";
+	        hqDojo.byId('viewname').style.display = "";
 	        return;
 	    } else if (option.value == 'update') {
 	        form.view.value = "<c:out value="${view}"/>";
 	    }
 	    
-	    dojo.byId('viewname').style.display = "none";
+	    hqDojo.byId('viewname').style.display = "none";
 	}
 </script>
 

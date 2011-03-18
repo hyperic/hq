@@ -46,7 +46,7 @@
 	autoLogout = false;
 	
 	function removePortlet(name, label) {
-	    dojo11.xhrPost({
+	    hqDojo.xhrPost({
 	        url: '/app/dashboard/<c:out value="${selectedDashboardId}" />/portlets/' + name,
 	        content: {
 				_method: "DELETE"
@@ -56,7 +56,7 @@
 	}
 	  
 	function postRemovet(name, label){
-	    new Effect.BlindUp(dojo.byId(name));
+	    new Effect.BlindUp(hqDojo.byId(name));
 	    var wide = isWide(name);
 	    if (!wide && !isNarrow(name)) {
 	        return;
@@ -80,14 +80,14 @@
 	        portletOptions[portletOptions.length] = new Option(label, name);
 	
 	        // Make sure div is visible
-	        dojo.byId('addContentsPortlet' + wide).style.visibility='visible';
+	        hqDojo.byId('addContentsPortlet' + wide).style.visibility='visible';
 	    }
 	}
 	
 	function refreshPortlets() {
 	
-	    var problemPortlet = dojo.byId('problemResourcesTable');
-	    var favoritePortlet = dojo.byId('favoriteTable');
+	    var problemPortlet = hqDojo.byId('problemResourcesTable');
+	    var favoritePortlet = hqDojo.byId('favoriteTable');
 	
 	    var nodes = document.getElementsByTagName('table');
 	    var getRecentForm = document.getElementsByTagName('form')
@@ -295,7 +295,7 @@
 			               			containment: ["<c:out value="narrowList_${narrow}"/>"],
 			               			handle: 'widgetHandle',
 			               			onUpdate: function() {
-			                    		dojo11.xhrPost({
+			                    		hqDojo.xhrPost({
 			                        		url: "<html:rewrite page="/dashboard/ReorderPortlets.do"/>?"+Sortable.serialize('<c:out value="narrowList_${narrow}"/>'),
 			                        		load: function(){ }
 			                    		});

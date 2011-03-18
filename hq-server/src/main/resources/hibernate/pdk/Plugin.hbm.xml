@@ -49,6 +49,10 @@
       <column name="NAME" not-null="true" length="200" unique="true"/>
     </property>
 
+    <property name="version" type="string">
+      <column name="VERSION" length="100" />
+    </property>
+
     <property name="path" type="string">
       <column name="PATH" not-null="true" length="500"/>
     </property>
@@ -59,6 +63,14 @@
 
     <property name="creationTime" type="long">
       <column name="CTIME" not-null="true"/>
+    </property>
+
+    <property name="modifiedTime" type="long">
+      <column name="MTIME" not-null="true"/>
+    </property>
+
+    <property name="disabled" type="boolean">
+      <column name="DISABLED" not-null="true" default="false"/>
     </property>
 
   </class>

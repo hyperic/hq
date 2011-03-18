@@ -177,7 +177,6 @@
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>examples</artifactId>
 			<version>${project.version}</version>
-			<classifier>agent</classifier>
 		    <type>zip</type>
 		</dependency>
 
@@ -236,28 +235,24 @@
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>geronimo-plugin</artifactId>
 			<version>${project.version}</version>
-			<classifier>agent</classifier>
 		    <type>zip</type>
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>glassfish-plugin</artifactId>
 			<version>${project.version}</version>
-			<classifier>agent</classifier>
 		    <type>zip</type>
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>groovy-scripting-plugin</artifactId>
 			<version>${project.version}</version>
-			<classifier>agent</classifier>
 		    <type>zip</type>
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>hq-internal-plugin</artifactId>
 			<version>${project.version}</version>
-			<classifier>agent</classifier>
 		    <type>zip</type>
 		</dependency>
 		<dependency>
@@ -284,7 +279,6 @@
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>hibernate-plugin</artifactId>
 			<version>${project.version}</version>
-			<classifier>agent</classifier>
 		    <type>zip</type>
 		</dependency>
 		<dependency>
@@ -296,21 +290,18 @@
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>jetty-plugin</artifactId>
 			<version>${project.version}</version>
-			<classifier>agent</classifier>
 		    <type>zip</type>
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>jmx-plugin</artifactId>
 			<version>${project.version}</version>
-			<classifier>agent</classifier>
 		    <type>zip</type>
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>jvm-plugin</artifactId>
 			<version>${project.version}</version>
-			<classifier>agent</classifier>
 		    <type>zip</type>
 		</dependency>
 		<dependency>
@@ -397,7 +388,6 @@
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>process-plugin</artifactId>
 			<version>${project.version}</version>
-			<classifier>agent</classifier>
 		    <type>zip</type>
 		</dependency>
         <dependency>
@@ -409,7 +399,6 @@
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>resin-plugin</artifactId>
 			<version>${project.version}</version>
-			<classifier>agent</classifier>
 		    <type>zip</type>
 		</dependency>
 		<dependency>
@@ -421,7 +410,6 @@
 			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>sendmail-plugin</artifactId>
 			<version>${project.version}</version>
-			<classifier>agent</classifier>
 		    <type>zip</type>
 		</dependency>
 		<dependency>

@@ -33,35 +33,27 @@
 <link rel="shortcut icon" href="<html:rewrite page="/images/4.0/icons/favicon.ico"/>"/>
 <link rel="stylesheet" href="<html:rewrite page="/css/win.css"/>" type="text/css"/>
 <link rel="stylesheet" href="<html:rewrite page="/css/HQ_40.css"/>" type="text/css"/>
-
 <script type="text/javascript">
-djConfig = { isDebug: false, locale: 'en-us' }
-</script>
-<script type="text/javascript" src="<html:rewrite page='/js/dojo/0.4.4/dojo.js'/>"></script> 
-<script type="text/javascript">
-djConfig.parseOnLoad = true;
-djConfig.baseUrl = '/static/js/dojo/1.5/dojo/';
-djConfig.scopeMap = [
-        ["dojo", "dojo11"],
-        ["dijit", "dijit11"],
-        ["dojox", "dojox11"]
-    ];
+	var djConfig = {};
+	djConfig.parseOnLoad = true;
+	djConfig.baseUrl = '/static/js/dojo/1.5/dojo/';
+	djConfig.scopeMap = [ [ "dojo", "hqDojo" ], [ "dijit", "hqDijit" ], [ "dojox", "hqDojox" ] ];
 </script>
 
 <!--[if IE]>
 <script type="text/javascript">
-// since dojo has trouble when it comes to using relative urls + ssl, we
-// use this workaorund to provide absolute urls.
-function qualifyURL(url) {
-	var a = document.createElement('img');
-    a.src = url;
-    return a.src;
-}
-
-djConfig.modulePaths = {
-    "dojo": qualifyURL("/static/js/dojo/1.5/dojo"),
-    "dijit":  qualifyURL("/static/js/dojo/1.5/dijit"),
-    "dojox":  qualifyURL("/static/js/dojo/1.5/dojox")
+	// since dojo has trouble when it comes to using relative urls + ssl, we
+	// use this workaorund to provide absolute urls.
+	function qualifyURL(url) {
+		var a = document.createElement('img');
+	    a.src = url;
+	    return a.src;
+	}
+	
+	djConfig.modulePaths = {
+	    "dojo": qualifyURL("/static/js/dojo/1.5/dojo"),
+	    "dijit":  qualifyURL("/static/js/dojo/1.5/dijit"),
+	    "dojox":  qualifyURL("/static/js/dojo/1.5/dojox")
   	};
 </script>
 <![endif]-->
@@ -69,9 +61,7 @@ djConfig.modulePaths = {
 <script src="<html:rewrite page='/static/js/dojo/1.5/dojo/dojo.js'/>" type="text/javascript"></script>
 <script type="text/javascript">
     var imagePath = "<html:rewrite page="/images/"/>";
-    dojo11.require('dojo.date');
-    dojo.require('dojo.event.*');
-	dojo.require('dojo.widget.*');
+    hqDojo.require('dojo.date');
 </script>
 <script src="<html:rewrite page='/js/prototype.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/popup.js'/>" type="text/javascript"></script>
