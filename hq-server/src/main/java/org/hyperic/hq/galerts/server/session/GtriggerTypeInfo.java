@@ -38,65 +38,28 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.common.SystemException;
 
 @Entity
-@Table(name="EAM_GTRIGGER_TYPES")
-public class GtriggerTypeInfo implements Serializable
-{
+@Table(name = "EAM_GTRIGGER_TYPES")
+public class GtriggerTypeInfo implements Serializable {
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "ID")
     private Integer id;
 
-    @Column(name="VERSION_COL",nullable=false)
+    @Column(name = "TYPE_CLASS", nullable = false)
+    private Class<?> type;
+
+    @Column(name = "VERSION_COL", nullable = false)
     @Version
     private Long version;
-    
-    @Column(name="TYPE_CLASS",nullable=false)
-    private Class<?> typeClass;
-    
-    protected GtriggerTypeInfo() {}
-    
-    GtriggerTypeInfo(Class<?> typeClass) {
-        this.typeClass = typeClass;
-    }
-    
-    public Integer getId() {
-        return id;
+
+    protected GtriggerTypeInfo() {
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public GtriggerTypeInfo(Class<?> typeClass) {
+        this.type = typeClass;
     }
 
-    public Long getVersion() {
-        return version;
-    }
-
-    public void setVersion(Long version) {
-        this.version = version;
-    }
-
-    /**
-     * Get the trigger type class which extends {@link GtriggerType}
-     */
-    protected Class<?> getTypeClass() {
-        return typeClass;
-    }
-    
-    protected void setTypeClass(Class<?> typeClass) {
-        this.typeClass = typeClass;
-    }
-    
-    public GtriggerType getType() {
-        try {
-            return (GtriggerType)typeClass.newInstance();
-        } catch(InstantiationException e) {
-            throw new SystemException(e);
-        } catch(IllegalAccessException e) {
-            throw new SystemException(e);
-        }
-    }
-    
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
@@ -104,17 +67,51 @@ public class GtriggerTypeInfo implements Serializable
         if (obj == null || !(obj instanceof GtriggerTypeInfo)) {
             return false;
         }
-        Integer objId = ((GtriggerTypeInfo)obj).getId();
-  
-        return getId() == objId ||
-        (getId() != null && 
-         objId != null && 
-         getId().equals(objId));     
+        Integer objId = ((GtriggerTypeInfo) obj).getId();
+
+        return getId() == objId || (getId() != null && objId != null && getId().equals(objId));
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public GtriggerType getType() {
+        try {
+            return (GtriggerType) type.newInstance();
+        } catch (InstantiationException e) {
+            throw new SystemException(e);
+        } catch (IllegalAccessException e) {
+            throw new SystemException(e);
+        }
+    }
+
+    /**
+     * Get the trigger type class which extends {@link GtriggerType}
+     */
+    protected Class<?> getTypeClass() {
+        return type;
+    }
+
+    public Long getVersion() {
+        return version;
     }
 
     public int hashCode() {
         int result = 17;
-        result = 37*result + (getId() != null ? getId().hashCode() : 0);
-        return result;      
+        result = 37 * result + (getId() != null ? getId().hashCode() : 0);
+        return result;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    protected void setTypeClass(Class<?> typeClass) {
+        this.type = typeClass;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }
