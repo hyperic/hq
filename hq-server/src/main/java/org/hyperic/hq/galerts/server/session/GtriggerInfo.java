@@ -46,110 +46,71 @@ import org.hyperic.hq.galerts.processor.Gtrigger;
 import org.hyperic.util.config.ConfigResponse;
 
 @Entity
-@Table(name="EAM_GTRIGGERS")
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-public class GtriggerInfo implements Serializable
-{
+@Table(name = "EAM_GTRIGGERS")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public class GtriggerInfo implements Serializable {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CONFIG_ID", nullable = false)
+    @Index(name = "GTRIGGERS_CONFIG_ID_IDX")
+    private Crispo config;
+
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "ID")
     private Integer id;
 
-    @Column(name="VERSION_COL",nullable=false)
+    @Column(name = "LIDX", nullable = false)
+    private int listIndex;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "STRAT_ID", nullable = false)
+    @Index(name = "GTRIGGERS_STRAT_ID_IDX")
+    private ExecutionStrategyInfo strategy;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "TYPE_ID", nullable = false)
+    @Index(name = "GTRIGGERS_TYPE_ID_IDX")
+    private GtriggerTypeInfo typeInfo;
+
+    @Column(name = "VERSION_COL", nullable = false)
     @Version
     private Long version;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="TYPE_ID",nullable=false)
-    @Index(name="GTRIGGERS_TYPE_ID_IDX")
-    private GtriggerTypeInfo      typeInfo;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="STRAT_ID",nullable=false)
-    @Index(name="GTRIGGERS_STRAT_ID_IDX")
-    private ExecutionStrategyInfo strategy;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="CONFIG_ID",nullable=false)
-    @Index(name="GTRIGGERS_CONFIG_ID_IDX")
-    private Crispo                config;
-    
-    @Column(name="LIDX",nullable=false)
-    private int                   listIndex;
-    
-    protected GtriggerInfo() {}
 
-    GtriggerInfo(GtriggerTypeInfo typeInfo, ExecutionStrategyInfo strategy, 
-                 Crispo config, int listIndex) 
-    {
-        this.typeInfo  = typeInfo;
-        this.strategy  = strategy;
-        this.config    = config;
+    protected GtriggerInfo() {
+    }
+
+    GtriggerInfo(GtriggerTypeInfo typeInfo, ExecutionStrategyInfo strategy, Crispo config,
+                 int listIndex) {
+        this.typeInfo = typeInfo;
+        this.strategy = strategy;
+        this.config = config;
         this.listIndex = listIndex;
     }
-    
-    
-    
-    public Integer getId() {
-        return id;
+
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof GtriggerInfo)) {
+            return false;
+        }
+        Integer objId = ((GtriggerInfo) obj).getId();
+
+        return getId() == objId || (getId() != null && objId != null && getId().equals(objId));
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Long getVersion() {
-        return version;
-    }
-
-    public void setVersion(Long version) {
-        this.version = version;
-    }
-
-    protected GtriggerTypeInfo getTypeInfo() {
-        return typeInfo;
-    }
-    
-    protected void setTypeInfo(GtriggerTypeInfo typeInfo) {
-        this.typeInfo = typeInfo;
-    }
-    
-    public Gtrigger getTrigger() {
-        return typeInfo.getType().createTrigger(getConfig());
-    }
-    
-    protected Crispo getConfigCrispo() {
-        return config;
-    }
-    
-    protected void setConfigCrispo(Crispo config) {
-        this.config = config;
-    }
-    
     public ConfigResponse getConfig() {
         return config.toResponse();
     }
-    
-    public ExecutionStrategyInfo getStrategy() {
-        return strategy;
+
+    protected Crispo getConfigCrispo() {
+        return config;
     }
-    
-    protected void setStrategy(ExecutionStrategyInfo strategy) {
-        this.strategy = strategy;
-    }
-    
-    protected void setListIndex(int listIndex) {
-        this.listIndex = listIndex;
-    }
-    
-    protected int getListIndex() {
-        return listIndex;
-    }
-    
+
     /**
-     * Return GtriggerInfo like a "value" object, parallel to existing
-     * API.  This guarantees that the pojo values have been loaded.
+     * Return GtriggerInfo like a "value" object, parallel to existing API. This
+     * guarantees that the pojo values have been loaded.
      * @return this with the values loaded
      */
     GtriggerInfo getGtriggerInfoValue() {
@@ -158,25 +119,58 @@ public class GtriggerInfo implements Serializable
         getTypeInfo();
         return this;
     }
-    
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || !(obj instanceof GtriggerInfo)) {
-            return false;
-        }
-        Integer objId = ((GtriggerInfo)obj).getId();
-  
-        return getId() == objId ||
-        (getId() != null && 
-         objId != null && 
-         getId().equals(objId));     
+
+    public Integer getId() {
+        return id;
+    }
+
+    protected int getListIndex() {
+        return listIndex;
+    }
+
+    public ExecutionStrategyInfo getStrategy() {
+        return strategy;
+    }
+
+    public Gtrigger getTrigger() {
+        return typeInfo.getType().createTrigger(getConfig());
+    }
+
+    protected GtriggerTypeInfo getTypeInfo() {
+        return typeInfo;
+    }
+
+    public Long getVersion() {
+        return version;
     }
 
     public int hashCode() {
         int result = 17;
-        result = 37*result + (getId() != null ? getId().hashCode() : 0);
-        return result;      
+        result = 37 * result + (getId() != null ? getId().hashCode() : 0);
+        return result;
+    }
+
+    protected void setConfigCrispo(Crispo config) {
+        this.config = config;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    protected void setListIndex(int listIndex) {
+        this.listIndex = listIndex;
+    }
+
+    protected void setStrategy(ExecutionStrategyInfo strategy) {
+        this.strategy = strategy;
+    }
+
+    protected void setTypeInfo(GtriggerTypeInfo typeInfo) {
+        this.typeInfo = typeInfo;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }

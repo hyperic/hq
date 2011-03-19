@@ -35,8 +35,8 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.galert.data.GalertDefRepository;
 import org.hyperic.hq.galerts.server.session.GalertDef;
-import org.hyperic.hq.galerts.server.session.GalertDefDAO;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventSourceId;
@@ -70,7 +70,7 @@ public class GalertProcessorImpl implements GalertProcessor {
     
     private final ZeventEnqueuer      _zMan;
     
-    private GalertDefDAO _defDAO;
+    private GalertDefRepository galertDefRepository;
     
     // Integer ids -> MemGalertDefs
     private Map _alertDefs = new HashMap();
@@ -79,10 +79,10 @@ public class GalertProcessorImpl implements GalertProcessor {
     private Map _listeners = new HashMap();
 
     @Autowired
-    public GalertProcessorImpl(ZeventEnqueuer zEventManager, GalertDefDAO galertDefDAO) {
+    public GalertProcessorImpl(ZeventEnqueuer zEventManager, GalertDefRepository galertDefRepository) {
         _zMan = zEventManager;
         _zMan.addBufferedGlobalListener(new EventListener(this));
-        this._defDAO = galertDefDAO;
+        this.galertDefRepository = galertDefRepository;
     }
 
     /**
@@ -347,9 +347,8 @@ public class GalertProcessorImpl implements GalertProcessor {
      */
     @Transactional
     public void startupInitialize() {
-        Collection galertDefs = _defDAO.findAll();
-        for (Iterator i=galertDefs.iterator(); i.hasNext(); ) {
-            GalertDef def = (GalertDef)i.next();
+        Collection<GalertDef> galertDefs = galertDefRepository.findAllExcludeDeletedOrderByName();
+        for ( GalertDef def : galertDefs ) {
             MemGalertDef memDef;
 
             if (!def.isEnabled())

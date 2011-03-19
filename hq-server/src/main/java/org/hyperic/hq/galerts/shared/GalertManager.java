@@ -85,17 +85,6 @@ public interface GalertManager {
      */
     public PageList<GalertDef> findAlertDefs(ResourceGroup g, PageControl pc);
 
-    /**
-     * Find all group alert
-     * @param minSeverity Minimum severity for returned defs
-     * @param enabled If non-null specifies the nature of the 'enabled' flag for
-     *        the
-     * @param pInfo Paging Must contain a sort field from
-     *        {@link GalertDefSortField}
-     */
-    public List<GalertDef> findAlertDefs(AuthzSubject subj, AlertSeverity minSeverity,
-                                         Boolean enabled, PageInfo pInfo);
-
     public Collection<ExecutionStrategyTypeInfo> findAllStrategyTypes();
 
     public ExecutionStrategyTypeInfo findStrategyType(ExecutionStrategyType t);
@@ -187,12 +176,6 @@ public interface GalertManager {
      * Register an execution
      */
     public ExecutionStrategyTypeInfo registerExecutionStrategy(ExecutionStrategyType stratType);
-
-    /**
-     * Unregister an execution This will fail if any alert definitions are
-     * currently using the strategy
-     */
-    public void unregisterExecutionStrategy(ExecutionStrategyType sType);
 
     /**
      * Configure triggers for a given

@@ -267,7 +267,7 @@ public class GalertDef implements AlertDefinitionInterface, PerformsEscalations,
         creationTime = ctime;
     }
 
-    protected void setDeleted(boolean deleted) {
+    public void setDeleted(boolean deleted) {
         this.deleted = deleted;
     }
 
@@ -279,7 +279,7 @@ public class GalertDef implements AlertDefinitionInterface, PerformsEscalations,
         this.enabled = enabled;
     }
 
-    protected void setEscalation(Escalation escalation) {
+    public void setEscalation(Escalation escalation) {
         this.escalation = escalation;
     }
 
