@@ -26,12 +26,16 @@
 package org.hyperic.hq.plugin.rabbitmq.detect;
 
 import java.io.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -300,12 +304,26 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @return rabbit@host
      */
     private String getServerName(String[] args) {
+        String name = null;
         for (int n = 0; n < args.length; n++) {
             if (args[n].equalsIgnoreCase(DetectorConstants.SNAME)) {
-                return args[n + 1];
+                name = args[n + 1];
             }
         }
-        return null;
+        if ((name != null) && (!name.contains("@"))) {
+            try {
+                InetAddress addr = InetAddress.getLocalHost();
+                String hostname = addr.getHostName();
+                String old_name=name;
+                name+="@"+hostname;
+                name=name.substring(0, name.indexOf("."));
+                logger.debug(DetectorConstants.SNAME+"="+old_name+" -> "+name);
+            } catch (UnknownHostException ex) {
+                name=null;
+                logger.debug(ex.getMessage(),ex);
+            }
+        }
+        return name;
     }
 
     /**
