@@ -1430,10 +1430,16 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         for (final String typeName : typeNames) {
             removeMeasurementTempls(typeName);
             final MonitorableType mt = monitorableTypeDAO.findByName(typeName);
-            monitorableTypeDAO.remove(mt);
+            // mt should not be null at this point, but you never know
+            if (mt != null) {
+                monitorableTypeDAO.remove(mt);
+            }
             final Resource proto = resourceDAO.findResourcePrototypeByName(typeName);
-            removeAppdefType(proto);
-            resourceDAO.remove(proto);
+            // proto = null here means that no resources are configured with that particular type
+            if (proto != null) {
+                removeAppdefType(proto);
+                resourceDAO.remove(proto);
+            }
         }
     }
 
