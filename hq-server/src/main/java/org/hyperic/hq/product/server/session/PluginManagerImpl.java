@@ -64,8 +64,11 @@ import org.hyperic.hq.appdef.shared.AgentPluginUpdater;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.measurement.server.session.MonitorableType;
+import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.shared.PluginDeployException;
 import org.hyperic.hq.product.shared.PluginManager;
@@ -83,9 +86,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly=true)
 public class PluginManagerImpl implements PluginManager, ApplicationContextAware {
     private static final Log log = LogFactory.getLog(PluginManagerImpl.class);
-    
-    private PluginDAO pluginDAO;
-    private AgentPluginStatusDAO agentPluginStatusDAO;
 
     private static final String TMP_DIR = System.getProperty("java.io.tmpdir");
 
@@ -94,17 +94,25 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     private PermissionManager permissionManager;
     private AgentSynchronizer agentSynchronizer;
     private AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
+    private PluginDAO pluginDAO;
+    private AgentPluginStatusDAO agentPluginStatusDAO;
+    private MonitorableTypeDAO monitorableTypeDAO;
+    private ResourceManager resourceManager;
 
     @Autowired
     public PluginManagerImpl(PluginDAO pluginDAO, AgentPluginStatusDAO agentPluginStatusDAO,
+                             MonitorableTypeDAO monitorableTypeDAO,
                              PermissionManager permissionManager,
+                             ResourceManager resourceManager,
                              AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle,
                              AgentSynchronizer agentSynchronizer) {
         this.pluginDAO = pluginDAO;
         this.agentPluginStatusDAO = agentPluginStatusDAO;
+        this.monitorableTypeDAO = monitorableTypeDAO;
         this.permissionManager = permissionManager;
         this.agentPluginSyncRestartThrottle = agentPluginSyncRestartThrottle;
         this.agentSynchronizer = agentSynchronizer;
+        this.resourceManager = resourceManager;
     }
     
     public Plugin getByJarName(String jarName) {
@@ -119,6 +127,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         final File pluginDir = getPluginDir();
         for (final String filename : pluginFileNames) {
             final File plugin = new File(pluginDir.getAbsolutePath() + "/" + filename);
+            removeAssociatedResources(subj, pluginDAO.getByFilename(filename));
             if (!plugin.delete()) {
                 log.warn("Could not remove plugin " + filename);
             }
@@ -127,6 +136,11 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         for (final Agent agent : agents) {
             agentPluginUpdater.queuePluginRemoval(agent.getId(), pluginFileNames);
         }
+    }
+    
+    private void removeAssociatedResources(AuthzSubject subj, Plugin plugin) {
+        final Map<String, MonitorableType> map = monitorableTypeDAO.findByPluginName(plugin.getName());
+        resourceManager.removeResourcesAndTypes(subj, map.values());
     }
     
     public Set<Integer> getAgentIdsInQueue() {

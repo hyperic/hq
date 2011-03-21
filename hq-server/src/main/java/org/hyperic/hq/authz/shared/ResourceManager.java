@@ -42,6 +42,7 @@ import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.bizapp.server.session.ResourceCleanupEventListener;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -309,4 +310,10 @@ public interface ResourceManager {
                                                    Collection<ResourceType> resourceTypes);
 
     ResourceType getResourceTypeById(Integer resourceTypeId);
+
+// XXX javadoc!
+    public void removeResourcesAndTypes(AuthzSubject subj, Collection<MonitorableType> values);
+
+// XXX javadoc!
+    public void removeResourceTypes(Collection<String> typeNames);
 }
