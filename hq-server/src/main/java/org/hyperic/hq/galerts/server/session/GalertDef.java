@@ -98,10 +98,7 @@ public class GalertDef implements AlertDefinitionInterface, PerformsEscalations,
     @Column(name = "NAME", nullable = false)
     private String name;
 
-    private transient AlertSeverity severity;
-
     @Column(name = "SEVERITY", nullable = false)
-    @SuppressWarnings("unused")
     private int severityEnum;
 
     @OneToMany(mappedBy = "alertDef", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -118,7 +115,7 @@ public class GalertDef implements AlertDefinitionInterface, PerformsEscalations,
     public GalertDef(String name, String desc, AlertSeverity severity, boolean enabled, ResourceGroup group) {
         this.name = name;
         this.desc = desc;
-        this.severity = severity;
+        setSeverityEnum(severity.getCode());
         this.enabled = enabled;
         this.group = group;
         escalation = null;
@@ -212,11 +209,11 @@ public class GalertDef implements AlertDefinitionInterface, PerformsEscalations,
     }
 
     public AlertSeverity getSeverity() {
-        return severity;
+        return AlertSeverity.findByCode(severityEnum);
     }
 
     protected int getSeverityEnum() {
-        return severity.getCode();
+        return this.severityEnum;
     }
 
     public Set<ExecutionStrategyInfo> getStrategies() {
@@ -308,7 +305,7 @@ public class GalertDef implements AlertDefinitionInterface, PerformsEscalations,
     }
 
     protected void setSeverityEnum(int code) {
-        severity = AlertSeverity.findByCode(code);
+        this.severityEnum = code;
     }
 
     protected void setStrategySet(Set<ExecutionStrategyInfo> strategies) {

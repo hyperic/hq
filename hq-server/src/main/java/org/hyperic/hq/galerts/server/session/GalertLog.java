@@ -59,171 +59,124 @@ import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.server.session.Action;
 
 @Entity
-@Table(name="EAM_GALERT_LOGS")
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-public class GalertLog implements AlertInterface, Serializable
-{     
+@Table(name = "EAM_GALERT_LOGS")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public class GalertLog implements AlertInterface, Serializable {
+    public static int MAX_LONG_REASON = 2048;
     public static int MAX_SHORT_REASON = 256;
-    public static int MAX_LONG_REASON  = 2048;
-    
+
+    @Formula("(select e.acknowledged_by from EAM_ESCALATION_STATE e where e.alert_id = id and e.alert_def_id = def_id and e.alert_type != -559038737)")
+    private Long ackedBy;
+
+    @OneToMany(mappedBy = "galertLog", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("id")
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Collection<GalertActionLog> actionLog = new ArrayList<GalertActionLog>();
+
+    @OneToMany(mappedBy = "alert", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("id")
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<GalertAuxLog> auxLogs = new ArrayList<GalertAuxLog>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "DEF_ID", nullable = false)
+    @Index(name = "GALERT_LOGS_DEF_ID_IDX")
+    private GalertDef def;
+
+    @Column(name = "FIXED", nullable = false)
+    private boolean fixed;
+
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "ID")
     private Integer id;
 
-    @Column(name="VERSION_COL",nullable=false)
+    @Column(name = "LONG_REASON", nullable = false, length = 2048)
+    private String longReason;
+
+    private transient GalertDefPartition partition;
+
+    @SuppressWarnings("unused")
+    @Column(name = "PARTITION", nullable = false)
+    private int partitionEnum;
+
+    @Column(name = "SHORT_REASON", nullable = false, length = 256)
+    private String shortReason;
+
+    @Formula("(select e.id from EAM_ESCALATION_STATE e where e.alert_id = id and e.alert_def_id = def_id and e.alert_type != -559038737)")
+    private Long stateId;
+
+    @Column(name = "TIMESTAMP", nullable = false)
+    @Index(name = "EAM_GALERT_LOGS_TIME_IDX")
+    private long timestamp;
+
+    @Column(name = "VERSION_COL", nullable = false)
     @Version
     private Long version;
 
-    @Column(name="FIXED",nullable=false)
-    private boolean            fixed;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="DEF_ID",nullable=false)
-    @Index(name="GALERT_LOGS_DEF_ID_IDX")
-    private GalertDef          def;
-    
-    @Column(name="TIMESTAMP",nullable=false)
-    @Index(name="EAM_GALERT_LOGS_TIME_IDX")
-    private long               timestamp;
-    
-    @Column(name="SHORT_REASON",nullable=false,length=256)
-    private String             shortReason;
-    
-    @Column(name="LONG_REASON",nullable=false,length=2048)
-    private String             longReason;
-    
-    @SuppressWarnings("unused")
-    @Column(name="PARTITION",nullable=false)
-    private int partitionEnum;
-    
-    private transient GalertDefPartition partition;
-    
-    @OneToMany(mappedBy="galertLog",cascade=CascadeType.ALL,orphanRemoval=true)
-    @OrderBy("id")
-    @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-    @OnDelete(action=OnDeleteAction.CASCADE)
-    private Collection<GalertActionLog>         actionLog = new ArrayList<GalertActionLog>();
-    
-    @OneToMany(mappedBy="alert",cascade=CascadeType.ALL,orphanRemoval=true)
-    @OrderBy("id")
-    @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-    @OnDelete(action=OnDeleteAction.CASCADE)
-    private List<GalertAuxLog>               auxLogs = new ArrayList<GalertAuxLog>();
-    
-    @Formula("(select e.id from EAM_ESCALATION_STATE e where e.alert_id = id and e.alert_def_id = def_id and e.alert_type != -559038737)")
-    private Long               stateId;
-    
-    @Formula("(select e.acknowledged_by from EAM_ESCALATION_STATE e where e.alert_id = id and e.alert_def_id = def_id and e.alert_type != -559038737)")
-    private Long               ackedBy;
-    
-    protected GalertLog() {}
-    
-    GalertLog(GalertDef def, ExecutionReason reason, long timestamp) {
+    protected GalertLog() {
+    }
+
+    public GalertLog(GalertDef def, ExecutionReason reason, long timestamp) {
         if (reason.getShortReason().length() > MAX_SHORT_REASON ||
-            reason.getLongReason().length() > MAX_LONG_REASON)
-        {
+            reason.getLongReason().length() > MAX_LONG_REASON) {
             throw new IllegalArgumentException("Reason is too long");
         }
-        
-        this.def         = def;
-        this.timestamp   = timestamp;
+
+        this.def = def;
+        this.timestamp = timestamp;
         shortReason = reason.getShortReason();
-        longReason  = reason.getLongReason();
-        partition   = reason.getPartition();
-    }
-    
-    
-
-    public Integer getId() {
-        return id;
+        longReason = reason.getLongReason();
+        partition = reason.getPartition();
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    GalertAuxLog addAuxLog(AlertAuxLog auxLog, GalertAuxLog parent) {
+        GalertAuxLog res = new GalertAuxLog(this, auxLog, parent);
+
+        getAuxLogBag().add(res);
+        return res;
     }
 
-    public Long getVersion() {
-        return version;
-    }
+    GalertActionLog createActionLog(String detail, Action action, AuthzSubject subject) {
+        GalertActionLog res = new GalertActionLog(this, detail, action, subject);
 
-    public void setVersion(Long version) {
-        this.version = version;
-    }
-
-    GalertActionLog createActionLog(String detail, Action action, 
-                                    AuthzSubject subject) 
-    {
-        GalertActionLog res = new GalertActionLog(this, detail, action, 
-                                                  subject);
-        
         actionLog.add(res);
         return res;
     }
-    
-    public PerformsEscalations getDefinition() {
-        return getAlertDef();
+
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+
+        if (o == null || o instanceof GalertLog == false)
+            return false;
+
+        GalertLog oe = (GalertLog) o;
+
+        return oe.getTimestamp() == getTimestamp() && oe.getShortReason().equals(getShortReason());
     }
 
-    public GalertDef getAlertDef() {
-        return def;
-    }
-    
-    protected void setAlertDef(GalertDef def) {
-        this.def = def;
-    }
-
-    public AlertDefinitionInterface getAlertDefinitionInterface() {
-        return getAlertDef();
-    }
-
-    public long getTimestamp() {
-        return timestamp;
-    }
-    
-    protected void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
-    
-    public String getShortReason() {
-        return shortReason;
-    }
-    
-    protected void setShortReason(String txt) {
-        shortReason = txt;
-    }
-    
-    public String getLongReason() {
-        return longReason;
-    }
-    
-    protected void setLongReason(String txt) {
-        longReason = txt;
-    }
-    
-    protected void setPartitionEnum(int code) {
-        partition = GalertDefPartition.findByCode(code);
-    }
-    
-    protected int getPartitionEnum() {
-        return partition.getCode();
-    }
-    
-    protected void setActionLogBag(Collection<GalertActionLog> actionLog) {
-        this.actionLog = actionLog;
-    }
-
-    protected Collection<GalertActionLog> getActionLogBag() {
-        return actionLog;
+    protected Long getAckedBy() {
+        return ackedBy;
     }
 
     public Collection<GalertActionLog> getActionLog() {
         return Collections.unmodifiableCollection(actionLog);
     }
 
-    protected void setAuxLogBag(List<GalertAuxLog> auxLogs) {
-        this.auxLogs = auxLogs;
+    protected Collection<GalertActionLog> getActionLogBag() {
+        return actionLog;
+    }
+
+    public GalertDef getAlertDef() {
+        return def;
+    }
+
+    public AlertDefinitionInterface getAlertDefinitionInterface() {
+        return getAlertDef();
     }
 
     protected List<GalertAuxLog> getAuxLogBag() {
@@ -236,68 +189,108 @@ public class GalertLog implements AlertInterface, Serializable
     public List<GalertAuxLog> getAuxLogs() {
         return Collections.unmodifiableList(getAuxLogBag());
     }
-    
-    GalertAuxLog addAuxLog(AlertAuxLog auxLog, GalertAuxLog parent) { 
-        GalertAuxLog res = new GalertAuxLog(this, auxLog, parent); 
-        
-        getAuxLogBag().add(res);
-        return res;
+
+    public PerformsEscalations getDefinition() {
+        return getAlertDef();
     }
 
-    public boolean isFixed() {
-        return fixed;
+    public Integer getId() {
+        return id;
     }
 
-    protected void setFixed(boolean fixed) {
-        this.fixed = fixed;
+    public String getLongReason() {
+        return longReason;
     }
-    
-    protected void setAckedBy(Long ackedBy) {
-        this.ackedBy = ackedBy;
+
+    protected int getPartitionEnum() {
+        return partition.getCode();
     }
-    
-    protected Long getAckedBy() { 
-        return ackedBy;
+
+    public String getShortReason() {
+        return shortReason;
     }
-    
-    protected void setStateId(Long stateId) {
-        this.stateId = stateId;
-    }
-    
+
     protected Long getStateId() {
         return stateId;
     }
-    
-    public boolean isAcknowledged() {
-        return getAckedBy() != null;
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public Long getVersion() {
+        return version;
     }
 
     public boolean hasEscalationState() {
         return getStateId() != null;
     }
 
+    public int hashCode() {
+        int hash = 1;
+
+        hash = hash * 31 + (int) getTimestamp();
+        hash = hash * 31 + getShortReason().hashCode();
+        return hash;
+    }
+
     public boolean isAcknowledgeable() {
         return getStateId() != null && getAckedBy() == null;
     }
 
-    public int hashCode() {
-        int hash = 1;
-
-        hash = hash * 31 + (int)getTimestamp();
-        hash = hash * 31 + getShortReason().hashCode();
-        return hash;
+    public boolean isAcknowledged() {
+        return getAckedBy() != null;
     }
-    
-    public boolean equals(Object o) {
-        if (o == this)
-            return true;
-        
-        if (o == null || o instanceof GalertLog == false)
-            return false;
-        
-        GalertLog oe = (GalertLog)o;
 
-        return oe.getTimestamp() == getTimestamp() && 
-               oe.getShortReason().equals(getShortReason());
+    public boolean isFixed() {
+        return fixed;
+    }
+
+    protected void setAckedBy(Long ackedBy) {
+        this.ackedBy = ackedBy;
+    }
+
+    protected void setActionLogBag(Collection<GalertActionLog> actionLog) {
+        this.actionLog = actionLog;
+    }
+
+    protected void setAlertDef(GalertDef def) {
+        this.def = def;
+    }
+
+    protected void setAuxLogBag(List<GalertAuxLog> auxLogs) {
+        this.auxLogs = auxLogs;
+    }
+
+    public void setFixed(boolean fixed) {
+        this.fixed = fixed;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    protected void setLongReason(String txt) {
+        longReason = txt;
+    }
+
+    protected void setPartitionEnum(int code) {
+        partition = GalertDefPartition.findByCode(code);
+    }
+
+    protected void setShortReason(String txt) {
+        shortReason = txt;
+    }
+
+    protected void setStateId(Long stateId) {
+        this.stateId = stateId;
+    }
+
+    protected void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }

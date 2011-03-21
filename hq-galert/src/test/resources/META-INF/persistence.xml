@@ -7,9 +7,13 @@
 		<class>org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfo</class>
 		<class>org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo</class>
 		<class>org.hyperic.hq.galerts.server.session.GalertDef</class>
+		<class>org.hyperic.hq.galerts.server.session.GalertLog</class>
+		<class>org.hyperic.hq.galerts.server.session.GalertActionLog</class>
+		<class>org.hyperic.hq.galerts.server.session.GalertAuxLog</class>
 		<class>org.hyperic.hq.galerts.server.session.GtriggerInfo</class>
 		<class>org.hyperic.hq.galerts.server.session.GtriggerTypeInfo</class>
 		<class>org.hyperic.hq.escalation.server.session.Escalation</class>
+		<class>org.hyperic.hq.escalation.server.session.EscalationState</class>
 		<class>org.hyperic.hq.events.server.session.Action</class>
 		<class>org.hyperic.hq.events.server.session.ResourceAlertDefinition</class>
 		<class>org.hyperic.hq.events.server.session.ResourceTypeAlertDefinition</class>

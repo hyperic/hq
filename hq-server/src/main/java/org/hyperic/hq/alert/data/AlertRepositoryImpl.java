@@ -1,6 +1,7 @@
 package org.hyperic.hq.alert.data;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +16,7 @@ import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
 
 public class AlertRepositoryImpl implements AlertRepositoryCustom {
 
@@ -79,8 +80,9 @@ public class AlertRepositoryImpl implements AlertRepositoryCustom {
                                                    Integer groupId, Integer alertDefId,
                                                    Pageable pageable) {
         String sql = getAlertSql(begin, end, priority, inEsc, notFixed, groupId, alertDefId, false);
-        while (pageable.getSort().iterator().hasNext()) {
-            Sort.Order order = pageable.getSort().iterator().next();
+        Iterator<Order> orders = pageable.getSort().iterator();
+        while (orders.hasNext()) {
+            Order order = orders.next();
             sql += " order by " + order.getProperty() + " " + order.getDirection();
         }
 
