@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -45,10 +46,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.hqu.RenditServer;
+import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginInfo;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ProductPluginManager;
+import org.hyperic.hq.product.shared.PluginManager;
 import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.file.FileWatcher;
@@ -89,16 +92,19 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
 
     private AgentManager agentManager;
 
+    private PluginManager pluginManager;
+
     @Autowired
     public ProductPluginDeployer(RenditServer renditServer, ProductManager productManager,
-                                 AgentManager agentManager) {
+                                 AgentManager agentManager, PluginManager pluginManager) {
         this.renditServer = renditServer;
         this.productManager = productManager;
         this.agentManager = agentManager;
+        this.pluginManager = pluginManager;
     }
 
     private void initializePlugins(File pluginDir) {
-        List<String> plugins = new ArrayList<String>();
+        List<String> plugins = new ArrayList<String>(0);
         // On startup, it's necessary to load all plugins first due to
         // inter-plugin class dependencies
         try {
@@ -108,10 +114,13 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         }
 
         // Now we can deploy the plugins
+        final Map<String, Integer> existing = pluginManager.getAllPluginIdsByName();
         Collections.sort(plugins, this);
         for (String pluginName : plugins) {
+            existing.remove(pluginName);
             deployPlugin(pluginName);
         }
+        pluginManager.markDisabled(existing.values());
     }
 
     /**
@@ -337,6 +346,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
     private void undeployPlugin(File pluginFile) throws Exception {
         log.info("Undeploying plugin: " + pluginFile);
         productPluginManager.removePluginJar(pluginFile.toString());
+        pluginManager.markDisabled(pluginFile.getName());
         agentManager.removePluginFromAgentsInBackground(pluginFile.getName());
     }
 
@@ -381,7 +391,9 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
     private class ProductPluginFileEventListener implements FileEventListener {
 
         public void onFileEvent(FileEvent fileEvent) {
-            log.debug("Received product plugin file event: " + fileEvent);
+            if (log.isDebugEnabled()) {
+                log.debug("Received product plugin file event: " + fileEvent);
+            }
             try {
                 if (FileOperation.CREATED.equals(fileEvent.getOperation())) {
                     loadAndDeployPlugin(fileEvent.getFileDetails().getFile());

@@ -429,5 +429,13 @@ public class ResourceDAO
         }
         return rtn;
     }
+    
+    @SuppressWarnings("unchecked")
+    Collection<Resource> getResourcesByProtoTypeName(Collection<String> typeNames) {
+        final String hql = "from Resource where prototype.name in (:typeNames)";
+        return getSession().createQuery(hql)
+                           .setParameterList("typeNames", typeNames)
+                           .list();
+    }
 
 }

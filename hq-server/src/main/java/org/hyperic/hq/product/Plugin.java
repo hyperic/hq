@@ -35,10 +35,12 @@ import org.hyperic.hq.product.shared.PluginValue;
 public class Plugin extends PersistedObject implements ContainerManagedTimestampTrackable {
     // Fields    
     private String name;
+    private String version;
     private String path;
     private String md5;
     private long creationTime;
     private long modifiedTime;
+    private boolean disabled;
 
     // Constructors
     /**
@@ -82,7 +84,15 @@ public class Plugin extends PersistedObject implements ContainerManagedTimestamp
         this.name = name;
     }
 
-    public String getPath()
+    public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
+	}
+
+	public String getPath()
     {
         return this.path;
     }
@@ -161,6 +171,14 @@ public class Plugin extends PersistedObject implements ContainerManagedTimestamp
         setPath( valueHolder.getPath() );
         setMD5( valueHolder.getMD5() );
         setCtime( valueHolder.getCtime() );
+    }
+
+    public boolean isDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
     }
 
     public boolean equals(Object obj)

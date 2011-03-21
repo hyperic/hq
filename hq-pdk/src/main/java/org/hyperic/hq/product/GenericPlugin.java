@@ -70,6 +70,7 @@ public abstract class GenericPlugin {
         PlatformDetector.IS_WIN32;
 
     private String name = null;
+    private String version = null;
     private TypeInfo type = null;
     private PluginManager manager = null;
     private ProductPlugin productPlugin = null;
@@ -200,7 +201,15 @@ public abstract class GenericPlugin {
         this.name = name;
     }
 
-    /**
+    public String getPluginVersion() {
+		return version;
+	}
+
+	public void setPluginVersion(String version) {
+		this.version = version;
+	}
+
+	/**
      * @return The TypeInfo of this plugin from ProductPlugin.getTypes
      */
     public TypeInfo getTypeInfo() {

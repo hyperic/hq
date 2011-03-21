@@ -44,6 +44,7 @@ import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
+import org.hyperic.hq.appdef.shared.ResourceTypeCleanupZevent;
 import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
@@ -52,10 +53,12 @@ import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
+import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.util.timer.StopWatch;
@@ -88,6 +91,8 @@ public class ResourceCleanupEventListener implements ZeventListener<ResourcesCle
     
     private MeasurementManager measurementManager;
 
+    private ResourceManager resourceManager;
+
    
     @Autowired 
     public ResourceCleanupEventListener(AppdefBoss appdefBoss, ZeventEnqueuer zEventManager,
@@ -96,7 +101,8 @@ public class ResourceCleanupEventListener implements ZeventListener<ResourcesCle
                                         ResourceGroupManager resourceGroupManager,
                                         ServiceManager serviceManager, ServerManager serverManager,
                                         PlatformManager platformManager, AgentManager agentManager,
-                                        MeasurementManager measurementManager) {
+                                        MeasurementManager measurementManager,
+                                        ResourceManager resourceManager) {
         this.appdefBoss = appdefBoss;
         this.zEventManager = zEventManager;
         this.authzSubjectManager = authzSubjectManager;
@@ -107,23 +113,34 @@ public class ResourceCleanupEventListener implements ZeventListener<ResourcesCle
         this.platformManager = platformManager;
         this.agentManager = agentManager;
         this.measurementManager = measurementManager;
+        this.resourceManager = resourceManager;
     }
 
     @Transactional
     public void registerResourceCleanupListener() {
         // Add listener to remove alert definition and alerts after resources
         // are deleted.
-        HashSet<Class<ResourcesCleanupZevent>> events = new HashSet<Class<ResourcesCleanupZevent>>();
+        HashSet<Class<? extends Zevent>> events = new HashSet<Class<? extends Zevent>>();
         events.add(ResourcesCleanupZevent.class);
+        events.add(ResourceTypeCleanupZevent.class);
         zEventManager.addBufferedListener(events, this);
         zEventManager.enqueueEventAfterCommit(new ResourcesCleanupZevent());
     }
 
     public void processEvents(List<ResourcesCleanupZevent> events) {
+        final Collection<String> typeNames = new ArrayList<String>();
+        for (final ResourcesCleanupZevent e : events) {
+            if (e instanceof ResourceTypeCleanupZevent) {
+                typeNames.addAll(((ResourceTypeCleanupZevent) e).getTypeNames());
+            }
+        }
         if (events != null && !events.isEmpty()) {
             try {
                 Map<Integer,List<AppdefEntityID>> agentCache = buildAsyncDeleteAgentCache(events);
                 removeDeletedResources(agentCache);
+                if (!typeNames.isEmpty()) {
+                    resourceManager.removeResourceTypes(typeNames);
+                }
             } catch (Exception e) {
                 log.error("removeDeletedResources() failed", e);
             }                        

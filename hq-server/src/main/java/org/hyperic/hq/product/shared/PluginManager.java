@@ -28,6 +28,7 @@ package org.hyperic.hq.product.shared;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum;
@@ -43,7 +44,7 @@ public interface PluginManager {
      * Deploys the specified plugin to the hq-plugins dir.  Checks if the jar file is corrupt
      * and if the hq-plugin.xml is well-formed.  If these checks fail a {@link PluginDeployException}
      * will be thrown.
-     * @param jarInfo {@link Map} of {@link String} = filename to {@link Collection} of bytes
+     * @param pluginInfo {@link Map} of {@link String} = filename to {@link Collection} of bytes
      * that represent the file contents
      * @throws {@link PluginDeployException} if the plugin file is corrupt and/or the hq-plugin.xml
      * is not well-formed.
@@ -55,7 +56,8 @@ public interface PluginManager {
     Map<Integer, Map<AgentPluginStatusEnum, Integer>> getPluginRollupStatus();
 
 // XXX javadoc!
-    Collection<AgentPluginStatus> getErrorStatusesByPluginId(int pluginId);
+    Collection<AgentPluginStatus> getStatusesByPluginId(int pluginId,
+                                                        AgentPluginStatusEnum ... statuses);
 
 // XXX javadoc!
     boolean isPluginDeploymentOff();
@@ -81,4 +83,19 @@ public interface PluginManager {
 
  // XXX javadoc!
     void removeAgentPluginStatuses(Integer agentId, Collection<String> pluginFileNames);
+
+ // XXX javadoc!
+    Set<Integer> getAgentIdsInQueue();
+
+ // XXX javadoc!
+    Map<Integer, Long> getAgentIdsInRestartState();
+
+ // XXX javadoc!
+    Map<String, Integer> getAllPluginIdsByName();
+
+ // XXX javadoc!
+    void markDisabled(Collection<Integer> pluginIds);
+
+ // XXX javadoc!
+    void markDisabled(String pluginFileName);
 }

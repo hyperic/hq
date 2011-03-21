@@ -117,10 +117,10 @@ public class JdbcHQAuthenticationProvider implements HQAuthenticationProvider {
         // Security...
         List<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
 
-        // ...TODO right now, every user is given the "ROLE USER" grant
+        // ...TODO right now, every user is given the "ROLE HQ USER" grant
         // authority, once we fully integrate with
         // spring security this should be updated with a better approach...
-        grantedAuthorities.add(new GrantedAuthorityImpl("ROLE_USER"));
+        grantedAuthorities.add(new GrantedAuthorityImpl("ROLE_HQ_USER"));
 
         return new UsernamePasswordAuthenticationToken(username, password, grantedAuthorities);
     }

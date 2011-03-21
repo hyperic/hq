@@ -52,7 +52,10 @@ import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerDAO;
 import org.hyperic.hq.appdef.server.session.ServerType;
+import org.hyperic.hq.appdef.server.session.ServerTypeDAO;
 import org.hyperic.hq.appdef.server.session.ServiceDAO;
+import org.hyperic.hq.appdef.server.session.ServiceType;
+import org.hyperic.hq.appdef.server.session.ServiceTypeDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -60,6 +63,7 @@ import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+import org.hyperic.hq.appdef.shared.ResourceTypeCleanupZevent;
 import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -73,6 +77,10 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplateDAO;
+import org.hyperic.hq.measurement.server.session.MonitorableType;
+import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.pager.PageControl;
@@ -117,6 +125,10 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     private PermissionManager permissionManager;
     private ResourceAuditFactory resourceAuditFactory;
     private ApplicationContext applicationContext;
+    private MonitorableTypeDAO monitorableTypeDAO;
+    private ServerTypeDAO serverTypeDAO;
+    private ServiceTypeDAO serviceTypeDAO;
+    private MeasurementTemplateDAO measurementTemplateDAO;
 
     @Autowired
     public ResourceManagerImpl(ResourceEdgeDAO resourceEdgeDAO, PlatformDAO platformDAO,
@@ -126,8 +138,11 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
                                ResourceTypeDAO resourceTypeDAO,
                                ResourceRelationDAO resourceRelationDAO,
                                ZeventEnqueuer zeventManager, PlatformTypeDAO platformTypeDAO,
+                               ServerTypeDAO serverTypeDAO, ServiceTypeDAO serviceTypeDAO,
+                               MeasurementTemplateDAO measurementTemplateDAO,
                                ApplicationDAO applicationDAO, PermissionManager permissionManager,
-                               ResourceAuditFactory resourceAuditFactory) {
+                               ResourceAuditFactory resourceAuditFactory,
+                               MonitorableTypeDAO monitorableTypeDAO) {
         this.resourceEdgeDAO = resourceEdgeDAO;
         this.platformDAO = platformDAO;
         this.serverDAO = serverDAO;
@@ -143,6 +158,10 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         this.permissionManager = permissionManager;
         resourceTypePager = Pager.getDefaultPager();
         this.resourceAuditFactory = resourceAuditFactory;
+        this.monitorableTypeDAO = monitorableTypeDAO;
+        this.serverTypeDAO = serverTypeDAO;
+        this.serviceTypeDAO = serviceTypeDAO;
+        this.measurementTemplateDAO = measurementTemplateDAO;
     }
 
     /**
@@ -1378,6 +1397,72 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
 
     public ResourceType findResourceTypeById(Integer id) {
         return resourceTypeDAO.findById(id);
+    }
+
+    public void removeResourcesAndTypes(AuthzSubject subj, Collection<MonitorableType> types) {
+        final boolean debug = log.isDebugEnabled();
+        final StopWatch watch = new StopWatch();
+        if (debug) log.debug("Removing Resources By Types " + types);
+        final Collection<String> typeNames = new ArrayList<String>(types.size());
+        for (final MonitorableType type : types) {
+            typeNames.add(type.getName());
+        }
+        if (debug) watch.markTimeBegin("getResourcesByProtoTypeName");
+        final Collection<Resource> resources = resourceDAO.getResourcesByProtoTypeName(typeNames);
+        if (debug) watch.markTimeEnd("getResourcesByProtoTypeName");
+        for (final Resource r : resources) {
+            try {
+                if (debug) watch.markTimeBegin("removeResourcePerms");
+                final AppdefEntityID[] aeids = removeResourcePerms(subj, r, true, false);
+                if (debug) watch.markTimeEnd("removeResourcePerms");
+                if (debug) log.debug("removed aeids=[" + aeids + "]");
+            } catch (PermissionException e) {
+                log.error(e,e);
+            } catch (VetoException e) {
+                log.error(e,e);
+            }
+        }
+        if (debug) log.debug("Done Removing Resources By Types " + watch);
+        zeventManager.enqueueEventAfterCommit(new ResourceTypeCleanupZevent(typeNames));
+    }
+
+    public void removeResourceTypes(Collection<String> typeNames) {
+        for (final String typeName : typeNames) {
+            removeMeasurementTempls(typeName);
+            final MonitorableType mt = monitorableTypeDAO.findByName(typeName);
+            // mt should not be null at this point, but you never know
+            if (mt != null) {
+                monitorableTypeDAO.remove(mt);
+            }
+            final Resource proto = resourceDAO.findResourcePrototypeByName(typeName);
+            // proto = null here means that no resources are configured with that particular type
+            if (proto != null) {
+                removeAppdefType(proto);
+                resourceDAO.remove(proto);
+            }
+        }
+    }
+
+    private void removeMeasurementTempls(String typeName) {
+        final List<MeasurementTemplate> templs =
+            measurementTemplateDAO.findDerivedByMonitorableType(typeName);
+        for (final MeasurementTemplate t : templs) {
+            measurementTemplateDAO.remove(t);
+        }
+    }
+
+    private void removeAppdefType(Resource proto) {
+        final Integer typeId = proto.getResourceType().getId();
+        if (typeId.equals(AuthzConstants.authzPlatformProto)) {
+            final PlatformType platformType = platformTypeDAO.get(proto.getInstanceId());
+            platformTypeDAO.remove(platformType);
+        } else if (typeId.equals(AuthzConstants.authzServerProto)) {
+            final ServerType serverType = serverTypeDAO.get(proto.getInstanceId());
+            serverTypeDAO.remove(serverType);
+        } else if (typeId.equals(AuthzConstants.authzServiceProto)) {
+            final ServiceType serviceType = serviceTypeDAO.get(proto.getInstanceId());
+            serviceTypeDAO.remove(serviceType);
+        }
     }
 
 }

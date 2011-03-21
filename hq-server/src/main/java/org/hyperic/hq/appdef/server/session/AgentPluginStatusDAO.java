@@ -36,6 +36,7 @@ import org.hibernate.Hibernate;
 import org.hibernate.SQLQuery;
 import org.hibernate.SessionFactory;
 import org.hibernate.type.IntegerType;
+import org.hibernate.type.StringType;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.product.Plugin;
@@ -71,7 +72,7 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
                         .list();
         final Map<String, AgentPluginStatus> rtn = new HashMap<String, AgentPluginStatus>(list.size());
         for (final AgentPluginStatus status : list) {
-            rtn.put(status.getJarName(), status);
+            rtn.put(status.getFileName(), status);
         }
         return rtn;
     }
@@ -182,13 +183,23 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
     }
 
     @SuppressWarnings("unchecked")
-    public Collection<AgentPluginStatus> getErrorPluginStatusByJarName(String jarName) {
+    public Collection<AgentPluginStatus> getPluginStatusByFileName(String fileName,
+                                                      Collection<AgentPluginStatusEnum> statuses) {
         final String hql =
-            "from AgentPluginStatus where jarName = :jarName and lastSyncStatus = :error";
+            "from AgentPluginStatus where fileName = :fileName and lastSyncStatus in (:statuses)";
+        Collection<String> vals = new ArrayList<String>(statuses.size());
+        for (final AgentPluginStatusEnum s : statuses) {
+            vals.add(s.toString());
+        }
         return getSession().createQuery(hql)
-                           .setParameter("jarName", jarName)
-                           .setParameter("error", AgentPluginStatusEnum.SYNC_FAILURE.toString())
+                           .setParameter("fileName", fileName)
+                           .setParameterList("statuses", vals, new StringType())
                            .list();
+    }
+
+    Long getNumAutoUpdatingAgents() {
+        final String hql = "select count(distinct agent) from AgentPluginStatus";
+        return (Long) getSession().createQuery(hql).uniqueResult();
     }
 
     @SuppressWarnings("unchecked")
@@ -199,7 +210,7 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
 
     public void removeAgentPluginStatuses(Integer agentId, Collection<String> pluginFileNames) {
         final String hql =
-            "select id from AgentPluginStatus where agent.id = :agentId and jarName in (:filenames)";
+            "select id from AgentPluginStatus where agent.id = :agentId and fileName in (:filenames)";
         @SuppressWarnings("unchecked")
         final List<Integer> list =
             getSession().createQuery(hql)

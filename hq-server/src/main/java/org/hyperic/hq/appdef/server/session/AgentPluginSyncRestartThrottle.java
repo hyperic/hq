@@ -26,9 +26,11 @@
 package org.hyperic.hq.appdef.server.session;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -59,7 +61,7 @@ public class AgentPluginSyncRestartThrottle {
     /** agentIds */
     private final TreeSet<Integer> pendingRestarts = new TreeSet<Integer>();
     @SuppressWarnings("unused")
-    private final Thread executor;
+    private Thread throttler;
     private final AtomicBoolean shutdown = new AtomicBoolean(false);
     private final Object LOCK = new Object();
     private AuthzSubject overlord;
@@ -69,7 +71,6 @@ public class AgentPluginSyncRestartThrottle {
     public AgentPluginSyncRestartThrottle(AuthzSubjectManager authzSubjectManager,
                                           ConcurrentStatsCollector concurrentStatsCollector) {
         this.overlord = authzSubjectManager.getOverlordPojo();
-        this.executor = startExecutorThread();
         this.concurrentStatsCollector = concurrentStatsCollector;
     }
     
@@ -77,9 +78,22 @@ public class AgentPluginSyncRestartThrottle {
     public void initialize() {
         concurrentStatsCollector.register(ConcurrentStatsCollector.AGENT_PLUGIN_SYNC_RESTARTS);
         concurrentStatsCollector.register(ConcurrentStatsCollector.AGENT_PLUGIN_SYNC_PENDING_RESTARTS);
+        throttler = startThrottlerThread();
     }
     
-    private Thread startExecutorThread() {
+    public Set<Integer> getQueuedAgentIds() {
+        synchronized (LOCK) {
+            return new HashSet<Integer>(pendingRestarts);
+        }
+    }
+    
+    public Map<Integer, Long> getAgentIdsInRestartState() {
+        synchronized (LOCK) {
+            return new HashMap<Integer, Long>(agentRestartTimstampMap);
+        }
+    }
+    
+    private Thread startThrottlerThread() {
         final Thread rtn = new Thread("AgentPluginSyncRestartThrottle") {
             public void run() {
                 while (!shutdown.get()) {
@@ -100,6 +114,7 @@ public class AgentPluginSyncRestartThrottle {
                 }
             }
         };
+        rtn.setDaemon(true);
         rtn.start();
         return rtn;
     }

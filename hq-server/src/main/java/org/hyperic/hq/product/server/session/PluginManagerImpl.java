@@ -37,12 +37,16 @@ import java.io.Writer;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
@@ -50,17 +54,21 @@ import java.util.jar.Manifest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.server.session.AgentSynchronizer;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatusDAO;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum;
-import org.hyperic.hq.appdef.shared.AgentManager;
+import org.hyperic.hq.appdef.server.session.AgentPluginSyncRestartThrottle;
 import org.hyperic.hq.appdef.shared.AgentPluginUpdater;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.measurement.server.session.MonitorableType;
+import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.shared.PluginDeployException;
 import org.hyperic.hq.product.shared.PluginManager;
@@ -74,28 +82,37 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-
 @Service
 @Transactional(readOnly=true)
 public class PluginManagerImpl implements PluginManager, ApplicationContextAware {
     private static final Log log = LogFactory.getLog(PluginManagerImpl.class);
-    
-    private PluginDAO pluginDAO;
-    private AgentPluginStatusDAO agentPluginStatusDAO;
 
     private static final String TMP_DIR = System.getProperty("java.io.tmpdir");
 
     private ApplicationContext ctx;
 
     private PermissionManager permissionManager;
+    private AgentSynchronizer agentSynchronizer;
+    private AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
+    private PluginDAO pluginDAO;
+    private AgentPluginStatusDAO agentPluginStatusDAO;
+    private MonitorableTypeDAO monitorableTypeDAO;
+    private ResourceManager resourceManager;
 
     @Autowired
     public PluginManagerImpl(PluginDAO pluginDAO, AgentPluginStatusDAO agentPluginStatusDAO,
-                             PermissionManager permissionManager) {
+                             MonitorableTypeDAO monitorableTypeDAO,
+                             PermissionManager permissionManager,
+                             ResourceManager resourceManager,
+                             AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle,
+                             AgentSynchronizer agentSynchronizer) {
         this.pluginDAO = pluginDAO;
         this.agentPluginStatusDAO = agentPluginStatusDAO;
+        this.monitorableTypeDAO = monitorableTypeDAO;
         this.permissionManager = permissionManager;
+        this.agentPluginSyncRestartThrottle = agentPluginSyncRestartThrottle;
+        this.agentSynchronizer = agentSynchronizer;
+        this.resourceManager = resourceManager;
     }
     
     public Plugin getByJarName(String jarName) {
@@ -110,6 +127,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         final File pluginDir = getPluginDir();
         for (final String filename : pluginFileNames) {
             final File plugin = new File(pluginDir.getAbsolutePath() + "/" + filename);
+            removeAssociatedResources(subj, pluginDAO.getByFilename(filename));
             if (!plugin.delete()) {
                 log.warn("Could not remove plugin " + filename);
             }
@@ -118,6 +136,24 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         for (final Agent agent : agents) {
             agentPluginUpdater.queuePluginRemoval(agent.getId(), pluginFileNames);
         }
+    }
+    
+    private void removeAssociatedResources(AuthzSubject subj, Plugin plugin) {
+        final Map<String, MonitorableType> map = monitorableTypeDAO.findByPluginName(plugin.getName());
+        resourceManager.removeResourcesAndTypes(subj, map.values());
+    }
+    
+    public Set<Integer> getAgentIdsInQueue() {
+        final Set<Integer> rtn = new HashSet<Integer>();
+        rtn.addAll(agentSynchronizer.getJobListByDescription(
+            Arrays.asList(new String[]{AgentPluginUpdater.AGENT_PLUGIN_REMOVE,
+                                       AgentPluginUpdater.AGENT_PLUGIN_TRANSFER})));
+        rtn.addAll(agentPluginSyncRestartThrottle.getQueuedAgentIds());
+        return rtn;
+    }
+    
+    public Map<Integer, Long> getAgentIdsInRestartState() {
+        return agentPluginSyncRestartThrottle.getAgentIdsInRestartState();
     }
     
     // XXX currently if one plugin validation fails all will fail.  Probably want to deploy the
@@ -290,6 +326,26 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     public Plugin getPluginById(Integer id) {
         return pluginDAO.get(id);
     }
+    
+    @Transactional(readOnly=false)
+    public void markDisabled(Collection<Integer> pluginIds) {
+        for (final Integer pluginId : pluginIds) {
+            final Plugin plugin = pluginDAO.get(pluginId);
+            if (plugin == null) {
+                continue;
+            }
+            plugin.setDisabled(true);
+        }
+    }
+
+    public Map<String, Integer> getAllPluginIdsByName() {
+        final List<Plugin> plugins = pluginDAO.findAll();
+        final Map<String, Integer> rtn = new HashMap<String, Integer>(plugins.size());
+        for (final Plugin plugin : plugins) {
+            rtn.put(plugin.getName(), plugin.getId());
+        }
+        return rtn;
+    }
 
     private Map<String, Plugin> getAllPluginsByName() {
         final List<Plugin> plugins = pluginDAO.findAll();
@@ -301,12 +357,15 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     }
 
     @SuppressWarnings("unchecked")
-    public Collection<AgentPluginStatus> getErrorStatusesByPluginId(int pluginId) {
+    public Collection<AgentPluginStatus> getStatusesByPluginId(int pluginId, AgentPluginStatusEnum ... keys) {
+        if (keys.length == 0) {
+            return Collections.emptyList();
+        }
         final Plugin plugin = pluginDAO.get(pluginId);
         if (plugin == null) {
             return Collections.emptyList();
         }
-        return agentPluginStatusDAO.getErrorPluginStatusByJarName(plugin.getPath());
+        return agentPluginStatusDAO.getPluginStatusByFileName(plugin.getPath(), Arrays.asList(keys));
     }
     
     public boolean isPluginDeploymentOff() {
@@ -329,6 +388,9 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
      @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly=false)
      public void updateAgentPluginSyncStatusInNewTran(AgentPluginStatusEnum s, Integer agentId,
                                                       Collection<Plugin> plugins) {
+         if (plugins == null || plugins.isEmpty()) {
+             return;
+         }
          final Map<String, AgentPluginStatus> statusMap =
              agentPluginStatusDAO.getStatusByAgentId(agentId);
          final long now = System.currentTimeMillis();
@@ -382,6 +444,15 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     @Transactional(readOnly=false)
     public void removeAgentPluginStatuses(Integer agentId, Collection<String> pluginFileNames) {
         agentPluginStatusDAO.removeAgentPluginStatuses(agentId, pluginFileNames);
+    }
+
+    @Transactional(readOnly=false)
+    public void markDisabled(String pluginFileName) {
+        final Plugin plugin = pluginDAO.getByFilename(pluginFileName);
+        if (plugin == null) {
+            return;
+        }
+        plugin.setDisabled(true);
     }
 
 }
