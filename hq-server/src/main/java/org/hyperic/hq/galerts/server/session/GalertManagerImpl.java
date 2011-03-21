@@ -61,6 +61,7 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.galert.data.ExecutionStrategyInfoRepository;
 import org.hyperic.hq.galert.data.ExecutionStrategyTypeInfoRepository;
+import org.hyperic.hq.galert.data.GalertActionLogRepository;
 import org.hyperic.hq.galert.data.GalertDefRepository;
 import org.hyperic.hq.galert.data.GalertLogRepository;
 import org.hyperic.hq.galert.data.GtriggerInfoRepository;
@@ -95,7 +96,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
     private GalertDefRepository galertDefRepository;
     private GalertAuxLogDAO _auxLogDAO;
     private GalertLogRepository gAlertLogRepository;
-    private GalertActionLogDAO _actionLogDAO;
+    private GalertActionLogRepository actionLogRepository;
     private CrispoManager crispoManager;
     private EscalationManager escalationManager;
     private GalertProcessor galertProcessor;
@@ -106,7 +107,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
     @Autowired
     public GalertManagerImpl(ExecutionStrategyTypeInfoRepository executionStrategyTypeInfoRepository, GalertDefRepository galertDefRepository,
                              GalertAuxLogDAO auxLogDAO, GalertLogRepository gAlertLogRepository,
-                             GalertActionLogDAO actionLogDAO, CrispoManager crispoManager,
+                             GalertActionLogRepository actionLogRepository, CrispoManager crispoManager,
                              EscalationManager escalationManager,
                              ResourceGroupManager resourceGroupManager, GalertProcessor gAlertProcessor,
                              ExecutionStrategyInfoRepository executionStrategyInfoRepository,
@@ -115,7 +116,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         this.galertDefRepository = galertDefRepository;
         _auxLogDAO = auxLogDAO;
         this.gAlertLogRepository = gAlertLogRepository;
-        _actionLogDAO = actionLogDAO;
+        this.actionLogRepository = actionLogRepository;
         this.crispoManager = crispoManager;
         this.escalationManager = escalationManager;
         this.resourceGroupManager = resourceGroupManager;
@@ -336,7 +337,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
     public void createActionLog(GalertLog alert, String detail, Action action, AuthzSubject subject) {
         GalertActionLog log = alert.createActionLog(detail, action, subject);
 
-        _actionLogDAO.save(log);
+        actionLogRepository.save(log);
     }
 
     /**
@@ -731,7 +732,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         } else if (event instanceof GroupMembersChangedEvent) {
             groupMembersChanged(((GroupMembersChangedEvent) event).getGroup());
         } else if (event instanceof SubjectDeleteRequestedEvent) {
-            _actionLogDAO.handleSubjectRemoval(((SubjectDeleteRequestedEvent) event).getSubject());
+            actionLogRepository.removeSubject(((SubjectDeleteRequestedEvent) event).getSubject());
         }
 
     }
