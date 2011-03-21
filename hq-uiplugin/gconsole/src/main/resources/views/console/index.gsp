@@ -7,7 +7,7 @@ function sendCode() {
     method: "post",
     mimetype: "text/json-comment-filtered",
     content: {
-        code:   dojo.byId("code").value,
+        code:   dojo.byId("code").value
     },
     load: function(type, data, evt) {
       dojo.byId('result').innerHTML = data.result;
