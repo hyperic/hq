@@ -24,9 +24,7 @@ public interface GalertLogRepository extends JpaRepository<GalertLog, Integer>,
     @Modifying
     void deleteByGroup(@Param("group") ResourceGroup group);
 
-    @Transactional(readOnly = true)
-    @Query("select l from GalertLog l where l.def.group = :group order by l.timestamp")
-    List<GalertLog> findByGroupOrderByTimestamp(@Param("group") ResourceGroup group);
+    List<GalertLog> findByDefGroupOrderByTimestampAsc(@Param("group") ResourceGroup group);
 
     @Transactional(readOnly = true)
     @Query("select l from GalertLog l where l.def.group = :group and l.fixed=false and l.timestamp >= :begin and l.timestamp <= :end")

@@ -153,7 +153,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         }
 
         if (severity != null) {
-            def.setSeverity(severity);
+            def.setSeverity(severity.getCode());
         }
 
         if (enabled != null) {
@@ -345,7 +345,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      */
     @Transactional(readOnly = true)
     public List<GalertLog> findAlertLogs(GalertDef def) {
-        return gAlertLogRepository.findByGroupOrderByTimestamp(def.getGroup());
+        return gAlertLogRepository.findByDefGroupOrderByTimestampAsc(def.getGroup());
     }
 
     /**
@@ -397,7 +397,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      */
     @Transactional(readOnly = true)
     public List<GalertLog> findAlertLogs(ResourceGroup group) {
-        return gAlertLogRepository.findByGroupOrderByTimestamp(group);
+        return gAlertLogRepository.findByDefGroupOrderByTimestampAsc(group);
     }
 
     /**

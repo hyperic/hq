@@ -170,7 +170,7 @@ public class TemplateManagerImpl implements TemplateManager {
         if (cat == null) {
             templates = measurementTemplateRepository.findByMonitorableTypeOrderByName(type);
         } else {
-            templates = measurementTemplateRepository.findByMonitorableTypeAndCategoryOrderByName(type, cat);
+            templates = measurementTemplateRepository.findByMonitorableTypeNameAndCategoryNameOrderByNameAsc(type, cat);
         }
 
         if (templates == null) {
@@ -216,19 +216,19 @@ public class TemplateManagerImpl implements TemplateManager {
 
             // Go through each filter
             if ((filters & MeasurementConstants.FILTER_AVAIL) > 0) {
-                mts.addAll(measurementTemplateRepository.findByMonitorableTypeAndCategoryOrderByName(type,
+                mts.addAll(measurementTemplateRepository.findByMonitorableTypeNameAndCategoryNameOrderByNameAsc(type,
                     MeasurementConstants.CAT_AVAILABILITY));
             }
             if ((filters & MeasurementConstants.FILTER_UTIL) > 0) {
-                mts.addAll(measurementTemplateRepository.findByMonitorableTypeAndCategoryOrderByName(type,
+                mts.addAll(measurementTemplateRepository.findByMonitorableTypeNameAndCategoryNameOrderByNameAsc(type,
                     MeasurementConstants.CAT_UTILIZATION));
             }
             if ((filters & MeasurementConstants.FILTER_THRU) > 0) {
-                mts.addAll(measurementTemplateRepository.findByMonitorableTypeAndCategoryOrderByName(type,
+                mts.addAll(measurementTemplateRepository.findByMonitorableTypeNameAndCategoryNameOrderByNameAsc(type,
                     MeasurementConstants.CAT_THROUGHPUT));
             }
             if ((filters & MeasurementConstants.FILTER_PERF) > 0) {
-                mts.addAll(measurementTemplateRepository.findByMonitorableTypeAndCategoryOrderByName(type,
+                mts.addAll(measurementTemplateRepository.findByMonitorableTypeNameAndCategoryNameOrderByNameAsc(type,
                     MeasurementConstants.CAT_PERFORMANCE));
             }
         } else {

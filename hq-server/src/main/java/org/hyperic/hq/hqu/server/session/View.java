@@ -58,11 +58,8 @@ public abstract class View<T extends Attachment> implements Serializable {
     @OneToMany(mappedBy = "view", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = Attachment.class)
     private Collection<T> attachments = new ArrayList<T>();
 
-    private transient AttachType attachType;
-
-    @SuppressWarnings("unused")
     @Column(name = "ATTACH_TYPE", nullable = false)
-    private int attachTypeEnum;
+    private int attachType;
 
     @Column(name = "DESCRIPTION", nullable = false, length = 255)
     private String descr;
@@ -92,8 +89,7 @@ public abstract class View<T extends Attachment> implements Serializable {
         this.plugin = plugin;
         path = view.getPath();
         descr = view.getDescription();
-        attachType = attach;
-        this.attachTypeEnum = attachType.getCode();
+        this.attachType = attach.getCode();
     }
 
     void addAttachment(T a) {
@@ -119,11 +115,7 @@ public abstract class View<T extends Attachment> implements Serializable {
     }
 
     public AttachType getAttachType() {
-        return attachType;
-    }
-
-    protected int getAttachTypeEnum() {
-        return attachType.getCode();
+        return AttachType.findByCode(attachType);
     }
 
     public String getDescription() {
@@ -163,9 +155,8 @@ public abstract class View<T extends Attachment> implements Serializable {
         attachments = a;
     }
 
-    protected void setAttachTypeEnum(int code) {
-        attachType = AttachType.findByCode(code);
-        attachTypeEnum = code;
+    protected void setAttachType(int code) {
+        attachType = code;
     }
 
     protected void setDescription(String descr) {

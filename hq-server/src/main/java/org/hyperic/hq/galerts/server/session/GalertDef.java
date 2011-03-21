@@ -99,7 +99,7 @@ public class GalertDef implements AlertDefinitionInterface, PerformsEscalations,
     private String name;
 
     @Column(name = "SEVERITY", nullable = false)
-    private int severityEnum;
+    private int severity;
 
     @OneToMany(mappedBy = "alertDef", cascade = CascadeType.ALL, orphanRemoval = true)
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
@@ -112,10 +112,11 @@ public class GalertDef implements AlertDefinitionInterface, PerformsEscalations,
     protected GalertDef() {
     }
 
-    public GalertDef(String name, String desc, AlertSeverity severity, boolean enabled, ResourceGroup group) {
+    public GalertDef(String name, String desc, AlertSeverity severity, boolean enabled,
+                     ResourceGroup group) {
         this.name = name;
         this.desc = desc;
-        setSeverityEnum(severity.getCode());
+        this.severity=severity.getCode();
         this.enabled = enabled;
         this.group = group;
         escalation = null;
@@ -209,11 +210,7 @@ public class GalertDef implements AlertDefinitionInterface, PerformsEscalations,
     }
 
     public AlertSeverity getSeverity() {
-        return AlertSeverity.findByCode(severityEnum);
-    }
-
-    protected int getSeverityEnum() {
-        return this.severityEnum;
+        return AlertSeverity.findByCode(severity);
     }
 
     public Set<ExecutionStrategyInfo> getStrategies() {
@@ -300,12 +297,8 @@ public class GalertDef implements AlertDefinitionInterface, PerformsEscalations,
         this.name = name;
     }
 
-    void setSeverity(AlertSeverity severity) {
-        setSeverityEnum(severity.getCode());
-    }
-
-    protected void setSeverityEnum(int code) {
-        this.severityEnum = code;
+    protected void setSeverity(int code) {
+        this.severity = code;
     }
 
     protected void setStrategySet(Set<ExecutionStrategyInfo> strategies) {

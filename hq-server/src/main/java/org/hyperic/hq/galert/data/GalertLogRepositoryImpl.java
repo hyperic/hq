@@ -36,7 +36,7 @@ public class GalertLogRepositoryImpl implements GalertLogRepositoryCustom {
                        "a.timestamp between :begin and :end " +
                        (notFixed ? " and a.fixed = false " : "") +
                        (galertDefId == null ? "" : "and d.id = " + galertDefId + " ") +
-                       "and d.severityEnum >= :priority " +
+                       "and d.severity >= :priority " +
                        (inEscalation ? "and a.id = es.alertId and "
                                        + "es.alertDefinitionId = d.id " : "");
         Iterator<Order> orders = pageable.getSort().iterator();

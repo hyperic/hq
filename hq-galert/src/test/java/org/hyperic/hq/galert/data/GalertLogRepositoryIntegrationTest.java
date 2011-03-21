@@ -265,7 +265,7 @@ public class GalertLogRepositoryIntegrationTest {
         List<GalertLog> expected = new ArrayList<GalertLog>();
         expected.add(log2);
         expected.add(log);
-        assertEquals(expected, galertLogRepository.findByGroupOrderByTimestamp(group));
+        assertEquals(expected, galertLogRepository.findByDefGroupOrderByTimestampAsc(group));
     }
 
     @Test
