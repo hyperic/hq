@@ -23,6 +23,13 @@
 		<class>org.hyperic.hq.events.server.session.Alert</class>
 		<class>org.hyperic.hq.events.server.session.AlertCondition</class>
 		<class>org.hyperic.hq.events.server.session.RegisteredTrigger</class>
+		<class>org.hyperic.hq.measurement.server.session.MonitorableType</class>
+		<class>org.hyperic.hq.measurement.server.session.Category</class>
+		<class>org.hyperic.hq.measurement.server.session.MeasurementTemplate</class>
+		<class>org.hyperic.hq.measurement.server.session.Measurement</class>
+		<class>org.hyperic.hq.measurement.server.session.AvailabilityDataRLE</class>
+		<class>org.hyperic.hq.measurement.server.session.Baseline</class>
+		<class>org.hyperic.hq.measurement.server.session.MetricAuxLogPojo</class>
 		<class>org.hyperic.hq.inventory.domain.ResourceGroup</class>
 		<class>org.hyperic.hq.inventory.domain.ResourceType</class>
 		<class>org.hyperic.hq.auth.domain.AuthzSubject</class>

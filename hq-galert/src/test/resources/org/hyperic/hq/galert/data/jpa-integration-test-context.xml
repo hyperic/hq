@@ -37,5 +37,10 @@
 	<jdbc:embedded-database id="dataSource" type="HSQL" />
 
 	<jpa:repositories base-package="org.hyperic.hq.galert.data" />
+	
+	<bean id="dialectAccessor" class="org.hyperic.hibernate.DialectAccessorImpl" />
+
+	<bean id="sessionFactory"
+		class="org.hyperic.hq.test.SessionFactoryAccessor"/>
 
 </beans>

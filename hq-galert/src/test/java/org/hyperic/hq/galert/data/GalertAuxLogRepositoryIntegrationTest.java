@@ -1,5 +1,7 @@
 package org.hyperic.hq.galert.data;
 
+import java.util.Arrays;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
@@ -7,10 +9,19 @@ import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.SimpleAlertAuxLog;
 import org.hyperic.hq.galerts.server.session.ExecutionReason;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
+import org.hyperic.hq.galerts.server.session.GalertAuxLogProvider;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertDefPartition;
 import org.hyperic.hq.galerts.server.session.GalertLog;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
+import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.galerts.MetricAuxLog;
+import org.hyperic.hq.measurement.server.session.Category;
+import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.server.session.MetricAuxLogPojo;
+import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,5 +68,42 @@ public class GalertAuxLogRepositoryIntegrationTest {
         entityManager.flush();
         entityManager.clear();
         assertEquals(Long.valueOf(1), galertAuxLogRepository.count());
+    }
+
+    @Test
+    public void testResetAuxType() {
+        long timestamp = System.currentTimeMillis();
+        ResourceGroup group2 = new ResourceGroup();
+        group2.setName("Group2");
+        entityManager.persist(group2);
+        Resource resource = new Resource();
+        resource.setName("Resource1");
+        entityManager.persist(resource);
+        MonitorableType type = new MonitorableType("Tomcat Server", "tomcat");
+        entityManager.persist(type);
+        Category category = new Category("Availability");
+        entityManager.persist(category);
+        MeasurementTemplate template = new MeasurementTemplate("Queue Size", "Availability",
+            "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true,
+            "service:queueSize", type, category, "tomcat");
+        entityManager.persist(template);
+        Measurement measurement = new Measurement(resource, template, 1234);
+        measurement.setDsn("queueSize");
+        entityManager.persist(measurement);
+        GalertDef def1 = new GalertDef("Platforms Down", "desc", AlertSeverity.HIGH, true, group2);
+        entityManager.persist(def1);
+        GalertLog log = new GalertLog(def1, new ExecutionReason("Threshold Exceeded",
+            "Something bad happened", null, GalertDefPartition.NORMAL), timestamp);
+        entityManager.persist(log);
+        GalertAuxLog auxLog = new GalertAuxLog(log, new SimpleAlertAuxLog("Descr", timestamp), null);
+        galertAuxLogRepository.save(auxLog);
+        MetricAuxLogPojo metricAuxLog = new MetricAuxLogPojo(auxLog, new MetricAuxLog("desc",
+            timestamp, measurement), def1);
+        entityManager.persist(metricAuxLog);
+        galertAuxLogRepository.resetAuxType(Arrays.asList(new Integer[] { measurement.getId() }));
+        entityManager.flush();
+        entityManager.clear();
+        assertEquals(GalertAuxLogProvider.INSTANCE.getCode(),
+            galertAuxLogRepository.findById(auxLog.getId()).getAuxType());
     }
 }

@@ -138,7 +138,7 @@ public class GalertAuxLog implements Serializable {
         return def;
     }
 
-    protected int getAuxType() {
+    public int getAuxType() {
         return auxType;
     }
 
