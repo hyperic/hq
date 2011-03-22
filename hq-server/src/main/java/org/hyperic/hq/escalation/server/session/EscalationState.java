@@ -44,152 +44,62 @@ import org.hibernate.annotations.Index;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 
 /**
- * The escalation state ties an escalation chain to an alert definition. 
+ * The escalation state ties an escalation chain to an alert definition.
  */
 @Entity
-@Table(name="EAM_ESCALATION_STATE", uniqueConstraints = { @UniqueConstraint(name = "alert_def_id_key", columnNames = { "ALERT_DEF_ID","ALERT_TYPE"
- }) })
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-public class EscalationState implements Serializable
-{
+@Table(name = "EAM_ESCALATION_STATE", uniqueConstraints = { @UniqueConstraint(name = "alert_def_id_key", columnNames = { "ALERT_DEF_ID",
+                                                                                                                        "ALERT_TYPE" }) })
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public class EscalationState implements Serializable {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ACKNOWLEDGED_BY")
+    @Index(name = "ACKNOWLEDGED_BY_IDX")
+    private AuthzSubject acknowledgedBy;
+
+    @Column(name = "ALERT_DEF_ID", nullable = false)
+    private int alertDefId;
+
+    @Column(name = "ALERT_ID", nullable = false)
+    private int alertId;
+
+    @Column(name = "ALERT_TYPE", nullable = false)
+    private int alertType;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ESCALATION_ID", nullable = false)
+    private Escalation escalation;
+
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "ID")
     private Integer id;
 
-    @Column(name="VERSION_COL",nullable=false)
-    @Version
-    private Long version;
-    
-    @Column(name="NEXT_ACTION_IDX",nullable=false)
+    @Column(name = "NEXT_ACTION_IDX", nullable = false)
     private int nextAction;
 
-    @Column(name="NEXT_ACTION_TIME",nullable=false)
+    @Column(name = "NEXT_ACTION_TIME", nullable = false)
     private long nextActionTime;
 
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="ESCALATION_ID",nullable=false)
-    private Escalation escalation;
-    
-    @SuppressWarnings("unused")
-    @Column(name="ALERT_TYPE",nullable=false)
-    private int alertTypeEnum;
-    
-    private transient EscalationAlertType alertType;
-    
-    @Column(name="ALERT_DEF_ID",nullable=false)
-    private int alertDefId;
-    
-    @Column(name="ALERT_ID",nullable=false)
-    private int alertId;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="ACKNOWLEDGED_BY")
-    @Index(name="ACKNOWLEDGED_BY_IDX")
-    private AuthzSubject acknowledgedBy;
-    
     private transient boolean paused;
-    
-    protected EscalationState(){
+
+    @Column(name = "VERSION_COL", nullable = false)
+    @Version
+    private Long version;
+
+    protected EscalationState() {
     }
 
-    protected EscalationState(Escalatable alert) {
+    public EscalationState(Escalatable alert) {
         PerformsEscalations def = alert.getDefinition();
-        
-        escalation     = def.getEscalation();
-        nextAction     = 0;
+        escalation = def.getEscalation();
+        nextAction = 0;
         nextActionTime = System.currentTimeMillis();
-        alertDefId     = def.getId().intValue();
-        alertType      = def.getAlertType();
-        alertId        = alert.getId().intValue();
+        alertDefId = def.getId().intValue();
+        alertType = def.getAlertType().getCode();
+        alertId = alert.getId().intValue();
     }
 
-    
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Long getVersion() {
-        return version;
-    }
-
-    public void setVersion(Long version) {
-        this.version = version;
-    }
-    
-    public boolean isPaused() {
-        return paused;
-    }
-
-    public void setPaused(boolean paused) {
-        this.paused = paused;
-    }
-
-    public int getNextAction() {
-        return nextAction;
-    }
-
-    protected void setNextAction(int nextAction) {
-        this.nextAction = nextAction;
-    }
-
-    public long getNextActionTime() {
-        return nextActionTime;
-    }
-
-    protected void setNextActionTime(long nextActionTime) {
-        this.nextActionTime = nextActionTime;
-    }
-
-    public Escalation getEscalation() {
-        return escalation;
-    }
-
-    protected void setEscalation(Escalation escalation) {
-        this.escalation = escalation;
-    }
-
-    public int getAlertDefinitionId() {
-        return alertDefId;
-    }
-
-    protected void setAlertDefinitionId(int alertDefinitionId) {
-        alertDefId = alertDefinitionId;
-    }
-
-    public int getAlertId() {
-        return alertId;
-    }
-
-    protected void setAlertId(int alertId) {
-        this.alertId = alertId;
-    }
-
-    public EscalationAlertType getAlertType() {
-        return alertType;
-    }
-
-    protected int getAlertTypeEnum() {
-        return alertType.getCode();
-    }
-
-    protected void setAlertTypeEnum(int typeCode) {
-        alertType = EscalationAlertType.findByCode(typeCode);
-    }
-    
-    public AuthzSubject getAcknowledgedBy() {
-        return acknowledgedBy;
-    }
-    
-    protected void setAcknowledgedBy(AuthzSubject subject) {
-        acknowledgedBy = subject;
-    }
-    
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
@@ -197,17 +107,94 @@ public class EscalationState implements Serializable
         if (obj == null || !(obj instanceof EscalationState)) {
             return false;
         }
-        Integer objId = ((EscalationState)obj).getId();
-  
-        return getId() == objId ||
-        (getId() != null && 
-         objId != null && 
-         getId().equals(objId));     
+        Integer objId = ((EscalationState) obj).getId();
+
+        return getId() == objId || (getId() != null && objId != null && getId().equals(objId));
+    }
+
+    public AuthzSubject getAcknowledgedBy() {
+        return acknowledgedBy;
+    }
+
+    public int getAlertDefinitionId() {
+        return alertDefId;
+    }
+
+    public int getAlertId() {
+        return alertId;
+    }
+
+    public EscalationAlertType getAlertType() {
+        return EscalationAlertType.findByCode(alertType);
+    }
+
+    public Escalation getEscalation() {
+        return escalation;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public int getNextAction() {
+        return nextAction;
+    }
+
+    public long getNextActionTime() {
+        return nextActionTime;
+    }
+
+    public Long getVersion() {
+        return version;
     }
 
     public int hashCode() {
         int result = 17;
-        result = 37*result + (getId() != null ? getId().hashCode() : 0);
-        return result;      
+        result = 37 * result + (getId() != null ? getId().hashCode() : 0);
+        return result;
+    }
+
+    public boolean isPaused() {
+        return paused;
+    }
+
+    public void setAcknowledgedBy(AuthzSubject subject) {
+        acknowledgedBy = subject;
+    }
+
+    protected void setAlertDefinitionId(int alertDefinitionId) {
+        alertDefId = alertDefinitionId;
+    }
+
+    protected void setAlertId(int alertId) {
+        this.alertId = alertId;
+    }
+
+    protected void setAlertType(int typeCode) {
+        alertType = typeCode;
+    }
+
+    protected void setEscalation(Escalation escalation) {
+        this.escalation = escalation;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    protected void setNextAction(int nextAction) {
+        this.nextAction = nextAction;
+    }
+
+    protected void setNextActionTime(long nextActionTime) {
+        this.nextActionTime = nextActionTime;
+    }
+
+    public void setPaused(boolean paused) {
+        this.paused = paused;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }

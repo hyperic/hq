@@ -14,6 +14,7 @@
 		<class>org.hyperic.hq.config.domain.Crispo</class>
 		<class>org.hyperic.hq.config.domain.CrispoOption</class>
 		<class>org.hyperic.hq.inventory.domain.Resource</class>
+		<class>org.hyperic.hq.inventory.domain.ResourceGroup</class>
 		<class>org.hyperic.hq.inventory.domain.ResourceType</class>
 		<class>org.hyperic.hq.events.server.session.Action</class>
 		<class>org.hyperic.hq.events.server.session.AlertActionLog</class>
@@ -24,6 +25,14 @@
 		<class>org.hyperic.hq.events.server.session.AlertCondition</class>
 		<class>org.hyperic.hq.events.server.session.ResourceAlertDefinition</class>
 		<class>org.hyperic.hq.events.server.session.ResourceTypeAlertDefinition</class>
+		<class>org.hyperic.hq.galerts.server.session.GalertDef</class>
+		<class>org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo</class>
+		<class>org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfo</class>
+		<class>org.hyperic.hq.galerts.server.session.GtriggerInfo</class>
+		<class>org.hyperic.hq.galerts.server.session.GtriggerTypeInfo</class>
+		<class>org.hyperic.hq.galerts.server.session.GalertLog</class>
+		<class>org.hyperic.hq.galerts.server.session.GalertActionLog</class>
+		<class>org.hyperic.hq.galerts.server.session.GalertAuxLog</class>
 		<shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
 		<properties>
 			<property name="hibernate.hbm2ddl.auto" value="update" />

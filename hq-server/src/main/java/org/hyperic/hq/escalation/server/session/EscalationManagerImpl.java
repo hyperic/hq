@@ -42,6 +42,7 @@ import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.escalation.EscalationEvent;
 import org.hyperic.hq.escalation.data.EscalationRepository;
+import org.hyperic.hq.escalation.data.EscalationStateRepository;
 import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.ActionConfigInterface;
 import org.hyperic.hq.events.AlertPermissionManager;
@@ -58,6 +59,7 @@ import org.hyperic.util.units.UnitNumber;
 import org.hyperic.util.units.UnitsConstants;
 import org.hyperic.util.units.UnitsFormat;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,7 +73,7 @@ public class EscalationManagerImpl implements EscalationManager {
     private AlertPermissionManager alertPermissionManager;
 
     private EscalationRepository escalationRepository;
-    private EscalationStateDAO escalationStateDAO;
+    private EscalationStateRepository escalationStateRepository;
     private AlertRegulator alertRegulator;
     private EscalationRuntime escalationRuntime;
     private MessagePublisher messagePublisher;
@@ -80,13 +82,13 @@ public class EscalationManagerImpl implements EscalationManager {
     public EscalationManagerImpl(ActionManager actionManager,
                                  AlertPermissionManager alertPermissionManager,
                                  EscalationRepository escalationRepository,
-                                 EscalationStateDAO escalationStateDAO,
+                                 EscalationStateRepository escalationStateRepository,
                                  MessagePublisher messagePublisher,
                                  EscalationRuntime escalationRuntime, AlertRegulator alertRegulator) {
         this.actionManager = actionManager;
         this.alertPermissionManager = alertPermissionManager;
         this.escalationRepository = escalationRepository;
-        this.escalationStateDAO = escalationStateDAO;
+        this.escalationStateRepository = escalationStateRepository;
         this.escalationRuntime = escalationRuntime;
         this.messagePublisher = messagePublisher;
         this.alertRegulator = alertRegulator;
@@ -128,7 +130,7 @@ public class EscalationManagerImpl implements EscalationManager {
 
     @Transactional(readOnly = true)
     public EscalationState findEscalationState(PerformsEscalations def) {
-        return escalationStateDAO.find(def);
+        return escalationStateRepository.findByAlertDefAndAlertType(def.getId(),def.getAlertType().getCode());
     }
 
     /**
@@ -155,7 +157,7 @@ public class EscalationManagerImpl implements EscalationManager {
     }
 
     private void unscheduleEscalation(Escalation escalation) {
-        Collection<EscalationState> escalationStates = escalationStateDAO.findStatesFor(escalation);
+        Collection<EscalationState> escalationStates = escalationStateRepository.findByEscalation(escalation);
 
         // Unschedule any escalations currently in progress
         for (Iterator<EscalationState> i = escalationStates.iterator(); i.hasNext();) {
@@ -326,7 +328,7 @@ public class EscalationManagerImpl implements EscalationManager {
                 if (!alert.getAlertInfo().isFixed()) {
                     EscalationState escalationState = new EscalationState(alert);
 
-                    escalationStateDAO.save(escalationState);
+                    escalationStateRepository.save(escalationState);
                     log.debug("Escalation started: state=" + escalationState.getId());
                     escalationRuntime.scheduleEscalation(escalationState);
 
@@ -358,7 +360,8 @@ public class EscalationManagerImpl implements EscalationManager {
 
         try {
             // Checks if there is a committed escalation state for this def.
-            existsInDb = escalationStateDAO.find(alertDefinition) != null;
+            existsInDb = escalationStateRepository.findByAlertDefAndAlertType(alertDefinition.getId(),
+                alertDefinition.getAlertType().getCode()) != null;
         } catch (Exception e) {
             log
                 .warn("There is already one escalation in progress for " + "alert def id=" +
@@ -455,7 +458,8 @@ public class EscalationManagerImpl implements EscalationManager {
             moreInfo = "";
         }
 
-        EscalationState escalationState = escalationStateDAO.find(alert);
+        EscalationState escalationState = escalationStateRepository.findByAlertIdAndAlertType(alert.getAlertInfo().getId(), 
+            alert.getDefinition().getAlertType().getCode());
         Escalation escalation = alertDefinition.getEscalation();
 
         if (pause > 0 && escalation.isPauseAllowed()) {
@@ -500,7 +504,8 @@ public class EscalationManagerImpl implements EscalationManager {
     @Transactional(readOnly = true)
     public boolean isAlertAcknowledgeable(Integer alertId, PerformsEscalations alertDefinition) {
         if (alertDefinition.getEscalation() != null) {
-            EscalationState escState = escalationStateDAO.find(alertDefinition);
+            EscalationState escState = escalationStateRepository.findByAlertDefAndAlertType(alertDefinition.getId(),
+                alertDefinition.getAlertType().getCode());
 
             if (escState != null) {
                 if (escState.getAlertId() == alertId.intValue() &&
@@ -520,7 +525,8 @@ public class EscalationManagerImpl implements EscalationManager {
      */
     public boolean fixAlert(AuthzSubject subject, PerformsEscalations alertDefinition,
                             String moreInfo) throws PermissionException {
-        EscalationState escalationState = escalationStateDAO.find(alertDefinition);
+        EscalationState escalationState = escalationStateRepository.findByAlertDefAndAlertType(alertDefinition.getId(),
+            alertDefinition.getAlertType().getCode());
 
         if (escalationState == null) {
             return false;
@@ -567,7 +573,8 @@ public class EscalationManagerImpl implements EscalationManager {
                          Integer alertId, String moreInfo, boolean suppressNotification)
         throws PermissionException {
         Escalatable escalation = escalationAlertType.findEscalatable(alertId);
-        EscalationState escalationState = escalationStateDAO.find(escalation);
+        EscalationState escalationState = escalationStateRepository.findByAlertIdAndAlertType(escalation.getAlertInfo().getId(),
+            escalation.getDefinition().getAlertType().getCode());
 
         fixOrNotify(subject, escalation, escalationState, escalationAlertType, true, moreInfo,
             suppressNotification);
@@ -757,7 +764,7 @@ public class EscalationManagerImpl implements EscalationManager {
      */
     @Transactional(readOnly = true)
     public Number getActiveEscalationCount() {
-        return new Integer(escalationStateDAO.size());
+        return escalationStateRepository.count();
     }
 
     /**
@@ -770,7 +777,7 @@ public class EscalationManagerImpl implements EscalationManager {
 
     @Transactional(readOnly = true)
     public List<EscalationState> getActiveEscalations(int maxEscalations) {
-        return escalationStateDAO.getActiveEscalations(maxEscalations);
+        return escalationStateRepository.findAll(new PageRequest(0, maxEscalations, new Sort("nextActionTime"))).getContent();
     }
 
     @Transactional(readOnly = true)
@@ -788,7 +795,7 @@ public class EscalationManagerImpl implements EscalationManager {
      * acknowledgedBy field
      */
     public void handleSubjectRemoval(AuthzSubject subject) {
-        escalationStateDAO.handleSubjectRemoval(subject);
+        escalationStateRepository.removeAcknowledgedBy(subject);
     }
 
     public void startup() {
@@ -796,7 +803,7 @@ public class EscalationManagerImpl implements EscalationManager {
 
         boolean debugLog = log.isDebugEnabled();
 
-        for (Iterator<EscalationState> i = escalationStateDAO.findAll().iterator(); i.hasNext();) {
+        for (Iterator<EscalationState> i = escalationStateRepository.findAll().iterator(); i.hasNext();) {
             EscalationState state = i.next();
 
             if (debugLog) {

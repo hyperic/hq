@@ -75,7 +75,7 @@ public class EscalatingEntityIdentifierTest extends TestCase {
         
         EscalationState state = new EscalationState();
         state.setAlertDefinitionId(id1.intValue());
-        state.setAlertTypeEnum(GalertEscalationAlertType.GALERT.getCode());
+        state.setAlertType(GalertEscalationAlertType.GALERT.getCode());
         
         EscalatingEntityIdentifier gaEs1 = 
             new EscalatingEntityIdentifier(state);
