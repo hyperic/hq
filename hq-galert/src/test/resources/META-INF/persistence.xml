@@ -4,6 +4,7 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
 	<persistence-unit name="spring-jpa" transaction-type="RESOURCE_LOCAL">
 		<provider>org.hibernate.ejb.HibernatePersistence</provider>
+		<class>org.hyperic.hq.appdef.server.session.ResourceAuxLogPojo</class>
 		<class>org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfo</class>
 		<class>org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo</class>
 		<class>org.hyperic.hq.galerts.server.session.GalertDef</class>

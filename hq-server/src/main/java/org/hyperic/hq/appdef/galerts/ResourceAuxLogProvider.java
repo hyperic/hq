@@ -30,6 +30,7 @@ import java.util.ResourceBundle;
 
 import org.hyperic.hq.appdef.server.session.ResourceAuxLogPojo;
 import org.hyperic.hq.appdef.shared.ResourceAuxLogManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.events.AlertAuxLog;
 import org.hyperic.hq.events.AlertAuxLogProvider;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
@@ -43,14 +44,17 @@ public class ResourceAuxLogProvider extends AlertAuxLogProvider {
     private static final String BUNDLE = "org.hyperic.hq.appdef.Resources";
     private GalertManager galertManager;
     private ResourceAuxLogManager resourceAuxLogManager;
+    private ResourceManager resourceManager;
 
     public static /*final*/ResourceAuxLogProvider INSTANCE;
     
     @Autowired
-    public ResourceAuxLogProvider(GalertManager galertManager, ResourceAuxLogManager resourceAuxLogManager) {
+    public ResourceAuxLogProvider(GalertManager galertManager, ResourceAuxLogManager resourceAuxLogManager,
+                                  ResourceManager resourceManager) {
         super(0xf00ff00f, "Auxillary Resource Data", "auxlog.appdef", ResourceBundle.getBundle(BUNDLE));
         this.galertManager = galertManager;
         this.resourceAuxLogManager = resourceAuxLogManager;
+        this.resourceManager = resourceManager;
         INSTANCE = this;
     }
     
@@ -61,8 +65,7 @@ public class ResourceAuxLogProvider extends AlertAuxLogProvider {
     public AlertAuxLog load(int auxLogId, long timestamp, String desc) {
         GalertAuxLog gAuxLog = findGAuxLog(auxLogId);
         ResourceAuxLogPojo auxLog = resourceAuxLogManager.find(gAuxLog);
-        
-        return new ResourceAuxLog(gAuxLog, auxLog);
+        return new ResourceAuxLog(gAuxLog, resourceManager.findResourceById(auxLog.getResourceId()));
     }
 
     public void save(int auxLogId, AlertAuxLog log) {
