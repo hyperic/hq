@@ -52,171 +52,171 @@ import org.hyperic.hq.events.AlertAuxLog;
 import org.hyperic.hq.events.AlertAuxLogProvider;
 
 @Entity
-@Table(name="EAM_GALERT_AUX_LOGS")
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-public class GalertAuxLog implements Serializable
-{ 
+@Table(name = "EAM_GALERT_AUX_LOGS")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public class GalertAuxLog implements Serializable {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "GALERT_ID", nullable = false)
+    @Index(name = "AUX_LOG_GALERT_ID")
+    private GalertLog alert;
+
+    @Column(name = "AUXTYPE", nullable = false)
+    private int auxType;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Collection<GalertAuxLog> children;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "DEF_ID", nullable = false)
+    @Index(name = "AUX_LOG_DEF_IDX")
+    private GalertDef def;
+
+    @Column(name = "DESCRIPTION", nullable = false)
+    private String description;
+
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "ID")
     private Integer id;
 
-    @Column(name="VERSION_COL",nullable=false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PARENT")
+    @Index(name = "GALERT_AUX_LOGS_PARENT_IDX")
+    private GalertAuxLog parent;
+
+    @Column(name = "TIMESTAMP", nullable = false)
+    private long timestamp;
+
+    @Column(name = "VERSION_COL", nullable = false)
     @Version
     private Long version;
-    
-    @Column(name="TIMESTAMP",nullable=false)
-    private long         timestamp;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="GALERT_ID",nullable=false)
-    @Index(name="AUX_LOG_GALERT_ID")
-    private GalertLog    alert;
-    
-    @Column(name="AUXTYPE",nullable=false)
-    private int          auxType;
-    
-    @Column(name="DESCRIPTION",nullable=false)
-    private String       description;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="PARENT")
-    @Index(name="GALERT_AUX_LOGS_PARENT_IDX")
-    private GalertAuxLog parent;
-    
-    @OneToMany(mappedBy="parent",cascade=CascadeType.ALL,orphanRemoval=true)
-    @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-    @OnDelete(action=OnDeleteAction.CASCADE)
-    private Collection<GalertAuxLog>   children;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="DEF_ID",nullable=false)
-    @Index(name="AUX_LOG_DEF_IDX")
-    private GalertDef    def;
-    
-    protected GalertAuxLog() {}
-    
-    GalertAuxLog(GalertLog alert, AlertAuxLog log, GalertAuxLog parent) {
-        timestamp   = log.getTimestamp();
-        this.alert       = alert;
+
+    protected GalertAuxLog() {
+    }
+
+    public GalertAuxLog(GalertLog alert, AlertAuxLog log, GalertAuxLog parent) {
+        timestamp = log.getTimestamp();
+        this.alert = alert;
         if (log.getProvider() == null)
             auxType = 0;
         else
             auxType = log.getProvider().getCode();
         description = log.getDescription();
-        this.parent      = parent;
-        children    = new ArrayList<GalertAuxLog>();
-        
+        this.parent = parent;
+        children = new ArrayList<GalertAuxLog>();
+
         if (parent != null) {
             parent.getChildrenBag().add(this);
         }
         def = alert.getAlertDef();
     }
-    
+
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+
+        if (o == null || o instanceof GalertLog == false)
+            return false;
+
+        GalertAuxLog oe = (GalertAuxLog) o;
+
+        return oe.getTimestamp() == getTimestamp() &&
+               oe.getAlert().equals(getAlert()) &&
+               oe.getDescription().equals(getDescription()) &&
+               ((oe.getParent() == getParent()) || getParent() != null &&
+                                                   getParent().equals(oe.getParent()));
+    }
+
+    public GalertLog getAlert() {
+        return alert;
+    }
+
+    public GalertDef getAlertDef() {
+        return def;
+    }
+
+    public int getAuxType() {
+        return auxType;
+    }
+
+    public Collection<GalertAuxLog> getChildren() {
+        return Collections.unmodifiableCollection(children);
+    }
+
+    protected Collection<GalertAuxLog> getChildrenBag() {
+        return children;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
     public Integer getId() {
         return id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public GalertAuxLog getParent() {
+        return parent;
+    }
+
+    public AlertAuxLogProvider getProvider() {
+        return AlertAuxLogProvider.findByCode(getAuxType());
+    }
+
+    public long getTimestamp() {
+        return timestamp;
     }
 
     public Long getVersion() {
         return version;
     }
 
-    public void setVersion(Long version) {
-        this.version = version;
-    }
-
-    public long getTimestamp() {
-        return timestamp;
-    }
-    
-    protected void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
-    
-    public GalertLog getAlert() {
-        return alert;
-    }
-    
-    protected void setAlert(GalertLog alert) {
-        this.alert = alert;
-    }
-    
-    public AlertAuxLogProvider getProvider() {
-        return AlertAuxLogProvider.findByCode(getAuxType());
-    }
-    
-    protected int getAuxType() {
-        return auxType;
-    }
-    
-    protected void setAuxType(int auxType) {
-        this.auxType = auxType;
-    }
-    
-    public String getDescription() {
-        return description;
-    }
-    
-    protected void setDescription(String description) {
-        this.description = description;
-    }
-    
-    public GalertAuxLog getParent() {
-        return parent;
-    }
-    
-    protected void setParent(GalertAuxLog parent) {
-        this.parent = parent;
-    }
-    
-    protected Collection<GalertAuxLog> getChildrenBag() {
-        return children;
-    }
-    
-    protected void setChildrenBag(Collection<GalertAuxLog> c) {
-        children = c;
-    }
-    
-    public Collection<GalertAuxLog> getChildren() {
-        return Collections.unmodifiableCollection(children);
-    }
-    
-    public GalertDef getAlertDef() {
-        return def;
-    }
-    
-    protected void setAlertDef(GalertDef def) {
-        this.def = def;
-    }
-    
     public int hashCode() {
         int hash = 1;
 
-        hash = hash * 31 + (int)getTimestamp();
+        hash = hash * 31 + (int) getTimestamp();
         hash = hash * 31 + getAlert().hashCode();
         hash = hash * 31 + getDescription().hashCode();
         hash = hash * 31 + (getParent() == null ? 0 : getParent().hashCode());
         return hash;
     }
-    
-    public boolean equals(Object o) {
-        if (o == this)
-            return true;
-        
-        if (o == null || o instanceof GalertLog == false)
-            return false;
-        
-        GalertAuxLog oe = (GalertAuxLog)o;
 
-        return oe.getTimestamp() == getTimestamp() &&
-               oe.getAlert().equals(getAlert()) &&
-               oe.getDescription().equals(getDescription()) &&
-               ((oe.getParent() == getParent()) ||
-                 getParent() != null && getParent().equals(oe.getParent()));
+    protected void setAlert(GalertLog alert) {
+        this.alert = alert;
+    }
+
+    protected void setAlertDef(GalertDef def) {
+        this.def = def;
+    }
+
+    protected void setAuxType(int auxType) {
+        this.auxType = auxType;
+    }
+
+    protected void setChildrenBag(Collection<GalertAuxLog> c) {
+        children = c;
+    }
+
+    protected void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    protected void setParent(GalertAuxLog parent) {
+        this.parent = parent;
+    }
+
+    protected void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }

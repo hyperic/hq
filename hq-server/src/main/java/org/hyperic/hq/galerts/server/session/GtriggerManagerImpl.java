@@ -27,7 +27,7 @@ package org.hyperic.hq.galerts.server.session;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.galert.data.GtriggerTypeInfoRepository;
 import org.hyperic.hq.galerts.shared.GtriggerManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,18 +40,18 @@ import org.springframework.transaction.annotation.Transactional;
 public class GtriggerManagerImpl implements GtriggerManager {
     private final Log log = LogFactory.getLog(GtriggerManagerImpl.class);
 
-    private GtriggerTypeInfoDAO gtriggerTypeInfoDao = Bootstrap.getBean(GtriggerTypeInfoDAO.class);
+    private GtriggerTypeInfoRepository gtriggerTypeInfoRepository;
 
     @Autowired
-    public GtriggerManagerImpl(GtriggerTypeInfoDAO gtriggerTypeInfoDao) {
-        this.gtriggerTypeInfoDao = gtriggerTypeInfoDao;
+    public GtriggerManagerImpl(GtriggerTypeInfoRepository gtriggerTypeInfoRepository) {
+        this.gtriggerTypeInfoRepository = gtriggerTypeInfoRepository;
     }
 
     /**
      */
     @Transactional(readOnly=true)
     public GtriggerTypeInfo findTriggerType(GtriggerType type) {
-        return gtriggerTypeInfoDao.find(type);
+        return gtriggerTypeInfoRepository.findByType(type.getClass());
     }
 
     /**
@@ -63,7 +63,7 @@ public class GtriggerManagerImpl implements GtriggerManager {
     public GtriggerTypeInfo registerTriggerType(GtriggerType triggerType) {
         GtriggerTypeInfo res;
 
-        res = gtriggerTypeInfoDao.find(triggerType);
+        res = gtriggerTypeInfoRepository.findByType(triggerType.getClass());
         if (res != null) {
             log.warn("Attempted to register GtriggerType class [" +
                      triggerType.getClass() + "] but it was already " +
@@ -71,7 +71,7 @@ public class GtriggerManagerImpl implements GtriggerManager {
             return res;
         }
         res = new GtriggerTypeInfo(triggerType.getClass());
-        gtriggerTypeInfoDao.save(res);
+        gtriggerTypeInfoRepository.save(res);
         return res;
     }
 
@@ -82,13 +82,13 @@ public class GtriggerManagerImpl implements GtriggerManager {
      * @param triggerType Trigger type to unregister
      */
     public void unregisterTriggerType(GtriggerType triggerType) {
-        GtriggerTypeInfo info = gtriggerTypeInfoDao.find(triggerType);
+        GtriggerTypeInfo info = gtriggerTypeInfoRepository.findByType(triggerType.getClass());
 
         if (info == null) {
             log.warn("Tried to unregister a trigger type which was not registered");
             return;
         }
 
-        gtriggerTypeInfoDao.remove(info);
+        gtriggerTypeInfoRepository.delete(info);
     }
 }

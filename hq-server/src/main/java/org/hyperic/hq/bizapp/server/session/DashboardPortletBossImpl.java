@@ -247,7 +247,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
             for (GalertLog galert : galerts) {
 
                 try {
-                    alertPermissionManager.canViewAlertDefinition(subj, galert.getAlertDef().getAppdefID());
+                    alertPermissionManager.canViewAlertDefinition(subj, AppdefUtil.newAppdefEntityId(galert.getAlertDef().getResource()));
                 } catch (PermissionException pe) {
                     // continue to next group alert
                     continue;

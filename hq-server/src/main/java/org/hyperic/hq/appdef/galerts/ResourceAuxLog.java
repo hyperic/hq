@@ -26,11 +26,12 @@
 
 package org.hyperic.hq.appdef.galerts;
 
-import org.hyperic.hq.appdef.server.session.ResourceAuxLogPojo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.events.AlertAuxLogProvider;
 import org.hyperic.hq.events.SimpleAlertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
+import org.hyperic.hq.inventory.domain.Resource;
 
 public class ResourceAuxLog
     extends SimpleAlertAuxLog
@@ -42,9 +43,9 @@ public class ResourceAuxLog
         _ent  = ent;
     }
     
-    ResourceAuxLog(GalertAuxLog gAuxLog, ResourceAuxLogPojo log) {
+    ResourceAuxLog(GalertAuxLog gAuxLog, Resource resource) {
         this(gAuxLog.getDescription(), gAuxLog.getTimestamp(),
-             log.getEntityId());
+             AppdefUtil.newAppdefEntityId(resource));
     }
 
     public AppdefEntityID getEntity() {

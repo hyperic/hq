@@ -15,23 +15,21 @@ import org.springframework.transaction.annotation.Transactional;
 public interface MeasurementTemplateRepository extends JpaRepository<MeasurementTemplate, Integer>,
     MeasurementTemplateRepositoryCustom {
 
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     @Query("select t from MeasurementTemplate t where t.id in (:ids)")
     @QueryHints({ @QueryHint(name = "org.hibernate.cacheable", value = "true"),
                  @QueryHint(name = "org.hibernate.cacheRegion", value = "MeasurementTemplate.findTemplates") })
     List<MeasurementTemplate> findByIds(@Param("ids") List<Integer> ids);
 
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     @Query("select t from MeasurementTemplate t " + "join fetch t.monitorableType mt "
            + "where mt.name=:type order by t.name")
     List<MeasurementTemplate> findByMonitorableTypeOrderByName(@Param("type") String type);
 
-    @Transactional(readOnly=true)
-    @Query("select t from MeasurementTemplate t " + "where t.monitorableType.name=:type "
-           + "and t.category.name=:category " + "order by t.name")
-    List<MeasurementTemplate> findByMonitorableTypeAndCategoryOrderByName(@Param("type") String type,
-                                                                          @Param("category") String category);
-    @Transactional(readOnly=true)
+    List<MeasurementTemplate> findByMonitorableTypeNameAndCategoryNameOrderByNameAsc(String type,
+                                                                                     String category);
+
+    @Transactional(readOnly = true)
     @Query("select t from MeasurementTemplate t " + "join fetch t.monitorableType mt "
            + "where mt.name=:type " + "and t.defaultOn = true")
     List<MeasurementTemplate> findByMonitorableTypeDefaultOn(@Param("type") String type);

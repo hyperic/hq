@@ -43,122 +43,103 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
 import org.hyperic.hq.appdef.galerts.ResourceAuxLog;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 
 @Entity
-@Table(name="EAM_RESOURCE_AUX_LOGS")
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-public class ResourceAuxLogPojo implements Serializable
-{
+@Table(name = "EAM_RESOURCE_AUX_LOGS")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public class ResourceAuxLogPojo implements Serializable {
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "AUX_LOG_ID", nullable = false)
+    @Index(name = "METRIC_AUX_LOG_ID_IDX")
+    private GalertAuxLog auxLog;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "DEF_ID", nullable = false)
+    @Index(name = "RSRC_AUX_LOG_IDX")
+    private GalertDef def;
+
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "ID")
     private Integer id;
 
-    @Column(name="VERSION_COL",nullable=false)
+    @Column(name = "RESOURCE_ID", nullable = false)
+    private int resourceId;
+
+    @Column(name = "VERSION_COL", nullable = false)
     @Version
     private Long version;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="AUX_LOG_ID",nullable=false)
-    @Index(name="METRIC_AUX_LOG_ID_IDX")
-    private GalertAuxLog  auxLog;
-    
-    @Column(name="APPDEF_TYPE",nullable=false)
-    private int           appdefType;
-    
-    @Column(name="APPDEF_ID",nullable=false)
-    private int           appdefId;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="DEF_ID",nullable=false)
-    @Index(name="RSRC_AUX_LOG_IDX")
-    private GalertDef     def;
-    
+
     protected ResourceAuxLogPojo() {
     }
 
-    ResourceAuxLogPojo(GalertAuxLog log, ResourceAuxLog logInfo, GalertDef def) 
-    { 
-        auxLog     = log;
-        appdefType = logInfo.getEntity().getType();
-        appdefId   = logInfo.getEntity().getID();
-        this.def        = def;
+    public ResourceAuxLogPojo(GalertAuxLog log, ResourceAuxLog logInfo, GalertDef def) {
+        auxLog = log;
+        resourceId = logInfo.getEntity().getID();
+        this.def = def;
     }
-   
+
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+
+        if (o == null || o instanceof ResourceAuxLogPojo == false)
+            return false;
+
+        ResourceAuxLogPojo oe = (ResourceAuxLogPojo) o;
+
+        return oe.getAuxLog().equals(getAuxLog()) && oe.getResourceId().equals(getResourceId());
+    }
+
+    public GalertDef getAlertDef() {
+        return def;
+    }
+
     public GalertAuxLog getAuxLog() {
         return auxLog;
     }
-    
-    protected void setAuxLog(GalertAuxLog log) {
-        auxLog = log;
-    }
-    
-    protected int getAppdefType() {
-        return appdefType;
-    }
-    
-    protected void setAppdefType(int appdefType) {
-        this.appdefType = appdefType;
-    }
-    
-    protected int getAppdefId() {
-        return appdefId;
-    }
-    
-    protected void setAppdefId(int appdefId) {
-        this.appdefId = appdefId;
-    }
-    
+
     public Integer getId() {
         return id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public Integer getResourceId() {
+        return resourceId;
     }
 
     public Long getVersion() {
         return version;
     }
 
-    public void setVersion(Long version) {
-        this.version = version;
-    }
-
-    public AppdefEntityID getEntityId() {
-        return new AppdefEntityID(getAppdefType(), getAppdefId());
-    }
-    
-    public GalertDef getAlertDef() {
-        return def;
-    }
-    
-    protected void setAlertDef(GalertDef def) {
-        this.def = def;
-    }
-    
     public int hashCode() {
         int hash = 1;
 
         hash = hash * 31 + getAuxLog().hashCode();
-        hash = hash * 31 + getEntityId().hashCode();
+        hash = hash * 31 + getResourceId().hashCode();
         return hash;
     }
-    
-    public boolean equals(Object o) {
-        if (o == this)
-            return true;
-        
-        if (o == null || o instanceof ResourceAuxLogPojo == false)
-            return false;
-        
-        ResourceAuxLogPojo oe = (ResourceAuxLogPojo)o;
 
-        return oe.getAuxLog().equals(getAuxLog()) &&
-               oe.getEntityId().equals(getEntityId());
+    protected void setAlertDef(GalertDef def) {
+        this.def = def;
+    }
+
+    protected void setAuxLog(GalertAuxLog log) {
+        auxLog = log;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setResourceId(int resourceId) {
+        this.resourceId = resourceId;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }

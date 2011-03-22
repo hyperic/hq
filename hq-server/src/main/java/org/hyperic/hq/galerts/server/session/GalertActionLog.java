@@ -45,116 +45,51 @@ import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.events.server.session.Action;
 
 @Entity
-@Table(name="EAM_GALERT_ACTION_LOG")
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-public class GalertActionLog implements Serializable
-{
+@Table(name = "EAM_GALERT_ACTION_LOG")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public class GalertActionLog implements Serializable {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ACTION_ID")
+    @Index(name = "GALERT_ACTION_ID_IDX")
+    private Action action;
+
+    @SuppressWarnings("unused")
+    @Column(name = "ALERT_TYPE", nullable = false)
+    private int alertTypeEnum;
+
+    @Column(name = "DETAIL", nullable = false, length = 1024)
+    private String detail;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "GALERT_ID", nullable = false)
+    @Index(name = "GALERT_ACTION_LOG_IDX")
+    private GalertLog galertLog;
+
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "ID")
     private Integer id;
-    
-    @Column(name="DETAIL",nullable=false,length=1024)
-    private String       detail;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="GALERT_ID",nullable=false)
-    @Index(name="GALERT_ACTION_LOG_IDX")
-    private GalertLog    galertLog;
-    
-    @SuppressWarnings("unused")
-    @Column(name="ALERT_TYPE",nullable=false)
-    private int alertTypeEnum;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="ACTION_ID")
-    @Index(name="GALERT_ACTION_ID_IDX")
-    private Action       action;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="SUBJECT_ID")
-    @Index(name="GALERT_ACTION_SUBJECT_ID_IDX")
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "SUBJECT_ID")
+    @Index(name = "GALERT_ACTION_SUBJECT_ID_IDX")
     private AuthzSubject subject;
-    
-    @Column(name="TIMESTAMP",nullable=false)
-    private long         timeStamp;
-    
+
+    @Column(name = "TIMESTAMP", nullable = false)
+    private long timeStamp;
+
     protected GalertActionLog() {
     }
-   
-    GalertActionLog(GalertLog alert, String detail, Action action,
-                    AuthzSubject subject) 
-    {
-        this.detail    = detail;
+
+    public GalertActionLog(GalertLog alert, String detail, Action action, AuthzSubject subject) {
+        this.detail = detail;
         galertLog = alert;
-        this.action    = action;
-        this.subject   = subject;
+        this.action = action;
+        this.subject = subject;
         timeStamp = System.currentTimeMillis();
     }
-    
-    
-    
-    public Integer getId() {
-        return id;
-    }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getDetail() {
-        return detail;
-    }
-    
-    protected void setDetail(String detail) {
-        this.detail = detail;
-    }
-    
-    public GalertLog getGalertLog() {
-        return galertLog;
-    }
-    
-    protected void setGalertLog(GalertLog alert) {
-        galertLog = alert;
-    }
-    
-    public Action getAction() {
-        return action;
-    }
-    
-    protected void setAction(Action action) {
-        this.action = action;
-    }
-    
-    public AuthzSubject getSubject() {
-        return subject;
-    }
-    
-    protected void setSubject(AuthzSubject subject) {
-        this.subject = subject;
-    }
-
-    protected int getAlertTypeEnum() {
-        return GalertEscalationAlertType.GALERT.getCode();
-    }
-    
-    protected void setAlertTypeEnum(int v) {
-        // Do nothing
-    }
-    
-    public EscalationAlertType getAlertType() {
-        return GalertEscalationAlertType.GALERT;
-    }
-
-    public long getTimeStamp() {
-        return timeStamp;
-    }
-    
-    protected void setTimeStamp(long stamp) {
-        timeStamp = stamp;
-    }
-    
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
@@ -162,18 +97,75 @@ public class GalertActionLog implements Serializable
         if (obj == null || !(obj instanceof GalertActionLog)) {
             return false;
         }
-        Integer objId = ((GalertActionLog)obj).getId();
-  
-        return getId() == objId ||
-        (getId() != null && 
-         objId != null && 
-         getId().equals(objId));     
+        Integer objId = ((GalertActionLog) obj).getId();
+
+        return getId() == objId || (getId() != null && objId != null && getId().equals(objId));
+    }
+
+    public Action getAction() {
+        return action;
+    }
+
+    public EscalationAlertType getAlertType() {
+        return GalertEscalationAlertType.GALERT;
+    }
+
+    protected int getAlertTypeEnum() {
+        return GalertEscalationAlertType.GALERT.getCode();
+    }
+
+    public String getDetail() {
+        return detail;
+    }
+
+    public GalertLog getGalertLog() {
+        return galertLog;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public AuthzSubject getSubject() {
+        return subject;
+    }
+
+    public long getTimeStamp() {
+        return timeStamp;
     }
 
     public int hashCode() {
         int result = 17;
-        result = 37*result + (getId() != null ? getId().hashCode() : 0);
-        return result;      
+        result = 37 * result + (getId() != null ? getId().hashCode() : 0);
+        return result;
+    }
+
+    protected void setAction(Action action) {
+        this.action = action;
+    }
+
+    protected void setAlertTypeEnum(int v) {
+        // Do nothing
+    }
+
+    protected void setDetail(String detail) {
+        this.detail = detail;
+    }
+
+    protected void setGalertLog(GalertLog alert) {
+        galertLog = alert;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    protected void setSubject(AuthzSubject subject) {
+        this.subject = subject;
+    }
+
+    protected void setTimeStamp(long stamp) {
+        timeStamp = stamp;
     }
 
 }

@@ -35,7 +35,7 @@ public class AttachmentRepositoryIntegrationTest {
     private EntityManager entityManager;
 
     @Test
-    public void testFindFor() {
+    public void testFindByViewAttachType() {
         UIPlugin plugin = new UIPlugin("mass", "2.0");
         entityManager.persist(plugin);
         ViewAdmin view = new ViewAdmin(plugin, new ViewDescriptor("/foo", "desciptor",
@@ -53,7 +53,7 @@ public class AttachmentRepositoryIntegrationTest {
         List<Attachment> expected = new ArrayList<Attachment>();
         expected.add(attachment);
 
-        assertEquals(expected, attachmentRepository.findFor(AttachType.ADMIN.getCode()));
+        assertEquals(expected, attachmentRepository.findByViewAttachType(AttachType.ADMIN.getCode()));
     }
 
 }

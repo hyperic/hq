@@ -27,7 +27,7 @@ package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.hq.appdef.galerts.ResourceAuxLog;
 import org.hyperic.hq.appdef.shared.ResourceAuxLogManager;
-import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.galert.data.ResourceAuxLogRepository;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,10 +38,10 @@ import org.springframework.transaction.annotation.Transactional;
 @org.springframework.stereotype.Service
 @Transactional
 public class ResourceAuxLogManagerImpl implements ResourceAuxLogManager {
-    private ResourceAuxLogDAO resourceAuxLogDao;
+    private ResourceAuxLogRepository resourceAuxLogDao;
 
     @Autowired
-    public ResourceAuxLogManagerImpl(ResourceAuxLogDAO resourceAuxLogDao) {
+    public ResourceAuxLogManagerImpl(ResourceAuxLogRepository resourceAuxLogDao) {
         this.resourceAuxLogDao = resourceAuxLogDao;
     }
 
@@ -57,19 +57,19 @@ public class ResourceAuxLogManagerImpl implements ResourceAuxLogManager {
     /**
      */
     public void remove(GalertAuxLog log) {
-        resourceAuxLogDao.remove(resourceAuxLogDao.find(log));
+        resourceAuxLogDao.delete(resourceAuxLogDao.findByAuxLog(log));
     }
 
     /**
      */
     @Transactional(readOnly=true)
     public ResourceAuxLogPojo find(GalertAuxLog log) {
-        return resourceAuxLogDao.find(log);
+        return resourceAuxLogDao.findByAuxLog(log);
     }
 
     /**
      */
     public void removeAll(GalertDef def) {
-        resourceAuxLogDao.removeAll(def);
+        resourceAuxLogDao.deleteByDef(def);
     }
 }

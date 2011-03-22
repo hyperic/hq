@@ -225,7 +225,7 @@ public class UIPluginManagerImpl implements UIPluginManager {
     public Collection<AttachmentDescriptor> findAttachments(AttachType type, AuthzSubject user) {
         Resource root = resourceManager.findRootResource();
 
-        return convertAttachmentsToDescriptors(attachmentRepository.findFor(type.getCode()), root, user);
+        return convertAttachmentsToDescriptors(attachmentRepository.findByViewAttachType(type.getCode()), root, user);
     }
 
     @Transactional(readOnly = true)

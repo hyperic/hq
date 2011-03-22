@@ -53,8 +53,8 @@ import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
+import org.hyperic.hq.galert.data.GalertLogRepository;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
-import org.hyperic.hq.galerts.server.session.GalertLogDAO;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,17 +102,17 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 	private AuthzSubjectManager authzSubjectManager;
 	private AlertRepository alertRepository;
 	private final Log log = LogFactory.getLog(EscalationRuntime.class);
-	private GalertLogDAO galertLogDAO;
+	private GalertLogRepository galertLogRepository;
 	private ConcurrentStatsCollector concurrentStatsCollector;
 	
 	@Autowired
 	public EscalationRuntimeImpl(EscalationStateDAO escalationStateDao,
 			AuthzSubjectManager authzSubjectManager, AlertRepository alertRepository,
-			GalertLogDAO galertLogDAO, ConcurrentStatsCollector concurrentStatsCollector) {
+			GalertLogRepository galertLogRepository, ConcurrentStatsCollector concurrentStatsCollector) {
 		this.escalationStateDao = escalationStateDao;
 		this.authzSubjectManager = authzSubjectManager;
 		this.alertRepository = alertRepository;
-		this.galertLogDAO = galertLogDAO;
+		this.galertLogRepository = galertLogRepository;
 		this.concurrentStatsCollector = concurrentStatsCollector;
 		// Want threads to never die (XXX, scottmf, keeping current
 		// functionality to get rid of
@@ -465,7 +465,7 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 		// HHQ-3499, need to make sure that the alertId that is pointed to by
 		// the escalation still exists
 		if (alertType instanceof GalertEscalationAlertType) {
-			alert = galertLogDAO.get(new Integer(s.getAlertId()));
+			alert = galertLogRepository.findById(new Integer(s.getAlertId()));
 		} else if (alertType instanceof ClassicEscalationAlertType) {
 			alert = alertRepository.findById(new Integer(s.getAlertId()));
 		}

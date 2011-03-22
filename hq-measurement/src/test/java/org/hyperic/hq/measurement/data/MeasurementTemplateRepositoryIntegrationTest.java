@@ -106,7 +106,7 @@ public class MeasurementTemplateRepositoryIntegrationTest {
         expected.add(mt3);
         expected.add(mt2);
         assertEquals(expected,
-            measurementTemplateRepository.findByMonitorableTypeAndCategoryOrderByName(
+            measurementTemplateRepository.findByMonitorableTypeNameAndCategoryNameOrderByNameAsc(
                 "Tomcat Server", "Performance"));
     }
 

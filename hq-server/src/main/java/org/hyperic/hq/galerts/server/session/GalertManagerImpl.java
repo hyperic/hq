@@ -40,6 +40,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.ApplicationEvent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.server.session.GroupDeleteRequestedEvent;
 import org.hyperic.hq.authz.server.session.GroupMembersChangedEvent;
@@ -47,6 +48,7 @@ import org.hyperic.hq.authz.server.session.SubjectDeleteRequestedEvent;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
+import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.common.shared.CrispoManager;
 import org.hyperic.hq.config.domain.Crispo;
 import org.hyperic.hq.escalation.server.session.Escalatable;
@@ -57,6 +59,13 @@ import org.hyperic.hq.events.AlertAuxLogProvider;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.server.session.Action;
+import org.hyperic.hq.galert.data.ExecutionStrategyInfoRepository;
+import org.hyperic.hq.galert.data.ExecutionStrategyTypeInfoRepository;
+import org.hyperic.hq.galert.data.GalertActionLogRepository;
+import org.hyperic.hq.galert.data.GalertAuxLogRepository;
+import org.hyperic.hq.galert.data.GalertDefRepository;
+import org.hyperic.hq.galert.data.GalertLogRepository;
+import org.hyperic.hq.galert.data.GtriggerInfoRepository;
 import org.hyperic.hq.galerts.processor.GalertProcessor;
 import org.hyperic.hq.galerts.processor.Gtrigger;
 import org.hyperic.hq.galerts.shared.GalertManager;
@@ -69,6 +78,10 @@ import org.hyperic.util.pager.Pager;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.context.ApplicationListener;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,31 +93,37 @@ import org.springframework.transaction.annotation.Transactional;
 public class GalertManagerImpl implements GalertManager, ApplicationListener<ApplicationEvent> {
     private final Log _log = LogFactory.getLog(GalertManagerImpl.class);
 
-    private ExecutionStrategyTypeInfoDAO _stratTypeDAO;
-    private GalertDefDAO _defDAO;
-    private GalertAuxLogDAO _auxLogDAO;
-    private GalertLogDAO _logDAO;
-    private GalertActionLogDAO _actionLogDAO;
+    private ExecutionStrategyTypeInfoRepository executionStrategyTypeInfoRepository;
+    private GalertDefRepository galertDefRepository;
+    private GalertAuxLogRepository auxLogRepository;
+    private GalertLogRepository gAlertLogRepository;
+    private GalertActionLogRepository actionLogRepository;
     private CrispoManager crispoManager;
     private EscalationManager escalationManager;
     private GalertProcessor galertProcessor;
     private ResourceGroupManager resourceGroupManager;
+    private ExecutionStrategyInfoRepository executionStrategyInfoRepository;
+    private GtriggerInfoRepository gtriggerInfoRepository;
 
     @Autowired
-    public GalertManagerImpl(ExecutionStrategyTypeInfoDAO stratTypeDAO, GalertDefDAO defDAO,
-                             GalertAuxLogDAO auxLogDAO, GalertLogDAO logDAO,
-                             GalertActionLogDAO actionLogDAO, CrispoManager crispoManager,
+    public GalertManagerImpl(ExecutionStrategyTypeInfoRepository executionStrategyTypeInfoRepository, GalertDefRepository galertDefRepository,
+                             GalertAuxLogRepository auxLogRepository, GalertLogRepository gAlertLogRepository,
+                             GalertActionLogRepository actionLogRepository, CrispoManager crispoManager,
                              EscalationManager escalationManager,
-                             ResourceGroupManager resourceGroupManager, GalertProcessor gAlertProcessor) {
-        _stratTypeDAO = stratTypeDAO;
-        _defDAO = defDAO;
-        _auxLogDAO = auxLogDAO;
-        _logDAO = logDAO;
-        _actionLogDAO = actionLogDAO;
+                             ResourceGroupManager resourceGroupManager, GalertProcessor gAlertProcessor,
+                             ExecutionStrategyInfoRepository executionStrategyInfoRepository,
+                             GtriggerInfoRepository gtriggerInfoRepository) {
+        this.executionStrategyTypeInfoRepository = executionStrategyTypeInfoRepository;
+        this.galertDefRepository = galertDefRepository;
+        this.auxLogRepository = auxLogRepository;
+        this.gAlertLogRepository = gAlertLogRepository;
+        this.actionLogRepository = actionLogRepository;
         this.crispoManager = crispoManager;
         this.escalationManager = escalationManager;
         this.resourceGroupManager = resourceGroupManager;
         this.galertProcessor = gAlertProcessor;
+        this.executionStrategyInfoRepository = executionStrategyInfoRepository;
+        this.gtriggerInfoRepository = gtriggerInfoRepository;
     }
 
     /**
@@ -135,7 +154,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         }
 
         if (severity != null) {
-            def.setSeverity(severity);
+            def.setSeverity(severity.getCode());
         }
 
         if (enabled != null) {
@@ -194,39 +213,16 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
     public PageList<GalertDef> findAlertDefs(ResourceGroup g, PageControl pc) {
         Pager pager = Pager.getDefaultPager();
         // TODO: G
-        return pager.seek(_defDAO.findAll(g), pc);
+        return pager.seek(galertDefRepository.findByGroupExcludeDeletedOrderByName(g), pc);
     }
 
-    /**
-     * Find all group alert definitions.
-     * 
-     * @param minSeverity Minimum severity for returned defs
-     * @param enabled If non-null specifies the nature of the 'enabled' flag for
-     *        the results.
-     * @param pInfo Paging information. Must contain a sort field from
-     *        {@link GalertDefSortField}
-     * 
-     */
-    @Transactional(readOnly = true)
-    public List<GalertDef> findAlertDefs(AuthzSubject subj, AlertSeverity minSeverity,
-                                         Boolean enabled, PageInfo pInfo) {
-        return _defDAO.findAll(subj, minSeverity, enabled, pInfo);
-    }
-
+  
     /**
      * 
      */
     @Transactional(readOnly = true)
     public Collection<ExecutionStrategyTypeInfo> findAllStrategyTypes() {
-        return _stratTypeDAO.findAll();
-    }
-
-    /**
-     * 
-     */
-    @Transactional(readOnly = true)
-    public ExecutionStrategyTypeInfo findStrategyType(Integer id) {
-        return _stratTypeDAO.findById(id);
+        return executionStrategyTypeInfoRepository.findAll();
     }
 
     /**
@@ -234,7 +230,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      */
     @Transactional(readOnly = true)
     public ExecutionStrategyTypeInfo findStrategyType(ExecutionStrategyType t) {
-        return _stratTypeDAO.find(t);
+        return executionStrategyTypeInfoRepository.findByType(t.getClass());
     }
 
     /**
@@ -242,7 +238,12 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      */
     @Transactional(readOnly = true)
     public GalertDef findById(Integer id) {
-        return _defDAO.findById(id);
+        GalertDef def = galertDefRepository.findById(id);
+        if(def == null) {
+            throw new EntityNotFoundException("GalertDef with ID: " + id + 
+                " was not found");
+        }
+        return def;
     }
 
     /**
@@ -250,7 +251,12 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      */
     @Transactional(readOnly = true)
     public GalertAuxLog findAuxLogById(Integer id) {
-        return _auxLogDAO.findById(id);
+        GalertAuxLog log = auxLogRepository.findById(id);
+        if(log == null) {
+            throw new EntityNotFoundException("GalertAuxLog with ID: " + id + 
+                " was not found");
+        }
+        return log;
     }
 
     /**
@@ -306,7 +312,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         // logs
         GalertLog newLog = new GalertLog(def, reason, System.currentTimeMillis());
         addAuxLogChildren(newLog, null, reason.getAuxLogs(), gAuxLogToAuxLog);
-        _logDAO.save(newLog);
+        gAlertLogRepository.save(newLog);
 
         for (Map.Entry<GalertAuxLog, AlertAuxLog> ent : gAuxLogToAuxLog.entrySet()) {
             GalertAuxLog gAuxLog = (GalertAuxLog) ent.getKey();
@@ -337,7 +343,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
     public void createActionLog(GalertLog alert, String detail, Action action, AuthzSubject subject) {
         GalertActionLog log = alert.createActionLog(detail, action, subject);
 
-        _actionLogDAO.save(log);
+        actionLogRepository.save(log);
     }
 
     /**
@@ -345,7 +351,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      */
     @Transactional(readOnly = true)
     public List<GalertLog> findAlertLogs(GalertDef def) {
-        return _logDAO.findAll(def.getGroup());
+        return gAlertLogRepository.findByDefGroupOrderByTimestampAsc(def.getGroup());
     }
 
     /**
@@ -354,7 +360,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
     @Transactional(readOnly = true)
     public GalertLog findLastFixedByDef(GalertDef def) {
         try {
-            return _logDAO.findLastByDefinition(def, true);
+            return gAlertLogRepository.findLastByDefinition(def, true);
         } catch (Exception e) {
             return null;
         }
@@ -373,8 +379,10 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      */
     @Transactional(readOnly = true)
     public Escalatable findEscalatableAlert(Integer id) {
-        GalertLog alert = _logDAO.findById(id);
-        _logDAO.getSession().refresh(alert);
+        GalertLog alert = gAlertLogRepository.findById(id);
+        if(alert == null) {
+            throw new EntityNotFoundException("GalertLog with ID: " + id + " was not found");
+        }
         return GalertEscalatableCreator.createEscalatable(alert);
     }
 
@@ -383,7 +391,11 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      */
     @Transactional(readOnly = true)
     public GalertLog findAlertLog(Integer id) {
-        return _logDAO.findById(id);
+        GalertLog log = gAlertLogRepository.findById(id);
+        if(log == null) {
+            throw new EntityNotFoundException("GalertLog with ID: " + id + " was not found");
+        }
+        return log;
     }
 
     /**
@@ -391,7 +403,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      */
     @Transactional(readOnly = true)
     public List<GalertLog> findAlertLogs(ResourceGroup group) {
-        return _logDAO.findAll(group);
+        return gAlertLogRepository.findByDefGroupOrderByTimestampAsc(group);
     }
 
     /**
@@ -400,7 +412,9 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
     @Transactional(readOnly = true)
     public PageList<GalertLog> findAlertLogsByTimeWindow(ResourceGroup group, long begin, long end,
                                                          PageControl pc) {
-        return _logDAO.findByTimeWindow(group, begin, end, pc);
+        Page<GalertLog> results = gAlertLogRepository.findByGroupAndTimestampBetween(group, begin, end,new PageRequest(pc.getPagenum(),
+            pc.getPagesize(),new Sort(pc.isAscending()? Direction.ASC: Direction.DESC,"timestamp")));
+        return new PageList<GalertLog>(results.getContent(),(int)results.getTotalElements());
     }
 
     /**
@@ -408,7 +422,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      */
     public List<GalertLog> findUnfixedAlertLogsByTimeWindow(ResourceGroup group, long begin,
                                                             long end) {
-        return _logDAO.findUnfixedByTimeWindow(group, begin, end);
+        return gAlertLogRepository.findUnfixedByGroupAndTimestampBetween(group, begin, end);
     }
 
     /**
@@ -447,7 +461,9 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
     public List<GalertLog> findAlerts(AuthzSubject subj, int count, int priority, long timeRange,
                                       long endTime, List<AppdefEntityID> includes)
         throws PermissionException {
-        PageInfo pInfo = PageInfo.create(0, count, GalertLogSortField.DATE, false);
+      
+        PageRequest request = new PageRequest(0, count,new Sort(Direction.DESC,
+            GalertLogSortField.DATE.getSortString("a", "d", "g")));
 
         if (priority == EventConstants.PRIORITY_ALL) {
             // if priority is "all" set the severity code as low
@@ -456,8 +472,9 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         }
         
         AlertSeverity s = AlertSeverity.findByCode(priority);
-        List<GalertLog> alerts = _logDAO.findByCreateTimeAndPriority(subj.getId(),
-            endTime - timeRange, endTime, s, false, false, null, null, pInfo);
+        
+        List<GalertLog> alerts = gAlertLogRepository.findByCreateTimeAndPriority(
+            endTime - timeRange, endTime, s, false, false, null, null, request);
 
         List<GalertLog> result = new ArrayList<GalertLog>();
         for (GalertLog l : alerts) {
@@ -467,7 +484,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
             }
 
             // Filter by appdef entity
-            AppdefEntityID aeid = def.getAppdefID();
+            AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(def.getResource());
             if (includes != null && !includes.contains(aeid))
                 continue;
 
@@ -494,8 +511,17 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
     public List<GalertLog> findAlerts(AuthzSubject subj, AlertSeverity severity, long timeRange,
                                       long endTime, boolean inEsc, boolean notFixed,
                                       Integer groupId, Integer galertDefId, PageInfo pInfo) {
-        return _logDAO.findByCreateTimeAndPriority(subj.getId(), endTime - timeRange, endTime,
-            severity, inEsc, notFixed, groupId, galertDefId, pInfo);
+        GalertLogSortField sort = (GalertLogSortField) pInfo.getSort();
+       
+        List<Sort.Order> sortOrders =  new ArrayList<Sort.Order>();
+        sortOrders.add(new Sort.Order(pInfo.isAscending() ? Direction.ASC : Direction.DESC, sort.getSortString("a", "d", "g")));
+        if (!sort.equals(GalertLogSortField.DATE)) {
+            sortOrders.add(new Sort.Order(Direction.DESC, GalertLogSortField.DATE.getSortString("a", "d", "g")));
+        }
+        PageRequest request = new PageRequest(pInfo.getPageNum(), pInfo.getPageSize(),new Sort(sortOrders));
+       
+        return gAlertLogRepository.findByCreateTimeAndPriority(endTime - timeRange, endTime,
+            severity, inEsc, notFixed, groupId, galertDefId, request);
     }
 
     /**
@@ -509,7 +535,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
                 ResourceGroup group = resourceGroupManager.findResourceGroupById(subj, ids[i]
                     .getId());
 
-                counts[i] = _logDAO.countAlerts(group).intValue();
+                counts[i] = gAlertLogRepository.getCountByGroup(group).intValue();
             }
         }
         return counts;
@@ -519,14 +545,14 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      * 
      */
     public void deleteAlertLog(GalertLog log) {
-        _logDAO.remove(log);
+        gAlertLogRepository.delete(log);
     }
 
     /**
      * 
      */
     public void deleteAlertLogs(ResourceGroup group) {
-        _logDAO.removeAll(group);
+        gAlertLogRepository.deleteByGroup(group);
     }
 
     /**
@@ -534,7 +560,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      * 
      */
     public ExecutionStrategyTypeInfo registerExecutionStrategy(ExecutionStrategyType stratType) {
-        ExecutionStrategyTypeInfo info = _stratTypeDAO.find(stratType);
+        ExecutionStrategyTypeInfo info = executionStrategyTypeInfoRepository.findByType(stratType.getClass());
 
         if (info != null) {
             _log.warn("Execution strategy type [" + stratType.getClass().getName() +
@@ -543,31 +569,8 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         }
 
         info = new ExecutionStrategyTypeInfo(stratType);
-        _stratTypeDAO.save(info);
+        executionStrategyTypeInfoRepository.save(info);
         return info;
-    }
-
-    /**
-     * Unregister an execution strategy. This will fail if any alert definitions
-     * are currently using the strategy
-     * 
-     */
-    public void unregisterExecutionStrategy(ExecutionStrategyType sType) {
-        ExecutionStrategyTypeInfo info = _stratTypeDAO.find(sType);
-
-        if (info == null) {
-            _log.warn("Execution strategy [" + sType.getClass().getName() +
-                      "] already unregistered");
-            return;
-        }
-
-        if (_defDAO.countByStrategy(info) != 0) {
-            throw new IllegalArgumentException("Unable to unregister [ " +
-                                               sType.getClass().getName() +
-                                               "] alert defs are using it");
-        }
-
-        _stratTypeDAO.remove(info);
     }
 
     /**
@@ -593,7 +596,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         List<Crispo> crispos = new ArrayList<Crispo>();
         for (GtriggerInfo t : strat.getTriggers()) {
             crispos.add(t.getConfigCrispo());
-            _defDAO.remove(t);
+            gtriggerInfoRepository.delete(t);
         }
 
         for (Iterator<Crispo> i = crispos.iterator(); i.hasNext();) {
@@ -608,7 +611,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
             Crispo crispo = crispoManager.create(config);
             GtriggerInfo t = strat.addTrigger(typeInfo, crispo, def.getGroup(), partition);
 
-            _defDAO.save(t);
+            gtriggerInfoRepository.save(t);
         }
         galertProcessor.loadReloadOrUnload(def);
     }
@@ -622,7 +625,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         Crispo stratCrispo = crispoManager.create(stratConfig);
         ExecutionStrategyInfo res = def.addPartition(partition, stratType, stratCrispo);
 
-        _stratTypeDAO.save(res);
+        executionStrategyInfoRepository.save(res);
         galertProcessor.loadReloadOrUnload(def);
         return res;
     }
@@ -636,7 +639,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
 
         def = new GalertDef(name, description, severity, enabled, group);
 
-        _defDAO.save(def);
+        galertDefRepository.save(def);
         galertProcessor.validateAlertDef(def);
         return def;
     }
@@ -675,10 +678,10 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         for (AlertAuxLogProvider p : AlertAuxLogProvider.findAll()) {
             p.deleteAll(def);
         }
-        _auxLogDAO.removeAll(def);
+        auxLogRepository.deleteByDef(def);
 
         // Kill the logs
-        _logDAO.removeAll(def);
+        gAlertLogRepository.deleteByDef(def);
 
         for (ExecutionStrategyInfo strat : def.getStrategies()) {
             // Reconfigure the def to have 0 triggers (i.e. nuke the instances)
@@ -689,7 +692,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
             nukeCrispos.add(strat.getConfigCrispo());
         }
 
-        _defDAO.remove(def);
+        galertDefRepository.delete(def);
 
         for (Crispo c : nukeCrispos) {
             crispoManager.deleteCrispo(c);
@@ -703,7 +706,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      */
     @Transactional(readOnly = true)
     public Collection<GalertDef> getUsing(Escalation e) {
-        return _defDAO.getUsing(e);
+        return galertDefRepository.findByEscalation(e);
     }
 
     /**
@@ -721,7 +724,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      * 
      */
     public void processGroupDeletion(ResourceGroup g) {
-        Collection<GalertDef> defs = _defDAO.findAbsolutelyAllGalertDefs(g);
+        Collection<GalertDef> defs = galertDefRepository.findByGroup(g);
 
         for (GalertDef def : defs) {
             _log.debug("Cascade deleting GalertDef[" + def.getName() + "]");
@@ -735,7 +738,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         } else if (event instanceof GroupMembersChangedEvent) {
             groupMembersChanged(((GroupMembersChangedEvent) event).getGroup());
         } else if (event instanceof SubjectDeleteRequestedEvent) {
-            _actionLogDAO.handleSubjectRemoval(((SubjectDeleteRequestedEvent) event).getSubject());
+            actionLogRepository.removeSubject(((SubjectDeleteRequestedEvent) event).getSubject());
         }
 
     }

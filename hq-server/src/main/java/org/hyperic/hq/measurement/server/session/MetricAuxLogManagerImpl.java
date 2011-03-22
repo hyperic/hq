@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.hyperic.hq.galert.data.GalertAuxLogRepository;
+import org.hyperic.hq.galert.data.MetricAuxLogRepository;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.measurement.galerts.MetricAuxLog;
@@ -46,11 +48,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class MetricAuxLogManagerImpl implements MetricAuxLogManager, ApplicationListener<MetricsDeleteRequestedEvent> {
     private static final int CHUNKSIZE = 500;
 
-    private MetricAuxLogDAO metricAuxLogDAO;
+    private MetricAuxLogRepository metricAuxLogRepository;
+    
+    private GalertAuxLogRepository galertAuxLogRepository;
 
     @Autowired
-    public MetricAuxLogManagerImpl(MetricAuxLogDAO metricAuxLogDAO) {
-        this.metricAuxLogDAO = metricAuxLogDAO;
+    public MetricAuxLogManagerImpl(MetricAuxLogRepository metricAuxLogRepository, GalertAuxLogRepository galertAuxLogRepository) {
+        this.metricAuxLogRepository = metricAuxLogRepository;
+        this.galertAuxLogRepository = galertAuxLogRepository;
     }
 
     /**
@@ -59,7 +64,7 @@ public class MetricAuxLogManagerImpl implements MetricAuxLogManager, Application
     public MetricAuxLogPojo create(GalertAuxLog log, MetricAuxLog logInfo) {
         MetricAuxLogPojo metricLog = new MetricAuxLogPojo(log, logInfo, log.getAlert().getAlertDef());
 
-        metricAuxLogDAO.save(metricLog);
+        metricAuxLogRepository.save(metricLog);
         return metricLog;
     }
 
@@ -67,7 +72,7 @@ public class MetricAuxLogManagerImpl implements MetricAuxLogManager, Application
      * 
      */
     public void removeAll(GalertDef def) {
-        metricAuxLogDAO.removeAll(def);
+        metricAuxLogRepository.deleteByDef(def);
     }
 
     /**
@@ -75,7 +80,7 @@ public class MetricAuxLogManagerImpl implements MetricAuxLogManager, Application
      */
     @Transactional(readOnly=true)
     public MetricAuxLogPojo find(GalertAuxLog log) {
-        return metricAuxLogDAO.find(log);
+        return metricAuxLogRepository.findByAuxLog(log);
     }
 
     /**
@@ -93,8 +98,8 @@ public class MetricAuxLogManagerImpl implements MetricAuxLogManager, Application
 
             for (int i = 0; i < asList.size(); i += CHUNKSIZE) {
                 int end = Math.min(i + CHUNKSIZE, asList.size());
-                metricAuxLogDAO.resetAuxType(asList.subList(i, end));
-                metricAuxLogDAO.deleteByMetricIds(asList.subList(i, end));
+                galertAuxLogRepository.resetAuxType(asList.subList(i, end));
+                metricAuxLogRepository.deleteByMetricIds(asList.subList(i, end));
             }
         }
         

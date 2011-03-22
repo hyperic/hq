@@ -41,74 +41,36 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.config.domain.Crispo;
 import org.hyperic.util.config.ConfigResponse;
 
-
 @Entity
-@Table(name="EAM_EXEC_STRATEGY_TYPES")
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-public class ExecutionStrategyTypeInfo implements Serializable
-{
-    
+@Table(name = "EAM_EXEC_STRATEGY_TYPES")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public class ExecutionStrategyTypeInfo implements Serializable {
+
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
+    @GenericGenerator(name = "mygen1", strategy = "increment")
+    @GeneratedValue(generator = "mygen1")
     @Column(name = "ID")
     private Integer id;
 
-    @Column(name="VERSION_COL",nullable=false)
+    @Column(name = "TYPE_CLASS", nullable = false)
+    private Class<? extends ExecutionStrategyType> type;
+
+    @Column(name = "VERSION_COL", nullable = false)
     @Version
     private Long version;
-    
-    @Column(name="TYPE_CLASS",nullable=false)
-    private Class<?> typeClass;
-    
-    protected ExecutionStrategyTypeInfo() {}
+
+    public ExecutionStrategyTypeInfo() {
+    }
 
     ExecutionStrategyTypeInfo(ExecutionStrategyType stratType) {
-        typeClass = stratType.getClass();
-    }
-    
-    public Integer getId() {
-        return id;
+        type = stratType.getClass();
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Long getVersion() {
-        return version;
-    }
-
-    public void setVersion(Long version) {
-        this.version = version;
-    }
-
-    public Class<?> getTypeClass() {
-        return typeClass;
-    }
-    
-    protected void setTypeClass(Class<?> typeClass) {
-        this.typeClass = typeClass;
-    }
-    
     ExecutionStrategyInfo createStrategyInfo(GalertDef def, Crispo config,
-                                             GalertDefPartition partition) 
-    {
+                                             GalertDefPartition partition) {
         return new ExecutionStrategyInfo(def, this, config, partition);
     }
-    
-    public ExecutionStrategyType getType() {
-        try {
-            return (ExecutionStrategyType)typeClass.newInstance();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
-    }
-    
-    public ExecutionStrategy getStrategy(ConfigResponse config) {
-        return getType().createStrategy(config);
-    }
-    
+
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
@@ -116,17 +78,50 @@ public class ExecutionStrategyTypeInfo implements Serializable
         if (obj == null || !(obj instanceof ExecutionStrategyTypeInfo)) {
             return false;
         }
-        Integer objId = ((ExecutionStrategyTypeInfo)obj).getId();
-  
-        return getId() == objId ||
-        (getId() != null && 
-         objId != null && 
-         getId().equals(objId));     
+        Integer objId = ((ExecutionStrategyTypeInfo) obj).getId();
+
+        return getId() == objId || (getId() != null && objId != null && getId().equals(objId));
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public ExecutionStrategy getStrategy(ConfigResponse config) {
+        return getType().createStrategy(config);
+    }
+
+    public ExecutionStrategyType getType() {
+        try {
+            return  type.newInstance();
+        } catch (Exception e) {
+            throw new SystemException(e);
+        }
+    }
+
+    public Class<? extends ExecutionStrategyType> getTypeClass() {
+        return type;
+    }
+
+    public Long getVersion() {
+        return version;
     }
 
     public int hashCode() {
         int result = 17;
-        result = 37*result + (getId() != null ? getId().hashCode() : 0);
-        return result;      
+        result = 37 * result + (getId() != null ? getId().hashCode() : 0);
+        return result;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setTypeClass(Class<? extends ExecutionStrategyType> typeClass) {
+        this.type = typeClass;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }
