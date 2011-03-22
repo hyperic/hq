@@ -233,10 +233,6 @@ public abstract class Audit implements Serializable {
         return AuditPurpose.findByCode(purpose);
     }
 
-    protected int getPurposeEnum() {
-        return purpose;
-    }
-
     public Resource getResource() {
         return resource;
     }
@@ -318,7 +314,7 @@ public abstract class Audit implements Serializable {
         parent = p;
     }
 
-    protected void setPurposeEnum(int p) {
+    protected void setPurpose(int p) {
         purpose = p;
     }
 

@@ -56,7 +56,7 @@ public class UpdateStatus implements Serializable {
     private String report;
 
     @Column(name = "UPMODE", nullable = false)
-    private int updateModeEnum;
+    private int updateMode;
 
     @Column(name = "VERSION_COL", nullable = false)
     @Version
@@ -67,7 +67,7 @@ public class UpdateStatus implements Serializable {
 
     UpdateStatus(String report, UpdateStatusMode mode) {
         this.report = report;
-        updateModeEnum = mode.getCode();
+        updateMode = mode.getCode();
         ignored = false;
     }
 
@@ -88,15 +88,15 @@ public class UpdateStatus implements Serializable {
     }
 
     public UpdateStatusMode getMode() {
-        return UpdateStatusMode.findByCode(updateModeEnum);
+        return UpdateStatusMode.findByCode(updateMode);
     }
 
     public String getReport() {
         return report;
     }
 
-    protected int getUpdateModeEnum() {
-        return updateModeEnum;
+    protected int getUpdateMode() {
+        return updateMode;
     }
 
     public Long getVersion() {
@@ -122,7 +122,7 @@ public class UpdateStatus implements Serializable {
     }
 
     void setMode(UpdateStatusMode mode) {
-        updateModeEnum = mode.getCode();
+        updateMode = mode.getCode();
     }
 
     protected void setReport(String report) {
@@ -130,7 +130,7 @@ public class UpdateStatus implements Serializable {
     }
 
     protected void setUpdateModeEnum(int mode) {
-        updateModeEnum = mode;
+        updateMode = mode;
     }
 
     public void setVersion(Long version) {
