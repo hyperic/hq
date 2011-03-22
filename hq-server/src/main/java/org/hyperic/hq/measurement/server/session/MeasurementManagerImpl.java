@@ -38,7 +38,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
@@ -828,13 +827,10 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             } else {
                 resource = resourceManager.findResourceById((Integer) o);
             }
-            try {
-                if (resource == null || resource.isInAsyncDeleteState()) {
-                    continue;
-                }
-            } catch (ObjectNotFoundException e) {
+            if (resource == null || resource.isInAsyncDeleteState()) {
                 continue;
             }
+           
           
             if (resource instanceof ResourceGroup && !(applicationManager.isApplication((ResourceGroup)resource))) {
                 ResourceGroup grp = (ResourceGroup)resource;
@@ -859,14 +855,10 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
     private Application findApplicationById(AuthzSubject subject, Integer id)
         throws ApplicationNotFoundException, PermissionException {
-        try {
-            
-            Application app = applicationManager.findApplicationById(subject,id);
-            permissionManager.checkViewPermission(subject, app.getEntityId());
-            return app;
-        } catch (ObjectNotFoundException e) {
-            throw new ApplicationNotFoundException(id, e);
-        }
+        
+        Application app = applicationManager.findApplicationById(subject,id);
+        permissionManager.checkViewPermission(subject, app.getEntityId());
+        return app;
     }
 
     private final Map<Integer, List<Measurement>> getAvailMeas(Resource application) {

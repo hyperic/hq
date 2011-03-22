@@ -29,8 +29,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-
-import org.hibernate.Query;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -743,16 +741,6 @@ public abstract class PermissionManager {
 
     public abstract Collection<Resource> findServiceResources(AuthzSubject subj, Boolean fsystem);
 
-    public interface RolePermNativeSQL {
-        String getSQL();
-
-        Query bindParams(Query q, AuthzSubject subject, List viewResourcesOperations, List manageAlertOperations);
-    }
-
-    public abstract RolePermNativeSQL  getRolePermissionNativeSQL(String resourceVar, String eventLogVar,
-                                           String subjectParam,
-                                           String opListViewResourcesParam,
-                                           String opListManageAlertsParam); 
 
     public abstract String getAlertsHQL(boolean inEscalation, boolean notFixed, Integer groupId,
                                         Integer alertDefId, boolean count);
@@ -763,78 +751,6 @@ public abstract class PermissionManager {
                                              Integer groupId, Integer galertDefId);
 
     public abstract String getGroupAlertDefsHQL();
-
-    /**
-     * Creates an edge perm check with default names of the replacement
-     * variables and parameters. Used for a SQL query.
-     * @param includeDescendants - include the resource's descendants in the
-     *        query
-     */
-    public EdgePermCheck makePermCheckSql(String resourceVar, boolean includeDescendants) {
-        return makePermCheckSql("subject", resourceVar, "resource", "distance", "ops",
-            includeDescendants);
-    }
-
-    /**
-     * Creates an edge perm check with default names of the replacement
-     * variables and parameters. Used for a HQL query.
-     * @param includeDescendants - include the resource's descendants in the
-     *        query
-     */
-    public EdgePermCheck makePermCheckHql(String resourceVar, boolean includeDescendants) {
-        return makePermCheckHql("subject", resourceVar, "resource", "distance", "ops",
-            includeDescendants);
-    }
-
-    /**
-     * Generates an object which aids in the creation of hierarchical,
-     * permission checking SQL. This is the SQL version of makePermCheckHql
-     * 
-     * This method spits out a piece of SQL, like: JOIN EAM_RESOURCE_EDGE edge
-     * ON edge.TO_ID = resId edge.FROM_ID = resId WHERE (resId = :resParam AND
-     * edge.distance >= :distParam AND resSubjId = :subjParam AND ... AND ...)
-     * 
-     * Therefore, it must used between the select and last parts of the where
-     * clause, preceded by an 'and'
-     * 
-     * The arguments ending with 'Param' are used to identify names of Query
-     * parameters which will later passed in. (e.g.
-     * query.setParameter("subject", s)
-     * 
-     * The arguments ending in 'Var' are the SQL variable names used straight in
-     * the SQL text. (e.g. "select rez from Resource rez "... , you would
-     * specify the name of your resourceVar as 'rez')
-     * @param includeDescendants - include the resource's descendants in the
-     *        query
-     */
-    public abstract EdgePermCheck makePermCheckSql(String subjectParam, String resourceVar,
-                                                   String resourceParam, String distanceParam,
-                                                   String opsParam, boolean includeDescendants);
-
-    /**
-     * Generates an object which aids in the creation of hierarchical,
-     * permission checking HQL.
-     * 
-     * This method spits out a piece of HQL, like: join r.toEdges _e ... where
-     * _e.fromDistance >= :distance (could be '=' based on includeDescendants)
-     * and ... and ...
-     * 
-     * Therefore, it must used between the select and last parts of the where
-     * clause, preceded by an 'and'
-     * 
-     * The arguments ending with 'Param' are used to identify names of Query
-     * parameters which will later passed in. (e.g.
-     * query.setParameter("subject", s)
-     * 
-     * The arguments ending in 'Var' are the SQL variable names used straight in
-     * the SQL text. (e.g. "select rez from Resource rez "... , you would
-     * specify the name of your resourceVar as 'rez')
-     * @param includeDescendants - include the resource's descendants in the
-     *        query
-     */
-    public abstract EdgePermCheck makePermCheckHql(String subjectParam, String resourceVar,
-                                                   String resourceParam, String distanceParam,
-                                                   String opsParam, boolean includeDescendants);
 
     /**
      * Return the MaintenanceEventManager implementation

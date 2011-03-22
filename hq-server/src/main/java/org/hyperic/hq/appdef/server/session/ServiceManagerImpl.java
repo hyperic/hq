@@ -40,7 +40,6 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.agent.mgmt.data.AgentRepository;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -58,6 +57,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.inventory.data.ResourceDao;
@@ -93,7 +93,6 @@ public class ServiceManagerImpl implements ServiceManager {
 
     private static final String VALUE_PROCESSOR = "org.hyperic.hq.appdef.server.session.PagerProcessor_service";
     private Pager valuePager;
-    private Pager defaultPager;
     private PermissionManager permissionManager;
     private ResourceManager resourceManager;
     private AuthzSubjectManager authzSubjectManager;
@@ -284,8 +283,13 @@ public class ServiceManagerImpl implements ServiceManager {
      * Find a ServiceType by id
      */
     @Transactional(readOnly = true)
-    public ServiceType findServiceType(Integer id) throws ObjectNotFoundException {
-        return serviceFactory.createServiceType(resourceManager.findResourceTypeById(id));
+    public ServiceType findServiceType(Integer id)  {
+        ResourceType serviceType = resourceManager.findResourceTypeById(id);
+        if(serviceType == null) {
+            throw new EntityNotFoundException("Resource Type with ID: " + id + 
+                " was not found");
+        }
+        return serviceFactory.createServiceType(serviceType);
     }
 
     /**
@@ -1052,7 +1056,6 @@ public class ServiceManagerImpl implements ServiceManager {
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
         valuePager = Pager.getPager(VALUE_PROCESSOR);
-        defaultPager = Pager.getDefaultPager();
     }
 
 }

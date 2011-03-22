@@ -36,9 +36,9 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.SessionFactory;
-import org.hibernate.engine.SessionFactoryImplementor;
+
 import org.hibernate.mapping.Table;
+import org.hyperic.hibernate.DialectAccessor;
 import org.hyperic.hibernate.HibernateConfigHolder;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.auth.domain.AuthzSubject;
@@ -97,17 +97,19 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
     private ConfigPropertyRepository configPropertyRepository;
     private ServerConfigAuditFactory serverConfigAuditFactory;
     private ServerConfigCache serverConfigCache;
+    private DialectAccessor dialectAccessor;
 
     @Autowired
     public ServerConfigManagerImpl(DBUtil dbUtil, AuthzSubjectManager authzSubjectManager,
                                    ConfigPropertyRepository configPropertyRepository,
                                    ServerConfigAuditFactory serverConfigAuditFactory,
-                                   ServerConfigCache serverConfigCache) {
+                                   ServerConfigCache serverConfigCache, DialectAccessor dialectAccessor) {
         this.dbUtil = dbUtil;
         this.authzSubjectManager = authzSubjectManager;
         this.configPropertyRepository = configPropertyRepository;
         this.serverConfigAuditFactory = serverConfigAuditFactory;
         this.serverConfigCache = serverConfigCache;
+        this.dialectAccessor = dialectAccessor;
     }
 
     private void createChangeAudit(AuthzSubject subject, String key, String oldVal, String newVal) {
@@ -272,8 +274,7 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
     @Transactional
     public long analyzeNonMetricTables() {
 
-        HQDialect dialect = (HQDialect) ((SessionFactoryImplementor) Bootstrap.getBean(SessionFactory.class))
-            .getDialect();
+        HQDialect dialect = dialectAccessor.getHQDialect();
         long duration = 0;
 
         Connection conn = null;
@@ -316,8 +317,7 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
         String prevMetricDataTable = MeasTabManagerUtil.getMeasTabname(prevtime);
 
         long duration = 0;
-        HQDialect dialect = (HQDialect) ((SessionFactoryImplementor) Bootstrap.getBean(SessionFactory.class))
-            .getDialect();
+        HQDialect dialect = dialectAccessor.getHQDialect();
 
         Connection conn = null;
         try {

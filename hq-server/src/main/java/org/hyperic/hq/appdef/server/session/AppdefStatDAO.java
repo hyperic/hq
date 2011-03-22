@@ -39,9 +39,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.SessionFactory;
-import org.hibernate.engine.SessionFactoryImplementor;
-import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -90,8 +87,6 @@ public class AppdefStatDAO {
     private static final int APPDEF_TYPE_GROUP = AppdefEntityConstants.APPDEF_TYPE_GROUP;
 
     protected JdbcTemplate jdbcTemplate;
-    
-    private SessionFactory sessionFactory;
 
     protected final Log log = LogFactory.getLog(AppdefStatDAO.class);
     
@@ -100,9 +95,8 @@ public class AppdefStatDAO {
     }
 
     @Autowired
-    public AppdefStatDAO(JdbcTemplate jdbcTemplate, SessionFactory sessionFactory) {
+    public AppdefStatDAO(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.sessionFactory = sessionFactory;
     }
 
     public Map<String, Integer> getPlatformCountsByTypeMap(AuthzSubject subject)

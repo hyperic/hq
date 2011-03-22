@@ -63,7 +63,7 @@ public class TemplateManagerTest
     public void testCreateTemplates() {
         MonitorableType monitorableType = templateManager.createMonitorableType("tomcat",
             new ServerTypeInfo("tomcat server", "A server of tomcat", "1.0"));
-        flushSession();
+        flush();
         
         MeasurementInfo measurementInfo = new MeasurementInfo();
         Map<String, Object> measAttributes = new HashMap<String, Object>();

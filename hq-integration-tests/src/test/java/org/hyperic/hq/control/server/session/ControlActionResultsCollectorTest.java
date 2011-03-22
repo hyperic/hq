@@ -80,14 +80,14 @@ public class ControlActionResultsCollectorTest
         server = createServer(platform, serverType, "Server1");
         server2 = createServer(platform, serverType, "Server2");
         server3 = createServer(platform, serverType, "Server3");
-        flushSession();
+        flush();
     }
 
     private Integer addControlHistory(AppdefEntityID resourceId, String status, String message) {
         Integer controlHistoryId = controlScheduleManager.createHistory(resourceId, null, null,
             authzSubjectManager.getOverlordPojo().getName(), "someAction", null, false, startTime,
             startTime, startTime, status, "", message);
-        flushSession();
+        flush();
         return controlHistoryId;
     }
 

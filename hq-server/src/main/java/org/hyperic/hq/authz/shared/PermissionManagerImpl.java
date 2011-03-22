@@ -37,7 +37,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Query;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.data.RoleRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
@@ -390,20 +389,6 @@ public class PermissionManagerImpl
         return null;
     }
 
-    public RolePermNativeSQL getRolePermissionNativeSQL(String resourceVar, String eventLogVar, String subjectParam,
-                                                        String opListViewResourcesParam,
-                                                        String opListManageAlertsParam) {
-        return new RolePermNativeSQL() {
-            public String getSQL() {
-                return "";
-            }
-
-            public Query bindParams(Query q, AuthzSubject subject, List opsViewResources, List opsManageAlerts) {
-                return q;
-            }
-        };
-    }
-
     public String getAlertsHQL(boolean inEscalation, boolean notFixed, Integer groupId,
                                Integer alertDefId, boolean count) {
         // Join with Resource for sorting
@@ -445,52 +430,6 @@ public class PermissionManagerImpl
 
     public boolean hasGuestRole() {
         return false;
-    }
-
-    public EdgePermCheck makePermCheckSql(String subjectParam, String resVar, String resParam,
-                                          String distanceParam, String opsParam,
-                                          boolean includeDescendants) {
-        //TODO
-        //final Integer cId = AuthzConstants.RELATION_CONTAINMENT_ID;
-        Integer cId = 1;
-        final String oper = (includeDescendants) ? ">=" : "=";
-        final String sql = new StringBuilder().append(" JOIN EAM_RESOURCE_EDGE edge")
-            .append(" ON ").append(resVar).append(".id = edge.TO_ID").append(" AND ")
-            .append(resVar).append(".id = edge.FROM_ID").append(" WHERE edge.distance ").append(
-                oper).append(" :").append(distanceParam).append(" AND edge.rel_id = ").append(cId)
-            .append(" AND ").append(resVar).append(".id = :").append(resParam).append(" ")
-            .toString();
-
-        return new EdgePermCheck(sql, subjectParam, resVar, resParam, distanceParam, opsParam) {
-            public Query addQueryParameters(Query q, AuthzSubject subject, Resource r,
-                                            int distance, List ops) {
-                return q.setInteger(getDistanceParam(), distance).setInteger(getResourceParam(),
-                    r.getId().intValue());
-            }
-        };
-    }
-
-    public EdgePermCheck makePermCheckHql(String subjectParam, String resourceVar,
-                                          String resourceParam, String distanceParam,
-                                          String opsParam, boolean includeDescendants) {
-        //TODO
-        //final Integer cId = AuthzConstants.RELATION_CONTAINMENT_ID;
-        Integer cId = 1;
-        final String oper = (includeDescendants) ? ">=" : "=";
-        final String sql = new StringBuilder().append("join ").append(resourceVar).append(
-            ".toEdges _e ").append("join _e.from _fromResource ").append("where ").append(
-            " _fromResource = :").append(resourceParam).append(" AND _e.distance ").append(oper)
-            .append(" :").append(distanceParam).append(" AND _e.relation.id = ").append(cId)
-            .append(' ').toString();
-
-        return new EdgePermCheck(sql, subjectParam, resourceVar, resourceParam, distanceParam,
-            opsParam) {
-            public Query addQueryParameters(Query q, AuthzSubject subject, Resource r,
-                                            int distance, List ops) {
-                return q.setInteger(getDistanceParam(), distance).setParameter(getResourceParam(),
-                    r);
-            }
-        };
     }
 
     public String getOperableGroupsHQL(AuthzSubject subject, String alias, String oper) {

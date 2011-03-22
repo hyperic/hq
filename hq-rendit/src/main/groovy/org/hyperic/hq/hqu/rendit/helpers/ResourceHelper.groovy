@@ -55,7 +55,6 @@ import org.hyperic.util.pager.PageControl
 import org.hyperic.hq.authz.shared.ResourceGroupCreateInfo
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.appdef.shared.AppdefEntityID
-import org.hyperic.hq.grouping.CritterList;
 class ResourceHelper extends BaseHelper {
     private rman = Bootstrap.getBean(ResourceManager.class)
     private groupMan = Bootstrap.getBean(ResourceGroupManager.class)
@@ -603,11 +602,12 @@ class ResourceHelper extends BaseHelper {
         return ResourceGroupFactory.create(groupMan.createResourceGroup(user, getCreateInfo(name,description,location,prototype,isPrivate), roles, convertedResources))
     }
     
-    ResourceGroup createGroup(String name, String description, String location,
-    Resource prototype, Collection roles,
-    Collection resources, boolean isPrivate, CritterList criteria) {
-        groupMan.createResourceGroup(user, getCreateInfo(name,description,location,prototype,isPrivate), roles, resources, criteria)
-    }
+    //TODO add support for removed CritterList?
+//    ResourceGroup createGroup(String name, String description, String location,
+//    Resource prototype, Collection roles,
+//    Collection resources, boolean isPrivate, CritterList criteria) {
+//        groupMan.createResourceGroup(user, getCreateInfo(name,description,location,prototype,isPrivate), roles, resources, criteria)
+//    }
     
     private ResourceGroupCreateInfo getCreateInfo(String name, String description, String location,
     Resource prototype, boolean isPrivate) {

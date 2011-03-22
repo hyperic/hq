@@ -63,7 +63,7 @@ public class AppdefBossTest
         sessionId = sessionManager.put(authzSubjectManager.getOverlordPojo());
         agentToken = "agentToken123";
         createAgent("127.0.0.1", 2144, "authToken", agentToken, "4.5");
-        flushSession();
+        flush();
         testPlatformType = createPlatformType("Linux");
         testPlatformResType = resourceManager.findResourceTypeByName("Linux");
         testPlatformResType.addPropertyType(new PropertyType("BiosUUID","The UUID of BIOS"));

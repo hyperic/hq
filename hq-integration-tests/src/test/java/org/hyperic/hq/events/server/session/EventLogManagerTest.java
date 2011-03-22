@@ -45,14 +45,14 @@ public class EventLogManagerTest
     public void setUp() throws Exception {
         String agentToken = "agentToken123";
         createAgent("127.0.0.1", 2144, "authToken", agentToken, "4.5");
-        flushSession();
+        flush();
         createPlatformType("Linux");
         platform = createPlatform(agentToken, "Linux", "Test Platform Linux",
             "Test Platform Linux", 2);
-        flushSession();
+        flush();
         eventLogManager.createLog(new TestEvent(platform), "Something", "Some Status", true);
-        flushSession();
-        clearSession();
+        flush();
+        clear();
     }
 
     @Test

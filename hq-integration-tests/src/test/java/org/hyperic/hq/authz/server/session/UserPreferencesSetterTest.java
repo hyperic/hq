@@ -55,13 +55,13 @@ public class UserPreferencesSetterTest
         AuthzSubject who = authzSubjectManager.getOverlordPojo();
         AuthzSubject user = authzSubjectManager.createSubject(who, "jen", true, "jen", "dept",
             "jen@jen.com", "Jen", "Hickey", "1111111", "sms", true);
-        flushSession();
+        flush();
         ConfigResponse prefs = new ConfigResponse();
         prefs.setValue("meat", false);
         List<UserPreferencesUpdatedEvent> events = new ArrayList<UserPreferencesUpdatedEvent>(1);
         events.add(new UserPreferencesUpdatedEvent(who.getId(), user.getId(), prefs));
         userPreferencesSetter.processEvents(events);
-        flushSession();
+        flush();
         ConfigResponse actualPrefs = authzSubjectManager.getUserPrefs(who, user.getId());
         assertEquals(prefs, actualPrefs);
     }
@@ -76,13 +76,13 @@ public class UserPreferencesSetterTest
         AuthzSubject user = authzSubjectManager.createSubject(
             authzSubjectManager.getOverlordPojo(), "jen", true, "jen", "dept", "jen@jen.com",
             "Jen", "Hickey", "1111111", "sms", true);
-        flushSession();
+        flush();
         ConfigResponse prefs = new ConfigResponse();
         prefs.setValue("meat", false);
         List<UserPreferencesUpdatedEvent> events = new ArrayList<UserPreferencesUpdatedEvent>(1);
         events.add(new UserPreferencesUpdatedEvent(345, user.getId(), prefs));
         userPreferencesSetter.processEvents(events);
-        flushSession();
+        flush();
         assertTrue(authzSubjectManager.getUserPrefs(authzSubjectManager.getOverlordPojo(),
             user.getId()).toProperties().isEmpty());
     }
@@ -100,7 +100,7 @@ public class UserPreferencesSetterTest
         events.add(new UserPreferencesUpdatedEvent(authzSubjectManager.getOverlordPojo().getId(),
             345, prefs));
         userPreferencesSetter.processEvents(events);
-        flushSession();
+        flush();
     }
 
 }

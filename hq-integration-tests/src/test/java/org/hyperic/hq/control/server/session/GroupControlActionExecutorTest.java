@@ -165,7 +165,7 @@ public class GroupControlActionExecutorTest
         controlPluginManager = productPluginDeployer.getProductPluginManager()
             .getControlPluginManager();
         controlActionExecutor.setControlCommandsClientFactory(clientFactory);
-        flushSession();
+        flush();
     }
 
     @Test
@@ -177,7 +177,7 @@ public class GroupControlActionExecutorTest
         GroupControlActionResult result = groupControlActionExecutor.executeGroupControlAction(
             groupId, authzSubjectManager.getOverlordPojo().getName(), new Date(), false, "",
             "stop", null, new int[0], ControlManagerImpl.DEFAULT_RESOURCE_TIMEOUT);
-        flushSession();
+        flush();
         // validate returned DTO
         assertEquals(groupId, result.getResource());
         assertEquals(ControlConstants.STATUS_FAILED, result.getStatus());
@@ -200,7 +200,7 @@ public class GroupControlActionExecutorTest
         GroupControlActionResult result = groupControlActionExecutor.executeGroupControlAction(
             groupId, authzSubjectManager.getOverlordPojo().getName(), new Date(), false, "",
             "stop", null, null, ControlManagerImpl.DEFAULT_RESOURCE_TIMEOUT);
-        flushSession();
+        flush();
         EasyMock.verify(clientFactory);
         // validate returned DTO
         assertEquals(groupId, result.getResource());
@@ -223,7 +223,7 @@ public class GroupControlActionExecutorTest
         GroupControlActionResult result = groupControlActionExecutor.executeGroupControlAction(
             groupId, authzSubjectManager.getOverlordPojo().getName(), new Date(), false, "",
             "stop", null, null, ControlManagerImpl.DEFAULT_RESOURCE_TIMEOUT);
-        flushSession();
+        flush();
         EasyMock.verify(clientFactory);
         // validate returned DTO
         assertEquals(groupId, result.getResource());
@@ -246,7 +246,7 @@ public class GroupControlActionExecutorTest
             groupId, authzSubjectManager.getOverlordPojo().getName(), new Date(), false, "",
             "stop", null, new int[] { server2.getId(), server.getId() },
             ControlManagerImpl.DEFAULT_RESOURCE_TIMEOUT);
-        flushSession();
+        flush();
         EasyMock.verify(clientFactory);
         // validate returned DTO
         assertEquals(groupId, result.getResource());
@@ -268,7 +268,7 @@ public class GroupControlActionExecutorTest
             groupId, authzSubjectManager.getOverlordPojo().getName(), new Date(), false, "",
             "stop", null, new int[] { server.getId(), server2.getId() },
             ControlManagerImpl.DEFAULT_RESOURCE_TIMEOUT);
-        flushSession();
+        flush();
         EasyMock.verify(clientFactory);
         // validate returned DTO
         assertEquals(groupId, result.getResource());

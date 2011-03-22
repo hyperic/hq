@@ -36,7 +36,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
@@ -167,7 +166,7 @@ public class ControlScheduleManagerImpl
 
         // this routine ignores sort attribute!
 
-        try {
+       
             Collection<ControlHistory> recent = controlHistoryRepository.findByStartTimeGreaterThanOrderByStartTimeDesc(System.currentTimeMillis() - window);
 
             // Run through the list only returning entities the user
@@ -188,13 +187,13 @@ public class ControlScheduleManagerImpl
 
             PageList<ControlHistory> list = historyPager.seek(recent, 0, rows);
             list.setTotalSize(recent.size());
-            return list;
-        } catch (ObjectNotFoundException e) {
-            throw new ApplicationException(e);
-        } finally {
+            
+       
             if (log.isDebugEnabled())
                 log.debug("getRecentControlActions(): " + watch.getElapsed());
-        }
+            
+            return list;
+        
     }
 
     /**

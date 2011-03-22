@@ -67,8 +67,8 @@ public class ApplicationManagerTest
         // Create one-service application
         Application application = createApplication("swf-booking-mvc", "Spring Travel", appServices);
         Integer appId = application.getId();
-        flushSession();
-        clearSession();
+        flush();
+        clear();
         assertNotNull(application);
         application = applicationManager.findApplicationById(authzSubjectManager.getOverlordPojo(),
             appId);
@@ -78,7 +78,7 @@ public class ApplicationManagerTest
         Application managerApplication = createApplication("manager", "Manages",
             new ArrayList<AppdefEntityID>(0));
         Integer managerAppId = managerApplication.getId();
-        flushSession();
+        flush();
         assertNotNull(managerApplication);
         assertEquals(0, managerApplication.getAppServices().size());
 
@@ -93,8 +93,8 @@ public class ApplicationManagerTest
         appVal.addAppServiceValue(appService.getAppServiceValue());
         appVal.setName("new name for updated application");
         applicationManager.updateApplication(authzSubjectManager.getOverlordPojo(), appVal);
-        flushSession();
-        clearSession();
+        flush();
+        clear();
         managerApplication = applicationManager.findApplicationById(
             authzSubjectManager.getOverlordPojo(), managerAppId);
         assertEquals(1, managerApplication.getAppServices().size());
@@ -110,8 +110,8 @@ public class ApplicationManagerTest
         // Create one-service application
         String appName = "swf-booking-mvc";
         Application application = createApplication(appName, "Spring Travel", appServices);
-        flushSession();
-        clearSession();
+        flush();
+        clear();
         assertNotNull(application);
         application = applicationManager.findApplicationById(authzSubjectManager.getOverlordPojo(),
             application.getId());
@@ -119,8 +119,8 @@ public class ApplicationManagerTest
 
         applicationManager.removeApplication(authzSubjectManager.getOverlordPojo(),
             application.getId());
-        flushSession();
-        clearSession();
+        flush();
+        clear();
 
         try {
             application = applicationManager.findApplicationById(
@@ -143,8 +143,8 @@ public class ApplicationManagerTest
             "Spring Travel Generic", appServices);
        
         Integer genericAppID = genericApp.getId();
-        flushSession();
-        clearSession();
+        flush();
+        clear();
 
         // Re-retrieve the apps from the database
         genericApp = applicationManager.findApplicationById(authzSubjectManager.getOverlordPojo(),
@@ -185,8 +185,8 @@ public class ApplicationManagerTest
             "Spring Travel Generic", appServices);
         Integer appID = application.getId();
 
-        flushSession();
-        clearSession();
+        flush();
+        clear();
 
         // Re-retrieve
         application = applicationManager.findApplicationById(authzSubjectManager.getOverlordPojo(),
@@ -208,8 +208,8 @@ public class ApplicationManagerTest
 
         applicationManager.removeAppService(authzSubjectManager.getOverlordPojo(), appID,
             service3AsvId);
-        flushSession();
-        clearSession();
+        flush();
+        clear();
 
         application = applicationManager.findApplicationById(authzSubjectManager.getOverlordPojo(),
             appID);
@@ -232,8 +232,8 @@ public class ApplicationManagerTest
         appServices.add(holder.service2.getEntityId());
         appServices.add(holder.service3.getEntityId());
         createApplication("swf-booking-mvc generic", "Spring Travel Generic", appServices);
-        flushSession();
-        clearSession();
+        flush();
+        clear();
 
         // Value object by service...
         PageList<ApplicationValue> appsByResource = applicationManager.getApplicationsByResource(

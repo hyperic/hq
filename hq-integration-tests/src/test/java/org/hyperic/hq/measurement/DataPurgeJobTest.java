@@ -118,15 +118,15 @@ public class DataPurgeJobTest
         p.setId(id);
         p.setType(MeasurementConstants.PROBLEM_TYPE_ALERT);
         metricProblemRepository.save(p);
-        flushSession();
+        flush();
         MeasurementDataId id2 = new MeasurementDataId(12345, timestamp + 2001, 5678);
         MetricProblem p2 = new MetricProblem();
         p2.setId(id2);
         p2.setType(MeasurementConstants.PROBLEM_TYPE_ALERT);
         metricProblemRepository.save(p2);
-        flushSession();
+        flush();
         dataPurgeJob.purgeMetricProblems(timestamp + 100l);
-        clearSession();
+        clear();
         assertEquals(1, metricProblemRepository.findAll().size());
     }
 

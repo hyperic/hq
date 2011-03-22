@@ -34,7 +34,7 @@ public class ControlManagerTest
     public void setUp() throws Exception {
         String agentToken = "agentToken123";
         createAgent("127.0.0.1", 2144, "authToken", agentToken, "4.5");
-        flushSession();
+        flush();
         Platform platform = createPlatform(agentToken, "PluginTestPlatform", "TestPlatform1",
             "TestPlatform1", 2);
         ServerType serverType = serverManager.findServerTypeByName("PluginTestServer 1.0");

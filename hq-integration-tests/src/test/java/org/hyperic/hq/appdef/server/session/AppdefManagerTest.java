@@ -96,7 +96,7 @@ public class AppdefManagerTest
         Set<Service> services = new HashSet<Service>(1);
         services.add(service);
         createServiceResourceGroup(services, "MyServices");
-        flushSession();
+        flush();
     }
 
     @Test

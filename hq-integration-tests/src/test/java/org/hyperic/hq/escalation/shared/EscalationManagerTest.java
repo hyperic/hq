@@ -116,7 +116,7 @@ public class EscalationManagerTest
         // Manual flush is required in any method in which you are updating the
         // Hibernate session in
         // order to avoid false positive in test
-        getCurrentSession().flush();
+        flush();
     }
 
     @Test

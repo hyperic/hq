@@ -33,8 +33,7 @@ import java.sql.Statement;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.SessionFactory;
-import org.hibernate.engine.SessionFactoryImplementor;
+import org.hyperic.hibernate.DialectAccessor;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
@@ -56,7 +55,7 @@ public class DataCompressionDAO {
    
 
     private JdbcTemplate jdbcTemplate;
-    private SessionFactory sessionFactory;
+    private DialectAccessor dialectAccessor;
     private final Log log = LogFactory.getLog(DataCompressionDAO.class);
     private static final String MEAS_VIEW = MeasTabManagerUtil.MEAS_VIEW;
     private static final String TAB_DATA = MeasurementConstants.TAB_DATA;
@@ -68,9 +67,9 @@ public class DataCompressionDAO {
     
 
     @Autowired
-    public DataCompressionDAO(JdbcTemplate jdbcTemplate, SessionFactory sessionFactory) {
+    public DataCompressionDAO(JdbcTemplate jdbcTemplate, DialectAccessor dialectAccessor) {
         this.jdbcTemplate = jdbcTemplate;
-        this.sessionFactory = sessionFactory;
+        this.dialectAccessor = dialectAccessor;
     }
 
     public void createMetricDataViews() {
@@ -99,8 +98,7 @@ public class DataCompressionDAO {
                                             " UNION ALL SELECT * FROM HQ_METRIC_DATA_COMPAT";
 
         try {
-            HQDialect dialect = (HQDialect) ((SessionFactoryImplementor) sessionFactory)
-                .getDialect();
+            HQDialect dialect = dialectAccessor.getHQDialect();
             Statement stmt = jdbcTemplate.getDataSource().getConnection().createStatement();
             if (!dialect.viewExists(stmt, TAB_DATA)) {
                 jdbcTemplate.execute(EAM_METRIC_DATA_VIEW);
@@ -134,7 +132,7 @@ public class DataCompressionDAO {
         }
         log.debug("Truncating tables, starting with -> " + delTable + " (currTable -> " +
                   currTable + ")\n");
-        HQDialect dialect = (HQDialect) ((SessionFactoryImplementor) sessionFactory).getDialect();
+        HQDialect dialect = dialectAccessor.getHQDialect();
         while (!currTable.equals(delTable) && truncateBefore > currTruncTime) {
             try {
                 log.debug("Truncating table " + delTable);
@@ -245,6 +243,6 @@ public class DataCompressionDAO {
     public String getMeasurementUnionStatement(long begin) {
         return MeasurementUnionStatementBuilder.getUnionStatement(
             (begin - MeasurementConstants.HOUR), begin,
-            (HQDialect) ((SessionFactoryImplementor) sessionFactory).getDialect());
+            dialectAccessor.getHQDialect());
     }
 }

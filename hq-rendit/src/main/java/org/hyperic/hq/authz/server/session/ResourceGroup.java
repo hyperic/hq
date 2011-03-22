@@ -7,8 +7,6 @@ import java.util.List;
 
 import org.hyperic.hq.auth.domain.Role;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
-import org.hyperic.hq.grouping.CritterList;
-import org.hyperic.hq.grouping.GroupException;
 
 public class ResourceGroup {
     private String _description;
@@ -243,48 +241,48 @@ public class ResourceGroup {
         _criteria = val;
     }
 
-    /**
-     * Getter method used to retrieve the criteria list for a ResourceGroup.
-     * @return CritterList The criteria list associated with this ResourceGroup
-     *         instance.
-     * @throws GroupException
-     */
-    public CritterList getCritterList() throws GroupException {
-        List critters = new ArrayList();
-        // iterate through all the persisted criteria, and convert to critters
-        // to put into a critter list
-        //TODO can't get rid of critters yet?
-//        for (Iterator it = getCriteriaList().iterator(); it.hasNext();) {
-//            PersistedCritter dump = (PersistedCritter) it.next();
-//            CritterType type = CritterRegistry.getRegistry()
-//                .getCritterTypeForClass(dump.getKlazz());
-//            critters.add(type.compose(dump));
-//        }
-        return new CritterList(critters, _orCriteria);
-    }
-
-    // used by the ResourceManager to set the criteria list for a resource group
-    // note that the ResourceManager should invoke this method rather than
-    // the setCriteriaList setter used by hibernate
-    void setCritterList(CritterList criteria) throws GroupException {
-        List dumps = new ArrayList();
-        // iterate through all the critters in the critter list
-        // and convert them to persisted critters
-        // finally update the resource group with the new set of critters
-        int index = 0;
-        //TODO can't get rid of critters  yet?
-//        for (Iterator it = criteria.getCritters().iterator(); it.hasNext(); index++) {
-//            Critter critter = (Critter) it.next();
-//            CritterType critType = critter.getCritterType();
-//            PersistedCritter dump = new PersistedCritter(this, critType, index);
-//            critType.decompose(critter, dump);
-//            dumps.add(dump);
-//        }
-        this.setOrCriteria(criteria.isAny());
-        // overwrite the contents of the criteria persisted by hibernate
-        getCriteriaList().clear();
-        getCriteriaList().addAll(dumps);
-    }
+//    /**
+//     * Getter method used to retrieve the criteria list for a ResourceGroup.
+//     * @return CritterList The criteria list associated with this ResourceGroup
+//     *         instance.
+//     * @throws GroupException
+//     */
+//    public CritterList getCritterList() throws GroupException {
+//        List critters = new ArrayList();
+//        // iterate through all the persisted criteria, and convert to critters
+//        // to put into a critter list
+//        //TODO can't get rid of critters yet?
+////        for (Iterator it = getCriteriaList().iterator(); it.hasNext();) {
+////            PersistedCritter dump = (PersistedCritter) it.next();
+////            CritterType type = CritterRegistry.getRegistry()
+////                .getCritterTypeForClass(dump.getKlazz());
+////            critters.add(type.compose(dump));
+////        }
+//        return new CritterList(critters, _orCriteria);
+//    }
+//
+//    // used by the ResourceManager to set the criteria list for a resource group
+//    // note that the ResourceManager should invoke this method rather than
+//    // the setCriteriaList setter used by hibernate
+//    void setCritterList(CritterList criteria) throws GroupException {
+//        List dumps = new ArrayList();
+//        // iterate through all the critters in the critter list
+//        // and convert them to persisted critters
+//        // finally update the resource group with the new set of critters
+//        int index = 0;
+//        //TODO can't get rid of critters  yet?
+////        for (Iterator it = criteria.getCritters().iterator(); it.hasNext(); index++) {
+////            Critter critter = (Critter) it.next();
+////            CritterType critType = critter.getCritterType();
+////            PersistedCritter dump = new PersistedCritter(this, critType, index);
+////            critType.decompose(critter, dump);
+////            dumps.add(dump);
+////        }
+//        this.setOrCriteria(criteria.isAny());
+//        // overwrite the contents of the criteria persisted by hibernate
+//        getCriteriaList().clear();
+//        getCriteriaList().addAll(dumps);
+//    }
 
     public void addRole(Role role) {
         //TODO support any persistent set through API?
