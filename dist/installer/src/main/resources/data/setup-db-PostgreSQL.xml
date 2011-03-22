@@ -41,8 +41,6 @@
       	<ant antfile="setup-db-common.xml" target="subst-props"/>
       </then>
       <else>
-        <echo>^^^INFO: Analyzing database...</echo>
-        <antcall target="analyze"/>
         <echo>^^^INFO: Upgrading database...</echo>
         <ant antfile="setup-db-common.xml"
              target="upgrade-db"/>
@@ -141,8 +139,6 @@
             <if>
               <istrue value="${setup.upgrade}" />
             <then>
-              <echo>^^^INFO: Analyzing database...</echo>
-              <antcall target="analyze"/>
               <!-- Upgrade the database to new schema -->
               <ant antfile="setup-db-common.xml"
                    target="upgrade-db"/>
@@ -199,16 +195,6 @@
   <target name="stop-pg" if="server.pgsql.available">
     <ant antfile="${install.dir}/data/server.xml"
          target="stop-postgresql"/>
-  </target>
-
-  <target name="analyze">
-    <sql driver="${server.database-driver}"
-         url="${server.database-url}"
-         userid="${server.database-user}"
-         password="${server.database-password}"
-         autocommit="true">
-      ANALYZE;
-    </sql>
   </target>
 
   <target name="recreate-symlinks" unless="isWin32">
