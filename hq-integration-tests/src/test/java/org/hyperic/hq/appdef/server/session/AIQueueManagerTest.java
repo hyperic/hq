@@ -92,7 +92,7 @@ public class AIQueueManagerTest
         aiPlatform.setCustomProperties(platformConfig.encode());
         this.queuedAIPlatform = aiQueueManager.queue(authzSubjectManager.getOverlordPojo(),
             aiPlatform, false, false, false);
-        flushSession();
+        flush();
         // Add the platform to inventory with custom prop value of 2 CPUs
         this.platform = createPlatform("agentToken", "JenOS", "Platform1", "Platform1", 5);
         platform.getResource().setProperty("numCpus", "2");
@@ -164,7 +164,7 @@ public class AIQueueManagerTest
        
         AIPlatformValue queuedAIPlatform2 = aiQueueManager.queue(
             authzSubjectManager.getOverlordPojo(), aiPlatform, false, false, false);
-        flushSession();
+        flush();
         List<Integer> aiPlatforms = Arrays.asList(new Integer[] { queuedAIPlatform2.getId() });
         AIServerValue queuedAIServerValue = (AIServerValue) queuedAIPlatform2
             .getAddedAIServerValues().iterator().next();

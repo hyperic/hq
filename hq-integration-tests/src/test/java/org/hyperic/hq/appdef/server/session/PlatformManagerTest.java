@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.hibernate.NonUniqueObjectException;
+
 import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
@@ -52,6 +52,7 @@ import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
@@ -124,7 +125,7 @@ public class PlatformManagerTest
     @Before
     public void initializeTestData() throws ApplicationException, NotFoundException {
         testAgent = createAgent("127.0.0.1", 2144, "authToken", agentToken, "4.5");
-        flushSession();
+        flush();
         testPlatformTypes = createTestPlatformTypes();
         // Get Linux platform type
         testPlatformType = testPlatformTypes.get(9);
@@ -143,6 +144,7 @@ public class PlatformManagerTest
         Set<Platform> testPlatforms = new HashSet<Platform>(1);
         testPlatforms.add(testPlatform);
         createPlatformResourceGroup(testPlatforms, "AllPlatformGroup");
+        flush();
     }
 
     @Test
@@ -201,6 +203,8 @@ public class PlatformManagerTest
             "Spring JDBC Template", "my computer");
         platformManager.removePlatform(authzSubjectManager.getOverlordPojo(),
               testPlatform);
+        flush();
+        clear();
         try {
             platformManager.findPlatformById(testPlatform.getId());
             fail("Platform was found after removal");
@@ -259,7 +263,7 @@ public class PlatformManagerTest
         fail("Expected SystemException is not thrown");
     }
 
-    @Test(expected = NonUniqueObjectException.class)
+    @Test(expected = DuplicateObjectException.class)
     public void testCreatePlatformDuplicate() throws ApplicationException {
         String agentToken = "agentToken123";
         AIPlatformValue aiPlatform = new AIPlatformValue();
@@ -303,7 +307,7 @@ public class PlatformManagerTest
         assertEquals(platform.getCpuCount(), new Integer(2));
     }
 
-    @Test(expected = NonUniqueObjectException.class)
+    @Test(expected = DuplicateObjectException.class)
     public void testCreatePlatformDuplicateName() throws ApplicationException {
         createPlatform(testAgent.getAgentToken(), testPlatformType.getName(),"Test Platform CreationByPlatformType","Test Platform ByPlatformType",2);
         createPlatform(testAgent.getAgentToken(), testPlatformType.getName(),"Test Platform CreationByPlatformType","Test Platform ByPlatformType",2);
@@ -508,9 +512,9 @@ public class PlatformManagerTest
         List<AppdefEntityID> services = new ArrayList<AppdefEntityID>();
         services.add(serviceId);
         Application app = createApplication("Test Application", "testing", services);
-        flushSession();
+        flush();
         //clear the session to update the bi-directional app to app service relationship
-        clearSession();
+        clear();
         PageControl pc = new PageControl();
         PageList<PlatformValue> pValues = platformManager.getPlatformsByApplication(
             authzSubjectManager.getOverlordPojo(), app.getId(), pc);

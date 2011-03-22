@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -43,8 +42,6 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.NonUniqueObjectException;
-import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.mgmt.data.AgentRepository;
 import org.hyperic.hq.agent.mgmt.domain.Agent;
@@ -74,13 +71,13 @@ import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
-import org.hyperic.hq.auth.data.AuthzSubjectRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.ProductProperties;
@@ -130,8 +127,6 @@ public class PlatformManagerImpl implements PlatformManager {
 
     private Pager valuePager;
     
-    private Pager defaultPager;
-
     private PermissionManager permissionManager;
 
     private AgentRepository agentDAO;
@@ -222,8 +217,13 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      */
     @Transactional(readOnly = true)
-    public PlatformType findPlatformType(Integer id) throws ObjectNotFoundException {
-        return platformFactory.createPlatformType(resourceManager.findResourceTypeById(id));
+    public PlatformType findPlatformType(Integer id)  {
+        ResourceType platType = resourceManager.findResourceTypeById(id);
+        if(platType ==  null) {
+            throw new EntityNotFoundException("Resource Type with ID: " + id + 
+                " was not found");
+        }
+        return platformFactory.createPlatformType(platType);
     }
 
     /**
@@ -456,13 +456,6 @@ public class PlatformManagerImpl implements PlatformManager {
     }
   
     
-  
-
-    private void throwDupPlatform(Serializable id, String platName) {
-        throw new NonUniqueObjectException(id, "Duplicate platform found " + "with name: " +
-                                               platName);
-    }
-    
     /**
      * Private method to validate a new PlatformValue object
      * 
@@ -539,7 +532,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      */
     public Platform createPlatform(AuthzSubject subject, AIPlatformValue aipValue)
-        throws ApplicationException {
+        throws ApplicationException, DuplicateObjectException {
         getCounter().addCPUs(aipValue.getCpuCount().intValue());
 
         ResourceType platType = resourceManager.findResourceTypeByName(aipValue.getPlatformTypeName());
@@ -551,7 +544,8 @@ public class PlatformManagerImpl implements PlatformManager {
 
         Resource checkP = resourceManager.findResourceByName(aipValue.getName());
         if (checkP != null) {
-            throwDupPlatform(checkP.getId(), aipValue.getName());
+            throw new DuplicateObjectException("Duplicate platform found " + "with name: " +
+                aipValue.getName());
         }
 
         Agent agent = agentDAO.findByAgentToken(aipValue.getAgentToken());
@@ -1989,7 +1983,6 @@ public class PlatformManagerImpl implements PlatformManager {
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
         valuePager = Pager.getPager(VALUE_PROCESSOR);
-        defaultPager = Pager.getDefaultPager();
         //TODO preload some other way?
         if(resourceManager.findResourceTypeByName(IP_RESOURCE_TYPE_NAME) == null) {
             ResourceType ipType = new ResourceType(IP_RESOURCE_TYPE_NAME);

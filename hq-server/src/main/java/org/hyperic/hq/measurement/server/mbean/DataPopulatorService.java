@@ -36,9 +36,7 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.SessionFactory;
-import org.hibernate.engine.SessionFactoryImplementor;
-import org.hyperic.hibernate.dialect.HQDialect;
+import org.hyperic.hibernate.DialectAccessor;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -74,18 +72,18 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
     private MeasurementManager measurementManager;
     private DataManager dataManager;
     private ServerConfigManager serverConfigManager;
-    private SessionFactory sessionFactory;
+    private DialectAccessor dialectAccessor;
     
     
     
     @Autowired
     public DataPopulatorService(DBUtil dbUtil, MeasurementManager measurementManager, DataManager dataManager,
-                                ServerConfigManager serverConfigManager, SessionFactory sessionFactory) {
+                                ServerConfigManager serverConfigManager, DialectAccessor dialectAccessor) {
         this.dbUtil = dbUtil;
         this.measurementManager = measurementManager;
         this.dataManager = dataManager;
         this.serverConfigManager = serverConfigManager;
-        this.sessionFactory = sessionFactory;
+        this.dialectAccessor = dialectAccessor;
     }
 
     /**
@@ -166,8 +164,7 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
     private DataPoint getLastDataPoint(Integer mid) throws Exception {
 
         String table = MeasurementUnionStatementBuilder.getUnionStatement(
-            getDetailedPurgeInterval(), mid.intValue(), (HQDialect) ((SessionFactoryImplementor) sessionFactory)
-            .getDialect());
+            getDetailedPurgeInterval(), mid.intValue(), dialectAccessor.getHQDialect());
         final String SQL =
             "SELECT timestamp, value FROM " + table +
             " WHERE measurement_id = ? AND timestamp = " +

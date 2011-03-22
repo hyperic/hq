@@ -92,7 +92,6 @@ import org.hyperic.hq.bizapp.shared.uibeans.ResourceMetricDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTypeDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.SingletonDisplaySummary;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.grouping.CritterTranslator;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.inventory.domain.Resource;
@@ -152,7 +151,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
     private ServerManager serverManager;
     private ServiceManager serviceManager;
     private ApplicationManager applicationManager;
-    private CritterTranslator critterTranslator;
+   
     private ProblemMetricManager problemMetricManager;
 
     @Autowired
@@ -165,7 +164,6 @@ public class MeasurementBossImpl implements MeasurementBoss {
                                ResourceGroupManager resourceGroupManager,
                                ServerManager serverManager, ServiceManager serviceManager,
                                ApplicationManager applicationManager, 
-                               CritterTranslator critterTranslator,
                                ProblemMetricManager problemMetricManager) {
         this.sessionManager = sessionManager;
         this.authBoss = authBoss;
@@ -180,7 +178,6 @@ public class MeasurementBossImpl implements MeasurementBoss {
         this.serverManager = serverManager;
         this.serviceManager = serviceManager;
         this.applicationManager = applicationManager;
-        this.critterTranslator = critterTranslator;
         this.problemMetricManager = problemMetricManager;
     }
 

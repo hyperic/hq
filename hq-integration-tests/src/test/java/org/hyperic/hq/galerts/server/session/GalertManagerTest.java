@@ -115,11 +115,11 @@ public class GalertManagerTest
         createPlatformType(TEST_PLATFORM_TYPE);
         MonitorableType monitorType = new MonitorableType("Platform monitor", "test");
         Category cate = new Category("Test Category");
-        getCurrentSession().save(monitorType);
-        getCurrentSession().save(cate);
+        entityManager.persist(monitorType);
+        entityManager.persist(cate);
         this.template = new MeasurementTemplate("HeapMemoryTemplate", "avail", "percentage", 1,
             true, 1l, true, "Availability:avail", monitorType, cate, "test");
-        getCurrentSession().save(template);
+        entityManager.persist(template);
 
         // Instance Data
         createAgent("127.0.0.1", 2344, "authToken", "agentToken", "4.5");
@@ -130,20 +130,20 @@ public class GalertManagerTest
             .getEntityId(), new Integer[] { template.getId() },
             new long[] { COLLECTION_INTERVAL_MILLIS }, new ConfigResponse());
         this.measurementId = measurements.get(0).getId();
-        flushSession();
+        flush();
     }
 
     private void createGroup() throws Exception {
         Set<Platform> testPlatforms = new HashSet<Platform>(1);
         testPlatforms.add(testPlatform);
         this.group = createPlatformResourceGroup(testPlatforms, "AllPlatformGroup");
-        flushSession();
+        flush();
     }
 
     private void createGroupAlertDef() throws Exception {
         this.alertDef = galertManager.createAlertDef(authzSubjectManager.getOverlordPojo(),
             "GroupAlert1", "A test alert", AlertSeverity.HIGH, true, group);
-        flushSession();
+        flush();
         // clearSession();
         ExecutionStrategyTypeInfo simpleType = galertManager
             .registerExecutionStrategy(new SimpleStrategyType());
@@ -153,10 +153,10 @@ public class GalertManagerTest
             .registerTriggerType(new MeasurementGtriggerType());
         galertManager.addPartition(alertDef, GalertDefPartition.NORMAL, simpleType,
             new ConfigResponse());
-        flushSession();
+        flush();
         galertManager.addPartition(alertDef, GalertDefPartition.RECOVERY, noneType,
             new ConfigResponse());
-        flushSession();
+        flush();
 
         ConfigResponse cfg = exportTriggerConfig();
 
@@ -169,7 +169,7 @@ public class GalertManagerTest
         galertManager.configureTriggers(alertDef, GalertDefPartition.NORMAL, trigTypes, configs);
         galertManager.configureTriggers(alertDef, GalertDefPartition.RECOVERY, trigTypes, configs);
 
-        flushSession();
+        flush();
         // The below has to be explicitly called to trigger handleUpdate b/c we
         // never commit the above transactions
         galertProcessor.startupInitialize();
@@ -206,7 +206,7 @@ public class GalertManagerTest
             "TestEscalation", false, 20000, false, false);
         escalationManager.setEscalation(GalertEscalationAlertType.GALERT, alertDef.getId(),
             escalation);
-        flushSession();
+        flush();
     }
 
     @Test

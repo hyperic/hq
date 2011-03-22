@@ -40,7 +40,6 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.agent.mgmt.data.AgentRepository;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -61,6 +60,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
@@ -99,7 +99,6 @@ public class ServerManagerImpl implements ServerManager {
 
     private static final String VALUE_PROCESSOR = "org.hyperic.hq.appdef.server.session.PagerProcessor_server";
     private Pager valuePager;
-    private Pager defaultPager;
     private PluginRepository pluginRepository;
     private AgentRepository agentRepository;
     private PermissionManager permissionManager;
@@ -548,7 +547,12 @@ public class ServerManagerImpl implements ServerManager {
      */
     @Transactional(readOnly=true)
     public ServerType findServerType(Integer id) {
-        return serverFactory.createServerType(resourceManager.findResourceTypeById(id));
+        ResourceType serverType = resourceManager.findResourceTypeById(id);
+        if(serverType == null) {
+            throw new EntityNotFoundException("Resource Type with ID: " + id + 
+                " was not found");
+        }
+        return serverFactory.createServerType(serverType);
     }
 
     /**
@@ -800,12 +804,9 @@ public class ServerManagerImpl implements ServerManager {
         throws ServerNotFoundException, ApplicationNotFoundException, PermissionException {
 
         List<Integer> authzPks;
-        ResourceGroup appLocal;
-
-        try {
-            appLocal = resourceGroupManager.findResourceGroupById(appId);
-        } catch (ObjectNotFoundException exc) {
-            throw new ApplicationNotFoundException(appId, exc);
+        ResourceGroup appLocal = resourceGroupManager.findResourceGroupById(appId);
+        if(appLocal == null) {
+            throw new ApplicationNotFoundException(appId);
         }
 
         try {
@@ -934,8 +935,10 @@ public class ServerManagerImpl implements ServerManager {
      */
     public Server updateServer(AuthzSubject subject, ServerValue existing) throws PermissionException, UpdateException,
         AppdefDuplicateNameException, ServerNotFoundException {
-        try {
             Resource server = resourceManager.findResourceById(existing.getId());
+            if(server == null) {
+                throw new ServerNotFoundException(existing.getId());
+            }
             //TODO perm check
             //permissionManager.checkModifyPermission(subject, server.getId());
             existing.setModifiedBy(subject.getName());
@@ -953,9 +956,6 @@ public class ServerManagerImpl implements ServerManager {
                 updateServer(existing,server);
             }
             return toServer(server);
-        } catch (ObjectNotFoundException e) {
-            throw new ServerNotFoundException(existing.getId(), e);
-        }
     }
 
     /**
@@ -1219,6 +1219,5 @@ public class ServerManagerImpl implements ServerManager {
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
         valuePager = Pager.getPager(VALUE_PROCESSOR);
-        defaultPager = Pager.getDefaultPager();
     }
 }

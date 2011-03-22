@@ -93,7 +93,7 @@ public interface ServiceManager {
     /**
      * Find a ServiceType by id
      */
-    public ServiceType findServiceType(Integer id) throws org.hibernate.ObjectNotFoundException;
+    public ServiceType findServiceType(Integer id);
 
     /**
      * Find service type by name

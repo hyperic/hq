@@ -30,7 +30,7 @@ import org.hyperic.hq.appdef.server.session.Server
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.appdef.shared.AppdefEntityValue
 import org.hyperic.hq.appdef.server.session.AgentSortField
-import org.hyperic.hq.agent.domain.Agent
+import org.hyperic.hq.agent.mgmt.domain.Agent
 import org.hyperic.util.PrintfFormat
 import org.hyperic.util.units.UnitsFormat
 import org.hyperic.util.units.UnitsConstants

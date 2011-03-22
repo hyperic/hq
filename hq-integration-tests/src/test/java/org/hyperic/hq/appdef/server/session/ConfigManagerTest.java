@@ -44,7 +44,7 @@ public class ConfigManagerTest
     public void setUp() throws ApplicationException, NotFoundException {
         String agentToken = "agentToken123";
         createAgent("127.0.0.1", 2144, "authToken", agentToken, "4.5");
-        flushSession();
+        flush();
         platform = createPlatform(agentToken, "PluginTestPlatform", "TestPlatform1",
             "TestPlatform1", 2);
         platformManager.addIp(platform, "10.1.4.5", "255:255:255:0", "181");

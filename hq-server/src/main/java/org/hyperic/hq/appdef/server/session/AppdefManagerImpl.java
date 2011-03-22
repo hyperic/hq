@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.hibernate.ObjectNotFoundException;
+
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -46,6 +46,7 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -101,7 +102,7 @@ public class AppdefManagerImpl implements AppdefManager {
             try {
                 PlatformType pt = platformManager.findPlatformType(typeId);
                 platformTypes.put(pt.getName(), AppdefEntityTypeID.newPlatformID(typeId));
-            } catch (ObjectNotFoundException e) {
+            } catch (EntityNotFoundException e) {
                 continue;
             }
         }
@@ -156,7 +157,7 @@ public class AppdefManagerImpl implements AppdefManager {
                 
                     serverTypes.put(st.getName(), new AppdefEntityTypeID(AppdefEntityConstants.APPDEF_TYPE_SERVER,
                         typeId));
-            } catch (ObjectNotFoundException e) {
+            } catch (EntityNotFoundException e) {
                 continue;
             }
         }
@@ -210,7 +211,7 @@ public class AppdefManagerImpl implements AppdefManager {
                 ServiceType st = serviceManager.findServiceType(typeId);
                 serviceTypes.put(st.getName(),
                     new AppdefEntityTypeID(AppdefEntityConstants.APPDEF_TYPE_SERVICE, typeId));
-            } catch (ObjectNotFoundException e) {
+            } catch (EntityNotFoundException e) {
                 continue;
             }
         }

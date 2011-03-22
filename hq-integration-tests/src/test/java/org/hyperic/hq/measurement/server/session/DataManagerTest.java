@@ -95,7 +95,7 @@ public class DataManagerTest
         createPlatformType(platformType);
         // Create test platform
         createPlatform(agentToken,platformType,"Test Platform","Test Platform",4);
-        flushSession();
+        flush();
     }
 
     private List<Measurement> createMeasurements() throws ApplicationException {
@@ -104,8 +104,8 @@ public class DataManagerTest
        
         MonitorableType monitor_Type = new MonitorableType("Platform monitor",  "test");
         Category cate = new Category("Test Category");
-        getCurrentSession().save(monitor_Type);
-        getCurrentSession().save(cate);
+        entityManager.persist(monitor_Type);
+        entityManager.persist(cate);
         MeasurementTemplate availTempl = new MeasurementTemplate("AvailabilityTemplate", "avail",
             "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
         MeasurementTemplate metric1Templ = new MeasurementTemplate("Metric1Template", "metric1",
@@ -118,12 +118,12 @@ public class DataManagerTest
             "percentage", 1, true, 60000l, true, "Metric4:metric4", monitor_Type, cate, "test");
         MeasurementTemplate metric5Templ = new MeasurementTemplate("Metric5Template", "metric5",
             "percentage", 1, true, 60000l, true, "Metric5:metric5", monitor_Type, cate, "test");
-        getCurrentSession().save(availTempl);
-        getCurrentSession().save(metric1Templ);
-        getCurrentSession().save(metric2Templ);
-        getCurrentSession().save(metric3Templ);
-        getCurrentSession().save(metric4Templ);
-        getCurrentSession().save(metric5Templ);
+        entityManager.persist(availTempl);
+        entityManager.persist(metric1Templ);
+        entityManager.persist(metric2Templ);
+        entityManager.persist(metric3Templ);
+        entityManager.persist(metric4Templ);
+        entityManager.persist(metric5Templ);
         Integer[] templateIds = new Integer[] { availTempl.getId(),
                                                metric1Templ.getId(),
                                                metric2Templ.getId(),

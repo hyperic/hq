@@ -115,7 +115,7 @@ public class AvailabilityManagerTest extends BaseInfrastructureTest {
     public void testFindLastAvail() {
         AvailabilityDataRLE data =  new AvailabilityDataRLE(platformAvail, 1234289880000l, 9223372036854775807l,1.0d);
         availabilityDataDao.save(data);
-        flushSession();
+        flush();
         List<AvailabilityDataRLE> rle = availabilityDataDao.findLastByMeasurements(Collections.singletonList(platformMeasurementId));
         Assert.assertTrue("rle value is incorrect",
             rle.get(0).getAvailVal() == MeasurementConstants.AVAIL_UP);
@@ -140,7 +140,7 @@ public class AvailabilityManagerTest extends BaseInfrastructureTest {
     public void testInsertIntoMiddle() throws Exception {
         AvailabilityDataRLE data = new AvailabilityDataRLE(platformAvail, 1234289880000l, 9223372036854775807l,1.0d);
         availabilityDataDao.save(data);
-        flushSession();
+        flush();
         int INCRTIME = 240000;
         long baseTime = TimingVoodoo.roundDownTime(now(), 60000);
         long tmpTime = baseTime;
@@ -161,7 +161,7 @@ public class AvailabilityManagerTest extends BaseInfrastructureTest {
     public void testOverlap() throws Exception {
         AvailabilityDataRLE data =  new AvailabilityDataRLE(platformAvail, 1234289880000l, 9223372036854775807l,1.0d);
         availabilityDataDao.save(data);
-        flushSession();
+        flush();
         List<DataPoint> list = new ArrayList<DataPoint>();
         long now = now();
         long baseTime = TimingVoodoo.roundDownTime(now, 60000);
@@ -209,8 +209,8 @@ public class AvailabilityManagerTest extends BaseInfrastructureTest {
 
     private void backfill(long baseTime) {
         availabilityCheckService.backfill(baseTime);
-        flushSession();
-        clearSession();
+        flush();
+        clear();
     }
 
     private void testCatchup(Integer measId) throws Exception {
@@ -529,8 +529,8 @@ public class AvailabilityManagerTest extends BaseInfrastructureTest {
         list.clear();
         list.addAll(vals);
         aMan.addData(list);
-        flushSession();
-        clearSession();
+        flush();
+        clear();
     }
 
     private DataPoint addData(Integer measId, MetricValue mVal) {
@@ -539,8 +539,8 @@ public class AvailabilityManagerTest extends BaseInfrastructureTest {
         DataPoint pt = new DataPoint(measId, mVal);
         list.add(pt);
         aMan.addData(list);
-        flushSession();
-        clearSession();
+        flush();
+        clear();
         return pt;
     }
 

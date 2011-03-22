@@ -100,8 +100,8 @@ public class AppdefStatManagerTest
             new ArrayList<AppdefEntityID>(0));
         createApplication("manager", "Manages", 
             new ArrayList<AppdefEntityID>(0));
-        flushSession();
-        clearSession();
+        flush();
+        clear();
     }
 
     @Test

@@ -73,7 +73,7 @@ public class MeasurementManagerTest
         measId = defaultMeasurements.get(0).getId();
         measurementManager.createDefaultMeasurements(authzSubjectManager.getOverlordPojo(), server2
             .getEntityId(), "PluginTestServer 1.0", new ConfigResponse());
-        flushSession();
+        flush();
     }
     
     @Test

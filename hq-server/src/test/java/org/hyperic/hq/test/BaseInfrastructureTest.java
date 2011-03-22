@@ -31,7 +31,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 import net.sf.ehcache.CacheManager;
 
@@ -40,7 +41,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
 import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.appdef.server.session.Application;
-import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.Server;
@@ -86,7 +86,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -121,8 +120,8 @@ abstract public class BaseInfrastructureTest {
     @Autowired
     protected AgentManager agentManager;
 
-    @Autowired
-    protected EntityManagerFactory entityManagerFactory;
+    @PersistenceContext
+    protected EntityManager entityManager;
 
     @Autowired
     protected ResourceManager resourceManager;
@@ -150,8 +149,7 @@ abstract public class BaseInfrastructureTest {
     @After
     public void after() {
         // Clear the query cache
-        ((Session)EntityManagerFactoryUtils
-            .getTransactionalEntityManager(entityManagerFactory).getDelegate()).getSessionFactory().getCache().evictQueryRegions();
+        ((Session)entityManager.getDelegate()).getSessionFactory().getCache().evictQueryRegions();
         // Clear the 2nd level cache including regions with queries
         CacheManager.getInstance().clearAll();
         endTime = System.nanoTime();
@@ -307,6 +305,7 @@ abstract public class BaseInfrastructureTest {
         return createResourceGroup(groupName, appDefEntTypeId, roles, resources,AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC);
     }
     
+    @SuppressWarnings("unchecked")
     protected ResourceGroup createMixedGroup(String groupName, int groupType) throws GroupDuplicateNameException, GroupCreationException {
         ResourceGroupCreateInfo gCInfo = new ResourceGroupCreateInfo(groupName, "",
             "", false,groupType);
@@ -315,6 +314,7 @@ abstract public class BaseInfrastructureTest {
         return resGrp;
     }
     
+    @SuppressWarnings("unchecked")
     protected ResourceGroup createMixedGroup(String groupName, int groupType,Collection<Resource> resources) throws GroupDuplicateNameException, GroupCreationException {
         ResourceGroupCreateInfo gCInfo = new ResourceGroupCreateInfo(groupName, "",
             "", false,groupType);
@@ -354,18 +354,11 @@ abstract public class BaseInfrastructureTest {
         return application;
     }
 
-    protected void flushSession() {
-        ((Session)EntityManagerFactoryUtils
-            .getTransactionalEntityManager(entityManagerFactory).getDelegate()).flush();
+    protected void flush() {
+       entityManager.flush();
     }
 
-    protected void clearSession() {
-        ((Session)EntityManagerFactoryUtils
-            .getTransactionalEntityManager(entityManagerFactory).getDelegate()).clear();
-    }
-    
-    protected Session getCurrentSession() {
-        return  (Session)EntityManagerFactoryUtils
-            .getTransactionalEntityManager(entityManagerFactory).getDelegate();
+    protected void clear() {
+       entityManager.clear();
     }
 }

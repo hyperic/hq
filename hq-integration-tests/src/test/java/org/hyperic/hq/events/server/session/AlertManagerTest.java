@@ -198,7 +198,7 @@ public class AlertManagerTest
         // Manual flush is required in any method in which you are updating the
         // Hibernate session in
         // order to avoid false positive in test
-        flushSession();
+        flush();
     }
 
     @Test
@@ -278,13 +278,13 @@ public class AlertManagerTest
     public void testLogActionDetail() {
         Action alertAction = Action.newNoOpAction();
         // Save transient instance of Action before flushing
-        getCurrentSession().save(alertAction);
+        entityManager.persist(alertAction);
         long ctime = System.currentTimeMillis();
         Alert testPlatformAlert = alertManager.createAlert(this.testPlatformAlertDef, ctime);
         testPlatformAlert.createActionLog("Notified users:", alertAction, authzSubjectManager
             .getOverlordPojo());
         // Flush the changes
-        flushSession();
+        flush();
         Collection<AlertActionLog> actionLogs = testPlatformAlert.getActionLog();
         assertEquals("Incorrect Detail", actionLogs.iterator().next().getDetail(),
             "Notified users:");
@@ -306,7 +306,7 @@ public class AlertManagerTest
         // The underlying DAO uses HQL to do bulk delete. This will NOT update
         // the session cache, so a subsequent query will make it seem as though
         // alert is still there. We have to explicitly remove it from cache.
-        clearSession();
+        clear();
         // verify alert cannot be loaded from DB
         try {
             alertManager.findAlertById(testPlatformAlert.getId());
@@ -338,7 +338,7 @@ public class AlertManagerTest
         alertManager.deleteAlerts(authzSubjectManager.getOverlordPojo(), testPlatformAlertDef);
         alertManager.deleteAlerts(authzSubjectManager.getOverlordPojo(), testServerAlertDef);
         alertManager.deleteAlerts(authzSubjectManager.getOverlordPojo(), testServiceAlertDef);
-        clearSession();
+        clear();
         // Verify Alerts not present
         try {
             alertManager.findAlertById(testPlatformAlert.getId());
@@ -376,7 +376,7 @@ public class AlertManagerTest
 
         // Now, delete alerts for a specific range
         alertManager.deleteAlerts(time3+1, 10);
-        clearSession();
+        clear();
         // Verify the alerts are deleted only within the given range
         testAlertNotExists(alert1);
         testAlertNotExists(alert2);
@@ -445,7 +445,7 @@ public class AlertManagerTest
         alertManager.setAlertFixed(testPlatformAlert2);
         alertManager.setAlertFixed(testPlatformAlert3);
         // flush the update
-        flushSession();
+        flush();
         Alert lastUnfixed = alertManager.findLastUnfixedByDefinition(authzSubjectManager
             .getOverlordPojo(), testPlatformAlertDef.getId());
         assertNull("There should be no last unfixed alerts", lastUnfixed);
@@ -463,7 +463,7 @@ public class AlertManagerTest
         alertManager.setAlertFixed(testPlatformAlert2);
         alertManager.setAlertFixed(testPlatformAlert3);
         // flush the update
-        flushSession();
+        flush();
         Alert lastFixed = alertManager.findLastFixedByDefinition(testPlatformAlertDef);
         assertEquals("Incorrect Last fixed Alert", testPlatformAlert3.getId(), lastFixed.getId());
     }
@@ -570,7 +570,7 @@ public class AlertManagerTest
         alertManager.createAlert(this.testServiceAlertDef, time6);
         alertManager.setAlertFixed(alert3);
         alertManager.setAlertFixed(alert4);
-        flushSession();
+        flush();
         // Following query should fetch only the platform alert which has
         // priority 3 & unfixed
         List<Alert> alerts = alertManager.findAlerts(overlord.getId(), 3, 10 * 60000l,
@@ -607,7 +607,7 @@ public class AlertManagerTest
         alertManager.createAlert(this.testServiceAlertDef, time6);
         alertManager.setAlertFixed(alert4);
         alertManager.setAlertFixed(alert5);
-        flushSession();
+        flush();
         // Following query should fetch only the platform alerts & unfixed
         List<Alert> alerts = alertManager.findAlerts(overlord.getId(), 3, 10 * 60000l,
             time1 + 2 * 60000l, false, true, resGrp.getId(), this.testPlatformAlertDef.getId(), pi);
@@ -699,7 +699,7 @@ public class AlertManagerTest
         alertManager.createAlert(this.testServiceAlertDef, time6);
         alertManager.setAlertFixed(alert3);
         alertManager.setAlertFixed(alert4);
-        flushSession();
+        flush();
         int unfixedCounts = alertManager.getUnfixedCount(overlord.getId(), 10 * 60000l,
             time1 + 60000l, resGrp.getId());
         assertEquals("Unfixed alerts count is incorrect", 4, unfixedCounts);
@@ -818,11 +818,11 @@ public class AlertManagerTest
         cond.setThreshold(1);
         MonitorableType monitor_Type = new MonitorableType("Platform monitor", "test");
         Category cate = new Category("Test Category");
-        getCurrentSession().save(monitor_Type);
-        getCurrentSession().save(cate);
+        entityManager.persist(monitor_Type);
+        entityManager.persist(cate);
         MeasurementTemplate testTempl = new MeasurementTemplate("AvailabilityTemplate", "avail",
             "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
-        getCurrentSession().save(testTempl);
+        entityManager.persist(testTempl);
         List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
             .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
             new ConfigResponse());
@@ -846,11 +846,11 @@ public class AlertManagerTest
         cond.setThreshold(75);
         MonitorableType monitor_Type = new MonitorableType("Platform monitor","test");
         Category cate = new Category("Test Category");
-        getCurrentSession().save(monitor_Type);
-        getCurrentSession().save(cate);
+        entityManager.persist(monitor_Type);
+        entityManager.persist(cate);
         MeasurementTemplate testTempl = new MeasurementTemplate("HeapMemoryTemplate", "avail",
             "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
-        getCurrentSession().save(testTempl);
+        entityManager.persist(testTempl);
         List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
             .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
             new ConfigResponse());
@@ -872,11 +872,11 @@ public class AlertManagerTest
         cond.setType(EventConstants.TYPE_CONTROL);
         MonitorableType monitor_Type = new MonitorableType("Platform monitor","test");
         Category cate = new Category("Test Category");
-        getCurrentSession().save(monitor_Type);
-        getCurrentSession().save(cate);
+        entityManager.persist(monitor_Type);
+        entityManager.persist(cate);
         MeasurementTemplate testTempl = new MeasurementTemplate("ControlTemplate", "avail",
             "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
-        getCurrentSession().save(testTempl);
+        entityManager.persist(testTempl);
         List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
             .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
             new ConfigResponse());
@@ -897,11 +897,11 @@ public class AlertManagerTest
         cond.setType(EventConstants.TYPE_CHANGE);
         MonitorableType monitor_Type = new MonitorableType("Platform monitor", "test");
         Category cate = new Category("Test Category");
-        getCurrentSession().save(monitor_Type);
-        getCurrentSession().save(cate);
+        entityManager.persist(monitor_Type);
+        entityManager.persist(cate);
         MeasurementTemplate testTempl = new MeasurementTemplate("ChangeConfigemplate", "avail",
             "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
-        getCurrentSession().save(testTempl);
+        entityManager.persist(testTempl);
         List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
             .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
             new ConfigResponse());
@@ -923,11 +923,11 @@ public class AlertManagerTest
         cond.setType(EventConstants.TYPE_CUST_PROP);
         MonitorableType monitor_Type = new MonitorableType("Platform monitor",  "test");
         Category cate = new Category("Test Category");
-        getCurrentSession().save(monitor_Type);
-        getCurrentSession().save(cate);
+        entityManager.persist(monitor_Type);
+        entityManager.persist(cate);
         MeasurementTemplate testTempl = new MeasurementTemplate("CustomPropertyTemplate", "avail",
             "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
-        getCurrentSession().save(testTempl);
+        entityManager.persist(testTempl);
         List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
             .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
             new ConfigResponse());
@@ -952,11 +952,11 @@ public class AlertManagerTest
         cond.setOptionStatus("server startup");
         MonitorableType monitor_Type = new MonitorableType("Platform monitor",  "test");
         Category cate = new Category("Test Category");
-        getCurrentSession().save(monitor_Type);
-        getCurrentSession().save(cate);
+        entityManager.persist(monitor_Type);
+        entityManager.persist(cate);
         MeasurementTemplate testTempl = new MeasurementTemplate("LogTemplate", "avail",
             "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
-        getCurrentSession().save(testTempl);
+        entityManager.persist(testTempl);
         List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
             .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
             new ConfigResponse());
@@ -982,11 +982,11 @@ public class AlertManagerTest
         
         MonitorableType monitor_Type = new MonitorableType("Platform monitor",  "test");
         Category cate = new Category("Test Category");
-        getCurrentSession().save(monitor_Type);
-        getCurrentSession().save(cate);
+        entityManager.persist(monitor_Type);
+        entityManager.persist(cate);
         MeasurementTemplate testTempl = new MeasurementTemplate("LogTemplate", "avail",
             "percentage", 1, true, 60000l, true, "Availability:avail", monitor_Type, cate, "test");
-        getCurrentSession().save(testTempl);
+        entityManager.persist(testTempl);
         List<Measurement> meas = measurementManager.createMeasurements(this.testPlatform
             .getEntityId(), new Integer[] { testTempl.getId() }, new long[] { 60000l },
             new ConfigResponse());
@@ -1005,13 +1005,13 @@ public class AlertManagerTest
         AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
         Action alertAction = Action.newNoOpAction();
         // Save transient instance of Action before flushing
-        getCurrentSession().save(alertAction);
+        entityManager.persist(alertAction);
         long ctime = System.currentTimeMillis();
         Alert testPlatformAlert = alertManager.createAlert(this.testPlatformAlertDef, ctime);
         testPlatformAlert.createActionLog("Notified users:", alertAction, overlord); // Flush
         // the
         // changes
-        flushSession();
+        flush();
         Collection<AlertActionLog> alertActionLogs = testPlatformAlert.getActionLog();
         for (AlertActionLog actionLog : alertActionLogs) {
             assertNotNull(actionLog.getSubject());
@@ -1020,7 +1020,7 @@ public class AlertManagerTest
         // The underlying DAO uses HQL to do bulk update. This will NOT update
         // the session cache, so a subsequent query will make it seem as though
         // subject is still there. We have to explicitly remove it from cache.
-        clearSession();
+        clear();
         // Now retrieve the alert and action log bag again
         Alert updatedAlert = alertManager.findAlertById(testPlatformAlert.getId());
         alertActionLogs = updatedAlert.getActionLog();

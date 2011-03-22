@@ -139,7 +139,6 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.shared.MaintenanceEventManager;
-import org.hyperic.hq.grouping.CritterTranslator;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
@@ -213,8 +212,6 @@ public class AppdefBossImpl implements AppdefBoss {
 
     private ZeventEnqueuer zEventManager;
 
-    private CritterTranslator critterTranslator;
-
     protected Log log = LogFactory.getLog(AppdefBossImpl.class.getName());
     protected boolean debug = log.isDebugEnabled();
     protected final int APPDEF_TYPE_UNDEFINED = -1;
@@ -233,8 +230,7 @@ public class AppdefBossImpl implements AppdefBoss {
                           AIBoss aiBoss, ResourceGroupManager resourceGroupManager,
                           ResourceManager resourceManager, ServerManager serverManager,
                           ServiceManager serviceManager, TrackerManager trackerManager,
-                          AppdefManager appdefManager, ZeventEnqueuer zEventManager,
-                          CritterTranslator critterTranslator) {
+                          AppdefManager appdefManager, ZeventEnqueuer zEventManager) {
         this.sessionManager = sessionManager;
         this.agentManager = agentManager;
         this.aiQueueManager = aiQueueManager;
@@ -255,7 +251,6 @@ public class AppdefBossImpl implements AppdefBoss {
         this.trackerManager = trackerManager;
         this.appdefManager = appdefManager;
         this.zEventManager = zEventManager;
-        this.critterTranslator = critterTranslator;
     }
 
     /**

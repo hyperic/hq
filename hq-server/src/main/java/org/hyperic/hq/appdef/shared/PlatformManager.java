@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -39,6 +38,7 @@ import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.inventory.domain.Resource;
@@ -62,7 +62,7 @@ public interface PlatformManager {
     /**
      * Find a PlatformType by id
      */
-    public PlatformType findPlatformType(Integer id) throws ObjectNotFoundException;
+    public PlatformType findPlatformType(Integer id);
     
     Platform getPlatformByName(String name);
 
@@ -108,7 +108,7 @@ public interface PlatformManager {
      * @param aipValue the AIPlatform to create as a regular appdef platform.
      */
     public Platform createPlatform(AuthzSubject subject, AIPlatformValue aipValue)
-        throws ApplicationException;
+        throws ApplicationException, DuplicateObjectException;
     
     Platform createPlatform(AuthzSubject subject, Integer platformTypeId,
                             PlatformValue pValue, Integer agentPK)

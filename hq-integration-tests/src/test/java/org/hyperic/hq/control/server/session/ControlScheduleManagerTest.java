@@ -67,7 +67,7 @@ public class ControlScheduleManagerTest
             new String[] { "TestPlatform" });
         server = createServer(platform, serverType, "Server1");
         server2 = createServer(platform, serverType, "Server2");
-        flushSession();
+        flush();
     }
 
     private void addControlHistory() {
@@ -80,7 +80,7 @@ public class ControlScheduleManagerTest
         controlScheduleManager.createHistory(server2.getEntityId(), null, null, authzSubjectManager
             .getOverlordPojo().getName(), "someOtherAction", null, false, startTime + 1000,
             startTime + 1000, startTime + 1000, ControlConstants.STATUS_INPROGRESS, "", null);
-        flushSession();
+        flush();
     }
 
     @Test

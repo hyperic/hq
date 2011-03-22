@@ -38,7 +38,6 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.shared.AppServiceValue;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
@@ -98,8 +97,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
     protected static final String VALUE_PROCESSOR = "org.hyperic.hq.appdef.server.session.PagerProcessor_app";
     private Pager valuePager;
-    private Pager defaultPager;
-
+   
     private ResourceManager resourceManager;
     
     private ResourceGroupManager resourceGroupManager;
@@ -360,16 +358,15 @@ public class ApplicationManagerImpl implements ApplicationManager {
      */
     public void removeAppService(AuthzSubject caller, Integer appId, Integer appServiceId)
         throws ApplicationException, ApplicationNotFoundException, PermissionException {
-        try {
-            ResourceGroup app = resourceGroupManager.findResourceGroupById(appId);
-            //TODO perm check
-            //permissionManager.checkModifyPermission(caller, app.getEntityId());
-
-            Resource appSvcLoc = resourceManager.findResourceById(appServiceId);
-            app.removeMember(appSvcLoc);
-        } catch (ObjectNotFoundException e) {
+        ResourceGroup app = resourceGroupManager.findResourceGroupById(appId);
+        if(app == null) {
             throw new ApplicationNotFoundException(appId);
         }
+        //TODO perm check
+        //permissionManager.checkModifyPermission(caller, app.getEntityId());
+
+        Resource appSvcLoc = resourceManager.findResourceById(appServiceId);
+        app.removeMember(appSvcLoc);
     }
 
   
@@ -405,8 +402,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
     
     private void setDependencyTree(Application a, DependencyTree newTree) {
         log.debug("Setting dependency tree for application: " + a.getName());
-        List nodes = newTree.getNodes();
+       
         //TODO
+        // List nodes = newTree.getNodes();
 //       
 //        for (int i = 0; i < nodes.size(); i++) {
 //            DependencyNode aNode = (DependencyNode) nodes.get(i);
@@ -446,14 +444,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
     @Transactional(readOnly = true)
     public DependencyTree getServiceDepsForApp(AuthzSubject subject, Integer pk)
         throws ApplicationNotFoundException, PermissionException {
-        try {
-            // find the app
-            Application app = toApplication(resourceGroupManager.findResourceGroupById(pk));
-            permissionManager.checkViewPermission(subject, app.getEntityId());
-            return getDependencyTree(app);
-        } catch (ObjectNotFoundException e) {
+        // find the app
+        ResourceGroup group = resourceGroupManager.findResourceGroupById(pk);
+        if(group == null) {
             throw new ApplicationNotFoundException(pk);
         }
+        Application app = toApplication(group);
+        permissionManager.checkViewPermission(subject, app.getEntityId());
+        return getDependencyTree(app);
     }
 
     /**
@@ -465,14 +463,14 @@ public class ApplicationManagerImpl implements ApplicationManager {
     public void setServiceDepsForApp(AuthzSubject subject, DependencyTree depTree)
         throws ApplicationNotFoundException, PermissionException {
         Integer pk = depTree.getApplication().getId();
-        try {
-            // find the app
-            Application app = toApplication(resourceGroupManager.findResourceGroupById(pk));
-            permissionManager.checkModifyPermission(subject, app.getEntityId());
-           setDependencyTree(app, depTree);
-        } catch (ObjectNotFoundException e) {
+        // find the app
+        ResourceGroup group = resourceGroupManager.findResourceGroupById(pk);
+        if(group == null) {
             throw new ApplicationNotFoundException(pk);
         }
+        Application app = toApplication(group);
+        permissionManager.checkModifyPermission(subject, app.getEntityId());
+        setDependencyTree(app, depTree);
     }
 
     /**
@@ -562,11 +560,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
     public void setApplicationServices(AuthzSubject subject, Integer appId,
                                        List<AppdefEntityID> entityIds)
         throws ApplicationNotFoundException, AppdefGroupNotFoundException, PermissionException {
-        try {
-            ResourceGroup app = resourceGroupManager.findResourceGroupById(appId);
-            //TODO perm check
-            //permissionManager.checkModifyPermission(subject, app.getEntityId());
-            for (Iterator<Resource> i = app.getMembers().iterator(); i.hasNext();) {
+        ResourceGroup app = resourceGroupManager.findResourceGroupById(appId);
+        if(app == null) {
+            throw new ApplicationNotFoundException(appId);
+        }
+        //TODO perm check
+        //permissionManager.checkModifyPermission(subject, app.getEntityId());
+        for (Iterator<Resource> i = app.getMembers().iterator(); i.hasNext();) {
                 Resource appSvc = i.next();
                 AppdefEntityID anId = AppdefEntityID.newServiceID(appSvc.getId());
                 if (!entityIds.contains(anId)) {
@@ -579,16 +579,13 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 } else {
                     entityIds.remove(anId);
                 }
-            }
+        }
             // iterate over the list, and create the individual entries
 
-            for (int i = 0; i < entityIds.size(); i++) {
+        for (int i = 0; i < entityIds.size(); i++) {
                 AppdefEntityID id = (AppdefEntityID) entityIds.get(i);
                 app.addMember(resourceManager.findResourceById(id.getId()));
                 
-            }
-        } catch (ObjectNotFoundException e) {
-            throw new ApplicationNotFoundException(appId);
         }
     }
 
@@ -888,7 +885,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
         valuePager = Pager.getPager(VALUE_PROCESSOR);
-        defaultPager = Pager.getDefaultPager();
         //TODO move init logic?
         if(resourceTypeDao.findByName(AppdefEntityConstants.APPDEF_NAME_APPLICATION) == null) {
             ResourceType groupType = new ResourceType(AppdefEntityConstants.APPDEF_NAME_APPLICATION);
