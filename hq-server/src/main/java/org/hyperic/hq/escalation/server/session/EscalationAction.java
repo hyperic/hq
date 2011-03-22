@@ -42,67 +42,25 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 @Embeddable
-public class EscalationAction 
-    implements Serializable, JSON
-{
+public class EscalationAction implements Serializable, JSON {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ACTION_ID", nullable = false)
+    @Index(name = "ESC_ACTION_ID_IDX")
+    private Action action;
+
     @Parent
     private Escalation parent;
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="ACTION_ID",nullable=false)
-    @Index(name="ESC_ACTION_ID_IDX")
-    private Action      action;
-    
-    @Column(name="WAIT_TIME",nullable=false)
-    private long        waitTime;
+
+    @Column(name = "WAIT_TIME", nullable = false)
+    private long waitTime;
 
     protected EscalationAction() {
     }
 
-    protected EscalationAction(Escalation parent, Action action, 
-                               long waitTime) 
-    {
-        this.parent   = parent;
-        this.action   = action;
-        this.waitTime = waitTime;
-    }
-    
-    protected void setParent(Escalation parent) {
+    protected EscalationAction(Escalation parent, Action action, long waitTime) {
         this.parent = parent;
-    }
-
-    public Escalation getParent() {
-        return parent;
-    }
-    
-    public Action getAction() {
-        return action;
-    }
-
-    protected void setAction(Action action) {
         this.action = action;
-    }
-
-    public long getWaitTime() {
-        return waitTime;
-    }
-
-    protected void setWaitTime(long waitTime) {
         this.waitTime = waitTime;
-    }
-
-    public JSONObject toJSON() {
-        try {
-            return new JSONObject()
-                .put(getAction().getJsonName(), getAction().toJSON())
-                .put("waitTime", getWaitTime());
-        } catch(JSONException e) {
-            throw new SystemException(e);
-        }
-    }
-
-    public String getJsonName() {
-        return "escalationAction";
     }
 
     public boolean equals(Object obj) {
@@ -114,21 +72,55 @@ public class EscalationAction
             return false;
         }
 
-        EscalationAction o = (EscalationAction)obj;
-        return parent.equals(o.getParent()) && 
-               waitTime == o.getWaitTime() &&
+        EscalationAction o = (EscalationAction) obj;
+        return parent.equals(o.getParent()) && waitTime == o.getWaitTime() &&
                action.equals(o.getAction());
+    }
+
+    public Action getAction() {
+        return action;
+    }
+
+    public String getJsonName() {
+        return "escalationAction";
+    }
+
+    public Escalation getParent() {
+        return parent;
+    }
+
+    public long getWaitTime() {
+        return waitTime;
     }
 
     public int hashCode() {
         int result = 17;
 
-        result = 37*result + parent.hashCode();
-        result = 37*result + (int)(waitTime ^ (waitTime >>> 32));
-        result = 37*result + action.hashCode();
+        result = 37 * result + parent.hashCode();
+        result = 37 * result + (int) (waitTime ^ (waitTime >>> 32));
+        result = 37 * result + action.hashCode();
 
         return result;
     }
+
+    protected void setAction(Action action) {
+        this.action = action;
+    }
+
+    protected void setParent(Escalation parent) {
+        this.parent = parent;
+    }
+
+    protected void setWaitTime(long waitTime) {
+        this.waitTime = waitTime;
+    }
+
+    public JSONObject toJSON() {
+        try {
+            return new JSONObject().put(getAction().getJsonName(), getAction().toJSON()).put(
+                "waitTime", getWaitTime());
+        } catch (JSONException e) {
+            throw new SystemException(e);
+        }
+    }
 }
-
-

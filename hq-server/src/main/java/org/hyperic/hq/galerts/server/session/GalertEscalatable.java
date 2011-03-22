@@ -59,7 +59,7 @@ public class GalertEscalatable
     private GalertLog _alert;
     private List      _auxLogs;
     
-    GalertEscalatable(GalertLog alert) {
+    public GalertEscalatable(GalertLog alert) {
         _alert = alert;
     }
     

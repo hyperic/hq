@@ -48,6 +48,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.alert.data.AlertRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
+import org.hyperic.hq.escalation.data.EscalationStateRepository;
 import org.hyperic.hq.events.ActionExecutionInfo;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertInterface;
@@ -98,7 +99,7 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 	private final Set _uncomittedEscalatingEntities = Collections
 			.synchronizedSet(new HashSet());
 	private final ThreadPoolExecutor _executor;
-	private final EscalationStateDAO escalationStateDao;
+	private final EscalationStateRepository escalationStateRepository;
 	private AuthzSubjectManager authzSubjectManager;
 	private AlertRepository alertRepository;
 	private final Log log = LogFactory.getLog(EscalationRuntime.class);
@@ -106,10 +107,10 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 	private ConcurrentStatsCollector concurrentStatsCollector;
 	
 	@Autowired
-	public EscalationRuntimeImpl(EscalationStateDAO escalationStateDao,
+	public EscalationRuntimeImpl(EscalationStateRepository escalationStateRepository,
 			AuthzSubjectManager authzSubjectManager, AlertRepository alertRepository,
 			GalertLogRepository galertLogRepository, ConcurrentStatsCollector concurrentStatsCollector) {
-		this.escalationStateDao = escalationStateDao;
+		this.escalationStateRepository = escalationStateRepository;
 		this.authzSubjectManager = authzSubjectManager;
 		this.alertRepository = alertRepository;
 		this.galertLogRepository = galertLogRepository;
@@ -258,7 +259,7 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 
 	private void deleteAllEscalations_(
 			EscalatingEntityIdentifier[] escalatingEntities) {
-		List stateIds = new ArrayList(escalatingEntities.length);
+		List<Integer> stateIds = new ArrayList<Integer>(escalatingEntities.length);
 
 		synchronized (_stateIdsToTasks) {
 			for (int i = 0; i < escalatingEntities.length; i++) {
@@ -272,8 +273,7 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 
 			}
 		}
-		escalationStateDao.removeAllEscalationStates((Integer[]) stateIds
-				.toArray(new Integer[stateIds.size()]));
+		escalationStateRepository.deleteByIds(stateIds);
 	}
 
 	private void unscheduleEscalation_(Integer stateId) {
@@ -530,11 +530,11 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 	public void endEscalation(EscalationState escalationState) {
 		if (escalationState != null) {
 			// make sure we have the updated state to avoid StaleStateExceptions
-			escalationState = escalationStateDao.get(escalationState.getId());
+			escalationState = escalationStateRepository.findById(escalationState.getId());
 			if (escalationState == null) {
 				return;
 			}
-			escalationStateDao.remove(escalationState);
+			escalationStateRepository.delete(escalationState);
 			unscheduleEscalation(escalationState);
 		}
 	}
@@ -546,7 +546,7 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 		// in a separate session when ending an escalation).
 		// The get() will return null if the escalation state
 		// does not exist.
-		EscalationState escalationState = escalationStateDao.get(stateId);
+		EscalationState escalationState = escalationStateRepository.findById(stateId);
 
 		if (hasEscalationStateOrEscalatingEntityBeenDeleted(escalationState)) {
 			// just to be safe
