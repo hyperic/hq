@@ -62,6 +62,7 @@ import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.galert.data.ExecutionStrategyInfoRepository;
 import org.hyperic.hq.galert.data.ExecutionStrategyTypeInfoRepository;
 import org.hyperic.hq.galert.data.GalertActionLogRepository;
+import org.hyperic.hq.galert.data.GalertAuxLogRepository;
 import org.hyperic.hq.galert.data.GalertDefRepository;
 import org.hyperic.hq.galert.data.GalertLogRepository;
 import org.hyperic.hq.galert.data.GtriggerInfoRepository;
@@ -94,7 +95,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
 
     private ExecutionStrategyTypeInfoRepository executionStrategyTypeInfoRepository;
     private GalertDefRepository galertDefRepository;
-    private GalertAuxLogDAO _auxLogDAO;
+    private GalertAuxLogRepository auxLogRepository;
     private GalertLogRepository gAlertLogRepository;
     private GalertActionLogRepository actionLogRepository;
     private CrispoManager crispoManager;
@@ -106,7 +107,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
 
     @Autowired
     public GalertManagerImpl(ExecutionStrategyTypeInfoRepository executionStrategyTypeInfoRepository, GalertDefRepository galertDefRepository,
-                             GalertAuxLogDAO auxLogDAO, GalertLogRepository gAlertLogRepository,
+                             GalertAuxLogRepository auxLogRepository, GalertLogRepository gAlertLogRepository,
                              GalertActionLogRepository actionLogRepository, CrispoManager crispoManager,
                              EscalationManager escalationManager,
                              ResourceGroupManager resourceGroupManager, GalertProcessor gAlertProcessor,
@@ -114,7 +115,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
                              GtriggerInfoRepository gtriggerInfoRepository) {
         this.executionStrategyTypeInfoRepository = executionStrategyTypeInfoRepository;
         this.galertDefRepository = galertDefRepository;
-        _auxLogDAO = auxLogDAO;
+        this.auxLogRepository = auxLogRepository;
         this.gAlertLogRepository = gAlertLogRepository;
         this.actionLogRepository = actionLogRepository;
         this.crispoManager = crispoManager;
@@ -250,7 +251,12 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      */
     @Transactional(readOnly = true)
     public GalertAuxLog findAuxLogById(Integer id) {
-        return _auxLogDAO.findById(id);
+        GalertAuxLog log = auxLogRepository.findById(id);
+        if(log == null) {
+            throw new EntityNotFoundException("GalertAuxLog with ID: " + id + 
+                " was not found");
+        }
+        return log;
     }
 
     /**
@@ -672,7 +678,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         for (AlertAuxLogProvider p : AlertAuxLogProvider.findAll()) {
             p.deleteAll(def);
         }
-        _auxLogDAO.removeAll(def);
+        auxLogRepository.deleteByDef(def);
 
         // Kill the logs
         gAlertLogRepository.deleteByDef(def);
