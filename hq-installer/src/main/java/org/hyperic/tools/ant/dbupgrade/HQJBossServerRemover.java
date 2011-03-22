@@ -52,6 +52,7 @@ public class HQJBossServerRemover
     private String upgradeDir;
 
     private int deletedAlertDefinitions;
+    private int deletedAlertConditions;
     private int removedFromGroups;
     private int removedFromApps;
 
@@ -147,6 +148,8 @@ public class HQJBossServerRemover
                     configResponseId);
                 removedServers++;
             }
+            log("Removed " + deletedAlertConditions + " " + autoinventoryidentifier +
+            " alert conditions");
             log("Removed " + deletedAlertDefinitions + " " + autoinventoryidentifier +
                 " alert definitions");
             log("Removed " + removedFromGroups + " " + autoinventoryidentifier +
@@ -235,8 +238,19 @@ public class HQJBossServerRemover
         stmt.executeUpdate("DELETE FROM EAM_EVENT_LOG" + " WHERE resource_id =" + resourceId);
 
         stmt
+            .executeUpdate("DELETE FROM EAM_ACTION WHERE alert_definition_id in (SELECT id FROM EAM_ALERT_DEFINITION" +
+                " WHERE resource_id =" + resourceId + ")");
+        
+        stmt
             .executeUpdate("DELETE FROM EAM_ALERT WHERE alert_definition_id in (SELECT id FROM EAM_ALERT_DEFINITION" +
-                           " WHERE resource_id =" + resourceId + ")");
+                " WHERE resource_id =" + resourceId + ")");
+        
+        stmt.executeUpdate("DELETE FROM EAM_REGISTERED_TRIGGER WHERE alert_definition_id in (SELECT id FROM EAM_ALERT_DEFINITION" +
+                " WHERE resource_id =" + resourceId + ")");
+        
+        int condDeleted = stmt.executeUpdate("DELETE FROM EAM_ALERT_CONDITION WHERE alert_definition_id in (SELECT id FROM EAM_ALERT_DEFINITION" +
+                          " WHERE resource_id =" + resourceId + ")");
+        deletedAlertConditions += condDeleted;
 
         int defsDeleted = stmt.executeUpdate("DELETE FROM EAM_ALERT_DEFINITION" +
                                              " WHERE resource_id =" + resourceId);
