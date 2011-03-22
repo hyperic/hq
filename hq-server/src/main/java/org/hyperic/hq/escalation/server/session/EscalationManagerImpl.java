@@ -39,7 +39,9 @@ import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.DuplicateObjectException;
+import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.escalation.EscalationEvent;
+import org.hyperic.hq.escalation.data.EscalationRepository;
 import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.ActionConfigInterface;
 import org.hyperic.hq.events.AlertPermissionManager;
@@ -56,6 +58,7 @@ import org.hyperic.util.units.UnitNumber;
 import org.hyperic.util.units.UnitsConstants;
 import org.hyperic.util.units.UnitsFormat;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,7 +70,7 @@ public class EscalationManagerImpl implements EscalationManager {
     private ActionManager actionManager;
     private AlertPermissionManager alertPermissionManager;
 
-    private EscalationDAO escalationDAO;
+    private EscalationRepository escalationRepository;
     private EscalationStateDAO escalationStateDAO;
     private AlertRegulator alertRegulator;
     private EscalationRuntime escalationRuntime;
@@ -76,13 +79,13 @@ public class EscalationManagerImpl implements EscalationManager {
     @Autowired
     public EscalationManagerImpl(ActionManager actionManager,
                                  AlertPermissionManager alertPermissionManager,
-                                 EscalationDAO escalationDAO,
+                                 EscalationRepository escalationRepository,
                                  EscalationStateDAO escalationStateDAO,
                                  MessagePublisher messagePublisher,
                                  EscalationRuntime escalationRuntime, AlertRegulator alertRegulator) {
         this.actionManager = actionManager;
         this.alertPermissionManager = alertPermissionManager;
-        this.escalationDAO = escalationDAO;
+        this.escalationRepository = escalationRepository;
         this.escalationStateDAO = escalationStateDAO;
         this.escalationRuntime = escalationRuntime;
         this.messagePublisher = messagePublisher;
@@ -99,9 +102,7 @@ public class EscalationManagerImpl implements EscalationManager {
     }
 
     private void assertEscalationNameIsUnique(String name) throws DuplicateObjectException {
-        Escalation escalation;
-
-        if ((escalation = escalationDAO.findByName(name)) != null) {
+        if ((escalationRepository.findByName(name)) != null) {
             throw new DuplicateObjectException("An escalation with that name " + "already exists");
         }
     }
@@ -120,7 +121,7 @@ public class EscalationManagerImpl implements EscalationManager {
 
         escalation = new Escalation(name, description, pauseAllowed, maxWaitTime, notifyAll, repeat);
 
-        escalationDAO.save(escalation);
+        escalationRepository.save(escalation);
 
         return escalation;
     }
@@ -236,32 +237,42 @@ public class EscalationManagerImpl implements EscalationManager {
             }
         }
 
-        escalationDAO.remove(escalation);
+        escalationRepository.delete(escalation);
     }
 
     @Transactional(readOnly = true)
     public Escalation findById(Integer id) {
-        return escalationDAO.findById(id);
+        Escalation escalation = escalationRepository.findById(id);
+        if(escalation == null) {
+            throw new EntityNotFoundException("Escalation with ID: " + id + 
+                " was not found");
+        }
+        return escalation;
     }
 
     @Transactional(readOnly = true)
     public Escalation findById(AuthzSubject subject, Integer id) throws PermissionException {
-        return escalationDAO.findById(id);
+        Escalation escalation = escalationRepository.findById(id);
+        if(escalation == null) {
+            throw new EntityNotFoundException("Escalation with ID: " + id + 
+                " was not found");
+        }
+        return escalation;
     }
 
     @Transactional(readOnly = true)
     public Collection<Escalation> findAll(AuthzSubject subject) throws PermissionException {
-        return escalationDAO.findAllOrderByName();
+        return escalationRepository.findAll(new Sort("name"));
     }
 
     @Transactional(readOnly = true)
     public Escalation findByName(AuthzSubject subject, String name) throws PermissionException {
-        return escalationDAO.findByName(name);
+        return escalationRepository.findByName(name);
     }
 
     @Transactional(readOnly = true)
     public Escalation findByName(String name) {
-        return escalationDAO.findByName(name);
+        return escalationRepository.findByName(name);
     }
 
     /**
@@ -754,7 +765,7 @@ public class EscalationManagerImpl implements EscalationManager {
      */
     @Transactional(readOnly = true)
     public Number getEscalationCount() {
-        return new Integer(escalationDAO.size());
+        return escalationRepository.count();
     }
 
     @Transactional(readOnly = true)
