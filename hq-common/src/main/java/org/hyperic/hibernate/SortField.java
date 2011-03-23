@@ -25,8 +25,16 @@
 
 package org.hyperic.hibernate;
 
+/**
+ * 
+ * @deprecated Use {@link org.springframework.data.domain.Sort} instead
+ * 
+ */
+@Deprecated
 public interface SortField {
     String getDescription();
+
     String getValue();
+
     boolean isSortable();
 }
