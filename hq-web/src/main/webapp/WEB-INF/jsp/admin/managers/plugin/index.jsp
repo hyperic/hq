@@ -27,7 +27,7 @@
 		margin: 0px;
 	}
         
-	.uploadBtn{
+	.selectFileBtn{
 		-moz-border-radius: 4px 4px 4px 4px;
 	    background: url("/images/4.0/backgrounds/button-green-background.jpg") repeat-x scroll center bottom #2DBF3D;
     	border: 1px solid #84B96D;
@@ -37,6 +37,7 @@
 	    font-weight: bold;
 	    padding: 3px 15px;
 	    width: 60px;
+	    float:right;
 	}
 	#uploadButtonBar{
 		text-align: right;
@@ -230,13 +231,31 @@
 	input[type="text"]{
 		margin:0.5em 0;
 	}
+	.selectInstruction{
+		font-weight:bold;
+		width:290px;
+		float:left;
+	}
+	#selectedFileList{
+		width:400px;
+	}
+	#selectFileBtn{
+		width:90px;
+		float:right;
+	}
+	.fileToUploadClose{
+		background: url("/images/dash_movecontent_del-on.gif") no-repeat scroll 5px center #FFFFFF
+	}
+	#afterSelectFileInstruction{
+		text-align:center;
+		color:#777777;
+	}
 	.mechanismOffInstruction{
 		background:yellow; 
 		font-weight:bold; 
 		color:red;
 		font-size: larger;
-	}
-	
+	}	
 </style>
 <section id="pluginManagerPanel" class="container top">
 	<h1><fmt:message key="admin.managers.plugin.title" /></h1>
@@ -310,13 +329,19 @@
 
 <c:if test="${mechanismOn}" >
 	<div id="uploadPanel" style="visibility:hidden;">
-			<strong><fmt:message key="admin.managers.plugin.upload.dialog.instruction" /></strong>
 			<p>
 				<span><fmt:message key="admin.managers.plugin.upload.dialog.label" />&nbsp;</span>
 			</p>
 			<p>
-				<div id="selectFileButton" class="uploadBtn">Select File</div>
+				<div class="selectInstruction"><fmt:message key="admin.managers.plugin.upload.dialog.instruction" />&nbsp;</div>
+				
+				<div id="selectFileButton" class="selectFileBtn">Select File</div>
+			</p>
+			<br/>
+			<p>
+			    <div><fmt:message key="admin.managers.plugin.upload.dialog.files.title" /></div>
 				<div id="selectedFileList"></div>
+				<p id="afterSelectFileInstruction"><fmt:message key="admin.managers.plugin.upload.dialog.instruction.after" /></p>
 			</p>
 			<p id="validationMessage" class="error" style="opacity:0;">&nbsp;</p>
 			<div id="uploadButtonBar">
