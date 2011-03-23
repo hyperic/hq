@@ -25,12 +25,14 @@
 
 package org.hyperic.hibernate;
 
-import org.hibernate.Query;
+
 import org.hyperic.util.pager.PageControl;
 
 /**
- * A paging class that knows a little about Hibernate.
+ * A paging class
+ * @deprecated Use {@link org.springframework.data.domain.PageRequest} instead
  */
+@Deprecated
 public class PageInfo {
     private int       _pageNum;
     private int       _pageSize;
@@ -89,20 +91,7 @@ public class PageInfo {
     public boolean isAll() {
         return _isAll;
     }
-
-    /**
-     * Modifies a Hibernate query to conform to the paging specs in this
-     * PageInfo object.  This only changes this method makes are to the
-     * page offset and result count.  Sort order must be dealt with elsewhere.
-     */
-    public Query pageResults(Query q) {
-        if (!_isAll) {
-            q.setFirstResult(getStartRow());
-            q.setMaxResults(getPageSize());
-        }
-        return q;
-    }
-    
+  
     public static PageInfo create(int pageNum, int pageSize, SortField sort,
                                   boolean ascending) 
     {
