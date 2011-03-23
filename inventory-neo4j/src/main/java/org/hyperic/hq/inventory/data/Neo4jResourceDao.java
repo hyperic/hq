@@ -10,11 +10,12 @@ import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.hyperic.hq.inventory.NotUniqueException;
 import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.util.pager.PageList;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.index.impl.lucene.QueryContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.graph.neo4j.finder.FinderFactory;
@@ -77,7 +78,7 @@ public class Neo4jResourceDao implements ResourceDao {
     }
 
     @Transactional(readOnly = true)
-    public PageList<Resource> findByIndexedProperty(String propertyName, Object propertyValue,
+    public Page<Resource> findByIndexedProperty(String propertyName, Object propertyValue,
                                                     Pageable pageInfo) {
         QueryContext queryContext = new QueryContext(propertyValue);
         if (pageInfo.getSort() != null) {
@@ -89,7 +90,7 @@ public class Neo4jResourceDao implements ResourceDao {
         IndexHits<Node> indexHits = graphDatabaseContext.getNodeIndex(
             GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME).query(propertyName, queryContext);
         if (indexHits == null) {
-            return new PageList<Resource>(0);
+            return new PageImpl<Resource>(new ArrayList<Resource>(0),pageInfo,0);
         }
 
         List<Resource> resources = new ArrayList<Resource>(pageInfo.getPageSize());
@@ -105,7 +106,7 @@ public class Neo4jResourceDao implements ResourceDao {
             }
             currentPosition++;
         }
-        return new PageList<Resource>(resources, indexHits.size());
+        return new PageImpl<Resource>(resources, pageInfo,indexHits.size());
     }
 
     // TODO Assumes name is unique...I think we want to change that behavior in

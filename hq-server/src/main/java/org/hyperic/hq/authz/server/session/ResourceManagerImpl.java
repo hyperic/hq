@@ -60,6 +60,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -349,7 +350,8 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     public PageList<Resource> getResourcesOfType(ResourceType resourceType, PageControl pc) {
         PageRequest pageInfo = new PageRequest(pc.getPagenum(),pc.getPagesize(),
             new Sort(pc.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
-        return resourceDao.findByIndexedProperty("type", resourceType.getId(),pageInfo);
+        Page<Resource> resources = resourceDao.findByIndexedProperty("type", resourceType.getId(),pageInfo);
+        return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
     }
 
 

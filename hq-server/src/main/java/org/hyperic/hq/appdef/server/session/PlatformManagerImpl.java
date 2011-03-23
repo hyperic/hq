@@ -105,6 +105,7 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -597,7 +598,9 @@ public class PlatformManagerImpl implements PlatformManager {
     public PageList<Resource> getAllPlatformResources(AuthzSubject subject, PageControl pc) {
         PageRequest pageInfo = new PageRequest(pc.getPagenum(),pc.getPagesize(),
             new Sort(pc.getSortorder() == PageControl.SORT_ASC? Direction.ASC : Direction.DESC,"name"));
-        return resourceDao.findByIndexedProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_PLATFORM,pageInfo);
+        Page<Resource> resources = resourceDao.findByIndexedProperty(AppdefResourceType.APPDEF_TYPE_ID, 
+            AppdefEntityConstants.APPDEF_TYPE_PLATFORM,pageInfo);
+        return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
     }
     
     public Set<Integer> getAllPlatformIds() {

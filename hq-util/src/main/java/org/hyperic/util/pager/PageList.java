@@ -40,8 +40,9 @@ import java.util.Collection;
  * the first 15 both the user and the application the user will want to know 
  * that there are 5000 users in the system.
  * <br> 
- * 
+ * @deprecated Use {{@link org.springframework.data.domain.PageImpl} instead
  */
+@Deprecated
 public class PageList<T> extends ArrayList<T> implements Serializable {
     private int          totalSize = 0;
     private boolean      isUnbounded;   // Is the total size of the list known?

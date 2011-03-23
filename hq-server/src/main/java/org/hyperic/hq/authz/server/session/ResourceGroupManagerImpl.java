@@ -83,6 +83,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -682,19 +683,22 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     public PageList<Resource> getCompatibleGroups(PageControl pageControl) {
         PageRequest pageInfo = new PageRequest(pageControl.getPagenum(),pageControl.getPagesize(),
             new Sort(pageControl.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
-        return resourceDao.findByIndexedProperty(MIXED, false,pageInfo);
+        Page<Resource> resources = resourceDao.findByIndexedProperty(MIXED, false,pageInfo);
+        return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
     }
 
     public PageList<Resource> getMixedGroups(PageControl pageControl) {
         PageRequest pageInfo = new PageRequest(pageControl.getPagenum(),pageControl.getPagesize(),
             new Sort(pageControl.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
-        return resourceDao.findByIndexedProperty(MIXED, true,pageInfo);
+        Page<Resource> resources = resourceDao.findByIndexedProperty(MIXED, true,pageInfo);
+        return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
     }
     
     public PageList<Resource> getCompatibleGroupsContainingType(int resourceTypeId, PageControl pageControl) {
         PageRequest pageInfo = new PageRequest(pageControl.getPagenum(),pageControl.getPagesize(),
             new Sort(pageControl.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
-        return resourceDao.findByIndexedProperty(GROUP_ENT_RES_TYPE, resourceTypeId,pageInfo);
+        Page<Resource> resources = resourceDao.findByIndexedProperty(GROUP_ENT_RES_TYPE, resourceTypeId,pageInfo);
+        return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
     }
 
     @Transactional(readOnly=true)

@@ -80,6 +80,7 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -879,7 +880,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
         int appGroupTypeId = resourceManager.findResourceTypeByName(AppdefEntityConstants.APPDEF_NAME_APPLICATION).getId();
         PageRequest pageInfo = new PageRequest(pc.getPagenum(),pc.getPagesize(),
             new Sort(pc.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
-        return resourceDao.findByIndexedProperty("type", appGroupTypeId,pageInfo);
+        Page<Resource> resources = resourceDao.findByIndexedProperty("type", appGroupTypeId,pageInfo);
+        return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
     }
 
     @PostConstruct

@@ -1,7 +1,7 @@
 package org.hyperic.hq.inventory.data;
 
 import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.util.pager.PageList;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -21,7 +21,7 @@ public interface ResourceDao extends GenericDao<Resource> {
      * @param pageInfo Info on paging and sorting
      * @return A paged list of Resource search results
      */
-    PageList<Resource> findByIndexedProperty(String propertyName, Object propertyValue,
+    Page<Resource> findByIndexedProperty(String propertyName, Object propertyValue,
                                              Pageable pageInfo);
 
     /**
