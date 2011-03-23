@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 public interface AuthzSubjectRepository extends JpaRepository<AuthzSubject, Integer> {
 
     @Transactional(readOnly = true)
-    @Query("select s from AuthzSubject s where s.name=:name and s.dsn=:dsn")
+    @Query("select s from AuthzSubject s where s.name=:name")
     @QueryHints({ @QueryHint(name = "org.hibernate.cacheable", value = "true"),
                  @QueryHint(name = "org.hibernate.cacheRegion", value = "AuthzSubject.findByName") })
     AuthzSubject findByName(@Param("name") String name);

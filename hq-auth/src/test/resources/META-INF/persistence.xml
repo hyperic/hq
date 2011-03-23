@@ -3,6 +3,14 @@
 <persistence-unit name="spring-jpa" transaction-type="RESOURCE_LOCAL">
      <provider>org.hibernate.ejb.HibernatePersistence</provider>
      <class>org.hyperic.hq.auth.Principal</class>
+     <class>org.hyperic.hq.auth.domain.AuthzSubject</class>
+     <class>org.hyperic.hq.auth.domain.Role</class>
+     <class>org.hyperic.hq.auth.domain.RoleCalendar</class>
+     <class>org.hyperic.hq.auth.domain.Calendar</class>
+     <class>org.hyperic.hq.auth.domain.CalendarEntry</class>
+     <class>org.hyperic.hq.config.domain.Crispo</class>
+     <class>org.hyperic.hq.config.domain.CrispoOption</class>
+     <class>org.hyperic.hq.inventory.domain.Resource</class>
      <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
       <properties>
             <property name="hibernate.hbm2ddl.auto" value="update"/>
