@@ -36,7 +36,6 @@ import org.hyperic.util.pager.PageControl;
 public class PageInfo {
     private int       _pageNum;
     private int       _pageSize;
-    private boolean   _isAll;
     private SortField _sort;
     private boolean   _ascending;
     
@@ -45,16 +44,10 @@ public class PageInfo {
     {
         _pageNum   = pageNum;
         _pageSize  = pageSize;
-        _isAll     = false;
         _sort      = sort;
         _ascending = ascending; 
     }
     
-    private PageInfo(SortField sort, boolean ascending) {
-        _isAll     = true;
-        _sort      = sort;
-        _ascending = ascending;
-    }
     
     /**
      * Get the page number.  The first page is page 0.
@@ -88,9 +81,7 @@ public class PageInfo {
         return _ascending;
     }
     
-    public boolean isAll() {
-        return _isAll;
-    }
+    
   
     public static PageInfo create(int pageNum, int pageSize, SortField sort,
                                   boolean ascending) 
@@ -98,19 +89,9 @@ public class PageInfo {
         return new PageInfo(pageNum, pageSize, sort, ascending);
     }
     
-    /**
-     * Returns a page control which will return all elements (not paged)
-     */
-    public static PageInfo getAll(SortField sort, boolean ascending) {
-        return new PageInfo(sort, ascending);
-    }
     
     public static PageInfo create(PageControl pc, SortField sort) {
-        if (pc.equals(PageControl.PAGE_ALL)) {
-            return getAll(sort, pc.isAscending());
-        } else {
-            return new PageInfo(pc.getPagenum(), pc.getPagesize(),
+        return new PageInfo(pc.getPagenum(), pc.getPagesize(),
                                 sort, pc.isAscending());
-        }
     }
 }
