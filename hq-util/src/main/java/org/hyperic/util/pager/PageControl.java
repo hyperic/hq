@@ -31,10 +31,15 @@ import java.io.Serializable;
  * A utility class to wrap up all the paging/sorting options that
  * are frequently used with finders and other methods that return
  * lists of things.
+ * @deprecated Use {@link org.springframework.data.domain.PageRequest} instead
  */
+@Deprecated
 public class PageControl implements Serializable, Cloneable {
 
-    public static final int SIZE_UNLIMITED = -1;
+    //TODO the PageRequest should only be used if you actually want paging (i.e. you have a real page size in mind).
+    //We don't support the "unlimited" page request, so this is now set to a really large value in the hopes
+    //that no data sets would exceed this
+    public static final int SIZE_UNLIMITED = Integer.MAX_VALUE;
 
     public static final int SORT_UNSORTED = 0;
     public static final int SORT_ASC      = 1;
