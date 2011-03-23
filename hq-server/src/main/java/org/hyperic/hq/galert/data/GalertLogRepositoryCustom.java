@@ -8,14 +8,20 @@ import org.hyperic.hq.galerts.server.session.GalertLog;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional(readOnly = true)
 public interface GalertLogRepositoryCustom {
 
+    Page<GalertLog> findByCreateTimeAndPriority(long begin, long end, AlertSeverity severity,
+                                                boolean inEscalation, boolean notFixed,
+                                                Integer groupId, Integer galertDefId,
+                                                Pageable pageable);
+
     List<GalertLog> findByCreateTimeAndPriority(long begin, long end, AlertSeverity severity,
-                                                boolean inEscalation, boolean notFixed, Integer groupId,
-                                                Integer galertDefId, Pageable pageable);
+                                                boolean inEscalation, boolean notFixed,
+                                                Integer groupId, Integer galertDefId, Sort sort);
 
     Page<GalertLog> findByGroupAndTimestampBetween(ResourceGroup group, long begin, long end,
                                                    Pageable pageable);

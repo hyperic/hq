@@ -129,9 +129,43 @@ public class GalertLogRepositoryIntegrationTest {
         List<GalertLog> expected = new ArrayList<GalertLog>();
         expected.add(log3);
         expected.add(log2);
+        PageRequest pageRequest = new PageRequest(0, 20,
+            new Sort("timestamp"));
+        assertEquals(new PageImpl<GalertLog>(expected,pageRequest,2l), galertLogRepository.findByCreateTimeAndPriority(timestamp - 5000,
+            timestamp, AlertSeverity.HIGH, false, true, null, null,pageRequest ));
+    }
+    
+    @Test
+    public void testFindByCreateTimeAndPriorityAndNotFixedSort() {
+        ResourceGroup group = new ResourceGroup();
+        group.setName("Group1");
+        entityManager.persist(group);
+        ResourceGroup group2 = new ResourceGroup();
+        group2.setName("Group2");
+        entityManager.persist(group2);
+        GalertDef def1 = new GalertDef("Platforms Down", "desc", AlertSeverity.HIGH, true, group);
+        entityManager.persist(def1);
+        GalertDef def2 = new GalertDef("CPU High", "desc", AlertSeverity.MEDIUM, true, group2);
+        entityManager.persist(def2);
+        long timestamp = System.currentTimeMillis();
+        GalertLog log = new GalertLog(def2, new ExecutionReason("Threshold Exceeded",
+            "Something bad happened", null, GalertDefPartition.NORMAL), timestamp);
+        galertLogRepository.save(log);
+        GalertLog log2 = new GalertLog(def1, new ExecutionReason("Threshold Exceeded Again",
+            "Something bad happened again", null, GalertDefPartition.NORMAL), timestamp - 3000);
+        galertLogRepository.save(log2);
+        GalertLog log3 = new GalertLog(def1, new ExecutionReason("Threshold Exceeded Again",
+            "Something bad happened again", null, GalertDefPartition.NORMAL), timestamp - 5000);
+        galertLogRepository.save(log3);
+        GalertLog log4 = new GalertLog(def1, new ExecutionReason("Threshold Exceeded Again",
+            "Something bad happened again", null, GalertDefPartition.NORMAL), timestamp - 2000);
+        log4.setFixed(true);
+        galertLogRepository.save(log4);
+        List<GalertLog> expected = new ArrayList<GalertLog>();
+        expected.add(log3);
+        expected.add(log2);
         assertEquals(expected, galertLogRepository.findByCreateTimeAndPriority(timestamp - 5000,
-            timestamp, AlertSeverity.HIGH, false, true, null, null, new PageRequest(0, 20,
-                new Sort("timestamp"))));
+            timestamp, AlertSeverity.HIGH, false, true, null, null,new Sort("timestamp") ));
     }
 
     @Test
@@ -169,9 +203,10 @@ public class GalertLogRepositoryIntegrationTest {
         expected.add(log3);
         expected.add(log2);
         expected.add(log4);
-        assertEquals(expected, galertLogRepository.findByCreateTimeAndPriority(timestamp - 5000,
-            timestamp, AlertSeverity.HIGH, false, false, null, null, new PageRequest(0, 20,
-                new Sort("timestamp"))));
+        PageRequest request = new PageRequest(0, 20,
+            new Sort("timestamp"));
+        assertEquals(new PageImpl<GalertLog>(expected,request,3l), galertLogRepository.findByCreateTimeAndPriority(timestamp - 5000,
+            timestamp, AlertSeverity.HIGH, false, false, null, null,request ));
     }
 
     @Test
@@ -202,9 +237,9 @@ public class GalertLogRepositoryIntegrationTest {
         galertLogRepository.save(log4);
         List<GalertLog> expected = new ArrayList<GalertLog>();
         expected.add(log);
-        assertEquals(expected, galertLogRepository.findByCreateTimeAndPriority(timestamp - 5000,
-            timestamp, AlertSeverity.HIGH, false, false, null, def2.getId(), new PageRequest(0, 20,
-                new Sort("timestamp"))));
+        PageRequest request = new PageRequest(0, 20,new Sort("timestamp"));
+        assertEquals(new PageImpl<GalertLog>(expected,request,1l), galertLogRepository.findByCreateTimeAndPriority(timestamp - 5000,
+            timestamp, AlertSeverity.HIGH, false, false, null, def2.getId(), request));
     }
 
     @Test
@@ -235,9 +270,9 @@ public class GalertLogRepositoryIntegrationTest {
         galertLogRepository.save(log4);
         List<GalertLog> expected = new ArrayList<GalertLog>();
         expected.add(log);
-        assertEquals(expected, galertLogRepository.findByCreateTimeAndPriority(timestamp - 5000,
-            timestamp, AlertSeverity.HIGH, false, false, group2.getId(), null, new PageRequest(0,
-                20, new Sort("timestamp"))));
+        PageRequest request = new PageRequest(0,20, new Sort("timestamp"));
+        assertEquals(new PageImpl<GalertLog>(expected, request,1l), galertLogRepository.findByCreateTimeAndPriority(timestamp - 5000,
+            timestamp, AlertSeverity.HIGH, false, false, group2.getId(), null,request ));
     }
 
     @Test

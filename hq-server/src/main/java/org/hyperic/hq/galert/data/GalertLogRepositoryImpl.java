@@ -14,6 +14,7 @@ import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 
 public class GalertLogRepositoryImpl implements GalertLogRepositoryCustom {
@@ -21,33 +22,58 @@ public class GalertLogRepositoryImpl implements GalertLogRepositoryCustom {
     @PersistenceContext
     private EntityManager entityManager;
 
-    public List<GalertLog> findByCreateTimeAndPriority(long begin, long end,
+    public Page<GalertLog> findByCreateTimeAndPriority(long begin, long end,
                                                        AlertSeverity severity,
                                                        boolean inEscalation, boolean notFixed,
                                                        Integer groupId, Integer galertDefId,
                                                        Pageable pageable) {
-        // TODO this query used to do perm checking with a passed-in subject ID
-        String query = "select a from " +
-                       (inEscalation ? "EscalationState es, " : "") +
-                       "GalertLog a " +
-                       "join a.def d " +
-                       "where " +
-                       (groupId != null ? " d.group.id = " + groupId + " and " : "") +
-                       "a.timestamp between :begin and :end " +
-                       (notFixed ? " and a.fixed = false " : "") +
-                       (galertDefId == null ? "" : "and d.id = " + galertDefId + " ") +
-                       "and d.severity >= :priority " +
-                       (inEscalation ? "and a.id = es.alertId and "
-                                       + "es.alertDefinitionId = d.id " : "");
+        long total = entityManager
+            .createQuery(
+                getCreateTimeAndPriorityQuery(begin, end, severity, inEscalation, notFixed,
+                    groupId, galertDefId, true), Long.class).setParameter("begin", begin)
+            .setParameter("end", end).setParameter("priority", severity.getCode())
+            .getSingleResult();
+        String query = getCreateTimeAndPriorityQuery(begin, end, severity, inEscalation, notFixed,
+            groupId, galertDefId, false);
         Iterator<Order> orders = pageable.getSort().iterator();
         while (orders.hasNext()) {
             Order order = orders.next();
             query += " order by " + order.getProperty() + " " + order.getDirection();
         }
+        List<GalertLog> results = entityManager.createQuery(query, GalertLog.class)
+            .setParameter("begin", begin).setParameter("end", end)
+            .setParameter("priority", severity.getCode()).setFirstResult(pageable.getOffset())
+            .setMaxResults(pageable.getPageSize()).getResultList();
+        return new PageImpl<GalertLog>(results, pageable, total);
+    }
+
+    public List<GalertLog> findByCreateTimeAndPriority(long begin, long end,
+                                                       AlertSeverity severity,
+                                                       boolean inEscalation, boolean notFixed,
+                                                       Integer groupId, Integer galertDefId,
+                                                       Sort sort) {
+        String query = getCreateTimeAndPriorityQuery(begin, end, severity, inEscalation, notFixed,
+            groupId, galertDefId, false);
+        Iterator<Order> orders = sort.iterator();
+        while (orders.hasNext()) {
+            Order order = orders.next();
+            query += " order by " + order.getProperty() + " " + order.getDirection();
+        }
         return entityManager.createQuery(query, GalertLog.class).setParameter("begin", begin)
-            .setParameter("end", end).setParameter("priority", severity.getCode())
-            .setFirstResult(pageable.getOffset()).setMaxResults(pageable.getPageSize())
-            .getResultList();
+            .setParameter("end", end).setParameter("priority", severity.getCode()).getResultList();
+    }
+
+    private String getCreateTimeAndPriorityQuery(long begin, long end, AlertSeverity severity,
+                                                 boolean inEscalation, boolean notFixed,
+                                                 Integer groupId, Integer galertDefId, boolean count) {
+        // TODO this query used to do perm checking with a passed-in subject ID
+        return "select " + (count ? "count(a)" : "a") + " from " +
+               (inEscalation ? "EscalationState es, " : "") + "GalertLog a " + "join a.def d " +
+               "where " + (groupId != null ? " d.group.id = " + groupId + " and " : "") +
+               "a.timestamp between :begin and :end " + (notFixed ? " and a.fixed = false " : "") +
+               (galertDefId == null ? "" : "and d.id = " + galertDefId + " ") +
+               "and d.severity >= :priority " +
+               (inEscalation ? "and a.id = es.alertId and " + "es.alertDefinitionId = d.id " : "");
     }
 
     public Page<GalertLog> findByGroupAndTimestampBetween(ResourceGroup group, long begin,

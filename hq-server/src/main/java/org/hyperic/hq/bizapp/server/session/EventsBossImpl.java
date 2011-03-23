@@ -128,6 +128,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -1240,14 +1242,13 @@ public class EventsBossImpl implements EventsBoss {
             AlertInterface alert = alertManager.findAlertById(alertID);
             alertsToFix = alertManager.findAlerts(subject.getId(), 0, alert.getTimestamp(), alert
                 .getTimestamp(), false, true, null, alert.getAlertDefinitionInterface().getId(),
-                PageInfo.getAll(AlertSortField.DATE, false));
+                new Sort(Direction.DESC,"ctime"));
 
         } else if (alertType.equals(GalertEscalationAlertType.GALERT)) {
             AlertInterface alert = galertManager.findAlertLog(alertID);
             alertsToFix = galertManager.findAlerts(subject, AlertSeverity.LOW,
                 alert.getTimestamp(), alert.getTimestamp(), false, true, null, alert
-                    .getAlertDefinitionInterface().getId(), PageInfo.getAll(
-                    GalertLogSortField.DATE, false));
+                    .getAlertDefinitionInterface().getId(), new Sort(Direction.DESC,"timestamp"));
         } else {
             alertsToFix = Collections.EMPTY_LIST;
         }

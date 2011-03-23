@@ -53,6 +53,7 @@ import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.data.domain.Sort;
 
 /**
  * Local interface for GalertManager
@@ -161,6 +162,10 @@ public interface GalertManager {
     public List<GalertLog> findAlerts(AuthzSubject subj, AlertSeverity severity, long timeRange,
                                       long endTime, boolean inEsc, boolean notFixed,
                                       Integer groupId, Integer galertDefId, PageInfo pInfo);
+    
+    List<GalertLog> findAlerts(AuthzSubject subj, AlertSeverity severity, long timeRange,
+        long endTime, boolean inEsc, boolean notFixed,
+        Integer groupId, Integer galertDefId, Sort sort);
 
     /**
      * Get the number of alerts for the given array of AppdefEntityID's

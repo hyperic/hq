@@ -474,7 +474,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         AlertSeverity s = AlertSeverity.findByCode(priority);
         
         List<GalertLog> alerts = gAlertLogRepository.findByCreateTimeAndPriority(
-            endTime - timeRange, endTime, s, false, false, null, null, request);
+            endTime - timeRange, endTime, s, false, false, null, null, request).getContent();
 
         List<GalertLog> result = new ArrayList<GalertLog>();
         for (GalertLog l : alerts) {
@@ -503,6 +503,15 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
                                       Integer groupId, PageInfo pInfo) {
         return findAlerts(subj, severity, timeRange, endTime, inEsc, notFixed, groupId, null, pInfo);
     }
+    
+    
+
+    public List<GalertLog> findAlerts(AuthzSubject subj, AlertSeverity severity, long timeRange,
+                                      long endTime, boolean inEsc, boolean notFixed,
+                                      Integer groupId, Integer galertDefId, Sort sort) {
+        return gAlertLogRepository.findByCreateTimeAndPriority(endTime - timeRange, endTime,
+            severity, inEsc, notFixed, groupId, galertDefId, sort);
+    }
 
     /**
      * 
@@ -521,7 +530,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         PageRequest request = new PageRequest(pInfo.getPageNum(), pInfo.getPageSize(),new Sort(sortOrders));
        
         return gAlertLogRepository.findByCreateTimeAndPriority(endTime - timeRange, endTime,
-            severity, inEsc, notFixed, groupId, galertDefId, request);
+            severity, inEsc, notFixed, groupId, galertDefId, request).getContent();
     }
 
     /**
