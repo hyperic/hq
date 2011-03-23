@@ -162,7 +162,7 @@
 	#showRemoveConfirmationButton{
 		float:left;
 	}
-	#pluginList .disabled{
+	#pluginList .notFound{
 		color:red;
 	}
 	.agentStatusSpan{
@@ -237,7 +237,7 @@
 	<p><fmt:message key="${instruction}" /></p>
 	
 	<div id="agentInfo">
-		<fmt:message key="admin.managers.Plugin.information.agent.count"/>&nbsp;<span id="agentInfoAllCount"></span> <br/>
+		<fmt:message key="admin.managers.Plugin.information.agent.count"/>&nbsp;<span id="agentInfoAllCount">${allAgentCount}</span> <br/>
 	</div>
 	
 	<div class="gridheader clear">
@@ -260,9 +260,9 @@
                     	<input type="checkbox" name="deleteId" value="${pluginSummary.id}" class="checkbox" />&nbsp; 
 					</c:if>
 				</span>
-				<span class="column span-3">${pluginSummary.name}&nbsp;
+				<span class="column span-3">${pluginSummary.name}
 					<c:if test="${disabled}">
-						<span class="disabled"><fmt:message key="admin.managers.Plugin.column.plugin.disabled"/></span>
+						<span class="notFound"><fmt:message key="admin.managers.Plugin.column.plugin.disabled"/></span>
 					</c:if>
 				</span>
 				<span class="column span-3">${pluginSummary.version}&nbsp;</span>
@@ -276,12 +276,12 @@
 					    </c:if>
 					    
 					    <c:if test="${pluginSummary.inProgressAgentCount>0 ||pluginSummary.errorAgentCount>0 }">
-					    	<span id="agentStatus_${pluginSummary.id}" class="agentStatusSpan">				    	
+					    	<span id="${pluginSummary.name}_${pluginSummary.id}" class="agentStatusSpan">				    	
 							<c:if test="${pluginSummary.inProgressAgentCount>0}">
-						        ${pluginSummary.inProgressAgentCount}&nbsp;<img id="progressIcon_${pluginSummary.id}" src="/images/arrow_refresh.png"/>&nbsp;&nbsp;
+						        ${pluginSummary.inProgressAgentCount}&nbsp;<img id="${pluginSummary.name}_${pluginSummary.id}" src="/images/arrow_refresh.png"/>&nbsp;&nbsp;
 						   	</c:if>	
 						   	<c:if test="${pluginSummary.errorAgentCount>0}">	   		
-					   			${pluginSummary.errorAgentCount}&nbsp;<img id="errorIcon_${pluginSummary.id}" src="/images/icon_available_red.gif"/>
+					   			${pluginSummary.errorAgentCount}&nbsp;<img id="${pluginSummary.name}_${pluginSummary.id}" src="/images/icon_available_red.gif"/>
 							</c:if>
 							</span>
 						</c:if>
@@ -299,52 +299,51 @@
 			<input id="showUploadFormButton" type="button" value="<fmt:message key="admin.managers.plugin.button.add.plugin" />" />
 		</div>	
 	</c:if>
-	<span> <fmt:message key="admin.managers.Plugin.column.plugin.disabled.tip" /></span>
 </section>
 
 
 <c:if test="${mechanismOn}" >
-<div id="uploadPanel" style="visibility:hidden;">
-		<strong><fmt:message key="admin.managers.plugin.upload.dialog.instruction" /></strong>
-		<p>
-			<span><fmt:message key="admin.managers.plugin.upload.dialog.label" />&nbsp;</span>
-		</p>
-		<p>
-			<div id="selectFileButton" class="uploadBtn">Select File</div>
-			<div id="selectedFileList"></div>
-			
-		</p>
-		<p id="validationMessage" class="error" style="opacity:0;">&nbsp;</p>
-		<div id="uploadButtonBar">
-			<input id="uploadButton" type="button" value="<fmt:message key='admin.managers.plugin.button.upload' />" /> &nbsp;
+	<div id="uploadPanel" style="visibility:hidden;">
+			<strong><fmt:message key="admin.managers.plugin.upload.dialog.instruction" /></strong>
+			<p>
+				<span><fmt:message key="admin.managers.plugin.upload.dialog.label" />&nbsp;</span>
+			</p>
+			<p>
+				<div id="selectFileButton" class="uploadBtn">Select File</div>
+				<div id="selectedFileList"></div>
+			</p>
+			<p id="validationMessage" class="error" style="opacity:0;">&nbsp;</p>
+			<div id="uploadButtonBar">
+				<input id="uploadButton" type="button" value="<fmt:message key='admin.managers.plugin.button.upload' />" /> &nbsp;
+				<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.cancel" /></a>
+			</div>
+	</div>
+	<div id="confirmationPanel" style="visibility:hidden;">
+		<p><fmt:message key="admin.managers.plugin.confirmation.message" /></p>
+		<div>
+			<input id="removeButton" type="button" name="remove" value="<fmt:message key="admin.managers.plugin.button.remove" />" />
 			<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.cancel" /></a>
 		</div>
-</div>
-<div id="confirmationPanel" style="visibility:hidden;">
-	<p><fmt:message key="admin.managers.plugin.confirmation.message" /></p>
-	<div>
-		<input id="removeButton" type="button" name="remove" value="<fmt:message key="admin.managers.plugin.button.remove" />" />
-		<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.cancel" /></a>
 	</div>
-</div>
-
-<div id="removeErrorPanel" style="visibility:hidden;">
-	<p id="removeErrorMsg"></p>
-	<div>
-		<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.cancel" /></a>
+	<div id="removeErrorPanel" style="visibility:hidden;">
+		<p id="removeErrorMsg"></p>
+		<div>
+			<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.cancel" /></a>
+		</div>
 	</div>
-</div>
 </c:if>
 
 <div id="showStatusPanel" style="visibility:hidden;">
 	<input type="text" id="searchText"/>
+	<input type="hidden" id="pluginId"/>
+	<input type ="hidden" id="pluginName"/>
 	<img id="loadingIcon" src="/static/images/ajax-loader.gif" />
 	<ul id="agentList"></ul>
 	
 	<div id="statusButtonBar">
 		<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.close" /></a>
 	</div>
-	<ul id="unfilteredList" style="visibility:hidden;"></ul>
+	
 </div>
 
 <script  djConfig="parseOnLoad: true">
@@ -375,14 +374,12 @@
 	}
 	
 	hqDojo.ready(function() {
-
-		refreshPage();
-		function seeStatusDetail(pluginId){
+		function seeStatusDetail(pluginId,keyword){
 			hqDijit.byId("showStatusPanelDialog").show();
 			var agentListUl = hqDojo.byId("agentList");
-			var unfilteredUl= hqDojo.byId("unfilteredList");
+			var searchWord = hqDojo.byId("searchText").value;
 			var xhrArgs = {
-					url: "/app/admin/managers/plugin/status/"+pluginId,
+					url: "/app/admin/managers/plugin/status/"+pluginId+"?searchWord="+searchWord,
 					load: function(response) {
 						hqDojo.style(hqDojo.byId("loadingIcon"),"visibility","hidden");
 						hqDojo.forEach(response, function(agentStatus) {
@@ -390,14 +387,12 @@
 								"innerHTML":agentStatus.agentName
 							});
 							statusLi.innerHTML+=" <fmt:message key="admin.managers.Plugin.tip.status.sync.date" /> "+agentStatus.syncDate;
-							if(response.status=="error"){
+							if(agentStatus.status=="error"){
 								hqDojo.addClass(statusLi,"errorAgent");
 							}else{
 								hqDojo.addClass(statusLi,"inProgressAgent");
 							};
 							agentListUl.appendChild(statusLi);
-							unfilteredLi = hqDojo.clone(statusLi);
-							unfilteredUl.appendChild(unfilteredLi);
 						});
 					},
 					handleAs: "json",
@@ -408,37 +403,27 @@
 				
 			};
 			hqDojo.xhrGet(xhrArgs);			
+			hqDojo.byId("showStatusPanelDialog_title").innerHTML=hqDojo.byId("pluginName").value + "&nbsp;-&nbsp;"+ "<fmt:message key="admin.managers.Plugin.tip.status.title" />";
 		}
-		function buildAgentStatusList(response){
-		var agentListUl = hqDojo.byId("agentList");
-			hqDojo.forEach(response, function(agentStatus) {
-							var statusLi = hqDojo.create("li",{
-								"innerHTML":agentStatus.agentName
-							},agentListUl);
-							
-							statusLi.innerHTML+="&nbsp;<fmt:message key="admin.managers.Plugin.tip.status.sync.date" />&nbsp;"+agentStatus.syncDate;
-							if(response.status=="error"){
-								hqDojo.addClass(statusLi,"errorAgent");
-							}else{
-								hqDojo.addClass(statusLi,"inProgressAgent");
-							};
-						});
-		}
+
 		hqDojo.behavior.add({
 			".agentStatusSpan":{
 				onclick: function(evt){
 					var anchor = evt.target.id.indexOf("_");
 					var pluginId = evt.target.id.substr(anchor+1,evt.target.id.length);
+					var pluginName = evt.target.id.substr(0,anchor);
+					hqDojo.byId("pluginName").value=pluginName;
+					hqDojo.byId("pluginId").value=pluginId;
 					seeStatusDetail(pluginId);
 				},
 				found: function(node){hqDojo.style(node,"cursor","pointer");}
 			}
 		});
+		
 		hqDojo.behavior.apply();
 		
 		var showStatusDialog = new hqDijit.Dialog({
-			id: "showStatusPanelDialog",
-			title: "<fmt:message key="admin.managers.Plugin.tip.status.title" />"
+			id: "showStatusPanelDialog"
 		});
 		
 		var showStatusPanel = hqDojo.byId("showStatusPanel");
@@ -448,40 +433,26 @@
 			
 		hqDojo.query("#showStatusPanelDialog .cancelLink").onclick(function(e) {
 			hqDijit.byId("showStatusPanelDialog").hide();
-			hqDojo.empty("unfilteredList");
 			hqDojo.empty("agentList");
+			hqDojo.byId("searchText").value="";
 		});
-		
+		 
 		hqDojo.connect(hqDojo.byId("searchText"),"onkeyup",function(e){
-			// filter here
-			var statusList = hqDojo.clone(hqDojo.query("#unfilteredList li"));
-			var inputText = hqDojo.byId("searchText").value;
-			
-			var result = hqDojo.filter(statusList,
-				function(agent){
-					return agent.innerHTML.toLowerCase().indexOf(inputText) !=-1;
-				}
-			);
-			
-			hqDojo.empty("agentList");
-			//buildAgentStatusList(result);
-			
-			hqDojo.forEach(result, function(node) {
-				var agentListUl = hqDojo.byId("agentList");
-				agentListUl.appendChild(node);
-			});			
-			
-			
+			var pluginId = hqDojo.byId("pluginId").value;
+			seeStatusDetail(pluginId,hqDojo.byId("searchText").value);			
 		});
 		
 		new hqDijit.Tooltip({
 			connectId:["agentInfo"],
 			label: "<fmt:message key='admin.managers.Plugin.information.agent.count.tip' />"
 		});
-		
-					
 
-			
+		hqDojo.query(".notFound").forEach(function(e){
+			new hqDijit.Tooltip({
+				connectId: [e],
+				label: "<fmt:message key='admin.managers.Plugin.column.plugin.disabled.tip' />"
+			});		
+		});
 		
 		if(${!mechanismOn}){
 			hqDojo.attr("deleteForm","class","mechanismOff");
@@ -704,7 +675,7 @@
                 		}, li);
                 		if(summary.disabled){
                 			span = hqDojo.create("span",{
-                				"class":"disabled",
+                				"class":"notFound",
                 				"innerHTML":"&nbsp;<fmt:message key='admin.managers.Plugin.column.plugin.disabled'/>"
                 			},spanName);
                 		}
@@ -739,14 +710,14 @@
                 			}
                 			if (summary.inProgressAgentCount>0 || summary.errorAgentCount > 0){
                 				var errorAgentSpan = hqDojo.create("span",{
-        	        				"id":"errorAgent_"+summary.id,
+        	        				"id":summary.name+"_"+summary.id,
             	    				"class":"agentStatusSpan"
                 					}, statusSpan);
 	                		if (summary.inProgressAgentCount>0) {
 	                		    errorAgentSpan.innerHTML+=summary.inProgressAgentCount+"&nbsp;";
     	           				hqDojo.create("img",{
         	       					"src": "/images/arrow_refresh.png",
-        	       					"id":"progressIcon_"+summary.id,
+        	       					"id":summary.name+"_"+summary.id,
 	        	       			}, errorAgentSpan);
 	        	       			errorAgentSpan.innerHTML+="&nbsp;&nbsp;&nbsp;";
                 			}			
@@ -754,7 +725,7 @@
                 				errorAgentSpan.innerHTML+= summary.errorAgentCount+"&nbsp;";
                 				hqDojo.create("img",{
                 					"src": "/images/icon_available_red.gif",
-                					"id":"errorIcon_"+summary.id,
+                					"id":summary.name+"_"+summary.id,
                 				}, errorAgentSpan);
                 				errorAgentSpan.innerHTML+="</img>";
                 			}
@@ -764,8 +735,13 @@
                 		index++;
                 	});
 
-		hqDojo.behavior.apply();
-		
+					hqDojo.behavior.apply();
+					hqDojo.query(".notFound").forEach(function(e){
+						new hqDijit.Tooltip({
+							connectId: [e],
+							label: "<fmt:message key='admin.managers.Plugin.column.plugin.disabled.tip' />"
+						});		
+					});
                 
                 },
                 error: function(response, args) {
