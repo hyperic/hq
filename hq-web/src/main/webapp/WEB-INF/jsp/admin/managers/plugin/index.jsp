@@ -162,7 +162,7 @@
 	#showRemoveConfirmationButton{
 		float:left;
 	}
-	#pluginList .disabled{
+	#pluginList .notFound{
 		color:red;
 	}
 	.agentStatusSpan{
@@ -260,9 +260,9 @@
                     	<input type="checkbox" name="deleteId" value="${pluginSummary.id}" class="checkbox" />&nbsp; 
 					</c:if>
 				</span>
-				<span class="column span-3">${pluginSummary.name}&nbsp;
+				<span class="column span-3">${pluginSummary.name}
 					<c:if test="${disabled}">
-						<span class="disabled"><fmt:message key="admin.managers.Plugin.column.plugin.disabled"/></span>
+						<span class="notFound"><fmt:message key="admin.managers.Plugin.column.plugin.disabled"/></span>
 					</c:if>
 				</span>
 				<span class="column span-3">${pluginSummary.version}&nbsp;</span>
@@ -299,7 +299,6 @@
 			<input id="showUploadFormButton" type="button" value="<fmt:message key="admin.managers.plugin.button.add.plugin" />" />
 		</div>	
 	</c:if>
-	<span> <fmt:message key="admin.managers.Plugin.column.plugin.disabled.tip" /></span>
 </section>
 
 
@@ -420,6 +419,7 @@
 				found: function(node){hqDojo.style(node,"cursor","pointer");}
 			}
 		});
+		
 		hqDojo.behavior.apply();
 		
 		var showStatusDialog = new hqDijit.Dialog({
@@ -445,6 +445,13 @@
 		new hqDijit.Tooltip({
 			connectId:["agentInfo"],
 			label: "<fmt:message key='admin.managers.Plugin.information.agent.count.tip' />"
+		});
+
+		hqDojo.query(".notFound").forEach(function(e){
+			new hqDijit.Tooltip({
+				connectId: [e],
+				label: "<fmt:message key='admin.managers.Plugin.column.plugin.disabled.tip' />"
+			});		
 		});
 		
 		if(${!mechanismOn}){
@@ -668,7 +675,7 @@
                 		}, li);
                 		if(summary.disabled){
                 			span = hqDojo.create("span",{
-                				"class":"disabled",
+                				"class":"notFound",
                 				"innerHTML":"&nbsp;<fmt:message key='admin.managers.Plugin.column.plugin.disabled'/>"
                 			},spanName);
                 		}
@@ -728,8 +735,13 @@
                 		index++;
                 	});
 
-		hqDojo.behavior.apply();
-		
+					hqDojo.behavior.apply();
+					hqDojo.query(".notFound").forEach(function(e){
+						new hqDijit.Tooltip({
+							connectId: [e],
+							label: "<fmt:message key='admin.managers.Plugin.column.plugin.disabled.tip' />"
+						});		
+					});
                 
                 },
                 error: function(response, args) {
