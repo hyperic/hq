@@ -14,10 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface AgentRepository extends JpaRepository<Agent, Integer>, AgentRepositoryCustom {
 
-    // TODO check this syntax
     @Transactional(readOnly = true)
-    @Query("select count(distinct a) from Agent a where a.managedResources not empty")
-    int countUsed();
+    @Query("select count(a) from Agent a where a.managedResources is not empty")
+    long countUsed();
 
     List<Agent> findByAddress(String address);
 
@@ -28,7 +27,7 @@ public interface AgentRepository extends JpaRepository<Agent, Integer>, AgentRep
     @QueryHints({ @QueryHint(name = "org.hibernate.cacheable", value = "true"),
                  @QueryHint(name = "org.hibernate.cacheRegion", value = "Agent.findByAgentToken") })
     Agent findByAgentToken(@Param("agentToken") String token);
-    
+
     @Transactional(readOnly = true)
     @Query("select a from Agent a join a.managedResources r where r=:resource")
     Agent findByManagedResource(@Param("resource") Resource resource);
