@@ -11607,13 +11607,13 @@ has already been defined.
 	
  <schemaSpec version="3.203">
     <schema-insert table="EAM_CONFIG_PROPS"
-	                   insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES ('67', 'LDAP_GROUP_SEARCH_BASE', '', '')"/>
+	                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE) VALUES ('67', 'LDAP_GROUP_SEARCH_BASE', '', '')"/>
 	<schema-insert table="EAM_CONFIG_PROPS"
-	                   insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES ('68', 'LDAP_GROUP_SEARCH_FILTER', '', '(member={0})')"/>
+	                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE) VALUES ('68', 'LDAP_GROUP_SEARCH_FILTER', '', '(member={0})')"/>
 	<schema-insert table="EAM_CONFIG_PROPS"
-	                   insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES ('69', 'LDAP_GROUP_SEARCH_ROLE_ATTRIBUTE', '', 'cn')"/>
+	                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE) VALUES ('69', 'LDAP_GROUP_SEARCH_ROLE_ATTRIBUTE', '', 'cn')"/>
 	<schema-insert table="EAM_CONFIG_PROPS"
-	                   insertCmd="(ID, KEY, VALUE, DEFAULT_VALUE) VALUES ('70', 'LDAP_GROUP_SEARCH_SUBTREE', '', 'false')"/>
+	                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE) VALUES ('70', 'LDAP_GROUP_SEARCH_SUBTREE', '', 'false')"/>
  </schemaSpec>
 </dbupgrade>
 </target>
