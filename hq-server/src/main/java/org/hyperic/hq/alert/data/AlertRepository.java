@@ -12,14 +12,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface AlertRepository extends JpaRepository<Alert, Integer>, AlertRepositoryCustom {
 
+    @Transactional(readOnly = true)
+    @Query("select COUNT(a) from Alert a where a.alertDefinition.resource = :res")
+    long countByResource(@Param("res") Resource resource);
+
     @Transactional
     @Modifying
     @Query("delete Alert a where a.id in (:ids)")
     void deleteByIds(@Param("ids") List<Integer> ids);
-
-    @Transactional(readOnly = true)
-    @Query("select COUNT(a) from Alert a where a.alertDefinition.resource = :res")
-    int countByResource(@Param("res") Resource resource);
 
     @Transactional(readOnly = true)
     @Query("select min(a.ctime) from Alert a where a.fixed = false")

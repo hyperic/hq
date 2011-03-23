@@ -399,7 +399,7 @@ abstract public class AlertDefinition implements AlertDefinitionInterface, Perfo
         this.notifyFiltered = notifyFiltered;
     }
 
-    void setPriority(int priority) {
+    public void setPriority(int priority) {
         this.priority = priority;
     }
 

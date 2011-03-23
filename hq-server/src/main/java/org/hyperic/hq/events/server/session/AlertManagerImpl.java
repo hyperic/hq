@@ -323,7 +323,7 @@ public class AlertManagerImpl implements AlertManager,
         int[] counts = new int[ids.length];
         for (int i = 0; i < ids.length; i++) {
             if (ids[i].isPlatform() || ids[i].isServer() || ids[i].isService()) {
-                counts[i] = alertRepository.countByResource(resourceManager.findResource(ids[i]));
+                counts[i] = (int) alertRepository.countByResource(resourceManager.findResource(ids[i]));
             }
         }
         return counts;

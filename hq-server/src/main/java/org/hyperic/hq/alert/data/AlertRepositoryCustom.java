@@ -14,31 +14,31 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface AlertRepositoryCustom {
 
-    @Transactional
-    int deleteByCreateTime(long before, int maxDeletes);
+    @Transactional(readOnly = true)
+    long countByCreateTimeAndPriority(long begin, long end, int priority, boolean inEsc,
+                                         boolean notFixed, Integer groupId, Integer alertDefId);
 
     @Transactional
     int deleteByAlertDefinition(AlertDefinition def);
 
+    @Transactional
+    int deleteByCreateTime(long before, int maxDeletes);
+    
     @Transactional(readOnly = true)
     Page<Alert> findByCreateTimeAndPriority(long begin, long end, int priority, boolean inEsc,
                                             boolean notFixed, Integer groupId, Integer alertDefId,
                                             Pageable pageable);
-    
     @Transactional(readOnly = true)
     List<Alert> findByCreateTimeAndPriority(long begin, long end, int priority, boolean inEsc,
                                             boolean notFixed, Integer groupId, Integer alertDefId,
                                             Sort sort);
+
     @Transactional(readOnly = true)
     List<Alert> findByResourceInRange(Resource res, long begin, long end, boolean nameSort,
                                       boolean asc);
 
     @Transactional(readOnly = true)
     Alert findLastByDefinition(AlertDefinition def, boolean fixed);
-
-    @Transactional(readOnly = true)
-    long countByCreateTimeAndPriority(long begin, long end, int priority, boolean inEsc,
-                                         boolean notFixed, Integer groupId, Integer alertDefId);
 
     @Transactional(readOnly = true)
     Map<Integer, Map<AlertInfo, Integer>> getUnfixedAlertInfoAfter(long ctime);
