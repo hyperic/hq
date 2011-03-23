@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -183,22 +184,38 @@ public class CommandListener
                 }
 
                 cmd = null;
+                dispatchResult = null;
                 try {
                     cmd = conn.readCommand();
                     this.logger.debug("Dispatching request for '" + 
                                       cmd.getCommand() + "'");
 
-                    dispatchResult = 
-                        this.dispatcher.processRequest(cmd, inputStream,
-                                                       outputStream);
+                    final List<AgentServerHandler> handlers = dispatcher.getHandlers(cmd);
+                    for (final AgentServerHandler handler: handlers){
+                        try{
+                            dispatchResult = 
+                                this.dispatcher.processRequest(cmd, handler, inputStream, outputStream);
+                        } catch (AgentRemoteException exc) {
+                            this.logger.warn("Error invoking method",
+                                (Exception)exc);
+                                    conn.sendErrorResponse(((AgentRemoteException)exc)
+                                      .getMessage());     
+                            continue;
+                        }
+                        if(dispatchResult == null){
+                            this.logger.debug("Method '" + cmd + "' returned null ");
+                            conn.sendSuccessResponse(new AgentRemoteValue());
+                        } else {
+                            this.logger.debug("Method '" + cmd + "' returned an " +
+                                              "object result");
+                            conn.sendSuccessResponse((AgentRemoteValue)dispatchResult);
+                        }
+                    }
+                                                      
                 } catch(AgentConnectionException exc){
                     this.stat_numConnFailures++;
                     this.logger.error("Failed to read method/args from client",
                                       exc);
-                    dispatchResult = exc;
-                } catch(AgentRemoteException exc){
-                    // This is a fine result, raised via the AgentServerHandler
-                    // interface
                     dispatchResult = exc;
                 } catch(EOFException exc){
                     logger.debug(exc, exc);
@@ -210,23 +227,11 @@ public class CommandListener
                 } 
 
                 try {
-                    if(dispatchResult instanceof AgentRemoteException){
-                        this.logger.warn("Error invoking method",
-                                         (Exception)dispatchResult);
-                        conn.sendErrorResponse(((AgentRemoteException)dispatchResult)
-                                               .getMessage());
-                    } else if(dispatchResult instanceof Exception){
+                    if(dispatchResult instanceof Exception){
                         this.logger.warn("Error invoking method",
                                          (Exception)dispatchResult);
                         conn.sendErrorResponse(((Exception)dispatchResult).
                                                toString());
-                    } else if(dispatchResult == null){
-                        this.logger.debug("Method '" + cmd + "' returned null ");
-                        conn.sendSuccessResponse(new AgentRemoteValue());
-                    } else {
-                        this.logger.debug("Method '" + cmd + "' returned an " +
-                                          "object result");
-                        conn.sendSuccessResponse((AgentRemoteValue)dispatchResult);
                     }
                 } catch(AgentConnectionException excIO) {
                     // Geez, we're really having problems now.  Close

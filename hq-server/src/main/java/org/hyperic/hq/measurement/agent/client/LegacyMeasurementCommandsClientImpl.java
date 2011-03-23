@@ -34,6 +34,7 @@ import org.hyperic.hq.measurement.agent.commands.DeleteProperties_args;
 import org.hyperic.hq.measurement.agent.commands.DeleteProperties_result;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_result;
+import org.hyperic.hq.measurement.agent.commands.TrackPluginActivate_args;
 import org.hyperic.hq.measurement.agent.commands.TrackPluginAdd_args;
 import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_args;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_args;
@@ -169,5 +170,16 @@ public class LegacyMeasurementCommandsClientImpl implements MeasurementCommandsC
         AgentRemoteValue val = this.agentConn.sendCommand(
                                    this.verAPI.command_trackRemove,
                                    this.verAPI.getVersion(), args);
+    }
+
+    public void activateTrackPlugin(String pluginType, String installPath,
+                                    ConfigResponse configResponse) throws AgentRemoteException,
+        AgentConnectionException {
+        TrackPluginActivate_args args = new TrackPluginActivate_args();
+        args.setConfig(pluginType, installPath, configResponse);
+
+        AgentRemoteValue val = this.agentConn.sendCommand(
+            this.verAPI.command_pushRuntimeDiscoveryConfig,
+            this.verAPI.getVersion(), args);
     }
 }

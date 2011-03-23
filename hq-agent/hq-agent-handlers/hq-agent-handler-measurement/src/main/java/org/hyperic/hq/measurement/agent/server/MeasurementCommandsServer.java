@@ -59,6 +59,7 @@ import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_result;
 import org.hyperic.hq.measurement.agent.commands.SetProperties_args;
 import org.hyperic.hq.measurement.agent.commands.SetProperties_result;
+import org.hyperic.hq.measurement.agent.commands.TrackPluginActivate_args;
 import org.hyperic.hq.measurement.agent.commands.TrackPluginAdd_args;
 import org.hyperic.hq.measurement.agent.commands.TrackPluginAdd_result;
 import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_args;
@@ -193,6 +194,11 @@ public class MeasurementCommandsServer
             measurementCommandsService.removeTrackPlugin(ta);
             
             return new TrackPluginRemove_result();
+        }  else if(cmd.equals(this.verAPI.command_pushRuntimeDiscoveryConfig)) {
+            TrackPluginActivate_args ta = new TrackPluginActivate_args(args);
+            measurementCommandsService.activateTrackPlugin(ta);
+            
+            return null; //new TrackPluginRemove_result();
         } else {
             throw new AgentRemoteException("Unknown command: " + cmd);
         }

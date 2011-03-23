@@ -93,4 +93,7 @@ public interface MeasurementCommandsClient {
     void removeTrackPlugin(String id, String pluginType)
             throws AgentRemoteException, AgentConnectionException;
     
+    void activateTrackPlugin(String pluginType, String installPath, ConfigResponse configResponse)
+            throws AgentRemoteException, AgentConnectionException;
+
 }

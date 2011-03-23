@@ -27,7 +27,11 @@ package org.hyperic.hq.agent.server;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import org.hyperic.hq.agent.AgentAPIInfo;
 import org.hyperic.hq.agent.AgentCommand;
@@ -36,7 +40,6 @@ import org.hyperic.hq.agent.AgentRemoteValue;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 
 /**
  * The object which manages all libraries wanting to have their
@@ -47,10 +50,10 @@ import org.apache.commons.logging.LogFactory;
 
 public class CommandDispatcher {
     private Log log;     
-    private Hashtable commands;
+    private Map<String, List<AgentServerHandler>> commands;
 
     CommandDispatcher(){
-        this.commands = new Hashtable();
+        this.commands = new HashMap<String, List<AgentServerHandler>>();
         this.log      = LogFactory.getLog(CommandDispatcher.class);
     }
 
@@ -68,11 +71,19 @@ public class CommandDispatcher {
     void addServerHandler(AgentServerHandler handler){
         String[] cmds = handler.getCommandSet();
         
-        for(int i=0; i<cmds.length; i++){
-            this.commands.put(cmds[i], handler);
+        for(final String cmd: cmds){
+            List<AgentServerHandler> handlerList = commands.get(cmd);
+            if (handlerList == null)
+                handlerList = new LinkedList<AgentServerHandler>();
+            handlerList.add(handler);
+            this.commands.put(cmd, handlerList);
         }
     }
 
+    public List<AgentServerHandler> getHandlers(AgentCommand command){
+        return commands.get(command.getCommand());
+    }
+    
     /**
      * Dispatch a method after verifying that the version APIs
      * match up.
@@ -86,21 +97,17 @@ public class CommandDispatcher {
      *                              the method.
      */
 
-    public AgentRemoteValue processRequest(AgentCommand cmd, InputStream inStream,
+    public AgentRemoteValue processRequest(AgentCommand cmd, AgentServerHandler handler, InputStream inStream,
                                     OutputStream outStream)
         throws AgentRemoteException
     {
         try {
-            AgentServerHandler handler;
             AgentAPIInfo apiInfo;
-            Object val;
-            
-            if((val = this.commands.get(cmd.getCommand())) == null){
+
+            if(handler == null){
                 throw new AgentRemoteException("Unknown command, '" + 
                                                cmd.getCommand() + "'");
             }
-
-            handler = (AgentServerHandler) val;        
             apiInfo = handler.getAPIInfo();
             if(!apiInfo.isCompatible(cmd.getCommandVersion())){
                 throw new AgentRemoteException("Client API mismatch: " +

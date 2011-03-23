@@ -164,4 +164,17 @@ public class MeasurementCommandsClientImpl
         }
     }
 
+    public void activateTrackPlugin(String pluginType, String installPath,
+                                    ConfigResponse configResponse) throws AgentRemoteException,
+        AgentConnectionException {
+        MeasurementCommandsClient proxy = null;
+        
+        try {
+            proxy = (MeasurementCommandsClient)getAsynchronousProxy(MeasurementCommandsClient.class, false);
+            proxy.activateTrackPlugin(pluginType, installPath, configResponse);    
+        } finally {
+            safeDestroyService(proxy);
+        }
+    }    
+
 }

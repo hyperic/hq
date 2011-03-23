@@ -43,11 +43,13 @@ import org.hyperic.hq.measurement.agent.commands.GetMeasurements_result;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_metric;
 import org.hyperic.hq.measurement.agent.commands.SetProperties_args;
+import org.hyperic.hq.measurement.agent.commands.TrackPluginActivate_args;
 import org.hyperic.hq.measurement.agent.commands.TrackPluginAdd_args;
 import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_args;
 import org.hyperic.hq.measurement.agent.commands.UnscheduleMeasurements_args;
 import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.product.ConfigTrackPluginManager;
+import org.hyperic.hq.product.FileChangeTrackPlugin;
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.LogTrackPluginManager;
 import org.hyperic.hq.product.MeasurementPluginManager;
@@ -396,4 +398,39 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
         _scheduleObject.unscheduleMeasurements(id);
     }
 
+    public void activateTrackPlugin(final TrackPluginActivate_args ta)
+        throws AgentRemoteException{
+        final String pluginType = ta.getType();
+        final String installPath = ta.getInstallPath();
+        final ConfigResponse configResponse = ta.getConfigResponse();
+        activateTrackPlugin(pluginType, installPath, configResponse);
+    }
+    
+    public void activateTrackPlugin(String pluginType, String installPath, ConfigResponse configResponse)
+            throws AgentRemoteException {
+        GenericPlugin plugin;
+        try {
+            plugin = _ctPluginManager.getPlugin(pluginType);
+        } catch (PluginNotFoundException e) {
+            plugin = null;
+        }   
+        if (plugin == null)
+            // log error
+            return;
+        
+        if (!(plugin instanceof FileChangeTrackPlugin))
+            // log error
+            return;
+        
+        try{
+            _ctPluginManager.updatePlugin(plugin, configResponse);
+        } catch (PluginNotFoundException e) {
+            _log.error(e.getMessage(), e);
+        } catch (PluginExistsException e) {
+            _log.error(e.getMessage(), e);
+        } catch (PluginException e) {
+            _log.error(e.getMessage(), e);
+            throw new AgentRemoteException(e.getMessage());
+        }
+}
 }
