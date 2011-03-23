@@ -230,11 +230,17 @@
 	input[type="text"]{
 		margin:0.5em 0;
 	}
+	.mechanismOffInstruction{
+		background:yellow; 
+		font-weight:bold; 
+		color:red;
+		font-size: larger;
+	}
 	
 </style>
 <section id="pluginManagerPanel" class="container top">
 	<h1><fmt:message key="admin.managers.plugin.title" /></h1>
-	<p><fmt:message key="${instruction}" /></p>
+	<p id="instruction"><fmt:message key="${instruction}" /></p>
 	
 	<div id="agentInfo">
 		<fmt:message key="admin.managers.Plugin.information.agent.count"/>&nbsp;<span id="agentInfoAllCount">${allAgentCount}</span> <br/>
@@ -456,6 +462,7 @@
 		
 		if(${!mechanismOn}){
 			hqDojo.attr("deleteForm","class","mechanismOff");
+			hqDojo.addClass(hqDojo.byId("instruction"),"mechanismOffInstruction");
 		}
 	
 		if (${mechanismOn}){
