@@ -221,7 +221,7 @@ class RenderFrame {
                 Map tmplMap = _templates.get(gspFile)
                 if (!tmplMap || tmplMap.mtime != mtime) {
                     log.info("Creating template for [${gspFile.absolutePath}]")
-                    gspFile.withReader { reader ->
+                    gspFile.withReader("UTF-8") { reader ->
                         def eng = new SimpleTemplateEngine(controller.dumpScripts)
                         t = eng.createTemplate(reader)
                         _templates[gspFile] = [mtime: mtime, template : t]

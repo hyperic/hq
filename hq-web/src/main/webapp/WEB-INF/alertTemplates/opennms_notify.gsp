@@ -19,7 +19,7 @@ Date timestamp = new Date()
 String hostname = InetAddress.getLocalHost().hostName
 
 Socket socket = new Socket(host, Integer.valueOf(port))
-socket.outputStream.withWriter { out ->
+socket.outputStream.withWriter("UTF-8") { out ->
         
     def xml = new MarkupBuilder(out)
     
