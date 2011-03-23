@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 public interface AlertRepositoryCustom {
 
     @Transactional
-    int deleteAlertsByCreateTime(long before, int maxDeletes);
+    int deleteByCreateTime(long before, int maxDeletes);
 
     @Transactional
     int deleteByAlertDefinition(AlertDefinition def);
@@ -37,7 +37,7 @@ public interface AlertRepositoryCustom {
     Alert findLastByDefinition(AlertDefinition def, boolean fixed);
 
     @Transactional(readOnly = true)
-    long getCountByCreateTimeAndPriority(long begin, long end, int priority, boolean inEsc,
+    long countByCreateTimeAndPriority(long begin, long end, int priority, boolean inEsc,
                                          boolean notFixed, Integer groupId, Integer alertDefId);
 
     @Transactional(readOnly = true)

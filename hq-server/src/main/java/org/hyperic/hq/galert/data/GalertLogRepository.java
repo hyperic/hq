@@ -34,6 +34,6 @@ public interface GalertLogRepository extends JpaRepository<GalertLog, Integer>,
 
     @Transactional(readOnly = true)
     @Query("select count(l) from GalertLog l where l.def.group = :group")
-    Long getCountByGroup(@Param("group") ResourceGroup group);
+    Long countByGroup(@Param("group") ResourceGroup group);
 
 }

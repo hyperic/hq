@@ -58,7 +58,7 @@ public class ServerFactory {
         server.setWasAutodiscovered((Boolean)serverResource.getProperty(WAS_AUTODISCOVERED));
         server.setAutodiscoveryZombie((Boolean)serverResource.getProperty(AUTODISCOVERY_ZOMBIE));
         server.setSortName((String) serverResource.getProperty(AppdefResource.SORT_NAME));
-        server.setOwnerName(authzSubjectRepository.findOwner(serverResource).getName());
+        server.setOwnerName(authzSubjectRepository.findByOwnedResource(serverResource).getName());
         Resource platform = serverResource.getResourceTo(RelationshipTypes.SERVER);
         if(platform != null) {
             server.setPlatform(platformFactory.createPlatform(platform));

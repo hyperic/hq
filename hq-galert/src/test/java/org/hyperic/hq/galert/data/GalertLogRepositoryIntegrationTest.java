@@ -464,6 +464,6 @@ public class GalertLogRepositoryIntegrationTest {
             "Something bad happened again", null, GalertDefPartition.NORMAL), timestamp - 2000);
         log4.setFixed(true);
         galertLogRepository.save(log4);
-        assertEquals(Long.valueOf(3), galertLogRepository.getCountByGroup(group));
+        assertEquals(Long.valueOf(3), galertLogRepository.countByGroup(group));
     }
 }

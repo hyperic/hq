@@ -247,7 +247,7 @@ public class AlertManagerImpl implements AlertManager,
      * The max number of records to delete is specified by maxDeletes
      */
     public int deleteAlerts(long before, int maxDeletes) {
-        return alertRepository.deleteAlertsByCreateTime(before, maxDeletes);
+        return alertRepository.deleteByCreateTime(before, maxDeletes);
     }
     
     @Transactional(readOnly = true)
@@ -323,7 +323,7 @@ public class AlertManagerImpl implements AlertManager,
         int[] counts = new int[ids.length];
         for (int i = 0; i < ids.length; i++) {
             if (ids[i].isPlatform() || ids[i].isServer() || ids[i].isService()) {
-                counts[i] = alertRepository.getAlertCountByResource(resourceManager.findResource(ids[i]));
+                counts[i] = alertRepository.countByResource(resourceManager.findResource(ids[i]));
             }
         }
         return counts;
@@ -558,7 +558,7 @@ public class AlertManagerImpl implements AlertManager,
         // Time voodoo the end time to the nearest minute so that we might
         // be able to use cached results
         endTime = TimingVoodoo.roundUpTime(endTime, 60000);
-        Number count = alertRepository.getCountByCreateTimeAndPriority(endTime - timeRange, endTime, 0,
+        Number count = alertRepository.countByCreateTimeAndPriority(endTime - timeRange, endTime, 0,
             false, true, groupId, null);
         if (count != null)
             return count.intValue();

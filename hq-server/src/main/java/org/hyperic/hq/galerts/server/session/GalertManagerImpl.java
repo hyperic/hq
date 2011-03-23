@@ -544,7 +544,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
                 ResourceGroup group = resourceGroupManager.findResourceGroupById(subj, ids[i]
                     .getId());
 
-                counts[i] = gAlertLogRepository.getCountByGroup(group).intValue();
+                counts[i] = gAlertLogRepository.countByGroup(group).intValue();
             }
         }
         return counts;

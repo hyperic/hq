@@ -44,7 +44,7 @@ public class PlatformFactory {
 
     public Platform createPlatform(Resource resource) {
         Platform platform = new Platform();
-        platform.setAgent(agentRepository.findManagingAgent(resource));
+        platform.setAgent(agentRepository.findByManagedResource(resource));
         platform.setCertdn((String) resource.getProperty(CERT_DN));
         platform.setCommentText((String) resource.getProperty(COMMENT_TEXT));
         platform.setCpuCount((Integer) resource.getProperty(CPU_COUNT));
@@ -59,7 +59,7 @@ public class PlatformFactory {
         platform.setResource(resource);
         platform.setPlatformType(createPlatformType(resource.getType()));
         platform.setSortName((String) resource.getProperty(AppdefResource.SORT_NAME));
-        platform.setOwnerName(authzSubjectRepository.findOwner(resource).getName());
+        platform.setOwnerName(authzSubjectRepository.findByOwnedResource(resource).getName());
         Set<Resource> ips = resource.getResourcesFrom(RelationshipTypes.IP);
         for (Resource ip : ips) {
             platform.addIp(createIp(ip));

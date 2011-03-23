@@ -66,8 +66,8 @@ public class AlertActionLogRepositoryIntegrationTest {
     }
 
     @Test
-    public void testDeleteAlertActions() {
-        alertActionLogRepository.deleteAlertActions(Collections.singletonList(alert));
+    public void testDeleteByAlerts() {
+        alertActionLogRepository.deleteByAlerts(Collections.singletonList(alert));
         assertEquals(Long.valueOf(0), alertActionLogRepository.count());
     }
 

@@ -11,7 +11,7 @@ public interface AIPlatformRepository extends JpaRepository<AIPlatform, Integer>
 
     @Transactional(readOnly=true)
     @Query("select a from AIPlatform a where a.ignored=false and a.lastApproved < a.modifiedTime order by name")
-    List<AIPlatform> findAllNotIgnored();
+    List<AIPlatform> findNotIgnored();
 
     List<AIPlatform> findByIgnoredOrderByNameAsc(boolean ignored);
 

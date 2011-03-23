@@ -251,7 +251,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         application.setBusinessContact((String)resourceGroup.getProperty(BUSINESS_CONTACT));
         application.setEngContact((String)resourceGroup.getProperty(ENG_CONTACT));
         application.setOpsContact((String)resourceGroup.getProperty(OPS_CONTACT));
-        application.setOwnerName(authzSubjectRepository.findOwner(resourceGroup).getName());
+        application.setOwnerName(authzSubjectRepository.findByOwnedResource(resourceGroup).getName());
         //TODO get rid of ApplicationType.  For now just hard-coding them all to Generic type
         application.setApplicationType(APPLICATION_TYPES.get(0));
         for(Resource member: resourceGroup.getMembers()) {

@@ -19,7 +19,7 @@ public interface AlertRepository extends JpaRepository<Alert, Integer>, AlertRep
 
     @Transactional(readOnly = true)
     @Query("select COUNT(a) from Alert a where a.alertDefinition.resource = :res")
-    int getAlertCountByResource(@Param("res") Resource resource);
+    int countByResource(@Param("res") Resource resource);
 
     @Transactional(readOnly = true)
     @Query("select min(a.ctime) from Alert a where a.fixed = false")

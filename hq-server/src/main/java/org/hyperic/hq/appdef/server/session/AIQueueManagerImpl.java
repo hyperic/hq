@@ -236,7 +236,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
                 if (showAlreadyProcessed) {
                     queue = aiPlatformRepository.findByIgnoredOrderByNameAsc(false);
                 } else {
-                    queue = aiPlatformRepository.findAllNotIgnored();
+                    queue = aiPlatformRepository.findNotIgnored();
                 }
             }
 

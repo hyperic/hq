@@ -36,7 +36,7 @@ public class AlertRepositoryImpl implements AlertRepositoryCustom {
         this.alertActionLogRepository = alertActionLogRepository;
     }
 
-    public int deleteAlertsByCreateTime(long before, int maxDeletes) {
+    public int deleteByCreateTime(long before, int maxDeletes) {
         if (maxDeletes <= 0) {
             return 0;
         }
@@ -59,7 +59,7 @@ public class AlertRepositoryImpl implements AlertRepositoryCustom {
             if (list.size() == 0) {
                 break;
             }
-            alertActionLogRepository.deleteAlertActions(list);
+            alertActionLogRepository.deleteByAlerts(list);
             for (Alert alert : list) {
                 count++;
                 entityManager.remove(alert);
@@ -83,7 +83,7 @@ public class AlertRepositoryImpl implements AlertRepositoryCustom {
                                                    boolean inEsc, boolean notFixed,
                                                    Integer groupId, Integer alertDefId,
                                                    Pageable pageable) {
-        long total = getCountByCreateTimeAndPriority(begin, end, priority, inEsc, notFixed, groupId, alertDefId);
+        long total = countByCreateTimeAndPriority(begin, end, priority, inEsc, notFixed, groupId, alertDefId);
         if (total == 0) {
             return new PageImpl<Alert>(new ArrayList<Alert>(0), pageable, 0);
         }
@@ -108,7 +108,7 @@ public class AlertRepositoryImpl implements AlertRepositoryCustom {
     public List<Alert> findByCreateTimeAndPriority(long begin, long end, int priority,
                                                    boolean inEsc, boolean notFixed,
                                                    Integer groupId, Integer alertDefId, Sort sort) {
-        long total = getCountByCreateTimeAndPriority(begin, end, priority, inEsc, notFixed, groupId, alertDefId);
+        long total = countByCreateTimeAndPriority(begin, end, priority, inEsc, notFixed, groupId, alertDefId);
         if (total == 0) {
             return new ArrayList<Alert>(0);
         }
@@ -164,7 +164,7 @@ public class AlertRepositoryImpl implements AlertRepositoryCustom {
                (inEsc ? "and a.id = es.alertId and " + "es.alertDefinitionId = d.id " : "");
     }
 
-    public long getCountByCreateTimeAndPriority(long begin, long end, int priority, boolean inEsc,
+    public long countByCreateTimeAndPriority(long begin, long end, int priority, boolean inEsc,
                                                 boolean notFixed, Integer groupId,
                                                 Integer alertDefId) {
         String sql = getAlertSql(begin, end, priority, inEsc, notFixed, groupId, alertDefId, true);

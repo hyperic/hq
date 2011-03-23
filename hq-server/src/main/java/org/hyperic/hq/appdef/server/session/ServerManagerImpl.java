@@ -251,7 +251,7 @@ public class ServerManagerImpl implements ServerManager {
         s.setProperty(ServerFactory.MODIFIED_TIME,System.currentTimeMillis());
         s.setProperty(AppdefResource.SORT_NAME, sv.getName().toUpperCase());
         owner.addOwnedResource(s);
-        agentRepository.findManagingAgent(p).addManagedResource(s);
+        agentRepository.findByManagedResource(p).addManagedResource(s);
         return s;
    }
     

@@ -260,18 +260,18 @@ public class UIPluginManagerImpl implements UIPluginManager {
         if (ent.isGroup()) {
             ResourceGroup group = resourceGroupManager.findResourceGroupById(ent.getId());
 
-            attachments = attachmentResourceRepository.findFor(resourceManager.findRootResource(), cat.getDescription());
+            attachments = attachmentResourceRepository.findByResourceAndCategory(resourceManager.findRootResource(), cat.getDescription());
 
             if (!resourceGroupManager.getGroupConvert(user, group).isMixed()) {
                 // For compatible groups add in attachments specific to that
                 // resource type.
                 Collection<Attachment> compatAttachments = attachmentResourceRepository
-                    .findFor(group, cat.getDescription());
+                    .findByResourceAndCategory(group, cat.getDescription());
 
                 attachments.addAll(compatAttachments);
             }
         } else {
-            attachments = attachmentResourceRepository.findFor(resourceManager.findResource(ent), cat.getDescription());
+            attachments = attachmentResourceRepository.findByResourceAndCategory(resourceManager.findResource(ent), cat.getDescription());
         }
 
         Resource viewedResource = resourceManager.findResource(ent);

@@ -37,7 +37,7 @@ public class AttachmentResourceRepositoryIntegrationTest {
     private AttachmentResourceRepository attachmentResourceRepository;
 
     @Test
-    public void testFindFor() {
+    public void testFindByResourceAndCategory() {
         UIPlugin plugin = new UIPlugin("mass", "2.0");
         entityManager.persist(plugin);
         Resource resource = new Resource();
@@ -65,7 +65,7 @@ public class AttachmentResourceRepositoryIntegrationTest {
 
         assertEquals(
             expected,
-            attachmentResourceRepository.findFor(resource,
+            attachmentResourceRepository.findByResourceAndCategory(resource,
                 ViewResourceCategory.VIEWS.getDescription()));
     }
 }

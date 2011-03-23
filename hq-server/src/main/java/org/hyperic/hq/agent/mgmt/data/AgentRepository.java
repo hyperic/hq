@@ -31,6 +31,6 @@ public interface AgentRepository extends JpaRepository<Agent, Integer>, AgentRep
     
     @Transactional(readOnly = true)
     @Query("select a from Agent a join a.managedResources r where r=:resource")
-    Agent findManagingAgent(@Param("resource") Resource resource);
+    Agent findByManagedResource(@Param("resource") Resource resource);
 
 }

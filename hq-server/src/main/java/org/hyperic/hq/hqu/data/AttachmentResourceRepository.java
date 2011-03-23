@@ -15,5 +15,5 @@ public interface AttachmentResourceRepository extends JpaRepository<AttachmentRe
     // TODO previously accepted Resource prototypes for type-based attachment
     @Transactional(readOnly=true)
     @Query("select a from AttachmentResource a where a.resource = :resource and a.category = :cat")
-    List<Attachment> findFor(@Param("resource") Resource resource, @Param("cat") String category);
+    List<Attachment> findByResourceAndCategory(@Param("resource") Resource resource, @Param("cat") String category);
 }

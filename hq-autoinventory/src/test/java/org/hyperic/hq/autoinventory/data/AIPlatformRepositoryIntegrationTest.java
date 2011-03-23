@@ -26,7 +26,7 @@ public class AIPlatformRepositoryIntegrationTest {
     private AIPlatformRepository aiPlatformRepository;
 
     @Test
-    public void testFindAllNotIgnored() {
+    public void testFindNotIgnored() {
         AIPlatform platform1 = createAIPlatform("Platform1", System.currentTimeMillis() - 5000,
             false, "agentToken1");
         // This one shouldn't be included
@@ -39,7 +39,7 @@ public class AIPlatformRepositoryIntegrationTest {
         expected.add(platform3);
         expected.add(platform1);
 
-        assertEquals(expected, aiPlatformRepository.findAllNotIgnored());
+        assertEquals(expected, aiPlatformRepository.findNotIgnored());
     }
 
     @Test

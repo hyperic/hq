@@ -471,7 +471,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         //retVal.setMTime(new Long(g.getMtime()));
         //retVal.setCTime(new Long(g.getCtime()));
         retVal.setModifiedBy(g.getModifiedBy());
-        retVal.setOwner(authzSubjectRepository.findOwner(g).getName());
+        retVal.setOwner(authzSubjectRepository.findByOwnedResource(g).getName());
 
         // Add the group members
         for (Resource r : members) {
@@ -657,7 +657,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     public void changeGroupOwner(AuthzSubject subject, ResourceGroup group, AuthzSubject newOwner)
         throws PermissionException {
         //TODO this used to call ResourceManager. Perm check?
-        AuthzSubject oldOwner = authzSubjectRepository.findOwner(group);
+        AuthzSubject oldOwner = authzSubjectRepository.findByOwnedResource(group);
         if(oldOwner != null) {
             oldOwner.removeOwnedResource(group);
         }

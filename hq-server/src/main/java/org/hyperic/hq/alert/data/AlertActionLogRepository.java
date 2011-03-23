@@ -16,7 +16,7 @@ public interface AlertActionLogRepository extends JpaRepository<AlertActionLog, 
     @Transactional
     @Modifying
     @Query("delete from AlertActionLog l where l.alert in (:alerts)")
-    void deleteAlertActions(@Param("alerts") List<Alert> alerts);
+    void deleteByAlerts(@Param("alerts") List<Alert> alerts);
 
     @Transactional
     @Modifying

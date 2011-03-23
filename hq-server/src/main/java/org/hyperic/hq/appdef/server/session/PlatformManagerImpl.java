@@ -889,7 +889,7 @@ public class PlatformManagerImpl implements PlatformManager {
             if (porker && // Let agent porker
                 // create new platforms
                 !(p.getProperty(PlatformFactory.FQDN).equals(fqdn) || p.getProperty(PlatformFactory.CERT_DN).equals(certdn) || 
-                    agentDAO.findManagingAgent(p).getAgentToken().equals(agentToken))) {
+                    agentDAO.findByManagedResource(p).getAgentToken().equals(agentToken))) {
                 p = null;
             }
         }
@@ -910,7 +910,7 @@ public class PlatformManagerImpl implements PlatformManager {
             Agent agent = agentManager.getAgent(agentToken);
             Collection<Resource> platforms = getAllPlatforms();
             for (Resource platform : platforms) {
-                if(agent.equals(agentDAO.findManagingAgent(platform))) {
+                if(agent.equals(agentDAO.findByManagedResource(platform))) {
                     String platType = platform.getType().getName();
                     // need to check if the platform is not a platform device
                     if (PlatformDetector.isSupportedPlatform(platType)) {
@@ -1005,7 +1005,7 @@ public class PlatformManagerImpl implements PlatformManager {
         Set<Resource> agentPlatforms = new HashSet<Resource>();
         Collection<Resource> platforms = getAllPlatforms();
         for (Resource platform : platforms) {
-            if(agentToken.equals(agentDAO.findManagingAgent(platform).getAgentToken())) {
+            if(agentToken.equals(agentDAO.findByManagedResource(platform).getAgentToken())) {
                 agentPlatforms.add(platform);
             }
         }
@@ -1411,7 +1411,7 @@ public class PlatformManagerImpl implements PlatformManager {
 
             // See if we need to create an AIPlatform
             if (existing.getAgent() != null) {
-                if (agentDAO.findManagingAgent(plat) == null) {
+                if (agentDAO.findByManagedResource(plat) == null) {
                     // Create AIPlatform for manually created platform
 
                     AIPlatformValue aiPlatform = new AIPlatformValue();
@@ -1432,7 +1432,7 @@ public class PlatformManagerImpl implements PlatformManager {
                     }
 
                     getAIQueueManager().queue(subject, aiPlatform, false, false, true);
-                } else if (!agentDAO.findManagingAgent(plat).equals(existing.getAgent())) {
+                } else if (!agentDAO.findByManagedResource(plat).equals(existing.getAgent())) {
                     // Need to enqueue the ResourceUpdatedZevent if the
                     // agent changed to get the metrics scheduled
                     List<ResourceUpdatedZevent> events = new ArrayList<ResourceUpdatedZevent>();
@@ -1735,7 +1735,7 @@ public class PlatformManagerImpl implements PlatformManager {
                 // make sure address does not change if/when last ping fails
                 agent.setAddress(origIp);
             }
-            if (agentDAO.findManagingAgent(platform) == null) {
+            if (agentDAO.findByManagedResource(platform) == null) {
                 log.warn("Removing agent reference from platformid=" + platform.getId() +
                          ".  Server cannot ping the agent from any IP " +
                          "associated with the platform");
@@ -1949,7 +1949,7 @@ public class PlatformManagerImpl implements PlatformManager {
         Collection<Platform> plats  = new HashSet<Platform>();
         Collection<Resource> resources = getAllPlatforms();
         for(Resource resource: resources) {
-            if(agentDAO.findManagingAgent(resource).equals(agt)) {
+            if(agentDAO.findByManagedResource(resource).equals(agt)) {
                 plats.add(toPlatform(resource));
             }
         }
