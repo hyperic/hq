@@ -12,30 +12,46 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 @DirtiesContext
 @Transactional
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:org/hyperic/hq/plugin/mgmt/data/jpa-integration-test-context.xml" })
 public class PluginRepositoryIntegrationTest {
-    
-    @Autowired
-    private PluginRepository pluginRepository;
-    
+
     @PersistenceContext
     private EntityManager entityManager;
-    
+
+    @Autowired
+    private PluginRepository pluginRepository;
+
+    @Test
+    public void testFindByName() {
+        Plugin plugin = new Plugin("tomcat", "/some/place", "hash");
+        pluginRepository.save(plugin);
+        Plugin plugin2 = new Plugin("weblogic", "/some/place", "hash");
+        pluginRepository.save(plugin2);
+        assertEquals(plugin, pluginRepository.findByName("tomcat"));
+    }
+
+    @Test
+    public void testFindByNameNonexistent() {
+        assertNull(pluginRepository.findByName("tomcat"));
+    }
+
     @Test
     public void testFindByResourceType() {
         ResourceType type = new ResourceType("Tomcat Server");
         entityManager.persist(type);
         ResourceType type2 = new ResourceType("Web Module Stats");
         entityManager.persist(type2);
-        Plugin plugin = new Plugin("tomcat","/some/place","hash");
+        Plugin plugin = new Plugin("tomcat", "/some/place", "hash");
         plugin.addResourceType(type);
         plugin.addResourceType(type2);
         pluginRepository.save(plugin);
-        pluginRepository.findByResourceType(type);
-        
+        assertEquals(plugin, pluginRepository.findByResourceType(type));
+
     }
 }
