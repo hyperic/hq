@@ -49,8 +49,6 @@ import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.ApplicationType;
-import org.hyperic.hq.appdef.server.session.DownResSortField;
-import org.hyperic.hq.appdef.server.session.DownResource;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
@@ -2893,75 +2891,6 @@ public class AppdefBossImpl implements AppdefBoss {
         AppdefEntityNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return appdefStatManager.getNavMapDataForAutoGroup(subject, adeIds, new Integer(ctype));
-    }
-
-    /**
-     * Get the list of resources that are unavailable
-     * 
-     */
-    public Collection<DownResource> getUnavailableResources(AuthzSubject user, String typeId,
-                                                            PageInfo info)
-        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException,
-        PermissionException {
-        List<DownMetricValue> unavailEnts = availabilityManager.getUnavailEntities(null);
-
-        if (unavailEnts.size() == 0) {
-            return new ArrayList<DownResource>(0);
-        }
-
-        DownResSortField sortField = (DownResSortField) info.getSort();
-        Set<DownResource> ret = new TreeSet<DownResource>(sortField.getComparator(!info
-            .isAscending()));
-
-        int appdefType = -1;
-        int appdefTypeId = -1;
-
-        if (typeId != null && typeId.length() > 0) {
-            try {
-                appdefType = Integer.parseInt(typeId);
-            } catch (NumberFormatException e) {
-                AppdefEntityTypeID aetid = new AppdefEntityTypeID(typeId);
-                appdefType = aetid.getType();
-                appdefTypeId = aetid.getID();
-            }
-        }
-
-        Set<AppdefEntityID> viewables = new HashSet<AppdefEntityID>(findViewableEntityIds(user,
-            APPDEF_TYPE_UNDEFINED, null, null, null));
-        for (DownMetricValue dmv : unavailEnts) {
-            AppdefEntityID entityId = dmv.getEntityId();
-            if (!viewables.contains(entityId)) {
-                continue;
-            }
-
-            AppdefEntityValue res = new AppdefEntityValue(entityId, user);
-
-            // Look up the resource type
-            if (appdefType != -1) {
-                if (entityId.getType() != appdefType) {
-                    continue;
-                }
-                if (appdefTypeId != -1) {
-                    AppdefResourceType type = res.getAppdefResourceType();
-                    if (type.getId().intValue() != appdefTypeId) {
-                        continue;
-                    }
-                }
-            }
-
-            if (log.isDebugEnabled()) {
-                log.debug(res.getName() + " down for " + (dmv.getDuration() / 60000) + "min");
-            }
-
-            ret.add(new DownResource(res.getResourcePOJO(), dmv));
-        }
-
-        if (!info.isAll() && ret.size() > info.getPageSize()) {
-            // Have to reduce the size
-            List<DownResource> reduced = new ArrayList<DownResource>(ret);
-            return reduced.subList(0, info.getPageSize() - 1);
-        }
-        return ret;
     }
 
     /**

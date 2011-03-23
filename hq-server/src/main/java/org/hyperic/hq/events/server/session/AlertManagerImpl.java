@@ -421,6 +421,28 @@ public class AlertManagerImpl implements AlertManager,
         return findAlerts(subj, priority, timeRange, endTime, inEsc, notFixed, groupId, null,
             pageInfo);
     }
+    
+    
+    
+    public List<Alert> findAlerts(Integer subj, int priority, long timeRange, long endTime,
+                                  boolean inEsc, boolean notFixed, Integer groupId,
+                                  Integer alertDefId, Sort sort) throws PermissionException {
+        // [HHQ-2946] Only round up if end time is not a multiple of a minute
+        long mod = endTime % 60000;
+        if (mod > 0) {
+            // Time voodoo the end time to the nearest minute so that we might
+            // be able to use cached results.
+            endTime = TimingVoodoo.roundUpTime(endTime, 60000);
+        }
+        return alertRepository.findByCreateTimeAndPriority(endTime - timeRange, endTime, priority,
+            inEsc, notFixed, groupId, alertDefId, sort);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Alert> findAlerts(Integer subj, int priority, long timeRange, long endTime,
+        boolean inEsc, boolean notFixed, Integer groupId, Sort sort) throws PermissionException {
+        return findAlerts(subj,priority,timeRange,endTime,inEsc,notFixed,groupId,null,sort);
+    }
 
     /**
      * A more optimized look up which includes the permission checking
@@ -443,8 +465,12 @@ public class AlertManagerImpl implements AlertManager,
         PageRequest pageRequest = new PageRequest(pageInfo.getPageNum(), pageInfo.getPageSize(), sort);
         
         return alertRepository.findByCreateTimeAndPriority(endTime - timeRange, endTime, priority,
-            inEsc, notFixed, groupId, alertDefId, pageRequest);
+            inEsc, notFixed, groupId, alertDefId, pageRequest).getContent();
     }
+    
+    
+
+    
 
     /**
      * Search alerts given a set of criteria

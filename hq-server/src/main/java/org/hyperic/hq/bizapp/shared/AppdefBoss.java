@@ -30,11 +30,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.ApplicationType;
-import org.hyperic.hq.appdef.server.session.DownResource;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.Server;
@@ -744,12 +742,6 @@ public interface AppdefBoss {
     public org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode[] getNavMapData(int sessionId,
                                                                                  AppdefEntityID[] adeIds, int ctype)
         throws SessionNotFoundException, SessionTimeoutException, PermissionException, AppdefEntityNotFoundException;
-
-    /**
-     * Get the list of resources that are unavailable
-     */
-    public Collection<DownResource> getUnavailableResources(AuthzSubject user, String typeId, PageInfo info)
-        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException, PermissionException;
 
     /**
      * Get the map of unavailable resource counts by type

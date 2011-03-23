@@ -56,7 +56,6 @@ import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.AlertPermissionManager;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.server.session.AlertSortField;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertManager;
@@ -75,6 +74,7 @@ import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -297,7 +297,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
             if (unfixed > 0) {
                 watch.markTimeBegin("getResourceStatus: findAlerts");
                 List<Alert> alerts = alertManager.findAlerts(subj.getId(), 0, begin, now, true, true, group.getId(),
-                    PageInfo.getAll(AlertSortField.FIXED, true));
+                    new Sort("fixed"));
                 watch.markTimeEnd("getResourceStatus: findAlerts");
 
                 // Are all unfixed alerts in escalation?

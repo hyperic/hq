@@ -38,6 +38,7 @@ import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.data.domain.Sort;
 
 /**
  * Local interface for AlertManager.
@@ -120,6 +121,10 @@ public interface AlertManager {
     public List<Alert> findAlerts(Integer subj, int priority, long timeRange, long endTime,
                                   boolean inEsc, boolean notFixed, Integer groupId,
                                   PageInfo pageInfo) throws PermissionException;
+    
+    List<Alert> findAlerts(Integer subj, int priority, long timeRange, long endTime,
+        boolean inEsc, boolean notFixed, Integer groupId,
+        Sort sort) throws PermissionException;
 
     /**
      * A more optimized look up which includes the permission checking
@@ -128,6 +133,10 @@ public interface AlertManager {
     public List<Alert> findAlerts(Integer subj, int priority, long timeRange, long endTime,
                                   boolean inEsc, boolean notFixed, Integer groupId,
                                   Integer alertDefId, PageInfo pageInfo) throws PermissionException;
+    
+    List<Alert> findAlerts(Integer subj, int priority, long timeRange, long endTime,
+        boolean inEsc, boolean notFixed, Integer groupId,
+        Integer alertDefId, Sort sort) throws PermissionException;
 
     /**
      * Search alerts given a set of criteria

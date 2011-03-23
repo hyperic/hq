@@ -1,5 +1,6 @@
 package org.hyperic.hq.alert.data;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -15,7 +16,10 @@ import org.hyperic.hq.events.server.session.AlertInfo;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 
 public class AlertRepositoryImpl implements AlertRepositoryCustom {
@@ -75,10 +79,14 @@ public class AlertRepositoryImpl implements AlertRepositoryCustom {
         return entityManager.createQuery(sql).setParameter("alertDef", def).executeUpdate();
     }
 
-    public List<Alert> findByCreateTimeAndPriority(long begin, long end, int priority,
+    public Page<Alert> findByCreateTimeAndPriority(long begin, long end, int priority,
                                                    boolean inEsc, boolean notFixed,
                                                    Integer groupId, Integer alertDefId,
                                                    Pageable pageable) {
+        long total = getCountByCreateTimeAndPriority(begin, end, priority, inEsc, notFixed, groupId, alertDefId);
+        if (total == 0) {
+            return new PageImpl<Alert>(new ArrayList<Alert>(0), pageable, 0);
+        }
         String sql = getAlertSql(begin, end, priority, inEsc, notFixed, groupId, alertDefId, false);
         Iterator<Order> orders = pageable.getSort().iterator();
         while (orders.hasNext()) {
@@ -92,7 +100,29 @@ public class AlertRepositoryImpl implements AlertRepositoryCustom {
         // TODO there used to be a subject ID in AlertDAO and perms were checked
         q.setFirstResult(pageable.getOffset());
         q.setMaxResults(pageable.getPageSize());
-        return q.getResultList();
+        return new PageImpl<Alert>(q.getResultList(),pageable,total);
+    }
+    
+    
+
+    public List<Alert> findByCreateTimeAndPriority(long begin, long end, int priority,
+                                                   boolean inEsc, boolean notFixed,
+                                                   Integer groupId, Integer alertDefId, Sort sort) {
+        long total = getCountByCreateTimeAndPriority(begin, end, priority, inEsc, notFixed, groupId, alertDefId);
+        if (total == 0) {
+            return new ArrayList<Alert>(0);
+        }
+        String sql = getAlertSql(begin, end, priority, inEsc, notFixed, groupId, alertDefId, false);
+        Iterator<Order> orders = sort.iterator();
+        while (orders.hasNext()) {
+            Order order = orders.next();
+            sql += " order by " + order.getProperty() + " " + order.getDirection();
+        }
+
+        return entityManager.createQuery(sql, Alert.class)
+            .setParameter("begin", begin).setParameter("end", end)
+            .setParameter("priority", priority).getResultList();
+        // TODO there used to be a subject ID in AlertDAO and perms were checked
     }
 
     public List<Alert> findByResourceInRange(Resource res, long begin, long end, boolean nameSort,
