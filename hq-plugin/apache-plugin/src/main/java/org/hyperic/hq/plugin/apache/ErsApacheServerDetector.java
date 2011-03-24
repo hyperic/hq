@@ -174,17 +174,26 @@ public class ErsApacheServerDetector
      */
     public List getServerResources(ConfigResponse platformConfig, String path, RegistryKey current)
         throws PluginException {
-
+        String version = getTypeInfo().getVersion();
         String key = current.getSubKeyName();
+        getLog().info("[getServerResources] ("+version+") RegistryKey="+key+" path="+path);
 
-        if (key.indexOf("Apache") == -1) {
+
+        if (key.toLowerCase().indexOf("apache") == -1) {
             return null; //e.g. Covalent$hostnameTomcatERS2.4
         }
 
-        String version = getTypeInfo().getVersion();
-        if (!key.endsWith(version)) {
-            // e.g. 2.4, but 2.3 detector..
-            return null;
+        if (version.equals("4.x")) {
+            if (!key.contains("apache2.2")) {
+                getLog().debug("[getServerResources] no ERS "+version);
+                return null;
+            }
+        } else {
+            if (!key.endsWith(version)) {
+                // e.g. 2.4, but 2.3 detector..
+                getLog().debug("[getServerResources] no ERS "+version);
+                return null;
+            }
         }
 
         //convert:

@@ -36,7 +36,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
@@ -354,17 +353,11 @@ public abstract class PermissionManager {
         resourceTypes.add(getResourceTypeDAO().get(AuthzConstants.authzService));
         resourceTypes.add(getResourceTypeDAO().get(AuthzConstants.authzGroup));
         resourceTypes.add(getResourceTypeDAO().get(AuthzConstants.authzApplication));
-        final Set<Integer> resourceIds = findViewableResources(subj, resourceTypes);
-        final ResourceDAO dao = getResourceDAO();
-        final List<AppdefEntityID> rtn = new ArrayList<AppdefEntityID>();
-        for (final Integer rid : resourceIds) {
-            Resource resource = dao.get(rid);
-            if (resource != null && !resource.isInAsyncDeleteState()) {
-                rtn.add(AppdefUtil.newAppdefEntityId(resource));
-            }
-        }
-        return rtn;
+        return findViewableInstances(subj, resourceTypes);
     }
+
+    public abstract List<AppdefEntityID> findViewableInstances(
+        AuthzSubject subj, Collection<ResourceType> types);
 
     /**
      * Check for create child object permission for a given resource Child
@@ -828,15 +821,22 @@ public abstract class PermissionManager {
      */
     public abstract HierarchicalAlertingManager getHierarchicalAlertingManager();
 
-    public void checkIsSuperUser(AuthzSubject subject) throws PermissionException {
+    private boolean isSuperUser(AuthzSubject subject) {
         if (subject.getId().equals(AuthzConstants.overlordId)) {
-            return;
+            return true;
         }
         final Collection<Role> roles = subject.getRoles();
         for (final Role role : roles) {
             if (role.getId().equals(AuthzConstants.rootRoleId)) {
-                return;
+                return true;
             }
+        }
+        return false;
+    }
+
+    public void checkIsSuperUser(AuthzSubject subject) throws PermissionException {
+        if (isSuperUser(subject)) {
+            return;
         }
         throw new PermissionException(subject.getName() + " does not have super user priviledge");
     }

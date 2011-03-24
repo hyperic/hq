@@ -665,12 +665,12 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      */
     @Transactional(readOnly = true)
     public Map<String, Collection<Integer>> findAllViewableInstances(AuthzSubject subject,
-                                                                     ResourceType resourceType) {
+                                                                     Collection<ResourceType> types) {
         final Map<String, Collection<Integer>> rtn = new HashMap<String, Collection<Integer>>();
         final PermissionManager pm = PermissionManagerFactory.getInstance();
-        final Set<Integer> resources = (resourceType == null) ?
+        final Set<Integer> resources = (types == null) ?
             pm.findViewableResources(subject, resourceTypeDAO.findAll()) :
-            pm.findViewableResources(subject, Collections.singletonList(resourceType));
+            pm.findViewableResources(subject, types);
         for (final Integer resId : resources) {
             final Resource res = findResourceById(resId);
             if (res == null || res.isInAsyncDeleteState() || res.isSystem()) {
