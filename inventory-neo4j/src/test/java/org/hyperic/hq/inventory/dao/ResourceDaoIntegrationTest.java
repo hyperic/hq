@@ -104,9 +104,8 @@ public class ResourceDaoIntegrationTest {
         resource3.setProperty(SKU, SKU1);
         PageRequest pageInfo = new PageRequest(0, 2, new Sort("name"));
         Page<Resource> actual = resourceDao.findByIndexedProperty(SKU, SKU1, pageInfo);
-        Page<Resource> expected = new PageImpl<Resource>(Arrays.asList(new Resource[] { resource2, resource1 }),pageInfo,2);
+        Page<Resource> expected = new PageImpl<Resource>(Arrays.asList(new Resource[] { resource2, resource1 }),pageInfo,3);
         assertEquals(expected, actual);
-        assertEquals(3, actual.getTotalElements());
     }
 
     @Test
@@ -128,8 +127,7 @@ public class ResourceDaoIntegrationTest {
         }
         PageRequest pageInfo = new PageRequest(1, 5, new Sort("name"));
         Page<Resource> actual = resourceDao.findByIndexedProperty(SKU, SKU1, pageInfo);
-        assertEquals(expected, actual);
-        assertEquals(11, actual.getTotalElements());
+        assertEquals(new PageImpl<Resource>(expected,pageInfo,11), actual);
     }
 
     @Test

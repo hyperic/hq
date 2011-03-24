@@ -162,9 +162,6 @@ public class MetricAuxLogRepositoryIntegrationTest {
 
     @Test
     public void testFindByAuxLogNone() {
-        MetricAuxLogPojo metricAuxLog = new MetricAuxLogPojo(auxLog, new MetricAuxLog("desc",
-            timestamp, measurement), def1);
-        metricAuxLogRepository.save(metricAuxLog);
         assertNull(metricAuxLogRepository.findByAuxLog(auxLog));
     }
 
