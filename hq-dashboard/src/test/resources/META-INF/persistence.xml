@@ -10,8 +10,9 @@
      <class>org.hyperic.hq.auth.domain.AuthzSubject</class>
      <class>org.hyperic.hq.auth.domain.Role</class>
      <class>org.hyperic.hq.auth.domain.RoleCalendar</class>
-     <class>org.hyperic.hq.calendar.domain.Calendar</class>
-     <class>org.hyperic.hq.calendar.domain.CalendarEntry</class>
+     <class>org.hyperic.hq.auth.domain.Calendar</class>
+     <class>org.hyperic.hq.auth.domain.CalendarEntry</class>
+      <class>org.hyperic.hq.inventory.domain.Resource</class>
      <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
       <properties>
             <property name="hibernate.hbm2ddl.auto" value="update"/>
