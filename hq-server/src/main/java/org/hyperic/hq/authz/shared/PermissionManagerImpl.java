@@ -39,6 +39,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
@@ -437,9 +438,33 @@ public class PermissionManagerImpl
         return (HierarchicalAlertingManager) Bootstrap.getBean("HierarchicalAlertingManager");
     }
 
+    public List<AppdefEntityID> findViewableInstances(AuthzSubject subj,
+                                                      Collection<ResourceType> resourceTypes) {
+        if (resourceTypes.isEmpty()) {
+            return Collections.emptyList();
+        }
+        final ResourceDAO resourceDAO = getResourceDAO();
+        final Collection<Resource> resources = (subj.getId().equals(1)) ?
+            resourceDAO.findAll() : resourceDAO.findByOwner(subj);
+        final List<AppdefEntityID> rtn = new ArrayList<AppdefEntityID>(resources.size());
+        final Set<Integer> typeIds = new HashSet<Integer>();
+        for (final ResourceType type : resourceTypes) {
+            typeIds.add(type.getId());
+        }
+        for (final Resource r : resources) {
+            if (r == null || r.isInAsyncDeleteState() || r.isSystem()) {
+                continue;
+            }
+            if (typeIds.contains(r.getResourceType().getId())) {
+                rtn.add(AppdefUtil.newAppdefEntityId(r));
+            }
+        }
+        return rtn;
+    }
+
     public Set<Integer> findViewableResources(AuthzSubject subj,
                                               Collection<ResourceType> resourceTypes) {
-        if (resourceTypes.size() == 0) {
+        if (resourceTypes.isEmpty()) {
             return Collections.emptySet();
         }
         final ResourceDAO resourceDAO = getResourceDAO();
@@ -460,4 +485,5 @@ public class PermissionManagerImpl
         }
         return rtn;
     }
+
 }

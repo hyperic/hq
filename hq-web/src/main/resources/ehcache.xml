@@ -474,6 +474,24 @@
          memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Permission related caches -->
+  <cache name="Permission.getViewableInstanceIdsAndTypesForSuperUser"
+         maxElementsInMemory="10000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Permission.getViewableInstanceIdsForSuperUser"
+         maxElementsInMemory="10000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Permission.getViewableResIdsForSuperUser"
+         maxElementsInMemory="10000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.authz.server.session.Resource"
          maxElementsInMemory="10000"
          eternal="true"

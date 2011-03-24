@@ -179,7 +179,7 @@ public interface ResourceManager {
      * @return Map of resource values
      */
     public Map<String, Collection<Integer>> findAllViewableInstances(AuthzSubject subject,
-                                                                     ResourceType resourceType);
+                                                                     Collection<ResourceType> types);
 
     /**
      * Find all the resources which are descendents of the given resource
