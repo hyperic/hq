@@ -133,7 +133,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-util"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-common"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-messaging"/>
-	<classpathentry kind="var" path="M2_REPO/hsqldb/hsqldb/1.8.0.10/hsqldb-1.8.0.10.jar"/>
 	<classpathentry kind="con" path="org.eclipse.ajdt.core.ASPECTJRT_CONTAINER"/>
+	<classpathentry kind="var" path="M2_REPO/org/hsqldb/hsqldb/2.0.0/hsqldb-2.0.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
