@@ -772,6 +772,20 @@
 					<module>hq-installer</module>
 					<module>hq-bootstrap</module>
 					<module>hq-web</module>
+					<module>hq-agent-mgmt</module>
+					<module>hq-alert</module>
+					<module>hq-auth</module>
+					<module>hq-autoinventory</module>
+					<module>hq-config</module>
+					<module>hq-control</module>
+					<module>hq-dashboard</module>
+					<module>hq-escalation</module>
+					<module>hq-event</module>
+					<module>hq-galert</module>
+					<module>hq-hqu</module>
+					<module>hq-measurement</module>
+					<module>hq-plugin-mgmt</module>
+					<module>hq-update</module>
 					<module>hq-integration-tests</module>
 			</modules>
 		</profile>
