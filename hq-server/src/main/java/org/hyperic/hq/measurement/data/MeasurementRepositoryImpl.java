@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 
@@ -80,10 +81,13 @@ public class MeasurementRepositoryImpl implements MeasurementRepositoryCustom {
         // should be a unique result if only one resource is being examined
         if (resources.size() == 1) {
             query.setParameter("resources", resList);
-            Measurement result = query.getSingleResult();
-            if (result != null) {
+            try {
+                Measurement result = query.getSingleResult();
                 rtn.add(result);
+            }catch(NoResultException e) {
+                //shouldn't happen
             }
+            
         } else {
             for (int i = 0; i < resList.size(); i += BATCH_SIZE) {
                 int end = Math.min(i + BATCH_SIZE, resList.size());
