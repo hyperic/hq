@@ -30,9 +30,7 @@ public class AvailabilityDataRepositoryImpl implements AvailabilityDataCustom {
     private static final int BATCH_SIZE = 1000;
 
     private static final long MAX_TIMESTAMP = AvailabilityDataRLE.getLastTimestamp();
-    // TOTAL_TIME and TOTAL_UPTIME are used to anchor the start and end values
-    // to
-    // the appropriate time range. They avoid the situation where a query
+  
     // TOTAL_TIME and TOTAL_UPTIME are used to anchor the start and end values
     // to
     // the appropriate time range. They avoid the situation where a query
@@ -53,6 +51,12 @@ public class AvailabilityDataRepositoryImpl implements AvailabilityDataCustom {
         this.dialectAccessor = dialectAccessor;
     }
 
+    /**
+     * @return List of Object[]. [0] = Measurement Obj [1] = min(availVal), [2]
+     *         = max(availVal), [3] = avg(availVal) [4] = mid count, [5] = total
+     *         uptime, [6] = = total time
+     */
+    @SuppressWarnings("unchecked")
     public List<Object[]> findAggregateAvailability(List<Integer> measIds, long start, long end) {
         if (measIds.isEmpty()) {
             // Nothing to do
@@ -60,7 +64,7 @@ public class AvailabilityDataRepositoryImpl implements AvailabilityDataCustom {
         }
         String sql = new StringBuilder().append("SELECT m, min(rle.availVal),")
             .append(" max(rle.availVal),").append(" avg(rle.availVal),")
-            .append(" (:endtime - :startime) / m.interval, ").append(" sum(")
+            .append(" (cast(:endtime as long) - cast(:startime as long)) / m.interval, ").append(" sum(")
             .append(TOTAL_UPTIME)
             .append("), ")
             .append(" sum(")
@@ -68,7 +72,7 @@ public class AvailabilityDataRepositoryImpl implements AvailabilityDataCustom {
             .append(") ")
             .append(" FROM Measurement m")
             .append(" JOIN m.availabilityData rle")
-            .append(" WHERE m in (:mids)")
+            .append(" WHERE m.id in (:mids)")
             .append(" AND (rle.startime > :startime")
             .append("   OR rle.endtime > :startime)")
             .append(" AND (rle.startime < :endtime")
@@ -77,8 +81,8 @@ public class AvailabilityDataRepositoryImpl implements AvailabilityDataCustom {
             // there is an open bug on this for hibernate to
             // automatically expand group by's
             // http://opensource.atlassian.com/projects/hibernate/browse/HHH-2407
-            .append(" GROUP BY m.id, m.version, m.instanceId,")
-            .append(" m.template, m.mtime,m.enabled,").append(" m.interval, m.dsn,m.resource,")
+            .append(" GROUP BY m.id, m.version, m.resource,")
+            .append(" m.template, m.mtime,m.enabled,").append(" m.interval, m.dsn,")
             .append(" rle.endtime").append(" ORDER BY rle.endtime").toString();
 
         final int size = measIds.size();
@@ -89,7 +93,7 @@ public class AvailabilityDataRepositoryImpl implements AvailabilityDataCustom {
         for (int i = 0; i < size; i += batchSize) {
             final int last = Math.min(i + batchSize, size);
             final List<Integer> sublist = measIds.subList(i, last);
-            rtn.addAll(entityManager.createQuery(sql, Object[].class)
+            rtn.addAll(entityManager.createQuery(sql)
                 .setParameter("startime", start).setParameter("endtime", end)
                 .setParameter("mids", sublist).getResultList());
         }
@@ -127,7 +131,7 @@ public class AvailabilityDataRepositoryImpl implements AvailabilityDataCustom {
             .append(AVAIL_DOWN).append(" AND ").append(ALIAS_CLAUSE);
         final boolean hasIncludes = (includes != null && includes.size() > 0) ? true : false;
         if (hasIncludes) {
-            sql.append(" rle.measurement in (:mids)");
+            sql.append(" and rle.measurement.id in (:mids)");
         }
         TypedQuery<AvailabilityDataRLE> query = entityManager.createQuery(sql.toString(),
             AvailabilityDataRLE.class);
@@ -160,7 +164,7 @@ public class AvailabilityDataRepositoryImpl implements AvailabilityDataCustom {
                 return lhsStart.compareTo(rhsStart);
             }
         };
-        StringBuilder sql = new StringBuilder().append("FROM AvailabilityDataRLE rle").append(
+        StringBuilder sql = new StringBuilder().append("select rle FROM AvailabilityDataRLE rle").append(
             " WHERE rle.measurement.id in (:mids)");
         if (after > 0) {
             sql.append(" AND rle.endtime >= :endtime");
@@ -194,7 +198,7 @@ public class AvailabilityDataRepositoryImpl implements AvailabilityDataCustom {
                                                          boolean descending) {
         final List<AvailabilityDataRLE> rtn = new ArrayList<AvailabilityDataRLE>(mids.size());
         final String sql = new StringBuilder().append("FROM AvailabilityDataRLE rle")
-            .append(" WHERE rle.measurement in (:mids)").append(" AND rle.endtime > :startime")
+            .append(" WHERE rle.measurement.id in (:mids)").append(" AND rle.endtime > :startime")
             .append(" AND rle.startime < :endtime").append(" ORDER BY rle.measurement,")
             .append(" rle.startime").append(((descending) ? " DESC" : " ASC")).toString();
         for (int i = 0; i < mids.size(); i += BATCH_SIZE) {
