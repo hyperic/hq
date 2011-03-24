@@ -35,6 +35,7 @@
 		<hibernate.version>3.5.6-Final</hibernate.version>
 		<hibernate-tools.version>3.2.3.GA</hibernate-tools.version>
 		<hqapi.version>4.1.0.BUILD-SNAPSHOT</hqapi.version>
+		<hsqldb.version>2.0.0</hsqldb.version>
 		<httpclient.version>3.1</httpclient.version>
 		<j2ee-management.version>1.1</j2ee-management.version>
         <jackson-mapper-asl.version>1.5.5</jackson-mapper-asl.version>
@@ -617,6 +618,12 @@
 				<groupId>com.cenqua.clover</groupId>
 				<artifactId>clover</artifactId>
 				<version>${clover2.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.hsqldb</groupId>
+				<artifactId>hsqldb</artifactId>
+				<version>${hsqldb.version}</version>
 				<scope>test</scope>
 			</dependency>
 		</dependencies>

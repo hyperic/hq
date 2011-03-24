@@ -5,16 +5,18 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
+import javax.persistence.Query;
 
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertInfo;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -36,16 +38,28 @@ public class AlertRepositoryImpl implements AlertRepositoryCustom {
         this.alertActionLogRepository = alertActionLogRepository;
     }
 
+    public long countByCreateTimeAndPriority(long begin, long end, int priority, boolean inEsc,
+                                             boolean notFixed, Integer groupId, Integer alertDefId) {
+        Query query = getAlertQuery(begin, end, priority, inEsc, notFixed, groupId, alertDefId,
+            true, null);
+        return (Long) query.getSingleResult();
+    }
+
+    public int deleteByAlertDefinition(AlertDefinition def) {
+        String sql = "DELETE FROM Alert a WHERE a.alertDefinition = :alertDef";
+        return entityManager.createQuery(sql).setParameter("alertDef", def).executeUpdate();
+    }
+
     public int deleteByCreateTime(long before, int maxDeletes) {
         if (maxDeletes <= 0) {
             return 0;
         }
         // don't want to thrash the Alert cache, so select and do an explicit
         // remove() on each Object
-        final String hql = new StringBuilder(64).append("from Alert where ")
-            .append("ctime < :before and ")
-            .append("not id in (select alertId from EscalationState es ")
-            .append("where alertTypeEnum = :type)").toString();
+        final String hql = new StringBuilder(64).append("select a from Alert a where ")
+            .append("a.ctime < :before and ")
+            .append("not id in (select es.alertId from EscalationState es ")
+            .append("where es.alertType = :type)").toString();
         List<Alert> list = null;
         int count = 0;
         // due to
@@ -62,7 +76,8 @@ public class AlertRepositoryImpl implements AlertRepositoryCustom {
             alertActionLogRepository.deleteByAlerts(list);
             for (Alert alert : list) {
                 count++;
-                entityManager.remove(alert);
+                entityManager.remove(entityManager.contains(alert) ? alert : entityManager
+                    .merge(alert));
             }
             // need to flush or else the removed alerts won't be reflected in
             // the next hql
@@ -74,60 +89,44 @@ public class AlertRepositoryImpl implements AlertRepositoryCustom {
         return count;
     }
 
-    public int deleteByAlertDefinition(AlertDefinition def) {
-        String sql = "DELETE FROM Alert a WHERE a.alertDefinition = :alertDef";
-        return entityManager.createQuery(sql).setParameter("alertDef", def).executeUpdate();
-    }
-
+    @SuppressWarnings("unchecked")
     public Page<Alert> findByCreateTimeAndPriority(long begin, long end, int priority,
                                                    boolean inEsc, boolean notFixed,
                                                    Integer groupId, Integer alertDefId,
                                                    Pageable pageable) {
-        long total = countByCreateTimeAndPriority(begin, end, priority, inEsc, notFixed, groupId, alertDefId);
+        long total = countByCreateTimeAndPriority(begin, end, priority, inEsc, notFixed, groupId,
+            alertDefId);
         if (total == 0) {
             return new PageImpl<Alert>(new ArrayList<Alert>(0), pageable, 0);
         }
-        String sql = getAlertSql(begin, end, priority, inEsc, notFixed, groupId, alertDefId, false);
-        Iterator<Order> orders = pageable.getSort().iterator();
-        while (orders.hasNext()) {
-            Order order = orders.next();
-            sql += " order by " + order.getProperty() + " " + order.getDirection();
-        }
 
-        TypedQuery<Alert> q = entityManager.createQuery(sql, Alert.class)
-            .setParameter("begin", begin).setParameter("end", end)
-            .setParameter("priority", priority);
+        Query query = getAlertQuery(begin, end, priority, inEsc, notFixed, groupId, alertDefId,
+            false, pageable.getSort());
         // TODO there used to be a subject ID in AlertDAO and perms were checked
-        q.setFirstResult(pageable.getOffset());
-        q.setMaxResults(pageable.getPageSize());
-        return new PageImpl<Alert>(q.getResultList(),pageable,total);
+        query.setFirstResult(pageable.getOffset());
+        query.setMaxResults(pageable.getPageSize());
+        return new PageImpl<Alert>(query.getResultList(), pageable, total);
     }
-    
-    
 
+    @SuppressWarnings("unchecked")
     public List<Alert> findByCreateTimeAndPriority(long begin, long end, int priority,
                                                    boolean inEsc, boolean notFixed,
                                                    Integer groupId, Integer alertDefId, Sort sort) {
-        long total = countByCreateTimeAndPriority(begin, end, priority, inEsc, notFixed, groupId, alertDefId);
+        long total = countByCreateTimeAndPriority(begin, end, priority, inEsc, notFixed, groupId,
+            alertDefId);
         if (total == 0) {
             return new ArrayList<Alert>(0);
         }
-        String sql = getAlertSql(begin, end, priority, inEsc, notFixed, groupId, alertDefId, false);
-        Iterator<Order> orders = sort.iterator();
-        while (orders.hasNext()) {
-            Order order = orders.next();
-            sql += " order by " + order.getProperty() + " " + order.getDirection();
-        }
-
-        return entityManager.createQuery(sql, Alert.class)
-            .setParameter("begin", begin).setParameter("end", end)
-            .setParameter("priority", priority).getResultList();
+        Query query = getAlertQuery(begin, end, priority, inEsc, notFixed, groupId, alertDefId,
+            false, sort);
         // TODO there used to be a subject ID in AlertDAO and perms were checked
+        return query.getResultList();
+
     }
 
     public List<Alert> findByResourceInRange(Resource res, long begin, long end, boolean nameSort,
                                              boolean asc) {
-        String sql = "from Alert a where a.alertDefinition.resource = :res " +
+        String sql = "select a from Alert a where a.alertDefinition.resource = :res " +
                      "and a.ctime between :begin and :end order by " +
                      (nameSort ? "a.alertDefinition.name" : "a.ctime") + (asc ? " asc" : " desc");
 
@@ -140,44 +139,59 @@ public class AlertRepositoryImpl implements AlertRepositoryCustom {
             return entityManager
                 .createQuery(
                     "select a from Alert a where a.alertDefinition=:def and a.fixed=:fixed order by ctime DESC",
-                    Alert.class).setParameter("alertDefinition", def).setParameter("fixed", fixed)
+                    Alert.class).setParameter("def", def).setParameter("fixed", fixed)
                 .setMaxResults(1).getSingleResult();
         } catch (Exception e) {
             return null;
         }
     }
 
-    private String getAlertSql(long begin, long end, int priority, boolean inEsc, boolean notFixed,
-                               Integer groupId, Integer alertDefId, boolean count) {
-        return "select " +
-               (count ? "count(a)" : "a") +
-               " from " +
-               (inEsc ? "EscalationState es, " : "") +
-               "Alert a " +
-               "join a.alertDefinition d " +
-               "join d.resource r where " +
-               (groupId == null ? "" : "exists (select rg from r.groupBag rg " +
-                                       "where rg.group.id = " + groupId + ") and ") +
-               "a.ctime between :begin and :end and " + (notFixed ? " a.fixed = false and " : "") +
-               (alertDefId == null ? "" : "d.id = " + alertDefId + " and ") +
-               "d.priority >= :priority " +
-               (inEsc ? "and a.id = es.alertId and " + "es.alertDefinitionId = d.id " : "");
+    private Query getAlertQuery(long begin, long end, int priority, boolean inEsc,
+                                boolean notFixed, Integer groupId, Integer alertDefId,
+                                boolean count, Sort sort) {
+        List<Integer> memberIds = new ArrayList<Integer>();
+        if (groupId != null) {
+            ResourceGroup group = entityManager.find(ResourceGroup.class, groupId);
+            if (group != null) {
+                // TODO used to call attach on the group if using DAO
+                Set<Resource> members = group.getMembers();
+                for (Resource member : members) {
+                    memberIds.add(member.getId());
+                }
+            }
+        }
+        String ql = "select " + (count ? "count(a)" : "a") + " from " +
+                    (inEsc ? "EscalationState es, " : "") + "Alert a " +
+                    "join a.alertDefinition d " + "join d.resource r where " +
+                    (groupId == null ? "" : "r.id in (:resourceIds) and ") +
+                    "a.ctime between :begin and :end and " +
+                    (notFixed ? " a.fixed = false and " : "") +
+                    (alertDefId == null ? "" : "d.id = " + alertDefId + " and ") +
+                    "d.priority >= :priority " +
+                    (inEsc ? "and a.id = es.alertId and " + "es.alertDefId = d.id " : "");
+        if (sort != null) {
+            Iterator<Order> orders = sort.iterator();
+            while (orders.hasNext()) {
+                Order order = orders.next();
+                ql += " order by " + order.getProperty() + " " + order.getDirection();
+            }
+        }
+        Query query = entityManager.createQuery(ql).setParameter("begin", begin)
+            .setParameter("end", end).setParameter("priority", priority);
+        if (groupId != null) {
+            query.setParameter("resourceIds", memberIds);
+        }
+        return query;
     }
 
-    public long countByCreateTimeAndPriority(long begin, long end, int priority, boolean inEsc,
-                                                boolean notFixed, Integer groupId,
-                                                Integer alertDefId) {
-        String sql = getAlertSql(begin, end, priority, inEsc, notFixed, groupId, alertDefId, true);
-        return entityManager.createQuery(sql, Long.class).setParameter("begin", begin)
-            .setParameter("end", end).setParameter("priority", priority).getSingleResult();
-    }
-
+    @SuppressWarnings("unchecked")
     public Map<Integer, Map<AlertInfo, Integer>> getUnfixedAlertInfoAfter(long ctime) {
-        final String hql = new StringBuilder(128).append("SELECT alertDefinition.id, id, ctime ")
-            .append("FROM Alert WHERE ctime >= :ctime and fixed = '0' ").append("ORDER BY ctime")
-            .toString();
-        final List<Object[]> list = entityManager.createQuery(hql, Object[].class)
-            .setParameter("ctime", ctime).getResultList();
+        final String hql = new StringBuilder(128)
+            .append("SELECT a.alertDefinition.id, a.id, a.ctime ")
+            .append("FROM Alert a WHERE a.ctime >= :ctime and a.fixed = false ")
+            .append("ORDER BY a.ctime").toString();
+        final List<Object[]> list = entityManager.createQuery(hql).setParameter("ctime", ctime)
+            .getResultList();
         final Map<Integer, Map<AlertInfo, Integer>> alerts = new HashMap<Integer, Map<AlertInfo, Integer>>(
             list.size());
         for (Object[] obj : list) {

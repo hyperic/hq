@@ -370,11 +370,11 @@ public class Alert implements AlertInterface, Serializable {
         this.conditionLog = conditionLog;
     }
 
-    protected void setCtime(long ctime) {
+    public void setCtime(long ctime) {
         this.ctime = ctime;
     }
 
-    protected void setFixed(boolean fixed) {
+    public void setFixed(boolean fixed) {
         this.fixed = fixed;
     }
 
