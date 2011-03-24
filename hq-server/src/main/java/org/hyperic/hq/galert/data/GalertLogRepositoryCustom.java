@@ -27,4 +27,10 @@ public interface GalertLogRepositoryCustom {
                                                    Pageable pageable);
 
     GalertLog findLastByDefinition(GalertDef def, boolean fixed);
+
+    boolean hasEscalationState(GalertLog galertLog);
+
+    boolean isAcknowledgeable(GalertLog galertLog);
+
+    boolean isAcknowledged(GalertLog galertLog);
 }

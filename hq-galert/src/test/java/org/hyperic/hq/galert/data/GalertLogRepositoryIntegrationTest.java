@@ -2,6 +2,8 @@ package org.hyperic.hq.galert.data;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -11,10 +13,14 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.hyperic.hq.auth.domain.AuthzSubject;
+import org.hyperic.hq.escalation.server.session.Escalation;
+import org.hyperic.hq.escalation.server.session.EscalationState;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.galerts.server.session.ExecutionReason;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertDefPartition;
+import org.hyperic.hq.galerts.server.session.GalertEscalatable;
 import org.hyperic.hq.galerts.server.session.GalertLog;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.junit.Test;
@@ -129,12 +135,12 @@ public class GalertLogRepositoryIntegrationTest {
         List<GalertLog> expected = new ArrayList<GalertLog>();
         expected.add(log3);
         expected.add(log2);
-        PageRequest pageRequest = new PageRequest(0, 20,
-            new Sort("timestamp"));
-        assertEquals(new PageImpl<GalertLog>(expected,pageRequest,2l), galertLogRepository.findByCreateTimeAndPriority(timestamp - 5000,
-            timestamp, AlertSeverity.HIGH, false, true, null, null,pageRequest ));
+        PageRequest pageRequest = new PageRequest(0, 20, new Sort("timestamp"));
+        assertEquals(new PageImpl<GalertLog>(expected, pageRequest, 2l),
+            galertLogRepository.findByCreateTimeAndPriority(timestamp - 5000, timestamp,
+                AlertSeverity.HIGH, false, true, null, null, pageRequest));
     }
-    
+
     @Test
     public void testFindByCreateTimeAndPriorityAndNotFixedSort() {
         ResourceGroup group = new ResourceGroup();
@@ -165,7 +171,7 @@ public class GalertLogRepositoryIntegrationTest {
         expected.add(log3);
         expected.add(log2);
         assertEquals(expected, galertLogRepository.findByCreateTimeAndPriority(timestamp - 5000,
-            timestamp, AlertSeverity.HIGH, false, true, null, null,new Sort("timestamp") ));
+            timestamp, AlertSeverity.HIGH, false, true, null, null, new Sort("timestamp")));
     }
 
     @Test
@@ -203,10 +209,10 @@ public class GalertLogRepositoryIntegrationTest {
         expected.add(log3);
         expected.add(log2);
         expected.add(log4);
-        PageRequest request = new PageRequest(0, 20,
-            new Sort("timestamp"));
-        assertEquals(new PageImpl<GalertLog>(expected,request,3l), galertLogRepository.findByCreateTimeAndPriority(timestamp - 5000,
-            timestamp, AlertSeverity.HIGH, false, false, null, null,request ));
+        PageRequest request = new PageRequest(0, 20, new Sort("timestamp"));
+        assertEquals(new PageImpl<GalertLog>(expected, request, 3l),
+            galertLogRepository.findByCreateTimeAndPriority(timestamp - 5000, timestamp,
+                AlertSeverity.HIGH, false, false, null, null, request));
     }
 
     @Test
@@ -237,9 +243,10 @@ public class GalertLogRepositoryIntegrationTest {
         galertLogRepository.save(log4);
         List<GalertLog> expected = new ArrayList<GalertLog>();
         expected.add(log);
-        PageRequest request = new PageRequest(0, 20,new Sort("timestamp"));
-        assertEquals(new PageImpl<GalertLog>(expected,request,1l), galertLogRepository.findByCreateTimeAndPriority(timestamp - 5000,
-            timestamp, AlertSeverity.HIGH, false, false, null, def2.getId(), request));
+        PageRequest request = new PageRequest(0, 20, new Sort("timestamp"));
+        assertEquals(new PageImpl<GalertLog>(expected, request, 1l),
+            galertLogRepository.findByCreateTimeAndPriority(timestamp - 5000, timestamp,
+                AlertSeverity.HIGH, false, false, null, def2.getId(), request));
     }
 
     @Test
@@ -270,9 +277,10 @@ public class GalertLogRepositoryIntegrationTest {
         galertLogRepository.save(log4);
         List<GalertLog> expected = new ArrayList<GalertLog>();
         expected.add(log);
-        PageRequest request = new PageRequest(0,20, new Sort("timestamp"));
-        assertEquals(new PageImpl<GalertLog>(expected, request,1l), galertLogRepository.findByCreateTimeAndPriority(timestamp - 5000,
-            timestamp, AlertSeverity.HIGH, false, false, group2.getId(), null,request ));
+        PageRequest request = new PageRequest(0, 20, new Sort("timestamp"));
+        assertEquals(new PageImpl<GalertLog>(expected, request, 1l),
+            galertLogRepository.findByCreateTimeAndPriority(timestamp - 5000, timestamp,
+                AlertSeverity.HIGH, false, false, group2.getId(), null, request));
     }
 
     @Test
@@ -465,5 +473,125 @@ public class GalertLogRepositoryIntegrationTest {
         log4.setFixed(true);
         galertLogRepository.save(log4);
         assertEquals(Long.valueOf(3), galertLogRepository.countByGroup(group));
+    }
+
+    @Test
+    public void testHasEscalationState() {
+        Escalation escalation2 = new Escalation("Escalation2", "Important", true, 1l, true, true);
+        entityManager.persist(escalation2);
+        ResourceGroup group2 = new ResourceGroup();
+        group2.setName("Group2");
+        entityManager.persist(group2);
+        GalertDef def2 = new GalertDef("CPU High", "desc", AlertSeverity.MEDIUM, true, group2);
+        def2.setEscalation(escalation2);
+        entityManager.persist(def2);
+        long timestamp = System.currentTimeMillis();
+        GalertLog log = new GalertLog(def2, new ExecutionReason("Threshold Exceeded",
+            "Something bad happened", null, GalertDefPartition.NORMAL), timestamp);
+        galertLogRepository.save(log);
+        EscalationState state = new EscalationState(new GalertEscalatable(log));
+        entityManager.persist(state);
+        assertTrue(galertLogRepository.hasEscalationState(log));
+    }
+
+    @Test
+    public void testHasNoEscalationState() {
+        Escalation escalation2 = new Escalation("Escalation2", "Important", true, 1l, true, true);
+        entityManager.persist(escalation2);
+        ResourceGroup group2 = new ResourceGroup();
+        group2.setName("Group2");
+        entityManager.persist(group2);
+        GalertDef def2 = new GalertDef("CPU High", "desc", AlertSeverity.MEDIUM, true, group2);
+        def2.setEscalation(escalation2);
+        entityManager.persist(def2);
+        long timestamp = System.currentTimeMillis();
+        GalertLog log = new GalertLog(def2, new ExecutionReason("Threshold Exceeded",
+            "Something bad happened", null, GalertDefPartition.NORMAL), timestamp);
+        galertLogRepository.save(log);
+        assertFalse(galertLogRepository.hasEscalationState(log));
+    }
+
+    @Test
+    public void testIsAcknowledgable() {
+        Escalation escalation2 = new Escalation("Escalation2", "Important", true, 1l, true, true);
+        entityManager.persist(escalation2);
+        ResourceGroup group2 = new ResourceGroup();
+        group2.setName("Group2");
+        entityManager.persist(group2);
+        GalertDef def2 = new GalertDef("CPU High", "desc", AlertSeverity.MEDIUM, true, group2);
+        def2.setEscalation(escalation2);
+        entityManager.persist(def2);
+        long timestamp = System.currentTimeMillis();
+        GalertLog log = new GalertLog(def2, new ExecutionReason("Threshold Exceeded",
+            "Something bad happened", null, GalertDefPartition.NORMAL), timestamp);
+        galertLogRepository.save(log);
+        EscalationState state = new EscalationState(new GalertEscalatable(log));
+        entityManager.persist(state);
+        assertTrue(galertLogRepository.isAcknowledgeable(log));
+    }
+
+    @Test
+    public void testIsAcknowledgableNot() {
+        AuthzSubject bob = new AuthzSubject(true, "bob", "dev", "bob@bob.com", true, "Bob",
+            "Bobbins", "Bob", "123123123", "123123123", false);
+        entityManager.persist(bob);
+        Escalation escalation2 = new Escalation("Escalation2", "Important", true, 1l, true, true);
+        entityManager.persist(escalation2);
+        ResourceGroup group2 = new ResourceGroup();
+        group2.setName("Group2");
+        entityManager.persist(group2);
+        GalertDef def2 = new GalertDef("CPU High", "desc", AlertSeverity.MEDIUM, true, group2);
+        def2.setEscalation(escalation2);
+        entityManager.persist(def2);
+        long timestamp = System.currentTimeMillis();
+        GalertLog log = new GalertLog(def2, new ExecutionReason("Threshold Exceeded",
+            "Something bad happened", null, GalertDefPartition.NORMAL), timestamp);
+        galertLogRepository.save(log);
+        EscalationState state = new EscalationState(new GalertEscalatable(log));
+        state.setAcknowledgedBy(bob);
+        entityManager.persist(state);
+        assertFalse(galertLogRepository.isAcknowledgeable(log));
+    }
+
+    @Test
+    public void testIsAcknowledged() {
+        AuthzSubject bob = new AuthzSubject(true, "bob", "dev", "bob@bob.com", true, "Bob",
+            "Bobbins", "Bob", "123123123", "123123123", false);
+        entityManager.persist(bob);
+        Escalation escalation2 = new Escalation("Escalation2", "Important", true, 1l, true, true);
+        entityManager.persist(escalation2);
+        ResourceGroup group2 = new ResourceGroup();
+        group2.setName("Group2");
+        entityManager.persist(group2);
+        GalertDef def2 = new GalertDef("CPU High", "desc", AlertSeverity.MEDIUM, true, group2);
+        def2.setEscalation(escalation2);
+        entityManager.persist(def2);
+        long timestamp = System.currentTimeMillis();
+        GalertLog log = new GalertLog(def2, new ExecutionReason("Threshold Exceeded",
+            "Something bad happened", null, GalertDefPartition.NORMAL), timestamp);
+        galertLogRepository.save(log);
+        EscalationState state = new EscalationState(new GalertEscalatable(log));
+        state.setAcknowledgedBy(bob);
+        entityManager.persist(state);
+        assertTrue(galertLogRepository.isAcknowledged(log));
+    }
+
+    @Test
+    public void testIsAcknowledgedNot() {
+        Escalation escalation2 = new Escalation("Escalation2", "Important", true, 1l, true, true);
+        entityManager.persist(escalation2);
+        ResourceGroup group2 = new ResourceGroup();
+        group2.setName("Group2");
+        entityManager.persist(group2);
+        GalertDef def2 = new GalertDef("CPU High", "desc", AlertSeverity.MEDIUM, true, group2);
+        def2.setEscalation(escalation2);
+        entityManager.persist(def2);
+        long timestamp = System.currentTimeMillis();
+        GalertLog log = new GalertLog(def2, new ExecutionReason("Threshold Exceeded",
+            "Something bad happened", null, GalertDefPartition.NORMAL), timestamp);
+        galertLogRepository.save(log);
+        EscalationState state = new EscalationState(new GalertEscalatable(log));
+        entityManager.persist(state);
+        assertFalse(galertLogRepository.isAcknowledged(log));
     }
 }

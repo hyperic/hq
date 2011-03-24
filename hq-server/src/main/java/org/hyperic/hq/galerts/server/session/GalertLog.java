@@ -46,7 +46,6 @@ import javax.persistence.Version;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
@@ -64,9 +63,6 @@ import org.hyperic.hq.events.server.session.Action;
 public class GalertLog implements AlertInterface, Serializable {
     public static int MAX_LONG_REASON = 2048;
     public static int MAX_SHORT_REASON = 256;
-
-    @Formula("(select e.acknowledged_by from EAM_ESCALATION_STATE e where e.alert_id = id and e.alert_def_id = def_id and e.alert_type != -559038737)")
-    private Long ackedBy;
 
     @OneToMany(mappedBy = "galertLog", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("id")
@@ -105,9 +101,6 @@ public class GalertLog implements AlertInterface, Serializable {
 
     @Column(name = "SHORT_REASON", nullable = false, length = 256)
     private String shortReason;
-
-    @Formula("(select e.id from EAM_ESCALATION_STATE e where e.alert_id = id and e.alert_def_id = def_id and e.alert_type != -559038737)")
-    private Long stateId;
 
     @Column(name = "TIMESTAMP", nullable = false)
     @Index(name = "EAM_GALERT_LOGS_TIME_IDX")
@@ -159,10 +152,6 @@ public class GalertLog implements AlertInterface, Serializable {
         return oe.getTimestamp() == getTimestamp() && oe.getShortReason().equals(getShortReason());
     }
 
-    protected Long getAckedBy() {
-        return ackedBy;
-    }
-
     public Collection<GalertActionLog> getActionLog() {
         return Collections.unmodifiableCollection(actionLog);
     }
@@ -210,20 +199,12 @@ public class GalertLog implements AlertInterface, Serializable {
         return shortReason;
     }
 
-    protected Long getStateId() {
-        return stateId;
-    }
-
     public long getTimestamp() {
         return timestamp;
     }
 
     public Long getVersion() {
         return version;
-    }
-
-    public boolean hasEscalationState() {
-        return getStateId() != null;
     }
 
     public int hashCode() {
@@ -234,20 +215,8 @@ public class GalertLog implements AlertInterface, Serializable {
         return hash;
     }
 
-    public boolean isAcknowledgeable() {
-        return getStateId() != null && getAckedBy() == null;
-    }
-
-    public boolean isAcknowledged() {
-        return getAckedBy() != null;
-    }
-
     public boolean isFixed() {
         return fixed;
-    }
-
-    protected void setAckedBy(Long ackedBy) {
-        this.ackedBy = ackedBy;
     }
 
     protected void setActionLogBag(Collection<GalertActionLog> actionLog) {
@@ -280,10 +249,6 @@ public class GalertLog implements AlertInterface, Serializable {
 
     protected void setShortReason(String txt) {
         shortReason = txt;
-    }
-
-    protected void setStateId(Long stateId) {
-        this.stateId = stateId;
     }
 
     protected void setTimestamp(long timestamp) {

@@ -44,6 +44,7 @@ import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.AlertPermissionManager;
 import org.hyperic.hq.events.AlertSeverity;
+import org.hyperic.hq.galert.data.GalertLogRepository;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyType;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfo;
@@ -79,6 +80,7 @@ public class GalertBossImpl implements GalertBoss {
     private AlertPermissionManager alertPermissionManager;
     private ResourceGroupManager resourceGroupManager;
     private EscalationManager escalationManager;
+    private GalertLogRepository galertLogRepository;
 
     @Autowired
     public GalertBossImpl(GalertManager galertManager,
@@ -86,13 +88,14 @@ public class GalertBossImpl implements GalertBoss {
                           AlertPermissionManager alertPermissionManager,
                           SessionManager sessionManager,
                           ResourceGroupManager resourceGroupManager,
-                          EscalationManager escalationManager) {
+                          EscalationManager escalationManager, GalertLogRepository galertLogRepository) {
         this.galertManager = galertManager;
         this.gtriggerManager = gtriggerManager;
         this.alertPermissionManager = alertPermissionManager;
         this.sessionManager = sessionManager;
         this.resourceGroupManager = resourceGroupManager;
         this.escalationManager = escalationManager;
+        this.galertLogRepository = galertLogRepository;
     }
 
     /**
@@ -350,7 +353,7 @@ public class GalertBossImpl implements GalertBoss {
                                               alert.getAlertDefinitionInterface().getPriority())
                                          .put("reason", alert.getShortReason())
                                          .put("fixed", alert.isFixed())
-                                         .put("acknowledgeable", alert.isAcknowledgeable())
+                                         .put("acknowledgeable", galertLogRepository.isAcknowledgeable(alert))
                                          .put("canTakeAction", canTakeAction)
                                          .put("maxPauseTime", maxPauseTime));
             }

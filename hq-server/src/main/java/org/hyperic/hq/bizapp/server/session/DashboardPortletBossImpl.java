@@ -59,6 +59,7 @@ import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertManager;
+import org.hyperic.hq.galert.data.GalertLogRepository;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertLog;
 import org.hyperic.hq.galerts.shared.GalertManager;
@@ -110,6 +111,8 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
     private EscalationManager escalationManager;
     
     private AlertPermissionManager alertPermissionManager;
+    
+    private GalertLogRepository galertLogRepository;
 
     @Autowired
     public DashboardPortletBossImpl(PermissionManager permissionManager, ResourceManager resourceManager,
@@ -117,7 +120,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
                                     MeasurementBoss measurementBoss, ResourceGroupManager resourceGroupManager,
                                     GalertManager galertManager, AlertManager alertManager,
                                     AlertDefinitionManager alertDefinitionManager, EscalationManager escalationManager, 
-                                    AlertPermissionManager alertPermissionManager) {
+                                    AlertPermissionManager alertPermissionManager, GalertLogRepository galertLogRepository) {
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
         this.measurementManager = measurementManager;
@@ -129,6 +132,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
         this.alertDefinitionManager = alertDefinitionManager;
         this.escalationManager = escalationManager;
         this.alertPermissionManager = alertPermissionManager;
+        this.galertLogRepository = galertLogRepository;
     }
     
     @Transactional(readOnly=true)
@@ -255,7 +259,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
                 // a galert always has an associated escalation which may or may
                 // not
                 // be acknowledged.
-                if (galert.hasEscalationState() && galert.isAcknowledged()) {
+                if (galertLogRepository.hasEscalationState(galert) && galertLogRepository.isAcknowledged(galert)) {
                     rtn = ALERT_WARN;
                 } else {
                     return ALERT_CRITICAL;

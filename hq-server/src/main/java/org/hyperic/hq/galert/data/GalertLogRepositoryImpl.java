@@ -7,6 +7,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertLog;
@@ -63,19 +64,6 @@ public class GalertLogRepositoryImpl implements GalertLogRepositoryCustom {
             .setParameter("end", end).setParameter("priority", severity.getCode()).getResultList();
     }
 
-    private String getCreateTimeAndPriorityQuery(long begin, long end, AlertSeverity severity,
-                                                 boolean inEscalation, boolean notFixed,
-                                                 Integer groupId, Integer galertDefId, boolean count) {
-        // TODO this query used to do perm checking with a passed-in subject ID
-        return "select " + (count ? "count(a)" : "a") + " from " +
-               (inEscalation ? "EscalationState es, " : "") + "GalertLog a " + "join a.def d " +
-               "where " + (groupId != null ? " d.group.id = " + groupId + " and " : "") +
-               "a.timestamp between :begin and :end " + (notFixed ? " and a.fixed = false " : "") +
-               (galertDefId == null ? "" : "and d.id = " + galertDefId + " ") +
-               "and d.severity >= :priority " +
-               (inEscalation ? "and a.id = es.alertId and " + "es.alertDefinitionId = d.id " : "");
-    }
-
     public Page<GalertLog> findByGroupAndTimestampBetween(ResourceGroup group, long begin,
                                                           long end, Pageable pageable) {
         long total = entityManager
@@ -109,6 +97,57 @@ public class GalertLogRepositoryImpl implements GalertLogRepositoryCustom {
             return null;
         }
         return logs.get(0);
+    }
+
+    private AuthzSubject getAcknowledgedBy(GalertLog galertLog) {
+        List<AuthzSubject> ackedBy = entityManager
+            .createQuery(
+                "select e.acknowledgedBy from EscalationState e where e.alertId = :id and e.alertDefId = :defId and e.alertType != -559038737",
+                AuthzSubject.class).setParameter("id", galertLog.getId())
+            .setParameter("defId", galertLog.getAlertDef().getId()).getResultList();
+        if (ackedBy.isEmpty()) {
+            return null;
+        }
+        return ackedBy.get(0);
+    }
+
+    private String getCreateTimeAndPriorityQuery(long begin, long end, AlertSeverity severity,
+                                                 boolean inEscalation, boolean notFixed,
+                                                 Integer groupId, Integer galertDefId, boolean count) {
+        // TODO this query used to do perm checking with a passed-in subject ID
+        return "select " + (count ? "count(a)" : "a") + " from " +
+               (inEscalation ? "EscalationState es, " : "") + "GalertLog a " + "join a.def d " +
+               "where " + (groupId != null ? " d.group.id = " + groupId + " and " : "") +
+               "a.timestamp between :begin and :end " + (notFixed ? " and a.fixed = false " : "") +
+               (galertDefId == null ? "" : "and d.id = " + galertDefId + " ") +
+               "and d.severity >= :priority " +
+               (inEscalation ? "and a.id = es.alertId and " + "es.alertDefinitionId = d.id " : "");
+    }
+
+    public boolean hasEscalationState(GalertLog galertLog) {
+        long escalationStates = entityManager
+            .createQuery(
+                "select count(e) from EscalationState e where e.alertId = :id and e.alertDefId = :defId and e.alertType != -559038737",
+                Long.class).setParameter("id", galertLog.getId())
+            .setParameter("defId", galertLog.getAlertDef().getId()).getSingleResult();
+        if (escalationStates == 0) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean isAcknowledgeable(GalertLog galertLog) {
+        if (!hasEscalationState(galertLog)) {
+            return false;
+        }
+        if (getAcknowledgedBy(galertLog) != null) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean isAcknowledged(GalertLog galertLog) {
+        return getAcknowledgedBy(galertLog) != null;
     }
 
 }

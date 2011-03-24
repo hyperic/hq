@@ -39,8 +39,12 @@ import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.AlertAuxLog;
 import org.hyperic.hq.events.AlertAuxLogProvider;
 import org.hyperic.hq.events.AlertInterface;
+import org.hyperic.hq.galert.data.GalertLogRepository;
 import org.hyperic.hq.measurement.galerts.MetricAuxLogProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 
+@Configurable
 public class GalertEscalatable
     implements Escalatable
 {
@@ -58,6 +62,9 @@ public class GalertEscalatable
     private static final Log _log = LogFactory.getLog(GalertEscalatable.class);
     private GalertLog _alert;
     private List      _auxLogs;
+    
+    @Autowired
+    private GalertLogRepository galertLogRepository;
     
     public GalertEscalatable(GalertLog alert) {
         _alert = alert;
@@ -142,6 +149,6 @@ public class GalertEscalatable
     }
 
     public boolean isAcknowledgeable() {
-        return _alert.isAcknowledgeable();
+        return galertLogRepository.isAcknowledgeable(_alert);
     } 
 }
