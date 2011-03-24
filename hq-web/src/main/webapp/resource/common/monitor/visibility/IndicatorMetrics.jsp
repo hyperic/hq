@@ -178,7 +178,9 @@
         metricsDiv.style.height = (bottom - top) + 'px';
       }
 
-      onloads.push( setMetricsHeight );
+      hqDojo.ready(function() {
+    	  setMetricsHeight();
+      });
     </script>
 		</c:if>
 

@@ -31,43 +31,45 @@
 
 
 <script  type="text/javascript">
-function checkGroup() {
-  if (document.ResourceHubForm.ff.selectedIndex == 4)
-    document.ResourceHubForm.g.value = 2;
-  else
-    document.ResourceHubForm.g.value = 1;
-}
+	function checkGroup() {
+	  	if (document.ResourceHubForm.ff.selectedIndex == 4) {
+	    	document.ResourceHubForm.g.value = 2;
+	  	} else {
+	    	document.ResourceHubForm.g.value = 1;
+	  	}
+	}
 </script>
-
 <div class="effectsPortlet">
-<!-- Content Block Title -->
-<tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="dash.home.SearchResources"/>
-  <tiles:put name="adminUrl" beanName="adminUrl" />
-  <tiles:put name="portletName" beanName="portletName" />
-</tiles:insert>
-<!-- fixme: there's no "minimize" functionality on this block, only "close" -->
-<html:form action="/ResourceHub" onsubmit="checkGroup()">
-<html:hidden property="g" value="1"/>
-<!-- Content Block Contents -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" class="portletLRBotBorder">
-  <tr>
-    <td class="BlockContent" colspan="3"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-  </tr>
-  <tr valign="top">
-    <td class="BlockContent" nowrap>
-      <input type="text" size="12" maxlength="40" value="<fmt:message key="common.header.ResourceName"/>" onfocus="this.select();" name="keywords">      
-    </td>
-    <td class="BlockContent" nowrap>
-      <html:select property="ff" styleClass="FilterFormText" size="1" >
-        <hq:optionMessageList property="functions" baseKey="resource.hub.filter"/>        
-      </html:select>
-    </td>
-    <td width="100%" class="BlockContent" valign="center"><html:image page="/images/4.0/icons/accept.png" border="0" property="ok" /></td>
-  </tr>                                                         
-  <tr>
-    <td class="BlockContent" colspan="3"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-  </tr>
-</table>
-</html:form>
+	<!-- Content Block Title -->
+	<tiles:insert definition=".header.tab">
+  		<tiles:put name="tabKey" value="dash.home.SearchResources"/>
+  		<tiles:put name="adminUrl" beanName="adminUrl" />
+  		<tiles:put name="portletName" beanName="portletName" />
+	</tiles:insert>
+
+	<!-- fixme: there's no "minimize" functionality on this block, only "close" -->
+	<html:form action="/ResourceHub" onsubmit="checkGroup()">
+		<html:hidden property="g" value="1"/>
+		
+		<!-- Content Block Contents -->
+		<table width="100%" cellpadding="0" cellspacing="0" border="0" class="portletLRBotBorder">
+  			<tr>
+    			<td class="BlockContent" colspan="3"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
+  			</tr>
+  			<tr valign="top">
+    			<td class="BlockContent" nowrap>
+      				<input type="text" size="12" maxlength="40" value="<fmt:message key="common.header.ResourceName"/>" onfocus="this.select();" name="keywords">      
+    			</td>
+    			<td class="BlockContent" nowrap>
+      				<html:select property="ff" styleClass="FilterFormText" size="1" >
+        				<hq:optionMessageList property="functions" baseKey="resource.hub.filter"/>        
+      				</html:select>
+    			</td>
+    			<td width="100%" class="BlockContent" valign="center"><html:image page="/images/4.0/icons/accept.png" border="0" property="ok" /></td>
+  			</tr>                                                         
+  			<tr>
+    			<td class="BlockContent" colspan="3"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
+  			</tr>
+		</table>
+	</html:form>
 </div>

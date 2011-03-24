@@ -85,7 +85,6 @@
 	}
 	
 	function refreshPortlets() {
-	
 	    var problemPortlet = hqDojo.byId('problemResourcesTable');
 	    var favoritePortlet = hqDojo.byId('favoriteTable');
 	
@@ -136,7 +135,9 @@
 	    }
 	}
 	
-	onloads.push(refreshPortlets);
+	hqDojo.ready(function() {
+		refreshPortlets();
+	});
 </script>
 <html:link page="/Resource.do?eid=" linkName="viewResUrl" styleId="viewResUrl" style="display:none;"></html:link>
 
