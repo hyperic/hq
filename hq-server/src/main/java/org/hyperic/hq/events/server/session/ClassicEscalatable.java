@@ -28,17 +28,23 @@ package org.hyperic.hq.events.server.session;
 import java.util.Collections;
 import java.util.List;
 
+import org.hyperic.hq.alert.data.AlertRepository;
 import org.hyperic.hq.escalation.server.session.EscalatableBase;
 import org.hyperic.hq.events.AlertInterface;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 
+@Configurable
 public class ClassicEscalatable
     extends EscalatableBase
 {
     private Alert _alert;
+    
+    @Autowired
+    private AlertRepository alertRepository;
 
     public ClassicEscalatable(Alert a, String shortReason, String longReason) {
-        super(a.getAlertDefinition(), a.getId(), shortReason, longReason,
-              a.isAckable());
+        super(a.getAlertDefinition(), a.getId(), shortReason, longReason);
         
         _alert = a;
     }
@@ -49,5 +55,9 @@ public class ClassicEscalatable
 
     public List getAuxLogs() {
         return Collections.EMPTY_LIST;
+    }
+    
+    public boolean isAcknowledgeable() {
+        return alertRepository.isAckable(_alert);
     }
 }

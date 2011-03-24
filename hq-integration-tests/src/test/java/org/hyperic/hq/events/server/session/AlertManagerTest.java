@@ -42,6 +42,7 @@ import java.util.List;
 import javax.persistence.EntityNotFoundException;
 
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.alert.data.AlertRepository;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerType;
@@ -97,6 +98,9 @@ public class AlertManagerTest
 
     @Autowired
     private AlertDefinitionManager alertDefinitionManager;
+    
+    @Autowired
+    private AlertRepository alertRepository;
 
     @Autowired
     private MeasurementManager measurementManager;
@@ -259,7 +263,7 @@ public class AlertManagerTest
         Alert testPlatformAlert = alertManager.createAlert(this.testPlatformAlertDef, ctime);
         Alert alert1 = alertManager.findAlertById(testPlatformAlert.getId());
         assertNotNull("Alert should be available here", alert1);
-        assertFalse("Alert should not be acknowledgeable", alert1.isAckable());
+        assertFalse("Alert should not be acknowledgeable", alertRepository.isAckable(alert1));
     }
 
     @Test
@@ -416,7 +420,7 @@ public class AlertManagerTest
         assertEquals("Alert Value: AlertDefId is incorrect", this.testPlatformAlertDef.getId(),
             alertVal.getAlertDefinition().getId());
         // Verify AlertValue: isAck
-        assertFalse("Alert should not be acknowledgeable", alertVal.isAckable());
+        assertFalse("Alert should not be acknowledgeable", alertRepository.isAckable(alertVal));
 
     }
 

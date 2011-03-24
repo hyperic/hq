@@ -264,9 +264,6 @@ public class AlertManagerImpl implements AlertManager,
         if(alert == null) {
             throw new EntityNotFoundException("Alert with ID: " + id + " was not found");
         }
-        alert.setAckable(escalationManager.isAlertAcknowledgeable(alert.getId(), alert
-            .getDefinition()));
-
         return alert;
     }
 

@@ -40,6 +40,7 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.alert.data.AlertRepository;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -83,15 +84,17 @@ public class ListAlertAction
     private MeasurementBoss measurementBoss;
     private AuthzBoss authzBoss;
     private AlertPermissionManager alertPermissionManager;
+    private AlertRepository alertRepository;
 
     @Autowired
     public ListAlertAction(EventsBoss eventsBoss, MeasurementBoss measurementBoss, AuthzBoss authzBoss, 
-                           AlertPermissionManager alertPermissionManager) {
+                           AlertPermissionManager alertPermissionManager, AlertRepository alertRepository) {
         super();
         this.eventsBoss = eventsBoss;
         this.measurementBoss = measurementBoss;
         this.authzBoss = authzBoss;
         this.alertPermissionManager = alertPermissionManager;
+        this.alertRepository = alertRepository;
     }
 
     /**
@@ -158,7 +161,7 @@ public class ListAlertAction
             AlertDefinition alertDefinition = alert.getAlertDefinition();
             AlertBean bean = new AlertBean(alert.getId(), alert.getCtime(), alertDefinition.getId(), alertDefinition
                 .getName(), alertDefinition.getPriority(), appEntId.getId(), new Integer(appEntId.getType()), alert
-                .isFixed(), alert.isAckable(), canTakeAction);
+                .isFixed(), alertRepository.isAckable(alert), canTakeAction);
             Escalation escalation = alertDefinition.getEscalation();
 
             if (escalation != null && escalation.isPauseAllowed()) {

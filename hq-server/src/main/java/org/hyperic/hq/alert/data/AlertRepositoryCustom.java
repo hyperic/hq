@@ -42,4 +42,7 @@ public interface AlertRepositoryCustom {
 
     @Transactional(readOnly = true)
     Map<Integer, Map<AlertInfo, Integer>> getUnfixedAlertInfoAfter(long ctime);
+    
+    @Transactional(readOnly = true)
+    boolean isAckable(Alert alert);
 }

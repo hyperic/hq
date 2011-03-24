@@ -47,7 +47,6 @@ import javax.persistence.Version;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
@@ -76,11 +75,6 @@ public class Alert implements AlertInterface, Serializable {
     public static List<AlertSortField> getSortFields() {
         return AlertSortField.getAll(AlertSortField.class);
     }
-
-    private transient Boolean ackable = null;
-
-    @Formula("select e.acknowledged_by from EAM_ESCALATION_STATE e where e.alert_id = id and e.alert_type = -559038737")
-    private Long ackedBy;
 
     @OneToMany(mappedBy = "alert", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @OptimisticLock(excluded = true)
@@ -113,9 +107,6 @@ public class Alert implements AlertInterface, Serializable {
     @GeneratedValue(generator = "mygen1")
     @Column(name = "ID")
     private Integer id;
-
-    @Formula("select e.id from EAM_ESCALATION_STATE e where e.alert_id = id and e.alert_type = -559038737")
-    private Long stateId;
 
     @Column(name = "VERSION_COL", nullable = false)
     @Version
@@ -167,10 +158,6 @@ public class Alert implements AlertInterface, Serializable {
         Integer objId = ((Alert) obj).getId();
 
         return getId() == objId || (getId() != null && objId != null && getId().equals(objId));
-    }
-
-    protected Long getAckedBy() {
-        return ackedBy;
     }
 
     public Collection<AlertActionLog> getActionLog() {
@@ -242,10 +229,6 @@ public class Alert implements AlertInterface, Serializable {
         return id;
     }
 
-    protected Long getStateId() {
-        return stateId;
-    }
-
     public long getTimestamp() {
         return getCtime();
     }
@@ -272,12 +255,6 @@ public class Alert implements AlertInterface, Serializable {
         setVersion(new Long(getVersion() + 1)); // Invalidate caches
     }
 
-    public boolean isAckable() {
-        // Performing the conditional check to maintain existing functionality
-        return (ackable == null) ? (getStateId() != null && getAckedBy() == null) : ackable
-            .booleanValue();
-    }
-
     public boolean isFixed() {
         return fixed;
     }
@@ -288,14 +265,6 @@ public class Alert implements AlertInterface, Serializable {
 
     private void removeConditionLog(AlertConditionLog acl) {
         conditionLog.remove(acl);
-    }
-
-    public void setAckable(boolean ackable) {
-        this.ackable = new Boolean(ackable);
-    }
-
-    protected void setAckedBy(Long ackedBy) {
-        this.ackedBy = ackedBy;
     }
 
     protected void setActionLogBag(Collection<AlertActionLog> actionLog) {
@@ -380,10 +349,6 @@ public class Alert implements AlertInterface, Serializable {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    protected void setStateId(Long stateId) {
-        this.stateId = stateId;
     }
 
     public void setVersion(Long version) {

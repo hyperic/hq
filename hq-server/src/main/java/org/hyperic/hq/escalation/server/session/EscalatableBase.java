@@ -37,17 +37,15 @@ public abstract class EscalatableBase
     private Integer             _id;
     private String              _shortReason;
     private String              _longReason;
-    private boolean             _acknowledgeable;
+   
     
     protected EscalatableBase(PerformsEscalations def, Integer id,
-                              String shortReason, String longReason,
-                              boolean ackable) 
+                              String shortReason, String longReason) 
     {
         _def             = def;
         _id              = id;
         _shortReason     = shortReason;
         _longReason      = longReason;
-        _acknowledgeable = ackable;
     }
     
     public PerformsEscalations getDefinition() {
@@ -66,7 +64,5 @@ public abstract class EscalatableBase
         return _shortReason;
     }
 
-    public boolean isAcknowledgeable() {
-        return _acknowledgeable;
-    }
+   
 }

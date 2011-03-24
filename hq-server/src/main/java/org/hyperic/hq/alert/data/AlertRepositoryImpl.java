@@ -11,6 +11,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertInfo;
@@ -204,6 +205,23 @@ public class AlertRepositoryImpl implements AlertRepositoryCustom {
             tmp.put(ai, (Integer) obj[1]);
         }
         return alerts;
+    }
+
+    public boolean isAckable(Alert alert) {
+        long escalationStates = entityManager
+            .createQuery(
+                "select count(e) from EscalationState e where e.alertId = :id and e.alertType = -559038737",
+                Long.class).setParameter("id", alert.getId()).getSingleResult();
+        if (escalationStates == 0) {
+            return false;
+        }
+        List<AuthzSubject> ackedBy = entityManager.createQuery(
+                "select e.acknowledgedBy from EscalationState e where e.alertId = :id and e.alertType = -559038737",
+                AuthzSubject.class).setParameter("id", alert.getId()).getResultList();
+        if(ackedBy.isEmpty()) {
+            return true;
+        }
+        return false;
     }
 
 }

@@ -1,6 +1,8 @@
 package org.hyperic.hq.alert.data;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,6 +13,7 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationState;
 import org.hyperic.hq.events.server.session.Alert;
@@ -457,6 +460,34 @@ public class AlertRepositoryIntegrationTest {
         expectedAlerts.put(new AlertInfo(alertdef2.getId(), timestamp), alert.getId());
         expected.put(alertdef2.getId(), expectedAlerts);
         assertEquals(expected, alertRepository.getUnfixedAlertInfoAfter(timestamp));
+    }
+
+    @Test
+    public void testIsAckableNoEscStates() {
+        assertFalse(alertRepository.isAckable(alert));
+    }
+
+    @Test
+    public void testIsAckable() {
+        Escalation escalation2 = new Escalation("Escalation2", "Important", true, 1l, true, true);
+        entityManager.persist(escalation2);
+        alertdef2.setEscalation(escalation2);
+        EscalationState state = new EscalationState(new ClassicEscalatable(alert, "short", "long"));
+        entityManager.persist(state);
+        assertTrue(alertRepository.isAckable(alert));
+    }
+
+    public void testIsAckableAlreadyAcked() {
+        AuthzSubject bob = new AuthzSubject(true, "bob", "dev", "bob@bob.com", true, "Bob",
+            "Bobbins", "Bob", "123123123", "123123123", false);
+        entityManager.persist(bob);
+        Escalation escalation2 = new Escalation("Escalation2", "Important", true, 1l, true, true);
+        entityManager.persist(escalation2);
+        alertdef2.setEscalation(escalation2);
+        EscalationState state = new EscalationState(new ClassicEscalatable(alert, "short", "long"));
+        state.setAcknowledgedBy(bob);
+        entityManager.persist(state);
+        assertFalse(alertRepository.isAckable(alert));
     }
 
 }
