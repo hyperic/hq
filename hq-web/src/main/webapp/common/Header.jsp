@@ -78,8 +78,8 @@
 
     function showRecentAlertResponse(response, args) {
       	if (response.indexOf('recentAlertsText') > 0) {
-        	$('headerAlerts').style.display = '';
-        	$('recentAlerts').innerHTML = response;
+        	hqDojo.style("headerAlerts", "display", "");
+        	hqDojo.byId("recentAlerts").innerHTML = response;
       	} else {
         	refreshCount = 31;
       	}

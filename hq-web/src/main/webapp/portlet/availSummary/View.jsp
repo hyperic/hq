@@ -43,6 +43,7 @@
 				token: "${portlet.token}",
 				hq: (new Date()).getTime()
 			},
+			handleAs: "json",
 			load: showAvailSummary,
 			error: reportError
 		});
