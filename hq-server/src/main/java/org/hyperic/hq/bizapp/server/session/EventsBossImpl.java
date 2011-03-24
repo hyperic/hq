@@ -840,45 +840,50 @@ public class EventsBossImpl implements EventsBoss {
         throws SessionNotFoundException, SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         long cur = System.currentTimeMillis();
+        final boolean debug = log.isDebugEnabled();
+        final StopWatch watch = new StopWatch();
 
         List<AppdefEntityID> appentResources = ids != null ? appentResources = Arrays.asList(ids)
                                                           : null;
 
         // Assume if user can be alerted, then they can view resource,
         // otherwise, it'll be filtered out later anyways
+        if (debug) watch.markTimeBegin("findEscalatables");
         List<Escalatable> alerts = alertManager.findEscalatables(subject, count, priority,
             timeRange, cur, appentResources);
+        if (debug) watch.markTimeEnd("findEscalatables");
 
         // CheckAlertingScope now only used for galerts
         if (ids == null) {
             // find ALL alertable resources
+            if (debug) watch.markTimeBegin("checkAlertingScope");
             appentResources = permissionManager.checkAlertingScope(subject);
+            if (debug) watch.markTimeEnd("checkAlertingScope");
         }
 
+        if (debug) watch.markTimeBegin("galertManager.findEscalatables");
         List<Escalatable> galerts = galertManager.findEscalatables(subject, count, priority,
             timeRange, cur, appentResources);
+        if (debug) watch.markTimeEnd("galertManager.findEscalatables");
         alerts.addAll(galerts);
 
         Collections.sort(alerts, new Comparator<Escalatable>() {
             public int compare(Escalatable o1, Escalatable o2) {
-                long l1 = o1.getAlertInfo().getTimestamp();
-                long l2 = o2.getAlertInfo().getTimestamp();
-
-                // Reverse sort
-                if (l1 > l2) {
-                    return -1;
-                } else if (l1 < l2) {
-                    return 1;
-                } else {
+                if (o1 == o2) {
                     return 0;
                 }
+                Long l1 = o1.getAlertInfo().getTimestamp();
+                Long l2 = o2.getAlertInfo().getTimestamp();
+                // Reverse sort
+                return l2.compareTo(l1);
             }
         });
 
         Set<AppdefEntityID> goodIds = new HashSet<AppdefEntityID>();
-        List<AppdefEntityID> badIds = new ArrayList<AppdefEntityID>();
+        Set<AppdefEntityID> badIds = new HashSet<AppdefEntityID>();
 
         List<Escalatable> res = new ArrayList<Escalatable>();
+        if (debug) watch.markTimeBegin("loop");
         for (Iterator<Escalatable> i = alerts.iterator(); i.hasNext() && res.size() < count;) {
             Escalatable alert = i.next();
             PerformsEscalations def = alert.getDefinition();
@@ -906,6 +911,8 @@ public class EventsBossImpl implements EventsBoss {
 
             res.add(alert);
         }
+        if (debug) watch.markTimeEnd("loop");
+        if (debug) log.debug(watch);
 
         return res;
     }
