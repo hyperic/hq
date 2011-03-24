@@ -200,7 +200,7 @@
 		visibility:hidden;
 	}
 	#showStatusPanelDialog{
-		width: 405px;
+		width: 505px;
 		height: 400px;
 	}
 	
@@ -209,11 +209,13 @@
 		vertical-align:bottom;
 	}
 	#agentList{
+		border: solid 1px;
+		border-color: #BBBBBB;
 		height: 290px;
 		overflow: auto;
 		margin: 10px;
 		padding: 0px 30px;
-		width:320px;
+		width:410px;
 	}
 	
 	.errorAgent{
@@ -252,17 +254,20 @@
 	}
 	.mechanismOffInstruction{
 		background:yellow; 
-		font-weight:bold; 
-		color:red;
-		font-size: larger;
 	}	
+	#loadingIcon{
+		width:15px;
+	}
+	.infoIcon{
+		width:12px;
+	}
 </style>
 <section id="pluginManagerPanel" class="container top">
 	<h1><fmt:message key="admin.managers.plugin.title" /></h1>
 	<p id="instruction"><fmt:message key="${instruction}" /></p>
 	
 	<div id="agentInfo">
-		<fmt:message key="admin.managers.Plugin.information.agent.count"/>&nbsp;<span id="agentInfoAllCount">${allAgentCount}</span> <br/>
+		<fmt:message key="admin.managers.Plugin.information.agent.count"/><img src="/images/icon_info_small.gif" class="infoIcon"/>:&nbsp;<span id="agentInfoAllCount">${allAgentCount}</span> <br/>
 	</div>
 	
 	<div class="gridheader clear">
@@ -270,8 +275,8 @@
 		<span class="column span-3"><fmt:message key="admin.managers.plugin.column.header.product.plugin" /></span>
 		<span class="column span-3"><fmt:message key="admin.managers.plugin.column.header.version" /></span>
 		<span class="column span-4"><fmt:message key="admin.managers.plugin.column.header.jar.name" /></span>
-		<span class="column span-4"><fmt:message key="admin.managers.plugin.column.header.initial.deploy.date" /></span>
-		<span class="column span-4"><fmt:message key="admin.managers.plugin.column.header.last.sync.date" /></span>
+		<span class="column span-4" id="addedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.initial.deploy.date" /><img src="/images/icon_info_small.gif" class="infoIcon"></span>
+		<span class="column span-4" id="updatedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.last.sync.date" /><img src="/images/icon_info_small.gif" class="infoIcon"></span>
 		<span class="last column span-3"><fmt:message key="admin.managers.plugin.column.header.status" /></span>
 	</div>
 	
@@ -286,8 +291,8 @@
 					</c:if>
 				</span>
 				<span class="column span-3">${pluginSummary.name}
-					<c:if test="${disabled}">
-						<span class="notFound"><fmt:message key="admin.managers.Plugin.column.plugin.disabled"/></span>
+					<c:if test="${pluginSummary.disabled}">
+						<br/><span class="notFound"><fmt:message key="admin.managers.Plugin.column.plugin.disabled"/></span>
 					</c:if>
 				</span>
 				<span class="column span-3">${pluginSummary.version}&nbsp;</span>
@@ -365,10 +370,13 @@
 </c:if>
 
 <div id="showStatusPanel" style="visibility:hidden;">
-	<input type="text" id="searchText"/>
+	<div style="text-align:center; margin:0px;">
+		<input type="text" id="searchText"/>
+		<img id="loadingIcon" src="/images/4.0/icons/ajax-loader-blue.gif" style=""/>
+	</div>
 	<input type="hidden" id="pluginId"/>
 	<input type ="hidden" id="pluginName"/>
-	<img id="loadingIcon" src="/static/images/ajax-loader.gif" />
+	
 	<ul id="agentList"></ul>
 	
 	<div id="statusButtonBar">
@@ -471,6 +479,16 @@
 		hqDojo.connect(hqDojo.byId("searchText"),"onkeyup",function(e){
 			var pluginId = hqDojo.byId("pluginId").value;
 			seeStatusDetail(pluginId,hqDojo.byId("searchText").value);			
+		});
+		
+		new hqDijit.Tooltip({
+			connectId:["addedTimeHeader"],
+			label: "<fmt:message key='admin.managers.plugin.column.header.initial.deploy.date.tip' />"
+		});
+		
+		new hqDijit.Tooltip({
+			connectId:["updatedTimeHeader"],
+			label: "<fmt:message key='admin.managers.plugin.column.header.last.sync.date.tip' />"
 		});
 		
 		new hqDijit.Tooltip({
@@ -708,7 +726,7 @@
                 		if(summary.disabled){
                 			span = hqDojo.create("span",{
                 				"class":"notFound",
-                				"innerHTML":"&nbsp;<fmt:message key='admin.managers.Plugin.column.plugin.disabled'/>"
+                				"innerHTML":"<br/><fmt:message key='admin.managers.Plugin.column.plugin.disabled'/>"
                 			},spanName);
                 		}
                 		span = hqDojo.create("span", {
