@@ -163,7 +163,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      */
     @Transactional(readOnly = true)
     public int getAgentCountUsed() {
-        return agentDao.countUsed();
+        return (int)agentDao.countUsed();
     }
     
     /**
