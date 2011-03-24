@@ -452,7 +452,7 @@ abstract class BaseController {
 
     private roleHelperInternal = null
     protected RoleHelper getRoleHelper() {
-        if (roleHelperInternal) {
+        if (roleHelperInternal == null) {
             roleHelperInternal = new RoleHelper(user)
         }
         roleHelperInternal
