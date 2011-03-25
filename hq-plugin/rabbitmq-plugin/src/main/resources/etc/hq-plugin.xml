@@ -39,10 +39,10 @@
                     <h2>Configure RabbitMQ for Monitoring</h2>
 
                       <h3>Prerequisites and Support</h3>
-                        The RabbitMQ plugin runs under HQ 4.5 and later and supports RabbitMQ versions 1.8.1 and higher.
+                        The RabbitMQ plugin runs under HQ 4.6 and later and supports RabbitMQ versions 2.x and higher.
 
-                        This version of the plugin requires that the HQ Agent that manages RabbitMQ has permission to read the Erlang cookie.
-
+                        This version of the plugin requires that the RabbitMQ has installaed and runnig the <b>rabbitmq-management</b> plugin.
+                        <a href="http://www.rabbitmq.com/management.html" target="_new">See the page on the management plugin</a>
                         <h3>Configuration Requirements</h3>
                         The HQ Agent on the platform where the RabbitMQ server should auto-discover the "RabbitMQ" server instance — assuming
                         at least one RabbitMQ Node is running. — and present it as a new server on the platform in the Auto-Discovery portlet
@@ -50,8 +50,12 @@
                         <h3>Config properties</h3>
                         <ol>
                             <li><b>node</b>: RabbitMQ node name (rabbit_X@servername)</li>
-                            <li><b>authentication</b>: Content of .erlang.cookie file</li>
-                            <li><b>process.query</b>: Sigar PTQL Query for RaabitMQ process (default='State.Name.re=[beam|erl],Args.*.eq=-sname,Args.*.eq=%node%')</li>
+                            <li><b>addr</b>: Management HTTP IP/HostName (usualy: localhost)</li>
+                            <li><b>port</b>: Management HTTP Listen Port</li>
+                            <li><b>username</b>: Administrator User name</li>
+                            <li><b>password</b>: Administrator User password</li>
+                            <li><b>nodurable</b>: If checked, all nondurable objetcs (Channels, Queue, etc.) will be auto-discovered</li>
+                            <li><b>autosycn</b>: If checked, all unavailable objetcs (Channels, Queue, etc.) will be auto-delete (but not the idle ones, shows as paused)</li>
                         </ol>
                   </p>
                   <p>
@@ -71,12 +75,12 @@
 
         <config>
             <option name="node" description="node"/>
-            <option name="addr" description="" default="localhost"/>
-            <option name="port" description="" default="55672"/>
-            <option name="username" description="" default="guest"/>
-            <option name="password" description="" default="guest"/>
-            <option name="nodurable" description="Discover No Durable Objects" type="boolean" default="false"/>
-            <option name="autosycn" description="Auto-Delete UnAvailable Objects" type="boolean" default="false"/>
+            <option name="addr" description="Http Address" default="localhost"/>
+            <option name="port" description="Http Port" default="55672"/>
+            <option name="username" description="Username" default="guest"/>
+            <option name="password" description="Password" default="guest"/>
+            <option name="nodurable" description="Discover Nondurable Objects" type="boolean" default="false"/>
+            <option name="autosycn" description="Auto-Delete Unavailable Objects" type="boolean" default="false"/>
         </config>
 
         <properties>
