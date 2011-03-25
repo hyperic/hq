@@ -228,12 +228,7 @@ public class PluginManagerController extends BaseController implements Applicati
             for (int i= 0 ; i<plugins.length;i++){
                 MultipartFile plugin = plugins[i];
                 String name = "";
-                name = plugin.getName();
-                if ("application/java-archive".equals(plugin.getContentType().toString())){
-                    name+=".jar";
-                }else if ("text/xml".equals(plugin.getContentType().toString())){
-                    name+=".xml";
-                }
+                name = plugin.getOriginalFilename();
                 filename.add(name);
                 pluginInfo.put(name, plugin.getBytes());
             }
@@ -268,7 +263,6 @@ public class PluginManagerController extends BaseController implements Applicati
 
         model.addAttribute("success", success);
         model.addAttribute("messageKey", messageKey);
-        model.addAttribute("filename", filename);
         
         return "admin/managers/plugin/upload/status";
     }
