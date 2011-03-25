@@ -56,7 +56,7 @@ public class PostgreSQLServerDetector
                RegistryServerDetector,
                AutoServerDetector {
 
-    private static Log log =  LogFactory.getLog("PostgreSQLServerDetector");
+    private static Log log =  LogFactory.getLog(PostgreSQLServerDetector.class);
 
     private static final String POSTGRESQL_VERSION = "(PostgreSQL)";
     //likely will only work w/ linux due to permissions
@@ -347,6 +347,7 @@ public class PostgreSQLServerDetector
     protected List discoverServices(ConfigResponse config) 
         throws PluginException
     {
+        log.debug("[discoverServices] config="+config);
         String url = config.getValue(PostgreSQLMeasurementPlugin.PROP_URL);
         String user = config.getValue(PostgreSQLMeasurementPlugin.PROP_USER);
         String pass = config.getValue(PostgreSQLMeasurementPlugin.PROP_PASSWORD);
@@ -388,28 +389,28 @@ public class PostgreSQLServerDetector
                 services.add(service);
             }
 
-            /* Discovery of PostgreSQL indexes is currently disabled.
-            rs.close();
-            rs = stmt.executeQuery(INDEX_QUERY);
+            if (config.getValue("indexes.enable", "fasle").equalsIgnoreCase("true")) {
+                rs.close();
+                rs = stmt.executeQuery(INDEX_QUERY);
 
-            while (rs != null && rs.next()) {
-                String indexname = rs.getString(1);
+                while (rs != null && rs.next()) {
+                    String indexname = rs.getString(1);
 
-                ServiceResource service = new ServiceResource();
-                service.setType(this, INDEX);
-                service.setServiceName(indexname);
+                    ServiceResource service = new ServiceResource();
+                    service.setType(this, INDEX);
+                    service.setServiceName(indexname);
 
-                ConfigResponse productConfig = new ConfigResponse();
-                productConfig.setValue(PostgreSQLMeasurementPlugin.PROP_INDEX,
-                                       indexname);
+                    ConfigResponse productConfig = new ConfigResponse();
+                    productConfig.setValue(PostgreSQLMeasurementPlugin.PROP_INDEX,
+                            indexname);
 
-                service.setProductConfig(productConfig);
-                service.setMeasurementConfig();
-                service.setControlConfig();
+                    service.setProductConfig(productConfig);
+                    service.setMeasurementConfig();
+                    service.setControlConfig();
 
-                services.add(service);
+                    services.add(service);
+                }
             }
-            */
 
         } catch (SQLException e) {
             throw new PluginException("Error querying for " +

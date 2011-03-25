@@ -285,6 +285,10 @@
       <option name="jdbcPassword" type="secret"
               optional="true"
               description="JDBC Password"/>
+      <option name="indexes.enable"
+              description="Auto Discover Indexes"
+              type="boolean"
+              default="false"/>
     </config>
 
     <service name="Table">
