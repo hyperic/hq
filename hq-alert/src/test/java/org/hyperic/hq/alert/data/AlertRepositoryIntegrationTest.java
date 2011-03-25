@@ -447,6 +447,13 @@ public class AlertRepositoryIntegrationTest {
         alertRepository.save(alert3);
         assertEquals(timestamp - 5000, alertRepository.getOldestUnfixedAlertTime());
     }
+    
+    @Test
+    public void testGetOldestUnfixedAlertTimeNoAlerts() {
+        alertRepository.delete(alert);
+        alertRepository.delete(alert2);
+        alertRepository.getOldestUnfixedAlertTime();
+    }
 
     @Test
     public void testGetUnfixedAlertInfoAfter() {

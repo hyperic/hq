@@ -185,6 +185,16 @@ public class AlertRepositoryImpl implements AlertRepositoryCustom {
         return query;
     }
 
+    public long getOldestUnfixedAlertTime() {
+        long alertCount = entityManager.createQuery("select count(a) from Alert a", Long.class)
+            .getSingleResult();
+        if (alertCount == 0) {
+            return 0;
+        }
+        return entityManager.createQuery("select min(a.ctime) from Alert a where a.fixed = false",
+            Long.class).getSingleResult();
+    }
+
     @SuppressWarnings("unchecked")
     public Map<Integer, Map<AlertInfo, Integer>> getUnfixedAlertInfoAfter(long ctime) {
         final String hql = new StringBuilder(128)
@@ -215,10 +225,11 @@ public class AlertRepositoryImpl implements AlertRepositoryCustom {
         if (escalationStates == 0) {
             return false;
         }
-        List<AuthzSubject> ackedBy = entityManager.createQuery(
+        List<AuthzSubject> ackedBy = entityManager
+            .createQuery(
                 "select e.acknowledgedBy from EscalationState e where e.alertId = :id and e.alertType = -559038737",
                 AuthzSubject.class).setParameter("id", alert.getId()).getResultList();
-        if(ackedBy.isEmpty()) {
+        if (ackedBy.isEmpty()) {
             return true;
         }
         return false;

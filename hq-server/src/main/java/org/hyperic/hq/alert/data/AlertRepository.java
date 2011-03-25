@@ -21,8 +21,4 @@ public interface AlertRepository extends JpaRepository<Alert, Integer>, AlertRep
     @Query("delete Alert a where a.id in (:ids)")
     void deleteByIds(@Param("ids") List<Integer> ids);
 
-    @Transactional(readOnly = true)
-    @Query("select min(a.ctime) from Alert a where a.fixed = false")
-    long getOldestUnfixedAlertTime();
-
 }

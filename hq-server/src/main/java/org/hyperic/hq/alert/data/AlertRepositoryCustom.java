@@ -41,6 +41,9 @@ public interface AlertRepositoryCustom {
     Alert findLastByDefinition(AlertDefinition def, boolean fixed);
 
     @Transactional(readOnly = true)
+    long getOldestUnfixedAlertTime();
+    
+    @Transactional(readOnly = true)
     Map<Integer, Map<AlertInfo, Integer>> getUnfixedAlertInfoAfter(long ctime);
     
     @Transactional(readOnly = true)
