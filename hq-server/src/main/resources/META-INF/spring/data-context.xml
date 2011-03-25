@@ -60,11 +60,6 @@
 		<constructor-arg ref="preloadCaches" />
 	</bean>
 	
-	<!-- TODO remove below bean definition once all DAO classes deleted -->
-	<bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor">
-		<property name="proxyTargetClass" value="true"/>
-	</bean>
-	
 	<jpa:repositories base-package="org.hyperic.hq.**.data"/>
 
 	<util:list id="preloadCaches">
