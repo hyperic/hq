@@ -389,7 +389,7 @@ public class PostgreSQLServerDetector
                 services.add(service);
             }
 
-            if (config.getValue("indexes.enable", "false").equalsIgnoreCase("true")) {
+            if (config.getValue("indexes.enable", "fasle").equalsIgnoreCase("true")) {
                 rs.close();
                 rs = stmt.executeQuery(INDEX_QUERY);
 

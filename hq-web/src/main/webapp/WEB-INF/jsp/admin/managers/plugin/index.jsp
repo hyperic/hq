@@ -27,7 +27,7 @@
 		margin: 0px;
 	}
         
-	.uploadBtn{
+	.selectFileBtn{
 		-moz-border-radius: 4px 4px 4px 4px;
 	    background: url("/images/4.0/backgrounds/button-green-background.jpg") repeat-x scroll center bottom #2DBF3D;
     	border: 1px solid #84B96D;
@@ -37,6 +37,7 @@
 	    font-weight: bold;
 	    padding: 3px 15px;
 	    width: 60px;
+	    float:right;
 	}
 	#uploadButtonBar{
 		text-align: right;
@@ -199,7 +200,7 @@
 		visibility:hidden;
 	}
 	#showStatusPanelDialog{
-		width: 405px;
+		width: 505px;
 		height: 400px;
 	}
 	
@@ -208,11 +209,13 @@
 		vertical-align:bottom;
 	}
 	#agentList{
+		border: solid 1px;
+		border-color: #BBBBBB;
 		height: 290px;
 		overflow: auto;
 		margin: 10px;
 		padding: 0px 30px;
-		width:320px;
+		width:410px;
 	}
 	
 	.errorAgent{
@@ -230,14 +233,41 @@
 	input[type="text"]{
 		margin:0.5em 0;
 	}
-	
+	.selectInstruction{
+		font-weight:bold;
+		width:290px;
+		float:left;
+	}
+	#selectedFileList{
+		width:400px;
+	}
+	#selectFileBtn{
+		width:90px;
+		float:right;
+	}
+	.fileToUploadClose{
+		background: url("/images/dash_movecontent_del-on.gif") no-repeat scroll 5px center #FFFFFF
+	}
+	#afterSelectFileInstruction{
+		text-align:center;
+		color:#777777;
+	}
+	.mechanismOffInstruction{
+		background:yellow; 
+	}	
+	#loadingIcon{
+		width:15px;
+	}
+	.infoIcon{
+		width:12px;
+	}
 </style>
 <section id="pluginManagerPanel" class="container top">
 	<h1><fmt:message key="admin.managers.plugin.title" /></h1>
-	<p><fmt:message key="${instruction}" /></p>
+	<p id="instruction"><fmt:message key="${instruction}" /></p>
 	
 	<div id="agentInfo">
-		<fmt:message key="admin.managers.Plugin.information.agent.count"/>&nbsp;<span id="agentInfoAllCount">${allAgentCount}</span> <br/>
+		<fmt:message key="admin.managers.Plugin.information.agent.count"/><img src="/images/icon_info_small.gif" class="infoIcon"/>:&nbsp;<span id="agentInfoAllCount">${allAgentCount}</span> <br/>
 	</div>
 	
 	<div class="gridheader clear">
@@ -245,8 +275,8 @@
 		<span class="column span-3"><fmt:message key="admin.managers.plugin.column.header.product.plugin" /></span>
 		<span class="column span-3"><fmt:message key="admin.managers.plugin.column.header.version" /></span>
 		<span class="column span-4"><fmt:message key="admin.managers.plugin.column.header.jar.name" /></span>
-		<span class="column span-4"><fmt:message key="admin.managers.plugin.column.header.initial.deploy.date" /></span>
-		<span class="column span-4"><fmt:message key="admin.managers.plugin.column.header.last.sync.date" /></span>
+		<span class="column span-4" id="addedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.initial.deploy.date" /><img src="/images/icon_info_small.gif" class="infoIcon"></span>
+		<span class="column span-4" id="updatedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.last.sync.date" /><img src="/images/icon_info_small.gif" class="infoIcon"></span>
 		<span class="last column span-3"><fmt:message key="admin.managers.plugin.column.header.status" /></span>
 	</div>
 	
@@ -261,8 +291,8 @@
 					</c:if>
 				</span>
 				<span class="column span-3">${pluginSummary.name}
-					<c:if test="${disabled}">
-						<span class="notFound"><fmt:message key="admin.managers.Plugin.column.plugin.disabled"/></span>
+					<c:if test="${pluginSummary.disabled}">
+						<br/><span class="notFound"><fmt:message key="admin.managers.Plugin.column.plugin.disabled"/></span>
 					</c:if>
 				</span>
 				<span class="column span-3">${pluginSummary.version}&nbsp;</span>
@@ -304,13 +334,19 @@
 
 <c:if test="${mechanismOn}" >
 	<div id="uploadPanel" style="visibility:hidden;">
-			<strong><fmt:message key="admin.managers.plugin.upload.dialog.instruction" /></strong>
 			<p>
 				<span><fmt:message key="admin.managers.plugin.upload.dialog.label" />&nbsp;</span>
 			</p>
 			<p>
-				<div id="selectFileButton" class="uploadBtn">Select File</div>
+				<div class="selectInstruction"><fmt:message key="admin.managers.plugin.upload.dialog.instruction" />&nbsp;</div>
+				
+				<div id="selectFileButton" class="selectFileBtn">Select File</div>
+			</p>
+			<br/>
+			<p>
+			    <div><fmt:message key="admin.managers.plugin.upload.dialog.files.title" /></div>
 				<div id="selectedFileList"></div>
+				<p id="afterSelectFileInstruction"><fmt:message key="admin.managers.plugin.upload.dialog.instruction.after" /></p>
 			</p>
 			<p id="validationMessage" class="error" style="opacity:0;">&nbsp;</p>
 			<div id="uploadButtonBar">
@@ -334,10 +370,13 @@
 </c:if>
 
 <div id="showStatusPanel" style="visibility:hidden;">
-	<input type="text" id="searchText"/>
+	<div style="text-align:center; margin:0px;">
+		<input type="text" id="searchText"/>
+		<img id="loadingIcon" src="/images/4.0/icons/ajax-loader-blue.gif" style=""/>
+	</div>
 	<input type="hidden" id="pluginId"/>
 	<input type ="hidden" id="pluginName"/>
-	<img id="loadingIcon" src="/static/images/ajax-loader.gif" />
+	
 	<ul id="agentList"></ul>
 	
 	<div id="statusButtonBar">
@@ -381,6 +420,7 @@
 			var xhrArgs = {
 					url: "/app/admin/managers/plugin/status/"+pluginId+"?searchWord="+searchWord,
 					load: function(response) {
+						hqDojo.empty("agentList");
 						hqDojo.style(hqDojo.byId("loadingIcon"),"visibility","hidden");
 						hqDojo.forEach(response, function(agentStatus) {
 							var statusLi = hqDojo.create("li",{
@@ -443,6 +483,16 @@
 		});
 		
 		new hqDijit.Tooltip({
+			connectId:["addedTimeHeader"],
+			label: "<fmt:message key='admin.managers.plugin.column.header.initial.deploy.date.tip' />"
+		});
+		
+		new hqDijit.Tooltip({
+			connectId:["updatedTimeHeader"],
+			label: "<fmt:message key='admin.managers.plugin.column.header.last.sync.date.tip' />"
+		});
+		
+		new hqDijit.Tooltip({
 			connectId:["agentInfo"],
 			label: "<fmt:message key='admin.managers.Plugin.information.agent.count.tip' />"
 		});
@@ -456,6 +506,7 @@
 		
 		if(${!mechanismOn}){
 			hqDojo.attr("deleteForm","class","mechanismOff");
+			hqDojo.addClass(hqDojo.byId("instruction"),"mechanismOffInstruction");
 		}
 	
 		if (${mechanismOn}){
@@ -676,7 +727,7 @@
                 		if(summary.disabled){
                 			span = hqDojo.create("span",{
                 				"class":"notFound",
-                				"innerHTML":"&nbsp;<fmt:message key='admin.managers.Plugin.column.plugin.disabled'/>"
+                				"innerHTML":"<br/><fmt:message key='admin.managers.Plugin.column.plugin.disabled'/>"
                 			},spanName);
                 		}
                 		span = hqDojo.create("span", {
@@ -704,7 +755,7 @@
                 			if(summary.successAgentCount>0){
                 				statusSpan.innerHTML+=summary.successAgentCount+"&nbsp;";
    	            				hqDojo.create("img",{
-       	        					"src": "/images/icon_available_green.gif",
+       	        					"src": "/images/icon_available_green.gif"
            	    				}, statusSpan); 
            	    				statusSpan.innerHTML+="&nbsp;&nbsp;&nbsp;";
                 			}
@@ -717,7 +768,7 @@
 	                		    errorAgentSpan.innerHTML+=summary.inProgressAgentCount+"&nbsp;";
     	           				hqDojo.create("img",{
         	       					"src": "/images/arrow_refresh.png",
-        	       					"id":summary.name+"_"+summary.id,
+        	       					"id":summary.name+"_"+summary.id
 	        	       			}, errorAgentSpan);
 	        	       			errorAgentSpan.innerHTML+="&nbsp;&nbsp;&nbsp;";
                 			}			
@@ -725,7 +776,7 @@
                 				errorAgentSpan.innerHTML+= summary.errorAgentCount+"&nbsp;";
                 				hqDojo.create("img",{
                 					"src": "/images/icon_available_red.gif",
-                					"id":summary.name+"_"+summary.id,
+                					"id":summary.name+"_"+summary.id
                 				}, errorAgentSpan);
                 				errorAgentSpan.innerHTML+="</img>";
                 			}
