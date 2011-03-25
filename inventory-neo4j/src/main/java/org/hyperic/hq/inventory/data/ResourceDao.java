@@ -19,10 +19,13 @@ public interface ResourceDao extends GenericDao<Resource> {
      *        PropertyType)
      * @param propertyValue The value to search for
      * @param pageInfo Info on paging and sorting
+     * @param sortAttributeType The class type of the property we are sorting by
+     *        (as specified by pageInfo.getSort()). Can be null if pageInfo has
+     *        no sort
      * @return A paged list of Resource search results
      */
     Page<Resource> findByIndexedProperty(String propertyName, Object propertyValue,
-                                             Pageable pageInfo);
+                                         Pageable pageInfo, Class<?> sortAttributeType);
 
     /**
      * 

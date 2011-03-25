@@ -350,7 +350,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     public PageList<Resource> getResourcesOfType(ResourceType resourceType, PageControl pc) {
         PageRequest pageInfo = new PageRequest(pc.getPagenum(),pc.getPagesize(),
             new Sort(pc.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
-        Page<Resource> resources = resourceDao.findByIndexedProperty("type", resourceType.getId(),pageInfo);
+        Page<Resource> resources = resourceDao.findByIndexedProperty("type", resourceType.getId(),pageInfo,String.class);
         return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
     }
 

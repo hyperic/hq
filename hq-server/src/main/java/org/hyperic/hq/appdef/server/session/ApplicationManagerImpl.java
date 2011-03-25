@@ -880,7 +880,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         int appGroupTypeId = resourceManager.findResourceTypeByName(AppdefEntityConstants.APPDEF_NAME_APPLICATION).getId();
         PageRequest pageInfo = new PageRequest(pc.getPagenum(),pc.getPagesize(),
             new Sort(pc.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
-        Page<Resource> resources = resourceDao.findByIndexedProperty("type", appGroupTypeId,pageInfo);
+        Page<Resource> resources = resourceDao.findByIndexedProperty("type", appGroupTypeId,pageInfo,String.class);
         return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
     }
 

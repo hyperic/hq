@@ -79,12 +79,12 @@ public class Neo4jResourceDao implements ResourceDao {
 
     @Transactional(readOnly = true)
     public Page<Resource> findByIndexedProperty(String propertyName, Object propertyValue,
-                                                    Pageable pageInfo) {
+                                                    Pageable pageInfo, Class<?> sortAttributeType) {
         QueryContext queryContext = new QueryContext(propertyValue);
         if (pageInfo.getSort() != null) {
             Order order = pageInfo.getSort().iterator().next();
             queryContext.sort(new Sort(new SortField(order.getProperty(),
-                getSortFieldType(propertyValue.getClass()), order.getDirection().equals(
+                getSortFieldType(sortAttributeType), order.getDirection().equals(
                     org.springframework.data.domain.Sort.Direction.DESC))));
         }
         IndexHits<Node> indexHits = graphDatabaseContext.getNodeIndex(

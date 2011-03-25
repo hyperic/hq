@@ -599,7 +599,7 @@ public class PlatformManagerImpl implements PlatformManager {
         PageRequest pageInfo = new PageRequest(pc.getPagenum(),pc.getPagesize(),
             new Sort(pc.getSortorder() == PageControl.SORT_ASC? Direction.ASC : Direction.DESC,"name"));
         Page<Resource> resources = resourceDao.findByIndexedProperty(AppdefResourceType.APPDEF_TYPE_ID, 
-            AppdefEntityConstants.APPDEF_TYPE_PLATFORM,pageInfo);
+            AppdefEntityConstants.APPDEF_TYPE_PLATFORM,pageInfo,String.class);
         return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
     }
     
@@ -1826,8 +1826,9 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      */
     public Ip addIp(Platform platform, String address, String netmask, String macAddress) {
-        //TODO unique name for IP?
-        Resource ip = new Resource(address, resourceManager.findResourceTypeByName(IP_RESOURCE_TYPE_NAME));
+        //IP unique by Platform and address
+        Resource ip = new Resource(platform.getName() + '.'+ address, 
+            resourceManager.findResourceTypeByName(IP_RESOURCE_TYPE_NAME));
         resourceDao.persist(ip);
         ip.setProperty(PlatformFactory.IP_ADDRESS,address);
         ip.setProperty(PlatformFactory.NETMASK,netmask);

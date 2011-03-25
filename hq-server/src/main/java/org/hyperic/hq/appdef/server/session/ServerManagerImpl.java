@@ -400,7 +400,7 @@ public class ServerManagerImpl implements ServerManager {
         PageRequest pageInfo = new PageRequest(pc.getPagenum(),pc.getPagesize(),
             new Sort(pc.getSortorder() == PageControl.SORT_ASC? Direction.ASC : Direction.DESC,"name"));
         Page<Resource> resources = resourceDao.findByIndexedProperty(AppdefResourceType.APPDEF_TYPE_ID, 
-            AppdefEntityConstants.APPDEF_TYPE_SERVER,pageInfo);
+            AppdefEntityConstants.APPDEF_TYPE_SERVER,pageInfo,String.class);
         return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
     }
     
