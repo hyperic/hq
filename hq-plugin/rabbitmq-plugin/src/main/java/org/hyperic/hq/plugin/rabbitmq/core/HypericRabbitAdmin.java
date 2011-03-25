@@ -25,17 +25,33 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
 
-import org.hyperic.hq.product.PluginException;
-import org.springframework.amqp.core.Exchange;
-import org.springframework.amqp.rabbit.admin.QueueInfo;
-import org.springframework.erlang.ErlangBadRpcException;
-import org.springframework.erlang.connection.SingleConnectionFactory;
-import org.springframework.util.Assert;
-
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
+import java.net.URLEncoder;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthPolicy;
+import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 
 /**
@@ -43,99 +59,190 @@ import org.hyperic.util.config.ConfigResponse;
  * HypericRabbitAdmin
  * @author Helena Edelson
  */
-public class HypericRabbitAdmin {
+public final class HypericRabbitAdmin {
 
     private static final Log logger = LogFactory.getLog(HypericRabbitAdmin.class);
-    private HypericErlangTemplate customErlangTemplate;
-    private String peerNodeName;
-    private static boolean NEW = false;
-    private static boolean MAKE_TEST = true;
+    private final HttpClient client;
+    private String addr;
+    private String user;
+    private String pass;
+    private int port;
 
-    public HypericRabbitAdmin(Properties props) {
-        this(new ConfigResponse(props));
+    public HypericRabbitAdmin(Properties props) throws PluginException {
+        this.port = Integer.parseInt(props.getProperty(DetectorConstants.PORT));
+        this.addr = props.getProperty(DetectorConstants.ADDR);
+        this.user = props.getProperty(DetectorConstants.USERNAME);
+        this.pass = props.getProperty(DetectorConstants.PASSWORD);
+
+        client = new HttpClient();
+        client.getState().setCredentials(
+                new AuthScope(addr, port, "Management: Web UI"),
+                new UsernamePasswordCredentials(user, pass));
+        List authPrefs = new ArrayList(1);
+        authPrefs.add("Management: Web UI");
+        client.getHttpConnectionManager().getParams().setConnectionTimeout(5000);
+        client.getParams().setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY, authPrefs);
+        client.getParams().setAuthenticationPreemptive(true);
+
+        RabbitOverview overview = getOverview();
+        if(overview==null) throw new PluginException("Connection to '"+addr+":"+port+"' fails");
     }
 
-    public HypericRabbitAdmin(ConfigResponse props) {
-        this(props.getValue(DetectorConstants.NODE), props.getValue(DetectorConstants.AUTHENTICATION));
+    public HypericRabbitAdmin(ConfigResponse props) throws PluginException {
+        this(props.toProperties());
     }
 
-    private HypericRabbitAdmin(String peerNodeName, String cookie) {
-        logger.debug("[HypericRabbitAdmin] init(" + peerNodeName + "," + cookie + ")");
-        this.peerNodeName = peerNodeName;
-        SingleConnectionFactory otpConnectionFactory = new SingleConnectionFactory("rabbit-monitor", cookie, peerNodeName);
-        otpConnectionFactory.afterPropertiesSet();
-        this.customErlangTemplate = new HypericErlangTemplate(otpConnectionFactory);
-        this.customErlangTemplate.afterPropertiesSet();
-
-        if (MAKE_TEST) {
-            try {
-                customErlangTemplate.executeRpcAndConvert("rabbit_access_control", "list_vhosts", new ErlangArgs(null, String.class));
-                logger.debug("old 'list_vhosts' detected.");
-            } catch (ErlangBadRpcException ex) {
-                NEW = true;
-                logger.debug("new 'list_vhosts' detected. ('" + ex.getMessage() + "')");
-            }
-            MAKE_TEST=false;
-        }
+    public RabbitOverview getOverview() throws PluginException {
+        return get("/api/overview", RabbitOverview.class);
     }
 
-    public void destroy() {
-        logger.debug("[HypericRabbitAdmin] destroy()");
-        ((SingleConnectionFactory) customErlangTemplate.getConnectionFactory()).destroy();
+    public List<RabbitVirtualHost> getVirtualHosts() throws PluginException {
+        return Arrays.asList(get("/api/vhosts", RabbitVirtualHost[].class));
     }
 
-    public List<String> getVirtualHosts() throws PluginException {
-        if (NEW) {
-            return (List<String>) customErlangTemplate.executeRpcAndConvert("rabbit_vhost", "list", new ErlangArgs(null, String.class));
-        } else {
-            return (List<String>) customErlangTemplate.executeRpcAndConvert("rabbit_access_control", "list_vhosts", new ErlangArgs(null, String.class));
-        }
-    }
-
-    public List<QueueInfo> getQueues(String virtualHost) throws ErlangBadRpcException {
-        return (List<QueueInfo>) customErlangTemplate.executeRpcAndConvert("rabbit_amqqueue", "info_all", new ErlangArgs(virtualHost, QueueInfo.class));
-    }
-
-    public List<Exchange> getExchanges(String virtualHost) throws ErlangBadRpcException {
-        return (List<Exchange>) customErlangTemplate.executeRpcAndConvert("rabbit_exchange", "list", new ErlangArgs(virtualHost, Exchange.class));
-    }
-
-    public List<RabbitBinding> getBindings(String virtualHost) throws ErlangBadRpcException {
-        return (List<RabbitBinding>) customErlangTemplate.executeRpcAndConvert("rabbit_exchange", "list_bindings", new ErlangArgs(virtualHost, RabbitBinding.class));
-    }
-
-    public List<RabbitConnection> getConnections() throws ErlangBadRpcException {
-        return (List<RabbitConnection>) customErlangTemplate.executeRpcAndConvert("rabbit_networking", "connection_info_all", new ErlangArgs(null, RabbitConnection.class));
-    }
-
-    public List<RabbitChannel> getChannels() throws ErlangBadRpcException {
-        return (List<RabbitChannel>) customErlangTemplate.executeRpcAndConvert("rabbit_channel", "info_all", new ErlangArgs(null, RabbitChannel.class));
-    }
-
-    public List<String> listUsers() {
-        return (List<String>) customErlangTemplate.executeRpcAndConvert("rabbit_access_control", "list_users", new ErlangArgs(null, String.class));
-    }
-
-    public boolean getStatus() {
-        String status = customErlangTemplate.executeRpc("rabbit_mnesia", "status").toString();
-        return status.contains(peerNodeName);
-    }
-
-    public String getPeerNodeName() {
-        return peerNodeName;
-    }
-
-    public boolean virtualHostAvailable(String virtualHost, String node) {
-        Assert.notNull(virtualHost, "'virtualHost' must not be null");
-        Assert.notNull(node, "'node' must not be null");
-
-        List<String> vhosts = null;
+    public List<RabbitQueue> getQueues(RabbitVirtualHost vh) throws PluginException {
         try {
-            vhosts = getVirtualHosts();
-        } catch (PluginException e) {
-            logger.error(e);
+            return Arrays.asList(get("/api/queues/" + URLEncoder.encode(vh.getName(), "UTF-8"), RabbitQueue[].class));
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public List<RabbitExchange> getExchanges(RabbitVirtualHost vh) throws PluginException {
+        try {
+            return Arrays.asList(get("/api/exchanges/" + URLEncoder.encode(vh.getName(), "UTF-8"), RabbitExchange[].class));
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public List<RabbitConnection> getConnections() throws PluginException {
+        return Arrays.asList(get("/api/connections", RabbitConnection[].class));
+    }
+
+    public RabbitConnection getConnection(String cName) throws PluginException {
+        try {
+            cName = URLEncoder.encode(cName, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex);
+        }
+        return get("/api/connections/" + cName, RabbitConnection.class);
+    }
+
+    public List<RabbitChannel> getChannels() throws PluginException {
+        return Arrays.asList(get("/api/channels", RabbitChannel[].class));
+    }
+
+    public RabbitChannel getChannel(String chName) throws PluginException {
+        try {
+            chName = URLEncoder.encode(chName, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex);
+        }
+        return get("/api/channels/" + chName, RabbitChannel.class);
+    }
+
+    public RabbitVirtualHost getVirtualHost(String vhName) throws PluginException {
+        try {
+            vhName = URLEncoder.encode(vhName, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex);
+        }
+        return get("/api/vhosts/" + vhName, RabbitVirtualHost.class);
+    }
+
+    public RabbitQueue getVirtualQueue(String vhName, String qName) throws PluginException {
+        try {
+            vhName = URLEncoder.encode(vhName, "UTF-8");
+            qName = URLEncoder.encode(qName, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex);
         }
 
-        return getStatus() && vhosts != null && vhosts.contains(virtualHost);
+        return get("/api/queues/" + vhName + "/" + qName, RabbitQueue.class);
+    }
+
+    public RabbitExchange getExchange(String vhost, String exch) throws PluginException {
+        try {
+            vhost = URLEncoder.encode(vhost, "UTF-8");
+            exch = URLEncoder.encode(exch, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex);
+        }
+
+        return get("/api/exchanges/" + vhost + "/" + exch, RabbitExchange.class);
+    }
+
+    public RabbitNode getNode(String node) throws PluginException {
+        try {
+            node = URLEncoder.encode(node, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex);
+        }
+
+        return get("/api/nodes/" + node, RabbitNode.class);
+    }
+
+    private <T extends Object> T get(String api, Class<T> classOfT) throws PluginException {
+        T res = null;
+        try {
+            GetMethod get = new GetMethod("http://" + addr + ":" + port + api);
+            get.setDoAuthentication(true);
+            int r = client.executeMethod(get);
+            if (r != 200) {
+                throw new PluginException("[" + api + "] http error code: '" + r + "'");
+            }
+            String responseBody = get.getResponseBodyAsString();
+            if (logger.isDebugEnabled()) {
+                logger.debug("[" + api + "] -(" + r + ")-> " + responseBody);
+            }
+
+            GsonBuilder gsb = new GsonBuilder();
+            gsb.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+            gsb.registerTypeAdapter(Date.class, new DateTimeDeserializer());
+            gsb.registerTypeAdapter(MessageStats.class, new MessageStatsDeserializer());
+            Gson gson = gsb.create();
+
+            res = gson.fromJson(responseBody, classOfT);
+            if (logger.isDebugEnabled()) {
+                if (res.getClass().isArray()) {
+                    logger.debug("[" + api + "] -(" + r + ")*> " + Arrays.asList((Object[]) res));
+                } else {
+                    logger.debug("[" + api + "] -(" + r + ")-> " + res);
+                }
+            }
+        } catch (IOException ex) {
+            logger.debug(ex.getMessage(),ex);
+            throw new PluginException(ex.getMessage(),ex);
+        }
+        return res;
+    }
+
+    private class DateTimeDeserializer implements JsonDeserializer<Date> {
+
+        public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            try {
+                return (Date) formatter.parse(json.getAsString());
+            } catch (ParseException ex) {
+                throw new JsonParseException(ex.getMessage(), ex);
+            }
+        }
+    }
+
+    private class MessageStatsDeserializer implements JsonDeserializer<MessageStats> {
+
+        public MessageStats deserialize(JsonElement je, Type Type, JsonDeserializationContext jdc) throws JsonParseException {
+            MessageStats res = null;
+            if (je.isJsonArray()) {
+                res = new MessageStats();
+            } else {
+                GsonBuilder gsb = new GsonBuilder();
+                gsb.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+                Gson gson = gsb.create();
+                res = gson.fromJson(je, Type);
+            }
+            return res;
+        }
     }
 }

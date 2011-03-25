@@ -29,25 +29,49 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitNode;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitOverview;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitStatsObject;
+import org.hyperic.hq.product.PluginException;
 
 /**
  * RabbitServiceCollector
  * @author Helena Edelson
  * @author German Laullon
  */
-public class RabbitServerCollector extends RabbitMQDefaultCollector {
+public class RabbitServerCollector extends RabbitStatsCollector {
 
     private static final Log logger = LogFactory.getLog(RabbitServerCollector.class);
 
-    @Override
-    public void collect(HypericRabbitAdmin rabbitAdmin) {
+    public RabbitStatsObject collectStats(HypericRabbitAdmin rabbitAdmin) {
         Properties props = getProperties();
         String node = (String) props.get(MetricConstants.NODE);
         if (logger.isDebugEnabled()) {
             logger.debug("[collect] node=" + node);
         }
 
-        setAvailability(rabbitAdmin.getStatus());
+        RabbitStatsObject res = null;
+
+        try {
+            RabbitNode n = rabbitAdmin.getNode(node);
+            RabbitOverview o = rabbitAdmin.getOverview();
+
+            setAvailability(n.isRunning());
+
+            setValue("mem_ets", n.getMemEts());
+            setValue("proc_used", n.getProcUsed());
+            setValue("proc_used_percentage", (double) n.getProcUsed() / (double) n.getProcTotal());
+            setValue("fd_percentage", (double) n.getFdUsed() / (double) n.getFdTotal());
+            setValue("connectionCount", rabbitAdmin.getConnections().size());
+            setValue("channelCount", rabbitAdmin.getChannels().size());
+            getResult().addValues(o.getQueueTotals());
+            res = o;
+
+        } catch (PluginException ex) {
+            setAvailability(false);
+            logger.debug(ex.getMessage(), ex);
+        }
+        return res;
     }
 
     @Override
