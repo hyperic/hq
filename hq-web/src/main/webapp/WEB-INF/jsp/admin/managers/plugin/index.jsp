@@ -262,7 +262,7 @@
 		width:12px;
 	}
 </style>
-<section id="pluginManagerPanel" class="container top">
+<div id="pluginManagerPanel" class="container top">
 	<h1><fmt:message key="admin.managers.plugin.title" /></h1>
 	<p id="instruction"><fmt:message key="${instruction}" /></p>
 	
@@ -329,7 +329,7 @@
 			<input id="showUploadFormButton" type="button" value="<fmt:message key="admin.managers.plugin.button.add.plugin" />" />
 		</div>	
 	</c:if>
-</section>
+</div>
 
 
 <c:if test="${mechanismOn}" >
@@ -754,7 +754,7 @@
                 			if(summary.successAgentCount>0){
                 				statusSpan.innerHTML+=summary.successAgentCount+"&nbsp;";
    	            				hqDojo.create("img",{
-       	        					"src": "/images/icon_available_green.gif",
+       	        					"src": "/images/icon_available_green.gif"
            	    				}, statusSpan); 
            	    				statusSpan.innerHTML+="&nbsp;&nbsp;&nbsp;";
                 			}
@@ -767,7 +767,7 @@
 	                		    errorAgentSpan.innerHTML+=summary.inProgressAgentCount+"&nbsp;";
     	           				hqDojo.create("img",{
         	       					"src": "/images/arrow_refresh.png",
-        	       					"id":summary.name+"_"+summary.id,
+        	       					"id":summary.name+"_"+summary.id
 	        	       			}, errorAgentSpan);
 	        	       			errorAgentSpan.innerHTML+="&nbsp;&nbsp;&nbsp;";
                 			}			
@@ -775,7 +775,7 @@
                 				errorAgentSpan.innerHTML+= summary.errorAgentCount+"&nbsp;";
                 				hqDojo.create("img",{
                 					"src": "/images/icon_available_red.gif",
-                					"id":summary.name+"_"+summary.id,
+                					"id":summary.name+"_"+summary.id
                 				}, errorAgentSpan);
                 				errorAgentSpan.innerHTML+="</img>";
                 			}
